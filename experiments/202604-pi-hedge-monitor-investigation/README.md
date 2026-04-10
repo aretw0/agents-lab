@@ -168,6 +168,28 @@ Leitura prática para o laboratório:
 2. schema e código compilado precisam entrar na investigação quando houver discrepância
 3. a diferença entre documentação declarada e runtime efetivo é, por si só, um achado importante do experimento
 
+### 7. Não encontramos um campo de configuração de provider no monitor
+
+Depois da leitura combinada de README, skill, schema e runtime, não apareceu nenhum mecanismo de primeira classe no formato do monitor para dizer algo como:
+
+- `classify.provider`
+- `classify.useCurrentProvider`
+- `classify.inheritProvider`
+
+O schema atual do monitor aceita essencialmente:
+
+- `classify.agent`
+- `classify.context`
+- `classify.excludes`
+
+E o runtime resolve o modelo/provider a partir do `.agent.yaml` carregado pelo agent loader.
+
+Leitura provisória mais forte neste estágio:
+
+- o pacote não parece oferecer, hoje, um campo declarativo no monitor para alinhar sensores ao provider principal
+- o mecanismo suportado que efetivamente existe é a resolução por agent spec
+- portanto, o override local em `.pi/agents/` não parece um hack acidental; parece usar a superfície de customização que o próprio pacote expõe
+
 ## O que este experimento ainda não conclui
 
 Ainda não concluímos:
@@ -194,7 +216,7 @@ Também é o primeiro caso claro em que um arquivo dentro de `.pi/` deixa de ser
 
 ## Próximos passos
 
-1. descobrir se existe configuração suportada pelo pacote para alinhar sensores ao provider autenticado principal sem override local
-2. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
-3. decidir se `.pi/agents/hedge-classifier.agent.yaml` deve permanecer como artefato versionado do laboratório
-4. usar o caso como referência para futuras decisões sobre `.pi/` como superfície de projeto
+1. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
+2. decidir se `.pi/agents/hedge-classifier.agent.yaml` deve permanecer como artefato versionado do laboratório
+3. usar o caso como referência para futuras decisões sobre `.pi/` como superfície de projeto
+4. repetir a mesma análise em outros sensores da stack para ver se o padrão se repete
