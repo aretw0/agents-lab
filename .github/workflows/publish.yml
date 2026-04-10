@@ -25,7 +25,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           FAILED=0
-          for pkg in packages/pi-stack packages/git-skills packages/web-skills; do
+          for pkg in packages/pi-stack packages/git-skills packages/web-skills packages/pi-skills packages/lab-skills; do
             VERSION=$(node -e "console.log(require('./$pkg/package.json').version)")
             if [ "$VERSION" != "$TAG" ]; then
               echo "::error::Tag v$TAG não bate com $pkg/package.json ($VERSION)"
@@ -43,5 +43,7 @@ jobs:
           npm publish --workspace packages/pi-stack --provenance --access public
           npm publish --workspace packages/git-skills --provenance --access public
           npm publish --workspace packages/web-skills --provenance --access public
+          npm publish --workspace packages/pi-skills --provenance --access public
+          npm publish --workspace packages/lab-skills --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
