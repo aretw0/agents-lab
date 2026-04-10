@@ -13,7 +13,7 @@
     "directory": "packages/pi-stack"
   },
   "bin": {
-    "pi-stack": "./install.mjs"
+    "pi-stack": "install.mjs"
   },
   "files": [
     "install.mjs",
