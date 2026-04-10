@@ -251,6 +251,58 @@ Com isso, a leitura mais forte sobe de patamar:
 - já existe confirmação prática de que a fragilidade alcança pelo menos um segundo sensor (`work-quality`)
 - a questão relevante do laboratório deixa de ser apenas "como corrigir o hedge" e passa a ser "como o ecossistema Pi deveria alinhar sensores auxiliares ao provider principal"
 
+### 11. O mesmo padrão apareceu em um sensor orientado a tool use
+
+Para sair do eixo `turn_end` e `command`, fizemos uma reprodução mínima com tool use explícito:
+
+```bash
+pi --provider github-copilot --model gpt-5.4 -p "Use uma ferramenta para listar os arquivos do diretório atual e depois pare."
+```
+
+O agente executou a ação pedida e respondeu com a listagem do diretório, mas ao final surgiu o erro auxiliar:
+
+```text
+[fragility] classify failed: No tool call in response (stopReason: error, content: [] error: Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the "X-Api-Key" or "Authorization" headers to be explicitly omitted)
+```
+
+Esse resultado é importante por três motivos:
+
+1. confirma o mesmo padrão em um sensor ligado ao fluxo de tool use
+2. mostra que a fragilidade atravessa tipos diferentes de evento (`turn_end`, `command`, `message_end`)
+3. reduz ainda mais a chance de estarmos diante de um bug isolado de um único monitor
+
+Com isso, o quadro experimental atual fica assim:
+
+- `hedge`: falha reproduzida e neutralizada com override local
+- `work-quality`: falha reproduzida em comando dedicado
+- `fragility`: falha reproduzida após tool use legítimo
+
+O problema, neste ponto, já merece ser tratado como comportamento sistêmico da família de classificadores empacotados até prova em contrário.
+
+### 12. Não encontramos issue pública correspondente no upstream
+
+Depois de identificar o repositório upstream declarado no `package.json` do pacote:
+
+- `davidorex/pi-project-workflows`
+
+fizemos buscas por issues com combinações como:
+
+- `"Could not resolve authentication method"`
+- `"claude-sonnet-4-6"`
+- `classify.agent provider`
+- `monitor provider`
+
+restritas ao próprio repositório.
+
+Resultado observado:
+
+- nenhuma issue encontrada para esses termos no upstream consultado
+
+Isso não prova ausência definitiva de conhecimento prévio, mas fortalece duas leituras úteis para o laboratório:
+
+1. a descoberta parece pouco documentada publicamente até aqui
+2. o experimento local deixa de ser apenas reprodução de conhecimento conhecido e passa a ter valor como achado original de integração
+
 ## O que este experimento ainda não conclui
 
 Ainda não concluímos:
@@ -262,6 +314,7 @@ Ainda não concluímos:
 - se a discrepância entre skill/README e runtime é atraso de documentação ou mudança de arquitetura ainda não consolidada
 - se outros sensores devem receber overrides locais equivalentes quando forem colocados em uso real
 - se vale criar overrides locais apenas sob demanda ou padronizar alinhamento explícito para toda a família de classificadores
+- se devemos abrir issue upstream com repro mínima e hipótese causal já documentada
 
 ## Implicações para o laboratório
 
@@ -282,4 +335,4 @@ Também é o primeiro caso claro em que um arquivo dentro de `.pi/` deixa de ser
 1. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
 2. decidir se `.pi/agents/hedge-classifier.agent.yaml` deve permanecer como artefato versionado do laboratório
 3. usar o caso como referência para futuras decisões sobre `.pi/` como superfície de projeto
-4. validar pelo menos mais um sensor orientado a tool use, como `fragility` ou `unauthorized-action`, para medir o alcance do problema em eventos diferentes
+4. decidir se o próximo passo do laboratório é abrir uma issue upstream ou primeiro padronizar overrides locais adicionais para experimentação controlada

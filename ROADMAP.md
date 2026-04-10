@@ -51,7 +51,8 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
   - [x] Confirmar override local via `.pi/agents/hedge-classifier.agent.yaml`
   - [x] Verificar que o padrão de modelo sem provider se repete nos classificadores embutidos
   - [x] Validar em execução que `work-quality` também exige alinhamento explícito de provider
-  - [ ] Validar em execução um sensor orientado a tool use, como `fragility` ou `unauthorized-action`
+  - [x] Validar em execução um sensor orientado a tool use (`fragility`)
+  - [ ] Decidir entre issue upstream ou padronização local adicional dos classificadores
 - [ ] Primeiro experimento com `pi-agent-core`
 - [ ] Experimento com tool calling em Pi
 - [ ] Experimento com múltiplos providers de LLM
