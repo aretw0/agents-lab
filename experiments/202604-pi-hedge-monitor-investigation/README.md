@@ -115,6 +115,37 @@ Could not resolve authentication method. Expected either apiKey or authToken to 
 
 Portanto, neste estágio da investigação, a hipótese principal deixou de ser apenas inferência comportamental e passou a ter suporte direto no código do pacote.
 
+### 5. Hipótese validada com override local de workspace
+
+Depois da análise do loader de agent specs, encontramos a ordem de busca usada por `createAgentLoader()`:
+
+1. `.pi/agents/<name>.agent.yaml` no projeto
+2. `~/.pi/agent/agents/<name>.agent.yaml` no usuário
+3. `agents/<name>.agent.yaml` do pacote
+
+Com isso, foi criado no projeto um override local em:
+
+- `.pi/agents/hedge-classifier.agent.yaml`
+
+Alteração aplicada no experimento:
+
+- antes: `model: claude-sonnet-4-6`
+- depois: `model: github-copilot/claude-sonnet-4.6`
+
+Após esse override, a mesma reprodução mínima passou a responder apenas:
+
+```text
+OK
+```
+
+Sem o erro auxiliar de autenticação do `hedge`.
+
+Isso confirma a leitura causal mais forte deste experimento:
+
+- o problema estava na resolução implícita de provider
+- o monitor não herdava automaticamente o provider do fluxo principal
+- um artefato local em `.pi/agents/` consegue reconfigurar o comportamento de forma limpa
+
 ## O que este experimento ainda não conclui
 
 Ainda não concluímos:
@@ -122,7 +153,7 @@ Ainda não concluímos:
 - se o pacote espera alguma configuração adicional do usuário
 - se há fallback automático de provider e ele está escolhendo um backend incompatível
 - se o comportamento é bug, limitação conhecida ou trade-off deliberado do pacote
-- se prefixar explicitamente o provider no agente resolve o caso sem efeitos colaterais
+- se essa solução deve ser tratada como workaround local ou convenção legítima do laboratório
 
 ## Implicações para o laboratório
 
@@ -136,9 +167,11 @@ O aprendizado central aqui não é “desabilitar hedge”.
 
 É reconhecer que o laboratório precisa aprender a ler monitores, sensores e artefatos auxiliares como parte do design do ecossistema.
 
+Também é o primeiro caso claro em que um arquivo dentro de `.pi/` deixa de ser apenas artefato ambíguo e passa a funcionar como configuração intencional de projeto.
+
 ## Próximos passos
 
-1. testar uma versão do classificador com provider explícito para validar a hipótese causal
-2. descobrir se existe configuração suportada pelo pacote para alinhar sensores ao provider autenticado principal
-3. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
-4. só então decidir entre manter, reconfigurar, isolar ou desabilitar o monitor
+1. descobrir se existe configuração suportada pelo pacote para alinhar sensores ao provider autenticado principal sem override local
+2. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
+3. decidir se `.pi/agents/hedge-classifier.agent.yaml` deve permanecer como artefato versionado do laboratório
+4. usar o caso como referência para futuras decisões sobre `.pi/` como superfície de projeto
