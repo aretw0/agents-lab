@@ -15,7 +15,7 @@ Um experimento é qualquer código, configuração ou prova de conceito criada p
 
 Cada experimento vive em seu próprio subdiretório:
 
-```
+```text
 experiments/
 ├── YYYYMM-nome-descritivo/
 │   ├── README.md          # Contexto, objetivos e conclusões
@@ -25,7 +25,7 @@ experiments/
 
 ### Formato do README de Experimento
 
-```markdown
+```md
 # Nome do Experimento
 
 **Data:** YYYY-MM-DD  
@@ -55,7 +55,7 @@ Implicações para o laboratório — primitivas extraíveis, padrões identific
 
 ## Ciclo de Vida
 
-```
+```text
 Ideia → Experimento → Revisão → [Primitiva / Documentação / Arquivado]
 ```
 
@@ -63,8 +63,8 @@ Experimentos bem-sucedidos podem ser **promovidos** a primitivas reutilizáveis 
 
 ## Experimentos Ativos
 
-> 🚧 Nenhum experimento ainda. Pronto para receber o primeiro!
+Primeiros experimentos já começaram a surgir a partir da validação prática do Pi no ambiente real do laboratório.
 
 | Experimento | Engine | Status | Data |
 |-------------|--------|--------|------|
-| _(em breve)_ | — | — | — |
+| [202604-pi-first-validation](./202604-pi-first-validation/README.md) | Pi | Concluído | 2026-04-09 |

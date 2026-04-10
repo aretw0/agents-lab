@@ -95,3 +95,18 @@ Depois de instalar Pi, o ideal é criar uma primeira rodada curta de validação
 3. testar pesquisa web
 4. testar revisão de código
 5. registrar atritos percebidos
+
+## Nota da primeira validação prática
+
+A primeira validação real confirmou que o Pi pode responder normalmente com provider autenticado, mas também revelou um comportamento importante do ecossistema:
+
+- extensões podem materializar diretórios e arquivos no workspace, como `.pi/` e `.pi-lens/`
+- isso deve ser tratado como decisão de arquitetura do projeto, não como detalhe invisível
+
+Resumo do aprendizado:
+
+- o core do Pi ficou funcional no Windows com Git Bash
+- a stack mínima instalou e foi persistida em `~/.pi/agent/settings.json`
+- artefatos gerados no workspace devem ser curados antes de entrar no git
+
+Ver experimento: [202604-pi-first-validation](../../experiments/202604-pi-first-validation/README.md)

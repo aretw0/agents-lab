@@ -39,7 +39,8 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
   - [x] Guia inicial de migração incremental
   - [x] Análise de compatibilidade de plataforma (Windows/Linux/macOS)
   - [x] Decisão sobre devcontainer (adiado para Fase 2-3)
-  - [ ] Instalar Pi e validar a stack no uso real
+  - [x] Instalar Pi e validar a stack no uso real
+  - [x] Registrar a primeira validação prática e os artefatos gerados no workspace
 
 ## Fase 2 — Primeiros Experimentos
 
