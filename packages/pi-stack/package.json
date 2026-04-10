@@ -55,6 +55,7 @@
     "extensions": [
       "./extensions/monitor-provider-patch.ts",
       "./extensions/environment-doctor.ts",
+      "./extensions/read-guard.ts",
       "node_modules/pi-lens/index.ts",
       "node_modules/pi-web-access/index.ts",
       "node_modules/@davidorex/pi-project-workflows/project-extension.ts",
