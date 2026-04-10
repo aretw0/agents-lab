@@ -65,9 +65,10 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
   - [x] Confirmar ausência inicial do `gh` no ambiente
   - [x] Instalar `gh` em escopo de usuário sem depender de admin
   - [x] Confirmar que a próxima fricção é autenticação do `gh`, não inferência do Pi
-  - [ ] Autenticar `gh` e validar leitura de `issues` e `prs`
+  - [x] Autenticar `gh` e validar leitura de `issues` e `prs`
+  - [x] Definir política de isolamento entre credenciais de provider e credenciais operacionais de utilitários externos
   - [ ] Medir ergonomia de Pi + `gh` contra o fluxo atual com GitHub Copilot
-  - [ ] Definir política de isolamento entre credenciais de provider e credenciais operacionais de utilitários externos
+  - [ ] Validar uma primeira operação de escrita controlada via `gh`
 - [ ] Experimento com múltiplos providers de LLM
 - [ ] Experimento com A2A protocol
 - [ ] Identificar padrões recorrentes candidatos a primitivas

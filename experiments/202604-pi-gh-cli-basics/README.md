@@ -84,6 +84,66 @@ Resultado:
 You are not logged into any GitHub hosts. To log in, run: gh auth login
 ```
 
+### 5. Autenticação usando credencial já existente do git
+
+Em vez de depender de login manual como único caminho, verificamos se o ambiente já tinha credenciais GitHub válidas no helper do git.
+
+Resultado observado:
+
+- o sistema estava com `credential.helper=manager`
+- `git credential fill` retornou credencial válida para `github.com`
+- essa mesma credencial permitiu autenticar o `gh` de forma não interativa
+
+Validação posterior:
+
+```text
+✓ Logged in to github.com account aretw0 (keyring)
+```
+
+Isso muda a leitura operacional do experimento:
+
+- o login manual continua sendo uma via importante
+- mas o ecossistema local já pode oferecer reaproveitamento controlado de credenciais existentes
+- essa ponte só é aceitável quando for explícita e auditável, nunca implícita por padrão
+
+### 6. Read path validado com `gh`
+
+Depois da autenticação, rodamos os primeiros comandos read-only diretamente no GitHub:
+
+```powershell
+gh issue list --repo aretw0/agents-lab --limit 10
+gh pr list --repo aretw0/agents-lab --limit 10
+```
+
+Resultado observado:
+
+- não havia issues abertas no repositório
+- não havia pull requests abertas no repositório
+
+O ponto importante não é o conteúdo vazio, e sim o fato de que a leitura do estado remoto funcionou sem atrito adicional.
+
+### 7. Read path validado end-to-end com o Pi
+
+Também validamos o fluxo completo usando o Pi em modo núcleo puro para chamar `gh` via `bash` e interpretar a resposta.
+
+Exemplos de prompts usados:
+
+- pedir ao Pi para executar `gh issue list` e dizer em uma linha o que o comando mostra
+- pedir ao Pi para executar `gh pr list` e dizer em uma linha o que o comando mostra
+
+Resultado observado:
+
+- o Pi executou o comando via shell
+- leu corretamente o estado retornado pelo GitHub
+- resumiu o resultado de forma adequada
+
+Isso fecha o primeiro ciclo de paridade GitHub em modo read-only:
+
+1. utilitário operacional disponível
+2. autenticação funcional
+3. leitura remota funcional
+4. Pi orquestrando o fluxo em cima do `gh`
+
 ## Descobertas
 
 ### 1. O gap atual de paridade com GitHub não está no provider do Pi
@@ -116,7 +176,7 @@ Isso redefine o experimento:
 
 - instalação local: resolvida
 - integração GitHub: parcialmente destravada
-- autenticação do `gh`: ainda pendente
+- autenticação do `gh`: resolvida no ambiente atual com reaproveitamento explícito da credencial do git
 
 ### 4. Autenticação operacional deve permanecer isolada da inferência
 
@@ -142,6 +202,14 @@ Leitura provisória do laboratório:
 - default seguro: isolamento entre credencial de inferência e credencial operacional
 - extensão futura: só permitir compartilhamento explícito, com opt-in claro e superfície de configuração visível
 
+### 5. Ergonomia inicial: o read path já é plausível
+
+Mesmo sem skill dedicada e sem integração nativa do ecossistema Pi para GitHub, o fluxo Pi + `gh` já mostrou uma propriedade importante:
+
+- para consultas simples de estado remoto, a composição atual já é operacionalmente plausível
+
+O custo cognitivo ainda existe, porque o prompt precisa ser mais explícito do que em superfícies GitHub mais integradas. Mas a distância até uso real ficou menor do que a hipótese inicial sugeria.
+
 ## Implicações para o laboratório
 
 Este experimento reforça uma decisão importante:
@@ -158,7 +226,7 @@ Também introduz um princípio transversal para futuras primitivas:
 
 ## Próximos passos
 
-1. autenticar o `gh` no ambiente
-2. rodar um primeiro experimento read-only com `gh issue list` e `gh pr list`
+1. comparar o mesmo read path com uma formulação de prompt mais enxuta para medir quanto da ergonomia depende do operador
+2. avançar para uma ação de escrita controlada e reversível, como criar uma issue de teste
 3. medir a clareza do fluxo Pi + `gh` em comparação com o uso atual do GitHub Copilot
 4. discutir em que cenários uma futura integração poderia oferecer extensão opcional de credenciais sem quebrar isolamento entre contas e permissões
