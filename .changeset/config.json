@@ -6,7 +6,9 @@
     [
       "@aretw0/pi-stack",
       "@aretw0/git-skills",
-      "@aretw0/web-skills"
+      "@aretw0/web-skills",
+      "@aretw0/pi-skills",
+      "@aretw0/lab-skills"
     ]
   ],
   "linked": [],

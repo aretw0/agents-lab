@@ -1,0 +1,24 @@
+{
+  "name": "@aretw0/lab-skills",
+  "version": "0.1.0",
+  "description": "Skills experimentais do agents-lab — cultivo de primitivas, avaliação de extensões e feedback de stack",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aretw0/agents-lab.git",
+    "directory": "packages/lab-skills"
+  },
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  }
+}

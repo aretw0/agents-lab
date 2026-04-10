@@ -1,0 +1,24 @@
+{
+  "name": "@aretw0/pi-skills",
+  "version": "0.1.0",
+  "description": "Skills para criar, configurar e operar o ecossistema pi — extensões, skills, temas, terminal setup e onboarding",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aretw0/agents-lab.git",
+    "directory": "packages/pi-skills"
+  },
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  }
+}
