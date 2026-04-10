@@ -303,6 +303,46 @@ Isso não prova ausência definitiva de conhecimento prévio, mas fortalece duas
 1. a descoberta parece pouco documentada publicamente até aqui
 2. o experimento local deixa de ser apenas reprodução de conhecimento conhecido e passa a ter valor como achado original de integração
 
+Atualização posterior:
+
+- issue upstream aberta em `davidorex/pi-project-workflows`: issue `#1`
+- foco da issue: default implícito para Anthropic em classifier agents com model spec sem provider
+
+### 13. O laboratório adotou uma correção local explícita
+
+Neste estágio, não há impedimento técnico relevante para corrigir localmente e seguir investigando. O laboratório passou a tratar isso como patch consciente de workspace, não como ajuste escondido.
+
+Overrides locais padronizados em `.pi/agents/`:
+
+- `commit-hygiene-classifier.agent.yaml`
+- `fragility-classifier.agent.yaml`
+- `hedge-classifier.agent.yaml`
+- `unauthorized-action-classifier.agent.yaml`
+- `work-quality-classifier.agent.yaml`
+
+Todos agora apontam para:
+
+```yaml
+model: github-copilot/claude-sonnet-4.6
+```
+
+Com isso, a regra prática adotada pelo laboratório passa a ser:
+
+1. corrigir localmente quando o comportamento impedir experimentação limpa
+2. documentar claramente que a correção é uma camada de adaptação do workspace
+3. preservar a possibilidade de isolar essa adaptação mais tarde, quando ela puder virar primitiva, convenção ou pacote próprio
+
+### 14. A correção local também separou configuração de saída operacional
+
+Depois dos overrides, surgiu um artefato em `.project/issues.json` produzido pelos monitores.
+
+Leitura atual do laboratório:
+
+- `.pi/agents/` é configuração intencional e versionável
+- `.project/` é saída operacional de runtime e não deve ser confundida com configuração do projeto
+
+Por isso, nesta fase, `.project/` foi tratado como artefato ignorado do workspace, mas mantido como pista arquitetural relevante para futuras primitivas de monitoramento e triagem.
+
 ## O que este experimento ainda não conclui
 
 Ainda não concluímos:
@@ -312,8 +352,7 @@ Ainda não concluímos:
 - se o comportamento é bug, limitação conhecida ou trade-off deliberado do pacote
 - se essa solução deve ser tratada como workaround local ou convenção legítima do laboratório
 - se a discrepância entre skill/README e runtime é atraso de documentação ou mudança de arquitetura ainda não consolidada
-- se outros sensores devem receber overrides locais equivalentes quando forem colocados em uso real
-- se vale criar overrides locais apenas sob demanda ou padronizar alinhamento explícito para toda a família de classificadores
+- se o alinhamento local de todos os classificadores deve permanecer no laboratório até existir solução upstream
 - se devemos abrir issue upstream com repro mínima e hipótese causal já documentada
 
 ## Implicações para o laboratório
@@ -332,7 +371,6 @@ Também é o primeiro caso claro em que um arquivo dentro de `.pi/` deixa de ser
 
 ## Próximos passos
 
-1. decidir se o comportamento é bug, limitação de design ou convenção deliberada do pacote
-2. decidir se `.pi/agents/hedge-classifier.agent.yaml` deve permanecer como artefato versionado do laboratório
-3. usar o caso como referência para futuras decisões sobre `.pi/` como superfície de projeto
-4. decidir se o próximo passo do laboratório é abrir uma issue upstream ou primeiro padronizar overrides locais adicionais para experimentação controlada
+1. acompanhar a issue upstream `davidorex/pi-project-workflows#1` e ajustar a adaptação local quando houver resposta ou correção
+2. decidir se o alinhamento local dos classificadores deve virar convenção temporária do laboratório até nova evidência
+3. usar o caso como referência para futuras decisões sobre `.pi/` e `.project/` como superfícies distintas de projeto e runtime

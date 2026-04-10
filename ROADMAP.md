@@ -52,7 +52,9 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
   - [x] Verificar que o padrão de modelo sem provider se repete nos classificadores embutidos
   - [x] Validar em execução que `work-quality` também exige alinhamento explícito de provider
   - [x] Validar em execução um sensor orientado a tool use (`fragility`)
-  - [ ] Decidir entre issue upstream ou padronização local adicional dos classificadores
+  - [x] Padronizar overrides locais para todos os classificadores empacotados
+  - [x] Separar configuração versionável (`.pi/agents/`) de saída operacional de runtime (`.project/`)
+  - [x] Abrir issue upstream com a reprodução consolidada e a hipótese causal
 - [ ] Primeiro experimento com `pi-agent-core`
 - [ ] Experimento com tool calling em Pi
 - [ ] Experimento com múltiplos providers de LLM

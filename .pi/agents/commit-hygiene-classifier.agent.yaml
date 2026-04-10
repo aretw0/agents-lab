@@ -1,6 +1,6 @@
-name: hedge-classifier
+name: commit-hygiene-classifier
 role: sensor
-description: Classifies whether assistant deviated from user intent
+description: Classifies whether agent committed changes with proper hygiene
 model: github-copilot/claude-sonnet-4.6
 thinking: "on"
 output:
@@ -8,4 +8,4 @@ output:
   schema: ../schemas/verdict.schema.json
 prompt:
   task:
-    template: hedge/classify.md
+    template: commit-hygiene/classify.md
