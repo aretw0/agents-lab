@@ -50,6 +50,12 @@ agents-lab/
 └── ROADMAP.md          # Planejamento e milestones futuros
 ```
 
+A estrutura acima organiza o laboratório para facilitar tanto a exploração prática quanto a consulta de material de apoio.
+
+- Em [`experiments/`](./experiments/), você encontra os resultados práticos do roadmap, incluindo experimentos e provas de conceito.
+- Em [`docs/research/`](./docs/research/), estão reunidas análises, pesquisas e referências usadas para orientar as decisões do laboratório.
+- Em [`docs/guides/`](./docs/guides/), ficam os guias práticos de uso, configuração e navegação pelo workspace.
+
 ## Filosofia de Design
 
 ### Primitivas Reutilizáveis

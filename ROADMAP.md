@@ -58,7 +58,9 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 - [x] Primeiro experimento com `pi-agent-core`
 - [ ] Experimento com tool calling em Pi
   - [x] Validar baseline de `read`, `write` e `bash` no núcleo puro do Pi
+  - [x] Validar uma microedição real em arquivo existente do projeto (`README.md`) no núcleo puro
   - [ ] Rodar fluxo multi-etapa com tool calling em arquivos reais do projeto
+  - [ ] Comparar o mesmo tipo de tarefa com a stack completa ativada
 - [ ] Experimento com múltiplos providers de LLM
 - [ ] Experimento com A2A protocol
 - [ ] Identificar padrões recorrentes candidatos a primitivas
