@@ -8,11 +8,16 @@
         "node_modules/@davidorex/pi-project-workflows/skills",
         "node_modules/@ifi/oh-pi-skills/skills",
         "!node_modules/@ifi/oh-pi-skills/skills/git-workflow",
+        "!node_modules/@ifi/oh-pi-skills/skills/web-search",
+        "!node_modules/@ifi/oh-pi-skills/skills/web-fetch",
         "node_modules/mitsupi/skills",
         "!node_modules/mitsupi/skills/github",
-        "!node_modules/mitsupi/skills/commit"
+        "!node_modules/mitsupi/skills/commit",
+        "!node_modules/mitsupi/skills/native-web-search",
+        "!node_modules/mitsupi/skills/web-browser"
       ]
     },
-    "./packages/git-skills"
+    "./packages/git-skills",
+    "./packages/web-skills"
   ]
 }

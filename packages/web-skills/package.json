@@ -1,0 +1,24 @@
+{
+  "name": "@aretw0/web-skills",
+  "version": "0.1.0",
+  "description": "First-party web skills: native search and browser automation via CDP",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aretw0/agents-lab.git",
+    "directory": "packages/web-skills"
+  },
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  }
+}
