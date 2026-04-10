@@ -1,0 +1,24 @@
+{
+  "name": "@aretw0/git-skills",
+  "version": "0.1.0",
+  "description": "First-party git skills: github (gh), gitlab (glab), workflow and commit conventions",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aretw0/agents-lab.git",
+    "directory": "packages/git-skills"
+  },
+  "files": [
+    "skills",
+    "README.md"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  }
+}

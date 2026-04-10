@@ -39,6 +39,8 @@ A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi
 
 ```text
 agents-lab/
+├── packages/
+│   └── pi-stack/       # @aretw0/pi-stack — meta-pacote da stack curada
 ├── docs/
 │   ├── research/       # Pesquisas, análises e material de referência
 │   ├── guides/         # Guias práticos de uso e configuração

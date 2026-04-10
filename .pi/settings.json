@@ -1,0 +1,18 @@
+{
+  "packages": [
+    {
+      "source": "./packages/pi-stack",
+      "skills": [
+        "node_modules/pi-lens/skills",
+        "node_modules/pi-web-access/skills",
+        "node_modules/@davidorex/pi-project-workflows/skills",
+        "node_modules/@ifi/oh-pi-skills/skills",
+        "!node_modules/@ifi/oh-pi-skills/skills/git-workflow",
+        "node_modules/mitsupi/skills",
+        "!node_modules/mitsupi/skills/github",
+        "!node_modules/mitsupi/skills/commit"
+      ]
+    },
+    "./packages/git-skills"
+  ]
+}

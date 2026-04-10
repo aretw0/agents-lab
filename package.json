@@ -1,0 +1,14 @@
+{
+  "name": "agents-lab",
+  "private": true,
+  "description": "Monorepo — solo de curadoria e experimentação para o ecossistema pi",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "list": "npm ls --workspaces --depth=0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

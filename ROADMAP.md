@@ -10,8 +10,11 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 - [x] README com missão, visão e filosofia
 - [x] Estrutura de diretórios (`docs/`, `experiments/`, `primitives/`)
 - [x] Documentação de convenções e contribuição
-- [ ] Definir estrutura de longo prazo do repositório (monorepo ou não?)
-  - *Pesquisa pendente: avaliar estado da arte em baixa fricção cognitiva para este tipo de projeto*
+- [x] Definir estrutura de longo prazo do repositório (monorepo ou não?)
+  - **Decisão:** monorepo com npm workspaces (`packages/*`)
+  - [x] Criar `package.json` raiz com workspaces
+  - [x] Criar primeiro meta-pacote `@aretw0/pi-stack`
+  - [x] Configurar `.pi/settings.json` para dogfood local
 
 ## Fase 1 — Pesquisa e Documentação
 
@@ -98,7 +101,7 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 
 | Decisão | Contexto | Prazo |
 |---------|----------|-------|
-| Monorepo ou não? | Avaliar estado da arte antes de decidir — alta dependência da estrutura de longo prazo | Fase 1 |
+| ~~Monorepo ou não?~~ | **Decidido:** monorepo com npm workspaces | ✅ Fase 0 |
 | Linguagem principal | TypeScript (Pi) vs. Python vs. poliglota | Fase 2 |
 | DevContainer | Pi funciona nativo no Windows, mas devcontainer será criado quando entrarmos em extensões in-house | Fase 2-3 |
 | Estratégia de publicação | npm / PyPI / GitHub Packages | Fase 3 |
