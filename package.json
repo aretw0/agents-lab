@@ -6,7 +6,12 @@
     "packages/*"
   ],
   "scripts": {
-    "list": "npm ls --workspaces --depth=0"
+    "list": "npm ls --workspaces --depth=0",
+    "release": "changeset version",
+    "publish:all": "npm run build --workspaces --if-present && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0"
   },
   "engines": {
     "node": ">=22"

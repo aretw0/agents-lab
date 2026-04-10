@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-lint:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          PATTERN='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+'
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            COMMITS=$(git log --format='%s' --no-merges "${BASE_SHA}..${HEAD_SHA}")
+          else
+            COMMITS=$(git log --format='%s' -1)
+          fi
+
+          FAILED=0
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+            if ! echo "$msg" | grep -qE "$PATTERN"; then
+              echo "::error::Commit inválido: '$msg'"
+              echo "  Formato: type(scope)?: descrição"
+              echo "  Tipos: feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert"
+              FAILED=1
+            fi
+          done <<< "$COMMITS"
+
+          [ "$FAILED" -eq 1 ] && exit 1
+          echo "✅ Todos os commits seguem Conventional Commits"
+
+  changeset:
+    name: Changeset
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore: release')"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar changeset presente
+        run: |
+          CHANGESETS=$(find .changeset -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$CHANGESETS" -eq 0 ]; then
+            echo "::warning::Nenhum changeset encontrado. Mudanças distribuíveis devem incluir um changeset."
+            echo "Execute: npx changeset"
+          else
+            echo "✅ $CHANGESETS changeset(s) encontrado(s)"
+          fi

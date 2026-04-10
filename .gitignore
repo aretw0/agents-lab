@@ -145,3 +145,4 @@ vite.config.ts.timestamp-*
 
 # Pi project settings is versionable
 !.pi/settings.json
+packages/web-skills/skills/web-browser/scripts/package-lock.json
