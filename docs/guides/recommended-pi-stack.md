@@ -16,6 +16,14 @@ Ou diretamente via pi:
 pi install npm:@aretw0/pi-stack
 ```
 
+**Via git** (sempre atualizado, sem esperar publish):
+
+```bash
+pi install https://github.com/aretw0/agents-lab
+```
+
+> A instalação via git traz o repositório inteiro. O pi descobre pacotes via `package.json` com `pi` manifest.
+
 ---
 
 ## O que está na stack
@@ -28,6 +36,8 @@ Desenvolvidos e curados no agents-lab:
 |---|---|
 | `@aretw0/git-skills` | `commit`, `git-workflow`, `github` (gh CLI), `glab` |
 | `@aretw0/web-skills` | `native-web-search`, `web-browser` (CDP) |
+| `@aretw0/pi-skills` | `terminal-setup`, `create-pi-skill`, `create-pi-extension`, `create-pi-theme`, `create-pi-prompt` |
+| `@aretw0/lab-skills` | `evaluate-extension`, `cultivate-primitive`, `stack-feedback` |
 
 ### Pacotes de Terceiros (via `@aretw0/pi-stack`)
 

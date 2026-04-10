@@ -72,7 +72,9 @@ git push && git push --tags
 O push da tag dispara `.github/workflows/publish.yml` que:
 1. Valida que a tag bate com a versão em todos os `package.json`
 2. Roda `npm install`
-3. Publica `@aretw0/pi-stack`, `@aretw0/git-skills` e `@aretw0/web-skills` com provenance
+3. Publica `@aretw0/pi-stack`, `@aretw0/git-skills`, `@aretw0/web-skills`, `@aretw0/pi-skills` e `@aretw0/lab-skills` com provenance
+
+> **Nota para usuários via git:** Quem instalou via `pi install https://github.com/aretw0/agents-lab` recebe atualizações com `pi update` sem esperar o publish no npm.
 
 ---
 

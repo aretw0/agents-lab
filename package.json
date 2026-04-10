@@ -15,6 +15,20 @@
   "devDependencies": {
     "@changesets/cli": "^2.30.0"
   },
+  "keywords": [
+    "pi-package"
+  ],
+  "pi": {
+    "extensions": [
+      "packages/pi-stack/extensions"
+    ],
+    "skills": [
+      "packages/git-skills/skills",
+      "packages/web-skills/skills",
+      "packages/pi-skills/skills",
+      "packages/lab-skills/skills"
+    ]
+  },
   "engines": {
     "node": ">=22"
   }

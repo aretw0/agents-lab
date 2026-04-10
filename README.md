@@ -32,6 +32,8 @@ Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party s
 | `@aretw0/pi-stack` | Meta-pacote da stack curada — instala tudo com `npx @aretw0/pi-stack` |
 | `@aretw0/git-skills` | Skills de git: `commit`, `git-workflow`, `github` (`gh`), `glab` |
 | `@aretw0/web-skills` | Skills de web: `native-web-search`, `web-browser` (CDP) |
+| `@aretw0/pi-skills` | Skills de fábrica: `terminal-setup`, `create-pi-skill/extension/theme/prompt` |
+| `@aretw0/lab-skills` | Skills experimentais: `evaluate-extension`, `cultivate-primitive`, `stack-feedback` |
 
 Ver [`docs/guides/publishing.md`](./docs/guides/publishing.md) para o workflow de release.
 
@@ -52,9 +54,11 @@ Ver [`docs/guides/publishing.md`](./docs/guides/publishing.md) para o workflow d
 ```text
 agents-lab/
 ├── packages/
-│   ├── pi-stack/       # @aretw0/pi-stack — meta-pacote da stack curada (npx @aretw0/pi-stack)
+│   ├── pi-stack/       # @aretw0/pi-stack — meta-pacote + monitor-provider-patch
 │   ├── git-skills/     # @aretw0/git-skills — commit, git-workflow, github, glab
-│   └── web-skills/     # @aretw0/web-skills — native-web-search, web-browser (CDP)
+│   ├── web-skills/     # @aretw0/web-skills — native-web-search, web-browser (CDP)
+│   ├── pi-skills/      # @aretw0/pi-skills — terminal-setup, create-pi-*
+│   └── lab-skills/     # @aretw0/lab-skills — evaluate, cultivate, feedback
 ├── docs/
 │   ├── research/       # Pesquisas, análises e material de referência
 │   ├── guides/         # Guias práticos de uso, configuração e publicação
@@ -110,6 +114,33 @@ Nosso objetivo não é controlar cedo demais o workspace de ninguém, e sim ente
 Ver também: [docs/guides/workspace-philosophy.md](./docs/guides/workspace-philosophy.md)
 
 ## Começando
+
+### Instalando a Stack
+
+A stack curada pode ser instalada de duas formas:
+
+**Via npm** (recomendado quando publicado):
+
+```bash
+# Stack completa
+pi install npm:@aretw0/pi-stack
+
+# Ou pacotes individuais
+pi install npm:@aretw0/git-skills
+pi install npm:@aretw0/pi-skills
+```
+
+**Via git** (sempre atualizado, sem esperar publish):
+
+```bash
+# Stack completa direto do repositório
+pi install https://github.com/aretw0/agents-lab
+
+# Ou para projeto local
+pi install -l https://github.com/aretw0/agents-lab
+```
+
+> **Nota:** A instalação via git traz o repositório inteiro. O pi descobre automaticamente os pacotes dentro de `packages/` via o manifesto `pi` de cada `package.json`.
 
 ### Recursos Recomendados
 

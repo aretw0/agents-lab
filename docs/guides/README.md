@@ -4,69 +4,50 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 
 ## Índice
 
-> 🚧 Em construção — guias serão adicionados conforme o laboratório amadurece.
+### Instalação e Configuração
 
-| Guia | Descrição | Status |
-|------|-----------|--------|
-| [recommended-pi-stack.md](./recommended-pi-stack.md) | Stack mínima recomendada para adoção inicial de Pi no laboratório | Inicial |
-| [copilot-to-pi-migration.md](./copilot-to-pi-migration.md) | Guia incremental de transição do Copilot para Pi | Inicial |
-| [pi-platform-compatibility.md](./pi-platform-compatibility.md) | Compatibilidade de plataforma (Windows/Linux/macOS) e decisão sobre devcontainer | Inicial |
-| [workspace-philosophy.md](./workspace-philosophy.md) | Filosofia do workspace como superfície compartilhada entre humanos, agentes e ferramentas | Inicial |
-| _(em breve)_ | Criando seu primeiro agente com pi-agent-core | Pendente |
-| _(em breve)_ | Usando ferramentas (tools) com Pi | Pendente |
-| _(em breve)_ | Trabalhando com múltiplos LLM providers | Pendente |
+| Guia | Descrição |
+|------|-----------|
+| [recommended-pi-stack.md](./recommended-pi-stack.md) | Stack curada `@aretw0/pi-stack` — o que inclui, como instalar, filosofia |
+| [terminal-setup.md](./terminal-setup.md) | Configuração de terminal por plataforma — Windows Terminal, Ghostty, WezTerm, VS Code |
+| [monitor-overrides.md](./monitor-overrides.md) | Fix para monitors com github-copilot — diagnóstico e overrides |
+| [pi-platform-compatibility.md](./pi-platform-compatibility.md) | Compatibilidade de plataforma (Windows/Linux/macOS) |
+
+### Contribuição e Release
+
+| Guia | Descrição |
+|------|-----------|
+| [publishing.md](./publishing.md) | Workflow de release — changesets, versionamento lockstep, publish via tag |
+
+### Migração e Filosofia
+
+| Guia | Descrição |
+|------|-----------|
+| [copilot-to-pi-migration.md](./copilot-to-pi-migration.md) | Guia incremental de transição do Copilot para Pi |
+| [workspace-philosophy.md](./workspace-philosophy.md) | Filosofia do workspace como superfície compartilhada |
 
 ## Pré-requisitos Gerais
 
-Para a maioria dos guias baseados em Pi, você precisará de:
-
-- **Node.js** >= 18
+- **Node.js** >= 22
 - **npm** >= 9
-- Chave de API de pelo menos um provider (Anthropic, OpenAI, Google, etc.)
+- **Pi** instalado: `npm install -g @mariozechner/pi-coding-agent`
+- Chave de API de pelo menos um provider (GitHub Copilot, Anthropic, OpenAI, Google, etc.)
 
-### Instalação Rápida do Pi Coding Agent
+### Instalação Rápida
 
 ```bash
+# Instalar pi
 npm install -g @mariozechner/pi-coding-agent
-```
 
-Configure sua chave de API:
+# Instalar a stack curada (via npm)
+pi install npm:@aretw0/pi-stack
 
-```bash
-export ANTHROPIC_API_KEY="sua-chave-aqui"
-# ou
-export OPENAI_API_KEY="sua-chave-aqui"
-```
-
-### Usando pi-agent-core em Projetos
-
-```bash
-npm install @mariozechner/pi-agent-core @mariozechner/pi-ai
-```
-
-```typescript
-import { Agent } from "@mariozechner/pi-agent-core";
-import { getModel } from "@mariozechner/pi-ai";
-
-const agent = new Agent({
-  initialState: {
-    systemPrompt: "You are a helpful assistant.",
-    model: getModel("anthropic", "claude-sonnet-4-20250514"),
-  },
-});
-
-agent.subscribe((event) => {
-  if (event.type === "message_update" && event.assistantMessageEvent.type === "text_delta") {
-    process.stdout.write(event.assistantMessageEvent.delta);
-  }
-});
-
-await agent.prompt("Olá, mundo!");
+# Ou via git (sempre atualizado)
+pi install https://github.com/aretw0/agents-lab
 ```
 
 ## Recursos Externos
 
 - [Documentação oficial do pi-mono](https://github.com/badlogic/pi-mono)
-- [Exemplos de padrões de agentes](https://github.com/nilayparikh/tuts-agentic-ai-examples)
-- [Pacotes Pi](https://pi.dev/packages)
+- [Pacotes Pi](https://shittycodingagent.ai/packages)
 - [Comunidade Pi no Discord](https://discord.com/invite/3cU7Bz4UPx)

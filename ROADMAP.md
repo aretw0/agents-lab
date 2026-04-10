@@ -86,9 +86,14 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 - [x] Definir estratégia de versionamento (lockstep com changesets)
 - [x] Criar `@aretw0/git-skills` — commit, git-workflow, github, glab
 - [x] Criar `@aretw0/web-skills` — native-web-search, web-browser CDP
+- [x] Criar `@aretw0/pi-skills` — terminal-setup, create-pi-skill/extension/theme/prompt
+- [x] Criar `@aretw0/lab-skills` — evaluate-extension, cultivate-primitive, stack-feedback
 - [x] Criar `@aretw0/pi-stack` com `install.mjs` (npx + fallback Windows)
-- [ ] Publicar scope `@aretw0` no npm e configurar `NPM_TOKEN` no repositório
-- [ ] Primeiro release (`v0.1.0`) e validação do workflow de publish
+- [x] Extension `monitor-provider-patch` — fix automático de classifiers para github-copilot (14 testes)
+- [x] Publicar scope `@aretw0` no npm e configurar `NPM_TOKEN` no repositório
+- [x] Primeiro release (`v0.1.0`) publicado no npm
+- [x] Branch protection ativada — PRs + 1 review + conventional commits
+- [ ] Release `v0.2.0` com todos os 5 pacotes
 - [ ] Avaliar e migrar primitivas de monitors (`@davidorex/pi-behavior-monitors`)
 - [ ] Avaliar e migrar primitivas de extensions (`@ifi/oh-pi-extensions`)
 - [ ] Avaliar Adaptive Routing do `@ifi/oh-pi` como primitiva futura de roteamento
@@ -97,10 +102,12 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 
 **Objetivo:** Abrir o laboratório para contribuições externas e escalar o ecossistema.
 
-- [ ] Decidir estrutura de longo prazo (monorepo, múltiplos repos, etc.)
-- [ ] Publicar primeiras primitivas no registro npm (se aplicável)
-- [ ] Guia de onboarding para novos colaboradores
-- [ ] Processo de avaliação e promoção de primitivas
+- [x] Branch protection e gateways de qualidade
+- [x] Primeiro contribuidor adicionado
+- [ ] Guia de onboarding para novos colaboradores (skills `pi-skills` e `lab-skills` cobrem parcialmente)
+- [ ] Processo de avaliação e promoção de primitivas (skill `evaluate-extension` + `cultivate-primitive`)
+- [ ] Validar instalação via `pi install https://github.com/aretw0/agents-lab`
+- [ ] Avaliar `@aretw0/terminal-configs` como pacote de configuração puro (issue #3)
 
 ---
 
