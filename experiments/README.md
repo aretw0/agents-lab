@@ -87,5 +87,6 @@ Primeiros experimentos já começaram a surgir a partir da validação prática 
 |-------------|--------|--------|------|
 | [202604-pi-first-validation](./202604-pi-first-validation/README.md) | Pi | Concluído | 2026-04-09 |
 | [202604-pi-agent-core-baseline](./202604-pi-agent-core-baseline/README.md) | Pi | Concluído | 2026-04-10 |
+| [202604-pi-gh-cli-basics](./202604-pi-gh-cli-basics/README.md) | Pi | Em andamento | 2026-04-10 |
 | [202604-pi-hedge-monitor-investigation](./202604-pi-hedge-monitor-investigation/README.md) | Pi | Em andamento | 2026-04-10 |
 | [202604-pi-tool-calling-real-files](./202604-pi-tool-calling-real-files/README.md) | Pi | Em andamento | 2026-04-10 |

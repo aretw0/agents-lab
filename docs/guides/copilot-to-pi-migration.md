@@ -71,6 +71,22 @@ Uso recomendado no começo:
 - Pi entra para sessões de exploração, planejamento e experimentação
 - depois expande para coding regular
 
+### Eixo GitHub: provider não substitui operações GitHub
+
+Um aprendizado importante da validação prática é que usar `github-copilot` como provider de inferência no Pi não substitui a camada operacional do GitHub.
+
+Para convergir ao Pi como driver em uso diário, o caminho mais pragmático hoje é:
+
+1. Pi para raciocínio, leitura, edição e tool calling
+2. `gh` CLI para operações de GitHub como `issues`, `pull requests`, comentários e checks
+
+Em outras palavras:
+
+- `github-copilot` resolve inferência
+- `gh` resolve operação GitHub
+
+Essa separação é importante para não esperar do ecossistema Pi uma integração nativa que ainda não foi validada neste laboratório.
+
 ## Critério de Avanço
 
 Podemos considerar a migração madura quando:
@@ -108,5 +124,6 @@ Resumo do aprendizado:
 - o core do Pi ficou funcional no Windows com Git Bash
 - a stack mínima instalou e foi persistida em `~/.pi/agent/settings.json`
 - artefatos gerados no workspace devem ser curados antes de entrar no git
+- a convergência para GitHub no curto prazo provavelmente passa por `gh` como ponte operacional, não por abstração própria imediata
 
 Ver experimento: [202604-pi-first-validation](../../experiments/202604-pi-first-validation/README.md)

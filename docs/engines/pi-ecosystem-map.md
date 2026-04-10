@@ -165,6 +165,7 @@ O laboratório não precisa construir tudo do zero. O caminho mais racional é:
 - Pi já é um ecossistema, não apenas uma engine isolada.
 - O problema principal agora não é falta de capacidade, e sim seleção e composição.
 - A futura fábrica de extensões deve nascer orientada por gaps concretos encontrados na curadoria, não por reimplementação precoce.
+- Para integração com GitHub no curto prazo, o laboratório ainda não encontrou uma superfície operacional pronta no ecossistema instalado equivalente ao que `gh` CLI já oferece. Isso reforça uma estratégia de composição pragmática: Pi para inferência e tool calling, `gh` para operações GitHub.
 
 ## Referências
 
