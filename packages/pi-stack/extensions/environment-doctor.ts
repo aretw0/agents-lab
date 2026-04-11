@@ -1,12 +1,12 @@
 /**
- * environment-doctor — Health check extension for pi-stack.
+ * environment-doctor -- Health check extension for pi-stack.
  *
  * On session_start, runs a quick environment check and shows a status
  * widget if tools or terminal configurations are missing.
  *
  * Provides /doctor command for full diagnostics with optional auto-fix.
  *
- * Never blocks the agent — only informs and offers to help.
+ * Never blocks the agent -- only informs and offers to help.
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -14,7 +14,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// --- Types ---
 
 type Severity = "ok" | "warn" | "error";
 
@@ -29,7 +29,7 @@ interface CheckResult {
   };
 }
 
-// ─── Terminal Detection ──────────────────────────────────────────────────────
+// --- Terminal Detection ---
 
 export type TerminalId =
   | "windows-terminal"
@@ -51,7 +51,7 @@ export function detectTerminal(): TerminalId {
   return "unknown";
 }
 
-// ─── Terminal Checks ─────────────────────────────────────────────────────────
+// --- Terminal Checks ---
 
 const WT_SETTINGS_PATH = join(
   homedir(),
@@ -76,7 +76,7 @@ export function checkWindowsTerminalConfig(): CheckResult {
     return {
       name: "Windows Terminal config",
       status: "warn",
-      message: "settings.json não encontrado",
+      message: "settings.json nao encontrado",
       fix: {
         description: "Abrir Windows Terminal e pressionar Ctrl+Shift+, para criar settings.json",
         auto: false,
@@ -91,8 +91,8 @@ export function checkWindowsTerminalConfig(): CheckResult {
     return {
       name: "Windows Terminal config",
       status: "warn",
-      message: "settings.json não pôde ser lido",
-      fix: { description: "Verificar se o arquivo é JSON válido", auto: false },
+      message: "settings.json nao pode ser lido",
+      fix: { description: "Verificar se o arquivo e JSON valido", auto: false },
     };
   }
 
@@ -152,7 +152,7 @@ export function checkGhosttyConfig(): CheckResult {
     return {
       name: "Ghostty config",
       status: "warn",
-      message: "Arquivo de config não encontrado",
+      message: "Arquivo de config nao encontrado",
       fix: {
         description: `Criar config em: ${configPaths[0]}\nAdicionar: keybind = alt+backspace=text:\\x1b\\x7f`,
         auto: false,
@@ -168,7 +168,7 @@ export function checkGhosttyConfig(): CheckResult {
     return {
       name: "Ghostty config",
       status: "warn",
-      message: "Tem keybind legado shift+enter=text:\\n — causa conflito com Ctrl+J no pi",
+      message: "Tem keybind legado shift+enter=text:\\n -- causa conflito com Ctrl+J no pi",
       fix: {
         description: "Remover: keybind = shift+enter=text:\\n do config do Ghostty",
         auto: false,
@@ -202,7 +202,7 @@ export function checkWeztermConfig(): CheckResult {
     return {
       name: "WezTerm config",
       status: "warn",
-      message: "~/.wezterm.lua não encontrado",
+      message: "~/.wezterm.lua nao encontrado",
       fix: {
         description: "Criar ~/.wezterm.lua com enable_kitty_keyboard = true",
         auto: true,
@@ -222,7 +222,7 @@ export function checkWeztermConfig(): CheckResult {
     return {
       name: "WezTerm config",
       status: "warn",
-      message: "enable_kitty_keyboard não configurado",
+      message: "enable_kitty_keyboard nao configurado",
       fix: {
         description: "Adicionar config.enable_kitty_keyboard = true ao ~/.wezterm.lua",
         auto: false,
@@ -240,7 +240,7 @@ export function checkTerminal(terminal: TerminalId): CheckResult | null {
     case "wezterm": return checkWeztermConfig();
     case "kitty":
     case "iterm2":
-      return { name: `${terminal} config`, status: "ok", message: "Suporte nativo — sem configuração necessária" };
+      return { name: `${terminal} config`, status: "ok", message: "Suporte nativo -- sem configuracao necessaria" };
     case "vscode":
       return {
         name: "VS Code terminal config",
@@ -256,7 +256,57 @@ export function checkTerminal(terminal: TerminalId): CheckResult | null {
   }
 }
 
-// ─── Tool Checks ─────────────────────────────────────────────────────────────
+// --- Shell Check ---
+
+export type ShellId = "git-bash" | "wsl" | "native-bash" | "unknown";
+
+export function detectShell(): ShellId {
+  const platform = process.platform;
+  if (platform !== "win32") return "native-bash";
+
+  // On Windows, check if we're running inside WSL
+  const isWSL =
+    process.env.WSL_DISTRO_NAME !== undefined ||
+    process.env.WSLENV !== undefined ||
+    (process.env.PATH ?? "").includes("/mnt/c/");
+
+  if (isWSL) return "wsl";
+
+  // Check for MSYS/MINGW (Git Bash)
+  if (process.env.MSYSTEM || process.env.MINGW_PREFIX) return "git-bash";
+
+  return "unknown";
+}
+
+export function checkShell(): CheckResult {
+  const shell = detectShell();
+  const platform = process.platform;
+
+  if (platform !== "win32") {
+    return { name: "Shell", status: "ok", message: `${shell} (nativo)` };
+  }
+
+  if (shell === "wsl") {
+    return {
+      name: "Shell",
+      status: "warn",
+      message: "Pi esta usando bash do WSL em vez do Git Bash",
+      fix: {
+        description:
+          'Adicionar ao ~/.pi/agent/settings.json:\n  "shellPath": "C:\\\\Program Files\\\\Git\\\\bin\\\\bash.exe"\n\nIsso faz o pi usar Git Bash no Windows. Rode /reload depois.',
+        auto: false,
+      },
+    };
+  }
+
+  if (shell === "git-bash") {
+    return { name: "Shell", status: "ok", message: "Git Bash (MINGW)" };
+  }
+
+  return { name: "Shell", status: "ok", message: shell };
+}
+
+// --- Tool Checks ---
 
 async function checkTool(
   pi: ExtensionAPI,
@@ -268,7 +318,7 @@ async function checkTool(
   try {
     const result = await pi.exec(command, versionArgs, { timeout: 5000 });
     if (result.code !== 0) {
-      return { name, status: "error", message: `${name} não encontrado no PATH` };
+      return { name, status: "error", message: `${name} nao encontrado no PATH` };
     }
 
     if (authCheck) {
@@ -278,7 +328,7 @@ async function checkTool(
           return {
             name,
             status: "warn",
-            message: `${name} instalado mas não autenticado`,
+            message: `${name} instalado mas nao autenticado`,
             fix: { description: authCheck.failHint, auto: false },
           };
         }
@@ -286,7 +336,7 @@ async function checkTool(
         return {
           name,
           status: "warn",
-          message: `${name} instalado mas autenticação não verificada`,
+          message: `${name} instalado mas autenticacao nao verificada`,
           fix: { description: authCheck.failHint, auto: false },
         };
       }
@@ -295,16 +345,18 @@ async function checkTool(
     const version = result.stdout?.trim().split("\n")[0] ?? "";
     return { name, status: "ok", message: version };
   } catch {
-    return { name, status: "error", message: `${name} não encontrado` };
+    return { name, status: "error", message: `${name} nao encontrado` };
   }
 }
 
 async function runAllChecks(pi: ExtensionAPI): Promise<{
   tools: CheckResult[];
   terminal: CheckResult | null;
+  shell: CheckResult;
   terminalId: TerminalId;
+  shellId: ShellId;
 }> {
-  const [tools, terminalId] = await Promise.all([
+  const [tools, terminalId, shellId] = await Promise.all([
     Promise.all([
       checkTool(pi, "git", "git", ["--version"]),
       checkTool(pi, "gh", "gh", ["--version"], {
@@ -321,50 +373,58 @@ async function runAllChecks(pi: ExtensionAPI): Promise<{
       checkTool(pi, "npm", "npm", ["--version"]),
     ]),
     Promise.resolve(detectTerminal()),
+    Promise.resolve(detectShell()),
   ]);
 
-  return { tools, terminal: checkTerminal(terminalId), terminalId };
+  return {
+    tools,
+    terminal: checkTerminal(terminalId),
+    shell: checkShell(),
+    terminalId,
+    shellId,
+  };
 }
 
-// ─── Extension ───────────────────────────────────────────────────────────────
+// --- Extension ---
 
 export default function (pi: ExtensionAPI) {
   pi.on("session_start", async (_event, ctx) => {
-    const { tools, terminal } = await runAllChecks(pi);
+    const { tools, terminal, shell } = await runAllChecks(pi);
 
     const issues = [
       ...tools.filter((r) => r.status !== "ok"),
       ...(terminal && terminal.status !== "ok" ? [terminal] : []),
+      ...(shell.status !== "ok" ? [shell] : []),
     ];
 
     if (issues.length > 0) {
       const labels = issues.map((i) => {
-        const icon = i.status === "error" ? "❌" : "⚠️";
+        const icon = i.status === "error" ? "!" : "?";
         return `${icon} ${i.name}`;
       });
-      ctx.ui?.setStatus?.("env-doctor", `${labels.join("  ")} — /doctor para detalhes`);
+      ctx.ui?.setStatus?.("env-doctor", `${labels.join("  ")} -- /doctor para detalhes`);
     }
   });
 
   pi.registerCommand("doctor", {
-    description: "Diagnóstico do ambiente — ferramentas, autenticações e configuração de terminal",
+    description: "Diagnostico do ambiente -- ferramentas, autenticacoes, terminal e shell",
     handler: async (_args, ctx) => {
-      ctx.ui.notify("🔍 Verificando ambiente...", "info");
+      ctx.ui.notify("Verificando ambiente...", "info");
 
-      const { tools, terminal, terminalId } = await runAllChecks(pi);
-      const allResults = [...tools, ...(terminal ? [terminal] : [])];
+      const { tools, terminal, shell, terminalId, shellId } = await runAllChecks(pi);
+      const allResults = [...tools, ...(terminal ? [terminal] : []), shell];
       const issues = allResults.filter((r) => r.status !== "ok");
 
       if (issues.length === 0) {
-        ctx.ui.notify("✅ Ambiente completo — tudo configurado.", "info");
+        ctx.ui.notify("Ambiente completo -- tudo configurado.", "info");
         ctx.ui.setStatus?.("env-doctor", undefined);
         return;
       }
 
-      ctx.ui.notify(`\n⚠️  ${issues.length} item(s) precisam de atenção:\n`, "info");
+      ctx.ui.notify(`\n${issues.length} item(s) precisam de atencao:\n`, "info");
 
       for (const issue of issues) {
-        const icon = issue.status === "error" ? "❌" : "⚠️";
+        const icon = issue.status === "error" ? "[ERRO]" : "[AVISO]";
         ctx.ui.notify(`${icon} ${issue.name}: ${issue.message}`, "info");
 
         if (issue.fix) {
@@ -375,18 +435,18 @@ export default function (pi: ExtensionAPI) {
             );
             if (ok && issue.fix.apply) {
               await issue.fix.apply();
-              ctx.ui.notify(`✅ ${issue.name} configurado. Reinicie o terminal para aplicar.`, "info");
+              ctx.ui.notify(`[OK] ${issue.name} configurado. Reinicie o terminal para aplicar.`, "info");
             } else if (!ok) {
-              ctx.ui.notify(`   → ${issue.fix.description}`, "info");
+              ctx.ui.notify(`   -> ${issue.fix.description}`, "info");
             }
           } else {
-            ctx.ui.notify(`   → ${issue.fix.description}`, "info");
+            ctx.ui.notify(`   -> ${issue.fix.description}`, "info");
           }
         }
       }
 
-      ctx.ui.notify(`\n📋 Terminal detectado: ${terminalId}`, "info");
-      ctx.ui.notify("O pi não está bloqueado, mas funcionalidades podem ser limitadas.", "info");
+      ctx.ui.notify(`\nTerminal: ${terminalId} | Shell: ${shellId}`, "info");
+      ctx.ui.notify("O pi nao esta bloqueado, mas funcionalidades podem ser limitadas.", "info");
     },
   });
 }

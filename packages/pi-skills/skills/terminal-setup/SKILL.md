@@ -1,25 +1,27 @@
 ---
 name: terminal-setup
 description: >
-  Diagnóstico e configuração de terminal para pi. Use quando o usuário tiver
-  problemas com Shift+Enter, keybindings, ou ao configurar um terminal novo.
+  Diagnostico e configuracao de terminal para pi. Use quando o usuario tiver
+  problemas com Shift+Enter, keybindings, shell errado, ou ao configurar um terminal novo.
 ---
 
 # Terminal Setup
 
-Ajuda o usuário a configurar o terminal para funcionar corretamente com o pi.
+Ajuda o usuario a configurar o terminal para funcionar corretamente com o pi.
 
-Pi usa o [Kitty keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/). Terminais que não suportam esse protocolo têm limitações com `Shift+Enter`, `Alt+Enter` e outros atalhos.
+Pi usa o [Kitty keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/). Terminais que nao suportam esse protocolo tem limitacoes com `Shift+Enter`, `Alt+Enter` e outros atalhos.
 
-## Diagnóstico
+## Diagnostico
 
-Se `Shift+Enter` não insere nova linha, pergunte ao usuário qual terminal usa e aplique a config correspondente.
+Se `Shift+Enter` nao insere nova linha, pergunte ao usuario qual terminal usa e aplique a config correspondente.
 
-## Configurações por Terminal
+Se o pi parece usar o shell errado (ex: WSL em vez de Git Bash), veja a secao "Windows -- Shell Path".
+
+## Configuracoes por Terminal
 
 ### Windows Terminal
 
-O usuário precisa adicionar ao `settings.json` (`Ctrl+Shift+,`):
+O usuario precisa adicionar ao `settings.json` (`Ctrl+Shift+,`):
 
 ```json
 {
@@ -36,7 +38,7 @@ O usuário precisa adicionar ao `settings.json` (`Ctrl+Shift+,`):
 }
 ```
 
-Diga ao usuário para fechar e reabrir completamente o Windows Terminal após salvar.
+Diga ao usuario para fechar e reabrir completamente o Windows Terminal apos salvar.
 
 ### Ghostty
 
@@ -46,7 +48,7 @@ Adicionar ao config (`~/.config/ghostty/config` no Linux, `~/Library/Application
 keybind = alt+backspace=text:\x1b\x7f
 ```
 
-Se o usuário tem `keybind = shift+enter=text:\n` (legado do Claude Code), oriente a remover — causa conflito com `Ctrl+J` no pi.
+Se o usuario tem `keybind = shift+enter=text:\n` (legado do Claude Code), oriente a remover -- causa conflito com `Ctrl+J` no pi.
 
 ### WezTerm
 
@@ -79,39 +81,68 @@ Paths do `keybindings.json`:
 
 ### Terminais com suporte nativo
 
-Kitty e iTerm2 funcionam sem configuração adicional.
+Kitty e iTerm2 funcionam sem configuracao adicional.
 
-### Terminais não recomendados
+### Terminais nao recomendados
 
-xfce4-terminal, terminator e IntelliJ Terminal não conseguem distinguir `Shift+Enter` de `Enter`.
+xfce4-terminal, terminator e IntelliJ Terminal nao conseguem distinguir `Shift+Enter` de `Enter`.
 
-## Windows — Shell Path
+## Windows -- Shell Path
 
-Pi precisa de bash no Windows. Verificar com:
+Pi precisa de bash no Windows. Existem dois cenarios comuns:
+
+### Git Bash (recomendado)
+
+Verificar se Git Bash esta instalado:
 
 ```bash
 git --version
 ```
 
-Se Git Bash não está instalado, orientar o download: https://git-scm.com/download/win
+Se nao esta instalado: https://git-scm.com/download/win
 
-Para path customizado, editar `~/.pi/agent/settings.json`:
+### WSL instalado junto com Git Bash
+
+Quando WSL e Git Bash coexistem, o pi pode resolver `/usr/bin/bash` (WSL)
+em vez do Git Bash. Sintomas:
+- `node` e `npm` nao encontrados no PATH
+- Rede instavel (WSL tem stack de rede separado do Windows)
+- Paths aparecem como `/mnt/c/...` em vez de `/c/...`
+- Ferramentas do Windows (gh, git credential manager) nao funcionam
+
+**Diagnostico rapido** -- rodar no pi:
+
+```bash
+uname -a
+```
+
+Se mostrar `Linux ... microsoft-standard-WSL2`, o pi esta usando WSL.
+
+**Fix:** Adicionar ao `~/.pi/agent/settings.json`:
 
 ```json
 {
-  "shellPath": "C:\\caminho\\para\\bash.exe"
+  "shellPath": "C:\\Program Files\\Git\\bin\\bash.exe"
 }
 ```
+
+Depois rode `/reload` no pi.
+
+**Importante:** `shellPath` e configuracao pessoal do usuario, nao do projeto.
+Pacotes e extensoes nunca devem alterar essa configuracao -- apenas diagnosticar
+e instruir o usuario.
+
+Se o pi-stack esta instalado, `/doctor` detecta esse cenario automaticamente.
 
 ## Keybindings Customizados
 
 Arquivo: `~/.pi/agent/keybindings.json`
 
-Exemplo — aceitar `Ctrl+J` como nova linha:
+Exemplo -- aceitar `Ctrl+J` como nova linha:
 ```json
 {
   "tui.input.newLine": ["shift+enter", "ctrl+j"]
 }
 ```
 
-Após editar: `/reload` no pi.
+Apos editar: `/reload` no pi.

@@ -22,6 +22,13 @@ function detectTerminal(env) {
   return "unknown";
 }
 
+function detectShell(platform, env) {
+  if (platform !== "win32") return "native-bash";
+  if (env.WSL_DISTRO_NAME !== undefined || env.WSLENV !== undefined || (env.PATH ?? "").includes("/mnt/c/")) return "wsl";
+  if (env.MSYSTEM || env.MINGW_PREFIX) return "git-bash";
+  return "unknown";
+}
+
 function hasWTRemappings(settingsPath) {
   const content = JSON.parse(readFileSync(settingsPath, "utf8"));
   const str = JSON.stringify(content.actions ?? []);
@@ -41,7 +48,7 @@ function applyWTRemappings(settingsPath) {
   writeFileSync(settingsPath, JSON.stringify(current, null, 4));
 }
 
-// ─── Tests ───────────────────────────────────────────────────────────────────
+// --- Tests ---
 
 describe("detectTerminal", () => {
   it("detects Windows Terminal via WT_SESSION", () => {
@@ -78,6 +85,41 @@ describe("detectTerminal", () => {
 
   it("Windows Terminal takes priority over others", () => {
     assert.equal(detectTerminal({ WT_SESSION: "x", KITTY_WINDOW_ID: "1" }), "windows-terminal");
+  });
+});
+
+describe("detectShell", () => {
+  it("returns native-bash on non-Windows", () => {
+    assert.equal(detectShell("linux", {}), "native-bash");
+    assert.equal(detectShell("darwin", {}), "native-bash");
+  });
+
+  it("detects WSL via WSL_DISTRO_NAME", () => {
+    assert.equal(detectShell("win32", { WSL_DISTRO_NAME: "Ubuntu" }), "wsl");
+  });
+
+  it("detects WSL via WSLENV", () => {
+    assert.equal(detectShell("win32", { WSLENV: "USERPROFILE" }), "wsl");
+  });
+
+  it("detects WSL via /mnt/c/ in PATH", () => {
+    assert.equal(detectShell("win32", { PATH: "/usr/bin:/mnt/c/Windows" }), "wsl");
+  });
+
+  it("detects Git Bash via MSYSTEM", () => {
+    assert.equal(detectShell("win32", { MSYSTEM: "MINGW64" }), "git-bash");
+  });
+
+  it("detects Git Bash via MINGW_PREFIX", () => {
+    assert.equal(detectShell("win32", { MINGW_PREFIX: "/mingw64" }), "git-bash");
+  });
+
+  it("returns unknown for bare Windows", () => {
+    assert.equal(detectShell("win32", {}), "unknown");
+  });
+
+  it("WSL takes priority over Git Bash on Windows", () => {
+    assert.equal(detectShell("win32", { WSL_DISTRO_NAME: "Ubuntu", MSYSTEM: "MINGW64" }), "wsl");
   });
 });
 
@@ -120,7 +162,7 @@ describe("Windows Terminal config", () => {
     assert.ok(str.includes("ctrl+c"));
   });
 
-  it("idempotent — does not duplicate remappings", () => {
+  it("idempotent -- does not duplicate remappings", () => {
     const path = join(tmpDir, "settings.json");
     writeFileSync(path, JSON.stringify({ actions: [] }));
     applyWTRemappings(path);
