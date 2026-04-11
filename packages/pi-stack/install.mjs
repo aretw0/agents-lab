@@ -49,6 +49,12 @@ const FILTER_PATCHES = [
     source: "npm:@ifi/oh-pi-skills",
     skills: ["!skills/git-workflow"],
   },
+  {
+    // pi-web-access/librarian — funcionalidade assimilada como @aretw0/web-skills/source-research
+    // mitsupi/librarian (git-cache) é mantido; este é suprimido para evitar colisão de nome
+    source: "npm:pi-web-access",
+    skills: ["!skills/librarian"],
+  },
 ];
 
 function parseArgs(argv) {

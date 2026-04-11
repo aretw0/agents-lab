@@ -4,6 +4,9 @@
  *
  * Para cada colisão encontrada, verifica se está coberta por um filtro
  * em FILTER_PATCHES do installer ou documentada como conhecida.
+ *
+ * Também verifica que cada colisão conhecida tem um filter patch que
+ * suprime o pacote perdedor, fechando o loop entre documentação e correção.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
@@ -12,9 +15,23 @@ import * as path from "node:path";
 const PKG = path.resolve(__dirname, "../../");
 const REPO_ROOT = path.resolve(PKG, "../../");
 
+// Ler FILTER_PATCHES do installer para validação
+const installerContent = readFileSync(path.join(PKG, "install.mjs"), "utf8");
+// Extrair { pkgName → skills excluídas } de cada patch block
+const patchedSkillSources: Map<string, string[]> = new Map();
+const patchBlockRe =
+  /\{[^{}]*source:\s*["']npm:([^"']+)["'][^{}]*skills:\s*(\[[^\]]*\])[^{}]*\}/gs;
+for (const m of installerContent.matchAll(patchBlockRe)) {
+  const src = m[1];
+  const excluded = [...m[2].matchAll(/["']!skills\/([^"']+)["']/g)].map((x) => x[1]);
+  patchedSkillSources.set(src, excluded);
+}
+
 // Colisões conhecidas e aceitas: { skillName: "pacote que deve vencer" }
 const KNOWN_COLLISIONS: Record<string, string> = {
-  librarian:     "mitsupi",               // mitsupi=git-cache, pi-web-access=research
+  // mitsupi=git-cache mantido; pi-web-access/librarian suprimido pois a funcionalidade
+  // foi assimilada como @aretw0/web-skills/source-research
+  librarian:     "mitsupi",
   commit:        "@aretw0/git-skills",
   github:        "@aretw0/git-skills",
   "web-browser": "@aretw0/web-skills",
@@ -91,6 +108,37 @@ describe("skill collisions", () => {
         `\n  → Adicione a FILTER_PATCHES em install.mjs ou a KNOWN_COLLISIONS neste teste.`
       ).join("\n");
     expect.fail(`Novas colisões de skill detectadas:\n${msg}`);
+  });
+
+  it("colisões conhecidas têm filter patch no installer (loop fechado)", () => {
+    // Para cada colisão conhecida onde um vencedor é declarado,
+    // o pacote PERDEDOR deve ter um patch em FILTER_PATCHES excluindo aquela skill.
+    const missing: string[] = [];
+    for (const [skillName, winner] of Object.entries(KNOWN_COLLISIONS)) {
+      const entries = skillMap.get(skillName);
+      if (!entries || entries.length < 2) continue; // colisão não existe localmente — skip
+      // Identificar os pacotes perdedores (todos exceto o vencedor)
+      const losers = entries
+        .map((e) => e.path.split("/skills/")[0]) // e.g. "mitsupi"
+        .filter((pkg) => !pkg.includes(winner));
+      for (const loserPkg of losers) {
+        // Extrair nome npm do caminho (último segmento do node_modules/...)
+        const npmName = loserPkg.replace(/.*node_modules[\/\\]/, "").replace(/\\/g, "/");
+        const excluded = patchedSkillSources.get(npmName) ?? [];
+        if (!excluded.includes(skillName)) {
+          missing.push(
+            `Skill "${skillName}": pacote perdedor "${npmName}" não tem patch excluindo !skills/${skillName}` +
+            `\n  → Adicione em FILTER_PATCHES: { source: "npm:${npmName}", skills: ["!skills/${skillName}"] }`
+          );
+        }
+      }
+    }
+    if (missing.length > 0) {
+      expect.fail(
+        `Colisões conhecidas sem filter patch (o conflito chega ao usuário):\n` +
+        missing.join("\n")
+      );
+    }
   });
 
   it("colisões conhecidas ainda existem (sem entradas obsoletas em KNOWN_COLLISIONS)", () => {
