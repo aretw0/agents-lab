@@ -1,6 +1,6 @@
 {
   "name": "@aretw0/git-skills",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "First-party git skills: github (gh), gitlab (glab), workflow and commit conventions",
   "type": "module",
   "license": "MIT",
