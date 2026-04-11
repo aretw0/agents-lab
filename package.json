@@ -12,7 +12,9 @@
     "verify": "node scripts/verify-pi-stack.mjs",
     "release": "changeset version",
     "publish:all": "npm run build --workspaces --if-present && changeset publish",
-    "postinstall": "npm install --prefix packages/pi-stack --no-workspaces --silent"
+    "pi:local": "node scripts/pi-source-switch.mjs local",
+    "pi:published": "node scripts/pi-source-switch.mjs published",
+    "pi:status": "node scripts/pi-source-switch.mjs status"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

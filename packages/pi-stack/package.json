@@ -1,7 +1,7 @@
 {
   "name": "@aretw0/pi-stack",
-  "version": "0.2.1",
-  "description": "Meta-pacote que centraliza a stack curada de extensões pi do agents-lab",
+  "version": "0.3.0",
+  "description": "Meta-pacote que instala a stack curada de extensões pi do agents-lab — cada pacote individualmente",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -17,95 +17,19 @@
   },
   "files": [
     "install.mjs",
+    "package-list.mjs",
     "extensions",
     "themes",
     "README.md"
-  ],
-  "dependencies": {
-    "mitsupi": "*",
-    "pi-lens": "*",
-    "pi-web-access": "*",
-    "@davidorex/pi-project-workflows": "*",
-    "@ifi/oh-pi-skills": "*",
-    "@ifi/oh-pi-themes": "*",
-    "@ifi/oh-pi-prompts": "*",
-    "@ifi/oh-pi-extensions": "*",
-    "@ifi/oh-pi-ant-colony": "*",
-    "@ifi/pi-extension-subagents": "*",
-    "@ifi/pi-plan": "*",
-    "@ifi/pi-spec": "*",
-    "@ifi/pi-web-remote": "*"
-  },
-  "bundledDependencies": [
-    "mitsupi",
-    "pi-lens",
-    "pi-web-access",
-    "@davidorex/pi-project-workflows",
-    "@ifi/oh-pi-skills",
-    "@ifi/oh-pi-themes",
-    "@ifi/oh-pi-prompts",
-    "@ifi/oh-pi-extensions",
-    "@ifi/oh-pi-ant-colony",
-    "@ifi/pi-extension-subagents",
-    "@ifi/pi-plan",
-    "@ifi/pi-spec",
-    "@ifi/pi-web-remote"
   ],
   "pi": {
     "extensions": [
       "./extensions/monitor-provider-patch.ts",
       "./extensions/environment-doctor.ts",
-      "./extensions/read-guard.ts",
-      "node_modules/pi-lens/index.ts",
-      "node_modules/pi-web-access/index.ts",
-      "node_modules/@davidorex/pi-project-workflows/project-extension.ts",
-      "node_modules/@davidorex/pi-project-workflows/workflows-extension.ts",
-      "node_modules/@davidorex/pi-project-workflows/monitors-extension.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/auto-session-name.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/auto-update.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/bg-process.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/btw.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/compact-header.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/custom-footer.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/git-guard.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/safe-guard.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/scheduler.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/usage-tracker.ts",
-      "node_modules/@ifi/oh-pi-extensions/extensions/watchdog.ts",
-      "node_modules/@ifi/oh-pi-ant-colony/extensions/ant-colony/index.ts",
-      "node_modules/@ifi/pi-extension-subagents/index.ts",
-      "node_modules/@ifi/pi-extension-subagents/notify.ts",
-      "node_modules/@ifi/pi-plan/index.ts",
-      "node_modules/@ifi/pi-spec/extension/index.ts",
-      "node_modules/@ifi/pi-web-remote/index.ts",
-      "node_modules/mitsupi/pi-extensions/answer.ts",
-      "node_modules/mitsupi/pi-extensions/context.ts",
-      "node_modules/mitsupi/pi-extensions/control.ts",
-      "node_modules/mitsupi/pi-extensions/files.ts",
-      "node_modules/mitsupi/pi-extensions/go-to-bed.ts",
-      "node_modules/mitsupi/pi-extensions/loop.ts",
-      "node_modules/mitsupi/pi-extensions/multi-edit.ts",
-      "node_modules/mitsupi/pi-extensions/notify.ts",
-      "node_modules/mitsupi/pi-extensions/prompt-editor.ts",
-      "node_modules/mitsupi/pi-extensions/review.ts",
-      "node_modules/mitsupi/pi-extensions/session-breakdown.ts",
-      "node_modules/mitsupi/pi-extensions/todos.ts",
-      "node_modules/mitsupi/pi-extensions/whimsical.ts"
-    ],
-    "skills": [
-      "node_modules/pi-lens/skills",
-      "node_modules/pi-web-access/skills",
-      "node_modules/@davidorex/pi-project-workflows/skills",
-      "node_modules/@ifi/oh-pi-skills/skills",
-      "node_modules/mitsupi/skills"
+      "./extensions/read-guard.ts"
     ],
     "themes": [
-      "node_modules/@ifi/oh-pi-themes/themes",
-      "node_modules/mitsupi/pi-themes",
       "./themes"
-    ],
-    "prompts": [
-      "node_modules/@ifi/oh-pi-prompts/prompts"
     ]
   }
 }

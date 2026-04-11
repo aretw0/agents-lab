@@ -30,13 +30,39 @@ Obrigado por querer contribuir! Este laboratório é um espaço colaborativo de 
 Os pacotes first-party vivem em `packages/` e são distribuídos como `@aretw0/*` no npm.
 
 1. Crie um diretório em `packages/meu-pacote/` com `package.json` e `README.md`.
-2. Adicione o pacote ao `.pi/settings.json` do projeto para desenvolvimento local:
-   ```json
-   { "packages": ["./packages/pi-stack", "./packages/meu-pacote"] }
+2. Ative o modo desenvolvimento local:
+   ```bash
+   npm run pi:local     # aponta pi para os workspace paths
    ```
 3. Faça `/reload` no pi para carregar o pacote.
 4. Quando a mudança estiver pronta, crie um changeset (ver abaixo).
-5. Quando o pacote estiver maduro, adicione-o como dependência do `pi-stack`.
+5. Quando o pacote estiver maduro, adicione-o à lista em `packages/pi-stack/package-list.mjs`.
+
+### Alternando entre Desenvolvimento e Produção
+
+O script `pi-source-switch.mjs` alterna os pacotes do pi entre local e npm:
+
+```bash
+npm run pi:local       # aponta pi para packages/ do monorepo
+npm run pi:published   # volta para npm:@aretw0/*
+npm run pi:status      # mostra configuração atual
+```
+
+Isso reescreve o `~/.pi/agent/settings.json`. Use `--pi-local` para escrever no `.pi/settings.json` do projeto.
+
+### Testando Extensões
+
+Use `@marcfargas/pi-test-harness` para testes automatizados:
+
+```bash
+# Testes smoke (vitest)
+npm run test:smoke
+
+# Testes unitários (node:test)
+npm test
+```
+
+A skill `test-pi-extension` documenta como usar o test-harness. Veja exemplos em `packages/pi-stack/test/`.
 
 ### Promovendo uma Primitiva
 
@@ -53,7 +79,7 @@ Todos os pacotes `@aretw0/*` compartilham a mesma versão.
 
 ### Documentar uma mudança distribuível
 
-Sempre que alterar algo em `packages/` que merea release:
+Sempre que alterar algo em `packages/` que mereça release:
 
 ```bash
 npx changeset
@@ -85,8 +111,6 @@ git push && git push --tags  # GitHub Actions publica no npm
 - **Segredos:** Nunca commite chaves de API, tokens ou credenciais.
 - **PRs pequenos:** Prefira PRs focados em um único tópico.
 - **Contexto:** Inclua sempre o contexto de por que a contribuição é relevante para o laboratório.
-- **Workspace:** Artefatos gerados por engines e extensões devem ser entendidos antes de serem ignorados, removidos ou promovidos a convenção do projeto.
-- **Overrides locais:** Configurações intencionais em `.pi/agents/` podem ser versionadas quando corrigem ou explicitam comportamento do workspace; saídas operacionais como `.project/` devem ser tratadas como runtime até que virem primitivas ou convenções estáveis.
 
 ## Discussões
 

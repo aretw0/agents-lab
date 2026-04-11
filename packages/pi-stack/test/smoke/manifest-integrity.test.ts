@@ -2,8 +2,8 @@
  * Smoke test: manifest integrity -- every path listed in
  * packages/pi-stack/package.json "pi" manifest actually exists on disk.
  *
- * This catches drift when upstream packages refactor internal files
- * (the exact problem that caused our oh-pi-extensions loading errors).
+ * Now that pi-stack is a lightweight package (no bundledDependencies),
+ * this only checks first-party extensions and themes.
  */
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -25,9 +25,9 @@ function checkPaths(section: string, paths: string[]) {
 
 describe("manifest integrity", () => {
   checkPaths("extensions", manifest.extensions);
-  checkPaths("skills", manifest.skills);
-  checkPaths("themes", manifest.themes);
-  checkPaths("prompts", manifest.prompts);
+  if (manifest.themes) checkPaths("themes", manifest.themes);
+  if (manifest.skills) checkPaths("skills", manifest.skills);
+  if (manifest.prompts) checkPaths("prompts", manifest.prompts);
 
   describe("extension entry points have valid default export", () => {
     const extensionFiles = (manifest.extensions as string[]).filter(

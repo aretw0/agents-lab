@@ -29,13 +29,11 @@ Este repositório é a fábrica onde a curadoria nasce. Os pacotes first-party s
 
 | Pacote | Descrição |
 |--------|----------|
-| `@aretw0/pi-stack` | Meta-pacote da stack curada — instala tudo com `npx @aretw0/pi-stack` |
+| `@aretw0/pi-stack` | Installer da stack curada — instala todos os pacotes via `npx @aretw0/pi-stack` |
 | `@aretw0/git-skills` | Skills de git: `commit`, `git-workflow`, `github` (`gh`), `glab` |
-| `@aretw0/web-skills` | Skills de web: `native-web-search`, `web-browser` (CDP) |
-| `@aretw0/pi-skills` | Skills de fábrica: `terminal-setup`, `create-pi-skill/extension/theme/prompt` |
+| `@aretw0/web-skills` | Skills de web: `web-browser` (CDP) |
+| `@aretw0/pi-skills` | Skills de fábrica: `terminal-setup`, `create-pi-skill/extension/theme/prompt`, `test-pi-extension` |
 | `@aretw0/lab-skills` | Skills experimentais: `evaluate-extension`, `cultivate-primitive`, `stack-feedback` |
-
-Ver [`docs/guides/publishing.md`](./docs/guides/publishing.md) para o workflow de release.
 
 ### Pacotes Pi Relevantes (Terceiros)
 
@@ -44,8 +42,8 @@ Ver [`docs/guides/publishing.md`](./docs/guides/publishing.md) para o workflow d
 | `@mariozechner/pi-ai` | API unificada multi-provider para LLMs |
 | `@mariozechner/pi-agent-core` | Runtime de agentes com tool calling e state management |
 | `@mariozechner/pi-coding-agent` | CLI de coding agent interativo |
-| `@mariozechner/pi-web-ui` | Web components para interfaces de chat com IA |
 | `@mariozechner/pi-tui` | Terminal UI com renderização diferencial |
+| `@marcfargas/pi-test-harness` | Test harness para extensões pi |
 
 > **Nota:** Apesar do Pi ser a engine principal, a estrutura do laboratório é deliberadamente engine-agnóstica. Caso surjam implementações superiores, podemos migrar sem perder o trabalho acumulado.
 
@@ -54,11 +52,13 @@ Ver [`docs/guides/publishing.md`](./docs/guides/publishing.md) para o workflow d
 ```text
 agents-lab/
 ├── packages/
-│   ├── pi-stack/       # @aretw0/pi-stack — meta-pacote + monitor-provider-patch
+│   ├── pi-stack/       # @aretw0/pi-stack — installer + extensions first-party
 │   ├── git-skills/     # @aretw0/git-skills — commit, git-workflow, github, glab
-│   ├── web-skills/     # @aretw0/web-skills — native-web-search, web-browser (CDP)
-│   ├── pi-skills/      # @aretw0/pi-skills — terminal-setup, create-pi-*
+│   ├── web-skills/     # @aretw0/web-skills — web-browser (CDP)
+│   ├── pi-skills/      # @aretw0/pi-skills — terminal-setup, create-pi-*, test-pi-extension
 │   └── lab-skills/     # @aretw0/lab-skills — evaluate, cultivate, feedback
+├── scripts/
+│   └── pi-source-switch.mjs  # Alterna entre dev local e pacotes npm
 ├── docs/
 │   ├── research/       # Pesquisas, análises e material de referência
 │   ├── guides/         # Guias práticos de uso, configuração e publicação
@@ -72,80 +72,78 @@ agents-lab/
 └── ROADMAP.md          # Planejamento e milestones futuros
 ```
 
-A estrutura acima organiza o laboratório para facilitar tanto a exploração prática quanto a consulta de material de apoio.
-
-- Em [`experiments/`](./experiments/), você encontra os resultados práticos do roadmap, incluindo experimentos e provas de conceito.
-- Em [`docs/research/`](./docs/research/), estão reunidas análises, pesquisas e referências usadas para orientar as decisões do laboratório.
-- Em [`docs/guides/`](./docs/guides/), ficam os guias práticos de uso, configuração e navegação pelo workspace.
-
-## Filosofia de Design
-
-### Primitivas Reutilizáveis
-
-O laboratório busca identificar e extrair as **primitivas fundamentais** do design de agentes:
-
-- **Memória** — como agentes armazenam e recuperam contexto
-- **Ferramentas** — como agentes interagem com o mundo externo
-- **Planejamento** — como agentes decompõem tarefas complexas
-- **Coordenação** — como múltiplos agentes colaboram (A2A, MAS)
-- **Avaliação** — como medir a qualidade e confiabilidade de agentes
-
-### Baixa Fricção Cognitiva
-
-Um princípio central é minimizar a fricção cognitiva para quem experimenta e para quem usa as primitivas. Isso significa:
-
-- Documentação clara e acessível
-- Exemplos autocontidos
-- Abstrações que mapeiam naturalmente para os conceitos do domínio
-
-### Workspace como Superfície de Trabalho
-
-O laboratório trata o workspace como parte da interface de trabalho entre humanos, agentes e ferramentas.
-
-Isso significa que arquivos, diretórios e artefatos projetados por uma engine ou extensão não devem ser vistos apenas como detalhe técnico. Eles podem revelar:
-
-- intenção arquitetural
-- forma de colaboração
-- memória operacional
-- novas convenções de trabalho
-
-Nosso objetivo não é controlar cedo demais o workspace de ninguém, e sim entender como ele passa a estruturar o trabalho conjunto.
-
-Ver também: [docs/guides/workspace-philosophy.md](./docs/guides/workspace-philosophy.md)
-
 ## Começando
 
 ### Instalando a Stack
 
-A stack curada pode ser instalada de duas formas:
-
-**Via npm** (recomendado quando publicado):
+A stack curada instala cada pacote individualmente no pi (mesmo padrão do oh-pi):
 
 ```bash
-# Stack completa
-pi install npm:@aretw0/pi-stack
+# Stack completa — instala 17 pacotes via pi install
+npx @aretw0/pi-stack
 
-# Ou pacotes individuais
+# Com versão fixa para @aretw0/*
+npx @aretw0/pi-stack --version 0.3.0
+
+# Instalação local (projeto)
+npx @aretw0/pi-stack --local
+
+# Remover tudo
+npx @aretw0/pi-stack --remove
+```
+
+Ou instale pacotes individuais:
+
+```bash
 pi install npm:@aretw0/git-skills
 pi install npm:@aretw0/pi-skills
+pi install npm:@ifi/oh-pi-themes
 ```
 
 **Via git** (sempre atualizado, sem esperar publish):
 
 ```bash
-# Stack completa direto do repositório
 pi install https://github.com/aretw0/agents-lab
-
-# Ou para projeto local
-pi install -l https://github.com/aretw0/agents-lab
 ```
 
-> **Nota:** A instalação via git traz o repositório inteiro. O pi descobre automaticamente os pacotes dentro de `packages/` via o manifesto `pi` de cada `package.json`.
+### Desenvolvimento Local
+
+Para desenvolver pacotes do monorepo usando o pi:
+
+```bash
+git clone https://github.com/aretw0/agents-lab.git
+cd agents-lab
+npm install
+
+# Apontar pi para os pacotes locais do workspace
+npm run pi:local
+
+# Verificar configuração atual
+npm run pi:status
+
+# Voltar para pacotes publicados no npm
+npm run pi:published
+```
+
+O `.pi/settings.json` do projeto já aponta para os pacotes locais automaticamente.
+
+### Testando Extensões
+
+Este monorepo usa `@marcfargas/pi-test-harness` para testes automatizados:
+
+```bash
+# Rodar todos os testes
+npm run test:smoke
+
+# Testes unitários de extensões
+npm test
+```
+
+A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes para suas próprias extensões.
 
 ### Recursos Recomendados
 
 - [pi-mono — repositório oficial](https://github.com/badlogic/pi-mono)
-- [tuts-agentic-ai-examples — exemplos de padrões de agentes](https://github.com/nilayparikh/tuts-agentic-ai-examples)
 - [Guias deste laboratório](./docs/guides/)
 - [Pesquisas e análises](./docs/research/)
 
