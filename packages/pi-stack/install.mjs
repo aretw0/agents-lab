@@ -34,9 +34,20 @@ const IS_WINDOWS = process.platform === "win32";
  */
 const FILTER_PATCHES = [
   {
-    // mitsupi/uv.ts registers tool "bash", conflicts with oh-pi-extensions/bg-process.ts
+    // mitsupi/uv.ts registers tool "bash" — conflicts with oh-pi-extensions/bg-process.ts
+    // mitsupi skills commit/github/web-browser — replaced by @aretw0/git-skills + web-skills
     source: "npm:mitsupi",
     extensions: ["!pi-extensions/uv.ts"],
+    skills: [
+      "!skills/commit",
+      "!skills/github",
+      "!skills/web-browser",
+    ],
+  },
+  {
+    // oh-pi-skills/git-workflow — replaced by @aretw0/git-skills/git-workflow
+    source: "npm:@ifi/oh-pi-skills",
+    skills: ["!skills/git-workflow"],
   },
 ];
 
@@ -149,14 +160,14 @@ function applyFilterPatches(settingsPath) {
 		const patch = FILTER_PATCHES.find((p) => source === p.source);
 		if (!patch) return entry;
 
-		// Already has filters — skip
-		if (typeof entry === "object" && entry.extensions) return entry;
+		// Already has all filters — skip
+		if (typeof entry === "object" && entry.extensions && entry.skills) return entry;
 
 		changed = true;
-		return {
-			source: patch.source,
-			extensions: patch.extensions,
-		};
+		const next = { source: patch.source };
+		if (patch.extensions) next.extensions = patch.extensions;
+		if (patch.skills) next.skills = patch.skills;
+		return next;
 	});
 
 	if (changed) {
