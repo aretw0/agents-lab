@@ -264,15 +264,12 @@ export function detectShell(): ShellId {
   const platform = process.platform;
   if (platform !== "win32") return "native-bash";
 
-  // On Windows, check if we're running inside WSL
   const isWSL =
     process.env.WSL_DISTRO_NAME !== undefined ||
     process.env.WSLENV !== undefined ||
     (process.env.PATH ?? "").includes("/mnt/c/");
 
   if (isWSL) return "wsl";
-
-  // Check for MSYS/MINGW (Git Bash)
   if (process.env.MSYSTEM || process.env.MINGW_PREFIX) return "git-bash";
 
   return "unknown";
@@ -293,7 +290,7 @@ export function checkShell(): CheckResult {
       message: "Pi esta usando bash do WSL em vez do Git Bash",
       fix: {
         description:
-          'Adicionar ao ~/.pi/agent/settings.json:\n  "shellPath": "C:\\\\Program Files\\\\Git\\\\bin\\\\bash.exe"\n\nIsso faz o pi usar Git Bash no Windows. Rode /reload depois.',
+          'Adicionar ao ~/.pi/agent/settings.json:\n  "shellPath": "C:\\\\Program Files\\\\Git\\\\bin\\\\bash.exe"\n\nDepois rode /reload.',
         auto: false,
       },
     };
@@ -318,7 +315,7 @@ async function checkTool(
   try {
     const result = await pi.exec(command, versionArgs, { timeout: 5000 });
     if (result.code !== 0) {
-      return { name, status: "error", message: `${name} nao encontrado no PATH` };
+      return { name, status: "error", message: `Nao encontrado no PATH` };
     }
 
     if (authCheck) {
@@ -328,7 +325,7 @@ async function checkTool(
           return {
             name,
             status: "warn",
-            message: `${name} instalado mas nao autenticado`,
+            message: `Instalado mas nao autenticado`,
             fix: { description: authCheck.failHint, auto: false },
           };
         }
@@ -336,7 +333,7 @@ async function checkTool(
         return {
           name,
           status: "warn",
-          message: `${name} instalado mas autenticacao nao verificada`,
+          message: `Instalado mas autenticacao nao verificada`,
           fix: { description: authCheck.failHint, auto: false },
         };
       }
@@ -345,30 +342,51 @@ async function checkTool(
     const version = result.stdout?.trim().split("\n")[0] ?? "";
     return { name, status: "ok", message: version };
   } catch {
-    return { name, status: "error", message: `${name} nao encontrado` };
+    return { name, status: "error", message: `Nao encontrado` };
   }
 }
 
-async function runAllChecks(pi: ExtensionAPI): Promise<{
+async function runAllChecks(
+  pi: ExtensionAPI,
+  options: { includeAuthChecks?: boolean } = {}
+): Promise<{
   tools: CheckResult[];
   terminal: CheckResult | null;
   shell: CheckResult;
   terminalId: TerminalId;
   shellId: ShellId;
 }> {
+  const includeAuthChecks = options.includeAuthChecks ?? true;
+
   const [tools, terminalId, shellId] = await Promise.all([
     Promise.all([
       checkTool(pi, "git", "git", ["--version"]),
-      checkTool(pi, "gh", "gh", ["--version"], {
-        command: "gh",
-        args: ["auth", "status"],
-        failHint: "gh auth login",
-      }),
-      checkTool(pi, "glab", "glab", ["--version"], {
-        command: "glab",
-        args: ["auth", "status"],
-        failHint: "glab auth login",
-      }),
+      checkTool(
+        pi,
+        "gh",
+        "gh",
+        ["--version"],
+        includeAuthChecks
+          ? {
+            command: "gh",
+            args: ["auth", "status"],
+            failHint: "gh auth login",
+          }
+          : undefined
+      ),
+      checkTool(
+        pi,
+        "glab",
+        "glab",
+        ["--version"],
+        includeAuthChecks
+          ? {
+            command: "glab",
+            args: ["auth", "status"],
+            failHint: "glab auth login",
+          }
+          : undefined
+      ),
       checkTool(pi, "node", "node", ["--version"]),
       checkTool(pi, "npm", "npm", ["--version"]),
     ]),
@@ -385,68 +403,125 @@ async function runAllChecks(pi: ExtensionAPI): Promise<{
   };
 }
 
+// --- Formatting ---
+
+function icon(status: Severity): string {
+  switch (status) {
+    case "ok": return "[ok]";
+    case "warn": return "[!!]";
+    case "error": return "[XX]";
+  }
+}
+
+function formatSection(title: string, results: CheckResult[]): string {
+  const lines = [`\n  ${title}`];
+  for (const r of results) {
+    lines.push(`    ${icon(r.status)} ${r.name}: ${r.message}`);
+  }
+  return lines.join("\n");
+}
+
 // --- Extension ---
 
 export default function (pi: ExtensionAPI) {
-  pi.on("session_start", async (_event, ctx) => {
-    const { tools, terminal, shell } = await runAllChecks(pi);
+  pi.on("session_start", (_event, ctx) => {
+    const loadingTimer = setTimeout(() => {
+      ctx.ui?.setStatus?.("env-doctor", "[..] Verificando ambiente...");
+    }, 700);
 
-    const issues = [
-      ...tools.filter((r) => r.status !== "ok"),
-      ...(terminal && terminal.status !== "ok" ? [terminal] : []),
-      ...(shell.status !== "ok" ? [shell] : []),
-    ];
+    // Nao bloqueia inicializacao: roda em background com checks mais leves.
+    void (async () => {
+      try {
+        const { tools, terminal, shell } = await runAllChecks(pi, { includeAuthChecks: false });
 
-    if (issues.length > 0) {
-      const labels = issues.map((i) => {
-        const icon = i.status === "error" ? "!" : "?";
-        return `${icon} ${i.name}`;
-      });
-      ctx.ui?.setStatus?.("env-doctor", `${labels.join("  ")} -- /doctor para detalhes`);
-    }
+        const allResults = [
+          ...tools,
+          ...(terminal ? [terminal] : []),
+          shell,
+        ];
+        const issues = allResults.filter((r) => r.status !== "ok");
+
+        if (issues.length > 0) {
+          const labels = issues.map((i) => `${icon(i.status)} ${i.name}`);
+          ctx.ui?.setStatus?.("env-doctor", `${labels.join("  ")} -- /doctor para detalhes e auto-fix`);
+        } else {
+          ctx.ui?.setStatus?.("env-doctor", undefined);
+        }
+      } finally {
+        clearTimeout(loadingTimer);
+      }
+    })();
   });
 
   pi.registerCommand("doctor", {
-    description: "Diagnostico do ambiente -- ferramentas, autenticacoes, terminal e shell",
+    description: "Diagnostico completo do ambiente -- ferramentas, auth, terminal, shell",
     handler: async (_args, ctx) => {
-      ctx.ui.notify("Verificando ambiente...", "info");
+      const { tools, terminal, shell, terminalId, shellId } = await runAllChecks(pi, { includeAuthChecks: true });
 
-      const { tools, terminal, shell, terminalId, shellId } = await runAllChecks(pi);
+      // Build full report
+      const report: string[] = [];
+      report.push("\n==============================");
+      report.push("  pi-stack environment doctor");
+      report.push("==============================");
+
+      // Platform
+      report.push(`\n  Plataforma: ${process.platform} | Terminal: ${terminalId} | Shell: ${shellId}`);
+
+      // Tools section -- always show everything
+      report.push(formatSection("Ferramentas", tools));
+
+      // Terminal section
+      if (terminal) {
+        report.push(formatSection("Terminal", [terminal]));
+      } else {
+        report.push(`\n  Terminal\n    [--] ${terminalId}: nao verificado (terminal desconhecido)`);
+      }
+
+      // Shell section
+      report.push(formatSection("Shell", [shell]));
+
+      // Summary
       const allResults = [...tools, ...(terminal ? [terminal] : []), shell];
       const issues = allResults.filter((r) => r.status !== "ok");
+      const okCount = allResults.filter((r) => r.status === "ok").length;
+
+      report.push("\n  ------------------------------");
+      report.push(`  ${okCount}/${allResults.length} checks ok`);
 
       if (issues.length === 0) {
-        ctx.ui.notify("Ambiente completo -- tudo configurado.", "info");
+        report.push("  Ambiente completo -- tudo configurado.");
+        report.push("==============================\n");
+        ctx.ui.notify(report.join("\n"), "info");
         ctx.ui.setStatus?.("env-doctor", undefined);
         return;
       }
 
-      ctx.ui.notify(`\n${issues.length} item(s) precisam de atencao:\n`, "info");
+      report.push(`  ${issues.length} item(s) precisam de atencao:`);
+      report.push("==============================\n");
 
+      ctx.ui.notify(report.join("\n"), "info");
+
+      // Offer fixes proactively
       for (const issue of issues) {
-        const icon = issue.status === "error" ? "[ERRO]" : "[AVISO]";
-        ctx.ui.notify(`${icon} ${issue.name}: ${issue.message}`, "info");
+        if (!issue.fix) continue;
 
-        if (issue.fix) {
-          if (issue.fix.auto && ctx.hasUI) {
-            const ok = await ctx.ui.confirm(
-              `Corrigir: ${issue.name}`,
-              `${issue.fix.description}\n\nAplicar automaticamente?`
-            );
-            if (ok && issue.fix.apply) {
-              await issue.fix.apply();
-              ctx.ui.notify(`[OK] ${issue.name} configurado. Reinicie o terminal para aplicar.`, "info");
-            } else if (!ok) {
-              ctx.ui.notify(`   -> ${issue.fix.description}`, "info");
-            }
+        ctx.ui.notify(`\n>> ${issue.name}: ${issue.message}`, "info");
+
+        if (issue.fix.auto && ctx.hasUI) {
+          const ok = await ctx.ui.confirm(
+            `Configurar ${issue.name}?`,
+            `${issue.fix.description}\n\nAplicar automaticamente?`
+          );
+          if (ok && issue.fix.apply) {
+            await issue.fix.apply();
+            ctx.ui.notify(`   [ok] Aplicado. Reinicie o terminal para efetivar.`, "info");
           } else {
-            ctx.ui.notify(`   -> ${issue.fix.description}`, "info");
+            ctx.ui.notify(`   Instrucao manual:\n   ${issue.fix.description.replace(/\n/g, "\n   ")}`, "info");
           }
+        } else {
+          ctx.ui.notify(`   Instrucao:\n   ${issue.fix.description.replace(/\n/g, "\n   ")}`, "info");
         }
       }
-
-      ctx.ui.notify(`\nTerminal: ${terminalId} | Shell: ${shellId}`, "info");
-      ctx.ui.notify("O pi nao esta bloqueado, mas funcionalidades podem ser limitadas.", "info");
     },
   });
 }
