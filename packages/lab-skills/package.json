@@ -1,6 +1,6 @@
 {
   "name": "@aretw0/lab-skills",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Skills experimentais do agents-lab — cultivo de primitivas, avaliação de extensões e feedback de stack",
   "type": "module",
   "license": "MIT",
