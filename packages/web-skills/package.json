@@ -1,6 +1,6 @@
 {
   "name": "@aretw0/web-skills",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "First-party web skills: native search and browser automation via CDP",
   "type": "module",
   "license": "MIT",
@@ -16,8 +16,8 @@
     "skills",
     "README.md"
   ],
-  "scripts": {
-    "postinstall": "npm install --prefix skills/web-browser/scripts --omit=dev"
+  "dependencies": {
+    "ws": "^8.18.0"
   },
   "pi": {
     "skills": [
