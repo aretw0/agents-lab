@@ -213,15 +213,53 @@ export function snapshotPilotState(state: PilotState) {
   };
 }
 
-function queueSlashCommands(pi: ExtensionAPI, commands: string[]) {
-  for (let i = 0; i < commands.length; i++) {
-    const command = commands[i];
-    if (i === 0) {
-      pi.sendUserMessage(command);
-    } else {
-      pi.sendUserMessage(command, { deliverAs: "followUp" });
-    }
+export function parseCommandInput(input: string): { cmd: string; body: string } {
+  const trimmed = input.trim();
+  if (!trimmed) return { cmd: "", body: "" };
+
+  const firstSpace = trimmed.indexOf(" ");
+  if (firstSpace === -1) return { cmd: trimmed, body: "" };
+
+  return {
+    cmd: trimmed.slice(0, firstSpace),
+    body: trimmed.slice(firstSpace + 1).trim(),
+  };
+}
+
+export function normalizeQuotedText(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+
+  if (
+    (trimmed.startsWith("\"") && trimmed.endsWith("\"")) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim();
   }
+
+  return trimmed;
+}
+
+function primeManualRunbook(
+  ctx: ExtensionContext,
+  title: string,
+  steps: string[],
+  reason = "Auto-dispatch de slash commands entre extensões não é suportado de forma confiável pela API atual do pi."
+) {
+  if (steps.length === 0) return;
+
+  const text = [
+    title,
+    reason,
+    "",
+    "Execute na ordem:",
+    ...steps.map((s) => `  - ${s}`),
+    "",
+    `Primei o editor com: ${steps[0]}`,
+  ].join("\n");
+
+  ctx.ui.notify(text, "info");
+  ctx.ui.setEditorText?.(steps[0]);
 }
 
 async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
@@ -290,7 +328,7 @@ export default function (pi: ExtensionAPI) {
     handler: async (args, ctx) => {
       currentCtx = ctx;
       const input = (args ?? "").trim();
-      const [cmd, ...rest] = input.length > 0 ? input.split(/\s+/) : [];
+      const { cmd, body } = parseCommandInput(input);
 
       if (!cmd || cmd === "help") {
         ctx.ui.notify(
@@ -299,12 +337,15 @@ export default function (pi: ExtensionAPI) {
             "",
             "Commands:",
             "  prep                          Mostrar plano recomendado do pilot",
-            "  run <goal>                    Despacha: /monitors off -> /remote -> /colony <goal>",
-            "  stop [--restore-monitors]     Despacha: /colony-stop all -> /remote stop [-> /monitors on]",
-            "  monitors <on|off>             Alterna profile de monitores da sessão atual",
+            "  run <goal>                    Prepara sequência manual: /monitors off -> /remote -> /colony <goal>",
+            "  stop [--restore-monitors]     Prepara sequência manual: /colony-stop all -> /remote stop [-> /monitors on]",
+            "  monitors <on|off>             Prepara comando de profile de monitores",
             "  web <start|stop|open|status>  Controla/inspeciona sessão web",
             "  tui                           Mostra como entrar/retomar sessão no TUI",
             "  status                        Snapshot consolidado",
+            "",
+            "Nota: o pi não expõe API confiável para uma extensão invocar slash commands de outra",
+            "extensão no mesmo runtime. O pilot prepara e guia execução manual assistida.",
           ].join("\n"),
           "info"
         );
@@ -312,19 +353,18 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (cmd === "prep") {
-        ctx.ui.notify(
+        const base = ["/monitors off", "/remote", "/colony <goal>"];
+        primeManualRunbook(
+          ctx,
+          "Pilot direction:",
+          base,
           [
-            "Pilot direction:",
             "- colony run com monitores gerais OFF",
             "- governança principal: mecanismos da colony (inclui soldier)",
             "- inspeção ativa por web remote + TUI status",
             "",
-            "Comandos base:",
-            "  /monitors off",
-            "  /remote",
-            "  /colony <goal>",
-          ].join("\n"),
-          "info"
+            "Auto-dispatch foi desativado por confiabilidade da API de comandos entre extensões.",
+          ].join("\n")
         );
         return;
       }
@@ -335,66 +375,72 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (cmd === "run") {
-        const goal = rest.join(" ").trim();
+        const goal = normalizeQuotedText(body);
         if (!goal) {
           ctx.ui.notify("Usage: /colony-pilot run <goal>", "warning");
           return;
         }
 
         const sequence = buildColonyRunSequence(goal);
-        queueSlashCommands(pi, sequence);
         state.monitorMode = "off";
         updateStatusUI(ctx, state);
 
-        ctx.ui.notify(
-          `Pilot run despachado (${sequence.length} passos):\n${sequence.map((s) => `  - ${s}`).join("\n")}`,
-          "info"
-        );
+        primeManualRunbook(ctx, "Pilot run pronto (manual assistido)", sequence);
         return;
       }
 
       if (cmd === "stop") {
-        const restore = rest.includes("--restore-monitors");
+        const restore = body.includes("--restore-monitors");
         const sequence = buildColonyStopSequence({ restoreMonitors: restore });
-        queueSlashCommands(pi, sequence);
         if (restore) state.monitorMode = "on";
         updateStatusUI(ctx, state);
-        ctx.ui.notify(
-          `Pilot stop despachado:\n${sequence.map((s) => `  - ${s}`).join("\n")}`,
-          "warning"
-        );
+
+        primeManualRunbook(ctx, "Pilot stop pronto (manual assistido)", sequence);
         return;
       }
 
       if (cmd === "monitors") {
-        const mode = rest[0];
+        const mode = normalizeQuotedText(body).split(/\s+/)[0];
         if (mode !== "on" && mode !== "off") {
           ctx.ui.notify("Usage: /colony-pilot monitors <on|off>", "warning");
           return;
         }
 
-        queueSlashCommands(pi, [`/monitors ${mode}`]);
         state.monitorMode = mode;
         updateStatusUI(ctx, state);
-        ctx.ui.notify(`Profile de monitores despachado: ${mode.toUpperCase()}`, "info");
+        primeManualRunbook(
+          ctx,
+          `Profile de monitores (${mode.toUpperCase()}) pronto`,
+          [`/monitors ${mode}`],
+          "Execute o comando abaixo para aplicar no runtime atual."
+        );
         return;
       }
 
       if (cmd === "web") {
-        const action = rest[0] ?? "status";
+        const { cmd: actionCmd } = parseCommandInput(body);
+        const action = actionCmd || "status";
 
         if (action === "start") {
-          queueSlashCommands(pi, ["/remote"]);
-          ctx.ui.notify("Solicitado start do remote web server (/remote).", "info");
+          primeManualRunbook(
+            ctx,
+            "Start do remote web pronto",
+            ["/remote"],
+            "Execute o comando abaixo para iniciar o servidor web da sessão."
+          );
           return;
         }
 
         if (action === "stop") {
-          queueSlashCommands(pi, ["/remote stop"]);
           state.remoteActive = false;
           state.remoteClients = 0;
           updateStatusUI(ctx, state);
-          ctx.ui.notify("Solicitado stop do remote web server (/remote stop).", "warning");
+          primeManualRunbook(
+            ctx,
+            "Stop do remote web pronto",
+            ["/remote stop"],
+            "Execute o comando abaixo para encerrar o servidor web da sessão."
+          );
           return;
         }
 

@@ -4,6 +4,8 @@ import {
   parseRemoteAccessUrl,
   buildColonyRunSequence,
   buildColonyStopSequence,
+  parseCommandInput,
+  normalizeQuotedText,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -34,5 +36,18 @@ describe("colony-pilot parsers", () => {
       "/remote stop",
       "/monitors on",
     ]);
+  });
+
+  it("parseCommandInput preserva body com espaços", () => {
+    expect(parseCommandInput("run migrar auth agora")).toEqual({
+      cmd: "run",
+      body: "migrar auth agora",
+    });
+  });
+
+  it("normalizeQuotedText remove aspas externas", () => {
+    expect(normalizeQuotedText('"goal complexo"')).toBe("goal complexo");
+    expect(normalizeQuotedText("'goal complexo'")).toBe("goal complexo");
+    expect(normalizeQuotedText("goal sem aspas")).toBe("goal sem aspas");
   });
 });
