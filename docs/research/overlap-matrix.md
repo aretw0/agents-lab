@@ -30,6 +30,12 @@ Mapear sobreposição entre pacotes da stack atual para decidir, por capability:
    - Planning/spec/workflow,
    - Multi-agent/subagents,
    - Guard rails/governança.
+4. **Web já tem direção preliminar definida**:
+   - quick lookup: skill simples (temporariamente third-party),
+   - deep research: `source-research` + `pi-web-access`,
+   - browser interaction: `web-browser` first-party.
+
+Referência detalhada: [`web-overlap-scorecard.md`](./web-overlap-scorecard.md).
 
 ---
 
@@ -107,8 +113,9 @@ Ou seja: há overlap funcional, mas com níveis diferentes de profundidade.
    - executar 6 tarefas canônicas (2 web quick lookup, 2 deep research, 2 browser automation),
    - medir: tempo, qualidade, ruído, previsibilidade.
 
-2. **Criar score comparativo Web**
-   - `oh-pi web-search/web-fetch` vs `pi-web-access` vs playbook `source-research`.
+2. **Transformar direção Web em política de instalação**
+   - decidir se `web-search`/`web-fetch` da `@ifi/oh-pi-skills` ficam como fallback explícito,
+   - ou se serão filtrados em `FILTER_PATCHES` para reduzir ambiguidade.
 
 3. **Definir pacote alvo de consolidação first-party (Web)**
    - opção A: extensão `@aretw0/web-core` (tools mínimas + estáveis),
