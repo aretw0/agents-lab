@@ -20,6 +20,12 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 |------|-----------|
 | [publishing.md](./publishing.md) | Workflow de release — changesets, versionamento lockstep, publish via tag |
 
+### Otimização e Operação
+
+| Guia | Descrição |
+|------|-----------|
+| [token-efficiency.md](./token-efficiency.md) | Diretivas T1–T11 de eficiência de tokens, S1–S3 de segurança e calibração de monitores |
+
 ### Migração e Filosofia
 
 | Guia | Descrição |
