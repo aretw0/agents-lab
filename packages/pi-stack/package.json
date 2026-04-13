@@ -1,7 +1,7 @@
 {
   "name": "@aretw0/pi-stack",
-  "version": "0.3.7",
-  "description": "Meta-pacote que instala a stack curada de extens\u00f5es pi do agents-lab \u2014 cada pacote individualmente",
+  "version": "0.3.8",
+  "description": "Meta-pacote que instala a stack curada de extensões pi do agents-lab — cada pacote individualmente",
   "type": "module",
   "license": "MIT",
   "keywords": [

@@ -1,5 +1,17 @@
 # @aretw0/pi-stack
 
+## 0.3.8
+
+### Patch Changes
+
+- Update monitor defaults for davidorex compatibility:
+
+  - switch monitor-provider-patch classifier overrides from claude-sonnet to claude-haiku
+  - set classifier thinking to off by default
+  - make hedge monitor conversation_history opt-in via settings
+  - apply sane defaults on session_start for already initialized workspaces
+  - document the new defaults in pi-stack docs
+
 ## 0.2.1
 
 ### Patch Changes
