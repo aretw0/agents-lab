@@ -1,5 +1,5 @@
 /**
- * Tests for web-routing-guard deterministic classifier and bash blocker.
+ * Tests for deterministic web-routing classifier and bash blocker (guardrails-core).
  *
  * Run: node --test packages/pi-stack/test/web-routing-guard.test.mjs
  */

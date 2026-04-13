@@ -38,7 +38,7 @@ Isso carrega apenas o tema especificado, ignorando todo o `settings.json`.
 pi --no-session \
    --no-extensions \
    --no-skills \
-   -e packages/pi-stack/extensions/read-guard.ts
+   -e packages/pi-stack/extensions/guardrails-core.ts
 ```
 
 O flag `-e` (ou `--extension`) é repetível — você pode combinar com outros arquivos explicitamente.

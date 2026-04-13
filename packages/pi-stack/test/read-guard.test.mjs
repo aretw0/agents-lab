@@ -1,5 +1,5 @@
 /**
- * Tests for read-guard extension logic.
+ * Tests for read-path guard logic (guardrails-core).
  *
  * Run: node --test packages/pi-stack/test/read-guard.test.mjs
  */
@@ -8,7 +8,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { resolve, relative, sep } from "node:path";
 
-// --- Extracted logic from read-guard.ts for testing ---
+// --- Extracted logic from guardrails-core.ts (read-path module) ---
 
 const SENSITIVE_PATHS = [
   ".ssh", ".aws", ".gnupg", ".npmrc", ".docker", ".kube", ".azure",

@@ -9,7 +9,7 @@
 
 /** @aretw0 first-party packages from this monorepo */
 export const FIRST_PARTY = [
-  "@aretw0/pi-stack",   // meta-package: environment-doctor, monitor-provider-patch, read-guard
+  "@aretw0/pi-stack",   // meta-package: environment-doctor, monitor-provider-patch, guardrails-core
   "@aretw0/pi-skills",
   "@aretw0/git-skills",
   "@aretw0/web-skills",
