@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { calls, createTestSession, says, when, type TestSession } from "@marcfargas/pi-test-harness";
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { Type } from "@sinclair/typebox";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -19,6 +19,11 @@ function tempCwdWithGatewayConfig(port: number) {
           webSessionGateway: {
             mode: "local",
             port,
+          },
+          colonyPilot: {
+            preflight: {
+              requiredExecutables: ["node"],
+            },
           },
         },
       },
@@ -112,6 +117,12 @@ describe("web-session-gateway e2e (pi-test-harness)", () => {
 
     await t.session.prompt("/session-web start");
 
+    const runtimeFile = join(cwd, ".pi", "session-web-runtime.json");
+    expect(existsSync(runtimeFile)).toBe(true);
+    const runtimeState = JSON.parse(readFileSync(runtimeFile, "utf8"));
+    expect(runtimeState.running).toBe(true);
+    expect(runtimeState.port).toBe(port);
+
     const health = await fetch(`http://127.0.0.1:${port}/api/health`);
     expect(health.status).toBe(200);
     expect(await health.json()).toMatchObject({ status: "ok", mode: "local" });
@@ -137,6 +148,9 @@ describe("web-session-gateway e2e (pi-test-harness)", () => {
 
     expect(Array.isArray(state.state.colonies)).toBe(true);
     expect(state.state.colonies.some((c: any) => c.id === "c9" && c.phase === "launched")).toBe(true);
+
+    await t.session.prompt("/session-web stop");
+    expect(existsSync(runtimeFile)).toBe(false);
   });
 
   it("colony-pilot usa session-web quando capability first-party está disponível", async () => {

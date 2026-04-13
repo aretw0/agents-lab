@@ -11,6 +11,8 @@ import {
   buildRuntimeRunSequence,
   buildRuntimeStopSequence,
   buildAntColonyMirrorCandidates,
+  resolveColonyPilotPreflightConfig,
+  executableProbe,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -92,5 +94,18 @@ describe("colony-pilot parsers", () => {
     expect(candidates.length).toBe(2);
     expect(candidates[0].replace(/\\/g, "/")).toContain("/.pi/agent/ant-colony/c/Users/alice/work/repo");
     expect(candidates[1].replace(/\\/g, "/")).toContain("/.pi/agent/ant-colony/root/c/Users/alice/work/repo");
+  });
+
+  it("resolveColonyPilotPreflightConfig aplica defaults e overrides", () => {
+    const cfg = resolveColonyPilotPreflightConfig({ requiredExecutables: ["node", "pnpm"] });
+    expect(cfg.enabled).toBe(true);
+    expect(cfg.enforceOnAntColonyTool).toBe(true);
+    expect(cfg.requiredExecutables).toEqual(["node", "pnpm"]);
+    expect(cfg.requireColonyCapabilities).toEqual(["colony", "colonyStop"]);
+  });
+
+  it("executableProbe usa npm.cmd no Windows", () => {
+    expect(executableProbe("npm", "win32")).toEqual({ command: "npm.cmd", args: ["--version"], label: "npm" });
+    expect(executableProbe("node", "linux")).toEqual({ command: "node", args: ["--version"], label: "node" });
   });
 });

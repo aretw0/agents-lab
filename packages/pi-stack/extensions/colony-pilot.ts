@@ -12,6 +12,7 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
@@ -247,6 +248,122 @@ export function missingCapabilities(
   return required.filter((k) => !caps[k]);
 }
 
+export interface ColonyPilotPreflightConfig {
+  enabled: boolean;
+  enforceOnAntColonyTool: boolean;
+  requiredExecutables: string[];
+  requireColonyCapabilities: Array<keyof PilotCapabilities>;
+}
+
+export interface ColonyPilotPreflightResult {
+  ok: boolean;
+  missingExecutables: string[];
+  missingCapabilities: Array<keyof PilotCapabilities>;
+  failures: string[];
+  checkedAt: number;
+}
+
+const DEFAULT_PREFLIGHT_CONFIG: ColonyPilotPreflightConfig = {
+  enabled: true,
+  enforceOnAntColonyTool: true,
+  requiredExecutables: ["node", "git", "npm"],
+  requireColonyCapabilities: ["colony", "colonyStop"],
+};
+
+function parseColonyPilotSettings(cwd: string): { preflight?: Partial<ColonyPilotPreflightConfig> } {
+  try {
+    const p = path.join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return {};
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    return json?.extensions?.colonyPilot ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeCapabilitiesList(value: unknown): Array<keyof PilotCapabilities> {
+  if (!Array.isArray(value)) return [...DEFAULT_PREFLIGHT_CONFIG.requireColonyCapabilities];
+  const allowed: Array<keyof PilotCapabilities> = ["monitors", "remote", "sessionWeb", "colony", "colonyStop"];
+  const out = value
+    .filter((v): v is keyof PilotCapabilities => typeof v === "string" && allowed.includes(v as keyof PilotCapabilities));
+  return out.length > 0 ? out : [...DEFAULT_PREFLIGHT_CONFIG.requireColonyCapabilities];
+}
+
+export function resolveColonyPilotPreflightConfig(raw?: Partial<ColonyPilotPreflightConfig>): ColonyPilotPreflightConfig {
+  return {
+    enabled: raw?.enabled !== false,
+    enforceOnAntColonyTool: raw?.enforceOnAntColonyTool !== false,
+    requiredExecutables: Array.isArray(raw?.requiredExecutables)
+      ? raw!.requiredExecutables.filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+      : [...DEFAULT_PREFLIGHT_CONFIG.requiredExecutables],
+    requireColonyCapabilities: normalizeCapabilitiesList(raw?.requireColonyCapabilities),
+  };
+}
+
+export function executableProbe(name: string, platform = process.platform): { command: string; args: string[]; label: string } {
+  const clean = name.trim();
+  if (!clean) return { command: "", args: [], label: "" };
+
+  if (platform === "win32" && clean.toLowerCase() === "npm") {
+    return { command: "npm.cmd", args: ["--version"], label: "npm" };
+  }
+
+  return { command: clean, args: ["--version"], label: clean };
+}
+
+export async function runColonyPilotPreflight(
+  pi: ExtensionAPI,
+  caps: PilotCapabilities,
+  config: ColonyPilotPreflightConfig
+): Promise<ColonyPilotPreflightResult> {
+  const missingCaps = missingCapabilities(caps, config.requireColonyCapabilities);
+  const missingExecutables: string[] = [];
+
+  for (const execName of config.requiredExecutables) {
+    const probe = executableProbe(execName);
+    if (!probe.command) continue;
+
+    try {
+      const r = await pi.exec(probe.command, probe.args, { timeout: 5000 });
+      if (r.code !== 0) missingExecutables.push(probe.label);
+    } catch {
+      missingExecutables.push(probe.label);
+    }
+  }
+
+  const failures: string[] = [];
+  if (missingCaps.length > 0) {
+    failures.push(`missing capabilities: ${missingCaps.join(", ")}`);
+  }
+  if (missingExecutables.length > 0) {
+    failures.push(`missing executables: ${missingExecutables.join(", ")}`);
+  }
+
+  return {
+    ok: failures.length === 0,
+    missingCapabilities: missingCaps,
+    missingExecutables,
+    failures,
+    checkedAt: Date.now(),
+  };
+}
+
+function formatPreflightResult(result: ColonyPilotPreflightResult): string {
+  const lines = [
+    "colony-pilot preflight",
+    `ok: ${result.ok ? "yes" : "no"}`,
+    `missingCapabilities: ${result.missingCapabilities.length > 0 ? result.missingCapabilities.join(", ") : "(none)"}`,
+    `missingExecutables: ${result.missingExecutables.length > 0 ? result.missingExecutables.join(", ") : "(none)"}`,
+    `checkedAt: ${new Date(result.checkedAt).toISOString()}`,
+  ];
+
+  if (result.failures.length > 0) {
+    lines.push("", "failures:", ...result.failures.map((f) => `  - ${f}`));
+  }
+
+  return lines.join("\n");
+}
+
 function extractText(message: unknown): string {
   if (!message || typeof message !== "object") return "";
   const msg = message as { content?: unknown };
@@ -479,6 +596,8 @@ export default function (pi: ExtensionAPI) {
   const state: PilotState = createPilotState();
 
   let currentCtx: ExtensionContext | undefined;
+  let preflightConfig = resolveColonyPilotPreflightConfig();
+  let preflightCache: { at: number; result: ColonyPilotPreflightResult } | undefined;
 
   pi.on("session_start", (_event, ctx) => {
     currentCtx = ctx;
@@ -488,6 +607,11 @@ export default function (pi: ExtensionAPI) {
     state.remoteClients = 0;
     state.monitorMode = "unknown";
     state.lastSessionFile = ctx.sessionManager.getSessionFile?.() ?? undefined;
+
+    const settings = parseColonyPilotSettings(ctx.cwd);
+    preflightConfig = resolveColonyPilotPreflightConfig(settings.preflight);
+    preflightCache = undefined;
+
     updateStatusUI(ctx, state);
   });
 
@@ -501,6 +625,24 @@ export default function (pi: ExtensionAPI) {
     const text = extractText(event);
     if (!text) return;
     if (trackFromText(text, state)) updateStatusUI(ctx, state);
+  });
+
+  pi.on("tool_call", async (event, ctx) => {
+    if (!preflightConfig.enabled || !preflightConfig.enforceOnAntColonyTool) return undefined;
+    if (!isToolCallEventType("ant_colony", event)) return undefined;
+
+    const now = Date.now();
+    let result = preflightCache?.result;
+    if (!result || now - preflightCache!.at > 30_000) {
+      result = await runColonyPilotPreflight(pi, getCapabilities(pi), preflightConfig);
+      preflightCache = { at: now, result };
+    }
+
+    if (result.ok) return undefined;
+
+    const reason = `Blocked by colony-pilot preflight: ${result.failures.join("; ")}`;
+    ctx.ui.notify(["ant_colony bloqueada por preflight", formatPreflightResult(result)].join("\n\n"), "warning");
+    return { block: true, reason };
   });
 
   pi.registerTool({
@@ -534,6 +676,22 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "colony_pilot_preflight",
+    label: "Colony Pilot Preflight",
+    description: "Run hard preflight checks used to gate ant_colony execution.",
+    parameters: Type.Object({}),
+    async execute() {
+      const caps = getCapabilities(pi);
+      const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
+      preflightCache = { at: Date.now(), result };
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
   pi.registerCommand("colony-pilot", {
     description: "Orquestra pilot de colony + web inspect + profile de monitores (run/status/stop/web).",
     handler: async (args, ctx) => {
@@ -556,6 +714,7 @@ export default function (pi: ExtensionAPI) {
             "  tui                           Mostra como entrar/retomar sessão no TUI",
             "  status                        Snapshot consolidado",
             "  check                         Diagnóstico de capacidades carregadas (/monitors,/remote,/colony)",
+            "  preflight                     Executa gates duros (capabilities + executáveis) antes da colony",
             "  artifacts                     Mostra onde colony guarda states/worktrees para recovery",
             "",
             "Nota: o pi não expõe API confiável para uma extensão invocar slash commands de outra",
@@ -617,6 +776,13 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
+      if (cmd === "preflight") {
+        const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
+        preflightCache = { at: Date.now(), result };
+        ctx.ui.notify(formatPreflightResult(result), result.ok ? "info" : "warning");
+        return;
+      }
+
       if (cmd === "artifacts") {
         const data = inspectAntColonyRuntime(ctx.cwd);
         ctx.ui.notify(formatArtifactsReport(data), "info");
@@ -642,6 +808,22 @@ export default function (pi: ExtensionAPI) {
             "Use /colony-pilot check para diagnóstico rápido.",
           ];
           ctx.ui.notify(lines.join("\n"), "warning");
+          return;
+        }
+
+        const preflight = await runColonyPilotPreflight(pi, caps, preflightConfig);
+        preflightCache = { at: Date.now(), result: preflight };
+        if (!preflight.ok) {
+          ctx.ui.notify(
+            [
+              "Run bloqueado por preflight.",
+              formatPreflightResult(preflight),
+              "",
+              "Resolva os itens e rode /colony-pilot preflight novamente.",
+            ].join("\n"),
+            "warning"
+          );
+          ctx.ui.setEditorText?.("/colony-pilot preflight");
           return;
         }
 

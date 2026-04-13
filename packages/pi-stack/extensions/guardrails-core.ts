@@ -8,7 +8,8 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
-import { resolve, relative, sep } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve, relative, sep } from "node:path";
 
 // =============================================================================
 // Read / Path Guard
@@ -246,6 +247,68 @@ export function isDisallowedBash(command: string): boolean {
   return DISALLOWED_BASH_PATTERNS.some((p) => p.test(lower));
 }
 
+export function extractExplicitPorts(command: string): number[] {
+  const out = new Set<number>();
+  const patterns = [
+    /(?:--port|--http-port|--listen)\s+([0-9]{2,5})\b/gi,
+    /(?:--port|--http-port|--listen)=([0-9]{2,5})\b/gi,
+    /\bPORT\s*=\s*([0-9]{2,5})\b/gi,
+    /\b-p\s+([0-9]{2,5})\b/gi,
+  ];
+
+  for (const pattern of patterns) {
+    let m: RegExpExecArray | null;
+    while ((m = pattern.exec(command)) !== null) {
+      const n = Number.parseInt(m[1] ?? "", 10);
+      if (!Number.isNaN(n)) out.add(n);
+    }
+  }
+
+  return [...out];
+}
+
+export function looksLikeServerStartCommand(command: string): boolean {
+  const lower = command.toLowerCase();
+  const hints = [
+    "npm run dev",
+    "npm run start",
+    "pnpm dev",
+    "pnpm start",
+    "yarn dev",
+    "yarn start",
+    "vite",
+    "next dev",
+    "http-server",
+    "serve ",
+    "python -m http.server",
+    "uvicorn",
+    "gunicorn",
+    "docker run",
+  ];
+  return hints.some((h) => lower.includes(h));
+}
+
+export function readReservedSessionWebPort(cwd: string): number | undefined {
+  try {
+    const p = join(cwd, ".pi", "session-web-runtime.json");
+    if (!existsSync(p)) return undefined;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    if (!json?.running) return undefined;
+    const port = Number(json?.port);
+    if (Number.isNaN(port) || port <= 0) return undefined;
+    return port;
+  } catch {
+    return undefined;
+  }
+}
+
+export function detectPortConflict(command: string, reservedPort?: number): number | undefined {
+  if (!reservedPort) return undefined;
+  if (!looksLikeServerStartCommand(command)) return undefined;
+  const ports = extractExplicitPorts(command);
+  return ports.includes(reservedPort) ? reservedPort : undefined;
+}
+
 // =============================================================================
 // Extension Entry
 // =============================================================================
@@ -296,6 +359,16 @@ export default function (pi: ExtensionAPI) {
           block: true,
           reason:
             "Blocked by guardrails-core (strict_interactive): use web-browser CDP scripts first for interactive sensitive-domain tasks.",
+        };
+      }
+
+      // Session web port conflict guard
+      const reservedPort = readReservedSessionWebPort(ctx.cwd);
+      const conflictPort = detectPortConflict(command, reservedPort);
+      if (conflictPort) {
+        return {
+          block: true,
+          reason: `Blocked by guardrails-core (port_conflict): port ${conflictPort} is reserved by session-web. Use a different test port.`,
         };
       }
 

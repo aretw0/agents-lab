@@ -11,7 +11,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { Type } from "@sinclair/typebox";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { parseColonySignal, parseCommandInput } from "./colony-pilot";
 
@@ -47,6 +47,46 @@ const DEFAULT_CONFIG: GatewayConfig = {
 
 const SIGNAL_LIMIT = 40;
 const MESSAGE_LIMIT = 80;
+const RUNTIME_FILE = join(".pi", "session-web-runtime.json");
+
+function writeRuntimeFile(cwd: string, config: GatewayConfig, rt: GatewayRuntime) {
+  try {
+    const url = buildGatewayAccessUrl({
+      mode: config.mode,
+      bindHost: rt.bindHost,
+      advertisedHost: config.advertisedHost,
+      port: rt.port,
+      token: rt.token,
+    });
+
+    writeFileSync(
+      join(cwd, RUNTIME_FILE),
+      JSON.stringify(
+        {
+          running: rt.running,
+          mode: config.mode,
+          bindHost: rt.bindHost,
+          port: rt.port,
+          url,
+          updatedAt: Date.now(),
+        },
+        null,
+        2
+      )
+    );
+  } catch {
+    // best-effort observability file
+  }
+}
+
+function clearRuntimeFile(cwd: string) {
+  try {
+    const p = join(cwd, RUNTIME_FILE);
+    if (existsSync(p)) unlinkSync(p);
+  } catch {
+    // ignore
+  }
+}
 
 export function resolveGatewayMode(input?: string): GatewayMode {
   if (input === "lan" || input === "public" || input === "local") return input;
@@ -305,7 +345,14 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 
   async function stopServer() {
     const server = runtime.server;
-    if (!server) return;
+    const runtimeCwd = sessionCtx?.cwd ?? process.cwd();
+
+    if (!server) {
+      runtime.running = false;
+      runtime.startedAt = undefined;
+      clearRuntimeFile(runtimeCwd);
+      return;
+    }
 
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
@@ -314,6 +361,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
     runtime.server = undefined;
     runtime.running = false;
     runtime.startedAt = undefined;
+    clearRuntimeFile(runtimeCwd);
   }
 
   async function startServer(ctx: ExtensionContext) {
@@ -390,6 +438,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
     runtime.running = true;
     runtime.startedAt = Date.now();
     updateStatus(ctx);
+    writeRuntimeFile(ctx.cwd, config, runtime);
   }
 
   function pushRecentMessage(role: string, text: string) {
@@ -424,6 +473,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 
   pi.on("session_start", (event, ctx) => {
     sessionCtx = ctx;
+    clearRuntimeFile(ctx.cwd);
 
     const cfg = readSettingsConfig(ctx.cwd);
     config = {
