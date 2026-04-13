@@ -35,7 +35,7 @@ Configuração em `.pi/settings.json` do projeto:
 
 ```json
 {
-  "extensions": {
+  "piStack": {
     "webSessionGateway": {
       "mode": "local",
       "port": 3100,

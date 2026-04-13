@@ -118,7 +118,7 @@ Baseline aplicada (default):
 
 ```json
 {
-  "extensions": {
+  "piStack": {
     "colonyPilot": {
       "preflight": {
         "enabled": true,
