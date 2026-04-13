@@ -27,7 +27,8 @@
       "./extensions/monitor-provider-patch.ts",
       "./extensions/environment-doctor.ts",
       "./extensions/guardrails-core.ts",
-      "./extensions/colony-pilot.ts"
+      "./extensions/colony-pilot.ts",
+      "./extensions/web-session-gateway.ts"
     ],
     "themes": [
       "./themes"

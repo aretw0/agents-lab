@@ -8,6 +8,8 @@ import {
   normalizeQuotedText,
   detectPilotCapabilities,
   missingCapabilities,
+  buildRuntimeRunSequence,
+  buildRuntimeStopSequence,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -54,10 +56,11 @@ describe("colony-pilot parsers", () => {
   });
 
   it("detectPilotCapabilities reconhece comandos base com sufixos", () => {
-    const caps = detectPilotCapabilities(["monitors", "remote:1", "colony", "colony-stop:2"]);
+    const caps = detectPilotCapabilities(["monitors", "remote:1", "session-web", "colony", "colony-stop:2"]);
     expect(caps).toEqual({
       monitors: true,
       remote: true,
+      sessionWeb: true,
       colony: true,
       colonyStop: true,
     });
@@ -65,7 +68,21 @@ describe("colony-pilot parsers", () => {
 
   it("missingCapabilities lista gaps do runtime", () => {
     const caps = detectPilotCapabilities(["monitors", "colony"]);
-    expect(missingCapabilities(caps, ["monitors", "remote", "colony", "colonyStop"]))
-      .toEqual(["remote", "colonyStop"]);
+    expect(missingCapabilities(caps, ["monitors", "remote", "sessionWeb", "colony", "colonyStop"]))
+      .toEqual(["remote", "sessionWeb", "colonyStop"]);
+  });
+
+  it("runtime sequence prefere session-web quando disponível", () => {
+    const caps = detectPilotCapabilities(["monitors", "session-web", "colony", "colony-stop"]);
+    expect(buildRuntimeRunSequence(caps, "Goal A")).toEqual([
+      "/monitors off",
+      "/session-web start",
+      "/colony Goal A",
+    ]);
+    expect(buildRuntimeStopSequence(caps, { restoreMonitors: true })).toEqual([
+      "/colony-stop all",
+      "/session-web stop",
+      "/monitors on",
+    ]);
   });
 });

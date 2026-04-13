@@ -98,6 +98,7 @@ export function buildColonyStopSequence(options?: { restoreMonitors?: boolean })
 export interface PilotCapabilities {
   monitors: boolean;
   remote: boolean;
+  sessionWeb: boolean;
   colony: boolean;
   colonyStop: boolean;
 }
@@ -111,9 +112,22 @@ export function detectPilotCapabilities(commandNames: string[]): PilotCapabiliti
   return {
     monitors: base.has("monitors"),
     remote: base.has("remote"),
+    sessionWeb: base.has("session-web"),
     colony: base.has("colony"),
     colonyStop: base.has("colony-stop"),
   };
+}
+
+export function buildRuntimeRunSequence(caps: PilotCapabilities, goal: string): string[] {
+  const webStart = caps.sessionWeb ? "/session-web start" : "/remote";
+  return ["/monitors off", webStart, `/colony ${goal}`];
+}
+
+export function buildRuntimeStopSequence(caps: PilotCapabilities, options?: { restoreMonitors?: boolean }): string[] {
+  const webStop = caps.sessionWeb ? "/session-web stop" : "/remote stop";
+  const out = ["/colony-stop all", webStop];
+  if (options?.restoreMonitors) out.push("/monitors on");
+  return out;
 }
 
 export function missingCapabilities(
@@ -293,7 +307,9 @@ function primeManualRunbook(
 function capabilityGuidance(capability: keyof PilotCapabilities): string {
   switch (capability) {
     case "remote":
-      return "`/remote` ausente — revisar inclusão de `@ifi/pi-web-remote` na stack curada do ambiente.";
+      return "`/remote` ausente — revisar inclusão de `@ifi/pi-web-remote` na stack curada do ambiente (ou usar `/session-web` first-party).";
+    case "sessionWeb":
+      return "`/session-web` ausente — revisar carga da extensão first-party `web-session-gateway` no `@aretw0/pi-stack`.";
     case "colony":
     case "colonyStop":
       return "Comandos de colony ausentes — revisar inclusão de `@ifi/oh-pi-ant-colony` na stack curada do ambiente.";
@@ -443,10 +459,11 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (cmd === "check") {
-        const missing = missingCapabilities(caps, ["monitors", "remote", "colony", "colonyStop"]);
+        const missing = missingCapabilities(caps, ["monitors", "sessionWeb", "remote", "colony", "colonyStop"]);
         const lines = [
           "colony-pilot capabilities",
           `  monitors: ${caps.monitors ? "ok" : "missing"}`,
+          `  session-web: ${caps.sessionWeb ? "ok" : "missing"}`,
           `  remote: ${caps.remote ? "ok" : "missing"}`,
           `  colony: ${caps.colony ? "ok" : "missing"}`,
           `  colony-stop: ${caps.colonyStop ? "ok" : "missing"}`,
@@ -466,6 +483,7 @@ export default function (pi: ExtensionAPI) {
           "",
           "capabilities:",
           `  monitors=${caps.monitors ? "ok" : "missing"}`,
+          `  session-web=${caps.sessionWeb ? "ok" : "missing"}`,
           `  remote=${caps.remote ? "ok" : "missing"}`,
           `  colony=${caps.colony ? "ok" : "missing"}`,
           `  colony-stop=${caps.colonyStop ? "ok" : "missing"}`,
@@ -481,11 +499,22 @@ export default function (pi: ExtensionAPI) {
           return;
         }
 
-        if (!requireCapabilities(ctx, caps, ["monitors", "remote", "colony"], "run")) {
+        if (!caps.monitors || !caps.colony || (!caps.remote && !caps.sessionWeb)) {
+          const missing: Array<keyof PilotCapabilities> = [];
+          if (!caps.monitors) missing.push("monitors");
+          if (!caps.colony) missing.push("colony");
+          if (!caps.remote && !caps.sessionWeb) missing.push("sessionWeb", "remote");
+          const lines = [
+            "Não posso preparar `run` porque faltam comandos no runtime atual:",
+            ...missing.map((m) => `  - ${m}: ${capabilityGuidance(m)}`),
+            "",
+            "Use /colony-pilot check para diagnóstico rápido.",
+          ];
+          ctx.ui.notify(lines.join("\n"), "warning");
           return;
         }
 
-        const sequence = buildColonyRunSequence(goal);
+        const sequence = buildRuntimeRunSequence(caps, goal);
         state.monitorMode = "off";
         updateStatusUI(ctx, state);
 
@@ -495,14 +524,23 @@ export default function (pi: ExtensionAPI) {
 
       if (cmd === "stop") {
         const restore = body.includes("--restore-monitors");
-        const required: Array<keyof PilotCapabilities> = ["colonyStop", "remote"];
-        if (restore) required.push("monitors");
+        if (!caps.colonyStop || (!caps.remote && !caps.sessionWeb) || (restore && !caps.monitors)) {
+          const missing: Array<keyof PilotCapabilities> = [];
+          if (!caps.colonyStop) missing.push("colonyStop");
+          if (!caps.remote && !caps.sessionWeb) missing.push("sessionWeb", "remote");
+          if (restore && !caps.monitors) missing.push("monitors");
 
-        if (!requireCapabilities(ctx, caps, required, "stop")) {
+          const lines = [
+            "Não posso preparar `stop` porque faltam comandos no runtime atual:",
+            ...missing.map((m) => `  - ${m}: ${capabilityGuidance(m)}`),
+            "",
+            "Use /colony-pilot check para diagnóstico rápido.",
+          ];
+          ctx.ui.notify(lines.join("\n"), "warning");
           return;
         }
 
-        const sequence = buildColonyStopSequence({ restoreMonitors: restore });
+        const sequence = buildRuntimeStopSequence(caps, { restoreMonitors: restore });
         if (restore) state.monitorMode = "on";
         updateStatusUI(ctx, state);
 
@@ -537,31 +575,45 @@ export default function (pi: ExtensionAPI) {
         const action = actionCmd || "status";
 
         if (action === "start") {
-          if (!requireCapabilities(ctx, caps, ["remote"], "web start")) {
+          if (!caps.remote && !caps.sessionWeb) {
+            const lines = [
+              "Não posso preparar `web start` porque faltam comandos de web no runtime:",
+              `  - sessionWeb: ${capabilityGuidance("sessionWeb")}`,
+              `  - remote: ${capabilityGuidance("remote")}`,
+            ];
+            ctx.ui.notify(lines.join("\n"), "warning");
             return;
           }
 
+          const cmd = caps.sessionWeb ? "/session-web start" : "/remote";
           primeManualRunbook(
             ctx,
-            "Start do remote web pronto",
-            ["/remote"],
+            "Start do web session pronto",
+            [cmd],
             "Execute o comando abaixo para iniciar o servidor web da sessão."
           );
           return;
         }
 
         if (action === "stop") {
-          if (!requireCapabilities(ctx, caps, ["remote"], "web stop")) {
+          if (!caps.remote && !caps.sessionWeb) {
+            const lines = [
+              "Não posso preparar `web stop` porque faltam comandos de web no runtime:",
+              `  - sessionWeb: ${capabilityGuidance("sessionWeb")}`,
+              `  - remote: ${capabilityGuidance("remote")}`,
+            ];
+            ctx.ui.notify(lines.join("\n"), "warning");
             return;
           }
 
           state.remoteActive = false;
           state.remoteClients = 0;
           updateStatusUI(ctx, state);
+          const cmd = caps.sessionWeb ? "/session-web stop" : "/remote stop";
           primeManualRunbook(
             ctx,
-            "Stop do remote web pronto",
-            ["/remote stop"],
+            "Stop do web session pronto",
+            [cmd],
             "Execute o comando abaixo para encerrar o servidor web da sessão."
           );
           return;

@@ -43,6 +43,7 @@ pi install https://github.com/aretw0/agents-lab
 | `environment-doctor` | Health check do ambiente na startup + comando `/doctor` |
 | `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo (CDP-first em domínios sensíveis) |
 | `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para pilot (monitors/remote/colony) e mantém snapshot de colonies em background |
+| `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
 
 #### Defaults do `monitor-provider-patch`
 
@@ -98,6 +99,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 |---|---|
 | `/doctor` | Diagnóstico do ambiente — verifica git, gh, glab, node, npm e autenticações |
 | `/colony-pilot` | Guia pilot (`check/run/status/stop/web/monitors/tui`) com execução manual assistida, diagnóstico de capacidades carregadas e visibilidade consolidada de sessão web + trabalho em background |
+| `/session-web` | Controla gateway web first-party (`start/status/open/stop`) para inspeção local da sessão sem UI hospedada externa |
 
 ## Filosofia
 
