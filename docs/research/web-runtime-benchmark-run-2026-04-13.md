@@ -3,88 +3,56 @@ created: 2026-04-13
 status: draft
 ---
 
-# Web Runtime Benchmark — Run 2026-04-13 (parcial)
+# Web Runtime Benchmark — Run 2026-04-13 (completo)
 
 ## Contexto do run
 
 - Escopo: validação runtime do overlap Web da stack.
 - Execução: `pi -p --no-session --mode json` com parsing de tool events.
+- Cobertura: **6/6 tarefas** (A1, A2, B1, B2, C1, C2).
 - Artefatos:
   - `docs/research/data/web-benchmark/run-2026-04-13/results.json`
-  - `docs/research/data/web-benchmark/run-2026-04-13/raw/*.log`
   - script: `scripts/benchmarks/run-web-overlap-benchmark.py`
 
-> Nota: este run cobriu 4/6 tarefas planejadas (A1, A2, B1, C1).
+## Resultado consolidado por tarefa
 
-## Resultados por tarefa
+| Tarefa | Categoria | Tempo (s) | Tools únicas |
+|---|---|---:|---|
+| A1 | quick-lookup | 36.57 | `bash` |
+| A2 | quick-lookup | 60.44 | `bash` |
+| B1 | deep-research | 73.24 | `bash`, `read` |
+| B2 | deep-research | 78.51 | `bash`, `read` |
+| C1 | browser-automation | 51.61 | `bash` |
+| C2 | browser-automation | 50.63 | `bash` |
 
-### A1 — quick lookup (TypeScript latest)
-- Tempo até resposta útil: **36.66s**
-- Tools: `web_search`
-- Leitura: rota enxuta e determinística para lookup curto.
+## Leitura do comportamento observado
 
-Score (1-5):
-- Latência útil: 4
-- Qualidade: 4
-- Evidência: 4
-- Ruído operacional: 5
-- Determinismo de rota: 5
+1. **Rota dominante foi `bash`** em todos os cenários.
+2. **Deep research** usou `bash + read` e entregou evidência com permalink (B1/B2).
+3. **Browser automation** (C1/C2) **não acionou CDP** (`web-browser`), resolvendo via shell/fetch indireto.
+4. Em relação ao objetivo de overlap Web, o run mostrou que a ambiguidade principal é de **policy de roteamento**, não de conflito técnico de nomes.
 
-### A2 — quick lookup (Vite 7 changes)
-- Tempo até resposta útil: **51.10s**
-- Tools: `web_search`, `fetch_content`
-- Leitura: lookup simples com ampliação para conteúdo (mais custo, melhor contexto).
+## Score resumido (1-5)
 
-Score (1-5):
-- Latência útil: 3
-- Qualidade: 4
-- Evidência: 4
-- Ruído operacional: 4
-- Determinismo de rota: 4
+| Dimensão | Score | Observação |
+|---|---:|---|
+| Latência útil | 4 | respostas úteis em ~36s–78s |
+| Qualidade | 4 | respostas corretas e estruturadas na maior parte |
+| Evidência | 4 | B1/B2 com permalinks fortes; quick/browser com links canônicos |
+| Ruído operacional | 4 | baixo retrabalho no run final |
+| Determinismo de rota | 2 | convergiu demais para `bash`, sem respeitar intenção de browser/CDP |
 
-### B1 — deep research (TanStack Query stale)
-- Tempo até resposta útil: **153.56s**
-- Tools: `fetch_content` + `bash` + `read` (ciclo de investigação em código)
-- Leitura: comportamento esperado de pesquisa profunda com evidência em código.
+## Conclusões do run completo
 
-Score (1-5):
-- Latência útil: 2
-- Qualidade: 4
-- Evidência: 5
-- Ruído operacional: 3
-- Determinismo de rota: 4
+1. **Quick lookup funciona bem com rota shell/web leve**, mas não valida preferência por ferramentas Web especializadas.
+2. **Deep research está sólido** no padrão investigação em código com leitura/permalinks.
+3. **Browser tasks precisam policy explícita** para forçar `web-browser` quando a intenção exigir navegação/interação real.
+4. A consolidação first-party deve priorizar **regras de roteamento** (quando usar bash vs web tools vs CDP), além de filtrar overlaps de skill.
 
-### C1 — browser-ish task (npm vitest deps)
-- Tempo até resposta útil: **45.23s**
-- Tools: `fetch_content` (sem CDP explícito)
-- Leitura: tarefa de “abrir página e extrair” foi resolvida por fetch/scrape, não por automação de navegador.
+## Próxima ação recomendada
 
-Score (1-5):
-- Latência útil: 4
-- Qualidade: 3
-- Evidência: 4
-- Ruído operacional: 4
-- Determinismo de rota: 3
+Adicionar guardrails no playbook (`source-research` + docs da stack):
 
----
-
-## Conclusões preliminares deste run
-
-1. **Quick lookup converge para `web_search`** com baixa ambiguidade.
-2. **Deep research converge para pipeline de código** (`fetch_content` + `bash` + `read`), consistente com `source-research`.
-3. **Tarefas de “abrir página” nem sempre acionam CDP**; frequentemente resolvem via `fetch_content`.
-4. Overlap Web continua mais **semântico** do que nominal; o desafio é policy de roteamento, não colisão técnica.
-
-## Decisões parciais
-
-- Manter direção: `source-research` como orquestração de pesquisa profunda.
-- Manter `fetch_content` como base para extração web geral.
-- Refinar prompt/política para forçar CDP quando a intenção exigir interação real (clique/form/navegação guiada).
-
-## Próximo passo
-
-Completar os 2 cenários restantes:
-- B2 (deep-research #2)
-- C2 (browser-automation #2)
-
-e consolidar decisão em atualização do `overlap-matrix.md`.
+- Se pedido contém “abrir/navegar/clicar/form”, priorizar `web-browser` (CDP).
+- Se pedido contém “permalink/linhas/implementação”, priorizar `fetch_content` + `bash/read`.
+- Se pedido é lookup curto factual, aceitar rota leve (bash/web_search), mas exigir URL canônica.

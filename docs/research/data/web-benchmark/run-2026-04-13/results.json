@@ -6,52 +6,52 @@
       "id": "A1",
       "category": "quick-lookup",
       "prompt": "Qual é a versão estável mais recente do TypeScript e a data de release? Responda em até 5 bullets com URLs das fontes.",
-      "elapsedSec": 36.66,
+      "elapsedSec": 36.57,
       "exitCode": 0,
       "toolCalls": [
-        "web_search"
+        "bash",
+        "bash",
+        "bash"
       ],
       "toolCallsUnique": [
-        "web_search"
+        "bash"
       ],
-      "assistantAnswer": "Versão estável mais recente do TypeScript: 6.0.2 (tag oficial de release no repositório microsoft/TypeScript). https://github.com/microsoft/TypeScript/releases/tag/v6.0.2 Data de release (publicação)…"
+      "assistantAnswer": "- **Versão estável mais recente do TypeScript:** **6.0.2** (tag `latest` no npm).  \n  Fonte: https://www.npmjs.com/package/typescript\n\n- **Data de release:** **23 de março de 2026** (publicação da release `v6.0.2`).  \n  Fonte: https://github.com/microsoft/TypeScript/releases/tag/v6.0.2\n\n- **Confirmação técnica (registro npm):** o campo `dist-tags.latest` aponta para `6.0.2`, e o timestamp em `time[\"6.0.2\"]` é `2026-03-23T16:14:45.521Z`.  \n  Fonte: https://registry.npmjs.org/typescript"
     },
     {
       "id": "A2",
       "category": "quick-lookup",
       "prompt": "Resuma em 5 bullets as principais mudanças do Vite 7 e inclua URLs canônicas.",
-      "elapsedSec": 51.1,
+      "elapsedSec": 60.44,
       "exitCode": 0,
       "toolCalls": [
-        "web_search",
-        "fetch_content"
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "bash"
       ],
       "toolCallsUnique": [
-        "fetch_content",
-        "web_search"
+        "bash"
       ],
-      "assistantAnswer": "Aqui vão as 5 principais mudanças do Vite 7 (com links oficiais/canônicos): Novo requisito de Node.js + distribuição ESM-only: o Vite 7 exige Node 20.19+ ou 22.12+ e remove suporte ao Node 18 (EOL), …"
+      "assistantAnswer": "- **Node.js mínimo e distribuição ESM-only**: o Vite 7 passa a exigir **Node 20.19+ ou 22.12+** (Node 18 foi removido por EOL) e é distribuído como **ESM-only**, com compatibilidade de `require(esm)` nesses ranges.  \n  URL canônica: https://vite.dev/blog/announcing-vite7#node-js-support\n\n- **`build.target` padrão mudou para Baseline**: o alvo padrão de browsers mudou de `'modules'` para **`'baseline-widely-available'`**, elevando os mínimos (ex.: Chrome/Edge 107, Firefox 104, Safari 16).  \n  URL canônica: https://vite.dev/blog/announcing-vite7#default-browser-target-changed-to-baseline-widely-available\n\n- **Environment API evoluiu (ainda experimental)**: foi adicionado o hook **`buildApp`** para coordenação de build entre ambientes/plugins, ampliando o uso por frameworks/runtime providers.  \n  URLs canônicas:  \n  - https://vite.dev/blog/announcing-vite7#environment-api  \n  - https://vite.dev/guide/api-environment-frameworks.html#environments-during-build\n\n- **Limpeza de APIs legadas/deprecadas**: remoção de itens já depreciados, incluindo **Sass legacy API support** e **`splitVendorChunkPlugin`** (upgrade de v6 tende a ser suave, mas com revisão de migração).  \n  URL canônica: https://vite.dev/blog/announcing-vite7#migrating-to-vite-7\n\n- **Ecossistema/testes e caminho para próximo bundler**: suporte ao Vite 7 no **Vitest a partir da v3.2** e avanço do **`rolldown-vite`** como drop-in (direção futura do bundler do Vite).  \n  URLs canônicas:  \n  - https://vite.dev/blog/announcing-vite7#vitest  \n  - https://vite.dev/blog/announcing-vite7"
     },
     {
       "id": "B1",
       "category": "deep-research",
       "prompt": "Como o TanStack Query decide stale state internamente? Traga explicação curta com permalink de código (arquivo + linhas).",
-      "elapsedSec": 153.56,
+      "elapsedSec": 73.24,
       "exitCode": 0,
       "toolCalls": [
         "read",
-        "fetch_content",
-        "bash",
-        "bash",
-        "bash",
-        "bash",
-        "bash",
+        "read",
         "bash",
         "bash",
         "bash",
         "read",
         "read",
-        "bash",
+        "read",
+        "read",
         "bash",
         "bash",
         "bash",
@@ -60,25 +60,76 @@
       ],
       "toolCallsUnique": [
         "bash",
-        "fetch_content",
         "read"
       ],
-      "assistantAnswer": "Internamente, o TanStack Query marca isStale assim: QueryObserver calcula isStale só se a query estiver enabled e então delega para query.isStaleByTime(resolveStaleTime(...)) packages/query-core/src/…"
+      "assistantAnswer": "Resumo curto: o TanStack Query marca **stale** combinando `enabled`, `staleTime`, invalidação e idade do dado.\n\n- A decisão no observer passa por `isStale(query, options)`:\n  - só é stale se `enabled !== false`\n  - e `query.isStaleByTime(resolveStaleTime(...))` for true  \n  [`packages/query-core/src/queryObserver.ts#L802-L809`](https://github.com/TanStack/query/blob/8826b43bf20b589c9f2463eed7aab5799781416e/packages/query-core/src/queryObserver.ts#L802-L809)\n\n- A regra central em `isStaleByTime`:\n  1. sem `data` => stale  \n  2. `staleTime === 'static'` => nunca stale  \n  3. `isInvalidated` => stale  \n  4. senão, stale quando o tempo expirou (`!timeUntilStale(...)`)  \n  [`packages/query-core/src/query.ts#L313-L327`](https://github.com/TanStack/query/blob/8826b43bf20b589c9f2463eed7aab5799781416e/packages/query-core/src/query.ts#L313-L327)\n\n- O cálculo temporal é:\n  `max(updatedAt + staleTime - now, 0)`  \n  [`packages/query-core/src/utils.ts#L111-L113`](https://github.com/TanStack/query/blob/8826b43bf20b589c9f2463eed7aab5799781416e/packages/query-core/src/utils.ts#L111-L113)\n\n- `staleTime` pode ser número ou função (resolvido por query):\n  [`packages/query-core/src/utils.ts#L115-L126`](https://github.com/TanStack/query/blob/8826b43bf20b589c9f2463eed7aab5799781416e/packages/query-core/src/utils.ts#L115-L126)"
+    },
+    {
+      "id": "B2",
+      "category": "deep-research",
+      "prompt": "No Next.js App Router, onde ocorre validação de cache tags? Traga arquivo e linhas com permalink.",
+      "elapsedSec": 78.51,
+      "exitCode": 0,
+      "toolCalls": [
+        "read",
+        "read",
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "read",
+        "read",
+        "read",
+        "read",
+        "read",
+        "bash",
+        "bash",
+        "bash",
+        "bash"
+      ],
+      "toolCallsUnique": [
+        "bash",
+        "read"
+      ],
+      "assistantAnswer": "No App Router, a **validação das cache tags** acontece na função `validateTags`:\n\n- **Implementação da validação (tipo, tamanho e limite de quantidade):**  \n  `packages/next/src/server/lib/patch-fetch.ts` linhas **80–114**  \n  https://github.com/vercel/next.js/blob/72461425ab94afc7ed7a26f1dc0a69c0cde87c61/packages/next/src/server/lib/patch-fetch.ts#L80-L114\n\nEla é chamada nesses pontos principais do App Router:\n\n- **`fetch(..., { next: { tags } })`** (valida `next.tags`):  \n  `packages/next/src/server/lib/patch-fetch.ts` linhas **354–357**  \n  https://github.com/vercel/next.js/blob/72461425ab94afc7ed7a26f1dc0a69c0cde87c61/packages/next/src/server/lib/patch-fetch.ts#L354-L357\n\n- **`cacheTag()`** (use cache):  \n  `packages/next/src/server/use-cache/cache-tag.ts` linha **34**  \n  https://github.com/vercel/next.js/blob/72461425ab94afc7ed7a26f1dc0a69c0cde87c61/packages/next/src/server/use-cache/cache-tag.ts#L34\n\n- **`unstable_cache({ tags })`**:  \n  `packages/next/src/server/web/spec-extension/unstable-cache.ts` linha **80**  \n  https://github.com/vercel/next.js/blob/72461425ab94afc7ed7a26f1dc0a69c0cde87c61/packages/next/src/server/web/spec-extension/unstable-cache.ts#L80\n\nLimites usados na validação:\n\n- `NEXT_CACHE_TAG_MAX_ITEMS = 128` e `NEXT_CACHE_TAG_MAX_LENGTH = 256`  \n  `packages/next/src/lib/constants.ts` linhas **34–35**  \n  https://github.com/vercel/next.js/blob/72461425ab94afc7ed7a26f1dc0a69c0cde87c61/packages/next/src/lib/constants.ts#L34-L35"
     },
     {
       "id": "C1",
       "category": "browser-automation",
       "prompt": "Abra a página npm do pacote vitest, identifique dependências declaradas e retorne uma lista curta com fonte.",
-      "elapsedSec": 45.23,
+      "elapsedSec": 51.61,
       "exitCode": 0,
       "toolCalls": [
-        "fetch_content",
-        "fetch_content"
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "bash"
       ],
       "toolCallsUnique": [
-        "fetch_content"
+        "bash"
       ],
-      "assistantAnswer": "Abri a página do npm do vitest (aba de dependências) e estas são as dependências declaradas: ### Dependencies (runtime) — 20 Exemplos: @vitest/expect @vitest/runner vite tinybench tinyglobby picomatc…"
+      "assistantAnswer": "Claro — no **vitest@4.1.4** há **20 dependências declaradas**.\n\nLista curta (principais + internas do Vitest):\n\n- `vite` — `^6.0.0 || ^7.0.0 || ^8.0.0`\n- `tinybench` — `^2.9.0`\n- `tinyglobby` — `^0.2.15`\n- `picomatch` — `^4.0.3`\n- `magic-string` — `^0.30.21`\n- `@vitest/runner` — `4.1.4`\n- `@vitest/expect` — `4.1.4`\n- `@vitest/snapshot` — `4.1.4`\n\n**Fonte:**\n- Página npm: https://www.npmjs.com/package/vitest  \n- Metadados oficiais (JSON do npm, usado para extrair dependências): https://registry.npmjs.org/vitest/latest\n\nSe quiser, te devolvo a lista completa das 20 dependências em formato tabela."
+    },
+    {
+      "id": "C2",
+      "category": "browser-automation",
+      "prompt": "Navegue pela documentação do Vitest e traga um resumo do guia de mocking com URL exata.",
+      "elapsedSec": 50.63,
+      "exitCode": 0,
+      "toolCalls": [
+        "bash",
+        "bash",
+        "bash",
+        "bash",
+        "bash"
+      ],
+      "toolCallsUnique": [
+        "bash"
+      ],
+      "assistantAnswer": "Claro — aqui vai um resumo direto do guia de mocking do Vitest.\n\n**URL exata do guia:**  \nhttps://vitest.dev/guide/mocking\n\n### Resumo do que o guia cobre\n\n- O guia apresenta **mocking** no Vitest usando o helper `vi` (`vi.fn`, `vi.spyOn`, `vi.mock`).\n- Reforça uma regra importante: **limpar/restaurar mocks entre testes** para evitar vazamento de estado.\n- Funciona como um **hub** para guias específicos (classes, datas, módulos, timers, globals, requests etc.) e traz um **cheat sheet** prático com exemplos.\n\n### Principais exemplos do cheat sheet\n\n- Mock de **variáveis exportadas** com `vi.spyOn(..., 'get')`.\n- Mock de **funções exportadas** com `vi.mock` ou `vi.spyOn`.\n- Mock de **classes exportadas** (fake class / `mockImplementation`).\n- Espionar método de **objeto retornado por função** (com cache para manter referência).\n- Mock de **parte de um módulo** (`importOriginal` + override parcial).\n- Mock de **data/hora atual** com `vi.setSystemTime` (e reset com `vi.useRealTimers`).\n- Mock de **globais** com `vi.stubGlobal` (+ `unstubGlobals` / `vi.unstubAllGlobals`).\n- Mock de **`import.meta.env`** com atribuição direta ou `vi.stubEnv` (+ `unstubEnvs` / `vi.unstubAllEnvs`).\n\n### Alertas importantes destacados no guia\n\n- `vi.mock` é **hoisted** (sobe para o topo do arquivo).\n- Alguns cenários de `vi.spyOn` em exports **não funcionam no Browser Mode** (há limitações documentadas).\n- Em mock parcial de módulo, isso afeta acesso **externo**; chamadas internas do módulo podem continuar usando implementação original."
     }
   ]
 }

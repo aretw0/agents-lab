@@ -15,7 +15,7 @@ Este diretório armazena pesquisas, análises e material de referência sobre o 
 | [overlap-matrix.md](./overlap-matrix.md) | Matriz de sobreposição entre pacotes da stack e direção de consolidação first-party | Draft |
 | [web-overlap-scorecard.md](./web-overlap-scorecard.md) | Avaliação específica de overlap Web (oh-pi, pi-web-access, first-party) | Draft |
 | [web-runtime-benchmark-plan.md](./web-runtime-benchmark-plan.md) | Plano de benchmark runtime para validar overlap Web em uso real | Draft |
-| [web-runtime-benchmark-run-2026-04-13.md](./web-runtime-benchmark-run-2026-04-13.md) | Resultado parcial do benchmark Web (4/6 tarefas) com evidências de roteamento | Draft |
+| [web-runtime-benchmark-run-2026-04-13.md](./web-runtime-benchmark-run-2026-04-13.md) | Resultado completo do benchmark Web (6/6 tarefas) com evidências de roteamento | Draft |
 | _(em breve)_ | Estado da arte em primitivas de agentes | Pendente |
 | _(em breve)_ | Padrões de design para sistemas multi-agentes | Pendente |
 
