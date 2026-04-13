@@ -25,6 +25,8 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | Guia | Descrição |
 |------|-----------|
 | [token-efficiency.md](./token-efficiency.md) | Diretivas de eficiência de tokens (T1–T11), segurança (S1–S3) e calibração de monitores |
+| [web-session-gateway.md](./web-session-gateway.md) | Gateway web first-party para observabilidade local da sessão (health/state/prompt) |
+| [colony-runtime-recovery.md](./colony-runtime-recovery.md) | Como localizar artefatos de colony (state/worktree/branch) e recuperar contexto após parada |
 
 ### Migração e Filosofia
 
