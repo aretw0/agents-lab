@@ -36,7 +36,7 @@ Mapear sobreposição entre pacotes da stack atual para decidir, por capability:
    - browser interaction: `web-browser` first-party.
 
 Referência detalhada: [`web-overlap-scorecard.md`](./web-overlap-scorecard.md).
-Validação runtime parcial: [`web-runtime-benchmark-run-2026-04-13.md`](./web-runtime-benchmark-run-2026-04-13.md).
+Validação runtime: [`web-runtime-benchmark-run-2026-04-13.md`](./web-runtime-benchmark-run-2026-04-13.md).
 
 ---
 
@@ -84,13 +84,13 @@ Ou seja: há overlap funcional, mas com níveis diferentes de profundidade.
 
 1. **Quick lookup** (leve, baixo custo):
    - manter skill simples (pode ser first-party no futuro, inspirada no `web-search` da oh-pi).
-   - ✅ evidência runtime parcial: tarefa A1 convergiu para `web_search` com rota direta.
+   - ✅ evidência runtime: lookup respondeu bem com rota leve, porém predominou `bash`.
 2. **Deep research** (bibliotecas, evidência, histórico):
    - padrão em `source-research` + tools de `pi-web-access`.
-   - ✅ evidência runtime parcial: tarefa B1 convergiu para `fetch_content` + `bash` + `read`.
+   - ✅ evidência runtime: B1/B2 entregaram resposta com investigação em código e permalinks.
 3. **Interactive site ops** (form/click/login):
    - padrão em `web-browser` (CDP).
-   - ⚠️ evidência runtime parcial: tarefa C1 foi resolvida por `fetch_content`, sem CDP explícito (precisa policy mais rígida).
+   - ⚠️ evidência runtime: C1/C2 também convergiram para `bash`, sem CDP explícito (policy de roteamento precisa ser mais rígida).
 
 ---
 
