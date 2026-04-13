@@ -30,6 +30,12 @@ Checklist vivo para não deixar backlog preso só na conversa.
 - [ ] Criar taskset de autenticação/formulário (login real em ambiente de teste) para medir vantagem estrutural de CDP
 - [ ] Medir custo incremental de setup browser (`start.js`) em sessão fria vs sessão quente
 
+## Tarefas estruturais (antes da Etapa B)
+
+- [ ] Consolidar `read-guard` + `web-routing-guard` em uma extensão única (`guardrails-core`)
+- [ ] Definir esquema de config único em `.pi/settings.json` para todos os guardrails
+- [ ] Padronizar códigos de bloqueio para facilitar telemetria/regressão
+
 ## Decisões pendentes de curadoria
 
 - [ ] Decidir se `@ifi/oh-pi-skills/web-search` e `web-fetch` permanecem como fallback explícito

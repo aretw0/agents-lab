@@ -20,6 +20,7 @@ Este diretório armazena pesquisas, análises e material de referência sobre o 
 | [web-routing-ab-run-2026-04-13.md](./web-routing-ab-run-2026-04-13.md) | Resultado A/B de roteamento web com decisão de sobriedade | Draft |
 | [web-routing-ab-run-2026-04-13-novpn-cf.md](./web-routing-ab-run-2026-04-13-novpn-cf.md) | Revalidação A/B sem VPN focada em cenários npmjs/Cloudflare | Draft |
 | [web-routing-next-steps.md](./web-routing-next-steps.md) | Backlog operacional da trilha de roteamento web (checklist vivo) | Draft |
+| [colony-readiness-checklist.md](./colony-readiness-checklist.md) | Gate de prontidão para liberar colônias com guardrails e regressão | Draft |
 | _(em breve)_ | Estado da arte em primitivas de agentes | Pendente |
 | _(em breve)_ | Padrões de design para sistemas multi-agentes | Pendente |
 
