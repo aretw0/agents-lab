@@ -11,15 +11,17 @@ versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 > Este arquivo cobre mudanças no laboratório (docs, experimentos, primitivas,
 > configuração de workspace e diretivas deste fork).
 
----
-
 ## [Não lançado]
 
 ### Adicionado
-- `CHANGELOG.md` retroativo na raiz do repositório
-- `upstream` remoto apontando para `https://github.com/aretw0/agents-lab`
-- Templates de PR e Issue em `.github/`
-- Diretivas de colaboração deste fork documentadas em `CONTRIBUTING.md`
+- Experimento `202604-token-efficiency-calibration`: calibração de eficiência de tokens e monitores portada do workspace `potlabs`
+- Guia `docs/guides/token-efficiency.md`: diretivas T1–T11 de tokens, S1–S3 de segurança, calibração de monitores
+- Templates de `APPEND_SYSTEM.md` para eficiência de tokens e proibição de `sudo`
+
+### Modificado
+- Classificadores de sensor (5 arquivos em `.pi/agents/`): migrados de `claude-sonnet-4.6` (thinking on) para `claude-haiku-4-5` (thinking off)
+- Índice `docs/guides/README.md`: nova seção "Otimização e Operação"
+- Tabela de experimentos em `experiments/README.md`
 
 ---
 

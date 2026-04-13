@@ -91,3 +91,4 @@ Primeiros experimentos já começaram a surgir a partir da validação prática 
 | [202604-pi-hedge-monitor-investigation](./202604-pi-hedge-monitor-investigation/README.md) | Pi | Em andamento | 2026-04-10 |
 | [202604-pi-tool-calling-real-files](./202604-pi-tool-calling-real-files/README.md) | Pi | Em andamento | 2026-04-10 |
 | [202604-pi-meta-workspace](./202604-pi-meta-workspace/README.md) | Pi | Em andamento | 2026-04-10 |
+| [202604-token-efficiency-calibration](./202604-token-efficiency-calibration/README.md) | Pi | Concluído | 2026-04-13 |
