@@ -7,6 +7,16 @@ description: "Interact with web pages via browser automation: navigate, click, f
 
 Browser automation via Chrome DevTools Protocol (CDP). All scripts live in `./scripts/` relative to this skill.
 
+## When to Prefer This Skill
+
+Use `web-browser` for **interactive** web tasks:
+- open/navigate pages and tabs
+- click buttons/links
+- fill forms and login flows
+- inspect dynamic UI state rendered in-browser
+
+For non-interactive tasks (searching links, extracting page text, fetching docs), prefer `web_search` / `fetch_content` instead.
+
 > **Requires:** `npm install` inside `./scripts/` before first use (installs `ws` for WebSocket/CDP).
 > ```bash
 > npm install --prefix ./scripts
