@@ -1,5 +1,15 @@
 # @aretw0/pi-stack
 
+## 0.3.9
+
+### Patch Changes
+
+- Refina o fluxo de desenvolvimento do pi-stack para o modelo pós-"guarda-chuva":
+
+  - remove o package-lock legado de packages/pi-stack
+  - atualiza smoke tests para resolver dependências third-party com prioridade em node_modules da raiz (fallback para node_modules local do pacote)
+  - reduz drift entre ambiente local e setup de workspaces, mantendo a cobertura de curadoria e filtros
+
 ## 0.3.8
 
 ### Patch Changes

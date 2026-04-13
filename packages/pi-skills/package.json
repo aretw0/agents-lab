@@ -1,6 +1,6 @@
 {
   "name": "@aretw0/pi-skills",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Skills para criar, configurar e operar o ecossistema pi — extensões, skills, temas, terminal setup e onboarding",
   "type": "module",
   "license": "MIT",
