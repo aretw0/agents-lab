@@ -69,6 +69,14 @@ Configuração em `.pi/settings.json` do projeto:
 - `GET /`
   - UI local mínima de observabilidade
 
+## Arquivo de runtime (coordenação de portas)
+
+Ao iniciar, o gateway grava `./.pi/session-web-runtime.json` com `running`, `port`, `mode` e `url`.
+
+Esse arquivo é consumido por guardrails first-party para evitar conflito de portas durante testes/servidores paralelos (ex.: bloquear `npm run dev -- --port 3100` quando session-web já está em `3100`).
+
+Ao parar o gateway, o arquivo é removido.
+
 ## Segurança mínima
 
 - token obrigatório para endpoints de estado e prompt

@@ -72,7 +72,7 @@ Esses erros são operacionais; mantenha objetivo técnico separado de dependênc
 
 - Priorize comandos de validação via `node`/scripts internos (menos dependência de shell tooling externo).
 - Evite utilitários fora da allowlist dos ants.
-- Use gates de capability (`/colony-pilot check`) antes de rodar.
+- Use gates de capability (`/colony-pilot check`) e preflight hard-gate (`/colony-pilot preflight`) antes de rodar.
 - Mantenha observabilidade ativa:
   - TUI: `/colony-status`, `/colony-pilot status`
   - Web: `/session-web status` + painel local
