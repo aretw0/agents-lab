@@ -156,6 +156,7 @@ A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes
 
 - [pi-mono — repositório oficial](https://github.com/badlogic/pi-mono)
 - [Guias deste laboratório](./docs/guides/)
+  - [Web Session Gateway](./docs/guides/web-session-gateway.md)
 - [Pesquisas e análises](./docs/research/)
 
 ### Contribuindo
