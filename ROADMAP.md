@@ -98,8 +98,8 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
 - [ ] Avaliar e migrar primitivas de monitors (`@davidorex/pi-behavior-monitors`)
 - [ ] Avaliar e migrar primitivas de extensions (`@ifi/oh-pi-extensions`)
 - [ ] Avaliar Adaptive Routing do `@ifi/oh-pi` como primitiva futura de roteamento
-- [ ] Consolidar guardrails first-party em uma extensão única (`guardrails-core`)
-- [ ] Definir gate objetivo de colony-readiness (guardrails + regressão + observabilidade)
+- [x] Consolidar guardrails first-party em uma extensão única (`guardrails-core`)
+- [x] Definir gate objetivo de colony-readiness (guardrails + regressão + observabilidade)
 
 ## Fase 4 — Comunidade e Escala
 

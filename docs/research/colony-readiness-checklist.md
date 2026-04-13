@@ -13,11 +13,11 @@ Definir um gate explícito de quando podemos "soltar colônias" no repositório 
 
 ## Fase A — Fundamentos de Guardrails
 
-- [ ] Consolidar guardrails first-party em **uma extensão única** (`guardrails-core`) com módulos internos:
-  - [ ] `readPathGuard`
-  - [ ] `webRoutingGuard`
+- [x] Consolidar guardrails first-party em **uma extensão única** (`guardrails-core`) com módulos internos:
+  - [x] `readPathGuard`
+  - [x] `webRoutingGuard`
   - [ ] interface para futuros guardas (`writeGuard`, `gitGuard`)
-- [ ] Definir ordem determinística de interceptação (router → blockers → observabilidade)
+- [x] Definir ordem determinística de interceptação (router → blockers → observabilidade)
 - [ ] Unificar configuração em `.pi/settings.json` (`extensions.guardrails.*`)
 - [ ] Definir política de fallback explícita por capability
 
@@ -47,6 +47,13 @@ Definir um gate explícito de quando podemos "soltar colônias" no repositório 
 - [ ] Critérios de rollback automático (latência, erro, violação de guardrail)
 - [ ] Retro semanal com ajuste de regras
 
+## Interoperabilidade de Monitores (davidorex × colony)
+
+- [x] Evidência estática: ants do `@ifi/oh-pi-ant-colony` usam `ResourceLoader` mínimo (`getExtensions: []`, `getSkills: []`) e **não carregam monitores do davidorex dentro dos ants**.
+- [ ] Validar impacto dos monitores do davidorex no processo principal durante execução de colônia (monitor ON vs OFF).
+- [ ] Definir profile operacional para pilot: `monitors off` durante colônia ou coexistência controlada por métricas.
+- [ ] Registrar decisão final de convivência entre monitor "soldier" da colônia e monitores gerais de sessão.
+
 ## Gate de Liberação (Go/No-Go)
 
 Liberar colônias por padrão apenas quando:
@@ -60,4 +67,6 @@ Liberar colônias por padrão apenas quando:
 
 - ✅ Policy e evidência A/B em Web já existem
 - ✅ Etapa A determinística de web routing já implementada
-- ⏳ Próximo foco: consolidação de guardrails e pilot de colônia
+- ✅ Guardrails consolidados em `guardrails-core`
+- ✅ Regressão estável iniciada (rodada 1/3 no taskset cloudflare-recheck)
+- ⏳ Próximo foco: fechar estabilidade 3/3 e pilot de colônia com política de monitores definida

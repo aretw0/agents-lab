@@ -52,7 +52,7 @@ Validações A/B: [`web-routing-ab-run-2026-04-13.md`](./web-routing-ab-run-2026
 | Web fetch/extraction | `@ifi/oh-pi-skills/web-fetch`, `pi-web-access/fetch_content` | **Semântico** | Coexistem | **Favorecer `fetch_content` em fluxos avançados** |
 | Planejamento | `@ifi/pi-plan`, `@ifi/pi-spec`, `@davidorex/pi-project-workflows` | **Semântico** | Coexistem | **Avaliação comparativa dirigida por casos reais** |
 | Multi-agent / delegação | `@ifi/oh-pi-ant-colony`, `@ifi/pi-extension-subagents` (+ workflows com delegação) | **Semântico** | Coexistem | **Consolidar estratégia (swarm vs subagentes)** |
-| Guard rails / segurança operacional | `@ifi/oh-pi-extensions` (safe-guard, git-guard, watchdog), `@aretw0/pi-stack/read-guard` | **Semântico (camadas diferentes)** | Coexistem | **Mapear fronteiras e evitar dupla intervenção** |
+| Guard rails / segurança operacional | `@ifi/oh-pi-extensions` (safe-guard, git-guard, watchdog), `@aretw0/pi-stack/guardrails-core` | **Semântico (camadas diferentes)** | Coexistem | **Mapear fronteiras e evitar dupla intervenção** |
 | Health/runtime doctor | `@aretw0/pi-stack/environment-doctor`, possíveis checks de terceiros | **Semântico leve** | Predomínio first-party | **Manter first-party** |
 
 ---
@@ -126,7 +126,8 @@ Ou seja: há overlap funcional, mas com níveis diferentes de profundidade.
    - ✅ A/B inicial (`web-routing-ab-run-2026-04-13`): melhorou determinismo (CDP-path 100%), mas com +32% de latência e sem ganho de sucesso.
    - ✅ A/B recheck sem VPN (`web-routing-ab-run-2026-04-13-novpn-cf`): em cenários npmjs/Cloudflare, policy-strict foi melhor (latência e determinismo), sem fallback e sem comandos proibidos.
    - ✅ hard por escopo implementado na policy das skills first-party (`source-research`, `web-browser`) com trigger explícito (intent interativo + domínio sensível/Cloudflare).
-   - ✅ Etapa A determinística implementada no runtime (`web-routing-guard`): pre-router + bloqueio de comandos `bash` proibidos em modo estrito.
+   - ✅ Etapa A determinística implementada no runtime (`guardrails-core`): pre-router + bloqueio de comandos `bash` proibidos em modo estrito.
+   - ✅ rodada estável inicial (`run-2026-04-13-guardrails-core-r1`): taskset cloudflare-recheck com CDP-path 100%, fallback 0% e zero comandos proibidos em ambos braços.
    - **decisão sóbria atual:** manter sem hard enforcement global; aplicar hard por escopo para intents interativas sensíveis (ex.: npmjs/Cloudflare), agora com enforcement técnico.
    - decidir se `web-search`/`web-fetch` da `@ifi/oh-pi-skills` ficam como fallback explícito,
    - ou se serão filtrados em `FILTER_PATCHES` para reduzir ambiguidade.

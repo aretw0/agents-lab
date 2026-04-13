@@ -1,0 +1,203 @@
+{
+  "runId": "run-2026-04-13-guardrails-core-r1",
+  "taskset": "cloudflare-recheck",
+  "arms": [
+    {
+      "id": "A",
+      "name": "baseline",
+      "tasks": [
+        {
+          "taskId": "CF1",
+          "prompt": "Abra https://www.npmjs.com/package/vitest e extraia 5 dependências da seção Dependencies usando navegação de browser. Não use npm view nem endpoints do registry.npmjs.org.",
+          "elapsedSec": 81.5,
+          "exitCode": 0,
+          "toolCalls": [
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash"
+          ],
+          "toolCallsUnique": [
+            "bash",
+            "read"
+          ],
+          "bashCommands": [
+            "ls -la \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\"",
+            "ls -la \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts\"",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/start.js",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/nav.js https://www.npmjs.com/package/vitest",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'document.title'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"h1,h2,h3,h4,h5,h6\")).map(h=>h.textContent.trim()).filter(Boolean).slice(0,40), null, 2)'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"*\")) .filter(el => el.children.length===0 && el.textContent && el.textContent.trim()===\"Dependencies\") .map(el => ({tag: el.tagName, class: el.className, parent: el.parentElement?.tagName, parentClass: el.parentElement?.className})).slice(0,20), null, 2)'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"*\")) .filter(el => el.children.length===0 && el.textContent && /depend/i.test(el.textContent.trim())) .map(el => ({text: el.textContent.trim().slice(0,80), tag: el.tagName, class: el.className})).slice(0,50), null, 2)'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(Object.keys(window.__context__||{}))'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(Object.keys((window.__context__||{}).context||{}).slice(0,100), null, 2)'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify((window.__context__||{}).context?.deps, null, 2)'",
+            "cd \"C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser\" && node ./scripts/eval.js 'JSON.stringify(((window.__context__||{}).context?.deps||[]).slice(0,5), null, 2)'"
+          ],
+          "cdpPathDetected": true,
+          "extractToolsDetected": false,
+          "disallowedCommandsDetected": [],
+          "assistantAnswer": "Feito via navegação no browser (CDP) em `https://www.npmjs.com/package/vitest`.\n\n5 dependências da seção **Dependencies**:\n\n1. `@vitest/expect`  \n2. `@vitest/mocker`  \n3. `@vitest/pretty-format`  \n4. `@vitest/runner`  \n5. `@vitest/snapshot`"
+        },
+        {
+          "taskId": "CF2",
+          "prompt": "Abra https://www.npmjs.com/package/typescript e retorne o título da página, URL final e 3 dados visíveis na interface web. Não use npm view nem endpoints do registry.npmjs.org.",
+          "elapsedSec": 71.35,
+          "exitCode": 0,
+          "toolCalls": [
+            "read",
+            "bash",
+            "read",
+            "bash",
+            "read",
+            "read",
+            "read",
+            "bash",
+            "read",
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash"
+          ],
+          "toolCallsUnique": [
+            "bash",
+            "read"
+          ],
+          "bashCommands": [
+            "ls -la ./packages/web-skills/skills/web-browser",
+            "ls -la ./packages/web-skills/skills/web-browser/scripts",
+            "node ./packages/web-skills/skills/web-browser/scripts/start.js",
+            "node ./packages/web-skills/skills/web-browser/scripts/nav.js https://www.npmjs.com/package/typescript --new",
+            "node ./packages/web-skills/skills/web-browser/scripts/eval.js '({ title: document.title, url: location.href })'",
+            "node ./packages/web-skills/skills/web-browser/scripts/eval.js 'Array.from(document.querySelectorAll(\"h1, h2, h3\")).slice(0,10).map(e=>({tag:e.tagName,text:e.innerText.trim()}))'",
+            "node ./packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const h2=[...document.querySelectorAll(\"h2,h3,h4\")].find(e=>e.textContent.includes(\"Package Sidebar\")); if(!h2) return {found:false}; const root=h2.parentElement?.parentElement || h2.parentElement; return {found:true, tag: root?.tagName, lines: root?.innerText?.split(\"\\n\").slice(0,30)}; })()'",
+            "node ./packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const h1=[...document.querySelectorAll(\"h1\")][0]; if(!h1) return {}; const container=h1.parentElement; return {h1:h1.innerText, siblingText: container?.innerText?.split(\"\\n\").slice(0,8)}; })()'",
+            "node ./packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const texts = Array.from(document.querySelectorAll(\"*\")) .map(el => (el.innerText||\"\").trim()) .filter(t => t && t.length < 80 && (/Dependencies|Dependents|Versions|License|Weekly Downloads|TypeScript/i.test(t))); return [...new Set(texts)].slice(0,30).map(text=>({text})); })()'"
+          ],
+          "cdpPathDetected": true,
+          "extractToolsDetected": false,
+          "disallowedCommandsDetected": [],
+          "assistantAnswer": "Aqui está o que encontrei abrindo a página no navegador:\n\n- **Título da página:** `typescript - npm`\n- **URL final:** `https://www.npmjs.com/package/typescript`\n\n**3 dados visíveis na interface web:**\n1. `6.0.2 • Public • Published 21 days ago`\n2. `Weekly Downloads: 163.781.296`\n3. `License: Apache-2.0`"
+        }
+      ],
+      "metrics": {
+        "taskCount": 2,
+        "successRate": 1.0,
+        "avgElapsedSec": 76.42,
+        "cdpPathRate": 1.0,
+        "fallbackRate": 0.0,
+        "disallowedCommandRate": 0.0
+      }
+    },
+    {
+      "id": "B",
+      "name": "policy-strict",
+      "tasks": [
+        {
+          "taskId": "CF1",
+          "prompt": "Abra https://www.npmjs.com/package/vitest e extraia 5 dependências da seção Dependencies usando navegação de browser. Não use npm view nem endpoints do registry.npmjs.org.",
+          "elapsedSec": 78.61,
+          "exitCode": 0,
+          "toolCalls": [
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash"
+          ],
+          "toolCallsUnique": [
+            "bash",
+            "read"
+          ],
+          "bashCommands": [
+            "ls -la C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser",
+            "ls -la C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/start.js",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/nav.js https://www.npmjs.com/package/vitest",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'document.title'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"h1,h2,h3,h4,h5,dt\")).map(e=>e.textContent.trim()).filter(Boolean).slice(0,200))'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"*\")) .map(e=>e.textContent?.trim()) .filter(t=>t && /Dependenc/i.test(t)) .slice(0,40))'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'document.body.innerText.includes(\"Dependencies\")'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const t = document.body.innerText; const i = t.indexOf(\"Dependencies\"); return i >= 0 ? t.slice(Math.max(0,i-200), i+600) : \"not found\"; })()'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"a,button\")).map(e=>({tag:e.tagName.toLowerCase(),text:e.textContent.trim().replace(/\\s+/g,\" \"),href:e.href||null})).filter(x=>/Dependenc/i.test(x.text)).slice(0,20))'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify(Array.from(document.querySelectorAll(\"a,button\")).map(e=>({tag:e.tagName,text:(e.textContent||\"\").trim(),href:e.href||null})).filter(x=>x.text.includes(\"Dependencies\")).slice(0,20))'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/nav.js 'https://www.npmjs.com/package/vitest?activeTab=dependencies'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const t = document.body.innerText; const i = t.indexOf(\"Dependencies\"); return i >= 0 ? t.slice(Math.max(0,i-200), i+1200) : \"not found\"; })()'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const t = document.body.innerText; const m = t.match(/Dependencies \\(\\d+\\)\\n([\\s\\S]*?)\\nDev Dependencies/); if (!m) return null; return m[1].split(\"\\n\").map(s => s.trim()).filter(Boolean).slice(0,5); })()'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify((() => { const t = document.body.innerText; const m = t.match(/Dependencies \\(\\d+\\)\\n([\\s\\S]*?)\\nDev Dependencies/); if (!m) return []; return m[1].split(\"\\n\").map(s => s.trim()).filter(Boolean).slice(0,5); })())'"
+          ],
+          "cdpPathDetected": true,
+          "extractToolsDetected": false,
+          "disallowedCommandsDetected": [],
+          "assistantAnswer": "Feito via navegação no browser em `https://www.npmjs.com/package/vitest?activeTab=dependencies`.\n\n5 dependências da seção **Dependencies**:\n\n1. `@vitest/expect`\n2. `@vitest/mocker`\n3. `@vitest/pretty-format`\n4. `@vitest/runner`\n5. `@vitest/snapshot`"
+        },
+        {
+          "taskId": "CF2",
+          "prompt": "Abra https://www.npmjs.com/package/typescript e retorne o título da página, URL final e 3 dados visíveis na interface web. Não use npm view nem endpoints do registry.npmjs.org.",
+          "elapsedSec": 66.56,
+          "exitCode": 0,
+          "toolCalls": [
+            "read",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash",
+            "bash"
+          ],
+          "toolCallsUnique": [
+            "bash",
+            "read"
+          ],
+          "bashCommands": [
+            "ls -la C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser",
+            "ls -la C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/start.js",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/nav.js https://www.npmjs.com/package/typescript",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'JSON.stringify({title: document.title, url: location.href})'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js 'document.body.innerText.slice(0,2000)'",
+            "node C:/Users/aretw/Documents/GitHub/agents-lab/packages/web-skills/skills/web-browser/scripts/eval.js '(() => { const lines = document.body.innerText.split(\"\\n\").map(l => l.trim()).filter(Boolean); const pick = (label) => { const i = lines.findIndex(l => l.toLowerCase() === label.toLowerCase()); return i >= 0 ? lines[i+1] : null; }; return JSON.stringify({weeklyDownloads: pick(\"Weekly Downloads\"), version: pick(\"Version\"), license: pick(\"License\")}); })()'"
+          ],
+          "cdpPathDetected": true,
+          "extractToolsDetected": false,
+          "disallowedCommandsDetected": [],
+          "assistantAnswer": "Aqui está o que encontrei na página via navegação web:\n\n- **Título da página:** `typescript - npm`\n- **URL final:** `https://www.npmjs.com/package/typescript`\n\n**3 dados visíveis na interface:**\n1. **Version:** `6.0.2`\n2. **Weekly Downloads:** `163.781.296`\n3. **License:** `Apache-2.0`"
+        }
+      ],
+      "metrics": {
+        "taskCount": 2,
+        "successRate": 1.0,
+        "avgElapsedSec": 72.59,
+        "cdpPathRate": 1.0,
+        "fallbackRate": 0.0,
+        "disallowedCommandRate": 0.0
+      }
+    }
+  ]
+}
