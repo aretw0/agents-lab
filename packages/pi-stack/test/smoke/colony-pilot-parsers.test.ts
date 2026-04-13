@@ -6,6 +6,8 @@ import {
   buildColonyStopSequence,
   parseCommandInput,
   normalizeQuotedText,
+  detectPilotCapabilities,
+  missingCapabilities,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -49,5 +51,21 @@ describe("colony-pilot parsers", () => {
     expect(normalizeQuotedText('"goal complexo"')).toBe("goal complexo");
     expect(normalizeQuotedText("'goal complexo'")).toBe("goal complexo");
     expect(normalizeQuotedText("goal sem aspas")).toBe("goal sem aspas");
+  });
+
+  it("detectPilotCapabilities reconhece comandos base com sufixos", () => {
+    const caps = detectPilotCapabilities(["monitors", "remote:1", "colony", "colony-stop:2"]);
+    expect(caps).toEqual({
+      monitors: true,
+      remote: true,
+      colony: true,
+      colonyStop: true,
+    });
+  });
+
+  it("missingCapabilities lista gaps do runtime", () => {
+    const caps = detectPilotCapabilities(["monitors", "colony"]);
+    expect(missingCapabilities(caps, ["monitors", "remote", "colony", "colonyStop"]))
+      .toEqual(["remote", "colonyStop"]);
   });
 });

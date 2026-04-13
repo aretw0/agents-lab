@@ -97,7 +97,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | Comando | O que faz |
 |---|---|
 | `/doctor` | Diagnóstico do ambiente — verifica git, gh, glab, node, npm e autenticações |
-| `/colony-pilot` | Guia pilot (`run/status/stop/web/monitors/tui`) com execução manual assistida e visibilidade consolidada de sessão web + trabalho em background |
+| `/colony-pilot` | Guia pilot (`check/run/status/stop/web/monitors/tui`) com execução manual assistida, diagnóstico de capacidades carregadas e visibilidade consolidada de sessão web + trabalho em background |
 
 ## Filosofia
 

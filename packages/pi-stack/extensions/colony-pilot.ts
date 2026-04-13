@@ -95,6 +95,34 @@ export function buildColonyStopSequence(options?: { restoreMonitors?: boolean })
   return out;
 }
 
+export interface PilotCapabilities {
+  monitors: boolean;
+  remote: boolean;
+  colony: boolean;
+  colonyStop: boolean;
+}
+
+export function toBaseCommandName(name: string): string {
+  return name.split(":")[0] ?? name;
+}
+
+export function detectPilotCapabilities(commandNames: string[]): PilotCapabilities {
+  const base = new Set(commandNames.map((n) => toBaseCommandName(n)));
+  return {
+    monitors: base.has("monitors"),
+    remote: base.has("remote"),
+    colony: base.has("colony"),
+    colonyStop: base.has("colony-stop"),
+  };
+}
+
+export function missingCapabilities(
+  caps: PilotCapabilities,
+  required: Array<keyof PilotCapabilities>
+): Array<keyof PilotCapabilities> {
+  return required.filter((k) => !caps[k]);
+}
+
 function extractText(message: unknown): string {
   if (!message || typeof message !== "object") return "";
   const msg = message as { content?: unknown };
@@ -262,6 +290,47 @@ function primeManualRunbook(
   ctx.ui.setEditorText?.(steps[0]);
 }
 
+function capabilityGuidance(capability: keyof PilotCapabilities): string {
+  switch (capability) {
+    case "remote":
+      return "`/remote` ausente — revisar inclusão de `@ifi/pi-web-remote` na stack curada do ambiente.";
+    case "colony":
+    case "colonyStop":
+      return "Comandos de colony ausentes — revisar inclusão de `@ifi/oh-pi-ant-colony` na stack curada do ambiente.";
+    case "monitors":
+      return "`/monitors` ausente — revisar inclusão de `@davidorex/pi-project-workflows` na stack curada do ambiente.";
+    default:
+      return "Capacidade ausente.";
+  }
+}
+
+function getCapabilities(pi: ExtensionAPI): PilotCapabilities {
+  const commands = pi.getCommands().map((c) => c.name);
+  return detectPilotCapabilities(commands);
+}
+
+function requireCapabilities(
+  ctx: ExtensionContext,
+  caps: PilotCapabilities,
+  required: Array<keyof PilotCapabilities>,
+  action: string
+): boolean {
+  const missing = missingCapabilities(caps, required);
+  if (missing.length === 0) return true;
+
+  const lines = [
+    `Não posso preparar \`${action}\` porque faltam comandos no runtime atual:`,
+    ...missing.map((m) => `  - ${m}: ${capabilityGuidance(m)}`),
+    "",
+    "Sem acoplamento ad hoc: valide a composição da stack e só então rode /reload.",
+    "Use /colony-pilot check para diagnóstico rápido.",
+  ];
+
+  ctx.ui.notify(lines.join("\n"), "warning");
+  ctx.ui.setEditorText?.("/colony-pilot check");
+  return false;
+}
+
 async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
   try {
     if (process.platform === "win32") {
@@ -315,10 +384,12 @@ export default function (pi: ExtensionAPI) {
     parameters: Type.Object({}),
     async execute() {
       const snapshot = snapshotPilotState(state);
+      const capabilities = getCapabilities(pi);
+      const payload = { ...snapshot, capabilities };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(snapshot, null, 2) }],
-        details: snapshot,
+        content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+        details: payload,
       };
     },
   });
@@ -329,6 +400,7 @@ export default function (pi: ExtensionAPI) {
       currentCtx = ctx;
       const input = (args ?? "").trim();
       const { cmd, body } = parseCommandInput(input);
+      const caps = getCapabilities(pi);
 
       if (!cmd || cmd === "help") {
         ctx.ui.notify(
@@ -343,6 +415,7 @@ export default function (pi: ExtensionAPI) {
             "  web <start|stop|open|status>  Controla/inspeciona sessão web",
             "  tui                           Mostra como entrar/retomar sessão no TUI",
             "  status                        Snapshot consolidado",
+            "  check                         Diagnóstico de capacidades carregadas (/monitors,/remote,/colony)",
             "",
             "Nota: o pi não expõe API confiável para uma extensão invocar slash commands de outra",
             "extensão no mesmo runtime. O pilot prepara e guia execução manual assistida.",
@@ -369,8 +442,35 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
+      if (cmd === "check") {
+        const missing = missingCapabilities(caps, ["monitors", "remote", "colony", "colonyStop"]);
+        const lines = [
+          "colony-pilot capabilities",
+          `  monitors: ${caps.monitors ? "ok" : "missing"}`,
+          `  remote: ${caps.remote ? "ok" : "missing"}`,
+          `  colony: ${caps.colony ? "ok" : "missing"}`,
+          `  colony-stop: ${caps.colonyStop ? "ok" : "missing"}`,
+        ];
+
+        if (missing.length > 0) {
+          lines.push("", "Gaps detectados:", ...missing.map((m) => `  - ${capabilityGuidance(m)}`));
+        }
+
+        ctx.ui.notify(lines.join("\n"), missing.length > 0 ? "warning" : "info");
+        return;
+      }
+
       if (cmd === "status") {
-        ctx.ui.notify(formatSnapshot(state), "info");
+        const lines = [
+          formatSnapshot(state),
+          "",
+          "capabilities:",
+          `  monitors=${caps.monitors ? "ok" : "missing"}`,
+          `  remote=${caps.remote ? "ok" : "missing"}`,
+          `  colony=${caps.colony ? "ok" : "missing"}`,
+          `  colony-stop=${caps.colonyStop ? "ok" : "missing"}`,
+        ];
+        ctx.ui.notify(lines.join("\n"), "info");
         return;
       }
 
@@ -378,6 +478,10 @@ export default function (pi: ExtensionAPI) {
         const goal = normalizeQuotedText(body);
         if (!goal) {
           ctx.ui.notify("Usage: /colony-pilot run <goal>", "warning");
+          return;
+        }
+
+        if (!requireCapabilities(ctx, caps, ["monitors", "remote", "colony"], "run")) {
           return;
         }
 
@@ -391,6 +495,13 @@ export default function (pi: ExtensionAPI) {
 
       if (cmd === "stop") {
         const restore = body.includes("--restore-monitors");
+        const required: Array<keyof PilotCapabilities> = ["colonyStop", "remote"];
+        if (restore) required.push("monitors");
+
+        if (!requireCapabilities(ctx, caps, required, "stop")) {
+          return;
+        }
+
         const sequence = buildColonyStopSequence({ restoreMonitors: restore });
         if (restore) state.monitorMode = "on";
         updateStatusUI(ctx, state);
@@ -403,6 +514,10 @@ export default function (pi: ExtensionAPI) {
         const mode = normalizeQuotedText(body).split(/\s+/)[0];
         if (mode !== "on" && mode !== "off") {
           ctx.ui.notify("Usage: /colony-pilot monitors <on|off>", "warning");
+          return;
+        }
+
+        if (!requireCapabilities(ctx, caps, ["monitors"], "monitors")) {
           return;
         }
 
@@ -422,6 +537,10 @@ export default function (pi: ExtensionAPI) {
         const action = actionCmd || "status";
 
         if (action === "start") {
+          if (!requireCapabilities(ctx, caps, ["remote"], "web start")) {
+            return;
+          }
+
           primeManualRunbook(
             ctx,
             "Start do remote web pronto",
@@ -432,6 +551,10 @@ export default function (pi: ExtensionAPI) {
         }
 
         if (action === "stop") {
+          if (!requireCapabilities(ctx, caps, ["remote"], "web stop")) {
+            return;
+          }
+
           state.remoteActive = false;
           state.remoteClients = 0;
           updateStatusUI(ctx, state);
