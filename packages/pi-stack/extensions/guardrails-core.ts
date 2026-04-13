@@ -320,7 +320,9 @@ function resolveGuardrailsPortConflictConfig(cwd: string): GuardrailsPortConflic
     const p = join(cwd, ".pi", "settings.json");
     if (!existsSync(p)) return defaults;
     const json = JSON.parse(readFileSync(p, "utf8"));
-    const cfg = json?.extensions?.guardrailsCore?.portConflict ?? {};
+    const cfg = json?.piStack?.guardrailsCore?.portConflict
+      ?? json?.extensions?.guardrailsCore?.portConflict
+      ?? {};
     const enabled = cfg?.enabled !== false;
     const suggested = Number(cfg?.suggestedTestPort);
     return {

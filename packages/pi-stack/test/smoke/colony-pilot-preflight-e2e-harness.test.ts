@@ -30,7 +30,7 @@ function tempCwdWithPreflightConfig() {
     join(cwd, ".pi", "settings.json"),
     JSON.stringify(
       {
-        extensions: {
+        piStack: {
           colonyPilot: {
             preflight: {
               requiredExecutables: [],

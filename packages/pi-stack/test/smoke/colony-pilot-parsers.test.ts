@@ -115,16 +115,29 @@ describe("colony-pilot parsers", () => {
   it("applyProjectBaselineSettings mescla sem remover config existente", () => {
     const merged = applyProjectBaselineSettings({
       model: "github-copilot",
-      extensions: {
-        monitorProviderPatch: { hedgeConversationHistory: true },
+      compaction: { enabled: true },
+      piStack: {
+        custom: { keep: true },
       },
     }) as any;
 
     expect(merged.model).toBe("github-copilot");
-    expect(merged.extensions.monitorProviderPatch.hedgeConversationHistory).toBe(true);
-    expect(merged.extensions.colonyPilot.preflight.enabled).toBe(true);
-    expect(merged.extensions.webSessionGateway.port).toBe(3100);
-    expect(merged.extensions.guardrailsCore.portConflict.suggestedTestPort).toBe(4173);
+    expect(merged.compaction.enabled).toBe(true);
+    expect(merged.piStack.custom.keep).toBe(true);
+    expect(merged.piStack.colonyPilot.preflight.enabled).toBe(true);
+    expect(merged.piStack.webSessionGateway.port).toBe(3100);
+    expect(merged.piStack.guardrailsCore.portConflict.suggestedTestPort).toBe(4173);
+  });
+
+  it("applyProjectBaselineSettings migra config legado em extensions objeto", () => {
+    const merged = applyProjectBaselineSettings({
+      extensions: {
+        colonyPilot: { preflight: { requiredExecutables: ["node"] } },
+      },
+    }) as any;
+
+    expect(Array.isArray(merged.extensions)).toBe(true);
+    expect(merged.piStack.colonyPilot.preflight.requiredExecutables).toEqual(["node", "git", "npm"]);
   });
 
   it("profile phase2 endurece baseline", () => {
@@ -132,13 +145,13 @@ describe("colony-pilot parsers", () => {
     expect(resolveBaselineProfile("other")).toBe("default");
 
     const phase2 = buildProjectBaselineSettings("phase2") as any;
-    expect(phase2.extensions.colonyPilot.preflight.requiredExecutables).toEqual(["node", "git", "npm", "npx"]);
-    expect(phase2.extensions.colonyPilot.preflight.requireColonyCapabilities).toEqual([
+    expect(phase2.piStack.colonyPilot.preflight.requiredExecutables).toEqual(["node", "git", "npm", "npx"]);
+    expect(phase2.piStack.colonyPilot.preflight.requireColonyCapabilities).toEqual([
       "colony",
       "colonyStop",
       "monitors",
       "sessionWeb",
     ]);
-    expect(phase2.extensions.guardrailsCore.portConflict.suggestedTestPort).toBe(4273);
+    expect(phase2.piStack.guardrailsCore.portConflict.suggestedTestPort).toBe(4273);
   });
 });

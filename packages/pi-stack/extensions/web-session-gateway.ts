@@ -121,7 +121,7 @@ function readSettingsConfig(cwd: string): Partial<GatewayConfig> {
     const p = join(cwd, ".pi", "settings.json");
     if (!existsSync(p)) return {};
     const json = JSON.parse(readFileSync(p, "utf8"));
-    const cfg = json?.extensions?.webSessionGateway ?? {};
+    const cfg = json?.piStack?.webSessionGateway ?? json?.extensions?.webSessionGateway ?? {};
     return {
       mode: resolveGatewayMode(cfg.mode),
       port: typeof cfg.port === "number" ? cfg.port : undefined,

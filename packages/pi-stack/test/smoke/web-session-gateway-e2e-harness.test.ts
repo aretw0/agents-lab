@@ -15,7 +15,7 @@ function tempCwdWithGatewayConfig(port: number) {
     join(cwd, ".pi", "settings.json"),
     JSON.stringify(
       {
-        extensions: {
+        piStack: {
           webSessionGateway: {
             mode: "local",
             port,

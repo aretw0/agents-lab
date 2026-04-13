@@ -275,7 +275,7 @@ function parseColonyPilotSettings(cwd: string): { preflight?: Partial<ColonyPilo
     const p = path.join(cwd, ".pi", "settings.json");
     if (!existsSync(p)) return {};
     const json = JSON.parse(readFileSync(p, "utf8"));
-    return json?.extensions?.colonyPilot ?? {};
+    return json?.piStack?.colonyPilot ?? json?.extensions?.colonyPilot ?? {};
   } catch {
     return {};
   }
@@ -372,7 +372,7 @@ export function resolveBaselineProfile(input?: string): BaselineProfile {
 
 export function buildProjectBaselineSettings(profile: BaselineProfile = "default") {
   const base = {
-    extensions: {
+    piStack: {
       colonyPilot: {
         preflight: {
           enabled: true,
@@ -397,7 +397,7 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
   if (profile === "default") return base;
 
   return deepMergeObjects(base, {
-    extensions: {
+    piStack: {
       colonyPilot: {
         preflight: {
           requiredExecutables: ["node", "git", "npm", "npx"],
@@ -430,7 +430,20 @@ export function deepMergeObjects<T extends Record<string, unknown>>(base: T, pat
 }
 
 export function applyProjectBaselineSettings(existing: unknown, profile: BaselineProfile = "default") {
-  const current = isPlainObject(existing) ? existing : {};
+  const current = isPlainObject(existing) ? { ...existing } : {};
+
+  // Migration safety: older versions wrote custom config under `extensions` (reserved by pi).
+  // If that happened, move known keys under `piStack` and restore `extensions` as array.
+  const ext = current.extensions;
+  if (isPlainObject(ext) && !Array.isArray(ext)) {
+    const migrated: Record<string, unknown> = isPlainObject(current.piStack) ? { ...(current.piStack as Record<string, unknown>) } : {};
+    for (const key of ["colonyPilot", "webSessionGateway", "guardrailsCore"]) {
+      if (key in ext) migrated[key] = (ext as Record<string, unknown>)[key];
+    }
+    current.piStack = migrated;
+    current.extensions = [];
+  }
+
   const baseline = buildProjectBaselineSettings(profile);
   return deepMergeObjects(current, baseline as Record<string, unknown>);
 }
