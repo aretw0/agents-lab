@@ -37,6 +37,7 @@ Mapear sobreposição entre pacotes da stack atual para decidir, por capability:
 
 Referência detalhada: [`web-overlap-scorecard.md`](./web-overlap-scorecard.md).
 Validação runtime: [`web-runtime-benchmark-run-2026-04-13.md`](./web-runtime-benchmark-run-2026-04-13.md).
+Validações A/B: [`web-routing-ab-run-2026-04-13.md`](./web-routing-ab-run-2026-04-13.md) e [`web-routing-ab-run-2026-04-13-novpn-cf.md`](./web-routing-ab-run-2026-04-13-novpn-cf.md).
 
 ---
 
@@ -90,7 +91,8 @@ Ou seja: há overlap funcional, mas com níveis diferentes de profundidade.
    - ✅ evidência runtime: B1/B2 entregaram resposta com investigação em código e permalinks.
 3. **Interactive site ops** (form/click/login):
    - padrão em `web-browser` (CDP).
-   - ⚠️ evidência runtime: C1/C2 também convergiram para `bash`, sem CDP explícito (policy de roteamento precisa ser mais rígida).
+   - ⚠️ run geral: C1/C2 convergiram para `bash` sem CDP explícito.
+   - ✅ recheck sem VPN (npmjs/Cloudflare): policy-strict melhorou para CDP-path 100% e menor latência média.
 
 ---
 
@@ -121,8 +123,9 @@ Ou seja: há overlap funcional, mas com níveis diferentes de profundidade.
    - ✅ policy de roteamento documentada nas skills first-party (`source-research` e `web-browser`):
      - intent interativo → `web-browser`
      - search/extract → `web_search`/`fetch_content`
-   - ✅ A/B executado (`web-routing-ab-run-2026-04-13`): melhorou determinismo (CDP-path 100%), mas com +32% de latência e sem ganho de sucesso.
-   - **decisão sóbria atual:** não ativar hard enforcement global; manter soft policy e avaliar hard por escopo.
+   - ✅ A/B inicial (`web-routing-ab-run-2026-04-13`): melhorou determinismo (CDP-path 100%), mas com +32% de latência e sem ganho de sucesso.
+   - ✅ A/B recheck sem VPN (`web-routing-ab-run-2026-04-13-novpn-cf`): em cenários npmjs/Cloudflare, policy-strict foi melhor (latência e determinismo), sem fallback e sem comandos proibidos.
+   - **decisão sóbria atual:** manter sem hard enforcement global; adotar hard por escopo para intents interativas sensíveis (ex.: npmjs/Cloudflare).
    - decidir se `web-search`/`web-fetch` da `@ifi/oh-pi-skills` ficam como fallback explícito,
    - ou se serão filtrados em `FILTER_PATCHES` para reduzir ambiguidade.
 
