@@ -21,7 +21,7 @@ const CLASSIFIERS = [
   "work-quality-classifier",
 ];
 
-const COPILOT_MODEL = "github-copilot/claude-sonnet-4.6";
+const COPILOT_MODEL = "github-copilot/claude-haiku-4.5";
 
 function detectDefaultProvider(cwd) {
   const candidates = [
@@ -54,7 +54,7 @@ function generateAgentYaml(classifierName, model) {
     `role: sensor`,
     `description: ${descriptions[monitorName] ?? `Classifier for ${monitorName}`}`,
     `model: ${model}`,
-    `thinking: "on"`,
+    `thinking: "off"`,
     `output:`,
     `  format: json`,
     `  schema: ../schemas/verdict.schema.json`,
@@ -145,7 +145,7 @@ describe("generateAgentYaml", () => {
     assert.ok(yaml.includes("name: hedge-classifier"));
     assert.ok(yaml.includes(`model: ${COPILOT_MODEL}`));
     assert.ok(yaml.includes("template: hedge/classify.md"));
-    assert.ok(yaml.includes('thinking: "on"'));
+    assert.ok(yaml.includes('thinking: "off"'));
   });
 
   it("generates correct YAML for commit-hygiene-classifier", () => {
@@ -155,8 +155,8 @@ describe("generateAgentYaml", () => {
   });
 
   it("uses provided model without modification", () => {
-    const yaml = generateAgentYaml("hedge-classifier", "anthropic/claude-sonnet-4-5");
-    assert.ok(yaml.includes("model: anthropic/claude-sonnet-4-5"));
+    const yaml = generateAgentYaml("hedge-classifier", "anthropic/claude-haiku-4-5");
+    assert.ok(yaml.includes("model: anthropic/claude-haiku-4-5"));
     assert.ok(!yaml.includes("github-copilot"));
   });
 });

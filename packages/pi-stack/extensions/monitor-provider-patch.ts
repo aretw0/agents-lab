@@ -30,7 +30,7 @@ const CLASSIFIERS = [
 ] as const;
 
 /** Model to use when patching for github-copilot */
-const COPILOT_MODEL = "github-copilot/claude-sonnet-4.6";
+const COPILOT_MODEL = "github-copilot/claude-haiku-4.5";
 
 /**
  * Reads defaultProvider from pi settings (project → global).
@@ -72,7 +72,7 @@ export function generateAgentYaml(classifierName: string, model: string): string
     `role: sensor`,
     `description: ${descriptions[monitorName] ?? `Classifier for ${monitorName}`}`,
     `model: ${model}`,
-    `thinking: "on"`,
+    `thinking: "off"`,
     `output:`,
     `  format: json`,
     `  schema: ../schemas/verdict.schema.json`,
