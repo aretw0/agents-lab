@@ -61,6 +61,24 @@ Curados e incluídos no meta-pacote enquanto equivalentes first-party não estã
 
 ---
 
+## Baseline operacional de projeto
+
+Para usuários do `@aretw0/pi-stack`, a baseline de governança pode ser aplicada direto pelo comando distribuído na stack:
+
+```text
+/colony-pilot baseline show default
+/colony-pilot baseline apply default
+
+# profile mais estrito (fase 2)
+/colony-pilot baseline show phase2
+/colony-pilot baseline apply phase2
+```
+
+Isso grava/mescla `./.pi/settings.json` do workspace com defaults de:
+- preflight hard-gate da colony
+- web session gateway local determinístico (`127.0.0.1:3100`)
+- guardrail de conflito de porta com sugestão de porta alternativa para testes
+
 ## Filosofia de Curadoria
 
 A stack evolui em dois sentidos:
