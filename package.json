@@ -19,7 +19,8 @@
     "pi:pilot:on": "node scripts/pi-pilot-profile.mjs on",
     "pi:pilot:off": "node scripts/pi-pilot-profile.mjs off",
     "pi:pilot:on:project": "node scripts/pi-pilot-profile.mjs on --project",
-    "pi:pilot:off:project": "node scripts/pi-pilot-profile.mjs off --project"
+    "pi:pilot:off:project": "node scripts/pi-pilot-profile.mjs off --project",
+    "colony:inspect": "node scripts/colony-runtime-inspect.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
