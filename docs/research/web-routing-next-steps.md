@@ -18,6 +18,10 @@ Checklist vivo para não deixar backlog preso só na conversa.
 - [x] Implementada policy de **hard por escopo** nas skills first-party (`source-research`, `web-browser`):
   - trigger explícito: intent interativo + domínio sensível (ex.: `npmjs.com`) ou relato de Cloudflare
   - fallback explícito apenas após evidência de falha CDP
+- [x] Implementada **Etapa A determinística** no runtime (`packages/pi-stack/extensions/web-routing-guard.ts`):
+  - pre-router por heurística (intent interativo + domínio sensível/hint de Cloudflare)
+  - bloqueio hard de comandos `bash` proibidos (`curl`, `wget`, `python requests`, `r.jina.ai`, `npm view`, `registry.npmjs.org`) em modo estrito
+- [x] Teste de regressão dos cenários sensíveis (`packages/pi-stack/test/web-routing-guard.test.mjs`)
 - [ ] Validar em run dedicado pós-policy (A/B + taskset cloudflare-recheck) para confirmar aderência operacional
 
 ## Próximos experimentos
