@@ -13,6 +13,9 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 
 type MonitorMode = "on" | "off" | "unknown";
 
@@ -128,6 +131,113 @@ export function buildRuntimeStopSequence(caps: PilotCapabilities, options?: { re
   const out = ["/colony-stop all", webStop];
   if (options?.restoreMonitors) out.push("/monitors on");
   return out;
+}
+
+export function buildAntColonyMirrorCandidates(cwd: string): string[] {
+  const root = path.join(homedir(), ".pi", "agent", "ant-colony");
+  const normalized = path.resolve(cwd).replace(/\\/g, "/");
+  const m = normalized.match(/^([A-Za-z]):\/(.*)$/);
+
+  if (m) {
+    const drive = m[1].toLowerCase();
+    const rest = m[2];
+    return [
+      path.join(root, drive, rest),
+      path.join(root, "root", drive, rest),
+    ];
+  }
+
+  const unix = normalized.startsWith("/") ? normalized.slice(1) : normalized;
+  return [
+    path.join(root, unix),
+    path.join(root, "root", unix),
+  ];
+}
+
+function inspectAntColonyRuntime(cwd: string) {
+  const roots = buildAntColonyMirrorCandidates(cwd).filter((p) => existsSync(p));
+
+  const mirrors = roots.map((rootPath) => {
+    const coloniesDir = path.join(rootPath, "colonies");
+    const worktreesDir = path.join(rootPath, "worktrees");
+
+    const colonies: Array<{ id: string; status: string; updatedAt: number; goal?: string; statePath: string }> = [];
+    if (existsSync(coloniesDir)) {
+      for (const d of readdirSync(coloniesDir, { withFileTypes: true })) {
+        if (!d.isDirectory()) continue;
+        const statePath = path.join(coloniesDir, d.name, "state.json");
+        if (!existsSync(statePath)) continue;
+        try {
+          const json = JSON.parse(readFileSync(statePath, "utf8"));
+          const st = statSync(statePath);
+          colonies.push({
+            id: json.id ?? d.name,
+            status: json.status ?? "unknown",
+            goal: typeof json.goal === "string" ? json.goal : undefined,
+            updatedAt: st.mtimeMs,
+            statePath,
+          });
+        } catch {
+          // ignore malformed state
+        }
+      }
+    }
+
+    colonies.sort((a, b) => b.updatedAt - a.updatedAt);
+
+    const worktrees: Array<{ name: string; path: string; updatedAt: number }> = [];
+    if (existsSync(worktreesDir)) {
+      for (const d of readdirSync(worktreesDir, { withFileTypes: true })) {
+        if (!d.isDirectory()) continue;
+        const full = path.join(worktreesDir, d.name);
+        if (!existsSync(path.join(full, ".git"))) continue;
+        worktrees.push({ name: d.name, path: full, updatedAt: statSync(full).mtimeMs });
+      }
+    }
+
+    worktrees.sort((a, b) => b.updatedAt - a.updatedAt);
+
+    return {
+      root: rootPath,
+      colonies: colonies.slice(0, 8),
+      worktrees: worktrees.slice(0, 8),
+    };
+  });
+
+  return { cwd: path.resolve(cwd), mirrors };
+}
+
+function formatArtifactsReport(data: ReturnType<typeof inspectAntColonyRuntime>): string {
+  const out: string[] = [];
+  out.push("colony-pilot artifacts");
+  out.push(`cwd: ${data.cwd}`);
+
+  if (data.mirrors.length === 0) {
+    out.push("No ant-colony workspace mirror found for this cwd.");
+    return out.join("\n");
+  }
+
+  for (const m of data.mirrors) {
+    out.push("");
+    out.push(`mirror: ${m.root}`);
+
+    out.push("  colonies:");
+    if (m.colonies.length === 0) out.push("    (none)");
+    for (const c of m.colonies) {
+      out.push(`    - ${c.id} [${c.status}] ${new Date(c.updatedAt).toISOString()}`);
+      out.push(`      state: ${c.statePath}`);
+      if (c.goal) out.push(`      goal: ${c.goal.slice(0, 100)}`);
+    }
+
+    out.push("  worktrees:");
+    if (m.worktrees.length === 0) out.push("    (none)");
+    for (const w of m.worktrees) {
+      out.push(`    - ${w.name} ${new Date(w.updatedAt).toISOString()}`);
+      out.push(`      path: ${w.path}`);
+    }
+  }
+
+  return out.join("\n");
 }
 
 export function missingCapabilities(
@@ -410,6 +520,20 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "colony_pilot_artifacts",
+    label: "Colony Pilot Artifacts",
+    description: "Inspect colony runtime artifacts (workspace mirrors, state files, worktrees).",
+    parameters: Type.Object({}),
+    async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+      const data = inspectAntColonyRuntime(ctx.cwd);
+      return {
+        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        details: data,
+      };
+    },
+  });
+
   pi.registerCommand("colony-pilot", {
     description: "Orquestra pilot de colony + web inspect + profile de monitores (run/status/stop/web).",
     handler: async (args, ctx) => {
@@ -432,6 +556,7 @@ export default function (pi: ExtensionAPI) {
             "  tui                           Mostra como entrar/retomar sessão no TUI",
             "  status                        Snapshot consolidado",
             "  check                         Diagnóstico de capacidades carregadas (/monitors,/remote,/colony)",
+            "  artifacts                     Mostra onde colony guarda states/worktrees para recovery",
             "",
             "Nota: o pi não expõe API confiável para uma extensão invocar slash commands de outra",
             "extensão no mesmo runtime. O pilot prepara e guia execução manual assistida.",
@@ -489,6 +614,12 @@ export default function (pi: ExtensionAPI) {
           `  colony-stop=${caps.colonyStop ? "ok" : "missing"}`,
         ];
         ctx.ui.notify(lines.join("\n"), "info");
+        return;
+      }
+
+      if (cmd === "artifacts") {
+        const data = inspectAntColonyRuntime(ctx.cwd);
+        ctx.ui.notify(formatArtifactsReport(data), "info");
         return;
       }
 

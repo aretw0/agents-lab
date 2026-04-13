@@ -10,6 +10,7 @@ import {
   missingCapabilities,
   buildRuntimeRunSequence,
   buildRuntimeStopSequence,
+  buildAntColonyMirrorCandidates,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -84,5 +85,12 @@ describe("colony-pilot parsers", () => {
       "/session-web stop",
       "/monitors on",
     ]);
+  });
+
+  it("buildAntColonyMirrorCandidates gera caminhos esperados no Windows", () => {
+    const candidates = buildAntColonyMirrorCandidates("C:/Users/alice/work/repo");
+    expect(candidates.length).toBe(2);
+    expect(candidates[0].replace(/\\/g, "/")).toContain("/.pi/agent/ant-colony/c/Users/alice/work/repo");
+    expect(candidates[1].replace(/\\/g, "/")).toContain("/.pi/agent/ant-colony/root/c/Users/alice/work/repo");
   });
 });
