@@ -55,6 +55,13 @@
       "rationale": "Goals são soft e não garantem comportamento determinístico. Controles hard reduzem lacunas entre 'reportado' e 'materializado' no branch principal.",
       "status": "decided",
       "context": "Após c1/c2 com reports ricos e baixa materialização automática no main."
+    },
+    {
+      "id": "DEC-BUD-009",
+      "decision": "Separar semântica de coordenação (clock, eventos, gates) do mecanismo de execução (local swarm, CI runner, PR workflow), adotando adapters por contexto.",
+      "rationale": "Garante controle total ao usuário independentemente de onde o pi roda ou como a execução é disparada, evitando acoplamento ao runtime local.",
+      "status": "decided",
+      "context": "Diretriz para suportar GitHub Actions/issues/PR e futuras interfaces (ex.: companion PWA com SQLite)."
     }
   ]
 }

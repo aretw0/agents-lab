@@ -98,6 +98,19 @@
         "Política pode exigir inventário de arquivos alterados e comandos de validação antes de marcar execução como entregue.",
         "Quando política hard falha, execução vira 'candidate/recovery required' com artefato preservado."
       ]
+    },
+    {
+      "id": "REQ-BUD-009",
+      "description": "O fluxo de coordenação deve ser runner-agnostic e interface-agnostic: o mesmo contrato de trabalho precisa operar em TUI/Web/local e também em automações (ex.: GitHub Actions/CI) com rastreio por issues/PR quando aplicável.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "acceptance_criteria": [
+        "Eventos de execução e estados de task podem ser emitidos/consumidos fora da sessão interativa local.",
+        "Existe mapeamento explícito entre board canônico e superfícies de issue/PR para CI runners.",
+        "Gates de governança (budget, evidência, revisão humana) preservados em qualquer runner/interface."
+      ]
     }
   ]
 }
