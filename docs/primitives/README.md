@@ -55,6 +55,7 @@ Como medir e garantir a qualidade de agentes.
 | Primitiva | Categoria | Descrição | Status |
 |-----------|-----------|-----------|--------|
 | [budget-envelope.md](./budget-envelope.md) | Avaliação / Coordenação / Planejamento | Contrato de custo por execução (goal + maxCost + evidência + revisão humana) | Em evolução |
+| [continuity-abstraction.md](./continuity-abstraction.md) | Memória / Coordenação / Governança | Continuidade desacoplada de backend/runner com contrato canônico de estado/eventos/gates | Em evolução |
 | _(em breve)_ | Memória | Context window manager | Planejado |
 | _(em breve)_ | Ferramentas | File system tools para Pi | Planejado |
 | _(em breve)_ | Planejamento | ReAct loop para pi-agent-core | Planejado |
