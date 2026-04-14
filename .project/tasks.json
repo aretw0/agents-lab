@@ -198,7 +198,7 @@
       "id": "colony-c1",
       "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock.\n\nContexto já pronto:\n- .project agora é versionado no git e é o board oficial.\n- Budget policy e projectTaskSync do colony-pilot já existem.\n\nObjetivos desta execução:\n1) Consolidar Swarm Launch Policy v1 (manual único)\n   - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana).\n   - Unificar links/referências para evitar duplicação/confusão.\n\n2) Fortalecer clock unificado em runtime\n   - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível).\n   - Manter sem auto-close; apenas status candidato para revisão humana.\n\n3) Aprendizado contínuo humano+agêntico (registro híbrido)\n   - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável).\n   - Produzir evidência executável (testes/comandos) para auditoria.\n\nCritérios de qualidade:\n- Mudanças incrementais, reversíveis e com testes.\n- Sem mexer em credenciais/sessões.\n- Não fechar tasks automaticamente.\n\nEntregáveis esperados:\n- Código + testes + docs atualizados.\n- Resumo final com riscos remanescentes, decisões e próximos passos.",
       "status": "in-progress",
-      "notes": "[2026-04-14T20:19:13.352Z] colony c1 phase=launched\n[2026-04-14T20:19:13.373Z] colony c1 phase=launched\n[2026-04-14T20:28:27.196Z] colony c1|colony-mnz2eg46-hw9a4 phase=complete (candidate only, aguardando revisão humana)\n[2026-04-14T21:38:32.019Z] colony c1 phase=launched\n[2026-04-14T21:38:32.034Z] colony c1 phase=launched"
+      "notes": "[2026-04-14T20:19:13.352Z] colony c1 phase=launched\n[2026-04-14T20:19:13.373Z] colony c1 phase=launched\n[2026-04-14T20:28:27.196Z] colony c1|colony-mnz2eg46-hw9a4 phase=complete (candidate only, aguardando revisão humana)\n[2026-04-14T21:38:32.019Z] colony c1 phase=launched\n[2026-04-14T21:38:32.034Z] colony c1 phase=launched\n[2026-04-14T21:58:10.079Z] colony c1 phase=launched\n[2026-04-14T21:58:10.107Z] colony c1 phase=launched\n[2026-04-14T22:07:17.872Z] colony c1 phase=completed (candidate only, aguardando revisão humana)"
     },
     {
       "id": "TASK-BUD-012",
@@ -274,7 +274,7 @@
     {
       "id": "TASK-BUD-015",
       "description": "[P1] Especificar adapter de execução para runners externos (GitHub Actions/CI) com sync issue/PR ↔ clock canônico.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-012",
         "TASK-BUD-014"
@@ -289,7 +289,7 @@
         "Mapeamento canônico para issue/PR state documentado com riscos/gaps.",
         "Proposta de implementação incremental sem acoplamento a um único provedor."
       ],
-      "notes": "Derivado de REQ-BUD-009 e DEC-BUD-009."
+      "notes": "Iniciando especificação adapter runner externo (CI/issue/PR) em paralelo ao hardening de delivery policy hard para reduzir acoplamento a runtime local."
     },
     {
       "id": "TASK-BUD-016",
@@ -351,6 +351,25 @@
         "Diretrizes de migração incremental do agents-lab para Refarm registradas."
       ],
       "notes": "Foco no próximo passo do usuário (daily driver Refarm)."
+    },
+    {
+      "id": "TASK-BUD-019",
+      "description": "[P1] Corrigir geração de task IDs inválidos a partir de sinais de colônia com placeholders/template literals (ex.: `colony ${colonyIdentity(colony)}`).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-010",
+        "TASK-BUD-014"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "IDs de task derivados de sinais são normalizados e rejeitam placeholders `${...}`.",
+        "Nenhuma task fantasma é criada no board a partir de IDs não resolvidos.",
+        "Teste cobre parsing/sanitize de IDs de sinal malformados."
+      ],
+      "notes": "Detectado em runtime: item bloqueado `colony-colonyidentity-colony` criado por sinal inválido."
     }
   ]
 }
