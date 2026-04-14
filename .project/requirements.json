@@ -111,6 +111,19 @@
         "Existe mapeamento explícito entre board canônico e superfícies de issue/PR para CI runners.",
         "Gates de governança (budget, evidência, revisão humana) preservados em qualquer runner/interface."
       ]
+    },
+    {
+      "id": "REQ-BUD-010",
+      "description": "A direção macro deve ser executável por agentes de forma autônoma: o sistema precisa permitir priorização e execução contínua do backlog sem dependência de instruções repetidas do humano, preservando gates de segurança e revisão final.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe charter operacional com north-star e critérios de priorização consumíveis por agentes.",
+        "Colônias podem selecionar próxima tarefa elegível do backlog dentro de budget e políticas hard.",
+        "Revisão humana permanece gate final para fechamento estratégico."
+      ]
     }
   ]
 }

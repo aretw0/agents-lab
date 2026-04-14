@@ -230,7 +230,7 @@
     {
       "id": "TASK-BUD-013",
       "description": "[P1] Tornar entrega de colônia auditável no branch principal (injeção confiável de diffs + inventário obrigatório de arquivos alterados).",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-010"
       ],
@@ -244,7 +244,7 @@
         "Inventário final lista arquivos alterados + comandos de validação executados.",
         "Falhas de injeção/worktree geram tarefa de recuperação automática sem perder patch proposto."
       ],
-      "notes": "Criada após c1/c2 reportarem entregas extensas sem materialização integral no branch principal."
+      "notes": "Criada após c1/c2 reportarem entregas extensas sem materialização integral no branch principal. Em execução junto da delivery policy hard para eliminar lacuna report->apply."
     },
     {
       "id": "colony-colonyidentity-colony",
@@ -290,6 +290,67 @@
         "Proposta de implementação incremental sem acoplamento a um único provedor."
       ],
       "notes": "Derivado de REQ-BUD-009 e DEC-BUD-009."
+    },
+    {
+      "id": "TASK-BUD-016",
+      "description": "[P0] Formalizar Agent Driver Charter (north-star + prioridade + limites) como contrato operacional para execução autônoma contínua.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-014"
+      ],
+      "files": [
+        "docs/guides/budget-governance.md",
+        "docs/research/colony-project-task-bridge.md",
+        ".project/project.json"
+      ],
+      "acceptance_criteria": [
+        "Charter define objetivo macro, critérios de priorização e stop conditions.",
+        "Agentes conseguem inferir próxima tarefa elegível sem instrução ad hoc do humano.",
+        "Contrato mantém budget envelope, evidência obrigatória e no-auto-close."
+      ],
+      "notes": "Derivado de REQ-BUD-010 e DEC-BUD-010."
+    },
+    {
+      "id": "TASK-BUD-017",
+      "description": "[P1] Implementar loop de execução autônoma supervisionada (scheduler/backlog pull) para colônias dentro de políticas hard.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-016",
+        "TASK-BUD-014",
+        "TASK-BUD-015"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        ".project/tasks.json",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Execução seleciona próxima task elegível por prioridade/dependências.",
+        "Cada run respeita budget/delivery policy e registra evidência mínima.",
+        "Falhas entram em recovery pipeline sem perder artefatos."
+      ],
+      "notes": "Objetivo: reduzir necessidade de micro-prompting humano mantendo aprovação final."
+    },
+    {
+      "id": "TASK-BUD-018",
+      "description": "[P1] Definir pacote de portabilidade para Refarm (SQLite/browser) e outros trackers via adapter canônico de task/event.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-012",
+        "TASK-BUD-015",
+        "TASK-BUD-016"
+      ],
+      "files": [
+        "docs/research/colony-project-task-bridge.md",
+        "docs/primitives/budget-envelope.md",
+        ".project/requirements.json"
+      ],
+      "acceptance_criteria": [
+        "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+        "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+        "Diretrizes de migração incremental do agents-lab para Refarm registradas."
+      ],
+      "notes": "Foco no próximo passo do usuário (daily driver Refarm)."
     }
   ]
 }

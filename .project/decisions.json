@@ -62,6 +62,13 @@
       "rationale": "Garante controle total ao usuário independentemente de onde o pi roda ou como a execução é disparada, evitando acoplamento ao runtime local.",
       "status": "decided",
       "context": "Diretriz para suportar GitHub Actions/issues/PR e futuras interfaces (ex.: companion PWA com SQLite)."
+    },
+    {
+      "id": "DEC-BUD-010",
+      "decision": "Operar em modo de direção autônoma supervisionada: agentes escolhem e executam trabalho a partir do backlog/charter macro; humano atua como aprovador final e guardião dos limites de governança.",
+      "rationale": "Remove gargalo de micro-direcionamento humano sem perder soberania, rastreabilidade e controle de risco.",
+      "status": "decided",
+      "context": "Objetivo explícito do usuário de maximizar potencial do agents-lab e preparar migração de operação para Refarm."
     }
   ]
 }

@@ -50,6 +50,15 @@
         "Script de paridade disponível e documentado.",
         "Guides distinguem claramente superfícies user-like vs lab local."
       ]
+    },
+    {
+      "id": "goal-agent-driver-max",
+      "description": "Maximizar o agents-lab como driver de agentes soberano e portátil, com coordenação garantida em múltiplos runners/interfaces/backends.",
+      "success_criteria": [
+        "Contrato canônico de coordenação (task/event/gates) operando local e externo.",
+        "Fluxo de execução autônoma supervisionada reduz micro-direcionamento humano.",
+        "Prontidão de migração para Refarm/SQLite documentada e validada por adapters."
+      ]
     }
   ],
   "status": "planning",
