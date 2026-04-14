@@ -294,7 +294,7 @@
     {
       "id": "TASK-BUD-016",
       "description": "[P0] Formalizar Agent Driver Charter (north-star + prioridade + limites) como contrato operacional para execução autônoma contínua.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-014"
       ],
@@ -308,7 +308,7 @@
         "Agentes conseguem inferir próxima tarefa elegível sem instrução ad hoc do humano.",
         "Contrato mantém budget envelope, evidência obrigatória e no-auto-close."
       ],
-      "notes": "Derivado de REQ-BUD-010 e DEC-BUD-010."
+      "notes": "Agent Driver Charter em formalização; primitiva de continuidade backend/runner-agnostic documentada em docs/primitives/continuity-abstraction.md para reduzir dependência de instruções repetidas e suportar múltiplos backends."
     },
     {
       "id": "TASK-BUD-017",
