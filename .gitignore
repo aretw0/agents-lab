@@ -141,8 +141,9 @@ vite.config.ts.timestamp-*
 # Pi workspace runtime artifacts
 .pi-lens/
 .pi/monitors/
-.project/
 
-# Pi project settings is versionable
+# Pi project settings/state versionable (single-board clock)
 !.pi/settings.json
+!.project/
+!.project/**/*.json
 packages/web-skills/skills/web-browser/scripts/package-lock.json

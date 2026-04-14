@@ -1,0 +1,46 @@
+{
+  "decisions": [
+    {
+      "id": "DEC-BUD-001",
+      "decision": "Separar ambiente de laboratório e ambiente user-like, usando checagem explícita de paridade para evitar falso gap funcional.",
+      "rationale": "O laboratório frequentemente roda subset de pacotes por isolamento. Sem checagem, conclusões sobre consumo/quota ficam enviesadas.",
+      "status": "decided",
+      "context": "Iniciativa de visibilidade de consumo e governança de custos."
+    },
+    {
+      "id": "DEC-BUD-002",
+      "decision": "Tratar observabilidade de custo como composição de superfícies: /usage (live provider), /session-breakdown (histórico) e /quota-visibility (auditoria exportável).",
+      "rationale": "Cada superfície cobre uma dimensão diferente de verdade operacional. Combinação reduz cegueira e melhora contestação com fornecedores.",
+      "status": "decided",
+      "context": "Definição de stack de observabilidade para custo/quota."
+    },
+    {
+      "id": "DEC-BUD-003",
+      "decision": "Adotar budget policy para ant_colony no colony-pilot com baseline configurada para exigir/injetar maxCost e aplicar hard cap.",
+      "rationale": "Swarm sem limite explícito é risco operacional e financeiro. Policy configurável permite controle progressivo sem lock-in imediato.",
+      "status": "decided",
+      "context": "Controle de custo para execuções de colônia/swarms."
+    },
+    {
+      "id": "DEC-BUD-004",
+      "decision": "Não fechar automaticamente tasks estratégicas de budget sem revisão humana explícita.",
+      "rationale": "Evita falso positivo de conclusão e mantém governança com accountability para mudanças que impactam custo.",
+      "status": "decided",
+      "context": "Pedido explícito do usuário para confirmar tasks criadas/fechadas."
+    },
+    {
+      "id": "DEC-BUD-005",
+      "decision": "Considerar bridge entre runtime da colônia e .project/tasks como evolução incremental, começando por pesquisa e protótipo opt-in.",
+      "rationale": "A colônia mantém task system próprio no runtime; integração direta com .project requer cuidado para não acoplar indevidamente extensões distintas.",
+      "status": "tentative",
+      "context": "Planejamento de integração futura entre oh-pi-ant-colony e pi-project."
+    },
+    {
+      "id": "DEC-BUD-006",
+      "decision": "Adotar .project/tasks como relógio oficial de trabalho macro e tratar estado de swarm como execução transitória sincronizada nesse board.",
+      "rationale": "Evita múltiplos sistemas concorrentes de tracking e preserva contexto coletivo entre agentes e sessões, mantendo humano no centro das decisões de fechamento.",
+      "status": "decided",
+      "context": "Diretriz de governança pedida pelo usuário para centralização de status e contexto."
+    }
+  ]
+}

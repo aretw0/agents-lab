@@ -1,0 +1,77 @@
+{
+  "requirements": [
+    {
+      "id": "REQ-BUD-001",
+      "description": "A iniciativa de custo deve validar paridade entre ambiente de laboratório e ambiente user-like antes de concluir ausência/presença de funcionalidades.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe comando/script reproduzível para relatório de paridade por escopo.",
+        "Documentação oficial orienta uso da checagem de paridade em estudos de consumo."
+      ]
+    },
+    {
+      "id": "REQ-BUD-002",
+      "description": "Execuções de swarm/colônia em contexto de laboratório devem operar com budget envelope explícito (maxCost) ou política equivalente de injeção/cap.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Política de budget para ant_colony existe e é configurável.",
+        "Baseline do projeto inclui defaults de budget policy para colônia."
+      ]
+    },
+    {
+      "id": "REQ-BUD-003",
+      "description": "Visibilidade de consumo deve combinar superfícies live de provider e auditoria local independente.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "must",
+      "source": "analysis",
+      "acceptance_criteria": [
+        "Playbook combina /usage, /session-breakdown e /quota-visibility.",
+        "Export de evidência local permanece disponível para contestação com fornecedor."
+      ]
+    },
+    {
+      "id": "REQ-BUD-004",
+      "description": "A gestão de tasks estratégicas de budget deve manter human-in-the-loop para fechamento e mudanças estruturais.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Tasks deste fluxo não são fechadas automaticamente.",
+        "Existe etapa explícita de revisão com o usuário antes de fechar tasks criadas."
+      ]
+    },
+    {
+      "id": "REQ-BUD-005",
+      "description": "A arquitetura deve mapear limite atual entre runtime da colônia e .project/tasks, com plano de bridge progressiva.",
+      "type": "non-functional",
+      "status": "proposed",
+      "priority": "should",
+      "source": "analysis",
+      "acceptance_criteria": [
+        "Limite atual documentado em guia/decision.",
+        "Backlog contém tasks para bridge start/progress/end sem acoplamento frágil."
+      ]
+    },
+    {
+      "id": "REQ-BUD-006",
+      "description": "O rastreamento oficial de trabalho deve convergir para um único board estável (.project/tasks), com colônia/swarms publicando progresso como eventos sincronizados em vez de manter estado final apenas em sessões efêmeras.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe política explícita de single-source-of-truth para tasks macro em .project/tasks.",
+        "Bridge colony→project atualiza lifecycle (start/progress/end) sem fechamento automático.",
+        "Representações TUI/WEB refletem esse board consolidado."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "name": "agents-lab",
+  "description": "Laboratório de pesquisa e engenharia de primitivas para ecossistema pi, com foco em operação segura, observabilidade e governança de custos.",
+  "core_value": "Transformar experimentos de agentes em primitivas reutilizáveis com operação previsível e evidência auditável.",
+  "vision": "Permitir operação de agentes (incluindo swarms) com governança explícita de custo, paridade de ambiente e isolamento entre laboratório e usuário final.",
+  "target_users": [
+    "Maintainers do agents-lab",
+    "Usuários da stack @aretw0/pi-stack",
+    "Equipes que precisam justificar orçamento de automação com LLM"
+  ],
+  "constraints": [
+    {
+      "type": "operational",
+      "description": "Evitar falso gap funcional causado por ambiente de laboratório diferente da stack completa dos usuários."
+    },
+    {
+      "type": "cost",
+      "description": "Executões de swarm devem ter budget envelope explícito e rastreável."
+    },
+    {
+      "type": "governance",
+      "description": "Fechamento de tasks estratégicas requer revisão humana explícita."
+    }
+  ],
+  "scope_boundaries": {
+    "in": [
+      "Paridade de ambiente (lab vs user-like)",
+      "Observabilidade de consumo/quota multi-superfície",
+      "Governança de budget para colônia/swarms",
+      "Integração planejada entre .project tasks e runtime da colônia"
+    ],
+    "out": [
+      "Substituição imediata de todas extensões third-party",
+      "Automação de fechamento de tasks sem validação humana"
+    ]
+  },
+  "goals": [
+    {
+      "id": "goal-budget-envelope",
+      "description": "Estabelecer budget envelope como contrato padrão para execuções de agentes.",
+      "success_criteria": [
+        "Toda execução de swarm relevante possui maxCost explícito ou política de injeção com hard cap.",
+        "Há evidência exportável de consumo por execução para auditoria/contestação."
+      ]
+    },
+    {
+      "id": "goal-parity-isolation",
+      "description": "Garantir paridade observável entre ambiente de laboratório e stack dos usuários sem acoplamento destrutivo.",
+      "success_criteria": [
+        "Script de paridade disponível e documentado.",
+        "Guides distinguem claramente superfícies user-like vs lab local."
+      ]
+    }
+  ],
+  "status": "planning",
+  "repository": "https://github.com/aretw0/agents-lab",
+  "stack": [
+    "pi",
+    "@aretw0/pi-stack",
+    "@ifi/oh-pi-ant-colony",
+    "@ifi/oh-pi-extensions",
+    "mitsupi",
+    "@davidorex/pi-project-workflows"
+  ]
+}

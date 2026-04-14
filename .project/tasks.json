@@ -1,0 +1,198 @@
+{
+  "tasks": [
+    {
+      "id": "TASK-BUD-001",
+      "description": "[P0] Implementar diagnóstico de paridade (lab vs user-like) com relatório de superfícies de consumo disponíveis.",
+      "status": "completed",
+      "files": [
+        "scripts/pi-parity.mjs",
+        "package.json",
+        "docs/guides/consumption-visibility-surfaces.md",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "Comando pi:parity identifica pacotes esperados ausentes por escopo/profile.",
+        "Comando pi:parity:project valida baseline first-party do laboratório.",
+        "Guia de consumo referencia a checagem de paridade."
+      ],
+      "notes": "Relacionado a REQ-BUD-001. Candidato a fechamento após revisão humana.",
+      "verification": "VER-BUD-001"
+    },
+    {
+      "id": "TASK-BUD-002",
+      "description": "[P0] Introduzir budget policy para ant_colony no colony-pilot (maxCost obrigatório/injetado + hard cap).",
+      "status": "completed",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/README.md",
+        "docs/guides/colony-provider-model-governance.md"
+      ],
+      "acceptance_criteria": [
+        "colony-pilot avalia budget policy em tool_call ant_colony.",
+        "Baseline default/phase2 inclui budgetPolicy.",
+        "Status/check exibem avaliação de budget policy."
+      ],
+      "notes": "Relacionado a REQ-BUD-002 e REQ-BUD-003. Candidato a fechamento após revisão humana.",
+      "verification": "VER-BUD-002"
+    },
+    {
+      "id": "TASK-BUD-003",
+      "description": "[P0] Documentar primitiva Budget Envelope e playbook operacional de governança de custos.",
+      "status": "completed",
+      "files": [
+        "docs/primitives/budget-envelope.md",
+        "docs/primitives/README.md",
+        "docs/guides/budget-governance.md",
+        "docs/guides/README.md"
+      ],
+      "acceptance_criteria": [
+        "Primitiva Budget Envelope descrita com invariantes e limites atuais.",
+        "Guia de governança define workflow com human-in-the-loop para fechamento.",
+        "Playbook integra /usage + /session-breakdown + /quota-visibility."
+      ],
+      "notes": "Relacionado a REQ-BUD-003 e REQ-BUD-004. Candidato a fechamento após revisão humana.",
+      "verification": "VER-BUD-003"
+    },
+    {
+      "id": "TASK-BUD-004",
+      "description": "[P1] Investigar e documentar bridge entre lifecycle da colônia e .project/tasks (start/progress/end).",
+      "status": "completed",
+      "files": [
+        "docs/research/colony-project-task-bridge.md"
+      ],
+      "acceptance_criteria": [
+        "Evidenciar limite atual (colony não lê/escreve tasks de .project nativamente).",
+        "Propor opções de integração com baixo acoplamento e rollback seguro."
+      ],
+      "notes": "Relacionado a REQ-BUD-005. Pesquisa inicial documentada em docs/research/colony-project-task-bridge.md. Candidato a fechamento após revisão humana.",
+      "verification": "VER-BUD-004"
+    },
+    {
+      "id": "TASK-BUD-005",
+      "description": "[P1] Implementar adapter inicial opcional para sincronizar eventos de colônia com tasks de projeto.",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-BUD-004"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts"
+      ],
+      "acceptance_criteria": [
+        "Criar tasks de execução quando sessão de colônia iniciar (opt-in).",
+        "Marcar status final apenas em modo candidato, com confirmação humana para fechamento."
+      ],
+      "notes": "Relacionado a REQ-BUD-005 e REQ-BUD-004. Adapter opt-in iniciado no colony-pilot com projectTaskSync (eventos de COLONY_SIGNAL -> .project/tasks, sem fechamento automático). Aguardando revisão humana."
+    },
+    {
+      "id": "TASK-BUD-006",
+      "description": "[P0] Definir gate explícito de revisão antes de fechar tasks estratégicas de budget.",
+      "status": "completed",
+      "files": [
+        "docs/guides/budget-governance.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Fluxo de revisão explícito registrado em documentação.",
+        "Sem automação de fechamento sem confirmação do usuário."
+      ],
+      "notes": "Relacionado a REQ-BUD-004. Gate de revisão documentado em docs/guides/budget-governance.md. Candidato a fechamento após revisão humana.",
+      "verification": "VER-BUD-006"
+    },
+    {
+      "id": "TASK-BUD-007",
+      "description": "[P1] Definir e implementar política de single-board clock: .project/tasks como fonte oficial macro, com sync de eventos da colônia (start/progress/end) em modo opt-in.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-005"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "docs/guides/budget-governance.md",
+        "docs/research/colony-project-task-bridge.md"
+      ],
+      "acceptance_criteria": [
+        "Eventos essenciais de execução de colônia criam/atualizam registros de task no board.",
+        "Estado efêmero da colônia não substitui o board oficial.",
+        "Fechamento continua human-in-the-loop."
+      ],
+      "notes": "Relacionado a REQ-BUD-006."
+    },
+    {
+      "id": "TASK-BUD-008",
+      "description": "[P2] Projetar projeções de status de budget/task para superfícies TUI e WEB usando dados consolidados de .project + consumo.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-007"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/web-session-gateway.ts",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Status consolidado (tasks + consumo + janela provider) visível sem depender de sessão específica.",
+        "Visão web local e TUI compartilham semântica de status do board.",
+        "Sem duplicar fonte de verdade de task."
+      ],
+      "notes": "Relacionado a REQ-BUD-006 e REQ-BUD-003."
+    },
+    {
+      "id": "TASK-BUD-009",
+      "description": "[P0] Consolidar Swarm Launch Policy v1 como manual único de operação (single-board clock + budget + evidência + revisão humana).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-005",
+        "TASK-BUD-007"
+      ],
+      "files": [
+        "docs/guides/budget-governance.md",
+        "docs/guides/consumption-visibility-surfaces.md",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "Existe checklist operacional único para disparo de swarm com budget envelope.",
+        "Manual diferencia estado versionado (board oficial) vs estado efêmero de execução.",
+        "Referências duplicadas/confusas foram consolidadas."
+      ],
+      "notes": "Derivado de REQ-BUD-006."
+    },
+    {
+      "id": "TASK-BUD-010",
+      "description": "[P0] Implementar reconciliador single-writer para sync colony->.project/tasks com segurança em worktrees e merges.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-005",
+        "TASK-BUD-007"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Atualizações concorrentes preservam consistência do board sem race evidente.",
+        "Mecanismo de lock/fila/reconciliação é determinístico e reversível.",
+        "Testes cobrem fluxo de conflito básico e resultado esperado."
+      ],
+      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree."
+    },
+    {
+      "id": "TASK-BUD-011",
+      "description": "[P0] Definir política de versionamento de .project no git (incluir board oficial e excluir artefatos efêmeros).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-007"
+      ],
+      "files": [
+        ".gitignore",
+        "docs/guides/budget-governance.md",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        ".project deixa de ser ignorado quando for fonte oficial compartilhada.",
+        "Artefatos efêmeros continuam claramente excluídos.",
+        "Guia documenta migração e impacto para colaboração entre agentes."
+      ],
+      "notes": "Alinha soberania de contexto com single-board clock."
+    }
+  ]
+}

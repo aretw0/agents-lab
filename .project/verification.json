@@ -1,0 +1,49 @@
+{
+  "verifications": [
+    {
+      "id": "VER-BUD-001",
+      "target": "TASK-BUD-001",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Paridade implementada e validada: scripts/pi-parity.mjs + package.json scripts. Execuções: npm run pi:parity e npm run pi:parity:project com relatório de coverage e superfícies.",
+      "timestamp": "2026-04-14T16:21:00Z"
+    },
+    {
+      "id": "VER-BUD-002",
+      "target": "TASK-BUD-002",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Budget policy adicionada ao colony-pilot com enforcement no tool_call ant_colony, baseline default/phase2 atualizada e cobertura em smoke tests colony-pilot-parsers. Validação: npm test + npx vitest run (pass).",
+      "timestamp": "2026-04-14T16:21:00Z"
+    },
+    {
+      "id": "VER-BUD-003",
+      "target": "TASK-BUD-003",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Documentação da primitiva e playbook entregue: docs/primitives/budget-envelope.md, docs/guides/budget-governance.md, índices atualizados com integração /usage + /session-breakdown + /quota-visibility.",
+      "timestamp": "2026-04-14T16:21:00Z"
+    },
+    {
+      "id": "VER-BUD-004",
+      "target": "TASK-BUD-004",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Pesquisa de bridge documentada em docs/research/colony-project-task-bridge.md com evidência de que colony não integra .project/tasks nativamente e proposta incremental de adapter opt-in.",
+      "timestamp": "2026-04-14T16:21:15Z"
+    },
+    {
+      "id": "VER-BUD-006",
+      "target": "TASK-BUD-006",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Gate de revisão humana para fechamento de tasks estratégicas registrado em docs/guides/budget-governance.md e aplicado no fluxo atual (sem fechamento automático).",
+      "timestamp": "2026-04-14T16:21:15Z"
+    }
+  ]
+}
