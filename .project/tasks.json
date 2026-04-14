@@ -139,7 +139,7 @@
     {
       "id": "TASK-BUD-009",
       "description": "[P0] Consolidar Swarm Launch Policy v1 como manual único de operação (single-board clock + budget + evidência + revisão humana).",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-005",
         "TASK-BUD-007"
@@ -154,12 +154,12 @@
         "Manual diferencia estado versionado (board oficial) vs estado efêmero de execução.",
         "Referências duplicadas/confusas foram consolidadas."
       ],
-      "notes": "Derivado de REQ-BUD-006."
+      "notes": "Derivado de REQ-BUD-006. c2 auditou canonicalização do Swarm Launch Policy e confirmou necessidade de manual canônico único + de-dup de referências. Aguardando aplicação final de arquivos no main e revisão humana."
     },
     {
       "id": "TASK-BUD-010",
       "description": "[P0] Implementar reconciliador single-writer para sync colony->.project/tasks com segurança em worktrees e merges.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-005",
         "TASK-BUD-007"
@@ -173,7 +173,7 @@
         "Mecanismo de lock/fila/reconciliação é determinístico e reversível.",
         "Testes cobrem fluxo de conflito básico e resultado esperado."
       ],
-      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree."
+      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree. c2 reportou lock/atomic/single-writer + testes de concorrência/no-auto-close; validar diffs efetivamente materializados no main antes de fechamento."
     },
     {
       "id": "TASK-BUD-011",
@@ -220,6 +220,12 @@
         "Semântica de governança preservada: budget envelope, no auto-close, revisão humana."
       ],
       "notes": "Derivado de REQ-BUD-007 e DEC-BUD-007."
+    },
+    {
+      "id": "colony-c2",
+      "description": "[COLONY:ant_colony] Recovery pass pós-colônia c1 para garantir injeção no branch principal e fechar lacunas remanescentes.\n\nContexto:\n- c1 reportou várias entregas, mas no main só parte do resultado apareceu.\n- Já corrigimos parsing de COMPLETE e consolidamos baseline tracker-agnostic no .project.\n\nObjetivo desta execução:\n1) Verificar diff real entre intenção de c1 e estado atual do main.\n2) Aplicar somente mudanças faltantes e úteis para:\n   - Swarm Launch Policy canônica (manual único + links sem duplicação)\n   - hardening deterministic sync colony->.project/tasks (single-writer/lock/atomic) caso ainda haja gaps\n   - testes de regressão no-auto-close/concorrência determinística se faltarem\n3) Produzir inventário final obrigatório de arquivos alterados e comandos de validação executados.\n4) Atualizar .project/tasks com status candidato (sem auto-close).\n\nRestrições:\n- Não fechar tasks automaticamente.\n- Mudanças incrementais, reversíveis, e com testes.\n- Sem credenciais/sessões.\n\nEntregável obrigatório:\n- Resumo final objetivo contendo: arquivos alterados, testes rodados (comandos), riscos residuais.",
+      "status": "in-progress",
+      "notes": "[2026-04-14T20:41:30.990Z] colony c2 phase=launched\n[2026-04-14T20:41:31.003Z] colony c2 phase=launched\n[2026-04-14T20:49:11.602Z] colony c2|colony-mnz3749j-1lk3t phase=complete (candidate only, aguardando revisão humana)"
     }
   ]
 }
