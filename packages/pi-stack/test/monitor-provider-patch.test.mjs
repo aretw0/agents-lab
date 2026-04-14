@@ -22,7 +22,7 @@ const CLASSIFIERS = [
 ];
 
 const COPILOT_MODEL = "github-copilot/claude-haiku-4.5";
-const HEDGE_HISTORY_SETTING_PATH = ["extensions", "monitorProviderPatch", "hedgeConversationHistory"];
+const HEDGE_HISTORY_SETTING_PATH = ["piStack", "monitorProviderPatch", "hedgeConversationHistory"];
 
 function detectDefaultProvider(cwd) {
   const candidates = [
@@ -407,6 +407,38 @@ describe("integration: full flow", () => {
       const filePath = join(tmpDir, ".pi", "agents", `${classifier}.agent.yaml`);
       assert.ok(!existsSync(filePath), `${classifier} should not be created for anthropic`);
     }
+  });
+
+  it("reads hedgeConversationHistory from piStack.monitorProviderPatch", () => {
+    const piDir = join(tmpDir, ".pi");
+    const monitorsDir = join(piDir, "monitors");
+    mkdirSync(monitorsDir, { recursive: true });
+
+    writeFileSync(join(piDir, "settings.json"), JSON.stringify({
+      defaultProvider: "anthropic",
+      piStack: {
+        monitorProviderPatch: {
+          hedgeConversationHistory: true,
+        },
+      },
+    }, null, 2) + "\n", "utf8");
+
+    const monitorPath = join(monitorsDir, "hedge.monitor.json");
+    writeFileSync(monitorPath, JSON.stringify({
+      name: "hedge",
+      classify: {
+        context: ["user_text", "assistant_text"],
+        agent: "hedge-classifier",
+      },
+    }, null, 2) + "\n", "utf8");
+
+    const result = simulateSessionStart(tmpDir);
+
+    assert.equal(result.includeHistory, true);
+    assert.ok(result.hedgeChanged, "should add conversation_history when opt-in is enabled");
+
+    const writtenMonitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+    assert.deepEqual(writtenMonitor.classify.context, ["user_text", "assistant_text", "conversation_history"]);
   });
 });
 
