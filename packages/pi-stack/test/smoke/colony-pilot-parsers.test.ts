@@ -27,6 +27,8 @@ import {
   resolveColonyPilotBudgetPolicy,
   evaluateAntColonyBudgetPolicy,
   resolveColonyPilotProjectTaskSync,
+  resolveColonyPilotDeliveryPolicy,
+  evaluateColonyDeliveryEvidence,
   colonyPhaseToProjectTaskStatus,
   buildModelPolicyProfile,
   resolveModelPolicyProfile,
@@ -153,6 +155,7 @@ describe("colony-pilot parsers", () => {
     expect(merged.piStack.guardrailsCore.portConflict.suggestedTestPort).toBe(4173);
     expect(merged.piStack.colonyPilot.budgetPolicy.enabled).toBe(true);
     expect(merged.piStack.colonyPilot.budgetPolicy.defaultMaxCostUsd).toBe(2);
+    expect(merged.piStack.colonyPilot.deliveryPolicy.enabled).toBe(false);
   });
 
   it("applyProjectBaselineSettings migra config legado em extensions objeto", () => {
@@ -181,6 +184,8 @@ describe("colony-pilot parsers", () => {
     expect(phase2.piStack.guardrailsCore.portConflict.suggestedTestPort).toBe(4273);
     expect(phase2.piStack.colonyPilot.budgetPolicy.defaultMaxCostUsd).toBe(1);
     expect(phase2.piStack.colonyPilot.budgetPolicy.hardCapUsd).toBe(10);
+    expect(phase2.piStack.colonyPilot.deliveryPolicy.enabled).toBe(true);
+    expect(phase2.piStack.colonyPilot.deliveryPolicy.mode).toBe("patch-artifact");
   });
 
   it("parseProviderModelRef separa provider/model", () => {
@@ -341,6 +346,53 @@ describe("colony-pilot parsers", () => {
     expect(cfg.enabled).toBe(true);
     expect(cfg.taskIdPrefix).toBe("swarm-main");
     expect(cfg.maxNoteLines).toBe(5);
+  });
+
+  it("delivery policy resolver aceita modos válidos", () => {
+    const cfg = resolveColonyPilotDeliveryPolicy({
+      enabled: true,
+      mode: "apply-to-branch",
+      requireFileInventory: true,
+      requireValidationCommandLog: true,
+    });
+
+    expect(cfg.enabled).toBe(true);
+    expect(cfg.mode).toBe("apply-to-branch");
+    expect(cfg.requireFileInventory).toBe(true);
+    expect(cfg.requireValidationCommandLog).toBe(true);
+  });
+
+  it("delivery evidence falha quando faltam evidências obrigatórias", () => {
+    const cfg = resolveColonyPilotDeliveryPolicy({
+      enabled: true,
+      mode: "patch-artifact",
+      requireFileInventory: true,
+      requireValidationCommandLog: true,
+    });
+
+    const ev = evaluateColonyDeliveryEvidence("[COLONY_SIGNAL:COMPLETE] [c1]", "completed", cfg);
+    expect(ev.ok).toBe(false);
+    expect(ev.issues.some((i) => i.includes("file inventory"))).toBe(true);
+    expect(ev.issues.some((i) => i.includes("validation command log"))).toBe(true);
+  });
+
+  it("delivery evidence passa com report completo", () => {
+    const cfg = resolveColonyPilotDeliveryPolicy({
+      enabled: true,
+      requireFileInventory: true,
+      requireValidationCommandLog: true,
+    });
+
+    const report = [
+      "### 🧪 Workspace",
+      "Mode: isolated git worktree",
+      "**Tasks:** 30/31 done",
+      "final file inventory: files changed: a.ts, b.md",
+      "validation commands: `pnpm vitest run`",
+    ].join("\n");
+
+    const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
+    expect(ev.ok).toBe(true);
   });
 
   it("colonyPhaseToProjectTaskStatus respeita human close", () => {

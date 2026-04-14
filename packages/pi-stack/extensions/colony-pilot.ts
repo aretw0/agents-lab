@@ -299,6 +299,16 @@ const DEFAULT_PROJECT_TASK_SYNC: ColonyPilotProjectTaskSyncConfig = {
   maxNoteLines: 20,
 };
 
+const DEFAULT_DELIVERY_POLICY: ColonyPilotDeliveryPolicyConfig = {
+  enabled: false,
+  mode: "report-only",
+  requireWorkspaceReport: true,
+  requireTaskSummary: true,
+  requireFileInventory: false,
+  requireValidationCommandLog: false,
+  blockOnMissingEvidence: true,
+};
+
 export interface AntColonyToolInput {
   goal: string;
   maxAnts?: number;
@@ -384,6 +394,76 @@ export function resolveColonyPilotProjectTaskSync(
     requireHumanClose: raw?.requireHumanClose !== false,
     maxNoteLines: Math.max(5, Math.min(200, maxNoteLinesRaw)),
   };
+}
+
+export function resolveColonyPilotDeliveryPolicy(
+  raw?: Partial<ColonyPilotDeliveryPolicyConfig>
+): ColonyPilotDeliveryPolicyConfig {
+  const modeRaw = typeof raw?.mode === "string" ? raw.mode.trim() : "";
+  const mode: ColonyDeliveryMode =
+    modeRaw === "patch-artifact" || modeRaw === "apply-to-branch" || modeRaw === "report-only"
+      ? modeRaw
+      : DEFAULT_DELIVERY_POLICY.mode;
+
+  return {
+    enabled: raw?.enabled === true,
+    mode,
+    requireWorkspaceReport: raw?.requireWorkspaceReport !== false,
+    requireTaskSummary: raw?.requireTaskSummary !== false,
+    requireFileInventory: raw?.requireFileInventory === true,
+    requireValidationCommandLog: raw?.requireValidationCommandLog === true,
+    blockOnMissingEvidence: raw?.blockOnMissingEvidence !== false,
+  };
+}
+
+export function evaluateColonyDeliveryEvidence(
+  text: string,
+  phase: ColonyPhase,
+  policy: ColonyPilotDeliveryPolicyConfig
+): ColonyPilotDeliveryEvaluation {
+  const evidence: ColonyPilotDeliveryEvidence = {
+    hasWorkspaceReport: /###\s+🧪\s+Workspace|Mode:\s+(?:isolated|shared)/i.test(text),
+    hasTaskSummary: /\*\*Tasks:\*\*\s*\d+\/\d+|tasks\s+done/i.test(text),
+    hasFileInventory: /(?:files?\s+(?:changed|altered|touched)|arquivos?\s+alterad|invent[aá]rio\s+final)/i.test(text),
+    hasValidationCommandLog: /(?:`(?:pnpm|npm|npx|vitest|node\s+--test|tsc)\b[^`]*`|comandos?\s+de\s+valida[cç][aã]o)/i.test(text),
+  };
+
+  if (!policy.enabled || phase !== "completed") {
+    return { ok: true, issues: [], evidence };
+  }
+
+  const issues: string[] = [];
+  if (policy.requireWorkspaceReport && !evidence.hasWorkspaceReport) {
+    issues.push("delivery evidence missing: workspace report");
+  }
+  if (policy.requireTaskSummary && !evidence.hasTaskSummary) {
+    issues.push("delivery evidence missing: task summary");
+  }
+  if (policy.requireFileInventory && !evidence.hasFileInventory) {
+    issues.push("delivery evidence missing: file inventory");
+  }
+  if (policy.requireValidationCommandLog && !evidence.hasValidationCommandLog) {
+    issues.push("delivery evidence missing: validation command log");
+  }
+
+  return { ok: issues.length === 0, issues, evidence };
+}
+
+export function formatDeliveryPolicyEvaluation(
+  policy: ColonyPilotDeliveryPolicyConfig,
+  evalResult: ColonyPilotDeliveryEvaluation
+): string[] {
+  return [
+    "delivery policy:",
+    `  enabled: ${policy.enabled ? "yes" : "no"}`,
+    `  mode: ${policy.mode}`,
+    `  requireWorkspaceReport: ${policy.requireWorkspaceReport ? "yes" : "no"}`,
+    `  requireTaskSummary: ${policy.requireTaskSummary ? "yes" : "no"}`,
+    `  requireFileInventory: ${policy.requireFileInventory ? "yes" : "no"}`,
+    `  requireValidationCommandLog: ${policy.requireValidationCommandLog ? "yes" : "no"}`,
+    `  blockOnMissingEvidence: ${policy.blockOnMissingEvidence ? "yes" : "no"}`,
+    `  evaluation: ${evalResult.ok ? "ok" : "issues"}`,
+  ];
 }
 
 export function colonyPhaseToProjectTaskStatus(
@@ -761,11 +841,37 @@ export interface ColonyPilotProjectTaskSyncConfig {
   maxNoteLines: number;
 }
 
+export type ColonyDeliveryMode = "report-only" | "patch-artifact" | "apply-to-branch";
+
+export interface ColonyPilotDeliveryPolicyConfig {
+  enabled: boolean;
+  mode: ColonyDeliveryMode;
+  requireWorkspaceReport: boolean;
+  requireTaskSummary: boolean;
+  requireFileInventory: boolean;
+  requireValidationCommandLog: boolean;
+  blockOnMissingEvidence: boolean;
+}
+
+export interface ColonyPilotDeliveryEvidence {
+  hasWorkspaceReport: boolean;
+  hasTaskSummary: boolean;
+  hasFileInventory: boolean;
+  hasValidationCommandLog: boolean;
+}
+
+export interface ColonyPilotDeliveryEvaluation {
+  ok: boolean;
+  issues: string[];
+  evidence: ColonyPilotDeliveryEvidence;
+}
+
 interface ColonyPilotSettings {
   preflight?: Partial<ColonyPilotPreflightConfig>;
   modelPolicy?: Partial<ColonyPilotModelPolicyConfig>;
   budgetPolicy?: Partial<ColonyPilotBudgetPolicyConfig>;
   projectTaskSync?: Partial<ColonyPilotProjectTaskSyncConfig>;
+  deliveryPolicy?: Partial<ColonyPilotDeliveryPolicyConfig>;
 }
 
 function parseColonyPilotSettings(cwd: string): ColonyPilotSettings {
@@ -982,6 +1088,15 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
           requireHumanClose: true,
           maxNoteLines: 20,
         },
+        deliveryPolicy: {
+          enabled: false,
+          mode: "report-only",
+          requireWorkspaceReport: true,
+          requireTaskSummary: true,
+          requireFileInventory: false,
+          requireValidationCommandLog: false,
+          blockOnMissingEvidence: true,
+        },
       },
       webSessionGateway: {
         mode: "local",
@@ -1012,6 +1127,12 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
         budgetPolicy: {
           defaultMaxCostUsd: 1,
           hardCapUsd: 10,
+        },
+        deliveryPolicy: {
+          enabled: true,
+          mode: "patch-artifact",
+          requireFileInventory: true,
+          requireValidationCommandLog: true,
         },
       },
       guardrailsCore: {
@@ -1436,6 +1557,7 @@ export default function (pi: ExtensionAPI) {
   let modelPolicyConfig = resolveColonyPilotModelPolicy();
   let budgetPolicyConfig = resolveColonyPilotBudgetPolicy();
   let projectTaskSyncConfig = resolveColonyPilotProjectTaskSync();
+  let deliveryPolicyConfig = resolveColonyPilotDeliveryPolicy();
   const pendingColonyGoals: Array<{ goal: string; source: "ant_colony" | "manual"; at: number }> = [];
   const colonyTaskMap = new Map<string, string>();
   const colonyGoalMap = new Map<string, string>();
@@ -1458,6 +1580,7 @@ export default function (pi: ExtensionAPI) {
     modelPolicyConfig = resolveColonyPilotModelPolicy(settings.modelPolicy);
     budgetPolicyConfig = resolveColonyPilotBudgetPolicy(settings.budgetPolicy);
     projectTaskSyncConfig = resolveColonyPilotProjectTaskSync(settings.projectTaskSync);
+    deliveryPolicyConfig = resolveColonyPilotDeliveryPolicy(settings.deliveryPolicy);
     preflightCache = undefined;
 
     updateStatusUI(ctx, state);
@@ -1466,8 +1589,11 @@ export default function (pi: ExtensionAPI) {
   function maybeSyncProjectTaskFromTelemetry(text: string, ctx: ExtensionContext) {
     if (!projectTaskSyncConfig.enabled) return;
 
-    const signal = parseColonySignal(text);
-    if (!signal) return;
+    const signalRaw = parseColonySignal(text);
+    if (!signalRaw) return;
+
+    const primaryId = signalRaw.id.split("|")[0]?.trim() || signalRaw.id;
+    const signal = { ...signalRaw, id: primaryId };
 
     const guessedGoal = colonyGoalMap.get(signal.id)
       ?? pendingColonyGoals.shift()?.goal
@@ -1484,6 +1610,25 @@ export default function (pi: ExtensionAPI) {
       taskIdOverride,
       source: "ant_colony",
     });
+
+    if (signal.phase === "completed") {
+      const deliveryEval = evaluateColonyDeliveryEvidence(text, signal.phase, deliveryPolicyConfig);
+      if (!deliveryEval.ok && deliveryPolicyConfig.enabled && deliveryPolicyConfig.blockOnMissingEvidence) {
+        const block = readProjectTasksBlock(ctx.cwd);
+        const idx = block.tasks.findIndex((t) => t.id === syncResult.taskId);
+        if (idx >= 0) {
+          const task = block.tasks[idx]!;
+          task.status = "blocked";
+          const now = new Date().toISOString();
+          task.notes = appendNote(
+            task.notes,
+            `[${now}] delivery-policy blocked completion: ${deliveryEval.issues.join("; ")}`,
+            projectTaskSyncConfig.maxNoteLines
+          );
+          writeProjectTasksBlock(ctx.cwd, block);
+        }
+      }
+    }
 
     colonyTaskMap.set(signal.id, syncResult.taskId);
   }
@@ -1581,6 +1726,7 @@ export default function (pi: ExtensionAPI) {
         modelPolicyConfig
       );
       const budgetPolicyEvaluation = evaluateAntColonyBudgetPolicy({ goal: "status" }, budgetPolicyConfig);
+      const deliveryPolicyEvaluation = evaluateColonyDeliveryEvidence("", "running", deliveryPolicyConfig);
       const payload = {
         ...snapshot,
         capabilities,
@@ -1590,6 +1736,8 @@ export default function (pi: ExtensionAPI) {
         budgetPolicy: budgetPolicyConfig,
         budgetPolicyEvaluation,
         projectTaskSync: projectTaskSyncConfig,
+        deliveryPolicy: deliveryPolicyConfig,
+        deliveryPolicyEvaluation,
       };
 
       return {
@@ -1721,6 +1869,7 @@ export default function (pi: ExtensionAPI) {
           modelPolicyConfig
         );
         const budgetEval = evaluateAntColonyBudgetPolicy({ goal: "check" }, budgetPolicyConfig);
+        const deliveryEval = evaluateColonyDeliveryEvidence("", "running", deliveryPolicyConfig);
 
         const lines = [
           "colony-pilot capabilities",
@@ -1735,6 +1884,8 @@ export default function (pi: ExtensionAPI) {
           ...formatPolicyEvaluation(modelPolicyConfig, policyEval),
           "",
           ...formatBudgetPolicyEvaluation(budgetPolicyConfig, budgetEval),
+          "",
+          ...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
           "",
           "project-task-sync:",
           `  enabled: ${projectTaskSyncConfig.enabled ? "yes" : "no"}`,
@@ -1787,6 +1938,7 @@ export default function (pi: ExtensionAPI) {
           modelPolicyConfig
         );
         const budgetEval = evaluateAntColonyBudgetPolicy({ goal: "status" }, budgetPolicyConfig);
+        const deliveryEval = evaluateColonyDeliveryEvidence("", "running", deliveryPolicyConfig);
         const lines = [
           formatSnapshot(state),
           "",
@@ -1802,6 +1954,8 @@ export default function (pi: ExtensionAPI) {
           ...formatPolicyEvaluation(modelPolicyConfig, policyEval),
           "",
           ...formatBudgetPolicyEvaluation(budgetPolicyConfig, budgetEval),
+          "",
+          ...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
           "",
           "project-task-sync:",
           `  enabled: ${projectTaskSyncConfig.enabled ? "yes" : "no"}`,
