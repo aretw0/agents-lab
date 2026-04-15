@@ -51,6 +51,9 @@ export interface PilotState {
 const COLONY_SIGNAL_RE = /\[COLONY_SIGNAL:([A-Z_]+)\]\s*\[([^\]]+)\]/i;
 const REMOTE_URL_RE = /(https?:\/\/[^\s]+\?t=[^\s]+)/i;
 const REMOTE_CLIENTS_RE = /Remote active\s*·\s*(\d+) client/i;
+const MONITOR_MODE_ON_RE = /\/monitors\s+on\b/i;
+const MONITOR_MODE_OFF_RE = /\/monitors\s+off\b/i;
+const TERMINAL_COLONY_PHASES = new Set<ColonyPhase>(["completed", "failed", "aborted", "budget_exceeded"]);
 
 export function createPilotState(): PilotState {
   return {
@@ -92,6 +95,22 @@ export function parseColonySignal(text: string): { phase: ColonyPhase; id: strin
 export function parseRemoteAccessUrl(text: string): string | undefined {
   const m = text.match(REMOTE_URL_RE);
   return m?.[1];
+}
+
+export function parseMonitorModeFromText(text: string): MonitorMode | undefined {
+  const on = MONITOR_MODE_ON_RE.test(text);
+  const off = MONITOR_MODE_OFF_RE.test(text);
+  if (on && !off) return "on";
+  if (off && !on) return "off";
+  return undefined;
+}
+
+export function normalizeColonySignalId(id: string): string | undefined {
+  const primary = id.split("|")[0]?.trim();
+  if (!primary) return undefined;
+  if (primary.includes("${") || primary.includes("}")) return undefined;
+  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(primary)) return undefined;
+  return primary;
 }
 
 export function buildColonyRunSequence(goal: string): string[] {
@@ -303,6 +322,8 @@ const DEFAULT_PROJECT_TASK_SYNC: ColonyPilotProjectTaskSyncConfig = {
   taskIdPrefix: "colony",
   requireHumanClose: true,
   maxNoteLines: 20,
+  autoQueueRecoveryOnCandidate: true,
+  recoveryTaskSuffix: "promotion",
 };
 
 const DEFAULT_DELIVERY_POLICY: ColonyPilotDeliveryPolicyConfig = {
@@ -408,6 +429,10 @@ export function resolveColonyPilotProjectTaskSync(
   const maxNoteLinesRaw = typeof raw?.maxNoteLines === "number" && Number.isFinite(raw.maxNoteLines)
     ? Math.floor(raw.maxNoteLines)
     : DEFAULT_PROJECT_TASK_SYNC.maxNoteLines;
+  const recoverySuffixRaw = typeof raw?.recoveryTaskSuffix === "string" ? raw.recoveryTaskSuffix.trim() : "";
+  const recoveryTaskSuffix = recoverySuffixRaw.length > 0
+    ? recoverySuffixRaw.replace(/[^a-zA-Z0-9_-]+/g, "-")
+    : DEFAULT_PROJECT_TASK_SYNC.recoveryTaskSuffix;
 
   return {
     enabled: raw?.enabled === true,
@@ -417,6 +442,8 @@ export function resolveColonyPilotProjectTaskSync(
     taskIdPrefix: prefix,
     requireHumanClose: raw?.requireHumanClose !== false,
     maxNoteLines: Math.max(5, Math.min(200, maxNoteLinesRaw)),
+    autoQueueRecoveryOnCandidate: raw?.autoQueueRecoveryOnCandidate !== false,
+    recoveryTaskSuffix,
   };
 }
 
@@ -902,6 +929,8 @@ export interface ColonyPilotProjectTaskSyncConfig {
   taskIdPrefix: string;
   requireHumanClose: boolean;
   maxNoteLines: number;
+  autoQueueRecoveryOnCandidate: boolean;
+  recoveryTaskSuffix: string;
 }
 
 export type ColonyDeliveryMode = "report-only" | "patch-artifact" | "apply-to-branch";
@@ -1208,6 +1237,8 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
           taskIdPrefix: "colony",
           requireHumanClose: true,
           maxNoteLines: 20,
+          autoQueueRecoveryOnCandidate: true,
+          recoveryTaskSuffix: "promotion",
         },
         deliveryPolicy: {
           enabled: false,
@@ -1442,6 +1473,61 @@ function upsertProjectTaskFromColonySignal(
   return { changed, taskId, status: current.status };
 }
 
+function ensureRecoveryTaskForCandidate(
+  cwd: string,
+  options: {
+    sourceTaskId: string;
+    colonyId: string;
+    goal?: string;
+    deliveryMode: ColonyDeliveryMode;
+    issues: string[];
+    config: ColonyPilotProjectTaskSyncConfig;
+  }
+): { taskId: string; changed: boolean } {
+  const block = readProjectTasksBlock(cwd);
+  const suffix = sanitizeTaskSlug(options.config.recoveryTaskSuffix || "promotion") || "promotion";
+  const recoveryTaskId = sanitizeTaskSlug(`${options.sourceTaskId}-${suffix}`) || `${options.sourceTaskId}-promotion`;
+  const idx = block.tasks.findIndex((t) => t.id === recoveryTaskId);
+  const now = new Date().toISOString();
+  const issueLine = options.issues.length > 0
+    ? options.issues.join("; ")
+    : (options.deliveryMode === "apply-to-branch"
+      ? "completion pending explicit promotion"
+      : `delivery mode '${options.deliveryMode}' requires promotion`);
+  const line = `[${now}] auto-queued from colony ${options.colonyId}: ${issueLine}`;
+  const checklist = [
+    "Coletar inventário final de arquivos alterados e validar se aplica ao branch alvo.",
+    "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
+    "Promover candidate para revisão humana (sem auto-close).",
+  ];
+
+  if (idx === -1) {
+    block.tasks.push({
+      id: recoveryTaskId,
+      description: `[RECOVERY:colony] Promote candidate ${options.sourceTaskId}${options.goal ? ` — ${options.goal}` : ""}`,
+      status: "planned",
+      depends_on: [options.sourceTaskId],
+      acceptance_criteria: checklist,
+      notes: appendNote(undefined, line, options.config.maxNoteLines),
+    });
+    writeProjectTasksBlock(cwd, block);
+    return { taskId: recoveryTaskId, changed: true };
+  }
+
+  const task = block.tasks[idx]!;
+  task.notes = appendNote(task.notes, line, options.config.maxNoteLines);
+  if (task.status === "completed" || task.status === "cancelled") {
+    task.status = "planned";
+  }
+  if (!Array.isArray(task.depends_on)) task.depends_on = [];
+  if (!task.depends_on.includes(options.sourceTaskId)) task.depends_on.push(options.sourceTaskId);
+  if (!Array.isArray(task.acceptance_criteria) || task.acceptance_criteria.length === 0) {
+    task.acceptance_criteria = checklist;
+  }
+  writeProjectTasksBlock(cwd, block);
+  return { taskId: recoveryTaskId, changed: true };
+}
+
 function extractColonyGoalFromMessageText(text: string): string | undefined {
   const m = text.match(/(?:Colony launched[^:]*:|\/colony\s+)([^\n]+)/i);
   if (!m) return undefined;
@@ -1468,8 +1554,47 @@ function extractText(message: unknown): string {
   return parts.join("\n");
 }
 
+function inferMonitorModeFromSessionFile(sessionFile?: string): MonitorMode {
+  if (!sessionFile || !existsSync(sessionFile)) return "unknown";
+  try {
+    const text = readFileSync(sessionFile, "utf8");
+    const lines = text.split(/\r?\n/);
+    const tail = lines.slice(Math.max(0, lines.length - 1200)).reverse();
+    for (const line of tail) {
+      const mode = parseMonitorModeFromText(line);
+      if (mode) return mode;
+    }
+  } catch {
+    // ignore session parse failures
+  }
+  return "unknown";
+}
+
+function countLiveColonies(state: PilotState): number {
+  let live = 0;
+  for (const colony of state.colonies.values()) {
+    if (!TERMINAL_COLONY_PHASES.has(colony.phase)) live += 1;
+  }
+  return live;
+}
+
+function pruneColonies(state: PilotState, now = Date.now()): boolean {
+  let changed = false;
+  for (const [id, colony] of state.colonies.entries()) {
+    const ageMs = Math.max(0, now - colony.updatedAt);
+    const terminalStale = TERMINAL_COLONY_PHASES.has(colony.phase) && ageMs > 15 * 60_000;
+    const nonTerminalStale = !TERMINAL_COLONY_PHASES.has(colony.phase) && ageMs > 4 * 60 * 60_000;
+    const invalidId = normalizeColonySignalId(id) === undefined;
+    if (terminalStale || nonTerminalStale || invalidId) {
+      state.colonies.delete(id);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 function renderStatus(state: PilotState): string | undefined {
-  const colonies = state.colonies.size;
+  const colonies = countLiveColonies(state);
   if (!state.remoteActive && colonies === 0 && state.monitorMode === "unknown") return undefined;
 
   const monitors = `monitors=${state.monitorMode}`;
@@ -1490,7 +1615,7 @@ function formatSnapshot(state: PilotState): string {
     `remoteUrl: ${state.remoteUrl ?? "(none)"}`,
     `remoteClients: ${state.remoteClients ?? 0}`,
     `sessionFile: ${state.lastSessionFile ?? "(ephemeral)"}`,
-    `colonies: ${state.colonies.size}`,
+    `colonies: ${countLiveColonies(state)} (tracked=${state.colonies.size})`,
     ...(colonyRows.length > 0 ? ["", ...colonyRows] : []),
   ].join("\n");
 }
@@ -1500,26 +1625,26 @@ function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
 }
 
 function trackFromText(text: string, state: PilotState): boolean {
-  let changed = false;
+  let changed = pruneColonies(state);
+
+  const mode = parseMonitorModeFromText(text);
+  if (mode && state.monitorMode !== mode) {
+    state.monitorMode = mode;
+    changed = true;
+  }
 
   const signal = parseColonySignal(text);
   if (signal) {
-    const current = state.colonies.get(signal.id);
-    state.colonies.set(signal.id, {
-      id: signal.id,
-      phase: signal.phase,
-      updatedAt: Date.now(),
-    });
-
-    if (
-      signal.phase === "completed" ||
-      signal.phase === "failed" ||
-      signal.phase === "aborted"
-    ) {
-      // Keep short-term completion visibility; can be pruned later if needed.
+    const normalizedId = normalizeColonySignalId(signal.id);
+    if (normalizedId) {
+      const current = state.colonies.get(normalizedId);
+      state.colonies.set(normalizedId, {
+        id: normalizedId,
+        phase: signal.phase,
+        updatedAt: Date.now(),
+      });
+      changed = !current || current.phase !== signal.phase || changed;
     }
-
-    changed = !current || current.phase !== signal.phase;
   }
 
   const remoteUrl = parseRemoteAccessUrl(text);
@@ -1699,6 +1824,7 @@ export default function (pi: ExtensionAPI) {
     state.remoteClients = 0;
     state.monitorMode = "unknown";
     state.lastSessionFile = ctx.sessionManager.getSessionFile?.() ?? undefined;
+    state.monitorMode = inferMonitorModeFromSessionFile(state.lastSessionFile);
     pendingColonyGoals.splice(0, pendingColonyGoals.length);
     colonyTaskMap.clear();
     colonyGoalMap.clear();
@@ -1720,7 +1846,8 @@ export default function (pi: ExtensionAPI) {
     const signalRaw = parseColonySignal(text);
     if (!signalRaw) return;
 
-    const primaryId = signalRaw.id.split("|")[0]?.trim() || signalRaw.id;
+    const primaryId = normalizeColonySignalId(signalRaw.id);
+    if (!primaryId) return;
     const signal = { ...signalRaw, id: primaryId };
 
     const guessedGoal = colonyGoalMap.get(signal.id)
@@ -1741,6 +1868,9 @@ export default function (pi: ExtensionAPI) {
 
     if (signal.phase === "completed") {
       const deliveryEval = evaluateColonyDeliveryEvidence(text, signal.phase, deliveryPolicyConfig);
+      const requiresPromotion =
+        deliveryPolicyConfig.mode !== "apply-to-branch" || !deliveryEval.ok;
+
       if (!deliveryEval.ok && deliveryPolicyConfig.enabled && deliveryPolicyConfig.blockOnMissingEvidence) {
         const block = readProjectTasksBlock(ctx.cwd);
         const idx = block.tasks.findIndex((t) => t.id === syncResult.taskId);
@@ -1751,6 +1881,33 @@ export default function (pi: ExtensionAPI) {
           task.notes = appendNote(
             task.notes,
             `[${now}] delivery-policy blocked completion: ${deliveryEval.issues.join("; ")}`,
+            projectTaskSyncConfig.maxNoteLines
+          );
+          writeProjectTasksBlock(ctx.cwd, block);
+        }
+      }
+
+      if (projectTaskSyncConfig.autoQueueRecoveryOnCandidate && requiresPromotion) {
+        const promotionIssues = deliveryEval.ok
+          ? [`delivery mode '${deliveryPolicyConfig.mode}' requires explicit promotion flow`]
+          : deliveryEval.issues;
+        const recovery = ensureRecoveryTaskForCandidate(ctx.cwd, {
+          sourceTaskId: syncResult.taskId,
+          colonyId: signal.id,
+          goal: guessedGoal,
+          deliveryMode: deliveryPolicyConfig.mode,
+          issues: promotionIssues,
+          config: projectTaskSyncConfig,
+        });
+
+        const block = readProjectTasksBlock(ctx.cwd);
+        const idx = block.tasks.findIndex((t) => t.id === syncResult.taskId);
+        if (idx >= 0) {
+          const task = block.tasks[idx]!;
+          const now = new Date().toISOString();
+          task.notes = appendNote(
+            task.notes,
+            `[${now}] promotion queued automatically: ${recovery.taskId}`,
             projectTaskSyncConfig.maxNoteLines
           );
           writeProjectTasksBlock(ctx.cwd, block);
@@ -2022,6 +2179,8 @@ export default function (pi: ExtensionAPI) {
           `  markTerminalState: ${projectTaskSyncConfig.markTerminalState ? "yes" : "no"}`,
           `  requireHumanClose: ${projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
           `  taskIdPrefix: ${projectTaskSyncConfig.taskIdPrefix}`,
+          `  autoQueueRecoveryOnCandidate: ${projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
+          `  recoveryTaskSuffix: ${projectTaskSyncConfig.recoveryTaskSuffix}`,
         ];
 
         if (missing.length > 0) {
@@ -2089,6 +2248,8 @@ export default function (pi: ExtensionAPI) {
           `  enabled: ${projectTaskSyncConfig.enabled ? "yes" : "no"}`,
           `  taskIdPrefix: ${projectTaskSyncConfig.taskIdPrefix}`,
           `  requireHumanClose: ${projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
+          `  autoQueueRecoveryOnCandidate: ${projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
+          `  recoveryTaskSuffix: ${projectTaskSyncConfig.recoveryTaskSuffix}`,
         ];
         const warn = !policyEval.ok || (budgetPolicyConfig.enabled && !budgetEval.ok);
         ctx.ui.notify(lines.join("\n"), warn ? "warning" : "info");

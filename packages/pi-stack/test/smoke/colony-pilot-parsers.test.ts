@@ -5,6 +5,8 @@ import { join } from "node:path";
 import {
   parseColonySignal,
   parseRemoteAccessUrl,
+  parseMonitorModeFromText,
+  normalizeColonySignalId,
   buildColonyRunSequence,
   buildColonyStopSequence,
   parseCommandInput,
@@ -55,6 +57,17 @@ describe("colony-pilot parsers", () => {
       "🌐 Remote active · inst-abc\nhttp://192.168.0.10:3100?t=token-123"
     );
     expect(url).toBe("http://192.168.0.10:3100?t=token-123");
+  });
+
+  it("parseMonitorModeFromText detecta ON/OFF apenas em comandos explícitos", () => {
+    expect(parseMonitorModeFromText("/monitors off")).toBe("off");
+    expect(parseMonitorModeFromText("/doctor ... monitors:OFF")).toBeUndefined();
+    expect(parseMonitorModeFromText("/monitors on")).toBe("on");
+  });
+
+  it("normalizeColonySignalId reduz IDs compostos e rejeita placeholders", () => {
+    expect(normalizeColonySignalId("c2|colony-abc")).toBe("c2");
+    expect(normalizeColonySignalId("${launched.id}")).toBeUndefined();
   });
 
   it("buildColonyRunSequence aplica ordem do pilot", () => {
@@ -388,6 +401,8 @@ describe("colony-pilot parsers", () => {
     expect(cfg.enabled).toBe(true);
     expect(cfg.taskIdPrefix).toBe("swarm-main");
     expect(cfg.maxNoteLines).toBe(5);
+    expect(cfg.autoQueueRecoveryOnCandidate).toBe(true);
+    expect(cfg.recoveryTaskSuffix).toBe("promotion");
   });
 
   it("delivery policy resolver aceita modos válidos", () => {

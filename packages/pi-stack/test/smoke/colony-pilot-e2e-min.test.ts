@@ -22,11 +22,12 @@ describe("colony-pilot e2e mínimo (simulado)", () => {
 
     applyTelemetryText(state, "🌐 Remote active · inst-01\nhttp://127.0.0.1:3100?t=abc");
     applyTelemetryText(state, "[COLONY_SIGNAL:LAUNCHED] [c1]");
-    applyTelemetryText(state, "[COLONY_SIGNAL:TASK_DONE] [c1]");
+    applyTelemetryText(state, "[COLONY_SIGNAL:TASK_DONE] [c1|colony-xyz]");
 
     let snap = snapshotPilotState(state);
     expect(snap.remoteActive).toBe(true);
     expect(snap.remoteUrl).toBe("http://127.0.0.1:3100?t=abc");
+    expect(snap.colonies.length).toBe(1);
     expect(snap.colonies[0]?.id).toBe("c1");
     expect(snap.colonies[0]?.phase).toBe("task_done");
 
@@ -35,9 +36,10 @@ describe("colony-pilot e2e mínimo (simulado)", () => {
 
     state.monitorMode = "on";
     applyTelemetryText(state, "Remote access stopped.");
+    applyTelemetryText(state, "/monitors off");
 
     snap = snapshotPilotState(state);
-    expect(snap.monitorMode).toBe("on");
+    expect(snap.monitorMode).toBe("off");
     expect(snap.remoteActive).toBe(false);
   });
 });
