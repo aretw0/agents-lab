@@ -198,7 +198,7 @@
       "id": "colony-c1",
       "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock.\n\nContexto já pronto:\n- .project agora é versionado no git e é o board oficial.\n- Budget policy e projectTaskSync do colony-pilot já existem.\n\nObjetivos desta execução:\n1) Consolidar Swarm Launch Policy v1 (manual único)\n   - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana).\n   - Unificar links/referências para evitar duplicação/confusão.\n\n2) Fortalecer clock unificado em runtime\n   - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível).\n   - Manter sem auto-close; apenas status candidato para revisão humana.\n\n3) Aprendizado contínuo humano+agêntico (registro híbrido)\n   - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável).\n   - Produzir evidência executável (testes/comandos) para auditoria.\n\nCritérios de qualidade:\n- Mudanças incrementais, reversíveis e com testes.\n- Sem mexer em credenciais/sessões.\n- Não fechar tasks automaticamente.\n\nEntregáveis esperados:\n- Código + testes + docs atualizados.\n- Resumo final com riscos remanescentes, decisões e próximos passos.",
       "status": "in-progress",
-      "notes": "[2026-04-14T20:19:13.352Z] colony c1 phase=launched\n[2026-04-14T20:19:13.373Z] colony c1 phase=launched\n[2026-04-14T20:28:27.196Z] colony c1|colony-mnz2eg46-hw9a4 phase=complete (candidate only, aguardando revisão humana)\n[2026-04-14T21:38:32.019Z] colony c1 phase=launched\n[2026-04-14T21:38:32.034Z] colony c1 phase=launched\n[2026-04-14T21:58:10.079Z] colony c1 phase=launched\n[2026-04-14T21:58:10.107Z] colony c1 phase=launched\n[2026-04-14T22:07:17.872Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:26:11.221Z] colony c1 phase=launched\n[2026-04-15T07:26:11.237Z] colony c1 phase=launched\n[2026-04-15T07:32:45.742Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:32:45.789Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.582Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.619Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.630Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.664Z] promotion queued automatically: colony-c1-promotion"
+      "notes": "[2026-04-15T07:26:11.221Z] colony c1 phase=launched\n[2026-04-15T07:26:11.237Z] colony c1 phase=launched\n[2026-04-15T07:32:45.742Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:32:45.789Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.582Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.619Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.630Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.664Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T09:03:30.364Z] colony c1 phase=launched\n[2026-04-15T09:03:30.378Z] colony c1 phase=launched\n[2026-04-15T09:15:26.379Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T09:15:26.410Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T18:00:35.957Z] colony c1 phase=launched\n[2026-04-15T18:00:35.981Z] colony c1 phase=launched\n[2026-04-15T18:00:39.398Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T18:00:39.434Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T18:00:39.459Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T18:00:39.493Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T18:24:08.087Z] colony c1 phase=launched\n[2026-04-15T18:24:08.103Z] colony c1 phase=launched"
     },
     {
       "id": "TASK-BUD-012",
@@ -383,7 +383,7 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:32:45.768Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.608Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.648Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow"
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:32:45.768Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.608Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.648Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T09:15:26.397Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.421Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.480Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow"
     },
     {
       "id": "colony-c2-promotion",
@@ -438,6 +438,125 @@
         "Promover candidate para revisão humana (sem auto-close)."
       ],
       "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow"
+    },
+    {
+      "id": "TASK-BUD-020",
+      "description": "[P0] Implementar pipeline de triagem de histórico recente (sessões + branch summaries) para consolidar pendências no board canônico com split operacional (unlock-now vs later).",
+      "status": "in-progress",
+      "files": [
+        "scripts/session-triage.mjs",
+        "packages/lab-skills/skills/session-triage/SKILL.md",
+        "docs/guides/session-triage.md",
+        "docs/guides/README.md",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Comando único gera visão das sessões recentes (default <=1 dia) e sinais de colônia.",
+        "Saída agrega Next Steps/In Progress/Blocked de branch summaries sem depender de leitura manual completa.",
+        "Split de pendências do board em unlock-now vs later é reproduzível e auditável."
+      ],
+      "notes": "Criada para reduzir dependência de memória humana e evitar deriva entre sessões/branches."
+    },
+    {
+      "id": "TASK-BUD-021",
+      "description": "[P1] Especificar control plane portátil para swarm (processo desacoplado + handoff/resume entre instâncias pi) sem interromper execuções em background.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-020",
+        "TASK-BUD-017"
+      ],
+      "files": [
+        "docs/research/colony-project-task-bridge.md",
+        "docs/guides/swarm-cleanroom-protocol.md",
+        ".project/requirements.json",
+        ".project/decisions.json"
+      ],
+      "acceptance_criteria": [
+        "Modelo de ownership/lease/handoff definido para trocar instância cliente sem matar swarm.",
+        "Protocolo de retomada (`pi --resume` + reconciliação de eventos) documentado com riscos e limites.",
+        "Requisitos de compatibilidade para múltiplos backends de execução (não só ant_colony) explicitados."
+      ],
+      "notes": "Derivado de necessidade operacional do usuário: poder reiniciar terminal/processo com segurança e continuar supervisão."
+    },
+    {
+      "id": "TASK-BUD-022",
+      "description": "[P1] Capturar branch-summary returns de forma estruturada (persistência local) para permitir triagem automática de branches no session-triage.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-020"
+      ],
+      "files": [
+        "scripts/session-triage.mjs",
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Eventos de retorno de branch ficam acessíveis em formato parseável (sem depender de cópia manual).",
+        "session-triage consegue agregar Next Steps/In Progress/Blocked também quando vieram de branch compactado.",
+        "Sem impacto em runs ativos e sem acoplamento rígido a um backend específico."
+      ],
+      "notes": "Lacuna observada: alguns resumos de branch não aparecem diretamente no JSONL da sessão, reduzindo cobertura automática."
+    },
+    {
+      "id": "TASK-BUD-023",
+      "description": "[P1] Definir e implementar contrato canônico de ingestão de conversas (provider-agnostic) para triagem operacional cross-platform (pi, Telegram, WhatsApp, Matrix, Signal).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-020",
+        "TASK-BUD-022"
+      ],
+      "files": [
+        "scripts/session-triage.mjs",
+        "docs/primitives/continuity-abstraction.md",
+        "docs/research/session-triage-run-2026-04-15.md",
+        ".project/requirements.json",
+        ".project/decisions.json"
+      ],
+      "acceptance_criteria": [
+        "Esquema canônico de evento/conversa documentado com campos obrigatórios e mapeamento mínimo por provider.",
+        "session-triage aceita fonte abstrata (adapter) além de JSONL local do pi.",
+        "Critérios de governança (evidência/no-auto-close/HITL) permanecem idênticos para qualquer origem."
+      ],
+      "notes": "Objetivo: botar ordem no caos de múltiplas threads/plataformas sem acoplar coordenação ao runtime local."
+    },
+    {
+      "id": "TASK-BUD-024",
+      "description": "[P0] Implementar budget semanal por provider em quota-visibility (share/cap + estados WARN/BLOCK) com comando/tool e documentação operacional.",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-BUD-020"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "docs/guides/quota-visibility.md",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Config aceita `providerBudgets` com cap absoluto ou percentual da quota global.",
+        "`/quota-visibility budget` e tool equivalente retornam estado por provider.",
+        "Status/export incluem avaliação por provider e warnings de alocação inválida."
+      ],
+      "notes": "Direcionado a uso compartilhado de chaves/cotas entre colegas com limites explícitos."
+    },
+    {
+      "id": "TASK-BUD-025",
+      "description": "[P1] Implementar gate hard de execução quando provider budget estiver em BLOCK (começando por ant_colony/colony-pilot) com override explícito e trilha de evidência.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-024"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Antes de lançar ant_colony, policy consulta estado de budget por provider e bloqueia quando BLOCK.",
+        "Existe override explícito auditável para exceções emergenciais.",
+        "Mensagens de bloqueio orientam ação corretiva (renegociar cap, trocar provider, esperar janela)."
+      ],
+      "notes": "Endurecimento inicial de trava operacional; escopo começa em swarm/colônia antes de cobertura total de todas as chamadas de modelo."
     }
   ]
 }

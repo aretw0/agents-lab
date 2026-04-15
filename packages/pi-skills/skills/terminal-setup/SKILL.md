@@ -145,4 +145,8 @@ Exemplo -- aceitar `Ctrl+J` como nova linha:
 }
 ```
 
-Apos editar: `/reload` no pi.
+Apos editar: `/reload` no pi **somente se o processo do pi continuar vivo**.
+
+Se o usuario precisou fechar/reabrir o terminal e o processo do pi encerrou, ao voltar com `pi --resume` o pi ja inicia com as configuracoes recarregadas; nesse caso `/reload` e redundante.
+
+Observacao operacional: reiniciar o processo pode restaurar estados padrao de runtime (por exemplo monitores), dependendo do hatch/configuracao ativa. Oriente o usuario a verificar estado com os comandos canônicos do nosso pi-stack (`/monitors status`, `/colony-pilot status`) apos retomar.

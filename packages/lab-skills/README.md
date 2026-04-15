@@ -9,6 +9,7 @@
 | `evaluate-extension` | Avalia uma extensão/skill pi com scorecard estruturado para inclusão na stack |
 | `cultivate-primitive` | Guia o cultivo de primitivas reutilizáveis — da identificação ao pacote publicado |
 | `stack-feedback` | Coleta feedback estruturado sobre a stack para orientar curadoria e priorização |
+| `session-triage` | Consolida histórico recente (incluindo branch summaries) em pendências executáveis no board canônico |
 
 ## Uso
 

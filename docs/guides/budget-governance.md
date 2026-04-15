@@ -34,6 +34,21 @@ Sem envelope explícito, não há controle operacional real.
 
 Não é "ou/ou"; é **camadas de observabilidade**.
 
+### Budget compartilhado por provider (cota emprestada/time)
+
+Quando você opera com chaves de colegas/time, configure orçamento por provider com percentual/cap acordado:
+
+- comando de leitura: `/quota-visibility budget`
+- config: `piStack.quotaVisibility.providerBudgets`
+
+Modelo de operação:
+- `period`: `weekly` (padrão) ou `monthly`;
+- semanal: `shareTokensPct` / `shareCostPct` e `weeklyQuotaTokens` / `weeklyQuotaCostUsd`;
+- mensal: `shareMonthlyTokensPct` / `shareMonthlyCostPct` e `monthlyQuotaTokens` / `monthlyQuotaCostUsd`;
+- `warnPct` / `hardPct`: thresholds operacionais (`WARN` / `BLOCK`).
+
+> Importante: no estado atual a separação é por **provider**. Separação por chave individual/conta no mesmo provider exige tagging adicional na ingestão de eventos (trilha futura provider-agnostic).
+
 ---
 
 ## Colônia e budget
@@ -50,7 +65,9 @@ Para hard cap explícito, use o caminho com `ant_colony` e `maxCost`.
 - exigir `maxCost`;
 - auto-injetar `defaultMaxCostUsd`;
 - bloquear acima de `hardCapUsd`;
-- bloquear abaixo de `minMaxCostUsd`.
+- bloquear abaixo de `minMaxCostUsd`;
+- bloquear launch quando provider usado estiver em `BLOCK` (`enforceProviderBudgetBlock`);
+- permitir override auditável no goal (`providerBudgetOverrideToken`, ex.: `budget-override:<motivo>`).
 
 `piStack.colonyPilot.projectTaskSync` (opt-in) permite sincronizar eventos de colônia para `.project/tasks`:
 - criar task no launch;
@@ -69,7 +86,11 @@ Exemplo:
         "autoInjectMaxCost": true,
         "defaultMaxCostUsd": 2,
         "hardCapUsd": 20,
-        "minMaxCostUsd": 0.05
+        "minMaxCostUsd": 0.05,
+        "enforceProviderBudgetBlock": true,
+        "providerBudgetLookbackDays": 30,
+        "allowProviderBudgetOverride": true,
+        "providerBudgetOverrideToken": "budget-override:"
       },
       "projectTaskSync": {
         "enabled": true,

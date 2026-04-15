@@ -94,7 +94,48 @@ export interface ProviderWindowInsight {
   notes: string[];
 }
 
-interface QuotaStatus {
+export interface ProviderBudgetConfig {
+  owner?: string;
+  period?: "weekly" | "monthly";
+  weeklyQuotaTokens?: number;
+  weeklyQuotaCostUsd?: number;
+  monthlyQuotaTokens?: number;
+  monthlyQuotaCostUsd?: number;
+  shareTokensPct?: number;
+  shareCostPct?: number;
+  shareMonthlyTokensPct?: number;
+  shareMonthlyCostPct?: number;
+  warnPct?: number;
+  hardPct?: number;
+}
+
+export type ProviderBudgetMap = Record<string, ProviderBudgetConfig>;
+
+export interface ProviderBudgetStatus {
+  provider: string;
+  owner?: string;
+  period: "weekly" | "monthly";
+  periodDays: number;
+  periodStartIso: string;
+  periodEndIso: string;
+  observedMessages: number;
+  observedTokens: number;
+  observedCostUsd: number;
+  projectedTokensEndOfPeriod: number;
+  projectedCostUsdEndOfPeriod: number;
+  periodTokensCap?: number;
+  periodCostUsdCap?: number;
+  usedPctTokens?: number;
+  usedPctCost?: number;
+  projectedPctTokens?: number;
+  projectedPctCost?: number;
+  warnPct: number;
+  hardPct: number;
+  state: "ok" | "warning" | "blocked";
+  notes: string[];
+}
+
+export interface QuotaStatus {
   source: {
     sessionsRoot: string;
     scannedFiles: number;
@@ -127,6 +168,11 @@ interface QuotaStatus {
     usedPctCost?: number;
     projectedPctCost?: number;
   };
+  providerBudgetPolicy: {
+    configuredProviders: number;
+    allocationWarnings: string[];
+  };
+  providerBudgets: ProviderBudgetStatus[];
   daily: DailyAggregate[];
   models: Array<{ model: string } & ModelAggregate>;
   providerWindows: ProviderWindowInsight[];
@@ -138,7 +184,10 @@ interface QuotaVisibilitySettings {
   defaultDays?: number;
   weeklyQuotaTokens?: number;
   weeklyQuotaCostUsd?: number;
+  monthlyQuotaTokens?: number;
+  monthlyQuotaCostUsd?: number;
   providerWindowHours?: ProviderWindowHours;
+  providerBudgets?: ProviderBudgetMap;
 }
 
 const SETTINGS_PATH = ["piStack", "quotaVisibility"];
@@ -244,6 +293,96 @@ export function parseProviderWindowHours(input: unknown): ProviderWindowHours {
     if (!provider || provider === "unknown") continue;
     if (hours <= 0 || hours > 24) continue;
     out[provider] = hours;
+  }
+
+  return out;
+}
+
+function parsePct(raw: unknown): number | undefined {
+  const n = safeNum(raw);
+  if (!Number.isFinite(n) || n <= 0 || n > 100) return undefined;
+  return n;
+}
+
+function parseBudgetPeriod(raw: unknown): "weekly" | "monthly" | undefined {
+  if (typeof raw !== "string") return undefined;
+  const v = raw.trim().toLowerCase();
+  if (v === "weekly" || v === "monthly") return v;
+  return undefined;
+}
+
+function startOfCurrentMonthLocal(now = new Date()): Date {
+  return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+}
+
+function endOfCurrentMonthLocal(now = new Date()): Date {
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+
+function daysInCurrentMonth(now = new Date()): number {
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+}
+
+function startOfRollingWeekLocal(now = new Date()): Date {
+  const s = new Date(now);
+  s.setHours(0, 0, 0, 0);
+  s.setDate(s.getDate() - 6);
+  return s;
+}
+
+export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
+  if (!input || typeof input !== "object") return {};
+  const out: ProviderBudgetMap = {};
+
+  for (const [k, rawRule] of Object.entries(input as Record<string, unknown>)) {
+    const provider = normalizeProvider(k);
+    if (!provider || provider === "unknown") continue;
+    if (!rawRule || typeof rawRule !== "object") continue;
+
+    const ruleObj = rawRule as Record<string, unknown>;
+    const period = parseBudgetPeriod(ruleObj.period);
+    const weeklyQuotaTokens = safeNum(ruleObj.weeklyQuotaTokens);
+    const weeklyQuotaCostUsd = safeNum(ruleObj.weeklyQuotaCostUsd);
+    const monthlyQuotaTokens = safeNum(ruleObj.monthlyQuotaTokens);
+    const monthlyQuotaCostUsd = safeNum(ruleObj.monthlyQuotaCostUsd);
+    const shareTokensPct = parsePct(ruleObj.shareTokensPct);
+    const shareCostPct = parsePct(ruleObj.shareCostPct);
+    const shareMonthlyTokensPct = parsePct(ruleObj.shareMonthlyTokensPct);
+    const shareMonthlyCostPct = parsePct(ruleObj.shareMonthlyCostPct);
+    const warnPct = parsePct(ruleObj.warnPct);
+    const hardPct = parsePct(ruleObj.hardPct);
+    const owner = typeof ruleObj.owner === "string" ? ruleObj.owner.trim() || undefined : undefined;
+
+    const hasAny =
+      period !== undefined ||
+      weeklyQuotaTokens > 0 ||
+      weeklyQuotaCostUsd > 0 ||
+      monthlyQuotaTokens > 0 ||
+      monthlyQuotaCostUsd > 0 ||
+      shareTokensPct !== undefined ||
+      shareCostPct !== undefined ||
+      shareMonthlyTokensPct !== undefined ||
+      shareMonthlyCostPct !== undefined ||
+      warnPct !== undefined ||
+      hardPct !== undefined ||
+      owner !== undefined;
+
+    if (!hasAny) continue;
+
+    out[provider] = {
+      owner,
+      period,
+      weeklyQuotaTokens: weeklyQuotaTokens > 0 ? weeklyQuotaTokens : undefined,
+      weeklyQuotaCostUsd: weeklyQuotaCostUsd > 0 ? weeklyQuotaCostUsd : undefined,
+      monthlyQuotaTokens: monthlyQuotaTokens > 0 ? monthlyQuotaTokens : undefined,
+      monthlyQuotaCostUsd: monthlyQuotaCostUsd > 0 ? monthlyQuotaCostUsd : undefined,
+      shareTokensPct,
+      shareCostPct,
+      shareMonthlyTokensPct,
+      shareMonthlyCostPct,
+      warnPct,
+      hardPct,
+    };
   }
 
   return out;
@@ -409,6 +548,184 @@ export function buildProviderWindowInsight(
   };
 }
 
+export function buildProviderBudgetStatuses(
+  usageEvents: QuotaUsageEvent[],
+  params: {
+    days: number;
+    weeklyQuotaTokens?: number;
+    weeklyQuotaCostUsd?: number;
+    monthlyQuotaTokens?: number;
+    monthlyQuotaCostUsd?: number;
+    providerBudgets: ProviderBudgetMap;
+  }
+): { allocationWarnings: string[]; budgets: ProviderBudgetStatus[] } {
+  const allocationWarnings: string[] = [];
+  const providers = Object.keys(params.providerBudgets).map((p) => normalizeProvider(p));
+  if (providers.length === 0) return { allocationWarnings, budgets: [] };
+
+  const sumShareTokensWeekly = providers.reduce(
+    (acc, p) => acc + safeNum(params.providerBudgets[p]?.shareTokensPct),
+    0
+  );
+  const sumShareCostWeekly = providers.reduce(
+    (acc, p) => acc + safeNum(params.providerBudgets[p]?.shareCostPct),
+    0
+  );
+  const sumShareTokensMonthly = providers.reduce(
+    (acc, p) => acc + safeNum(params.providerBudgets[p]?.shareMonthlyTokensPct),
+    0
+  );
+  const sumShareCostMonthly = providers.reduce(
+    (acc, p) => acc + safeNum(params.providerBudgets[p]?.shareMonthlyCostPct),
+    0
+  );
+
+  if (sumShareTokensWeekly > 100.001) {
+    allocationWarnings.push(`providerBudgets.shareTokensPct soma ${sumShareTokensWeekly.toFixed(2)}% (>100%).`);
+  }
+  if (sumShareCostWeekly > 100.001) {
+    allocationWarnings.push(`providerBudgets.shareCostPct soma ${sumShareCostWeekly.toFixed(2)}% (>100%).`);
+  }
+  if (sumShareTokensMonthly > 100.001) {
+    allocationWarnings.push(`providerBudgets.shareMonthlyTokensPct soma ${sumShareTokensMonthly.toFixed(2)}% (>100%).`);
+  }
+  if (sumShareCostMonthly > 100.001) {
+    allocationWarnings.push(`providerBudgets.shareMonthlyCostPct soma ${sumShareCostMonthly.toFixed(2)}% (>100%).`);
+  }
+
+  const now = new Date();
+  const nowMs = now.getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  const budgets: ProviderBudgetStatus[] = providers
+    .sort((a, b) => a.localeCompare(b))
+    .map((provider) => {
+      const rule = params.providerBudgets[provider] ?? {};
+      const notes: string[] = [];
+
+      const inferredPeriod: "weekly" | "monthly" =
+        rule.period ??
+        ((rule.monthlyQuotaTokens || rule.monthlyQuotaCostUsd || rule.shareMonthlyTokensPct || rule.shareMonthlyCostPct)
+          ? "monthly"
+          : "weekly");
+
+      const periodStart = inferredPeriod === "monthly" ? startOfCurrentMonthLocal(now) : startOfRollingWeekLocal(now);
+      const periodEnd = inferredPeriod === "monthly"
+        ? endOfCurrentMonthLocal(now)
+        : new Date(periodStart.getTime() + 7 * dayMs - 1);
+      const periodDays = inferredPeriod === "monthly" ? daysInCurrentMonth(now) : 7;
+
+      const providerEvents = usageEvents.filter(
+        (e) => normalizeProvider(e.provider) === provider && e.timestampMs >= periodStart.getTime() && e.timestampMs <= nowMs
+      );
+
+      const observedMessages = providerEvents.length;
+      const observedTokens = sumTokens(providerEvents);
+      const observedCostUsd = sumCost(providerEvents);
+
+      let warnPct = rule.warnPct ?? 80;
+      let hardPct = rule.hardPct ?? 100;
+      if (hardPct < warnPct) {
+        notes.push(`hardPct (${hardPct}) < warnPct (${warnPct}); ajustado para hardPct=${warnPct}.`);
+        hardPct = warnPct;
+      }
+
+      const periodTokensCap = inferredPeriod === "monthly"
+        ? rule.monthlyQuotaTokens ??
+          (rule.shareMonthlyTokensPct && params.monthlyQuotaTokens
+            ? (params.monthlyQuotaTokens * rule.shareMonthlyTokensPct) / 100
+            : undefined)
+        : rule.weeklyQuotaTokens ??
+          (rule.shareTokensPct && params.weeklyQuotaTokens
+            ? (params.weeklyQuotaTokens * rule.shareTokensPct) / 100
+            : undefined);
+
+      const periodCostUsdCap = inferredPeriod === "monthly"
+        ? rule.monthlyQuotaCostUsd ??
+          (rule.shareMonthlyCostPct && params.monthlyQuotaCostUsd
+            ? (params.monthlyQuotaCostUsd * rule.shareMonthlyCostPct) / 100
+            : undefined)
+        : rule.weeklyQuotaCostUsd ??
+          (rule.shareCostPct && params.weeklyQuotaCostUsd
+            ? (params.weeklyQuotaCostUsd * rule.shareCostPct) / 100
+            : undefined);
+
+      if (inferredPeriod === "monthly") {
+        if (rule.shareMonthlyTokensPct && !params.monthlyQuotaTokens && !rule.monthlyQuotaTokens) {
+          notes.push("shareMonthlyTokensPct definido sem monthlyQuotaTokens global; configure monthlyQuotaTokens ou quota mensal absoluta por provider.");
+        }
+        if (rule.shareMonthlyCostPct && !params.monthlyQuotaCostUsd && !rule.monthlyQuotaCostUsd) {
+          notes.push("shareMonthlyCostPct definido sem monthlyQuotaCostUsd global; configure monthlyQuotaCostUsd ou quota mensal absoluta por provider.");
+        }
+      } else {
+        if (rule.shareTokensPct && !params.weeklyQuotaTokens && !rule.weeklyQuotaTokens) {
+          notes.push("shareTokensPct definido sem weeklyQuotaTokens global; configure weeklyQuotaTokens ou quota semanal absoluta por provider.");
+        }
+        if (rule.shareCostPct && !params.weeklyQuotaCostUsd && !rule.weeklyQuotaCostUsd) {
+          notes.push("shareCostPct definido sem weeklyQuotaCostUsd global; configure weeklyQuotaCostUsd ou quota semanal absoluta por provider.");
+        }
+      }
+
+      if (!periodTokensCap && !periodCostUsdCap) {
+        notes.push(
+          inferredPeriod === "monthly"
+            ? "Sem limite mensal resolvido (tokens/custo) para este provider."
+            : "Sem limite semanal resolvido (tokens/custo) para este provider."
+        );
+      }
+
+      const elapsedDays = Math.max(
+        1,
+        Math.floor((nowLocalMidnight(now).getTime() - periodStart.getTime()) / dayMs) + 1
+      );
+
+      const projectedTokensEndOfPeriod = (observedTokens / elapsedDays) * periodDays;
+      const projectedCostUsdEndOfPeriod = (observedCostUsd / elapsedDays) * periodDays;
+
+      const usedPctTokens = periodTokensCap ? (observedTokens / periodTokensCap) * 100 : undefined;
+      const projectedPctTokens = periodTokensCap ? (projectedTokensEndOfPeriod / periodTokensCap) * 100 : undefined;
+      const usedPctCost = periodCostUsdCap ? (observedCostUsd / periodCostUsdCap) * 100 : undefined;
+      const projectedPctCost = periodCostUsdCap ? (projectedCostUsdEndOfPeriod / periodCostUsdCap) * 100 : undefined;
+
+      const maxPct = Math.max(
+        safeNum(usedPctTokens),
+        safeNum(projectedPctTokens),
+        safeNum(usedPctCost),
+        safeNum(projectedPctCost)
+      );
+
+      let state: ProviderBudgetStatus["state"] = "ok";
+      if (maxPct >= hardPct && hardPct > 0) state = "blocked";
+      else if (maxPct >= warnPct && warnPct > 0) state = "warning";
+
+      return {
+        provider,
+        owner: rule.owner,
+        period: inferredPeriod,
+        periodDays,
+        periodStartIso: periodStart.toISOString(),
+        periodEndIso: periodEnd.toISOString(),
+        observedMessages,
+        observedTokens,
+        observedCostUsd,
+        projectedTokensEndOfPeriod,
+        projectedCostUsdEndOfPeriod,
+        periodTokensCap,
+        periodCostUsdCap,
+        usedPctTokens,
+        usedPctCost,
+        projectedPctTokens,
+        projectedPctCost,
+        warnPct,
+        hardPct,
+        state,
+        notes,
+      };
+    });
+
+  return { allocationWarnings, budgets };
+}
+
 async function walkJsonlFiles(root: string): Promise<string[]> {
   const out: string[] = [];
   const stack = [root];
@@ -451,7 +768,10 @@ function readSettings(cwd: string): QuotaVisibilitySettings {
       defaultDays: safeNum(cfg.defaultDays) || undefined,
       weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
       weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
+      monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
+      monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
       providerWindowHours: parseProviderWindowHours(cfg.providerWindowHours),
+      providerBudgets: parseProviderBudgets(cfg.providerBudgets),
     };
   } catch {
     return {};
@@ -576,7 +896,10 @@ export function buildQuotaStatus(
     scannedFiles: number;
     weeklyQuotaTokens?: number;
     weeklyQuotaCostUsd?: number;
+    monthlyQuotaTokens?: number;
+    monthlyQuotaCostUsd?: number;
     providerWindowHours: ProviderWindowHours;
+    providerBudgets: ProviderBudgetMap;
   }
 ): QuotaStatus {
   const totals = {
@@ -638,6 +961,15 @@ export function buildQuotaStatus(
     .map(([provider, hours]) => buildProviderWindowInsight(provider, hours, usageEvents, params.days))
     .sort((a, b) => b.observedTokens - a.observedTokens);
 
+  const providerBudgetEval = buildProviderBudgetStatuses(usageEvents, {
+    days: params.days,
+    weeklyQuotaTokens: params.weeklyQuotaTokens,
+    weeklyQuotaCostUsd: params.weeklyQuotaCostUsd,
+    monthlyQuotaTokens: params.monthlyQuotaTokens,
+    monthlyQuotaCostUsd: params.monthlyQuotaCostUsd,
+    providerBudgets: params.providerBudgets,
+  });
+
   return {
     source: {
       sessionsRoot: params.sessionsRoot,
@@ -664,6 +996,11 @@ export function buildQuotaStatus(
       usedPctCost,
       projectedPctCost,
     },
+    providerBudgetPolicy: {
+      configuredProviders: Object.keys(params.providerBudgets).length,
+      allocationWarnings: providerBudgetEval.allocationWarnings,
+    },
+    providerBudgets: providerBudgetEval.budgets,
     daily: [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day)),
     models: [...byModel.entries()]
       .map(([model, v]) => ({ model, ...v }))
@@ -674,12 +1011,15 @@ export function buildQuotaStatus(
   };
 }
 
-async function analyzeQuota(
+export async function analyzeQuota(
   params: {
     days: number;
     weeklyQuotaTokens?: number;
     weeklyQuotaCostUsd?: number;
+    monthlyQuotaTokens?: number;
+    monthlyQuotaCostUsd?: number;
     providerWindowHours: ProviderWindowHours;
+    providerBudgets: ProviderBudgetMap;
   }
 ): Promise<QuotaStatus> {
   const sessionsRoot = path.join(homedir(), ".pi", "agent", "sessions");
@@ -712,7 +1052,10 @@ async function analyzeQuota(
     scannedFiles: filtered.length,
     weeklyQuotaTokens: params.weeklyQuotaTokens,
     weeklyQuotaCostUsd: params.weeklyQuotaCostUsd,
+    monthlyQuotaTokens: params.monthlyQuotaTokens,
+    monthlyQuotaCostUsd: params.monthlyQuotaCostUsd,
     providerWindowHours: params.providerWindowHours,
+    providerBudgets: params.providerBudgets,
   });
 }
 
@@ -756,6 +1099,40 @@ function formatWindowInsightLine(w: ProviderWindowInsight): string {
   ].join("\n");
 }
 
+function formatProviderBudgetLine(b: ProviderBudgetStatus): string {
+  const stateTag = b.state === "blocked" ? "BLOCK" : b.state === "warning" ? "WARN" : "OK";
+  const owner = b.owner ? ` owner=${b.owner}` : "";
+  const capTok = b.periodTokensCap ? fmt(b.periodTokensCap) : "n/a";
+  const capUsd = b.periodCostUsdCap ? money(b.periodCostUsdCap) : "n/a";
+  return [
+    `  - [${stateTag}] ${b.provider}${owner} | period=${b.period} | used=${fmt(b.observedTokens)} tok (${pct(b.usedPctTokens)}) / cap=${capTok}`,
+    `    cost=${money(b.observedCostUsd)} (${pct(b.usedPctCost)}) / cap=${capUsd} | proj@period-end=${fmt(b.projectedTokensEndOfPeriod)} tok (${pct(b.projectedPctTokens)})`,
+    `    window: ${b.periodStartIso} -> ${b.periodEndIso}`,
+  ].join("\n");
+}
+
+function formatProviderBudgetsReport(s: QuotaStatus, provider?: string): string {
+  const normalized = provider ? normalizeProvider(provider) : undefined;
+  const rows = normalized
+    ? s.providerBudgets.filter((b) => b.provider === normalized)
+    : s.providerBudgets;
+
+  if (rows.length === 0) {
+    return normalized
+      ? `quota-visibility budget: provider '${normalized}' não configurado em providerBudgets.`
+      : "quota-visibility budget: sem providerBudgets configurado.";
+  }
+
+  const lines: string[] = [];
+  lines.push(`quota-visibility budget (${s.source.windowDays}d)`);
+  if (s.providerBudgetPolicy.allocationWarnings.length > 0) {
+    lines.push("allocation warnings:");
+    for (const w of s.providerBudgetPolicy.allocationWarnings) lines.push(`  - ${w}`);
+  }
+  for (const b of rows) lines.push(formatProviderBudgetLine(b));
+  return lines.join("\n");
+}
+
 function formatStatusReport(s: QuotaStatus): string {
   const lines: string[] = [];
   lines.push("quota-visibility");
@@ -771,6 +1148,15 @@ function formatStatusReport(s: QuotaStatus): string {
     }
     if (s.quota.weeklyCostUsd) {
       lines.push(`  weekly usd: ${money(s.quota.weeklyCostUsd)} | used: ${pct(s.quota.usedPctCost)} | projected: ${pct(s.quota.projectedPctCost)}`);
+    }
+  }
+
+  if (s.providerBudgets.length > 0) {
+    const blocked = s.providerBudgets.filter((b) => b.state === "blocked").length;
+    const warn = s.providerBudgets.filter((b) => b.state === "warning").length;
+    lines.push(`provider budgets: ${s.providerBudgets.length} configured | blocked=${blocked} | warning=${warn}`);
+    if (s.providerBudgetPolicy.allocationWarnings.length > 0) {
+      lines.push(`  allocation warnings: ${s.providerBudgetPolicy.allocationWarnings.length}`);
     }
   }
 
@@ -834,13 +1220,18 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
       days?: number;
       weeklyQuotaTokens?: number;
       weeklyQuotaCostUsd?: number;
+      monthlyQuotaTokens?: number;
+      monthlyQuotaCostUsd?: number;
       providerWindowHoursOverride?: ProviderWindowHours;
+      providerBudgetsOverride?: ProviderBudgetMap;
     }
   ) {
     const cfg = readSettings(ctx.cwd);
-    const days = Math.max(1, Math.min(90, Math.floor(args.days ?? cfg.defaultDays ?? DEFAULT_DAYS)));
+    const baseDays = Math.max(1, Math.min(90, Math.floor(args.days ?? cfg.defaultDays ?? DEFAULT_DAYS)));
     const weeklyQuotaTokens = args.weeklyQuotaTokens ?? cfg.weeklyQuotaTokens;
     const weeklyQuotaCostUsd = args.weeklyQuotaCostUsd ?? cfg.weeklyQuotaCostUsd;
+    const monthlyQuotaTokens = args.monthlyQuotaTokens ?? cfg.monthlyQuotaTokens;
+    const monthlyQuotaCostUsd = args.monthlyQuotaCostUsd ?? cfg.monthlyQuotaCostUsd;
 
     const providerWindowHours: ProviderWindowHours = {
       ...DEFAULT_PROVIDER_WINDOW_HOURS,
@@ -848,7 +1239,31 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
       ...(args.providerWindowHoursOverride ?? {}),
     };
 
-    const key = JSON.stringify({ days, weeklyQuotaTokens, weeklyQuotaCostUsd, providerWindowHours });
+    const providerBudgets: ProviderBudgetMap = {
+      ...(cfg.providerBudgets ?? {}),
+      ...(args.providerBudgetsOverride ?? {}),
+    };
+
+    const needsMonthlyWindow = Object.values(providerBudgets).some((rule) => {
+      const period = rule.period ??
+        ((rule.monthlyQuotaTokens || rule.monthlyQuotaCostUsd || rule.shareMonthlyTokensPct || rule.shareMonthlyCostPct)
+          ? "monthly"
+          : "weekly");
+      return period === "monthly";
+    });
+
+    const dayOfMonth = new Date().getDate();
+    const days = Math.max(baseDays, needsMonthlyWindow ? dayOfMonth : 0);
+
+    const key = JSON.stringify({
+      days,
+      weeklyQuotaTokens,
+      weeklyQuotaCostUsd,
+      monthlyQuotaTokens,
+      monthlyQuotaCostUsd,
+      providerWindowHours,
+      providerBudgets,
+    });
     const prev = cache.get(key);
     if (prev && Date.now() - prev.at < 30_000) return prev.value;
 
@@ -856,7 +1271,10 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
       days,
       weeklyQuotaTokens,
       weeklyQuotaCostUsd,
+      monthlyQuotaTokens,
+      monthlyQuotaCostUsd,
       providerWindowHours,
+      providerBudgets,
     });
     cache.set(key, { at: Date.now(), value: status });
     return status;
@@ -865,14 +1283,22 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "quota_visibility_status",
     label: "Quota Visibility Status",
-    description: "Analyze local pi session usage and estimate weekly quota burn (tokens/cost + provider windows).",
+    description: "Analyze local pi session usage and estimate weekly/monthly quota burn (tokens/cost + provider windows).",
     parameters: Type.Object({
       days: Type.Optional(Type.Number({ minimum: 1, maximum: 90 })),
       weeklyQuotaTokens: Type.Optional(Type.Number({ minimum: 1 })),
       weeklyQuotaCostUsd: Type.Optional(Type.Number({ minimum: 0.01 })),
+      monthlyQuotaTokens: Type.Optional(Type.Number({ minimum: 1 })),
+      monthlyQuotaCostUsd: Type.Optional(Type.Number({ minimum: 0.01 })),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const p = params as { days?: number; weeklyQuotaTokens?: number; weeklyQuotaCostUsd?: number };
+      const p = params as {
+        days?: number;
+        weeklyQuotaTokens?: number;
+        weeklyQuotaCostUsd?: number;
+        monthlyQuotaTokens?: number;
+        monthlyQuotaCostUsd?: number;
+      };
       const status = await getStatus(ctx, p);
       return {
         content: [{ type: "text", text: JSON.stringify(status, null, 2) }],
@@ -915,6 +1341,29 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
   });
 
   pi.registerTool({
+    name: "quota_visibility_provider_budgets",
+    label: "Quota Visibility Provider Budgets",
+    description: "Evaluate per-provider quota caps/shares (including warning/block states).",
+    parameters: Type.Object({
+      days: Type.Optional(Type.Number({ minimum: 1, maximum: 90 })),
+      provider: Type.Optional(Type.String()),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = params as { days?: number; provider?: string };
+      const status = await getStatus(ctx, { days: p.days });
+      const normalized = p.provider ? normalizeProvider(p.provider) : undefined;
+      const data = normalized
+        ? status.providerBudgets.filter((b) => b.provider === normalized)
+        : status.providerBudgets;
+
+      return {
+        content: [{ type: "text", text: JSON.stringify({ allocationWarnings: status.providerBudgetPolicy.allocationWarnings, data }, null, 2) }],
+        details: { provider: normalized, allocationWarnings: status.providerBudgetPolicy.allocationWarnings, data },
+      };
+    },
+  });
+
+  pi.registerTool({
     name: "quota_visibility_export",
     label: "Quota Visibility Export",
     description: "Export a quota evidence JSON report under .pi/reports for provider dispute/audit.",
@@ -922,9 +1371,17 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
       days: Type.Optional(Type.Number({ minimum: 1, maximum: 90 })),
       weeklyQuotaTokens: Type.Optional(Type.Number({ minimum: 1 })),
       weeklyQuotaCostUsd: Type.Optional(Type.Number({ minimum: 0.01 })),
+      monthlyQuotaTokens: Type.Optional(Type.Number({ minimum: 1 })),
+      monthlyQuotaCostUsd: Type.Optional(Type.Number({ minimum: 0.01 })),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const p = params as { days?: number; weeklyQuotaTokens?: number; weeklyQuotaCostUsd?: number };
+      const p = params as {
+        days?: number;
+        weeklyQuotaTokens?: number;
+        weeklyQuotaCostUsd?: number;
+        monthlyQuotaTokens?: number;
+        monthlyQuotaCostUsd?: number;
+      };
       const status = await getStatus(ctx, p);
       const outputPath = await writeEvidenceBundle(ctx, status);
       return {
@@ -935,7 +1392,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
   });
 
   pi.registerCommand("quota-visibility", {
-    description: "Consumer quota observability from ~/.pi sessions (status/windows/export).",
+    description: "Consumer quota observability from ~/.pi sessions (status/windows/budget/export).",
     handler: async (args, ctx) => {
       const tokens = (args ?? "").trim().split(/\s+/).filter(Boolean);
       const cmd = (tokens[0] ?? "status").toLowerCase();
@@ -966,6 +1423,25 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
         return;
       }
 
+      if (cmd === "budget") {
+        const maybeProvider = tokens[1];
+        const maybeDays = tokens[2];
+
+        let provider: string | undefined;
+        let days: number | undefined;
+
+        if (maybeProvider && parseDays(maybeProvider) === undefined) {
+          provider = maybeProvider;
+          days = parseDays(maybeDays);
+        } else {
+          days = parseDays(maybeProvider);
+        }
+
+        const status = await getStatus(ctx, { days });
+        ctx.ui.notify(formatProviderBudgetsReport(status, provider), "info");
+        return;
+      }
+
       if (cmd === "export") {
         const days = parseDays(tokens[1]);
         const status = await getStatus(ctx, { days });
@@ -974,7 +1450,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
         return;
       }
 
-      ctx.ui.notify("Usage: /quota-visibility <status|windows|export> [provider] [days]", "warning");
+      ctx.ui.notify("Usage: /quota-visibility <status|windows|budget|export> [provider] [days]", "warning");
     },
   });
 }

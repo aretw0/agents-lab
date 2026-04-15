@@ -1,0 +1,18 @@
+{
+  "events": [
+    {
+      "schemaVersion": "1.0",
+      "source": {
+        "provider": "matrix",
+        "threadId": "room-42"
+      },
+      "event": {
+        "id": "evt-1",
+        "type": "summary",
+        "timestampIso": "2026-04-15T10:00:00.000Z",
+        "role": "user",
+        "text": "The following is a summary of a branch that this conversation came back from:\n<summary>## Next Steps\n1. Priorizar promotion c3\n## In Progress\n- TASK-BUD-024\n## Blocked\n- Nenhum</summary>"
+      }
+    }
+  ]
+}

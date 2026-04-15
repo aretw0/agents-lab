@@ -29,10 +29,11 @@ npm run pi:parity
 
 A extensão `quota-visibility` adiciona:
 
-- comando: `/quota-visibility <status|windows|export> [provider] [days]`
+- comando: `/quota-visibility <status|windows|budget|export> [provider] [days]`
 - tools:
   - `quota_visibility_status`
   - `quota_visibility_windows`
+  - `quota_visibility_provider_budgets`
   - `quota_visibility_export`
 
 ### 1) Status rápido (janela padrão)
@@ -74,7 +75,25 @@ Mesmo que vocês usem pouco Anthropic no Pi, manter `anthropic: 5` configurado a
 
 > Importante: isso é evidência estatística local, não garantia oficial do provider.
 
-### 4) Export para evidência
+### 4) Budget por provider (share/cap com estado WARN/BLOCK)
+
+```text
+/quota-visibility budget
+/quota-visibility budget openai-codex 14
+```
+
+Mostra, por provider configurado em `providerBudgets`:
+- owner opcional (ex.: colega/time dono da cota);
+- consumo observado + projeção 7d;
+- cap semanal resolvido (absoluto ou por % da quota global);
+- estado:
+  - `OK` (abaixo de `warnPct`),
+  - `WARN` (>= `warnPct`),
+  - `BLOCK` (>= `hardPct`).
+
+> Observação importante: hoje a medição é por **provider**. Se você usar múltiplas chaves no mesmo provider, o runtime local não separa automaticamente por chave/conta sem tagging adicional.
+
+### 5) Export para evidência
 
 ```text
 /quota-visibility export 7
@@ -90,7 +109,7 @@ Esse bundle é o anexo ideal para abrir ticket com provedor.
 
 ---
 
-## Configuração opcional (meta semanal + providers com janela curta)
+## Configuração opcional (meta semanal + janelas + budget por provider)
 
 Em `.pi/settings.json`:
 
@@ -101,18 +120,51 @@ Em `.pi/settings.json`:
       "defaultDays": 7,
       "weeklyQuotaTokens": 250000,
       "weeklyQuotaCostUsd": 25,
+      "monthlyQuotaTokens": 600000,
+      "monthlyQuotaCostUsd": 60,
       "providerWindowHours": {
         "anthropic": 5,
         "openai-codex": 5
+      },
+      "providerBudgets": {
+        "openai-codex": {
+          "owner": "colega-a",
+          "period": "weekly",
+          "shareTokensPct": 30,
+          "shareCostPct": 30,
+          "warnPct": 75,
+          "hardPct": 100
+        },
+        "github-copilot": {
+          "owner": "colega-b",
+          "period": "monthly",
+          "shareMonthlyTokensPct": 50,
+          "shareMonthlyCostPct": 50,
+          "warnPct": 80,
+          "hardPct": 100
+        }
       }
     }
   }
 }
 ```
 
-Com isso, o status também mostra `% usado` e `% projetado` da semana, além de monitoramento das janelas rolling por provider.
+Com isso, o status também mostra `% usado` e `% projetado` da semana, monitoramento das janelas rolling e avaliação de budget por provider.
 
 Se o Codex passar a operar com peak hours de forma mais explícita, você já terá baseline histórico para reagir rápido.
+
+### Operação com cota emprestada (colegas/time)
+
+1. definir por escrito o acordo de `%` ou cap absoluto por provider;
+2. registrar `owner` no `providerBudgets`;
+3. validar diariamente com `/quota-visibility budget`;
+4. se entrar em `BLOCK`, pausar execuções de alto custo até renegociar limite.
+
+Boas práticas:
+- para providers com cota mensal fixa (ex.: GitHub Copilot; validar Gemini caso use o mesmo modelo), prefira `period: "monthly"`;
+- prefira fluxo de autenticação do provider (sem compartilhar segredo em chat);
+- não persistir tokens/chaves em docs/versionamento;
+- manter evidência exportável (`/quota-visibility export`) para reconciliação transparente com quem emprestou cota.
 
 ---
 

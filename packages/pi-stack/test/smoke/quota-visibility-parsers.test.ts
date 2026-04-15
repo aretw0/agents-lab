@@ -2,8 +2,10 @@ import { describe, it, expect } from "vitest";
 import {
   extractUsage,
   parseProviderWindowHours,
+  parseProviderBudgets,
   computeWindowStartScores,
   buildProviderWindowInsight,
+  buildProviderBudgetStatuses,
   type QuotaUsageEvent,
 } from "../../extensions/quota-visibility";
 
@@ -38,6 +40,30 @@ describe("quota-visibility parsers", () => {
     });
   });
 
+  it("parseProviderBudgets normaliza regras de share/owner", () => {
+    const budgets = parseProviderBudgets({
+      "openai-codex": {
+        owner: "time-a",
+        shareTokensPct: "30",
+        shareCostPct: 25,
+        warnPct: 70,
+        hardPct: 95,
+      },
+      invalid: {
+        shareTokensPct: 999,
+      },
+    });
+
+    expect(budgets["openai-codex"]).toMatchObject({
+      owner: "time-a",
+      shareTokensPct: 30,
+      shareCostPct: 25,
+      warnPct: 70,
+      hardPct: 95,
+    });
+    expect(budgets.invalid).toBeUndefined();
+  });
+
   it("computeWindowStartScores soma janela circular corretamente", () => {
     const hourly = Array.from({ length: 24 }, () => 0);
     hourly[14] = 100;
@@ -48,6 +74,96 @@ describe("quota-visibility parsers", () => {
     expect(scores[11]).toBe(150); // 11..15
     expect(scores[10]).toBe(100); // 10..14
     expect(scores[0]).toBe(0);
+  });
+
+  it("buildProviderBudgetStatuses aplica shares e bloqueio por provider", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 2 * 3600_000).toISOString(),
+        timestampMs: now - 2 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 1,
+        provider: "openai-codex",
+        model: "gpt-5",
+        tokens: 4000,
+        costUsd: 1.2,
+        sessionFile: "s1.jsonl",
+      },
+      {
+        timestampIso: new Date(now - 1 * 3600_000).toISOString(),
+        timestampMs: now - 1 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 2,
+        provider: "openai-codex",
+        model: "gpt-5",
+        tokens: 2000,
+        costUsd: 0.8,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 7,
+      weeklyQuotaTokens: 10000,
+      weeklyQuotaCostUsd: 10,
+      providerBudgets: {
+        "openai-codex": {
+          owner: "time-a",
+          shareTokensPct: 50,
+          shareCostPct: 20,
+          warnPct: 70,
+          hardPct: 90,
+        },
+      },
+    });
+
+    expect(evalResult.allocationWarnings).toEqual([]);
+    expect(evalResult.budgets).toHaveLength(1);
+    expect(evalResult.budgets[0]?.provider).toBe("openai-codex");
+    expect(evalResult.budgets[0]?.period).toBe("weekly");
+    expect(evalResult.budgets[0]?.periodTokensCap).toBe(5000);
+    expect(evalResult.budgets[0]?.periodCostUsdCap).toBe(2);
+    expect(evalResult.budgets[0]?.state).toBe("blocked");
+  });
+
+  it("buildProviderBudgetStatuses suporta cota mensal fixa", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 3 * 24 * 3600_000).toISOString(),
+        timestampMs: now - 3 * 24 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 10,
+        provider: "github-copilot",
+        model: "gpt-5",
+        tokens: 1000,
+        costUsd: 0.3,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 30,
+      monthlyQuotaTokens: 10000,
+      monthlyQuotaCostUsd: 20,
+      providerBudgets: {
+        "github-copilot": {
+          owner: "colega-b",
+          period: "monthly",
+          shareMonthlyTokensPct: 50,
+          shareMonthlyCostPct: 50,
+          warnPct: 80,
+          hardPct: 100,
+        },
+      },
+    });
+
+    expect(evalResult.budgets).toHaveLength(1);
+    expect(evalResult.budgets[0]?.provider).toBe("github-copilot");
+    expect(evalResult.budgets[0]?.period).toBe("monthly");
+    expect(evalResult.budgets[0]?.periodTokensCap).toBe(5000);
+    expect(evalResult.budgets[0]?.periodCostUsdCap).toBe(10);
   });
 
   it("buildProviderWindowInsight destaca pico e início antes do pico", () => {

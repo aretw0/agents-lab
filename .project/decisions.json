@@ -69,6 +69,20 @@
       "rationale": "Remove gargalo de micro-direcionamento humano sem perder soberania, rastreabilidade e controle de risco.",
       "status": "decided",
       "context": "Objetivo explícito do usuário de maximizar potencial do agents-lab e preparar migração de operação para Refarm."
+    },
+    {
+      "id": "DEC-BUD-011",
+      "decision": "Tratar análise de histórico conversacional como capability provider-agnostic (event model canônico + adapters), começando por sessões locais do pi e evoluindo para canais externos (Telegram, WhatsApp, Matrix, Signal, etc.).",
+      "rationale": "O caos operacional vem de múltiplas threads/plataformas; a organização não pode depender de um runtime único. Um contrato canônico evita lock-in e permite triagem consistente independentemente da origem.",
+      "status": "decided",
+      "context": "Diretriz explícita do usuário para cultivar ferramentas de ordem operacional cross-platform."
+    },
+    {
+      "id": "DEC-BUD-012",
+      "decision": "Suportar budget compartilhado por provider com caps absolutos ou percentuais (warn/block), para operar cota emprestada de forma auditável e com limites explícitos.",
+      "rationale": "Colaboração com colegas exige controle previsível de consumo por provider; sem cap por provider, acordos de cota ociosa ficam frágeis e geram risco operacional/relacional.",
+      "status": "decided",
+      "context": "Pedido explícito do usuário para travar uso por porcentagem acordada com terceiros."
     }
   ]
 }

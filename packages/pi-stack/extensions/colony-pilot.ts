@@ -19,6 +19,13 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
+import {
+  analyzeQuota,
+  parseProviderBudgets,
+  safeNum,
+  type ProviderBudgetMap,
+  type ProviderBudgetStatus,
+} from "./quota-visibility";
 
 type MonitorMode = "on" | "off" | "unknown";
 
@@ -317,6 +324,10 @@ const DEFAULT_BUDGET_POLICY: ColonyPilotBudgetPolicyConfig = {
   defaultMaxCostUsd: 2,
   hardCapUsd: 20,
   minMaxCostUsd: 0.05,
+  enforceProviderBudgetBlock: false,
+  providerBudgetLookbackDays: 30,
+  allowProviderBudgetOverride: true,
+  providerBudgetOverrideToken: "budget-override:",
 };
 
 const DEFAULT_PROJECT_TASK_SYNC: ColonyPilotProjectTaskSyncConfig = {
@@ -415,6 +426,14 @@ function normalizeOptionalBudget(value: unknown): number | undefined {
 }
 
 export function resolveColonyPilotBudgetPolicy(raw?: Partial<ColonyPilotBudgetPolicyConfig>): ColonyPilotBudgetPolicyConfig {
+  const providerBudgetLookbackDaysRaw = typeof raw?.providerBudgetLookbackDays === "number" && Number.isFinite(raw.providerBudgetLookbackDays)
+    ? Math.floor(raw.providerBudgetLookbackDays)
+    : DEFAULT_BUDGET_POLICY.providerBudgetLookbackDays;
+
+  const providerBudgetOverrideTokenRaw = typeof raw?.providerBudgetOverrideToken === "string"
+    ? raw.providerBudgetOverrideToken.trim()
+    : "";
+
   return {
     enabled: raw?.enabled === true,
     enforceOnAntColonyTool: raw?.enforceOnAntColonyTool !== false,
@@ -423,6 +442,12 @@ export function resolveColonyPilotBudgetPolicy(raw?: Partial<ColonyPilotBudgetPo
     defaultMaxCostUsd: normalizeOptionalBudget(raw?.defaultMaxCostUsd) ?? DEFAULT_BUDGET_POLICY.defaultMaxCostUsd,
     hardCapUsd: normalizeOptionalBudget(raw?.hardCapUsd) ?? DEFAULT_BUDGET_POLICY.hardCapUsd,
     minMaxCostUsd: normalizeOptionalBudget(raw?.minMaxCostUsd) ?? DEFAULT_BUDGET_POLICY.minMaxCostUsd,
+    enforceProviderBudgetBlock: raw?.enforceProviderBudgetBlock === true,
+    providerBudgetLookbackDays: Math.max(1, Math.min(90, providerBudgetLookbackDaysRaw)),
+    allowProviderBudgetOverride: raw?.allowProviderBudgetOverride !== false,
+    providerBudgetOverrideToken: providerBudgetOverrideTokenRaw.length > 0
+      ? providerBudgetOverrideTokenRaw
+      : DEFAULT_BUDGET_POLICY.providerBudgetOverrideToken,
   };
 }
 
@@ -531,6 +556,121 @@ export function colonyPhaseToProjectTaskStatus(
   return "in-progress";
 }
 
+export function parseBudgetOverrideReason(goal: string, overrideToken: string): string | undefined {
+  const token = overrideToken.trim();
+  if (!token) return undefined;
+
+  const lowerGoal = goal.toLowerCase();
+  const lowerToken = token.toLowerCase();
+  const idx = lowerGoal.indexOf(lowerToken);
+  if (idx < 0) return undefined;
+
+  const raw = goal.slice(idx + token.length).trim();
+  if (!raw) return undefined;
+
+  const reason = raw.split(/[\r\n;]+/)[0]?.trim();
+  return reason && reason.length > 0 ? reason : undefined;
+}
+
+export function collectAntColonyProviders(input: AntColonyToolInput, currentModelRef?: string): string[] {
+  const out = new Set<string>();
+
+  const add = (modelRef?: string) => {
+    const provider = providerOf(modelRef);
+    if (provider) out.add(provider);
+  };
+
+  add(currentModelRef);
+  add(input.scoutModel);
+  add(input.workerModel);
+  add(input.soldierModel);
+  add(input.designWorkerModel);
+  add(input.multimodalWorkerModel);
+  add(input.backendWorkerModel);
+  add(input.reviewWorkerModel);
+
+  return [...out.values()].sort();
+}
+
+export interface ColonyPilotProviderBudgetGateEvaluation {
+  ok: boolean;
+  checked: boolean;
+  issues: string[];
+  consideredProviders: string[];
+  blockedProviders: string[];
+  allocationWarnings: string[];
+  overrideReason?: string;
+}
+
+export function evaluateProviderBudgetGate(
+  input: AntColonyToolInput,
+  currentModelRef: string | undefined,
+  goal: string,
+  statuses: ProviderBudgetStatus[],
+  allocationWarnings: string[],
+  policy: ColonyPilotBudgetPolicyConfig
+): ColonyPilotProviderBudgetGateEvaluation {
+  const consideredProviders = collectAntColonyProviders(input, currentModelRef);
+  if (statuses.length === 0) {
+    return {
+      ok: true,
+      checked: false,
+      issues: [],
+      consideredProviders,
+      blockedProviders: [],
+      allocationWarnings,
+    };
+  }
+
+  const blocked = statuses
+    .filter((s) => s.state === "blocked")
+    .filter((s) => consideredProviders.length === 0 || consideredProviders.includes(s.provider));
+
+  if (blocked.length === 0) {
+    return {
+      ok: true,
+      checked: true,
+      issues: [],
+      consideredProviders,
+      blockedProviders: [],
+      allocationWarnings,
+    };
+  }
+
+  const blockedProviders = blocked.map((s) => s.provider).sort();
+
+  if (policy.allowProviderBudgetOverride) {
+    const reason = parseBudgetOverrideReason(goal, policy.providerBudgetOverrideToken);
+    if (reason) {
+      return {
+        ok: true,
+        checked: true,
+        issues: [],
+        consideredProviders,
+        blockedProviders,
+        allocationWarnings,
+        overrideReason: reason,
+      };
+    }
+  }
+
+  const issues = [
+    `provider budget blocked for: ${blockedProviders.join(", ")}`,
+    policy.allowProviderBudgetOverride
+      ? `override required in goal: '${policy.providerBudgetOverrideToken}<reason>'`
+      : "override disabled by policy",
+  ];
+
+  return {
+    ok: false,
+    checked: true,
+    issues,
+    consideredProviders,
+    blockedProviders,
+    allocationWarnings,
+  };
+}
+
 export function evaluateAntColonyBudgetPolicy(
   input: AntColonyToolInput,
   policy: ColonyPilotBudgetPolicyConfig
@@ -586,6 +726,10 @@ function formatBudgetPolicyEvaluation(
     `  defaultMaxCostUsd: ${policy.defaultMaxCostUsd ?? "(none)"}`,
     `  hardCapUsd: ${policy.hardCapUsd ?? "(none)"}`,
     `  minMaxCostUsd: ${policy.minMaxCostUsd ?? "(none)"}`,
+    `  enforceProviderBudgetBlock: ${policy.enforceProviderBudgetBlock ? "yes" : "no"}`,
+    `  providerBudgetLookbackDays: ${policy.providerBudgetLookbackDays}`,
+    `  allowProviderBudgetOverride: ${policy.allowProviderBudgetOverride ? "yes" : "no"}`,
+    `  providerBudgetOverrideToken: ${policy.providerBudgetOverrideToken}`,
     `  effectiveMaxCostUsd: ${evaluation.effectiveMaxCostUsd ?? "(none)"}`,
   ];
 }
@@ -918,6 +1062,10 @@ export interface ColonyPilotBudgetPolicyConfig {
   defaultMaxCostUsd?: number;
   hardCapUsd?: number;
   minMaxCostUsd?: number;
+  enforceProviderBudgetBlock: boolean;
+  providerBudgetLookbackDays: number;
+  allowProviderBudgetOverride: boolean;
+  providerBudgetOverrideToken: string;
 }
 
 export interface ColonyPilotBudgetPolicyEvaluation {
@@ -971,6 +1119,14 @@ interface ColonyPilotSettings {
   deliveryPolicy?: Partial<ColonyPilotDeliveryPolicyConfig>;
 }
 
+interface QuotaVisibilityBudgetSettings {
+  weeklyQuotaTokens?: number;
+  weeklyQuotaCostUsd?: number;
+  monthlyQuotaTokens?: number;
+  monthlyQuotaCostUsd?: number;
+  providerBudgets: ProviderBudgetMap;
+}
+
 function parseColonyPilotSettings(cwd: string): ColonyPilotSettings {
   try {
     const p = path.join(cwd, ".pi", "settings.json");
@@ -979,6 +1135,25 @@ function parseColonyPilotSettings(cwd: string): ColonyPilotSettings {
     return json?.piStack?.colonyPilot ?? json?.extensions?.colonyPilot ?? {};
   } catch {
     return {};
+  }
+}
+
+function parseQuotaVisibilityBudgetSettings(cwd: string): QuotaVisibilityBudgetSettings {
+  try {
+    const p = path.join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return { providerBudgets: {} };
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.quotaVisibility ?? {};
+
+    return {
+      weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
+      weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
+      monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
+      monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
+      providerBudgets: parseProviderBudgets(cfg.providerBudgets),
+    };
+  } catch {
+    return { providerBudgets: {} };
   }
 }
 
@@ -1233,6 +1408,10 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
           defaultMaxCostUsd: 2,
           hardCapUsd: 20,
           minMaxCostUsd: 0.05,
+          enforceProviderBudgetBlock: false,
+          providerBudgetLookbackDays: 30,
+          allowProviderBudgetOverride: true,
+          providerBudgetOverrideToken: "budget-override:",
         },
         projectTaskSync: {
           enabled: false,
@@ -1291,6 +1470,7 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
         budgetPolicy: {
           defaultMaxCostUsd: 1,
           hardCapUsd: 10,
+          enforceProviderBudgetBlock: true,
         },
         deliveryPolicy: {
           enabled: true,
@@ -1807,6 +1987,19 @@ async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
   }
 }
 
+interface ProviderBudgetGateSnapshot {
+  lookbackDays: number;
+  generatedAtIso: string;
+  budgets: ProviderBudgetStatus[];
+  allocationWarnings: string[];
+}
+
+function formatProviderBudgetStatusLine(status: ProviderBudgetStatus): string {
+  const capTokens = status.periodTokensCap ? Math.round(status.periodTokensCap).toLocaleString("en-US") : "n/a";
+  const usedPct = status.usedPctTokens !== undefined ? `${status.usedPctTokens.toFixed(1)}%` : "n/a";
+  return `  - ${status.provider} (${status.period}) used=${Math.round(status.observedTokens).toLocaleString("en-US")} tok (${usedPct}) cap=${capTokens}`;
+}
+
 export default function (pi: ExtensionAPI) {
   const state: PilotState = createPilotState();
 
@@ -1820,6 +2013,7 @@ export default function (pi: ExtensionAPI) {
   const colonyTaskMap = new Map<string, string>();
   const colonyGoalMap = new Map<string, string>();
   let preflightCache: { at: number; result: ColonyPilotPreflightResult } | undefined;
+  let providerBudgetGateCache: { at: number; key: string; snapshot: ProviderBudgetGateSnapshot } | undefined;
 
   pi.on("session_start", (_event, ctx) => {
     currentCtx = ctx;
@@ -1841,6 +2035,7 @@ export default function (pi: ExtensionAPI) {
     projectTaskSyncConfig = resolveColonyPilotProjectTaskSync(settings.projectTaskSync);
     deliveryPolicyConfig = resolveColonyPilotDeliveryPolicy(settings.deliveryPolicy);
     preflightCache = undefined;
+    providerBudgetGateCache = undefined;
 
     updateStatusUI(ctx, state);
   });
@@ -1923,6 +2118,45 @@ export default function (pi: ExtensionAPI) {
     colonyTaskMap.set(signal.id, syncResult.taskId);
   }
 
+  async function resolveProviderBudgetGateSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGateSnapshot | undefined> {
+    const quotaCfg = parseQuotaVisibilityBudgetSettings(ctx.cwd);
+    if (Object.keys(quotaCfg.providerBudgets).length === 0) return undefined;
+
+    const cacheKey = JSON.stringify({
+      cwd: ctx.cwd,
+      days: budgetPolicyConfig.providerBudgetLookbackDays,
+      weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
+      weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
+      monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
+      monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
+      providerBudgets: quotaCfg.providerBudgets,
+    });
+
+    if (providerBudgetGateCache && providerBudgetGateCache.key === cacheKey && Date.now() - providerBudgetGateCache.at < 30_000) {
+      return providerBudgetGateCache.snapshot;
+    }
+
+    const status = await analyzeQuota({
+      days: budgetPolicyConfig.providerBudgetLookbackDays,
+      weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
+      weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
+      monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
+      monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
+      providerWindowHours: {},
+      providerBudgets: quotaCfg.providerBudgets,
+    });
+
+    const snapshot: ProviderBudgetGateSnapshot = {
+      lookbackDays: budgetPolicyConfig.providerBudgetLookbackDays,
+      generatedAtIso: status.source.generatedAtIso,
+      budgets: status.providerBudgets,
+      allocationWarnings: status.providerBudgetPolicy.allocationWarnings,
+    };
+
+    providerBudgetGateCache = { at: Date.now(), key: cacheKey, snapshot };
+    return snapshot;
+  }
+
   pi.on("message_end", (event, ctx) => {
     const text = extractText((event as { message?: unknown }).message);
     if (!text) return;
@@ -1956,6 +2190,7 @@ export default function (pi: ExtensionAPI) {
     }
 
     const currentModelRef = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined;
+    const goal = typeof event.input.goal === "string" ? event.input.goal.trim() : "";
 
     if (modelPolicyConfig.enabled) {
       const evaluation = evaluateAntColonyModelPolicy(event.input, currentModelRef, ctx.modelRegistry, modelPolicyConfig);
@@ -1974,8 +2209,9 @@ export default function (pi: ExtensionAPI) {
       }
     }
 
+    let budgetEval: ColonyPilotBudgetPolicyEvaluation | undefined;
     if (budgetPolicyConfig.enabled && budgetPolicyConfig.enforceOnAntColonyTool) {
-      const budgetEval = evaluateAntColonyBudgetPolicy(event.input, budgetPolicyConfig);
+      budgetEval = evaluateAntColonyBudgetPolicy(event.input, budgetPolicyConfig);
       if (!budgetEval.ok) {
         const reason = `Blocked by colony-pilot budget-policy: ${budgetEval.issues.join("; ")}`;
         const msg = [
@@ -1990,7 +2226,68 @@ export default function (pi: ExtensionAPI) {
       }
     }
 
-    const goal = typeof event.input.goal === "string" ? event.input.goal.trim() : "";
+    if (budgetPolicyConfig.enabled && budgetPolicyConfig.enforceOnAntColonyTool && budgetPolicyConfig.enforceProviderBudgetBlock) {
+      const snapshot = await resolveProviderBudgetGateSnapshot(ctx);
+      const providerGateEval = evaluateProviderBudgetGate(
+        event.input,
+        currentModelRef,
+        goal,
+        snapshot?.budgets ?? [],
+        snapshot?.allocationWarnings ?? [],
+        budgetPolicyConfig
+      );
+
+      if (!providerGateEval.ok) {
+        const blockedRows = (snapshot?.budgets ?? [])
+          .filter((b) => providerGateEval.blockedProviders.includes(b.provider))
+          .map((b) => formatProviderBudgetStatusLine(b));
+
+        const reason = `Blocked by colony-pilot provider-budget gate: ${providerGateEval.issues.join("; ")}`;
+        const msg = [
+          "ant_colony bloqueada por provider-budget gate",
+          ...formatBudgetPolicyEvaluation(
+            budgetPolicyConfig,
+            budgetEval ?? evaluateAntColonyBudgetPolicy(event.input, budgetPolicyConfig)
+          ),
+          `  lookbackDays: ${snapshot?.lookbackDays ?? budgetPolicyConfig.providerBudgetLookbackDays}`,
+          `  snapshotAt: ${snapshot?.generatedAtIso ?? "(no data)"}`,
+          `  consideredProviders: ${providerGateEval.consideredProviders.join(", ") || "(none)"}`,
+          `  blockedProviders: ${providerGateEval.blockedProviders.join(", ") || "(none)"}`,
+          ...(snapshot?.allocationWarnings?.length
+            ? ["", "allocationWarnings:", ...snapshot.allocationWarnings.map((w) => `  - ${w}`)]
+            : []),
+          ...(blockedRows.length ? ["", "blocked status:", ...blockedRows] : []),
+          "",
+          "Ação:",
+          "  - Ajuste budgets/uso no provider",
+          `  - Ou use override auditável no goal: '${budgetPolicyConfig.providerBudgetOverrideToken}<motivo>'`,
+          "  - Inspecione: /quota-visibility budget <provider> <days>",
+        ].join("\n");
+        ctx.ui.notify(msg, "warning");
+        return { block: true, reason };
+      }
+
+      if (providerGateEval.overrideReason) {
+        const audit = {
+          atIso: new Date().toISOString(),
+          goal,
+          overrideReason: providerGateEval.overrideReason,
+          blockedProviders: providerGateEval.blockedProviders,
+          consideredProviders: providerGateEval.consideredProviders,
+          lookbackDays: snapshot?.lookbackDays ?? budgetPolicyConfig.providerBudgetLookbackDays,
+          snapshotAtIso: snapshot?.generatedAtIso,
+        };
+        pi.appendEntry("colony-pilot.provider-budget-override", audit);
+        ctx.ui.notify(
+          [
+            "provider-budget override aceito (auditado)",
+            `reason: ${providerGateEval.overrideReason}`,
+            `blockedProviders: ${providerGateEval.blockedProviders.join(", ") || "(none)"}`,
+          ].join("\n"),
+          "warning"
+        );
+      }
+    }
 
     if (
       deliveryPolicyConfig.enabled &&
@@ -2046,6 +2343,17 @@ export default function (pi: ExtensionAPI) {
         modelPolicyEvaluation,
         budgetPolicy: budgetPolicyConfig,
         budgetPolicyEvaluation,
+        providerBudgetGateCache: providerBudgetGateCache
+          ? {
+              at: new Date(providerBudgetGateCache.at).toISOString(),
+              lookbackDays: providerBudgetGateCache.snapshot.lookbackDays,
+              generatedAtIso: providerBudgetGateCache.snapshot.generatedAtIso,
+              blockedProviders: providerBudgetGateCache.snapshot.budgets
+                .filter((b) => b.state === "blocked")
+                .map((b) => b.provider),
+              allocationWarnings: providerBudgetGateCache.snapshot.allocationWarnings,
+            }
+          : undefined,
         projectTaskSync: projectTaskSyncConfig,
         deliveryPolicy: deliveryPolicyConfig,
         deliveryPolicyEvaluation,

@@ -29,6 +29,9 @@ import {
   evaluateAntColonyModelPolicy,
   resolveColonyPilotBudgetPolicy,
   evaluateAntColonyBudgetPolicy,
+  parseBudgetOverrideReason,
+  collectAntColonyProviders,
+  evaluateProviderBudgetGate,
   resolveColonyPilotProjectTaskSync,
   resolveColonyPilotDeliveryPolicy,
   evaluateColonyDeliveryEvidence,
@@ -396,6 +399,108 @@ describe("colony-pilot parsers", () => {
 
     expect(evalResult.ok).toBe(false);
     expect(evalResult.issues.some((i) => i.includes("hardCapUsd"))).toBe(true);
+  });
+
+  it("parseBudgetOverrideReason extrai motivo auditável", () => {
+    expect(parseBudgetOverrideReason("Executar swarm budget-override: incidente de produção", "budget-override:")).toBe(
+      "incidente de produção"
+    );
+    expect(parseBudgetOverrideReason("Executar swarm sem override", "budget-override:")).toBeUndefined();
+  });
+
+  it("collectAntColonyProviders agrega providers de queen e roles", () => {
+    const providers = collectAntColonyProviders(
+      {
+        goal: "x",
+        scoutModel: "openai-codex/gpt-5.4-mini",
+        workerModel: "github-copilot/claude-sonnet-4.6",
+      },
+      "openai-codex/gpt-5.5"
+    );
+
+    expect(providers).toEqual(["github-copilot", "openai-codex"]);
+  });
+
+  it("evaluateProviderBudgetGate bloqueia provider em BLOCK sem override", () => {
+    const policy = resolveColonyPilotBudgetPolicy({ enabled: true, enforceProviderBudgetBlock: true });
+    const evalResult = evaluateProviderBudgetGate(
+      { goal: "x", workerModel: "github-copilot/claude-sonnet-4.6" },
+      "github-copilot/claude-sonnet-4.6",
+      "x",
+      [
+        {
+          provider: "github-copilot",
+          period: "monthly",
+          periodDays: 30,
+          periodStartIso: "2026-04-01T00:00:00.000Z",
+          periodEndIso: "2026-04-30T23:59:59.999Z",
+          observedMessages: 10,
+          observedTokens: 1000,
+          observedCostUsd: 2,
+          projectedTokensEndOfPeriod: 6000,
+          projectedCostUsdEndOfPeriod: 12,
+          periodTokensCap: 5000,
+          periodCostUsdCap: 10,
+          usedPctTokens: 20,
+          usedPctCost: 20,
+          projectedPctTokens: 120,
+          projectedPctCost: 120,
+          warnPct: 80,
+          hardPct: 100,
+          state: "blocked",
+          notes: [],
+        },
+      ],
+      [],
+      policy
+    );
+
+    expect(evalResult.ok).toBe(false);
+    expect(evalResult.blockedProviders).toEqual(["github-copilot"]);
+  });
+
+  it("evaluateProviderBudgetGate permite override auditável", () => {
+    const policy = resolveColonyPilotBudgetPolicy({
+      enabled: true,
+      enforceProviderBudgetBlock: true,
+      allowProviderBudgetOverride: true,
+      providerBudgetOverrideToken: "budget-override:",
+    });
+
+    const evalResult = evaluateProviderBudgetGate(
+      { goal: "x", workerModel: "github-copilot/claude-sonnet-4.6" },
+      "github-copilot/claude-sonnet-4.6",
+      "Rodar agora budget-override: plantao critico",
+      [
+        {
+          provider: "github-copilot",
+          period: "monthly",
+          periodDays: 30,
+          periodStartIso: "2026-04-01T00:00:00.000Z",
+          periodEndIso: "2026-04-30T23:59:59.999Z",
+          observedMessages: 10,
+          observedTokens: 1000,
+          observedCostUsd: 2,
+          projectedTokensEndOfPeriod: 6000,
+          projectedCostUsdEndOfPeriod: 12,
+          periodTokensCap: 5000,
+          periodCostUsdCap: 10,
+          usedPctTokens: 20,
+          usedPctCost: 20,
+          projectedPctTokens: 120,
+          projectedPctCost: 120,
+          warnPct: 80,
+          hardPct: 100,
+          state: "blocked",
+          notes: [],
+        },
+      ],
+      [],
+      policy
+    );
+
+    expect(evalResult.ok).toBe(true);
+    expect(evalResult.overrideReason).toBe("plantao critico");
   });
 
   it("project task sync resolver aplica defaults e clamp", () => {

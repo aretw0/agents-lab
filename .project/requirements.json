@@ -124,6 +124,32 @@
         "Colônias podem selecionar próxima tarefa elegível do backlog dentro de budget e políticas hard.",
         "Revisão humana permanece gate final para fechamento estratégico."
       ]
+    },
+    {
+      "id": "REQ-BUD-011",
+      "description": "A capability de triagem de histórico deve evoluir para ingestão multi-fonte (pi local + canais externos) via contrato canônico de evento/conversa, preservando governança e rastreabilidade.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe esquema canônico de evento de conversa (mensagem, thread, branch, status, origem).",
+        "Adapters de ingestão podem ser plugados por provider sem alterar regras de governança do board.",
+        "Triagem mantém split operacional reproduzível (unlock-now vs later) independentemente da plataforma de origem."
+      ]
+    },
+    {
+      "id": "REQ-BUD-012",
+      "description": "A governança de consumo deve suportar budget semanal por provider com cap absoluto e/ou percentual da quota global, incluindo estados operacionais de alerta e bloqueio.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Configuração permite definir limites por provider (tokens/custo) e/ou percentuais da quota global.",
+        "Relatório de quota expõe estado por provider (OK/WARN/BLOCK) com projeção 7d.",
+        "Evidência exportável inclui avaliação de budget por provider para auditoria."
+      ]
     }
   ]
 }
