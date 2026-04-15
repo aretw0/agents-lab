@@ -198,7 +198,7 @@
       "id": "colony-c1",
       "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock.\n\nContexto já pronto:\n- .project agora é versionado no git e é o board oficial.\n- Budget policy e projectTaskSync do colony-pilot já existem.\n\nObjetivos desta execução:\n1) Consolidar Swarm Launch Policy v1 (manual único)\n   - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana).\n   - Unificar links/referências para evitar duplicação/confusão.\n\n2) Fortalecer clock unificado em runtime\n   - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível).\n   - Manter sem auto-close; apenas status candidato para revisão humana.\n\n3) Aprendizado contínuo humano+agêntico (registro híbrido)\n   - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável).\n   - Produzir evidência executável (testes/comandos) para auditoria.\n\nCritérios de qualidade:\n- Mudanças incrementais, reversíveis e com testes.\n- Sem mexer em credenciais/sessões.\n- Não fechar tasks automaticamente.\n\nEntregáveis esperados:\n- Código + testes + docs atualizados.\n- Resumo final com riscos remanescentes, decisões e próximos passos.",
       "status": "in-progress",
-      "notes": "[2026-04-14T20:19:13.352Z] colony c1 phase=launched\n[2026-04-14T20:19:13.373Z] colony c1 phase=launched\n[2026-04-14T20:28:27.196Z] colony c1|colony-mnz2eg46-hw9a4 phase=complete (candidate only, aguardando revisão humana)\n[2026-04-14T21:38:32.019Z] colony c1 phase=launched\n[2026-04-14T21:38:32.034Z] colony c1 phase=launched\n[2026-04-14T21:58:10.079Z] colony c1 phase=launched\n[2026-04-14T21:58:10.107Z] colony c1 phase=launched\n[2026-04-14T22:07:17.872Z] colony c1 phase=completed (candidate only, aguardando revisão humana)"
+      "notes": "[2026-04-14T20:19:13.352Z] colony c1 phase=launched\n[2026-04-14T20:19:13.373Z] colony c1 phase=launched\n[2026-04-14T20:28:27.196Z] colony c1|colony-mnz2eg46-hw9a4 phase=complete (candidate only, aguardando revisão humana)\n[2026-04-14T21:38:32.019Z] colony c1 phase=launched\n[2026-04-14T21:38:32.034Z] colony c1 phase=launched\n[2026-04-14T21:58:10.079Z] colony c1 phase=launched\n[2026-04-14T21:58:10.107Z] colony c1 phase=launched\n[2026-04-14T22:07:17.872Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:26:11.221Z] colony c1 phase=launched\n[2026-04-15T07:26:11.237Z] colony c1 phase=launched\n[2026-04-15T07:32:45.742Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:32:45.789Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.582Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.619Z] promotion queued automatically: colony-c1-promotion\n[2026-04-15T07:34:02.630Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:34:02.664Z] promotion queued automatically: colony-c1-promotion"
     },
     {
       "id": "TASK-BUD-012",
@@ -225,7 +225,7 @@
       "id": "colony-c2",
       "description": "[COLONY:ant_colony] Recovery pass pós-colônia c1 para garantir injeção no branch principal e fechar lacunas remanescentes.\n\nContexto:\n- c1 reportou várias entregas, mas no main só parte do resultado apareceu.\n- Já corrigimos parsing de COMPLETE e consolidamos baseline tracker-agnostic no .project.\n\nObjetivo desta execução:\n1) Verificar diff real entre intenção de c1 e estado atual do main.\n2) Aplicar somente mudanças faltantes e úteis para:\n   - Swarm Launch Policy canônica (manual único + links sem duplicação)\n   - hardening deterministic sync colony->.project/tasks (single-writer/lock/atomic) caso ainda haja gaps\n   - testes de regressão no-auto-close/concorrência determinística se faltarem\n3) Produzir inventário final obrigatório de arquivos alterados e comandos de validação executados.\n4) Atualizar .project/tasks com status candidato (sem auto-close).\n\nRestrições:\n- Não fechar tasks automaticamente.\n- Mudanças incrementais, reversíveis, e com testes.\n- Sem credenciais/sessões.\n\nEntregável obrigatório:\n- Resumo final objetivo contendo: arquivos alterados, testes rodados (comandos), riscos residuais.",
       "status": "in-progress",
-      "notes": "[2026-04-14T20:41:30.990Z] colony c2 phase=launched\n[2026-04-14T20:41:31.003Z] colony c2 phase=launched\n[2026-04-14T20:49:11.602Z] colony c2|colony-mnz3749j-1lk3t phase=complete (candidate only, aguardando revisão humana)\n[2026-04-15T06:11:31.687Z] colony c2 phase=completed (candidate only, aguardando revisão humana)"
+      "notes": "[2026-04-14T20:41:30.990Z] colony c2 phase=launched\n[2026-04-14T20:41:31.003Z] colony c2 phase=launched\n[2026-04-14T20:49:11.602Z] colony c2|colony-mnz3749j-1lk3t phase=complete (candidate only, aguardando revisão humana)\n[2026-04-15T06:11:31.687Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:41:47.485Z] colony c2 phase=launched\n[2026-04-15T07:41:47.503Z] colony c2 phase=launched\n[2026-04-15T07:51:15.302Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:51:15.327Z] promotion queued automatically: colony-c2-promotion"
     },
     {
       "id": "TASK-BUD-013",
@@ -383,7 +383,7 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact."
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:32:45.768Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.608Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.648Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow"
     },
     {
       "id": "colony-c2-promotion",
@@ -397,7 +397,47 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact."
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow"
+    },
+    {
+      "id": "colony-c3",
+      "description": "[COLONY:ant_colony] Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais.",
+      "status": "in-progress",
+      "notes": "[2026-04-15T07:52:21.146Z] colony c3 phase=launched\n[2026-04-15T07:52:21.162Z] colony c3 phase=launched\n[2026-04-15T08:00:55.474Z] colony c3 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:00:55.524Z] promotion queued automatically: colony-c3-promotion"
+    },
+    {
+      "id": "colony-c3-promotion",
+      "description": "[RECOVERY:colony] Promote candidate colony-c3 — Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais.",
+      "status": "planned",
+      "depends_on": [
+        "colony-c3"
+      ],
+      "acceptance_criteria": [
+        "Coletar inventário final de arquivos alterados e validar se aplica ao branch alvo.",
+        "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
+        "Promover candidate para revisão humana (sem auto-close)."
+      ],
+      "notes": "[2026-04-15T08:00:55.504Z] auto-queued from colony c3: delivery mode 'patch-artifact' requires explicit promotion flow"
+    },
+    {
+      "id": "colony-c4",
+      "description": "[COLONY:ant_colony] Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3.",
+      "status": "in-progress",
+      "notes": "[2026-04-15T08:05:00.076Z] colony c4 phase=launched\n[2026-04-15T08:05:00.093Z] colony c4 phase=launched\n[2026-04-15T08:11:49.629Z] colony c4 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:11:49.653Z] promotion queued automatically: colony-c4-promotion"
+    },
+    {
+      "id": "colony-c4-promotion",
+      "description": "[RECOVERY:colony] Promote candidate colony-c4 — Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3.",
+      "status": "planned",
+      "depends_on": [
+        "colony-c4"
+      ],
+      "acceptance_criteria": [
+        "Coletar inventário final de arquivos alterados e validar se aplica ao branch alvo.",
+        "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
+        "Promover candidate para revisão humana (sem auto-close)."
+      ],
+      "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow"
     }
   ]
 }
