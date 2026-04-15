@@ -337,7 +337,13 @@ async function checkTool(
   authCheck?: { command: string; args: string[]; failHint: string }
 ): Promise<CheckResult> {
   try {
-    const result = await pi.exec(command, versionArgs, { timeout: 5000 });
+    let result = await pi.exec(command, versionArgs, { timeout: 5000 });
+
+    // Windows portability fallback: some runtimes fail spawning npm(.cmd) directly.
+    if (result.code !== 0 && process.platform === "win32" && name === "npm") {
+      result = await pi.exec("cmd", ["/c", "npm", "--version"], { timeout: 5000 });
+    }
+
     if (result.code !== 0) {
       return { name, status: "error", message: `Nao encontrado no PATH` };
     }
