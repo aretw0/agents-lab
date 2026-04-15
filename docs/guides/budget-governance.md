@@ -120,6 +120,8 @@ Isso permite pesquisar e desenvolver sem confundir ausência de pacote com ausê
 5. Coletar evidência (`/usage`, `/quota-visibility export`).
 6. Revisar resultados com humano antes de fechar tasks.
 
+> Para disciplina operacional completa (cleanroom, promoção de candidate e reconciliação de drift), ver também: [`swarm-cleanroom-protocol.md`](./swarm-cleanroom-protocol.md).
+
 ---
 
 ## Regra de governança de tasks
