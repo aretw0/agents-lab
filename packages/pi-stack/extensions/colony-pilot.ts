@@ -97,6 +97,11 @@ export function parseRemoteAccessUrl(text: string): string | undefined {
   return m?.[1];
 }
 
+export function requiresApplyToBranch(goal: string): boolean {
+  const g = goal.toLowerCase();
+  return /\b(materializ|materializ[ae]r|promov|promotion|apply|aplicar|main|branch principal|merge)\b/.test(g);
+}
+
 export function parseMonitorModeFromText(text: string): MonitorMode | undefined {
   const on = MONITOR_MODE_ON_RE.test(text);
   const off = MONITOR_MODE_OFF_RE.test(text);
@@ -1986,6 +1991,27 @@ export default function (pi: ExtensionAPI) {
     }
 
     const goal = typeof event.input.goal === "string" ? event.input.goal.trim() : "";
+
+    if (
+      deliveryPolicyConfig.enabled &&
+      goal.length > 0 &&
+      requiresApplyToBranch(goal) &&
+      deliveryPolicyConfig.mode !== "apply-to-branch"
+    ) {
+      const reason = `Blocked by colony-pilot delivery-policy: goal requires apply-to-branch but mode=${deliveryPolicyConfig.mode}`;
+      const msg = [
+        "ant_colony bloqueada por delivery-policy",
+        "Goal indica materialização/promoção no branch principal,",
+        `mas delivery mode atual é '${deliveryPolicyConfig.mode}'.`,
+        "",
+        "Ajuste recomendado:",
+        "  - definir piStack.colonyPilot.deliveryPolicy.mode = 'apply-to-branch'",
+        "  - /reload 3",
+      ].join("\n");
+      ctx.ui.notify(msg, "warning");
+      return { block: true, reason };
+    }
+
     if (goal.length > 0) {
       pendingColonyGoals.push({ goal, source: "ant_colony", at: Date.now() });
       while (pendingColonyGoals.length > 20) pendingColonyGoals.shift();

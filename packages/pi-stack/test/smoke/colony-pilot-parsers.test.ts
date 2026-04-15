@@ -7,6 +7,7 @@ import {
   parseRemoteAccessUrl,
   parseMonitorModeFromText,
   normalizeColonySignalId,
+  requiresApplyToBranch,
   buildColonyRunSequence,
   buildColonyStopSequence,
   parseCommandInput,
@@ -68,6 +69,12 @@ describe("colony-pilot parsers", () => {
   it("normalizeColonySignalId reduz IDs compostos e rejeita placeholders", () => {
     expect(normalizeColonySignalId("c2|colony-abc")).toBe("c2");
     expect(normalizeColonySignalId("${launched.id}")).toBeUndefined();
+  });
+
+  it("requiresApplyToBranch detecta goals de materialização/promoção", () => {
+    expect(requiresApplyToBranch("Executar promoção/materialização no branch principal")).toBe(true);
+    expect(requiresApplyToBranch("apply outputs to main")).toBe(true);
+    expect(requiresApplyToBranch("pesquisar docs de embedding")).toBe(false);
   });
 
   it("buildColonyRunSequence aplica ordem do pilot", () => {
