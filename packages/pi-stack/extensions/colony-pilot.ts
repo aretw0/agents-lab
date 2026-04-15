@@ -2017,7 +2017,7 @@ export function buildHatchDoctorSnapshot(input: {
       source: "runtime",
       label: `capability missing: ${cap}`,
       detail: capabilityGuidance(cap),
-      fix: "Revisar stack instalada e executar /reload 3 após ajuste.",
+      fix: "Revisar stack instalada e executar /reload após ajuste.",
     });
   }
 
@@ -2525,7 +2525,7 @@ export default function (pi: ExtensionAPI) {
         "",
         "Ajuste recomendado:",
         "  - definir piStack.colonyPilot.deliveryPolicy.mode = 'apply-to-branch'",
-        "  - /reload 3",
+        "  - /reload",
       ].join("\n");
       ctx.ui.notify(msg, "warning");
       return { block: true, reason };
@@ -2851,7 +2851,7 @@ export default function (pi: ExtensionAPI) {
               `hatch apply: baseline '${profile}' aplicado em .pi/settings.json`,
               "",
               "Próximos passos (ordem recomendada):",
-              "  1) /reload 3",
+              "  1) /reload",
               "  2) /monitor-provider apply",
               "  3) /colony-pilot hatch check",
               "  4) /quota-visibility budget 30",
@@ -2859,7 +2859,7 @@ export default function (pi: ExtensionAPI) {
             ].join("\n"),
             "info"
           );
-          ctx.ui.setEditorText?.("/reload 3");
+          ctx.ui.setEditorText?.("/reload");
           return;
         }
 

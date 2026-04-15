@@ -6,7 +6,7 @@
 
 - efc6313: Block `ant_colony` launches that request materialization/apply when `colony-pilot` delivery mode is `patch-artifact`.
 
-  Adds explicit operator feedback with corrective action (`apply-to-branch` + `/reload 3`) and parser test coverage for materialization-goal detection.
+  Adds explicit operator feedback with corrective action (`apply-to-branch` + `/reload`) and parser test coverage for materialization-goal detection.
 
 ## 0.4.1
 

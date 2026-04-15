@@ -97,7 +97,7 @@ git status --short
 
 # controle de execução
 /colony-stop all
-/reload 3
+/reload
 ```
 
 ---

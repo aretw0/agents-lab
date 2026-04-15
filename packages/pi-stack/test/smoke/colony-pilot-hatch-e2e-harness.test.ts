@@ -103,11 +103,11 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
 
     const msg = lastNotifyMessage(t);
     expect(msg).toContain("hatch apply: baseline 'default' aplicado");
-    expect(msg).toContain("/reload 3");
+    expect(msg).toContain("/reload");
 
     const editorCalls = t.events.uiCallsFor("setEditorText");
     expect(editorCalls.length).toBeGreaterThan(0);
-    expect(String(editorCalls[editorCalls.length - 1]?.args?.[0] ?? "")).toBe("/reload 3");
+    expect(String(editorCalls[editorCalls.length - 1]?.args?.[0] ?? "")).toBe("/reload");
 
     const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     expect(settings?.piStack?.colonyPilot?.preflight?.enabled).toBe(true);
