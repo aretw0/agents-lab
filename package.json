@@ -24,7 +24,8 @@
     "pi:pilot:off:project": "node scripts/pi-pilot-profile.mjs off --project",
     "pi:parity": "node scripts/pi-parity.mjs --scope user --profile stack-full",
     "pi:parity:project": "node scripts/pi-parity.mjs --scope project --profile first-party",
-    "colony:inspect": "node scripts/colony-runtime-inspect.mjs"
+    "colony:inspect": "node scripts/colony-runtime-inspect.mjs",
+    "release:deprecate": "node scripts/deprecate-release.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
