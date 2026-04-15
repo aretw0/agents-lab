@@ -279,17 +279,19 @@ describe("colony-pilot parsers", () => {
     expect(input.soldierModel).toBe("openai-codex/gpt-5.2-codex");
   });
 
-  it("model policy profile codex gera defaults de classes", () => {
+  it("model policy profile codex mantém generic-first", () => {
     const policy = buildModelPolicyProfile("codex");
+    expect(policy.specializedRolesEnabled).toBe(false);
     expect(policy.allowedProviders).toEqual(["openai-codex"]);
     expect(policy.roleModels.worker).toBe("openai-codex/gpt-5.3-codex");
-    expect(policy.roleModels.review).toBe("openai-codex/gpt-5.2-codex");
+    expect(policy.roleModels.review).toBeUndefined();
   });
 
   it("model policy profile factory-strict endurece regras", () => {
     expect(resolveModelPolicyProfile("factory-strict")).toBe("factory-strict");
 
     const policy = buildModelPolicyProfile("factory-strict");
+    expect(policy.specializedRolesEnabled).toBe(true);
     expect(policy.requireExplicitRoleModels).toBe(true);
     expect(policy.allowMixedProviders).toBe(false);
     expect(policy.allowedProviders).toEqual(["openai-codex"]);
@@ -302,6 +304,46 @@ describe("colony-pilot parsers", () => {
       "backend",
       "review",
     ]);
+  });
+
+  it("model policy profile factory-strict-copilot endurece regras em copilot", () => {
+    expect(resolveModelPolicyProfile("factory-strict-copilot")).toBe("factory-strict-copilot");
+
+    const policy = buildModelPolicyProfile("factory-strict-copilot");
+    expect(policy.specializedRolesEnabled).toBe(true);
+    expect(policy.requireExplicitRoleModels).toBe(true);
+    expect(policy.allowMixedProviders).toBe(false);
+    expect(policy.allowedProviders).toEqual(["github-copilot"]);
+    expect(policy.roleModels.worker).toBe("github-copilot/claude-sonnet-4.6");
+  });
+
+  it("factory-strict-hybrid aplica allowlist por role", () => {
+    expect(resolveModelPolicyProfile("factory-strict-hybrid")).toBe("factory-strict-hybrid");
+
+    const policy = buildModelPolicyProfile("factory-strict-hybrid");
+    expect(policy.allowMixedProviders).toBe(true);
+    expect(policy.allowedProviders).toEqual(["github-copilot", "openai-codex"]);
+    expect(policy.allowedProvidersByRole.worker).toEqual(["github-copilot"]);
+    expect(policy.allowedProvidersByRole.scout).toEqual(["openai-codex"]);
+
+    const input: any = {
+      goal: "x",
+      scoutModel: "openai-codex/gpt-5.4-mini",
+      workerModel: "openai-codex/gpt-5.3-codex",
+      soldierModel: "openai-codex/gpt-5.2-codex",
+      designWorkerModel: "github-copilot/claude-sonnet-4.6",
+      multimodalWorkerModel: "openai-codex/gpt-5.4-mini",
+      backendWorkerModel: "openai-codex/gpt-5.3-codex",
+      reviewWorkerModel: "github-copilot/claude-sonnet-4.6",
+    };
+    const registry = {
+      find: () => ({ id: "ok" }),
+      hasConfiguredAuth: () => true,
+    };
+
+    const evalResult = evaluateAntColonyModelPolicy(input, "openai-codex/gpt-5.4-mini", registry, policy);
+    expect(evalResult.ok).toBe(false);
+    expect(evalResult.issues.some((i) => i.includes("allowedProvidersByRole.worker"))).toBe(true);
   });
 
   it("budget policy injeta maxCost padrão quando habilitada", () => {
