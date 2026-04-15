@@ -43,8 +43,10 @@ Quando você opera com chaves de colegas/time, configure orçamento por provider
 
 Modelo de operação:
 - `period`: `weekly` (padrão) ou `monthly`;
-- semanal: `shareTokensPct` / `shareCostPct` e `weeklyQuotaTokens` / `weeklyQuotaCostUsd`;
-- mensal: `shareMonthlyTokensPct` / `shareMonthlyCostPct` e `monthlyQuotaTokens` / `monthlyQuotaCostUsd`;
+- `unit`: `tokens-cost` (padrão) ou `requests` (recomendado para GitHub Copilot premium requests);
+- semanal: `shareTokensPct` / `shareCostPct` / `shareRequestsPct` e `weeklyQuotaTokens` / `weeklyQuotaCostUsd` / `weeklyQuotaRequests`;
+- mensal: `shareMonthlyTokensPct` / `shareMonthlyCostPct` / `shareMonthlyRequestsPct` e `monthlyQuotaTokens` / `monthlyQuotaCostUsd` / `monthlyQuotaRequests`;
+- `requestSharePolicy`: `fixed` ou `remaining` (ex.: metade do disponível no momento);
 - `warnPct` / `hardPct`: thresholds operacionais (`WARN` / `BLOCK`).
 
 > Importante: no estado atual a separação é por **provider**. Separação por chave individual/conta no mesmo provider exige tagging adicional na ingestão de eventos (trilha futura provider-agnostic).
@@ -68,6 +70,11 @@ Para hard cap explícito, use o caminho com `ant_colony` e `maxCost`.
 - bloquear abaixo de `minMaxCostUsd`;
 - bloquear launch quando provider usado estiver em `BLOCK` (`enforceProviderBudgetBlock`);
 - permitir override auditável no goal (`providerBudgetOverrideToken`, ex.: `budget-override:<motivo>`).
+
+`piStack.guardrailsCore.providerBudgetGovernor` permite enforcement global (não só swarm):
+- bloqueia prompts normais quando provider atual está em `BLOCK`;
+- mantém allowlist de recovery commands (`/doctor`, `/quota-visibility`, `/model`, `/login`);
+- aceita override auditável com token configurável.
 
 `piStack.colonyPilot.projectTaskSync` (opt-in) permite sincronizar eventos de colônia para `.project/tasks`:
 - criar task no launch;

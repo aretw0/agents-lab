@@ -88,6 +88,7 @@ describe("quota-visibility parsers", () => {
         model: "gpt-5",
         tokens: 4000,
         costUsd: 1.2,
+        requests: 1,
         sessionFile: "s1.jsonl",
       },
       {
@@ -99,6 +100,7 @@ describe("quota-visibility parsers", () => {
         model: "gpt-5",
         tokens: 2000,
         costUsd: 0.8,
+        requests: 1,
         sessionFile: "s1.jsonl",
       },
     ];
@@ -139,6 +141,7 @@ describe("quota-visibility parsers", () => {
         model: "gpt-5",
         tokens: 1000,
         costUsd: 0.3,
+        requests: 1,
         sessionFile: "s1.jsonl",
       },
     ];
@@ -166,6 +169,42 @@ describe("quota-visibility parsers", () => {
     expect(evalResult.budgets[0]?.periodCostUsdCap).toBe(10);
   });
 
+  it("buildProviderBudgetStatuses suporta budget por requests (copilot)", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 2 * 24 * 3600_000).toISOString(),
+        timestampMs: now - 2 * 24 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 10,
+        provider: "github-copilot",
+        model: "claude-sonnet-4.6",
+        tokens: 500,
+        costUsd: 0,
+        requests: 30,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 30,
+      monthlyQuotaRequests: 100,
+      providerBudgets: {
+        "github-copilot": {
+          unit: "requests",
+          period: "monthly",
+          shareMonthlyRequestsPct: 50,
+          warnPct: 70,
+          hardPct: 90,
+        },
+      },
+    });
+
+    expect(evalResult.budgets[0]?.periodRequestsCap).toBe(50);
+    expect(evalResult.budgets[0]?.usedPctRequests).toBe(60);
+    expect(evalResult.budgets[0]?.unit).toBe("requests");
+  });
+
   it("buildProviderWindowInsight destaca pico e início antes do pico", () => {
     const base = Date.UTC(2026, 3, 14, 0, 0, 0);
     const events: QuotaUsageEvent[] = [
@@ -178,6 +217,7 @@ describe("quota-visibility parsers", () => {
         model: "claude-sonnet",
         tokens: 1200,
         costUsd: 0.02,
+        requests: 1,
         sessionFile: "s1.jsonl",
       },
       {
@@ -189,6 +229,7 @@ describe("quota-visibility parsers", () => {
         model: "claude-sonnet",
         tokens: 900,
         costUsd: 0.015,
+        requests: 1,
         sessionFile: "s1.jsonl",
       },
       {
@@ -200,6 +241,7 @@ describe("quota-visibility parsers", () => {
         model: "claude-sonnet",
         tokens: 100,
         costUsd: 0.002,
+        requests: 1,
         sessionFile: "s2.jsonl",
       },
     ];

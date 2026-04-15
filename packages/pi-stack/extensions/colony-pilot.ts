@@ -1122,8 +1122,10 @@ interface ColonyPilotSettings {
 interface QuotaVisibilityBudgetSettings {
   weeklyQuotaTokens?: number;
   weeklyQuotaCostUsd?: number;
+  weeklyQuotaRequests?: number;
   monthlyQuotaTokens?: number;
   monthlyQuotaCostUsd?: number;
+  monthlyQuotaRequests?: number;
   providerBudgets: ProviderBudgetMap;
 }
 
@@ -1148,8 +1150,10 @@ function parseQuotaVisibilityBudgetSettings(cwd: string): QuotaVisibilityBudgetS
     return {
       weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
       weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
+      weeklyQuotaRequests: safeNum(cfg.weeklyQuotaRequests) || undefined,
       monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
       monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
+      monthlyQuotaRequests: safeNum(cfg.monthlyQuotaRequests) || undefined,
       providerBudgets: parseProviderBudgets(cfg.providerBudgets),
     };
   } catch {
@@ -2213,8 +2217,10 @@ export default function (pi: ExtensionAPI) {
       days: budgetPolicyConfig.providerBudgetLookbackDays,
       weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
       weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
+      weeklyQuotaRequests: quotaCfg.weeklyQuotaRequests,
       monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
       monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
+      monthlyQuotaRequests: quotaCfg.monthlyQuotaRequests,
       providerBudgets: quotaCfg.providerBudgets,
     });
 
@@ -2226,8 +2232,10 @@ export default function (pi: ExtensionAPI) {
       days: budgetPolicyConfig.providerBudgetLookbackDays,
       weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
       weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
+      weeklyQuotaRequests: quotaCfg.weeklyQuotaRequests,
       monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
       monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
+      monthlyQuotaRequests: quotaCfg.monthlyQuotaRequests,
       providerWindowHours: {},
       providerBudgets: quotaCfg.providerBudgets,
     });

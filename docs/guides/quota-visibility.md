@@ -122,6 +122,7 @@ Em `.pi/settings.json`:
       "weeklyQuotaCostUsd": 25,
       "monthlyQuotaTokens": 600000,
       "monthlyQuotaCostUsd": 60,
+      "monthlyQuotaRequests": 1000,
       "providerWindowHours": {
         "anthropic": 5,
         "openai-codex": 5
@@ -138,8 +139,9 @@ Em `.pi/settings.json`:
         "github-copilot": {
           "owner": "colega-b",
           "period": "monthly",
-          "shareMonthlyTokensPct": 50,
-          "shareMonthlyCostPct": 50,
+          "unit": "requests",
+          "requestSharePolicy": "remaining",
+          "shareMonthlyRequestsPct": 50,
           "warnPct": 80,
           "hardPct": 100
         }

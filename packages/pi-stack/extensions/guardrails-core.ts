@@ -12,6 +12,8 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve, relative, sep } from "node:path";
+import { analyzeQuota, parseProviderBudgets, safeNum, type ProviderBudgetMap, type ProviderBudgetStatus } from "./quota-visibility";
+import { parseBudgetOverrideReason } from "./colony-pilot";
 
 // =============================================================================
 // Read / Path Guard
@@ -336,6 +338,87 @@ function resolveGuardrailsPortConflictConfig(cwd: string): GuardrailsPortConflic
   }
 }
 
+interface ProviderBudgetGovernorConfig {
+  enabled: boolean;
+  lookbackDays: number;
+  allowOverride: boolean;
+  overrideToken: string;
+  recoveryCommands: string[];
+}
+
+interface ProviderBudgetGovernorSnapshot {
+  atIso: string;
+  budgets: ProviderBudgetStatus[];
+}
+
+function normalizeCmdName(text: string): string {
+  const t = text.trim();
+  if (!t.startsWith("/")) return "";
+  const name = t.slice(1).split(/\s+/)[0] ?? "";
+  return name.toLowerCase();
+}
+
+function readQuotaBudgetSettings(cwd: string): {
+  weeklyQuotaTokens?: number;
+  weeklyQuotaCostUsd?: number;
+  weeklyQuotaRequests?: number;
+  monthlyQuotaTokens?: number;
+  monthlyQuotaCostUsd?: number;
+  monthlyQuotaRequests?: number;
+  providerBudgets: ProviderBudgetMap;
+} {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return { providerBudgets: {} };
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.quotaVisibility ?? {};
+    return {
+      weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
+      weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
+      weeklyQuotaRequests: safeNum(cfg.weeklyQuotaRequests) || undefined,
+      monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
+      monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
+      monthlyQuotaRequests: safeNum(cfg.monthlyQuotaRequests) || undefined,
+      providerBudgets: parseProviderBudgets(cfg.providerBudgets),
+    };
+  } catch {
+    return { providerBudgets: {} };
+  }
+}
+
+function resolveProviderBudgetGovernorConfig(cwd: string): ProviderBudgetGovernorConfig {
+  const defaults: ProviderBudgetGovernorConfig = {
+    enabled: false,
+    lookbackDays: 30,
+    allowOverride: true,
+    overrideToken: "budget-override:",
+    recoveryCommands: ["doctor", "quota-visibility", "model", "login"],
+  };
+
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return defaults;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.guardrailsCore?.providerBudgetGovernor ?? {};
+    const lookback = Number.isFinite(Number(cfg.lookbackDays)) ? Math.floor(Number(cfg.lookbackDays)) : defaults.lookbackDays;
+    const recoveryCommands = Array.isArray(cfg.recoveryCommands)
+      ? cfg.recoveryCommands
+        .filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
+        .map((x: string) => x.trim().toLowerCase())
+      : defaults.recoveryCommands;
+
+    return {
+      enabled: cfg?.enabled === true,
+      lookbackDays: Math.max(1, Math.min(90, lookback)),
+      allowOverride: cfg?.allowOverride !== false,
+      overrideToken: typeof cfg?.overrideToken === "string" && cfg.overrideToken.trim().length > 0 ? cfg.overrideToken.trim() : defaults.overrideToken,
+      recoveryCommands,
+    };
+  } catch {
+    return defaults;
+  }
+}
+
 // =============================================================================
 // Extension Entry
 // =============================================================================
@@ -343,10 +426,53 @@ function resolveGuardrailsPortConflictConfig(cwd: string): GuardrailsPortConflic
 export default function (pi: ExtensionAPI) {
   let strictInteractiveMode = false;
   let portConflictConfig: GuardrailsPortConflictConfig = { enabled: true, suggestedTestPort: 4173 };
+  let providerBudgetGovernorConfig: ProviderBudgetGovernorConfig = {
+    enabled: false,
+    lookbackDays: 30,
+    allowOverride: true,
+    overrideToken: "budget-override:",
+    recoveryCommands: ["doctor", "quota-visibility", "model", "login"],
+  };
+  let providerBudgetSnapshotCache: { at: number; key: string; snapshot: ProviderBudgetGovernorSnapshot } | undefined;
+
+  async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
+    const quota = readQuotaBudgetSettings(ctx.cwd);
+    if (Object.keys(quota.providerBudgets).length === 0) return undefined;
+
+    const key = JSON.stringify({
+      lookbackDays: providerBudgetGovernorConfig.lookbackDays,
+      quota,
+    });
+
+    if (providerBudgetSnapshotCache && providerBudgetSnapshotCache.key === key && Date.now() - providerBudgetSnapshotCache.at < 60_000) {
+      return providerBudgetSnapshotCache.snapshot;
+    }
+
+    const status = await analyzeQuota({
+      days: providerBudgetGovernorConfig.lookbackDays,
+      weeklyQuotaTokens: quota.weeklyQuotaTokens,
+      weeklyQuotaCostUsd: quota.weeklyQuotaCostUsd,
+      weeklyQuotaRequests: quota.weeklyQuotaRequests,
+      monthlyQuotaTokens: quota.monthlyQuotaTokens,
+      monthlyQuotaCostUsd: quota.monthlyQuotaCostUsd,
+      monthlyQuotaRequests: quota.monthlyQuotaRequests,
+      providerWindowHours: {},
+      providerBudgets: quota.providerBudgets,
+    });
+
+    const snapshot: ProviderBudgetGovernorSnapshot = {
+      atIso: status.source.generatedAtIso,
+      budgets: status.providerBudgets,
+    };
+    providerBudgetSnapshotCache = { at: Date.now(), key, snapshot };
+    return snapshot;
+  }
 
   pi.on("session_start", (_event, ctx) => {
     strictInteractiveMode = false;
     portConflictConfig = resolveGuardrailsPortConflictConfig(ctx.cwd);
+    providerBudgetGovernorConfig = resolveProviderBudgetGovernorConfig(ctx.cwd);
+    providerBudgetSnapshotCache = undefined;
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -372,6 +498,69 @@ export default function (pi: ExtensionAPI) {
     ].join("\n");
 
     return { systemPrompt: hardPrompt };
+  });
+
+  pi.on("input", async (event, ctx) => {
+    if (!providerBudgetGovernorConfig.enabled) return { action: "continue" as const };
+
+    const cmd = normalizeCmdName(event.text ?? "");
+    if (cmd && providerBudgetGovernorConfig.recoveryCommands.includes(cmd)) {
+      return { action: "continue" as const };
+    }
+
+    const currentProvider = ctx.model?.provider;
+    if (!currentProvider) return { action: "continue" as const };
+
+    const snapshot = await resolveProviderBudgetSnapshot(ctx);
+    const blocked = snapshot?.budgets.find((b) => b.provider === currentProvider && b.state === "blocked");
+    if (!blocked) return { action: "continue" as const };
+
+    if (providerBudgetGovernorConfig.allowOverride) {
+      const reason = parseBudgetOverrideReason(event.text ?? "", providerBudgetGovernorConfig.overrideToken);
+      if (reason) {
+        ctx.appendEntry("guardrails-core.provider-budget-override", {
+          atIso: new Date().toISOString(),
+          provider: currentProvider,
+          reason,
+          snapshotAtIso: snapshot?.atIso,
+        });
+        ctx.ui.notify(`provider-budget override aceito para ${currentProvider}: ${reason}`, "warning");
+        return { action: "continue" as const };
+      }
+    }
+
+    ctx.appendEntry("guardrails-core.provider-budget-block", {
+      atIso: new Date().toISOString(),
+      provider: currentProvider,
+      snapshotAtIso: snapshot?.atIso,
+    });
+
+    ctx.ui.notify(
+      [
+        `Bloqueado por provider-budget governor: ${currentProvider} está em BLOCK.`,
+        `Use /quota-visibility budget ${currentProvider} ${providerBudgetGovernorConfig.lookbackDays}`,
+        `Comandos de recovery permitidos: ${providerBudgetGovernorConfig.recoveryCommands.map((x) => `/${x}`).join(", ")}`,
+        providerBudgetGovernorConfig.allowOverride
+          ? `Override auditável: inclua '${providerBudgetGovernorConfig.overrideToken}<motivo>' na mensagem.`
+          : "Override desativado pela policy.",
+      ].join("\n"),
+      "warning"
+    );
+    return { action: "handled" as const };
+  });
+
+  pi.on("before_provider_request", async (_event, ctx) => {
+    if (!providerBudgetGovernorConfig.enabled) return undefined;
+    const currentProvider = ctx.model?.provider;
+    if (!currentProvider) return undefined;
+    const snapshot = await resolveProviderBudgetSnapshot(ctx);
+    const blocked = snapshot?.budgets.find((b) => b.provider === currentProvider && b.state === "blocked");
+    if (blocked) {
+      ctx.ui?.setStatus?.("guardrails-core-budget", `[budget] ${currentProvider}=BLOCK`);
+    } else {
+      ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
+    }
+    return undefined;
   });
 
   pi.on("tool_call", async (event, ctx) => {
@@ -411,8 +600,10 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on("agent_end", (_event, ctx) => {
-    if (!strictInteractiveMode) return;
-    strictInteractiveMode = false;
-    ctx.ui?.setStatus?.("guardrails-core", undefined);
+    if (strictInteractiveMode) {
+      strictInteractiveMode = false;
+      ctx.ui?.setStatus?.("guardrails-core", undefined);
+    }
+    ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
   });
 }
