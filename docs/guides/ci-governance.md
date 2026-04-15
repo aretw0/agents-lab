@@ -119,3 +119,4 @@ npm test
 - `docs/guides/stack-sovereignty-user-guide.md`
 - `docs/guides/extension-acceptance-checklist.md`
 - `docs/architecture/stack-sovereignty-rfc-2026-04.md`
+- `docs/runbooks/release-deprecation.md`
