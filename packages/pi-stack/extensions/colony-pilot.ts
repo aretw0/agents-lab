@@ -714,18 +714,22 @@ export function buildRuntimeStopSequence(caps: PilotCapabilities, options?: { re
 
 export function buildAntColonyMirrorCandidates(cwd: string): string[] {
   const root = path.join(homedir(), ".pi", "agent", "ant-colony");
-  const normalized = path.resolve(cwd).replace(/\\/g, "/");
-  const m = normalized.match(/^([A-Za-z]):\/(.*)$/);
 
-  if (m) {
-    const drive = m[1].toLowerCase();
-    const rest = m[2];
+  // Preserve Windows drive-style paths even when tests run on non-Windows hosts.
+  // Example: "C:/Users/alice/work/repo" should map to ".../c/Users/alice/work/repo"
+  // instead of being treated as a relative path by path.resolve on Linux/macOS.
+  const raw = String(cwd ?? "").replace(/\\/g, "/");
+  const win = raw.match(/^([A-Za-z]):\/(.*)$/);
+  if (win) {
+    const drive = win[1].toLowerCase();
+    const rest = win[2];
     return [
       path.join(root, drive, rest),
       path.join(root, "root", drive, rest),
     ];
   }
 
+  const normalized = path.resolve(cwd).replace(/\\/g, "/");
   const unix = normalized.startsWith("/") ? normalized.slice(1) : normalized;
   return [
     path.join(root, unix),
