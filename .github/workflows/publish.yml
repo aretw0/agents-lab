@@ -1,29 +1,59 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: publish-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Fetch tags
+        run: git fetch --force --tags
 
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Verificar tag bate com versão dos pacotes
+      - name: Detect release tag on commit
+        id: tag
+        shell: bash
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
+          SHA="${{ github.event.workflow_run.head_sha || github.sha }}"
+          TAG=$(git tag --points-at "$SHA" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [ -z "$TAG" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "No semver tag found on $SHA; skipping publish."
+            exit 0
+          fi
+
+          echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Detected release tag: $TAG"
+
+      - name: Verificar tag bate com versão dos pacotes
+        if: steps.tag.outputs.should_publish == 'true'
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          TAG="${TAG#v}"
           FAILED=0
           for pkg in packages/pi-stack packages/git-skills packages/web-skills packages/pi-skills packages/lab-skills; do
             VERSION=$(node -e "console.log(require('./$pkg/package.json').version)")
@@ -36,9 +66,20 @@ jobs:
           echo "✅ Tag v$TAG bate com todos os pacotes"
 
       - name: Instalar dependências
+        if: steps.tag.outputs.should_publish == 'true'
         run: npm install --no-fund --no-audit
 
+      - name: Revalidar gates antes de publicar
+        if: steps.tag.outputs.should_publish == 'true'
+        run: |
+          npm run test:smoke
+          npm test
+          npm run verify
+          npm run audit:sovereignty
+          npm run audit:sovereignty:diff
+
       - name: Publicar pacotes
+        if: steps.tag.outputs.should_publish == 'true'
         run: |
           npm publish --workspace packages/pi-stack --provenance --access public
           npm publish --workspace packages/git-skills --provenance --access public
