@@ -112,6 +112,14 @@
       "id": "DEC-BUD-016",
       "rationale": "Se não sentimos a dor da UX ao operar o Swarm para construir nossos próprios produtos, não conseguiremos curar a ferramenta para os nossos usuários. Dependência força excelência.",
       "context": "O time de desenvolvimento lançou extensões e recursos no pi-stack que não são usados no dia a dia do próprio agents-lab, resultando em falta de curadoria, desconexão de UX e acúmulo de complexidade não testada na prática."
+    },
+    {
+      "date": "2026-04-16",
+      "rationale": "Confiar apenas em telemetria local cria um falso senso de segurança (ou pânico) e mina a confiança na soberania de custos. A verdade do custo está no provedor.",
+      "decision": "A governança de custos não pode depender apenas de telemetry local (custo inferido). É mandatório integrar com fontes externas de billing (APIs, dashboards) para ter uma visão real e evitar surpresas. O custo local passa a ser uma estimativa de 'pressão', não a verdade absoluta.",
+      "id": "DEC-BUD-017",
+      "context": "O usuário confirmou que o budget de $40 do GitHub Copilot não mostra gastos (está $0), apesar do telemetry local registrar milhões de tokens, indicando uma desconexão entre custo real e observabilidade via logs de sessão.",
+      "status": "decided"
     }
   ]
 }

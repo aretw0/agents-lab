@@ -278,6 +278,19 @@
         "Cada perfil define thresholds consistentes (warn/hard), fallback order e política de overage.",
         "Perfil ativo é visível no /doctor hatch e no /quota-visibility route."
       ]
+    },
+    {
+      "acceptance_criteria": [
+        "Existe um adapter ou comando que busca o custo real de um provider via API de billing ou fonte externa.",
+        "O dashboard do /quota-visibility mostra custo 'observado' (local) e 'faturado' (externo), quando disponível.",
+        "A política de bloqueio pode ser configurada para usar o custo faturado como fonte primária de verdade."
+      ],
+      "source": "human",
+      "priority": "must",
+      "status": "accepted",
+      "description": "O sistema de budget deve suportar ingestão de dados de billing de fontes externas (API do provider, CSV de fatura) para reconciliar o custo observado localmente com o custo real faturado.",
+      "id": "REQ-BUD-023",
+      "type": "integration"
     }
   ]
 }

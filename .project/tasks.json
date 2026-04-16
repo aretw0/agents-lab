@@ -791,6 +791,17 @@
         "packages/pi-stack/extensions/colony-pilot.ts",
         "docs/guides/quota-visibility.md"
       ]
+    },
+    {
+      "type": "feature",
+      "id": "TASK-BUD-040",
+      "description": "[P1] Desenvolver um adapter de billing para o GitHub Copilot que consulte a API de custos (ou fonte externa equivalente) e injete o custo real faturado no sistema de budget.",
+      "status": "planned",
+      "references": [
+        "REQ-BUD-023",
+        "DEC-BUD-017"
+      ],
+      "files": []
     }
   ]
 }
