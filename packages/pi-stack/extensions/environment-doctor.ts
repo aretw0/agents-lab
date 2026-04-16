@@ -581,6 +581,7 @@ function buildHatchDoctorPayload(
   const providerBudgets = (((settings.piStack as any)?.quotaVisibility?.providerBudgets ?? {}) as Record<string, unknown>);
   const providerBudgetCount = Object.keys(providerBudgets).length;
   const providerGateEnabled = budgetPolicy?.enforceProviderBudgetBlock === true;
+  const governanceProfileActive = ((settings.piStack as any)?.governanceProfile?.active as string | undefined);
 
   const requiredCaps = ["monitors", "colony", "colony-stop"];
   const missingCaps = requiredCaps.filter((c) => !commands.has(c));
@@ -632,6 +633,14 @@ function buildHatchDoctorPayload(
             ? `${providerBudgetCount} provider(s) configurado(s)`
             : "gate ativo sem providerBudgets (configure em piStack.quotaVisibility)")
         : "gate provider-budget desativado (enforceProviderBudgetBlock=false)",
+    },
+    {
+      id: "governance-profile",
+      label: "governance profile",
+      status: governanceProfileActive ? "pass" : "warn",
+      detail: governanceProfileActive
+        ? `active: ${governanceProfileActive}`
+        : "não configurado — use /governance-profile apply <conservative|balanced|throughput>",
     },
   ];
 
