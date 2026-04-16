@@ -882,8 +882,20 @@
       ],
       "description": "[P0] Evoluir a tool `ant_colony` para aceitar um parâmetro de override da política de entrega (ex: `deliveryMode='apply-to-branch'`), eliminando a necessidade de editar a configuração global. A implementação pode ser via parâmetro direto ou um comando wrapper (ex: /colony-promote) que invoca a `ant_colony` com permissões elevadas.",
       "id": "TASK-BUD-042",
-      "status": "planned",
-      "type": "feature"
+      "status": "completed",
+      "type": "feature",
+      "description": "[P0] Evoluir a tool ant_colony para aceitar deliveryMode='apply-to-branch' como parametro de override por chamada, eliminando necessidade de editar a configuracao global.",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "AntColonyToolInput aceita deliveryMode?: ColonyDeliveryMode como parametro opcional.",
+        "Quando deliveryMode='apply-to-branch' e passado, override e auditado via pi.appendEntry.",
+        "Override bypassa o bloco de delivery-policy sem editar a configuracao global.",
+        "/colony-promote command pre-preenche editor com ant_colony + deliveryMode:apply-to-branch.",
+        "Testes unitarios cobrem parseDeliveryModeOverride com valores validos e invalidos."
+      ]
     },
     {
       "id": "TASK-BUD-043",

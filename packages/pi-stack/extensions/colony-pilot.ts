@@ -363,6 +363,18 @@ export interface AntColonyToolInput {
   multimodalWorkerModel?: string;
   backendWorkerModel?: string;
   reviewWorkerModel?: string;
+  deliveryMode?: ColonyDeliveryMode;
+}
+
+/** Parse and validate a per-call delivery mode override from raw tool input.
+ *  Returns the valid ColonyDeliveryMode if provided and recognized, else undefined. */
+export function parseDeliveryModeOverride(input: unknown): ColonyDeliveryMode | undefined {
+  if (!input || typeof input !== "object") return undefined;
+  const raw = (input as Record<string, unknown>)["deliveryMode"];
+  if (raw === "report-only" || raw === "patch-artifact" || raw === "apply-to-branch") {
+    return raw as ColonyDeliveryMode;
+  }
+  return undefined;
 }
 
 function normalizeRoleList(value: unknown): ColonyAgentRole[] {
@@ -2505,21 +2517,41 @@ export default function (pi: ExtensionAPI) {
       }
     }
 
+    const deliveryModeOverride = parseDeliveryModeOverride(event.input);
+    const effectiveDeliveryMode = deliveryModeOverride ?? deliveryPolicyConfig.mode;
+
+    if (deliveryModeOverride && deliveryModeOverride !== deliveryPolicyConfig.mode) {
+      pi.appendEntry("colony-pilot.delivery-mode-override", {
+        atIso: new Date().toISOString(),
+        goal,
+        overrideMode: deliveryModeOverride,
+        configuredMode: deliveryPolicyConfig.mode,
+      });
+      ctx.ui.notify(
+        [
+          `delivery-mode override aceito (auditado)`,
+          `override: ${deliveryModeOverride}  (config: ${deliveryPolicyConfig.mode})`,
+        ].join("\n"),
+        "info"
+      );
+    }
+
     if (
       deliveryPolicyConfig.enabled &&
       goal.length > 0 &&
       requiresApplyToBranch(goal) &&
-      deliveryPolicyConfig.mode !== "apply-to-branch"
+      effectiveDeliveryMode !== "apply-to-branch"
     ) {
-      const reason = `Blocked by colony-pilot delivery-policy: goal requires apply-to-branch but mode=${deliveryPolicyConfig.mode}`;
+      const reason = `Blocked by colony-pilot delivery-policy: goal requires apply-to-branch but mode=${effectiveDeliveryMode}`;
       const msg = [
         "ant_colony bloqueada por delivery-policy",
         "Goal indica materialização/promoção no branch principal,",
-        `mas delivery mode atual é '${deliveryPolicyConfig.mode}'.`,
+        `mas delivery mode efetivo é '${effectiveDeliveryMode}'.`,
         "",
         "Ajuste recomendado:",
-        "  - definir piStack.colonyPilot.deliveryPolicy.mode = 'apply-to-branch'",
-        "  - /reload",
+        "  - passar deliveryMode='apply-to-branch' diretamente na chamada ant_colony",
+        "  - ou definir piStack.colonyPilot.deliveryPolicy.mode = 'apply-to-branch'",
+        "  - ou usar /colony-promote <goal>",
       ].join("\n");
       ctx.ui.notify(msg, "warning");
       return { block: true, reason };
@@ -3227,6 +3259,45 @@ export default function (pi: ExtensionAPI) {
       }
 
       ctx.ui.notify(`Comando desconhecido: ${cmd}. Use /colony-pilot help`, "warning");
+    },
+  });
+
+  // ---- command: /colony-promote ------------------------------------------
+
+  pi.registerCommand("colony-promote", {
+    description: [
+      "Convenience shortcut: pre-fills ant_colony call with deliveryMode='apply-to-branch'.",
+      "Usage: /colony-promote <goal>",
+      "This sets the per-call delivery mode override so the goal passes the delivery-policy gate",
+      "without requiring a global settings change. The override is audited in the session log.",
+    ].join(" "),
+    handler: async (args, ctx) => {
+      const goal = (args ?? "").trim();
+      if (!goal) {
+        ctx.ui.notify(
+          [
+            "colony-promote: nenhum goal fornecido.",
+            "Usage: /colony-promote <goal>",
+            "",
+            "Este comando prepara uma chamada ant_colony com deliveryMode='apply-to-branch'",
+            "permitindo materialização/promoção sem editar a configuração global.",
+          ].join("\n"),
+          "warning"
+        );
+        return;
+      }
+
+      const hint = [
+        "colony-promote: promote goal pronto para confirmação.",
+        "",
+        `goal: ${goal}`,
+        `deliveryMode: apply-to-branch (override per-call — auditado)`,
+        "",
+        "Execute a chamada abaixo (confirme antes de rodar):",
+        `  ant_colony({ "goal": ${JSON.stringify(goal)}, "deliveryMode": "apply-to-branch" })`,
+      ].join("\n");
+
+      ctx.ui.notify(hint, "info");
     },
   });
 

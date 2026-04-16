@@ -43,6 +43,7 @@ import {
   formatHatchReadiness,
   buildHatchDoctorSnapshot,
   formatHatchDoctorSnapshot,
+  parseDeliveryModeOverride,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -701,5 +702,40 @@ describe("colony-pilot parsers", () => {
     expect(promotions.length).toBe(1);
 
     rmSync(dir, { recursive: true, force: true });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseDeliveryModeOverride
+// ---------------------------------------------------------------------------
+
+describe("colony-pilot parsers — parseDeliveryModeOverride", () => {
+  it("retorna apply-to-branch quando especificado", () => {
+    expect(parseDeliveryModeOverride({ deliveryMode: "apply-to-branch" })).toBe("apply-to-branch");
+  });
+
+  it("retorna report-only quando especificado", () => {
+    expect(parseDeliveryModeOverride({ deliveryMode: "report-only" })).toBe("report-only");
+  });
+
+  it("retorna patch-artifact quando especificado", () => {
+    expect(parseDeliveryModeOverride({ deliveryMode: "patch-artifact" })).toBe("patch-artifact");
+  });
+
+  it("retorna undefined para valor desconhecido", () => {
+    expect(parseDeliveryModeOverride({ deliveryMode: "invalid-mode" })).toBeUndefined();
+  });
+
+  it("retorna undefined quando deliveryMode ausente", () => {
+    expect(parseDeliveryModeOverride({ goal: "do something" })).toBeUndefined();
+  });
+
+  it("retorna undefined para input nulo", () => {
+    expect(parseDeliveryModeOverride(null)).toBeUndefined();
+  });
+
+  it("retorna undefined para input nao-objeto", () => {
+    expect(parseDeliveryModeOverride("apply-to-branch")).toBeUndefined();
+    expect(parseDeliveryModeOverride(42)).toBeUndefined();
   });
 });
