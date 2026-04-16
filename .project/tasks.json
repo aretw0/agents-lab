@@ -802,6 +802,15 @@
         "DEC-BUD-017"
       ],
       "files": []
+    },
+    {
+      "type": "bug",
+      "status": "planned",
+      "id": "TASK-BUD-041",
+      "description": "[P0] Re-implementar a primitiva de verificação de saúde de providers (/provider-matrix) de forma correta, usando a API de extensões disponível ou solicitando as primitivas necessárias ao core do 'pi' para evitar o erro 'pi.loadModel is not a function'.",
+      "references": [
+        "REQ-BUD-020"
+      ]
     }
   ]
 }

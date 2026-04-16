@@ -27,7 +27,6 @@
       "./extensions/monitor-provider-patch.ts",
       "./extensions/environment-doctor.ts",
       "./extensions/claude-code-adapter.ts",
-      "./extensions/provider-readiness.ts",
       "./extensions/guardrails-core.ts",
       "./extensions/scheduler-governance.ts",
       "./extensions/stack-sovereignty.ts",
