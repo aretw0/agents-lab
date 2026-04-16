@@ -711,15 +711,25 @@
     {
       "type": "feature",
       "files": [
-        "packages/pi-stack/extensions/claude-code-adapter.ts"
+        "packages/pi-stack/extensions/claude-code-adapter.ts",
+        "packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts"
       ],
-      "status": "planned",
+      "status": "completed",
       "id": "TASK-BUD-033",
       "description": "[P0] Integrar adapter experimental do Claude Code CLI como provider completo no roteador do pi, garantindo soberania de custo local, controle de budget via requests e isolamento determinístico para o Swarm.",
       "references": [
         "REQ-BUD-016",
         "TASK-BUD-032"
-      ]
+      ],
+      "acceptance_criteria": [
+        "claude_code_execute tool executa 'claude --print <goal>' com budget check por request.",
+        "Budget state (ok/warn/block) baseado em request cap configuravel por sessao.",
+        "Modo dry-run nao invoca subprocess; retorna preview do goal e estado de budget.",
+        "Isolamento via cwd: cada execucao pode receber diretorio de trabalho isolado.",
+        "/claude-code budget exibe requests usados, cap, estado e sugestao de routeModelRef.",
+        "Testes unitarios cobrem: parseClaudeCodeRequestBudget, checkBudgetGate, buildProviderHint."
+      ],
+      "notes": "Implementado. Adapter agora e provider completo: request-budget governor (ok/warn/block por session cap), claude_code_execute tool com dry-run e isolamento via cwd, buildProviderHint com sugestao de routeModelRef para quota-visibility. 11 novos testes cobrindo parseClaudeCodeRequestBudget, checkBudgetGate, buildProviderHint. 176/176 testes passando."
     },
     {
       "id": "TASK-BUD-034",
