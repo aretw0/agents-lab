@@ -701,6 +701,31 @@
         "Execução como subagente respeita budget governor e trilha auditável."
       ],
       "notes": "Usuário confirmou binário disponível em `c:\\Users\\aretw\\.local\\bin\\claude.exe`."
+    },
+    {
+      "type": "feature",
+      "files": [
+        "packages/pi-stack/extensions/claude-code-adapter.ts"
+      ],
+      "status": "planned",
+      "id": "TASK-BUD-033",
+      "description": "[P0] Integrar adapter experimental do Claude Code CLI como provider completo no roteador do pi, garantindo soberania de custo local, controle de budget via requests e isolamento determinístico para o Swarm.",
+      "references": [
+        "REQ-BUD-016",
+        "TASK-BUD-032"
+      ]
+    },
+    {
+      "id": "TASK-BUD-034",
+      "status": "planned",
+      "type": "feature",
+      "description": "[P0] Desenvolver ferramenta/primitiva para permitir exploração analítica do arquivo de log da sessão por swarms ou agentes auxiliares, integrando com 'session-triage' e permitindo queries no Control Plane.",
+      "files": [
+        "packages/lab-skills/skills/session-triage/SKILL.md"
+      ],
+      "references": [
+        "REQ-BUD-018"
+      ]
     }
   ]
 }

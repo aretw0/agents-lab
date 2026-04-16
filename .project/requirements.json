@@ -215,6 +215,17 @@
         "Não há persistência de senha/token em texto no repo ou logs.",
         "Existe fallback manual quando automação de browser falhar."
       ]
+    },
+    {
+      "type": "functional",
+      "references": [
+        "DEC-BUD-015"
+      ],
+      "status": "accepted",
+      "title": "Soberania de Custos no Claude Code Adapter",
+      "priority": "must",
+      "description": "A adoção do Claude Code CLI deve operar como um sub-agente/provider integrado, obedecendo às mesmas cotas (requests/month), governança e bloqueios que os LLMs via API, blindando o desenvolvedor da complexidade de gerir múltiplas instâncias de billing isoladas.",
+      "id": "REQ-BUD-018"
     }
   ]
 }

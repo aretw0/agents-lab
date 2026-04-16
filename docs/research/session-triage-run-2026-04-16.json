@@ -1,0 +1,417 @@
+{
+  "generatedAt": "2026-04-16T03:30:51.569Z",
+  "workspace": "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab",
+  "lookbackDays": 1,
+  "limit": 8,
+  "sessionDir": "C:\\Users\\aretw\\.pi\\agent\\sessions\\--C--Users-aretw-Documents-GitHub-agents-lab--",
+  "sources": {
+    "piSessionJsonl": true,
+    "canonicalEvents": null
+  },
+  "sessions": [
+    {
+      "file": "2026-04-15T02-39-00-861Z_eafb9d02-14da-4daf-a6b6-75e4145b16c8.jsonl",
+      "path": "C:\\Users\\aretw\\.pi\\agent\\sessions\\--C--Users-aretw-Documents-GitHub-agents-lab--\\2026-04-15T02-39-00-861Z_eafb9d02-14da-4daf-a6b6-75e4145b16c8.jsonl",
+      "updatedAt": "2026-04-16T03:30:51.325Z",
+      "messageCount": 2016,
+      "userMessages": 106,
+      "assistantMessages": 995,
+      "colonySignals": {
+        "BUDGET_EXCEEDED": 3,
+        "COMPLETE": 9,
+        "DONE": 1,
+        "FAILED": 1,
+        "LAUNCHED": 21,
+        "REVIEWING": 1,
+        "SCOUTING": 1,
+        "TASK_DONE": 33,
+        "WORKING": 2
+      },
+      "branchSummaries": []
+    }
+  ],
+  "aggregate": {
+    "colonySignals": {
+      "BUDGET_EXCEEDED": 3,
+      "COMPLETE": 9,
+      "DONE": 1,
+      "FAILED": 1,
+      "LAUNCHED": 21,
+      "REVIEWING": 1,
+      "SCOUTING": 1,
+      "TASK_DONE": 33,
+      "WORKING": 2
+    },
+    "nextSteps": [],
+    "inProgress": [],
+    "blocked": []
+  },
+  "board": {
+    "pending": [
+      {
+        "id": "TASK-BUD-005",
+        "status": "in-progress",
+        "description": "[P1] Implementar adapter inicial opcional para sincronizar eventos de colônia com tasks de projeto."
+      },
+      {
+        "id": "TASK-BUD-007",
+        "status": "planned",
+        "description": "[P1] Definir e implementar política de single-board clock: .project/tasks como fonte oficial macro, com sync de eventos da colônia (start/progress/end) em modo opt-in."
+      },
+      {
+        "id": "TASK-BUD-008",
+        "status": "planned",
+        "description": "[P2] Projetar projeções de status de budget/task para superfícies TUI e WEB usando dados consolidados de .project + consumo."
+      },
+      {
+        "id": "TASK-BUD-009",
+        "status": "in-progress",
+        "description": "[P0] Consolidar Swarm Launch Policy v1 como manual único de operação (single-board clock + budget + evidência + revisão humana)."
+      },
+      {
+        "id": "TASK-BUD-010",
+        "status": "in-progress",
+        "description": "[P0] Implementar reconciliador single-writer para sync colony->.project/tasks com segurança em worktrees e merges."
+      },
+      {
+        "id": "TASK-BUD-011",
+        "status": "planned",
+        "description": "[P0] Definir política de versionamento de .project no git (incluir board oficial e excluir artefatos efêmeros)."
+      },
+      {
+        "id": "colony-c1",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock. Contexto já pronto: - .project agora é versionado no git e é o board oficial. - Budget policy e projectTaskSync do colony-pilot já existem. Objetivos desta execução: 1) Consolidar Swarm Launch Policy v1 (manual único) - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana). - Unificar links/referências para evitar duplicação/confusão. 2) Fortalecer clock unificado em runtime - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível). - Manter sem auto-close; apenas status candidato para revisão humana. 3) Aprendizado contínuo humano+agêntico (registro híbrido) - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável). - Produzir evidência executável (testes/comandos) para auditoria. Critérios de qualidade: - Mudanças incrementais, reversíveis e com testes. - Sem mexer em credenciais/sessões. - Não fechar tasks automaticamente. Entregáveis esperados: - Código + testes + docs atualizados. - Resumo final com riscos remanescentes, decisões e próximos passos."
+      },
+      {
+        "id": "TASK-BUD-012",
+        "status": "planned",
+        "description": "[P1] Definir contrato backend-agnostic para clock de trabalho (task/event model + adapters) com piloto em `.project` e trilha para GitHub/Gitea/SQLite."
+      },
+      {
+        "id": "colony-c2",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] Recovery pass pós-colônia c1 para garantir injeção no branch principal e fechar lacunas remanescentes. Contexto: - c1 reportou várias entregas, mas no main só parte do resultado apareceu. - Já corrigimos parsing de COMPLETE e consolidamos baseline tracker-agnostic no .project. Objetivo desta execução: 1) Verificar diff real entre intenção de c1 e estado atual do main. 2) Aplicar somente mudanças faltantes e úteis para: - Swarm Launch Policy canônica (manual único + links sem duplicação) - hardening deterministic sync colony->.project/tasks (single-writer/lock/atomic) caso ainda haja gaps - testes de regressão no-auto-close/concorrência determinística se faltarem 3) Produzir inventário final obrigatório de arquivos alterados e comandos de validação executados. 4) Atualizar .project/tasks com status candidato (sem auto-close). Restrições: - Não fechar tasks automaticamente. - Mudanças incrementais, reversíveis, e com testes. - Sem credenciais/sessões. Entregável obrigatório: - Resumo final objetivo contendo: arquivos alterados, testes rodados (comandos), riscos residuais."
+      },
+      {
+        "id": "TASK-BUD-013",
+        "status": "in-progress",
+        "description": "[P1] Tornar entrega de colônia auditável no branch principal (injeção confiável de diffs + inventário obrigatório de arquivos alterados)."
+      },
+      {
+        "id": "colony-colonyidentity-colony",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] colony ${colonyIdentity(colony)}"
+      },
+      {
+        "id": "TASK-BUD-014",
+        "status": "in-progress",
+        "description": "[P0] Implementar delivery policy hard no colony-pilot (report-only | patch-artifact | apply-to-branch + gates obrigatórios de evidência)."
+      },
+      {
+        "id": "TASK-BUD-015",
+        "status": "in-progress",
+        "description": "[P1] Especificar adapter de execução para runners externos (GitHub Actions/CI) com sync issue/PR ↔ clock canônico."
+      },
+      {
+        "id": "TASK-BUD-016",
+        "status": "in-progress",
+        "description": "[P0] Formalizar Agent Driver Charter (north-star + prioridade + limites) como contrato operacional para execução autônoma contínua."
+      },
+      {
+        "id": "TASK-BUD-017",
+        "status": "planned",
+        "description": "[P1] Implementar loop de execução autônoma supervisionada (scheduler/backlog pull) para colônias dentro de políticas hard."
+      },
+      {
+        "id": "TASK-BUD-018",
+        "status": "planned",
+        "description": "[P1] Definir pacote de portabilidade para Refarm (SQLite/browser) e outros trackers via adapter canônico de task/event."
+      },
+      {
+        "id": "TASK-BUD-019",
+        "status": "planned",
+        "description": "[P1] Corrigir geração de task IDs inválidos a partir de sinais de colônia com placeholders/template literals (ex.: `colony ${colonyIdentity(colony)}`)."
+      },
+      {
+        "id": "colony-c1-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promover candidate da execução colony-c1 (c1|colony-mnzmi243-lk2d0) para materialização verificável no branch alvo."
+      },
+      {
+        "id": "colony-c2-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promover candidate da execução colony-c2 (c2|colony-mnzn239m-myfor) para materialização verificável no branch alvo."
+      },
+      {
+        "id": "colony-c3",
+        "status": "in-progress",
+        "description": "[COLONY:ant_colony] Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais."
+      },
+      {
+        "id": "colony-c3-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promote candidate colony-c3 — Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais."
+      },
+      {
+        "id": "colony-c4",
+        "status": "in-progress",
+        "description": "[COLONY:ant_colony] Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3."
+      },
+      {
+        "id": "colony-c4-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promote candidate colony-c4 — Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3."
+      },
+      {
+        "id": "TASK-BUD-020",
+        "status": "in-progress",
+        "description": "[P0] Implementar pipeline de triagem de histórico recente (sessões + branch summaries) para consolidar pendências no board canônico com split operacional (unlock-now vs later)."
+      },
+      {
+        "id": "TASK-BUD-021",
+        "status": "planned",
+        "description": "[P1] Especificar control plane portátil para swarm (processo desacoplado + handoff/resume entre instâncias pi) sem interromper execuções em background."
+      },
+      {
+        "id": "TASK-BUD-022",
+        "status": "planned",
+        "description": "[P1] Capturar branch-summary returns de forma estruturada (persistência local) para permitir triagem automática de branches no session-triage."
+      },
+      {
+        "id": "TASK-BUD-023",
+        "status": "planned",
+        "description": "[P1] Definir e implementar contrato canônico de ingestão de conversas (provider-agnostic) para triagem operacional cross-platform (pi, Telegram, WhatsApp, Matrix, Signal)."
+      },
+      {
+        "id": "TASK-BUD-024",
+        "status": "in-progress",
+        "description": "[P0] Implementar budget semanal por provider em quota-visibility (share/cap + estados WARN/BLOCK) com comando/tool e documentação operacional."
+      },
+      {
+        "id": "TASK-BUD-025",
+        "status": "planned",
+        "description": "[P1] Implementar gate hard de execução quando provider budget estiver em BLOCK (começando por ant_colony/colony-pilot) com override explícito e trilha de evidência."
+      },
+      {
+        "id": "TASK-BUD-026",
+        "status": "in-progress",
+        "description": "[P0] Operacionalizar budget global no workspace: ativar governor de provider em guardrails-core e gate de provider budget em colony-pilot com overrides auditáveis e allowlist de recovery."
+      },
+      {
+        "id": "TASK-BUD-027",
+        "status": "planned",
+        "description": "[P1] Implementar portfolio routing advisor: recomendação de provider/model por tipo de trabalho baseada em custo relativo, estado de budget (OK/WARN/BLOCK) e confiabilidade alvo."
+      },
+      {
+        "id": "TASK-BUD-028",
+        "status": "planned",
+        "description": "[P1] Definir chave canônica account-aware (`provider/account`) e plano de ingestão para múltiplas contas do mesmo provider (incluindo Copilot), com fallback compatível provider-only."
+      },
+      {
+        "id": "TASK-BUD-029",
+        "status": "in-progress",
+        "description": "[P0] Fechar release candidate de governança multi-provider (hatch + budget global + copilot requests) com gates determinísticos de qualidade e operação em ambiente com plugins extras."
+      },
+      {
+        "id": "TASK-BUD-030",
+        "status": "planned",
+        "description": "[P0] Implementar 'safe-core boot profile' e rollback snapshot para pi-stack (dogfood), com comando de ativação rápida e recovery path garantido."
+      },
+      {
+        "id": "TASK-BUD-031",
+        "status": "planned",
+        "description": "[P0] Implementar rota de rodízio v1 (advisory+execute opt-in) entre providers configurados com matriz custo/confiabilidade/capacidade e evidência por decisão."
+      },
+      {
+        "id": "TASK-BUD-032",
+        "status": "planned",
+        "description": "[P1] Criar adapter experimental para Claude Code CLI como runtime de subagente, com auth-status/login bridge e execução controlada por policy."
+      }
+    ],
+    "unlockNow": [
+      {
+        "id": "TASK-BUD-009",
+        "status": "in-progress",
+        "description": "[P0] Consolidar Swarm Launch Policy v1 como manual único de operação (single-board clock + budget + evidência + revisão humana)."
+      },
+      {
+        "id": "TASK-BUD-010",
+        "status": "in-progress",
+        "description": "[P0] Implementar reconciliador single-writer para sync colony->.project/tasks com segurança em worktrees e merges."
+      },
+      {
+        "id": "TASK-BUD-011",
+        "status": "planned",
+        "description": "[P0] Definir política de versionamento de .project no git (incluir board oficial e excluir artefatos efêmeros)."
+      },
+      {
+        "id": "colony-c1",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock. Contexto já pronto: - .project agora é versionado no git e é o board oficial. - Budget policy e projectTaskSync do colony-pilot já existem. Objetivos desta execução: 1) Consolidar Swarm Launch Policy v1 (manual único) - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana). - Unificar links/referências para evitar duplicação/confusão. 2) Fortalecer clock unificado em runtime - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível). - Manter sem auto-close; apenas status candidato para revisão humana. 3) Aprendizado contínuo humano+agêntico (registro híbrido) - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável). - Produzir evidência executável (testes/comandos) para auditoria. Critérios de qualidade: - Mudanças incrementais, reversíveis e com testes. - Sem mexer em credenciais/sessões. - Não fechar tasks automaticamente. Entregáveis esperados: - Código + testes + docs atualizados. - Resumo final com riscos remanescentes, decisões e próximos passos."
+      },
+      {
+        "id": "colony-c2",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] Recovery pass pós-colônia c1 para garantir injeção no branch principal e fechar lacunas remanescentes. Contexto: - c1 reportou várias entregas, mas no main só parte do resultado apareceu. - Já corrigimos parsing de COMPLETE e consolidamos baseline tracker-agnostic no .project. Objetivo desta execução: 1) Verificar diff real entre intenção de c1 e estado atual do main. 2) Aplicar somente mudanças faltantes e úteis para: - Swarm Launch Policy canônica (manual único + links sem duplicação) - hardening deterministic sync colony->.project/tasks (single-writer/lock/atomic) caso ainda haja gaps - testes de regressão no-auto-close/concorrência determinística se faltarem 3) Produzir inventário final obrigatório de arquivos alterados e comandos de validação executados. 4) Atualizar .project/tasks com status candidato (sem auto-close). Restrições: - Não fechar tasks automaticamente. - Mudanças incrementais, reversíveis, e com testes. - Sem credenciais/sessões. Entregável obrigatório: - Resumo final objetivo contendo: arquivos alterados, testes rodados (comandos), riscos residuais."
+      },
+      {
+        "id": "colony-colonyidentity-colony",
+        "status": "blocked",
+        "description": "[COLONY:ant_colony] colony ${colonyIdentity(colony)}"
+      },
+      {
+        "id": "TASK-BUD-014",
+        "status": "in-progress",
+        "description": "[P0] Implementar delivery policy hard no colony-pilot (report-only | patch-artifact | apply-to-branch + gates obrigatórios de evidência)."
+      },
+      {
+        "id": "TASK-BUD-016",
+        "status": "in-progress",
+        "description": "[P0] Formalizar Agent Driver Charter (north-star + prioridade + limites) como contrato operacional para execução autônoma contínua."
+      },
+      {
+        "id": "colony-c1-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promover candidate da execução colony-c1 (c1|colony-mnzmi243-lk2d0) para materialização verificável no branch alvo."
+      },
+      {
+        "id": "colony-c2-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promover candidate da execução colony-c2 (c2|colony-mnzn239m-myfor) para materialização verificável no branch alvo."
+      },
+      {
+        "id": "colony-c3-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promote candidate colony-c3 — Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais."
+      },
+      {
+        "id": "colony-c4-promotion",
+        "status": "planned",
+        "description": "[RECOVERY:colony] Promote candidate colony-c4 — Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3."
+      },
+      {
+        "id": "TASK-BUD-020",
+        "status": "in-progress",
+        "description": "[P0] Implementar pipeline de triagem de histórico recente (sessões + branch summaries) para consolidar pendências no board canônico com split operacional (unlock-now vs later)."
+      },
+      {
+        "id": "TASK-BUD-024",
+        "status": "in-progress",
+        "description": "[P0] Implementar budget semanal por provider em quota-visibility (share/cap + estados WARN/BLOCK) com comando/tool e documentação operacional."
+      },
+      {
+        "id": "TASK-BUD-026",
+        "status": "in-progress",
+        "description": "[P0] Operacionalizar budget global no workspace: ativar governor de provider em guardrails-core e gate de provider budget em colony-pilot com overrides auditáveis e allowlist de recovery."
+      },
+      {
+        "id": "TASK-BUD-029",
+        "status": "in-progress",
+        "description": "[P0] Fechar release candidate de governança multi-provider (hatch + budget global + copilot requests) com gates determinísticos de qualidade e operação em ambiente com plugins extras."
+      },
+      {
+        "id": "TASK-BUD-030",
+        "status": "planned",
+        "description": "[P0] Implementar 'safe-core boot profile' e rollback snapshot para pi-stack (dogfood), com comando de ativação rápida e recovery path garantido."
+      },
+      {
+        "id": "TASK-BUD-031",
+        "status": "planned",
+        "description": "[P0] Implementar rota de rodízio v1 (advisory+execute opt-in) entre providers configurados com matriz custo/confiabilidade/capacidade e evidência por decisão."
+      }
+    ],
+    "later": [
+      {
+        "id": "TASK-BUD-005",
+        "status": "in-progress",
+        "description": "[P1] Implementar adapter inicial opcional para sincronizar eventos de colônia com tasks de projeto."
+      },
+      {
+        "id": "TASK-BUD-007",
+        "status": "planned",
+        "description": "[P1] Definir e implementar política de single-board clock: .project/tasks como fonte oficial macro, com sync de eventos da colônia (start/progress/end) em modo opt-in."
+      },
+      {
+        "id": "TASK-BUD-008",
+        "status": "planned",
+        "description": "[P2] Projetar projeções de status de budget/task para superfícies TUI e WEB usando dados consolidados de .project + consumo."
+      },
+      {
+        "id": "TASK-BUD-012",
+        "status": "planned",
+        "description": "[P1] Definir contrato backend-agnostic para clock de trabalho (task/event model + adapters) com piloto em `.project` e trilha para GitHub/Gitea/SQLite."
+      },
+      {
+        "id": "TASK-BUD-013",
+        "status": "in-progress",
+        "description": "[P1] Tornar entrega de colônia auditável no branch principal (injeção confiável de diffs + inventário obrigatório de arquivos alterados)."
+      },
+      {
+        "id": "TASK-BUD-015",
+        "status": "in-progress",
+        "description": "[P1] Especificar adapter de execução para runners externos (GitHub Actions/CI) com sync issue/PR ↔ clock canônico."
+      },
+      {
+        "id": "TASK-BUD-017",
+        "status": "planned",
+        "description": "[P1] Implementar loop de execução autônoma supervisionada (scheduler/backlog pull) para colônias dentro de políticas hard."
+      },
+      {
+        "id": "TASK-BUD-018",
+        "status": "planned",
+        "description": "[P1] Definir pacote de portabilidade para Refarm (SQLite/browser) e outros trackers via adapter canônico de task/event."
+      },
+      {
+        "id": "TASK-BUD-019",
+        "status": "planned",
+        "description": "[P1] Corrigir geração de task IDs inválidos a partir de sinais de colônia com placeholders/template literals (ex.: `colony ${colonyIdentity(colony)}`)."
+      },
+      {
+        "id": "colony-c3",
+        "status": "in-progress",
+        "description": "[COLONY:ant_colony] Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais."
+      },
+      {
+        "id": "colony-c4",
+        "status": "in-progress",
+        "description": "[COLONY:ant_colony] Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3."
+      },
+      {
+        "id": "TASK-BUD-021",
+        "status": "planned",
+        "description": "[P1] Especificar control plane portátil para swarm (processo desacoplado + handoff/resume entre instâncias pi) sem interromper execuções em background."
+      },
+      {
+        "id": "TASK-BUD-022",
+        "status": "planned",
+        "description": "[P1] Capturar branch-summary returns de forma estruturada (persistência local) para permitir triagem automática de branches no session-triage."
+      },
+      {
+        "id": "TASK-BUD-023",
+        "status": "planned",
+        "description": "[P1] Definir e implementar contrato canônico de ingestão de conversas (provider-agnostic) para triagem operacional cross-platform (pi, Telegram, WhatsApp, Matrix, Signal)."
+      },
+      {
+        "id": "TASK-BUD-025",
+        "status": "planned",
+        "description": "[P1] Implementar gate hard de execução quando provider budget estiver em BLOCK (começando por ant_colony/colony-pilot) com override explícito e trilha de evidência."
+      },
+      {
+        "id": "TASK-BUD-027",
+        "status": "planned",
+        "description": "[P1] Implementar portfolio routing advisor: recomendação de provider/model por tipo de trabalho baseada em custo relativo, estado de budget (OK/WARN/BLOCK) e confiabilidade alvo."
+      },
+      {
+        "id": "TASK-BUD-028",
+        "status": "planned",
+        "description": "[P1] Definir chave canônica account-aware (`provider/account`) e plano de ingestão para múltiplas contas do mesmo provider (incluindo Copilot), com fallback compatível provider-only."
+      },
+      {
+        "id": "TASK-BUD-032",
+        "status": "planned",
+        "description": "[P1] Criar adapter experimental para Claude Code CLI como runtime de subagente, com auth-status/login bridge e execução controlada por policy."
+      }
+    ]
+  }
+}
