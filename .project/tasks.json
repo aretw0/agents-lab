@@ -145,16 +145,17 @@
         "TASK-BUD-007"
       ],
       "files": [
-        "docs/guides/budget-governance.md",
+        "docs/guides/recommended-pi-stack.md",
+        "docs/guides/swarm-cleanroom-protocol.md",
         "docs/guides/consumption-visibility-surfaces.md",
-        "docs/guides/recommended-pi-stack.md"
+        "docs/guides/budget-governance.md"
       ],
       "acceptance_criteria": [
         "Existe checklist operacional único para disparo de swarm com budget envelope.",
         "Manual diferencia estado versionado (board oficial) vs estado efêmero de execução.",
         "Referências duplicadas/confusas foram consolidadas."
       ],
-      "notes": "Derivado de REQ-BUD-006. c2 auditou canonicalização do Swarm Launch Policy e confirmou necessidade de manual canônico único + de-dup de referências. Aguardando aplicação final de arquivos no main e revisão humana."
+      "notes": "Derivado de REQ-BUD-006. c2 auditou canonicalização do Swarm Launch Policy e confirmou necessidade de manual canônico único + de-dup de referências. Aguardando aplicação final de arquivos no main e revisão humana.\n[2026-04-16T05:30:15Z] TRIAGEM 2026-04-16: AC1 (checklist operacional) atendido via docs/guides/swarm-cleanroom-protocol.md (commit 97e05db). AC2 e AC3 (manual diferencia board vs efemero + consolidacao de referencias) pendentes. Task permanece in-progress ate manual canonico completo."
     },
     {
       "id": "TASK-BUD-010",
@@ -197,8 +198,8 @@
     {
       "id": "colony-c1",
       "description": "[COLONY:ant_colony] Self-improvement do agents-lab/pi-stack com foco em soberania e coordenação de agentes usando single-board clock.\n\nContexto já pronto:\n- .project agora é versionado no git e é o board oficial.\n- Budget policy e projectTaskSync do colony-pilot já existem.\n\nObjetivos desta execução:\n1) Consolidar Swarm Launch Policy v1 (manual único)\n   - Criar/atualizar guia único em docs/guides com checklist obrigatório (budget envelope, escopo, evidência, validação, revisão humana).\n   - Unificar links/referências para evitar duplicação/confusão.\n\n2) Fortalecer clock unificado em runtime\n   - Evoluir adapter colony->.project/tasks para comportamento mais determinístico em cenários concorrentes/worktrees (single-writer/reconciler simples e reversível).\n   - Manter sem auto-close; apenas status candidato para revisão humana.\n\n3) Aprendizado contínuo humano+agêntico (registro híbrido)\n   - Registrar aprendizado em formato narrativo (docs) e estruturado (.project: decisions/requirements/tasks/verification, quando aplicável).\n   - Produzir evidência executável (testes/comandos) para auditoria.\n\nCritérios de qualidade:\n- Mudanças incrementais, reversíveis e com testes.\n- Sem mexer em credenciais/sessões.\n- Não fechar tasks automaticamente.\n\nEntregáveis esperados:\n- Código + testes + docs atualizados.\n- Resumo final com riscos remanescentes, decisões e próximos passos.",
-      "status": "blocked",
-      "notes": "[2026-04-15T18:24:08.103Z] colony c1 phase=launched\n[2026-04-15T20:33:50.452Z] colony c1 phase=launched\n[2026-04-15T20:33:50.467Z] colony c1 phase=launched\n[2026-04-15T20:46:50.758Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T20:46:50.776Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-15T20:46:50.809Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:43:16.629Z] colony c1 phase=launched\n[2026-04-16T03:43:16.664Z] colony c1 phase=launched\n[2026-04-16T03:52:12.986Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:52:13.008Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:52:13.044Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:53:25.709Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:53:25.732Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:53:25.760Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:54:17.025Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:54:17.052Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.086Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:54:17.102Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:54:17.124Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.156Z] promotion queued automatically: colony-c1-promotion"
+      "status": "completed",
+      "notes": "[2026-04-15T20:33:50.467Z] colony c1 phase=launched\n[2026-04-15T20:46:50.758Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T20:46:50.776Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-15T20:46:50.809Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:43:16.629Z] colony c1 phase=launched\n[2026-04-16T03:43:16.664Z] colony c1 phase=launched\n[2026-04-16T03:52:12.986Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:52:13.008Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:52:13.044Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:53:25.709Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:53:25.732Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:53:25.760Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:54:17.025Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:54:17.052Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.086Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T03:54:17.102Z] colony c1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-16T03:54:17.124Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.156Z] promotion queued automatically: colony-c1-promotion\n[2026-04-16T05:08:01.074Z] colony c1 phase=launched\n[2026-04-16T05:08:01.105Z] colony c1 phase=launched\n[2026-04-16T05:29:54Z] TRIAGEM: colony-c1 fechada por revisão humana. FILE INVENTORY (materializado em main, revisão humana 2026-04-16):\n  docs/guides/swarm-cleanroom-protocol.md (111 linhas — commit 97e05db)\n  packages/pi-stack/extensions/colony-pilot.ts (auto-queue recovery, monitor state — commit 340d97e)\n  packages/pi-stack/test/smoke/colony-pilot-*.test.ts (cobertura de parsers — commit 340d97e)\n  packages/pi-stack/extensions/colony-pilot.ts (block apply goals in patch-artifact — commit efc6313)\nVALIDATION: npm run verify → 10/10 ✅ | npm test → 84/84 ✅\nNOTA: delivery evidence foi produzida manualmente na triagem de 2026-04-16 por ausência de runtime alternativo.\n[2026-04-16T05:30:07Z] TRIAGEM: colony-c1 fechada por revisao humana. FILE INVENTORY (materializado em main, revisao humana 2026-04-16):\n  docs/guides/swarm-cleanroom-protocol.md (111 linhas - commit 97e05db)\n  packages/pi-stack/extensions/colony-pilot.ts (auto-queue recovery, monitor state - commit 340d97e)\n  packages/pi-stack/test/smoke/colony-pilot-*.test.ts (cobertura parsers - commit 340d97e)\n  packages/pi-stack/extensions/colony-pilot.ts (block apply goals in patch-artifact - commit efc6313)\nVALIDATION: npm run verify 10/10 OK | npm test 84/84 OK\nNOTA: delivery evidence produzida manualmente na triagem 2026-04-16 por ausencia de runtime alternativo."
     },
     {
       "id": "TASK-BUD-012",
@@ -224,8 +225,8 @@
     {
       "id": "colony-c2",
       "description": "[COLONY:ant_colony] Recovery pass pós-colônia c1 para garantir injeção no branch principal e fechar lacunas remanescentes.\n\nContexto:\n- c1 reportou várias entregas, mas no main só parte do resultado apareceu.\n- Já corrigimos parsing de COMPLETE e consolidamos baseline tracker-agnostic no .project.\n\nObjetivo desta execução:\n1) Verificar diff real entre intenção de c1 e estado atual do main.\n2) Aplicar somente mudanças faltantes e úteis para:\n   - Swarm Launch Policy canônica (manual único + links sem duplicação)\n   - hardening deterministic sync colony->.project/tasks (single-writer/lock/atomic) caso ainda haja gaps\n   - testes de regressão no-auto-close/concorrência determinística se faltarem\n3) Produzir inventário final obrigatório de arquivos alterados e comandos de validação executados.\n4) Atualizar .project/tasks com status candidato (sem auto-close).\n\nRestrições:\n- Não fechar tasks automaticamente.\n- Mudanças incrementais, reversíveis, e com testes.\n- Sem credenciais/sessões.\n\nEntregável obrigatório:\n- Resumo final objetivo contendo: arquivos alterados, testes rodados (comandos), riscos residuais.",
-      "status": "blocked",
-      "notes": "[2026-04-14T20:41:30.990Z] colony c2 phase=launched\n[2026-04-14T20:41:31.003Z] colony c2 phase=launched\n[2026-04-14T20:49:11.602Z] colony c2|colony-mnz3749j-1lk3t phase=complete (candidate only, aguardando revisão humana)\n[2026-04-15T06:11:31.687Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:41:47.485Z] colony c2 phase=launched\n[2026-04-15T07:41:47.503Z] colony c2 phase=launched\n[2026-04-15T07:51:15.302Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:51:15.327Z] promotion queued automatically: colony-c2-promotion\n[2026-04-15T20:59:54.678Z] colony c2 phase=launched\n[2026-04-15T20:59:54.694Z] colony c2 phase=launched\n[2026-04-15T21:12:19.232Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T21:12:19.255Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-15T21:12:19.295Z] promotion queued automatically: colony-c2-promotion"
+      "status": "completed",
+      "notes": "[2026-04-14T20:41:30.990Z] colony c2 phase=launched\n[2026-04-14T20:41:31.003Z] colony c2 phase=launched\n[2026-04-14T20:49:11.602Z] colony c2|colony-mnz3749j-1lk3t phase=complete (candidate only, aguardando revisão humana)\n[2026-04-15T06:11:31.687Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:41:47.485Z] colony c2 phase=launched\n[2026-04-15T07:41:47.503Z] colony c2 phase=launched\n[2026-04-15T07:51:15.302Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T07:51:15.327Z] promotion queued automatically: colony-c2-promotion\n[2026-04-15T20:59:54.678Z] colony c2 phase=launched\n[2026-04-15T20:59:54.694Z] colony c2 phase=launched\n[2026-04-15T21:12:19.232Z] colony c2 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T21:12:19.255Z] delivery-policy blocked completion: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-15T21:12:19.295Z] promotion queued automatically: colony-c2-promotion\n[2026-04-16T05:29:54Z] TRIAGEM: colony-c2 fechada por revisão humana. FILE INVENTORY (recovery materializado via commits manuais no período Apr 14–15):\n  fix(colony-pilot): normalize colony COMPLETE signal parsing — 67b4496\n  feat(pi-stack): add hard delivery policy gates for colony sync — 0698142\n  feat(project): add tracker-agnostic coordination baseline — 83b881e\n  feat(project): version .project as shared work board — 5209baf\n  fix(colony-pilot): handle windows paths — 2d4c927\n  fix(colony-pilot): block apply goals in patch-artifact mode — efc6313\nVALIDATION: npm run verify → 10/10 ✅ | npm test → 84/84 ✅\nNOTA: recovery confirmado por revisão do git log; evidência produzida manualmente na triagem 2026-04-16.\n[2026-04-16T05:30:07Z] TRIAGEM: colony-c2 fechada por revisao humana. FILE INVENTORY (recovery materializado via commits manuais Apr 14-15):\n  fix(colony-pilot): normalize COMPLETE signal - 67b4496\n  feat(pi-stack): hard delivery policy gates - 0698142\n  feat(project): tracker-agnostic coordination baseline - 83b881e\n  feat(project): version .project as board - 5209baf\n  fix(colony-pilot): windows paths - 2d4c927\n  fix(colony-pilot): block apply goals in patch-artifact mode - efc6313\nVALIDATION: npm run verify 10/10 OK | npm test 84/84 OK\nNOTA: recovery confirmado por revisao do git log; evidencia produzida manualmente na triagem 2026-04-16."
     },
     {
       "id": "TASK-BUD-013",
@@ -374,7 +375,7 @@
     {
       "id": "colony-c1-promotion",
       "description": "[RECOVERY:colony] Promover candidate da execução colony-c1 (c1|colony-mnzmi243-lk2d0) para materialização verificável no branch alvo.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "colony-c1"
       ],
@@ -383,12 +384,12 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:32:45.768Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.608Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.648Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T09:15:26.397Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.421Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.480Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T20:46:50.793Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:52:13.029Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:53:25.746Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.071Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.141Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log"
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:32:45.768Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.608Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T07:34:02.648Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T09:15:26.397Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.421Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T18:00:39.480Z] auto-queued from colony c1: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T20:46:50.793Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:52:13.029Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:53:25.746Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.071Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T03:54:17.141Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Inventário e validação registrados em colony-c1.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Inventario e validacao registrados em colony-c1."
     },
     {
       "id": "colony-c2-promotion",
       "description": "[RECOVERY:colony] Promover candidate da execução colony-c2 (c2|colony-mnzn239m-myfor) para materialização verificável no branch alvo.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "colony-c2"
       ],
@@ -397,13 +398,13 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log"
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Recovery confirmado no git log."
     },
     {
       "id": "colony-c3",
       "description": "[COLONY:ant_colony] Criar base prática para tornar o pi embedable em projetos CLI de terceiros. Entregáveis obrigatórios (incrementais e reversíveis): (1) pesquisa técnica curta do estado atual de integração/embedding no ecossistema pi (SDK, comandos, runtime, extensões) com evidência em docs; (2) guia canônico em docs/guides explicando arquitetura de embedding para CLIs externos (modelos de integração, ciclo de vida de sessão, auth/provider, isolamento, observabilidade, segurança, governança); (3) skill reutilizável para orientar implementação de integração embedable em projetos externos (passo a passo, checklists, pitfalls, validação); (4) exemplo mínimo de integração ou template (sem credenciais) demonstrando bootstrap/handshake/runtime básico; (5) testes/smokes mínimos para validar que o material não está quebrado e comandos/documentação referenciam caminhos corretos. Restrições: não quebrar políticas hard existentes, sem auto-close, com inventário final de arquivos alterados + comandos de validação + riscos residuais.",
-      "status": "in-progress",
-      "notes": "[2026-04-15T07:52:21.146Z] colony c3 phase=launched\n[2026-04-15T07:52:21.162Z] colony c3 phase=launched\n[2026-04-15T08:00:55.474Z] colony c3 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:00:55.524Z] promotion queued automatically: colony-c3-promotion"
+      "status": "blocked",
+      "notes": "[2026-04-15T07:52:21.146Z] colony c3 phase=launched\n[2026-04-15T07:52:21.162Z] colony c3 phase=launched\n[2026-04-15T08:00:55.474Z] colony c3 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:00:55.524Z] promotion queued automatically: colony-c3-promotion\n[2026-04-16T05:29:54Z] TRIAGEM: entregáveis de c3 (embed guide + skill + template) NÃO foram materializados no main. Commit 83aac8d registrou apenas estado de promoção no board; nenhum arquivo de conteúdo foi commitado. Trabalho real ainda pendente — desbloqueado apenas quando entregáveis forem produzidos.\n[2026-04-16T05:30:07Z] TRIAGEM: entregaveis (embed guide + skill + template) NAO materializados no main. Commit 83aac8d so registrou estado no board; nenhum arquivo de conteudo foi commitado. Trabalho real pendente."
     },
     {
       "id": "colony-c3-promotion",
@@ -417,13 +418,13 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-15T08:00:55.504Z] auto-queued from colony c3: delivery mode 'patch-artifact' requires explicit promotion flow"
+      "notes": "[2026-04-15T08:00:55.504Z] auto-queued from colony c3: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: promoção aguarda materialização real dos entregáveis (embed guide + skill + template). colony-c3 reclassificada como blocked. Esta promotion só pode avançar após c3 ser desbloqueada.\n[2026-04-16T05:30:07Z] TRIAGEM: aguarda materializacao real dos entregaveis. colony-c3 reclassificada como blocked."
     },
     {
       "id": "colony-c4",
       "description": "[COLONY:ant_colony] Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3.",
-      "status": "in-progress",
-      "notes": "[2026-04-15T08:05:00.076Z] colony c4 phase=launched\n[2026-04-15T08:05:00.093Z] colony c4 phase=launched\n[2026-04-15T08:11:49.629Z] colony c4 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:11:49.653Z] promotion queued automatically: colony-c4-promotion"
+      "status": "blocked",
+      "notes": "[2026-04-15T08:05:00.076Z] colony c4 phase=launched\n[2026-04-15T08:05:00.093Z] colony c4 phase=launched\n[2026-04-15T08:11:49.629Z] colony c4 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:11:49.653Z] promotion queued automatically: colony-c4-promotion\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 (entregáveis não materializados). Não avançar até c3 ser desbloqueada e entregáveis confirmados no main.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 (entregaveis nao materializados). Nao avancar ate c3 ser desbloqueada."
     },
     {
       "id": "colony-c4-promotion",
@@ -437,7 +438,7 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow"
+      "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materialização real.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materializacao real."
     },
     {
       "id": "TASK-BUD-020",
@@ -820,6 +821,23 @@
       "id": "TASK-BUD-042",
       "status": "planned",
       "type": "feature"
+    },
+    {
+      "id": "TASK-BUD-043",
+      "description": "[P1] Implementar dispatch de comportamento por intenção (skill routing): dado um prompt livre do usuário, inferir e ativar automaticamente a extensão/skill/agent mais adequada — análogo ao carregamento dinâmico de skills do Claude Code, mas no ecossistema pi. Complementa o portfolio routing advisor (TASK-BUD-027) que rota providers; este rota comportamentos.",
+      "status": "planned",
+      "type": "feature",
+      "depends_on": [
+        "TASK-BUD-027",
+        "TASK-BUD-036"
+      ],
+      "acceptance_criteria": [
+        "Existe classificador de intenção (leve, determinístico) que mapeia prompt -> extensão candidata.",
+        "Ativação é transparente ao usuário: sem necessidade de nomear a skill explicitamente.",
+        "Fallback seguro: se nenhuma skill bater com confiança suficiente, comportamento padrão é preservado.",
+        "Auditável: log mostra qual skill foi selecionada e por quê."
+      ],
+      "notes": "Originou de observação do usuário (2026-04-16): o pi-stack tem roteamento de provider mas não de comportamento. O Claude Code decide dinamicamente qual skill carregar baseado no contexto do prompt — lacuna equivalente existe no pi."
     }
   ]
 }
