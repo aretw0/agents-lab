@@ -4,7 +4,12 @@
     "../packages/git-skills",
     "../packages/web-skills",
     "../packages/pi-skills",
-    "../packages/lab-skills"
+    "../packages/lab-skills",
+    { "source": "npm:@aretw0/pi-stack",   "extensions": [], "skills": [] },
+    { "source": "npm:@aretw0/git-skills",  "extensions": [], "skills": [] },
+    { "source": "npm:@aretw0/web-skills",  "extensions": [], "skills": [] },
+    { "source": "npm:@aretw0/pi-skills",   "extensions": [], "skills": [] },
+    { "source": "npm:@aretw0/lab-skills",  "extensions": [], "skills": [] }
   ],
   "piStack": {
     "monitorProviderPatch": {
