@@ -142,6 +142,7 @@ vite.config.ts.timestamp-*
 .pi-lens/
 .pi/monitors/
 .pi/agent/
+.pi/npm/
 .pi/reports/
 .pi/snapshots/
 
