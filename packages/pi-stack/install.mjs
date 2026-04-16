@@ -21,6 +21,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import process from "node:process";
 import { FIRST_PARTY, THIRD_PARTY, PACKAGES } from "./package-list.mjs";
 
@@ -57,12 +58,132 @@ const FILTER_PATCHES = [
   },
 ];
 
+/**
+ * Default baseline settings ejected into settings.json via --baseline.
+ * Mirrors the "default" profile from colony-pilot buildProjectBaselineSettings
+ * plus claude-code adapter defaults and theme reference.
+ *
+ * Uses deepMerge so existing user settings are preserved.
+ */
+export const INSTALLER_BASELINE = {
+  theme: "agents-lab",
+  piStack: {
+    colonyPilot: {
+      preflight: {
+        enabled: true,
+        enforceOnAntColonyTool: true,
+        requiredExecutables: ["node", "git", "npm"],
+        requireColonyCapabilities: ["colony", "colonyStop"],
+      },
+      modelPolicy: {
+        enabled: true,
+        specializedRolesEnabled: false,
+        autoInjectRoleModels: true,
+        requireHealthyCurrentModel: true,
+        requireExplicitRoleModels: false,
+        requiredRoles: ["scout", "worker", "soldier"],
+        enforceFullModelRef: true,
+        allowMixedProviders: true,
+        allowedProviders: [],
+        allowedProvidersByRole: {},
+        roleModels: {},
+      },
+      budgetPolicy: {
+        enabled: true,
+        enforceOnAntColonyTool: true,
+        requireMaxCost: true,
+        autoInjectMaxCost: true,
+        defaultMaxCostUsd: 2,
+        hardCapUsd: 20,
+        minMaxCostUsd: 0.05,
+        enforceProviderBudgetBlock: false,
+        providerBudgetLookbackDays: 30,
+        allowProviderBudgetOverride: true,
+        providerBudgetOverrideToken: "budget-override:",
+      },
+      projectTaskSync: {
+        enabled: false,
+        createOnLaunch: true,
+        trackProgress: true,
+        markTerminalState: true,
+        taskIdPrefix: "colony",
+        requireHumanClose: true,
+        maxNoteLines: 20,
+        autoQueueRecoveryOnCandidate: true,
+        recoveryTaskSuffix: "promotion",
+      },
+      deliveryPolicy: {
+        enabled: false,
+        mode: "report-only",
+        requireWorkspaceReport: true,
+        requireTaskSummary: true,
+        requireFileInventory: false,
+        requireValidationCommandLog: false,
+        blockOnMissingEvidence: true,
+      },
+    },
+    webSessionGateway: {
+      mode: "local",
+      port: 3100,
+    },
+    schedulerGovernance: {
+      enabled: true,
+      policy: "observe",
+      requireTextConfirmation: true,
+      allowEnvOverride: true,
+      staleAfterMs: 10000,
+    },
+    guardrailsCore: {
+      portConflict: {
+        enabled: true,
+        suggestedTestPort: 4173,
+      },
+    },
+    claudeCodeAdapter: {
+      sessionRequestCap: 20,
+      warnFraction: 0.75,
+    },
+    quotaVisibility: {
+      routeModelRefs: {
+        "claude-code": "claude-code/claude-sonnet-4-6",
+      },
+    },
+  },
+};
+
+/**
+ * Deep-merge patch into base (non-destructive: existing values are preserved
+ * for scalar keys; objects are merged recursively).
+ */
+export function deepMergeForBaseline(base, patch) {
+  const out = Object.assign({}, base);
+  for (const [key, value] of Object.entries(patch)) {
+    if (value !== null && typeof value === "object" && !Array.isArray(value)
+        && out[key] !== null && typeof out[key] === "object" && !Array.isArray(out[key])) {
+      out[key] = deepMergeForBaseline(out[key], value);
+    } else if (!(key in out)) {
+      // Only set if the key doesn't already exist
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/**
+ * Apply INSTALLER_BASELINE to an existing settings object.
+ * Returns the merged result (does not mutate input).
+ */
+export function applyBaselineToSettings(current, baseline = INSTALLER_BASELINE) {
+  return deepMergeForBaseline(current, baseline);
+}
+
 function parseArgs(argv) {
 	const args = argv.slice(2);
 	let version = null;
 	let local = false;
 	let remove = false;
 	let help = false;
+	let baseline = false;
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
@@ -76,6 +197,8 @@ function parseArgs(argv) {
 			local = true;
 		} else if (arg === "--remove" || arg === "-r") {
 			remove = true;
+		} else if (arg === "--baseline" || arg === "-b") {
+			baseline = true;
 		} else if (arg === "--help" || arg === "-h") {
 			help = true;
 		} else {
@@ -84,7 +207,7 @@ function parseArgs(argv) {
 		}
 	}
 
-	return { version, local, remove, help };
+	return { version, local, remove, help, baseline };
 }
 
 function printHelp() {
@@ -95,11 +218,13 @@ Usage:
   npx @aretw0/pi-stack                    Install all packages (global)
   npx @aretw0/pi-stack --version 0.3.0    Pin @aretw0/* packages to a version
   npx @aretw0/pi-stack --local            Install to project .pi/settings.json
+  npx @aretw0/pi-stack --local --baseline Apply theme + colony-pilot + claude-code defaults
   npx @aretw0/pi-stack --remove           Remove all managed packages from pi
 
 Options:
   -v, --version <ver>   Pin @aretw0/* packages to a specific version
   -l, --local           Install project-locally instead of globally
+  -b, --baseline        Merge default baseline settings (theme, colony-pilot, claude-code)
   -r, --remove          Remove all managed packages from pi
   -h, --help            Show this help
 
@@ -218,58 +343,86 @@ function run(pi, command, args, { label }) {
 	}
 }
 
-const opts = parseArgs(process.argv);
+// Guard: only run main() when this file is invoked directly (not when imported as a module).
+const IS_MAIN = process.argv[1] && (() => {
+  try {
+    return fileURLToPath(import.meta.url) === join(process.argv[1]);
+  } catch {
+    return false;
+  }
+})();
 
-if (opts.help) {
-	printHelp();
-	process.exit(0);
+if (IS_MAIN) {
+  const opts = parseArgs(process.argv);
+
+  if (opts.help) {
+    printHelp();
+    process.exit(0);
+  }
+
+  const pi = findPi();
+  const localFlag = opts.local ? ["-l"] : [];
+  const scope = opts.local ? "project" : "global";
+  const settingsPath = getSettingsPath(opts.local);
+
+  if (opts.remove) {
+    console.log(`\n🧹 Removing pi-stack packages from pi (${scope})...\n`);
+
+    let failures = 0;
+    for (const pkg of PACKAGES) {
+      const ok = run(pi, "remove", [`npm:${pkg}`, ...localFlag], { label: pkg });
+      if (!ok) failures++;
+    }
+
+    console.log(
+      failures === 0
+        ? "\n✅ All pi-stack packages removed."
+        : `\n⚠️  ${failures} package(s) could not be removed.`
+    );
+    process.exit(failures > 0 ? 1 : 0);
+  }
+
+  console.log(`\n📦 Installing pi-stack packages into pi (${scope})...\n`);
+
+  let failures = 0;
+  for (const pkg of PACKAGES) {
+    const suffix =
+      opts.version && pkg.startsWith("@aretw0/") ? `@${opts.version}` : "";
+    const source = `npm:${pkg}${suffix}`;
+    const ok = run(pi, "install", [source, ...localFlag], { label: pkg });
+    if (!ok) failures++;
+  }
+
+  // Apply filter patches to resolve known conflicts
+  const patched = applyFilterPatches(settingsPath);
+  if (patched) {
+    console.log("\n🔧 Applied conflict filters (mitsupi/uv.ts excluded — conflicts with bg-process).");
+  }
+
+  // Apply baseline settings (theme, colony-pilot, claude-code defaults)
+  if (opts.baseline) {
+    const current = loadSettings(settingsPath);
+    const merged = applyBaselineToSettings(current);
+    saveSettings(settingsPath, merged);
+    console.log("\n🎨 Applied baseline settings:");
+    console.log("  • theme: agents-lab");
+    console.log("  • piStack.colonyPilot: preflight, modelPolicy, budgetPolicy, deliveryPolicy");
+    console.log("  • piStack.claudeCodeAdapter: sessionRequestCap, warnFraction");
+    console.log("  • piStack.quotaVisibility.routeModelRefs: claude-code");
+    console.log("\n  Keybinding recommendation (apply in terminal settings):");
+    console.log("  • Ctrl+Enter → submit message");
+    console.log("  • Escape → cancel / interrupt");
+    console.log("  • Ctrl+J → new line in editor");
+    console.log(`\n  Settings file: ${settingsPath}`);
+  }
+
+  if (failures === 0) {
+    console.log("\n✅ All pi-stack packages installed. Restart pi to load them.");
+  } else {
+    console.log(
+      `\n⚠️  ${failures} package(s) failed to install. Check the errors above.`
+    );
+  }
+
+  process.exit(failures > 0 ? 1 : 0);
 }
-
-const pi = findPi();
-const localFlag = opts.local ? ["-l"] : [];
-const scope = opts.local ? "project" : "global";
-const settingsPath = getSettingsPath(opts.local);
-
-if (opts.remove) {
-	console.log(`\n🧹 Removing pi-stack packages from pi (${scope})...\n`);
-
-	let failures = 0;
-	for (const pkg of PACKAGES) {
-		const ok = run(pi, "remove", [`npm:${pkg}`, ...localFlag], { label: pkg });
-		if (!ok) failures++;
-	}
-
-	console.log(
-		failures === 0
-			? "\n✅ All pi-stack packages removed."
-			: `\n⚠️  ${failures} package(s) could not be removed.`
-	);
-	process.exit(failures > 0 ? 1 : 0);
-}
-
-console.log(`\n📦 Installing pi-stack packages into pi (${scope})...\n`);
-
-let failures = 0;
-for (const pkg of PACKAGES) {
-	const suffix =
-		opts.version && pkg.startsWith("@aretw0/") ? `@${opts.version}` : "";
-	const source = `npm:${pkg}${suffix}`;
-	const ok = run(pi, "install", [source, ...localFlag], { label: pkg });
-	if (!ok) failures++;
-}
-
-// Apply filter patches to resolve known conflicts
-const patched = applyFilterPatches(settingsPath);
-if (patched) {
-	console.log("\n🔧 Applied conflict filters (mitsupi/uv.ts excluded — conflicts with bg-process).");
-}
-
-if (failures === 0) {
-	console.log("\n✅ All pi-stack packages installed. Restart pi to load them.");
-} else {
-	console.log(
-		`\n⚠️  ${failures} package(s) failed to install. Check the errors above.`
-	);
-}
-
-process.exit(failures > 0 ? 1 : 0);

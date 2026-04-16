@@ -760,7 +760,20 @@
       "type": "feature",
       "description": "[P0] Desenvolver mecanismo no instalador/bootstrapper do pi-stack para ejetar e configurar o tema visual padrão (agents-lab), keybindings e o baseline de configuração do colony-pilot e claude-code para qualquer projeto externo, eliminando a desconexão de UX relatada.",
       "id": "TASK-BUD-035",
-      "status": "planned"
+      "status": "completed",
+      "acceptance_criteria": [
+        "install.mjs aceita --baseline para mesclar tema, colony-pilot e claude-code defaults.",
+        "--local --baseline aplica baseline em .pi/settings.json do projeto.",
+        "Flag --baseline tambem funciona sem --local (baseline global em ~/.pi/agent/settings.json).",
+        "Baseline inclui: theme=agents-lab, colonyPilot defaults, claudeCodeAdapter request budget.",
+        "deepMerge preserva configuracoes existentes (nao sobrescreve).",
+        "Smoke test verifica que applyBaselineToSettings produz estrutura correta."
+      ],
+      "files": [
+        "packages/pi-stack/install.mjs",
+        "packages/pi-stack/test/smoke/installer-baseline.test.ts"
+      ],
+      "notes": "Implementado. install.mjs agora exporta INSTALLER_BASELINE, deepMergeForBaseline, applyBaselineToSettings. Flag --baseline (-b) aplica tema, colony-pilot, claude-code adapter e routeModelRefs. Merge nao-destrutivo: valores existentes do usuario sao preservados. IS_MAIN guard previne execucao ao importar como modulo. 8 testes unitarios. 200/200 passando."
     },
     {
       "description": "[P1] Realizar auditoria de curadoria no pi-stack: mapear todas as features/tools expostas aos usuários vs o que realmente usamos no agents-lab. Adotar, refinar ou remover/desativar aquilo que não for essencial para o nosso próprio fluxo swarm-first.",
