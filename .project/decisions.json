@@ -104,6 +104,14 @@
       "rationale": "Evita auto-switch opaco e permite amadurecer heurísticas antes de automatizar execução multi-provider em produção.",
       "status": "decided",
       "context": "Pedido do usuário para começar imediatamente o malabarismo de providers com segurança."
+    },
+    {
+      "decision": "Dogfooding Operacional e Curadoria Extrema: O agents-lab deve depender exclusivamente das mesmas ferramentas, fluxos e recursos (Swarm, Claude Code, adapters) que o usuário final. Ferramentas não utilizadas internamente devem ser curadas (polidas, adotadas ou removidas). O Swarm deve ser o construtor primário do próprio ecossistema para forçar a melhoria contínua da UX.",
+      "date": "2026-04-16",
+      "status": "decided",
+      "id": "DEC-BUD-016",
+      "rationale": "Se não sentimos a dor da UX ao operar o Swarm para construir nossos próprios produtos, não conseguiremos curar a ferramenta para os nossos usuários. Dependência força excelência.",
+      "context": "O time de desenvolvimento lançou extensões e recursos no pi-stack que não são usados no dia a dia do próprio agents-lab, resultando em falta de curadoria, desconexão de UX e acúmulo de complexidade não testada na prática."
     }
   ]
 }

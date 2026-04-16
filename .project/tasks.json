@@ -735,6 +735,15 @@
       "description": "[P0] Desenvolver mecanismo no instalador/bootstrapper do pi-stack para ejetar e configurar o tema visual padrão (agents-lab), keybindings e o baseline de configuração do colony-pilot e claude-code para qualquer projeto externo, eliminando a desconexão de UX relatada.",
       "id": "TASK-BUD-035",
       "status": "planned"
+    },
+    {
+      "description": "[P1] Realizar auditoria de curadoria no pi-stack: mapear todas as features/tools expostas aos usuários vs o que realmente usamos no agents-lab. Adotar, refinar ou remover/desativar aquilo que não for essencial para o nosso próprio fluxo swarm-first.",
+      "references": [
+        "DEC-BUD-016"
+      ],
+      "id": "TASK-BUD-036",
+      "status": "planned",
+      "type": "chore"
     }
   ]
 }
