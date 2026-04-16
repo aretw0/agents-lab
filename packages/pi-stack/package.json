@@ -32,7 +32,8 @@
       "./extensions/stack-sovereignty.ts",
       "./extensions/colony-pilot.ts",
       "./extensions/web-session-gateway.ts",
-      "./extensions/quota-visibility.ts"
+      "./extensions/quota-visibility.ts",
+      "./extensions/provider-readiness.ts"
     ],
     "themes": [
       "./themes"

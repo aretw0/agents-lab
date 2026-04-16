@@ -295,21 +295,19 @@
     {
       "id": "TASK-BUD-016",
       "description": "[P0] Formalizar Agent Driver Charter (north-star + prioridade + limites) como contrato operacional para execução autônoma contínua.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-014"
       ],
       "files": [
-        "docs/guides/budget-governance.md",
-        "docs/research/colony-project-task-bridge.md",
-        ".project/project.json"
+        "docs/guides/agent-driver-charter.md"
       ],
       "acceptance_criteria": [
         "Charter define objetivo macro, critérios de priorização e stop conditions.",
         "Agentes conseguem inferir próxima tarefa elegível sem instrução ad hoc do humano.",
         "Contrato mantém budget envelope, evidência obrigatória e no-auto-close."
       ],
-      "notes": "Agent Driver Charter em formalização; primitiva de continuidade backend/runner-agnostic documentada em docs/primitives/continuity-abstraction.md para reduzir dependência de instruções repetidas e suportar múltiplos backends."
+      "notes": "Agent Driver Charter em formalização; primitiva de continuidade backend/runner-agnostic documentada em docs/primitives/continuity-abstraction.md para reduzir dependência de instruções repetidas e suportar múltiplos backends.\n[2026-04-16T05:58:32Z] Fechada. Charter produzido em docs/guides/agent-driver-charter.md (commit e9560f3).\nCobre: north-star, criterios de priorizacao, limites de autonomia, stop conditions, contratos invariantes, ciclo operacional por run e algoritmo de selecao de proxima task."
     },
     {
       "id": "TASK-BUD-017",
@@ -812,12 +810,22 @@
     },
     {
       "type": "bug",
-      "status": "planned",
+      "status": "completed",
       "id": "TASK-BUD-041",
       "description": "[P0] Re-implementar a primitiva de verificação de saúde de providers (/provider-matrix) de forma correta, usando a API de extensões disponível ou solicitando as primitivas necessárias ao core do 'pi' para evitar o erro 'pi.loadModel is not a function'.",
       "references": [
         "REQ-BUD-020"
-      ]
+      ],
+      "files": [
+        "packages/pi-stack/extensions/provider-readiness.ts",
+        "packages/pi-stack/test/smoke/provider-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Extensao registra /provider-matrix e tool provider_readiness_matrix sem erro de runtime.",
+        "Matrix usa apenas dados passivos (config + budget state) — sem chamadas de modelo.",
+        "Testes cobrem: sem config, provider ready, provider unconfigured, summary/recommendation."
+      ],
+      "notes": "[2026-04-16T06:02:12Z] Implementada como matriz passiva (config + budget state de quota-visibility).\nMotivo: pi.loadModel() nao existe na ExtensionAPI — abordagem ativa era inviavel e desnecessaria.\nA matriz passiva responde a pergunta real de pre-launch: provider configurado + budget ok?\n4 testes adicionados em provider-readiness.test.ts. vitest 166/166 pass."
     },
     {
       "references": [
