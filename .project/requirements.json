@@ -239,6 +239,19 @@
       "description": "O pacote @aretw0/pi-stack deve garantir 100% de paridade de Dogfooding: a experiência visual (TUI, temas) e operacional (Swarm, Claude Code) de um usuário final em um projeto externo deve ser idêntica à do ambiente de desenvolvimento interno.",
       "source": "human",
       "status": "accepted"
+    },
+    {
+      "id": "REQ-BUD-020",
+      "description": "O control plane deve recomendar troca de provider/model em tempo real com base em 3 sinais combinados: budget (WARN/BLOCK), readiness (ping/auth/model-ref válido) e degradação runtime (erros 400/401/429/5xx), evitando guessing manual.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe comando/tool que retorna recomendação explícita de próximo provider/model para o control plane.",
+        "Recomendação explica o motivo (budget, readiness ou erro runtime) e a ação sugerida (manter, trocar, bloquear).",
+        "Quando o provider atual degrada por 429 repetido, a recomendação muda para fallback saudável sem auto-switch silencioso."
+      ]
     }
   ]
 }

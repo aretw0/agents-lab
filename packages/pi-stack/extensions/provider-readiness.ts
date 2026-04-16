@@ -1,5 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 export interface ReadinessResult {
   provider: string;
@@ -9,8 +11,20 @@ export interface ReadinessResult {
   message?: string;
 }
 
+function readProviderSettingsFromWorkspace(): Record<string, unknown> {
+  try {
+    const p = path.join(process.cwd(), ".pi", "settings.json");
+    const raw = JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown>;
+    const piStack = (raw.piStack ?? {}) as Record<string, unknown>;
+    const quotaVisibility = (piStack.quotaVisibility ?? {}) as Record<string, unknown>;
+    return quotaVisibility;
+  } catch {
+    return {};
+  }
+}
+
 export default function providerReadinessExtension(pi: ExtensionAPI) {
-  const getProviderSettings = () => (pi.getSettings() as any)?.piStack?.quotaVisibility ?? {};
+  const getProviderSettings = () => readProviderSettingsFromWorkspace();
 
   pi.registerTool({
     name: "provider_readiness_matrix",
