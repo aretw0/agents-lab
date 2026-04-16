@@ -56,6 +56,12 @@ const FILTER_PATCHES = [
     source: "npm:pi-web-access",
     skills: ["!skills/librarian"],
   },
+  {
+    // oh-pi-extensions/custom-footer — replaced by @aretw0/pi-stack/extensions/custom-footer.ts
+    // Our fork adds provider/modelId in the compact line and inline budget status.
+    source: "npm:@ifi/oh-pi-extensions",
+    extensions: ["!extensions/custom-footer.ts"],
+  },
 ];
 
 /**
