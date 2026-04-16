@@ -120,6 +120,22 @@
       "id": "DEC-BUD-017",
       "context": "O usuário confirmou que o budget de $40 do GitHub Copilot não mostra gastos (está $0), apesar do telemetry local registrar milhões de tokens, indicando uma desconexão entre custo real e observabilidade via logs de sessão.",
       "status": "decided"
+    },
+    {
+      "id": "DEC-BUD-018",
+      "date": "2026-04-16",
+      "status": "decided",
+      "context": "oh-pi-extensions/custom-footer.ts controlava o footer compacto mas não expunha provider/model ref nem budget status na linha compacta. Modificar o pacote npm não é versionável. patch-package é frágil com updates upstream.",
+      "decision": "Quando uma extensão upstream controla superfície de UI ou comportamento crítico que precisamos customizar, o padrão correto é: silenciar com filter patch + criar equivalente first-party em packages/pi-stack/extensions/. Isso dá controle total, é versionável e testável com smoke tests de registro.",
+      "rationale": "Fork first-party é a única forma de ter garantia de comportamento sem dependência de lançamentos upstream. O filter patch (install.mjs + .pi/settings.json) garante que tanto o lab quanto usuários recebem o filtro automaticamente."
+    },
+    {
+      "id": "DEC-BUD-019",
+      "date": "2026-04-16",
+      "status": "decided",
+      "context": "Claude Code usa hooks de pre-write que detectam padrões inseguros e informam o agente sem bloquear automaticamente. O agente lê o sinal, avalia com contexto, e decide. O mesmo hook disparou false positive em texto de documentação no próprio tasks.json.",
+      "decision": "Guardrails no pi-stack devem ser informativos por padrão, não bloqueantes. Hard blocks ficam reservados para violações inequívocas (budget exceeded, auth missing). Para riscos de código e padrões suspeitos, o modelo correto é sinalizar (setStatus, notify) e deixar o runtime decidir.",
+      "rationale": "Bloqueios cegos geram false positives em código legítimo e criam fricção desnecessária. O agente com contexto completo toma decisões melhores do que pattern-match estático sem contexto."
     }
   ]
 }

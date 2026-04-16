@@ -317,6 +317,33 @@
         "Indicadores de quota deixam explícito se a barra representa usado ou restante.",
         "Quando quota é por conta (ex.: Google subscription) e não por modelo, a UI informa essa limitação para evitar falsa interpretação."
       ]
+    },
+    {
+      "id": "REQ-BUD-026",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "description": "Security signal hooks para extensões pi-stack: check estático que detecta padrões de injeção de shell em extensões do projeto, emitindo sinal informativo (não hard block). Inspirado no hook de pre-write do Claude Code.",
+      "acceptance_criteria": [
+        "hatch-doctor ou guardrails-core detecta interpolação de shell insegura em extensões.",
+        "Emite warning via setStatus ou notify — não bloqueia o boot.",
+        "Código seguro (pi.exec com args[]) não dispara o warning.",
+        "False positives em strings literais e comentários são filtrados."
+      ]
+    },
+    {
+      "id": "REQ-BUD-027",
+      "type": "non-functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "description": "Catálogo de extensões first-party vs third-party com política de fork: documentar quais extensões upstream são candidatas a fork (custom-footer já foi), critério de decisão, e manter sincronização entre FILTER_PATCHES em install.mjs e o documento.",
+      "acceptance_criteria": [
+        "Documento lista extensões silenciadas com razão e equivalente first-party.",
+        "FILTER_PATCHES em install.mjs está sincronizado com o documento.",
+        "Processo de decisão documentado: quando forkar vs quando contribuir upstream."
+      ]
     }
   ]
 }

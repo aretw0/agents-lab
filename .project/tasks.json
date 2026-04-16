@@ -1,49 +1,4 @@
 {
-  "decisions": [
-    {
-      "id": "DEC-001",
-      "title": "Extensões third-party com comportamento crítico devem ser forked como first-party",
-      "date": "2026-04-16",
-      "context": "oh-pi-extensions/custom-footer.ts controlava o footer compacto mas não expunha provider/model ref nem budget status na linha visível. Modificar o pacote npm não é versionável. patch-package é frágil com updates.",
-      "decision": "Quando uma extensão upstream controla uma superfície de UI ou comportamento que precisamos customizar, o padrão correto é: silenciar com filter patch + criar equivalente first-party em packages/pi-stack/extensions/. Isso dá controle total, é versionável, e testável com smoke tests de registro.",
-      "consequences": "Requer manutenção ao atualizar oh-pi-extensions (verificar se upstream mudou a lógica base). Filtro deve ser propagado tanto em .pi/settings.json (lab) quanto em install.mjs FILTER_PATCHES (usuários)."
-    },
-    {
-      "id": "DEC-002",
-      "title": "Guardrails devem ser informativos por padrão, não bloqueantes",
-      "date": "2026-04-16",
-      "context": "Claude Code usa hooks de pre-write que detectam padrões inseguros e informam o agente sem bloquear automaticamente. O agente lê o sinal, avalia com contexto completo, e decide. Bloqueios cegos geram false positives em código legítimo — como o próprio hook disparar em texto de documentação.",
-      "decision": "O pi-stack deve seguir o mesmo padrão: guardrails emitem sinais (setStatus, notify) que o runtime pode consumir e decidir. Hard blocks ficam reservados para violações inequívocas (budget exceeded, auth missing). Para riscos de código, o modelo certo é sinalizar e documentar, não rejeitar.",
-      "consequences": "Requer que extensões que hoje usam process.exit() para tudo sejam revisadas e classifiquem a severidade antes de decidir entre hard block vs soft signal."
-    }
-  ],
-  "requirements": [
-    {
-      "id": "REQ-STACK-001",
-      "title": "Security signal hooks para extensões pi-stack",
-      "priority": "P2",
-      "description": "Adicionar ao hatch-doctor ou guardrails-core um check estático que detecta padrões de injeção de shell em extensões. O check deve emitir um sinal informativo, não bloquear o boot. Inspirado no hook de pre-write do Claude Code. Deve ter cuidado com false positives (ex: texto de documentação contendo o padrão).",
-      "acceptance_criteria": [
-        "hatch-doctor ou guardrails-core detecta interpolação de shell insegura em extensões do projeto.",
-        "Emite warning via setStatus ou notify — não hard block.",
-        "Tem testes que verificam que código seguro (pi.exec com args[]) não dispara o warning.",
-        "Falsos positivos em comentários/strings literais são filtrados."
-      ],
-      "related_decisions": ["DEC-002"]
-    },
-    {
-      "id": "REQ-STACK-002",
-      "title": "Catálogo de extensões first-party vs third-party com política de fork",
-      "priority": "P2",
-      "description": "Documentar em docs/ quais extensões upstream são candidatas a fork first-party (custom-footer já foi). Critério: a extensão controla comportamento crítico de UI ou segurança, e o upstream não expõe hooks suficientes para customização sem modificar o fonte. Manter lista de filtros aplicados e razão.",
-      "acceptance_criteria": [
-        "Documento lista extensões silenciadas com razão e equivalente first-party.",
-        "FILTER_PATCHES em install.mjs está sincronizado com o documento.",
-        "Processo documentado: quando forkar vs quando contribuir upstream."
-      ],
-      "related_decisions": ["DEC-001"]
-    }
-  ],
   "tasks": [
     {
       "id": "TASK-BUD-001",
