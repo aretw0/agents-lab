@@ -9,7 +9,8 @@
     { "source": "npm:@aretw0/git-skills",  "extensions": [], "skills": [] },
     { "source": "npm:@aretw0/web-skills",  "extensions": [], "skills": [] },
     { "source": "npm:@aretw0/pi-skills",   "extensions": [], "skills": [] },
-    { "source": "npm:@aretw0/lab-skills",  "extensions": [], "skills": [] }
+    { "source": "npm:@aretw0/lab-skills",  "extensions": [], "skills": [] },
+    { "source": "npm:@ifi/oh-pi-extensions", "extensions": ["!extensions/custom-footer.ts"] }
   ],
   "piStack": {
     "monitorProviderPatch": {
