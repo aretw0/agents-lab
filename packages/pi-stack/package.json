@@ -33,7 +33,8 @@
       "./extensions/colony-pilot.ts",
       "./extensions/web-session-gateway.ts",
       "./extensions/quota-visibility.ts",
-      "./extensions/provider-readiness.ts"
+      "./extensions/provider-readiness.ts",
+      "./extensions/session-analytics.ts"
     ],
     "themes": [
       "./themes"

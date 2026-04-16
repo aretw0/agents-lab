@@ -733,15 +733,25 @@
     },
     {
       "id": "TASK-BUD-034",
-      "status": "planned",
+      "status": "completed",
       "type": "feature",
       "description": "[P0] Desenvolver ferramenta/primitiva para permitir exploração analítica do arquivo de log da sessão por swarms ou agentes auxiliares, integrando com 'session-triage' e permitindo queries no Control Plane.",
       "files": [
-        "packages/lab-skills/skills/session-triage/SKILL.md"
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts",
+        "packages/pi-stack/package.json"
       ],
       "references": [
         "REQ-BUD-018"
-      ]
+      ],
+      "acceptance_criteria": [
+        "session_analytics_query tool aceita query_type: signals|timeline|model-usage|summary.",
+        "Queries filtram por lookback_hours e retornam JSON estruturado.",
+        "Leitura de arquivos JSONL de sessao sem chamar subprocess externo.",
+        "/session-analytics command com sub-comandos: signals, timeline, model-usage, summary.",
+        "Testes unitarios cobrem: toSessionWorkspaceKey, parseSignals, parseModelChanges."
+      ],
+      "notes": "Implementado. session-analytics.ts expoe session_analytics_query tool (signals|timeline|model-usage|summary) e /session-analytics command. Le JSONL de sessao diretamente, sem subprocess. 14 testes unitarios: toSessionWorkspaceKey, parseSignals, parseModelChanges, parseTimeline, runQuery. 192/192 testes passando."
     },
     {
       "references": [
