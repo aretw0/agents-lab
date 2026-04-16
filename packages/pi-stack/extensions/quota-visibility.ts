@@ -1891,6 +1891,10 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
     }
   }
 
+  // Fire immediately so reload also updates the footer (session_start won't re-fire on reload).
+  refreshModelStatus(ctx);
+  refreshBudgetStatus(ctx).catch(() => {});
+
   pi.on("session_start", async (_event, ctx) => {
     refreshModelStatus(ctx);
     await refreshBudgetStatus(ctx);
