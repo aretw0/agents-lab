@@ -1823,6 +1823,8 @@ function formatSnapshot(state: PilotState): string {
 
 function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
   ctx?.ui?.setStatus?.("colony-pilot", renderStatus(state));
+  const modelRef = ctx?.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined;
+  ctx?.ui?.setStatus?.("control-plane-model", modelRef ? `[model] ${modelRef}` : undefined);
 }
 
 function trackFromText(text: string, state: PilotState): boolean {
@@ -2261,6 +2263,14 @@ export default function (pi: ExtensionAPI) {
     preflightCache = undefined;
     providerBudgetGateCache = undefined;
 
+    updateStatusUI(ctx, state);
+  });
+
+  pi.on("model_select", (_event, ctx) => {
+    updateStatusUI(ctx, state);
+  });
+
+  pi.on("turn_start", (_event, ctx) => {
     updateStatusUI(ctx, state);
   });
 

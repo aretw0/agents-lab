@@ -15,7 +15,8 @@
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { homedir } from "node:os";
 import path from "node:path";
 import {
   analyzeQuota,
@@ -44,6 +45,12 @@ export interface ProviderReadinessMatrix {
   recommendation: string;
 }
 
+interface RuntimeSignal {
+  rateLimitHits: number;
+  authHits: number;
+  serverHits: number;
+}
+
 function readWorkspaceSettings(cwd: string): Record<string, unknown> {
   try {
     const p = path.join(cwd, ".pi", "settings.json");
@@ -57,6 +64,84 @@ function piStackSettings(raw: Record<string, unknown>): Record<string, unknown> 
   return ((raw.piStack ?? {}) as Record<string, unknown>);
 }
 
+const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
+const AUTH_RE = /(\b401\b|\b403\b|unauthori[sz]ed|forbidden|auth\s*failed|invalid\s*token)/i;
+const SERVER_RE = /(\b5\d\d\b|overloaded|temporar(y|ily)\s*unavailable|internal\s*server\s*error)/i;
+
+function sessionDir(cwd: string): string {
+  const resolved = path.resolve(cwd).replace(/\\/g, "/");
+  const driveMatch = resolved.match(/^([A-Za-z]):\/(.*)$/);
+  if (driveMatch) {
+    const letter = driveMatch[1].toUpperCase();
+    const rest = driveMatch[2]
+      .split("/")
+      .filter(Boolean)
+      .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
+      .join("-");
+    return path.join(homedir(), ".pi", "agent", "sessions", `--${letter}--${rest}--`);
+  }
+  const rest = resolved
+    .replace(/^\//, "")
+    .split("/")
+    .filter(Boolean)
+    .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
+    .join("-");
+  return path.join(homedir(), ".pi", "agent", "sessions", `--${rest}--`);
+}
+
+function collectRuntimeSignals(cwd: string, lookbackMinutes = 45): Record<string, RuntimeSignal> {
+  const dir = sessionDir(cwd);
+  if (!existsSync(dir)) return {};
+
+  const cutoffMs = Date.now() - lookbackMinutes * 60 * 1000;
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".jsonl"))
+    .map((f) => path.join(dir, f))
+    .filter((p) => {
+      try {
+        return statSync(p).mtimeMs >= cutoffMs;
+      } catch {
+        return false;
+      }
+    });
+
+  const out: Record<string, RuntimeSignal> = {};
+
+  for (const file of files) {
+    let lines: string[] = [];
+    try {
+      lines = readFileSync(file, "utf8").split(/\r?\n/).filter(Boolean);
+    } catch {
+      continue;
+    }
+
+    for (const line of lines) {
+      let rec: any;
+      try {
+        rec = JSON.parse(line);
+      } catch {
+        continue;
+      }
+
+      const msg = rec?.message;
+      const providerRaw = msg?.provider ?? rec?.provider;
+      if (typeof providerRaw !== "string" || providerRaw.trim() === "") continue;
+      const provider = providerRaw.trim().toLowerCase();
+
+      const errorText = `${msg?.errorMessage ?? ""}`.trim();
+      if (!errorText) continue;
+
+      const cur = out[provider] ?? { rateLimitHits: 0, authHits: 0, serverHits: 0 };
+      if (RATE_LIMIT_RE.test(errorText)) cur.rateLimitHits += 1;
+      if (AUTH_RE.test(errorText)) cur.authHits += 1;
+      if (SERVER_RE.test(errorText)) cur.serverHits += 1;
+      out[provider] = cur;
+    }
+  }
+
+  return out;
+}
+
 export async function buildProviderReadinessMatrix(cwd: string): Promise<ProviderReadinessMatrix> {
   const raw = readWorkspaceSettings(cwd);
   const piStack = piStackSettings(raw);
@@ -66,6 +151,7 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
   const providerBudgets = parseProviderBudgets(qv.providerBudgets);
 
   const configuredProviders = Object.keys(routeModelRefs);
+  const runtimeSignals = collectRuntimeSignals(cwd);
 
   // Get budget state from session history
   let budgetStateByProvider: Record<string, "ok" | "warning" | "blocked"> = {};
@@ -84,6 +170,7 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
   const entries: ProviderReadinessEntry[] = configuredProviders.map((provider) => {
     const modelRef = routeModelRefs[provider] ?? null;
     const budgetState = budgetStateByProvider[provider] ?? "unknown";
+    const runtime = runtimeSignals[provider];
     const notes: string[] = [];
     let readiness: ProviderReadinessEntry["readiness"];
 
@@ -101,6 +188,18 @@ export async function buildProviderReadinessMatrix(cwd: string): Promise<Provide
       readiness = "ready";
     } else {
       readiness = "ready";
+    }
+
+    // Runtime health overlay from recent session errors.
+    if (runtime?.authHits && runtime.authHits >= 1) {
+      notes.push(`Runtime auth failures detected (${runtime.authHits}) in recent window.`);
+      readiness = "blocked";
+    } else if (runtime?.rateLimitHits && runtime.rateLimitHits >= 2) {
+      notes.push(`Runtime 429/rate-limit streak detected (${runtime.rateLimitHits}) in recent window.`);
+      if (readiness !== "blocked") readiness = "degraded";
+    } else if (runtime?.serverHits && runtime.serverHits >= 3) {
+      notes.push(`Runtime server instability detected (${runtime.serverHits}) in recent window.`);
+      if (readiness !== "blocked") readiness = "degraded";
     }
 
     return { provider, modelRef, budgetState, readiness, notes };

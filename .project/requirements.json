@@ -304,6 +304,19 @@
       "priority": "must",
       "type": "functional",
       "status": "accepted"
+    },
+    {
+      "id": "REQ-BUD-025",
+      "description": "A UX do control plane deve explicitar provider/model ativo e semântica das barras de quota (usado vs restante), incluindo distinção entre quota guarda-chuva por conta e disponibilidade por modelo.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Rodapé/overlay mostra modelRef completo (provider/model) ativo no control plane.",
+        "Indicadores de quota deixam explícito se a barra representa usado ou restante.",
+        "Quando quota é por conta (ex.: Google subscription) e não por modelo, a UI informa essa limitação para evitar falsa interpretação."
+      ]
     }
   ]
 }

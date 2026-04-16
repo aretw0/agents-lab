@@ -30,6 +30,16 @@ import {
 } from "./quota-visibility";
 import { buildProviderReadinessMatrix } from "./provider-readiness";
 
+const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
+
+function extractProviderRuntimeError(event: unknown): { provider?: string; errorMessage?: string } {
+  if (!event || typeof event !== "object") return {};
+  const msg = (event as any).message;
+  const provider = typeof msg?.provider === "string" ? msg.provider : undefined;
+  const errorMessage = typeof msg?.errorMessage === "string" ? msg.errorMessage : undefined;
+  return { provider, errorMessage };
+}
+
 // ---------------------------------------------------------------------------
 // Score types
 // ---------------------------------------------------------------------------
@@ -375,5 +385,34 @@ export default function handoffAdvisorExtension(pi: ExtensionAPI) {
             : "info"
       );
     },
+  });
+
+  // ---- proactive runtime hint (no auto-switch) -------------------------
+
+  pi.on("message_end", async (event, ctx) => {
+    const { provider, errorMessage } = extractProviderRuntimeError(event);
+    if (!provider || !errorMessage) return;
+    if (!RATE_LIMIT_RE.test(errorMessage)) return;
+
+    const advisory = await buildHandoffAdvisory(ctx.cwd, provider);
+    if (!advisory.recommended || advisory.recommended.provider === provider) return;
+
+    const recommendation = [
+      `runtime 429 detectado em ${provider}`,
+      `próximo recomendado: ${advisory.recommended.modelRef}`,
+      `execute manual: /handoff ${provider} --execute --reason runtime-429`,
+    ].join(" | ");
+
+    ctx.ui.setStatus?.("handoff-advisor", `[handoff] ${provider}→${advisory.recommended.provider}`);
+    ctx.ui.notify(recommendation, "warning");
+
+    pi.appendEntry("handoff-advisor.runtime-alert", {
+      atIso: new Date().toISOString(),
+      fromProvider: provider,
+      errorMessage,
+      recommendedProvider: advisory.recommended.provider,
+      recommendedModelRef: advisory.recommended.modelRef,
+      noAutoSwitch: true,
+    });
   });
 }
