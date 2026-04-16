@@ -1891,13 +1891,14 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
     }
   }
 
-  // Fire immediately so reload also updates the footer (session_start won't re-fire on reload).
-  refreshModelStatus(ctx);
-  refreshBudgetStatus(ctx).catch(() => {});
-
   pi.on("session_start", async (_event, ctx) => {
     refreshModelStatus(ctx);
     await refreshBudgetStatus(ctx);
+  });
+
+  // turn_start fires on first user message after a reload — keeps model ref current.
+  pi.on("turn_start", (_event, ctx) => {
+    refreshModelStatus(ctx);
   });
 
   pi.on("model_select", (_event, ctx) => {

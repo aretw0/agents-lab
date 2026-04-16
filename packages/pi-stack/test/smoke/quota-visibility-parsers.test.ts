@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import {
+import { describe, it, expect, vi } from "vitest";
+import quotaVisibilityExtension, {
   extractUsage,
   parseProviderWindowHours,
   parseProviderBudgets,
@@ -12,6 +12,32 @@ import {
   type QuotaUsageEvent,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
+
+/** Minimal ExtensionAPI mock — enough to register without crashing. */
+function makeMockPi() {
+  return {
+    on: vi.fn(),
+    registerCommand: vi.fn(),
+    registerTool: vi.fn(),
+  } as unknown as Parameters<typeof quotaVisibilityExtension>[0];
+}
+
+describe("quota-visibility extension — registration smoke", () => {
+  it("não crasha ao ser carregada (sem ctx no escopo global)", () => {
+    expect(() => quotaVisibilityExtension(makeMockPi())).not.toThrow();
+  });
+
+  it("registra handlers para session_start, turn_start e model_select", () => {
+    const pi = makeMockPi();
+    quotaVisibilityExtension(pi);
+    const registeredEvents = (pi.on as ReturnType<typeof vi.fn>).mock.calls.map(
+      ([event]: [string]) => event,
+    );
+    expect(registeredEvents).toContain("session_start");
+    expect(registeredEvents).toContain("turn_start");
+    expect(registeredEvents).toContain("model_select");
+  });
+});
 
 describe("quota-visibility parsers", () => {
   it("extractUsage normaliza formatos de usage/cost", () => {
