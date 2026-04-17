@@ -1880,28 +1880,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
     }
   }
 
-  /** Footer entry: "provider/model" resolved from ctx.model. */
-  function refreshModelStatus(ctx: ExtensionContext): void {
-    const m = ctx.model as (Record<string, unknown> | undefined);
-    if (!m) return;
-    const provider = typeof m["provider"] === "string" ? m["provider"] : undefined;
-    const id = typeof m["id"] === "string" ? m["id"] : undefined;
-    if (provider && id) {
-      ctx.ui.setStatus("active-model", `${provider}/${id}`);
-    }
-  }
-
   pi.on("session_start", async (_event, ctx) => {
-    refreshModelStatus(ctx);
     await refreshBudgetStatus(ctx);
-  });
-
-  // turn_start fires on first user message after a reload — keeps model ref current.
-  pi.on("turn_start", (_event, ctx) => {
-    refreshModelStatus(ctx);
-  });
-
-  pi.on("model_select", (_event, ctx) => {
-    refreshModelStatus(ctx);
   });
 }

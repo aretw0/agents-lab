@@ -1823,8 +1823,6 @@ function formatSnapshot(state: PilotState): string {
 
 function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
   ctx?.ui?.setStatus?.("colony-pilot", renderStatus(state));
-  const modelRef = ctx?.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined;
-  ctx?.ui?.setStatus?.("control-plane-model", modelRef ? `[model] ${modelRef}` : undefined);
 }
 
 function trackFromText(text: string, state: PilotState): boolean {

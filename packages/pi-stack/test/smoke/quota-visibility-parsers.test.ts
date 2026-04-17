@@ -27,15 +27,13 @@ describe("quota-visibility extension — registration smoke", () => {
     expect(() => quotaVisibilityExtension(makeMockPi())).not.toThrow();
   });
 
-  it("registra handlers para session_start, turn_start e model_select", () => {
+  it("registra handler para session_start (budget refresh)", () => {
     const pi = makeMockPi();
     quotaVisibilityExtension(pi);
     const registeredEvents = (pi.on as ReturnType<typeof vi.fn>).mock.calls.map(
       ([event]: [string]) => event,
     );
     expect(registeredEvents).toContain("session_start");
-    expect(registeredEvents).toContain("turn_start");
-    expect(registeredEvents).toContain("model_select");
   });
 });
 

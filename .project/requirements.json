@@ -344,6 +344,46 @@
         "FILTER_PATCHES em install.mjs está sincronizado com o documento.",
         "Processo de decisão documentado: quando forkar vs quando contribuir upstream."
       ]
+    },
+    {
+      "id": "REQ-BUD-028",
+      "description": "TUI control plane deve ser consolidada como escopo fechado: nenhuma informação deve se repetir entre pi built-in status bar, extension statuses e custom footer.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "model/provider aparece em exatamente um lugar visível (pi built-in compact bar — não via setStatus nem footer).",
+        "budget health (✓provider:pct%) aparece somente no footer LINE 2 via quota-budgets status.",
+        "env-doctor status aparece somente quando há issues (already implemented), não em execução normal.",
+        "Nenhum widget de rate-limit automático (usage-tracker) ativo no estado padrão — info disponível apenas via /usage command."
+      ]
+    },
+    {
+      "id": "REQ-BUD-029",
+      "description": "Tema agents-lab deve ser consolidado first-party: todas as cores e estilos usados pelo custom-footer e extensions devem ser definidos no tema, não dependidos de upstream oh-pi-extensions.",
+      "type": "functional",
+      "status": "proposed",
+      "priority": "should",
+      "source": "human",
+      "acceptance_criteria": [
+        "themes/agents-lab.json define todas as cores usadas por custom-footer.ts.",
+        "Nenhuma dependência de tema do @ifi/oh-pi-themes ou @ifi/oh-pi-extensions para estilos visuais do control plane.",
+        "Reiniciar pi com apenas packages/pi-stack carregado produz output visualmente consistente."
+      ]
+    },
+    {
+      "id": "REQ-BUD-030",
+      "description": "Quota display deve refletir apenas janelas ativas de uso — providers com plano 'unlimited' não devem exibir barra de progresso permanente que aparenta uso máximo.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "usage-tracker.ts de @ifi/oh-pi-extensions está silenciado via filter patch (implementado).",
+        "Quota display via quota-budgets status mostra apenas providers configurados em providerBudgets.",
+        "Providers sem quota configurada não aparecem no footer budget status."
+      ]
     }
   ]
 }
