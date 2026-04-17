@@ -38,7 +38,9 @@
       "./extensions/handoff-advisor.ts",
       "./extensions/quota-alerts.ts",
       "./extensions/safe-boot.ts",
-      "./extensions/governance-profiles.ts"
+      "./extensions/governance-profiles.ts",
+      "./extensions/quota-panel.ts",
+      "./extensions/custom-footer.ts"
     ],
     "themes": [
       "./themes"
