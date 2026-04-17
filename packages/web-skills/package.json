@@ -1,6 +1,6 @@
 {
   "name": "@aretw0/web-skills",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "First-party web skills: native search and browser automation via CDP",
   "type": "module",
   "license": "MIT",
