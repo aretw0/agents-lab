@@ -5,12 +5,46 @@
     "../packages/web-skills",
     "../packages/pi-skills",
     "../packages/lab-skills",
-    { "source": "npm:@aretw0/pi-stack",   "extensions": [], "skills": [] },
-    { "source": "npm:@aretw0/git-skills",  "extensions": [], "skills": [] },
-    { "source": "npm:@aretw0/web-skills",  "extensions": [], "skills": [] },
-    { "source": "npm:@aretw0/pi-skills",   "extensions": [], "skills": [] },
-    { "source": "npm:@aretw0/lab-skills",  "extensions": [], "skills": [] },
-    { "source": "npm:@ifi/oh-pi-extensions", "extensions": ["!extensions/custom-footer.ts"] }
+    {
+      "source": "npm:@aretw0/pi-stack",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/git-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/web-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/pi-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/lab-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@ifi/oh-pi-extensions",
+      "extensions": [
+        "!extensions/custom-footer.ts",
+        "!extensions/usage-tracker.ts",
+        "!extensions/usage-tracker-providers.ts"
+      ],
+      "skills": [],
+      "themes": []
+    }
   ],
   "piStack": {
     "monitorProviderPatch": {
@@ -25,10 +59,7 @@
       "preflight": {
         "enabled": true,
         "enforceOnAntColonyTool": true,
-        "requiredExecutables": [
-          "node",
-          "git"
-        ]
+        "requiredExecutables": ["node", "git"]
       },
       "budgetPolicy": {
         "enabled": true,
@@ -68,12 +99,7 @@
         "lookbackDays": 30,
         "allowOverride": true,
         "overrideToken": "budget-override:",
-        "recoveryCommands": [
-          "doctor",
-          "quota-visibility",
-          "model",
-          "login"
-        ]
+        "recoveryCommands": ["doctor", "quota-visibility", "model", "login"]
       }
     },
     "quotaVisibility": {

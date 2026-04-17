@@ -58,9 +58,14 @@ const FILTER_PATCHES = [
   },
   {
     // oh-pi-extensions/custom-footer — replaced by @aretw0/pi-stack/extensions/custom-footer.ts
-    // Our fork adds provider/modelId in the compact line and inline budget status.
+    // usage-tracker/usage-tracker-providers — replaced by quota-visibility budget status line
+    // (usage-tracker showed "Google Subscription quota: 100%" for unlimited plans — misleading)
     source: "npm:@ifi/oh-pi-extensions",
-    extensions: ["!extensions/custom-footer.ts"],
+    extensions: [
+      "!extensions/custom-footer.ts",
+      "!extensions/usage-tracker.ts",
+      "!extensions/usage-tracker-providers.ts",
+    ],
   },
 ];
 
