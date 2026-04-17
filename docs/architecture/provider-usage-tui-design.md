@@ -179,8 +179,8 @@ graph TD
     C --> A
     D --> A
     E --> A
-    A -->|isPanelVisible()| E
-    E -->|quando ativo| G
+    A -->|"isPanelVisible()"| E
+    E -->|"quando ativo"| G
     G --> H
     H --> B
     B --> E
