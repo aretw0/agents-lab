@@ -302,15 +302,9 @@ export default function governanceProfilesExtension(pi: ExtensionAPI) {
       "status: show the currently active profile.",
     ].join(" "),
     parameters: Type.Object({
-      action: Type.Union(
-        [
-          Type.Literal("preview"),
-          Type.Literal("apply"),
-          Type.Literal("list"),
-          Type.Literal("status"),
-        ],
-        { description: "preview | apply | list | status" },
-      ),
+      action: Type.String({
+        description: "preview | apply | list | status",
+      }),
       profile: Type.Optional(
         Type.String({ description: "conservative | balanced | throughput (required for preview/apply)" }),
       ),

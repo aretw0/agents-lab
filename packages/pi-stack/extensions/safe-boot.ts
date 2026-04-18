@@ -195,12 +195,9 @@ export default function safeBootExtension(pi: ExtensionAPI) {
       "Snapshot is saved before any change so it can be restored by /safe-boot restore.",
     ].join(" "),
     parameters: Type.Object({
-      action: Type.Union([
-        Type.Literal("apply"),
-        Type.Literal("snapshot"),
-        Type.Literal("restore"),
-        Type.Literal("list"),
-      ], { description: "apply: snapshot+apply safe-core | snapshot: save only | restore: restore last | list: list snapshots" }),
+      action: Type.String({
+        description: "apply: snapshot+apply safe-core | snapshot: save only | restore: restore last | list: list snapshots",
+      }),
       snapshot_filename: Type.Optional(
         Type.String({ description: "For restore: specific snapshot filename to restore." })
       ),

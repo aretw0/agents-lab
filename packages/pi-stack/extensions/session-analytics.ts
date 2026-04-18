@@ -293,15 +293,9 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
       "Returns structured JSON; no subprocess invocation.",
     ].join(" "),
     parameters: Type.Object({
-      query_type: Type.Union(
-        [
-          Type.Literal("signals"),
-          Type.Literal("timeline"),
-          Type.Literal("model-usage"),
-          Type.Literal("summary"),
-        ],
-        { description: "Type of analytical query to run." }
-      ),
+      query_type: Type.String({
+        description: "Type of analytical query to run (signals | timeline | model-usage | summary).",
+      }),
       lookback_hours: Type.Optional(
         Type.Number({ description: "How many hours back to scan session files. Default: 24." })
       ),
