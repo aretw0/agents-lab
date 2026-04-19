@@ -20,7 +20,16 @@ import type {
   ReadonlyFooterDataProvider,
 } from "@mariozechner/pi-coding-agent";
 import { truncateToWidth } from "@mariozechner/pi-tui";
-import { shouldShowPanel, getCachedStatus, buildPanelLines } from "./quota-panel";
+import {
+  shouldShowPanel,
+  getCachedStatus,
+  buildPanelLines as buildQuotaPanelLines,
+} from "./quota-panel";
+import {
+  shouldShowColonyPanel,
+  getColonyPanelSnapshot,
+  buildColonyPanelLines,
+} from "./colony-panel";
 
 export function hyperlink(url: string, text: string): string {
   return `\x1b]8;;${url}\x07${text}\x1b]8;;\x07`;
@@ -208,8 +217,18 @@ export default function customFooterExtension(pi: ExtensionAPI) {
             theme,
             width,
           );
-          if (!shouldShowPanel()) return baseLines;
-          return [...baseLines, ...buildPanelLines(getCachedStatus(), width)];
+          const showQuotaPanel = shouldShowPanel();
+          const showColonyPanel = shouldShowColonyPanel();
+          if (!showQuotaPanel && !showColonyPanel) return baseLines;
+
+          const panelLines: string[] = [];
+          if (showQuotaPanel) {
+            panelLines.push(...buildQuotaPanelLines(getCachedStatus(), width));
+          }
+          if (showColonyPanel) {
+            panelLines.push(...buildColonyPanelLines(getColonyPanelSnapshot(), width));
+          }
+          return [...baseLines, ...panelLines];
         },
       };
     });
