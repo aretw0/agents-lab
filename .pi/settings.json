@@ -50,7 +50,6 @@
     "monitorProviderPatch": {
       "classifierThinking": "off",
       "classifierModelByProvider": {
-        "github-copilot": "github-copilot/claude-haiku-4.5",
         "openai-codex": "openai-codex/gpt-5.4-mini"
       },
       "hedgeConversationHistory": false
@@ -66,8 +65,8 @@
         "enforceOnAntColonyTool": true,
         "requireMaxCost": true,
         "autoInjectMaxCost": true,
-        "defaultMaxCostUsd": 2,
-        "hardCapUsd": 20,
+        "defaultMaxCostUsd": 6,
+        "hardCapUsd": 60,
         "minMaxCostUsd": 0.05,
         "enforceProviderBudgetBlock": true,
         "providerBudgetLookbackDays": 30,
@@ -105,48 +104,18 @@
     "quotaVisibility": {
       "defaultDays": 30,
       "providerBudgets": {
-        "github-copilot": {
-          "owner": "shared-github-account",
-          "period": "monthly",
-          "unit": "tokens-cost",
-          "monthlyQuotaTokens": 650000000,
-          "monthlyQuotaCostUsd": 40,
-          "warnPct": 75,
-          "hardPct": 100
-        },
         "openai-codex": {
-          "owner": "shared-portfolio",
+          "owner": "openai-pro",
           "period": "monthly",
           "unit": "tokens-cost",
-          "monthlyQuotaTokens": 600000000,
-          "monthlyQuotaCostUsd": 180,
-          "warnPct": 70,
-          "hardPct": 95
-        },
-        "google-antigravity": {
-          "owner": "shared-portfolio",
-          "period": "monthly",
-          "unit": "tokens-cost",
-          "monthlyQuotaTokens": 300000000,
-          "monthlyQuotaCostUsd": 60,
-          "warnPct": 80,
-          "hardPct": 100
-        },
-        "google-gemini-cli": {
-          "owner": "shared-portfolio",
-          "period": "monthly",
-          "unit": "tokens-cost",
-          "monthlyQuotaTokens": 300000000,
-          "monthlyQuotaCostUsd": 60,
-          "warnPct": 80,
-          "hardPct": 100
+          "monthlyQuotaTokens": 1200000000,
+          "monthlyQuotaCostUsd": 500,
+          "warnPct": 85,
+          "hardPct": 98
         }
       },
       "routeModelRefs": {
-        "openai-codex": "openai-codex/gpt-5.3-codex",
-        "github-copilot": "github-copilot/claude-sonnet-4.6",
-        "google-antigravity": "google-antigravity/gemini-3.1-pro-high",
-        "google-gemini-cli": "google-gemini-cli/gemini-3.1-pro-preview"
+        "openai-codex": "openai-codex/gpt-5.3-codex"
       }
     }
   }

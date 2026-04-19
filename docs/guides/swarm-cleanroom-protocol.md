@@ -69,6 +69,28 @@ Durante a execução:
 3. Tratar falhas de scout/drone como evento de execução (não “fim de run”).
 4. Para throughput de swarm, manter monitores de sessão no perfil operacional decidido (`/monitors off` quando aplicável).
 
+### Fase B.1 — Controle de contexto (quando houver planejamento amplo)
+
+Se a execução entrar em planejamento muito grande, aplicar o protocolo anti-estouro:
+
+1. Quebrar a análise em lotes de 3-5 decisões.
+2. Ao fim de cada lote, registrar mini-handoff (usar [`mini-handoff-template.md`](./mini-handoff-template.md)) com:
+   - resumo do que foi decidido;
+   - pendências imediatas;
+   - próximos 3 passos.
+3. Delegar por trilhas independentes (policy, budget, docs, research) e consolidar só o necessário.
+4. Se houver risco de saturação de contexto, **parar antes**, consolidar e só então continuar.
+   - gatilhos mínimos: 2 ciclos sem decisão, >3 trilhas simultâneas sem checkpoint, ou planejamento excessivamente longo sem mini-handoff.
+
+### Ritual rápido de checkpoint (90 segundos)
+
+Aplicar ao fim de cada micro-lote:
+
+1. Criar/atualizar checkpoint em `docs/research/context-checkpoint-YYYY-MM-DD.md` (ou `...-lote-N.md`).
+2. Preencher com o template: [`mini-handoff-template.md`](./mini-handoff-template.md).
+3. Registrar no `.project/tasks.json` (notes da task ativa) um resumo de 1 linha + link do artefato.
+4. Só abrir novo lote após definir os próximos 3 passos.
+
 ---
 
 ## Fase C — Pós-run imediato

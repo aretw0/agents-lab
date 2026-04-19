@@ -67,6 +67,7 @@ Um agente deve parar imediatamente quando:
 3. **Falha de validação repetida** (verify ou test falhando após 2 tentativas de fix) → não persistir; reportar estado e parar
 4. **Conflito de merge não-trivial** em `.project/tasks.json` → não resolver automaticamente; chamar humano
 5. **Escopo de mudança > 5 arquivos** numa task que parecia simples → pausar e confirmar escopo antes de continuar
+6. **Orçamento de contexto em risco** (planejamento crescendo sem fechar decisão) → parar, consolidar mini-handoff e retomar em lote menor
 
 ---
 
@@ -97,15 +98,49 @@ Um agente deve parar imediatamente quando:
 
 ---
 
+## Protocolo anti-estouro de contexto (planejamento grande)
+
+Quando o plano for amplo, o agente deve operar em **micro-lotes**:
+
+1. **Lote curto:** no máximo 3-5 decisões por iteração.
+2. **Checkpoint obrigatório:** ao fim de cada lote, produzir mini-handoff (estado atual + próximos 3 passos).
+3. **Delegação por trilha:** separar investigação por eixo (policy, budget, docs, research) e consolidar só o essencial.
+4. **Pesquisa em shards:** preferir perguntas menores e sequenciais em vez de investigação monolítica.
+5. **Gatilho de consolidação:** se a sessão ficar longa sem decisão fechada, parar e resumir antes de continuar.
+
+### Limiar objetivo para "contexto em risco"
+
+Acionar consolidação quando **qualquer** condição abaixo ocorrer:
+
+- 2 ciclos consecutivos sem decisão fechada;
+- mais de 3 trilhas ativas ao mesmo tempo sem checkpoint;
+- produção de resposta/planejamento muito extensa sem mini-handoff intermediário.
+
+### Fluxo de delegação por trilha (reutilizável)
+
+Para planejamento amplo, separar em até 4 trilhas paralelas:
+
+| Trilha | Entrada | Saída esperada |
+|--------|---------|----------------|
+| Policy | dúvidas de roleModels/modelPolicy/enforcement | mapa de regras + riscos |
+| Budget | budgets, janelas, WARN/BLOCK, handoff | recomendação de rota + limites |
+| Docs | charter/protocol/guides | atualização objetiva + checklist |
+| Research | referências externas/repos | comparativo curto com decisão de adoção |
+
+**Contrato de consolidação:** cada trilha retorna no máximo 5 bullets; a consolidação final fecha no máximo 3 decisões por lote.
+
+---
+
 ## Ciclo operacional por run
 
 Cada execução autônoma deve:
 
 1. **Pre-run**: `git status` limpo + `/colony-pilot status` + budget OK
 2. **Execução**: uma task por vez; marcar `in-progress` antes de começar
-3. **Pós-run imediato**: produzir inventário de arquivos + resultado de validação
-4. **Atualizar board**: notas com evidência; task candidata a fechamento (não auto-close P0)
-5. **Commit**: somente código testado e verificado; mensagem de commit com task ID
+3. **Checkpoint de contexto (se necessário)**: se planejamento ficar grande, fazer mini-handoff e quebrar em novo lote
+4. **Pós-run imediato**: produzir inventário de arquivos + resultado de validação
+5. **Atualizar board**: notas com evidência; task candidata a fechamento (não auto-close P0)
+6. **Commit**: somente código testado e verificado; mensagem de commit com task ID
 
 ---
 
@@ -114,6 +149,7 @@ Cada execução autônoma deve:
 | Recurso | Uso |
 |---------|-----|
 | [`swarm-cleanroom-protocol.md`](./swarm-cleanroom-protocol.md) | **Protocolo de execução** — pré/pós-run, promoção, reconciliação |
+| [`mini-handoff-template.md`](./mini-handoff-template.md) | Modelo padrão para checkpoints de contexto em micro-lotes |
 | [`budget-governance.md`](./budget-governance.md) | Budget envelope e governança de custo |
 | [`quota-visibility.md`](./quota-visibility.md) | Como auditar consumo e detectar WARN/BLOCK |
 | [`provider-readiness`](/provider-matrix) | Verificar saúde de providers antes de lançar swarm |
