@@ -401,3 +401,25 @@ Status: **implementado e validado**.
 1. Web UI `/api/prompt`: e2e de token inválido + concorrência (followUp/steer).
 2. Refinar heurística do `cpanel auto` (ex.: abrir por `failed|blocked` mesmo com live baixo).
 3. Avaliar layout “cards” no web-session-gateway para múltiplas colônias com filtros.
+
+## Hatch de conflito mitsupi/uv vs bg-process (pós-feedback de campo)
+
+Status: **endereçado com patch determinístico + smoke dedicado**.
+
+- `packages/pi-stack/install.mjs`
+  - `FILTER_PATCHES` exportado;
+  - novo helper puro `applyFilterPatchesToSettings(...)`;
+  - merge de filtros agora é **aditivo e idempotente** (não perde customizações existentes);
+  - garante exclusão `!pi-extensions/uv.ts` em `npm:mitsupi` para evitar colisão de tool/keybinding com `bg-process`.
+
+- Novo teste: `packages/pi-stack/test/smoke/installer-filters.test.ts`
+  - cobre conversão de entrada string para objeto filtrado,
+  - cobre merge com filtros já existentes,
+  - cobre idempotência (sem duplicar filtros),
+  - cobre no-op quando `packages` não existe.
+
+Validação rodada:
+
+- `npx vitest run` → **PASS (385/385)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
