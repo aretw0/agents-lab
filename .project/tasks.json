@@ -928,6 +928,143 @@
       "notes": "Motivação (2026-04-16): usuário identificou que iniciar o consumo da janela de cota mais cedo permite que ela expire e reinicie antes do pico de trabalho. Estratégia: um workflow cron que faz um 'oi' ao modelo às 7-8h, abrindo a janela. Quando a janela expirar (dependendo do provider: 5h/diária/semanal), já terá reiniciado para quando o trabalho pesado começar.\n[2026-04-16T15:00:00Z] Implementado. .github/workflows/quota-window-opener.yml: cron 0 10 * * 1-5 (10h UTC = 7h BRT, Seg-Sex). Chama claude-haiku-4-5-20251001 com max_tokens=1 via Anthropic API. Secret: ANTHROPIC_API_KEY. Dry-run via workflow_dispatch. Loga timestamp + tokens consumidos."
     },
     {
+      "id": "TASK-BUD-046",
+      "description": "[P0] Executar Lote A unattended para estabilizar reconciliador single-writer (TASK-BUD-010) com validação determinística de concorrência/worktree.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-045"
+      ],
+      "references": [
+        "TASK-BUD-010"
+      ],
+      "acceptance_criteria": [
+        "Lote A executado com maxCost explícito e resumo de mudanças no board.",
+        "Testes de reconciliador/concorrência rodam sem regressão.",
+        "Resultado permanece em estado candidato para revisão humana (sem auto-close P0)."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "docs/research/unattended-swarm-runbook-2026-04-19.md"
+      ]
+    },
+    {
+      "id": "TASK-BUD-047",
+      "description": "[P0] Executar Lote B unattended para fechar pipeline de triagem e budget semanal por provider (TASK-BUD-020 + TASK-BUD-024).",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-046"
+      ],
+      "references": [
+        "TASK-BUD-020",
+        "TASK-BUD-024"
+      ],
+      "acceptance_criteria": [
+        "session-triage e budget semanal operam com comandos determinísticos.",
+        "Board atualizado com split unlock-now/later e estado por provider.",
+        "Sem auto-close de tasks P0."
+      ],
+      "files": [
+        "scripts/session-triage.mjs",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "docs/guides/quota-visibility.md"
+      ]
+    },
+    {
+      "id": "TASK-BUD-048",
+      "description": "[P1] Executar lote de desbloqueio para gate hard de provider budget (TASK-BUD-025) como pré-condição de TASK-BUD-026.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-047"
+      ],
+      "references": [
+        "TASK-BUD-025",
+        "TASK-BUD-026"
+      ],
+      "acceptance_criteria": [
+        "Gate BLOCK com override auditável implementado e documentado.",
+        "Comandos de recovery permanecem permitidos.",
+        "Pré-condição de TASK-BUD-026 explicitamente satisfeita no board."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "docs/guides/budget-governance.md"
+      ]
+    },
+    {
+      "id": "TASK-BUD-049",
+      "description": "[P0] Executar Lote C unattended para operacionalizar governor global no workspace (TASK-BUD-026) após desbloqueio do gate.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-048"
+      ],
+      "references": [
+        "TASK-BUD-026"
+      ],
+      "acceptance_criteria": [
+        "Provider em BLOCK é barrado globalmente com trilha auditável.",
+        "Comandos de recovery (/doctor,/quota-visibility,/model,/login) seguem permitidos.",
+        "Execução registrada no board com mini-handoff de lote."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        ".pi/settings.json"
+      ]
+    },
+    {
+      "id": "TASK-BUD-050",
+      "description": "[P1] Executar lote de desbloqueio para portfolio routing advisor (TASK-BUD-027) como pré-condição de TASK-BUD-029.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-049"
+      ],
+      "references": [
+        "TASK-BUD-027",
+        "TASK-BUD-029"
+      ],
+      "acceptance_criteria": [
+        "Advisor de roteamento retorna recomendação determinística com justificativa auditável.",
+        "Providers bloqueados não são sugeridos automaticamente.",
+        "Pré-condição de TASK-BUD-029 satisfeita no board."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "docs/guides/quota-visibility.md"
+      ]
+    },
+    {
+      "id": "TASK-BUD-051",
+      "description": "[P0] Executar Lote D unattended para fechar release candidate de governança multi-provider (TASK-BUD-029) sem publish.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-050"
+      ],
+      "references": [
+        "TASK-BUD-029"
+      ],
+      "acceptance_criteria": [
+        "Hatch check pronto no setup alvo.",
+        "Smoke/node tests/verify sem regressão.",
+        "Changeset e notas de risco preparados (sem publish)."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "docs/guides/budget-governance.md",
+        "docs/guides/quota-visibility.md"
+      ]
+    },
+    {
       "id": "TASK-BUD-045",
       "description": "[P1] Definir e aplicar estratégia operacional anti-estouro de contexto para planejamentos grandes: quebrar em lotes pequenos, usar checkpoints de handoff, delegação por trilhas e pesquisa em shards com gatilho explícito de consolidação.",
       "status": "in-progress",
@@ -947,6 +1084,8 @@
         "docs/research/context-checkpoint-2026-04-19-lote-4-preflight.md",
         "docs/research/context-checkpoint-2026-04-19-lote-5-provider-rebaseline.md",
         "docs/research/context-checkpoint-2026-04-19-lote-6-c2-failed.md",
+        "docs/guides/unattended-swarm-execution-plan.md",
+        "docs/research/unattended-swarm-runbook-2026-04-19.md",
         ".pi/settings.json"
       ],
       "acceptance_criteria": [
@@ -958,7 +1097,8 @@
       ],
       "notes": "Originada em 2026-04-19 após relato explícito do usuário sobre estouro de contexto em planejamento amplo. Foco: continuidade operacional com baixa carga cognitiva via fragmentação + delegação + checkpoints.\n[2026-04-19] Iniciado: status -> in-progress; HANDOFF atualizado com seção de lição operacional; protocolo incorporado em docs/guides/agent-driver-charter.md (stop condition + micro-lotes + checkpoint) e docs/guides/swarm-cleanroom-protocol.md (Fase B.1 controle de contexto).\n[2026-04-19] Checkpoint de execução registrado em docs/research/context-checkpoint-2026-04-19.md.\n[2026-04-19] Limiar objetivo de contexto em risco adicionado (2 ciclos sem decisão, >3 trilhas sem checkpoint, ou planejamento extenso sem mini-handoff).\n[2026-04-19] Lote 2 concluído com mini-handoff em docs/research/context-checkpoint-2026-04-19-lote-2.md; fluxo de delegação por trilha e ritual de checkpoint (90s) formalizados.\n[2026-04-19] Lote 3: criado checklist operacional docs/guides/swarm-preflight-15m.md e checkpoint docs/research/context-checkpoint-2026-04-19-lote-3.md como execução curta real do protocolo.\n[2026-04-19] Lote 4 (preflight): budget/readiness coletados; openai-codex em warning; handoff recomenda github-copilot/claude-sonnet-4.6 para piloto; aguardando decisão humana para switch explícito.\n[2026-04-19] Correção de premissa pelo usuário: sem cota no GitHub Copilot; Google bloqueado; Claude ainda não operacional. Rebaseline aplicado para OpenAI-only em .pi/settings.json (budget/route/classifier) e novo checkpoint em docs/research/context-checkpoint-2026-04-19-lote-5-provider-rebaseline.md.\n[2026-04-19] Swarm piloto lançado: COLONY_SIGNAL:LAUNCHED [c1], maxCost=8, objetivo de quebrar P0 em lotes e preparar execução unattended com baixa interação.\n[2026-04-19] c1 concluída: 12/13 tasks done, custo $0.43, 1 falha não crítica (drone com excesso de argumentos).\n[2026-04-19] Baseline commitado em main: dc7828d (rebaseline openai + operação unattended).\n[2026-04-19] c2 lançada para execução unattended dos lotes P0: COLONY_SIGNAL:LAUNCHED [c2], maxCost=10.
 [2026-04-19] c2 failed: no_pending_worker_tasks após 2 rounds de planning recovery (custo $0.00). Mitigação registrada em docs/research/context-checkpoint-2026-04-19-lote-6-c2-failed.md.
-[2026-04-19] c3 relançada em modo artifact-first (escopo explícito por arquivos) para evitar nova falha de planejamento abstrato."
+[2026-04-19] c3 relançada em modo artifact-first (escopo explícito por arquivos) para evitar nova falha de planejamento abstrato.
+[2026-04-19] c3 concluída: 13/14 tasks done, custo $0.55, falha não crítica em validação final por allowlist do drone. Entregáveis consolidados manualmente no main: docs/guides/unattended-swarm-execution-plan.md e docs/research/unattended-swarm-runbook-2026-04-19.md; lotes preparados no board (TASK-BUD-046..051)."
     }
   ]
 }

@@ -32,6 +32,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [colony-runtime-recovery.md](./colony-runtime-recovery.md) | Como localizar artefatos de colony (state/worktree/branch) e recuperar contexto após parada |
 | [colony-provider-model-governance.md](./colony-provider-model-governance.md) | Governança de provider/model para colony e multi-agentes (usuário + dev) |
 | [swarm-cleanroom-protocol.md](./swarm-cleanroom-protocol.md) | Protocolo cleanroom para runs de swarm (pre-run, execução, promoção, reconciliação) |
+| [unattended-swarm-execution-plan.md](./unattended-swarm-execution-plan.md) | Plano de execução unattended por lotes P0 (OpenAI-only) com go/no-go e rollback |
 | [session-triage.md](./session-triage.md) | Triage do histórico recente de sessões/branches para consolidar pendências no board canônico |
 | [scheduler-governance.md](./scheduler-governance.md) | Governança forte de ownership/lease do scheduler para evitar conflito entre sessões |
 | [stack-sovereignty-user-guide.md](./stack-sovereignty-user-guide.md) | Guia operacional da soberania da stack (owners, defaults seguros, convivência) |
