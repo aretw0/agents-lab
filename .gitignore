@@ -138,6 +138,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Claude local settings (ephemeral — NOT versioned)
+.claude/settings.local.json
+
 # Pi workspace runtime artifacts (ephemeral — NOT versioned)
 .pi-lens/
 .pi/monitors/
