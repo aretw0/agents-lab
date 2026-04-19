@@ -144,3 +144,10 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Escopo reportado: checkpoint principal + auditoria de compliance do governor global + reforço de evidência determinística (`TASK-BUD-052`) + ajustes de testes/ambiente.
 - Checkpoint principal: `docs/research/context-checkpoint-2026-04-19-lote-c-main-task-bud-049.md`.
 - Estado operacional mantido: candidate-only até materialização explícita no `main`.
+
+## Incidente pós-c3 (c4 failed, 2026-04-19)
+
+- c4 (Lote D-unlock / `TASK-BUD-050`) falhou com `no_pending_worker_tasks` após 2 recovery rounds (custo `$0.00`).
+- Interpretação: escopo amplo sem delta executável claro, possivelmente por sobreposição com `TASK-BUD-031` já concluída.
+- Checkpoint do incidente: `docs/research/context-checkpoint-2026-04-19-lote-d-unlock-c4-failed.md`.
+- Mitigação definida: executar delta-audit determinístico (027 vs 031) antes de novo lote de implementação.
