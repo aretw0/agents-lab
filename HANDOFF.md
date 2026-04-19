@@ -172,3 +172,15 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Usuário sinalizou risco de estourar janela/cota separada do `gpt-5.3-codex-spark`.
 - Diretriz acordada: priorizar cota normal e usar Spark só quando realmente necessário.
 - Task preparada no board: `TASK-BUD-053` (roteamento Spark-aware com gatilhos explícitos + evidência auditável).
+
+## Atualização Spark-aware aplicada (pós-c6, 2026-04-19)
+
+- Política materializada: default continua em cota normal; Spark liberado apenas com gatilho explícito no goal.
+- Gatilhos registrados: `planning recovery` e `scout burst`.
+- Restrição adicional: com gatilho `scout burst`, Spark fica limitado ao papel `scout`.
+- Artefatos:
+  - `.pi/settings.json` (`modelPolicy.sparkGateEnabled=true` + triggers)
+  - `packages/pi-stack/extensions/colony-pilot.ts` (gate de trigger para modelos `codex-spark`)
+  - `docs/guides/colony-provider-model-governance.md` (seção "Spark gating policy")
+  - `docs/guides/unattended-swarm-execution-plan.md` (diretriz Spark-aware)
+  - `docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md`

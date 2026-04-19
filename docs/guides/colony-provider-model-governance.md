@@ -71,6 +71,34 @@ Comportamento importante:
 
 > Heurística: scout mais barato/rápido, worker/soldier mais fortes.
 
+### Spark gating policy (OpenAI Codex)
+
+Para preservar a cota PRO separada de `gpt-5.3-codex-spark`, a política operacional é:
+
+- **padrão**: usar cota normal (`gpt-5.3-codex` / `gpt-5.4-mini` / `gpt-5.2-codex`)
+- **Spark só com gatilho explícito no goal**:
+  - `planning recovery`
+  - `scout burst`
+- Sem gatilho explícito, uso de modelo `*-spark` deve ser bloqueado por policy.
+- Com gatilho `scout burst`, uso de Spark fica restrito ao papel `scout`.
+- Para uso amplo de Spark (múltiplos papéis), o goal deve conter `planning recovery`.
+
+Config recomendada em `.pi/settings.json`:
+
+```json
+{
+  "piStack": {
+    "colonyPilot": {
+      "modelPolicy": {
+        "sparkGateEnabled": true,
+        "sparkAllowedGoalTriggers": ["planning recovery", "scout burst"],
+        "sparkScoutOnlyTrigger": "scout burst"
+      }
+    }
+  }
+}
+```
+
 ---
 
 ## Checklist operacional (usuário pi-stack)

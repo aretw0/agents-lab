@@ -8,6 +8,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
 - `maxCost` explícito em toda colônia.
 - Sem auto-close de P0.
 - Sempre atualizar `.project/tasks.json` + mini-handoff de lote.
+- Spark-aware: default em cota normal; `gpt-5.3-codex-spark` só com gatilho explícito (`planning recovery` ou `scout burst`).
 
 ## Ordem recomendada (com dependências reais)
 1. **Lote A — TASK-BUD-010** (single-writer/reconciler).
@@ -32,6 +33,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
    - `quota-visibility status 30`
    - `quota-visibility route balanced`
    - `colony-pilot preflight`
+   - confirmar goal semântico do lote (se houver Spark): incluir trigger explícito e justificativa auditável.
 2. Execução:
    - `ant_colony` com goal estrito + `maxCost` (3 a 10 USD conforme lote).
 3. Pós-run:

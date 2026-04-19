@@ -314,6 +314,9 @@ const DEFAULT_MODEL_POLICY: ColonyPilotModelPolicyConfig = {
   allowedProviders: [],
   allowedProvidersByRole: {},
   roleModels: {},
+  sparkGateEnabled: false,
+  sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
+  sparkScoutOnlyTrigger: "scout burst",
 };
 
 const DEFAULT_BUDGET_POLICY: ColonyPilotBudgetPolicyConfig = {
@@ -412,6 +415,12 @@ function normalizeAllowedProvidersByRole(value: unknown): Partial<Record<ColonyA
 export function resolveColonyPilotModelPolicy(raw?: Partial<ColonyPilotModelPolicyConfig>): ColonyPilotModelPolicyConfig {
   const specializedRolesEnabled = raw?.specializedRolesEnabled === true;
   const requestedRequiredRoles = normalizeRoleList(raw?.requiredRoles);
+  const sparkAllowedGoalTriggers = normalizeStringList(raw?.sparkAllowedGoalTriggers)
+    .map((v) => v.toLowerCase())
+    .filter((v, idx, arr) => arr.indexOf(v) === idx);
+  const sparkScoutOnlyTriggerRaw = typeof raw?.sparkScoutOnlyTrigger === "string"
+    ? raw.sparkScoutOnlyTrigger.trim().toLowerCase()
+    : "";
   const requiredRoles = specializedRolesEnabled
     ? requestedRequiredRoles
     : requestedRequiredRoles.filter((role) => role === "queen" || CORE_ROLE_ORDER.includes(role as Exclude<ColonyAgentRole, "queen">));
@@ -428,6 +437,11 @@ export function resolveColonyPilotModelPolicy(raw?: Partial<ColonyPilotModelPoli
     allowedProviders: normalizeStringList(raw?.allowedProviders),
     allowedProvidersByRole: normalizeAllowedProvidersByRole(raw?.allowedProvidersByRole),
     roleModels: normalizeRoleModels(raw?.roleModels),
+    sparkGateEnabled: raw?.sparkGateEnabled === true,
+    sparkAllowedGoalTriggers: sparkAllowedGoalTriggers.length > 0
+      ? sparkAllowedGoalTriggers
+      : [...DEFAULT_MODEL_POLICY.sparkAllowedGoalTriggers],
+    sparkScoutOnlyTrigger: sparkScoutOnlyTriggerRaw || DEFAULT_MODEL_POLICY.sparkScoutOnlyTrigger,
   };
 }
 
@@ -762,7 +776,8 @@ export function evaluateAntColonyModelPolicy(
   currentModelRef: string | undefined,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   modelRegistry: any,
-  policy: ColonyPilotModelPolicyConfig
+  policy: ColonyPilotModelPolicyConfig,
+  goal?: string
 ): ColonyModelPolicyEvaluation {
   const issues: string[] = [];
   const effectiveModels: Record<ColonyAgentRole, string | undefined> = {
@@ -851,6 +866,33 @@ export function evaluateAntColonyModelPolicy(
     }
   }
 
+  if (policy.sparkGateEnabled) {
+    const sparkRoles = (["queen", ...ROLE_ORDER] as ColonyAgentRole[])
+      .filter((role) => {
+        const modelRef = effectiveModels[role];
+        return typeof modelRef === "string" && modelRef.toLowerCase().includes("codex-spark");
+      });
+
+    if (sparkRoles.length > 0) {
+      const normalizedGoal = (goal ?? "").toLowerCase();
+      const matchedSparkTriggers = policy.sparkAllowedGoalTriggers.filter((trigger) => normalizedGoal.includes(trigger));
+
+      if (matchedSparkTriggers.length === 0) {
+        issues.push(`spark model usage requires explicit goal trigger: ${policy.sparkAllowedGoalTriggers.join(", ")}`);
+      } else {
+        const hasPlanningRecoveryTrigger = matchedSparkTriggers.includes("planning recovery");
+        const hasScoutOnlyTrigger = matchedSparkTriggers.includes(policy.sparkScoutOnlyTrigger);
+
+        if (!hasPlanningRecoveryTrigger && hasScoutOnlyTrigger) {
+          const nonScoutRoles = sparkRoles.filter((role) => role !== "scout");
+          if (nonScoutRoles.length > 0) {
+            issues.push(`spark with trigger '${policy.sparkScoutOnlyTrigger}' is scout-only; found roles: ${nonScoutRoles.join(", ")}`);
+          }
+        }
+      }
+    }
+  }
+
   return {
     ok: issues.length === 0,
     issues,
@@ -880,6 +922,9 @@ function formatPolicyEvaluation(policy: ColonyPilotModelPolicyConfig, evalResult
     `  requiredRoles: ${policy.requiredRoles.join(", ") || "(none)"}`,
     `  allowMixedProviders: ${policy.allowMixedProviders ? "yes" : "no"}`,
     `  allowedProviders: ${policy.allowedProviders.join(", ") || "(any)"}`,
+    `  sparkGateEnabled: ${policy.sparkGateEnabled ? "yes" : "no"}`,
+    `  sparkAllowedGoalTriggers: ${policy.sparkAllowedGoalTriggers.join(", ") || "(none)"}`,
+    `  sparkScoutOnlyTrigger: ${policy.sparkScoutOnlyTrigger || "(none)"}`,
     `  allowedProvidersByRole: ${roleAllowRows.length > 0 ? "(configured)" : "(none)"}`,
     ...(roleAllowRows.length > 0 ? roleAllowRows : []),
     "  effectiveModels:",
@@ -1064,6 +1109,9 @@ export interface ColonyPilotModelPolicyConfig {
   allowedProviders: string[];
   allowedProvidersByRole: Partial<Record<ColonyAgentRole, string[]>>;
   roleModels: ColonyRoleModelMap;
+  sparkGateEnabled: boolean;
+  sparkAllowedGoalTriggers: string[];
+  sparkScoutOnlyTrigger: string;
 }
 
 export interface ColonyPilotBudgetPolicyConfig {
@@ -1415,6 +1463,9 @@ export function buildProjectBaselineSettings(profile: BaselineProfile = "default
           allowedProviders: [],
           allowedProvidersByRole: {},
           roleModels: {},
+          sparkGateEnabled: false,
+          sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
+          sparkScoutOnlyTrigger: "scout burst",
         },
         budgetPolicy: {
           enabled: true,
@@ -2429,7 +2480,7 @@ export default function (pi: ExtensionAPI) {
     const goal = typeof event.input.goal === "string" ? event.input.goal.trim() : "";
 
     if (modelPolicyConfig.enabled) {
-      const evaluation = evaluateAntColonyModelPolicy(event.input, currentModelRef, ctx.modelRegistry, modelPolicyConfig);
+      const evaluation = evaluateAntColonyModelPolicy(event.input, currentModelRef, ctx.modelRegistry, modelPolicyConfig, goal);
 
       if (!evaluation.ok) {
         const reason = `Blocked by colony-pilot model-policy: ${evaluation.issues.join("; ")}`;

@@ -968,11 +968,12 @@
 			"files": [
 				".pi/settings.json",
 				"packages/pi-stack/extensions/colony-pilot.ts",
-				"packages/pi-stack/extensions/quota-visibility.ts",
 				"docs/guides/colony-provider-model-governance.md",
-				"docs/guides/unattended-swarm-execution-plan.md"
+				"docs/guides/unattended-swarm-execution-plan.md",
+				"docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md",
+				"HANDOFF.md"
 			],
-			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável."
+			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável.\n[2026-04-19] Consolidação spark-aware aplicada no main: modelPolicy com sparkGateEnabled + triggers explícitos (planning recovery/scout burst), documentação operacional atualizada e checkpoint dedicado em docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md. Estado permanece in-progress (candidate/HITL)."
 		},
 		{
 			"id": "TASK-BUD-045",

@@ -60,6 +60,12 @@
         "enforceOnAntColonyTool": true,
         "requiredExecutables": ["node", "git"]
       },
+      "modelPolicy": {
+        "enabled": true,
+        "sparkGateEnabled": true,
+        "sparkAllowedGoalTriggers": ["planning recovery", "scout burst"],
+        "sparkScoutOnlyTrigger": "scout burst"
+      },
       "budgetPolicy": {
         "enabled": true,
         "enforceOnAntColonyTool": true,
