@@ -896,7 +896,7 @@
 		{
 			"id": "TASK-BUD-050",
 			"description": "[P1] Executar lote de desbloqueio para portfolio routing advisor (TASK-BUD-027) como pré-condição de TASK-BUD-029.",
-			"status": "planned",
+			"status": "in-progress",
 			"type": "chore",
 			"depends_on": ["TASK-BUD-049"],
 			"references": ["TASK-BUD-027", "TASK-BUD-029"],
@@ -909,7 +909,8 @@
 				"packages/pi-stack/extensions/quota-visibility.ts",
 				"packages/pi-stack/extensions/colony-pilot.ts",
 				"docs/guides/quota-visibility.md"
-			]
+			],
+			"notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados."
 		},
 		{
 			"id": "TASK-BUD-051",
