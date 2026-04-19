@@ -423,3 +423,34 @@ Validação rodada:
 - `npx vitest run` → **PASS (385/385)**
 - `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
 - `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
+## Nota estratégica (deferida): centralização first-party de capacidades hoje filtradas
+
+Conforme feedback de campo, foi criada memória técnica para futuras seções sem desviar do marco atual:
+
+- `docs/guides/first-party-assimilation-notes.md`
+- indexado em `docs/guides/README.md`
+
+Escopo do documento: registrar funcionalidades suprimidas por conflito (ex.: `mitsupi/uv.ts`, footer duplicado, skills colidentes) e critérios de promoção para first-party quando a base estiver estável.
+
+## Parte B (Web UI prompt path) — avanço concluído
+
+Status: **implementado e validado** para token inválido + concorrência.
+
+- Arquivo: `packages/pi-stack/test/smoke/web-session-gateway-e2e-harness.test.ts`
+  - novo teste: `"/api/prompt rejeita token inválido e aceita bursts concorrentes com token válido"`.
+  - cobre:
+    - `401` com token inválido,
+    - burst concorrente de `POST /api/prompt` com token válido,
+    - aceitação de `deliverAs` em `followUp` e `steer`.
+
+Validação atualizada:
+
+- `npx vitest run` → **PASS (386/386)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
+### Próximo passo após este checkpoint
+
+1. Refinar heurística do `cpanel auto` (abrir com `failed|blocked` mesmo com live baixo já é suportado; falta calibrar thresholds por perfil).
+2. Evoluir layout de colônias para “cards” na Web UI (agrupamento por fase/filtro).
