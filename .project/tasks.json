@@ -973,7 +973,7 @@
 				"docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md",
 				"HANDOFF.md"
 			],
-			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável.\n[2026-04-19] Consolidação spark-aware aplicada no main: modelPolicy com sparkGateEnabled + triggers explícitos (planning recovery/scout burst), documentação operacional atualizada e checkpoint dedicado em docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md. Estado permanece in-progress (candidate/HITL)."
+			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável.\n[2026-04-19] Consolidação spark-aware aplicada no main: modelPolicy com sparkGateEnabled + triggers explícitos (planning recovery/scout burst), documentação operacional atualizada e checkpoint dedicado em docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md. Estado permanece in-progress (candidate/HITL).\n[2026-04-19] Validação pós-c7: routeModelRefs.openai-codex permanece openai-codex/gpt-5.3-codex (cota normal) e uso de codex-spark só passa com gatilho explícito no goal; enforcement ativo em colony-pilot."
 		},
 		{
 			"id": "TASK-BUD-045",

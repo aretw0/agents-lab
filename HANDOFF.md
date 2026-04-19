@@ -184,3 +184,11 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
   - `docs/guides/colony-provider-model-governance.md` (seção "Spark gating policy")
   - `docs/guides/unattended-swarm-execution-plan.md` (diretriz Spark-aware)
   - `docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md`
+
+## Consolidação pós-c7 (TASK-BUD-053)
+
+- c7 concluída (`29/31`, `$0.97`, `12m07s`) com 2 falhas não-críticas de drone/allowlist.
+- Board atualizado mantendo estado candidato/HITL (sem auto-close).
+- Validação confirmada:
+  - default em cota normal: `routeModelRefs.openai-codex = openai-codex/gpt-5.3-codex`
+  - Spark só por gatilho explícito (`planning recovery`/`scout burst`) com enforcement no `colony-pilot`.
