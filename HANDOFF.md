@@ -357,3 +357,47 @@ Objetivo: quando houver muitas colônias, manter linha principal curta e mover d
    - smoke do parser/render do painel (wide/narrow terminal),
    - regressão do footer para não estourar em largura curta,
    - validação determinística (`vitest`, `node --test`, `verify-pi-stack`).
+
+## Execução da fase (pós-compact) — painel de colônias v1
+
+Status: **implementado e validado**.
+
+### O que entrou
+
+1. Nova extensão `packages/pi-stack/extensions/colony-panel.ts`:
+   - comando `/cpanel off|on|auto|status|snapshot`;
+   - modos `off|on|auto` com `autoOpenCountThreshold`;
+   - rastreamento de `COLONY_SIGNAL` via `message_end`/`tool_result`;
+   - painel com resumo (`tracked/live/run/scout/done/fail`) + chips `id:phase` com quebra automática;
+   - overflow controlado com `+N hidden`.
+
+2. Integração no footer:
+   - `custom-footer` agora compõe painel de quota e painel de colônias (quando ativos),
+   - mantendo linha principal compacta e movendo detalhes para painel dedicado.
+
+3. Registro no manifesto do pacote:
+   - `packages/pi-stack/package.json` inclui `./extensions/colony-panel.ts` antes do `custom-footer`.
+
+4. Config workspace:
+   - `.pi/settings.json` ganhou bloco:
+     - `piStack.colonyPanel.mode = "auto"`
+     - `piStack.colonyPanel.autoOpenCountThreshold = 4`
+     - `piStack.colonyPanel.maxVisibleColonies = 8`
+
+### Cobertura adicionada
+
+- `packages/pi-stack/test/smoke/colony-panel.test.ts` (novo)
+- `packages/pi-stack/test/smoke/custom-footer-registration.test.ts`
+  - regressão para terminal estreito (re-truncation invariant).
+
+### Validação determinística
+
+- `npx vitest run` → **PASS (381/381)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
+### Próxima parte recomendada
+
+1. Web UI `/api/prompt`: e2e de token inválido + concorrência (followUp/steer).
+2. Refinar heurística do `cpanel auto` (ex.: abrir por `failed|blocked` mesmo com live baixo).
+3. Avaliar layout “cards” no web-session-gateway para múltiplas colônias com filtros.
