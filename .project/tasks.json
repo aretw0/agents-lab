@@ -872,7 +872,7 @@
 				"packages/pi-stack/extensions/quota-visibility.ts",
 				"docs/guides/budget-governance.md"
 			],
-			"notes": "[2026-04-19] Lote C-unlock iniciado após consolidação do Lote B. Execução deve incluir evidência determinística de validação para reduzir promoção manual."
+			"notes": "[2026-04-19] Lote C-unlock iniciado após consolidação do Lote B. Execução deve incluir evidência determinística de validação para reduzir promoção manual.\n[2026-04-19] c2 concluída (13/13, $0.41, 4m51s) com hard gate/override/recovery e checkpoint de lote reportados; resultado permanece em estado candidato até materialização explícita no main."
 		},
 		{
 			"id": "TASK-BUD-049",
@@ -933,7 +933,7 @@
 		{
 			"id": "TASK-BUD-052",
 			"description": "[P1] Padronizar evidência determinística de entrega de swarm (file inventory + validation command log detectável) para reduzir promoções manuais.",
-			"status": "planned",
+			"status": "in-progress",
 			"type": "chore",
 			"depends_on": ["TASK-BUD-047"],
 			"references": ["TASK-BUD-013", "TASK-BUD-014"],
@@ -947,7 +947,7 @@
 				"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
 				"docs/guides/unattended-swarm-execution-plan.md"
 			],
-			"notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções."
+			"notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções.\n[2026-04-19] Lote C-unlock reportou endurecimento adicional (candidate) para reduzir falso negativo de validation command log; pendente materialização explícita no main."
 		},
 		{
 			"id": "TASK-BUD-045",

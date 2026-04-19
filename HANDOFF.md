@@ -130,3 +130,10 @@ Ainda exige consolidação/manual quando:
 3. task P0 precisa decisão final de fechamento.
 
 Próxima melhoria determinística recomendada: padronizar seção de validação em formato rigidamente detectável (comandos explícitos em bloco) para reduzir novas promoções manuais.
+
+## Atualização pós-Lote C-unlock (c2, 2026-04-19)
+
+- c2 (Lote C-unlock / `TASK-BUD-048`) reportada como **COMPLETE** (`13/13`, `$0.41`, `4m51s`).
+- Escopo reportado: hard gate provider-budget + override auditável + preservação recovery allowlist + avanço de evidência determinística (`TASK-BUD-052` candidate).
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-c-unlock-task-bud-048.md`.
+- Próximo passo operacional: **promoção/materialização explícita** do resultado no `main` antes de disparar `TASK-BUD-049`.
