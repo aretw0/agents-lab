@@ -910,7 +910,7 @@
 				"packages/pi-stack/extensions/colony-pilot.ts",
 				"docs/guides/quota-visibility.md"
 			],
-			"notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md.\n[2026-04-19] Pré-condição para TASK-BUD-029 tratada como candidata por evidência; seguir para lote final sem reimplementar advisor completo."
+			"notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md.\n[2026-04-19] Pré-condição para TASK-BUD-029 tratada como candidata por evidência; seguir para lote final sem reimplementar advisor completo.\n[2026-04-19] Consolidação operacional aplicada: evidência determinística considerada suficiente para liberar disparo de TASK-BUD-051 em modo artifact-first, mantendo estado candidato (HITL)."
 		},
 		{
 			"id": "TASK-BUD-051",
@@ -931,7 +931,7 @@
 				"docs/guides/budget-governance.md",
 				"docs/guides/quota-visibility.md"
 			],
-			"notes": "[2026-04-19] Lote D final iniciado em modo artifact-first (sem publish) para fechar candidate de governança multi-provider.\n[2026-04-19] c6 concluída (31/31, $1.26, 14m47s) com checkpoint final e hardening de evidência/parser em estado candidato revisável; pendente materialização explícita no main."
+			"notes": "[2026-04-19] Lote D final iniciado em modo artifact-first (sem publish) para fechar candidate de governança multi-provider.\n[2026-04-19] Disparo autorizado a partir da consolidação de TASK-BUD-050 (c4 failed + c5 delta-audit com evidência determinística suficiente).\n[2026-04-19] c6 concluída (31/31, $1.26, 14m47s) com checkpoint final e hardening de evidência/parser em estado candidato revisável; pendente materialização explícita no main."
 		},
 		{
 			"id": "TASK-BUD-052",
