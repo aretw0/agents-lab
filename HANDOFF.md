@@ -89,3 +89,21 @@ Calibrar o **control plane dinâmico e proativo** do `pi-stack` com:
 
 ---
 Se abrir nova sessão: comece por este arquivo + `.pi/settings.json` + `.project/tasks.json`.
+
+## Checkpoint rápido (mid-run c4, 2026-04-19)
+
+- `c4` em execução para Lote A (`TASK-BUD-046` / foco `TASK-BUD-010`).
+- Observado risco operacional no `projectTaskSync`: em launch anterior houve escrita transitória no `.project/tasks.json`.
+- Estado atual está íntegro (board restaurado, `git status` limpo, `.project/tasks.json` com 1104 linhas).
+- Decisão: **não interromper c4**; calibrar sync **após** término da c4.
+- Calibração recomendada pós-c4:
+  1) `/reload` para aplicar `.pi/settings.json` recente no runtime (budget default ainda aparece antigo no status).
+  2) reduzir agressividade do sync (`createOnLaunch=false`, `trackProgress=false`) ou desativar sync automático se necessário.
+
+### Atualização pós-c4
+
+- c4 finalizada com sucesso (`9/9`, `$0.28`) para o Lote A / `TASK-BUD-046`.
+- Calibração já aplicada em `.pi/settings.json`:
+  - `projectTaskSync.createOnLaunch=false`
+  - `projectTaskSync.trackProgress=false`
+- **Ação pendente do operador:** rodar `/reload` antes de lançar o próximo lote (`TASK-BUD-047`).
