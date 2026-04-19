@@ -239,3 +239,43 @@ Contexto para retomada após nova compactação manual:
 ### Referência de pesquisa já aceita
 
 - `claudioemmanuel/squeez` segue como fonte de heurísticas de compressão/contexto (dedup, intensidade adaptativa, sumarização estruturada), sem substituir governança do `pi-stack`.
+
+## Baseline de contratos e regressões invisíveis (início da retomada)
+
+Validação executada antes de avançar (determinística):
+
+- `"/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe" --test packages/pi-stack/test/*.test.mjs` → **PASS** (84/84)
+- `npx vitest run` (com PATH node+scoop explícito) → **PASS** (370/370)
+- `"/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe" scripts/verify-pi-stack.mjs` → **PASS** (10/10)
+
+### Contratos hoje cobertos (alto nível)
+
+1. **Governança colony/model/budget/provider**
+   - parsers e gates principais em `colony-pilot` (inclui lock provider, budget gate, delivery evidence).
+   - cobertura Spark reforçada nesta rodada (novos testes de trigger explícito + scout-only).
+2. **Quota stack**
+   - parsers/estado de budget, alerts, panel, handoff advisor, provider-readiness.
+3. **Web session gateway (Web UI surface)**
+   - resolução de modo/host/url/token + e2e harness de start/stop e endpoint auth.
+4. **TUI footer/status surface**
+   - registro da extensão, formatação e integração com quota-panel.
+
+### Regressões invisíveis (a cobrir antes de acelerar)
+
+1. **Drift de teste vs runtime real**
+   - parte dos `*.test.mjs` reimplementa lógica em vez de importar funções reais da extensão.
+   - risco: teste verde com código de produção quebrado.
+2. **Monitores em runtime real com custo**
+   - monitores estão OFF (decisão operacional correta), então falta cobertura e2e de classificação com orçamento real de token.
+3. **TUI em cenários de largura/ruído**
+   - falta teste de regressão visual/textual para truncamento/legibilidade em terminais estreitos.
+4. **Web UI prompt path**
+   - falta e2e explícito do `/api/prompt` (followUp/steer), incluindo comportamento com token inválido e concorrência.
+5. **OpenAI-only lock como contrato explícito**
+   - ajustes em `.pi/settings.json` estão aplicados, mas ainda sem teste dedicado de contrato do workspace.
+
+### Próxima ordem de execução (por partes)
+
+1. **Parte A (agora):** consolidar contratos críticos de governança (Spark/OpenAI-only) em testes source-linked.
+2. **Parte B:** fechar gaps de Web UI (`/api/prompt`) e TUI (largura/overflow) com smoke/e2e mínimo.
+3. **Parte C:** só então calibrar monitor `context-pressure` em modo on-demand (sem flood passivo).
