@@ -90,6 +90,13 @@ function lastNotifyMessage(t: TestSession): string {
   return String(last?.args?.[0] ?? "");
 }
 
+function extractGatewayTokenFromNotify(t: TestSession): string {
+  const info = lastNotifyMessage(t);
+  const tokenMatch = info.match(/\?t=([a-f0-9]+)/i);
+  expect(tokenMatch).toBeTruthy();
+  return tokenMatch![1];
+}
+
 describe("web-session-gateway e2e (pi-test-harness)", () => {
   let t: TestSession | undefined;
 
@@ -127,10 +134,7 @@ describe("web-session-gateway e2e (pi-test-harness)", () => {
     expect(health.status).toBe(200);
     expect(await health.json()).toMatchObject({ status: "ok", mode: "local" });
 
-    const info = lastNotifyMessage(t);
-    const tokenMatch = info.match(/\?t=([a-f0-9]+)/i);
-    expect(tokenMatch).toBeTruthy();
-    const token = tokenMatch![1];
+    const token = extractGatewayTokenFromNotify(t);
 
     const unauth = await fetch(`http://127.0.0.1:${port}/api/state`);
     expect(unauth.status).toBe(401);
@@ -151,6 +155,46 @@ describe("web-session-gateway e2e (pi-test-harness)", () => {
 
     await t.session.prompt("/session-web stop");
     expect(existsSync(runtimeFile)).toBe(false);
+  });
+
+  it("/api/prompt rejeita token inválido e aceita bursts concorrentes com token válido", async () => {
+    const port = 31909;
+    const cwd = tempCwdWithGatewayConfig(port);
+
+    t = await createTestSession({
+      cwd,
+      extensionFactories: [webSessionGateway],
+    });
+    patchHarnessAgentCompat(t);
+
+    await t.session.prompt("/session-web start");
+    const token = extractGatewayTokenFromNotify(t);
+
+    const invalidTokenRes = await fetch(`http://127.0.0.1:${port}/api/prompt?t=invalid-token`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "x" }),
+    });
+    expect(invalidTokenRes.status).toBe(401);
+
+    const requests = Array.from({ length: 8 }, (_v, i) =>
+      fetch(`http://127.0.0.1:${port}/api/prompt?t=${token}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          message: `burst-${i}`,
+          deliverAs: i % 2 === 0 ? "followUp" : "steer",
+        }),
+      })
+    );
+
+    const responses = await Promise.all(requests);
+    expect(responses.every((r) => r.status === 200)).toBe(true);
+
+    const payloads = await Promise.all(responses.map((r) => r.json()));
+    expect(payloads.every((p) => p.accepted === true)).toBe(true);
+    expect(payloads.filter((p) => p.deliverAs === "steer").length).toBeGreaterThan(0);
+    expect(payloads.filter((p) => p.deliverAs === "followUp").length).toBeGreaterThan(0);
   });
 
   it("colony-pilot usa session-web quando capability first-party está disponível", async () => {
