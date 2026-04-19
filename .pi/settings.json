@@ -1,4 +1,6 @@
 {
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.3-codex",
   "packages": [
     "../packages/pi-stack",
     "../packages/git-skills",
@@ -62,6 +64,8 @@
       },
       "modelPolicy": {
         "enabled": true,
+        "allowMixedProviders": false,
+        "allowedProviders": ["openai-codex"],
         "sparkGateEnabled": true,
         "sparkAllowedGoalTriggers": ["planning recovery", "scout burst"],
         "sparkScoutOnlyTrigger": "scout burst"

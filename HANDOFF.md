@@ -192,3 +192,12 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Validação confirmada:
   - default em cota normal: `routeModelRefs.openai-codex = openai-codex/gpt-5.3-codex`
   - Spark só por gatilho explícito (`planning recovery`/`scout burst`) com enforcement no `colony-pilot`.
+
+## Ajuste operacional de cota (OpenAI-only)
+
+- Reforçado lock OpenAI-only em `.pi/settings.json`:
+  - `defaultProvider = openai-codex`
+  - `defaultModel = gpt-5.3-codex`
+  - `piStack.colonyPilot.modelPolicy.allowMixedProviders = false`
+  - `piStack.colonyPilot.modelPolicy.allowedProviders = ["openai-codex"]`
+- Objetivo: evitar delegações/subagentes em providers sem cota e manter esforço concentrado na cota disponível.
