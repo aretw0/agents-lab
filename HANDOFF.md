@@ -151,3 +151,11 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Interpretação: escopo amplo sem delta executável claro, possivelmente por sobreposição com `TASK-BUD-031` já concluída.
 - Checkpoint do incidente: `docs/research/context-checkpoint-2026-04-19-lote-d-unlock-c4-failed.md`.
 - Mitigação definida: executar delta-audit determinístico (027 vs 031) antes de novo lote de implementação.
+
+## Atualização pós-delta-audit (c5, 2026-04-19)
+
+- c5 concluída (`$0.06`) com artefato de delta entre `TASK-BUD-027` e `TASK-BUD-031`.
+- Resultado: **gap parcial** — núcleo do advisor já existe; remanescente é consolidação operacional/documental para pré-condição de `TASK-BUD-029`.
+- Evidências:
+  - `docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md`
+  - `docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md`
