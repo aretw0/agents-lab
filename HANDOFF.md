@@ -530,6 +530,27 @@ Com janela de contexto alta nesta sessão, foi feito corte de preparação de re
    - validar versão/tag alvo;
    - executar ritual de publish por humano responsável (sem auto-publish por agente).
 
+## Hardening monitor-provider (corrige warning "Instructions are required")
+
+Status: **implementado** para reduzir recorrência de classifiers quebrando por template legado em `.pi/agents/*.agent.yaml`.
+
+- Arquivo: `packages/pi-stack/extensions/monitor-provider-patch.ts`
+  - novo `extractTemplateFromAgentYaml(...)`;
+  - novo `repairLegacyTemplateOverrides(...)`;
+  - `session_start` agora, além de `ensureOverrides(...)`, também repara paths legados de template:
+    - antes: `template: <monitor>/classify.md`
+    - depois: `template: ../monitors/<monitor>/classify.md`
+
+- Testes:
+  - `packages/pi-stack/test/monitor-provider-patch.test.mjs`
+    - novo caso: `repara template legado dos classifiers no session_start`.
+
+Validação:
+
+- `npx vitest run` → **PASS (394/394)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (85/85)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
 ## Correção de warnings dos monitores (classify failed: "Instructions are required")
 
 Status: **corrigido na origem + overrides locais alinhados**.
