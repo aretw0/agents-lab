@@ -836,11 +836,11 @@
 			],
 			"notes": "[2026-04-19] Lote A executado via colônia c4 (COMPLETE, $0.28). Resultado em estado candidato até consolidação manual de evidências no board. Checkpoint: docs/research/context-checkpoint-2026-04-19-lote-a-task-bud-010.md."
 		},
-		{
-			"id": "TASK-BUD-047",
-			"description": "[P0] Executar Lote B unattended para fechar pipeline de triagem e budget semanal por provider (TASK-BUD-020 + TASK-BUD-024).",
-			"status": "planned",
-			"type": "chore",
+    {
+      "id": "TASK-BUD-047",
+      "description": "[P0] Executar Lote B unattended para fechar pipeline de triagem e budget semanal por provider (TASK-BUD-020 + TASK-BUD-024).",
+      "status": "in-progress",
+      "type": "chore",
 			"depends_on": ["TASK-BUD-046"],
 			"references": ["TASK-BUD-020", "TASK-BUD-024"],
 			"acceptance_criteria": [
@@ -848,12 +848,13 @@
 				"Board atualizado com split unlock-now/later e estado por provider.",
 				"Sem auto-close de tasks P0."
 			],
-			"files": [
-				"scripts/session-triage.mjs",
-				"packages/pi-stack/extensions/quota-visibility.ts",
-				"docs/guides/quota-visibility.md"
-			]
-		},
+      "files": [
+        "scripts/session-triage.mjs",
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "docs/guides/quota-visibility.md"
+      ],
+      "notes": "[2026-04-19] Lote B iniciado após reload validado (budgetPolicy=6/60 e projectTaskSync createOnLaunch/trackProgress desativados)."
+    },
 		{
 			"id": "TASK-BUD-048",
 			"description": "[P1] Executar lote de desbloqueio para gate hard de provider budget (TASK-BUD-025) como pré-condição de TASK-BUD-026.",
