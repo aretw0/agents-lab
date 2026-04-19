@@ -61,7 +61,7 @@ function generateAgentYaml(classifierName, model) {
     `  schema: ../schemas/verdict.schema.json`,
     `prompt:`,
     `  task:`,
-    `    template: ${monitorName}/classify.md`,
+    `    template: ../monitors/${monitorName}/classify.md`,
     ``,
   ].join("\n");
 }
@@ -222,14 +222,14 @@ describe("generateAgentYaml", () => {
     const yaml = generateAgentYaml("hedge-classifier", COPILOT_MODEL);
     assert.ok(yaml.includes("name: hedge-classifier"));
     assert.ok(yaml.includes(`model: ${COPILOT_MODEL}`));
-    assert.ok(yaml.includes("template: hedge/classify.md"));
+    assert.ok(yaml.includes("template: ../monitors/hedge/classify.md"));
     assert.ok(yaml.includes('thinking: "off"'));
   });
 
   it("generates correct YAML for commit-hygiene-classifier", () => {
     const yaml = generateAgentYaml("commit-hygiene-classifier", COPILOT_MODEL);
     assert.ok(yaml.includes("name: commit-hygiene-classifier"));
-    assert.ok(yaml.includes("template: commit-hygiene/classify.md"));
+    assert.ok(yaml.includes("template: ../monitors/commit-hygiene/classify.md"));
   });
 
   it("uses provided model without modification", () => {

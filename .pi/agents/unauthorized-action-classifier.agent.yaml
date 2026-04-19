@@ -8,4 +8,4 @@ output:
   schema: ../schemas/verdict.schema.json
 prompt:
   task:
-    template: unauthorized-action/classify.md
+    template: ../monitors/unauthorized-action/classify.md

@@ -195,7 +195,7 @@ export function generateAgentYaml(classifierName: string, model: string, thinkin
     `  schema: ../schemas/verdict.schema.json`,
     `prompt:`,
     `  task:`,
-    `    template: ${monitorName}/classify.md`,
+    `    template: ../monitors/${monitorName}/classify.md`,
     ``,
   ].join("\n");
 }
