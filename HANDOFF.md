@@ -506,6 +506,30 @@ Validação:
 - `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
 - `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
 
+## Sangria de handoff + encaminhamento para próxima release
+
+Com janela de contexto alta nesta sessão, foi feito corte de preparação de release (sem publish automático):
+
+1. **Changeset de release criado**
+   - arquivo: `.changeset/silent-crabs-travel.md`
+   - tipo: `minor` (lockstep para os pacotes `@aretw0/*` conforme config fixed)
+   - escopo: consolidação TUI/control-plane, compactação de outputs, hardening de installer e correções de monitores.
+
+2. **Go/No-Go técnico (estado atual)**
+   - `npx vitest run` → PASS (394/394)
+   - `node --test packages/pi-stack/test/*.test.mjs` → PASS (84/84)
+   - `node scripts/verify-pi-stack.mjs` → PASS (10/10)
+   - workspace: limpo após commits desta rodada.
+
+3. **Pendências não-bloqueantes para release notes**
+   - warning de keybinding em `npm:@ifi/pi-extension-subagents` (atalho conflitante ignorado pelo runtime);
+   - watchdog safe mode eventual em picos de event-loop (observação operacional, sem evidência de regressão funcional).
+
+4. **Próxima sessão (release closer)**
+   - revisar changelog gerado por `npm run release`;
+   - validar versão/tag alvo;
+   - executar ritual de publish por humano responsável (sem auto-publish por agente).
+
 ## Correção de warnings dos monitores (classify failed: "Instructions are required")
 
 Status: **corrigido na origem + overrides locais alinhados**.
