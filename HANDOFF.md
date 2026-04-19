@@ -201,3 +201,41 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
   - `piStack.colonyPilot.modelPolicy.allowMixedProviders = false`
   - `piStack.colonyPilot.modelPolicy.allowedProviders = ["openai-codex"]`
 - Objetivo: evitar delegações/subagentes em providers sem cota e manter esforço concentrado na cota disponível.
+
+## Checkpoint pós-/reload e pré-compactação (2026-04-19)
+
+Contexto para retomada após nova compactação manual:
+
+- `/reload` já executado para aplicar os últimos ajustes de governança.
+- Estado de execução consolidado:
+  - Spark-aware ativo (default cota normal; Spark só por gatilho explícito).
+  - OpenAI-only reforçado em `.pi/settings.json`.
+  - Board canônico atualizado em `.project/tasks.json`.
+- Fricção atual observada no runtime de monitores:
+  - aviso recorrente: `[hedge] classify failed: No tool call in response`.
+  - decisão operacional do usuário: **monitores desativados temporariamente** para evitar flood de token/contexto enquanto calibramos.
+
+### Decisão de governança válida agora
+
+- Aceitamos compactação manual de contexto no curto prazo.
+- Não forçar reativação dos monitores atuais antes da recalibração.
+- Prioridade imediata: cultivar primitiva de **monitor de pressão de contexto** com custo baixo e rollout gradual.
+
+### Próximos passos (pós-compactação)
+
+1. Criar v1 do monitor `context-pressure` em modo **on-demand** (`event: command`) para não gerar custo passivo.
+2. Usar sinais mínimos e baratos (sem contexto longo):
+   - repetição sem progresso,
+   - crescimento de tool_calls sem checkpoint,
+   - ausência de mini-handoff em long runs.
+3. Definir ações graduais:
+   - L1 advisory,
+   - L2 checkpoint obrigatório (mini-handoff + file inventory + command log),
+   - L3 shard/delegação,
+   - L4 hard-stop com pedido de consolidação.
+4. Só depois migrar para modo automático (`every(N)` / gatilho forte), com orçamento explícito de classificação.
+5. Reavaliar reativação seletiva dos monitores legados após calibração (não all-on de uma vez).
+
+### Referência de pesquisa já aceita
+
+- `claudioemmanuel/squeez` segue como fonte de heurísticas de compressão/contexto (dedup, intensidade adaptativa, sumarização estruturada), sem substituir governança do `pi-stack`.
