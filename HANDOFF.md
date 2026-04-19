@@ -137,3 +137,10 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Escopo reportado: hard gate provider-budget + override auditável + preservação recovery allowlist + avanço de evidência determinística (`TASK-BUD-052` candidate).
 - Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-c-unlock-task-bud-048.md`.
 - Próximo passo operacional: **promoção/materialização explícita** do resultado no `main` antes de disparar `TASK-BUD-049`.
+
+## Atualização pós-Lote C principal (c3, 2026-04-19)
+
+- c3 (Lote C principal / `TASK-BUD-049`) reportada como **COMPLETE** (`13/13`, `$0.51`, `7m32s`).
+- Escopo reportado: checkpoint principal + auditoria de compliance do governor global + reforço de evidência determinística (`TASK-BUD-052`) + ajustes de testes/ambiente.
+- Checkpoint principal: `docs/research/context-checkpoint-2026-04-19-lote-c-main-task-bud-049.md`.
+- Estado operacional mantido: candidate-only até materialização explícita no `main`.
