@@ -400,7 +400,7 @@
 				"Saída agrega Next Steps/In Progress/Blocked de branch summaries sem depender de leitura manual completa.",
 				"Split de pendências do board em unlock-now vs later é reproduzível e auditável."
 			],
-			"notes": "Criada para reduzir dependência de memória humana e evitar deriva entre sessões/branches."
+			"notes": "Criada para reduzir dependência de memória humana e evitar deriva entre sessões/branches.\n[2026-04-19] Lote B (colônia c1) concluído em modo candidate-only: pipeline de triagem reproduzível avançado com smoke local, pendente materialização explícita no main com inventário final auditável."
 		},
 		{
 			"id": "TASK-BUD-021",
@@ -472,7 +472,7 @@
 				"`/quota-visibility budget` e tool equivalente retornam estado por provider.",
 				"Status/export incluem avaliação por provider e warnings de alocação inválida."
 			],
-			"notes": "Direcionado a uso compartilhado de chaves/cotas entre colegas com limites explícitos."
+			"notes": "Direcionado a uso compartilhado de chaves/cotas entre colegas com limites explícitos.\n[2026-04-19] Lote B (colônia c1) concluiu ajustes de budget semanal por provider com smoke mínimo WARN/BLOCK em candidate-only; pendente consolidação final com evidência de validação no main."
 		},
 		{
 			"id": "TASK-BUD-025",
@@ -836,11 +836,11 @@
 			],
 			"notes": "[2026-04-19] Lote A executado via colônia c4 (COMPLETE, $0.28). Resultado em estado candidato até consolidação manual de evidências no board. Checkpoint: docs/research/context-checkpoint-2026-04-19-lote-a-task-bud-010.md."
 		},
-    {
-      "id": "TASK-BUD-047",
-      "description": "[P0] Executar Lote B unattended para fechar pipeline de triagem e budget semanal por provider (TASK-BUD-020 + TASK-BUD-024).",
-      "status": "in-progress",
-      "type": "chore",
+		{
+			"id": "TASK-BUD-047",
+			"description": "[P0] Executar Lote B unattended para fechar pipeline de triagem e budget semanal por provider (TASK-BUD-020 + TASK-BUD-024).",
+			"status": "in-progress",
+			"type": "chore",
 			"depends_on": ["TASK-BUD-046"],
 			"references": ["TASK-BUD-020", "TASK-BUD-024"],
 			"acceptance_criteria": [
@@ -848,13 +848,13 @@
 				"Board atualizado com split unlock-now/later e estado por provider.",
 				"Sem auto-close de tasks P0."
 			],
-      "files": [
-        "scripts/session-triage.mjs",
-        "packages/pi-stack/extensions/quota-visibility.ts",
-        "docs/guides/quota-visibility.md"
-      ],
-      "notes": "[2026-04-19] Lote B iniciado após reload validado (budgetPolicy=6/60 e projectTaskSync createOnLaunch/trackProgress desativados)."
-    },
+			"files": [
+				"scripts/session-triage.mjs",
+				"packages/pi-stack/extensions/quota-visibility.ts",
+				"docs/guides/quota-visibility.md"
+			],
+			"notes": "[2026-04-19] Lote B iniciado após reload validado (budgetPolicy=6/60 e projectTaskSync createOnLaunch/trackProgress desativados).\n[2026-04-19] c1 concluída (12/12, $0.43, 6m44s) em modo artifact-first para TASK-BUD-020+024. Resultado em estado candidato com bloqueio de delivery evidence em validação final (faltou command log detectável), exigindo promoção/consolidação explícita no main."
+		},
 		{
 			"id": "TASK-BUD-048",
 			"description": "[P1] Executar lote de desbloqueio para gate hard de provider budget (TASK-BUD-025) como pré-condição de TASK-BUD-026.",
@@ -928,6 +928,25 @@
 				"docs/guides/budget-governance.md",
 				"docs/guides/quota-visibility.md"
 			]
+		},
+		{
+			"id": "TASK-BUD-052",
+			"description": "[P1] Padronizar evidência determinística de entrega de swarm (file inventory + validation command log detectável) para reduzir promoções manuais.",
+			"status": "planned",
+			"type": "chore",
+			"depends_on": ["TASK-BUD-047"],
+			"references": ["TASK-BUD-013", "TASK-BUD-014"],
+			"acceptance_criteria": [
+				"Run summary sempre inclui seção explícita de comandos de validação em formato parseável pelo delivery-policy.",
+				"Smoke test cobre caso positivo e regressão de falso negativo para validation command log.",
+				"Checklist de operação unattended referencia template determinístico de evidência."
+			],
+			"files": [
+				"packages/pi-stack/extensions/colony-pilot.ts",
+				"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+				"docs/guides/unattended-swarm-execution-plan.md"
+			],
+			"notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções."
 		},
 		{
 			"id": "TASK-BUD-045",

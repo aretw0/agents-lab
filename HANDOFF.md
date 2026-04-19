@@ -107,3 +107,26 @@ Se abrir nova sessão: comece por este arquivo + `.pi/settings.json` + `.project
   - `projectTaskSync.createOnLaunch=false`
   - `projectTaskSync.trackProgress=false`
 - **Ação pendente do operador:** rodar `/reload` antes de lançar o próximo lote (`TASK-BUD-047`).
+
+## Atualização pós-Lote B (c1, 2026-04-19)
+
+- c1 (Lote B / `TASK-BUD-047`) reportada como **COMPLETE** (`12/12`, `$0.43`, `6m44s`).
+- Execução avançou `TASK-BUD-020` e `TASK-BUD-024` em modo **candidate-only**.
+- Residual operacional: delivery-policy ainda marcou ausência de `validation command log` detectável.
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-b-task-bud-020-024.md`.
+
+## Limite atual de autonomia (para reduzir interação humana)
+
+Podemos deixar as formigas trabalharem sem intervenção em:
+
+1. implementação incremental de código/docs com escopo fechado por arquivos,
+2. atualização de board em estado candidato (sem auto-close),
+3. geração de checkpoints e inventário final.
+
+Ainda exige consolidação/manual quando:
+
+1. delivery evidence falha no parser (ex.: command log não detectado),
+2. houve risco de drift no `.project/tasks.json`,
+3. task P0 precisa decisão final de fechamento.
+
+Próxima melhoria determinística recomendada: padronizar seção de validação em formato rigidamente detectável (comandos explícitos em bloco) para reduzir novas promoções manuais.
