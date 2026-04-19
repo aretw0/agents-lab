@@ -563,7 +563,7 @@
 				"Smoke + node tests + verify passam sem regressão.",
 				"Changeset preparado e release notes resumem riscos/limites conhecidos."
 			],
-			"notes": "Task de stop condition para decidir momento exato de cortar versão e publicar.\n[2026-04-19] Pré-condição TASK-BUD-050 entrou em revisão de delta após falha c4 (no_pending_worker_tasks), para evitar loops sem trabalho executável.\n[2026-04-19] Delta-audit c5 concluiu GO condicional: pré-condição pode avançar por consolidação de evidência (sem reimplementar advisor do zero)."
+			"notes": "Task de stop condition para decidir momento exato de cortar versão e publicar.\n[2026-04-19] Pré-condição TASK-BUD-050 entrou em revisão de delta após falha c4 (no_pending_worker_tasks), para evitar loops sem trabalho executável.\n[2026-04-19] Delta-audit c5 concluiu GO condicional: pré-condição pode avançar por consolidação de evidência (sem reimplementar advisor do zero).\n[2026-04-19] Lote D final (c6) executado com resultado candidato; pré-condições operacionais para fechamento de RC avançadas, ainda sem auto-close."
 		},
 		{
 			"id": "TASK-BUD-030",
@@ -930,7 +930,8 @@
 				"packages/pi-stack/extensions/quota-visibility.ts",
 				"docs/guides/budget-governance.md",
 				"docs/guides/quota-visibility.md"
-			]
+			],
+			"notes": "[2026-04-19] Lote D final iniciado em modo artifact-first (sem publish) para fechar candidate de governança multi-provider.\n[2026-04-19] c6 concluída (31/31, $1.26, 14m47s) com checkpoint final e hardening de evidência/parser em estado candidato revisável; pendente materialização explícita no main."
 		},
 		{
 			"id": "TASK-BUD-052",
@@ -949,7 +950,29 @@
 				"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
 				"docs/guides/unattended-swarm-execution-plan.md"
 			],
-			"notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções.\n[2026-04-19] Lote C-unlock reportou endurecimento adicional (candidate) para reduzir falso negativo de validation command log; pendente materialização explícita no main.\n[2026-04-19] Lote C principal (c3) reportou reforço de testes/evidence e ajuste de ambiente Vitest em candidate-only, aguardando promoção/materialização explícita."
+			"notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções.\n[2026-04-19] Lote C-unlock reportou endurecimento adicional (candidate) para reduzir falso negativo de validation command log; pendente materialização explícita no main.\n[2026-04-19] Lote C principal (c3) reportou reforço de testes/evidence e ajuste de ambiente Vitest em candidate-only, aguardando promoção/materialização explícita.\n[2026-04-19] Lote D final (c6) reportou migração/validação extensa de smoke parser em modo node-native para reforçar trilha determinística de evidência (candidate-only)."
+		},
+		{
+			"id": "TASK-BUD-053",
+			"description": "[P1] Implementar roteamento Spark-aware para priorizar cota normal e usar gpt-5.3-codex-spark apenas em gatilhos explícitos de alto valor.",
+			"status": "planned",
+			"type": "chore",
+			"depends_on": ["TASK-BUD-051"],
+			"references": ["TASK-BUD-029", "TASK-BUD-052"],
+			"acceptance_criteria": [
+				"Default da operação unattended usa modelo da cota normal (não-spark).",
+				"Spark só é selecionado por gatilhos explícitos (ex.: planning recovery/scout burst) com justificativa auditável.",
+				"Relatórios/checkpoints registram quando e por que Spark foi usado, para controle de cota PRO.",
+				"Sem regressão na governança de budget e model-policy existente."
+			],
+			"files": [
+				".pi/settings.json",
+				"packages/pi-stack/extensions/colony-pilot.ts",
+				"packages/pi-stack/extensions/quota-visibility.ts",
+				"docs/guides/colony-provider-model-governance.md",
+				"docs/guides/unattended-swarm-execution-plan.md"
+			],
+			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente."
 		},
 		{
 			"id": "TASK-BUD-045",

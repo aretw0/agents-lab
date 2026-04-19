@@ -159,3 +159,16 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - Evidências:
   - `docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md`
   - `docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md`
+
+## Atualização pós-Lote D final (c6, 2026-04-19)
+
+- c6 (Lote D final / `TASK-BUD-051`) reportada como **COMPLETE** (`31/31`, `$1.26`, `14m47s`).
+- Escopo reportado: checkpoint final + atualização de board candidato + hardening de parser/evidência em suíte smoke node-native.
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-d-final-task-bud-051.md`.
+- Estado operacional: candidate-only até materialização explícita no `main`.
+
+## Próxima leva planejada (Spark-aware)
+
+- Usuário sinalizou risco de estourar janela/cota separada do `gpt-5.3-codex-spark`.
+- Diretriz acordada: priorizar cota normal e usar Spark só quando realmente necessário.
+- Task preparada no board: `TASK-BUD-053` (roteamento Spark-aware com gatilhos explícitos + evidência auditável).
