@@ -9,6 +9,8 @@ import quotaVisibilityExtension, {
   buildRouteAdvisory,
   shortProviderLabel,
   formatBudgetStatusParts,
+  resolveQuotaToolOutputPolicy,
+  formatQuotaToolJsonOutput,
   type QuotaUsageEvent,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
@@ -34,6 +36,30 @@ describe("quota-visibility extension — registration smoke", () => {
       ([event]: [string]) => event,
     );
     expect(registeredEvents).toContain("session_start");
+  });
+
+  describe("quota tool output policy", () => {
+    it("resolveQuotaToolOutputPolicy aplica defaults e clamp", () => {
+      const p1 = resolveQuotaToolOutputPolicy();
+      expect(p1.compactLargeJson).toBe(true);
+      expect(p1.maxInlineJsonChars).toBe(1200);
+
+      const p2 = resolveQuotaToolOutputPolicy({
+        outputPolicy: { compactLargeJson: false, maxInlineJsonChars: 50 },
+      } as any);
+      expect(p2.compactLargeJson).toBe(false);
+      expect(p2.maxInlineJsonChars).toBe(400);
+    });
+
+    it("formatQuotaToolJsonOutput compacta payload grande", () => {
+      const data = { rows: Array.from({ length: 100 }, (_, i) => ({ i, txt: "x".repeat(40) })) };
+      const text = formatQuotaToolJsonOutput("quota_visibility_status", data, {
+        compactLargeJson: true,
+        maxInlineJsonChars: 500,
+      });
+      expect(text).toContain("output compactado");
+      expect(text).toContain("payload completo disponível em details");
+    });
   });
 });
 
