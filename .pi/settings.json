@@ -100,6 +100,10 @@
         "requireFileInventory": true,
         "requireValidationCommandLog": true,
         "blockOnMissingEvidence": true
+      },
+      "outputPolicy": {
+        "compactLargeJson": true,
+        "maxInlineJsonChars": 1200
       }
     },
     "guardrailsCore": {
@@ -127,6 +131,9 @@
       "routeModelRefs": {
         "openai-codex": "openai-codex/gpt-5.3-codex"
       }
+    },
+    "quotaPanel": {
+      "mode": "on"
     }
   }
 }

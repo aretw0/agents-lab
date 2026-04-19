@@ -44,9 +44,30 @@ import {
   buildHatchDoctorSnapshot,
   formatHatchDoctorSnapshot,
   parseDeliveryModeOverride,
+  formatToolJsonOutput,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
+  it("formatToolJsonOutput compacta payload grande quando habilitado", () => {
+    const big = { items: Array.from({ length: 200 }, (_, i) => ({ id: i, txt: "x".repeat(30) })) };
+    const text = formatToolJsonOutput("colony_pilot_status", big, {
+      compactLargeJson: true,
+      maxInlineJsonChars: 500,
+    });
+
+    expect(text).toContain("output compactado");
+    expect(text).toContain("payload completo disponível em details");
+  });
+
+  it("formatToolJsonOutput mantém json completo quando compactação desativada", () => {
+    const data = { ok: true, n: 1 };
+    const text = formatToolJsonOutput("x", data, {
+      compactLargeJson: false,
+      maxInlineJsonChars: 10,
+    });
+
+    expect(text).toBe(JSON.stringify(data, null, 2));
+  });
   it("parseColonySignal extrai phase/id", () => {
     const parsed = parseColonySignal("[COLONY_SIGNAL:LAUNCHED] [c1]");
     expect(parsed).toEqual({ phase: "launched", id: "c1" });

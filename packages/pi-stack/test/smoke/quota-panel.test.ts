@@ -7,6 +7,7 @@ import {
   buildPanelLines,
   triggerAuto,
   resetAuto,
+  resolvePanelMode,
   type PanelMode,
 } from "../../extensions/quota-panel";
 import type { QuotaStatus, ProviderBudgetStatus } from "../../extensions/quota-visibility";
@@ -40,6 +41,13 @@ describe("quota-panel — buildProgressBar", () => {
 describe("quota-panel — mode state", () => {
   beforeEach(() => {
     setMode("off");
+  });
+
+  it("resolvePanelMode aceita off|on|auto e fallback em inválido", () => {
+    expect(resolvePanelMode("off")).toBe("off");
+    expect(resolvePanelMode("on")).toBe("on");
+    expect(resolvePanelMode("auto")).toBe("auto");
+    expect(resolvePanelMode("x", "auto")).toBe("auto");
   });
 
   it("modo padrão é off", () => {

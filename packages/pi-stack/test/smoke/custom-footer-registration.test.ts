@@ -113,6 +113,7 @@ describe("custom-footer — buildFooterLines", () => {
     contextPct: 30,
     branch: "main",
     budgetStatus: undefined,
+    pilotStatus: undefined,
     cwd: "/home/user/projects/agents-lab",
   };
 
@@ -145,6 +146,15 @@ describe("custom-footer — buildFooterLines", () => {
       200,
     );
     expect(lines[1]).toContain("✓copilot:38% !codex:46%");
+  });
+
+  it("linha 2 inclui pilotStatus quando presente", () => {
+    const lines = buildFooterLines(
+      { ...baseInput, pilotStatus: "[pilot] monitors=off · web=on · colonies=1" },
+      plainTheme,
+      200,
+    );
+    expect(lines[1]).toContain("[pilot] monitors=off");
   });
 
   it("linha 2 não inclui budget quando ausente", () => {
@@ -180,6 +190,7 @@ describe("custom-footer — panel integration", () => {
         contextPct: 10,
         branch: "main",
         budgetStatus: undefined,
+        pilotStatus: undefined,
         cwd: "/home/user/project",
       },
       plainTheme,

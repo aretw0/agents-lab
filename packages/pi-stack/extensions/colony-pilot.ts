@@ -355,6 +355,16 @@ const DEFAULT_DELIVERY_POLICY: ColonyPilotDeliveryPolicyConfig = {
   blockOnMissingEvidence: true,
 };
 
+export interface ColonyPilotOutputPolicyConfig {
+  compactLargeJson: boolean;
+  maxInlineJsonChars: number;
+}
+
+const DEFAULT_OUTPUT_POLICY: ColonyPilotOutputPolicyConfig = {
+  compactLargeJson: true,
+  maxInlineJsonChars: 1800,
+};
+
 export interface AntColonyToolInput {
   goal: string;
   maxAnts?: number;
@@ -1177,6 +1187,7 @@ interface ColonyPilotSettings {
   budgetPolicy?: Partial<ColonyPilotBudgetPolicyConfig>;
   projectTaskSync?: Partial<ColonyPilotProjectTaskSyncConfig>;
   deliveryPolicy?: Partial<ColonyPilotDeliveryPolicyConfig>;
+  outputPolicy?: Partial<ColonyPilotOutputPolicyConfig>;
 }
 
 interface QuotaVisibilityBudgetSettings {
@@ -1237,6 +1248,19 @@ export function resolveColonyPilotPreflightConfig(raw?: Partial<ColonyPilotPrefl
       ? raw!.requiredExecutables.filter((v): v is string => typeof v === "string" && v.trim().length > 0)
       : [...DEFAULT_PREFLIGHT_CONFIG.requiredExecutables],
     requireColonyCapabilities: normalizeCapabilitiesList(raw?.requireColonyCapabilities),
+  };
+}
+
+export function resolveColonyPilotOutputPolicy(
+  raw?: Partial<ColonyPilotOutputPolicyConfig>
+): ColonyPilotOutputPolicyConfig {
+  const maxInline = typeof raw?.maxInlineJsonChars === "number" && Number.isFinite(raw.maxInlineJsonChars)
+    ? Math.floor(raw.maxInlineJsonChars)
+    : DEFAULT_OUTPUT_POLICY.maxInlineJsonChars;
+
+  return {
+    compactLargeJson: raw?.compactLargeJson !== false,
+    maxInlineJsonChars: Math.max(400, Math.min(20_000, maxInline)),
   };
 }
 
@@ -1872,6 +1896,27 @@ function formatSnapshot(state: PilotState): string {
   ].join("\n");
 }
 
+export function formatToolJsonOutput(
+  label: string,
+  data: unknown,
+  policy: ColonyPilotOutputPolicyConfig
+): string {
+  const pretty = JSON.stringify(data, null, 2);
+  if (!policy.compactLargeJson || pretty.length <= policy.maxInlineJsonChars) {
+    return pretty;
+  }
+
+  const maxPreview = Math.max(200, policy.maxInlineJsonChars - 120);
+  const preview = pretty.slice(0, maxPreview).trimEnd();
+  return [
+    `${label}: output compactado (${pretty.length} chars > ${policy.maxInlineJsonChars})`,
+    "preview:",
+    preview,
+    "...",
+    "(payload completo disponível em details)",
+  ].join("\n");
+}
+
 function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
   ctx?.ui?.setStatus?.("colony-pilot", renderStatus(state));
 }
@@ -2284,6 +2329,7 @@ export default function (pi: ExtensionAPI) {
   let budgetPolicyConfig = resolveColonyPilotBudgetPolicy();
   let projectTaskSyncConfig = resolveColonyPilotProjectTaskSync();
   let deliveryPolicyConfig = resolveColonyPilotDeliveryPolicy();
+  let outputPolicyConfig = resolveColonyPilotOutputPolicy();
   const pendingColonyGoals: Array<{ goal: string; source: "ant_colony" | "manual"; at: number }> = [];
   const colonyTaskMap = new Map<string, string>();
   const colonyGoalMap = new Map<string, string>();
@@ -2309,6 +2355,7 @@ export default function (pi: ExtensionAPI) {
     budgetPolicyConfig = resolveColonyPilotBudgetPolicy(settings.budgetPolicy);
     projectTaskSyncConfig = resolveColonyPilotProjectTaskSync(settings.projectTaskSync);
     deliveryPolicyConfig = resolveColonyPilotDeliveryPolicy(settings.deliveryPolicy);
+    outputPolicyConfig = resolveColonyPilotOutputPolicy(settings.outputPolicy);
     preflightCache = undefined;
     providerBudgetGateCache = undefined;
 
@@ -2667,7 +2714,7 @@ export default function (pi: ExtensionAPI) {
       };
 
       return {
-        content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+        content: [{ type: "text", text: formatToolJsonOutput("colony_pilot_status", payload, outputPolicyConfig) }],
         details: payload,
       };
     },
@@ -2681,7 +2728,7 @@ export default function (pi: ExtensionAPI) {
     async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
       const data = inspectAntColonyRuntime(ctx.cwd);
       return {
-        content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+        content: [{ type: "text", text: formatToolJsonOutput("colony_pilot_artifacts", data, outputPolicyConfig) }],
         details: data,
       };
     },
@@ -2697,7 +2744,7 @@ export default function (pi: ExtensionAPI) {
       const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
       preflightCache = { at: Date.now(), result };
       return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        content: [{ type: "text", text: formatToolJsonOutput("colony_pilot_preflight", result, outputPolicyConfig) }],
         details: result,
       };
     },
@@ -2718,7 +2765,7 @@ export default function (pi: ExtensionAPI) {
       const baseline = buildProjectBaselineSettings(profile);
       if (!apply) {
         return {
-          content: [{ type: "text", text: JSON.stringify({ profile, baseline }, null, 2) }],
+          content: [{ type: "text", text: formatToolJsonOutput("colony_pilot_baseline", { profile, baseline }, outputPolicyConfig) }],
           details: { profile, baseline },
         };
       }
