@@ -33,7 +33,7 @@ const IS_WINDOWS = process.platform === "win32";
  *
  * Format: { source: "npm:pkg", extensions: ["!path/to/conflicting.ts"] }
  */
-const FILTER_PATCHES = [
+export const FILTER_PATCHES = [
   {
     // mitsupi/uv.ts registers tool "bash" — conflicts with oh-pi-extensions/bg-process.ts
     // mitsupi skills commit/github/web-browser — replaced by @aretw0/git-skills + web-skills
@@ -288,35 +288,64 @@ function getPackageSource(entry) {
 	return typeof entry === "string" ? entry : entry?.source;
 }
 
+function mergeUniqueArray(base = [], extra = []) {
+	return [...new Set([...(Array.isArray(base) ? base : []), ...(Array.isArray(extra) ? extra : [])])];
+}
+
+function arraysEqual(a = [], b = []) {
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
+	}
+	return true;
+}
+
+/**
+ * Pure helper: apply FILTER_PATCHES to a settings object.
+ * Returns { settings, changed } without touching disk.
+ */
+export function applyFilterPatchesToSettings(settings, filterPatches = FILTER_PATCHES) {
+	if (!Array.isArray(settings?.packages)) {
+		return { settings, changed: false };
+	}
+
+	let changed = false;
+	const nextSettings = { ...settings };
+	nextSettings.packages = settings.packages.map((entry) => {
+		const source = getPackageSource(entry);
+		const patch = filterPatches.find((p) => source === p.source);
+		if (!patch) return entry;
+
+		const current = typeof entry === "string" ? { source: patch.source } : { ...entry, source: patch.source };
+		const next = { ...current };
+
+		for (const key of ["extensions", "skills", "themes"]) {
+			if (!patch[key]) continue;
+			const merged = mergeUniqueArray(current[key], patch[key]);
+			next[key] = merged;
+			if (!arraysEqual(current[key] ?? [], merged)) {
+				changed = true;
+			}
+		}
+
+		if (typeof entry === "string") changed = true;
+		return next;
+	});
+
+	return { settings: nextSettings, changed };
+}
+
 /**
  * Apply filter patches to settings.json after install.
  * Converts plain source strings to filter objects for known conflicting packages.
  */
 function applyFilterPatches(settingsPath) {
 	const settings = loadSettings(settingsPath);
-	if (!Array.isArray(settings.packages)) return;
-
-	let changed = false;
-	settings.packages = settings.packages.map((entry) => {
-		const source = getPackageSource(entry);
-		const patch = FILTER_PATCHES.find((p) => source === p.source);
-		if (!patch) return entry;
-
-		// Already has all filters — skip
-		if (typeof entry === "object" && entry.extensions && entry.skills) return entry;
-
-		changed = true;
-		const next = { source: patch.source };
-		if (patch.extensions) next.extensions = patch.extensions;
-		if (patch.skills) next.skills = patch.skills;
-		return next;
-	});
-
-	if (changed) {
-		saveSettings(settingsPath, settings);
+	const result = applyFilterPatchesToSettings(settings, FILTER_PATCHES);
+	if (result.changed) {
+		saveSettings(settingsPath, result.settings);
 	}
-
-	return changed;
+	return result.changed;
 }
 
 function run(pi, command, args, { label }) {
