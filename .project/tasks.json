@@ -955,7 +955,7 @@
 		{
 			"id": "TASK-BUD-053",
 			"description": "[P1] Implementar roteamento Spark-aware para priorizar cota normal e usar gpt-5.3-codex-spark apenas em gatilhos explícitos de alto valor.",
-			"status": "planned",
+			"status": "in-progress",
 			"type": "chore",
 			"depends_on": ["TASK-BUD-051"],
 			"references": ["TASK-BUD-029", "TASK-BUD-052"],
@@ -972,7 +972,7 @@
 				"docs/guides/colony-provider-model-governance.md",
 				"docs/guides/unattended-swarm-execution-plan.md"
 			],
-			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente."
+			"notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável."
 		},
 		{
 			"id": "TASK-BUD-045",
