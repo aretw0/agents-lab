@@ -455,6 +455,33 @@ Validação atualizada:
 1. Refinar heurística do `cpanel auto` (abrir com `failed|blocked` mesmo com live baixo já é suportado; falta calibrar thresholds por perfil).
 2. Evoluir layout de colônias para “cards” na Web UI (agrupamento por fase/filtro).
 
+## Compactação de status de monitores (evitar bloco grande no TUI)
+
+Status: **implementado** com superfície compacta first-party.
+
+### O que entrou
+
+1. Nova extensão `packages/pi-stack/extensions/monitor-summary.ts`:
+   - tool `monitors_compact_status` (inline curto + payload completo em `details`),
+   - comando `/mstatus [inline|full|refresh]`,
+   - status line `monitor-summary` (`[mon] enabled/total · fail=N`),
+   - contador de warnings `"[name] classify failed"` por sessão.
+
+2. Footer integrado:
+   - `custom-footer` agora também mostra `status("monitor-summary")` na linha 2.
+
+3. Manifesto:
+   - `packages/pi-stack/package.json` inclui `./extensions/monitor-summary.ts`.
+
+4. Cobertura:
+   - novo smoke `packages/pi-stack/test/smoke/monitor-summary.test.ts`.
+
+Validação:
+
+- `npx vitest run` → **PASS (392/392)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
 ## Correção de warnings dos monitores (classify failed: "Instructions are required")
 
 Status: **corrigido na origem + overrides locais alinhados**.
