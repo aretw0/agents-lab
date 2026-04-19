@@ -877,7 +877,7 @@
 		{
 			"id": "TASK-BUD-049",
 			"description": "[P0] Executar Lote C unattended para operacionalizar governor global no workspace (TASK-BUD-026) após desbloqueio do gate.",
-			"status": "planned",
+			"status": "in-progress",
 			"type": "chore",
 			"depends_on": ["TASK-BUD-048"],
 			"references": ["TASK-BUD-026"],
@@ -890,7 +890,8 @@
 				"packages/pi-stack/extensions/guardrails-core.ts",
 				"packages/pi-stack/extensions/colony-pilot.ts",
 				".pi/settings.json"
-			]
+			],
+			"notes": "[2026-04-19] Lote C principal iniciado em modo artifact-first, condicionado à materialização explícita dos resultados candidatos de TASK-BUD-048/TASK-BUD-052 no main."
 		},
 		{
 			"id": "TASK-BUD-050",
