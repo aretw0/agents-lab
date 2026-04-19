@@ -454,3 +454,33 @@ Validação atualizada:
 
 1. Refinar heurística do `cpanel auto` (abrir com `failed|blocked` mesmo com live baixo já é suportado; falta calibrar thresholds por perfil).
 2. Evoluir layout de colônias para “cards” na Web UI (agrupamento por fase/filtro).
+
+## Correção de warnings dos monitores (classify failed: "Instructions are required")
+
+Status: **corrigido na origem + overrides locais alinhados**.
+
+### Causa raiz
+
+- `monitor-provider-patch` gerava agents YAML com template relativo incorreto:
+  - antes: `template: <monitor>/classify.md`
+  - correto: `template: ../monitors/<monitor>/classify.md`
+- Resultado em runtime: prompt vazio para alguns classificadores (`fragility`, `commit-hygiene`), gerando erro `Instructions are required`.
+
+### Ações aplicadas
+
+1. `packages/pi-stack/extensions/monitor-provider-patch.ts`
+   - `generateAgentYaml(...)` ajustado para usar `../monitors/<monitor>/classify.md`.
+2. `packages/pi-stack/test/monitor-provider-patch.test.mjs`
+   - expectativas atualizadas para o novo path.
+3. `.pi/agents/*.agent.yaml`
+   - overrides locais corrigidos para eliminar warnings imediatamente nesta workspace.
+
+### Validação
+
+- `node --test packages/pi-stack/test/monitor-provider-patch.test.mjs` → **PASS**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
+### Nota de UX/visibilidade (deferida)
+
+- Registrar execução de classificadores como telemetria visível (estilo background/status panel) permanece como melhoria futura first-party para equilibrar economia + observabilidade.

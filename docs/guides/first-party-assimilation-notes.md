@@ -37,6 +37,15 @@ Diretriz: manter filtros agora, consolidar experiências, e só depois migrar pa
   - namespace/alias oficial por domínio,
   - camada de roteamento de skill com prioridade explícita e telemetria de fallback.
 
+### 4) Visibilidade de "agents-as-tools" (classificadores/monitores)
+
+- Sintoma: execução de classificadores só fica evidente quando sai warning/output, com baixa visibilidade durante a conversa.
+- Estado atual: sem superfície de progresso unificada para micro-execuções de monitor.
+- Possível evolução first-party:
+  - status line/painel com "agentes de monitor ativos" + latência,
+  - integração opcional com superfície de processos em background,
+  - budget/timeout explícito para classificações para preservar economia.
+
 ## Critério para “promover” algo a first-party
 
 Só promover quando todos os itens abaixo estiverem verdadeiros:
