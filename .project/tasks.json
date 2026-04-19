@@ -910,12 +910,12 @@
 				"packages/pi-stack/extensions/colony-pilot.ts",
 				"docs/guides/quota-visibility.md"
 			],
-			"notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md."
+			"notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md.\n[2026-04-19] Pré-condição para TASK-BUD-029 tratada como candidata por evidência; seguir para lote final sem reimplementar advisor completo."
 		},
 		{
 			"id": "TASK-BUD-051",
 			"description": "[P0] Executar Lote D unattended para fechar release candidate de governança multi-provider (TASK-BUD-029) sem publish.",
-			"status": "planned",
+			"status": "in-progress",
 			"type": "chore",
 			"depends_on": ["TASK-BUD-050"],
 			"references": ["TASK-BUD-029"],
