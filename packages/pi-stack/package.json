@@ -41,6 +41,7 @@
 			"./extensions/governance-profiles.ts",
 			"./extensions/quota-panel.ts",
 			"./extensions/colony-panel.ts",
+			"./extensions/monitor-summary.ts",
 			"./extensions/custom-footer.ts"
 		],
 		"themes": [

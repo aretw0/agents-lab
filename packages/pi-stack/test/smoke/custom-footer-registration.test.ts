@@ -121,6 +121,7 @@ describe("custom-footer — buildFooterLines", () => {
 		branch: "main",
 		budgetStatus: undefined,
 		pilotStatus: undefined,
+		monitorSummaryStatus: undefined,
 		cwd: "/home/user/projects/agents-lab",
 	};
 
@@ -165,6 +166,18 @@ describe("custom-footer — buildFooterLines", () => {
 			200,
 		);
 		expect(lines[1]).toContain("[pilot] monitors=off");
+	});
+
+	it("linha 2 inclui monitorSummaryStatus quando presente", () => {
+		const lines = buildFooterLines(
+			{
+				...baseInput,
+				monitorSummaryStatus: "[mon] 5/5 · fail=0",
+			},
+			plainTheme,
+			200,
+		);
+		expect(lines[1]).toContain("[mon] 5/5");
 	});
 
 	it("linha 2 não inclui budget quando ausente", () => {
@@ -224,6 +237,7 @@ describe("custom-footer — panel integration", () => {
 				branch: "main",
 				budgetStatus: undefined,
 				pilotStatus: undefined,
+				monitorSummaryStatus: undefined,
 				cwd: "/home/user/project",
 			},
 			plainTheme,

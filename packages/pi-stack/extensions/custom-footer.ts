@@ -84,6 +84,7 @@ export type FooterRenderInput = {
   branch: string | null;
   budgetStatus: string | undefined;
   pilotStatus: string | undefined;
+  monitorSummaryStatus: string | undefined;
   cwd: string;
 };
 
@@ -93,7 +94,7 @@ export function buildFooterLines(
   width: number,
 ): string[] {
   const { usageTotals, sessionStart, cachedPr, thinkingLevel, modelId, modelProvider,
-          contextPct, branch, budgetStatus, pilotStatus, cwd } = input;
+          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, cwd } = input;
 
   const thinkColor =
     thinkingLevel === "high" ? "warning"
@@ -133,6 +134,7 @@ export function buildFooterLines(
   if (branchStr) line2Parts.push(branchStr);
   if (budgetStatus) line2Parts.push(theme.fg("dim", budgetStatus));
   if (pilotStatus) line2Parts.push(theme.fg("dim", pilotStatus));
+  if (monitorSummaryStatus) line2Parts.push(theme.fg("dim", monitorSummaryStatus));
 
   return [
     truncateToWidth(line1Parts.join(sep), width),
@@ -212,6 +214,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
               branch: footerData.getGitBranch(),
               budgetStatus: statuses?.get("quota-budgets"),
               pilotStatus: statuses?.get("colony-pilot"),
+              monitorSummaryStatus: statuses?.get("monitor-summary"),
               cwd: process.cwd(),
             },
             theme,
