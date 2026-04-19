@@ -356,6 +356,107 @@ describe("colony-pilot parsers", () => {
     expect(input.soldierModel).toBe("openai-codex/gpt-5.2-codex");
   });
 
+  it("spark gate bloqueia uso spark sem trigger explícito no goal", () => {
+    const policy = resolveColonyPilotModelPolicy({
+      allowMixedProviders: false,
+      allowedProviders: ["openai-codex"],
+      sparkGateEnabled: true,
+      sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
+      sparkScoutOnlyTrigger: "scout burst",
+    });
+
+    const input: any = {
+      goal: "rodar swarm normal",
+      workerModel: "openai-codex/gpt-5.3-codex-spark",
+    };
+    const registry = {
+      find: () => ({ id: "ok" }),
+      hasConfiguredAuth: () => true,
+    };
+
+    const evalResult = evaluateAntColonyModelPolicy(
+      input,
+      "openai-codex/gpt-5.3-codex",
+      registry,
+      policy,
+      input.goal
+    );
+
+    expect(evalResult.ok).toBe(false);
+    expect(evalResult.issues.some((i) => i.includes("spark model usage requires explicit goal trigger"))).toBe(true);
+  });
+
+  it("spark gate permite spark fora do scout quando goal inclui planning recovery", () => {
+    const policy = resolveColonyPilotModelPolicy({
+      allowMixedProviders: false,
+      allowedProviders: ["openai-codex"],
+      sparkGateEnabled: true,
+      sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
+      sparkScoutOnlyTrigger: "scout burst",
+    });
+
+    const input: any = {
+      goal: "executar planning recovery com burst controlado",
+      workerModel: "openai-codex/gpt-5.3-codex-spark",
+    };
+    const registry = {
+      find: () => ({ id: "ok" }),
+      hasConfiguredAuth: () => true,
+    };
+
+    const evalResult = evaluateAntColonyModelPolicy(
+      input,
+      "openai-codex/gpt-5.3-codex",
+      registry,
+      policy,
+      input.goal
+    );
+
+    expect(evalResult.ok).toBe(true);
+  });
+
+  it("spark gate enforce scout-only quando trigger é scout burst", () => {
+    const policy = resolveColonyPilotModelPolicy({
+      allowMixedProviders: false,
+      allowedProviders: ["openai-codex"],
+      sparkGateEnabled: true,
+      sparkAllowedGoalTriggers: ["planning recovery", "scout burst"],
+      sparkScoutOnlyTrigger: "scout burst",
+    });
+
+    const registry = {
+      find: () => ({ id: "ok" }),
+      hasConfiguredAuth: () => true,
+    };
+
+    const scoutOnlyInput: any = {
+      goal: "ativar scout burst para triagem inicial",
+      scoutModel: "openai-codex/gpt-5.3-codex-spark",
+    };
+    const scoutOnlyResult = evaluateAntColonyModelPolicy(
+      scoutOnlyInput,
+      "openai-codex/gpt-5.3-codex",
+      registry,
+      policy,
+      scoutOnlyInput.goal
+    );
+    expect(scoutOnlyResult.ok).toBe(true);
+
+    const invalidInput: any = {
+      goal: "ativar scout burst para triagem inicial",
+      workerModel: "openai-codex/gpt-5.3-codex-spark",
+    };
+    const invalidResult = evaluateAntColonyModelPolicy(
+      invalidInput,
+      "openai-codex/gpt-5.3-codex",
+      registry,
+      policy,
+      invalidInput.goal
+    );
+    expect(invalidResult.ok).toBe(false);
+    expect(invalidResult.issues.some((i) => i.includes("is scout-only; found roles: worker"))).toBe(true);
+  });
+
   it("model policy profile codex mantém generic-first", () => {
     const policy = buildModelPolicyProfile("codex");
     expect(policy.specializedRolesEnabled).toBe(false);
