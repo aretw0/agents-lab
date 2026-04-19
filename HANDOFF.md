@@ -325,3 +325,35 @@ Validação executada antes de avançar (determinística):
 1. Cobrir `web-session-gateway` `/api/prompt` com e2e de concorrência + token inválido.
 2. Teste de largura/overflow no footer (budget + pilot + cwd) para evitar perda de sinal útil em terminal estreito.
 3. Definir hatch first-party para conflitos de ambiente (`uv`/background process) sem depender de pacote externo.
+
+## Decisão operacional (contexto ~52%)
+
+- Escolha recomendada: **compactar agora** e retomar com contexto limpo.
+- Motivo: já temos baseline estável + validação verde; próximos passos (TUI layout de colônias + Web prompt e2e) vão gerar muito diff/artefato.
+- Trade-off aceito: checkpoint manual frequente > risco de saturação do control-plane.
+
+### Ação obrigatória antes da próxima execução
+
+- Como `.pi/settings.json` foi alterado nesta rodada (quotaPanel + outputPolicy), rodar **`/reload`** na sessão retomada.
+
+## Próximo pacote (pós-compact) — colônias sem inchar TUI
+
+Objetivo: quando houver muitas colônias, manter linha principal curta e mover detalhe para painel dedicado.
+
+1. **Linha principal compacta (sempre fixa)**
+   - formato alvo: `colonies=<n> (run:<x> scout:<y> done:<z>)`.
+   - sem listar IDs na linha principal.
+
+2. **Painel dedicado toggleável para colônias**
+   - comando proposto: `/cpanel off|on|auto|snapshot|status`.
+   - `auto`: abrir quando `colonies > threshold` ou houver `failed|blocked`.
+   - wrap automático por largura (sem truncar informação crítica).
+
+3. **Overflow controlado**
+   - mostrar top-N por recência/criticidade + linha `+N hidden`.
+   - payload completo acessível por `/colony-pilot status` e `details`.
+
+4. **Testes mínimos para essa fase**
+   - smoke do parser/render do painel (wide/narrow terminal),
+   - regressão do footer para não estourar em largura curta,
+   - validação determinística (`vitest`, `node --test`, `verify-pi-stack`).
