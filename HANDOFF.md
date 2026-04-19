@@ -482,6 +482,30 @@ Validação:
 - `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
 - `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
 
+## Compactação adicional de tools quota-visibility (controle de contexto)
+
+Status: **implementado** para reduzir blocos JSON extensos em tool results.
+
+- Arquivo: `packages/pi-stack/extensions/quota-visibility.ts`
+  - novo `resolveQuotaToolOutputPolicy(...)` + `formatQuotaToolJsonOutput(...)`;
+  - tools com saída compactada (inline) e payload completo em `details`:
+    - `quota_visibility_status`
+    - `quota_visibility_windows`
+    - `quota_visibility_provider_budgets`
+    - `quota_visibility_route`
+  - política default: `compactLargeJson=true`, `maxInlineJsonChars=1200`.
+
+- Testes:
+  - `packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts`
+    - cobre defaults/clamp de output policy,
+    - cobre compactação de payload grande.
+
+Validação:
+
+- `npx vitest run` → **PASS (394/394)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
 ## Correção de warnings dos monitores (classify failed: "Instructions are required")
 
 Status: **corrigido na origem + overrides locais alinhados**.
