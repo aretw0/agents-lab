@@ -279,3 +279,49 @@ Validação executada antes de avançar (determinística):
 1. **Parte A (agora):** consolidar contratos críticos de governança (Spark/OpenAI-only) em testes source-linked.
 2. **Parte B:** fechar gaps de Web UI (`/api/prompt`) e TUI (largura/overflow) com smoke/e2e mínimo.
 3. **Parte C:** só então calibrar monitor `context-pressure` em modo on-demand (sem flood passivo).
+
+## Atualização incremental — TUI/Web observability + compactação (2026-04-19)
+
+### Implementado nesta rodada
+
+1. **Cobertura de regressão Spark (governança de modelo)**
+   - novos testes em `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`:
+     - bloqueio de Spark sem trigger explícito,
+     - permissão com trigger `planning recovery`,
+     - enforcement scout-only para `scout burst`.
+
+2. **Widget de quota mais visível (TUI)**
+   - `quota-panel` agora suporta modo default via settings:
+     - `piStack.quotaPanel.mode = off|on|auto`
+   - adicionado `/qp status` para diagnóstico rápido (modo ativo/config/cache/visibilidade).
+   - `.pi/settings.json` atualizado para `piStack.quotaPanel.mode = "on"` (visibilidade imediata).
+
+3. **Status de background no footer principal (TUI)**
+   - `custom-footer` passou a exibir também `status("colony-pilot")` na linha compacta,
+   - junto do `quota-budgets`, para visibilidade contínua de colônias/web sem abrir telas extras.
+
+4. **Compactação automática de JSON grande em tools first-party**
+   - `colony-pilot` tools (`colony_pilot_status`, `colony_pilot_artifacts`, `colony_pilot_preflight`, `colony_pilot_baseline`) agora aplicam compactação por threshold.
+   - `web-session-gateway` (`session_web_status` tool e `/session-web status`) idem.
+   - payload completo permanece em `details`; texto inline mostra preview compacto.
+   - threshold configurável em `.pi/settings.json` para colony-pilot:
+     - `piStack.colonyPilot.outputPolicy.maxInlineJsonChars`.
+
+### Config aplicada no workspace
+
+- `.pi/settings.json`:
+  - `piStack.colonyPilot.outputPolicy.compactLargeJson = true`
+  - `piStack.colonyPilot.outputPolicy.maxInlineJsonChars = 1200`
+  - `piStack.quotaPanel.mode = "on"`
+
+### Validação determinística desta rodada
+
+- `npx vitest run` → **PASS (372/372)**
+- `node --test packages/pi-stack/test/*.test.mjs` → **PASS (84/84)**
+- `node scripts/verify-pi-stack.mjs` → **PASS (10/10)**
+
+### Pendências imediatas (próxima parte)
+
+1. Cobrir `web-session-gateway` `/api/prompt` com e2e de concorrência + token inválido.
+2. Teste de largura/overflow no footer (budget + pilot + cwd) para evitar perda de sinal útil em terminal estreito.
+3. Definir hatch first-party para conflitos de ambiente (`uv`/background process) sem depender de pacote externo.
