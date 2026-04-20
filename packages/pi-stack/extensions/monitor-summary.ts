@@ -8,7 +8,15 @@
  * - we want a compact default plus structured details on demand
  */
 
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import {
+	existsSync,
+	openSync,
+	readFileSync,
+	readSync,
+	readdirSync,
+	statSync,
+	closeSync,
+} from "node:fs";
 import path from "node:path";
 import type {
 	ExtensionAPI,
@@ -33,14 +41,21 @@ interface MonitorSummary {
 		total: number;
 		byMonitor: Record<string, number>;
 		lastAtIso?: string;
+		lastMonitor?: string;
+		lastError?: string;
 	};
 }
 
 interface RuntimeState {
 	summary: MonitorSummary;
+	scan: {
+		sessionFile?: string;
+		offset: number;
+	};
 }
 
 const CLASSIFY_FAIL_RE = /\[([a-z0-9-]+)\]\s+classify failed:/i;
+const MAX_SCAN_BYTES = 512_000;
 
 function extractText(message: unknown): string {
 	if (!message || typeof message !== "object") return "";
@@ -126,41 +141,133 @@ export function formatMonitorSummaryInline(summary: MonitorSummary): string {
 		.join(" ");
 
 	const fails = summary.classifyFailures.total;
+	const last = summary.classifyFailures.lastMonitor;
 	return [
 		"monitor-summary",
 		`total=${summary.total}`,
 		`enabled=${summary.enabled}`,
 		events ? `events=[${events}]` : "events=[]",
 		`classifyFail=${fails}`,
-	].join(" · ");
+		last ? `lastFail=${last}` : undefined,
+	]
+		.filter((v): v is string => typeof v === "string" && v.length > 0)
+		.join(" · ");
 }
 
 function updateStatus(ctx: ExtensionContext, state: RuntimeState) {
+	const last = state.summary.classifyFailures.lastMonitor;
 	ctx.ui.setStatus?.(
 		"monitor-summary",
-		`[mon] ${state.summary.enabled}/${state.summary.total} · fail=${state.summary.classifyFailures.total}`,
+		`[mon] ${state.summary.enabled}/${state.summary.total} · fail=${state.summary.classifyFailures.total}${last ? ` (${last})` : ""}`,
 	);
 }
 
-function bumpClassifyFailure(text: string, state: RuntimeState): boolean {
-	const m = text.match(CLASSIFY_FAIL_RE);
-	if (!m) return false;
-
-	const monitorName = m[1].trim();
+function bumpClassifyFailure(
+	monitorNameRaw: string,
+	state: RuntimeState,
+	errorText?: string,
+): boolean {
+	const monitorName = monitorNameRaw.trim();
+	if (!monitorName) return false;
 	state.summary.classifyFailures.total += 1;
 	state.summary.classifyFailures.byMonitor[monitorName] =
 		(state.summary.classifyFailures.byMonitor[monitorName] ?? 0) + 1;
 	state.summary.classifyFailures.lastAtIso = new Date().toISOString();
+	state.summary.classifyFailures.lastMonitor = monitorName;
+	state.summary.classifyFailures.lastError =
+		errorText && errorText.trim().length > 0
+			? errorText.trim().slice(0, 300)
+			: undefined;
 	return true;
+}
+
+function bumpClassifyFailureFromText(
+	text: string,
+	state: RuntimeState,
+): boolean {
+	const m = text.match(CLASSIFY_FAIL_RE);
+	if (!m) return false;
+	return bumpClassifyFailure(m[1] ?? "", state, text);
+}
+
+function readTail(pathToFile: string, maxBytes = MAX_SCAN_BYTES): string {
+	const size = statSync(pathToFile).size;
+	if (size <= 0) return "";
+	const bytes = Math.max(1, Math.min(maxBytes, size));
+	const start = size - bytes;
+	const fd = openSync(pathToFile, "r");
+	try {
+		const buf = Buffer.alloc(bytes);
+		const read = readSync(fd, buf, 0, bytes, start);
+		return buf.slice(0, read).toString("utf8");
+	} finally {
+		closeSync(fd);
+	}
+}
+
+function scanSessionFileForClassifyFailures(
+	ctx: ExtensionContext,
+	state: RuntimeState,
+): boolean {
+	const sessionFile = ctx.sessionManager?.getSessionFile?.();
+	if (!sessionFile || !existsSync(sessionFile)) return false;
+
+	const st = statSync(sessionFile);
+	if (st.size <= 0) {
+		state.scan = { sessionFile, offset: 0 };
+		return false;
+	}
+
+	let chunk = "";
+	let nextOffset = st.size;
+
+	if (
+		state.scan.sessionFile !== sessionFile ||
+		state.scan.offset <= 0 ||
+		state.scan.offset > st.size
+	) {
+		chunk = readTail(sessionFile);
+	} else {
+		const bytes = st.size - state.scan.offset;
+		if (bytes <= 0) {
+			state.scan = { sessionFile, offset: st.size };
+			return false;
+		}
+
+		const fd = openSync(sessionFile, "r");
+		try {
+			const buf = Buffer.alloc(bytes);
+			const read = readSync(fd, buf, 0, bytes, state.scan.offset);
+			chunk = buf.slice(0, read).toString("utf8");
+		} finally {
+			closeSync(fd);
+		}
+	}
+
+	state.scan = { sessionFile, offset: nextOffset };
+	if (!chunk) return false;
+
+	let changed = false;
+	const regex = /\[([a-z0-9-]+)\]\s+classify failed:[^\n\r]*/gi;
+	for (const match of chunk.matchAll(regex)) {
+		if (bumpClassifyFailure(match[1] ?? "", state, match[0])) {
+			changed = true;
+		}
+	}
+	return changed;
 }
 
 export default function monitorSummaryExtension(pi: ExtensionAPI) {
 	const state: RuntimeState = {
 		summary: summarizeMonitors([]),
+		scan: { offset: 0 },
 	};
 
 	function refresh(ctx: ExtensionContext) {
+		const classifyFailures = { ...state.summary.classifyFailures };
 		state.summary = summarizeMonitors(readMonitorFiles(ctx.cwd));
+		state.summary.classifyFailures = classifyFailures;
+		scanSessionFileForClassifyFailures(ctx, state);
 		updateStatus(ctx, state);
 	}
 
@@ -171,13 +278,13 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 	pi.on("message_end", (event, ctx) => {
 		const text = extractText((event as { message?: unknown }).message);
 		if (!text) return;
-		if (bumpClassifyFailure(text, state)) updateStatus(ctx, state);
+		if (bumpClassifyFailureFromText(text, state)) updateStatus(ctx, state);
 	});
 
 	pi.on("tool_result", (event, ctx) => {
 		const text = extractText(event);
 		if (!text) return;
-		if (bumpClassifyFailure(text, state)) updateStatus(ctx, state);
+		if (bumpClassifyFailureFromText(text, state)) updateStatus(ctx, state);
 	});
 
 	pi.registerTool({

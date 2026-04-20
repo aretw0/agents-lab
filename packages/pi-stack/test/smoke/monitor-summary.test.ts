@@ -35,13 +35,18 @@ describe("monitor-summary", () => {
 			enabled: 4,
 			byEvent: { message_end: 2, turn_end: 2, tool_call: 1 },
 			monitors: [],
-			classifyFailures: { total: 1, byMonitor: { fragility: 1 } },
+			classifyFailures: {
+				total: 1,
+				byMonitor: { fragility: 1 },
+				lastMonitor: "fragility",
+			},
 		});
 
 		expect(text).toContain("monitor-summary");
 		expect(text).toContain("total=5");
 		expect(text).toContain("enabled=4");
 		expect(text).toContain("classifyFail=1");
+		expect(text).toContain("lastFail=fragility");
 	});
 
 	it("carrega monitores do workspace e expõe compact tool", async () => {
@@ -66,6 +71,9 @@ describe("monitor-summary", () => {
 
 		const ctx = {
 			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
 			ui: {
 				setStatus: vi.fn(),
 				notify: vi.fn(),
@@ -94,6 +102,9 @@ describe("monitor-summary", () => {
 
 		const ctx = {
 			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
 			ui: {
 				setStatus: vi.fn(),
 				notify: vi.fn(),
@@ -118,5 +129,49 @@ describe("monitor-summary", () => {
 		const result = await pi.toolDef().execute("tc2", {});
 		expect(result.details.classifyFailures.total).toBe(1);
 		expect(result.details.classifyFailures.byMonitor.fragility).toBe(1);
+		expect(result.details.classifyFailures.lastMonitor).toBe("fragility");
+	});
+
+	it("mstatus refresh hidrata classify failures do session file", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-refresh-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+		writeFileSync(
+			join(cwd, ".pi", "monitors", "hedge.monitor.json"),
+			JSON.stringify({ name: "hedge", event: "turn_end" }, null, 2),
+		);
+
+		const sessionFile = join(cwd, "session.jsonl");
+		writeFileSync(
+			sessionFile,
+			[
+				'{"type":"message","message":{"role":"assistant","content":[{"type":"text","text":"Warning: [fragility] classify failed: No tool call in response (stopReason: error, content: [] error: {\\"detail\\":\\"Instructions are required\\"})"}]}}',
+			].join("\n") + "\n",
+			"utf8",
+		);
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => sessionFile,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+
+		const cmdReg = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls;
+		const mstatusDef = cmdReg.find(([name]) => name === "mstatus")?.[1];
+		expect(mstatusDef).toBeDefined();
+		await mstatusDef.handler("refresh", ctx);
+
+		const result = await pi.toolDef().execute("tc3", {});
+		expect(result.details.classifyFailures.total).toBeGreaterThanOrEqual(1);
+		expect(result.details.classifyFailures.byMonitor.fragility).toBeGreaterThanOrEqual(1);
 	});
 });
