@@ -104,6 +104,11 @@
 			"outputPolicy": {
 				"compactLargeJson": true,
 				"maxInlineJsonChars": 1200
+			},
+			"candidateRetention": {
+				"enabled": true,
+				"maxEntries": 40,
+				"maxAgeDays": 14
 			}
 		},
 		"guardrailsCore": {
