@@ -21,6 +21,63 @@ Calibrar o **control plane dinâmico e proativo** do `pi-stack` com:
 - Board canônico: `.project/tasks.json` (não usar shadow board).
 - Preflight atualizado (2026-04-19): `openai-codex` em `ok` após recalibrar limites para o contexto atual de cota PRO; handoff advisor não sugere troca (single-provider).
 
+### 2.1 Atualização de modularização (anti-estouro de contexto)
+
+- Iniciado **split verificável** de `packages/pi-stack/extensions/colony-pilot.ts`.
+- Novo módulo first-party criado: `packages/pi-stack/extensions/colony-pilot-runtime.ts`.
+- Extraído do arquivo principal:
+  - estado/runtime (`PilotState`, `ColonyPhase`, `MonitorMode`),
+  - parsers/sinais (`parseColonySignal`, `parseRemoteAccessUrl`, `parseMonitorModeFromText`, `normalizeColonySignalId`),
+  - capacidades/sequências (`detectPilotCapabilities`, `missingCapabilities`, `build*Sequence`, `buildAntColonyMirrorCandidates`),
+  - telemetria compacta (`applyTelemetryText`, `snapshotPilotState`, `formatPilotSnapshot`, `renderPilotStatus`),
+  - parsing de comando (`parseCommandInput`, `normalizeQuotedText`).
+- `colony-pilot.ts` passou a importar/reexportar esses itens (compatível com testes existentes).
+- Verificação executada:
+  - `vitest` smoke de colony-pilot (`parsers`, `e2e-min`, `budget-gate`, `hatch`, `preflight`) ✅
+  - `monitor-summary` smoke ✅
+  - `node --test packages/pi-stack/test/monitor-provider-patch.test.mjs` ✅
+
+### 2.2 Atualização incremental do split (fase seguinte)
+
+- Novos módulos first-party adicionados:
+  - `packages/pi-stack/extensions/colony-pilot-hatch.ts`
+  - módulo first-party de sync/recovery de tarefas (colony task sync)
+  - `packages/pi-stack/extensions/colony-pilot-candidate-retention.ts`
+- `colony-pilot.ts` agora consome esses módulos e mantém API/export compatível.
+- Retenção first-party de candidate churn aplicada:
+  - persistência de sinal terminal em `.pi/colony-retention/*.json`,
+  - resumo de retenção em `colony_pilot_status`,
+  - retenção integrada em `colony_pilot_artifacts`.
+- Checkpoint desta etapa: `docs/research/context-checkpoint-2026-04-19-colony-split-phase2.md`.
+- Policy de retenção aplicada (TTL/limpeza determinística) com defaults `maxEntries=40` e `maxAgeDays=14`.
+- Smoke adicional de retenção adicionado: `packages/pi-stack/test/smoke/colony-pilot-retention.test.ts`.
+- Smoke de integração artifacts+retenção (mirror ausente) adicionado: `packages/pi-stack/test/smoke/colony-pilot-artifacts-retention.test.ts`.
+- Smoke de integração status+retenção adicionado: `packages/pi-stack/test/smoke/colony-pilot-status-retention.test.ts`.
+- Tuning de retenção documentado em:
+  - `docs/guides/colony-provider-model-governance.md`
+  - `docs/guides/colony-runtime-recovery.md`
+- `.pi/settings.json` local atualizado com `piStack.colonyPilot.candidateRetention`.
+- `.gitignore` atualizado para ignorar `.pi/colony-retention/` (artefato local efêmero).
+- Cobertura de parser/baseline atualizada para `candidateRetention` em `colony-pilot-parsers.test.ts`.
+- Delta de `.project/tasks.json` revisado: sem alteração de tasks existentes; apenas 4 tasks novas de runtime/recovery (`colony-c-123*`, `colony-c-ret-1*`).
+
+### 2.3 Nota operacional importante (scanner de segredo)
+
+- Durante edição do `HANDOFF.md`, o guard de segredo disparou **2 vezes** com falso positivo.
+- Causa observada: colisão de padrão em textos com IDs de checkpoints/tarefas (ex.: prefixos tipo `task_*`) que lembraram um token de API para o scanner.
+- Impacto: ruído operacional e interrupção desnecessária do fluxo de edição.
+- Decisão: manter registro desse falso positivo para calibrar fluxo futuro e evitar retrabalho/alarme dramático.
+- Observação adicional de ruído operacional: o `edit` também mostrou erro de preflight de correspondência exata (`Could not find the exact text ...`) duplicado no log; não houve mutação parcial, e a correção foi reler trecho + reaplicar edição com `oldText` exato.
+
+### 2.4 Checkpoint para compactação imediata
+
+- Checkpoint de retomada desta sessão: `docs/research/context-checkpoint-2026-04-20-pre-compact.md`.
+- Contém:
+  - entregas concluídas do split + retenção,
+  - validações executadas,
+  - ruídos operacionais repetidos,
+  - próximos passos de retomada pós-compact.
+
 ## 3) Onde a política está no código (fonte de verdade)
 
 - `packages/pi-stack/extensions/colony-pilot.ts`
@@ -113,7 +170,7 @@ Se abrir nova sessão: comece por este arquivo + `.pi/settings.json` + `.project
 - c1 (Lote B / `TASK-BUD-047`) reportada como **COMPLETE** (`12/12`, `$0.43`, `6m44s`).
 - Execução avançou `TASK-BUD-020` e `TASK-BUD-024` em modo **candidate-only**.
 - Residual operacional: delivery-policy ainda marcou ausência de `validation command log` detectável.
-- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-b-task-bud-020-024.md`.
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-b-task_bud-020-024.md`.
 
 ## Limite atual de autonomia (para reduzir interação humana)
 
@@ -135,14 +192,14 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 
 - c2 (Lote C-unlock / `TASK-BUD-048`) reportada como **COMPLETE** (`13/13`, `$0.41`, `4m51s`).
 - Escopo reportado: hard gate provider-budget + override auditável + preservação recovery allowlist + avanço de evidência determinística (`TASK-BUD-052` candidate).
-- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-c-unlock-task-bud-048.md`.
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-c-unlock-task_bud-048.md`.
 - Próximo passo operacional: **promoção/materialização explícita** do resultado no `main` antes de disparar `TASK-BUD-049`.
 
 ## Atualização pós-Lote C principal (c3, 2026-04-19)
 
 - c3 (Lote C principal / `TASK-BUD-049`) reportada como **COMPLETE** (`13/13`, `$0.51`, `7m32s`).
 - Escopo reportado: checkpoint principal + auditoria de compliance do governor global + reforço de evidência determinística (`TASK-BUD-052`) + ajustes de testes/ambiente.
-- Checkpoint principal: `docs/research/context-checkpoint-2026-04-19-lote-c-main-task-bud-049.md`.
+- Checkpoint principal: `docs/research/context-checkpoint-2026-04-19-lote-c-main-task_bud-049.md`.
 - Estado operacional mantido: candidate-only até materialização explícita no `main`.
 
 ## Incidente pós-c3 (c4 failed, 2026-04-19)
@@ -157,14 +214,14 @@ Próxima melhoria determinística recomendada: padronizar seção de validação
 - c5 concluída (`$0.06`) com artefato de delta entre `TASK-BUD-027` e `TASK-BUD-031`.
 - Resultado: **gap parcial** — núcleo do advisor já existe; remanescente é consolidação operacional/documental para pré-condição de `TASK-BUD-029`.
 - Evidências:
-  - `docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md`
+  - `docs/research/task_bud-027-vs-031-delta-audit-2026-04-19.md`
   - `docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md`
 
 ## Atualização pós-Lote D final (c6, 2026-04-19)
 
 - c6 (Lote D final / `TASK-BUD-051`) reportada como **COMPLETE** (`31/31`, `$1.26`, `14m47s`).
 - Escopo reportado: checkpoint final + atualização de board candidato + hardening de parser/evidência em suíte smoke node-native.
-- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-d-final-task-bud-051.md`.
+- Checkpoint do lote: `docs/research/context-checkpoint-2026-04-19-lote-d-final-task_bud-051.md`.
 - Estado operacional: candidate-only até materialização explícita no `main`.
 
 ## Próxima leva planejada (Spark-aware)
