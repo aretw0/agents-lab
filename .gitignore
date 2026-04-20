@@ -148,6 +148,7 @@ vite.config.ts.timestamp-*
 .pi/npm/
 .pi/reports/
 .pi/snapshots/
+.pi/colony-retention/
 
 # Pi versioned configuration + single-board clock
 # Policy: .pi/settings.json and .pi/agents/*.yaml are shared config — versioned.
