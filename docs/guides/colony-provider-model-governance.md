@@ -99,6 +99,36 @@ Config recomendada em `.pi/settings.json`:
 }
 ```
 
+### Policy de retenção de candidate churn (first-party)
+
+Para reduzir perda de contexto quando mirrors/worktrees desaparecem (cleanup externo),
+o `colony-pilot` mantém retenção local em `.pi/colony-retention/*.json` para sinais terminais.
+
+Configuração em `.pi/settings.json`:
+
+```json
+{
+  "piStack": {
+    "colonyPilot": {
+      "candidateRetention": {
+        "enabled": true,
+        "maxEntries": 40,
+        "maxAgeDays": 14
+      }
+    }
+  }
+}
+```
+
+Notas operacionais:
+
+- sem config explícita, defaults internos: `maxEntries=40`, `maxAgeDays=14`;
+- valores são normalizados/clampados em runtime (`maxEntries: 1..500`, `maxAgeDays: 1..365`);
+- prune determinístico roda em gravação de registro (inclusive quando conteúdo não mudou);
+- observabilidade:
+  - `colony_pilot_status` expõe `retention.config` + resumo;
+  - `colony_pilot_artifacts` inclui inventário de retenção mesmo sem mirror local.
+
 ---
 
 ## Checklist operacional (usuário pi-stack)

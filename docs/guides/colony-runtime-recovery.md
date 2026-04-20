@@ -11,6 +11,7 @@ Para configuração de provider/model e controle operacional da colônia, veja t
 - Estado persistido: `~/.pi/agent/ant-colony/.../colonies/<colony-id>/state.json`
 - Worktrees isolados: `~/.pi/agent/ant-colony/.../worktrees/<name>`
 - Branches locais geralmente `ant-colony/<name>`
+- Retenção first-party de sinais terminais: `.pi/colony-retention/*.json`
 
 ## Onde as coisas ficam
 
@@ -60,6 +61,32 @@ git -C <worktree-path> diff --stat
 4. Se auto-injeção não trouxe tudo para branch atual:
    - `cherry-pick` de commits relevantes, ou
    - gerar patch e aplicar no repo principal.
+
+## Retenção first-party (quando mirror/worktree sumiu)
+
+Mesmo sem mirror disponível, sinais terminais da colônia podem ser recuperados em
+`.pi/colony-retention/*.json` (goal, fase terminal, hints de mirror, etc.).
+
+Tuning em `.pi/settings.json`:
+
+```json
+{
+  "piStack": {
+    "colonyPilot": {
+      "candidateRetention": {
+        "enabled": true,
+        "maxEntries": 40,
+        "maxAgeDays": 14
+      }
+    }
+  }
+}
+```
+
+Observabilidade:
+
+- `colony_pilot_status`: mostra `retention.config` + contagem/itens recentes.
+- `colony_pilot_artifacts`: inclui inventário de retenção junto de mirrors/worktrees.
 
 ## Sinais comuns e interpretação
 
