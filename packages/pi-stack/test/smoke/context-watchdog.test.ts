@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
+	buildAutoCompactDiagnostics,
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
@@ -120,6 +121,16 @@ describe("context-watchdog", () => {
 		expect(pendingDecision).toEqual({ trigger: false, reason: "pending-messages" });
 		expect(shouldScheduleAutoCompactRetry(pendingDecision)).toBe(true);
 		expect(shouldScheduleAutoCompactRetry({ trigger: false, reason: "cooldown" })).toBe(false);
+
+		const diag = buildAutoCompactDiagnostics(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: false,
+			hasPendingMessages: true,
+		});
+		expect(diag.decision.reason).toBe("not-idle");
+		expect(diag.retryRecommended).toBe(true);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {

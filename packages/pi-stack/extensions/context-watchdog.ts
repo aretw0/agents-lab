@@ -241,6 +241,29 @@ export function shouldScheduleAutoCompactRetry(decision: ContextWatchAutoCompact
 		|| decision.reason === "in-flight";
 }
 
+export type ContextWatchAutoCompactDiagnostics = {
+	decision: ContextWatchAutoCompactDecision;
+	retryRecommended: boolean;
+};
+
+export function buildAutoCompactDiagnostics(
+	assessment: ContextWatchAssessment,
+	config: ContextWatchdogConfig,
+	state: {
+		nowMs: number;
+		lastAutoCompactAt: number;
+		inFlight: boolean;
+		isIdle: boolean;
+		hasPendingMessages: boolean;
+	},
+): ContextWatchAutoCompactDiagnostics {
+	const decision = shouldTriggerAutoCompact(assessment, config, state);
+	return {
+		decision,
+		retryRecommended: shouldScheduleAutoCompactRetry(decision),
+	};
+}
+
 export function shouldTriggerAutoCompact(
 	assessment: ContextWatchAssessment,
 	config: ContextWatchdogConfig,
@@ -659,14 +682,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			lastAutoCheckpointAt = now;
 		}
 
-		const autoCompactDecision = shouldTriggerAutoCompact(assessment, config, {
+		const autoCompactState = buildAutoCompactDiagnostics(assessment, config, {
 			nowMs: now,
 			lastAutoCompactAt,
 			inFlight: autoCompactInFlight,
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
 		});
-		if (autoCompactDecision.trigger) {
+		if (autoCompactState.decision.trigger) {
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;
@@ -681,7 +704,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify(`context-watch: auto compact failed (${error.message})`, "warning");
 				},
 			});
-		} else if (assessment.level === "compact" && shouldScheduleAutoCompactRetry(autoCompactDecision)) {
+		} else if (assessment.level === "compact" && autoCompactState.retryRecommended) {
 			scheduleAutoCompactRetry(ctx);
 		} else {
 			clearAutoCompactRetryTimer();
@@ -711,6 +734,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			lines.push(`handoff: ${rel}`);
 		}
 		ctx.ui.notify(lines.join("\n"), assessment.severity);
+	};
+
+	const currentAutoCompactState = (ctx: ExtensionContext, assessment: ContextWatchAssessment) => {
+		const state = buildAutoCompactDiagnostics(assessment, config, {
+			nowMs: Date.now(),
+			lastAutoCompactAt,
+			inFlight: autoCompactInFlight,
+			isIdle: ctx.isIdle(),
+			hasPendingMessages: ctx.hasPendingMessages(),
+		});
+		return {
+			...state,
+			retryScheduled: Boolean(autoCompactRetryTimer),
+		};
 	};
 
 	const applyPreset = (ctx: ExtensionContext, presetInput?: unknown) => {
@@ -757,9 +794,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
+			const autoCompact = currentAutoCompactState(ctx, assessment);
+			const payload = {
+				...assessment,
+				autoCompact,
+			};
 			return {
-				content: [{ type: "text", text: JSON.stringify(assessment, null, 2) }],
-				details: assessment,
+				content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+				details: payload,
 			};
 		},
 	});
@@ -839,8 +881,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
+			const autoCompact = currentAutoCompactState(ctx, assessment);
 			ctx.ui.notify(
-				`${formatContextWatchStatus(assessment)}\naction: ${assessment.action}\n${assessment.recommendation}`,
+				[
+					formatContextWatchStatus(assessment),
+					`action: ${assessment.action}`,
+					assessment.recommendation,
+					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"}`,
+				].join("\n"),
 				assessment.severity,
 			);
 		},
