@@ -40,6 +40,7 @@ interface SovereignConfig {
 	enabled: boolean;
 	mode: Mode;
 	reportMaxEntries: number;
+	startupNotify: boolean;
 }
 
 interface MonitorVerdict {
@@ -83,6 +84,7 @@ const SETTINGS_ROOT = ["piStack", "monitorSovereign"];
 const ENABLED_PATH = [...SETTINGS_ROOT, "enabled"];
 const MODE_PATH = [...SETTINGS_ROOT, "mode"];
 const REPORT_MAX_ENTRIES_PATH = [...SETTINGS_ROOT, "reportMaxEntries"];
+const STARTUP_NOTIFY_PATH = [...SETTINGS_ROOT, "startupNotify"];
 
 function settingsCandidates(cwd: string): string[] {
 	return [
@@ -126,6 +128,7 @@ function loadConfig(cwd: string): SovereignConfig {
 	const enabledRaw = detectSetting(cwd, ENABLED_PATH);
 	const modeRaw = detectSetting(cwd, MODE_PATH);
 	const maxRaw = detectSetting(cwd, REPORT_MAX_ENTRIES_PATH);
+	const startupNotifyRaw = detectSetting(cwd, STARTUP_NOTIFY_PATH);
 
 	const mode: Mode = modeRaw === "shadow" ? "shadow" : "audit";
 	const reportMaxEntries =
@@ -137,6 +140,7 @@ function loadConfig(cwd: string): SovereignConfig {
 		enabled: enabledRaw === true,
 		mode,
 		reportMaxEntries,
+		startupNotify: startupNotifyRaw === true,
 	};
 }
 
@@ -255,6 +259,24 @@ function notifyStatus(ctx: ExtensionContext, state: RuntimeState) {
 	);
 }
 
+export function planSovereignSessionStartOutput(config: {
+	enabled: boolean;
+	mode: Mode;
+	startupNotify: boolean;
+}, monitorCount: number): {
+	notify: boolean;
+	message?: string;
+	severity?: "info";
+} {
+	if (!config.enabled) return { notify: false };
+	if (!config.startupNotify) return { notify: false };
+	return {
+		notify: true,
+		severity: "info",
+		message: `monitor-sovereign: enabled (${config.mode}) with ${monitorCount} monitor specs`,
+	};
+}
+
 function refreshState(cwd: string, state: RuntimeState) {
 	state.cwd = cwd;
 	state.config = loadConfig(cwd);
@@ -309,7 +331,8 @@ function usageText(): string {
 		'    "monitorSovereign": {',
 		'      "enabled": true,',
 		'      "mode": "audit",',
-		'      "reportMaxEntries": 40',
+		'      "reportMaxEntries": 40,',
+		'      "startupNotify": false',
 		"    }",
 		"  }",
 		"}",
@@ -385,7 +408,12 @@ function applyControlAction(
 export default function monitorSovereignExtension(pi: ExtensionAPI) {
 	const state: RuntimeState = {
 		cwd: undefined,
-		config: { enabled: false, mode: "audit", reportMaxEntries: 40 },
+		config: {
+			enabled: false,
+			mode: "audit",
+			reportMaxEntries: 40,
+			startupNotify: false,
+		},
 		monitors: [],
 		facts: resetFacts(),
 		activations: {},
@@ -403,11 +431,9 @@ export default function monitorSovereignExtension(pi: ExtensionAPI) {
 		syncThirdPartyFailures(ctx, state);
 		state.thirdParty.baselineTotal = state.thirdParty.classifyFailures.total;
 		notifyStatus(ctx, state);
-		if (state.config.enabled) {
-			ctx.ui.notify(
-				`monitor-sovereign: enabled (${state.config.mode}) with ${state.monitors.length} monitor specs`,
-				"info",
-			);
+		const startup = planSovereignSessionStartOutput(state.config, state.monitors.length);
+		if (startup.notify && startup.message && startup.severity) {
+			ctx.ui.notify(startup.message, startup.severity);
 		}
 	});
 
