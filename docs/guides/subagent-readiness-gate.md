@@ -2,9 +2,14 @@
 
 Objetivo: decidir **quando delegar para sub-agentes/swarms** com base em sinais reproduzíveis, evitando lotar o contexto da sessão principal.
 
-> Status de rollout: neste momento o gate roda como scripts de laboratório no workspace. A promoção para superfície publicada da `@aretw0/pi-stack` está planejada em `TASK-BUD-061`.
+> Status de rollout: gate também disponível na superfície publicada da `@aretw0/pi-stack` via tool `subagent_readiness_status` e comando `/subagent-readiness`.
 
-## Comandos
+## Superfície publicada (tool/command)
+
+- Tool: `subagent_readiness_status`
+- Command: `/subagent-readiness [strict]`
+
+## Comandos (scripts de laboratório)
 
 ```bash
 npm run subagent:readiness

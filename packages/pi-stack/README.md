@@ -215,10 +215,10 @@ Para evitar regressão de UX, operamos em duas trilhas:
 
 1. **Superfície publicada (`@aretw0/pi-stack`)**
    - Tudo que está em `packages/pi-stack/package.json -> pi.extensions` já vai para usuários.
-   - Exemplos já publicados: `monitor-summary`, `monitor-sovereign`, `guardrails-core`, `colony-pilot`.
+   - Exemplos já publicados: `monitor-summary`, `monitor-sovereign`, `guardrails-core`, `colony-pilot`, `subagent-readiness`.
 
 2. **Utilitários de laboratório (workspace scripts)**
-   - Scripts como `monitor:stability:*`, `subagent:readiness:*`, `pi:pilot:*` aceleram estabilização no lab.
+   - Scripts como `monitor:stability:*`, `subagent:readiness:*`, `pi:pilot:*` aceleram estabilização no lab (mesmo com `subagent-readiness` já publicado como tool/command, os scripts continuam úteis para CI/reports).
    - Eles **não** fazem parte automaticamente da superfície npm publicada enquanto não virarem extensão/tool first-party.
 
 Auditoria rápida da fronteira publicada vs lab:
