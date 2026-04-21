@@ -1475,6 +1475,23 @@
       ],
       "notes": "Slice orientado por feedback operacional do usuário sobre sinais próximos ao 70% e continuidade em sessões long-run.",
       "verification": "VER-BUD-063"
+    },
+    {
+      "id": "TASK-BUD-064",
+      "description": "[P1] Adicionar preset de bootstrap portável para context-watchdog (control-plane vs agent-worker) para facilitar fábrica de agentes com contexto resiliente e ruído controlado.",
+      "status": "completed",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Tool `context_watch_bootstrap` expõe patch portable para presets `control-plane` e `agent-worker`.",
+        "Comando `/context-watch bootstrap ...` imprime patch + notas operacionais.",
+        "Smoke cobre parsing/preset defaults e valores esperados por preset."
+      ],
+      "notes": "Foco: portabilidade de bootstrap entre agentes long-run e delegados, sem comportamento bloqueante.",
+      "verification": "VER-BUD-064"
     }
   ]
 }

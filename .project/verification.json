@@ -757,6 +757,32 @@
           "evidence": "context-watchdog.test.ts 5/5 + custom-footer-registration.test.ts 25/25."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-064",
+      "target": "TASK-BUD-064",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T12:46:55.000Z",
+      "evidence": "Context-watchdog ganhou primitive de bootstrap portável para fábrica de agentes via tool `context_watch_bootstrap` e comando `/context-watch bootstrap [control-plane|agent-worker]`, entregando patches de configuração com níveis de ruído apropriados por tipo de agente.",
+      "criteria_results": [
+        {
+          "criterion": "Tool expõe patch portable para control-plane e agent-worker",
+          "status": "passed",
+          "evidence": "registerTool context_watch_bootstrap + helper buildContextWatchBootstrapPlan."
+        },
+        {
+          "criterion": "Comando imprime patch + notas operacionais",
+          "status": "passed",
+          "evidence": "registerCommand context-watch suporta subcommand bootstrap com output JSON+notes."
+        },
+        {
+          "criterion": "Smoke cobre parsing/presets",
+          "status": "passed",
+          "evidence": "context-watchdog.test.ts 6/6 valida parseContextBootstrapPreset e valores dos patches."
+        }
+      ]
     }
   ]
 }
