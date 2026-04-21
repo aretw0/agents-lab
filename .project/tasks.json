@@ -1458,6 +1458,23 @@
       ],
       "notes": "Objetivo operacional: reduzir back-and-forth de compactação tardia no control-plane com checkpoints controlados e portáveis.",
       "verification": "VER-BUD-062"
+    },
+    {
+      "id": "TASK-BUD-063",
+      "description": "[P1] Calibrar defaults do context-watchdog para checkpoint/compact próximos ao limiar operacional (~70%) com headroom model-aware, reduzindo alertas precoces e melhorando cadência de compactação controlada.",
+      "status": "completed",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Defaults sem override resultam em baseline openai-like: checkpoint=68 e compact=72.",
+        "Providers com warn/error maiores mantêm headroom proporcional (ex.: anthropic-like: checkpoint=78 compact=82).",
+        "Smoke tests cobrem derivação e transições de nível sem regressão de anúncio."
+      ],
+      "notes": "Slice orientado por feedback operacional do usuário sobre sinais próximos ao 70% e continuidade em sessões long-run.",
+      "verification": "VER-BUD-063"
     }
   ]
 }

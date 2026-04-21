@@ -731,6 +731,32 @@
           "evidence": "vitest packages/pi-stack/test/smoke/context-watchdog.test.ts (5/5) e regressão custom-footer (25/25)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-063",
+      "target": "TASK-BUD-063",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T12:41:45.000Z",
+      "evidence": "Calibração dos defaults do context-watchdog movida para checkpoint/compact próximos ao limiar operacional de compactação com headroom por provider/model. Derivação padrão agora produz OpenAI-like 68/72 e Anthropic-like 78/82, mantendo nível warn herdado do footer.",
+      "criteria_results": [
+        {
+          "criterion": "Defaults openai-like checkpoint=68 compact=72",
+          "status": "passed",
+          "evidence": "deriveContextWatchThresholds(50,75,{}) -> checkpoint=68 compact=72 (smoke)."
+        },
+        {
+          "criterion": "Headroom proporcional para providers com janela maior",
+          "status": "passed",
+          "evidence": "deriveContextWatchThresholds(65,85,{}) -> checkpoint=78 compact=82 (smoke)."
+        },
+        {
+          "criterion": "Sem regressão de sinalização/thresholds model-aware",
+          "status": "passed",
+          "evidence": "context-watchdog.test.ts 5/5 + custom-footer-registration.test.ts 25/25."
+        }
+      ]
     }
   ]
 }
