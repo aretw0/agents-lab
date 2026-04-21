@@ -42,7 +42,7 @@ pi install https://github.com/aretw0/agents-lab
 | `monitor-provider-patch` | Patch provider-aware para classifiers de monitor (Copilot/Codex + mapa custom) com comando `/monitor-provider` |
 | `environment-doctor` | Health check do ambiente na startup + comando `/doctor` + tool `environment_doctor_status` |
 | `claude-code-adapter` | Scaffold experimental para runtime externo Claude Code (`/claude-code status|login|auth-status`, sem persistência de credenciais) |
-| `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web |
+| `guardrails-core` | Guardrail unificado first-party: proteção de paths sensíveis + roteamento web determinístico por escopo + bloqueio de conflito de porta reservada pelo session-web + bloqueio de scans de conteúdo em `~/.pi/agent/sessions` e scans recursivos de conteúdo na raiz `.pi` (evita explosão de saída/stack overflow no TUI) |
 | `colony-pilot` | Primitiva de orquestração/visibilidade: prepara runbooks manuais para pilot (monitors/remote/colony) e mantém snapshot de colonies em background |
 | `web-session-gateway` | Gateway web first-party para observabilidade local da sessão (URL determinística, `/api/health` e painel web local) |
 | `quota-visibility` | Observabilidade de consumo/cota a partir de `~/.pi/agent/sessions` (burn rate, janelas de 5h/peak hours por provider, export de evidências) |
@@ -53,7 +53,10 @@ pi install https://github.com/aretw0/agents-lab
 |---|---|---|
 | Modelo dos classificadores (provider-aware) | `github-copilot -> github-copilot/claude-haiku-4.5`<br>`openai-codex -> openai-codex/gpt-5.4-mini` | Sim (`classifierModel` / `classifierModelByProvider`) |
 | Thinking | `off` | Sim (`classifierThinking`) |
+| Trigger do hedge (lean-by-default) | `has_bash` | Sim (`hedgeWhen`) |
+| Contexto de projeto no hedge | desabilitado | Sim (`hedgeIncludeProjectContext`) |
 | `conversation_history` no hedge monitor | desabilitado | Sim (`hedgeConversationHistory`) |
+| `prompt.system` nos classifiers | obrigatório (auto-repair em overrides legados) | automático (`monitor-provider-patch`) |
 
 Exemplo em `.pi/settings.json`:
 
@@ -62,11 +65,13 @@ Exemplo em `.pi/settings.json`:
   "piStack": {
     "monitorProviderPatch": {
       "classifierThinking": "off",
+      "hedgeWhen": "has_bash",
+      "hedgeIncludeProjectContext": false,
+      "hedgeConversationHistory": false,
       "classifierModelByProvider": {
         "github-copilot": "github-copilot/claude-haiku-4.5",
         "openai-codex": "openai-codex/gpt-5.4-mini"
-      },
-      "hedgeConversationHistory": true
+      }
     }
   }
 }
@@ -81,6 +86,8 @@ Diagnóstico/aplicação rápida:
 ```
 
 Detalhes: [`docs/guides/monitor-overrides.md`](../../docs/guides/monitor-overrides.md)
+
+> Gate de release: não publicar RC/final com monitor runtime instável. Faça smoke (>=3 turns) com monitores ligados e bloqueie publish se surgir novo `classify failed`.
 
 ### Tema
 
@@ -117,6 +124,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | `/session-web` | Controla gateway web first-party (`start/status/open/stop`) para inspeção local da sessão sem UI hospedada externa |
 | `/monitor-provider` | Diagnostica e sincroniza modelos dos classifiers dos monitors por provider (`status/apply/template`) |
 | `/quota-visibility` | Mostra consumo estimado da janela, projeção semanal, janelas/peak hours, budgets por provider e `route` advisory determinístico (`cheap|balanced|reliable`, `--execute` opt-in) |
+| `/session-analytics` | Analytics de sessões (`signals|timeline|model-usage|summary|outliers`) para triagem sem grep recursivo em `~/.pi` |
 | `/scheduler-governance` | Governança de scheduler lease/ownership (`status/policy/apply`) com confirmações fortes para ações destrutivas |
 | `/stack-status` | Diagnóstico de soberania da stack: owners por capability, risco de overlap e postura de governança em runtime |
 | `/claude-code` | Bridge experimental para Claude Code CLI (status/login/auth-status) |
@@ -200,6 +208,24 @@ No repositório, a soberania é validada por dois níveis:
   - gera `docs/architecture/stack-sovereignty-audit-latest.md`
   - publica artifact `stack-sovereignty-audit`
   - faz upsert de comentário no PR (`<!-- stack-sovereignty-report -->`)
+
+## Rollout lab → usuários (estado atual)
+
+Para evitar regressão de UX, operamos em duas trilhas:
+
+1. **Superfície publicada (`@aretw0/pi-stack`)**
+   - Tudo que está em `packages/pi-stack/package.json -> pi.extensions` já vai para usuários.
+   - Exemplos já publicados: `monitor-summary`, `monitor-sovereign`, `guardrails-core`, `colony-pilot`.
+
+2. **Utilitários de laboratório (workspace scripts)**
+   - Scripts como `monitor:stability:*`, `subagent:readiness:*`, `pi:pilot:*` aceleram estabilização no lab.
+   - Eles **não** fazem parte automaticamente da superfície npm publicada enquanto não virarem extensão/tool first-party.
+
+Auditoria rápida da fronteira publicada vs lab:
+
+```bash
+npm run pi-stack:user-surface
+```
 
 ## Filosofia
 

@@ -12,6 +12,12 @@ model: claude-sonnet-4-6
 
 Sem prefixo de provider, o runtime pode resolver para backend errado e os monitors podem ficar inativos sem erro visível.
 
+No setup `openai-codex`, havia ainda uma falha adicional: classifiers sem `prompt.system` geravam payload com `instructions` vazio no backend Responses, resultando em:
+
+```text
+No tool call in response (...) error: {"detail":"Instructions are required"}
+```
+
 Investigação: [`experiments/202604-pi-hedge-monitor-investigation`](../../experiments/202604-pi-hedge-monitor-investigation/README.md)  
 Issue upstream: [davidorex/pi-project-workflows#1](https://github.com/davidorex/pi-project-workflows/issues/1)
 
@@ -24,8 +30,11 @@ A extensão `monitor-provider-patch` agora:
 1. mantém `hedge.monitor.json` com `conversation_history` desabilitado por padrão (opt-in);
 2. resolve modelo de classifier por provider (`defaultProvider` + mapa configurável);
 3. garante overrides em `.pi/agents/` para os 5 classifiers;
-4. avisa quando overrides existentes divergem do provider/modelo atual;
-5. fornece comando `/monitor-provider` para diagnosticar e sincronizar.
+4. auto-repara overrides legados sem `prompt.system` (compat com OpenAI Codex Responses);
+5. avisa quando overrides existentes divergem do provider/modelo atual;
+6. fornece comando `/monitor-provider` para diagnosticar e sincronizar.
+
+Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sovereign` (modo `audit`/`shadow`) para começar a convergência de semântica entre guardrails e monitores sem depender de runtime third-party para observabilidade básica.
 
 ### Comando principal
 
@@ -87,6 +96,75 @@ Para manter classifiers no mesmo “tier” operacional:
 > Regra simples: classifiers de monitor tendem a performar melhor com modelo “mini/leve” + `thinking: off`.
 
 ---
+
+## Guard vs Monitor (semântica única)
+
+- **Guard**: decisão **pré-ação** (enforce), pode bloquear (`block: true`).
+- **Monitor**: decisão **pós-ação** (observe), gera sinal/verdict.
+
+No laboratório, ambos devem compartilhar a mesma primitiva de trigger (`when`, `tool(...)`, `every(n)`) e o mesmo modelo de fatos; muda apenas o modo de execução (`enforce` vs `observe`).
+
+Config da primitiva first-party (`.pi/settings.json`):
+
+```json
+{
+  "piStack": {
+    "monitorSovereign": {
+      "enabled": false,
+      "mode": "audit",
+      "reportMaxEntries": 40
+    }
+  }
+}
+```
+
+Comandos:
+
+```text
+/monitor-sovereign status
+/monitor-sovereign on
+/monitor-sovereign off
+/monitor-sovereign enable <monitor-name>
+/monitor-sovereign disable <monitor-name>
+/monitor-sovereign refresh
+/monitor-sovereign reset
+```
+
+Tools equivalentes (automação):
+
+```text
+monitor_sovereign_control { action: "status|refresh|reset|on|off|enable|disable", monitor?: "hedge" }
+monitor_sovereign_status { verbose?: true }
+monitor_sovereign_delta {}
+```
+
+Evidência offline/repetível (sem sessão interativa):
+
+```text
+npm run monitor:stability:evidence
+npm run monitor:stability:evidence:write
+npm run monitor:stability:gate
+npm run monitor:stability:gate:strict
+npm run subagent:readiness
+npm run subagent:readiness:strict
+```
+
+> Em sessão isolada sem `@davidorex/pi-project-workflows`, o comando `/monitors` não existe.
+> Nesse caso, use `/monitor-sovereign on|off` para controle básico dos specs locais.
+
+## Gate operacional de release (monitors)
+
+Antes de qualquer publish RC/final:
+
+1. `monitors-control on`
+2. rodar smoke curto com provider alvo (mínimo 3 turns com eventos que acionem monitor)
+3. verificar `monitors_compact_status` e `monitors-status`
+4. **bloquear publish** se aparecer novo `classify failed` (especialmente `Instructions are required`)
+5. em caso de falha: `/monitor-provider apply`, `/reload`, repetir smoke
+
+Critério de saída: runtime de monitor estável no provider alvo, sem novos classify failures durante o smoke.
+
+> Nota prática: `npm run verify` agora tenta auto-repair do contrato crítico de classify (`systemPrompt: compiled.systemPrompt`) em cópias divergentes de `@davidorex/pi-behavior-monitors/dist/index.js` antes de falhar. Além disso, no `session_start`, `monitor-provider-patch` aplica o mesmo reparo de runtime (best-effort) para reduzir drift após reinstalações.
 
 ## Diagnóstico rápido de drift
 
