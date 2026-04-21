@@ -206,6 +206,13 @@
       "decision": "Adotar estratégia devcontainer-first como trilha opcional de distribuição do laboratório, com isolamento workspace-local (sem depender de `~/.pi` global) e entrada simplificada estilo `farm` para Docker Desktop.",
       "rationale": "Facilita onboarding de usuários com stack mínima (Docker Desktop + Git + VS Code), reproduz ambiente user-like para dogfood TUI+WEB e reduz deriva de configuração global.",
       "context": "Solicitação do usuário para preparar futuro devcontainer inspirado em refarm, mantendo pragmatismo e governança canônica."
+    },
+    {
+      "id": "DEC-BUD-030",
+      "status": "decided",
+      "decision": "Introduzir a primitiva de 'Capability Gap Claim': quando faltar ferramenta/capability para executar trabalho, o agente deve registrar blocker estruturado e solicitar bootstrap/permissão antes de iniciar execução principal.",
+      "rationale": "Evita execução frágil, reduz retrabalho e cria trilha auditável de pré-condições operacionais. Permite que scouts levantem gaps cedo sem acoplar a uma implementação de colônia específica.",
+      "context": "Solicitação do usuário para suportar fluxo onde agente pode pedir construção/permissão de ferramenta antes de começar o trabalho principal."
     }
   ]
 }

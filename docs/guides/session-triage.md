@@ -95,6 +95,7 @@ node scripts/session-triage.mjs --no-summary-store
 - split de pendências do board:
   - **Unlock swarm now** (P0/promotion/bloqueios)
   - **Later stabilization** (restante)
+- detecção de **tooling/capability gaps** com candidatos de claim (`toolingClaims`) para bootstrap/permissão antes de execução principal
 
 Contrato canônico de eventos (v1):
 - [`docs/primitives/conversation-event-canonical-schema.md`](../primitives/conversation-event-canonical-schema.md)
@@ -120,6 +121,16 @@ Política prática para comandos longos:
 Patrol recorrente (soft intent) é opcional para sessões long-run:
 - use scheduler prompt para cadência de observação;
 - mantenha decisão operacional em gates hard (GO/GO condicional/NO-GO).
+
+## Capability gap claim (primitiva operacional)
+
+Quando a triagem mostrar blockers recorrentes como `command-not-found`, `ENOENT`, `missing capabilities/executables` ou `Instructions are required`:
+
+1. registrar claim de capability gap (com recomendação de ação);
+2. remediar bootstrap/permissão primeiro;
+3. só então iniciar lote autônomo principal.
+
+Referência da primitiva: `docs/primitives/capability-gap-claim.md`.
 
 ## Governança
 

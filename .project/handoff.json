@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-21T17:07:00Z",
-  "context": "Registro pragmático de expansão: adicionada trilha futura de devcontainer opcional para onboarding mínimo (Docker Desktop + Git + VS Code), sem desviar da execução atual. Capturados DEC-BUD-029, REQ-BUD-036 e TASK-BUD-074 com referência ao padrão `farm` e necessidade de manter isolamento workspace-local (`PI_CODING_AGENT_DIR`) para dogfood TUI+WEB.",
+  "timestamp": "2026-04-21T17:24:00Z",
+  "context": "Loop maior concluído com segurança e pragmatismo: primitiva Capability Gap Claim formalizada e materializada no `session-triage` (DEC-BUD-030, REQ-BUD-037, TASK-BUD-075 closed com VER-BUD-084). Também mantida fila de release preparada (`fresh-horns-laugh`) e trilha devcontainer opcional registrada (TASK-BUD-074 planned).",
   "current_phase": "maturity-queue-prep",
   "current_tasks": [
     "TASK-BUD-046",
@@ -8,13 +8,14 @@
     "TASK-BUD-052",
     "TASK-BUD-051",
     "TASK-BUD-066",
-    "TASK-BUD-068"
+    "TASK-BUD-068",
+    "TASK-BUD-074"
   ],
   "blockers": [],
   "next_actions": [
-    "Rodar 2-3 ciclos medindo redução de re-leitura com `context:preload` e registrar delta objetivo.",
+    "Rodar 2-3 ciclos medindo redução de re-leitura com `context:preload` e delta de `toolingClaims` no triage.",
     "Retomar reconciliação dos legados (046 -> 047 -> 052 -> 051) fechando por evidência quando possível.",
-    "Planejar micro-slice inicial de TASK-BUD-074 (blueprint `.devcontainer`) sem implementar container completo no mesmo lote."
+    "Abrir micro-slice inicial de TASK-BUD-074 com blueprint `.devcontainer` mínimo (sem tentar fechar container completo no mesmo lote)."
   ],
   "open_questions": [
     "Qual contrato mínimo de espelho (`.project` -> vault) evita drift e permite replay determinístico?",

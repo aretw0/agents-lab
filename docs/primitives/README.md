@@ -57,6 +57,7 @@ Como medir e garantir a qualidade de agentes.
 | [budget-envelope.md](./budget-envelope.md) | Avaliação / Coordenação / Planejamento | Contrato de custo por execução (goal + maxCost + evidência + revisão humana) | Em evolução |
 | [continuity-abstraction.md](./continuity-abstraction.md) | Memória / Coordenação / Governança | Continuidade desacoplada de backend/runner com contrato canônico de estado/eventos/gates | Em evolução |
 | [conversation-event-canonical-schema.md](./conversation-event-canonical-schema.md) | Memória / Coordenação / Observabilidade | Schema canônico provider-agnostic para ingestão/triagem de conversas e threads | Em evolução |
+| [capability-gap-claim.md](./capability-gap-claim.md) | Coordenação / Ferramentas / Governança | Detecta ausência de ferramenta/capability e exige claim de bootstrap/permissão antes da execução principal | Em evolução |
 | _(em breve)_ | Memória | Context window manager | Planejado |
 | _(em breve)_ | Ferramentas | File system tools para Pi | Planejado |
 | _(em breve)_ | Planejamento | ReAct loop para pi-agent-core | Planejado |

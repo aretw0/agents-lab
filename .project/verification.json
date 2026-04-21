@@ -971,6 +971,15 @@
       "method": "inspect",
       "evidence": "Fila de release preparada sem publish: changeset `.changeset/fresh-horns-laugh.md` para `@aretw0/pi-stack` cobrindo preload + onboarding dual-mode/mirror. Runbook de isolamento unificado criado em `docs/guides/unified-dogfood-isolation.md` com fluxo `pi:isolated` + `/session-web` + gates (`preflight/readiness/context-watch`). Índice atualizado em `docs/guides/README.md`.",
       "timestamp": "2026-04-21T16:55:00Z"
+    },
+    {
+      "id": "VER-BUD-084",
+      "target": "TASK-BUD-075",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "`scripts/session-triage.mjs` agora agrega `toolingGaps` por sessão/canônico e `aggregate.toolingClaims` com recomendações de bootstrap/permissão (primitiva capability gap claim). Evidência: `node scripts/session-triage.mjs --days 1 --limit 4` (seção 'Tooling blockers') e `--json` com chaves `toolingGaps/toolingClaims` (arquivo `.sandbox/pi-agent/triage/session-triage.latest.json`). Documentação atualizada em `docs/guides/session-triage.md` e `docs/primitives/capability-gap-claim.md`.",
+      "timestamp": "2026-04-21T17:20:00Z"
     }
   ]
 }

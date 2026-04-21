@@ -475,6 +475,22 @@
         "Existe comando de entrada simplificado (estilo `farm`) para garantir usuário/workdir corretos ao anexar via Docker Desktop/VS Code.",
         "Guia operacional cobre attach/terminal por plataforma (Linux: kitty; Windows: Windows Terminal PowerShell) e valida fluxo TUI+WEB unificado em isolamento."
       ]
+    },
+    {
+      "id": "REQ-BUD-037",
+      "description": "A triagem/control plane deve detectar sinais recorrentes de falta de ferramenta/capability e produzir candidatos de 'capability gap claim' com ação recomendada antes de execução autônoma.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-036"
+      ],
+      "acceptance_criteria": [
+        "Pipeline de triagem agrega padrões de gap (ex.: command-not-found, ENOENT, missing capabilities/executables, instructions required).",
+        "Saída humana e JSON incluem lista de claim candidates com recomendação de ação/bootstrap.",
+        "Guia documenta uso dessa saída para bloquear início de lote até remediação explícita."
+      ]
     }
   ]
 }

@@ -143,6 +143,54 @@ function addCount(map, key, amount = 1) {
   map.set(key, (map.get(key) ?? 0) + amount);
 }
 
+const TOOLING_GAP_RULES = [
+  {
+    code: "command-not-found",
+    pattern: /(?:\bcommand not found\b|is not recognized as an internal or external command)/i,
+    recommendation: "Solicitar bootstrap de executáveis antes de iniciar o lote.",
+  },
+  {
+    code: "spawn-enoent",
+    pattern: /(?:spawn(?:Sync)?\s+[^\n]*\bENOENT\b|\bENOENT\b)/i,
+    recommendation: "Abrir claim de capability faltante e bloquear execução até remediação.",
+  },
+  {
+    code: "missing-capability",
+    pattern: /(?:missingCapabilities|missing capabilities)/i,
+    recommendation: "Registrar capability gap e pedir permissão para construir/adicionar ferramenta.",
+  },
+  {
+    code: "missing-executable",
+    pattern: /(?:missingExecutables|missing executables)/i,
+    recommendation: "Executar preflight/hatch e corrigir executáveis requeridos antes de continuar.",
+  },
+  {
+    code: "instructions-required",
+    pattern: /Instructions are required/i,
+    recommendation: "Classificar como blocker de contrato e corrigir instruções antes de delegar.",
+  },
+];
+
+function detectToolingGapCodes(text) {
+  if (typeof text !== "string" || !text.trim()) return [];
+  const out = [];
+  for (const rule of TOOLING_GAP_RULES) {
+    if (rule.pattern.test(text)) out.push(rule.code);
+  }
+  return out;
+}
+
+function buildToolingClaimCandidates(gapTotals) {
+  const recommendationByCode = new Map(TOOLING_GAP_RULES.map((r) => [r.code, r.recommendation]));
+  return Object.entries(gapTotals)
+    .map(([code, count]) => ({
+      code,
+      count,
+      recommendation: recommendationByCode.get(code) ?? "Registrar blocker e pedir remediação explícita.",
+    }))
+    .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+}
+
 function toIsoOrFallback(raw, fallbackIso) {
   if (!raw) return fallbackIso;
   const d = new Date(raw);
@@ -228,10 +276,12 @@ function parseSessionFile(filePath) {
     userMessages: 0,
     assistantMessages: 0,
     colonySignals: {},
+    toolingGaps: {},
     branchSummaries: [],
   };
 
   const signalCount = new Map();
+  const toolingGapCount = new Map();
 
   for (const line of lines) {
     let rec;
@@ -250,6 +300,8 @@ function parseSessionFile(filePath) {
 
     const matches = [...text.matchAll(/\[COLONY_SIGNAL:([A-Z_]+)\]/g)];
     for (const m of matches) addCount(signalCount, m[1]);
+
+    for (const code of detectToolingGapCodes(text)) addCount(toolingGapCount, code);
 
     if (role !== "toolResult") {
       const summary = extractSummaryBlock(text);
@@ -272,6 +324,7 @@ function parseSessionFile(filePath) {
   }
 
   out.colonySignals = Object.fromEntries([...signalCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+  out.toolingGaps = Object.fromEntries([...toolingGapCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
   return out;
 }
 
@@ -326,6 +379,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
 
   const signalCount = new Map();
   const providerCount = new Map();
+  const toolingGapCount = new Map();
   const out = {
     file: `canonical:${path.basename(eventsPath)}`,
     path: path.resolve(eventsPath),
@@ -335,6 +389,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
     userMessages: 0,
     assistantMessages: 0,
     colonySignals: {},
+    toolingGaps: {},
     providers: {},
     branchSummaries: [],
   };
@@ -362,6 +417,8 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
     const matches = [...text.matchAll(/\[COLONY_SIGNAL:([A-Z_]+)\]/g)];
     for (const m of matches) addCount(signalCount, m[1]);
 
+    for (const code of detectToolingGapCodes(text)) addCount(toolingGapCount, code);
+
     const summary = extractSummaryBlock(text);
     if (summary) {
       out.branchSummaries.push(
@@ -381,6 +438,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
   }
 
   out.colonySignals = Object.fromEntries([...signalCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+  out.toolingGaps = Object.fromEntries([...toolingGapCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
   out.providers = Object.fromEntries([...providerCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
   return out;
 }
@@ -463,8 +521,12 @@ function renderHuman(report) {
         .join(", ");
       lines.push(`- ${s.file}`);
       lines.push(`  - msgs: ${s.messageCount} (user ${s.userMessages}, assistant ${s.assistantMessages})`);
+      const gaps = Object.entries(s.toolingGaps ?? {})
+        .map(([k, v]) => `${k}:${v}`)
+        .join(", ");
       lines.push(`  - branch summaries: ${s.branchSummaries.length}`);
       lines.push(`  - colony signals: ${sig || "none"}`);
+      lines.push(`  - tooling gaps: ${gaps || "none"}`);
     }
   }
   lines.push("");
@@ -473,6 +535,17 @@ function renderHuman(report) {
   const providerPairs = Object.entries(report.aggregate.providers ?? {});
   if (providerPairs.length === 0) lines.push("- (none)");
   else providerPairs.forEach(([provider, count]) => lines.push(`- ${provider}: ${count}`));
+  lines.push("");
+
+  lines.push("## Tooling blockers (claim candidates)");
+  if ((report.aggregate.toolingClaims ?? []).length === 0) {
+    lines.push("- (none)");
+  } else {
+    for (const item of report.aggregate.toolingClaims) {
+      lines.push(`- ${item.code}: ${item.count}`);
+      lines.push(`  - action: ${item.recommendation}`);
+    }
+  }
   lines.push("");
 
   lines.push(`## Branch-summary aggregation (merged=${report.aggregate.branchSummariesCount ?? 0})`);
@@ -545,6 +618,7 @@ const allInProgress = [];
 const allBlocked = [];
 const signalTotals = new Map();
 const providerTotals = new Map();
+const toolingGapTotals = new Map();
 
 for (const bs of mergedSummaries) {
   allNext.push(...bs.nextSteps);
@@ -554,6 +628,7 @@ for (const bs of mergedSummaries) {
 
 for (const s of sessions) {
   for (const [k, v] of Object.entries(s.colonySignals)) addCount(signalTotals, k, v);
+  for (const [k, v] of Object.entries(s.toolingGaps ?? {})) addCount(toolingGapTotals, k, v);
 
   const providers = s?.providers && typeof s.providers === "object" ? s.providers : null;
   if (providers && Object.keys(providers).length > 0) {
@@ -579,6 +654,10 @@ const report = {
   sessions,
   aggregate: {
     colonySignals: Object.fromEntries([...signalTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
+    toolingGaps: Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
+    toolingClaims: buildToolingClaimCandidates(
+      Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
+    ),
     providers: Object.fromEntries([...providerTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
     nextSteps: dedupeStrings(allNext),
     inProgress: dedupeStrings(allInProgress),
