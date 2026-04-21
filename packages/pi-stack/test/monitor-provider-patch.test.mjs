@@ -26,6 +26,7 @@ import {
 	DEFAULT_HEDGE_WHEN,
 	HEDGE_LEAN_BASE_CONTEXT,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
+	planSessionStartOutput,
 	detectDefaultProvider,
 	generateAgentYaml,
 	extractTemplateFromAgentYaml,
@@ -254,6 +255,25 @@ describe("ensureOverrides", () => {
 
 		assert.equal(result.created.length, 0);
 		assert.equal(result.skipped.length, 5);
+	});
+});
+
+describe("session_start output planning", () => {
+	it("suppresses info notifications while keeping compact status", () => {
+		const output = planSessionStartOutput(["hedge policy synced (ok)"], "info");
+		assert.equal(output.notify, false);
+		assert.equal(output.status, "[mprov] sync:1");
+		assert.match(output.message, /monitor-provider-patch/i);
+	});
+
+	it("keeps warning notifications for actionable issues", () => {
+		const output = planSessionStartOutput(
+			["overrides divergentes detectados (2) — use /monitor-provider apply"],
+			"warning",
+		);
+		assert.equal(output.notify, true);
+		assert.equal(output.status, "[mprov] warning:1");
+		assert.equal(output.severity, "warning");
 	});
 });
 

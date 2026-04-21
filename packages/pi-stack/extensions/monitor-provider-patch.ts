@@ -777,6 +777,35 @@ function readHedgeMonitorState(cwd: string): {
 	};
 }
 
+export function planSessionStartOutput(
+	details: string[],
+	severity: "info" | "warning",
+): {
+	notify: boolean;
+	status?: string;
+	message?: string;
+	severity?: "info" | "warning";
+} {
+	if (details.length === 0) {
+		return { notify: false };
+	}
+	const message = `monitor-provider-patch: ${details.join(", ")}`;
+	if (severity === "warning") {
+		return {
+			notify: true,
+			message,
+			severity,
+			status: `[mprov] warning:${details.length}`,
+		};
+	}
+	return {
+		notify: false,
+		message,
+		severity,
+		status: `[mprov] sync:${details.length}`,
+	};
+}
+
 function buildStatusReport(
 	cwd: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1037,8 +1066,10 @@ export default function (pi: ExtensionAPI) {
 					`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 				);
 			}
-			if (earlyDetails.length > 0) {
-				ctx.ui?.notify?.(`monitor-provider-patch: ${earlyDetails.join(", ")}`, "info");
+			const output = planSessionStartOutput(earlyDetails, "info");
+			ctx.ui?.setStatus?.("monitor-provider-patch", output.status);
+			if (output.notify && output.message && output.severity) {
+				ctx.ui?.notify?.(output.message, output.severity);
 			}
 			return;
 		}
@@ -1106,11 +1137,10 @@ export default function (pi: ExtensionAPI) {
 			);
 		}
 
-		if (details.length > 0) {
-			ctx.ui?.notify?.(
-				`monitor-provider-patch: ${details.join(", ")}`,
-				severity,
-			);
+		const output = planSessionStartOutput(details, severity);
+		ctx.ui?.setStatus?.("monitor-provider-patch", output.status);
+		if (output.notify && output.message && output.severity) {
+			ctx.ui?.notify?.(output.message, output.severity);
 		}
 	});
 }

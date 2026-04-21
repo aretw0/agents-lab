@@ -50,6 +50,27 @@ const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"Do not fail just because monitor instructions are empty; classify from available context.",
 ];
 
+function planSessionStartOutput(details, severity) {
+	if (!Array.isArray(details) || details.length === 0) {
+		return { notify: false };
+	}
+	const message = `monitor-provider-patch: ${details.join(", ")}`;
+	if (severity === "warning") {
+		return {
+			notify: true,
+			message,
+			severity,
+			status: `[mprov] warning:${details.length}`,
+		};
+	}
+	return {
+		notify: false,
+		message,
+		severity: "info",
+		status: `[mprov] sync:${details.length}`,
+	};
+}
+
 function detectDefaultProvider(cwd) {
 	const candidates = [join(cwd, ".pi", "settings.json")];
 	for (const settingsPath of candidates) {
@@ -478,6 +499,23 @@ function simulateSessionStart(cwd) {
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
+		const earlyDetails = [];
+		if (hedgePatch.changed) {
+			earlyDetails.push(
+				`hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (fragilityPatch.changed) {
+			earlyDetails.push(
+				`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (fragilityClassifierPatch.changed) {
+			earlyDetails.push(
+				`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		const output = planSessionStartOutput(earlyDetails, "info");
 		return {
 			provider,
 			hedgePolicy,
@@ -486,6 +524,7 @@ function simulateSessionStart(cwd) {
 			fragilityClassifierChanged: fragilityClassifierPatch.changed,
 			created: [],
 			repaired: [],
+			output,
 		};
 	}
 
@@ -493,6 +532,18 @@ function simulateSessionStart(cwd) {
 	const { repaired } = repairLegacyTemplateOverrides(cwd);
 	const { repaired: repairedSystemPrompt } =
 		repairMissingSystemPromptOverrides(cwd);
+	const details = [];
+	if (created.length > 0) details.push(`criou ${created.length} override(s) (provider-default)`);
+	if (hedgePatch.changed) details.push(`hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`);
+	if (fragilityPatch.changed) details.push(`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`);
+	if (fragilityClassifierPatch.changed) {
+		details.push(`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`);
+	}
+	if (repaired.length > 0) details.push(`corrigiu template legado em ${repaired.length} override(s)`);
+	if (repairedSystemPrompt.length > 0) {
+		details.push(`corrigiu prompt.system ausente em ${repairedSystemPrompt.length} override(s)`);
+	}
+	const output = planSessionStartOutput(details, "info");
 	return {
 		provider,
 		hedgePolicy,
@@ -502,6 +553,7 @@ function simulateSessionStart(cwd) {
 		created,
 		repaired,
 		repairedSystemPrompt,
+		output,
 	};
 }
 
@@ -514,6 +566,7 @@ export {
 	DEFAULT_HEDGE_WHEN,
 	HEDGE_LEAN_BASE_CONTEXT,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
+	planSessionStartOutput,
 	detectDefaultProvider,
 	generateAgentYaml,
 	extractTemplateFromAgentYaml,
