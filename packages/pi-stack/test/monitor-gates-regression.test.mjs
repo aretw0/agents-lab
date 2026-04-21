@@ -186,4 +186,23 @@ describe("monitor stability gates (deterministic fixtures)", () => {
     assert.ok(Array.isArray(run.json.summary.tailAttempts));
     assert.ok(run.json.summary.tailAttempts.length >= 2);
   });
+
+  it("uses bounded default tail thresholds", () => {
+    writeSessionFixture(tmpAgentDir, "session-e.jsonl", [
+      msg("user", "turn1"),
+      msg("assistant", "clean"),
+    ]);
+
+    const run = runScript(
+      "scripts/monitor-stability-gate.mjs",
+      ["--source", "auto", "--min-user-turns", "0", "--max-classify-failures", "0"],
+      { env: { PI_CODING_AGENT_DIR: tmpAgentDir } },
+    );
+
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.ok(run.json, "expected JSON output");
+    assert.equal(run.json.thresholds.tailBytes, 200000);
+    assert.equal(run.json.thresholds.maxTailBytes, 1200000);
+    assert.equal(run.json.thresholds.autoExpandTail, true);
+  });
 });

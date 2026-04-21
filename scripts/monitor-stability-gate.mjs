@@ -19,8 +19,8 @@ import process from "node:process";
 function parseArgs(argv) {
 	const out = {
 		source: "auto",
-		tailBytes: 1_000_000,
-		maxTailBytes: 5_000_000,
+		tailBytes: 200_000,
+		maxTailBytes: 1_200_000,
 		autoExpandTail: true,
 		minUserTurns: 3,
 		maxClassifyFailures: 0,
