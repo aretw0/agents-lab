@@ -580,6 +580,27 @@
           "evidence": "node --test monitor-provider-patch.test.mjs + monitor-context-budget.test.mjs => pass; monitor-stability-gate adaptive-tail => stable=true classifyFailures=0."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-A5",
+      "target": "TASK-CAL-2026-04-21-A",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T11:30:35.000Z",
+      "evidence": "Calibração adicional do fragility para reduzir falso positivo de empty-response: guard line extra para output substantivo + higiene de patterns learned em startup validada com regressões.",
+      "criteria_results": [
+        {
+          "criterion": "Classifier calibration inclui proteção explícita para respostas não vazias",
+          "status": "passed",
+          "evidence": "ensureFragilityClassifierCalibration agora injeta linha: substantive non-whitespace content => não flag de empty-output; coberto em monitor-provider-patch.test + monitor-context-budget.test."
+        },
+        {
+          "criterion": "Suite determinística permanece verde",
+          "status": "passed",
+          "evidence": "node --test monitor-provider-patch.test.mjs e monitor-context-budget.test.mjs => pass; gate monitor-stability com tail adaptivo => stable=true classifyFailures=0."
+        }
+      ]
     }
   ]
 }
