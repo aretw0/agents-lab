@@ -2,7 +2,10 @@
  * governance-profiles — named governance profiles for budget/routing/delivery.
  *
  * Three profiles abstract the most common safety × velocity trade-offs so
- * operators don't have to hand-tune individual thresholds:
+ * operators don't have to hand-tune individual thresholds.
+ *
+ * IMPORTANT: profiles are opt-in. Nothing is auto-applied on install/reload;
+ * baseline behavior remains whatever is currently in `.pi/settings.json`.
  *
  *   conservative — safety-first: report-only delivery, observe scheduler,
  *                  provider-budget enforcement on, low per-run cost cap.
@@ -125,7 +128,7 @@ export const PROFILE_DESCRIPTIONS: Record<GovernanceProfileName, string> = {
   conservative:
     "Safety-first. delivery=report-only, scheduler=observe, enforcement=on, maxCost=$0.50/run.",
   balanced:
-    "Production default. delivery=patch-artifact, scheduler=observe, enforcement=on, maxCost=$2/run.",
+    "General-purpose. delivery=patch-artifact, scheduler=observe, enforcement=on, maxCost=$2/run.",
   throughput:
     "Max velocity. delivery=apply-to-branch, scheduler=enforce, enforcement=relaxed, maxCost=$5/run.",
 };
@@ -295,7 +298,7 @@ export default function governanceProfilesExtension(pi: ExtensionAPI) {
     name: "governance_profile",
     label: "Governance Profile",
     description: [
-      "Apply or preview a named governance profile (conservative|balanced|throughput).",
+      "Apply or preview an opt-in governance profile (conservative|balanced|throughput).",
       "preview: show what would change vs current settings.",
       "apply: snapshot current settings then apply the profile.",
       "list: describe all available profiles.",
@@ -396,7 +399,7 @@ export default function governanceProfilesExtension(pi: ExtensionAPI) {
 
       if (sub === "list") {
         const lines = [
-          "governance profiles disponíveis:",
+          "governance profiles disponíveis (opt-in; nenhum é aplicado automaticamente):",
           "",
           ...(Object.keys(GOVERNANCE_PROFILES) as GovernanceProfileName[]).map(
             (n) => `  ${n.padEnd(12)} — ${PROFILE_DESCRIPTIONS[n]}`,

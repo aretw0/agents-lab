@@ -158,6 +158,8 @@ Isso permite pesquisar e desenvolver sem confundir ausência de pacote com ausê
 
 > Para disciplina operacional completa (cleanroom, promoção de candidate e reconciliação de drift), ver também: [`swarm-cleanroom-protocol.md`](./swarm-cleanroom-protocol.md).
 
+Para fronteira explícita entre baseline agnóstico e estilos opt-in: [`opt-in-lean-profile-inventory.md`](./opt-in-lean-profile-inventory.md).
+
 ---
 
 ## Regra de governança de tasks
