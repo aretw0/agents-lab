@@ -1381,6 +1381,39 @@
         "docs/guides/subagent-readiness-gate.md",
         ".project/tasks.json"
       ]
+    },
+    {
+      "id": "TASK-CAL-2026-04-21-A",
+      "description": "[P1] Consolidar calibração de ruído/contexto em startup/auto-eventos com budget de saída por extensão (notify vs status vs silent) e testes determinísticos.",
+      "status": "in-progress",
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/extensions/monitor-sovereign.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs",
+        "packages/pi-stack/test/smoke/monitor-sovereign-startup-output.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Extensões automáticas não emitirem notify info por padrão sem necessidade acionável.",
+        "Warnings críticos continuarem visíveis com mensagem objetiva.",
+        "Testes cobrirem planejamento de saída (info suprimido, warning preservado)."
+      ],
+      "notes": "Slice atual já cobriu monitor-provider-patch e monitor-sovereign; manter incremental por extensão para evitar regressão."
+    },
+    {
+      "id": "TASK-CAL-2026-04-21-B",
+      "description": "[P2] Mapear lições do squeez para perfil opcional de operação enxuta (não-default), separando o que vira padrão agnóstico do que fica como modo/tema opinativo.",
+      "status": "planned",
+      "files": [
+        "docs/research",
+        "docs/guides",
+        "packages/pi-stack/extensions/governance-profiles.ts"
+      ],
+      "acceptance_criteria": [
+        "Inventário explícito: lições que entram no baseline agnóstico vs opt-in.",
+        "Perfil opcional documentado sem alterar comportamento default da stack.",
+        "Sem dependência rígida de um único estilo operacional."
+      ],
+      "notes": "Referência inicial: https://github.com/claudioemmanuel/squeez. Executar só após fechar calibração hard de ruído/contexto."
     }
   ]
 }

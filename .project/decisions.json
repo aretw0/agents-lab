@@ -164,6 +164,13 @@
       "rationale": "Evita expor utilitários ainda voláteis para usuários finais e mantém previsibilidade da stack publicada; ao mesmo tempo, acelera aprendizado no laboratório com critérios reprodutíveis.",
       "status": "decided",
       "context": "Pergunta explícita sobre o que já está indo para usuários versus o que ainda é interno de estabilização."
+    },
+    {
+      "id": "DEC-BUD-024",
+      "decision": "Manter a pi-stack agnóstica por padrão (baseline mínima de ruído/contexto) e tratar estilos/opiniões operacionais como perfis opt-in (ex.: modo \"caveman\" inspirado no squeez), sem acoplá-los ao fluxo default.",
+      "rationale": "Preserva portabilidade entre workspaces e objetivos diferentes, reduz lock-in de preferências locais e mantém a stack utilizável por qualquer usuário com seu próprio .pi/.project.",
+      "status": "decided",
+      "context": "Diretriz de calibração para escalar com controle de contexto e ruído baixo, mantendo espaço para personalização opcional."
     }
   ]
 }
