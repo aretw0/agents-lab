@@ -1685,7 +1685,7 @@
     {
       "id": "TASK-BUD-074",
       "description": "[P1] Especificar blueprint de devcontainer para agents-lab (docker desktop onboarding + entrada estilo farm + isolamento de runtime pi local).",
-      "status": "planned",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-073"
@@ -1702,10 +1702,15 @@
       "files": [
         ".devcontainer/devcontainer.json",
         ".devcontainer/Dockerfile",
+        ".devcontainer/postCreate.sh",
+        "scripts/devcontainer-farm.mjs",
+        "package.json",
         "docs/guides/unified-dogfood-isolation.md",
-        "docs/research/devcontainer-blueprint-2026-04-21.md"
+        "docs/research/devcontainer-blueprint-2026-04-21.md",
+        "docs/research/task-bud-074-closure-2026-04-21.md"
       ],
-      "notes": "Registrar como próximo passo de maturidade. Implementação posterior em micro-slices para não desviar do backlog crítico atual."
+      "notes": "Blueprint mínimo implementado com entrada estilo farm e isolamento por PI_CODING_AGENT_DIR no workspace, pronto para onboarding opcional via Docker Desktop + VS Code.",
+      "verification": "VER-BUD-091"
     },
     {
       "id": "TASK-BUD-075",

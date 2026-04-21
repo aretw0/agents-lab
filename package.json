@@ -26,6 +26,8 @@
     "pi:isolated:adopt-latest:dry": "node scripts/pi-isolated.mjs adopt-latest --dry-run",
     "pi:isolated:help": "node scripts/pi-isolated.mjs help",
     "pi:isolated:reset": "node scripts/pi-isolated.mjs --reset",
+    "devcontainer:farm": "node scripts/devcontainer-farm.mjs",
+    "devcontainer:farm:pi": "node scripts/devcontainer-farm.mjs agents-lab-dev -- npm run pi:isolated",
     "pi:pilot:status": "node scripts/pi-pilot-profile.mjs status",
     "pi:pilot:on": "node scripts/pi-pilot-profile.mjs on",
     "pi:pilot:off": "node scripts/pi-pilot-profile.mjs off",

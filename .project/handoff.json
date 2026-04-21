@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-04-21T19:48:00Z",
-  "context": "TASK-BUD-078 concluída com evidência canônica (VER-BUD-090): contrato hard gate de qualidade language-agnostic foi especificado, com integração ao fluxo `.project/verification` + `complete-task` e diferenciação explícita entre soft intent e hard gate no pipeline canônico.",
+  "timestamp": "2026-04-21T20:05:00Z",
+  "context": "TASK-BUD-074 concluída com evidência canônica (VER-BUD-091): blueprint devcontainer opcional implementado com usuário não-root, workdir fixo e PI_CODING_AGENT_DIR local no workspace, incluindo comando de entrada estilo farm e runbook Linux/Windows para attach + checklist TUI/WEB.",
   "current_phase": "post-compact-stabilization",
   "current_tasks": [
-    "TASK-BUD-074",
     "TASK-BUD-046",
-    "TASK-BUD-047"
+    "TASK-BUD-047",
+    "TASK-BUD-052"
   ],
   "blockers": [],
   "next_actions": [
-    "Abrir recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional).",
     "Retomar reconciliação legada na ordem combinada (046 -> 047 -> 052 -> 051).",
-    "Avaliar policy final de enforcement para scan-bounds (advisory em warn vs hard em checkpoint)."
+    "Avaliar policy final de enforcement para scan-bounds (advisory em warn vs hard em checkpoint).",
+    "Medir em ciclos reais o onboarding devcontainer (attach + pi:isolated + session-web)."
   ],
   "open_questions": [
     "No guardrail de scan-bounds, enforcement default permanece advisory em warn ou sobe para hard only em checkpoint?"
@@ -23,8 +23,12 @@
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json",
-    "docs/primitives/quality-verification-gate.md",
-    "docs/guides/project-canonical-pipeline.md",
-    "docs/research/task-bud-078-closure-2026-04-21.md"
+    ".devcontainer/devcontainer.json",
+    ".devcontainer/Dockerfile",
+    ".devcontainer/postCreate.sh",
+    "scripts/devcontainer-farm.mjs",
+    "docs/guides/unified-dogfood-isolation.md",
+    "docs/research/devcontainer-blueprint-2026-04-21.md",
+    "docs/research/task-bud-074-closure-2026-04-21.md"
   ]
 }

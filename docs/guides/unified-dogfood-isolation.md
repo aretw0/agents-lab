@@ -53,11 +53,67 @@ Escolha explicitamente uma trilha:
 - modo escolhido (`.project-first` / adapter-first / mirror);
 - ação aplicada + verificação canônica em `.project/verification`.
 
-## Trilha futura: devcontainer opcional
+## Devcontainer opcional (Docker Desktop + VS Code)
 
-A estratégia de isolamento deste guia será espelhada em devcontainer (Docker Desktop + VS Code) para onboarding mínimo, mantendo os mesmos invariantes de runtime local.
+Blueprint base disponível em:
+- `.devcontainer/devcontainer.json`
+- `.devcontainer/Dockerfile`
+- `.devcontainer/postCreate.sh`
 
-Referência de planejamento: `docs/research/devcontainer-blueprint-2026-04-21.md`.
+Invariantes aplicados:
+- usuário não-root (`remoteUser: vscode`);
+- workdir fixo (`/workspaces/agents-lab`);
+- runtime local no workspace (`PI_CODING_AGENT_DIR=/workspaces/agents-lab/.sandbox/pi-agent`).
+
+### Entrada simplificada estilo farm
+
+Script dedicado no host:
+
+```bash
+npm run devcontainer:farm -- <container-name> -- npm run pi:isolated
+```
+
+Atalho padrão (container `agents-lab-dev`):
+
+```bash
+npm run devcontainer:farm:pi
+```
+
+O comando força usuário/workdir/env corretos ao anexar no container.
+
+### Attach por plataforma
+
+**Linux (Kitty):**
+1. Reopen in Container no VS Code.
+2. Descobrir nome do container:
+   ```bash
+   docker ps --format '{{.Names}}' | grep agents-lab-dev
+   ```
+3. Entrar com farm:
+   ```bash
+   npm run devcontainer:farm -- <container-name> -- npm run pi:isolated
+   ```
+
+**Windows (Windows Terminal PowerShell):**
+1. Reopen in Container no VS Code.
+2. Descobrir nome do container:
+   ```powershell
+   $c = docker ps --format "{{.Names}}" | Where-Object { $_ -like "*agents-lab-dev*" } | Select-Object -First 1
+   ```
+3. Entrar com farm:
+   ```powershell
+   npm run devcontainer:farm -- $c -- npm run pi:isolated
+   ```
+
+### Checklist TUI + WEB no container
+
+Dentro da sessão isolada:
+1. `/session-web start` e `/session-web status`
+2. `/colony-pilot preflight`
+3. `/subagent-readiness`
+4. registrar evidência canônica em `.project/verification` quando fechar slice
+
+Referência de desenho: `docs/research/devcontainer-blueprint-2026-04-21.md`.
 
 ## Regras de segurança operacional
 

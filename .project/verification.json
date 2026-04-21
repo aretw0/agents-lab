@@ -1085,6 +1085,32 @@
           "evidence": "project-canonical-pipeline.md ganhou seção dedicada 'Soft intent vs Hard gate de qualidade'."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-091",
+      "target": "TASK-BUD-074",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Blueprint devcontainer criado com entrada estilo farm e isolamento local do runtime. Comando validado: /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe scripts/devcontainer-farm.mjs --help. Inspeção dos artefatos confirma remoteUser=vscode, workspaceFolder=/workspaces/agents-lab e PI_CODING_AGENT_DIR no workspace.",
+      "timestamp": "2026-04-21T20:02:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Documento de design define estrutura `.devcontainer/` (Dockerfile/devcontainer.json/postCreate) alinhada ao fluxo do laboratório.",
+          "status": "passed",
+          "evidence": "Arquivos .devcontainer/Dockerfile, .devcontainer/devcontainer.json e .devcontainer/postCreate.sh criados e documentados em docs/research/devcontainer-blueprint-2026-04-21.md."
+        },
+        {
+          "criterion": "Runbook define comando de entrada/attach garantindo usuário e diretório corretos dentro do container.",
+          "status": "passed",
+          "evidence": "scripts/devcontainer-farm.mjs + scripts npm devcontainer:farm/devcontainer:farm:pi e guia atualizado com uso no unified-dogfood-isolation."
+        },
+        {
+          "criterion": "Checklist de validação cobre dogfood isolado com TUI+WEB sem dependência de configuração global do host.",
+          "status": "passed",
+          "evidence": "docs/guides/unified-dogfood-isolation.md inclui attach Linux/Windows e checklist TUI+WEB com runtime isolado no workspace."
+        }
+      ]
     }
   ]
 }

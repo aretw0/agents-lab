@@ -1,0 +1,20 @@
+{
+  "name": "agents-lab-dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspaces/agents-lab",
+  "containerEnv": {
+    "PI_CODING_AGENT_DIR": "/workspaces/agents-lab/.sandbox/pi-agent"
+  },
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

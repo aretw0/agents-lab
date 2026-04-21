@@ -26,6 +26,26 @@ Criar um caminho opcional de execução do agents-lab em container, sem depender
 - Sem publish automático; foco em reproducibilidade e maturidade operacional.
 - Implementação em micro-slices (config base -> entry helper -> validação TUI/WEB).
 
+## Micro-slice implementado (TASK-BUD-074)
+
+Estrutura criada:
+- `.devcontainer/devcontainer.json`
+- `.devcontainer/Dockerfile`
+- `.devcontainer/postCreate.sh`
+
+Comando de entrada simplificado (estilo `farm`):
+- `scripts/devcontainer-farm.mjs`
+- `npm run devcontainer:farm -- <container-name> -- npm run pi:isolated`
+- `npm run devcontainer:farm:pi` (atalho padrão)
+
+Invariantes aplicados no blueprint:
+- `remoteUser: vscode` (não-root)
+- `workspaceFolder: /workspaces/agents-lab`
+- `PI_CODING_AGENT_DIR` local no workspace (sem depender de `~/.pi` global)
+
+Runbook atualizado:
+- `docs/guides/unified-dogfood-isolation.md` agora inclui attach Linux/Windows e checklist TUI+WEB em isolamento.
+
 ## Registro canônico relacionado
 - DEC-BUD-029
 - REQ-BUD-036
