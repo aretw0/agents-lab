@@ -34,13 +34,29 @@ node scripts/session-triage.mjs --events docs/research/data/session-triage/canon
 
 Por padrão, o script lê **último 1 dia** e até **8 sessões** mais recentes.
 
+Também mantém um cache parseável de branch summaries em:
+
+- `.sandbox/pi-agent/triage/branch-summary-store.json`
+
+Esse store é atualizado automaticamente com summaries detectados (sessões + fonte canônica), para evitar depender de cópia manual quando um resumo de branch saiu da janela curta.
+
+Flags úteis:
+
+```bash
+# usar caminho explícito
+node scripts/session-triage.mjs --summary-store ./.sandbox/pi-agent/triage/branch-summary-store.json
+
+# desativar persistência local
+node scripts/session-triage.mjs --no-summary-store
+```
+
 ## O que o script entrega
 
 > Estado atual: implementação inicial focada em sessões locais do pi.
 > Direção oficial: evoluir para ingestão provider-agnostic (Telegram/WhatsApp/Matrix/Signal etc.) via adapter canônico, sem mudar a governança do board.
 
 - sessões recentes e sinais de colônia (`COLONY_SIGNAL:*`)
-- agregação de branch summaries (`Next Steps`, `In Progress`, `Blocked`)
+- agregação de branch summaries (`Next Steps`, `In Progress`, `Blocked`), incluindo os persistidos no store local parseável
 - split de pendências do board:
   - **Unlock swarm now** (P0/promotion/bloqueios)
   - **Later stabilization** (restante)

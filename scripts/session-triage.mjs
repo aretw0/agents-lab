@@ -12,10 +12,12 @@
  *   node scripts/session-triage.mjs
  *   node scripts/session-triage.mjs --days 2 --limit 12
  *   node scripts/session-triage.mjs --events ./data/canonical-events.json
+ *   node scripts/session-triage.mjs --summary-store ./.sandbox/pi-agent/triage/branch-summary-store.json
+ *   node scripts/session-triage.mjs --no-summary-store
  *   node scripts/session-triage.mjs --json
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -26,6 +28,8 @@ function parseArgs(argv) {
     json: false,
     workspace: process.cwd(),
     eventsPath: undefined,
+    summaryStore: true,
+    summaryStorePath: undefined,
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -52,6 +56,17 @@ function parseArgs(argv) {
     }
     if (a === "--json") {
       out.json = true;
+      continue;
+    }
+    if (a === "--summary-store") {
+      out.summaryStore = true;
+      out.summaryStorePath = argv[i + 1] ?? out.summaryStorePath;
+      i++;
+      continue;
+    }
+    if (a === "--no-summary-store") {
+      out.summaryStore = false;
+      continue;
     }
   }
 
@@ -128,6 +143,78 @@ function addCount(map, key, amount = 1) {
   map.set(key, (map.get(key) ?? 0) + amount);
 }
 
+function toIsoOrFallback(raw, fallbackIso) {
+  if (!raw) return fallbackIso;
+  const d = new Date(raw);
+  if (!Number.isFinite(d.getTime())) return fallbackIso;
+  return d.toISOString();
+}
+
+function normalizeSummaryEntry(entry, fallbackSource = "unknown", fallbackSeenAt = new Date().toISOString()) {
+  return {
+    nextSteps: dedupeStrings(entry?.nextSteps ?? []),
+    inProgress: dedupeStrings(entry?.inProgress ?? []),
+    blocked: dedupeStrings(entry?.blocked ?? []),
+    source: typeof entry?.source === "string" && entry.source.trim() ? entry.source : fallbackSource,
+    seenAt: toIsoOrFallback(entry?.seenAt, fallbackSeenAt),
+  };
+}
+
+function summaryFingerprint(entry) {
+  const pack = (arr) => dedupeStrings(arr).map((x) => x.toLowerCase()).sort().join("|");
+  return `${pack(entry.nextSteps)}::${pack(entry.inProgress)}::${pack(entry.blocked)}`;
+}
+
+function mergeSummaryEntries(existingEntries, incomingEntries) {
+  const byFingerprint = new Map();
+
+  for (const raw of [...existingEntries, ...incomingEntries]) {
+    const norm = normalizeSummaryEntry(raw);
+    const key = summaryFingerprint(norm);
+    const prev = byFingerprint.get(key);
+    if (!prev) {
+      byFingerprint.set(key, norm);
+      continue;
+    }
+    const prevMs = new Date(prev.seenAt).getTime();
+    const currMs = new Date(norm.seenAt).getTime();
+    if (Number.isFinite(currMs) && (!Number.isFinite(prevMs) || currMs >= prevMs)) {
+      byFingerprint.set(key, norm);
+    }
+  }
+
+  return [...byFingerprint.values()].sort((a, b) => new Date(b.seenAt).getTime() - new Date(a.seenAt).getTime());
+}
+
+function loadSummaryStore(storePath) {
+  if (!storePath || !existsSync(storePath)) return [];
+  try {
+    const parsed = JSON.parse(readFileSync(storePath, "utf8"));
+    const entries = Array.isArray(parsed?.entries) ? parsed.entries : [];
+    return entries.map((entry) => normalizeSummaryEntry(entry));
+  } catch {
+    return [];
+  }
+}
+
+function writeSummaryStore(storePath, entries, retentionDays = 30, maxEntries = 500) {
+  if (!storePath) return;
+  const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+  const filtered = entries
+    .filter((entry) => new Date(entry.seenAt).getTime() >= cutoff)
+    .slice(0, maxEntries);
+
+  const payload = {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    retentionDays,
+    entries: filtered,
+  };
+
+  mkdirSync(path.dirname(storePath), { recursive: true });
+  writeFileSync(storePath, JSON.stringify(payload, null, 2));
+}
+
 function parseSessionFile(filePath) {
   const lines = readFileSync(filePath, "utf8")
     .split(/\r?\n/)
@@ -167,11 +254,19 @@ function parseSessionFile(filePath) {
     if (role !== "toolResult") {
       const summary = extractSummaryBlock(text);
       if (summary) {
-        out.branchSummaries.push({
-          nextSteps: sectionBullets(summary, "Next Steps"),
-          inProgress: sectionBullets(summary, "In Progress"),
-          blocked: sectionBullets(summary, "Blocked"),
-        });
+        out.branchSummaries.push(
+          normalizeSummaryEntry(
+            {
+              nextSteps: sectionBullets(summary, "Next Steps"),
+              inProgress: sectionBullets(summary, "In Progress"),
+              blocked: sectionBullets(summary, "Blocked"),
+              source: path.basename(filePath),
+              seenAt: toIsoOrFallback(rec?.timestamp ?? rec?.createdAt, out.updatedAt),
+            },
+            path.basename(filePath),
+            out.updatedAt,
+          ),
+        );
       }
     }
   }
@@ -235,11 +330,19 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
 
     const summary = extractSummaryBlock(text);
     if (summary) {
-      out.branchSummaries.push({
-        nextSteps: sectionBullets(summary, "Next Steps"),
-        inProgress: sectionBullets(summary, "In Progress"),
-        blocked: sectionBullets(summary, "Blocked"),
-      });
+      out.branchSummaries.push(
+        normalizeSummaryEntry(
+          {
+            nextSteps: sectionBullets(summary, "Next Steps"),
+            inProgress: sectionBullets(summary, "In Progress"),
+            blocked: sectionBullets(summary, "Blocked"),
+            source: `canonical:${path.basename(eventsPath)}`,
+            seenAt: toIsoOrFallback(tsRaw, out.updatedAt),
+          },
+          `canonical:${path.basename(eventsPath)}`,
+          out.updatedAt,
+        ),
+      );
     }
   }
 
@@ -309,6 +412,9 @@ function renderHuman(report) {
   if (report.sources?.canonicalEvents) {
     lines.push(`Canonical events: ${report.sources.canonicalEvents}`);
   }
+  if (report.sources?.branchSummaryStore) {
+    lines.push(`Branch-summary store: ${report.sources.branchSummaryStore}`);
+  }
   lines.push(`Scanned: ${report.sessions.length} file(s)`);
   lines.push("");
 
@@ -328,7 +434,7 @@ function renderHuman(report) {
   }
   lines.push("");
 
-  lines.push("## Branch-summary aggregation (recent)");
+  lines.push(`## Branch-summary aggregation (merged=${report.aggregate.branchSummariesCount ?? 0})`);
   lines.push("### In Progress");
   if (report.aggregate.inProgress.length === 0) lines.push("- (none)");
   else report.aggregate.inProgress.forEach((x) => lines.push(`- ${x}`));
@@ -357,6 +463,9 @@ const workspace = path.resolve(opts.workspace);
 const key = toSessionWorkspaceKey(workspace);
 const sessionDir = path.join(homedir(), ".pi", "agent", "sessions", key);
 const cutoff = Date.now() - opts.days * 24 * 60 * 60 * 1000;
+const summaryStorePath = opts.summaryStore
+  ? path.resolve(opts.summaryStorePath ?? path.join(workspace, ".sandbox", "pi-agent", "triage", "branch-summary-store.json"))
+  : null;
 
 let sessions = [];
 if (existsSync(sessionDir)) {
@@ -378,17 +487,30 @@ if (opts.eventsPath) {
   if (canonical) sessions.unshift(canonical);
 }
 
+const sessionSummaries = sessions.flatMap((session) =>
+  (session.branchSummaries ?? []).map((summary) =>
+    normalizeSummaryEntry(summary, session.file, session.updatedAt),
+  ),
+);
+
+const storedSummaries = summaryStorePath ? loadSummaryStore(summaryStorePath) : [];
+const mergedSummaries = mergeSummaryEntries(storedSummaries, sessionSummaries);
+if (summaryStorePath) {
+  writeSummaryStore(summaryStorePath, mergedSummaries);
+}
+
 const allNext = [];
 const allInProgress = [];
 const allBlocked = [];
 const signalTotals = new Map();
 
+for (const bs of mergedSummaries) {
+  allNext.push(...bs.nextSteps);
+  allInProgress.push(...bs.inProgress);
+  allBlocked.push(...bs.blocked);
+}
+
 for (const s of sessions) {
-  for (const bs of s.branchSummaries) {
-    allNext.push(...bs.nextSteps);
-    allInProgress.push(...bs.inProgress);
-    allBlocked.push(...bs.blocked);
-  }
   for (const [k, v] of Object.entries(s.colonySignals)) addCount(signalTotals, k, v);
 }
 
@@ -401,6 +523,7 @@ const report = {
   sources: {
     piSessionJsonl: existsSync(sessionDir),
     canonicalEvents: opts.eventsPath ? path.resolve(opts.eventsPath) : null,
+    branchSummaryStore: summaryStorePath,
   },
   sessions,
   aggregate: {
@@ -408,6 +531,14 @@ const report = {
     nextSteps: dedupeStrings(allNext),
     inProgress: dedupeStrings(allInProgress),
     blocked: dedupeStrings(allBlocked),
+    branchSummariesCount: mergedSummaries.length,
+  },
+  branchSummaryStore: {
+    enabled: Boolean(summaryStorePath),
+    path: summaryStorePath,
+    loaded: storedSummaries.length,
+    merged: mergedSummaries.length,
+    sessionExtracted: sessionSummaries.length,
   },
   board: loadBoardPending(workspace),
 };

@@ -496,7 +496,7 @@
     {
       "id": "TASK-BUD-022",
       "description": "[P1] Capturar branch-summary returns de forma estruturada (persistência local) para permitir triagem automática de branches no session-triage.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-020"
       ],
@@ -510,7 +510,8 @@
         "session-triage consegue agregar Next Steps/In Progress/Blocked também quando vieram de branch compactado.",
         "Sem impacto em runs ativos e sem acoplamento rígido a um backend específico."
       ],
-      "notes": "Lacuna observada: alguns resumos de branch não aparecem diretamente no JSONL da sessão, reduzindo cobertura automática."
+      "notes": "Lacuna observada: alguns resumos de branch não aparecem diretamente no JSONL da sessão, reduzindo cobertura automática.",
+      "verification": "VER-BUD-071"
     },
     {
       "id": "TASK-BUD-023",
