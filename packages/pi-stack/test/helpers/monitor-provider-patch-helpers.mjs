@@ -458,6 +458,8 @@ const FRAGILITY_EMPTY_OUTPUT_GUARD_LINE =
 	"- Only classify empty-output fragility when assistant_text is actually empty (or whitespace-only).";
 const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
 	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
+const FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE =
+	"- If assistant_text has substantive non-whitespace content, do not flag empty-output fragility.";
 const FRAGILITY_EMPTY_RESPONSE_PATTERN_RE =
 	/empty response|empty output|responds with empty/i;
 
@@ -481,6 +483,10 @@ function ensureFragilityClassifierCalibration(cwd) {
 	if (!content.includes(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE)) {
 		additions.push(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE);
 		details.push("monitor-feedback-guard");
+	}
+	if (!content.includes(FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE)) {
+		additions.push(FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE);
+		details.push("substantive-output-guard");
 	}
 	if (additions.length === 0) return { changed: false, details: [] };
 

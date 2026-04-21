@@ -671,6 +671,10 @@ describe("integration: full flow", () => {
 			updated,
 			/Automated monitor feedback is not evidence of fragility by itself/i,
 		);
+		assert.match(
+			updated,
+			/If assistant_text has substantive non-whitespace content, do not flag empty-output fragility/i,
+		);
 	});
 
 	it("session_start prunes learned fragility empty-response patterns", () => {

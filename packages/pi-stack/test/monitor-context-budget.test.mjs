@@ -144,5 +144,9 @@ describe("fragility anti-false-positive calibration", () => {
       classifyText,
       /automated monitor feedback.*not.*evidence/i,
     );
+    assert.match(
+      classifyText,
+      /substantive non-whitespace content.*do not flag empty-output fragility/i,
+    );
   });
 });
