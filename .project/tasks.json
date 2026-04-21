@@ -491,7 +491,7 @@
         "Protocolo de retomada (`pi --resume` + reconciliação de eventos) documentado com riscos e limites.",
         "Requisitos de compatibilidade para múltiplos backends de execução (não só ant_colony) explicitados."
       ],
-      "notes": "Derivado de necessidade operacional do usuário: poder reiniciar terminal/processo com segurança e continuar supervisão.\n[2026-04-21] Readiness gate executado em runtime (`subagent_readiness_status`, `scheduler_governance_status`, `colony_pilot_preflight`, `context_watch_status`, `quota_alerts`, `provider_readiness_matrix`, `stack_sovereignty_status`): GO condicional para evolução non-invasive do control plane com base nas superfícies estáveis atuais; bloqueio estrito de subagentes permanece por ausência de sinal COMPLETE recente (0/1). Evidência: docs/research/control-plane-readiness-gate-2026-04-21.md."
+      "notes": "Derivado de necessidade operacional do usuário: poder reiniciar terminal/processo com segurança e continuar supervisão.\n[2026-04-21] Readiness gate executado em runtime (`subagent_readiness_status`, `scheduler_governance_status`, `colony_pilot_preflight`, `context_watch_status`, `quota_alerts`, `provider_readiness_matrix`, `stack_sovereignty_status`): GO condicional para evolução non-invasive do control plane com base nas superfícies estáveis atuais; bloqueio estrito de subagentes permanece por ausência de sinal COMPLETE recente (0/1). Evidência: docs/research/control-plane-readiness-gate-2026-04-21.md.\n[2026-04-21 L2] Política de duas pistas validada: `isolated/warm` para continuidade operacional e `global/strict` para promoção de autonomia. Evidência: docs/research/control-plane-loop-run-2026-04-21-l2.md (VER-BUD-068)."
     },
     {
       "id": "TASK-BUD-022",
@@ -1561,7 +1561,7 @@
         "Proposals viram tasks `planned` com descrição objetiva, AC mínimo e referência de origem, sem auto-close nem auto-priorização agressiva.",
         "Fluxo inclui etapa explícita de revisão humana para promover prioridade/scope antes de execução autônoma."
       ],
-      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável."
+      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável. Alinhada ao modelo de intenção híbrida (DEC-BUD-027): soft intent distribuída em skills/prompts + hard intent de governança."
     },
     {
       "id": "TASK-BUD-069",

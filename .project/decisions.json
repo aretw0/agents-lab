@@ -185,6 +185,13 @@
       "rationale": "Evita lock-in no backend atual, protege portabilidade de operação e permite que skills/processos com hard intent funcionem sobre múltiplas fontes de trabalho sem reescrever governança.",
       "status": "decided",
       "context": "Diretriz explícita do usuário para evolução first-party sem perder agnosticismo de ticket/project systems e suporte a caixa de notas em Markdown/Obsidian."
+    },
+    {
+      "id": "DEC-BUD-027",
+      "decision": "Operar com intenção híbrida: `soft intent` distribuída via skills/prompts da pi-stack para orientar comportamento e `hard intent` via tools/policies/gates para enforcement determinístico.",
+      "rationale": "A combinação maximiza autonomia prática sem perder controle: soft intent melhora coordenação contextual e hard intent garante limites auditáveis/reprodutíveis.",
+      "status": "decided",
+      "context": "Reminder explícito do usuário para preservar valor de skills/prompts distribuídos junto da trilha de hard intent."
     }
   ]
 }

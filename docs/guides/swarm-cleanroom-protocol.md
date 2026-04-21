@@ -37,6 +37,7 @@ A causa raiz dos "candidates órfãos" (como c1–c4 nesta sessão) é tratar o 
 - **Evidência obrigatória**: sem inventário + validação, sem promoção para done.
 - **Board canônico**: `.project/tasks` é o relógio macro oficial.
 - **Mudança reversível**: toda alteração crítica deve ter caminho de rollback.
+- **Intenção híbrida**: distribuir `soft intent` em skills/prompts da pi-stack e reservar `hard intent` para tools/policies/gates determinísticos.
 
 ---
 
@@ -75,6 +76,18 @@ Quando houver troca de instância/terminal, rodar este loop **antes** e **depois
 - **GO**: checks operacionais OK + readiness strict sem bloqueios.
 - **GO condicional**: runtime estável, mas readiness strict bloqueado (ex.: `minCompleteSignals=0`); seguir em supervisão manual.
 - **NO-GO**: preflight/lease/quota em falha.
+
+### Leitura em duas pistas (recomendado)
+
+- **Pista operacional (isolated/warm):** decide continuidade do loop atual com baixo atrito.
+- **Pista strict (global/history):** decide promoção de autonomia/execução mais agressiva.
+
+Exemplo rápido:
+
+```bash
+node scripts/subagent-readiness-gate.mjs --source isolated --min-user-turns 2 --days 1 --limit 1
+node scripts/subagent-readiness-gate.mjs --strict --source global --days 7 --limit 20
+```
 
 ### Caminho de desbloqueio do strict
 

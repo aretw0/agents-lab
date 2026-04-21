@@ -827,6 +827,15 @@
       "method": "command",
       "evidence": "Micro-slice de control plane validado por composição de primitivas estáveis. Docs atualizados com loop deterministic de handoff/resume e desbloqueio strict: docs/guides/swarm-cleanroom-protocol.md + docs/guides/session-triage.md. Smoke operacional executado no modo observe: scheduler_governance_status (policy=observe, activeForeignOwner=false), colony_pilot_preflight(ok=true), context_watch_status(level=ok), subagent_readiness_status(strict=true) com bloqueios explícitos, e continuidade com job em background (`sleep 12; echo CONTROL_LOOP_BG_OK`) confirmada via bg_status.",
       "timestamp": "2026-04-21T13:48:30Z"
+    },
+    {
+      "id": "VER-BUD-068",
+      "target": "TASK-BUD-021",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "evidence": "Loop L2 do control plane executado com duas pistas de readiness. isolated strict bloqueou por cold-start (`minUserTurns`, `minCompleteSignals`), global strict bloqueou por histórico (`classifyFailures`, `FAILED`, `BUDGET_EXCEEDED`), enquanto isolated warm (`minUserTurns=2`) ficou ready. Resultado formalizado como política operacional de duas pistas em docs/guides/subagent-readiness-gate.md e docs/guides/swarm-cleanroom-protocol.md. Evidência detalhada: docs/research/control-plane-loop-run-2026-04-21-l2.md.",
+      "timestamp": "2026-04-21T14:03:30Z"
     }
   ]
 }
