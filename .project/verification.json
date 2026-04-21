@@ -486,6 +486,32 @@
           "evidence": "reports: monitor-stability-2026-04-21T10-40-42-753Z.json e subagent-readiness-2026-04-21T10-40-43-216Z.json."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-A2",
+      "target": "TASK-CAL-2026-04-21-A",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-21T10:45:55.000Z",
+      "evidence": "Slice de ruído: guardrails-core agora evita notify repetitivo de strict_interactive; notify info ocorre apenas na primeira ativação por sessão, mantendo status ativo por turno.",
+      "criteria_results": [
+        {
+          "criterion": "Reduzir notify automático não acionável em auto-eventos",
+          "status": "passed",
+          "evidence": "Função shouldAnnounceStrictInteractiveMode aplicada no before_agent_start; notify condicionado ao primeiro anúncio da sessão."
+        },
+        {
+          "criterion": "Cobertura de regressão determinística",
+          "status": "passed",
+          "evidence": "vitest packages/pi-stack/test/smoke/guardrails-provider-budget-governor.test.ts (7/7) com novos testes de calibração de anúncio strict mode."
+        },
+        {
+          "criterion": "Gate de estabilidade sem classify failures",
+          "status": "passed",
+          "evidence": "scripts/monitor-stability-gate.mjs --source auto --tail-bytes 600000 --min-user-turns 3 --max-classify-failures 0 => stable=true."
+        }
+      ]
     }
   ]
 }
