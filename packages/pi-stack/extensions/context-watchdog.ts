@@ -241,9 +241,27 @@ export function shouldScheduleAutoCompactRetry(decision: ContextWatchAutoCompact
 		|| decision.reason === "in-flight";
 }
 
+export function resolveAutoCompactRetryDelayMs(
+	decision: ContextWatchAutoCompactDecision,
+	state: { nowMs: number; lastAutoCompactAt: number },
+	config: ContextWatchdogConfig,
+	defaultRetryMs: number,
+): number | undefined {
+	if (decision.trigger) return undefined;
+	if (decision.reason === "cooldown") {
+		const remaining = config.autoCompactCooldownMs - (state.nowMs - state.lastAutoCompactAt);
+		return Math.max(250, Math.floor(remaining));
+	}
+	if (shouldScheduleAutoCompactRetry(decision)) {
+		return Math.max(250, Math.floor(defaultRetryMs));
+	}
+	return undefined;
+}
+
 export type ContextWatchAutoCompactDiagnostics = {
 	decision: ContextWatchAutoCompactDecision;
 	retryRecommended: boolean;
+	retryDelayMs?: number;
 };
 
 export function buildAutoCompactDiagnostics(
@@ -256,11 +274,19 @@ export function buildAutoCompactDiagnostics(
 		isIdle: boolean;
 		hasPendingMessages: boolean;
 	},
+	defaultRetryMs = 2_000,
 ): ContextWatchAutoCompactDiagnostics {
 	const decision = shouldTriggerAutoCompact(assessment, config, state);
+	const retryDelayMs = resolveAutoCompactRetryDelayMs(
+		decision,
+		{ nowMs: state.nowMs, lastAutoCompactAt: state.lastAutoCompactAt },
+		config,
+		defaultRetryMs,
+	);
 	return {
 		decision,
-		retryRecommended: shouldScheduleAutoCompactRetry(decision),
+		retryRecommended: retryDelayMs !== undefined,
+		retryDelayMs,
 	};
 }
 
@@ -647,19 +673,28 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoCompactAt = 0;
 	let autoCompactInFlight = false;
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
+	let autoCompactRetryDueAt = 0;
 
 	const clearAutoCompactRetryTimer = () => {
 		if (!autoCompactRetryTimer) return;
 		clearTimeout(autoCompactRetryTimer);
 		autoCompactRetryTimer = undefined;
+		autoCompactRetryDueAt = 0;
 	};
 
-	const scheduleAutoCompactRetry = (ctx: ExtensionContext) => {
-		if (autoCompactRetryTimer) return;
+	const scheduleAutoCompactRetry = (ctx: ExtensionContext, delayMs: number) => {
+		const safeDelayMs = Math.max(250, Math.floor(delayMs));
+		const dueAt = Date.now() + safeDelayMs;
+		if (autoCompactRetryTimer && autoCompactRetryDueAt > 0 && autoCompactRetryDueAt <= dueAt) {
+			return;
+		}
+		clearAutoCompactRetryTimer();
+		autoCompactRetryDueAt = dueAt;
 		autoCompactRetryTimer = setTimeout(() => {
 			autoCompactRetryTimer = undefined;
+			autoCompactRetryDueAt = 0;
 			run(ctx, "message_end");
-		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		}, safeDelayMs);
 	};
 
 	const run = (ctx: ExtensionContext, reason: "session_start" | "message_end") => {
@@ -688,7 +723,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			inFlight: autoCompactInFlight,
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
-		});
+		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (autoCompactState.decision.trigger) {
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
@@ -704,8 +739,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify(`context-watch: auto compact failed (${error.message})`, "warning");
 				},
 			});
-		} else if (assessment.level === "compact" && autoCompactState.retryRecommended) {
-			scheduleAutoCompactRetry(ctx);
+		} else if (assessment.level === "compact" && autoCompactState.retryDelayMs !== undefined) {
+			scheduleAutoCompactRetry(ctx, autoCompactState.retryDelayMs);
 		} else {
 			clearAutoCompactRetryTimer();
 		}
@@ -737,16 +772,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	};
 
 	const currentAutoCompactState = (ctx: ExtensionContext, assessment: ContextWatchAssessment) => {
+		const nowMs = Date.now();
 		const state = buildAutoCompactDiagnostics(assessment, config, {
-			nowMs: Date.now(),
+			nowMs,
 			lastAutoCompactAt,
 			inFlight: autoCompactInFlight,
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
-		});
+		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
+			retryInMs,
 		};
 	};
 
@@ -887,7 +925,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					formatContextWatchStatus(assessment),
 					`action: ${assessment.action}`,
 					assessment.recommendation,
-					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"}`,
+					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 				].join("\n"),
 				assessment.severity,
 			);

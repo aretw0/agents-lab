@@ -8,6 +8,7 @@ import {
 	evaluateContextWatch,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
+	resolveAutoCompactRetryDelayMs,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
 	shouldScheduleAutoCompactRetry,
@@ -121,6 +122,12 @@ describe("context-watchdog", () => {
 		expect(pendingDecision).toEqual({ trigger: false, reason: "pending-messages" });
 		expect(shouldScheduleAutoCompactRetry(pendingDecision)).toBe(true);
 		expect(shouldScheduleAutoCompactRetry({ trigger: false, reason: "cooldown" })).toBe(false);
+		expect(resolveAutoCompactRetryDelayMs(
+			{ trigger: false, reason: "cooldown" },
+			{ nowMs: 30_000, lastAutoCompactAt: 0 },
+			cfg,
+			2_000,
+		)).toBe(90_000);
 
 		const diag = buildAutoCompactDiagnostics(compact, cfg, {
 			nowMs: 200_000,
@@ -131,6 +138,7 @@ describe("context-watchdog", () => {
 		});
 		expect(diag.decision.reason).toBe("not-idle");
 		expect(diag.retryRecommended).toBe(true);
+		expect(diag.retryDelayMs).toBe(2_000);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {
