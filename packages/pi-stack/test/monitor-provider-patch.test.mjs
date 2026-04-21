@@ -677,6 +677,83 @@ describe("integration: full flow", () => {
 		);
 	});
 
+	it("session_start applies distributed quality nudges to monitor instructions", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors");
+		mkdirSync(monitorsDir, { recursive: true });
+
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify({ defaultProvider: "anthropic" }, null, 2) + "\n",
+			"utf8",
+		);
+
+		const commitInstructionsPath = join(
+			monitorsDir,
+			"commit-hygiene.instructions.json",
+		);
+		const workInstructionsPath = join(
+			monitorsDir,
+			"work-quality.instructions.json",
+		);
+		writeFileSync(commitInstructionsPath, "[]\n", "utf8");
+		writeFileSync(workInstructionsPath, "[]\n", "utf8");
+
+		const first = simulateSessionStart(tmpDir);
+		assert.equal(first.commitHygieneInstructionsChanged, true);
+		assert.equal(first.workQualityInstructionsChanged, true);
+
+		const commitInstructions = JSON.parse(
+			readFileSync(commitInstructionsPath, "utf8"),
+		);
+		const workInstructions = JSON.parse(
+			readFileSync(workInstructionsPath, "utf8"),
+		);
+		assert.equal(
+			commitInstructions.some(
+				(entry) =>
+					typeof entry?.text === "string" &&
+					/verification evidence appears after the latest edits/i.test(entry.text),
+			),
+			true,
+		);
+		assert.equal(
+			workInstructions.some(
+				(entry) =>
+					typeof entry?.text === "string" &&
+					/cohesive slice boundaries/i.test(entry.text),
+			),
+			true,
+		);
+
+		const second = simulateSessionStart(tmpDir);
+		assert.equal(second.commitHygieneInstructionsChanged, false);
+		assert.equal(second.workQualityInstructionsChanged, false);
+
+		const commitAfterSecond = JSON.parse(
+			readFileSync(commitInstructionsPath, "utf8"),
+		);
+		const workAfterSecond = JSON.parse(
+			readFileSync(workInstructionsPath, "utf8"),
+		);
+		assert.equal(
+			commitAfterSecond.filter(
+				(entry) =>
+					typeof entry?.text === "string" &&
+					/verification evidence appears after the latest edits/i.test(entry.text),
+			).length,
+			1,
+		);
+		assert.equal(
+			workAfterSecond.filter(
+				(entry) =>
+					typeof entry?.text === "string" &&
+					/cohesive slice boundaries/i.test(entry.text),
+			).length,
+			1,
+		);
+	});
+
 	it("session_start prunes learned fragility empty-response patterns", () => {
 		const piDir = join(tmpDir, ".pi");
 		const monitorsDir = join(piDir, "monitors");

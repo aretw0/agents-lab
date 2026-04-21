@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-04-21T19:18:00Z",
-  "context": "Retomada pós-compact estabilizada e TASK-BUD-080 já concluída. TASK-BUD-079 entrou em execução com plano canônico e reforço documental de fonte distribuível vs override local para monitoria.",
+  "timestamp": "2026-04-21T19:32:00Z",
+  "context": "TASK-BUD-079 concluída com evidência canônica (VER-BUD-089): defaults de nudge de qualidade agora são promovidos por superfície distribuível da pi-stack no session_start, sem depender de edição manual local em .pi/monitors como baseline.",
   "current_phase": "post-compact-stabilization",
   "current_tasks": [
-    "TASK-BUD-079",
     "TASK-BUD-078",
-    "TASK-BUD-074"
+    "TASK-BUD-074",
+    "TASK-BUD-046"
   ],
   "blockers": [],
   "next_actions": [
-    "Implementar micro-slice técnico de TASK-BUD-079 em superfície versionada da pi-stack (sem depender de .pi/monitors local).",
-    "Avançar design de TASK-BUD-078 (hard gate language-agnostic em verification).",
-    "Planejar recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional)."
+    "Executar micro-slice de TASK-BUD-078: contrato hard gate de qualidade language-agnostic em verification.",
+    "Abrir recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional).",
+    "Retomar reconciliação legada na ordem combinada (046 -> 047 -> 052 -> 051)."
   ],
   "open_questions": [
     "No guardrail de scan-bounds, enforcement default permanece advisory em warn ou sobe para hard only em checkpoint?"
@@ -21,8 +21,11 @@
   ],
   "files_in_flux": [
     ".project/tasks.json",
+    ".project/verification.json",
     ".project/handoff.json",
-    "docs/guides/monitor-overrides.md",
-    "docs/research/task-bud-079-plan-2026-04-21.md"
+    "packages/pi-stack/extensions/monitor-provider-config.ts",
+    "packages/pi-stack/extensions/monitor-provider-patch.ts",
+    "packages/pi-stack/test/monitor-provider-patch.test.mjs",
+    "docs/research/task-bud-079-closure-2026-04-21.md"
   ]
 }

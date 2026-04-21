@@ -1033,6 +1033,32 @@
           "evidence": "Patrol de control-plane executado após compactação: context_watch_status percent=13, level=ok, operação normal sem novo spike."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-089",
+      "target": "TASK-BUD-079",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Calibração de qualidade promovida para superfície distribuível via monitor-provider-patch: session_start sincroniza nudge language-agnostic em commit-hygiene/work-quality instructions sem edição manual. Evidência automatizada: /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe --test packages/pi-stack/test/monitor-provider-patch.test.mjs (36 pass, 0 fail), incluindo teste novo 'session_start applies distributed quality nudges to monitor instructions'.",
+      "timestamp": "2026-04-21T19:30:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Existe mecanismo versionado/distribuível para carregar regras de nudge de verificação sem editar `.pi/monitors` local.",
+          "status": "passed",
+          "evidence": "Implementado em packages/pi-stack/extensions/monitor-provider-patch.ts + monitor-provider-config.ts com aplicação automática no session_start."
+        },
+        {
+          "criterion": "Documentação explicita que `.pi/monitors` local é override de workspace e não fonte de distribuição.",
+          "status": "passed",
+          "evidence": "Seção 'Fonte distribuível vs override local' em docs/guides/monitor-overrides.md."
+        },
+        {
+          "criterion": "Smoke/inspeção confirma que defaults distribuídos aplicam mensagens language-agnostic de verificação por slice.",
+          "status": "passed",
+          "evidence": "Teste de integração em monitor-provider-patch.test.mjs validando aplicação e idempotência das instruções de commit-hygiene/work-quality."
+        }
+      ]
     }
   ]
 }

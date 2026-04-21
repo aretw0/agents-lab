@@ -95,3 +95,10 @@ export const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"Use CLEAN when no issue is found; FLAG/NEW require a short description.",
 	"Do not fail just because monitor instructions are empty; classify from available context.",
 ] as const;
+
+/** Distributed soft-quality defaults (promoted from local monitor calibration). */
+export const COMMIT_HYGIENE_VERIFY_NUDGE_LINE =
+	"When tracked source/config changes exist and no verification evidence appears after the latest edits, include advisory to run project-appropriate verification before commit (language-agnostic).";
+
+export const WORK_QUALITY_SLICE_NUDGE_LINE =
+	"For no-verify findings, flag only on cohesive slice boundaries (meaningful batch of edits), not per-line churn; keep advisory concise and actionable.";

@@ -34,6 +34,7 @@ A extensão `monitor-provider-patch` agora:
 5. auto-repara overrides legados sem `prompt.system` (compat com OpenAI Codex Responses);
 6. avisa quando overrides existentes divergem do provider/modelo atual;
 7. fornece comando `/monitor-provider` para diagnosticar e sincronizar.
+8. promove defaults distribuíveis de qualidade (nudge language-agnostic de verificação em `commit-hygiene` e `work-quality`) para `*.instructions.json` no `session_start`, sem depender de edição manual local.
 
 Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sovereign` (modo `audit`/`shadow`) para começar a convergência de semântica entre guardrails e monitores sem depender de runtime third-party para observabilidade básica.
 

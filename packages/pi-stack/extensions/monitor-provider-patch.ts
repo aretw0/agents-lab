@@ -32,6 +32,7 @@ import {
 	CLASSIFIER_MODEL_SETTING_PATH,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
 	CLASSIFIER_THINKING_SETTING_PATH,
+	COMMIT_HYGIENE_VERIFY_NUDGE_LINE,
 	DEFAULT_FRAGILITY_WHEN,
 	DEFAULT_HEDGE_WHEN,
 	DEFAULT_MODEL_BY_PROVIDER,
@@ -45,6 +46,7 @@ import {
 	HEDGE_WHEN_PATTERNS,
 	HEDGE_WHEN_SETTING_PATH,
 	THINKING_LEVELS,
+	WORK_QUALITY_SLICE_NUDGE_LINE,
 	type ThinkingLevel,
 } from "./monitor-provider-config";
 import { ensureMonitorRuntimeClassifyContract } from "./monitor-runtime-contract";
@@ -780,6 +782,65 @@ export function ensureFragilityPatternHygiene(cwd: string): {
 	};
 }
 
+type InstructionEntry = {
+	text: string;
+	added_at?: string;
+};
+
+function ensureInstructionLine(opts: {
+	cwd: string;
+	fileName: string;
+	line: string;
+	detail: string;
+}): { changed: boolean; details: string[] } {
+	const filePath = join(opts.cwd, ".pi", "monitors", opts.fileName);
+	if (!existsSync(filePath)) return { changed: false, details: [] };
+
+	let entries: unknown;
+	try {
+		entries = JSON.parse(readFileSync(filePath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+	if (!Array.isArray(entries)) return { changed: false, details: [] };
+
+	const rows = entries as unknown[];
+	const hasLine = rows.some((entry) => {
+		if (!entry || typeof entry !== "object") return false;
+		const text = (entry as InstructionEntry).text;
+		return typeof text === "string" && text.trim() === opts.line;
+	});
+	if (hasLine) return { changed: false, details: [] };
+
+	rows.push({ text: opts.line, added_at: new Date().toISOString() });
+	writeFileSync(filePath, `${JSON.stringify(rows, null, 2)}\n`, "utf8");
+	return { changed: true, details: [opts.detail] };
+}
+
+export function ensureCommitHygieneInstructionCalibration(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	return ensureInstructionLine({
+		cwd,
+		fileName: "commit-hygiene.instructions.json",
+		line: COMMIT_HYGIENE_VERIFY_NUDGE_LINE,
+		detail: "commit-hygiene=verification-before-commit-nudge",
+	});
+}
+
+export function ensureWorkQualityInstructionCalibration(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	return ensureInstructionLine({
+		cwd,
+		fileName: "work-quality.instructions.json",
+		line: WORK_QUALITY_SLICE_NUDGE_LINE,
+		detail: "work-quality=slice-aware-no-verify-nudge",
+	});
+}
+
 type FragilityMonitorPolicy = {
 	when: string;
 };
@@ -1164,6 +1225,10 @@ export default function (pi: ExtensionAPI) {
 			ctx.cwd,
 		);
 		const fragilityPatternPatch = ensureFragilityPatternHygiene(ctx.cwd);
+		const commitHygieneInstructionPatch =
+			ensureCommitHygieneInstructionCalibration(ctx.cwd);
+		const workQualityInstructionPatch =
+			ensureWorkQualityInstructionCalibration(ctx.cwd);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
@@ -1188,6 +1253,16 @@ export default function (pi: ExtensionAPI) {
 			if (fragilityPatternPatch.changed) {
 				earlyDetails.push(
 					`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (commitHygieneInstructionPatch.changed) {
+				earlyDetails.push(
+					`commit-hygiene instructions synced (${commitHygieneInstructionPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (workQualityInstructionPatch.changed) {
+				earlyDetails.push(
+					`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
 				);
 			}
 			const output = planSessionStartOutput(earlyDetails, "info", {
@@ -1243,6 +1318,16 @@ export default function (pi: ExtensionAPI) {
 				`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (commitHygieneInstructionPatch.changed) {
+			details.push(
+				`commit-hygiene instructions synced (${commitHygieneInstructionPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (workQualityInstructionPatch.changed) {
+			details.push(
+				`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
+			);
+		}
 		if (systemPromptRepair.repaired.length > 0) {
 			details.push(
 				`corrigiu prompt.system ausente em ${systemPromptRepair.repaired.length} override(s)`,
@@ -1275,6 +1360,8 @@ export default function (pi: ExtensionAPI) {
 				fragilityPatch.changed ||
 				fragilityClassifierPatch.changed ||
 				fragilityPatternPatch.changed ||
+				commitHygieneInstructionPatch.changed ||
+				workQualityInstructionPatch.changed ||
 				legacyTemplateRepair.repaired.length > 0 ||
 				systemPromptRepair.repaired.length > 0 ||
 				runtimeContract.repaired.length > 0,

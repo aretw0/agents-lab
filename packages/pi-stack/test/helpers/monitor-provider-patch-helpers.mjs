@@ -462,6 +462,10 @@ const FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE =
 	"- If assistant_text has substantive non-whitespace content, do not flag empty-output fragility.";
 const FRAGILITY_EMPTY_RESPONSE_PATTERN_RE =
 	/empty response|empty output|responds with empty/i;
+const COMMIT_HYGIENE_VERIFY_NUDGE_LINE =
+	"When tracked source/config changes exist and no verification evidence appears after the latest edits, include advisory to run project-appropriate verification before commit (language-agnostic).";
+const WORK_QUALITY_SLICE_NUDGE_LINE =
+	"For no-verify findings, flag only on cohesive slice boundaries (meaningful batch of edits), not per-line churn; keep advisory concise and actionable.";
 
 function ensureFragilityClassifierCalibration(cwd) {
 	const classifyPath = join(cwd, ".pi", "monitors", "fragility", "classify.md");
@@ -533,6 +537,47 @@ function ensureFragilityPatternHygiene(cwd) {
 	};
 }
 
+function ensureInstructionLine(cwd, fileName, line, detail) {
+	const instructionsPath = join(cwd, ".pi", "monitors", fileName);
+	if (!existsSync(instructionsPath)) return { changed: false, details: [] };
+
+	let rows;
+	try {
+		rows = JSON.parse(readFileSync(instructionsPath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+	if (!Array.isArray(rows)) return { changed: false, details: [] };
+
+	const hasLine = rows.some((entry) => {
+		if (!entry || typeof entry !== "object") return false;
+		return typeof entry.text === "string" && entry.text.trim() === line;
+	});
+	if (hasLine) return { changed: false, details: [] };
+
+	rows.push({ text: line, added_at: new Date().toISOString() });
+	writeFileSync(instructionsPath, JSON.stringify(rows, null, 2) + "\n", "utf8");
+	return { changed: true, details: [detail] };
+}
+
+function ensureCommitHygieneInstructionCalibration(cwd) {
+	return ensureInstructionLine(
+		cwd,
+		"commit-hygiene.instructions.json",
+		COMMIT_HYGIENE_VERIFY_NUDGE_LINE,
+		"commit-hygiene=verification-before-commit-nudge",
+	);
+}
+
+function ensureWorkQualityInstructionCalibration(cwd) {
+	return ensureInstructionLine(
+		cwd,
+		"work-quality.instructions.json",
+		WORK_QUALITY_SLICE_NUDGE_LINE,
+		"work-quality=slice-aware-no-verify-nudge",
+	);
+}
+
 function ensureFragilityMonitorPolicy(cwd, policy) {
 	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
 	if (!existsSync(monitorPath)) return { changed: false, details: [] };
@@ -593,6 +638,10 @@ function simulateSessionStart(cwd) {
 	const fragilityPatch = ensureFragilityMonitorPolicy(cwd, fragilityPolicy);
 	const fragilityClassifierPatch = ensureFragilityClassifierCalibration(cwd);
 	const fragilityPatternPatch = ensureFragilityPatternHygiene(cwd);
+	const commitHygieneInstructionPatch =
+		ensureCommitHygieneInstructionCalibration(cwd);
+	const workQualityInstructionPatch =
+		ensureWorkQualityInstructionCalibration(cwd);
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
@@ -617,6 +666,16 @@ function simulateSessionStart(cwd) {
 				`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (commitHygieneInstructionPatch.changed) {
+			earlyDetails.push(
+				`commit-hygiene instructions synced (${commitHygieneInstructionPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (workQualityInstructionPatch.changed) {
+			earlyDetails.push(
+				`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
+			);
+		}
 		const output = planSessionStartOutput(earlyDetails, "info", {
 			requiresReload: earlyDetails.length > 0,
 		});
@@ -627,6 +686,8 @@ function simulateSessionStart(cwd) {
 			fragilityChanged: fragilityPatch.changed,
 			fragilityClassifierChanged: fragilityClassifierPatch.changed,
 			fragilityPatternsChanged: fragilityPatternPatch.changed,
+			commitHygieneInstructionsChanged: commitHygieneInstructionPatch.changed,
+			workQualityInstructionsChanged: workQualityInstructionPatch.changed,
 			created: [],
 			repaired: [],
 			output,
@@ -647,6 +708,16 @@ function simulateSessionStart(cwd) {
 	if (fragilityPatternPatch.changed) {
 		details.push(`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`);
 	}
+	if (commitHygieneInstructionPatch.changed) {
+		details.push(
+			`commit-hygiene instructions synced (${commitHygieneInstructionPatch.details.join(", ") || "ok"})`,
+		);
+	}
+	if (workQualityInstructionPatch.changed) {
+		details.push(
+			`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
+		);
+	}
 	if (repaired.length > 0) details.push(`corrigiu template legado em ${repaired.length} override(s)`);
 	if (repairedSystemPrompt.length > 0) {
 		details.push(`corrigiu prompt.system ausente em ${repairedSystemPrompt.length} override(s)`);
@@ -658,6 +729,8 @@ function simulateSessionStart(cwd) {
 			fragilityPatch.changed ||
 			fragilityClassifierPatch.changed ||
 			fragilityPatternPatch.changed ||
+			commitHygieneInstructionPatch.changed ||
+			workQualityInstructionPatch.changed ||
 			repaired.length > 0 ||
 			repairedSystemPrompt.length > 0,
 	});
@@ -668,6 +741,8 @@ function simulateSessionStart(cwd) {
 		fragilityChanged: fragilityPatch.changed,
 		fragilityClassifierChanged: fragilityClassifierPatch.changed,
 		fragilityPatternsChanged: fragilityPatternPatch.changed,
+		commitHygieneInstructionsChanged: commitHygieneInstructionPatch.changed,
+		workQualityInstructionsChanged: workQualityInstructionPatch.changed,
 		created,
 		repaired,
 		repairedSystemPrompt,
@@ -706,5 +781,7 @@ export {
 	ensureFragilityMonitorContext,
 	ensureFragilityClassifierCalibration,
 	ensureFragilityPatternHygiene,
+	ensureCommitHygieneInstructionCalibration,
+	ensureWorkQualityInstructionCalibration,
 	simulateSessionStart,
 };
