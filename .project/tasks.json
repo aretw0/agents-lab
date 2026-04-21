@@ -1566,7 +1566,7 @@
     {
       "id": "TASK-BUD-069",
       "description": "[P1] Executar micro-slice de control plane portable usando capacidades estáveis já publicadas (lease governance + watchdog advisory + preflight/readiness), sem ampliar superfície de runtime.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-021"
       ],
@@ -1580,7 +1580,8 @@
         "Smoke operacional confirma continuidade de supervisão sem interromper jobs em background no modo observe.",
         "Checklist explicita condição de bloqueio estrito de subagentes (ausência de COMPLETE recente) e caminho de desbloqueio com evidência."
       ],
-      "notes": "Derivada do gate de prontidão 2026-04-21 para avançar control plane por composição de primitivas estáveis, evitando nova infraestrutura prematura."
+      "notes": "Derivada do gate de prontidão 2026-04-21 para avançar control plane por composição de primitivas estáveis, evitando nova infraestrutura prematura.",
+      "verification": "VER-BUD-067"
     }
   ]
 }

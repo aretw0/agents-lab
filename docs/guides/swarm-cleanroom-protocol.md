@@ -60,6 +60,30 @@ Antes de lançar swarm:
 
 ---
 
+## Fase A.1 — Handoff/Resume loop (control plane portátil)
+
+Quando houver troca de instância/terminal, rodar este loop **antes** e **depois** da retomada:
+
+1. `scheduler_governance_status` → confirmar lease owner ativo, `activeForeignOwner=false`.
+2. `colony_pilot_preflight` → `ok=true` sem missing capabilities.
+3. `context_watch_status` → nível `ok|warn` (evitar retomar em `compact` sem checkpoint).
+4. `quota_alerts` + `provider_readiness_matrix` → sem `BLOCK` no provider ativo.
+5. `subagent_readiness_status(strict=true)` → registrar bloqueios explícitos antes de delegar swarm.
+
+### Resultado do loop
+
+- **GO**: checks operacionais OK + readiness strict sem bloqueios.
+- **GO condicional**: runtime estável, mas readiness strict bloqueado (ex.: `minCompleteSignals=0`); seguir em supervisão manual.
+- **NO-GO**: preflight/lease/quota em falha.
+
+### Caminho de desbloqueio do strict
+
+Se `subagent_readiness_status(strict=true)` bloquear por atividade recente:
+
+1. atingir `minUserTurns` no recorte atual da sessão;
+2. executar ciclo controlado que gere `COLONY_SIGNAL:COMPLETE` com evidência;
+3. reexecutar readiness strict e anexar resultado no board.
+
 ## Fase B — Execução swarm
 
 Durante a execução:

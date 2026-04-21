@@ -130,6 +130,9 @@ function parseArgs(argv) {
 				"  node scripts/subagent-readiness-gate.mjs",
 				"  node scripts/subagent-readiness-gate.mjs --strict --write-report",
 				"  node scripts/subagent-readiness-gate.mjs --limit 3 --days 2",
+				"",
+				"Loop control-plane (rápido):",
+				"  node scripts/subagent-readiness-gate.mjs --strict --days 1 --limit 1",
 			].join("\n"));
 			process.exit(0);
 		}

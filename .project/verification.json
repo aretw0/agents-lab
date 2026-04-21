@@ -818,6 +818,15 @@
       "method": "command",
       "evidence": "Gate de prontidão do control plane executado com superfícies estáveis: subagent_readiness_status(strict=true), context_watch_status, colony_pilot_preflight, scheduler_governance_status, monitors_compact_status, quota_alerts, provider_readiness_matrix, stack_sovereignty_status. Resultado: GO condicional para evolução non-invasive; bloqueio estrito permanece por minCompleteSignals=0 (sem COMPLETE recente). Evidência consolidada em docs/research/control-plane-readiness-gate-2026-04-21.md.",
       "timestamp": "2026-04-21T13:36:00Z"
+    },
+    {
+      "id": "VER-BUD-067",
+      "target": "TASK-BUD-069",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Micro-slice de control plane validado por composição de primitivas estáveis. Docs atualizados com loop deterministic de handoff/resume e desbloqueio strict: docs/guides/swarm-cleanroom-protocol.md + docs/guides/session-triage.md. Smoke operacional executado no modo observe: scheduler_governance_status (policy=observe, activeForeignOwner=false), colony_pilot_preflight(ok=true), context_watch_status(level=ok), subagent_readiness_status(strict=true) com bloqueios explícitos, e continuidade com job em background (`sleep 12; echo CONTROL_LOOP_BG_OK`) confirmada via bg_status.",
+      "timestamp": "2026-04-21T13:48:30Z"
     }
   ]
 }
