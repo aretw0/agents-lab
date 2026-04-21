@@ -899,6 +899,15 @@
       "method": "test",
       "evidence": "Consolidação de budget por provider validada. Runtime: `quota_visibility_provider_budgets(days=14)` retornou estado por provider; `quota_visibility_status(days=14)` expôs `providerBudgetPolicy/providerBudgets`; `quota_visibility_export(days=14)` gerou bundle em `.pi/reports/quota-visibility-*.json`. Teste smoke: `node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` => 30 passed (inclui novo caso de warning quando shares >100%). Síntese: docs/research/task-bud-024-closure-2026-04-21.md.",
       "timestamp": "2026-04-21T15:30:00Z"
+    },
+    {
+      "id": "VER-BUD-076",
+      "target": "TASK-BUD-025",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Gate hard por provider budget validado no colony-pilot. Evidências: (1) testes de bloqueio e override auditável em `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (`evaluateProviderBudgetGate bloqueia provider em BLOCK sem override` e `permite override auditável`); (2) execução de smoke: `node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 65 passed; (3) mensagem de bloqueio com ação corretiva em `packages/pi-stack/extensions/colony-pilot.ts` inclui ajuste de budget, override auditável (`budget-override:<motivo>`) e inspeção via `/quota-visibility budget`.",
+      "timestamp": "2026-04-21T15:38:00Z"
     }
   ]
 }
