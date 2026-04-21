@@ -96,6 +96,7 @@ node scripts/session-triage.mjs --no-summary-store
   - **Unlock swarm now** (P0/promotion/bloqueios)
   - **Later stabilization** (restante)
 - detecção de **tooling/capability gaps** com candidatos de claim (`toolingClaims`) para bootstrap/permissão antes de execução principal
+- recomendação de **delegation lane** (`recommendation`) para escalar com pragmatismo: `bootstrap-first` -> `subagent-as-tool` -> `swarm-candidate`
 
 Contrato canônico de eventos (v1):
 - [`docs/primitives/conversation-event-canonical-schema.md`](../primitives/conversation-event-canonical-schema.md)
@@ -129,6 +130,11 @@ Quando a triagem mostrar blockers recorrentes como `command-not-found`, `ENOENT`
 1. registrar claim de capability gap (com recomendação de ação);
 2. remediar bootstrap/permissão primeiro;
 3. só então iniciar lote autônomo principal.
+
+Se a saída `recommendation.lane` vier como:
+- `bootstrap-first`: resolver claims antes de delegar;
+- `subagent-as-tool`/`subagent-warmup`: delegar micro-slice curto;
+- `swarm-candidate`: rodar gate strict e considerar swarm com budget explícito.
 
 Referência da primitiva: `docs/primitives/capability-gap-claim.md`.
 

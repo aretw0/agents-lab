@@ -491,6 +491,22 @@
         "Saída humana e JSON incluem lista de claim candidates com recomendação de ação/bootstrap.",
         "Guia documenta uso dessa saída para bloquear início de lote até remediação explícita."
       ]
+    },
+    {
+      "id": "REQ-BUD-038",
+      "description": "A triagem do control-plane deve emitir recomendação de lane de delegação (manual/subagent/swarm/bootstrap-first) baseada em sinais objetivos de risco/prontidão.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-037"
+      ],
+      "acceptance_criteria": [
+        "Output do session-triage inclui recomendação parseável com lane, razões e próxima ação.",
+        "Se houver capability/tooling gaps, lane recomendada deve ser bootstrap-first.",
+        "Quando não houver gaps e houver sinais de execução estável, lane deve incentivar subagent-as-tool antes de swarm-candidate."
+      ]
     }
   ]
 }

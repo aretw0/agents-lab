@@ -980,6 +980,24 @@
       "method": "command",
       "evidence": "`scripts/session-triage.mjs` agora agrega `toolingGaps` por sessão/canônico e `aggregate.toolingClaims` com recomendações de bootstrap/permissão (primitiva capability gap claim). Evidência: `node scripts/session-triage.mjs --days 1 --limit 4` (seção 'Tooling blockers') e `--json` com chaves `toolingGaps/toolingClaims` (arquivo `.sandbox/pi-agent/triage/session-triage.latest.json`). Documentação atualizada em `docs/guides/session-triage.md` e `docs/primitives/capability-gap-claim.md`.",
       "timestamp": "2026-04-21T17:20:00Z"
+    },
+    {
+      "id": "VER-BUD-085",
+      "target": "TASK-BUD-076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "`scripts/session-triage.mjs` agora emite `recommendation` com lane/razões/nextAction/confidence e seção humana 'Delegation lane recommendation'. Evidência: `node scripts/session-triage.mjs --days 1 --limit 2` (lane bootstrap-first exibida) e `--json` (chaves `recommendation.lane/confidence/nextAction` em `.sandbox/pi-agent/triage/session-triage.latest.json`). Guia atualizado em `docs/guides/session-triage.md`.",
+      "timestamp": "2026-04-21T17:35:00Z"
+    },
+    {
+      "id": "VER-BUD-086",
+      "target": "TASK-BUD-076",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Teste automatizado adicionado para lane de delegação no triage: `scripts/test/session-triage-delegation.test.mjs`. Execução: `node --test scripts/test/session-triage-delegation.test.mjs` => 2 passed (bootstrap-first quando há tooling gap; swarm-candidate quando COMPLETE + unlock backlog).",
+      "timestamp": "2026-04-21T17:45:00Z"
     }
   ]
 }

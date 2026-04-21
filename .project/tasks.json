@@ -1732,6 +1732,30 @@
       ],
       "notes": "Primitiva transversal (não específica de colônia) para scouts/coordenadores identificarem pré-condições faltantes cedo.",
       "verification": "VER-BUD-084"
+    },
+    {
+      "id": "TASK-BUD-076",
+      "description": "[P1] Implementar recomendação de lane de delegação no session-triage (manual/subagent/swarm/bootstrap-first) para acelerar com qualidade.",
+      "status": "completed",
+      "type": "feature",
+      "depends_on": [
+        "TASK-BUD-075"
+      ],
+      "references": [
+        "DEC-BUD-031",
+        "REQ-BUD-038"
+      ],
+      "acceptance_criteria": [
+        "`scripts/session-triage.mjs` inclui campo JSON `recommendation` com lane/razões/nextAction/confidence.",
+        "Saída humana mostra seção compacta de recomendação de delegação.",
+        "Guia de triagem descreve como usar a lane para decidir subagent-as-tool vs swarm."
+      ],
+      "files": [
+        "scripts/session-triage.mjs",
+        "docs/guides/session-triage.md"
+      ],
+      "notes": "Escada operacional para throughput progressivo: bootstrap-first quando faltam ferramentas; depois subagent-as-tool; swarm apenas com sinais de estabilidade.",
+      "verification": "VER-BUD-085"
     }
   ]
 }

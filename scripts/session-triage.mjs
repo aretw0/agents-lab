@@ -191,6 +191,64 @@ function buildToolingClaimCandidates(gapTotals) {
     .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
 }
 
+function recommendDelegationLane(report) {
+  const claims = Array.isArray(report?.aggregate?.toolingClaims) ? report.aggregate.toolingClaims : [];
+  const claimCount = claims.reduce((sum, item) => sum + (Number(item?.count) || 0), 0);
+  const completeSignals = Number(report?.aggregate?.colonySignals?.COMPLETE ?? 0);
+  const unlockNowCount = Array.isArray(report?.board?.unlockNow) ? report.board.unlockNow.length : 0;
+  const blockedNowCount = Array.isArray(report?.board?.unlockNow)
+    ? report.board.unlockNow.filter((t) => t?.status === "blocked").length
+    : 0;
+
+  if (claimCount > 0) {
+    return {
+      lane: "bootstrap-first",
+      confidence: "high",
+      reasons: [
+        `toolingClaims=${claimCount}`,
+        "Existem gaps de ferramenta/capability que devem ser tratados antes da delegação.",
+      ],
+      nextAction: "Abrir claim de capability, corrigir bootstrap/permissão e só então delegar execução.",
+      metrics: { claimCount, completeSignals, unlockNowCount, blockedNowCount },
+    };
+  }
+
+  if (completeSignals <= 0) {
+    return {
+      lane: "subagent-warmup",
+      confidence: "medium",
+      reasons: ["Sem sinal COMPLETE recente no recorte.", "Delegação leve recomendada antes de swarm."],
+      nextAction: "Rodar 1 subtask curta com subagent-as-tool e reavaliar readiness.",
+      metrics: { claimCount, completeSignals, unlockNowCount, blockedNowCount },
+    };
+  }
+
+  if (unlockNowCount >= 3) {
+    return {
+      lane: "swarm-candidate",
+      confidence: "medium",
+      reasons: [
+        `unlockNow=${unlockNowCount}`,
+        "Backlog urgente com sinais de execução recente suficiente para escalar.",
+      ],
+      nextAction: "Executar gate strict (preflight/readiness/quota) e lançar swarm curto com budget explícito.",
+      metrics: { claimCount, completeSignals, unlockNowCount, blockedNowCount },
+    };
+  }
+
+  return {
+    lane: "subagent-as-tool",
+    confidence: "high",
+    reasons: [
+      "Sem tooling claims ativas.",
+      `COMPLETE=${completeSignals}`,
+      "Escalar por delegação leve antes de swarm total.",
+    ],
+    nextAction: "Delegar micro-slice para subagent e manter coordenação no control-plane.",
+    metrics: { claimCount, completeSignals, unlockNowCount, blockedNowCount },
+  };
+}
+
 function toIsoOrFallback(raw, fallbackIso) {
   if (!raw) return fallbackIso;
   const d = new Date(raw);
@@ -548,6 +606,13 @@ function renderHuman(report) {
   }
   lines.push("");
 
+  lines.push("## Delegation lane recommendation");
+  const rec = report.recommendation ?? { lane: "manual-micro-slice", confidence: "low", reasons: [], nextAction: "Reavaliar sinais." };
+  lines.push(`lane: ${rec.lane} (confidence=${rec.confidence})`);
+  for (const reason of rec.reasons ?? []) lines.push(`- ${reason}`);
+  lines.push(`next: ${rec.nextAction}`);
+  lines.push("");
+
   lines.push(`## Branch-summary aggregation (merged=${report.aggregate.branchSummariesCount ?? 0})`);
   lines.push("### In Progress");
   if (report.aggregate.inProgress.length === 0) lines.push("- (none)");
@@ -640,6 +705,9 @@ for (const s of sessions) {
   }
 }
 
+const board = loadBoardPending(workspace);
+const toolingGaps = Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+
 const report = {
   generatedAt: new Date().toISOString(),
   workspace,
@@ -654,10 +722,8 @@ const report = {
   sessions,
   aggregate: {
     colonySignals: Object.fromEntries([...signalTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
-    toolingGaps: Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
-    toolingClaims: buildToolingClaimCandidates(
-      Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
-    ),
+    toolingGaps,
+    toolingClaims: buildToolingClaimCandidates(toolingGaps),
     providers: Object.fromEntries([...providerTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
     nextSteps: dedupeStrings(allNext),
     inProgress: dedupeStrings(allInProgress),
@@ -671,8 +737,10 @@ const report = {
     merged: mergedSummaries.length,
     sessionExtracted: sessionSummaries.length,
   },
-  board: loadBoardPending(workspace),
+  board,
 };
+
+report.recommendation = recommendDelegationLane(report);
 
 if (opts.json) {
   console.log(JSON.stringify(report, null, 2));

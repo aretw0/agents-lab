@@ -213,6 +213,13 @@
       "decision": "Introduzir a primitiva de 'Capability Gap Claim': quando faltar ferramenta/capability para executar trabalho, o agente deve registrar blocker estruturado e solicitar bootstrap/permissão antes de iniciar execução principal.",
       "rationale": "Evita execução frágil, reduz retrabalho e cria trilha auditável de pré-condições operacionais. Permite que scouts levantem gaps cedo sem acoplar a uma implementação de colônia específica.",
       "context": "Solicitação do usuário para suportar fluxo onde agente pode pedir construção/permissão de ferramenta antes de começar o trabalho principal."
+    },
+    {
+      "id": "DEC-BUD-031",
+      "status": "decided",
+      "decision": "Adotar uma escada de delegação explícita no control-plane: manual micro-slice -> subagent-as-tool -> swarm-candidate, com bloqueio automático em modo bootstrap-first quando houver capability gaps.",
+      "rationale": "Aumenta velocidade com qualidade sem salto prematuro para swarm; reduz retrabalho ao tratar lacunas de ferramenta/capability antes da delegação pesada.",
+      "context": "Solicitação do usuário para acelerar com pragmatismo, usando sub-agentes como ferramentas e escalando para swarms quando houver confiança."
     }
   ]
 }

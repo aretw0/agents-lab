@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-21T17:24:00Z",
-  "context": "Loop maior concluído com segurança e pragmatismo: primitiva Capability Gap Claim formalizada e materializada no `session-triage` (DEC-BUD-030, REQ-BUD-037, TASK-BUD-075 closed com VER-BUD-084). Também mantida fila de release preparada (`fresh-horns-laugh`) e trilha devcontainer opcional registrada (TASK-BUD-074 planned).",
-  "current_phase": "maturity-queue-prep",
+  "timestamp": "2026-04-21T17:38:00Z",
+  "context": "Loop de aceleração com qualidade evoluiu: após Capability Gap Claim (TASK-BUD-075), foi entregue recomendação de delegation lane no triage (TASK-BUD-076 closed). Agora o control-plane indica quando ficar em bootstrap-first (gaps), quando usar subagent-as-tool e quando considerar swarm-candidate. Release queue segue preparada (changeset atualizado).",
+  "current_phase": "progressive-delegation",
   "current_tasks": [
     "TASK-BUD-046",
     "TASK-BUD-047",
@@ -13,16 +13,16 @@
   ],
   "blockers": [],
   "next_actions": [
-    "Rodar 2-3 ciclos medindo redução de re-leitura com `context:preload` e delta de `toolingClaims` no triage.",
+    "Medir por 2-3 ciclos se delegation lane reduz retrabalho e melhora throughput antes de escalar para swarm-candidate.",
     "Retomar reconciliação dos legados (046 -> 047 -> 052 -> 051) fechando por evidência quando possível.",
-    "Abrir micro-slice inicial de TASK-BUD-074 com blueprint `.devcontainer` mínimo (sem tentar fechar container completo no mesmo lote)."
+    "Abrir micro-slice inicial de TASK-BUD-074 para blueprint `.devcontainer` mínimo em lote separado."
   ],
   "open_questions": [
-    "Qual contrato mínimo de espelho (`.project` -> vault) evita drift e permite replay determinístico?",
-    "Qual UX de comando estilo `farm` melhor preserva usuário/workdir corretos em attach Docker Desktop no Windows e Linux?"
+    "Qual UX de comando estilo `farm` melhor preserva usuário/workdir corretos em attach Docker Desktop no Windows e Linux?",
+    "Qual contrato mínimo de espelho (`.project` -> vault) evita drift e permite replay determinístico?"
   ],
   "key_decisions_pending": [
-    "Follow-up de DEC-BUD-028/DEC-BUD-027 para granularidade operacional de soft intent e sincronização mirror."
+    "Follow-up de DEC-BUD-028/DEC-BUD-031 para integração entre mirror adapter e escada de delegação."
   ],
   "files_in_flux": []
 }
