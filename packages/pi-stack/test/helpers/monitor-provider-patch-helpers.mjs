@@ -403,6 +403,40 @@ function normalizeFragilityContext(input) {
 	return ordered;
 }
 
+const FRAGILITY_EMPTY_OUTPUT_GUARD_LINE =
+	"- Only classify empty-output fragility when assistant_text is actually empty (or whitespace-only).";
+const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
+	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
+
+function ensureFragilityClassifierCalibration(cwd) {
+	const classifyPath = join(cwd, ".pi", "monitors", "fragility", "classify.md");
+	if (!existsSync(classifyPath)) return { changed: false, details: [] };
+
+	let content = "";
+	try {
+		content = readFileSync(classifyPath, "utf8");
+	} catch {
+		return { changed: false, details: [] };
+	}
+
+	const details = [];
+	const additions = [];
+	if (!content.includes(FRAGILITY_EMPTY_OUTPUT_GUARD_LINE)) {
+		additions.push(FRAGILITY_EMPTY_OUTPUT_GUARD_LINE);
+		details.push("empty-output-guard");
+	}
+	if (!content.includes(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE)) {
+		additions.push(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE);
+		details.push("monitor-feedback-guard");
+	}
+	if (additions.length === 0) return { changed: false, details: [] };
+
+	const calibrationBlock = ["Calibration guardrails:", ...additions].join("\n");
+	const next = `${content.trimEnd()}\n\n${calibrationBlock}\n`;
+	writeFileSync(classifyPath, next, "utf8");
+	return { changed: true, details };
+}
+
 function ensureFragilityMonitorContext(cwd) {
 	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
 	if (!existsSync(monitorPath)) return { changed: false, details: [] };
@@ -440,6 +474,7 @@ function simulateSessionStart(cwd) {
 	};
 	const hedgePatch = ensureHedgeMonitorPolicy(cwd, hedgePolicy);
 	const fragilityPatch = ensureFragilityMonitorContext(cwd);
+	const fragilityClassifierPatch = ensureFragilityClassifierCalibration(cwd);
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
@@ -448,6 +483,7 @@ function simulateSessionStart(cwd) {
 			hedgePolicy,
 			hedgeChanged: hedgePatch.changed,
 			fragilityChanged: fragilityPatch.changed,
+			fragilityClassifierChanged: fragilityClassifierPatch.changed,
 			created: [],
 			repaired: [],
 		};
@@ -462,6 +498,7 @@ function simulateSessionStart(cwd) {
 		hedgePolicy,
 		hedgeChanged: hedgePatch.changed,
 		fragilityChanged: fragilityPatch.changed,
+		fragilityClassifierChanged: fragilityClassifierPatch.changed,
 		created,
 		repaired,
 		repairedSystemPrompt,
@@ -491,5 +528,6 @@ export {
 	normalizeHedgeContext,
 	ensureHedgeMonitorPolicy,
 	ensureHedgeMonitorContext,
+	ensureFragilityClassifierCalibration,
 	simulateSessionStart,
 };

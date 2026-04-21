@@ -487,6 +487,51 @@ describe("integration: full flow", () => {
 		]);
 	});
 
+	it("session_start calibrates fragility classifier against empty-output hallucinations", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors", "fragility");
+		mkdirSync(monitorsDir, { recursive: true });
+
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify(
+				{
+					defaultProvider: "anthropic",
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		const classifyPath = join(monitorsDir, "classify.md");
+		writeFileSync(
+			classifyPath,
+			[
+				"An agent just performed actions and responded.",
+				"The agent then said:",
+				'"{{ assistant_text }}"',
+				"",
+				"{{ instructions }}",
+			].join("\n"),
+			"utf8",
+		);
+
+		const result = simulateSessionStart(tmpDir);
+		assert.equal(result.provider, "anthropic");
+		assert.equal(result.fragilityClassifierChanged, true);
+
+		const updated = readFileSync(classifyPath, "utf8");
+		assert.match(
+			updated,
+			/Only classify empty-output fragility when assistant_text is actually empty/i,
+		);
+		assert.match(
+			updated,
+			/Automated monitor feedback is not evidence of fragility by itself/i,
+		);
+	});
+
 	it("repara template legado dos classifiers no session_start", () => {
 		const piDir = join(tmpDir, ".pi");
 		const monitorsDir = join(piDir, "monitors");

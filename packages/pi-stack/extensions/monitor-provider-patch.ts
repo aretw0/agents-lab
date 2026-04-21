@@ -672,6 +672,43 @@ function normalizeFragilityContext(input: unknown): string[] {
 	return ordered;
 }
 
+const FRAGILITY_EMPTY_OUTPUT_GUARD_LINE =
+	"- Only classify empty-output fragility when assistant_text is actually empty (or whitespace-only).";
+const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
+	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
+
+export function ensureFragilityClassifierCalibration(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	const classifyPath = join(cwd, ".pi", "monitors", "fragility", "classify.md");
+	if (!existsSync(classifyPath)) return { changed: false, details: [] };
+
+	let content = "";
+	try {
+		content = readFileSync(classifyPath, "utf8");
+	} catch {
+		return { changed: false, details: [] };
+	}
+
+	const details: string[] = [];
+	const additions: string[] = [];
+	if (!content.includes(FRAGILITY_EMPTY_OUTPUT_GUARD_LINE)) {
+		additions.push(FRAGILITY_EMPTY_OUTPUT_GUARD_LINE);
+		details.push("empty-output-guard");
+	}
+	if (!content.includes(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE)) {
+		additions.push(FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE);
+		details.push("monitor-feedback-guard");
+	}
+	if (additions.length === 0) return { changed: false, details: [] };
+
+	const calibrationBlock = ["Calibration guardrails:", ...additions].join("\n");
+	const next = `${content.trimEnd()}\n\n${calibrationBlock}\n`;
+	writeFileSync(classifyPath, next, "utf8");
+	return { changed: true, details };
+}
+
 export function ensureFragilityMonitorContext(cwd: string): {
 	changed: boolean;
 	details: string[];
@@ -976,6 +1013,9 @@ export default function (pi: ExtensionAPI) {
 		};
 		const hedgePatch = ensureHedgeMonitorPolicy(ctx.cwd, hedgePolicy);
 		const fragilityPatch = ensureFragilityMonitorContext(ctx.cwd);
+		const fragilityClassifierPatch = ensureFragilityClassifierCalibration(
+			ctx.cwd,
+		);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
@@ -990,6 +1030,11 @@ export default function (pi: ExtensionAPI) {
 			if (fragilityPatch.changed) {
 				earlyDetails.push(
 					`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (fragilityClassifierPatch.changed) {
+				earlyDetails.push(
+					`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 				);
 			}
 			if (earlyDetails.length > 0) {
@@ -1029,6 +1074,11 @@ export default function (pi: ExtensionAPI) {
 		if (fragilityPatch.changed) {
 			details.push(
 				`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (fragilityClassifierPatch.changed) {
+			details.push(
+				`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 			);
 		}
 		if (systemPromptRepair.repaired.length > 0) {

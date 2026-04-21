@@ -125,4 +125,24 @@ describe("fragility anti-false-positive calibration", () => {
     assert.match(classifyText, /investigative/i);
     assert.match(classifyText, /observing-and-reporting is not a fragility/i);
   });
+
+  it("guards empty-response pattern against monitor-feedback hallucinations", () => {
+    const classifyPath = join(
+      process.cwd(),
+      ".pi",
+      "monitors",
+      "fragility",
+      "classify.md",
+    );
+    const classifyText = readFileSync(classifyPath, "utf8");
+
+    assert.match(
+      classifyText,
+      /only classify empty-output fragility when assistant_text is actually empty/i,
+    );
+    assert.match(
+      classifyText,
+      /automated monitor feedback.*not.*evidence/i,
+    );
+  });
 });
