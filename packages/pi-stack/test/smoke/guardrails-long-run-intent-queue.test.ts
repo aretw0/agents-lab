@@ -7,6 +7,7 @@ import {
   dequeueDeferredIntent,
   enqueueDeferredIntent,
   listDeferredIntents,
+  parseLaneQueueAddText,
   resolveLongRunIntentQueueConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
@@ -45,6 +46,13 @@ describe("guardrails-core long-run intent queue", () => {
     expect(shouldQueueInputForLongRun("/status", true, cfg)).toBe(false);
     expect(shouldQueueInputForLongRun("lane-now: processa agora", true, cfg)).toBe(false);
     expect(shouldQueueInputForLongRun("registrar isso", false, cfg)).toBe(false);
+  });
+
+  it("parses explicit lane-queue add payloads", () => {
+    expect(parseLaneQueueAddText("add revisar isso depois")).toBe("revisar isso depois");
+    expect(parseLaneQueueAddText("ADD   item")).toBe("item");
+    expect(parseLaneQueueAddText("list")).toBeUndefined();
+    expect(parseLaneQueueAddText("add")).toBeUndefined();
   });
 
   it("enqueues items and enforces max size", () => {

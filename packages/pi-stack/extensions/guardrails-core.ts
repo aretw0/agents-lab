@@ -655,6 +655,13 @@ export function shouldQueueInputForLongRun(
   return true;
 }
 
+export function parseLaneQueueAddText(args: string): string | undefined {
+  const trimmed = String(args ?? "").trim();
+  if (!/^add(\s+|$)/i.test(trimmed)) return undefined;
+  const text = trimmed.replace(/^add\b/i, "").trim();
+  return text.length > 0 ? text : undefined;
+}
+
 export function shouldAutoDrainDeferredIntent(
   activeLongRun: boolean,
   queuedCount: number,
@@ -1072,14 +1079,41 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|list|pop|clear]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|list|add <text>|pop|clear]",
     handler: async (args, ctx) => {
-      const sub = (args ?? "").trim().toLowerCase().split(/\s+/)[0] || "status";
+      const rawArgs = String(args ?? "").trim();
+      const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
 
       if (sub === "clear") {
         const cleared = clearDeferredIntentQueue(ctx.cwd);
         updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages());
         ctx.ui.notify(`lane-queue: cleared ${cleared.cleared} item(s).`, "info");
+        return;
+      }
+
+      if (sub === "add") {
+        const text = parseLaneQueueAddText(rawArgs);
+        if (!text) {
+          ctx.ui.notify("lane-queue: usage /lane-queue add <text>", "warning");
+          return;
+        }
+
+        const queued = enqueueDeferredIntent(
+          ctx.cwd,
+          text,
+          "interactive-command",
+          longRunIntentQueueConfig.maxItems,
+        );
+        appendAuditEntry(ctx, "guardrails-core.long-run-intent-queued", {
+          atIso: new Date().toISOString(),
+          itemId: queued.itemId,
+          queuedCount: queued.queuedCount,
+          queuePath: queued.queuePath,
+          activeLongRun: !ctx.isIdle() || ctx.hasPendingMessages(),
+          manual: true,
+        });
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages());
+        ctx.ui.notify(`lane-queue: queued ${queued.itemId} (total=${queued.queuedCount})`, "info");
         return;
       }
 
