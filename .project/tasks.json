@@ -533,7 +533,7 @@
         "session-triage aceita fonte abstrata (adapter) além de JSONL local do pi.",
         "Critérios de governança (evidência/no-auto-close/HITL) permanecem idênticos para qualquer origem."
       ],
-      "notes": "Objetivo: botar ordem no caos de múltiplas threads/plataformas sem acoplar coordenação ao runtime local.\n[2026-04-21] session-triage evoluído para adapter canônico em JSON/JSONL com agregação por provider e persistência de branch summaries no store local parseável. Evidência: docs/research/session-triage-provider-agnostic-adapter-2026-04-21.md (VER-BUD-072)."
+      "notes": "Objetivo: botar ordem no caos de múltiplas threads/plataformas sem acoplar coordenação ao runtime local.\n[2026-04-21] session-triage evoluído para adapter canônico em JSON/JSONL com agregação por provider e persistência de branch summaries no store local parseável. Evidência: docs/research/session-triage-provider-agnostic-adapter-2026-04-21.md (VER-BUD-072).\n[2026-04-21 L5] Atalhos npm adicionados para smoke do adapter (`session:triage:events:json` e `session:triage:events:jsonl`) para reduzir atrito operacional e manter validação reproduzível."
     },
     {
       "id": "TASK-BUD-024",

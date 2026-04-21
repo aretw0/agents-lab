@@ -38,6 +38,13 @@ Exemplo no repositório:
 node scripts/session-triage.mjs --events docs/research/data/session-triage/canonical-events.example.json
 ```
 
+Atalhos npm para smoke do adapter canônico:
+
+```bash
+npm run session:triage:events:json
+npm run session:triage:events:jsonl
+```
+
 Por padrão, o script lê **último 1 dia** e até **8 sessões** mais recentes.
 
 Também mantém um cache parseável de branch summaries em:

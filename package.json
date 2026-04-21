@@ -36,6 +36,8 @@
     "colony:inspect": "node scripts/colony-runtime-inspect.mjs",
     "session:triage": "node scripts/session-triage.mjs --days 1 --limit 8",
     "session:triage:json": "node scripts/session-triage.mjs --days 1 --limit 8 --json",
+    "session:triage:events:json": "node scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.json --json",
+    "session:triage:events:jsonl": "node scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.jsonl --json",
     "pi-stack:user-surface": "node scripts/pi-stack-user-surface-audit.mjs",
     "repo:complexity": "node scripts/repo-complexity-check.mjs --max-lines 1000",
     "repo:complexity:strict": "node scripts/repo-complexity-check.mjs --max-lines 1000 --strict",

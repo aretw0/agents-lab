@@ -872,6 +872,15 @@
       "method": "command",
       "evidence": "Slice provider-agnostic aplicado em session-triage: `--events` aceita JSON e JSONL, agrega `aggregate.providers` e preserva governança canônica. Evidência executada com exemplos `canonical-events.example.json` (provider=matrix) e `canonical-events.example.jsonl` (provider=telegram + COMPLETE + summary bullets). Detalhes: docs/research/session-triage-provider-agnostic-adapter-2026-04-21.md.",
       "timestamp": "2026-04-21T14:32:00Z"
+    },
+    {
+      "id": "VER-BUD-073",
+      "target": "TASK-BUD-023",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "evidence": "Usabilidade operacional do adapter provider-agnostic reforçada com scripts npm: `session:triage:events:json` e `session:triage:events:jsonl` em package.json; guia atualizado com atalhos de smoke. Validação executada via `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.json --json` (provider `matrix`) e `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.jsonl --json` (provider `telegram` + summary), com `branchSummariesCount > 0`. Nota de ambiente: wrapper `npm` no shell atual falha com `node: not found`.",
+      "timestamp": "2026-04-21T14:36:00Z"
     }
   ]
 }
