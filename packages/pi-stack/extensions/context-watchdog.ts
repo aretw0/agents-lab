@@ -345,9 +345,32 @@ export function shouldEmitAutoResumeAfterCompact(
 	return (nowMs - lastAutoResumeAt) >= config.autoResumeCooldownMs;
 }
 
-function autoResumePrompt(): string {
+function truncateForPrompt(value: string, max = 180): string {
+	const s = String(value ?? "").trim().replace(/\s+/g, " ");
+	if (s.length <= max) return s;
+	return `${s.slice(0, Math.max(0, max - 1))}…`;
+}
+
+export function buildAutoResumePromptFromHandoff(handoffInput: Record<string, unknown> | undefined): string {
+	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
+	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
+		? handoff.timestamp
+		: "unknown";
+	const tasks = normalizeStringArray(handoff.current_tasks).slice(0, 3);
+	const blockers = normalizeStringArray(handoff.blockers)
+		.filter((b) => !b.startsWith("context-watch-"))
+		.slice(0, 2)
+		.map((b) => truncateForPrompt(b, 80));
+	const next = normalizeStringArray(handoff.next_actions)
+		.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
+		.slice(0, 2)
+		.map((line) => truncateForPrompt(line, 120));
+
 	return [
-		"context-watch auto-resume: continue from .project/handoff.json and active tasks.",
+		`context-watch auto-resume: continue from .project/handoff.json (ts=${timestamp}).`,
+		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
+		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
+		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",
 		"Keep micro-slice-only (1 file + 1 test) and preserve canonical board/verification flow.",
 	].join("\n");
 }
@@ -766,7 +789,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					const nowAfterCompact = Date.now();
 					if (shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt)) {
 						lastAutoResumeAt = nowAfterCompact;
-						pi.sendUserMessage(autoResumePrompt(), { deliverAs: "followUp" });
+						const resumePrompt = buildAutoResumePromptFromHandoff(readHandoffJson(ctx.cwd));
+						pi.sendUserMessage(resumePrompt, { deliverAs: "followUp" });
 						ctx.ui.notify("context-watch: auto resume queued", "info");
 					}
 				},

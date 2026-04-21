@@ -3,6 +3,7 @@ import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	buildAutoCompactDiagnostics,
+	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
@@ -181,6 +182,23 @@ describe("context-watchdog", () => {
 		expect(((merged.settings.piStack as any).contextWatchdog.notify)).toBe(false);
 		expect(((merged.settings.piStack as any).quotaVisibility.routeModelRefs["openai-codex"]))
 			.toBe("openai-codex/gpt-5.3-codex");
+	});
+
+	it("builds compact auto-resume prompt from handoff freshness snapshot", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			timestamp: "2026-04-21T20:20:00.000Z",
+			current_tasks: ["TASK-BUD-084", "TASK-BUD-018"],
+			blockers: ["context-watch-compact-required", "infra-wait"],
+			next_actions: [
+				"Context-watch action: level=compact 72% (compact-now)",
+				"Consolidar TASK-BUD-084 com micro-slice final",
+			],
+		} as any);
+		expect(prompt).toContain("ts=2026-04-21T20:20:00.000Z");
+		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
+		expect(prompt).toContain("blockers: infra-wait");
+		expect(prompt).toContain("Consolidar TASK-BUD-084");
+		expect(prompt).not.toContain("Context-watch action:");
 	});
 
 	it("writes canonical action/event trail into handoff snapshot", () => {
