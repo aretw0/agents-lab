@@ -176,7 +176,7 @@
         "Mecanismo de lock/fila/reconciliação é determinístico e reversível.",
         "Testes cobrem fluxo de conflito básico e resultado esperado."
       ],
-      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree. c2 reportou lock/atomic/single-writer + testes de concorrência/no-auto-close; validar diffs efetivamente materializados no main antes de fechamento."
+      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree. c2 reportou lock/atomic/single-writer + testes de concorrência/no-auto-close; validar diffs efetivamente materializados no main antes de fechamento.\n[2026-04-21T22:47:00Z] Após fechamento de 046/047/052/051/013, TASK-BUD-010 permanece in-progress para consolidar hardening explícito de reconciliação concorrente (single-writer/lock) com evidência dedicada antes de fechamento."
     },
     {
       "id": "TASK-BUD-011",
@@ -229,7 +229,7 @@
     {
       "id": "TASK-BUD-013",
       "description": "[P1] Tornar entrega de colônia auditável no branch principal (injeção confiável de diffs + inventário obrigatório de arquivos alterados).",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-010"
       ],
@@ -243,7 +243,8 @@
         "Inventário final lista arquivos alterados + comandos de validação executados.",
         "Falhas de injeção/worktree geram tarefa de recuperação automática sem perder patch proposto."
       ],
-      "notes": "Criada após c1/c2 reportarem entregas extensas sem materialização integral no branch principal. Em execução junto da delivery policy hard para eliminar lacuna report->apply."
+      "notes": "Criada após c1/c2 reportarem entregas extensas sem materialização integral no branch principal. Em execução junto da delivery policy hard para eliminar lacuna report->apply.",
+      "verification": "VER-BUD-099"
     },
     {
       "id": "colony-colonyidentity-colony",

@@ -1293,6 +1293,32 @@
           "evidence": "`.changeset/bright-spoons-jam.md` contém RC + seção de riscos/limites; sem publish automático."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-099",
+      "target": "TASK-BUD-013",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Auditabilidade de entrega consolidada: (1) retenção determinística com `runtimeSnapshotPath` em terminal states no `colony-pilot` (`packages/pi-stack/extensions/colony-pilot.ts` + `colony-pilot-candidate-retention.ts`); (2) recovery task auto-queue para candidates sem evidência final via `ensureRecoveryTaskForCandidate`; (3) template obrigatório de inventário + command log no runbook unattended (`docs/guides/unattended-swarm-execution-plan.md`); (4) parser de delivery atualizado para aceitar command log determinístico com heading+bullet e manter bloqueio de falso positivo. Testes: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts` => 2 files passed, 71 tests passed. Fechamento documentado em `docs/research/task-bud-013-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T22:45:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Ao final da colônia, existe evidência determinística do que foi aplicado no main (ou motivo explícito de não aplicação).",
+          "status": "passed",
+          "evidence": "Retention record + artifacts expõem caminho de recovery (`runtimeSnapshotPath`) e motivo quando snapshot não é capturado."
+        },
+        {
+          "criterion": "Inventário final lista arquivos alterados + comandos de validação executados.",
+          "status": "passed",
+          "evidence": "Runbook unattended define template determinístico de `Final file inventory` + `Validation command log` e parser reconhece formato."
+        },
+        {
+          "criterion": "Falhas de injeção/worktree geram tarefa de recuperação automática sem perder patch proposto.",
+          "status": "passed",
+          "evidence": "`ensureRecoveryTaskForCandidate` auto-enfileira task de promoção; snapshot runtime preserva contexto reaplicável em failed/budget_exceeded."
+        }
+      ]
     }
   ]
 }
