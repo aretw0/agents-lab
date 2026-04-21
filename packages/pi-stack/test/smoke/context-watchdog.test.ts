@@ -9,6 +9,7 @@ import {
 	parseContextBootstrapPreset,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
+	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 } from "../../extensions/context-watchdog";
 
@@ -99,13 +100,26 @@ describe("context-watchdog", () => {
 			hasPendingMessages: false,
 		})).toEqual({ trigger: false, reason: "cooldown" });
 
-		expect(shouldTriggerAutoCompact(compact, cfg, {
+		const notIdleDecision = shouldTriggerAutoCompact(compact, cfg, {
 			nowMs: 200_000,
 			lastAutoCompactAt: 0,
 			inFlight: false,
 			isIdle: false,
 			hasPendingMessages: true,
-		})).toEqual({ trigger: false, reason: "not-idle" });
+		});
+		expect(notIdleDecision).toEqual({ trigger: false, reason: "not-idle" });
+		expect(shouldScheduleAutoCompactRetry(notIdleDecision)).toBe(true);
+
+		const pendingDecision = shouldTriggerAutoCompact(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: true,
+			hasPendingMessages: true,
+		});
+		expect(pendingDecision).toEqual({ trigger: false, reason: "pending-messages" });
+		expect(shouldScheduleAutoCompactRetry(pendingDecision)).toBe(true);
+		expect(shouldScheduleAutoCompactRetry({ trigger: false, reason: "cooldown" })).toBe(false);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {

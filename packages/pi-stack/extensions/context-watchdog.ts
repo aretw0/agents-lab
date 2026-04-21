@@ -234,6 +234,13 @@ export type ContextWatchAutoCompactDecision = {
 		| "trigger";
 };
 
+export function shouldScheduleAutoCompactRetry(decision: ContextWatchAutoCompactDecision): boolean {
+	if (decision.trigger) return false;
+	return decision.reason === "not-idle"
+		|| decision.reason === "pending-messages"
+		|| decision.reason === "in-flight";
+}
+
 export function shouldTriggerAutoCompact(
 	assessment: ContextWatchAssessment,
 	config: ContextWatchdogConfig,
@@ -607,6 +614,7 @@ function buildAssessment(
 }
 
 export default function contextWatchdogExtension(pi: ExtensionAPI) {
+	const AUTO_COMPACT_RETRY_DELAY_MS = 2_000;
 	let config = DEFAULT_CONFIG;
 	let thresholdOverrides: ContextThresholdOverrides | undefined;
 	let lastAssessment: ContextWatchAssessment | null = null;
@@ -615,6 +623,21 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
 	let autoCompactInFlight = false;
+	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
+
+	const clearAutoCompactRetryTimer = () => {
+		if (!autoCompactRetryTimer) return;
+		clearTimeout(autoCompactRetryTimer);
+		autoCompactRetryTimer = undefined;
+	};
+
+	const scheduleAutoCompactRetry = (ctx: ExtensionContext) => {
+		if (autoCompactRetryTimer) return;
+		autoCompactRetryTimer = setTimeout(() => {
+			autoCompactRetryTimer = undefined;
+			run(ctx, "message_end");
+		}, AUTO_COMPACT_RETRY_DELAY_MS);
+	};
 
 	const run = (ctx: ExtensionContext, reason: "session_start" | "message_end") => {
 		if (!config.enabled) {
@@ -644,6 +667,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			hasPendingMessages: ctx.hasPendingMessages(),
 		});
 		if (autoCompactDecision.trigger) {
+			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;
 			ctx.ui.notify("context-watch: auto compact triggered", "warning");
@@ -657,6 +681,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify(`context-watch: auto compact failed (${error.message})`, "warning");
 				},
 			});
+		} else if (assessment.level === "compact" && shouldScheduleAutoCompactRetry(autoCompactDecision)) {
+			scheduleAutoCompactRetry(ctx);
+		} else {
+			clearAutoCompactRetryTimer();
 		}
 
 		if (!config.notify) return;
@@ -712,6 +740,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAutoCheckpointAt = 0;
 		lastAutoCompactAt = 0;
 		autoCompactInFlight = false;
+		clearAutoCompactRetryTimer();
 		run(ctx, "session_start");
 	});
 
@@ -776,6 +805,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAutoCheckpointAt = 0;
 				lastAutoCompactAt = 0;
 				autoCompactInFlight = false;
+				clearAutoCompactRetryTimer();
 				ctx.ui.notify("context-watch: state reset", "info");
 				return;
 			}
