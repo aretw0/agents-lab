@@ -97,6 +97,22 @@ Se `subagent_readiness_status(strict=true)` bloquear por atividade recente:
 2. executar ciclo controlado que gere `COLONY_SIGNAL:COMPLETE` com evidência;
 3. reexecutar readiness strict e anexar resultado no board.
 
+### Compatibilidade multi-backend (control plane)
+
+O protocolo deve funcionar além de `ant_colony`.
+
+| Backend/runner | Como executa | Sinal mínimo para o board canônico |
+|---|---|---|
+| `ant_colony` (local) | `colony-pilot` + sinais de sessão | start/progress/end + evidência de materialização |
+| scheduler prompt (soft patrol) | loop recorrente em sessão ativa | classificação GO/condicional/NO-GO + deltas de risco |
+| CI runner (GitHub/Gitea/local CI) | job não interativo | evento `review/done/recovery` + inventário + validação |
+| fluxo manual (sem swarm) | operação humana assistida | atualização direta em `.project/tasks` com evidência |
+
+Invariantes de compatibilidade:
+1. `no-auto-close` continua valendo para tasks estratégicas;
+2. decisão de bloqueio/promoção vem de gates hard (não da superfície de disparo);
+3. qualquer backend deve produzir trilha auditável em `.project`.
+
 ## Fase B — Execução swarm
 
 Durante a execução:

@@ -845,6 +845,15 @@
       "method": "command",
       "evidence": "Patrol recorrente configurado via scheduler prompt (id xchvdmmx, recurring 2h, scope instance). Documentação de contrato soft/hard e critérios de ajuste/parada registrada em docs/research/control-plane-patrol-pilot-2026-04-21.md; guias operacionais atualizados em docs/guides/session-triage.md e docs/guides/subagent-readiness-gate.md.",
       "timestamp": "2026-04-21T14:09:00Z"
+    },
+    {
+      "id": "VER-BUD-070",
+      "target": "TASK-BUD-021",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "AC3 do TASK-BUD-021 foi explicitado com matriz multi-backend em docs/guides/swarm-cleanroom-protocol.md (ant_colony, scheduler patrol, CI runner, fluxo manual) e invariantes de compatibilidade (`no-auto-close`, gates hard, trilha auditável em .project). Task permanece in-progress até fechamento dos demais critérios/dependências.",
+      "timestamp": "2026-04-21T14:18:00Z"
     }
   ]
 }
