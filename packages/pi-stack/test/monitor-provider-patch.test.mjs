@@ -23,7 +23,9 @@ import {
 	HEDGE_HISTORY_SETTING_PATH,
 	HEDGE_WHEN_SETTING_PATH,
 	HEDGE_PROJECT_CONTEXT_SETTING_PATH,
+	FRAGILITY_WHEN_SETTING_PATH,
 	DEFAULT_HEDGE_WHEN,
+	DEFAULT_FRAGILITY_WHEN,
 	HEDGE_LEAN_BASE_CONTEXT,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
 	planSessionStartOutput,
@@ -38,6 +40,7 @@ import {
 	detectStringSetting,
 	detectHedgeWhen,
 	detectHedgeIncludeProjectContext,
+	detectFragilityWhen,
 	normalizeHedgeContext,
 	ensureHedgeMonitorPolicy,
 	ensureHedgeMonitorContext,
@@ -499,12 +502,58 @@ describe("integration: full flow", () => {
 		assert.equal(result.fragilityChanged, true);
 
 		const written = JSON.parse(readFileSync(monitorPath, "utf8"));
+		assert.equal(written.when, "has_file_writes");
 		assert.deepEqual(written.classify.context, [
 			"assistant_text",
 			"user_text",
 			"tool_calls",
 			"custom_messages",
 		]);
+	});
+
+	it("reads fragilityWhen policy knob from piStack.monitorProviderPatch", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors");
+		mkdirSync(monitorsDir, { recursive: true });
+
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify(
+				{
+					defaultProvider: "anthropic",
+					piStack: {
+						monitorProviderPatch: {
+							fragilityWhen: "has_bash",
+						},
+					},
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		const monitorPath = join(monitorsDir, "fragility.monitor.json");
+		writeFileSync(
+			monitorPath,
+			JSON.stringify(
+				{
+					name: "fragility",
+					when: "has_tool_results",
+					classify: {
+						context: ["assistant_text"],
+						agent: "fragility-classifier",
+					},
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		simulateSessionStart(tmpDir);
+		const written = JSON.parse(readFileSync(monitorPath, "utf8"));
+		assert.equal(written.when, "has_bash");
 	});
 
 	it("session_start calibrates fragility classifier against empty-output hallucinations", () => {

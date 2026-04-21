@@ -9,7 +9,7 @@
  *   monitors silently fail or drift from the active provider.
  *
  * What this extension does:
- * - On session_start, keeps hedge context lean (conversation_history opt-in).
+ * - On session_start, keeps hedge context lean (conversation_history opt-in) and calibrates fragility policy/context.
  * - Resolves classifier model by provider/settings.
  * - Ensures missing .pi/agents classifier overrides exist.
  * - Warns when existing overrides are misaligned with active provider/model.
@@ -32,10 +32,13 @@ import {
 	CLASSIFIER_MODEL_SETTING_PATH,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
 	CLASSIFIER_THINKING_SETTING_PATH,
+	DEFAULT_FRAGILITY_WHEN,
 	DEFAULT_HEDGE_WHEN,
 	DEFAULT_MODEL_BY_PROVIDER,
 	DEFAULT_THINKING,
 	FRAGILITY_LEAN_BASE_CONTEXT,
+	FRAGILITY_WHEN_PATTERNS,
+	FRAGILITY_WHEN_SETTING_PATH,
 	HEDGE_HISTORY_SETTING_PATH,
 	HEDGE_LEAN_BASE_CONTEXT,
 	HEDGE_PROJECT_CONTEXT_SETTING_PATH,
@@ -196,6 +199,25 @@ export function detectHedgeWhen(cwd: string): string {
 /** Detects whether hedge should include project_vision/project_conventions. */
 export function detectHedgeIncludeProjectContext(cwd: string): boolean {
 	return detectBooleanSetting(cwd, HEDGE_PROJECT_CONTEXT_SETTING_PATH) ?? false;
+}
+
+/** Detects fragility monitor trigger policy, defaults to has_file_writes. */
+export function detectFragilityWhen(cwd: string): string {
+	const value = detectStringSetting(cwd, FRAGILITY_WHEN_SETTING_PATH);
+	if (!value) return DEFAULT_FRAGILITY_WHEN;
+
+	if (
+		FRAGILITY_WHEN_PATTERNS.includes(
+			value as (typeof FRAGILITY_WHEN_PATTERNS)[number],
+		)
+	) {
+		return value;
+	}
+
+	if (/^tool\(\w+\)$/.test(value)) return value;
+	if (/^every\(\d+\)$/.test(value)) return value;
+
+	return DEFAULT_FRAGILITY_WHEN;
 }
 
 /** Splits provider/model reference. */
@@ -709,7 +731,14 @@ export function ensureFragilityClassifierCalibration(cwd: string): {
 	return { changed: true, details };
 }
 
-export function ensureFragilityMonitorContext(cwd: string): {
+type FragilityMonitorPolicy = {
+	when: string;
+};
+
+export function ensureFragilityMonitorPolicy(
+	cwd: string,
+	policy: FragilityMonitorPolicy,
+): {
 	changed: boolean;
 	details: string[];
 } {
@@ -723,9 +752,20 @@ export function ensureFragilityMonitorContext(cwd: string): {
 		return { changed: false, details: [] };
 	}
 
+	let changed = false;
+	const details: string[] = [];
+	if (monitor["when"] !== policy.when) {
+		monitor["when"] = policy.when;
+		changed = true;
+		details.push(`when=${policy.when}`);
+	}
+
 	const classify = monitor["classify"];
 	if (!classify || typeof classify !== "object") {
-		return { changed: false, details: [] };
+		if (changed) {
+			writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+		}
+		return { changed, details };
 	}
 
 	const prevContext = (classify as Record<string, unknown>)["context"];
@@ -736,11 +776,24 @@ export function ensureFragilityMonitorContext(cwd: string): {
 	);
 	const nextContext = normalizeFragilityContext(prevContext);
 	const nextSerialized = JSON.stringify(nextContext);
-	if (prevSerialized === nextSerialized) return { changed: false, details: [] };
+	if (prevSerialized !== nextSerialized) {
+		(classify as Record<string, unknown>)["context"] = nextContext;
+		changed = true;
+		details.push("context=lean(no-tool_results)");
+	}
 
-	(classify as Record<string, unknown>)["context"] = nextContext;
-	writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
-	return { changed: true, details: ["fragility-context=lean(no-tool_results)"] };
+	if (changed) {
+		writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+	}
+	return { changed, details };
+}
+
+/** Backward-compatible helper kept for tests/importers. */
+export function ensureFragilityMonitorContext(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	return ensureFragilityMonitorPolicy(cwd, { when: DEFAULT_FRAGILITY_WHEN });
 }
 
 function readHedgeMonitorState(cwd: string): {
@@ -1041,7 +1094,13 @@ export default function (pi: ExtensionAPI) {
 			when: detectHedgeWhen(ctx.cwd),
 		};
 		const hedgePatch = ensureHedgeMonitorPolicy(ctx.cwd, hedgePolicy);
-		const fragilityPatch = ensureFragilityMonitorContext(ctx.cwd);
+		const fragilityPolicy: FragilityMonitorPolicy = {
+			when: detectFragilityWhen(ctx.cwd),
+		};
+		const fragilityPatch = ensureFragilityMonitorPolicy(
+			ctx.cwd,
+			fragilityPolicy,
+		);
 		const fragilityClassifierPatch = ensureFragilityClassifierCalibration(
 			ctx.cwd,
 		);

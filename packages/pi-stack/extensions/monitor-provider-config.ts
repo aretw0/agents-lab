@@ -47,6 +47,7 @@ export const HEDGE_PROJECT_CONTEXT_SETTING_PATH = [
 	...SETTINGS_ROOT,
 	"hedgeIncludeProjectContext",
 ];
+export const FRAGILITY_WHEN_SETTING_PATH = [...SETTINGS_ROOT, "fragilityWhen"];
 export const CLASSIFIER_MODEL_SETTING_PATH = [...SETTINGS_ROOT, "classifierModel"];
 export const CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH = [
 	...SETTINGS_ROOT,
@@ -58,8 +59,16 @@ export const CLASSIFIER_THINKING_SETTING_PATH = [
 ];
 
 export const DEFAULT_HEDGE_WHEN = "has_bash";
+export const DEFAULT_FRAGILITY_WHEN = "has_file_writes";
 
 export const HEDGE_WHEN_PATTERNS = [
+	"always",
+	"has_tool_results",
+	"has_file_writes",
+	"has_bash",
+] as const;
+
+export const FRAGILITY_WHEN_PATTERNS = [
 	"always",
 	"has_tool_results",
 	"has_file_writes",

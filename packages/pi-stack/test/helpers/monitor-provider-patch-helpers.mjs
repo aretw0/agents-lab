@@ -30,7 +30,13 @@ const HEDGE_PROJECT_CONTEXT_SETTING_PATH = [
 	"monitorProviderPatch",
 	"hedgeIncludeProjectContext",
 ];
+const FRAGILITY_WHEN_SETTING_PATH = [
+	"piStack",
+	"monitorProviderPatch",
+	"fragilityWhen",
+];
 const DEFAULT_HEDGE_WHEN = "has_bash";
+const DEFAULT_FRAGILITY_WHEN = "has_file_writes";
 const HEDGE_LEAN_BASE_CONTEXT = [
 	"user_text",
 	"tool_calls",
@@ -306,6 +312,21 @@ function detectHedgeIncludeProjectContext(cwd) {
 	return detectBooleanSetting(cwd, HEDGE_PROJECT_CONTEXT_SETTING_PATH) ?? false;
 }
 
+function detectFragilityWhen(cwd) {
+	const value = detectStringSetting(cwd, FRAGILITY_WHEN_SETTING_PATH);
+	if (!value) return DEFAULT_FRAGILITY_WHEN;
+
+	if (
+		["always", "has_tool_results", "has_file_writes", "has_bash"].includes(
+			value,
+		)
+	)
+		return value;
+	if (/^tool\(\w+\)$/.test(value)) return value;
+	if (/^every\(\d+\)$/.test(value)) return value;
+	return DEFAULT_FRAGILITY_WHEN;
+}
+
 function normalizeHedgeContext(input, policy) {
 	const raw = Array.isArray(input)
 		? input.filter((item) => typeof item === "string")
@@ -458,7 +479,7 @@ function ensureFragilityClassifierCalibration(cwd) {
 	return { changed: true, details };
 }
 
-function ensureFragilityMonitorContext(cwd) {
+function ensureFragilityMonitorPolicy(cwd, policy) {
 	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
 	if (!existsSync(monitorPath)) return { changed: false, details: [] };
 
@@ -469,21 +490,39 @@ function ensureFragilityMonitorContext(cwd) {
 		return { changed: false, details: [] };
 	}
 
+	let changed = false;
+	const details = [];
+	if (monitor.when !== policy.when) {
+		monitor.when = policy.when;
+		changed = true;
+		details.push(`when=${policy.when}`);
+	}
+
 	if (!monitor.classify || typeof monitor.classify !== "object") {
-		return { changed: false, details: [] };
+		if (changed) {
+			writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+		}
+		return { changed, details };
 	}
 
 	const prev = Array.isArray(monitor.classify.context)
 		? monitor.classify.context.filter((item) => typeof item === "string")
 		: [];
 	const next = normalizeFragilityContext(prev);
-	if (JSON.stringify(prev) === JSON.stringify(next)) {
-		return { changed: false, details: [] };
+	if (JSON.stringify(prev) !== JSON.stringify(next)) {
+		monitor.classify.context = next;
+		changed = true;
+		details.push("context=lean(no-tool_results)");
 	}
 
-	monitor.classify.context = next;
-	writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
-	return { changed: true, details: ["fragility-context=lean(no-tool_results)"] };
+	if (changed) {
+		writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+	}
+	return { changed, details };
+}
+
+function ensureFragilityMonitorContext(cwd) {
+	return ensureFragilityMonitorPolicy(cwd, { when: DEFAULT_FRAGILITY_WHEN });
 }
 
 function simulateSessionStart(cwd) {
@@ -494,7 +533,10 @@ function simulateSessionStart(cwd) {
 		when: detectHedgeWhen(cwd),
 	};
 	const hedgePatch = ensureHedgeMonitorPolicy(cwd, hedgePolicy);
-	const fragilityPatch = ensureFragilityMonitorContext(cwd);
+	const fragilityPolicy = {
+		when: detectFragilityWhen(cwd),
+	};
+	const fragilityPatch = ensureFragilityMonitorPolicy(cwd, fragilityPolicy);
 	const fragilityClassifierPatch = ensureFragilityClassifierCalibration(cwd);
 
 	const provider = detectDefaultProvider(cwd);
@@ -563,7 +605,9 @@ export {
 	HEDGE_HISTORY_SETTING_PATH,
 	HEDGE_WHEN_SETTING_PATH,
 	HEDGE_PROJECT_CONTEXT_SETTING_PATH,
+	FRAGILITY_WHEN_SETTING_PATH,
 	DEFAULT_HEDGE_WHEN,
+	DEFAULT_FRAGILITY_WHEN,
 	HEDGE_LEAN_BASE_CONTEXT,
 	CLASSIFIER_SYSTEM_PROMPT_LINES,
 	planSessionStartOutput,
@@ -578,9 +622,12 @@ export {
 	detectStringSetting,
 	detectHedgeWhen,
 	detectHedgeIncludeProjectContext,
+	detectFragilityWhen,
 	normalizeHedgeContext,
 	ensureHedgeMonitorPolicy,
 	ensureHedgeMonitorContext,
+	ensureFragilityMonitorPolicy,
+	ensureFragilityMonitorContext,
 	ensureFragilityClassifierCalibration,
 	simulateSessionStart,
 };
