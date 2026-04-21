@@ -126,6 +126,12 @@ Exemplo:
 - Sync start/progress/end atualiza o board oficial, mas não substitui revisão humana de fechamento.
 - `requireHumanClose=true` mantém `completed` em estado candidato (`in-progress`) até verificação explícita.
 
+### Projeção de status (TUI + WEB)
+- **Semântica compartilhada**: status `board-clock` derivado de `.project/tasks` (`ip/blk/plan`).
+- **TUI**: footer exibe `board-clock` quando disponível.
+- **WEB local** (`session-web`): `/api/state` inclui snapshot de board no payload (`state.boardClock`).
+- **Regra**: projeção só lê board canônico; não cria segunda fonte de verdade.
+
 ---
 
 ## Paridade + isolamento

@@ -23,6 +23,11 @@ import type {
 } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { parseColonySignal, parseCommandInput } from "./colony-pilot";
+import {
+	formatBoardClockStatus,
+	readBoardClockSnapshot,
+	type BoardClockSnapshot,
+} from "./board-clock";
 
 type GatewayMode = "local" | "lan" | "public";
 
@@ -37,6 +42,7 @@ interface GatewayConfig {
 interface WebState {
 	monitorMode: "on" | "off" | "unknown";
 	sessionFile?: string;
+	boardClock: BoardClockSnapshot;
 	colonies: Array<{ id: string; phase: string; updatedAt: number }>;
 	recentSignals: Array<{ at: number; text: string }>;
 	recentMessages: Array<{ at: number; role: string; text: string }>;
@@ -386,6 +392,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 	const webState: WebState = {
 		monitorMode: "unknown",
 		sessionFile: undefined,
+		boardClock: readBoardClockSnapshot(process.cwd()),
 		colonies: [],
 		recentSignals: [],
 		recentMessages: [],
@@ -406,6 +413,14 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 			? `[web] ${config.mode} http://${buildAccessHost(config.mode, runtime.bindHost, config.advertisedHost)}:${runtime.port}`
 			: undefined;
 		ctx.ui.setStatus("web-session-gateway", text);
+		ctx.ui.setStatus("board-clock", formatBoardClockStatus(webState.boardClock));
+	}
+
+	function refreshBoardClock(ctx?: ExtensionContext) {
+		const cwd = ctx?.cwd ?? sessionCtx?.cwd ?? process.cwd();
+		webState.boardClock = readBoardClockSnapshot(cwd);
+		if (ctx) updateStatus(ctx);
+		else if (sessionCtx) updateStatus(sessionCtx);
 	}
 
 	async function stopServer() {
@@ -568,6 +583,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 		webState.colonies = [];
 		webState.recentSignals = [];
 		webState.recentMessages = [];
+		refreshBoardClock(ctx);
 
 		updateStatus(ctx);
 
@@ -576,7 +592,7 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 		}
 	});
 
-	pi.on("message_end", (event, _ctx) => {
+	pi.on("message_end", (event, ctx) => {
 		const message = (event as { message?: unknown }).message as
 			| { role?: string }
 			| undefined;
@@ -587,12 +603,14 @@ export default function webSessionGateway(pi: ExtensionAPI) {
 		if (role === "user" || role === "assistant" || role === "toolResult") {
 			pushRecentMessage(role, text);
 		}
+		refreshBoardClock(ctx);
 	});
 
-	pi.on("tool_result", (event) => {
+	pi.on("tool_result", (event, ctx) => {
 		const text = tryExtractText(event);
 		trackText(text);
 		pushRecentMessage("tool_result", text);
+		refreshBoardClock(ctx);
 	});
 
 	pi.registerTool({

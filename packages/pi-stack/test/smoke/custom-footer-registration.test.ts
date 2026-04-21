@@ -231,6 +231,18 @@ describe("custom-footer — buildFooterLines", () => {
 		expect(lines[1]).toContain("[mon] 5/5");
 	});
 
+	it("linha 2 inclui boardClockStatus quando presente", () => {
+		const lines = buildFooterLines(
+			{
+				...baseInput,
+				boardClockStatus: "[board] ip=2 blk=1 plan=4",
+			},
+			plainTheme,
+			200,
+		);
+		expect(lines[1]).toContain("[board] ip=2 blk=1 plan=4");
+	});
+
 	it("linha 2 não inclui budget quando ausente", () => {
 		const lines = buildFooterLines(
 			{ ...baseInput, budgetStatus: undefined },

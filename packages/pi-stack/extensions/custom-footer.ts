@@ -163,6 +163,7 @@ export type FooterRenderInput = {
   budgetStatus: string | undefined;
   pilotStatus: string | undefined;
   monitorSummaryStatus: string | undefined;
+  boardClockStatus?: string;
   cwd: string;
   contextThresholdOverrides?: ContextThresholdOverrides;
 };
@@ -173,7 +174,7 @@ export function buildFooterLines(
   width: number,
 ): string[] {
   const { usageTotals, sessionStart, cachedPr, thinkingLevel, modelId, modelProvider,
-          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, cwd,
+          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, boardClockStatus, cwd,
           contextThresholdOverrides } = input;
 
   const thinkColor =
@@ -225,6 +226,7 @@ export function buildFooterLines(
   if (budgetStatus) line2Parts.push(theme.fg("dim", budgetStatus));
   if (pilotStatus) line2Parts.push(theme.fg("dim", pilotStatus));
   if (monitorSummaryStatus) line2Parts.push(theme.fg("dim", monitorSummaryStatus));
+  if (boardClockStatus) line2Parts.push(theme.fg("dim", boardClockStatus));
 
   return [
     truncateToWidth(line1Parts.join(sep), width),
@@ -307,6 +309,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
               budgetStatus: statuses?.get("quota-budgets"),
               pilotStatus: statuses?.get("colony-pilot"),
               monitorSummaryStatus: statuses?.get("monitor-summary"),
+              boardClockStatus: statuses?.get("board-clock"),
               cwd: process.cwd(),
               contextThresholdOverrides,
             },

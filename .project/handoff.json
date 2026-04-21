@@ -1,17 +1,18 @@
 {
-  "timestamp": "2026-04-21T23:22:00Z",
-  "context": "TASK-BUD-007 concluída (VER-BUD-102) com política single-board clock consolidada e cobertura start/progress/end no adapter opt-in. Contexto em warn alto (64%), próximo de checkpoint.",
-  "current_phase": "post-task-bud-007",
+  "timestamp": "2026-04-21T23:33:00Z",
+  "context": "TASK-BUD-008 concluída (VER-BUD-103) com projeção single-board clock compartilhada entre TUI e WEB (`board-clock`), derivada de `.project/tasks` sem fonte paralela. Contexto atingiu compact threshold (72%).",
+  "current_phase": "compact-required",
   "current_tasks": [
-    "TASK-BUD-008"
+    "TASK-BUD-012",
+    "TASK-BUD-018"
   ],
   "blockers": [
-    "context-watch-warn-active"
+    "context-watch-compact-required"
   ],
   "next_actions": [
-    "Context-watch action: level=warn 64% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
-    "Executar apenas micro-slice em TASK-BUD-008 ou registrar checkpoint curto se contexto subir para >=68.",
-    "Evitar qualquer varredura ampla até compactação, se necessária."
+    "Context-watch action: level=compact 72% (compact-now) · Compact now and continue from checkpoint.",
+    "Após compactação, retomar backlog estrutural por micro-slices a partir de TASK-BUD-012/TASK-BUD-018.",
+    "Evitar varreduras amplas na retomada; manter bounded-by-default até reduzir pressão."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -21,27 +22,28 @@
     "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts",
+    "packages/pi-stack/extensions/board-clock.ts",
+    "packages/pi-stack/extensions/web-session-gateway.ts",
+    "packages/pi-stack/extensions/custom-footer.ts",
     "docs/guides/budget-governance.md",
-    "docs/research/colony-project-task-bridge.md",
-    "docs/research/task-bud-007-closure-2026-04-21.md",
+    "docs/research/task-bud-008-closure-2026-04-21.md",
     ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-21T23:22:00Z",
+      "atIso": "2026-04-21T23:33:00Z",
       "reason": "message_end",
-      "level": "warn",
-      "percent": 64,
+      "level": "compact",
+      "percent": 72,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

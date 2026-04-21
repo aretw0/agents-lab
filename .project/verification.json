@@ -1392,6 +1392,32 @@
           "evidence": "`requireHumanClose=true` mantém fase `completed` em estado candidato (`in-progress`) até fechamento explícito."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-103",
+      "target": "TASK-BUD-008",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Projeção unificada de status board implementada para TUI+WEB sem duplicar fonte de verdade: `board-clock` derivado de `.project/tasks` em `packages/pi-stack/extensions/board-clock.ts`; `web-session-gateway` expõe snapshot em `/api/state` (`state.boardClock`) e publica status `board-clock`; `custom-footer` renderiza `board-clock` no rodapé. Guia atualizado em `docs/guides/budget-governance.md`. Testes: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/board-clock.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts packages/pi-stack/test/smoke/web-session-gateway.test.ts packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 4 files passed, 38 tests passed.",
+      "timestamp": "2026-04-21T23:30:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Status consolidado (tasks + consumo + janela provider) visível sem depender de sessão específica.",
+          "status": "passed",
+          "evidence": "`board-clock` snapshot deriva do board canônico e fica disponível como status + payload web."
+        },
+        {
+          "criterion": "Visão web local e TUI compartilham semântica de status do board.",
+          "status": "passed",
+          "evidence": "Mesmo formatter `board-clock` alimenta footer (TUI) e `/api/state` (WEB)."
+        },
+        {
+          "criterion": "Sem duplicar fonte de verdade de task.",
+          "status": "passed",
+          "evidence": "Snapshot é read-only de `.project/tasks`; nenhum store paralelo é introduzido."
+        }
+      ]
     }
   ]
 }

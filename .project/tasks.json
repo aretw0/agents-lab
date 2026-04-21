@@ -123,7 +123,7 @@
     {
       "id": "TASK-BUD-008",
       "description": "[P2] Projetar projeções de status de budget/task para superfícies TUI e WEB usando dados consolidados de .project + consumo.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-007"
       ],
@@ -136,7 +136,8 @@
         "Visão web local e TUI compartilham semântica de status do board.",
         "Sem duplicar fonte de verdade de task."
       ],
-      "notes": "Relacionado a REQ-BUD-006 e REQ-BUD-003."
+      "notes": "Relacionado a REQ-BUD-006 e REQ-BUD-003.",
+      "verification": "VER-BUD-103"
     },
     {
       "id": "TASK-BUD-009",
