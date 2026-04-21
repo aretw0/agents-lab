@@ -73,4 +73,26 @@ Trocar para lane mais enxuta quando ocorrer qualquer um:
    - `project-status`
    - update de `.project/handoff.json` (delta curto)
 
+## Context pressure model-aware (footer)
+
+A `custom-footer` agora usa thresholds por `provider/model` para colorir `% de contexto`:
+- baseline geral: warning `50%`, error `75%`
+- `anthropic/*`: warning `65%`, error `85%`
+- `github-copilot/claude-*` **não** herda automaticamente perfil Anthropic (fica no baseline, salvo override)
+
+Override opcional em `.pi/settings.json`:
+```json
+{
+  "piStack": {
+    "customFooter": {
+      "contextPressure": {
+        "byProviderModel": {
+          "github-copilot/claude-sonnet-4-6": { "warningPct": 60, "errorPct": 80 }
+        }
+      }
+    }
+  }
+}
+```
+
 Esse playbook complementa o pipeline canônico: `docs/guides/project-canonical-pipeline.md`.

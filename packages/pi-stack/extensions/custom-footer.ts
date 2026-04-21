@@ -13,6 +13,9 @@
  *   { "source": "npm:@ifi/oh-pi-extensions", "extensions": ["!extensions/custom-footer.ts"] }
  */
 
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import path from "node:path";
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import type {
   ExtensionAPI,
@@ -73,6 +76,81 @@ export function collectFooterUsageTotals(
 
 export type FooterTheme = { fg: (color: string, text: string) => string };
 
+export type ContextThresholds = { warningPct: number; errorPct: number };
+export type ContextThresholdOverrides = {
+  default?: Partial<ContextThresholds>;
+  byProvider?: Record<string, Partial<ContextThresholds>>;
+  byProviderModel?: Record<string, Partial<ContextThresholds>>;
+};
+
+const DEFAULT_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 50, errorPct: 75 };
+const ANTHROPIC_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 65, errorPct: 85 };
+
+function normalizeThresholds(
+  input: Partial<ContextThresholds> | undefined,
+  fallback: ContextThresholds,
+): ContextThresholds {
+  const warning = Number.isFinite(Number(input?.warningPct))
+    ? Math.max(1, Math.min(99, Number(input?.warningPct)))
+    : fallback.warningPct;
+  const error = Number.isFinite(Number(input?.errorPct))
+    ? Math.max(warning + 1, Math.min(100, Number(input?.errorPct)))
+    : fallback.errorPct;
+  return {
+    warningPct: Math.floor(warning),
+    errorPct: Math.floor(error),
+  };
+}
+
+export function resolveContextThresholds(
+  modelProvider: string | null,
+  modelId: string,
+  overrides?: ContextThresholdOverrides,
+): ContextThresholds {
+  const provider = (modelProvider ?? "").trim().toLowerCase();
+  const base = provider === "anthropic"
+    ? ANTHROPIC_CONTEXT_THRESHOLDS
+    : DEFAULT_CONTEXT_THRESHOLDS;
+
+  let resolved = normalizeThresholds(overrides?.default, base);
+  if (provider && overrides?.byProvider?.[provider]) {
+    resolved = normalizeThresholds(overrides.byProvider[provider], resolved);
+  }
+
+  const modelKey = provider ? `${provider}/${modelId}`.toLowerCase() : modelId.toLowerCase();
+  const byModel = overrides?.byProviderModel?.[modelKey];
+  if (byModel) {
+    resolved = normalizeThresholds(byModel, resolved);
+  }
+
+  return resolved;
+}
+
+function readContextThresholdOverrides(cwd: string): ContextThresholdOverrides | undefined {
+  const candidates = [
+    path.join(cwd, ".pi", "settings.json"),
+    path.join(homedir(), ".pi", "agent", "settings.json"),
+  ];
+
+  for (const settingsPath of candidates) {
+    if (!existsSync(settingsPath)) continue;
+    try {
+      const json = JSON.parse(readFileSync(settingsPath, "utf8"));
+      const cfg = json?.piStack?.customFooter?.contextPressure;
+      if (!cfg || typeof cfg !== "object") continue;
+      const entry = cfg as ContextThresholdOverrides;
+      return {
+        default: entry.default,
+        byProvider: entry.byProvider,
+        byProviderModel: entry.byProviderModel,
+      };
+    } catch {
+      // ignore malformed settings
+    }
+  }
+  return undefined;
+}
+
 export type FooterRenderInput = {
   usageTotals: FooterUsageTotals;
   sessionStart: number;
@@ -86,6 +164,7 @@ export type FooterRenderInput = {
   pilotStatus: string | undefined;
   monitorSummaryStatus: string | undefined;
   cwd: string;
+  contextThresholdOverrides?: ContextThresholdOverrides;
 };
 
 export function buildFooterLines(
@@ -94,7 +173,8 @@ export function buildFooterLines(
   width: number,
 ): string[] {
   const { usageTotals, sessionStart, cachedPr, thinkingLevel, modelId, modelProvider,
-          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, cwd } = input;
+          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, cwd,
+          contextThresholdOverrides } = input;
 
   const thinkColor =
     thinkingLevel === "high" ? "warning"
@@ -102,7 +182,17 @@ export function buildFooterLines(
     : thinkingLevel === "low" ? "dim"
     : "muted";
 
-  const pctColor = contextPct > 75 ? "error" : contextPct > 50 ? "warning" : "success";
+  const thresholds = resolveContextThresholds(
+    modelProvider,
+    modelId,
+    contextThresholdOverrides,
+  );
+  const pctColor =
+    contextPct > thresholds.errorPct
+      ? "error"
+      : contextPct > thresholds.warningPct
+        ? "warning"
+        : "success";
 
   const modelLabel = modelProvider ? `${modelProvider}/${modelId}` : modelId;
   const modelStr = `${theme.fg(thinkColor, "◆")} ${theme.fg("accent", modelLabel)}`;
@@ -151,6 +241,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
   let activeCtx: ExtensionContext | null = null;
   let cachedPr: PrInfo | null = null;
   let prProbedForBranch: string | null = null;
+  let contextThresholdOverrides: ContextThresholdOverrides | undefined;
   let lastPrProbeAt = 0;
   let prProbeInFlight = false;
 
@@ -185,6 +276,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
     sessionStart = Date.now();
     syncUsageTotals(ctx);
     activeCtx = ctx;
+    contextThresholdOverrides = readContextThresholdOverrides(ctx.cwd);
 
     ctx.ui.setFooter((tui, theme, footerData) => {
       activeFooterData = footerData;
@@ -216,6 +308,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
               pilotStatus: statuses?.get("colony-pilot"),
               monitorSummaryStatus: statuses?.get("monitor-summary"),
               cwd: process.cwd(),
+              contextThresholdOverrides,
             },
             theme,
             width,
@@ -286,7 +379,17 @@ export default function customFooterExtension(pi: ExtensionAPI) {
     const usage = activeCtx?.getContextUsage?.();
     if (usage) {
       const pct = usage.percent ?? 0;
-      const pctColor = pct > 75 ? "error" : pct > 50 ? "warning" : "success";
+      const thresholds = resolveContextThresholds(
+        typeof modelProvider === "string" && modelProvider ? modelProvider : null,
+        modelId,
+        contextThresholdOverrides,
+      );
+      const pctColor =
+        pct > thresholds.errorPct
+          ? "error"
+          : pct > thresholds.warningPct
+            ? "warning"
+            : "success";
       const tokens = usage.tokens == null ? "?" : fmt(usage.tokens);
       lines.push(
         `  ${theme.fg("accent", "Context")}${sep}${theme.fg(pctColor, `${pct.toFixed(0)}% used`)}${sep}${tokens} / ${fmt(usage.contextWindow)} tokens`,

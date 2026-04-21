@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import customFooterExtension, {
 	buildFooterLines,
 	collectFooterUsageTotals,
+	type ContextThresholdOverrides,
 	type FooterRenderInput,
 	fmt,
 	formatElapsed,
+	resolveContextThresholds,
 } from "../../extensions/custom-footer";
 import { resetAuto, setMode } from "../../extensions/quota-panel";
 
@@ -107,6 +109,36 @@ describe("custom-footer — pure formatters", () => {
 	});
 });
 
+describe("custom-footer — context thresholds", () => {
+	it("uses anthropic-specific defaults only when provider is anthropic", () => {
+		const anthropic = resolveContextThresholds("anthropic", "claude-sonnet-4-6");
+		expect(anthropic.warningPct).toBe(65);
+		expect(anthropic.errorPct).toBe(85);
+
+		const copilotClaude = resolveContextThresholds(
+			"github-copilot",
+			"claude-sonnet-4-6",
+		);
+		expect(copilotClaude.warningPct).toBe(50);
+		expect(copilotClaude.errorPct).toBe(75);
+	});
+
+	it("applies explicit overrides by provider/model", () => {
+		const overrides: ContextThresholdOverrides = {
+			byProviderModel: {
+				"anthropic/claude-sonnet-4-6": { warningPct: 72, errorPct: 91 },
+			},
+		};
+		const resolved = resolveContextThresholds(
+			"anthropic",
+			"claude-sonnet-4-6",
+			overrides,
+		);
+		expect(resolved.warningPct).toBe(72);
+		expect(resolved.errorPct).toBe(91);
+	});
+});
+
 describe("custom-footer — buildFooterLines", () => {
 	const plainTheme = { fg: (_color: string, text: string) => text };
 
@@ -139,6 +171,25 @@ describe("custom-footer — buildFooterLines", () => {
 	it("linha 1 contém tempo decorrido", () => {
 		const lines = buildFooterLines(baseInput, plainTheme, 200);
 		expect(lines[0]).toContain("1m30s");
+	});
+
+	it("usa thresholds model-aware para cor de contexto", () => {
+		const themed = {
+			fg: (color: string, text: string) => `<${color}>${text}</${color}>`,
+		};
+		const anthLines = buildFooterLines(
+			{ ...baseInput, contextPct: 60, modelProvider: "anthropic" },
+			themed,
+			200,
+		);
+		expect(anthLines[0]).toContain("<success>60%</success>");
+
+		const copilotLines = buildFooterLines(
+			{ ...baseInput, contextPct: 60, modelProvider: "github-copilot" },
+			themed,
+			200,
+		);
+		expect(copilotLines[0]).toContain("<warning>60%</warning>");
 	});
 
 	it("linha 2 contém cwd e branch", () => {
