@@ -458,6 +458,8 @@ const FRAGILITY_EMPTY_OUTPUT_GUARD_LINE =
 	"- Only classify empty-output fragility when assistant_text is actually empty (or whitespace-only).";
 const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
 	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
+const FRAGILITY_EMPTY_RESPONSE_PATTERN_RE =
+	/empty response|empty output|responds with empty/i;
 
 function ensureFragilityClassifierCalibration(cwd) {
 	const classifyPath = join(cwd, ".pi", "monitors", "fragility", "classify.md");
@@ -486,6 +488,43 @@ function ensureFragilityClassifierCalibration(cwd) {
 	const next = `${content.trimEnd()}\n\n${calibrationBlock}\n`;
 	writeFileSync(classifyPath, next, "utf8");
 	return { changed: true, details };
+}
+
+function ensureFragilityPatternHygiene(cwd) {
+	const patternsPath = join(cwd, ".pi", "monitors", "fragility.patterns.json");
+	if (!existsSync(patternsPath)) return { changed: false, details: [] };
+
+	let patterns;
+	try {
+		patterns = JSON.parse(readFileSync(patternsPath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+	if (!Array.isArray(patterns)) return { changed: false, details: [] };
+
+	const kept = [];
+	let removed = 0;
+	for (const entry of patterns) {
+		if (!entry || typeof entry !== "object") {
+			kept.push(entry);
+			continue;
+		}
+		const source = typeof entry.source === "string" ? entry.source : "";
+		const signal = `${entry.id ?? ""} ${entry.description ?? ""}`;
+		const isLearned = source.toLowerCase() === "learned";
+		if (isLearned && FRAGILITY_EMPTY_RESPONSE_PATTERN_RE.test(signal)) {
+			removed += 1;
+			continue;
+		}
+		kept.push(entry);
+	}
+
+	if (removed === 0) return { changed: false, details: [] };
+	writeFileSync(patternsPath, JSON.stringify(kept, null, 2) + "\n", "utf8");
+	return {
+		changed: true,
+		details: [`patterns=pruned-empty-response(${removed})`],
+	};
 }
 
 function ensureFragilityMonitorPolicy(cwd, policy) {
@@ -547,6 +586,7 @@ function simulateSessionStart(cwd) {
 	};
 	const fragilityPatch = ensureFragilityMonitorPolicy(cwd, fragilityPolicy);
 	const fragilityClassifierPatch = ensureFragilityClassifierCalibration(cwd);
+	const fragilityPatternPatch = ensureFragilityPatternHygiene(cwd);
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
@@ -566,6 +606,11 @@ function simulateSessionStart(cwd) {
 				`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (fragilityPatternPatch.changed) {
+			earlyDetails.push(
+				`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
+			);
+		}
 		const output = planSessionStartOutput(earlyDetails, "info", {
 			requiresReload: earlyDetails.length > 0,
 		});
@@ -575,11 +620,12 @@ function simulateSessionStart(cwd) {
 			hedgeChanged: hedgePatch.changed,
 			fragilityChanged: fragilityPatch.changed,
 			fragilityClassifierChanged: fragilityClassifierPatch.changed,
+			fragilityPatternsChanged: fragilityPatternPatch.changed,
 			created: [],
 			repaired: [],
 			output,
 		};
-	}
+		}
 
 	const { created } = ensureOverrides(cwd, COPILOT_MODEL);
 	const { repaired } = repairLegacyTemplateOverrides(cwd);
@@ -592,6 +638,9 @@ function simulateSessionStart(cwd) {
 	if (fragilityClassifierPatch.changed) {
 		details.push(`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`);
 	}
+	if (fragilityPatternPatch.changed) {
+		details.push(`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`);
+	}
 	if (repaired.length > 0) details.push(`corrigiu template legado em ${repaired.length} override(s)`);
 	if (repairedSystemPrompt.length > 0) {
 		details.push(`corrigiu prompt.system ausente em ${repairedSystemPrompt.length} override(s)`);
@@ -602,6 +651,7 @@ function simulateSessionStart(cwd) {
 			hedgePatch.changed ||
 			fragilityPatch.changed ||
 			fragilityClassifierPatch.changed ||
+			fragilityPatternPatch.changed ||
 			repaired.length > 0 ||
 			repairedSystemPrompt.length > 0,
 	});
@@ -611,6 +661,7 @@ function simulateSessionStart(cwd) {
 		hedgeChanged: hedgePatch.changed,
 		fragilityChanged: fragilityPatch.changed,
 		fragilityClassifierChanged: fragilityClassifierPatch.changed,
+		fragilityPatternsChanged: fragilityPatternPatch.changed,
 		created,
 		repaired,
 		repairedSystemPrompt,
@@ -648,5 +699,6 @@ export {
 	ensureFragilityMonitorPolicy,
 	ensureFragilityMonitorContext,
 	ensureFragilityClassifierCalibration,
+	ensureFragilityPatternHygiene,
 	simulateSessionStart,
 };

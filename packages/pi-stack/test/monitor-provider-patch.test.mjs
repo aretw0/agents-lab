@@ -673,6 +673,59 @@ describe("integration: full flow", () => {
 		);
 	});
 
+	it("session_start prunes learned fragility empty-response patterns", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors");
+		mkdirSync(monitorsDir, { recursive: true });
+
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify({ defaultProvider: "anthropic" }, null, 2) + "\n",
+			"utf8",
+		);
+
+		const patternsPath = join(monitorsDir, "fragility.patterns.json");
+		writeFileSync(
+			patternsPath,
+			JSON.stringify(
+				[
+					{
+						id: "bundled-safe",
+						description: "Bundled baseline pattern",
+						source: "bundled",
+					},
+					{
+						id: "learned-empty-output",
+						description: "Agent responds with empty output after tools",
+						source: "learned",
+					},
+					{
+						id: "learned-other",
+						description: "Leaves TODO instead of fix",
+						source: "learned",
+					},
+				],
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		const result = simulateSessionStart(tmpDir);
+		assert.equal(result.fragilityPatternsChanged, true);
+
+		const updated = JSON.parse(readFileSync(patternsPath, "utf8"));
+		assert.equal(updated.length, 2);
+		assert.equal(
+			updated.some((entry) => /empty output/i.test(entry.description)),
+			false,
+		);
+		assert.equal(
+			updated.some((entry) => entry.id === "learned-other"),
+			true,
+		);
+	});
+
 	it("repara template legado dos classifiers no session_start", () => {
 		const piDir = join(tmpDir, ".pi");
 		const monitorsDir = join(piDir, "monitors");

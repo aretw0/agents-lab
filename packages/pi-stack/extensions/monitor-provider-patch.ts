@@ -698,6 +698,8 @@ const FRAGILITY_EMPTY_OUTPUT_GUARD_LINE =
 	"- Only classify empty-output fragility when assistant_text is actually empty (or whitespace-only).";
 const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
 	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
+const FRAGILITY_EMPTY_RESPONSE_PATTERN_RE =
+	/empty response|empty output|responds with empty/i;
 
 export function ensureFragilityClassifierCalibration(cwd: string): {
 	changed: boolean;
@@ -729,6 +731,47 @@ export function ensureFragilityClassifierCalibration(cwd: string): {
 	const next = `${content.trimEnd()}\n\n${calibrationBlock}\n`;
 	writeFileSync(classifyPath, next, "utf8");
 	return { changed: true, details };
+}
+
+export function ensureFragilityPatternHygiene(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	const patternsPath = join(cwd, ".pi", "monitors", "fragility.patterns.json");
+	if (!existsSync(patternsPath)) return { changed: false, details: [] };
+
+	let patterns: unknown;
+	try {
+		patterns = JSON.parse(readFileSync(patternsPath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+	if (!Array.isArray(patterns)) return { changed: false, details: [] };
+
+	const kept: unknown[] = [];
+	let removed = 0;
+	for (const entry of patterns) {
+		if (!entry || typeof entry !== "object") {
+			kept.push(entry);
+			continue;
+		}
+		const row = entry as Record<string, unknown>;
+		const source = typeof row["source"] === "string" ? row["source"] : "";
+		const signal = `${String(row["id"] ?? "")} ${String(row["description"] ?? "")}`;
+		const isLearned = source.toLowerCase() === "learned";
+		if (isLearned && FRAGILITY_EMPTY_RESPONSE_PATTERN_RE.test(signal)) {
+			removed += 1;
+			continue;
+		}
+		kept.push(entry);
+	}
+
+	if (removed === 0) return { changed: false, details: [] };
+	writeFileSync(patternsPath, JSON.stringify(kept, null, 2) + "\n", "utf8");
+	return {
+		changed: true,
+		details: [`patterns=pruned-empty-response(${removed})`],
+	};
 }
 
 type FragilityMonitorPolicy = {
@@ -1114,6 +1157,7 @@ export default function (pi: ExtensionAPI) {
 		const fragilityClassifierPatch = ensureFragilityClassifierCalibration(
 			ctx.cwd,
 		);
+		const fragilityPatternPatch = ensureFragilityPatternHygiene(ctx.cwd);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
@@ -1133,6 +1177,11 @@ export default function (pi: ExtensionAPI) {
 			if (fragilityClassifierPatch.changed) {
 				earlyDetails.push(
 					`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (fragilityPatternPatch.changed) {
+				earlyDetails.push(
+					`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
 				);
 			}
 			const output = planSessionStartOutput(earlyDetails, "info", {
@@ -1183,6 +1232,11 @@ export default function (pi: ExtensionAPI) {
 				`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (fragilityPatternPatch.changed) {
+			details.push(
+				`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
+			);
+		}
 		if (systemPromptRepair.repaired.length > 0) {
 			details.push(
 				`corrigiu prompt.system ausente em ${systemPromptRepair.repaired.length} override(s)`,
@@ -1214,6 +1268,7 @@ export default function (pi: ExtensionAPI) {
 				hedgePatch.changed ||
 				fragilityPatch.changed ||
 				fragilityClassifierPatch.changed ||
+				fragilityPatternPatch.changed ||
 				legacyTemplateRepair.repaired.length > 0 ||
 				systemPromptRepair.repaired.length > 0 ||
 				runtimeContract.repaired.length > 0,
