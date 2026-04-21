@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	applyContextWatchBootstrapToSettings,
+	applyContextWatchToHandoff,
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
@@ -92,5 +93,54 @@ describe("context-watchdog", () => {
 		expect(((merged.settings.piStack as any).contextWatchdog.notify)).toBe(false);
 		expect(((merged.settings.piStack as any).quotaVisibility.routeModelRefs["openai-codex"]))
 			.toBe("openai-codex/gpt-5.3-codex");
+	});
+
+	it("writes canonical action/event trail into handoff snapshot", () => {
+		const assessment = evaluateContextWatch(69, {
+			warnPct: 50,
+			checkpointPct: 68,
+			compactPct: 72,
+		});
+		const next = applyContextWatchToHandoff(
+			{
+				context: "ongoing",
+				next_actions: ["keep lane"],
+				blockers: ["infra-wait"],
+			},
+			assessment,
+			"message_end",
+			"2026-04-21T21:30:00.000Z",
+		) as any;
+
+		expect(next.timestamp).toBe("2026-04-21T21:30:00.000Z");
+		expect(next.next_actions[0]).toContain("Context-watch action:");
+		expect(next.next_actions[0]).toContain("checkpoint");
+		expect(next.blockers).toContain("context-watch-checkpoint-required");
+		expect(Array.isArray(next.context_watch_events)).toBe(true);
+		expect(next.context_watch_events.at(-1).action).toBe("write-checkpoint");
+	});
+
+	it("cleans old context-watch blockers when level returns to ok", () => {
+		const assessment = evaluateContextWatch(20, {
+			warnPct: 50,
+			checkpointPct: 68,
+			compactPct: 72,
+		});
+		const next = applyContextWatchToHandoff(
+			{
+				context: "ongoing",
+				next_actions: ["Context-watch action: level=warn 55% (micro-slice-only)"],
+				blockers: ["context-watch-warn-active", "other-blocker"],
+				context_watch_events: [],
+			},
+			assessment,
+			"message_end",
+			"2026-04-21T21:31:00.000Z",
+		) as any;
+
+		expect(next.next_actions).toBeUndefined();
+		expect(next.blockers).toContain("other-blocker");
+		expect(next.blockers.some((line: string) => String(line).startsWith("context-watch-")))
+			.toBe(false);
 	});
 });

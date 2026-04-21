@@ -1111,6 +1111,32 @@
           "evidence": "docs/guides/unified-dogfood-isolation.md inclui attach Linux/Windows e checklist TUI+WEB com runtime isolado no workspace."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-092",
+      "target": "TASK-BUD-081",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Watchdog operacional agora registra trilha canônica em `.project/handoff.json` durante escalonamento de nível (`warn/checkpoint/compact`) com `next_actions`, `blockers` contextuais e `context_watch_events`; notify inclui `action:` explícita para reduzir ambiguidade de execução. Runbook atualizado com fallback determinístico em `docs/guides/openai-context-window-playbook.md`. Testes: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts` => 2 files passed, 13 tests passed.",
+      "timestamp": "2026-04-21T21:20:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Quando nível atingir warn/checkpoint/compact, há registro canônico curto da ação recomendada/executada.",
+          "status": "passed",
+          "evidence": "`applyContextWatchToHandoff` persiste `Context-watch action:` + `context_watch_events` com `action` no handoff."
+        },
+        {
+          "criterion": "Controle-plane não ignora aviso por falta de visibilidade de UI/status.",
+          "status": "passed",
+          "evidence": "notify inclui `action:` e referência do handoff atualizado no evento de escalonamento."
+        },
+        {
+          "criterion": "Runbook documenta fallback determinístico quando aviso aparece fora do chat principal.",
+          "status": "passed",
+          "evidence": "Playbook adiciona seção de fallback com `context_watch_status` + inspeção de `context_watch_events`."
+        }
+      ]
     }
   ]
 }

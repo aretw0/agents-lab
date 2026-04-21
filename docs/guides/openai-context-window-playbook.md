@@ -137,6 +137,13 @@ Níveis:
 - `checkpoint` → registrar handoff antes do próximo slice grande
 - `compact` → compactar e retomar do checkpoint
 
+Visibilidade operacional (control-plane):
+- Em escalonamento (`warn/checkpoint/compact`), o watchdog registra trilha canônica em `.project/handoff.json`:
+  - `next_actions` recebe linha `Context-watch action: ...`
+  - `blockers` recebe marcador contextual (`context-watch-*-required`)
+  - `context_watch_events` recebe histórico estruturado (`atIso`, `level`, `percent`, `action`, `recommendation`)
+- O notify passa a incluir `action:` e caminho do handoff atualizado.
+
 ### Guardrail de investigação sob pressão (bounded-by-default)
 Quando `context_watch` estiver em `warn` ou acima:
 - evitar varredura ampla/recursiva em sessões e logs;
@@ -144,6 +151,11 @@ Quando `context_watch` estiver em `warn` ou acima:
 - testar hipóteses em janelas curtas (1 arquivo, 1 pergunta, 1 evidência);
 - em `checkpoint`, registrar handoff antes de qualquer diagnóstico adicional;
 - em `compact`, interromper investigação e continuar só após compactação.
+
+Fallback determinístico (quando o aviso não apareceu no chat principal):
+1. Rodar `context_watch_status`.
+2. Verificar `.project/handoff.json` em `context_watch_events` e `Context-watch action:`.
+3. Executar a ação indicada (`micro-slice-only`, `write-checkpoint`, `compact-now`) antes de iniciar novo slice grande.
 
 Sintoma clássico de violação: salto abrupto de contexto sem ganho de decisão.
 Resposta padrão: parar, checkpoint curto, compactar e retomar pelo handoff.

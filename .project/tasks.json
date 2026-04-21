@@ -1870,7 +1870,7 @@
     {
       "id": "TASK-BUD-081",
       "description": "[P1] Tornar watchdog advisory operacionalmente visível no control-plane (warn/checkpoint/compact) com trilha canônica de ação em handoff e sem depender de polling manual.",
-      "status": "planned",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-080"
@@ -1889,7 +1889,8 @@
         "docs/guides/openai-context-window-playbook.md",
         ".project/handoff.json"
       ],
-      "notes": "Fechar gap entre emissão de aviso e influência real no comportamento operacional em long-run."
+      "notes": "Fechar gap entre emissão de aviso e influência real no comportamento operacional em long-run.",
+      "verification": "VER-BUD-092"
     },
     {
       "id": "TASK-BUD-082",

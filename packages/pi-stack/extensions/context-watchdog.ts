@@ -43,6 +43,7 @@ export type ContextWatchAssessment = {
 	level: ContextWatchdogLevel;
 	thresholds: ContextWatchThresholds;
 	recommendation: string;
+	action: string;
 	severity: "info" | "warning";
 };
 
@@ -113,6 +114,19 @@ export function deriveContextWatchThresholds(
 	};
 }
 
+export function contextWatchActionForLevel(level: ContextWatchdogLevel): string {
+	switch (level) {
+		case "compact":
+			return "compact-now";
+		case "checkpoint":
+			return "write-checkpoint";
+		case "warn":
+			return "micro-slice-only";
+		default:
+			return "continue";
+	}
+}
+
 export function evaluateContextWatch(
 	percentInput: number,
 	thresholds: ContextWatchThresholds,
@@ -124,6 +138,7 @@ export function evaluateContextWatch(
 			level: "compact",
 			thresholds,
 			recommendation: "Compact now and continue from checkpoint.",
+			action: contextWatchActionForLevel("compact"),
 			severity: "warning",
 		};
 	}
@@ -134,6 +149,7 @@ export function evaluateContextWatch(
 			level: "checkpoint",
 			thresholds,
 			recommendation: "Write handoff checkpoint before the next large slice.",
+			action: contextWatchActionForLevel("checkpoint"),
 			severity: "warning",
 		};
 	}
@@ -144,6 +160,7 @@ export function evaluateContextWatch(
 			level: "warn",
 			thresholds,
 			recommendation: "Keep micro-slices and avoid broad scans until checkpoint.",
+			action: contextWatchActionForLevel("warn"),
 			severity: "info",
 		};
 	}
@@ -153,6 +170,7 @@ export function evaluateContextWatch(
 		level: "ok",
 		thresholds,
 		recommendation: "Context healthy.",
+		action: contextWatchActionForLevel("ok"),
 		severity: "info",
 	};
 }
@@ -323,6 +341,157 @@ function readSettingsJson(cwd: string): Record<string, unknown> {
 	return {};
 }
 
+export type ContextWatchHandoffEvent = {
+	atIso: string;
+	reason: "session_start" | "message_end";
+	level: ContextWatchdogLevel;
+	percent: number;
+	thresholds: ContextWatchThresholds;
+	action: string;
+	recommendation: string;
+};
+
+const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
+const CONTEXT_WATCH_BLOCKER_PREFIX = "context-watch-";
+const CONTEXT_WATCH_EVENTS_KEY = "context_watch_events";
+const CONTEXT_WATCH_EVENTS_MAX = 12;
+
+function handoffFilePath(cwd: string): string {
+	return path.join(cwd, ".project", "handoff.json");
+}
+
+function normalizeStringArray(value: unknown): string[] {
+	if (!Array.isArray(value)) return [];
+	return value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
+}
+
+function normalizeContextWatchEventList(value: unknown): ContextWatchHandoffEvent[] {
+	if (!Array.isArray(value)) return [];
+	const out: ContextWatchHandoffEvent[] = [];
+	for (const item of value) {
+		if (!item || typeof item !== "object") continue;
+		const row = item as Record<string, unknown>;
+		const level = row.level;
+		if (level !== "ok" && level !== "warn" && level !== "checkpoint" && level !== "compact") {
+			continue;
+		}
+		const percent = Number(row.percent);
+		const thresholdsRaw = row.thresholds as Record<string, unknown> | undefined;
+		const warnPct = Number(thresholdsRaw?.warnPct);
+		const checkpointPct = Number(thresholdsRaw?.checkpointPct);
+		const compactPct = Number(thresholdsRaw?.compactPct);
+		if (!Number.isFinite(percent) || !Number.isFinite(warnPct) || !Number.isFinite(checkpointPct) || !Number.isFinite(compactPct)) {
+			continue;
+		}
+		out.push({
+			atIso: typeof row.atIso === "string" && row.atIso ? row.atIso : new Date().toISOString(),
+			reason: row.reason === "session_start" ? "session_start" : "message_end",
+			level,
+			percent: Math.max(0, Math.min(100, Math.floor(percent))),
+			thresholds: {
+				warnPct: Math.max(1, Math.min(99, Math.floor(warnPct))),
+				checkpointPct: Math.max(1, Math.min(99, Math.floor(checkpointPct))),
+				compactPct: Math.max(1, Math.min(100, Math.floor(compactPct))),
+			},
+			action: typeof row.action === "string" ? row.action : contextWatchActionForLevel(level),
+			recommendation:
+				typeof row.recommendation === "string" ? row.recommendation : "",
+		});
+	}
+	return out.slice(-CONTEXT_WATCH_EVENTS_MAX);
+}
+
+function readHandoffJson(cwd: string): Record<string, unknown> {
+	const filePath = handoffFilePath(cwd);
+	if (!existsSync(filePath)) return {};
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+	} catch {
+		return {};
+	}
+}
+
+function contextWatchActionLine(assessment: ContextWatchAssessment): string {
+	return `${CONTEXT_WATCH_ACTION_PREFIX} level=${assessment.level} ${assessment.percent}% (${assessment.action}) · ${assessment.recommendation}`;
+}
+
+function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
+	if (level === "compact") return ["context-watch-compact-required"];
+	if (level === "checkpoint") return ["context-watch-checkpoint-required"];
+	if (level === "warn") return ["context-watch-warn-active"];
+	return [];
+}
+
+export function applyContextWatchToHandoff(
+	handoffInput: Record<string, unknown> | undefined,
+	assessment: ContextWatchAssessment,
+	reason: "session_start" | "message_end",
+	atIso: string,
+): Record<string, unknown> {
+	const base = (handoffInput && typeof handoffInput === "object")
+		? { ...handoffInput }
+		: {};
+	const actionLine = contextWatchActionLine(assessment);
+
+	const nextActions = normalizeStringArray(base.next_actions)
+		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_ACTION_PREFIX));
+	if (assessment.level !== "ok") nextActions.unshift(actionLine);
+	if (nextActions.length > 0) {
+		base.next_actions = nextActions.slice(0, 20);
+	} else {
+		delete base.next_actions;
+	}
+
+	const blockers = normalizeStringArray(base.blockers)
+		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_BLOCKER_PREFIX));
+	const contextBlockers = contextWatchBlockersForLevel(assessment.level);
+	if (contextBlockers.length > 0) blockers.unshift(...contextBlockers);
+	if (blockers.length > 0) {
+		base.blockers = Array.from(new Set(blockers)).slice(0, 20);
+	} else {
+		delete base.blockers;
+	}
+
+	const event: ContextWatchHandoffEvent = {
+		atIso,
+		reason,
+		level: assessment.level,
+		percent: assessment.percent,
+		thresholds: assessment.thresholds,
+		action: assessment.action,
+		recommendation: assessment.recommendation,
+	};
+	const events = normalizeContextWatchEventList(base[CONTEXT_WATCH_EVENTS_KEY]);
+	events.push(event);
+	base[CONTEXT_WATCH_EVENTS_KEY] = events.slice(-CONTEXT_WATCH_EVENTS_MAX);
+
+	base.timestamp = atIso;
+	if (typeof base.context !== "string" || base.context.trim().length === 0) {
+		base.context = "Context-watch tracking active: maintain continuity under context pressure.";
+	}
+	return base;
+}
+
+function writeHandoffJson(cwd: string, handoff: Record<string, unknown>): string {
+	const filePath = handoffFilePath(cwd);
+	mkdirSync(path.dirname(filePath), { recursive: true });
+	writeFileSync(filePath, `${JSON.stringify(handoff, null, 2)}\n`, "utf8");
+	return filePath;
+}
+
+function persistContextWatchHandoffEvent(
+	ctx: ExtensionContext,
+	assessment: ContextWatchAssessment,
+	reason: "session_start" | "message_end",
+): string | undefined {
+	if (assessment.level === "ok") return undefined;
+	const nowIso = new Date().toISOString();
+	const current = readHandoffJson(ctx.cwd);
+	const next = applyContextWatchToHandoff(current, assessment, reason, nowIso);
+	return writeHandoffJson(ctx.cwd, next);
+}
+
 function readContextThresholdOverrides(cwd: string): ContextThresholdOverrides | undefined {
 	const settings = readSettingsJson(cwd);
 	const cfg = (settings.piStack as Record<string, unknown> | undefined)?.customFooter;
@@ -394,11 +563,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		if (!announce) return;
 		lastAnnouncedAt = now;
 
+		const handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
 		const label = reason === "session_start" ? "context-watch start" : "context-watch";
-		ctx.ui.notify(
-			`${label}: ${formatContextWatchStatus(assessment)}\n${assessment.recommendation}`,
-			assessment.severity,
-		);
+		const lines = [
+			`${label}: ${formatContextWatchStatus(assessment)}`,
+			`action: ${assessment.action}`,
+			assessment.recommendation,
+		];
+		if (handoffPath) {
+			const rel = path.relative(ctx.cwd, handoffPath).replace(/\\/g, "/");
+			lines.push(`handoff: ${rel}`);
+		}
+		ctx.ui.notify(lines.join("\n"), assessment.severity);
 	};
 
 	const applyPreset = (ctx: ExtensionContext, presetInput?: unknown) => {
@@ -520,7 +696,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			ctx.ui.notify(
-				`${formatContextWatchStatus(assessment)}\n${assessment.recommendation}`,
+				`${formatContextWatchStatus(assessment)}\naction: ${assessment.action}\n${assessment.recommendation}`,
 				assessment.severity,
 			);
 		},

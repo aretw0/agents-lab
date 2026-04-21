@@ -1,21 +1,18 @@
 {
-  "timestamp": "2026-04-21T21:05:00Z",
-  "context": "Retomada pós-compact concluída com contexto saudável. TASK-BUD-082 avançou para mitigação short-term: colony-pilot agora captura snapshot de runtime em terminal states failed/budget_exceeded e grava artefato reaplicável em .pi/colony-retention/runtime-artifacts/, além de expor runtimeSnapshotPath no retention record/artifacts.",
+  "timestamp": "2026-04-21T21:28:00Z",
+  "context": "Pós-compact: TASK-BUD-082 segue em execução (retenção de runtime snapshot em failed/budget_exceeded já aplicada). TASK-BUD-081 foi concluída com verificação VER-BUD-092: context-watchdog agora registra trilha canônica em handoff (`context_watch_events`, ação em `next_actions`, blockers contextuais) quando há escalonamento warn/checkpoint/compact.",
   "current_phase": "active-post-compact",
   "current_tasks": [
     "TASK-BUD-082",
-    "TASK-BUD-081",
     "TASK-BUD-046"
   ],
   "blockers": [
-    "watchdog-visibility-gap",
     "colony-recovery-first-party-gap"
   ],
   "next_actions": [
-    "Rodar testes smoke do retention para validar patch de snapshot runtime.",
-    "Consolidar evidência de TASK-BUD-082 em verification/closure (sem auto-close prematuro).",
-    "Executar TASK-BUD-081 para tornar warn/checkpoint/compact operacionalmente explícitos no fluxo principal.",
-    "Decidir política final snapshot-first vs keep-worktree-on-failure para trilha first-party."
+    "Consolidar fechamento formal de TASK-BUD-082 (decidir snapshot-first vs keep-worktree-on-failure).",
+    "Retomar reconciliação legada evidence-first: TASK-BUD-046 -> TASK-BUD-047 -> TASK-BUD-052 -> TASK-BUD-051.",
+    "Manter micro-slices com bounded-by-default enquanto context_watch permanecer abaixo de checkpoint."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -25,11 +22,11 @@
     "Política definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/colony-pilot-candidate-retention.ts",
-    "packages/pi-stack/extensions/colony-pilot.ts",
-    "packages/pi-stack/test/smoke/colony-pilot-retention.test.ts",
-    "docs/guides/unattended-swarm-execution-plan.md",
-    "docs/research/colony-worktree-retention-2026-04-21.md",
+    "packages/pi-stack/extensions/context-watchdog.ts",
+    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+    "docs/guides/openai-context-window-playbook.md",
+    "docs/research/task-bud-081-closure-2026-04-21.md",
+    ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
   ]
