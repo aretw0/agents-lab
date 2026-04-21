@@ -1866,6 +1866,53 @@
       ],
       "notes": "Task de governança operacional para prevenir repetição do incidente de contexto durante triagem de sessão.",
       "verification": "VER-BUD-088"
+    },
+    {
+      "id": "TASK-BUD-081",
+      "description": "[P1] Tornar watchdog advisory operacionalmente visível no control-plane (warn/checkpoint/compact) com trilha canônica de ação em handoff e sem depender de polling manual.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-080"
+      ],
+      "references": [
+        "DEC-BUD-034",
+        "REQ-BUD-041"
+      ],
+      "acceptance_criteria": [
+        "Quando nível atingir warn/checkpoint/compact, há registro canônico curto da ação recomendada/executada.",
+        "Controle-plane não ignora aviso por falta de visibilidade de UI/status.",
+        "Runbook documenta fallback determinístico quando aviso aparece fora do chat principal."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "docs/guides/openai-context-window-playbook.md",
+        ".project/handoff.json"
+      ],
+      "notes": "Fechar gap entre emissão de aviso e influência real no comportamento operacional em long-run."
+    },
+    {
+      "id": "TASK-BUD-082",
+      "description": "[P1] Endurecer retenção de artefatos de colônia em terminal states (failed/budget_exceeded) para evitar perda de worktree sem evidência reaplicável.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-052"
+      ],
+      "references": [
+        "REQ-BUD-041"
+      ],
+      "acceptance_criteria": [
+        "Em budget_exceeded/failed, existe artefato reaplicável (patch/diff/snapshot) mesmo após cleanup.",
+        "Relatório de colônia inclui caminho de recuperação determinístico.",
+        "Policy define quando manter worktree temporariamente vs cleanup imediato."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "docs/guides/unattended-swarm-execution-plan.md",
+        "docs/research/colony-worktree-retention-2026-04-21.md"
+      ],
+      "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery."
     }
   ]
 }

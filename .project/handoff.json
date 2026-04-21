@@ -1,34 +1,33 @@
 {
-  "timestamp": "2026-04-21T20:05:00Z",
-  "context": "TASK-BUD-074 concluída com evidência canônica (VER-BUD-091): blueprint devcontainer opcional implementado com usuário não-root, workdir fixo e PI_CODING_AGENT_DIR local no workspace, incluindo comando de entrada estilo farm e runbook Linux/Windows para attach + checklist TUI/WEB.",
-  "current_phase": "post-compact-stabilization",
+  "timestamp": "2026-04-21T20:32:00Z",
+  "context": "Preparação ativa para compactação com contexto em faixa warn (65%, W50/C68/X72). Gap confirmado de visibilidade operacional do watchdog (aviso emitido sem influência clara no fluxo). Colônia c1 encerrou em budget_exceeded com saída parcial, mas sem worktree disponível para inspeção posterior.",
+  "current_phase": "pre-compact-warning",
   "current_tasks": [
-    "TASK-BUD-046",
-    "TASK-BUD-047",
-    "TASK-BUD-052"
+    "TASK-BUD-081",
+    "TASK-BUD-082",
+    "TASK-BUD-046"
   ],
-  "blockers": [],
+  "blockers": [
+    "watchdog-visibility-gap",
+    "colony-worktree-retention-gap"
+  ],
   "next_actions": [
-    "Retomar reconciliação legada na ordem combinada (046 -> 047 -> 052 -> 051).",
-    "Avaliar policy final de enforcement para scan-bounds (advisory em warn vs hard em checkpoint).",
-    "Medir em ciclos reais o onboarding devcontainer (attach + pi:isolated + session-web)."
+    "Manter micro-slices e evitar varredura ampla até checkpoint.",
+    "Ao atingir checkpoint (>=68%), registrar checkpoint canônico curto e reduzir escopo.",
+    "Ao atingir compact (>=72%), compactar imediatamente e retomar por handoff.",
+    "Após retomada, executar TASK-BUD-081 (watchdog operacional) e TASK-BUD-082 (retenção de artefatos de colônia)."
   ],
   "open_questions": [
-    "No guardrail de scan-bounds, enforcement default permanece advisory em warn ou sobe para hard only em checkpoint?"
+    "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
+    "Retenção de colônia deve priorizar keep-worktree-on-failure ou snapshot patch-first?"
   ],
   "key_decisions_pending": [
-    "Calibrar política final de enforcement (advisory vs hard) para scan-bounds conforme maturidade operacional."
+    "Política definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
+    ".project/decisions.json",
     ".project/tasks.json",
-    ".project/verification.json",
     ".project/handoff.json",
-    ".devcontainer/devcontainer.json",
-    ".devcontainer/Dockerfile",
-    ".devcontainer/postCreate.sh",
-    "scripts/devcontainer-farm.mjs",
-    "docs/guides/unified-dogfood-isolation.md",
-    "docs/research/devcontainer-blueprint-2026-04-21.md",
-    "docs/research/task-bud-074-closure-2026-04-21.md"
+    "docs/research/context-checkpoint-2026-04-21-65warn-watchdog-visibility.md"
   ]
 }

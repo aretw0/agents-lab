@@ -234,6 +234,13 @@
       "decision": "Formalizar um guardrail de scan bounded-by-default em contexto pressionado: quando `context_watch` estiver >= warn, evitar varredura ampla de logs/sessions e preferir consultas limitadas por arquivo/offset/escopo.",
       "rationale": "Evita explosão de contexto por comandos de busca de alto fan-out e reduz risco de parada abrupta do loop de execução durante fases críticas próximas de compactação.",
       "context": "Incidente operacional em 2026-04-21: busca ampla (`grep`) elevou contexto para ~83% e interrompeu continuidade da fábrica."
+    },
+    {
+      "id": "DEC-BUD-034",
+      "status": "decided",
+      "decision": "Tratar sinais de context-watchdog (warn/checkpoint/compact) como eventos operacionais explícitos no control-plane, com ação visível e auditável no handoff, em vez de depender apenas de superfície de status/footer.",
+      "rationale": "Evita perda de timing de checkpoint/compact quando o aviso não aparece de forma saliente no fluxo principal e reduz risco de compactação tardia.",
+      "context": "Feedback humano em 2026-04-21: aviso '[ctx] 52% warn · W50/C68/X72' ocorreu sem influenciar claramente a execução."
     }
   ]
 }
