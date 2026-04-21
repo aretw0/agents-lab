@@ -77,9 +77,15 @@ Invariantes em ambos os modos:
 - **target:** `TASK-...`
 - **target_type:** `task`
 - **status:** `passed|partial|failed`
-- **method:** `inspect|test|smoke`
+- **method:** `command|inspect|test` (agnóstico de stack)
 - **evidence:** evidência curta e auditável
 - **timestamp:** ISO
+
+## Soft intent vs Hard gate de qualidade
+- **Soft intent (advisory):** monitor orienta verificar em granularidade de slice; não bloqueia sozinho.
+- **Hard gate (canônico):** promoção/conclusão estratégica requer `verification` com `status=passed` vinculada ao target.
+- Use `inspect` para governança/doc/processo e `command/test` quando houver impacto executável.
+- Referência de contrato: `docs/primitives/quality-verification-gate.md`.
 
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:

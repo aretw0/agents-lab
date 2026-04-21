@@ -1785,7 +1785,7 @@
     {
       "id": "TASK-BUD-078",
       "description": "[P1] Especificar hard gate language-agnostic de qualidade (verification evidence gate) para promoção/conclusão de slices estratégicos.",
-      "status": "planned",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-077"
@@ -1802,9 +1802,10 @@
       "files": [
         "docs/primitives/quality-verification-gate.md",
         "docs/guides/project-canonical-pipeline.md",
-        ".project/requirements.json"
+        "docs/research/task-bud-078-closure-2026-04-21.md"
       ],
-      "notes": "Planejamento de enforcement progressivo, mantendo default atual advisory até validação operacional."
+      "notes": "Contrato hard gate language-agnostic definido e integrado ao runbook canônico sem lock-in de stack.",
+      "verification": "VER-BUD-090"
     },
     {
       "id": "TASK-BUD-079",

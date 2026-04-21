@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-04-21T19:32:00Z",
-  "context": "TASK-BUD-079 concluída com evidência canônica (VER-BUD-089): defaults de nudge de qualidade agora são promovidos por superfície distribuível da pi-stack no session_start, sem depender de edição manual local em .pi/monitors como baseline.",
+  "timestamp": "2026-04-21T19:48:00Z",
+  "context": "TASK-BUD-078 concluída com evidência canônica (VER-BUD-090): contrato hard gate de qualidade language-agnostic foi especificado, com integração ao fluxo `.project/verification` + `complete-task` e diferenciação explícita entre soft intent e hard gate no pipeline canônico.",
   "current_phase": "post-compact-stabilization",
   "current_tasks": [
-    "TASK-BUD-078",
     "TASK-BUD-074",
-    "TASK-BUD-046"
+    "TASK-BUD-046",
+    "TASK-BUD-047"
   ],
   "blockers": [],
   "next_actions": [
-    "Executar micro-slice de TASK-BUD-078: contrato hard gate de qualidade language-agnostic em verification.",
     "Abrir recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional).",
-    "Retomar reconciliação legada na ordem combinada (046 -> 047 -> 052 -> 051)."
+    "Retomar reconciliação legada na ordem combinada (046 -> 047 -> 052 -> 051).",
+    "Avaliar policy final de enforcement para scan-bounds (advisory em warn vs hard em checkpoint)."
   ],
   "open_questions": [
     "No guardrail de scan-bounds, enforcement default permanece advisory em warn ou sobe para hard only em checkpoint?"
@@ -23,9 +23,8 @@
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json",
-    "packages/pi-stack/extensions/monitor-provider-config.ts",
-    "packages/pi-stack/extensions/monitor-provider-patch.ts",
-    "packages/pi-stack/test/monitor-provider-patch.test.mjs",
-    "docs/research/task-bud-079-closure-2026-04-21.md"
+    "docs/primitives/quality-verification-gate.md",
+    "docs/guides/project-canonical-pipeline.md",
+    "docs/research/task-bud-078-closure-2026-04-21.md"
   ]
 }

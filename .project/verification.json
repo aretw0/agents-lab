@@ -1059,6 +1059,32 @@
           "evidence": "Teste de integração em monitor-provider-patch.test.mjs validando aplicação e idempotência das instruções de commit-hygiene/work-quality."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-090",
+      "target": "TASK-BUD-078",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Contrato hard gate language-agnostic documentado em docs/primitives/quality-verification-gate.md e integrado ao runbook em docs/guides/project-canonical-pipeline.md (soft intent vs hard gate + método command|inspect|test). Closure registrada em docs/research/task-bud-078-closure-2026-04-21.md.",
+      "timestamp": "2026-04-21T19:45:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Documento de design define sinais mínimos de evidência aceitos por tipo de projeto.",
+          "status": "passed",
+          "evidence": "quality-verification-gate.md define sinais mínimos, métodos e perfis por tipo de slice."
+        },
+        {
+          "criterion": "Integração proposta com `.project/verification` e fluxo `complete-task` sem acoplamento a stack específica.",
+          "status": "passed",
+          "evidence": "quality-verification-gate.md descreve vínculo canônico e uso de complete-task sem linguagem específica."
+        },
+        {
+          "criterion": "Runbook diferencia claramente soft intent (nudge) vs hard intent (gate).",
+          "status": "passed",
+          "evidence": "project-canonical-pipeline.md ganhou seção dedicada 'Soft intent vs Hard gate de qualidade'."
+        }
+      ]
     }
   ]
 }
