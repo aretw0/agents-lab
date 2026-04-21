@@ -24,6 +24,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainOnIdle).toBe(true);
       expect(cfg.autoDrainCooldownMs).toBe(3000);
       expect(cfg.autoDrainBatchSize).toBe(1);
+      expect(cfg.autoDrainIdleStableMs).toBe(1500);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -35,6 +36,10 @@ describe("guardrails-core long-run intent queue", () => {
       requireActiveLongRun: true,
       maxItems: 50,
       forceNowPrefix: "lane-now:",
+      autoDrainOnIdle: true,
+      autoDrainCooldownMs: 3000,
+      autoDrainBatchSize: 1,
+      autoDrainIdleStableMs: 1500,
     };
     expect(shouldQueueInputForLongRun("registrar isso", true, cfg)).toBe(true);
     expect(shouldQueueInputForLongRun("/status", true, cfg)).toBe(false);
@@ -97,6 +102,7 @@ describe("guardrails-core long-run intent queue", () => {
                 autoDrainOnIdle: false,
                 autoDrainCooldownMs: 8000,
                 autoDrainBatchSize: 4,
+                autoDrainIdleStableMs: 5000,
               },
             },
           },
@@ -110,6 +116,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainOnIdle).toBe(false);
       expect(cfg.autoDrainCooldownMs).toBe(8000);
       expect(cfg.autoDrainBatchSize).toBe(4);
+      expect(cfg.autoDrainIdleStableMs).toBe(5000);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -123,11 +130,14 @@ describe("guardrails-core long-run intent queue", () => {
       forceNowPrefix: "lane-now:",
       autoDrainOnIdle: true,
       autoDrainCooldownMs: 1000,
+      autoDrainBatchSize: 1,
+      autoDrainIdleStableMs: 800,
     };
 
-    expect(shouldAutoDrainDeferredIntent(false, 1, 2_000, 0, cfg)).toBe(true);
-    expect(shouldAutoDrainDeferredIntent(true, 1, 2_000, 0, cfg)).toBe(false);
-    expect(shouldAutoDrainDeferredIntent(false, 0, 2_000, 0, cfg)).toBe(false);
-    expect(shouldAutoDrainDeferredIntent(false, 1, 500, 0, cfg)).toBe(false);
+    expect(shouldAutoDrainDeferredIntent(false, 1, 2_000, 0, 1_200, cfg)).toBe(true);
+    expect(shouldAutoDrainDeferredIntent(true, 1, 2_000, 0, 1_200, cfg)).toBe(false);
+    expect(shouldAutoDrainDeferredIntent(false, 0, 2_000, 0, 1_200, cfg)).toBe(false);
+    expect(shouldAutoDrainDeferredIntent(false, 1, 500, 0, 1_200, cfg)).toBe(false);
+    expect(shouldAutoDrainDeferredIntent(false, 1, 2_000, 0, 200, cfg)).toBe(false);
   });
 });

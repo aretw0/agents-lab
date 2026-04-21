@@ -547,6 +547,7 @@ interface LongRunIntentQueueConfig {
   autoDrainOnIdle: boolean;
   autoDrainCooldownMs: number;
   autoDrainBatchSize: number;
+  autoDrainIdleStableMs: number;
 }
 
 interface DeferredIntentItem {
@@ -569,6 +570,7 @@ const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   autoDrainOnIdle: true,
   autoDrainCooldownMs: 3000,
   autoDrainBatchSize: 1,
+  autoDrainIdleStableMs: 1500,
 };
 function deferredIntentQueuePath(cwd: string): string {
   return join(cwd, ".pi", "deferred-intents.json");
@@ -613,6 +615,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const maxItemsRaw = Number(cfg?.maxItems);
     const autoDrainCooldownMsRaw = Number(cfg?.autoDrainCooldownMs);
     const autoDrainBatchSizeRaw = Number(cfg?.autoDrainBatchSize);
+    const autoDrainIdleStableMsRaw = Number(cfg?.autoDrainIdleStableMs);
     return {
       enabled: cfg?.enabled !== false,
       requireActiveLongRun: cfg?.requireActiveLongRun !== false,
@@ -629,6 +632,9 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
       autoDrainBatchSize: Number.isFinite(autoDrainBatchSizeRaw) && autoDrainBatchSizeRaw > 0
         ? Math.max(1, Math.min(10, Math.floor(autoDrainBatchSizeRaw)))
         : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.autoDrainBatchSize,
+      autoDrainIdleStableMs: Number.isFinite(autoDrainIdleStableMsRaw) && autoDrainIdleStableMsRaw >= 0
+        ? Math.max(0, Math.floor(autoDrainIdleStableMsRaw))
+        : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.autoDrainIdleStableMs,
     };
   } catch {
     return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
@@ -654,12 +660,14 @@ export function shouldAutoDrainDeferredIntent(
   queuedCount: number,
   nowMs: number,
   lastAutoDrainAt: number,
+  idleSinceMs: number,
   cfg: LongRunIntentQueueConfig,
 ): boolean {
   if (!cfg.enabled || !cfg.autoDrainOnIdle) return false;
   if (activeLongRun) return false;
   if (queuedCount <= 0) return false;
-  return (nowMs - lastAutoDrainAt) >= cfg.autoDrainCooldownMs;
+  if ((nowMs - lastAutoDrainAt) < cfg.autoDrainCooldownMs) return false;
+  return idleSinceMs >= cfg.autoDrainIdleStableMs;
 }
 
 export function enqueueDeferredIntent(
@@ -751,6 +759,8 @@ export default function (pi: ExtensionAPI) {
   let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
   let lastAutoDrainAt = 0;
+  let lastLongRunBusyAt = Date.now();
+  let autoDrainTimer: NodeJS.Timeout | undefined;
 
   async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
     const quota = readQuotaBudgetSettings(ctx.cwd);
@@ -785,12 +795,32 @@ export default function (pi: ExtensionAPI) {
     return snapshot;
   }
 
-  function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop"): boolean {
+  function clearAutoDrainTimer(): void {
+    if (!autoDrainTimer) return;
+    clearTimeout(autoDrainTimer);
+    autoDrainTimer = undefined;
+  }
+
+  function scheduleAutoDrainDeferredIntent(
+    ctx: ExtensionContext,
+    reason: "agent_end" | "lane_pop" | "idle_timer",
+  ): void {
+    if (!longRunIntentQueueConfig.enabled || !longRunIntentQueueConfig.autoDrainOnIdle) return;
+    clearAutoDrainTimer();
+    const delay = Math.max(0, longRunIntentQueueConfig.autoDrainIdleStableMs);
+    autoDrainTimer = setTimeout(() => {
+      autoDrainTimer = undefined;
+      tryAutoDrainDeferredIntent(ctx, reason);
+    }, delay);
+  }
+
+  function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop" | "idle_timer"): boolean {
     const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
     const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
     const nowMs = Date.now();
+    const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
 
-    if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, longRunIntentQueueConfig)) {
+    if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, idleSinceMs, longRunIntentQueueConfig)) {
       updateLongRunLaneStatus(ctx, activeLongRun);
       return false;
     }
@@ -850,10 +880,14 @@ export default function (pi: ExtensionAPI) {
     }
     providerBudgetSnapshotCache = undefined;
     lastAutoDrainAt = 0;
+    lastLongRunBusyAt = Date.now();
+    clearAutoDrainTimer();
     updateLongRunLaneStatus(ctx, false);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
+    lastLongRunBusyAt = Date.now();
+    clearAutoDrainTimer();
     const decision = classifyRouting(event.prompt ?? "");
     strictInteractiveMode = decision.strictMode;
 
@@ -886,6 +920,10 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("input", async (event, ctx) => {
     const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+    if (activeLongRun) {
+      lastLongRunBusyAt = Date.now();
+      clearAutoDrainTimer();
+    }
     updateLongRunLaneStatus(ctx, activeLongRun);
 
     if (
@@ -1078,6 +1116,7 @@ export default function (pi: ExtensionAPI) {
         });
         ctx.ui.notify(`lane-queue: dispatching ${popped.item.id}`, "info");
         pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+        scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
         return;
       }
 
@@ -1085,7 +1124,7 @@ export default function (pi: ExtensionAPI) {
       const queued = getDeferredIntentQueueCount(ctx.cwd);
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs}`,
           "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
         ].join("\n"),
         "info",
@@ -1099,8 +1138,8 @@ export default function (pi: ExtensionAPI) {
       ctx.ui?.setStatus?.("guardrails-core", undefined);
     }
     ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
-    if (!tryAutoDrainDeferredIntent(ctx, "agent_end")) {
-      updateLongRunLaneStatus(ctx, false);
-    }
+    lastLongRunBusyAt = Date.now();
+    scheduleAutoDrainDeferredIntent(ctx, "agent_end");
+    updateLongRunLaneStatus(ctx, false);
   });
 }
