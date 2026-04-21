@@ -622,6 +622,27 @@
           "evidence": "monitor-gates-regression.test.mjs inclui caso 'uses bounded default tail thresholds' e suite 5/5 pass."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-C5",
+      "target": "TASK-CAL-2026-04-21-C",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T11:45:40.000Z",
+      "evidence": "calibrate-repro defaults ajustados para operação bounded por classe de step: monitor tail=200k e readiness tail=600k. Dry-run e execução real (skip-monitor-tests) confirmam comandos e sucesso determinístico.",
+      "criteria_results": [
+        {
+          "criterion": "Pipeline reproduzível mantém estabilidade com menor custo de contexto inicial",
+          "status": "passed",
+          "evidence": "node scripts/calibrate-repro.mjs --skip-monitor-tests => ok=true; monitor-stability-gate em 200k passou sem expansão; readiness strict passou com 600k."
+        },
+        {
+          "criterion": "Cobertura determinística para defaults bounded no orchestrator",
+          "status": "passed",
+          "evidence": "packages/pi-stack/test/calibrate-repro.test.mjs adiciona 'uses bounded default tails per step class' (6/6 pass)."
+        }
+      ]
     }
   ]
 }
