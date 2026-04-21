@@ -809,6 +809,15 @@
           "evidence": "context-watchdog smoke (7/7) inclui caso applyContextWatchBootstrapToSettings preservando routeModelRefs."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-066",
+      "target": "TASK-BUD-021",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "evidence": "Gate de prontidão do control plane executado com superfícies estáveis: subagent_readiness_status(strict=true), context_watch_status, colony_pilot_preflight, scheduler_governance_status, monitors_compact_status, quota_alerts, provider_readiness_matrix, stack_sovereignty_status. Resultado: GO condicional para evolução non-invasive; bloqueio estrito permanece por minCompleteSignals=0 (sem COMPLETE recente). Evidência consolidada em docs/research/control-plane-readiness-gate-2026-04-21.md.",
+      "timestamp": "2026-04-21T13:36:00Z"
     }
   ]
 }

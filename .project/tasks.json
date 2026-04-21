@@ -475,7 +475,7 @@
     {
       "id": "TASK-BUD-021",
       "description": "[P1] Especificar control plane portátil para swarm (processo desacoplado + handoff/resume entre instâncias pi) sem interromper execuções em background.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-020",
         "TASK-BUD-017"
@@ -491,7 +491,7 @@
         "Protocolo de retomada (`pi --resume` + reconciliação de eventos) documentado com riscos e limites.",
         "Requisitos de compatibilidade para múltiplos backends de execução (não só ant_colony) explicitados."
       ],
-      "notes": "Derivado de necessidade operacional do usuário: poder reiniciar terminal/processo com segurança e continuar supervisão."
+      "notes": "Derivado de necessidade operacional do usuário: poder reiniciar terminal/processo com segurança e continuar supervisão.\n[2026-04-21] Readiness gate executado em runtime (`subagent_readiness_status`, `scheduler_governance_status`, `colony_pilot_preflight`, `context_watch_status`, `quota_alerts`, `provider_readiness_matrix`, `stack_sovereignty_status`): GO condicional para evolução non-invasive do control plane com base nas superfícies estáveis atuais; bloqueio estrito de subagentes permanece por ausência de sinal COMPLETE recente (0/1). Evidência: docs/research/control-plane-readiness-gate-2026-04-21.md."
     },
     {
       "id": "TASK-BUD-022",
@@ -1562,6 +1562,25 @@
         "Fluxo inclui etapa explícita de revisão humana para promover prioridade/scope antes de execução autônoma."
       ],
       "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável."
+    },
+    {
+      "id": "TASK-BUD-069",
+      "description": "[P1] Executar micro-slice de control plane portable usando capacidades estáveis já publicadas (lease governance + watchdog advisory + preflight/readiness), sem ampliar superfície de runtime.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-021"
+      ],
+      "files": [
+        "docs/guides/swarm-cleanroom-protocol.md",
+        "docs/guides/session-triage.md",
+        "scripts/subagent-readiness-gate.mjs"
+      ],
+      "acceptance_criteria": [
+        "Playbook de handoff/resume documenta sequência determinística de checagens (lease owner, preflight, context/quota) antes e depois de retomada.",
+        "Smoke operacional confirma continuidade de supervisão sem interromper jobs em background no modo observe.",
+        "Checklist explicita condição de bloqueio estrito de subagentes (ausência de COMPLETE recente) e caminho de desbloqueio com evidência."
+      ],
+      "notes": "Derivada do gate de prontidão 2026-04-21 para avançar control plane por composição de primitivas estáveis, evitando nova infraestrutura prematura."
     }
   ]
 }
