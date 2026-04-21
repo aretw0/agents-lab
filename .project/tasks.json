@@ -1414,6 +1414,27 @@
         "Sem dependência rígida de um único estilo operacional."
       ],
       "notes": "Referência inicial: https://github.com/claudioemmanuel/squeez. Executar só após fechar calibração hard de ruído/contexto."
+    },
+    {
+      "id": "TASK-CAL-2026-04-21-C",
+      "description": "[P1] Empacotar calibração reproduzível de contexto/ruído em pipeline único (determinístico por padrão + canary real opt-in com budget cap e evidência em .pi/reports).",
+      "status": "planned",
+      "files": [
+        "package.json",
+        "scripts/monitor-stability-gate.mjs",
+        "scripts/subagent-readiness-gate.mjs",
+        "scripts/monitor-stability-evidence.mjs",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Comando único executa suíte determinística (tests+gates) sem depender de token real.",
+        "Canary real fica separado e explícito (opt-in) com limite de custo/tokens.",
+        "Relatórios persistidos em .pi/reports com timestamp para auditoria e replay."
+      ],
+      "depends_on": [
+        "TASK-CAL-2026-04-21-A"
+      ],
+      "notes": "Priorizar UX de reprodução curta para evitar drift entre sessões e reduzir custo de contexto no control plane."
     }
   ]
 }

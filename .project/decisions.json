@@ -171,6 +171,13 @@
       "rationale": "Preserva portabilidade entre workspaces e objetivos diferentes, reduz lock-in de preferências locais e mantém a stack utilizável por qualquer usuário com seu próprio .pi/.project.",
       "status": "decided",
       "context": "Diretriz de calibração para escalar com controle de contexto e ruído baixo, mantendo espaço para personalização opcional."
+    },
+    {
+      "id": "DEC-BUD-025",
+      "decision": "Calibração de contexto/ruído deve ser model-aware por provider/model e overrideável por workspace, mantendo baseline agnóstico e reproduzível por scripts determinísticos com canary real apenas opt-in.",
+      "rationale": "Limites úteis variam por runtime efetivo (provider+model), e decisões de warning/compaction não podem assumir um único contexto window. Baseline deterministic-first evita custo desnecessário e mantém auditoria.",
+      "status": "decided",
+      "context": "Ajuste operacional para escalar com contexto lean sem lock-in de estilo ou provider."
     }
   ]
 }

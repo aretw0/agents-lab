@@ -413,6 +413,27 @@
       "method": "test",
       "evidence": "Root cause do classify failure em OpenAI Codex identificado e mitigado: classifiers sem `prompt.system` deixavam `instructions` vazio no payload Responses, causando `{\"detail\":\"Instructions are required\"}`. Correção productizada em `packages/pi-stack/extensions/monitor-provider-patch.ts` (generateAgentYaml com `prompt.system` + `repairMissingSystemPromptOverrides` no `session_start`), overrides `.pi/agents/*-classifier.agent.yaml` reparados e documentação de gate de release publicada em `docs/guides/monitor-overrides.md` e `packages/pi-stack/README.md`. Evidência: `node --test packages/pi-stack/test/monitor-provider-patch.test.mjs` (25/25 pass), `npm run verify` (10 checks pass), e smoke controlado com `monitors-control on` + 3 ciclos tool_call (unauthorized-action) sem novo incremento de `classifyFail` em `monitors_compact_status`. Registro detalhado: `docs/research/task-bud-060-monitor-classify-stability-2026-04-20.md`.",
       "timestamp": "2026-04-20T23:20:00Z"
+    },
+    {
+      "id": "VER-CAL-2026-04-21-A1",
+      "target": "TASK-CAL-2026-04-21-A",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-21T10:14:00.000Z",
+      "evidence": "Deterministic gates executados com sucesso após slices de calibração: monitor-stability-gate stable=true (userTurns=4, classifyFailures=0) e subagent-readiness-gate strict ready=true (COMPLETE=6, failed=0, budgetExceeded=0). Commits recentes aplicados para redução de ruído/contexto: a483c9b, fe60006.",
+      "criteria_results": [
+        {
+          "criterion": "Gate de estabilidade sem classify failures",
+          "status": "passed",
+          "evidence": "scripts/monitor-stability-gate.mjs --source auto --tail-bytes 600000 --min-user-turns 3 --max-classify-failures 0 => stable=true"
+        },
+        {
+          "criterion": "Readiness strict sem sinais de falha/budget exceeded",
+          "status": "passed",
+          "evidence": "scripts/subagent-readiness-gate.mjs --source auto --days 1 --limit 1 --strict --tail-bytes 600000 => ready=true"
+        }
+      ]
     }
   ]
 }
