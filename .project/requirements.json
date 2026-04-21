@@ -507,6 +507,38 @@
         "Se houver capability/tooling gaps, lane recomendada deve ser bootstrap-first.",
         "Quando não houver gaps e houver sinais de execução estável, lane deve incentivar subagent-as-tool antes de swarm-candidate."
       ]
+    },
+    {
+      "id": "REQ-BUD-039",
+      "description": "Monitores de qualidade devem fornecer nudge soft de verificação apenas em granularidade de slice (não a cada linha), com linguagem agnóstica e foco em ações pragmáticas.",
+      "type": "non-functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-038"
+      ],
+      "acceptance_criteria": [
+        "Mensagens de monitor orientam verificar antes de commit quando houver mudanças relevantes, sem citar stack específica.",
+        "Calibração evita spam por micro-edições; foco em lote/slice coeso.",
+        "Configuração default permanece advisory (soft intent), sem bloquear execução automaticamente."
+      ]
+    },
+    {
+      "id": "REQ-BUD-040",
+      "description": "A stack deve oferecer caminho de hard intent agnóstico de linguagem para qualidade: promoção/conclusão exige evidência mínima de verificação compatível com o projeto, sem fixar JS/TS.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-039"
+      ],
+      "acceptance_criteria": [
+        "Contrato de evidência mínima é definido em termos genéricos (comando/test/inspect), não em framework específico.",
+        "Fechamento de trabalho estratégico depende de verificação canônica (`verification`) vinculada ao target.",
+        "Guia operacional explica diferença entre soft nudges e hard gates de qualidade."
+      ]
     }
   ]
 }

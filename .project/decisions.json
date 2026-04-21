@@ -220,6 +220,13 @@
       "decision": "Adotar uma escada de delegação explícita no control-plane: manual micro-slice -> subagent-as-tool -> swarm-candidate, com bloqueio automático em modo bootstrap-first quando houver capability gaps.",
       "rationale": "Aumenta velocidade com qualidade sem salto prematuro para swarm; reduz retrabalho ao tratar lacunas de ferramenta/capability antes da delegação pesada.",
       "context": "Solicitação do usuário para acelerar com pragmatismo, usando sub-agentes como ferramentas e escalando para swarms quando houver confiança."
+    },
+    {
+      "id": "DEC-BUD-032",
+      "status": "decided",
+      "decision": "Separar qualidade em duas camadas: (1) soft intent padrão com nudge de verificação por slice (não por linha), (2) hard intent progressivo via evidência canônica antes de conclusão/promoção.",
+      "rationale": "Mantém fluxo pragmático e evita ruído excessivo, ao mesmo tempo em que prepara enforcement robusto e agnóstico de linguagem para usos diversos da pi-stack.",
+      "context": "Discussão sobre por que monitor não influenciou testes e como calibrar defaults sem acoplamento a JavaScript/TypeScript."
     }
   ]
 }

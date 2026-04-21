@@ -998,6 +998,15 @@
       "method": "test",
       "evidence": "Teste automatizado adicionado para lane de delegação no triage: `scripts/test/session-triage-delegation.test.mjs`. Execução: `node --test scripts/test/session-triage-delegation.test.mjs` => 2 passed (bootstrap-first quando há tooling gap; swarm-candidate quando COMPLETE + unlock backlog).",
       "timestamp": "2026-04-21T17:45:00Z"
+    },
+    {
+      "id": "VER-BUD-087",
+      "target": "TASK-BUD-077",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Calibração soft intent aplicada em monitores: (1) `.pi/monitors/commit-hygiene.monitor.json` steer atualizado para recomendar verificação language-agnostic antes de commit; (2) `.pi/monitors/commit-hygiene.instructions.json` recebeu regra para nudge quando há mudanças tracked sem evidência de verificação; (3) `.pi/monitors/work-quality.instructions.json` recebeu regra anti-spam para no-verify em granularidade de slice coeso. `monitors-inspect` confirmou contagem de instruções (`commit-hygiene`=4, `work-quality`=3).",
+      "timestamp": "2026-04-21T18:00:00Z"
     }
   ]
 }

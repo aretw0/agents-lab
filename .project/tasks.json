@@ -1756,6 +1756,79 @@
       ],
       "notes": "Escada operacional para throughput progressivo: bootstrap-first quando faltam ferramentas; depois subagent-as-tool; swarm apenas com sinais de estabilidade.",
       "verification": "VER-BUD-085"
+    },
+    {
+      "id": "TASK-BUD-077",
+      "description": "[P1] Calibrar soft intent de verificação em monitores (slice-aware, language-agnostic) para influenciar qualidade sem ruído por linha.",
+      "status": "completed",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-076"
+      ],
+      "references": [
+        "DEC-BUD-032",
+        "REQ-BUD-039"
+      ],
+      "acceptance_criteria": [
+        "`commit-hygiene` advisory inclui verificação antes de commit em termos agnósticos de linguagem.",
+        "`work-quality` recebe regra de calibração para no-verify em granularidade de slice coeso.",
+        "Inspeção de monitores confirma regras carregadas e monitor habilitado."
+      ],
+      "files": [
+        ".pi/monitors/commit-hygiene.monitor.json",
+        ".pi/monitors/commit-hygiene.instructions.json",
+        ".pi/monitors/work-quality.instructions.json"
+      ],
+      "notes": "Objetivo é influência de qualidade com pragmatismo: menos spam, mais ação útil.",
+      "verification": "VER-BUD-087"
+    },
+    {
+      "id": "TASK-BUD-078",
+      "description": "[P1] Especificar hard gate language-agnostic de qualidade (verification evidence gate) para promoção/conclusão de slices estratégicos.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-077"
+      ],
+      "references": [
+        "REQ-BUD-040",
+        "DEC-BUD-032"
+      ],
+      "acceptance_criteria": [
+        "Documento de design define sinais mínimos de evidência aceitos por tipo de projeto.",
+        "Integração proposta com `.project/verification` e fluxo `complete-task` sem acoplamento a stack específica.",
+        "Runbook diferencia claramente soft intent (nudge) vs hard intent (gate)."
+      ],
+      "files": [
+        "docs/primitives/quality-verification-gate.md",
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/requirements.json"
+      ],
+      "notes": "Planejamento de enforcement progressivo, mantendo default atual advisory até validação operacional."
+    },
+    {
+      "id": "TASK-BUD-079",
+      "description": "[P1] Promover calibração de qualidade (soft intent de verificação) de runtime local `.pi/monitors` para superfície distribuível da pi-stack, sem depender de arquivos ignorados.",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-077"
+      ],
+      "references": [
+        "REQ-BUD-039",
+        "REQ-BUD-040"
+      ],
+      "acceptance_criteria": [
+        "Existe mecanismo versionado/distribuível para carregar regras de nudge de verificação sem editar `.pi/monitors` local.",
+        "Documentação explicita que `.pi/monitors` local é override de workspace e não fonte de distribuição.",
+        "Smoke/inspeção confirma que defaults distribuídos aplicam mensagens language-agnostic de verificação por slice."
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-config.ts",
+        "docs/guides/monitor-overrides.md",
+        "docs/research/task-bud-079-plan-2026-04-21.md"
+      ],
+      "notes": "Fecha gap entre calibração local rápida e distribuição na próxima release."
     }
   ]
 }
