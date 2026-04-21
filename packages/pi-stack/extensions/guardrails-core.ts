@@ -516,6 +516,29 @@ function resolveProviderBudgetGovernorConfig(cwd: string): ProviderBudgetGoverno
   }
 }
 
+export type ProviderBudgetGovernorMisconfig = "missing-provider-budgets";
+
+export function detectProviderBudgetGovernorMisconfig(
+  enabled: boolean,
+  providerBudgets: ProviderBudgetMap,
+): ProviderBudgetGovernorMisconfig | undefined {
+  if (!enabled) return undefined;
+  if (Object.keys(providerBudgets).length === 0) return "missing-provider-budgets";
+  return undefined;
+}
+
+export function providerBudgetGovernorMisconfigReason(
+  issue: ProviderBudgetGovernorMisconfig,
+): string {
+  if (issue === "missing-provider-budgets") {
+    return [
+      "guardrails-core: providerBudgetGovernor habilitado sem quotaVisibility.providerBudgets.",
+      "BLOCK por provider não será aplicado até configurar budgets em .pi/settings.json.",
+    ].join(" ");
+  }
+  return "guardrails-core: providerBudgetGovernor misconfigured.";
+}
+
 // =============================================================================
 // Extension Entry
 // =============================================================================
@@ -531,6 +554,7 @@ export default function (pi: ExtensionAPI) {
     recoveryCommands: ["doctor", "quota-visibility", "model", "login"],
   };
   let providerBudgetSnapshotCache: { at: number; key: string; snapshot: ProviderBudgetGovernorSnapshot } | undefined;
+  let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
 
   async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
     const quota = readQuotaBudgetSettings(ctx.cwd);
@@ -569,6 +593,18 @@ export default function (pi: ExtensionAPI) {
     strictInteractiveMode = false;
     portConflictConfig = resolveGuardrailsPortConflictConfig(ctx.cwd);
     providerBudgetGovernorConfig = resolveProviderBudgetGovernorConfig(ctx.cwd);
+    const quotaSettings = readQuotaBudgetSettings(ctx.cwd);
+    providerBudgetGovernorMisconfig = detectProviderBudgetGovernorMisconfig(
+      providerBudgetGovernorConfig.enabled,
+      quotaSettings.providerBudgets,
+    );
+    if (providerBudgetGovernorMisconfig) {
+      ctx.ui?.notify?.(
+        providerBudgetGovernorMisconfigReason(providerBudgetGovernorMisconfig),
+        "warning",
+      );
+      ctx.ui?.setStatus?.("guardrails-core-budget", "[budget] governor-misconfig");
+    }
     providerBudgetSnapshotCache = undefined;
   });
 
@@ -599,6 +635,7 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("input", async (event, ctx) => {
     if (!providerBudgetGovernorConfig.enabled) return { action: "continue" as const };
+    if (providerBudgetGovernorMisconfig) return { action: "continue" as const };
 
     const cmd = normalizeCmdName(event.text ?? "");
     if (cmd && providerBudgetGovernorConfig.recoveryCommands.includes(cmd)) {
@@ -648,6 +685,10 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("before_provider_request", async (_event, ctx) => {
     if (!providerBudgetGovernorConfig.enabled) return undefined;
+    if (providerBudgetGovernorMisconfig) {
+      ctx.ui?.setStatus?.("guardrails-core-budget", "[budget] governor-misconfig");
+      return undefined;
+    }
     const currentProvider = ctx.model?.provider;
     if (!currentProvider) return undefined;
     const snapshot = await resolveProviderBudgetSnapshot(ctx);
