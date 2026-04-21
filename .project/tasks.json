@@ -1528,6 +1528,21 @@
         "Fluxo de hard intent (skill/processo/extensão) é documentado como camada sobre o contrato, sem depender de formato único de storage."
       ],
       "notes": "Derivada de DEC-BUD-026. Objetivo: tratar sistema de tickets como implementação e preservar interoperabilidade de operação."
+    },
+    {
+      "id": "TASK-BUD-067",
+      "description": "[P2] Investigar e corrigir o prefixo `[undefined]` em caixas de output de eventos/background no TUI, além de consolidar heurística de uso de processos em background (quando usar timeout maior vs background intencional).",
+      "status": "planned",
+      "files": [
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Reprodução mínima do artefato visual `[undefined]` registrada com origem provável (runtime/pi-stack/upstream).",
+        "Correção aplicada ou workaround documentado com fallback de label não-nulo em mensagens de output.",
+        "Guia curto de operação define política prática de background (foreground com timeout explícito para comandos curtos; background para jobs longos com PID/log e checkpoint)."
+      ],
+      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1."
     }
   ]
 }
