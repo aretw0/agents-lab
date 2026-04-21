@@ -539,6 +539,22 @@
         "Fechamento de trabalho estratégico depende de verificação canônica (`verification`) vinculada ao target.",
         "Guia operacional explica diferença entre soft nudges e hard gates de qualidade."
       ]
+    },
+    {
+      "id": "REQ-BUD-041",
+      "description": "O control-plane deve suportar protocolo de compactação long-run com sinais interpretáveis e fila de continuação, incluindo política de parada na segunda compactação.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-039"
+      ],
+      "acceptance_criteria": [
+        "Existe definição explícita de sinais (`CHECKPOINT_READY`, `COMPACT_REQUIRED`) e ação associada.",
+        "Loop de continuidade agenda próxima iteração automaticamente após compactação, com checkpoint canônico antes de continuar.",
+        "Política de segurança encerra o ciclo na segunda compactação e exige revisão humana do progresso."
+      ]
     }
   ]
 }
