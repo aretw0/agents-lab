@@ -121,4 +121,35 @@ Override opcional em `.pi/settings.json`:
 }
 ```
 
+## Context watchdog (advisory, não-bloqueante)
+
+A extensão `context-watchdog` adiciona sinais operacionais para sessões long-run:
+- tool: `context_watch_status`
+- command: `/context-watch [status|reset]`
+- status key: `context-watch`
+
+Níveis:
+- `warn` → operar em micro-slices
+- `checkpoint` → registrar handoff antes do próximo slice grande
+- `compact` → compactar e retomar do checkpoint
+
+Config opcional em `.pi/settings.json`:
+
+```json
+{
+  "piStack": {
+    "contextWatchdog": {
+      "enabled": true,
+      "checkpointPct": 68,
+      "compactPct": 72,
+      "cooldownMs": 600000,
+      "notify": true,
+      "status": true
+    }
+  }
+}
+```
+
+Observação: `warnPct` é herdado do threshold model-aware do `custom-footer` (`contextPressure`).
+
 Esse playbook complementa o pipeline canônico: `docs/guides/project-canonical-pipeline.md`.

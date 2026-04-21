@@ -44,6 +44,7 @@
 			"./extensions/colony-panel.ts",
 			"./extensions/monitor-summary.ts",
 			"./extensions/monitor-sovereign.ts",
+			"./extensions/context-watchdog.ts",
 			"./extensions/custom-footer.ts"
 		],
 		"themes": [
