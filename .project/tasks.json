@@ -1007,7 +1007,7 @@
         "packages/pi-stack/extensions/quota-visibility.ts",
         "docs/guides/quota-visibility.md"
       ],
-      "notes": "[2026-04-19] Lote B iniciado após reload validado (budgetPolicy=6/60 e projectTaskSync createOnLaunch/trackProgress desativados).\n[2026-04-19] c1 concluída (12/12, $0.43, 6m44s) em modo artifact-first para TASK-BUD-020+024. Resultado em estado candidato com bloqueio de delivery evidence em validação final (faltou command log detectável), exigindo promoção/consolidação explícita no main."
+      "notes": "[2026-04-19] Lote B iniciado após reload validado (budgetPolicy=6/60 e projectTaskSync createOnLaunch/trackProgress desativados).\n[2026-04-19] c1 concluída (12/12, $0.43, 6m44s) em modo artifact-first para TASK-BUD-020+024. Resultado em estado candidato com bloqueio de delivery evidence em validação final (faltou command log detectável), exigindo promoção/consolidação explícita no main.\n[2026-04-21] Consolidações canônicas associadas já fechadas no main: TASK-BUD-020 (VER-BUD-077) e TASK-BUD-024 (VER-BUD-075). Manter TASK-BUD-047 in-progress até reconciliação final com dependência TASK-BUD-046 e verificação de lote integrada (sem auto-close P0)."
     },
     {
       "id": "TASK-BUD-048",

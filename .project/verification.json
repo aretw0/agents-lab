@@ -926,6 +926,15 @@
       "method": "command",
       "evidence": "Control plane portátil validado por runtime + documentação. Runtime: `scheduler_governance_status` (owner/lease saudável), `colony_pilot_preflight` ok=true, `context_watch_status` warn com recomendação de micro-slice, `subagent_readiness_status(strict=true)` ready=true sem bloqueios. Protocolo: `docs/guides/swarm-cleanroom-protocol.md` com handoff/resume loop, leitura em duas pistas e compatibilidade multi-backend. Síntese em docs/research/task-bud-021-closure-2026-04-21.md.",
       "timestamp": "2026-04-21T15:47:30Z"
+    },
+    {
+      "id": "VER-BUD-079",
+      "target": "TASK-BUD-047",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Registro de consolidação parcial do Lote B: outcomes nucleares já materializados e fechados no board canônico via TASK-BUD-020 (VER-BUD-077) e TASK-BUD-024 (VER-BUD-075). TASK-BUD-047 permanece in-progress por dependência de reconciliação com TASK-BUD-046 e fechamento integrado de lote (HITL).",
+      "timestamp": "2026-04-21T16:02:00Z"
     }
   ]
 }
