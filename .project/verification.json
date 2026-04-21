@@ -512,6 +512,32 @@
           "evidence": "scripts/monitor-stability-gate.mjs --source auto --tail-bytes 600000 --min-user-turns 3 --max-classify-failures 0 => stable=true."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-A3",
+      "target": "TASK-CAL-2026-04-21-A",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T10:51:00.000Z",
+      "evidence": "Calibração de saída em startup/auto-eventos consolidada com cobertura determinística: monitor-provider-patch (info suprimido por padrão + notify somente quando requer reload), monitor-sovereign startup notify opt-in, guardrails strict-mode notify não repetitivo. Gates de estabilidade seguem sem classify failures.",
+      "criteria_results": [
+        {
+          "criterion": "Extensões automáticas não emitirem notify info por padrão sem necessidade acionável",
+          "status": "passed",
+          "evidence": "monitor-provider-patch.test.mjs valida info suprimido por padrão; guardrails-provider-budget-governor.test.ts valida anúncio strict-mode único por sessão; monitor-sovereign-startup-output.test.ts valida startupNotify opt-in."
+        },
+        {
+          "criterion": "Warnings críticos continuarem visíveis com mensagem objetiva",
+          "status": "passed",
+          "evidence": "monitor-provider-patch.test.mjs mantém warning notify para divergência/ação; guardrails governor misconfig mantém warning com ação."
+        },
+        {
+          "criterion": "Testes cobrirem planejamento de saída (info suprimido, warning preservado)",
+          "status": "passed",
+          "evidence": "Suites executadas: node --test monitor-provider-patch + monitor-context-budget; vitest smoke monitor-sovereign-startup-output + guardrails-provider-budget-governor (10/10). Gate: monitor-stability-gate --tail-bytes 1200000 --min-user-turns 3 --max-classify-failures 0 => stable=true, classifyFailures=0."
+        }
+      ]
     }
   ]
 }

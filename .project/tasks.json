@@ -1385,7 +1385,7 @@
     {
       "id": "TASK-CAL-2026-04-21-A",
       "description": "[P1] Consolidar calibração de ruído/contexto em startup/auto-eventos com budget de saída por extensão (notify vs status vs silent) e testes determinísticos.",
-      "status": "in-progress",
+      "status": "completed",
       "files": [
         "packages/pi-stack/extensions/monitor-provider-patch.ts",
         "packages/pi-stack/extensions/monitor-sovereign.ts",
@@ -1397,7 +1397,8 @@
         "Warnings críticos continuarem visíveis com mensagem objetiva.",
         "Testes cobrirem planejamento de saída (info suprimido, warning preservado)."
       ],
-      "notes": "Slice atual já cobriu monitor-provider-patch e monitor-sovereign; manter incremental por extensão para evitar regressão."
+      "notes": "Slice atual já cobriu monitor-provider-patch e monitor-sovereign; manter incremental por extensão para evitar regressão.",
+      "verification": "VER-CAL-2026-04-21-A3"
     },
     {
       "id": "TASK-CAL-2026-04-21-B",
