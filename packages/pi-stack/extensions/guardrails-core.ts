@@ -662,6 +662,22 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
+export function estimateAutoDrainWaitMs(
+  activeLongRun: boolean,
+  queuedCount: number,
+  nowMs: number,
+  lastAutoDrainAt: number,
+  idleSinceMs: number,
+  cfg: LongRunIntentQueueConfig,
+): number | undefined {
+  if (!cfg.enabled || !cfg.autoDrainOnIdle) return undefined;
+  if (queuedCount <= 0) return undefined;
+  if (activeLongRun) return undefined;
+  const cooldownRemaining = Math.max(0, cfg.autoDrainCooldownMs - (nowMs - lastAutoDrainAt));
+  const idleRemaining = Math.max(0, cfg.autoDrainIdleStableMs - idleSinceMs);
+  return Math.max(cooldownRemaining, idleRemaining);
+}
+
 export function shouldAutoDrainDeferredIntent(
   activeLongRun: boolean,
   queuedCount: number,
@@ -670,11 +686,15 @@ export function shouldAutoDrainDeferredIntent(
   idleSinceMs: number,
   cfg: LongRunIntentQueueConfig,
 ): boolean {
-  if (!cfg.enabled || !cfg.autoDrainOnIdle) return false;
-  if (activeLongRun) return false;
-  if (queuedCount <= 0) return false;
-  if ((nowMs - lastAutoDrainAt) < cfg.autoDrainCooldownMs) return false;
-  return idleSinceMs >= cfg.autoDrainIdleStableMs;
+  const waitMs = estimateAutoDrainWaitMs(
+    activeLongRun,
+    queuedCount,
+    nowMs,
+    lastAutoDrainAt,
+    idleSinceMs,
+    cfg,
+  );
+  return waitMs !== undefined && waitMs === 0;
 }
 
 export function enqueueDeferredIntent(
@@ -1156,9 +1176,27 @@ export default function (pi: ExtensionAPI) {
 
       const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
       const queued = getDeferredIntentQueueCount(ctx.cwd);
+      const nowMs = Date.now();
+      const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
+      const waitMs = estimateAutoDrainWaitMs(
+        activeLongRun,
+        queued,
+        nowMs,
+        lastAutoDrainAt,
+        idleSinceMs,
+        longRunIntentQueueConfig,
+      );
+      const nextDrain = activeLongRun
+        ? "after-idle"
+        : waitMs === undefined
+          ? "n/a"
+          : waitMs === 0
+            ? "now"
+            : `${Math.ceil(waitMs / 1000)}s`;
+
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} nextDrain=${nextDrain}`,
           "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
         ].join("\n"),
         "info",
