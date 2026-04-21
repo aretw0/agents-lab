@@ -351,11 +351,30 @@ function truncateForPrompt(value: string, max = 180): string {
 	return `${s.slice(0, Math.max(0, max - 1))}…`;
 }
 
+export function resolveHandoffFreshness(
+	timestampIso: string | undefined,
+	nowMs = Date.now(),
+	maxFreshAgeMs = 30 * 60 * 1000,
+): { label: "fresh" | "stale" | "unknown"; ageMs?: number } {
+	if (!timestampIso) return { label: "unknown" };
+	const ts = Date.parse(timestampIso);
+	if (!Number.isFinite(ts)) return { label: "unknown" };
+	const ageMs = Math.max(0, nowMs - ts);
+	return {
+		label: ageMs <= maxFreshAgeMs ? "fresh" : "stale",
+		ageMs,
+	};
+}
+
 export function buildAutoResumePromptFromHandoff(handoffInput: Record<string, unknown> | undefined): string {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
-		: "unknown";
+		: undefined;
+	const freshness = resolveHandoffFreshness(timestamp);
+	const freshnessText = freshness.label === "unknown"
+		? "unknown"
+		: `${freshness.label}${freshness.ageMs !== undefined ? ` ageSec=${Math.ceil(freshness.ageMs / 1000)}` : ""}`;
 	const tasks = normalizeStringArray(handoff.current_tasks).slice(0, 3);
 	const blockers = normalizeStringArray(handoff.blockers)
 		.filter((b) => !b.startsWith("context-watch-"))
@@ -367,7 +386,7 @@ export function buildAutoResumePromptFromHandoff(handoffInput: Record<string, un
 		.map((line) => truncateForPrompt(line, 120));
 
 	return [
-		`context-watch auto-resume: continue from .project/handoff.json (ts=${timestamp}).`,
+		`context-watch auto-resume: continue from .project/handoff.json (ts=${timestamp ?? "unknown"}, freshness=${freshnessText}).`,
 		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
 		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
 		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",

@@ -10,6 +10,7 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	resolveHandoffFreshness,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
 	shouldEmitAutoResumeAfterCompact,
@@ -195,10 +196,22 @@ describe("context-watchdog", () => {
 			],
 		} as any);
 		expect(prompt).toContain("ts=2026-04-21T20:20:00.000Z");
+		expect(prompt).toContain("freshness=");
 		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
 		expect(prompt).not.toContain("Context-watch action:");
+	});
+
+	it("computes handoff freshness deterministically", () => {
+		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
+		expect(resolveHandoffFreshness(undefined, nowMs).label).toBe("unknown");
+		expect(resolveHandoffFreshness("invalid", nowMs).label).toBe("unknown");
+		const fresh = resolveHandoffFreshness("2026-04-21T20:20:00.000Z", nowMs, 15 * 60 * 1000);
+		expect(fresh.label).toBe("fresh");
+		expect(fresh.ageMs).toBe(600_000);
+		const stale = resolveHandoffFreshness("2026-04-21T19:20:00.000Z", nowMs, 15 * 60 * 1000);
+		expect(stale.label).toBe("stale");
 	});
 
 	it("writes canonical action/event trail into handoff snapshot", () => {
