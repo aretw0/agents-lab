@@ -38,6 +38,21 @@ describe("quota-visibility extension — registration smoke", () => {
     expect(registeredEvents).toContain("session_start");
   });
 
+  it("registra command budget e tool equivalente por provider", () => {
+    const pi = makeMockPi();
+    quotaVisibilityExtension(pi);
+
+    const commandNames = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.map(
+      ([name]: [string]) => name,
+    );
+    const toolNames = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(
+      ([def]: [{ name: string }]) => def.name,
+    );
+
+    expect(commandNames).toContain("quota-visibility");
+    expect(toolNames).toContain("quota_visibility_provider_budgets");
+  });
+
   describe("quota tool output policy", () => {
     it("resolveQuotaToolOutputPolicy aplica defaults e clamp", () => {
       const p1 = resolveQuotaToolOutputPolicy();
@@ -128,6 +143,37 @@ describe("quota-visibility parsers", () => {
     expect(scores[11]).toBe(150); // 11..15
     expect(scores[10]).toBe(100); // 10..14
     expect(scores[0]).toBe(0);
+  });
+
+  it("buildProviderBudgetStatuses alerta quando shares excedem 100%", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 1 * 3600_000).toISOString(),
+        timestampMs: now - 1 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 2,
+        provider: "openai-codex",
+        model: "gpt-5",
+        tokens: 200,
+        costUsd: 0.1,
+        requests: 1,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 7,
+      weeklyQuotaTokens: 10000,
+      weeklyQuotaCostUsd: 10,
+      providerBudgets: {
+        "openai-codex": { shareTokensPct: 70, shareCostPct: 70 },
+        "github-copilot": { shareTokensPct: 50, shareCostPct: 50 },
+      },
+    });
+
+    expect(evalResult.allocationWarnings.length).toBeGreaterThan(0);
+    expect(evalResult.allocationWarnings.join("\n")).toContain("shareTokensPct soma");
   });
 
   it("buildProviderBudgetStatuses aplica shares e bloqueio por provider", () => {

@@ -539,7 +539,7 @@
     {
       "id": "TASK-BUD-024",
       "description": "[P0] Implementar budget semanal por provider em quota-visibility (share/cap + estados WARN/BLOCK) com comando/tool e documentação operacional.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-020"
       ],
@@ -554,7 +554,8 @@
         "`/quota-visibility budget` e tool equivalente retornam estado por provider.",
         "Status/export incluem avaliação por provider e warnings de alocação inválida."
       ],
-      "notes": "Direcionado a uso compartilhado de chaves/cotas entre colegas com limites explícitos.\n[2026-04-19] Lote B (colônia c1) concluiu ajustes de budget semanal por provider com smoke mínimo WARN/BLOCK em candidate-only; pendente consolidação final com evidência de validação no main."
+      "notes": "Direcionado a uso compartilhado de chaves/cotas entre colegas com limites explícitos.\n[2026-04-19] Lote B (colônia c1) concluiu ajustes de budget semanal por provider com smoke mínimo WARN/BLOCK em candidate-only; pendente consolidação final com evidência de validação no main.",
+      "verification": "VER-BUD-075"
     },
     {
       "id": "TASK-BUD-025",
