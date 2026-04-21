@@ -70,11 +70,34 @@ Trocar para lane mais enxuta quando ocorrer qualquer um:
 3. Rodar calibração reproduzível:
    - `npm run calibrate:repro` (determinístico/offline)
    - `npm run calibrate:repro:canary` (opt-in, gera evidências em `.pi/reports`)
+   - `npm run calibrate:repro:token` (opt-in com request real, budget cap por `--real-token-max-requests`)
 4. Fechar com:
    - `npm run project:verification:check`
    - `project-validate`
    - `project-status`
    - update de `.project/handoff.json` (delta curto)
+
+### Canary real (token) com budget cap
+
+Crie `.pi/real-token-canary.command.json` com o comando one-shot:
+```json
+{
+  "command": "C:/Users/aretw/scoop/apps/nodejs/current/node.exe",
+  "args": [
+    "C:/Users/aretw/scoop/persist/nodejs/bin/node_modules/@mariozechner/pi-coding-agent/dist/cli.js",
+    "--print",
+    "Responda exatamente: OK",
+    "--no-tools",
+    "--no-skills",
+    "--no-prompt-templates",
+    "--no-themes"
+  ]
+}
+```
+
+Notas:
+- `real-token-max-requests` limita hard o número de requests (padrão `1`, máx `5`).
+- `real-token-timeout-ms` limita tempo por request para evitar runaway.
 
 ## Context pressure model-aware (footer)
 

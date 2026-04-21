@@ -45,6 +45,7 @@
     "monitor:stability:gate:strict": "node scripts/monitor-stability-gate.mjs --source auto --min-user-turns 3 --max-classify-failures 0 --require-sovereign-delta",
     "calibrate:repro": "node scripts/calibrate-repro.mjs",
     "calibrate:repro:canary": "node scripts/calibrate-repro.mjs --canary",
+    "calibrate:repro:token": "node scripts/calibrate-repro.mjs --canary --real-token-canary --real-token-command-file .pi/real-token-canary.command.json",
     "calibrate:repro:dry": "node scripts/calibrate-repro.mjs --dry-run",
     "subagent:readiness": "node scripts/subagent-readiness-gate.mjs --source auto --days 1 --limit 1 --min-user-turns 3 --max-classify-failures 0 --max-failed-signals 0 --max-budget-exceeded-signals 0",
     "subagent:readiness:strict": "node scripts/subagent-readiness-gate.mjs --source auto --days 1 --limit 1 --strict",
