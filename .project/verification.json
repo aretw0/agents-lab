@@ -460,6 +460,32 @@
           "evidence": "monitor-stability-2026-04-21T10-25-56-447Z.json e subagent-readiness-2026-04-21T10-25-56-949Z.json gerados via --canary --write-report."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-C2",
+      "target": "TASK-CAL-2026-04-21-C",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-04-21T10:41:25.000Z",
+      "evidence": "Pipeline reproduzível executado nos três modos: deterministic ok=true, canary+real-token ok=true (1 request real capped) e relatórios persistidos em .pi/reports.",
+      "criteria_results": [
+        {
+          "criterion": "Comando único executa suíte determinística sem token real",
+          "status": "passed",
+          "evidence": "node scripts/calibrate-repro.mjs --tail-bytes 600000 => mode=deterministic ok=true."
+        },
+        {
+          "criterion": "Canary real separado e explícito com limite de custo/tokens",
+          "status": "passed",
+          "evidence": "node scripts/calibrate-repro.mjs --canary --skip-monitor-tests --real-token-canary --real-token-max-requests 1 --real-token-timeout-ms 180000 --real-token-command-json '[...]' => mode=canary+real-token ok=true; real-token-canary-1 retornou OK."
+        },
+        {
+          "criterion": "Relatórios persistidos em .pi/reports com timestamp",
+          "status": "passed",
+          "evidence": "reports: monitor-stability-2026-04-21T10-40-42-753Z.json e subagent-readiness-2026-04-21T10-40-43-216Z.json."
+        }
+      ]
     }
   ]
 }

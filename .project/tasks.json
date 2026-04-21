@@ -1418,7 +1418,7 @@
     {
       "id": "TASK-CAL-2026-04-21-C",
       "description": "[P1] Empacotar calibração reproduzível de contexto/ruído em pipeline único (determinístico por padrão + canary real opt-in com budget cap e evidência em .pi/reports).",
-      "status": "planned",
+      "status": "completed",
       "files": [
         "package.json",
         "scripts/monitor-stability-gate.mjs",
@@ -1434,7 +1434,8 @@
       "depends_on": [
         "TASK-CAL-2026-04-21-A"
       ],
-      "notes": "Priorizar UX de reprodução curta para evitar drift entre sessões e reduzir custo de contexto no control plane."
+      "notes": "Priorizar UX de reprodução curta para evitar drift entre sessões e reduzir custo de contexto no control plane.",
+      "verification": "VER-CAL-2026-04-21-C2"
     }
   ]
 }
