@@ -44,6 +44,375 @@
       "method": "inspect",
       "evidence": "Gate de revisão humana para fechamento de tasks estratégicas registrado em docs/guides/budget-governance.md e aplicado no fluxo atual (sem fechamento automático).",
       "timestamp": "2026-04-14T16:21:15Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-009",
+      "target": "TASK-BUD-009",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-011",
+      "target": "TASK-BUD-011",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-colonyidentity-colony",
+      "target": "colony-colonyidentity-colony",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-014",
+      "target": "TASK-BUD-014",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-015",
+      "target": "TASK-BUD-015",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-016",
+      "target": "TASK-BUD-016",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-017",
+      "target": "TASK-BUD-017",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-019",
+      "target": "TASK-BUD-019",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-c2-promotion",
+      "target": "colony-c2-promotion",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-c3",
+      "target": "colony-c3",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-c3-promotion",
+      "target": "colony-c3-promotion",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-c4",
+      "target": "colony-c4",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-colony-c4-promotion",
+      "target": "colony-c4-promotion",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-030",
+      "target": "TASK-BUD-030",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-031",
+      "target": "TASK-BUD-031",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-032",
+      "target": "TASK-BUD-032",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-033",
+      "target": "TASK-BUD-033",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-034",
+      "target": "TASK-BUD-034",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-035",
+      "target": "TASK-BUD-035",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-036",
+      "target": "TASK-BUD-036",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-037",
+      "target": "TASK-BUD-037",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-038",
+      "target": "TASK-BUD-038",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-039",
+      "target": "TASK-BUD-039",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-041",
+      "target": "TASK-BUD-041",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-042",
+      "target": "TASK-BUD-042",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-LEGACY-TASK-BUD-044",
+      "target": "TASK-BUD-044",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Legacy completion backfilled for schema integrity; full historical evidence may reside in git/session artifacts and should be refined when task area is revisited.",
+      "timestamp": "2026-04-20T21:06:37.236Z"
+    },
+    {
+      "id": "VER-BUD-054",
+      "target": "TASK-BUD-054",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Script canônico criado (scripts/project/backfill-task-verification.mjs), npm scripts adicionados (project:verification:check/backfill), execução --strict confirmou pendingWithoutVerification=0 e project-validate retornou clean.",
+      "timestamp": "2026-04-20T21:07:00Z"
+    },
+    {
+      "id": "VER-BUD-055",
+      "target": "TASK-BUD-055",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Ritual de fechamento 5-10 min formalizado em docs/guides/mini-handoff-template.md (check/validate/triage + update handoff + WIP=1). HANDOFF.md e ROADMAP.md reforçam modo derivado (delta/macro) com .project como fonte canônica. Execuções de evidência na sessão: project:verification:check (pendingWithoutVerification=0), project-validate (clean), project-status (triagem registrada).",
+      "timestamp": "2026-04-20T21:28:00Z"
+    },
+    {
+      "id": "VER-BUD-056",
+      "target": "TASK-BUD-056",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Pipeline canônico formalizado em docs/guides/project-canonical-pipeline.md (loop .project-first + template rápido de decisão/requisito/task/verification + retomada pós-compactação). HANDOFF.md e ROADMAP.md atualizados para reforçar distinção entre fonte canônica (.project) e superfícies derivadas. Checks executados: project:verification:check (pendingWithoutVerification=0), project-validate (clean), project-status (triagem).",
+      "timestamp": "2026-04-20T21:46:00Z"
+    },
+    {
+      "id": "VER-BUD-057",
+      "target": "TASK-BUD-057",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Fonte do STOP mapeada em node_modules/pi-lens/clients/pipeline.ts (scanForSecrets/formatSecrets/blocked_secrets) e node_modules/pi-lens/clients/secrets-scanner.ts (pattern s[k]-*, mensagem STOP). Falso positivo validado em .project/tasks.json L1072: regex captura substring interna em `task-bud-027-vs-031...` (`s[k]-bud-...`). Plano de mitigação local documentado em docs/research/preflight-secret-stop-investigation-2026-04-20.md.",
+      "timestamp": "2026-04-20T22:00:00Z"
+    },
+    {
+      "id": "VER-BUD-053",
+      "target": "TASK-BUD-053",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Spark-aware routing confirmado em execução e configuração: .pi/settings.json mantém default openai-codex/gpt-5.3-codex (cota normal) com modelPolicy sparkGateEnabled=true + gatilhos explícitos (planning recovery, scout burst). Enforcement presente em packages/pi-stack/extensions/colony-pilot.ts. Documentação operacional em docs/guides/colony-provider-model-governance.md. Regressão checada com `vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (65/65 testes pass).",
+      "timestamp": "2026-04-20T22:12:00Z"
+    },
+    {
+      "id": "VER-BUD-045",
+      "target": "TASK-BUD-045",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Estratégia anti-estouro consolidada e aplicada: protocolo em lotes + checkpoints documentado (docs/guides/agent-driver-charter.md, docs/guides/swarm-cleanroom-protocol.md, docs/guides/swarm-preflight-15m.md, docs/guides/mini-handoff-template.md). Execuções reais registradas em checkpoints e runbook (docs/research/context-checkpoint-2026-04-19*.md, docs/research/unattended-swarm-runbook-2026-04-19.md) com múltiplos lotes/custos e consolidação operacional. Nesta sessão, rotina de fechamento e pipeline canônico .project-first foram reforçados (TASK-BUD-055/056), mantendo gatilho de consolidação e WIP=1.",
+      "timestamp": "2026-04-20T22:14:00Z"
+    },
+    {
+      "id": "VER-BUD-058",
+      "target": "TASK-BUD-058",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Benchmark A/B voltou a ser comparável após hardening do parser JSON no script canônico (`scripts/benchmarks/run-context-economy-ab.mjs`): recuperação de linhas com OSC/ANSI e sufixo de terminal em stdout. Run validado: `run-2026-04-20-r7-post-hygiene-json-recovery` com B stack-default `totalTokens=13931` e `comparisons.comparable=true` (delta input +1216.56%, custo +1092.38%, latência +758.93%). Evidência adicional de diagnóstico bounded permanece nos runs r4/r5/r6/r7.",
+      "timestamp": "2026-04-20T22:46:00Z"
+    },
+    {
+      "id": "VER-BUD-059",
+      "target": "TASK-BUD-059",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Playbook publicado em docs/guides/openai-context-window-playbook.md com 3 lanes (lean/governed/swarm), comandos padrão, trade-offs e gatilhos de troca de lane antes de saturar contexto. Evidência canônica referenciada: runs comparáveis r7 e split r8 em docs/research/data/context-economy/.",
+      "timestamp": "2026-04-20T23:05:00Z"
+    },
+    {
+      "id": "VER-BUD-050",
+      "target": "TASK-BUD-050",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Pré-condição de advisor consolidada com evidência técnica e operacional: (1) delta audit confirma núcleo funcional já entregue em TASK-BUD-031 e ausência de necessidade de reimplementação (docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md + context-checkpoint lote D), (2) documentação de route advisory determinístico e comportamento em BLOCK registrada em docs/guides/quota-visibility.md, (3) regressão executada com sucesso: `vitest run packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` (48/48).",
+      "timestamp": "2026-04-21T00:06:00Z"
+    },
+    {
+      "id": "VER-BUD-049",
+      "target": "TASK-BUD-049",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Governor global em BLOCK operacional no main: guardrails-core bloqueia input quando provider atual está `blocked`, mantém trilha auditável e permite recovery commands explícitos (`doctor`, `quota-visibility`, `model`, `login`) em packages/pi-stack/extensions/guardrails-core.ts (resolveProviderBudgetGovernorConfig + hooks input/before_provider_request). Evidência de lote C principal registrada em docs/research/context-checkpoint-2026-04-19-lote-c-main-task-bud-049.md. Regressão mínima validada com `vitest run packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts` (3/3).",
+      "timestamp": "2026-04-21T00:09:00Z"
+    },
+    {
+      "id": "VER-BUD-048",
+      "target": "TASK-BUD-048",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Gate hard de provider budget em BLOCK com override auditável e recovery allowlist está materializado no main: guardrails-core (`providerBudgetGovernor`) e policy documentada em docs/guides/budget-governance.md (BLOCK + token de override + `/doctor` `/quota-visibility` `/model` `/login`). Evidência operacional do lote C-unlock registrada em docs/research/context-checkpoint-2026-04-19-lote-c-unlock-task-bud-048.md; avanço para TASK-BUD-049 foi executado e concluído nesta sessão, confirmando pré-condição atendida no board.",
+      "timestamp": "2026-04-21T00:12:00Z"
+    },
+    {
+      "id": "VER-BUD-026",
+      "target": "TASK-BUD-026",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Budget global operacionalizado no runtime: `.pi/settings.json` ativa `guardrailsCore.providerBudgetGovernor` (com recoveryCommands `/doctor,/quota-visibility,/model,/login`) e `colonyPilot.budgetPolicy.enforceProviderBudgetBlock=true` com `providerBudgetOverrideToken`. Implementação em `packages/pi-stack/extensions/guardrails-core.ts` bloqueia provider em BLOCK com trilha auditável e override; `packages/pi-stack/extensions/colony-pilot.ts` aplica gate equivalente em ant_colony. Regressão mínima validada com `vitest run packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts` (3/3).",
+      "timestamp": "2026-04-21T00:15:00Z"
+    },
+    {
+      "id": "VER-BUD-027",
+      "target": "TASK-BUD-027",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Surface determinística de roteamento está ativa via `quota_visibility_route` (profiles cheap|balanced|reliable, advisory + execute opt-in) em packages/pi-stack/extensions/quota-visibility.ts. Lógica evita providers em BLOCK e retorna estado/racional auditável (incluindo caso `state=blocked` sem recomendação). Documentação operacional em docs/guides/quota-visibility.md seção de route advisory. Regressão executada: `vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` (inclui cenários de route e BLOCK; 28/28 pass).",
+      "timestamp": "2026-04-21T00:18:00Z"
+    },
+    {
+      "id": "VER-BUD-029",
+      "target": "TASK-BUD-029",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Critérios de RC atendidos com evidência versionada: (1) hatch check ready=yes coberto por e2e harness `vitest run packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts` (asserção explícita de `ready: yes`, 3/3). (2) Governança global BLOCK + recovery allowlist consolidada via TASK-BUD-026/048/049 e implementada em guardrails-core/colony-pilot + docs budget-governance. (3) Validação sem regressão executada: `vitest run packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts` (48/48), `vitest run packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts` (3/3), `npm run verify` (10 checks pass). (4) Changeset de RC preparado com release notes e riscos/limites em `.changeset/bright-spoons-jam.md`.",
+      "timestamp": "2026-04-21T00:26:00Z"
+    },
+    {
+      "id": "VER-BUD-060",
+      "target": "TASK-BUD-060",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Root cause do classify failure em OpenAI Codex identificado e mitigado: classifiers sem `prompt.system` deixavam `instructions` vazio no payload Responses, causando `{\"detail\":\"Instructions are required\"}`. Correção productizada em `packages/pi-stack/extensions/monitor-provider-patch.ts` (generateAgentYaml com `prompt.system` + `repairMissingSystemPromptOverrides` no `session_start`), overrides `.pi/agents/*-classifier.agent.yaml` reparados e documentação de gate de release publicada em `docs/guides/monitor-overrides.md` e `packages/pi-stack/README.md`. Evidência: `node --test packages/pi-stack/test/monitor-provider-patch.test.mjs` (25/25 pass), `npm run verify` (10 checks pass), e smoke controlado com `monitors-control on` + 3 ciclos tool_call (unauthorized-action) sem novo incremento de `classifyFail` em `monitors_compact_status`. Registro detalhado: `docs/research/task-bud-060-monitor-classify-stability-2026-04-20.md`.",
+      "timestamp": "2026-04-20T23:20:00Z"
     }
   ]
 }

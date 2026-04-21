@@ -506,6 +506,78 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo89xnoe",
+      "description": "The agent encountered a clear environment/dependency failure (`node: not found`) but did not resolve or work around it, instead leaving the broken state implicit while continuing with unrelated status checks and an empty response.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8a3x1q",
+      "description": "The agent completed the investigation and wrote a handoff file, but then replied with an empty message, failing to communicate any findings or conclusion to the user.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8a90b9",
+      "description": "The agent discovered a reproducible classify drift issue after a cold boot, documented it in the handoff, and explicitly deferred the deterministic prefilter fix instead of resolving the known broken state.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8aav6n",
+      "description": "The agent performed investigative reads that concluded a reproducible drift and proposed next steps, but its final response was empty, leaving the findings and required follow-up uncommunicated.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8aghaz",
+      "description": "The agent performed investigative tool calls but replied with empty output, failing to communicate any findings or conclusion to the user.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8ampax",
+      "description": "The agent completed investigative checks but returned an empty response, failing to communicate any findings or conclusion to the user.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8az1cn",
+      "description": "The agent completed investigative checks but returned an empty response, leaving findings/conclusions uncommunicated to the user.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8bgdh6",
+      "description": "The agent investigated and ran tests, then responded with an empty message, leaving findings and conclusions uncommunicated to the user.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-mo8bzzp8",
+      "description": "The agent observed Git hygiene problems after committing (gc.log/unreachable loose objects) but left them unaddressed, effectively deferring cleanup of a known broken repository state.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }

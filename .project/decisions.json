@@ -136,6 +136,34 @@
       "context": "Claude Code usa hooks de pre-write que detectam padrões inseguros e informam o agente sem bloquear automaticamente. O agente lê o sinal, avalia com contexto, e decide. O mesmo hook disparou false positive em texto de documentação no próprio tasks.json.",
       "decision": "Guardrails no pi-stack devem ser informativos por padrão, não bloqueantes. Hard blocks ficam reservados para violações inequívocas (budget exceeded, auth missing). Para riscos de código e padrões suspeitos, o modelo correto é sinalizar (setStatus, notify) e deixar o runtime decidir.",
       "rationale": "Bloqueios cegos geram false positives em código legítimo e criam fricção desnecessária. O agente com contexto completo toma decisões melhores do que pattern-match estático sem contexto."
+    },
+    {
+      "id": "DEC-BUD-020",
+      "decision": "Adotar .project como fonte canônica de continuidade (backlog/requisitos/decisões/verificação), usando HANDOFF.md apenas para delta operacional curto e ROADMAP.md para direção macro.",
+      "rationale": "Centralizar estado canônico reduz perda de contexto entre sessões, evita duplicação entre documentos narrativos e melhora auditabilidade por qualquer agente/pessoa.",
+      "status": "decided",
+      "context": "Pedido explícito do usuário para arrumar a casa e tornar posteridade reproduzível sem depender de memória de sessão."
+    },
+    {
+      "id": "DEC-BUD-021",
+      "decision": "Descontinuar manutenção narrativa do HANDOFF.md raiz e manter esse arquivo apenas como ponte curta para o estado canônico em `.project/handoff.json` + checkpoints de pesquisa.",
+      "rationale": "Reduz drift, custo de contexto e retrabalho. Um único estado canônico estruturado melhora retomada pós-compactação e coordenação multiagente.",
+      "status": "decided",
+      "context": "Após consolidar pipeline .project-first (TASK-BUD-056) e higiene de handoff canônico em blocos davidorex."
+    },
+    {
+      "id": "DEC-BUD-022",
+      "decision": "Operar OpenAI com lanes explícitas de contexto (lean, governed, swarm) escolhidas por tipo de trabalho e budget, em vez de usar stack-default para tudo.",
+      "rationale": "Benchmark split mostrou taxa fixa alta de contexto no stack-default. Lanes reduzem custo/latência para trabalho simples sem perder governança quando ela é necessária.",
+      "status": "decided",
+      "context": "Resultados comparáveis r7/r8 do benchmark canônico de economia de contexto."
+    },
+    {
+      "id": "DEC-BUD-023",
+      "decision": "Adotar rollout em duas trilhas: (1) laboratório com scripts/gates operacionais para validação rápida e (2) promoção somente do que virar extensão/tool first-party na superfície do `@aretw0/pi-stack`.",
+      "rationale": "Evita expor utilitários ainda voláteis para usuários finais e mantém previsibilidade da stack publicada; ao mesmo tempo, acelera aprendizado no laboratório com critérios reprodutíveis.",
+      "status": "decided",
+      "context": "Pergunta explícita sobre o que já está indo para usuários versus o que ainda é interno de estabilização."
     }
   ]
 }

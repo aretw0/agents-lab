@@ -384,6 +384,19 @@
         "Quota display via quota-budgets status mostra apenas providers configurados em providerBudgets.",
         "Providers sem quota configurada não aparecem no footer budget status."
       ]
+    },
+    {
+      "id": "REQ-BUD-031",
+      "description": "A governança de continuidade deve manter hygiene automática do board canônico: toda task completed precisa verificação vinculada, e pendências de validação devem virar backlog explícito com prioridade.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "project-validate não deve falhar por completed sem verification em estado steady-state.",
+        "Quando houver dívida histórica, ela deve estar registrada em task/issue explícita com plano de backfill.",
+        "Sessões de execução devem registrar decisões/requisitos no .project antes de encerrar handoff."
+      ]
     }
   ]
 }

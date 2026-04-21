@@ -156,7 +156,8 @@
         "Manual diferencia estado versionado (board oficial) vs estado efêmero de execução.",
         "Referências duplicadas/confusas foram consolidadas."
       ],
-      "notes": "Derivado de REQ-BUD-006. c2 auditou canonicalização do Swarm Launch Policy e confirmou necessidade de manual canônico único + de-dup de referências. Aguardando aplicação final de arquivos no main e revisão humana.\n[2026-04-16T05:30:15Z] TRIAGEM 2026-04-16: AC1 (checklist operacional) atendido via docs/guides/swarm-cleanroom-protocol.md (commit 97e05db). AC2 e AC3 (manual diferencia board vs efemero + consolidacao de referencias) pendentes. Task permanece in-progress ate manual canonico completo.\n[2026-04-16T06:18:51Z] Fechada. Todos os ACs atendidos:\n  AC1: checklist operacional em swarm-cleanroom-protocol.md (fases A-E + criterio de saida)\n  AC2: secao 'Estado versionado vs estado efemero' adicionada ao cleanroom protocol\n  AC3: referencias consolidadas — swarm-cleanroom-protocol.md e' o ponto de entrada canonico;\n       recommended-pi-stack.md e agent-driver-charter.md referenciam corretamente;\n       budget-governance.md ja tinha referencia (linha 158)."
+      "notes": "Derivado de REQ-BUD-006. c2 auditou canonicalização do Swarm Launch Policy e confirmou necessidade de manual canônico único + de-dup de referências. Aguardando aplicação final de arquivos no main e revisão humana.\n[2026-04-16T05:30:15Z] TRIAGEM 2026-04-16: AC1 (checklist operacional) atendido via docs/guides/swarm-cleanroom-protocol.md (commit 97e05db). AC2 e AC3 (manual diferencia board vs efemero + consolidacao de referencias) pendentes. Task permanece in-progress ate manual canonico completo.\n[2026-04-16T06:18:51Z] Fechada. Todos os ACs atendidos:\n  AC1: checklist operacional em swarm-cleanroom-protocol.md (fases A-E + criterio de saida)\n  AC2: secao 'Estado versionado vs estado efemero' adicionada ao cleanroom protocol\n  AC3: referencias consolidadas — swarm-cleanroom-protocol.md e' o ponto de entrada canonico;\n       recommended-pi-stack.md e agent-driver-charter.md referenciam corretamente;\n       budget-governance.md ja tinha referencia (linha 158).",
+      "verification": "VER-LEGACY-TASK-BUD-009"
     },
     {
       "id": "TASK-BUD-010",
@@ -189,7 +190,8 @@
         "Artefatos efêmeros continuam claramente excluídos.",
         "Guia documenta migração e impacto para colaboração entre agentes."
       ],
-      "notes": "Implementado via .gitignore: .project/**/*.json e .pi/settings.json + .pi/agents/*.yaml incluidos; .pi/reports/, .pi/snapshots/, .pi/agent/ explicitamente excluidos com comentarios de politica. .project/ ja estava rastreado (22 arquivos)."
+      "notes": "Implementado via .gitignore: .project/**/*.json e .pi/settings.json + .pi/agents/*.yaml incluidos; .pi/reports/, .pi/snapshots/, .pi/agent/ explicitamente excluidos com comentarios de politica. .project/ ja estava rastreado (22 arquivos).",
+      "verification": "VER-LEGACY-TASK-BUD-011"
     },
     {
       "id": "colony-c1",
@@ -247,7 +249,8 @@
       "id": "colony-colonyidentity-colony",
       "description": "[COLONY:ant_colony] colony ${colonyIdentity(colony)}",
       "status": "completed",
-      "notes": "[2026-04-14T20:52:59.566Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:52:59.584Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:53:05.527Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:53:05.541Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-16T14:32:00Z] PHANTOM TASK — criada por sinal com template literal nao resolvido (BUD-019). normalizeColonySignalId ja rejeita IDs com '${..}' desde commit 340d97e. Fechada como artefato historico; guard em producao previne novas ocorrencias."
+      "notes": "[2026-04-14T20:52:59.566Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:52:59.584Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:53:05.527Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-14T20:53:05.541Z] colony ${colonyIdentity(colony)} phase=failed\n[2026-04-16T14:32:00Z] PHANTOM TASK — criada por sinal com template literal nao resolvido (BUD-019). normalizeColonySignalId ja rejeita IDs com '${..}' desde commit 340d97e. Fechada como artefato historico; guard em producao previne novas ocorrencias.",
+      "verification": "VER-LEGACY-colony-colonyidentity-colony"
     },
     {
       "id": "TASK-BUD-014",
@@ -266,7 +269,8 @@
         "Gate hard bloqueia marcação de entrega sem inventário de arquivos + comandos de validação.",
         "Fluxo de recovery preserva patch/artefato quando apply não ocorre."
       ],
-      "notes": "Implementação iniciada no colony-pilot com delivery policy hard/configurável (modo de entrega + gates de evidência). Expandir para contexto runner/interface-agnostic conforme REQ-BUD-009.\n[2026-04-16T05:38:50Z] Fechada por triagem 2026-04-16. Todos os ACs verificados:\n  AC1: tres modos suportados (report-only|patch-artifact|apply-to-branch) + default seguro\n  AC2: evaluateColonyDeliveryEvidence bloqueia sem fileInventory+validationCommandLog\n  AC3: recovery auto-queue de *-promotion task quando apply nao ocorre (l.1677-1703)\nRef: commits 0698142, 340d97e, 96c605f"
+      "notes": "Implementação iniciada no colony-pilot com delivery policy hard/configurável (modo de entrega + gates de evidência). Expandir para contexto runner/interface-agnostic conforme REQ-BUD-009.\n[2026-04-16T05:38:50Z] Fechada por triagem 2026-04-16. Todos os ACs verificados:\n  AC1: tres modos suportados (report-only|patch-artifact|apply-to-branch) + default seguro\n  AC2: evaluateColonyDeliveryEvidence bloqueia sem fileInventory+validationCommandLog\n  AC3: recovery auto-queue de *-promotion task quando apply nao ocorre (l.1677-1703)\nRef: commits 0698142, 340d97e, 96c605f",
+      "verification": "VER-LEGACY-TASK-BUD-014"
     },
     {
       "id": "TASK-BUD-015",
@@ -287,7 +291,8 @@
         "Mapeamento canônico para issue/PR state documentado com riscos/gaps.",
         "Proposta de implementação incremental sem acoplamento a um único provedor."
       ],
-      "notes": "Iniciando especificação adapter runner externo (CI/issue/PR) em paralelo ao hardening de delivery policy hard para reduzir acoplamento a runtime local.\n[2026-04-16T06:23:09Z] Fechada. Spec produzida em docs/guides/ci-runner-adapter-spec.md.\n  AC1: contrato de 5 eventos (start/progress/review/done/recovery) definido.\n  AC2: mapeamento GitHub Issues/PRs documentado com gaps e riscos.\n  AC3: implementacao incremental em 3 fases sem acoplamento a um provider."
+      "notes": "Iniciando especificação adapter runner externo (CI/issue/PR) em paralelo ao hardening de delivery policy hard para reduzir acoplamento a runtime local.\n[2026-04-16T06:23:09Z] Fechada. Spec produzida em docs/guides/ci-runner-adapter-spec.md.\n  AC1: contrato de 5 eventos (start/progress/review/done/recovery) definido.\n  AC2: mapeamento GitHub Issues/PRs documentado com gaps e riscos.\n  AC3: implementacao incremental em 3 fases sem acoplamento a um provider.",
+      "verification": "VER-LEGACY-TASK-BUD-015"
     },
     {
       "id": "TASK-BUD-016",
@@ -304,7 +309,8 @@
         "Agentes conseguem inferir próxima tarefa elegível sem instrução ad hoc do humano.",
         "Contrato mantém budget envelope, evidência obrigatória e no-auto-close."
       ],
-      "notes": "Agent Driver Charter em formalização; primitiva de continuidade backend/runner-agnostic documentada em docs/primitives/continuity-abstraction.md para reduzir dependência de instruções repetidas e suportar múltiplos backends.\n[2026-04-16T05:58:32Z] Fechada. Charter produzido em docs/guides/agent-driver-charter.md (commit e9560f3).\nCobre: north-star, criterios de priorizacao, limites de autonomia, stop conditions, contratos invariantes, ciclo operacional por run e algoritmo de selecao de proxima task."
+      "notes": "Agent Driver Charter em formalização; primitiva de continuidade backend/runner-agnostic documentada em docs/primitives/continuity-abstraction.md para reduzir dependência de instruções repetidas e suportar múltiplos backends.\n[2026-04-16T05:58:32Z] Fechada. Charter produzido em docs/guides/agent-driver-charter.md (commit e9560f3).\nCobre: north-star, criterios de priorizacao, limites de autonomia, stop conditions, contratos invariantes, ciclo operacional por run e algoritmo de selecao de proxima task.",
+      "verification": "VER-LEGACY-TASK-BUD-016"
     },
     {
       "id": "TASK-BUD-017",
@@ -324,7 +330,8 @@
         "Cada run respeita budget/delivery policy e registra evidência mínima.",
         "Falhas entram em recovery pipeline sem perder artefatos."
       ],
-      "notes": "Implementado. scheduler.mjs le .project/tasks.json, filtra por status=planned + depends_on completos, ordena P0>P1>P2 e por countUnblocked(). Flags: --execute emite goal-prompt para colar em sessao pi, --json para automacao, --budget, --priority, --verbose. Dry-run por padrao. Testado: 10 tarefas elegiveis, selecionou TASK-BUD-033. Scripts adicionados: scheduler:next, scheduler:next:p0, scheduler:next:execute."
+      "notes": "Implementado. scheduler.mjs le .project/tasks.json, filtra por status=planned + depends_on completos, ordena P0>P1>P2 e por countUnblocked(). Flags: --execute emite goal-prompt para colar em sessao pi, --json para automacao, --budget, --priority, --verbose. Dry-run por padrao. Testado: 10 tarefas elegiveis, selecionou TASK-BUD-033. Scripts adicionados: scheduler:next, scheduler:next:p0, scheduler:next:execute.",
+      "verification": "VER-LEGACY-TASK-BUD-017"
     },
     {
       "id": "TASK-BUD-018",
@@ -365,7 +372,8 @@
         "Nenhuma task fantasma é criada no board a partir de IDs não resolvidos.",
         "Teste cobre parsing/sanitize de IDs de sinal malformados."
       ],
-      "notes": "Detectado em runtime: item bloqueado `colony-colonyidentity-colony` criado por sinal inválido.\n[2026-04-16T14:32:00Z] Fechado. Guard normalizeColonySignalId ja rejeitava '${...}' (commit 340d97e). Adicionados 8 testes abrangentes em colony-pilot-parsers.test.ts cobrindo: template literal exato do caso real, variantes ${...}, ID vazio/whitespace/espacos, IDs validos, compostos com pipe, e segmento invalido antes do pipe. Phantom task colony-colonyidentity-colony marcada como completed com nota explicativa."
+      "notes": "Detectado em runtime: item bloqueado `colony-colonyidentity-colony` criado por sinal inválido.\n[2026-04-16T14:32:00Z] Fechado. Guard normalizeColonySignalId ja rejeitava '${...}' (commit 340d97e). Adicionados 8 testes abrangentes em colony-pilot-parsers.test.ts cobrindo: template literal exato do caso real, variantes ${...}, ID vazio/whitespace/espacos, IDs validos, compostos com pipe, e segmento invalido antes do pipe. Phantom task colony-colonyidentity-colony marcada como completed com nota explicativa.",
+      "verification": "VER-LEGACY-TASK-BUD-019"
     },
     {
       "id": "colony-c1-promotion",
@@ -393,7 +401,8 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Recovery confirmado no git log."
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Recovery confirmado no git log.",
+      "verification": "VER-LEGACY-colony-c2-promotion"
     },
     {
       "id": "colony-c3",
@@ -405,7 +414,8 @@
         "docs/guides/pi-embedding-cli.md",
         "packages/lab-skills/skills/embed-pi-cli/SKILL.md",
         "docs/guides/README.md"
-      ]
+      ],
+      "verification": "VER-LEGACY-colony-c3"
     },
     {
       "id": "colony-c3-promotion",
@@ -419,13 +429,15 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-15T08:00:55.504Z] auto-queued from colony c3: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: promoção aguarda materialização real dos entregáveis (embed guide + skill + template). colony-c3 reclassificada como blocked. Esta promotion só pode avançar após c3 ser desbloqueada.\n[2026-04-16T05:30:07Z] TRIAGEM: aguarda materializacao real dos entregaveis. colony-c3 reclassificada como blocked.\n[2026-04-16T05:34:51Z] Promocao concluida. Entregaveis de c3 materializados e registrados."
+      "notes": "[2026-04-15T08:00:55.504Z] auto-queued from colony c3: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: promoção aguarda materialização real dos entregáveis (embed guide + skill + template). colony-c3 reclassificada como blocked. Esta promotion só pode avançar após c3 ser desbloqueada.\n[2026-04-16T05:30:07Z] TRIAGEM: aguarda materializacao real dos entregaveis. colony-c3 reclassificada como blocked.\n[2026-04-16T05:34:51Z] Promocao concluida. Entregaveis de c3 materializados e registrados.",
+      "verification": "VER-LEGACY-colony-c3-promotion"
     },
     {
       "id": "colony-c4",
       "description": "[COLONY:ant_colony] Executar materialização/promoção de colony-c3-promotion no branch principal atual com escopo estrito e reversível. Objetivo: aplicar outputs da run c3 (embedding CLI guide + skill + template + smoke/docs updates) ao main, com evidência completa. Requisitos obrigatórios: (1) inventário final de arquivos alterados; (2) comandos de validação executados e resultados; (3) riscos residuais; (4) preservar no-auto-close e human-in-the-loop; (5) se apply conflitar, preservar patch artifact e registrar recovery explícito sem perda. Não expandir escopo além da promoção c3.",
       "status": "completed",
-      "notes": "[2026-04-15T08:05:00.076Z] colony c4 phase=launched\n[2026-04-15T08:05:00.093Z] colony c4 phase=launched\n[2026-04-15T08:11:49.629Z] colony c4 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:11:49.653Z] promotion queued automatically: colony-c4-promotion\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 (entregáveis não materializados). Não avançar até c3 ser desbloqueada e entregáveis confirmados no main.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 (entregaveis nao materializados). Nao avancar ate c3 ser desbloqueada.\n[2026-04-16T05:34:51Z] c4 fechado junto com c3: dependencia resolvida com materializacao direta dos entregaveis."
+      "notes": "[2026-04-15T08:05:00.076Z] colony c4 phase=launched\n[2026-04-15T08:05:00.093Z] colony c4 phase=launched\n[2026-04-15T08:11:49.629Z] colony c4 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-15T08:11:49.653Z] promotion queued automatically: colony-c4-promotion\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 (entregáveis não materializados). Não avançar até c3 ser desbloqueada e entregáveis confirmados no main.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 (entregaveis nao materializados). Nao avancar ate c3 ser desbloqueada.\n[2026-04-16T05:34:51Z] c4 fechado junto com c3: dependencia resolvida com materializacao direta dos entregaveis.",
+      "verification": "VER-LEGACY-colony-c4"
     },
     {
       "id": "colony-c4-promotion",
@@ -439,7 +451,8 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materialização real.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materializacao real.\n[2026-04-16T05:34:51Z] Promocao concluida por dependencia resolvida (c3 materializou)."
+      "notes": "[2026-04-15T08:11:49.642Z] auto-queued from colony c4: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-16T05:29:54Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materialização real.\n[2026-04-16T05:30:07Z] TRIAGEM: bloqueado em colony-c3 e colony-c4. Aguarda materializacao real.\n[2026-04-16T05:34:51Z] Promocao concluida por dependencia resolvida (c3 materializou).",
+      "verification": "VER-LEGACY-colony-c4-promotion"
     },
     {
       "id": "TASK-BUD-020",
@@ -563,7 +576,7 @@
     {
       "id": "TASK-BUD-026",
       "description": "[P0] Operacionalizar budget global no workspace: ativar governor de provider em guardrails-core e gate de provider budget em colony-pilot com overrides auditáveis e allowlist de recovery.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-025"
       ],
@@ -578,12 +591,13 @@
         "/doctor, /quota-visibility, /model e /login continuam permitidos para recovery.",
         "Override auditável registra evidência de exceção."
       ],
-      "notes": "Task operacional imediata para transformar capability em política ativa no runtime atual."
+      "notes": "Task operacional imediata para transformar capability em política ativa no runtime atual.",
+      "verification": "VER-BUD-026"
     },
     {
       "id": "TASK-BUD-027",
       "description": "[P1] Implementar portfolio routing advisor: recomendação de provider/model por tipo de trabalho baseada em custo relativo, estado de budget (OK/WARN/BLOCK) e confiabilidade alvo.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-026"
       ],
@@ -597,7 +611,8 @@
         "Sugestões evitam providers em BLOCK e degradam para alternativas mais baratas quando possível.",
         "Saída inclui justificativa auditável (custo/risco/limites)."
       ],
-      "notes": "Primeira etapa para malabarismo de custo multi-provider com decisões explícitas."
+      "notes": "Primeira etapa para malabarismo de custo multi-provider com decisões explícitas.",
+      "verification": "VER-BUD-027"
     },
     {
       "id": "TASK-BUD-028",
@@ -622,7 +637,7 @@
     {
       "id": "TASK-BUD-029",
       "description": "[P0] Fechar release candidate de governança multi-provider (hatch + budget global + copilot requests) com gates determinísticos de qualidade e operação em ambiente com plugins extras.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-026",
         "TASK-BUD-027"
@@ -642,7 +657,8 @@
         "Smoke + node tests + verify passam sem regressão.",
         "Changeset preparado e release notes resumem riscos/limites conhecidos."
       ],
-      "notes": "Task de stop condition para decidir momento exato de cortar versão e publicar.\n[2026-04-19] Pré-condição TASK-BUD-050 entrou em revisão de delta após falha c4 (no_pending_worker_tasks), para evitar loops sem trabalho executável.\n[2026-04-19] Delta-audit c5 concluiu GO condicional: pré-condição pode avançar por consolidação de evidência (sem reimplementar advisor do zero).\n[2026-04-19] Lote D final (c6) executado com resultado candidato; pré-condições operacionais para fechamento de RC avançadas, ainda sem auto-close."
+      "notes": "Task de stop condition para decidir momento exato de cortar versão e publicar.\n[2026-04-19] Pré-condição TASK-BUD-050 entrou em revisão de delta após falha c4 (no_pending_worker_tasks), para evitar loops sem trabalho executável.\n[2026-04-19] Delta-audit c5 concluiu GO condicional: pré-condição pode avançar por consolidação de evidência (sem reimplementar advisor do zero).\n[2026-04-19] Lote D final (c6) executado com resultado candidato; pré-condições operacionais para fechamento de RC avançadas, ainda sem auto-close.",
+      "verification": "VER-BUD-029"
     },
     {
       "id": "TASK-BUD-030",
@@ -658,7 +674,8 @@
         "Snapshot pré-boot é salvo e pode ser restaurado por comando único.",
         "Recovery channel permanece funcional para diagnóstico e correção."
       ],
-      "notes": "Implementado via safe-boot.ts: SAFE_CORE_PROFILE (delivery=report-only, scheduler=observe, gateways=local), saveSnapshot/restoreSnapshot, /safe-boot [apply|snapshot|restore|list|recover]. 14 unit tests."
+      "notes": "Implementado via safe-boot.ts: SAFE_CORE_PROFILE (delivery=report-only, scheduler=observe, gateways=local), saveSnapshot/restoreSnapshot, /safe-boot [apply|snapshot|restore|list|recover]. 14 unit tests.",
+      "verification": "VER-LEGACY-TASK-BUD-030"
     },
     {
       "id": "TASK-BUD-031",
@@ -674,7 +691,8 @@
         "Modo execute é opt-in e registra decisão + motivo + provider escolhido.",
         "Providers em BLOCK nunca são selecionados automaticamente."
       ],
-      "notes": "Implementado via handoff-advisor.ts (execute path + /handoff --execute) + quota_visibility_route. Matriz: budget (quota-visibility) + readiness (provider-readiness). Execute audita via pi.appendEntry. BLOCK providers filtrados por isAvailable()."
+      "notes": "Implementado via handoff-advisor.ts (execute path + /handoff --execute) + quota_visibility_route. Matriz: budget (quota-visibility) + readiness (provider-readiness). Execute audita via pi.appendEntry. BLOCK providers filtrados por isAvailable().",
+      "verification": "VER-LEGACY-TASK-BUD-031"
     },
     {
       "id": "TASK-BUD-032",
@@ -692,7 +710,8 @@
         "Fluxo de login segue caminho oficial do provider com fallback manual; automação browser é opcional/local.",
         "Execução como subagente respeita budget governor e trilha auditável."
       ],
-      "notes": "Implementado em TASK-BUD-033 (claude_code_execute + budget governor). BUD-032 completa o auth bridge: extraiu parseAuthStatusOutput como função pura testável (interpreta stdout/stderr de 'claude auth status' em authenticated/unauthenticated/unknown). 11 novos testes adicionados cobrindo: exit code não-zero, todas as frases de sinal conhecidas (not logged, not authenticated, login required, logged in, account:), saída ambígua, e stderr."
+      "notes": "Implementado em TASK-BUD-033 (claude_code_execute + budget governor). BUD-032 completa o auth bridge: extraiu parseAuthStatusOutput como função pura testável (interpreta stdout/stderr de 'claude auth status' em authenticated/unauthenticated/unknown). 11 novos testes adicionados cobrindo: exit code não-zero, todas as frases de sinal conhecidas (not logged, not authenticated, login required, logged in, account:), saída ambígua, e stderr.",
+      "verification": "VER-LEGACY-TASK-BUD-032"
     },
     {
       "type": "feature",
@@ -715,7 +734,8 @@
         "/claude-code budget exibe requests usados, cap, estado e sugestao de routeModelRef.",
         "Testes unitarios cobrem: parseClaudeCodeRequestBudget, checkBudgetGate, buildProviderHint."
       ],
-      "notes": "Implementado. Adapter agora e provider completo: request-budget governor (ok/warn/block por session cap), claude_code_execute tool com dry-run e isolamento via cwd, buildProviderHint com sugestao de routeModelRef para quota-visibility. 11 novos testes cobrindo parseClaudeCodeRequestBudget, checkBudgetGate, buildProviderHint. 176/176 testes passando."
+      "notes": "Implementado. Adapter agora e provider completo: request-budget governor (ok/warn/block por session cap), claude_code_execute tool com dry-run e isolamento via cwd, buildProviderHint com sugestao de routeModelRef para quota-visibility. 11 novos testes cobrindo parseClaudeCodeRequestBudget, checkBudgetGate, buildProviderHint. 176/176 testes passando.",
+      "verification": "VER-LEGACY-TASK-BUD-033"
     },
     {
       "id": "TASK-BUD-034",
@@ -737,7 +757,8 @@
         "/session-analytics command com sub-comandos: signals, timeline, model-usage, summary.",
         "Testes unitarios cobrem: toSessionWorkspaceKey, parseSignals, parseModelChanges."
       ],
-      "notes": "Implementado. session-analytics.ts expoe session_analytics_query tool (signals|timeline|model-usage|summary) e /session-analytics command. Le JSONL de sessao diretamente, sem subprocess. 14 testes unitarios: toSessionWorkspaceKey, parseSignals, parseModelChanges, parseTimeline, runQuery. 192/192 testes passando."
+      "notes": "Implementado. session-analytics.ts expoe session_analytics_query tool (signals|timeline|model-usage|summary) e /session-analytics command. Le JSONL de sessao diretamente, sem subprocess. 14 testes unitarios: toSessionWorkspaceKey, parseSignals, parseModelChanges, parseTimeline, runQuery. 192/192 testes passando.",
+      "verification": "VER-LEGACY-TASK-BUD-034"
     },
     {
       "references": [
@@ -759,7 +780,8 @@
         "packages/pi-stack/install.mjs",
         "packages/pi-stack/test/smoke/installer-baseline.test.ts"
       ],
-      "notes": "Implementado. install.mjs agora exporta INSTALLER_BASELINE, deepMergeForBaseline, applyBaselineToSettings. Flag --baseline (-b) aplica tema, colony-pilot, claude-code adapter e routeModelRefs. Merge nao-destrutivo: valores existentes do usuario sao preservados. IS_MAIN guard previne execucao ao importar como modulo. 8 testes unitarios. 200/200 passando."
+      "notes": "Implementado. install.mjs agora exporta INSTALLER_BASELINE, deepMergeForBaseline, applyBaselineToSettings. Flag --baseline (-b) aplica tema, colony-pilot, claude-code adapter e routeModelRefs. Merge nao-destrutivo: valores existentes do usuario sao preservados. IS_MAIN guard previne execucao ao importar como modulo. 8 testes unitarios. 200/200 passando.",
+      "verification": "VER-LEGACY-TASK-BUD-035"
     },
     {
       "description": "[P1] Realizar auditoria de curadoria no pi-stack: mapear todas as features/tools expostas aos usuários vs o que realmente usamos no agents-lab. Adotar, refinar ou remover/desativar aquilo que não for essencial para o nosso próprio fluxo swarm-first.",
@@ -774,7 +796,8 @@
         "packages/pi-stack/extensions/quota-visibility.ts",
         "docs/guides/swarm-cleanroom-protocol.md"
       ],
-      "notes": "Auditoria em docs/research/pi-stack-curation-audit-2026-04-16.md. 15 extensões auditadas. Veredictos: CORE (7), ADOTAR (4), OBSERVAR (2), REFINAR (1). 0 removidas. Ações imediatas aplicadas: quota-visibility criticality medium→high (A1), safe-boot snapshot step no swarm-cleanroom-protocol (A4). Ações diferidas registradas: A2 (fusao claude_code_adapter_status), A3 (governance-profile no hatch check), A5 (web-session-gateway no checklist), A6 (dogfood governance-profiles). Desbloqueia TASK-BUD-043."
+      "notes": "Auditoria em docs/research/pi-stack-curation-audit-2026-04-16.md. 15 extensões auditadas. Veredictos: CORE (7), ADOTAR (4), OBSERVAR (2), REFINAR (1). 0 removidas. Ações imediatas aplicadas: quota-visibility criticality medium→high (A1), safe-boot snapshot step no swarm-cleanroom-protocol (A4). Ações diferidas registradas: A2 (fusao claude_code_adapter_status), A3 (governance-profile no hatch check), A5 (web-session-gateway no checklist), A6 (dogfood governance-profiles). Desbloqueia TASK-BUD-043.",
+      "verification": "VER-LEGACY-TASK-BUD-036"
     },
     {
       "id": "TASK-BUD-037",
@@ -797,7 +820,8 @@
         "/handoff command exibe o mesmo resultado em formato humano com instrucoes de troca.",
         "Testes unitarios cobrem: computeHandoffScore, selectNextProvider, buildHandoffAdvisory."
       ],
-      "notes": "Implementado. handoff-advisor.ts combina quota-visibility (budget_state) + provider-readiness (readiness) em score aditivo: computeHandoffScore = budget_score + readiness_score. selectNextProvider exclui current_provider e provider blocked/unconfigured. handoff_advisor tool + /handoff command com noAutoSwitch invariante. 16 testes unitarios. 218/218 passando."
+      "notes": "Implementado. handoff-advisor.ts combina quota-visibility (budget_state) + provider-readiness (readiness) em score aditivo: computeHandoffScore = budget_score + readiness_score. selectNextProvider exclui current_provider e provider blocked/unconfigured. handoff_advisor tool + /handoff command com noAutoSwitch invariante. 16 testes unitarios. 218/218 passando.",
+      "verification": "VER-LEGACY-TASK-BUD-037"
     },
     {
       "id": "TASK-BUD-038",
@@ -821,7 +845,8 @@
         "/quota-alerts command exibe alertas com severidade (info/warning/error).",
         "Testes cobrem: parse429Streak, buildQuotaAlerts sem sessoes, alertas de WARN/BLOCK."
       ],
-      "notes": "Implementado. quota-alerts.ts com 3 fontes de alertas: budget (WARN/BLOCK + overage consent), 429-streak (texto de rate-limit em sessoes recentes), window-pressure (projectedPct >= 80% para provider em ok). quota_alerts tool + /quota-alerts command. 18 testes unitarios. 238/238 passando."
+      "notes": "Implementado. quota-alerts.ts com 3 fontes de alertas: budget (WARN/BLOCK + overage consent), 429-streak (texto de rate-limit em sessoes recentes), window-pressure (projectedPct >= 80% para provider em ok). quota_alerts tool + /quota-alerts command. 18 testes unitarios. 238/238 passando.",
+      "verification": "VER-LEGACY-TASK-BUD-038"
     },
     {
       "id": "TASK-BUD-039",
@@ -841,7 +866,8 @@
         "Cada perfil define thresholds consistentes (warn/hard), fallback order e política de overage.",
         "Perfil ativo é visível no /doctor hatch e no /quota-visibility route."
       ],
-      "notes": "Implementado em governance-profiles.ts. 3 perfis: conservative (report-only, observe, $0.50/run), balanced (patch-artifact, observe, $2/run), throughput (apply-to-branch, enforce, $5/run). governance_profile tool (preview|apply|list|status) + /governance-profile command. Perfil ativo salvo em piStack.governanceProfile.active. Snapshot antes de apply via .pi/snapshots/. 21 testes unitarios: parseGovernanceProfile, flattenObject, previewGovernanceDelta, applyGovernanceProfile, invariantes dos perfis. 296/296 vitest passando."
+      "notes": "Implementado em governance-profiles.ts. 3 perfis: conservative (report-only, observe, $0.50/run), balanced (patch-artifact, observe, $2/run), throughput (apply-to-branch, enforce, $5/run). governance_profile tool (preview|apply|list|status) + /governance-profile command. Perfil ativo salvo em piStack.governanceProfile.active. Snapshot antes de apply via .pi/snapshots/. 21 testes unitarios: parseGovernanceProfile, flattenObject, previewGovernanceDelta, applyGovernanceProfile, invariantes dos perfis. 296/296 vitest passando.",
+      "verification": "VER-LEGACY-TASK-BUD-039"
     },
     {
       "type": "feature",
@@ -871,7 +897,8 @@
         "Matrix usa apenas dados passivos (config + budget state) — sem chamadas de modelo.",
         "Testes cobrem: sem config, provider ready, provider unconfigured, summary/recommendation."
       ],
-      "notes": "[2026-04-16T06:02:12Z] Implementada como matriz passiva (config + budget state de quota-visibility).\nMotivo: pi.loadModel() nao existe na ExtensionAPI — abordagem ativa era inviavel e desnecessaria.\nA matriz passiva responde a pergunta real de pre-launch: provider configurado + budget ok?\n4 testes adicionados em provider-readiness.test.ts. vitest 166/166 pass."
+      "notes": "[2026-04-16T06:02:12Z] Implementada como matriz passiva (config + budget state de quota-visibility).\nMotivo: pi.loadModel() nao existe na ExtensionAPI — abordagem ativa era inviavel e desnecessaria.\nA matriz passiva responde a pergunta real de pre-launch: provider configurado + budget ok?\n4 testes adicionados em provider-readiness.test.ts. vitest 166/166 pass.",
+      "verification": "VER-LEGACY-TASK-BUD-041"
     },
     {
       "references": [
@@ -891,7 +918,8 @@
         "Override bypassa o bloco de delivery-policy sem editar a configuracao global.",
         "/colony-promote command pre-preenche editor com ant_colony + deliveryMode:apply-to-branch.",
         "Testes unitarios cobrem parseDeliveryModeOverride com valores validos e invalidos."
-      ]
+      ],
+      "verification": "VER-LEGACY-TASK-BUD-042"
     },
     {
       "id": "TASK-BUD-043",
@@ -925,7 +953,8 @@
         "Execução registra evidência mínima (timestamp + provider + tokens consumidos) nos logs do Actions.",
         "Não expõe credenciais — usa GitHub Secrets."
       ],
-      "notes": "Motivação (2026-04-16): usuário identificou que iniciar o consumo da janela de cota mais cedo permite que ela expire e reinicie antes do pico de trabalho. Estratégia: um workflow cron que faz um 'oi' ao modelo às 7-8h, abrindo a janela. Quando a janela expirar (dependendo do provider: 5h/diária/semanal), já terá reiniciado para quando o trabalho pesado começar.\n[2026-04-16T15:00:00Z] Implementado. .github/workflows/quota-window-opener.yml: cron 0 10 * * 1-5 (10h UTC = 7h BRT, Seg-Sex). Chama claude-haiku-4-5-20251001 com max_tokens=1 via Anthropic API. Secret: ANTHROPIC_API_KEY. Dry-run via workflow_dispatch. Loga timestamp + tokens consumidos."
+      "notes": "Motivação (2026-04-16): usuário identificou que iniciar o consumo da janela de cota mais cedo permite que ela expire e reinicie antes do pico de trabalho. Estratégia: um workflow cron que faz um 'oi' ao modelo às 7-8h, abrindo a janela. Quando a janela expirar (dependendo do provider: 5h/diária/semanal), já terá reiniciado para quando o trabalho pesado começar.\n[2026-04-16T15:00:00Z] Implementado. .github/workflows/quota-window-opener.yml: cron 0 10 * * 1-5 (10h UTC = 7h BRT, Seg-Sex). Chama claude-haiku-4-5-20251001 com max_tokens=1 via Anthropic API. Secret: ANTHROPIC_API_KEY. Dry-run via workflow_dispatch. Loga timestamp + tokens consumidos.",
+      "verification": "VER-LEGACY-TASK-BUD-044"
     },
     {
       "id": "TASK-BUD-046",
@@ -977,7 +1006,7 @@
     {
       "id": "TASK-BUD-048",
       "description": "[P1] Executar lote de desbloqueio para gate hard de provider budget (TASK-BUD-025) como pré-condição de TASK-BUD-026.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-047"
@@ -996,12 +1025,13 @@
         "packages/pi-stack/extensions/quota-visibility.ts",
         "docs/guides/budget-governance.md"
       ],
-      "notes": "[2026-04-19] Lote C-unlock iniciado após consolidação do Lote B. Execução deve incluir evidência determinística de validação para reduzir promoção manual.\n[2026-04-19] c2 concluída (13/13, $0.41, 4m51s) com hard gate/override/recovery e checkpoint de lote reportados; resultado permanece em estado candidato até materialização explícita no main."
+      "notes": "[2026-04-19] Lote C-unlock iniciado após consolidação do Lote B. Execução deve incluir evidência determinística de validação para reduzir promoção manual.\n[2026-04-19] c2 concluída (13/13, $0.41, 4m51s) com hard gate/override/recovery e checkpoint de lote reportados; resultado permanece em estado candidato até materialização explícita no main.",
+      "verification": "VER-BUD-048"
     },
     {
       "id": "TASK-BUD-049",
       "description": "[P0] Executar Lote C unattended para operacionalizar governor global no workspace (TASK-BUD-026) após desbloqueio do gate.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-048"
@@ -1019,12 +1049,13 @@
         "packages/pi-stack/extensions/colony-pilot.ts",
         ".pi/settings.json"
       ],
-      "notes": "[2026-04-19] Lote C principal iniciado em modo artifact-first, condicionado à materialização explícita dos resultados candidatos de TASK-BUD-048/TASK-BUD-052 no main.\n[2026-04-19] c3 concluída (13/13, $0.51, 7m32s) com checkpoint principal, auditoria de compliance e reforço de trilha determinística de evidência; permanece em estado candidato até materialização explícita no main."
+      "notes": "[2026-04-19] Lote C principal iniciado em modo artifact-first, condicionado à materialização explícita dos resultados candidatos de TASK-BUD-048/TASK-BUD-052 no main.\n[2026-04-19] c3 concluída (13/13, $0.51, 7m32s) com checkpoint principal, auditoria de compliance e reforço de trilha determinística de evidência; permanece em estado candidato até materialização explícita no main.",
+      "verification": "VER-BUD-049"
     },
     {
       "id": "TASK-BUD-050",
       "description": "[P1] Executar lote de desbloqueio para portfolio routing advisor (TASK-BUD-027) como pré-condição de TASK-BUD-029.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-049"
@@ -1043,7 +1074,8 @@
         "packages/pi-stack/extensions/colony-pilot.ts",
         "docs/guides/quota-visibility.md"
       ],
-      "notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md.\n[2026-04-19] Pré-condição para TASK-BUD-029 tratada como candidata por evidência; seguir para lote final sem reimplementar advisor completo.\n[2026-04-19] Consolidação operacional aplicada: evidência determinística considerada suficiente para liberar disparo de TASK-BUD-051 em modo artifact-first, mantendo estado candidato (HITL)."
+      "notes": "[2026-04-19] Lote D-unlock iniciado para preparar TASK-BUD-029 com advisor determinístico e exclusão explícita de providers bloqueados.\n[2026-04-19] c4 failed (0$) com no_pending_worker_tasks após 2 planning recovery rounds. Hipótese: escopo de TASK-BUD-050 colide com capability já entregue em TASK-BUD-031; pivot para delta-audit determinístico (027 vs 031) antes de novo lote de implementação.\n[2026-04-19] c5 delta-audit concluída ($0.06): gap classificado como parcial (núcleo já entregue em TASK-BUD-031; falta consolidação operacional/documental). Evidência: docs/research/task-bud-027-vs-031-delta-audit-2026-04-19.md e docs/research/context-checkpoint-2026-04-19-lote-d-delta-audit.md.\n[2026-04-19] Pré-condição para TASK-BUD-029 tratada como candidata por evidência; seguir para lote final sem reimplementar advisor completo.\n[2026-04-19] Consolidação operacional aplicada: evidência determinística considerada suficiente para liberar disparo de TASK-BUD-051 em modo artifact-first, mantendo estado candidato (HITL).",
+      "verification": "VER-BUD-050"
     },
     {
       "id": "TASK-BUD-051",
@@ -1097,7 +1129,7 @@
     {
       "id": "TASK-BUD-053",
       "description": "[P1] Implementar roteamento Spark-aware para priorizar cota normal e usar gpt-5.3-codex-spark apenas em gatilhos explícitos de alto valor.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-051"
@@ -1120,12 +1152,13 @@
         "docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md",
         "HANDOFF.md"
       ],
-      "notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável.\n[2026-04-19] Consolidação spark-aware aplicada no main: modelPolicy com sparkGateEnabled + triggers explícitos (planning recovery/scout burst), documentação operacional atualizada e checkpoint dedicado em docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md. Estado permanece in-progress (candidate/HITL).\n[2026-04-19] Validação pós-c7: routeModelRefs.openai-codex permanece openai-codex/gpt-5.3-codex (cota normal) e uso de codex-spark só passa com gatilho explícito no goal; enforcement ativo em colony-pilot."
+      "notes": "Criada após alerta operacional do usuário sobre janela/cota separada do gpt-5.3-codex-spark. Planejar na próxima leva sem interromper lote corrente.\n[2026-04-19] Próxima leva iniciada: priorizar cota normal e reservar Spark para gatilhos explícitos com evidência auditável.\n[2026-04-19] Consolidação spark-aware aplicada no main: modelPolicy com sparkGateEnabled + triggers explícitos (planning recovery/scout burst), documentação operacional atualizada e checkpoint dedicado em docs/research/context-checkpoint-2026-04-19-spark-aware-routing.md. Estado permanece in-progress (candidate/HITL).\n[2026-04-19] Validação pós-c7: routeModelRefs.openai-codex permanece openai-codex/gpt-5.3-codex (cota normal) e uso de codex-spark só passa com gatilho explícito no goal; enforcement ativo em colony-pilot.",
+      "verification": "VER-BUD-053"
     },
     {
       "id": "TASK-BUD-045",
       "description": "[P1] Definir e aplicar estratégia operacional anti-estouro de contexto para planejamentos grandes: quebrar em lotes pequenos, usar checkpoints de handoff, delegação por trilhas e pesquisa em shards com gatilho explícito de consolidação.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-036"
@@ -1154,7 +1187,8 @@
         "Há gatilho operacional de orçamento de contexto para parar e consolidar antes de saturar.",
         "Ao menos 1 execução real usando o protocolo é registrada no board com evidência de menor fricção/contexto."
       ],
-      "notes": "Originada em 2026-04-19 após relato explícito do usuário sobre estouro de contexto em planejamento amplo. Foco: continuidade operacional com baixa carga cognitiva via fragmentação + delegação + checkpoints.\n[2026-04-19] Iniciado: status -> in-progress; HANDOFF atualizado com seção de lição operacional; protocolo incorporado em docs/guides/agent-driver-charter.md (stop condition + micro-lotes + checkpoint) e docs/guides/swarm-cleanroom-protocol.md (Fase B.1 controle de contexto).\n[2026-04-19] Checkpoint de execução registrado em docs/research/context-checkpoint-2026-04-19.md.\n[2026-04-19] Limiar objetivo de contexto em risco adicionado (2 ciclos sem decisão, >3 trilhas sem checkpoint, ou planejamento extenso sem mini-handoff).\n[2026-04-19] Lote 2 concluído com mini-handoff em docs/research/context-checkpoint-2026-04-19-lote-2.md; fluxo de delegação por trilha e ritual de checkpoint (90s) formalizados.\n[2026-04-19] Lote 3: criado checklist operacional docs/guides/swarm-preflight-15m.md e checkpoint docs/research/context-checkpoint-2026-04-19-lote-3.md como execução curta real do protocolo.\n[2026-04-19] Lote 4 (preflight): budget/readiness coletados; openai-codex em warning; handoff recomenda github-copilot/claude-sonnet-4.6 para piloto; aguardando decisão humana para switch explícito.\n[2026-04-19] Correção de premissa pelo usuário: sem cota no GitHub Copilot; Google bloqueado; Claude ainda não operacional. Rebaseline aplicado para OpenAI-only em .pi/settings.json (budget/route/classifier) e novo checkpoint em docs/research/context-checkpoint-2026-04-19-lote-5-provider-rebaseline.md.\n[2026-04-19] Swarm piloto lançado: COLONY_SIGNAL:LAUNCHED [c1], maxCost=8, objetivo de quebrar P0 em lotes e preparar execução unattended com baixa interação.\n[2026-04-19] c1 concluída: 12/13 tasks done, custo $0.43, 1 falha não crítica (drone com excesso de argumentos).\n[2026-04-19] Baseline commitado em main: dc7828d (rebaseline openai + operação unattended).\n[2026-04-19] c2 lançada para execução unattended dos lotes P0: COLONY_SIGNAL:LAUNCHED [c2], maxCost=10.\n[2026-04-19] c2 failed: no_pending_worker_tasks após 2 rounds de planning recovery (custo $0.00). Mitigação registrada em docs/research/context-checkpoint-2026-04-19-lote-6-c2-failed.md.\n[2026-04-19] c3 relançada em modo artifact-first (escopo explícito por arquivos) para evitar nova falha de planejamento abstrato.\n[2026-04-19] c3 concluída: 13/14 tasks done, custo $0.55, falha não crítica em validação final por allowlist do drone. Entregáveis consolidados manualmente no main: docs/guides/unattended-swarm-execution-plan.md e docs/research/unattended-swarm-runbook-2026-04-19.md; lotes preparados no board (TASK-BUD-046..051).\n[2026-04-19] c4 (Lote A / TASK-BUD-046) concluída: 9/9 tasks done, custo $0.28. Antes do próximo lote, obrigatório `/reload` para aplicar calibração de projectTaskSync (createOnLaunch=false, trackProgress=false).\n[2026-04-19] Lote C-unlock (c2) concluído: 13/13, custo $0.41, com gate hard/override/recovery em candidate-only e checkpoint dedicado.\n[2026-04-19] Lote C principal (c3) concluído: 13/13, custo $0.51, com hardening de evidência determinística e checkpoint principal; pendente materialização explícita no main."
+      "notes": "Originada em 2026-04-19 após relato explícito do usuário sobre estouro de contexto em planejamento amplo. Foco: continuidade operacional com baixa carga cognitiva via fragmentação + delegação + checkpoints.\n[2026-04-19] Iniciado: status -> in-progress; HANDOFF atualizado com seção de lição operacional; protocolo incorporado em docs/guides/agent-driver-charter.md (stop condition + micro-lotes + checkpoint) e docs/guides/swarm-cleanroom-protocol.md (Fase B.1 controle de contexto).\n[2026-04-19] Checkpoint de execução registrado em docs/research/context-checkpoint-2026-04-19.md.\n[2026-04-19] Limiar objetivo de contexto em risco adicionado (2 ciclos sem decisão, >3 trilhas sem checkpoint, ou planejamento extenso sem mini-handoff).\n[2026-04-19] Lote 2 concluído com mini-handoff em docs/research/context-checkpoint-2026-04-19-lote-2.md; fluxo de delegação por trilha e ritual de checkpoint (90s) formalizados.\n[2026-04-19] Lote 3: criado checklist operacional docs/guides/swarm-preflight-15m.md e checkpoint docs/research/context-checkpoint-2026-04-19-lote-3.md como execução curta real do protocolo.\n[2026-04-19] Lote 4 (preflight): budget/readiness coletados; openai-codex em warning; handoff recomenda github-copilot/claude-sonnet-4.6 para piloto; aguardando decisão humana para switch explícito.\n[2026-04-19] Correção de premissa pelo usuário: sem cota no GitHub Copilot; Google bloqueado; Claude ainda não operacional. Rebaseline aplicado para OpenAI-only em .pi/settings.json (budget/route/classifier) e novo checkpoint em docs/research/context-checkpoint-2026-04-19-lote-5-provider-rebaseline.md.\n[2026-04-19] Swarm piloto lançado: COLONY_SIGNAL:LAUNCHED [c1], maxCost=8, objetivo de quebrar P0 em lotes e preparar execução unattended com baixa interação.\n[2026-04-19] c1 concluída: 12/13 tasks done, custo $0.43, 1 falha não crítica (drone com excesso de argumentos).\n[2026-04-19] Baseline commitado em main: dc7828d (rebaseline openai + operação unattended).\n[2026-04-19] c2 lançada para execução unattended dos lotes P0: COLONY_SIGNAL:LAUNCHED [c2], maxCost=10.\n[2026-04-19] c2 failed: no_pending_worker_tasks após 2 rounds de planning recovery (custo $0.00). Mitigação registrada em docs/research/context-checkpoint-2026-04-19-lote-6-c2-failed.md.\n[2026-04-19] c3 relançada em modo artifact-first (escopo explícito por arquivos) para evitar nova falha de planejamento abstrato.\n[2026-04-19] c3 concluída: 13/14 tasks done, custo $0.55, falha não crítica em validação final por allowlist do drone. Entregáveis consolidados manualmente no main: docs/guides/unattended-swarm-execution-plan.md e docs/research/unattended-swarm-runbook-2026-04-19.md; lotes preparados no board (TASK-BUD-046..051).\n[2026-04-19] c4 (Lote A / TASK-BUD-046) concluída: 9/9 tasks done, custo $0.28. Antes do próximo lote, obrigatório `/reload` para aplicar calibração de projectTaskSync (createOnLaunch=false, trackProgress=false).\n[2026-04-19] Lote C-unlock (c2) concluído: 13/13, custo $0.41, com gate hard/override/recovery em candidate-only e checkpoint dedicado.\n[2026-04-19] Lote C principal (c3) concluído: 13/13, custo $0.51, com hardening de evidência determinística e checkpoint principal; pendente materialização explícita no main.",
+      "verification": "VER-BUD-045"
     },
     {
       "id": "colony-c-123",
@@ -1180,7 +1214,7 @@
       "id": "colony-c-ret-1",
       "description": "[COLONY:ant_colony] Ajustar governança\\n[COLONY_SIGNAL:COMPLETE] [c-ret-1]\",\u001b[39m",
       "status": "blocked",
-      "notes": "[2026-04-20T02:37:19.955Z] colony c-ret-1 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-20T02:37:20.007Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.116Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T02:37:20.177Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.289Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T03:31:53.548Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.620Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T03:31:53.664Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.743Z] promotion queued automatically: colony-c-ret-1-promotion"
+      "notes": "[2026-04-20T03:31:53.548Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.620Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T03:31:53.664Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.743Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:04:33.688Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:04:33.761Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:04:34.026Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:04:34.091Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:10:07.133Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.193Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:10:07.223Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.284Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:14:20.842Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.903Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:14:20.931Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.985Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T03:35:23.181Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.230Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T03:35:23.254Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.298Z] promotion queued automatically: colony-c-ret-1-promotion"
     },
     {
       "id": "colony-c-ret-1-promotion",
@@ -1194,7 +1228,159 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-20T02:37:20.061Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.242Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.583Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.709Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log"
+      "notes": "[2026-04-20T02:37:20.061Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.242Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.583Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.709Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T21:04:33.726Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:04:34.059Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.165Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.260Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.875Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.955Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-21T03:35:23.208Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.276Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary"
+    },
+    {
+      "id": "TASK-BUD-054",
+      "description": "[NOW][P0] Backfill de verificação para tasks completed sem campo verification, restaurando integridade do .project/tasks.",
+      "status": "completed",
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        "scripts/project/backfill-task-verification.mjs",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Existe script reusável para backfill de verification em tasks completed.",
+        "Execução em modo check retorna pendingWithoutVerification=0 no estado atual.",
+        "project-validate retorna clean após o backfill."
+      ],
+      "notes": "Frente NOW para higiene estrutural do board canônico. Mantém trilha auditável e evita regressão de schema.",
+      "verification": "VER-BUD-054"
+    },
+    {
+      "id": "TASK-BUD-055",
+      "description": "[NEXT][P1] Definir rotina leve de hygiene do .project (checklist + frequência) para manter backlog/requisitos/decisões coerentes sem inflar contexto.",
+      "status": "completed",
+      "files": [
+        "docs/guides/mini-handoff-template.md",
+        "HANDOFF.md",
+        "ROADMAP.md"
+      ],
+      "acceptance_criteria": [
+        "Ritual de 5-10 minutos definido (project:verification:check + project-validate + triagem de status).",
+        "Critério WIP=1 documentado para evitar múltiplas frentes concorrentes.",
+        "Handoff passa a registrar apenas delta operacional, sem duplicar estado canônico."
+      ],
+      "notes": "Frente NEXT orientada à disciplina contínua de contexto e board hygiene.\n[2026-04-20] Ritual fechado em docs/guides/mini-handoff-template.md com check (`project:verification:check`), validate (`project-validate`) e triagem rápida (`project-status`).\n[2026-04-20] WIP=1 por sessão documentado no template e no topo do HANDOFF.md.\n[2026-04-20] ROADMAP.md e HANDOFF.md reforçados como superfícies derivadas (delta/macro), mantendo .project como fonte canônica.",
+      "verification": "VER-BUD-055"
+    },
+    {
+      "id": "TASK-BUD-056",
+      "description": "[LATER][P2] Consolidar pipeline de posteridade: captura de decisões/requisitos/backlog no .project com geração derivada para handoff/roadmap.",
+      "status": "completed",
+      "files": [
+        ".project/decisions.json",
+        ".project/requirements.json",
+        ".project/tasks.json",
+        "HANDOFF.md",
+        "ROADMAP.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Template de lançamento de backlog/requisito/decisão definido para uso rápido em sessão.",
+        "Fluxo distingue claramente fonte canônica (.project) de documentos derivados (handoff/roadmap).",
+        "Operação futura consegue retomar trabalho apenas com .project + um handoff curto."
+      ],
+      "notes": "Frente LATER para reduzir dependência de memória de sessão e melhorar continuidade multiagente.\n[2026-04-20] Guia operacional criado em docs/guides/project-canonical-pipeline.md com loop .project-first, template rápido (decisão/requisito/task/verification) e política de retomada pós-compactação.\n[2026-04-20] HANDOFF.md e ROADMAP.md reforçados com referência explícita ao guia e distinção canônico vs derivado.",
+      "verification": "VER-BUD-056"
+    },
+    {
+      "id": "TASK-BUD-057",
+      "description": "[LATER][P2] Investigar ruído de preflight `🔴 STOP` (secret scanner) para reduzir duplicação de aviso e falso positivo em `.project/tasks.json`.",
+      "status": "completed",
+      "type": "chore",
+      "files": [
+        "node_modules/pi-lens/clients/pipeline.ts",
+        "node_modules/pi-lens/clients/secrets-scanner.ts",
+        ".project/tasks.json",
+        "docs/research/preflight-secret-stop-investigation-2026-04-20.md"
+      ],
+      "acceptance_criteria": [
+        "Fonte do aviso documentada com precisão (hook/pipeline e momento de execução por edit).",
+        "Hipótese de falso positivo `sk-*` validada com evidência no conteúdo da linha sinalizada.",
+        "Plano definido para reduzir ruído (dedupe por sessão/arquivo ou calibração do pattern/ignore) sem perder proteção real."
+      ],
+      "notes": "Evidência atual: aviso aponta L1072 em `.project/tasks.json` por substring em texto histórico (`task-bud-027-vs-031...`) e reaparece a cada nova execução de `edit` no mesmo arquivo.\n[2026-04-20] Investigação consolidada em docs/research/preflight-secret-stop-investigation-2026-04-20.md com origem exata no pi-lens pipeline, validação do falso positivo e plano de mitigação sob controle local (batch edit + evitar retrabalho no mesmo arquivo + registrar ruído conhecido).",
+      "verification": "VER-BUD-057"
+    },
+    {
+      "id": "TASK-BUD-058",
+      "description": "[P0] Tornar benchmark de economia de contexto comparável no braço stack-default (capturar uso/tokens de forma determinística mesmo com extensões que escrevem em stdout).",
+      "status": "completed",
+      "type": "chore",
+      "files": [
+        "scripts/benchmarks/run-context-economy-ab.mjs",
+        "docs/research/data/context-economy/run-2026-04-20-r4-post-hygiene/results.json",
+        "docs/research/data/context-economy/run-2026-04-20-r5-post-hygiene-rerun/results.json",
+        "docs/research/data/context-economy/run-2026-04-20-r6-post-hygiene-diagnostics/results.json",
+        "node_modules/@ifi/oh-pi-extensions/extensions/git-guard.ts"
+      ],
+      "acceptance_criteria": [
+        "Braço B do benchmark gera métricas de uso (assistantTurns>0 e totalTokens>0) em pelo menos 1 run comparável.",
+        "Artefato results.json inclui diagnóstico bounded quando run não comparável (event types tail + stderr/stdout tail).",
+        "Causa raiz de drift (ex.: extensões que escrevem OSC notification em stdout) fica documentada com mitigação operacional clara."
+      ],
+      "notes": "[2026-04-20] r4/r5/r6 executados: A comparável, B não comparável (events=2, totalTokens=0). Script recebeu melhoria de diagnóstico bounded (eventTypesTail, stdoutNonJsonTail, lastAssistantStopReason/lastError). Evidência aponta OSC notifications (`\\u001b]777;notify;...`) durante stack-default; extensão candidata: @ifi/oh-pi-extensions git-guard.",
+      "verification": "VER-BUD-058"
+    },
+    {
+      "id": "TASK-BUD-059",
+      "description": "[P0] Formalizar lanes operacionais de contexto para OpenAI (lean/governed/swarm) com comandos padrão e critérios de seleção baseados em benchmark.",
+      "status": "completed",
+      "type": "chore",
+      "files": [
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/research/data/context-economy/run-2026-04-20-r7-post-hygiene-json-recovery/results.json",
+        "docs/research/data/context-economy/run-2026-04-20-r8-split-overhead/results.json",
+        ".project/decisions.json"
+      ],
+      "acceptance_criteria": [
+        "Playbook curto define 3 lanes com quando usar, comandos e trade-offs de custo/latência/contexto.",
+        "Playbook referencia evidência canônica dos runs comparáveis (r7/r8).",
+        "Fluxo de sessão inclui gatilho claro para alternar lane antes de saturar janela de contexto."
+      ],
+      "notes": "Objetivo imediato: maximizar qualidade e eficiência da cota OpenAI com disciplina operacional de contexto, sem abrir frentes paralelas de engenharia pesada.",
+      "verification": "VER-BUD-059"
+    },
+    {
+      "id": "TASK-BUD-060",
+      "description": "[P0] Resolver falhas de classify dos monitores (\"Instructions are required\") e definir gate de release para não publicar com monitor runtime instável.",
+      "status": "completed",
+      "type": "chore",
+      "files": [
+        "node_modules/@davidorex/pi-behavior-monitors/dist/index.js",
+        ".pi/agents/hedge-classifier.agent.yaml",
+        ".pi/agents/commit-hygiene-classifier.agent.yaml",
+        "packages/pi-stack/README.md"
+      ],
+      "acceptance_criteria": [
+        "Com monitores habilitados no setup OpenAI-only, não há novos `classify failed` em execução controlada de smoke (>=3 turns).",
+        "Causa raiz e mitigação documentadas (compat de instructions/provider no classifyViaAgent ou fallback equivalente).",
+        "Gate operacional de release documentado: publish bloqueado enquanto monitor runtime estiver instável."
+      ],
+      "notes": "Evidência atual: `monitors_compact_status` reporta `classifyFail=14` e `lastFail=hedge`; `monitors-status` mostra todos os monitores desabilitados (mitigação temporária).",
+      "verification": "VER-BUD-060"
+    },
+    {
+      "id": "TASK-BUD-061",
+      "description": "[P1] Promover o gate de prontidão de subagentes (subagent-readiness) para superfície publicada da pi-stack via extensão/tool first-party (sem depender de scripts de laboratório).",
+      "status": "planned",
+      "acceptance_criteria": [
+        "Tool disponível na sessão de usuário final instalada via `pi install npm:@aretw0/pi-stack`.",
+        "Retorna `ready`, checks e motivos de bloqueio em formato estruturado.",
+        "Documentação em `packages/pi-stack/README.md` diferenciando modo baseline e strict.",
+        "Smoke de regressão cobrindo cenário com pacotes pilot ausentes/presentes."
+      ],
+      "depends_on": [
+        "TASK-BUD-060"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/README.md",
+        "docs/guides/subagent-readiness-gate.md",
+        ".project/tasks.json"
+      ]
     }
   ]
 }
