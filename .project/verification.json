@@ -559,6 +559,27 @@
           "evidence": "scripts/monitor-stability-gate.mjs --tail-bytes 200000 --max-tail-bytes 1200000 --min-user-turns 3 --max-classify-failures 0 => stable=true, tailBytesUsed=800000, tailAttempts registrados."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-A4",
+      "target": "TASK-CAL-2026-04-21-A",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T11:04:40.000Z",
+      "evidence": "monitor-provider-patch agora higieniza fragility.patterns removendo padrões learned de empty-response em session_start, reduzindo recorrência de falsos positivos após monitor feedback. Cobertura adicionada na integração de monitor-provider-patch e gate permaneceu estável.",
+      "criteria_results": [
+        {
+          "criterion": "Calibrar fragility contra falso positivo de empty response sem desligar monitor",
+          "status": "passed",
+          "evidence": "Novo fluxo ensureFragilityPatternHygiene prune patterns source=learned que casam empty response/output; teste 'session_start prunes learned fragility empty-response patterns' aprovado."
+        },
+        {
+          "criterion": "Regressões determinísticas verdes",
+          "status": "passed",
+          "evidence": "node --test monitor-provider-patch.test.mjs + monitor-context-budget.test.mjs => pass; monitor-stability-gate adaptive-tail => stable=true classifyFailures=0."
+        }
+      ]
     }
   ]
 }
