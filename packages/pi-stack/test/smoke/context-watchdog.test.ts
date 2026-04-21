@@ -21,12 +21,17 @@ describe("context-watchdog", () => {
 		expect(cfg.cooldownMs).toBe(60_000);
 	});
 
-	it("derives thresholds from model-aware warning/error", () => {
+	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
 		const cfg = normalizeContextWatchdogConfig({});
-		const t = deriveContextWatchThresholds(65, 85, cfg);
-		expect(t.warnPct).toBe(65);
-		expect(t.checkpointPct).toBe(73);
-		expect(t.compactPct).toBe(85);
+		const tAnthropic = deriveContextWatchThresholds(65, 85, cfg);
+		expect(tAnthropic.warnPct).toBe(65);
+		expect(tAnthropic.checkpointPct).toBe(78);
+		expect(tAnthropic.compactPct).toBe(82);
+
+		const tOpenAi = deriveContextWatchThresholds(50, 75, cfg);
+		expect(tOpenAi.warnPct).toBe(50);
+		expect(tOpenAi.checkpointPct).toBe(68);
+		expect(tOpenAi.compactPct).toBe(72);
 	});
 
 	it("respects explicit checkpoint/compact overrides", () => {

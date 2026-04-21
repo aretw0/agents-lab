@@ -87,10 +87,14 @@ export function deriveContextWatchThresholds(
 	cfg: ContextWatchdogConfig,
 ): ContextWatchThresholds {
 	const warn = Math.max(1, Math.min(99, Math.floor(warningPct)));
-	const compactRaw = cfg.compactPct ?? Math.max(warn + 2, Math.floor(errorPct));
+	// Default compact target keeps headroom before footer "error" pressure.
+	// OpenAI-like defaults become ~72, Anthropic-like defaults ~82.
+	const compactDefault = Math.max(warn + 4, Math.floor(errorPct) - 3);
+	const compactRaw = cfg.compactPct ?? compactDefault;
 	const compact = Math.max(warn + 2, Math.min(100, Math.floor(compactRaw)));
 
-	const checkpointDefault = Math.min(compact - 1, warn + 8);
+	// Default checkpoint is the pre-compact lane (4pp before compact).
+	const checkpointDefault = Math.max(warn + 1, compact - 4);
 	const checkpointRaw = cfg.checkpointPct ?? checkpointDefault;
 	const checkpoint = Math.max(warn + 1, Math.min(compact - 1, Math.floor(checkpointRaw)));
 

@@ -128,6 +128,10 @@ A extensão `context-watchdog` adiciona sinais operacionais para sessões long-r
 - command: `/context-watch [status|reset]`
 - status key: `context-watch`
 
+Defaults derivados (sem override):
+- baseline `warn=50` (footer) → `checkpoint=68`, `compact=72`
+- `anthropic/* warn=65` (footer) → `checkpoint=78`, `compact=82`
+
 Níveis:
 - `warn` → operar em micro-slices
 - `checkpoint` → registrar handoff antes do próximo slice grande
