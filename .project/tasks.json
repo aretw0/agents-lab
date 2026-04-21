@@ -1200,7 +1200,7 @@
       "id": "colony-c-123",
       "description": "[COLONY:ant_colony] colony c-123",
       "status": "blocked",
-      "notes": "[2026-04-20T02:27:04.851Z] colony c-123 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-20T02:27:04.885Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:04.957Z] promotion queued automatically: colony-c-123-promotion\n[2026-04-20T02:27:04.994Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.060Z] promotion queued automatically: colony-c-123-promotion"
+      "notes": "[2026-04-20T02:27:04.851Z] colony c-123 phase=completed (candidate only, aguardando revisão humana)\n[2026-04-20T02:27:04.885Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:04.957Z] promotion queued automatically: colony-c-123-promotion\n[2026-04-20T02:27:04.994Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.060Z] promotion queued automatically: colony-c-123-promotion\n[2026-04-21T19:39:26.386Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.452Z] promotion queued automatically: colony-c-123-promotion\n[2026-04-21T19:39:26.495Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.550Z] promotion queued automatically: colony-c-123-promotion"
     },
     {
       "id": "colony-c-123-promotion",
@@ -1214,7 +1214,7 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-20T02:27:04.919Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.026Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log"
+      "notes": "[2026-04-20T02:27:04.919Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.026Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.421Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.523Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log"
     },
     {
       "id": "colony-c-ret-1",
@@ -1894,7 +1894,7 @@
     {
       "id": "TASK-BUD-082",
       "description": "[P1] Endurecer retenção de artefatos de colônia em terminal states (failed/budget_exceeded) para evitar perda de worktree sem evidência reaplicável.",
-      "status": "planned",
+      "status": "in-progress",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-052"
@@ -1912,7 +1912,7 @@
         "docs/guides/unattended-swarm-execution-plan.md",
         "docs/research/colony-worktree-retention-2026-04-21.md"
       ],
-      "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery."
+      "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery.\n[2026-04-21T20:58:00Z] Patch short-term aplicado no colony-pilot: captura snapshot de runtime em failed/budget_exceeded, persiste em .pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json e expõe runtimeSnapshotPath no retention record/artifacts."
     }
   ]
 }

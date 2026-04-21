@@ -1,33 +1,36 @@
 {
-  "timestamp": "2026-04-21T20:32:00Z",
-  "context": "Preparação ativa para compactação com contexto em faixa warn (65%, W50/C68/X72). Gap confirmado de visibilidade operacional do watchdog (aviso emitido sem influência clara no fluxo). Colônia c1 encerrou em budget_exceeded com saída parcial, mas sem worktree disponível para inspeção posterior. Evidência técnica confirmada: cleanup em @ifi/oh-pi-ant-colony/worktree.ts remove worktree/branch (`git worktree remove --force` + `rmSync(worktreeRoot)`) em terminal states.",
-  "current_phase": "pre-compact-warning",
+  "timestamp": "2026-04-21T21:05:00Z",
+  "context": "Retomada pós-compact concluída com contexto saudável. TASK-BUD-082 avançou para mitigação short-term: colony-pilot agora captura snapshot de runtime em terminal states failed/budget_exceeded e grava artefato reaplicável em .pi/colony-retention/runtime-artifacts/, além de expor runtimeSnapshotPath no retention record/artifacts.",
+  "current_phase": "active-post-compact",
   "current_tasks": [
-    "TASK-BUD-081",
     "TASK-BUD-082",
+    "TASK-BUD-081",
     "TASK-BUD-046"
   ],
   "blockers": [
     "watchdog-visibility-gap",
-    "colony-worktree-retention-gap"
+    "colony-recovery-first-party-gap"
   ],
   "next_actions": [
-    "Manter micro-slices e evitar varredura ampla até checkpoint.",
-    "Ao atingir checkpoint (>=68%), registrar checkpoint canônico curto e reduzir escopo.",
-    "Ao atingir compact (>=72%), compactar imediatamente e retomar por handoff.",
-    "Após retomada, executar TASK-BUD-081 (watchdog operacional) e TASK-BUD-082 (retenção de artefatos de colônia)."
+    "Rodar testes smoke do retention para validar patch de snapshot runtime.",
+    "Consolidar evidência de TASK-BUD-082 em verification/closure (sem auto-close prematuro).",
+    "Executar TASK-BUD-081 para tornar warn/checkpoint/compact operacionalmente explícitos no fluxo principal.",
+    "Decidir política final snapshot-first vs keep-worktree-on-failure para trilha first-party."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
-    "Retenção de colônia deve priorizar keep-worktree-on-failure ou snapshot patch-first?"
+    "Recovery first-party deve aplicar patch automaticamente ou manter human-in-the-loop obrigatório?"
   ],
   "key_decisions_pending": [
     "Política definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    ".project/decisions.json",
+    "packages/pi-stack/extensions/colony-pilot-candidate-retention.ts",
+    "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/test/smoke/colony-pilot-retention.test.ts",
+    "docs/guides/unattended-swarm-execution-plan.md",
+    "docs/research/colony-worktree-retention-2026-04-21.md",
     ".project/tasks.json",
-    ".project/handoff.json",
-    "docs/research/context-checkpoint-2026-04-21-65warn-watchdog-visibility.md"
+    ".project/handoff.json"
   ]
 }

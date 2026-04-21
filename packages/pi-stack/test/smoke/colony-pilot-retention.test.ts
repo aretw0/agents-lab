@@ -1,8 +1,16 @@
-import { mkdtempSync, readFileSync, rmSync, utimesSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	utimesSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+	captureColonyRuntimeSnapshot,
 	persistColonyRetentionRecord,
 	pruneColonyRetention,
 	readColonyRetentionSnapshot,
@@ -71,6 +79,80 @@ describe("colony-pilot candidate retention", () => {
 			expect(raw.deliveryIssues.length).toBeLessThanOrEqual(20);
 			expect(Array.isArray(raw.mirrors)).toBe(true);
 			expect(raw.mirrors.length).toBeLessThanOrEqual(8);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("captura runtime snapshot em failed/budget e registra caminho de recovery", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "colony-retention-runtime-"));
+		try {
+			const mirror = join(cwd, ".sandbox", "pi-agent", "ant-colony", "x");
+			const colonyRoot = join(mirror, "colonies", "colony-abc123");
+			const tasksRoot = join(colonyRoot, "tasks");
+			mkdirSync(tasksRoot, { recursive: true });
+
+			writeFileSync(
+				join(colonyRoot, "state.json"),
+				JSON.stringify(
+					{
+						id: "colony-abc123",
+						status: "budget_exceeded",
+						goal: "demo",
+						workspace: {
+							branch: "ant-colony/c1-xyz",
+							worktreeRoot: "C:/tmp/worktree/c1-xyz",
+						},
+					},
+					null,
+					2,
+				),
+			);
+
+			writeFileSync(
+				join(tasksRoot, "t-1.json"),
+				JSON.stringify(
+					{
+						id: "t-1",
+						title: "worker task",
+						status: "done",
+						result: "final patch summary",
+					},
+					null,
+					2,
+				),
+			);
+
+			const snap = captureColonyRuntimeSnapshot(cwd, {
+				colonyId: "c1",
+				runtimeColonyId: "colony-abc123",
+				mirrors: [{ path: mirror, exists: true }],
+			});
+
+			expect(snap).toBeDefined();
+			expect(snap?.colonyRuntimeId).toBe("colony-abc123");
+			expect(snap?.relativeSnapshotPath).toContain(
+				".pi/colony-retention/runtime-artifacts/c1.runtime-snapshot.json",
+			);
+
+			const payload = JSON.parse(readFileSync(snap!.snapshotPath, "utf8"));
+			expect(payload.runtimeColonyId).toBe("colony-abc123");
+			expect(payload.tasksCaptured).toBe(1);
+
+			persistColonyRetentionRecord(cwd, {
+				colonyId: "c1",
+				phase: "budget_exceeded",
+				capturedAtIso: "2026-04-21T00:00:00.000Z",
+				runtimeColonyId: "colony-abc123",
+				runtimeSnapshotPath: snap?.snapshotPath,
+				runtimeSnapshotTaskCount: snap?.taskCount,
+			});
+
+			const retention = readColonyRetentionSnapshot(cwd, 1);
+			expect(retention.records[0]?.record.runtimeSnapshotPath).toContain(
+				".pi/colony-retention/runtime-artifacts/c1.runtime-snapshot.json",
+			);
+			expect(retention.records[0]?.record.runtimeSnapshotTaskCount).toBe(1);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

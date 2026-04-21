@@ -29,6 +29,7 @@ import type {
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
+	captureColonyRuntimeSnapshot,
 	persistColonyRetentionRecord,
 	readColonyRetentionSnapshot,
 } from "./colony-pilot-candidate-retention";
@@ -298,6 +299,14 @@ export function parseDeliveryModeOverride(
 		return raw as ColonyDeliveryMode;
 	}
 	return undefined;
+}
+
+function extractRuntimeColonyId(signalId: string): string | undefined {
+	const raw = signalId.split("|")[1]?.trim();
+	if (!raw) return undefined;
+	if (raw.includes("${") || raw.includes("}")) return undefined;
+	if (!/^[A-Za-z0-9][A-Za-z0-9._:-]*$/.test(raw)) return undefined;
+	return raw;
 }
 
 function normalizeRoleList(value: unknown): ColonyAgentRole[] {
@@ -1093,6 +1102,17 @@ function formatArtifactsReport(
 				`  - ${entry.record.colonyId} [${entry.record.phase}] ${entry.updatedAtIso}`,
 			);
 			out.push(`    file: ${entry.path}`);
+			if (entry.record.runtimeColonyId) {
+				out.push(`    runtimeId: ${entry.record.runtimeColonyId}`);
+			}
+			if (entry.record.runtimeSnapshotPath) {
+				out.push(`    recovery: ${entry.record.runtimeSnapshotPath}`);
+			}
+			if (entry.record.runtimeSnapshotMissingReason) {
+				out.push(
+					`    recovery-missing: ${entry.record.runtimeSnapshotMissingReason}`,
+				);
+			}
 			if (entry.record.goal) {
 				out.push(`    goal: ${entry.record.goal.slice(0, 100)}`);
 			}
@@ -1876,6 +1896,7 @@ export default function (pi: ExtensionAPI) {
 
 		const primaryId = normalizeColonySignalId(signalRaw.id);
 		if (!primaryId) return;
+		const runtimeColonyId = extractRuntimeColonyId(signalRaw.id);
 		const signal = { ...signalRaw, id: primaryId };
 
 		const guessedGoal =
@@ -1982,6 +2003,14 @@ export default function (pi: ExtensionAPI) {
 				path: p,
 				exists: existsSync(p),
 			}));
+			const runtimeSnapshot =
+				signal.phase === "failed" || signal.phase === "budget_exceeded"
+					? captureColonyRuntimeSnapshot(ctx.cwd, {
+							colonyId: signal.id,
+							runtimeColonyId,
+							mirrors,
+						})
+					: undefined;
 			const retention = persistColonyRetentionRecord(
 				ctx.cwd,
 				{
@@ -1997,6 +2026,15 @@ export default function (pi: ExtensionAPI) {
 					deliveryIssues: deliveryEval?.issues,
 					messageExcerpt: text,
 					mirrors,
+					runtimeColonyId,
+					runtimeSnapshotPath: runtimeSnapshot?.snapshotPath,
+					runtimeSnapshotTaskCount: runtimeSnapshot?.taskCount,
+					runtimeSnapshotMissingReason:
+						signal.phase === "failed" || signal.phase === "budget_exceeded"
+							? runtimeSnapshot
+								? undefined
+								: "runtime state not found in mirror roots"
+							: undefined,
 				},
 				{
 					maxEntries: candidateRetentionConfig.maxEntries,
@@ -2008,9 +2046,12 @@ export default function (pi: ExtensionAPI) {
 				pi.appendEntry("colony-pilot.candidate-retention", {
 					atIso: new Date().toISOString(),
 					colonyId: signal.id,
+					runtimeColonyId,
 					phase: signal.phase,
 					goal: guessedGoal,
 					path: retention.path,
+					runtimeSnapshotPath: runtimeSnapshot?.relativeSnapshotPath,
+					runtimeSnapshotTaskCount: runtimeSnapshot?.taskCount,
 					sourceTaskId: syncResult?.taskId ?? taskIdOverride,
 					prune: retention.prune,
 				});
@@ -2351,9 +2392,15 @@ export default function (pi: ExtensionAPI) {
 					count: retentionSnapshot.count,
 					records: retentionSnapshot.records.map((entry) => ({
 						colonyId: entry.record.colonyId,
+						runtimeColonyId: entry.record.runtimeColonyId,
 						phase: entry.record.phase,
 						updatedAtIso: entry.updatedAtIso,
 						path: entry.path,
+						runtimeSnapshotPath: entry.record.runtimeSnapshotPath,
+						runtimeSnapshotTaskCount:
+							entry.record.runtimeSnapshotTaskCount,
+						runtimeSnapshotMissingReason:
+							entry.record.runtimeSnapshotMissingReason,
 						goal: entry.record.goal,
 					})),
 				},

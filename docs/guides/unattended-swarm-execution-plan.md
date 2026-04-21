@@ -49,3 +49,14 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
   - manter commits por lote,
   - reversão via `git revert` do lote,
   - reabrir task no board com motivo explícito.
+
+## Retenção pós-falha (`failed` / `budget_exceeded`)
+- Em terminal state com worktree isolada, o runtime pode remover worktree/branch no cleanup.
+- O control-plane deve persistir snapshot reaplicável em:
+  - `.pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json`
+- O registro canônico de retenção (`.pi/colony-retention/<colony-id>.json`) deve apontar para o campo `runtimeSnapshotPath`.
+- Fluxo de recuperação mínimo:
+  1. `colony_pilot_artifacts` para localizar o retention record.
+  2. Abrir `runtimeSnapshotPath` e usar `workspace.branch/worktreeRoot` + tarefas capturadas para promoção manual determinística.
+  3. Atualizar `.project/tasks.json` com nota de recovery (sem auto-close).
+

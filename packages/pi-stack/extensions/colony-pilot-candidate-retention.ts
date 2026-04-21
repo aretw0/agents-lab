@@ -25,6 +25,10 @@ export interface ColonyRetentionRecord {
 	deliveryIssues?: string[];
 	messageExcerpt?: string;
 	mirrors?: ColonyRetentionMirrorHint[];
+	runtimeColonyId?: string;
+	runtimeSnapshotPath?: string;
+	runtimeSnapshotTaskCount?: number;
+	runtimeSnapshotMissingReason?: string;
 }
 
 export interface ColonyRetentionEntry {
@@ -40,9 +44,26 @@ export interface ColonyRetentionSnapshot {
 	records: ColonyRetentionEntry[];
 }
 
+export interface ColonyRuntimeSnapshotCaptureInput {
+	colonyId: string;
+	runtimeColonyId?: string;
+	mirrors?: ColonyRetentionMirrorHint[];
+	maxTasks?: number;
+}
+
+export interface ColonyRuntimeSnapshotCaptureResult {
+	snapshotPath: string;
+	relativeSnapshotPath: string;
+	mirrorRoot: string;
+	colonyRuntimeId: string;
+	taskCount: number;
+}
+
 const RETENTION_DIR = [".pi", "colony-retention"];
+const RUNTIME_ARTIFACTS_DIR = "runtime-artifacts";
 const MAX_EXCERPT = 4000;
 const MAX_RECORDS = 40;
+const MAX_RUNTIME_TASKS = 80;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface ColonyRetentionPolicy {
@@ -65,8 +86,20 @@ export interface ColonyRetentionPruneResult {
 	policy: ColonyRetentionPolicy;
 }
 
+interface RuntimeSnapshotCandidate {
+	score: number;
+	root: string;
+	statePath: string;
+	state: Record<string, unknown>;
+	updatedAtMs: number;
+}
+
 function retentionRoot(cwd: string): string {
 	return path.join(cwd, ...RETENTION_DIR);
+}
+
+function runtimeArtifactsRoot(cwd: string): string {
+	return path.join(retentionRoot(cwd), RUNTIME_ARTIFACTS_DIR);
 }
 
 function normalizeRetentionPolicy(
@@ -192,6 +225,282 @@ function normalizeExcerpt(value?: string): string | undefined {
 	return trimmed.slice(0, MAX_EXCERPT);
 }
 
+function normalizePathForRecord(cwd: string, value?: string): string | undefined {
+	if (!value || typeof value !== "string") return undefined;
+	const resolved = path.resolve(value);
+	try {
+		const rel = path.relative(cwd, resolved);
+		if (rel && !rel.startsWith("..") && !path.isAbsolute(rel)) {
+			return rel.replace(/\\/g, "/");
+		}
+	} catch {
+		// keep absolute fallback
+	}
+	return resolved;
+}
+
+function parseJsonObject(filePath: string): Record<string, unknown> | undefined {
+	try {
+		const raw = JSON.parse(readFileSync(filePath, "utf8")) as unknown;
+		return raw && typeof raw === "object"
+			? (raw as Record<string, unknown>)
+			: undefined;
+	} catch {
+		return undefined;
+	}
+}
+
+function clipText(value: unknown, max = MAX_EXCERPT): string | undefined {
+	if (typeof value !== "string") return undefined;
+	const trimmed = value.trim();
+	if (!trimmed) return undefined;
+	return trimmed.slice(0, max);
+}
+
+function mirrorRootsFromHints(hints?: ColonyRetentionMirrorHint[]): string[] {
+	if (!Array.isArray(hints)) return [];
+	const out: string[] = [];
+	for (const hint of hints) {
+		if (!hint?.exists) continue;
+		if (typeof hint.path !== "string" || hint.path.trim().length === 0) continue;
+		const full = path.resolve(hint.path);
+		if (!existsSync(full)) continue;
+		if (!out.includes(full)) out.push(full);
+	}
+	return out;
+}
+
+function scoreStateCandidate(args: {
+	aliasId: string;
+	runtimeId?: string;
+	state: Record<string, unknown>;
+	dirName: string;
+}): number {
+	const alias = args.aliasId.toLowerCase();
+	const runtime = args.runtimeId?.toLowerCase();
+	const stateId =
+		typeof args.state.id === "string" ? args.state.id.toLowerCase() : "";
+	const branch =
+		typeof (args.state.workspace as Record<string, unknown> | undefined)?.branch ===
+		"string"
+			? String(
+					(args.state.workspace as Record<string, unknown> | undefined)?.branch,
+				).toLowerCase()
+			: "";
+	const dirLower = args.dirName.toLowerCase();
+
+	let score = 0;
+	if (runtime && stateId === runtime) score += 200;
+	if (runtime && dirLower === runtime) score += 180;
+	if (stateId === alias) score += 120;
+	if (dirLower === alias) score += 100;
+	if (branch.includes(`${alias}-`) || branch.includes(`/${alias}-`)) score += 90;
+	if (branch.includes(alias)) score += 20;
+	if (runtime && branch.includes(runtime)) score += 30;
+	return score;
+}
+
+function findBestRuntimeState(
+	root: string,
+	aliasId: string,
+	runtimeId?: string,
+): RuntimeSnapshotCandidate | undefined {
+	const coloniesDir = path.join(root, "colonies");
+	if (!existsSync(coloniesDir)) return undefined;
+
+	const directRuntime = runtimeId
+		? path.join(coloniesDir, runtimeId, "state.json")
+		: undefined;
+	if (directRuntime && existsSync(directRuntime)) {
+		const state = parseJsonObject(directRuntime);
+		if (state) {
+			const st = statSync(directRuntime);
+			return {
+				score: 999,
+				root,
+				statePath: directRuntime,
+				state,
+				updatedAtMs: st.mtimeMs,
+			};
+		}
+	}
+
+	const directAlias = path.join(coloniesDir, aliasId, "state.json");
+	if (existsSync(directAlias)) {
+		const state = parseJsonObject(directAlias);
+		if (state) {
+			const st = statSync(directAlias);
+			return {
+				score: 950,
+				root,
+				statePath: directAlias,
+				state,
+				updatedAtMs: st.mtimeMs,
+			};
+		}
+	}
+
+	const candidates: RuntimeSnapshotCandidate[] = [];
+	for (const dirent of readdirSync(coloniesDir, { withFileTypes: true })) {
+		if (!dirent.isDirectory()) continue;
+		const statePath = path.join(coloniesDir, dirent.name, "state.json");
+		if (!existsSync(statePath)) continue;
+		const state = parseJsonObject(statePath);
+		if (!state) continue;
+		const st = statSync(statePath);
+		const score = scoreStateCandidate({
+			aliasId,
+			runtimeId,
+			state,
+			dirName: dirent.name,
+		});
+		if (score <= 0) continue;
+		candidates.push({
+			score,
+			root,
+			statePath,
+			state,
+			updatedAtMs: st.mtimeMs,
+		});
+	}
+
+	if (candidates.length === 0) return undefined;
+	candidates.sort((a, b) => {
+		if (a.score !== b.score) return b.score - a.score;
+		return b.updatedAtMs - a.updatedAtMs;
+	});
+	return candidates[0];
+}
+
+function normalizeTaskCount(value: number | undefined): number {
+	if (typeof value !== "number" || !Number.isFinite(value)) return MAX_RUNTIME_TASKS;
+	return Math.max(5, Math.min(MAX_RUNTIME_TASKS, Math.floor(value)));
+}
+
+export function captureColonyRuntimeSnapshot(
+	cwd: string,
+	input: ColonyRuntimeSnapshotCaptureInput,
+): ColonyRuntimeSnapshotCaptureResult | undefined {
+	const aliasId = sanitizeId(input.colonyId);
+	if (!aliasId) return undefined;
+	const runtimeId =
+		typeof input.runtimeColonyId === "string" &&
+		input.runtimeColonyId.trim().length > 0
+			? input.runtimeColonyId.trim()
+			: undefined;
+
+	const roots = mirrorRootsFromHints(input.mirrors);
+	if (roots.length === 0) return undefined;
+
+	const candidates = roots
+		.map((root) => findBestRuntimeState(root, aliasId, runtimeId))
+		.filter((v): v is RuntimeSnapshotCandidate => Boolean(v));
+	if (candidates.length === 0) return undefined;
+
+	candidates.sort((a, b) => {
+		if (a.score !== b.score) return b.score - a.score;
+		return b.updatedAtMs - a.updatedAtMs;
+	});
+	const winner = candidates[0];
+	const tasksDir = path.join(path.dirname(winner.statePath), "tasks");
+	const taskLimit = normalizeTaskCount(input.maxTasks);
+	const tasks: Array<Record<string, unknown>> = [];
+
+	if (existsSync(tasksDir)) {
+		const taskFiles = readdirSync(tasksDir)
+			.filter((f) => f.endsWith(".json"))
+			.map((f) => path.join(tasksDir, f))
+			.sort((a, b) => {
+				try {
+					return statSync(b).mtimeMs - statSync(a).mtimeMs;
+				} catch {
+					return 0;
+				}
+			})
+			.slice(0, taskLimit);
+
+		for (const taskPath of taskFiles) {
+			const task = parseJsonObject(taskPath);
+			if (!task) continue;
+			tasks.push({
+				id: task.id,
+				title: task.title,
+				status: task.status,
+				caste: task.caste,
+				priority: task.priority,
+				files: Array.isArray(task.files)
+					? (task.files as unknown[])
+							.filter((f) => typeof f === "string")
+							.slice(0, 30)
+					: [],
+				startedAt: task.startedAt,
+				finishedAt: task.finishedAt,
+				resultExcerpt: clipText(task.result),
+				errorExcerpt: clipText(task.error),
+				sourcePath: taskPath,
+			});
+		}
+	}
+
+	const workspace =
+		winner.state.workspace && typeof winner.state.workspace === "object"
+			? {
+				mode: (winner.state.workspace as Record<string, unknown>).mode,
+				originCwd: (winner.state.workspace as Record<string, unknown>).originCwd,
+				executionCwd: (winner.state.workspace as Record<string, unknown>)
+					.executionCwd,
+				repoRoot: (winner.state.workspace as Record<string, unknown>).repoRoot,
+				worktreeRoot: (winner.state.workspace as Record<string, unknown>)
+					.worktreeRoot,
+				branch: (winner.state.workspace as Record<string, unknown>).branch,
+				baseBranch: (winner.state.workspace as Record<string, unknown>)
+					.baseBranch,
+			}
+			: undefined;
+
+	const payload = {
+		schemaVersion: 1,
+		capturedAtIso: new Date().toISOString(),
+		colonyId: input.colonyId,
+		runtimeColonyId:
+			typeof winner.state.id === "string"
+				? winner.state.id
+				: runtimeId ?? undefined,
+		source: {
+			mirrorRoot: winner.root,
+			statePath: winner.statePath,
+			tasksDir,
+		},
+		status: winner.state.status,
+		goal: winner.state.goal,
+		maxCost: winner.state.maxCost,
+		metrics: winner.state.metrics,
+		workspace,
+		tasksCaptured: tasks.length,
+		tasks,
+	};
+
+	const artifactsRoot = runtimeArtifactsRoot(cwd);
+	mkdirSync(artifactsRoot, { recursive: true });
+	const snapshotPath = path.join(
+		artifactsRoot,
+		`${sanitizeId(input.colonyId)}.runtime-snapshot.json`,
+	);
+	writeFileSync(snapshotPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+
+	const rel = normalizePathForRecord(cwd, snapshotPath) ?? snapshotPath;
+	return {
+		snapshotPath,
+		relativeSnapshotPath: rel,
+		mirrorRoot: winner.root,
+		colonyRuntimeId:
+			typeof payload.runtimeColonyId === "string"
+				? payload.runtimeColonyId
+				: input.colonyId,
+		taskCount: tasks.length,
+	};
+}
+
 export function persistColonyRetentionRecord(
 	cwd: string,
 	record: ColonyRetentionRecord,
@@ -211,6 +520,20 @@ export function persistColonyRetentionRecord(
 					.slice(0, 8)
 					.map((m) => ({ path: m.path, exists: !!m.exists }))
 			: undefined,
+		runtimeColonyId:
+			typeof record.runtimeColonyId === "string" &&
+			record.runtimeColonyId.trim().length > 0
+				? record.runtimeColonyId.trim().slice(0, 120)
+				: undefined,
+		runtimeSnapshotPath: normalizePathForRecord(cwd, record.runtimeSnapshotPath),
+		runtimeSnapshotTaskCount:
+			typeof record.runtimeSnapshotTaskCount === "number" &&
+			Number.isFinite(record.runtimeSnapshotTaskCount)
+				? Math.max(0, Math.floor(record.runtimeSnapshotTaskCount))
+				: undefined,
+		runtimeSnapshotMissingReason: normalizeExcerpt(
+			record.runtimeSnapshotMissingReason,
+		),
 	};
 
 	let current = "";
