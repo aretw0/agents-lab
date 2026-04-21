@@ -21,7 +21,6 @@ import {
 	statSync,
 	writeFileSync,
 } from "node:fs";
-import { homedir } from "node:os";
 import path from "node:path";
 import type {
 	ExtensionAPI,
@@ -74,6 +73,26 @@ import {
 	snapshotPilotState,
 	toBaseCommandName,
 } from "./colony-pilot-runtime";
+import type {
+	ColonyPilotPreflightConfig,
+	ColonyPilotPreflightResult,
+} from "./colony-pilot-preflight";
+import {
+	executableProbe,
+	formatPreflightResult,
+	resolveColonyPilotPreflightConfig,
+	runColonyPilotPreflight,
+} from "./colony-pilot-preflight";
+import type {
+	ColonyModelReadiness,
+	ModelAuthStatus,
+} from "./colony-pilot-model-readiness";
+import {
+	formatModelReadiness,
+	parseProviderModelRef,
+	resolveColonyModelReadiness,
+	resolveModelAuthStatus,
+} from "./colony-pilot-model-readiness";
 import {
 	appendNote,
 	ensureRecoveryTaskForCandidate as ensureRecoveryTaskForCandidateInternal,
@@ -91,11 +110,15 @@ import {
 } from "./quota-visibility";
 
 export type {
+	ColonyModelReadiness,
 	ColonyPhase,
+	ColonyPilotPreflightConfig,
+	ColonyPilotPreflightResult,
 	HatchCheckStatus,
 	HatchDoctorIssue,
 	HatchDoctorSnapshot,
 	HatchReadiness,
+	ModelAuthStatus,
 	MonitorMode,
 	PilotCapabilities,
 	PilotState,
@@ -105,6 +128,7 @@ export {
 	buildAntColonyMirrorCandidates,
 	buildColonyRunSequence,
 	buildColonyStopSequence,
+	executableProbe,
 	buildHatchDoctorSnapshot,
 	buildRuntimeRunSequence,
 	buildRuntimeStopSequence,
@@ -117,148 +141,19 @@ export {
 	missingCapabilities,
 	normalizeColonySignalId,
 	normalizeQuotedText,
+	parseProviderModelRef,
 	parseColonySignal,
 	parseCommandInput,
 	parseMonitorModeFromText,
 	parseRemoteAccessUrl,
+	resolveColonyPilotPreflightConfig,
+	resolveColonyModelReadiness,
+	resolveModelAuthStatus,
+	runColonyPilotPreflight,
 	requiresApplyToBranch,
 	snapshotPilotState,
 	toBaseCommandName,
 };
-
-export type ModelAuthStatus =
-	| "ok"
-	| "missing-auth"
-	| "missing-model"
-	| "invalid-model"
-	| "not-set"
-	| "unavailable";
-
-export interface ColonyModelReadiness {
-	currentModelRef?: string;
-	currentModelStatus: ModelAuthStatus;
-	defaultProvider?: string;
-	defaultModel?: string;
-	defaultModelRef?: string;
-	defaultModelStatus: ModelAuthStatus;
-	antColonyDefaultModelRef?: string;
-}
-
-function settingsCandidates(cwd: string): string[] {
-	return [
-		path.join(cwd, ".pi", "settings.json"),
-		path.join(homedir(), ".pi", "agent", "settings.json"),
-	];
-}
-
-function readTopLevelStringSetting(
-	cwd: string,
-	key: string,
-): string | undefined {
-	for (const candidate of settingsCandidates(cwd)) {
-		if (!existsSync(candidate)) continue;
-
-		try {
-			const json = JSON.parse(readFileSync(candidate, "utf8"));
-			const value = json?.[key];
-			if (typeof value === "string" && value.trim().length > 0) {
-				return value.trim();
-			}
-		} catch {
-			// ignore malformed settings
-		}
-	}
-
-	return undefined;
-}
-
-export function parseProviderModelRef(
-	modelRef: string,
-): { provider: string; model: string } | undefined {
-	const idx = modelRef.indexOf("/");
-	if (idx <= 0 || idx >= modelRef.length - 1) return undefined;
-	return {
-		provider: modelRef.slice(0, idx),
-		model: modelRef.slice(idx + 1),
-	};
-}
-
-export function resolveModelAuthStatus(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	modelRegistry: any,
-	modelRef?: string,
-): ModelAuthStatus {
-	if (!modelRef) return "not-set";
-
-	const parsed = parseProviderModelRef(modelRef);
-	if (!parsed) return "invalid-model";
-
-	if (!modelRegistry || typeof modelRegistry.find !== "function") {
-		return "unavailable";
-	}
-
-	const model = modelRegistry.find(parsed.provider, parsed.model);
-	if (!model) return "missing-model";
-
-	if (typeof modelRegistry.hasConfiguredAuth === "function") {
-		const hasAuth = modelRegistry.hasConfiguredAuth(model);
-		if (!hasAuth) return "missing-auth";
-	}
-
-	return "ok";
-}
-
-export function resolveColonyModelReadiness(
-	cwd: string,
-	currentModelRef: string | undefined,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	modelRegistry: any,
-): ColonyModelReadiness {
-	const defaultProvider = readTopLevelStringSetting(cwd, "defaultProvider");
-	const defaultModel = readTopLevelStringSetting(cwd, "defaultModel");
-
-	const currentModelStatus = resolveModelAuthStatus(
-		modelRegistry,
-		currentModelRef,
-	);
-
-	let defaultModelRef: string | undefined;
-	if (defaultModel) {
-		defaultModelRef = defaultModel.includes("/")
-			? defaultModel
-			: defaultProvider
-				? `${defaultProvider}/${defaultModel}`
-				: undefined;
-	}
-
-	const defaultModelStatus = defaultModelRef
-		? resolveModelAuthStatus(modelRegistry, defaultModelRef)
-		: defaultModel
-			? "invalid-model"
-			: "not-set";
-
-	return {
-		currentModelRef,
-		currentModelStatus,
-		defaultProvider,
-		defaultModel,
-		defaultModelRef,
-		defaultModelStatus,
-		antColonyDefaultModelRef: currentModelRef,
-	};
-}
-
-function formatModelReadiness(readiness: ColonyModelReadiness): string[] {
-	return [
-		"provider/model:",
-		`  ant_colony default model: ${readiness.antColonyDefaultModelRef ?? "(none)"}`,
-		`  current model status: ${readiness.currentModelStatus}`,
-		`  defaultProvider: ${readiness.defaultProvider ?? "(not set)"}`,
-		`  defaultModel: ${readiness.defaultModel ?? "(not set)"}`,
-		`  defaultModelRef: ${readiness.defaultModelRef ?? "(unresolved)"}`,
-		`  default model status: ${readiness.defaultModelStatus}`,
-	];
-}
 
 const ROLE_ORDER: Array<Exclude<ColonyAgentRole, "queen">> = [
 	"scout",
@@ -1207,28 +1102,6 @@ function formatArtifactsReport(
 	return out.join("\n");
 }
 
-export interface ColonyPilotPreflightConfig {
-	enabled: boolean;
-	enforceOnAntColonyTool: boolean;
-	requiredExecutables: string[];
-	requireColonyCapabilities: Array<keyof PilotCapabilities>;
-}
-
-export interface ColonyPilotPreflightResult {
-	ok: boolean;
-	missingExecutables: string[];
-	missingCapabilities: Array<keyof PilotCapabilities>;
-	failures: string[];
-	checkedAt: number;
-}
-
-const DEFAULT_PREFLIGHT_CONFIG: ColonyPilotPreflightConfig = {
-	enabled: true,
-	enforceOnAntColonyTool: true,
-	requiredExecutables: ["node", "git", "npm"],
-	requireColonyCapabilities: ["colony", "colonyStop"],
-};
-
 export type ColonyAgentRole =
 	| "queen"
 	| "scout"
@@ -1380,44 +1253,6 @@ function parseQuotaVisibilityBudgetSettings(
 	}
 }
 
-function normalizeCapabilitiesList(
-	value: unknown,
-): Array<keyof PilotCapabilities> {
-	if (!Array.isArray(value))
-		return [...DEFAULT_PREFLIGHT_CONFIG.requireColonyCapabilities];
-	const allowed: Array<keyof PilotCapabilities> = [
-		"monitors",
-		"remote",
-		"sessionWeb",
-		"colony",
-		"colonyStop",
-	];
-	const out = value.filter(
-		(v): v is keyof PilotCapabilities =>
-			typeof v === "string" && allowed.includes(v as keyof PilotCapabilities),
-	);
-	return out.length > 0
-		? out
-		: [...DEFAULT_PREFLIGHT_CONFIG.requireColonyCapabilities];
-}
-
-export function resolveColonyPilotPreflightConfig(
-	raw?: Partial<ColonyPilotPreflightConfig>,
-): ColonyPilotPreflightConfig {
-	return {
-		enabled: raw?.enabled !== false,
-		enforceOnAntColonyTool: raw?.enforceOnAntColonyTool !== false,
-		requiredExecutables: Array.isArray(raw?.requiredExecutables)
-			? raw!.requiredExecutables.filter(
-					(v): v is string => typeof v === "string" && v.trim().length > 0,
-				)
-			: [...DEFAULT_PREFLIGHT_CONFIG.requiredExecutables],
-		requireColonyCapabilities: normalizeCapabilitiesList(
-			raw?.requireColonyCapabilities,
-		),
-	};
-}
-
 export function resolveColonyPilotOutputPolicy(
 	raw?: Partial<ColonyPilotOutputPolicyConfig>,
 ): ColonyPilotOutputPolicyConfig {
@@ -1451,83 +1286,6 @@ export function resolveColonyPilotCandidateRetentionConfig(
 		maxAgeDays: Math.max(1, Math.min(365, maxAgeDaysRaw)),
 	};
 }
-
-export function executableProbe(
-	name: string,
-	platform = process.platform,
-): { command: string; args: string[]; label: string } {
-	const clean = name.trim();
-	if (!clean) return { command: "", args: [], label: "" };
-
-	if (platform === "win32" && clean.toLowerCase() === "npm") {
-		// Em alguns runtimes Windows, `cmd /c npm` pode não executar como esperado.
-		// PowerShell sem profile é mais estável para probe de versão.
-		return {
-			command: "powershell",
-			args: ["-NoProfile", "-Command", "npm --version"],
-			label: "npm",
-		};
-	}
-
-	return { command: clean, args: ["--version"], label: clean };
-}
-
-export async function runColonyPilotPreflight(
-	pi: ExtensionAPI,
-	caps: PilotCapabilities,
-	config: ColonyPilotPreflightConfig,
-): Promise<ColonyPilotPreflightResult> {
-	const missingCaps = missingCapabilities(
-		caps,
-		config.requireColonyCapabilities,
-	);
-	const missingExecutables: string[] = [];
-
-	for (const execName of config.requiredExecutables) {
-		const probe = executableProbe(execName);
-		if (!probe.command) continue;
-
-		try {
-			const r = await pi.exec(probe.command, probe.args, { timeout: 5000 });
-			if (r.code !== 0) missingExecutables.push(probe.label);
-		} catch {
-			missingExecutables.push(probe.label);
-		}
-	}
-
-	const failures: string[] = [];
-	if (missingCaps.length > 0) {
-		failures.push(`missing capabilities: ${missingCaps.join(", ")}`);
-	}
-	if (missingExecutables.length > 0) {
-		failures.push(`missing executables: ${missingExecutables.join(", ")}`);
-	}
-
-	return {
-		ok: failures.length === 0,
-		missingCapabilities: missingCaps,
-		missingExecutables,
-		failures,
-		checkedAt: Date.now(),
-	};
-}
-
-function formatPreflightResult(result: ColonyPilotPreflightResult): string {
-	const lines = [
-		"colony-pilot preflight",
-		`ok: ${result.ok ? "yes" : "no"}`,
-		`missingCapabilities: ${result.missingCapabilities.length > 0 ? result.missingCapabilities.join(", ") : "(none)"}`,
-		`missingExecutables: ${result.missingExecutables.length > 0 ? result.missingExecutables.join(", ") : "(none)"}`,
-		`checkedAt: ${new Date(result.checkedAt).toISOString()}`,
-	];
-
-	if (result.failures.length > 0) {
-		lines.push("", "failures:", ...result.failures.map((f) => `  - ${f}`));
-	}
-
-	return lines.join("\n");
-}
-
 export type BaselineProfile = "default" | "phase2";
 export type ModelPolicyProfile =
 	| "copilot"
