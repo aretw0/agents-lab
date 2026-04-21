@@ -26,6 +26,12 @@ Fonte canônica adicional (provider-agnostic):
 node scripts/session-triage.mjs --events ./data/canonical-events.json
 ```
 
+Também aceita JSONL (um evento por linha):
+
+```bash
+node scripts/session-triage.mjs --events ./data/canonical-events.jsonl
+```
+
 Exemplo no repositório:
 
 ```bash
@@ -56,6 +62,7 @@ node scripts/session-triage.mjs --no-summary-store
 > Direção oficial: evoluir para ingestão provider-agnostic (Telegram/WhatsApp/Matrix/Signal etc.) via adapter canônico, sem mudar a governança do board.
 
 - sessões recentes e sinais de colônia (`COLONY_SIGNAL:*`)
+- agregação por provider da fonte de eventos (ex.: `pi`, `telegram`, `matrix`, `custom`)
 - agregação de branch summaries (`Next Steps`, `In Progress`, `Blocked`), incluindo os persistidos no store local parseável
 - split de pendências do board:
   - **Unlock swarm now** (P0/promotion/bloqueios)

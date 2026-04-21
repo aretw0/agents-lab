@@ -284,38 +284,72 @@ function normalizeCanonicalText(event) {
   return "";
 }
 
+function parseCanonicalEventsInput(eventsPath) {
+  const rawText = readFileSync(eventsPath, "utf8");
+
+  try {
+    const parsed = JSON.parse(rawText);
+    const events = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.events) ? parsed.events : [];
+    return {
+      events: Array.isArray(events) ? events : [],
+      format: "json",
+    };
+  } catch {
+    // fallback: JSONL (one event per line)
+  }
+
+  const events = rawText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+
+  return {
+    events,
+    format: "jsonl",
+  };
+}
+
 function parseCanonicalEventsFile(eventsPath, cutoffMs) {
   if (!eventsPath || !existsSync(eventsPath)) return null;
 
-  let raw;
-  try {
-    raw = JSON.parse(readFileSync(eventsPath, "utf8"));
-  } catch {
-    return null;
-  }
-
-  const events = Array.isArray(raw) ? raw : Array.isArray(raw?.events) ? raw.events : [];
+  const parsed = parseCanonicalEventsInput(eventsPath);
+  const events = parsed?.events ?? [];
   if (!Array.isArray(events) || events.length === 0) return null;
 
   const signalCount = new Map();
+  const providerCount = new Map();
   const out = {
     file: `canonical:${path.basename(eventsPath)}`,
     path: path.resolve(eventsPath),
+    format: parsed.format,
     updatedAt: new Date(statSync(eventsPath).mtimeMs).toISOString(),
     messageCount: 0,
     userMessages: 0,
     assistantMessages: 0,
     colonySignals: {},
+    providers: {},
     branchSummaries: [],
   };
 
   for (const event of events) {
     if (!event || typeof event !== "object") continue;
+    const source = event.source && typeof event.source === "object" ? event.source : {};
     const ev = event.event && typeof event.event === "object" ? event.event : event;
 
     const tsRaw = ev.timestampIso ?? ev.timestamp ?? ev.createdAt ?? ev.created_at;
     const ts = tsRaw ? new Date(tsRaw) : undefined;
     if (ts && Number.isFinite(ts.getTime()) && ts.getTime() < cutoffMs) continue;
+
+    const provider = typeof source.provider === "string" && source.provider.trim() ? source.provider.trim().toLowerCase() : "custom";
+    addCount(providerCount, provider);
 
     const roleRaw = ev.role ?? ev.authorRole ?? ev.author_role;
     const role = typeof roleRaw === "string" ? roleRaw.toLowerCase() : "unknown";
@@ -336,10 +370,10 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
             nextSteps: sectionBullets(summary, "Next Steps"),
             inProgress: sectionBullets(summary, "In Progress"),
             blocked: sectionBullets(summary, "Blocked"),
-            source: `canonical:${path.basename(eventsPath)}`,
+            source: `canonical:${path.basename(eventsPath)}:${provider}`,
             seenAt: toIsoOrFallback(tsRaw, out.updatedAt),
           },
-          `canonical:${path.basename(eventsPath)}`,
+          `canonical:${path.basename(eventsPath)}:${provider}`,
           out.updatedAt,
         ),
       );
@@ -347,6 +381,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
   }
 
   out.colonySignals = Object.fromEntries([...signalCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+  out.providers = Object.fromEntries([...providerCount.entries()].sort((a, b) => a[0].localeCompare(b[0])));
   return out;
 }
 
@@ -434,6 +469,12 @@ function renderHuman(report) {
   }
   lines.push("");
 
+  lines.push("## Source providers (message volume)");
+  const providerPairs = Object.entries(report.aggregate.providers ?? {});
+  if (providerPairs.length === 0) lines.push("- (none)");
+  else providerPairs.forEach(([provider, count]) => lines.push(`- ${provider}: ${count}`));
+  lines.push("");
+
   lines.push(`## Branch-summary aggregation (merged=${report.aggregate.branchSummariesCount ?? 0})`);
   lines.push("### In Progress");
   if (report.aggregate.inProgress.length === 0) lines.push("- (none)");
@@ -503,6 +544,7 @@ const allNext = [];
 const allInProgress = [];
 const allBlocked = [];
 const signalTotals = new Map();
+const providerTotals = new Map();
 
 for (const bs of mergedSummaries) {
   allNext.push(...bs.nextSteps);
@@ -512,6 +554,15 @@ for (const bs of mergedSummaries) {
 
 for (const s of sessions) {
   for (const [k, v] of Object.entries(s.colonySignals)) addCount(signalTotals, k, v);
+
+  const providers = s?.providers && typeof s.providers === "object" ? s.providers : null;
+  if (providers && Object.keys(providers).length > 0) {
+    for (const [provider, count] of Object.entries(providers)) {
+      addCount(providerTotals, provider, Number(count) || 0);
+    }
+  } else {
+    addCount(providerTotals, "pi", s.messageCount || 0);
+  }
 }
 
 const report = {
@@ -528,6 +579,7 @@ const report = {
   sessions,
   aggregate: {
     colonySignals: Object.fromEntries([...signalTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
+    providers: Object.fromEntries([...providerTotals.entries()].sort((a, b) => a[0].localeCompare(b[0]))),
     nextSteps: dedupeStrings(allNext),
     inProgress: dedupeStrings(allInProgress),
     blocked: dedupeStrings(allBlocked),

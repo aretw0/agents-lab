@@ -863,6 +863,15 @@
       "method": "command",
       "evidence": "session-triage passou a persistir branch-summary returns em store parseável local (`.sandbox/pi-agent/triage/branch-summary-store.json`) e a agregar esse store junto de sessões/canonical events. Validação: (1) `node.exe scripts/session-triage.mjs --json` confirma `branchSummaryStore.enabled=true`; (2) `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.json --json` mostra `branchSummariesCount=1` e bullets de summary agregados; (3) store contém entry estruturada sem cópia manual.",
       "timestamp": "2026-04-21T14:27:00Z"
+    },
+    {
+      "id": "VER-BUD-072",
+      "target": "TASK-BUD-023",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "evidence": "Slice provider-agnostic aplicado em session-triage: `--events` aceita JSON e JSONL, agrega `aggregate.providers` e preserva governança canônica. Evidência executada com exemplos `canonical-events.example.json` (provider=matrix) e `canonical-events.example.jsonl` (provider=telegram + COMPLETE + summary bullets). Detalhes: docs/research/session-triage-provider-agnostic-adapter-2026-04-21.md.",
+      "timestamp": "2026-04-21T14:32:00Z"
     }
   ]
 }
