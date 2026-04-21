@@ -20,6 +20,7 @@
     "pi:published": "node scripts/pi-source-switch.mjs published",
     "pi:status": "node scripts/pi-source-switch.mjs status",
     "pi:isolated": "node scripts/pi-isolated.mjs",
+    "pi:isolated:config": "node scripts/pi-isolated.mjs config",
     "pi:isolated:resume": "node scripts/pi-isolated.mjs --resume",
     "pi:isolated:status": "node scripts/pi-isolated.mjs status",
     "pi:isolated:adopt-latest": "node scripts/pi-isolated.mjs adopt-latest",
