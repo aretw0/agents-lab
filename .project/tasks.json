@@ -1492,6 +1492,23 @@
       ],
       "notes": "Foco: portabilidade de bootstrap entre agentes long-run e delegados, sem comportamento bloqueante.",
       "verification": "VER-BUD-064"
+    },
+    {
+      "id": "TASK-BUD-065",
+      "description": "[P1] Permitir aplicar preset do context-watchdog sem reload (persistindo em .pi/settings e ativando runtime imediato) para reduzir fricção operacional em sessões long-run.",
+      "status": "completed",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Tool `context_watch_bootstrap` aceita `apply=true` e retorna resultado de aplicação.",
+        "Comando `/context-watch apply <preset>` aplica patch e confirma efeito imediato sem reload para o watchdog.",
+        "Aplicação preserva settings não relacionados via deep-merge."
+      ],
+      "notes": "Motivado por feedback sobre reduzir back-and-forth de reload e acelerar bootstrap de agentes durante operação contínua.",
+      "verification": "VER-BUD-065"
     }
   ]
 }

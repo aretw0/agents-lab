@@ -783,6 +783,32 @@
           "evidence": "context-watchdog.test.ts 6/6 valida parseContextBootstrapPreset e valores dos patches."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-065",
+      "target": "TASK-BUD-065",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T12:52:15.000Z",
+      "evidence": "context-watchdog agora suporta aplicação direta de preset via tool (`context_watch_bootstrap` com `apply=true`) e comando (`/context-watch apply <preset>`), persistindo em .pi/settings.json e atualizando configuração runtime do watchdog sem precisar reload para esse componente.",
+      "criteria_results": [
+        {
+          "criterion": "Tool aceita apply=true com resposta estruturada",
+          "status": "passed",
+          "evidence": "registerTool context_watch_bootstrap expõe parâmetro apply e retorna applied/reloadRequired."
+        },
+        {
+          "criterion": "Comando apply atualiza runtime imediatamente",
+          "status": "passed",
+          "evidence": "handler `/context-watch apply` chama applyPreset(), reconfigura runtime e executa run() no mesmo ciclo."
+        },
+        {
+          "criterion": "Deep-merge preserva settings não relacionados",
+          "status": "passed",
+          "evidence": "context-watchdog smoke (7/7) inclui caso applyContextWatchBootstrapToSettings preservando routeModelRefs."
+        }
+      ]
     }
   ]
 }
