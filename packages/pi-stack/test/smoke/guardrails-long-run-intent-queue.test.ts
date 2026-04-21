@@ -8,6 +8,7 @@ import {
   enqueueDeferredIntent,
   estimateAutoDrainWaitMs,
   listDeferredIntents,
+  oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
   resolveLongRunIntentQueueConfig,
   shouldAutoDrainDeferredIntent,
@@ -54,6 +55,16 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueAddText("ADD   item")).toBe("item");
     expect(parseLaneQueueAddText("list")).toBeUndefined();
     expect(parseLaneQueueAddText("add")).toBeUndefined();
+  });
+
+  it("computes oldest queued intent age", () => {
+    const nowMs = Date.parse("2026-04-21T22:00:10.000Z");
+    const age = oldestDeferredIntentAgeMs([
+      { id: "i-1", atIso: "2026-04-21T22:00:05.000Z", text: "a", source: "interactive" },
+      { id: "i-2", atIso: "2026-04-21T22:00:00.000Z", text: "b", source: "interactive" },
+    ], nowMs);
+    expect(age).toBe(10_000);
+    expect(oldestDeferredIntentAgeMs([], nowMs)).toBeUndefined();
   });
 
   it("enqueues items and enforces max size", () => {

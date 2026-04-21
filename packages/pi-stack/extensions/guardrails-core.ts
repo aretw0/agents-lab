@@ -746,6 +746,17 @@ export function listDeferredIntents(cwd: string): DeferredIntentItem[] {
   return readDeferredIntentQueue(cwd).items;
 }
 
+export function oldestDeferredIntentAgeMs(items: DeferredIntentItem[], nowMs = Date.now()): number | undefined {
+  let maxAge = -1;
+  for (const item of items) {
+    const ts = Date.parse(item.atIso);
+    if (!Number.isFinite(ts)) continue;
+    const age = Math.max(0, nowMs - ts);
+    if (age > maxAge) maxAge = age;
+  }
+  return maxAge >= 0 ? maxAge : undefined;
+}
+
 function getDeferredIntentQueueCount(cwd: string): number {
   return readDeferredIntentQueue(cwd).items.length;
 }
@@ -1175,7 +1186,8 @@ export default function (pi: ExtensionAPI) {
       }
 
       const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-      const queued = getDeferredIntentQueueCount(ctx.cwd);
+      const items = listDeferredIntents(ctx.cwd);
+      const queued = items.length;
       const nowMs = Date.now();
       const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
       const waitMs = estimateAutoDrainWaitMs(
@@ -1186,6 +1198,7 @@ export default function (pi: ExtensionAPI) {
         idleSinceMs,
         longRunIntentQueueConfig,
       );
+      const oldestAgeMs = oldestDeferredIntentAgeMs(items, nowMs);
       const nextDrain = activeLongRun
         ? "after-idle"
         : waitMs === undefined
@@ -1193,10 +1206,11 @@ export default function (pi: ExtensionAPI) {
           : waitMs === 0
             ? "now"
             : `${Math.ceil(waitMs / 1000)}s`;
+      const oldest = oldestAgeMs === undefined ? "n/a" : `${Math.ceil(oldestAgeMs / 1000)}s`;
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} nextDrain=${nextDrain}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} nextDrain=${nextDrain}`,
           "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
         ].join("\n"),
         "info",
