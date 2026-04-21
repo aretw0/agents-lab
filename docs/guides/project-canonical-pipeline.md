@@ -13,6 +13,27 @@ Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 - Fluxos baseados em **Markdown/Obsidian** (ex.: inbox/caixa de notas) devem ser suportados via adapter, preservando os mesmos invariantes de governança (`no-auto-close`, evidência, revisão humana).
 - Skills/processos/extensões com **hard intent** devem consumir o contrato de primitivas (task/event/intent/evidence), não um backend específico.
 
+## Onboarding dual-mode (sem migração forçada)
+Use este framing com usuários novos:
+
+1. **Modo A — `.project-first` (canônico local)**
+   - melhor quando o usuário quer governança integrada no workspace;
+   - estado oficial em `.project/*`.
+
+2. **Modo B — adapter-first (sistema do usuário)**
+   - melhor quando o usuário já opera em outro sistema (Markdown/Obsidian, DB/API, automação/web);
+   - o agente trabalha **junto** do sistema existente, sem impor migração total.
+
+3. **Modo C — canônico + espelho humano (opcional)**
+   - o estado oficial continua em `.project/*`;
+   - um adapter projeta esse estado para Markdown renderizável (ex.: Obsidian/vault);
+   - referência inicial de template: `https://github.com/aretw0/vault-seed`.
+
+Invariantes em ambos os modos:
+- `no-auto-close` para itens estratégicos;
+- verificação auditável (`verification`) antes de `completed`;
+- decisões/handoff curtos para retomada determinística.
+
 ## Loop operacional (5-10 min)
 1. Capturar mudanças no board canônico:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.

@@ -1608,6 +1608,53 @@
       ],
       "notes": "Derivada de REQ-BUD-032 e DEC-BUD-027. Patrol recorrente criado: schedule id `xchvdmmx` (instance, cada 2h, expira em 3 dias).",
       "verification": "VER-BUD-069"
+    },
+    {
+      "id": "TASK-BUD-071",
+      "description": "[P1] Implementar primitiva de preload de contexto (control-plane warm pack) baseada em telemetria de leituras recentes para reduzir re-leitura repetitiva após compactação/resume.",
+      "status": "completed",
+      "type": "feature",
+      "depends_on": [
+        "TASK-BUD-066"
+      ],
+      "acceptance_criteria": [
+        "Script determinístico gera top arquivos lidos via tool `read` nas sessões recentes do workspace.",
+        "Saída inclui sugestão de pack `control-plane-core` e `agent-worker-lean` com caminhos normalizados e filtros de ruído (node_modules/sandbox).",
+        "Guia operacional documenta uso antes de spawn/resume para deixar agentes 'frescos' sem varredura ampla."
+      ],
+      "files": [
+        "scripts/context-preload-pack.mjs",
+        "docs/guides/openai-context-window-playbook.md",
+        "package.json"
+      ],
+      "notes": "Slice 1 do objetivo de 'agentes carregados e frescos'. Foco: evidência local + pack sugerido; sem acoplamento a provider específico.",
+      "verification": "VER-BUD-080"
+    },
+    {
+      "id": "TASK-BUD-072",
+      "description": "[P1] Documentar onboarding dual-mode (`.project-first` vs adapter-first no sistema do usuário) com checklist de seleção e invariantes de governança.",
+      "status": "completed",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-066",
+        "TASK-BUD-071"
+      ],
+      "references": [
+        "DEC-BUD-028",
+        "REQ-BUD-033"
+      ],
+      "acceptance_criteria": [
+        "Guia canônico inclui seção de escolha de modo em até 2 minutos.",
+        "Exemplos mínimos cobrem Markdown/Obsidian, DB/API e automação/web como superfícies adapter-first.",
+        "Checklist de spawn usa warm packs por modo sem re-leitura ampla de contexto."
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/guides/session-triage.md"
+      ],
+      "notes": "Criada a partir de feedback direto do usuário para reduzir fricção de adoção e deixar agentes prontos para operar em sistemas heterogêneos. Incluir modo espelho `.project` -> Markdown humano (referência inicial: https://github.com/aretw0/vault-seed) como adapter opt-in. [2026-04-21] Primeira parcial aplicada nos guias canônicos (`project-canonical-pipeline` + `openai-context-window-playbook`) com framing dual-mode e mirror opt-in; pendente checklist 2-min completo + exemplo em `session-triage`.",
+      "verification": "VER-BUD-082"
     }
   ]
 }

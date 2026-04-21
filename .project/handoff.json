@@ -1,24 +1,26 @@
 {
-  "timestamp": "2026-04-21T16:10:00Z",
-  "context": "Checkpoint em 68% de contexto. Mantido modo conservador: registro/evidência e reconciliação leve, sem frente nova. Entregas já fechadas no main: TASK-BUD-020, 021, 023, 024, 025. Consolidação parcial de legado registrada em TASK-BUD-047 (VER-BUD-079).",
-  "current_phase": "checkpoint-threshold",
+  "timestamp": "2026-04-21T16:42:00Z",
+  "context": "Slice de produtividade concluído com foco em contexto fresco e onboarding heterogêneo. Fechadas: TASK-BUD-071 (primitiva de warm preload por telemetria de `read`) e TASK-BUD-072 (onboarding dual-mode + mirror opt-in). Novos artefatos: script `context-preload-pack.mjs`, atalhos npm `context:preload*`, guia dual-mode/mirror e checklist de spawn 2-min. Decisões/requisitos canônicos registrados: DEC-BUD-028, REQ-BUD-033, REQ-BUD-034 (inclui referência vault-seed para espelho Markdown/Obsidian).",
+  "current_phase": "post-compact-delivery",
   "current_tasks": [
     "TASK-BUD-046",
     "TASK-BUD-047",
     "TASK-BUD-052",
-    "TASK-BUD-051"
+    "TASK-BUD-051",
+    "TASK-BUD-066",
+    "TASK-BUD-068"
   ],
   "blockers": [],
   "next_actions": [
-    "Compactar/handoff agora para preservar controle da janela.",
-    "Retomar por reconciliação leve de legado (046 -> 047 -> 052 -> 051), priorizando fechamento por evidência existente.",
-    "Evitar implementação nova até cair pressão de contexto e revalidar gates runtime."
+    "Aplicar warm preload no início de cada loop (context:preload) e validar se reduz re-leituras recorrentes nos próximos ciclos.",
+    "Retomar reconciliação leve de legados (046 -> 047 -> 052 -> 051) fechando por evidência quando possível.",
+    "Evoluir TASK-BUD-066/068 conectando adapter canônico de inbox/espelho (vault) com promoção determinística para `.project/tasks`."
   ],
   "open_questions": [
-    "Qual evidência mínima objetiva falta para encerrar TASK-BUD-046 sem reabrir escopo técnico amplo?"
+    "Qual contrato mínimo de mirror adapter garante idempotência entre `.project` e vault Markdown sem drift?"
   ],
   "key_decisions_pending": [
-    "DEC-BUD-027 follow-up: granularidade operacional de soft intent distribuída vs hard intent por superfície."
+    "Follow-up operacional de DEC-BUD-027: granularidade prática entre soft intent distribuída e hard intent por superfície."
   ],
   "files_in_flux": []
 }

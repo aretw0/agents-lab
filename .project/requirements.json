@@ -410,6 +410,38 @@
         "Loops recorrentes de supervisão podem ser disparados por superfícies soft (prompts/scheduler), mas decisões de bloqueio/promoção usam apenas gates hard.",
         "Mudanças de status canônico (.project/tasks) continuam exigindo evidência e revisão humana quando estratégico."
       ]
+    },
+    {
+      "id": "REQ-BUD-033",
+      "description": "A stack deve oferecer onboarding dual-mode: (A) `.project-first` canônico; (B) operação no sistema do usuário via adapters (Markdown/Obsidian, DB/API, automação web), preservando governança hard intent e trilha de evidência.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-032"
+      ],
+      "acceptance_criteria": [
+        "Guias explicam, em linguagem direta, quando usar `.project-first` vs adapter-first sem exigir migração total.",
+        "Cada modo mantém invariantes de governança: no-auto-close estratégico, verificação auditável e fechamento explícito.",
+        "Existe caminho operacional para spawn de agentes com contexto mínimo pré-carregado por modo (control-plane core vs worker lean)."
+      ]
+    },
+    {
+      "id": "REQ-BUD-034",
+      "description": "Quando operar em `.project-first`, a stack deve suportar modo espelho opcional para artefato humano/renderizável (ex.: vault Markdown para Obsidian) sem quebrar o canônico.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-033"
+      ],
+      "acceptance_criteria": [
+        "Fluxo de espelho é explicitamente opt-in e não substitui o board canônico de governança.",
+        "Atualizações críticas (status/verificação) continuam decididas no canônico e projetadas para o espelho com rastreabilidade.",
+        "Guia de onboarding referencia template inicial para vault Markdown (ex.: `vault-seed`) como adapter de saída humana."
+      ]
     }
   ]
 }

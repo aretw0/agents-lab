@@ -8,6 +8,27 @@ Este guia transforma conversas recentes do pi (incluindo branch summaries) em pe
 - Muitas sessões/branches em paralelo
 - Necessidade de separar **destravar swarm agora** vs **estabilizar depois**
 
+## Escolha de modo (2 min)
+
+Antes de rodar triagem, escolha o modo de operação:
+
+1. **`.project-first`**
+   - canônico local no workspace;
+   - melhor para governança integrada.
+
+2. **adapter-first**
+   - manter sistema atual do usuário (Markdown/Obsidian, DB/API, automação/web);
+   - triagem continua útil para organizar backlog, sem migração forçada.
+
+3. **canônico + espelho humano (opt-in)**
+   - `.project` segue oficial;
+   - projeção para vault Markdown renderizável (referência: https://github.com/aretw0/vault-seed).
+
+Checklist de spawn rápido por modo:
+- `npm run context:preload` para sugerir carga mínima recente;
+- coordenador carrega `control-plane-core`;
+- workers carregam `agent-worker-lean`.
+
 ## Comando principal
 
 ```bash

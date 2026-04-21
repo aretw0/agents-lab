@@ -142,6 +142,16 @@ Para bootstrap portável de novos agentes, use:
 - `context_watch_bootstrap` com `preset=agent-worker` (delegados/worker com menos notify)
 - `context_watch_bootstrap` com `apply=true` (persiste patch em `.pi/settings.json` e ativa no runtime do context-watchdog sem `/reload`)
 
+Para reduzir re-leitura repetitiva pós-compactação, gere um warm pack por telemetria real:
+- `npm run context:preload` (inspeção humana)
+- `npm run context:preload:write` (gera JSON em `.sandbox/pi-agent/preload/context-preload-pack.json`)
+
+Saídas sugerem dois perfis de carga:
+- `control-plane-core`: contexto mínimo para coordenação/decisão.
+- `agent-worker-lean`: contexto mínimo para execução delegada.
+
+Esses perfis servem tanto para `.project-first` quanto para modo adapter/mirror (ex.: projeção para vault Markdown), sem exigir releitura ampla no spawn.
+
 Config opcional em `.pi/settings.json`:
 
 ```json

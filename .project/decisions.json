@@ -192,6 +192,13 @@
       "rationale": "A combinação maximiza autonomia prática sem perder controle: soft intent melhora coordenação contextual e hard intent garante limites auditáveis/reprodutíveis.",
       "status": "decided",
       "context": "Reminder explícito do usuário para preservar valor de skills/prompts distribuídos junto da trilha de hard intent."
+    },
+    {
+      "id": "DEC-BUD-028",
+      "status": "decided",
+      "decision": "Operar em modo dual explícito: `.project-first` para governança local canônica, mas com onboarding adapter-first para usuários que não desejam migrar seu sistema de trabalho.",
+      "rationale": "Usuários do pi-stack podem manter trabalho em sistemas diversos (Markdown/Obsidian, DB, API externa, web automation). A stack deve explicar claramente as duas opções: migrar para blocos canônicos ou integrar via adapters sem perder invariantes de hard intent/evidência.",
+      "context": "Feedback do usuário (2026-04-21): risco de fricção quando o modelo mental Davidorex/.project não for desejado; necessidade de clareza operacional e prontidão multi-backend."
     }
   ]
 }

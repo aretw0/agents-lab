@@ -935,6 +935,33 @@
       "method": "inspect",
       "evidence": "Registro de consolidação parcial do Lote B: outcomes nucleares já materializados e fechados no board canônico via TASK-BUD-020 (VER-BUD-077) e TASK-BUD-024 (VER-BUD-075). TASK-BUD-047 permanece in-progress por dependência de reconciliação com TASK-BUD-046 e fechamento integrado de lote (HITL).",
       "timestamp": "2026-04-21T16:02:00Z"
+    },
+    {
+      "id": "VER-BUD-080",
+      "target": "TASK-BUD-071",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Primitiva de preload implementada com telemetria real de `read`. Arquivos: `scripts/context-preload-pack.mjs`, `package.json` (scripts `context:preload*`), docs `docs/guides/openai-context-window-playbook.md`. Execuções validadas: `node scripts/context-preload-pack.mjs --days 1 --limit 8 --top 16 --write --json` (843 read calls, packs core/lean gerados) e `node scripts/context-preload-pack.mjs --days 1 --limit 4 --top 8` (saída humana determinística). Evidência consolidada em `docs/research/context-preload-pack-2026-04-21.md`.",
+      "timestamp": "2026-04-21T16:30:00Z"
+    },
+    {
+      "id": "VER-BUD-081",
+      "target": "TASK-BUD-072",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Framing dual-mode + mirror opt-in documentado parcialmente em `docs/guides/project-canonical-pipeline.md` e `docs/guides/openai-context-window-playbook.md` (inclui referência `vault-seed`). Ainda falta checklist de seleção 2-min e exemplo dedicado em `docs/guides/session-triage.md`.",
+      "timestamp": "2026-04-21T16:33:00Z"
+    },
+    {
+      "id": "VER-BUD-082",
+      "target": "TASK-BUD-072",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Onboarding dual-mode documentado com checklist operacional: `docs/guides/project-canonical-pipeline.md` (seção Onboarding dual-mode + Modo C mirror), `docs/guides/openai-context-window-playbook.md` (warm packs `context:preload` para spawn por modo), `docs/guides/session-triage.md` (seção Escolha de modo 2 min + checklist de spawn). Inclui referência de espelho Markdown/Obsidian (`vault-seed`).",
+      "timestamp": "2026-04-21T16:38:00Z"
     }
   ]
 }
