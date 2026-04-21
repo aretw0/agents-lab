@@ -1,22 +1,21 @@
 {
-  "timestamp": "2026-04-21T11:50:00Z",
-  "context": "Estado atual estabilizado e bounded: fragility false-positive mitigado por guardrails + pattern hygiene; monitor-stability-gate com tail adaptivo bounded-default (200k->1.2M); calibrate-repro com tails por classe (monitor 200k, readiness 600k); evidências .project atualizadas e workspace limpo.",
-  "current_phase": "stabilization-bounded-operations",
+  "timestamp": "2026-04-21T12:05:00Z",
+  "context": "Checkpoint pré-compactação (68% contexto). Entregas concluídas nesta sessão: TASK-BUD-061 promovida para superfície publicada (tool subagent_readiness_status + comando /subagent-readiness, smoke e docs), calibrações adicionais de fragility (guardrails + pattern hygiene + substantive-output guard), gate stability bounded-default e pipeline calibrate-repro com tails por classe. Estado operacional estável: classifyFailures=0 nos gates recentes.",
+  "current_phase": "pre-compact-checkpoint",
   "current_tasks": [
-    "TASK-BUD-061",
     "TASK-CAL-2026-04-21-B"
   ],
   "blockers": [],
   "next_actions": [
-    "Próximo micro-slice: avançar TASK-BUD-061 com cobertura smoke mínima da superfície publicada de readiness, sem ampliar runtime noise.",
-    "Manter execução deterministic-first; canary real somente opt-in quando necessário.",
-    "Evitar loops de diagnóstico; no máximo 1 gate por slice."
+    "Compactar agora (limiar operacional ~70%) e retomar imediatamente deste checkpoint.",
+    "Após compactar: validar runtime pós-reload do slice mais recente da superfície publicada (se ainda não validado), depois iniciar TASK-CAL-2026-04-21-B em micro-slice documental (inventário baseline agnóstico vs perfil opt-in).",
+    "Manter cadence deterministic-first + commit atômico por slice."
   ],
   "open_questions": [
-    "Priorizar imediatamente TASK-BUD-061 (readiness publicado) antes de TASK-CAL-2026-04-21-B?"
+    "Nenhuma bloqueante para continuar após compactação."
   ],
   "key_decisions_pending": [
-    "DEC-BUD-025 follow-up: ordem de execução readiness published vs perfil opt-in."
+    "DEC-BUD-025 follow-up: framing final do perfil opt-in (squeez learnings) sem alterar baseline default."
   ],
   "files_in_flux": []
 }
