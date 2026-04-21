@@ -103,7 +103,7 @@
     {
       "id": "TASK-BUD-007",
       "description": "[P1] Definir e implementar política de single-board clock: .project/tasks como fonte oficial macro, com sync de eventos da colônia (start/progress/end) em modo opt-in.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-005"
       ],
@@ -117,7 +117,8 @@
         "Estado efêmero da colônia não substitui o board oficial.",
         "Fechamento continua human-in-the-loop."
       ],
-      "notes": "Relacionado a REQ-BUD-006.\n[2026-04-21T23:10:00Z] Dependência TASK-BUD-005 concluída (VER-BUD-101). Iniciada consolidação de política single-board clock com base no task-sync opt-in já validado."
+      "notes": "Relacionado a REQ-BUD-006.\n[2026-04-21T23:10:00Z] Dependência TASK-BUD-005 concluída (VER-BUD-101). Iniciada consolidação de política single-board clock com base no task-sync opt-in já validado.",
+      "verification": "VER-BUD-102"
     },
     {
       "id": "TASK-BUD-008",

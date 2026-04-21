@@ -1,18 +1,17 @@
 {
-  "timestamp": "2026-04-21T23:10:00Z",
-  "context": "TASK-BUD-005 concluída (VER-BUD-101) com cobertura comportamental explícita do adapter opt-in colony->.project/tasks (createOnLaunch + candidate-only em requireHumanClose). Contexto em warn (62%), mantendo micro-slices bounded-by-default.",
-  "current_phase": "post-task-bud-005",
+  "timestamp": "2026-04-21T23:22:00Z",
+  "context": "TASK-BUD-007 concluída (VER-BUD-102) com política single-board clock consolidada e cobertura start/progress/end no adapter opt-in. Contexto em warn alto (64%), próximo de checkpoint.",
+  "current_phase": "post-task-bud-007",
   "current_tasks": [
-    "TASK-BUD-007",
     "TASK-BUD-008"
   ],
   "blockers": [
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Context-watch action: level=warn 62% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
-    "Avançar TASK-BUD-007 (single-board clock policy) usando evidência já consolidada em task-sync.",
-    "Checkpoint canônico curto imediato se contexto atingir >=68."
+    "Context-watch action: level=warn 64% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
+    "Executar apenas micro-slice em TASK-BUD-008 ou registrar checkpoint curto se contexto subir para >=68.",
+    "Evitar qualquer varredura ampla até compactação, se necessária."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -23,17 +22,19 @@
   ],
   "files_in_flux": [
     "packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts",
-    "docs/research/task-bud-005-closure-2026-04-21.md",
+    "docs/guides/budget-governance.md",
+    "docs/research/colony-project-task-bridge.md",
+    "docs/research/task-bud-007-closure-2026-04-21.md",
     ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-21T23:10:00Z",
+      "atIso": "2026-04-21T23:22:00Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 62,
+      "percent": 64,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

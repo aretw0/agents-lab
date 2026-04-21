@@ -120,6 +120,12 @@ Exemplo:
 }
 ```
 
+### Política single-board clock (v1)
+- `.project/tasks` é a fonte oficial macro (planejamento/governança/versionamento).
+- Estado efêmero da colônia (runtime/worktree/tasks internas) é apenas execução operacional.
+- Sync start/progress/end atualiza o board oficial, mas não substitui revisão humana de fechamento.
+- `requireHumanClose=true` mantém `completed` em estado candidato (`in-progress`) até verificação explícita.
+
 ---
 
 ## Paridade + isolamento

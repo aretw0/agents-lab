@@ -84,4 +84,41 @@ describe("colony-pilot task-sync behavior", () => {
 			rmSync(cwd, { recursive: true, force: true });
 		}
 	});
+
+	it("updates same board task across start/progress/end without replacing canonical board", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-progress-"));
+		try {
+			const launch = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "launched", id: "c-flow" },
+				{ config: cfg(), source: "ant_colony" },
+			);
+			expect(launch.changed).toBe(true);
+
+			const progress = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "running", id: "c-flow" },
+				{ config: cfg(), taskIdOverride: launch.taskId, source: "ant_colony" },
+			);
+			expect(progress.changed).toBe(true);
+
+			const failed = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "failed", id: "c-flow" },
+				{ config: cfg(), taskIdOverride: launch.taskId, source: "ant_colony" },
+			);
+			expect(failed.changed).toBe(true);
+
+			const block = readProjectTasksBlock(cwd);
+			expect(block.tasks.length).toBe(1);
+			const task = block.tasks[0];
+			expect(task?.id).toBe(launch.taskId);
+			expect(task?.status).toBe("blocked");
+			expect(task?.notes ?? "").toContain("phase=launched");
+			expect(task?.notes ?? "").toContain("phase=running");
+			expect(task?.notes ?? "").toContain("phase=failed");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
 });

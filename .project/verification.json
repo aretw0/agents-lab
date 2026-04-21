@@ -1366,6 +1366,32 @@
           "evidence": "Teste cobre `requireHumanClose=true` mantendo status `in-progress` na fase `completed` com nota `candidate only`."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-102",
+      "target": "TASK-BUD-007",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Política single-board clock consolidada com bridge opt-in e cobertura de start/progress/end. Documentação atualizada em `docs/guides/budget-governance.md` (single-board clock v1) e `docs/research/colony-project-task-bridge.md` (board macro vs estado efêmero). Cobertura comportamental em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` valida criação opt-in no launch, atualização do mesmo registro ao longo de start/progress/end e manutenção de fechamento human-in-the-loop (`requireHumanClose=true` mantém candidate). Execução: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 3 files passed, 74 tests passed.",
+      "timestamp": "2026-04-21T23:20:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Eventos essenciais de execução de colônia criam/atualizam registros de task no board.",
+          "status": "passed",
+          "evidence": "Teste cobre fluxo start/progress/end no mesmo taskId canônico."
+        },
+        {
+          "criterion": "Estado efêmero da colônia não substitui o board oficial.",
+          "status": "passed",
+          "evidence": "Bridge documentado como adapter opt-in; board `.project/tasks` explicitado como fonte macro oficial."
+        },
+        {
+          "criterion": "Fechamento continua human-in-the-loop.",
+          "status": "passed",
+          "evidence": "`requireHumanClose=true` mantém fase `completed` em estado candidato (`in-progress`) até fechamento explícito."
+        }
+      ]
     }
   ]
 }
