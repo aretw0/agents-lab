@@ -881,6 +881,15 @@
       "method": "command",
       "evidence": "Usabilidade operacional do adapter provider-agnostic reforçada com scripts npm: `session:triage:events:json` e `session:triage:events:jsonl` em package.json; guia atualizado com atalhos de smoke. Validação executada via `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.json --json` (provider `matrix`) e `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.jsonl --json` (provider `telegram` + summary), com `branchSummariesCount > 0`. Nota de ambiente: wrapper `npm` no shell atual falha com `node: not found`.",
       "timestamp": "2026-04-21T14:36:00Z"
+    },
+    {
+      "id": "VER-BUD-074",
+      "target": "TASK-BUD-023",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Fechamento dos ACs de TASK-BUD-023 validado. AC1: schema canônico com campos/mapeamento por provider em docs/primitives/conversation-event-canonical-schema.md. AC2: adapter provider-agnostic executado com `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.json --json` (provider `matrix`) e `node.exe scripts/session-triage.mjs --days 30 --events docs/research/data/session-triage/canonical-events.example.jsonl --json` (provider `telegram`). AC3: governança preservada (`sem auto-close`, `evidência obrigatória`, `revisão humana final`) em docs/guides/session-triage.md. Síntese: docs/research/task-bud-023-closure-2026-04-21.md.",
+      "timestamp": "2026-04-21T15:22:00Z"
     }
   ]
 }
