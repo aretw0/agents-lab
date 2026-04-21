@@ -137,6 +137,17 @@ Níveis:
 - `checkpoint` → registrar handoff antes do próximo slice grande
 - `compact` → compactar e retomar do checkpoint
 
+### Guardrail de investigação sob pressão (bounded-by-default)
+Quando `context_watch` estiver em `warn` ou acima:
+- evitar varredura ampla/recursiva em sessões e logs;
+- preferir leitura direcionada por arquivo com `read` + `offset/limit`;
+- testar hipóteses em janelas curtas (1 arquivo, 1 pergunta, 1 evidência);
+- em `checkpoint`, registrar handoff antes de qualquer diagnóstico adicional;
+- em `compact`, interromper investigação e continuar só após compactação.
+
+Sintoma clássico de violação: salto abrupto de contexto sem ganho de decisão.
+Resposta padrão: parar, checkpoint curto, compactar e retomar pelo handoff.
+
 Para bootstrap portável de novos agentes, use:
 - `context_watch_bootstrap` com `preset=control-plane` (sessões long-run)
 - `context_watch_bootstrap` com `preset=agent-worker` (delegados/worker com menos notify)

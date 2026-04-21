@@ -81,6 +81,18 @@ Invariantes em ambos os modos:
 - **evidence:** evidência curta e auditável
 - **timestamp:** ISO
 
+## Guardrail de scan-bounds no loop longo
+Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
+1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).
+2. **Checkpoint:** handoff canônico obrigatório antes de novo diagnóstico.
+3. **Compact:** parar investigação, compactar e retomar do handoff.
+
+Checklist operacional rápido:
+- consultar no máximo o arquivo-alvo do sintoma;
+- usar janela curta (`offset/limit`) e evitar fan-out recursivo;
+- registrar achado em 1–3 linhas no checkpoint;
+- adiar varredura profunda para sessão pós-compact com contexto saudável.
+
 ## Política de retomada pós-compactação
 Retomar apenas com:
 1. `.project/handoff.json`

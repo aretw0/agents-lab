@@ -1829,6 +1829,30 @@
         "docs/research/task-bud-079-plan-2026-04-21.md"
       ],
       "notes": "Fecha gap entre calibração local rápida e distribuição na próxima release."
+    },
+    {
+      "id": "TASK-BUD-080",
+      "description": "[P1] Instituir protocolo canônico de scan-bounds no compact loop (warn/checkpoint/compact), com regra explícita de consulta limitada para logs/sessions e checklist de retomada pós-compact.",
+      "status": "in-progress",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-076"
+      ],
+      "references": [
+        "DEC-BUD-033",
+        "REQ-BUD-041"
+      ],
+      "acceptance_criteria": [
+        "Runbook do loop longo descreve comandos permitidos em modo pressionado (bounded-by-default).",
+        "Handoff canônico inclui passo de retomada pós-compact sem varredura ampla.",
+        "Evidência operacional mostra pelo menos 1 ciclo de retomada sem novo salto abrupto de contexto."
+      ],
+      "files": [
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/task-bud-080-plan-2026-04-21.md"
+      ],
+      "notes": "Task de governança operacional para prevenir repetição do incidente de contexto durante triagem de sessão."
     }
   ]
 }

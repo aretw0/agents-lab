@@ -227,6 +227,13 @@
       "decision": "Separar qualidade em duas camadas: (1) soft intent padrão com nudge de verificação por slice (não por linha), (2) hard intent progressivo via evidência canônica antes de conclusão/promoção.",
       "rationale": "Mantém fluxo pragmático e evita ruído excessivo, ao mesmo tempo em que prepara enforcement robusto e agnóstico de linguagem para usos diversos da pi-stack.",
       "context": "Discussão sobre por que monitor não influenciou testes e como calibrar defaults sem acoplamento a JavaScript/TypeScript."
+    },
+    {
+      "id": "DEC-BUD-033",
+      "status": "decided",
+      "decision": "Formalizar um guardrail de scan bounded-by-default em contexto pressionado: quando `context_watch` estiver >= warn, evitar varredura ampla de logs/sessions e preferir consultas limitadas por arquivo/offset/escopo.",
+      "rationale": "Evita explosão de contexto por comandos de busca de alto fan-out e reduz risco de parada abrupta do loop de execução durante fases críticas próximas de compactação.",
+      "context": "Incidente operacional em 2026-04-21: busca ampla (`grep`) elevou contexto para ~83% e interrompeu continuidade da fábrica."
     }
   ]
 }

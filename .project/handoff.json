@@ -1,29 +1,26 @@
 {
-  "timestamp": "2026-04-21T18:10:00Z",
-  "context": "Resposta pragmática ao tema monitor->testes: calibramos soft intent em nível de slice (TASK-BUD-077 closed) e registramos camada hard intent language-agnostic (REQ-BUD-040/TASK-BUD-078). Gap de distribuição identificado: overrides em `.pi/monitors` são locais/ignorados; promoção para superfície distribuível foi registrada em TASK-BUD-079.",
-  "current_phase": "progressive-quality-governance",
+  "timestamp": "2026-04-21T18:45:00Z",
+  "context": "Retomada pós-compactação concluída. Incidente anterior de salto para ~83% foi registrado e convertido em decisão/tarefa canônicas para prevenção (scan bounded-by-default sob pressão de contexto).",
+  "current_phase": "post-compact-resume",
   "current_tasks": [
-    "TASK-BUD-046",
-    "TASK-BUD-047",
-    "TASK-BUD-052",
-    "TASK-BUD-051",
-    "TASK-BUD-066",
-    "TASK-BUD-068",
-    "TASK-BUD-074",
-    "TASK-BUD-078",
-    "TASK-BUD-079"
+    "TASK-BUD-080",
+    "TASK-BUD-079",
+    "TASK-BUD-078"
   ],
   "blockers": [],
   "next_actions": [
-    "Executar reload quando conveniente para validar steer runtime novo de commit-hygiene na sessão ativa.",
-    "Abrir micro-slice de TASK-BUD-079 para mecanismo distribuível de nudge de verificação (sem depender de `.pi/monitors` local).",
-    "Abrir micro-slice de TASK-BUD-078 para contrato hard gate de evidência language-agnostic."
+    "Executar micro-slice de TASK-BUD-080 (definir guardrail de scan-bounds no runbook).",
+    "Seguir com TASK-BUD-079 para superfície distribuível de calibração de qualidade.",
+    "Avançar TASK-BUD-078 (hard gate language-agnostic) após contrato de governança estabilizado."
   ],
   "open_questions": [
-    "Qual limiar mínimo define 'slice coeso' de forma robusta para diferentes linguagens e stacks?"
+    "Qual gatilho mínimo para bloquear busca ampla: warn (>=50%) ou checkpoint (>=68%)?"
   ],
   "key_decisions_pending": [
-    "Follow-up DEC-BUD-032: quando migrar de advisory default para hard gate parcial por criticidade."
+    "Definir enforcement: advisory-only vs bloqueio operacional em modo warn/checkpoint."
   ],
-  "files_in_flux": []
+  "files_in_flux": [
+    ".project/decisions.json",
+    ".project/tasks.json"
+  ]
 }
