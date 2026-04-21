@@ -1,36 +1,22 @@
 {
-  "timestamp": "2026-04-21T07:20:00Z",
-  "phase": "compact-now",
-  "status": "descalibrated-reproducible",
-  "problem": "Third-party monitor classify drift (`Instructions are required`) reproduces even after cold boot.",
-  "what_went_wrong": [
-    "Sessão ficou longa demais com ciclos repetidos de diagnóstico (status + log scans), inflando contexto.",
-    "Faltou transformar hipótese em teste automatizado cedo; ficamos em validação manual por canário.",
-    "Aplicamos mitigação sem gate estrutural pré-classify (ficou frágil e sujeito a regressão)."
+  "timestamp": "2026-04-21T11:40:00Z",
+  "context": "Calibração/estabilização avançou com foco em contexto bounded: fragility empty-response hardening (classifier guardrails + pruning de patterns learned), startup noise calibration concluída, e monitor-stability-gate com tail adaptivo bounded-by-default (200k->1.2M). Sessão está estável (classifyFailures=0) com evidência determinística e canário real já validado em task C.",
+  "current_phase": "stabilization-bounded-operations",
+  "current_tasks": [
+    "TASK-BUD-061",
+    "TASK-CAL-2026-04-21-B"
   ],
-  "proof_we_can_require_with_tests": {
-    "unit": [
-      "Prefilter determinístico: quando evento não qualifica, NÃO chamar classify.",
-      "Prefilter ignora paths efêmeros sem depender de prompt/instructions."
-    ],
-    "integration": [
-      "Fixture de sessão com monitor event -> assert zero classify calls para casos filtrados.",
-      "Fixture com caso válido -> assert exatamente 1 classify call com contract válido."
-    ],
-    "e2e_smoke": [
-      "Cold boot isolated + 2 canários -> assert `monitor_sovereign_delta.thirdPartyDelta == 0`.",
-      "Falha do smoke bloqueia promoção/publicação."
-    ]
-  },
-  "next_session_strict_plan": [
-    "1) Implementar prefilter determinístico mínimo (sem escopo extra).",
-    "2) Escrever testes unit+integration antes de novo canário manual.",
-    "3) Rodar smoke cold-boot curto e registrar evidência final."
+  "blockers": [],
+  "next_actions": [
+    "Executar próximo micro-slice de estabilização com baixo risco/contexto: cobertura de smoke para superfície publicada de readiness (TASK-BUD-061) sem aumentar runtime noise.",
+    "Manter gate monitor-stability em modo bounded-default e registrar apenas evidência acionável.",
+    "Compactar ao atingir ~70% de contexto usado."
   ],
-  "operational_budget_rules": [
-    "Não repetir loops de status sem mudança de estado.",
-    "No máximo 1 leitura de log por ciclo de hipótese.",
-    "Compactar ao atingir ~70% contexto."
+  "open_questions": [
+    "Priorizar imediatamente TASK-BUD-061 (surface published readiness) ou seguir para TASK-CAL-2026-04-21-B (perfil opt-in)?"
   ],
-  "resume_prompt": "Retomar com fix test-first do prefilter pré-classify; provar com unit+integration+smoke e só depois novo canário manual."
+  "key_decisions_pending": [
+    "DEC-BUD-025 follow-up: priorização da próxima entrega publicada (readiness vs perfil opt-in)."
+  ],
+  "files_in_flux": []
 }
