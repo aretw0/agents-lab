@@ -434,6 +434,32 @@
           "evidence": "scripts/subagent-readiness-gate.mjs --source auto --days 1 --limit 1 --strict --tail-bytes 600000 => ready=true"
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-C1",
+      "target": "TASK-CAL-2026-04-21-C",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-21T10:26:10.000Z",
+      "evidence": "Pipeline reproduzível implementado via scripts/calibrate-repro.mjs + npm scripts calibrate:repro/calibrate:repro:canary. Execuções validadas: deterministic ok=true e canary ok=true com relatórios gerados em .pi/reports.",
+      "criteria_results": [
+        {
+          "criterion": "Comando único executa suíte determinística sem token real",
+          "status": "passed",
+          "evidence": "node scripts/calibrate-repro.mjs --tail-bytes 600000 => ok=true (monitor-regression-tests + monitor-stability-gate + subagent-readiness-gate-strict)."
+        },
+        {
+          "criterion": "Canary real separado e explícito com limite de custo/tokens",
+          "status": "skipped",
+          "evidence": "Canary separado foi implementado; etapa de token real com budget cap explícito permanece pendente para próximo slice."
+        },
+        {
+          "criterion": "Relatórios persistidos em .pi/reports com timestamp",
+          "status": "passed",
+          "evidence": "monitor-stability-2026-04-21T10-25-56-447Z.json e subagent-readiness-2026-04-21T10-25-56-949Z.json gerados via --canary --write-report."
+        }
+      ]
     }
   ]
 }
