@@ -1895,7 +1895,7 @@
     {
       "id": "TASK-BUD-082",
       "description": "[P1] Endurecer retenção de artefatos de colônia em terminal states (failed/budget_exceeded) para evitar perda de worktree sem evidência reaplicável.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-052"
@@ -1913,7 +1913,8 @@
         "docs/guides/unattended-swarm-execution-plan.md",
         "docs/research/colony-worktree-retention-2026-04-21.md"
       ],
-      "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery.\n[2026-04-21T20:58:00Z] Patch short-term aplicado no colony-pilot: captura snapshot de runtime em failed/budget_exceeded, persiste em .pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json e expõe runtimeSnapshotPath no retention record/artifacts."
+      "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery.\n[2026-04-21T20:58:00Z] Patch short-term aplicado no colony-pilot: captura snapshot de runtime em failed/budget_exceeded, persiste em .pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json e expõe runtimeSnapshotPath no retention record/artifacts.",
+      "verification": "VER-BUD-093"
     }
   ]
 }

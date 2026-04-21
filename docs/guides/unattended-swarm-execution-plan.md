@@ -55,6 +55,9 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
 - O control-plane deve persistir snapshot reaplicável em:
   - `.pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json`
 - O registro canônico de retenção (`.pi/colony-retention/<colony-id>.json`) deve apontar para o campo `runtimeSnapshotPath`.
+- Política operacional (snapshot-first):
+  - default: cleanup imediato da worktree + retenção por snapshot reaplicável;
+  - exceção: `keep-worktree-on-failure` apenas em debug explícito e temporário.
 - Fluxo de recuperação mínimo:
   1. `colony_pilot_artifacts` para localizar o retention record.
   2. Abrir `runtimeSnapshotPath` e usar `workspace.branch/worktreeRoot` + tarefas capturadas para promoção manual determinística.

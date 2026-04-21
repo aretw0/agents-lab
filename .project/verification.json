@@ -1137,6 +1137,32 @@
           "evidence": "Playbook adiciona seção de fallback com `context_watch_status` + inspeção de `context_watch_events`."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-093",
+      "target": "TASK-BUD-082",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Retenção de artefatos em terminal states endurecida com snapshot reaplicável no `colony-pilot`: `failed|budget_exceeded` agora persiste runtime snapshot em `.pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json`, registra `runtimeSnapshotPath/runtimeColonyId/runtimeSnapshotTaskCount` no retention record e expõe caminho de recovery em `colony_pilot_artifacts`. Política operacional documentada como snapshot-first (keep-worktree só debug explícito). Validação: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 2 files passed, 69 tests passed.",
+      "timestamp": "2026-04-21T21:40:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Em budget_exceeded/failed, existe artefato reaplicável (patch/diff/snapshot) mesmo após cleanup.",
+          "status": "passed",
+          "evidence": "`captureColonyRuntimeSnapshot` grava snapshot versionado em `.pi/colony-retention/runtime-artifacts/` e retention aponta para `runtimeSnapshotPath`."
+        },
+        {
+          "criterion": "Relatório de colônia inclui caminho de recuperação determinístico.",
+          "status": "passed",
+          "evidence": "`colony_pilot_artifacts`/status inclui `recovery:` quando `runtimeSnapshotPath` existe."
+        },
+        {
+          "criterion": "Policy define quando manter worktree temporariamente vs cleanup imediato.",
+          "status": "passed",
+          "evidence": "`docs/guides/unattended-swarm-execution-plan.md` define estratégia snapshot-first com exceção `keep-worktree-on-failure` apenas em debug explícito."
+        }
+      ]
     }
   ]
 }

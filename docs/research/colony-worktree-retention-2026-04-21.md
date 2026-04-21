@@ -26,5 +26,10 @@ Escopo: `packages/pi-stack/extensions/colony-pilot*`
 - Snapshot é evidência reaplicável para promoção manual; não substitui recovery fully-automatic.
 - Se o mirror não contiver `state.json` compatível, o retention record marca `runtimeSnapshotMissingReason`.
 
+## Política atual
+- Estratégia adotada no patch: **snapshot-first**.
+- Worktree não é preservada por padrão em terminal state; a recuperação parte do snapshot canônico.
+- Preservar worktree fica restrito a debug explícito/temporário (`keep-worktree-on-failure`).
+
 ## Próximo passo (first-party)
 Evoluir de snapshot passivo para fluxo first-party de recovery (apply assistido), incluindo comando dedicado de promoção/rehydration com trilha auditável no board canônico.

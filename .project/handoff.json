@@ -1,31 +1,30 @@
 {
-  "timestamp": "2026-04-21T21:28:00Z",
-  "context": "Pós-compact: TASK-BUD-082 segue em execução (retenção de runtime snapshot em failed/budget_exceeded já aplicada). TASK-BUD-081 foi concluída com verificação VER-BUD-092: context-watchdog agora registra trilha canônica em handoff (`context_watch_events`, ação em `next_actions`, blockers contextuais) quando há escalonamento warn/checkpoint/compact.",
+  "timestamp": "2026-04-21T21:42:00Z",
+  "context": "Pós-compact com loops estabilizados. TASK-BUD-081 concluída (VER-BUD-092) com watchdog operacional escrevendo trilha canônica no handoff. TASK-BUD-082 concluída (VER-BUD-093) com retenção snapshot-first para terminal states de colônia (`failed`/`budget_exceeded`) e recovery path determinístico via runtimeSnapshotPath.",
   "current_phase": "active-post-compact",
   "current_tasks": [
-    "TASK-BUD-082",
-    "TASK-BUD-046"
+    "TASK-BUD-046",
+    "TASK-BUD-047"
   ],
   "blockers": [
-    "colony-recovery-first-party-gap"
+    "legacy-reconciliation-pending"
   ],
   "next_actions": [
-    "Consolidar fechamento formal de TASK-BUD-082 (decidir snapshot-first vs keep-worktree-on-failure).",
     "Retomar reconciliação legada evidence-first: TASK-BUD-046 -> TASK-BUD-047 -> TASK-BUD-052 -> TASK-BUD-051.",
-    "Manter micro-slices com bounded-by-default enquanto context_watch permanecer abaixo de checkpoint."
+    "Aplicar apenas updates mínimos canônicos na reconciliação (sem auto-close estratégico sem evidência).",
+    "Manter micro-slices bounded-by-default; checkpoint em >=68 e compact em >=72."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
     "Recovery first-party deve aplicar patch automaticamente ou manter human-in-the-loop obrigatório?"
   ],
   "key_decisions_pending": [
-    "Política definitiva de recovery para budget_exceeded/failed em worktree isolation."
+    "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/context-watchdog.ts",
-    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
-    "docs/guides/openai-context-window-playbook.md",
-    "docs/research/task-bud-081-closure-2026-04-21.md",
+    "docs/guides/unattended-swarm-execution-plan.md",
+    "docs/research/colony-worktree-retention-2026-04-21.md",
+    "docs/research/task-bud-082-closure-2026-04-21.md",
     ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
