@@ -34,6 +34,8 @@ export type ContextWatchdogConfig = {
 	autoCompact: boolean;
 	autoCompactCooldownMs: number;
 	autoCompactRequireIdle: boolean;
+	autoResumeAfterCompact: boolean;
+	autoResumeCooldownMs: number;
 };
 
 export type ContextWatchThresholds = {
@@ -68,6 +70,8 @@ const DEFAULT_CONFIG: ContextWatchdogConfig = {
 	autoCompact: true,
 	autoCompactCooldownMs: 20 * 60 * 1000,
 	autoCompactRequireIdle: true,
+	autoResumeAfterCompact: true,
+	autoResumeCooldownMs: 30_000,
 };
 
 function toFiniteNumber(value: unknown): number | undefined {
@@ -89,6 +93,7 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 	const compactPct = toFiniteNumber(cfg.compactPct);
 	const cooldownMs = toFiniteNumber(cfg.cooldownMs);
 	const autoCompactCooldownMs = toFiniteNumber(cfg.autoCompactCooldownMs);
+	const autoResumeCooldownMs = toFiniteNumber(cfg.autoResumeCooldownMs);
 
 	return {
 		enabled: toBoolean(cfg.enabled, DEFAULT_CONFIG.enabled),
@@ -106,6 +111,10 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 			? Math.max(60_000, Math.floor(autoCompactCooldownMs))
 			: DEFAULT_CONFIG.autoCompactCooldownMs,
 		autoCompactRequireIdle: toBoolean(cfg.autoCompactRequireIdle, DEFAULT_CONFIG.autoCompactRequireIdle),
+		autoResumeAfterCompact: toBoolean(cfg.autoResumeAfterCompact, DEFAULT_CONFIG.autoResumeAfterCompact),
+		autoResumeCooldownMs: autoResumeCooldownMs !== undefined
+			? Math.max(5_000, Math.floor(autoResumeCooldownMs))
+			: DEFAULT_CONFIG.autoResumeCooldownMs,
 	};
 }
 
@@ -327,6 +336,22 @@ export function shouldAutoCheckpoint(
 	return (nowMs - lastAutoCheckpointAt) >= config.cooldownMs;
 }
 
+export function shouldEmitAutoResumeAfterCompact(
+	config: ContextWatchdogConfig,
+	nowMs: number,
+	lastAutoResumeAt: number,
+): boolean {
+	if (!config.autoResumeAfterCompact) return false;
+	return (nowMs - lastAutoResumeAt) >= config.autoResumeCooldownMs;
+}
+
+function autoResumePrompt(): string {
+	return [
+		"context-watch auto-resume: continue from .project/handoff.json and active tasks.",
+		"Keep micro-slice-only (1 file + 1 test) and preserve canonical board/verification flow.",
+	].join("\n");
+}
+
 export function formatContextWatchStatus(assessment: ContextWatchAssessment): string {
 	const t = assessment.thresholds;
 	return `[ctx] ${assessment.percent}% ${assessment.level} · W${t.warnPct}/C${t.checkpointPct}/X${t.compactPct}`;
@@ -356,6 +381,8 @@ export function buildContextWatchBootstrapPlan(
 						autoCompact: false,
 						autoCompactCooldownMs: 20 * 60 * 1000,
 						autoCompactRequireIdle: true,
+						autoResumeAfterCompact: false,
+						autoResumeCooldownMs: 30_000,
 					},
 				},
 			},
@@ -381,6 +408,8 @@ export function buildContextWatchBootstrapPlan(
 					autoCompact: true,
 					autoCompactCooldownMs: 20 * 60 * 1000,
 					autoCompactRequireIdle: true,
+					autoResumeAfterCompact: true,
+					autoResumeCooldownMs: 30_000,
 				},
 			},
 		},
@@ -671,6 +700,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAnnouncedAt = 0;
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
+	let lastAutoResumeAt = 0;
 	let autoCompactInFlight = false;
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
 	let autoCompactRetryDueAt = 0;
@@ -733,6 +763,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				onComplete: () => {
 					autoCompactInFlight = false;
 					ctx.ui.notify("context-watch: auto compact completed", "info");
+					const nowAfterCompact = Date.now();
+					if (shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt)) {
+						lastAutoResumeAt = nowAfterCompact;
+						pi.sendUserMessage(autoResumePrompt(), { deliverAs: "followUp" });
+						ctx.ui.notify("context-watch: auto resume queued", "info");
+					}
 				},
 				onError: (error) => {
 					autoCompactInFlight = false;
@@ -785,6 +821,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
 			retryInMs,
+			autoResumeEnabled: config.autoResumeAfterCompact,
+			autoResumeCooldownMs: config.autoResumeCooldownMs,
+			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
 		};
 	};
 
@@ -814,6 +853,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAnnouncedAt = 0;
 		lastAutoCheckpointAt = 0;
 		lastAutoCompactAt = 0;
+		lastAutoResumeAt = 0;
 		autoCompactInFlight = false;
 		clearAutoCompactRetryTimer();
 		run(ctx, "session_start");
@@ -884,6 +924,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAnnouncedAt = 0;
 				lastAutoCheckpointAt = 0;
 				lastAutoCompactAt = 0;
+				lastAutoResumeAt = 0;
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				ctx.ui.notify("context-watch: state reset", "info");
@@ -926,6 +967,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`action: ${assessment.action}`,
 					assessment.recommendation,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
+					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs}`,
 				].join("\n"),
 				assessment.severity,
 			);

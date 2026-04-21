@@ -11,6 +11,7 @@ import {
 	resolveAutoCompactRetryDelayMs,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
+	shouldEmitAutoResumeAfterCompact,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 } from "../../extensions/context-watchdog";
@@ -32,6 +33,8 @@ describe("context-watchdog", () => {
 		expect(cfg.autoCompact).toBe(true);
 		expect(cfg.autoCompactCooldownMs).toBe(20 * 60 * 1000);
 		expect(cfg.autoCompactRequireIdle).toBe(true);
+		expect(cfg.autoResumeAfterCompact).toBe(true);
+		expect(cfg.autoResumeCooldownMs).toBe(30_000);
 	});
 
 	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
@@ -139,6 +142,9 @@ describe("context-watchdog", () => {
 		expect(diag.decision.reason).toBe("not-idle");
 		expect(diag.retryRecommended).toBe(true);
 		expect(diag.retryDelayMs).toBe(2_000);
+
+		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
+		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {
@@ -151,6 +157,7 @@ describe("context-watchdog", () => {
 		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(72);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.autoCompact).toBe(true);
+		expect((control.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(true);
 
 		const worker = buildContextWatchBootstrapPlan("agent-worker");
 		expect(worker.preset).toBe("agent-worker");
@@ -158,6 +165,7 @@ describe("context-watchdog", () => {
 		expect((worker.patch.piStack as any).contextWatchdog.compactPct).toBe(78);
 		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
 		expect((worker.patch.piStack as any).contextWatchdog.autoCompact).toBe(false);
+		expect((worker.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(false);
 	});
 
 	it("applies bootstrap patch without clobbering unrelated settings", () => {
