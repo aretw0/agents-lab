@@ -38,6 +38,17 @@ describe("calibrate-repro", () => {
     assert.ok(run.json.steps.some((s) => s.id === "subagent-readiness-gate-strict"));
   });
 
+  it("uses bounded default tails per step class", () => {
+    const run = runCalibrate(["--dry-run", "--skip-monitor-tests"]);
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.ok(run.json, "expected JSON output");
+
+    const monitorGate = run.json.steps.find((s) => s.id === "monitor-stability-gate");
+    const readinessGate = run.json.steps.find((s) => s.id === "subagent-readiness-gate-strict");
+    assert.ok(monitorGate?.command?.includes("--tail-bytes 200000"));
+    assert.ok(readinessGate?.command?.includes("--tail-bytes 600000"));
+  });
+
   it("dry-run canary includes write-report steps", () => {
     const run = runCalibrate(["--dry-run", "--canary", "--skip-monitor-tests"]);
     assert.equal(run.status, 0, run.stderr || run.stdout);

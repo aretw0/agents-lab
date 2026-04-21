@@ -68,7 +68,7 @@ Trocar para lane mais enxuta quando ocorrer qualquer um:
 1. Escolher lane explicitamente no início.
 2. Manter WIP=1.
 3. Rodar calibração reproduzível:
-   - `npm run calibrate:repro` (determinístico/offline)
+   - `npm run calibrate:repro` (determinístico/offline; defaults bounded: monitor tail 200k, readiness tail 600k)
    - `npm run calibrate:repro:canary` (opt-in, gera evidências em `.pi/reports`)
    - `npm run calibrate:repro:token` (opt-in com request real, budget cap por `--real-token-max-requests`)
 4. Fechar com:

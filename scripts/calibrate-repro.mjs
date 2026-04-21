@@ -26,7 +26,8 @@ const DEFAULT_REAL_TOKEN_COMMAND_FILE = ".pi/real-token-canary.command.json";
 function parseArgs(argv) {
   const out = {
     source: "auto",
-    tailBytes: 800_000,
+    tailBytes: 200_000,
+    readinessTailBytes: 600_000,
     minUserTurns: 3,
     maxClassifyFailures: 0,
     canary: false,
@@ -53,6 +54,12 @@ function parseArgs(argv) {
       const n = Number(argv[++i]);
       if (!Number.isFinite(n) || n <= 0) throw new Error("--tail-bytes inválido");
       out.tailBytes = Math.floor(n);
+      continue;
+    }
+    if (arg === "--readiness-tail-bytes") {
+      const n = Number(argv[++i]);
+      if (!Number.isFinite(n) || n <= 0) throw new Error("--readiness-tail-bytes inválido");
+      out.readinessTailBytes = Math.floor(n);
       continue;
     }
     if (arg === "--min-user-turns") {
@@ -116,6 +123,7 @@ function parseArgs(argv) {
         "Uso:",
         "  node scripts/calibrate-repro.mjs",
         "  node scripts/calibrate-repro.mjs --canary",
+        "  node scripts/calibrate-repro.mjs --readiness-tail-bytes 600000",
         "  node scripts/calibrate-repro.mjs --canary --real-token-canary --real-token-command-file .pi/real-token-canary.command.json",
         "  node scripts/calibrate-repro.mjs --dry-run",
       ].join("\n"));
@@ -248,7 +256,7 @@ function buildSteps(opts) {
       "--source",
       opts.source,
       "--tail-bytes",
-      String(opts.tailBytes),
+      String(opts.readinessTailBytes),
       "--days",
       "1",
       "--limit",
@@ -279,7 +287,7 @@ function buildSteps(opts) {
         "--source",
         opts.source,
         "--tail-bytes",
-        String(opts.tailBytes),
+        String(opts.readinessTailBytes),
         "--days",
         "1",
         "--limit",
