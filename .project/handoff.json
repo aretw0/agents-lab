@@ -1,47 +1,51 @@
 {
-  "timestamp": "2026-04-21T23:55:00Z",
-  "context": "Compact executada e retomada concluída com TASK-BUD-012 fechada (VER-BUD-104): contrato backend-agnostic task/event formalizado, mapa de adapters consolidado e governança registrada via REQ-BUD-042 + DEC-BUD-035.",
-  "current_phase": "post-task-bud-012",
+  "timestamp": "2026-04-21T22:35:43Z",
+  "context": "Checkpoint preparado após sequência de micro-slices para autonomia pragmática do control plane: lane-queue (deferimento sem desvio), auto-drain com cooldown+idle-stability, comando manual '/lane-queue add', e status com estimativa deterministicamente calculada de nextDrain. Também foi aplicado hardening de context-watch para auto-checkpoint/auto-compact com guardrails de idle/cooldown.",
+  "current_phase": "long-run-lane-hardening",
   "current_tasks": [
+    "TASK-BUD-084",
     "TASK-BUD-018"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-warn-active"
+  ],
   "next_actions": [
-    "Iniciar micro-slice de TASK-BUD-018 (portabilidade Refarm/SQLite com sync bidirecional task/event).",
-    "Aplicar preferência operacional do usuário: quando atingir compact threshold, executar protocolo automaticamente (checkpoint + handoff + continuidade) sem aguardar confirmação manual, salvo hard blocker técnico.",
-    "Manter bounded-by-default para evitar regressão de contexto em scans amplos."
+    "Manter micro-slices (1 arquivo + 1 teste) até abaixo do limiar de checkpoint; evitar scans amplos.",
+    "Consolidar TASK-BUD-084 com um último slice de governança (integração de drenagem segura em janela idle sem duplicar semântica nativa de follow-up).",
+    "Registrar evidência canônica de fechamento parcial no board (.project/tasks + verification) para refletir commits já aplicados.",
+    "Retomar TASK-BUD-018 após estabilizar a trilha de long-run autonomy e contexto saudável."
   ],
   "open_questions": [
-    "Como transformar REQ-BUD-041 em enforcement hard end-to-end para compactação autônoma (não apenas advisory), dado limite da sessão interativa atual?",
-    "Recovery first-party deve aplicar patch automaticamente ou manter human-in-the-loop obrigatório?"
+    "Política final: lane-queue deve permanecer apenas complementar ao follow-up nativo ou ganhar interoperabilidade explícita com fila nativa?",
+    "TASK-BUD-084 fecha em uma etapa única ou será dividido em sub-verifys (queue capture, idle drain, status UX)?"
   ],
   "key_decisions_pending": [
-    "Política final de compactação autônoma no control-plane com fail-safe de segunda compactação.",
-    "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
+    "Enforcement final para compactação autônoma (advisory vs hard default) no control-plane.",
+    "Contrato final de drenagem de intenção deferida sem acoplamento pessoal às primitivas da stack."
   ],
   "files_in_flux": [
-    "docs/primitives/budget-envelope.md",
-    "docs/research/colony-project-task-bridge.md",
-    "docs/research/task-bud-012-closure-2026-04-21.md",
-    ".project/requirements.json",
-    ".project/decisions.json",
-    ".project/verification.json",
+    "packages/pi-stack/extensions/guardrails-core.ts",
+    "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
+    "packages/pi-stack/extensions/context-watchdog.ts",
+    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+    "docs/guides/agent-driver-charter.md",
     ".project/tasks.json",
+    ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-21T23:55:00Z",
+      "atIso": "2026-04-21T22:35:43Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 30,
+      "level": "warn",
+      "percent": 67,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy."
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }
