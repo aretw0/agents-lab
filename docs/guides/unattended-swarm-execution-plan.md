@@ -63,3 +63,21 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
   2. Abrir `runtimeSnapshotPath` e usar `workspace.branch/worktreeRoot` + tarefas capturadas para promoção manual determinística.
   3. Atualizar `.project/tasks.json` com nota de recovery (sem auto-close).
 
+## Template determinístico de evidência (delivery-policy friendly)
+Use este trecho no resumo final da execução para evitar falso negativo no parser:
+
+```md
+Final file inventory:
+- packages/pi-stack/extensions/colony-pilot.ts
+- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts
+
+Validation command log:
+- /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts
+- /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts
+```
+
+Regras:
+- manter heading explícito `Final file inventory` + `Validation command log`;
+- cada comando em linha própria (`- <comando>`), com caminho real executável;
+- manter coerência com comandos realmente executados no slice.
+

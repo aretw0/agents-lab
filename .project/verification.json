@@ -1241,6 +1241,58 @@
           "evidence": "TASK-BUD-047 permaneceu in-progress até reconciliação final manual com verificação."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-097",
+      "target": "TASK-BUD-052",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Padronização de evidência de entrega aplicada no delivery parser: `evaluateColonyDeliveryEvidence` agora aceita `Validation command log` com comandos em bullets (incluindo path para `node.exe`) e mantém proteção contra falso positivo quando só há heading sem comando. Documentação operacional recebeu template determinístico em `docs/guides/unattended-swarm-execution-plan.md`. Teste: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-retention.test.ts` => 2 files passed, 71 tests passed.",
+      "timestamp": "2026-04-21T22:25:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Run summary sempre inclui seção explícita de comandos de validação em formato parseável pelo delivery-policy.",
+          "status": "passed",
+          "evidence": "Guia unattended inclui template `Final file inventory` + `Validation command log` em formato determinístico."
+        },
+        {
+          "criterion": "Smoke test cobre caso positivo e regressão de falso negativo para validation command log.",
+          "status": "passed",
+          "evidence": "Novos testes em colony-pilot-parsers: heading+bullet sem backticks (passa) e heading sem comando (falha)."
+        },
+        {
+          "criterion": "Checklist de operação unattended referencia template determinístico de evidência.",
+          "status": "passed",
+          "evidence": "Seção `Template determinístico de evidência (delivery-policy friendly)` adicionada no runbook unattended."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-098",
+      "target": "TASK-BUD-051",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Fechamento RC multi-provider sem publish validado com evidência determinística: (1) `colony_pilot_preflight` retornou `ok=true` sem gaps; (2) `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe scripts/verify-pi-stack.mjs` => 11 verificações passaram; (3) smoke `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/guardrails-provider-budget-governor.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 3 files passed, 104 tests passed; (4) changeset `.changeset/bright-spoons-jam.md` mantém RC com riscos explícitos e sem auto-publish. Consolidação em `docs/research/task-bud-051-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T22:32:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Hatch check pronto no setup alvo.",
+          "status": "passed",
+          "evidence": "`colony_pilot_preflight` ok=true sem missing capabilities/executables."
+        },
+        {
+          "criterion": "Smoke/node tests/verify sem regressão.",
+          "status": "passed",
+          "evidence": "verify-pi-stack e suíte smoke (104 testes) executadas com sucesso."
+        },
+        {
+          "criterion": "Changeset e notas de risco preparados (sem publish).",
+          "status": "passed",
+          "evidence": "`.changeset/bright-spoons-jam.md` contém RC + seção de riscos/limites; sem publish automático."
+        }
+      ]
     }
   ]
 }

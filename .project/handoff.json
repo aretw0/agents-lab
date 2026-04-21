@@ -1,18 +1,19 @@
 {
-  "timestamp": "2026-04-21T22:10:00Z",
-  "context": "Reconciliação legada avançou com fechamento evidence-first de TASK-BUD-046 (VER-BUD-095) e TASK-BUD-047 (VER-BUD-096), sem auto-close automático. Loops de watchdog/retenção seguem estáveis pós-reload, contexto em nível ok.",
-  "current_phase": "legacy-sequence-next",
+  "timestamp": "2026-04-21T22:36:00Z",
+  "context": "Reconciliação legacy 046/047 concluída e sequência 052->051 finalizada no modo evidence-first. TASK-BUD-052 fechada com parser determinístico de validation command log + template unattended; TASK-BUD-051 fechada com preflight ok, verify/smoke sem regressão e RC sem publish com riscos explícitos em changeset.",
+  "current_phase": "legacy-sequence-completed",
   "current_tasks": [
-    "TASK-BUD-052",
-    "TASK-BUD-051"
+    "TASK-BUD-010",
+    "TASK-BUD-013"
   ],
   "blockers": [
-    "task-bud-052-delivery-evidence-standardization-pending"
+    "context-watch-warn-active",
+    "legacy-delivery-hardening-followups"
   ],
   "next_actions": [
-    "Consolidar TASK-BUD-052 (padrão determinístico de file inventory + validation command log detectável).",
-    "Depois destravar/fechar TASK-BUD-051 com base na padronização de evidência de entrega.",
-    "Manter micro-slices bounded-by-default; checkpoint em >=68 e compact em >=72."
+    "Context-watch action: level=warn 52% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
+    "Retomar backlog estrutural in-progress: TASK-BUD-010 e TASK-BUD-013 com slices curtos.",
+    "Manter protocolo bounded-by-default até sair de warn ou atingir checkpoint (>=68)."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -22,10 +23,28 @@
     "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "docs/research/task-bud-046-closure-2026-04-21.md",
-    "docs/research/task-bud-047-closure-2026-04-21.md",
+    "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+    "docs/guides/unattended-swarm-execution-plan.md",
+    "docs/research/task-bud-052-closure-2026-04-21.md",
+    "docs/research/task-bud-051-closure-2026-04-21.md",
     ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
+  ],
+  "context_watch_events": [
+    {
+      "atIso": "2026-04-21T22:36:00Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 52,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+    }
   ]
 }

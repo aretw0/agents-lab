@@ -1088,7 +1088,7 @@
     {
       "id": "TASK-BUD-051",
       "description": "[P0] Executar Lote D unattended para fechar release candidate de governança multi-provider (TASK-BUD-029) sem publish.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-050"
@@ -1108,12 +1108,13 @@
         "docs/guides/budget-governance.md",
         "docs/guides/quota-visibility.md"
       ],
-      "notes": "[2026-04-19] Lote D final iniciado em modo artifact-first (sem publish) para fechar candidate de governança multi-provider.\n[2026-04-19] Disparo autorizado a partir da consolidação de TASK-BUD-050 (c4 failed + c5 delta-audit com evidência determinística suficiente).\n[2026-04-19] c6 concluída (31/31, $1.26, 14m47s) com checkpoint final e hardening de evidência/parser em estado candidato revisável; pendente materialização explícita no main."
+      "notes": "[2026-04-19] Lote D final iniciado em modo artifact-first (sem publish) para fechar candidate de governança multi-provider.\n[2026-04-19] Disparo autorizado a partir da consolidação de TASK-BUD-050 (c4 failed + c5 delta-audit com evidência determinística suficiente).\n[2026-04-19] c6 concluída (31/31, $1.26, 14m47s) com checkpoint final e hardening de evidência/parser em estado candidato revisável; pendente materialização explícita no main.",
+      "verification": "VER-BUD-098"
     },
     {
       "id": "TASK-BUD-052",
       "description": "[P1] Padronizar evidência determinística de entrega de swarm (file inventory + validation command log detectável) para reduzir promoções manuais.",
-      "status": "in-progress",
+      "status": "completed",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-047"
@@ -1132,7 +1133,8 @@
         "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
         "docs/guides/unattended-swarm-execution-plan.md"
       ],
-      "notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções.\n[2026-04-19] Lote C-unlock reportou endurecimento adicional (candidate) para reduzir falso negativo de validation command log; pendente materialização explícita no main.\n[2026-04-19] Lote C principal (c3) reportou reforço de testes/evidence e ajuste de ambiente Vitest em candidate-only, aguardando promoção/materialização explícita.\n[2026-04-19] Lote D final (c6) reportou migração/validação extensa de smoke parser em modo node-native para reforçar trilha determinística de evidência (candidate-only)."
+      "notes": "Criada após Lote B (2026-04-19): run técnica completou, mas delivery-policy bloqueou por ausência de command log detectável; objetivo é reduzir intervenção humana em promoções.\n[2026-04-19] Lote C-unlock reportou endurecimento adicional (candidate) para reduzir falso negativo de validation command log; pendente materialização explícita no main.\n[2026-04-19] Lote C principal (c3) reportou reforço de testes/evidence e ajuste de ambiente Vitest em candidate-only, aguardando promoção/materialização explícita.\n[2026-04-19] Lote D final (c6) reportou migração/validação extensa de smoke parser em modo node-native para reforçar trilha determinística de evidência (candidate-only).",
+      "verification": "VER-BUD-097"
     },
     {
       "id": "TASK-BUD-053",
