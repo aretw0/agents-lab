@@ -124,8 +124,8 @@ Override opcional em `.pi/settings.json`:
 ## Context watchdog (advisory, não-bloqueante)
 
 A extensão `context-watchdog` adiciona sinais operacionais para sessões long-run:
-- tool: `context_watch_status`
-- command: `/context-watch [status|reset]`
+- tools: `context_watch_status`, `context_watch_bootstrap`
+- command: `/context-watch [status|reset|bootstrap [control-plane|agent-worker]]`
 - status key: `context-watch`
 
 Defaults derivados (sem override):
@@ -136,6 +136,10 @@ Níveis:
 - `warn` → operar em micro-slices
 - `checkpoint` → registrar handoff antes do próximo slice grande
 - `compact` → compactar e retomar do checkpoint
+
+Para bootstrap portável de novos agentes, use:
+- `context_watch_bootstrap` com `preset=control-plane` (sessões long-run)
+- `context_watch_bootstrap` com `preset=agent-worker` (delegados/worker com menos notify)
 
 Config opcional em `.pi/settings.json`:
 

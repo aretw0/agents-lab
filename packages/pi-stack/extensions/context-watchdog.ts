@@ -46,6 +46,14 @@ export type ContextWatchAssessment = {
 	severity: "info" | "warning";
 };
 
+export type ContextWatchBootstrapPreset = "control-plane" | "agent-worker";
+
+export type ContextWatchBootstrapPlan = {
+	preset: ContextWatchBootstrapPreset;
+	patch: Record<string, unknown>;
+	notes: string[];
+};
+
 const DEFAULT_CONFIG: ContextWatchdogConfig = {
 	enabled: true,
 	cooldownMs: 10 * 60 * 1000,
@@ -182,6 +190,57 @@ export function formatContextWatchStatus(assessment: ContextWatchAssessment): st
 	return `[ctx] ${assessment.percent}% ${assessment.level} · W${t.warnPct}/C${t.checkpointPct}/X${t.compactPct}`;
 }
 
+export function parseContextBootstrapPreset(input: unknown): ContextWatchBootstrapPreset {
+	return input === "agent-worker" ? "agent-worker" : "control-plane";
+}
+
+export function buildContextWatchBootstrapPlan(
+	presetInput?: unknown,
+): ContextWatchBootstrapPlan {
+	const preset = parseContextBootstrapPreset(presetInput);
+	if (preset === "agent-worker") {
+		return {
+			preset,
+			patch: {
+				piStack: {
+					contextWatchdog: {
+						enabled: true,
+						checkpointPct: 72,
+						compactPct: 78,
+						cooldownMs: 15 * 60 * 1000,
+						notify: false,
+						status: true,
+					},
+				},
+			},
+			notes: [
+				"worker preset: minimizes notify noise while preserving status telemetry.",
+				"recommended for short-lived delegated agents and swarm workers.",
+			],
+		};
+	}
+
+	return {
+		preset: "control-plane",
+		patch: {
+			piStack: {
+				contextWatchdog: {
+					enabled: true,
+					checkpointPct: 68,
+					compactPct: 72,
+					cooldownMs: 10 * 60 * 1000,
+					notify: true,
+					status: true,
+				},
+			},
+		},
+		notes: [
+			"control-plane preset: checkpoint near 70% to preserve long-run continuity.",
+			"compact recommendation remains advisory (non-blocking).",
+		],
+	};
+}
+
 function readSettingsJson(cwd: string): Record<string, unknown> {
 	const candidates = [
 		path.join(cwd, ".pi", "settings.json"),
@@ -308,15 +367,47 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		},
 	});
 
+	pi.registerTool({
+		name: "context_watch_bootstrap",
+		label: "Context Watch Bootstrap",
+		description:
+			"Returns a portable long-run context-watch preset patch (control-plane or agent-worker).",
+		parameters: Type.Object({
+			preset: Type.Optional(Type.String({ description: "control-plane | agent-worker" })),
+		}),
+		async execute(_toolCallId, params) {
+			const p = params as { preset?: string };
+			const plan = buildContextWatchBootstrapPlan(p.preset);
+			return {
+				content: [{ type: "text", text: JSON.stringify(plan, null, 2) }],
+				details: plan,
+			};
+		},
+	});
+
 	pi.registerCommand("context-watch", {
-		description: "Show or reset context-watch state. Usage: /context-watch [status|reset]",
+		description: "Show/reset status or print bootstrap patch. Usage: /context-watch [status|reset|bootstrap [control-plane|agent-worker]]",
 		handler: async (args, ctx) => {
-			const sub = String(args ?? "").trim().toLowerCase() || "status";
+			const tokens = String(args ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+			const sub = tokens[0] ?? "status";
 			if (sub === "reset") {
 				lastAssessment = null;
 				lastAnnouncedLevel = null;
 				lastAnnouncedAt = 0;
 				ctx.ui.notify("context-watch: state reset", "info");
+				return;
+			}
+
+			if (sub === "bootstrap") {
+				const plan = buildContextWatchBootstrapPlan(tokens[1]);
+				ctx.ui.notify(
+					[
+						`context-watch bootstrap (${plan.preset})`,
+						JSON.stringify(plan.patch, null, 2),
+						...plan.notes.map((n) => `- ${n}`),
+					].join("\n"),
+					"info",
+				);
 				return;
 			}
 

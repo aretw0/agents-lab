@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	normalizeContextWatchdogConfig,
+	parseContextBootstrapPreset,
 	shouldAnnounceContextWatch,
 } from "../../extensions/context-watchdog";
 
@@ -57,5 +59,22 @@ describe("context-watchdog", () => {
 		expect(shouldAnnounceContextWatch("checkpoint", "checkpoint", 601_000, 600_000)).toBe(true);
 		expect(shouldAnnounceContextWatch("compact", "compact", 601_000, 600_000)).toBe(true);
 		expect(shouldAnnounceContextWatch("compact", "ok", 601_000, 600_000)).toBe(false);
+	});
+
+	it("builds portable bootstrap plans for control-plane and worker presets", () => {
+		expect(parseContextBootstrapPreset(undefined)).toBe("control-plane");
+		expect(parseContextBootstrapPreset("agent-worker")).toBe("agent-worker");
+
+		const control = buildContextWatchBootstrapPlan("control-plane");
+		expect(control.preset).toBe("control-plane");
+		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(68);
+		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(72);
+		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
+
+		const worker = buildContextWatchBootstrapPlan("agent-worker");
+		expect(worker.preset).toBe("agent-worker");
+		expect((worker.patch.piStack as any).contextWatchdog.checkpointPct).toBe(72);
+		expect((worker.patch.piStack as any).contextWatchdog.compactPct).toBe(78);
+		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
 	});
 });
