@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-04-21T20:32:00Z",
-  "context": "Preparação ativa para compactação com contexto em faixa warn (65%, W50/C68/X72). Gap confirmado de visibilidade operacional do watchdog (aviso emitido sem influência clara no fluxo). Colônia c1 encerrou em budget_exceeded com saída parcial, mas sem worktree disponível para inspeção posterior.",
+  "context": "Preparação ativa para compactação com contexto em faixa warn (65%, W50/C68/X72). Gap confirmado de visibilidade operacional do watchdog (aviso emitido sem influência clara no fluxo). Colônia c1 encerrou em budget_exceeded com saída parcial, mas sem worktree disponível para inspeção posterior. Evidência técnica confirmada: cleanup em @ifi/oh-pi-ant-colony/worktree.ts remove worktree/branch (`git worktree remove --force` + `rmSync(worktreeRoot)`) em terminal states.",
   "current_phase": "pre-compact-warning",
   "current_tasks": [
     "TASK-BUD-081",
