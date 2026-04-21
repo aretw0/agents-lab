@@ -1655,6 +1655,32 @@
       ],
       "notes": "Criada a partir de feedback direto do usuário para reduzir fricção de adoção e deixar agentes prontos para operar em sistemas heterogêneos. Incluir modo espelho `.project` -> Markdown humano (referência inicial: https://github.com/aretw0/vault-seed) como adapter opt-in. [2026-04-21] Primeira parcial aplicada nos guias canônicos (`project-canonical-pipeline` + `openai-context-window-playbook`) com framing dual-mode e mirror opt-in; pendente checklist 2-min completo + exemplo em `session-triage`.",
       "verification": "VER-BUD-082"
+    },
+    {
+      "id": "TASK-BUD-073",
+      "description": "[P1] Preparar fila da próxima release com slice de maturidade (context preload + onboarding dual-mode/mirror) e runbook de isolamento dogfood TUI+WEB unificado.",
+      "status": "completed",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-071",
+        "TASK-BUD-072"
+      ],
+      "references": [
+        "REQ-BUD-035",
+        "DEC-BUD-028"
+      ],
+      "acceptance_criteria": [
+        "Changeset criado para @aretw0/pi-stack cobrindo preload + dual-mode/mirror.",
+        "Novo guia de isolamento unificado documenta fluxo workspace-isolated + session-web + gates essenciais.",
+        "Índice de guias inclui o novo runbook para descoberta rápida."
+      ],
+      "files": [
+        ".changeset/*.md",
+        "docs/guides/unified-dogfood-isolation.md",
+        "docs/guides/README.md"
+      ],
+      "notes": "Slice de preparação de release (sem publish) para garantir que as melhorias recentes entrem na próxima janela de lançamento.",
+      "verification": "VER-BUD-083"
     }
   ]
 }

@@ -442,6 +442,23 @@
         "Atualizações críticas (status/verificação) continuam decididas no canônico e projetadas para o espelho com rastreabilidade.",
         "Guia de onboarding referencia template inicial para vault Markdown (ex.: `vault-seed`) como adapter de saída humana."
       ]
+    },
+    {
+      "id": "REQ-BUD-035",
+      "description": "A próxima release deve incluir explicitamente as capacidades de contexto fresco (warm preload) e onboarding dual-mode/mirror, com orientação de isolamento para dogfood TUI+WEB.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-033",
+        "REQ-BUD-034"
+      ],
+      "acceptance_criteria": [
+        "Existe changeset em fila citando preload de contexto e onboarding dual-mode/mirror como parte da release.",
+        "Guia operacional de isolamento descreve fluxo unificado TUI+WEB em ambiente workspace-isolated.",
+        "Adoção continua pragmática: sem publish automático, apenas fila de release preparada com riscos/limites claros."
+      ]
     }
   ]
 }

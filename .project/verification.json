@@ -962,6 +962,15 @@
       "method": "inspect",
       "evidence": "Onboarding dual-mode documentado com checklist operacional: `docs/guides/project-canonical-pipeline.md` (seção Onboarding dual-mode + Modo C mirror), `docs/guides/openai-context-window-playbook.md` (warm packs `context:preload` para spawn por modo), `docs/guides/session-triage.md` (seção Escolha de modo 2 min + checklist de spawn). Inclui referência de espelho Markdown/Obsidian (`vault-seed`).",
       "timestamp": "2026-04-21T16:38:00Z"
+    },
+    {
+      "id": "VER-BUD-083",
+      "target": "TASK-BUD-073",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Fila de release preparada sem publish: changeset `.changeset/fresh-horns-laugh.md` para `@aretw0/pi-stack` cobrindo preload + onboarding dual-mode/mirror. Runbook de isolamento unificado criado em `docs/guides/unified-dogfood-isolation.md` com fluxo `pi:isolated` + `/session-web` + gates (`preflight/readiness/context-watch`). Índice atualizado em `docs/guides/README.md`.",
+      "timestamp": "2026-04-21T16:55:00Z"
     }
   ]
 }
