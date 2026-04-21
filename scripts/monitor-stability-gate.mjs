@@ -12,6 +12,7 @@
  */
 
 import { spawnSync } from "node:child_process";
+import { statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -19,6 +20,8 @@ function parseArgs(argv) {
 	const out = {
 		source: "auto",
 		tailBytes: 1_000_000,
+		maxTailBytes: 5_000_000,
+		autoExpandTail: true,
 		minUserTurns: 3,
 		maxClassifyFailures: 0,
 		requireSovereignDelta: false,
@@ -39,6 +42,16 @@ function parseArgs(argv) {
 			const n = Number(argv[++i]);
 			if (!Number.isFinite(n) || n <= 0) throw new Error("--tail-bytes inválido");
 			out.tailBytes = Math.floor(n);
+			continue;
+		}
+		if (arg === "--max-tail-bytes") {
+			const n = Number(argv[++i]);
+			if (!Number.isFinite(n) || n <= 0) throw new Error("--max-tail-bytes inválido");
+			out.maxTailBytes = Math.floor(n);
+			continue;
+		}
+		if (arg === "--no-auto-expand-tail") {
+			out.autoExpandTail = false;
 			continue;
 		}
 		if (arg === "--min-user-turns") {
@@ -71,23 +84,25 @@ function parseArgs(argv) {
 				"  node scripts/monitor-stability-gate.mjs",
 				"  node scripts/monitor-stability-gate.mjs --min-user-turns 3 --max-classify-failures 0",
 				"  node scripts/monitor-stability-gate.mjs --require-sovereign-delta --write-report",
+				"  node scripts/monitor-stability-gate.mjs --tail-bytes 300000 --max-tail-bytes 2000000",
 			].join("\n"));
 			process.exit(0);
 		}
 		throw new Error(`Argumento desconhecido: ${arg}`);
 	}
 
+	out.maxTailBytes = Math.max(out.tailBytes, out.maxTailBytes);
 	return out;
 }
 
-function runEvidence(opts) {
+function runEvidenceAtTail(opts, tailBytes) {
 	const evidenceScript = path.join(process.cwd(), "scripts", "monitor-stability-evidence.mjs");
 	const args = [
 		evidenceScript,
 		"--source",
 		opts.source,
 		"--tail-bytes",
-		String(opts.tailBytes),
+		String(tailBytes),
 	];
 	if (opts.writeReport) args.push("--write-report");
 
@@ -110,6 +125,43 @@ function runEvidence(opts) {
 	} catch {
 		throw new Error("falha ao parsear JSON do evidence script");
 	}
+}
+
+function resolveAdaptiveEvidence(opts) {
+	let tailBytes = opts.tailBytes;
+	const attempts = [];
+
+	for (let pass = 0; pass < 8; pass++) {
+		const report = runEvidenceAtTail(opts, tailBytes);
+		const userTurns = report?.sessionStats?.userMessages ?? 0;
+		attempts.push({ tailBytes, userTurns });
+
+		if (!opts.autoExpandTail || userTurns >= opts.minUserTurns) {
+			return { report, tailBytesUsed: tailBytes, tailAttempts: attempts };
+		}
+
+		const sessionFile = report?.sessionFile;
+		if (!sessionFile) {
+			return { report, tailBytesUsed: tailBytes, tailAttempts: attempts };
+		}
+
+		let fileSize = 0;
+		try {
+			fileSize = Math.max(1, statSync(sessionFile).size);
+		} catch {
+			return { report, tailBytesUsed: tailBytes, tailAttempts: attempts };
+		}
+
+		const nextTail = Math.min(opts.maxTailBytes, fileSize, tailBytes * 2);
+		if (nextTail <= tailBytes) {
+			return { report, tailBytesUsed: tailBytes, tailAttempts: attempts };
+		}
+		tailBytes = nextTail;
+	}
+
+	const report = runEvidenceAtTail(opts, tailBytes);
+	attempts.push({ tailBytes, userTurns: report?.sessionStats?.userMessages ?? 0 });
+	return { report, tailBytesUsed: tailBytes, tailAttempts: attempts };
 }
 
 function buildChecks(report, opts) {
@@ -154,8 +206,13 @@ function main() {
 	}
 
 	let report;
+	let tailBytesUsed = opts.tailBytes;
+	let tailAttempts = [];
 	try {
-		report = runEvidence(opts);
+		const resolved = resolveAdaptiveEvidence(opts);
+		report = resolved.report;
+		tailBytesUsed = resolved.tailBytesUsed;
+		tailAttempts = resolved.tailAttempts;
 	} catch (err) {
 		console.error(String(err?.message ?? err));
 		process.exit(2);
@@ -170,6 +227,9 @@ function main() {
 			minUserTurns: opts.minUserTurns,
 			maxClassifyFailures: opts.maxClassifyFailures,
 			requireSovereignDelta: opts.requireSovereignDelta,
+			tailBytes: opts.tailBytes,
+			maxTailBytes: opts.maxTailBytes,
+			autoExpandTail: opts.autoExpandTail,
 		},
 		summary: {
 			source: report.source,
@@ -178,6 +238,8 @@ function main() {
 			classifyFailures: report?.classifyFailures?.total ?? 0,
 			sovereignDeltaMentions: report?.sovereignDelta?.mentions ?? 0,
 			reportFile: report.reportFile,
+			tailBytesUsed,
+			tailAttempts,
 		},
 		checks,
 	};

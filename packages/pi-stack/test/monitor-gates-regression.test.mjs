@@ -151,4 +151,39 @@ describe("monitor stability gates (deterministic fixtures)", () => {
     assert.equal(run.json.summary.userTurns, 3);
     assert.equal(run.json.summary.classifyFailures, 0);
   });
+
+  it("gate auto-expands tail when initial slice undercounts user turns", () => {
+    const huge = "x".repeat(300_000);
+    writeSessionFixture(tmpAgentDir, "session-d.jsonl", [
+      msg("user", "turn1"),
+      msg("user", "turn2"),
+      msg("user", "turn3"),
+      msg("assistant", huge),
+    ]);
+
+    const run = runScript(
+      "scripts/monitor-stability-gate.mjs",
+      [
+        "--source",
+        "auto",
+        "--tail-bytes",
+        "20000",
+        "--max-tail-bytes",
+        "1000000",
+        "--min-user-turns",
+        "3",
+        "--max-classify-failures",
+        "0",
+      ],
+      { env: { PI_CODING_AGENT_DIR: tmpAgentDir } },
+    );
+
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.ok(run.json, "expected JSON output");
+    assert.equal(run.json.stable, true);
+    assert.equal(run.json.summary.userTurns, 3);
+    assert.ok(run.json.summary.tailBytesUsed > 20000);
+    assert.ok(Array.isArray(run.json.summary.tailAttempts));
+    assert.ok(run.json.summary.tailAttempts.length >= 2);
+  });
 });
