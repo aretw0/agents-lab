@@ -51,10 +51,12 @@
 	"piStack": {
 		"monitorProviderPatch": {
 			"classifierThinking": "off",
+			"hedgeWhen": "has_bash",
+			"hedgeIncludeProjectContext": false,
+			"hedgeConversationHistory": false,
 			"classifierModelByProvider": {
 				"openai-codex": "openai-codex/gpt-5.4-mini"
-			},
-			"hedgeConversationHistory": false
+			}
 		},
 		"colonyPilot": {
 			"preflight": {

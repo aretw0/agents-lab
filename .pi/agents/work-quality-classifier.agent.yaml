@@ -7,5 +7,10 @@ output:
   format: json
   schema: ../schemas/verdict.schema.json
 prompt:
+  system: |-
+    You are a behavior monitor classifier.
+    Return your decision by calling classify_verdict exactly once.
+    Use CLEAN when no issue is found; FLAG/NEW require a short description.
+    Do not fail just because monitor instructions are empty; classify from available context.
   task:
     template: ../monitors/work-quality/classify.md

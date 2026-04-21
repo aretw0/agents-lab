@@ -150,6 +150,9 @@ vite.config.ts.timestamp-*
 .pi/snapshots/
 .pi/colony-retention/
 
+# Workspace-local isolated agent runtime (pi-isolated)
+.sandbox/
+
 # Pi versioned configuration + single-board clock
 # Policy: .pi/settings.json and .pi/agents/*.yaml are shared config — versioned.
 # .project/**/*.json is the canonical task board and architecture record — versioned.
