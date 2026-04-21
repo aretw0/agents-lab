@@ -1007,6 +1007,32 @@
       "method": "inspect",
       "evidence": "Calibração soft intent aplicada em monitores: (1) `.pi/monitors/commit-hygiene.monitor.json` steer atualizado para recomendar verificação language-agnostic antes de commit; (2) `.pi/monitors/commit-hygiene.instructions.json` recebeu regra para nudge quando há mudanças tracked sem evidência de verificação; (3) `.pi/monitors/work-quality.instructions.json` recebeu regra anti-spam para no-verify em granularidade de slice coeso. `monitors-inspect` confirmou contagem de instruções (`commit-hygiene`=4, `work-quality`=3).",
       "timestamp": "2026-04-21T18:00:00Z"
+    },
+    {
+      "id": "VER-BUD-088",
+      "target": "TASK-BUD-080",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Guardrail de scan bounded-by-default formalizado e aplicado no loop canônico: DEC-BUD-033 registrada; runbooks atualizados em docs/guides/openai-context-window-playbook.md e docs/guides/project-canonical-pipeline.md; handoff pós-compact atualizado em .project/handoff.json; patrol recente confirmou execução estável com context_watch_status=13 (level=ok) sem novo salto abrupto.",
+      "timestamp": "2026-04-21T19:05:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Runbook do loop longo descreve comandos permitidos em modo pressionado (bounded-by-default).",
+          "status": "passed",
+          "evidence": "Seção 'Guardrail de investigação sob pressão (bounded-by-default)' adicionada no playbook e seção 'Guardrail de scan-bounds no loop longo' no pipeline canônico."
+        },
+        {
+          "criterion": "Handoff canônico inclui passo de retomada pós-compact sem varredura ampla.",
+          "status": "passed",
+          "evidence": ".project/handoff.json atualizado na retomada pós-compact com diretriz de micro-slices bounded-by-default."
+        },
+        {
+          "criterion": "Evidência operacional mostra pelo menos 1 ciclo de retomada sem novo salto abrupto de contexto.",
+          "status": "passed",
+          "evidence": "Patrol de control-plane executado após compactação: context_watch_status percent=13, level=ok, operação normal sem novo spike."
+        }
+      ]
     }
   ]
 }

@@ -1,26 +1,27 @@
 {
-  "timestamp": "2026-04-21T18:45:00Z",
-  "context": "Retomada pós-compactação concluída. Incidente anterior de salto para ~83% foi registrado e convertido em decisão/tarefa canônicas para prevenção (scan bounded-by-default sob pressão de contexto).",
-  "current_phase": "post-compact-resume",
+  "timestamp": "2026-04-21T19:05:00Z",
+  "context": "Retomada pós-compact estabilizada: TASK-BUD-080 concluída com evidência canônica (VER-BUD-088). Guardrail bounded-by-default está documentado no playbook de contexto e no pipeline canônico.",
+  "current_phase": "post-compact-stabilization",
   "current_tasks": [
-    "TASK-BUD-080",
     "TASK-BUD-079",
-    "TASK-BUD-078"
+    "TASK-BUD-078",
+    "TASK-BUD-074"
   ],
   "blockers": [],
   "next_actions": [
-    "Executar micro-slice de TASK-BUD-080 (definir guardrail de scan-bounds no runbook).",
-    "Seguir com TASK-BUD-079 para superfície distribuível de calibração de qualidade.",
-    "Avançar TASK-BUD-078 (hard gate language-agnostic) após contrato de governança estabilizado."
+    "Executar micro-slice de TASK-BUD-079 para promover calibração distribuível fora de .pi/monitors local.",
+    "Avançar design de TASK-BUD-078 (hard gate language-agnostic em verification).",
+    "Planejar recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional)."
   ],
   "open_questions": [
-    "Qual gatilho mínimo para bloquear busca ampla: warn (>=50%) ou checkpoint (>=68%)?"
+    "No guardrail de scan-bounds, enforcement default permanece advisory em warn ou sobe para hard only em checkpoint?"
   ],
   "key_decisions_pending": [
-    "Definir enforcement: advisory-only vs bloqueio operacional em modo warn/checkpoint."
+    "Calibrar política final de enforcement (advisory vs hard) para scan-bounds conforme maturidade operacional."
   ],
   "files_in_flux": [
-    ".project/decisions.json",
-    ".project/tasks.json"
+    ".project/verification.json",
+    ".project/tasks.json",
+    ".project/handoff.json"
   ]
 }
