@@ -8,6 +8,8 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	shouldAnnounceContextWatch,
+	shouldAutoCheckpoint,
+	shouldTriggerAutoCompact,
 } from "../../extensions/context-watchdog";
 
 describe("context-watchdog", () => {
@@ -23,6 +25,10 @@ describe("context-watchdog", () => {
 		expect(cfg.checkpointPct).toBe(99);
 		expect(cfg.compactPct).toBe(2);
 		expect(cfg.cooldownMs).toBe(60_000);
+		expect(cfg.autoCheckpoint).toBe(true);
+		expect(cfg.autoCompact).toBe(true);
+		expect(cfg.autoCompactCooldownMs).toBe(20 * 60 * 1000);
+		expect(cfg.autoCompactRequireIdle).toBe(true);
 	});
 
 	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
@@ -63,6 +69,45 @@ describe("context-watchdog", () => {
 		expect(shouldAnnounceContextWatch("compact", "ok", 601_000, 600_000)).toBe(false);
 	});
 
+	it("auto-checkpoint/compact gates are deterministic", () => {
+		const cfg = normalizeContextWatchdogConfig({
+			autoCheckpoint: true,
+			autoCompact: true,
+			autoCompactCooldownMs: 120_000,
+			autoCompactRequireIdle: true,
+			cooldownMs: 60_000,
+		});
+		const compact = evaluateContextWatch(72, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
+		const checkpoint = evaluateContextWatch(68, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
+
+		expect(shouldAutoCheckpoint(checkpoint, cfg, 120_000, 0)).toBe(true);
+		expect(shouldAutoCheckpoint(checkpoint, cfg, 30_000, 0)).toBe(false);
+
+		expect(shouldTriggerAutoCompact(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: true,
+			hasPendingMessages: false,
+		})).toEqual({ trigger: true, reason: "trigger" });
+
+		expect(shouldTriggerAutoCompact(compact, cfg, {
+			nowMs: 30_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: true,
+			hasPendingMessages: false,
+		})).toEqual({ trigger: false, reason: "cooldown" });
+
+		expect(shouldTriggerAutoCompact(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: false,
+			hasPendingMessages: true,
+		})).toEqual({ trigger: false, reason: "not-idle" });
+	});
+
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {
 		expect(parseContextBootstrapPreset(undefined)).toBe("control-plane");
 		expect(parseContextBootstrapPreset("agent-worker")).toBe("agent-worker");
@@ -72,12 +117,14 @@ describe("context-watchdog", () => {
 		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(68);
 		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(72);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
+		expect((control.patch.piStack as any).contextWatchdog.autoCompact).toBe(true);
 
 		const worker = buildContextWatchBootstrapPlan("agent-worker");
 		expect(worker.preset).toBe("agent-worker");
 		expect((worker.patch.piStack as any).contextWatchdog.checkpointPct).toBe(72);
 		expect((worker.patch.piStack as any).contextWatchdog.compactPct).toBe(78);
 		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
+		expect((worker.patch.piStack as any).contextWatchdog.autoCompact).toBe(false);
 	});
 
 	it("applies bootstrap patch without clobbering unrelated settings", () => {

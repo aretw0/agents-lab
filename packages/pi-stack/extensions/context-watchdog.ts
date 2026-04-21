@@ -8,7 +8,7 @@
  * - suggest checkpoint at a configurable threshold
  * - suggest compact near hard pressure
  *
- * This extension is advisory only (no blocking).
+ * Supports autonomous checkpoint/compact actions with cooldown + idle guards.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -30,6 +30,10 @@ export type ContextWatchdogConfig = {
 	cooldownMs: number;
 	notify: boolean;
 	status: boolean;
+	autoCheckpoint: boolean;
+	autoCompact: boolean;
+	autoCompactCooldownMs: number;
+	autoCompactRequireIdle: boolean;
 };
 
 export type ContextWatchThresholds = {
@@ -60,12 +64,20 @@ const DEFAULT_CONFIG: ContextWatchdogConfig = {
 	cooldownMs: 10 * 60 * 1000,
 	notify: true,
 	status: true,
+	autoCheckpoint: true,
+	autoCompact: true,
+	autoCompactCooldownMs: 20 * 60 * 1000,
+	autoCompactRequireIdle: true,
 };
 
 function toFiniteNumber(value: unknown): number | undefined {
 	const n = Number(value);
 	if (!Number.isFinite(n)) return undefined;
 	return n;
+}
+
+function toBoolean(value: unknown, fallback: boolean): boolean {
+	return typeof value === "boolean" ? value : fallback;
 }
 
 export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogConfig {
@@ -76,17 +88,24 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 	const checkpointPct = toFiniteNumber(cfg.checkpointPct);
 	const compactPct = toFiniteNumber(cfg.compactPct);
 	const cooldownMs = toFiniteNumber(cfg.cooldownMs);
+	const autoCompactCooldownMs = toFiniteNumber(cfg.autoCompactCooldownMs);
 
 	return {
-		enabled: cfg.enabled === false ? false : DEFAULT_CONFIG.enabled,
+		enabled: toBoolean(cfg.enabled, DEFAULT_CONFIG.enabled),
 		checkpointPct:
 			checkpointPct !== undefined ? Math.max(1, Math.min(99, Math.floor(checkpointPct))) : undefined,
 		compactPct:
 			compactPct !== undefined ? Math.max(2, Math.min(100, Math.floor(compactPct))) : undefined,
 		cooldownMs:
 			cooldownMs !== undefined ? Math.max(60_000, Math.floor(cooldownMs)) : DEFAULT_CONFIG.cooldownMs,
-		notify: cfg.notify === false ? false : DEFAULT_CONFIG.notify,
-		status: cfg.status === false ? false : DEFAULT_CONFIG.status,
+		notify: toBoolean(cfg.notify, DEFAULT_CONFIG.notify),
+		status: toBoolean(cfg.status, DEFAULT_CONFIG.status),
+		autoCheckpoint: toBoolean(cfg.autoCheckpoint, DEFAULT_CONFIG.autoCheckpoint),
+		autoCompact: toBoolean(cfg.autoCompact, DEFAULT_CONFIG.autoCompact),
+		autoCompactCooldownMs: autoCompactCooldownMs !== undefined
+			? Math.max(60_000, Math.floor(autoCompactCooldownMs))
+			: DEFAULT_CONFIG.autoCompactCooldownMs,
+		autoCompactRequireIdle: toBoolean(cfg.autoCompactRequireIdle, DEFAULT_CONFIG.autoCompactRequireIdle),
 	};
 }
 
@@ -203,6 +222,55 @@ export function shouldAnnounceContextWatch(
 	return false;
 }
 
+export type ContextWatchAutoCompactDecision = {
+	trigger: boolean;
+	reason:
+		| "level-not-compact"
+		| "feature-disabled"
+		| "in-flight"
+		| "cooldown"
+		| "not-idle"
+		| "pending-messages"
+		| "trigger";
+};
+
+export function shouldTriggerAutoCompact(
+	assessment: ContextWatchAssessment,
+	config: ContextWatchdogConfig,
+	state: {
+		nowMs: number;
+		lastAutoCompactAt: number;
+		inFlight: boolean;
+		isIdle: boolean;
+		hasPendingMessages: boolean;
+	},
+): ContextWatchAutoCompactDecision {
+	if (assessment.level !== "compact") return { trigger: false, reason: "level-not-compact" };
+	if (!config.autoCompact) return { trigger: false, reason: "feature-disabled" };
+	if (state.inFlight) return { trigger: false, reason: "in-flight" };
+	if ((state.nowMs - state.lastAutoCompactAt) < config.autoCompactCooldownMs) {
+		return { trigger: false, reason: "cooldown" };
+	}
+	if (config.autoCompactRequireIdle && !state.isIdle) {
+		return { trigger: false, reason: "not-idle" };
+	}
+	if (config.autoCompactRequireIdle && state.hasPendingMessages) {
+		return { trigger: false, reason: "pending-messages" };
+	}
+	return { trigger: true, reason: "trigger" };
+}
+
+export function shouldAutoCheckpoint(
+	assessment: ContextWatchAssessment,
+	config: ContextWatchdogConfig,
+	nowMs: number,
+	lastAutoCheckpointAt: number,
+): boolean {
+	if (!config.autoCheckpoint) return false;
+	if (assessment.level !== "checkpoint" && assessment.level !== "compact") return false;
+	return (nowMs - lastAutoCheckpointAt) >= config.cooldownMs;
+}
+
 export function formatContextWatchStatus(assessment: ContextWatchAssessment): string {
 	const t = assessment.thresholds;
 	return `[ctx] ${assessment.percent}% ${assessment.level} · W${t.warnPct}/C${t.checkpointPct}/X${t.compactPct}`;
@@ -228,6 +296,10 @@ export function buildContextWatchBootstrapPlan(
 						cooldownMs: 15 * 60 * 1000,
 						notify: false,
 						status: true,
+						autoCheckpoint: true,
+						autoCompact: false,
+						autoCompactCooldownMs: 20 * 60 * 1000,
+						autoCompactRequireIdle: true,
 					},
 				},
 			},
@@ -249,12 +321,16 @@ export function buildContextWatchBootstrapPlan(
 					cooldownMs: 10 * 60 * 1000,
 					notify: true,
 					status: true,
+					autoCheckpoint: true,
+					autoCompact: true,
+					autoCompactCooldownMs: 20 * 60 * 1000,
+					autoCompactRequireIdle: true,
 				},
 			},
 		},
 		notes: [
 			"control-plane preset: checkpoint near 70% to preserve long-run continuity.",
-			"compact recommendation remains advisory (non-blocking).",
+			"auto-compact runs with idle + cooldown guards.",
 		],
 	};
 }
@@ -536,6 +612,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAssessment: ContextWatchAssessment | null = null;
 	let lastAnnouncedLevel: ContextWatchdogLevel | null = null;
 	let lastAnnouncedAt = 0;
+	let lastAutoCheckpointAt = 0;
+	let lastAutoCompactAt = 0;
+	let autoCompactInFlight = false;
 
 	const run = (ctx: ExtensionContext, reason: "session_start" | "message_end") => {
 		if (!config.enabled) {
@@ -545,13 +624,42 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 
 		const assessment = buildAssessment(ctx, config, thresholdOverrides);
 		lastAssessment = assessment;
+		const now = Date.now();
+		let handoffPath: string | undefined;
 
 		if (config.status) {
 			ctx.ui.setStatus?.("context-watch", formatContextWatchStatus(assessment));
 		}
 
+		if (shouldAutoCheckpoint(assessment, config, now, lastAutoCheckpointAt)) {
+			handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
+			lastAutoCheckpointAt = now;
+		}
+
+		const autoCompactDecision = shouldTriggerAutoCompact(assessment, config, {
+			nowMs: now,
+			lastAutoCompactAt,
+			inFlight: autoCompactInFlight,
+			isIdle: ctx.isIdle(),
+			hasPendingMessages: ctx.hasPendingMessages(),
+		});
+		if (autoCompactDecision.trigger) {
+			autoCompactInFlight = true;
+			lastAutoCompactAt = now;
+			ctx.ui.notify("context-watch: auto compact triggered", "warning");
+			ctx.compact({
+				onComplete: () => {
+					autoCompactInFlight = false;
+					ctx.ui.notify("context-watch: auto compact completed", "info");
+				},
+				onError: (error) => {
+					autoCompactInFlight = false;
+					ctx.ui.notify(`context-watch: auto compact failed (${error.message})`, "warning");
+				},
+			});
+		}
+
 		if (!config.notify) return;
-		const now = Date.now();
 		const elapsed = now - lastAnnouncedAt;
 		const announce = shouldAnnounceContextWatch(
 			lastAnnouncedLevel,
@@ -563,15 +671,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		if (!announce) return;
 		lastAnnouncedAt = now;
 
-		const handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
+		const persistedPath = handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason);
 		const label = reason === "session_start" ? "context-watch start" : "context-watch";
 		const lines = [
 			`${label}: ${formatContextWatchStatus(assessment)}`,
 			`action: ${assessment.action}`,
 			assessment.recommendation,
 		];
-		if (handoffPath) {
-			const rel = path.relative(ctx.cwd, handoffPath).replace(/\\/g, "/");
+		if (persistedPath) {
+			const rel = path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/");
 			lines.push(`handoff: ${rel}`);
 		}
 		ctx.ui.notify(lines.join("\n"), assessment.severity);
@@ -601,6 +709,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAssessment = null;
 		lastAnnouncedLevel = null;
 		lastAnnouncedAt = 0;
+		lastAutoCheckpointAt = 0;
+		lastAutoCompactAt = 0;
+		autoCompactInFlight = false;
 		run(ctx, "session_start");
 	});
 
@@ -662,6 +773,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAssessment = null;
 				lastAnnouncedLevel = null;
 				lastAnnouncedAt = 0;
+				lastAutoCheckpointAt = 0;
+				lastAutoCompactAt = 0;
+				autoCompactInFlight = false;
 				ctx.ui.notify("context-watch: state reset", "info");
 				return;
 			}
