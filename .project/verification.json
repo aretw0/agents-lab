@@ -1189,6 +1189,58 @@
           "evidence": "TASK-BUD-046 segue `in-progress` após reconciliação; sem auto-close."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-095",
+      "target": "TASK-BUD-046",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Lote A consolidado evidence-first. Execução histórica registrada em `docs/research/context-checkpoint-2026-04-19-lote-a-task-bud-010.md` (colônia c4 COMPLETE 9/9, $0.28, resumo lock/unlock + escrita atômica no board). Regressão atual: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 2 files passed, 69 tests passed. Consolidação final em `docs/research/task-bud-046-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T22:05:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Lote A executado com maxCost explícito e resumo de mudanças no board.",
+          "status": "passed",
+          "evidence": "Checkpoint de lote A registra c4 COMPLETE (9/9, $0.28) com resumo lock/unlock + escrita atômica."
+        },
+        {
+          "criterion": "Testes de reconciliador/concorrência rodam sem regressão.",
+          "status": "passed",
+          "evidence": "Smoke/parsers executados com sucesso (69 testes passados)."
+        },
+        {
+          "criterion": "Resultado permanece em estado candidato para revisão humana (sem auto-close P0).",
+          "status": "passed",
+          "evidence": "TASK-BUD-046 permaneceu in-progress até fechamento manual com verificação explícita."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-096",
+      "target": "TASK-BUD-047",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Lote B reconciliado com comandos determinísticos e estado por provider. Evidências: (1) `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe scripts/session-triage.mjs --days 1 --limit 4 --json` mostrou `board.unlockNow/later`; (2) `quota_visibility_provider_budgets(days=14)` mostrou estado por provider (`openai-codex: ok`); (3) outcomes nucleares já fechados via `VER-BUD-077` (TASK-BUD-020) e `VER-BUD-075` (TASK-BUD-024). Consolidação final: `docs/research/task-bud-047-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T22:06:00Z",
+      "criteria_results": [
+        {
+          "criterion": "session-triage e budget semanal operam com comandos determinísticos.",
+          "status": "passed",
+          "evidence": "`session-triage --json` e `quota_visibility_provider_budgets` executados neste ciclo."
+        },
+        {
+          "criterion": "Board atualizado com split unlock-now/later e estado por provider.",
+          "status": "passed",
+          "evidence": "Saída de triage contém `board.unlockNow/later`; quota provider budgets contém estado por provider."
+        },
+        {
+          "criterion": "Sem auto-close de tasks P0.",
+          "status": "passed",
+          "evidence": "TASK-BUD-047 permaneceu in-progress até reconciliação final manual com verificação."
+        }
+      ]
     }
   ]
 }

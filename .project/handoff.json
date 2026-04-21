@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-04-21T21:54:00Z",
-  "context": "Loops estabilizados pós-reload. TASK-BUD-081 (VER-BUD-092) e TASK-BUD-082 (VER-BUD-093) concluídas. Reconciliação legada 046/047 avançou com relatório canônico (`docs/research/task-bud-046-047-reconciliation-2026-04-21.md`) e verificação parcial de 046 (VER-BUD-094): testes verdes, porém sem inventário final consolidado do lote A para fechamento.",
-  "current_phase": "legacy-reconciliation",
+  "timestamp": "2026-04-21T22:10:00Z",
+  "context": "Reconciliação legada avançou com fechamento evidence-first de TASK-BUD-046 (VER-BUD-095) e TASK-BUD-047 (VER-BUD-096), sem auto-close automático. Loops de watchdog/retenção seguem estáveis pós-reload, contexto em nível ok.",
+  "current_phase": "legacy-sequence-next",
   "current_tasks": [
-    "TASK-BUD-046",
-    "TASK-BUD-047"
+    "TASK-BUD-052",
+    "TASK-BUD-051"
   ],
   "blockers": [
-    "task-bud-046-missing-integrated-lote-a-closure"
+    "task-bud-052-delivery-evidence-standardization-pending"
   ],
   "next_actions": [
-    "Fechar evidência integrada de lote A para TASK-BUD-046 (inventário final + validação consolidada).",
-    "Concluir reconciliação final de TASK-BUD-047 após fechamento de 046 (dependência explícita).",
-    "Seguir sequência legada 052 -> 051 sem auto-close estratégico sem evidência determinística."
+    "Consolidar TASK-BUD-052 (padrão determinístico de file inventory + validation command log detectável).",
+    "Depois destravar/fechar TASK-BUD-051 com base na padronização de evidência de entrega.",
+    "Manter micro-slices bounded-by-default; checkpoint em >=68 e compact em >=72."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -22,9 +22,10 @@
     "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "docs/research/task-bud-046-047-reconciliation-2026-04-21.md",
-    ".project/tasks.json",
+    "docs/research/task-bud-046-closure-2026-04-21.md",
+    "docs/research/task-bud-047-closure-2026-04-21.md",
     ".project/verification.json",
+    ".project/tasks.json",
     ".project/handoff.json"
   ]
 }
