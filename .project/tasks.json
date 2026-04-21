@@ -1439,6 +1439,25 @@
       ],
       "notes": "Priorizar UX de reprodução curta para evitar drift entre sessões e reduzir custo de contexto no control plane.",
       "verification": "VER-CAL-2026-04-21-C2"
+    },
+    {
+      "id": "TASK-BUD-062",
+      "description": "[P1] Publicar monitor advisory de headroom de contexto (warn/checkpoint/compact) para sessões long-run, com thresholds model-aware e sem bloqueio de execução.",
+      "status": "completed",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md",
+        "packages/pi-stack/package.json"
+      ],
+      "acceptance_criteria": [
+        "Tool e command first-party expostos na superfície publicada (`context_watch_status`, `/context-watch`).",
+        "Sinalização não-bloqueante com níveis warn/checkpoint/compact e cooldown anti-ruído.",
+        "Thresholds herdados de model-aware contextPressure + overrides opcionais de checkpoint/compact.",
+        "Cobertura smoke para avaliação de nível e política de anúncio."
+      ],
+      "notes": "Objetivo operacional: reduzir back-and-forth de compactação tardia no control-plane com checkpoints controlados e portáveis.",
+      "verification": "VER-BUD-062"
     }
   ]
 }

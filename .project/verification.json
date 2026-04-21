@@ -700,6 +700,37 @@
           "evidence": "smoke governance-profiles.test.ts valida que patches não hardcodam routeModelRefs/providerBudgets (preserva configuração do usuário)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-062",
+      "target": "TASK-BUD-062",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T12:36:30.000Z",
+      "evidence": "Nova extensão first-party `context-watchdog` publicada na stack com tool `context_watch_status`, comando `/context-watch`, status runtime e política advisory não-bloqueante (warn/checkpoint/compact). Thresholds aproveitam base model-aware do custom-footer e suportam overrides de checkpoint/compact/cooldown.",
+      "criteria_results": [
+        {
+          "criterion": "Tool e command publicados na superfície da stack",
+          "status": "passed",
+          "evidence": "packages/pi-stack/package.json inclui ./extensions/context-watchdog.ts; extensão registra tool e command."
+        },
+        {
+          "criterion": "Sinalização advisory com cooldown anti-ruído",
+          "status": "passed",
+          "evidence": "helpers shouldAnnounceContextWatch e evaluateContextWatch cobertos em smoke."
+        },
+        {
+          "criterion": "Thresholds model-aware + configuração opcional",
+          "status": "passed",
+          "evidence": "deriveContextWatchThresholds usa resolveContextThresholds(custom-footer) e config `piStack.contextWatchdog`."
+        },
+        {
+          "criterion": "Cobertura smoke de regras de nível/anúncio",
+          "status": "passed",
+          "evidence": "vitest packages/pi-stack/test/smoke/context-watchdog.test.ts (5/5) e regressão custom-footer (25/25)."
+        }
+      ]
     }
   ]
 }
