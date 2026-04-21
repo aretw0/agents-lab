@@ -56,22 +56,31 @@ const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"Do not fail just because monitor instructions are empty; classify from available context.",
 ];
 
-function planSessionStartOutput(details, severity) {
+function planSessionStartOutput(details, severity, opts = {}) {
 	if (!Array.isArray(details) || details.length === 0) {
 		return { notify: false };
 	}
-	const message = `monitor-provider-patch: ${details.join(", ")}`;
+	const requiresReload = opts?.requiresReload === true;
+	const baseMessage = `monitor-provider-patch: ${details.join(", ")}`;
 	if (severity === "warning") {
 		return {
 			notify: true,
-			message,
+			message: baseMessage,
 			severity,
 			status: `[mprov] warning:${details.length}`,
 		};
 	}
+	if (requiresReload) {
+		return {
+			notify: true,
+			message: `${baseMessage}\nRecomendado: /reload`,
+			severity: "info",
+			status: `[mprov] sync:${details.length}`,
+		};
+	}
 	return {
 		notify: false,
-		message,
+		message: baseMessage,
 		severity: "info",
 		status: `[mprov] sync:${details.length}`,
 	};
@@ -557,7 +566,9 @@ function simulateSessionStart(cwd) {
 				`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 			);
 		}
-		const output = planSessionStartOutput(earlyDetails, "info");
+		const output = planSessionStartOutput(earlyDetails, "info", {
+			requiresReload: earlyDetails.length > 0,
+		});
 		return {
 			provider,
 			hedgePolicy,
@@ -585,7 +596,15 @@ function simulateSessionStart(cwd) {
 	if (repairedSystemPrompt.length > 0) {
 		details.push(`corrigiu prompt.system ausente em ${repairedSystemPrompt.length} override(s)`);
 	}
-	const output = planSessionStartOutput(details, "info");
+	const output = planSessionStartOutput(details, "info", {
+		requiresReload:
+			created.length > 0 ||
+			hedgePatch.changed ||
+			fragilityPatch.changed ||
+			fragilityClassifierPatch.changed ||
+			repaired.length > 0 ||
+			repairedSystemPrompt.length > 0,
+	});
 	return {
 		provider,
 		hedgePolicy,

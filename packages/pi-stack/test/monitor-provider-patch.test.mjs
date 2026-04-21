@@ -321,10 +321,24 @@ describe("ensureOverrides", () => {
 
 describe("session_start output planning", () => {
 	it("suppresses info notifications while keeping compact status", () => {
-		const output = planSessionStartOutput(["hedge policy synced (ok)"], "info");
+		const output = planSessionStartOutput(["hedge policy synced (ok)"], "info", {
+			requiresReload: false,
+		});
 		assert.equal(output.notify, false);
 		assert.equal(output.status, "[mprov] sync:1");
 		assert.match(output.message, /monitor-provider-patch/i);
+	});
+
+	it("shows info notify when runtime reload is required", () => {
+		const output = planSessionStartOutput(
+			["fragility policy synced (when=has_file_writes)"],
+			"info",
+			{ requiresReload: true },
+		);
+		assert.equal(output.notify, true);
+		assert.equal(output.status, "[mprov] sync:1");
+		assert.equal(output.severity, "info");
+		assert.match(output.message, /Recomendado: \/reload/i);
 	});
 
 	it("keeps warning notifications for actionable issues", () => {

@@ -833,6 +833,7 @@ function readHedgeMonitorState(cwd: string): {
 export function planSessionStartOutput(
 	details: string[],
 	severity: "info" | "warning",
+	opts?: { requiresReload?: boolean },
 ): {
 	notify: boolean;
 	status?: string;
@@ -842,19 +843,28 @@ export function planSessionStartOutput(
 	if (details.length === 0) {
 		return { notify: false };
 	}
-	const message = `monitor-provider-patch: ${details.join(", ")}`;
+	const requiresReload = opts?.requiresReload === true;
+	const baseMessage = `monitor-provider-patch: ${details.join(", ")}`;
 	if (severity === "warning") {
 		return {
 			notify: true,
-			message,
+			message: baseMessage,
 			severity,
 			status: `[mprov] warning:${details.length}`,
 		};
 	}
+	if (requiresReload) {
+		return {
+			notify: true,
+			message: `${baseMessage}\nRecomendado: /reload`,
+			severity: "info",
+			status: `[mprov] sync:${details.length}`,
+		};
+	}
 	return {
 		notify: false,
-		message,
-		severity,
+		message: baseMessage,
+		severity: "info",
 		status: `[mprov] sync:${details.length}`,
 	};
 }
@@ -1125,7 +1135,9 @@ export default function (pi: ExtensionAPI) {
 					`fragility classifier synced (${fragilityClassifierPatch.details.join(", ") || "ok"})`,
 				);
 			}
-			const output = planSessionStartOutput(earlyDetails, "info");
+			const output = planSessionStartOutput(earlyDetails, "info", {
+				requiresReload: earlyDetails.length > 0,
+			});
 			ctx.ui?.setStatus?.("monitor-provider-patch", output.status);
 			if (output.notify && output.message && output.severity) {
 				ctx.ui?.notify?.(output.message, output.severity);
@@ -1196,7 +1208,16 @@ export default function (pi: ExtensionAPI) {
 			);
 		}
 
-		const output = planSessionStartOutput(details, severity);
+		const output = planSessionStartOutput(details, severity, {
+			requiresReload:
+				created.length > 0 ||
+				hedgePatch.changed ||
+				fragilityPatch.changed ||
+				fragilityClassifierPatch.changed ||
+				legacyTemplateRepair.repaired.length > 0 ||
+				systemPromptRepair.repaired.length > 0 ||
+				runtimeContract.repaired.length > 0,
+		});
 		ctx.ui?.setStatus?.("monitor-provider-patch", output.status);
 		if (output.notify && output.message && output.severity) {
 			ctx.ui?.notify?.(output.message, output.severity);
