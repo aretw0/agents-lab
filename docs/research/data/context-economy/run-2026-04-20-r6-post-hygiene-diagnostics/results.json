@@ -1,0 +1,113 @@
+{
+  "runId": "run-2026-04-20-r6-post-hygiene-diagnostics",
+  "generatedAt": "2026-04-20T21:46:55.084Z",
+  "cwd": "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab",
+  "runner": {
+    "label": "workspace-cli-js",
+    "command": "C:\\Users\\aretw\\scoop\\apps\\nodejs\\24.6.0\\node.exe",
+    "prefixArgs": [
+      "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab\\node_modules\\@mariozechner\\pi-coding-agent\\dist\\cli.js"
+    ]
+  },
+  "benchmark": {
+    "promptAB": "oi",
+    "includeHatch": false,
+    "timeoutSec": 120,
+    "capabilities": {
+      "supportsNoContextFiles": false
+    },
+    "boundedOutput": {
+      "maxCaptureBytes": 16777216,
+      "rawLogsStored": false,
+      "stderrTailLines": 4,
+      "stdoutNonJsonTailLines": 3,
+      "eventTypesTailCount": 6
+    }
+  },
+  "results": [
+    {
+      "id": "A",
+      "name": "pure",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 3202,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 14575,
+      "stderrChars": 1037,
+      "events": 21,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "stdoutNonJsonTail": [],
+      "eventTypesTail": [
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_end",
+        "turn_end",
+        "agent_end"
+      ],
+      "lastAssistantStopReason": "stop",
+      "lastError": null,
+      "inputTokens": 1057,
+      "outputTokens": 15,
+      "totalTokens": 1072,
+      "costUsd": 0.00206,
+      "assistantChars": 35,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    },
+    {
+      "id": "B",
+      "name": "stack-default",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 21634,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 300,
+      "stderrChars": 1037,
+      "events": 2,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "stdoutNonJsonTail": [
+        "\u001b]777;notify;oh-pi;Done after 1 turn(s). Ready for input.\u0007\u001b]777;notify;π;Oi! 👋 Como posso te ajudar hoje?\u0007"
+      ],
+      "eventTypesTail": [
+        "session",
+        "agent_start"
+      ],
+      "lastAssistantStopReason": null,
+      "lastError": null,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "costUsd": 0,
+      "assistantChars": 0,
+      "assistantTurns": 0,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    }
+  ],
+  "comparisons": {
+    "comparable": false,
+    "reason": "A/B run missing assistant usage tokens (incomplete or provider/runtime failure)",
+    "pureComparable": true,
+    "stackComparable": false
+  }
+}

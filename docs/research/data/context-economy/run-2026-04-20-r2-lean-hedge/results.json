@@ -1,0 +1,93 @@
+{
+  "runId": "run-2026-04-20-r2-lean-hedge",
+  "generatedAt": "2026-04-20T20:48:26.074Z",
+  "cwd": "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab",
+  "runner": {
+    "label": "workspace-cli-js",
+    "command": "C:\\Users\\aretw\\scoop\\apps\\nodejs\\24.6.0\\node.exe",
+    "prefixArgs": [
+      "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab\\node_modules\\@mariozechner\\pi-coding-agent\\dist\\cli.js"
+    ]
+  },
+  "benchmark": {
+    "promptAB": "oi",
+    "includeHatch": false,
+    "timeoutSec": 120,
+    "capabilities": {
+      "supportsNoContextFiles": false
+    },
+    "boundedOutput": {
+      "maxCaptureBytes": 16777216,
+      "rawLogsStored": false,
+      "stderrTailLines": 4
+    }
+  },
+  "results": [
+    {
+      "id": "A",
+      "name": "pure",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 3915,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 14583,
+      "stderrChars": 1037,
+      "events": 21,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "inputTokens": 1057,
+      "outputTokens": 15,
+      "totalTokens": 1072,
+      "costUsd": 0.00206,
+      "assistantChars": 35,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    },
+    {
+      "id": "B",
+      "name": "stack-default",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 32857,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 13349,
+      "stderrChars": 1166,
+      "events": 19,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\"",
+        "[hedge] classify failed: No tool call in response (stopReason: error, content: [] error: {\"detail\":\"Instructions are required\"})"
+      ],
+      "inputTokens": 13916,
+      "outputTokens": 15,
+      "totalTokens": 13931,
+      "costUsd": 0.024563,
+      "assistantChars": 35,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    }
+  ],
+  "comparisons": {
+    "comparable": true,
+    "inputTokensDeltaPct": 1216.56,
+    "elapsedDeltaPct": 739.26,
+    "costDeltaPct": 1092.38,
+    "eventCountDeltaPct": -9.52,
+    "toolCallsDeltaPct": null
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "runId": "run-2026-04-20-r8-split-overhead",
+  "generatedAt": "2026-04-20T22:00:21.102Z",
+  "cwd": "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab",
+  "runner": {
+    "label": "workspace-cli-js",
+    "command": "C:\\Users\\aretw\\scoop\\apps\\nodejs\\24.6.0\\node.exe",
+    "prefixArgs": [
+      "C:\\Users\\aretw\\Documents\\GitHub\\agents-lab\\node_modules\\@mariozechner\\pi-coding-agent\\dist\\cli.js"
+    ]
+  },
+  "benchmark": {
+    "promptAB": "oi",
+    "includeHatch": false,
+    "includeSplit": true,
+    "timeoutSec": 120,
+    "capabilities": {
+      "supportsNoContextFiles": false
+    },
+    "boundedOutput": {
+      "maxCaptureBytes": 16777216,
+      "rawLogsStored": false,
+      "stderrTailLines": 4,
+      "stdoutNonJsonTailLines": 3,
+      "eventTypesTailCount": 6
+    }
+  },
+  "results": [
+    {
+      "id": "A",
+      "name": "pure",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 3154,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 14575,
+      "stderrChars": 1037,
+      "events": 21,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "stdoutNonJsonTail": [],
+      "eventTypesTail": [
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_end",
+        "turn_end",
+        "agent_end"
+      ],
+      "lastAssistantStopReason": "stop",
+      "lastError": null,
+      "inputTokens": 1057,
+      "outputTokens": 15,
+      "totalTokens": 1072,
+      "costUsd": 0.00206,
+      "assistantChars": 35,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    },
+    {
+      "id": "B",
+      "name": "stack-default",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 21375,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 13254,
+      "stderrChars": 1144,
+      "events": 19,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\"",
+        "\u001b]777;notify;oh-pi;Done after 1 turn(s). Ready for input.\u0007\u001b]777;notify;π;Oi! 👋 Como posso te ajudar hoje?\u0007"
+      ],
+      "stdoutNonJsonTail": [],
+      "eventTypesTail": [
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_end"
+      ],
+      "lastAssistantStopReason": "stop",
+      "lastError": null,
+      "inputTokens": 13916,
+      "outputTokens": 15,
+      "totalTokens": 13931,
+      "costUsd": 0.024563,
+      "assistantChars": 35,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    },
+    {
+      "id": "D",
+      "name": "stack-no-skills-prompts-themes",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 20170,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 297,
+      "stderrChars": 1037,
+      "events": 2,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "stdoutNonJsonTail": [
+        "\u001b]777;notify;oh-pi;Done after 1 turn(s). Ready for input.\u0007\u001b]777;notify;π;Oi! Como posso te ajudar hoje?\u0007"
+      ],
+      "eventTypesTail": [
+        "session",
+        "agent_start"
+      ],
+      "lastAssistantStopReason": null,
+      "lastError": null,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "totalTokens": 0,
+      "costUsd": 0,
+      "assistantChars": 0,
+      "assistantTurns": 0,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    },
+    {
+      "id": "E",
+      "name": "stack-no-extensions",
+      "prompt": "oi",
+      "exitCode": 0,
+      "signal": null,
+      "elapsedMs": 5031,
+      "timedOut": false,
+      "bufferExceeded": false,
+      "stdoutChars": 13577,
+      "stderrChars": 1037,
+      "events": 20,
+      "stderrTail": [
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-sonnet-4-5\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-6-thinking\"",
+        "Warning: No models match pattern \"google-antigravity/claude-opus-4-5-thinking\""
+      ],
+      "stdoutNonJsonTail": [],
+      "eventTypesTail": [
+        "message_update",
+        "message_update",
+        "message_update",
+        "message_end",
+        "turn_end",
+        "agent_end"
+      ],
+      "lastAssistantStopReason": "stop",
+      "lastError": null,
+      "inputTokens": 6895,
+      "outputTokens": 14,
+      "totalTokens": 6909,
+      "costUsd": 0.012262,
+      "assistantChars": 33,
+      "assistantTurns": 1,
+      "toolCalls": 0,
+      "toolNamesUnique": [],
+      "toolResultChars": 0,
+      "maxToolResultChars": 0
+    }
+  ],
+  "comparisons": {
+    "comparable": true,
+    "inputTokensDeltaPct": 1216.56,
+    "elapsedDeltaPct": 577.71,
+    "costDeltaPct": 1092.38,
+    "eventCountDeltaPct": -9.52,
+    "toolCallsDeltaPct": null
+  }
+}
