@@ -128,6 +128,20 @@ npm run pi:parity:project
 # Voltar para pacotes publicados no npm
 npm run pi:published
 
+# Isolamento forte (recomendado para curadoria):
+# roda o pi com PI_CODING_AGENT_DIR local do workspace (.sandbox/pi-agent)
+npm run pi:isolated
+# para retomar sessão isolada existente
+npm run pi:isolated:resume
+npm run pi:isolated:status
+npm run pi:isolated:help
+# copiar a sessão global mais recente para o sandbox local (quando necessário)
+npm run pi:isolated:adopt-latest
+# preview sem alterar arquivos (sem depender de flags do npm)
+npm run pi:isolated:adopt-latest:dry
+# reset do sandbox local quando quiser começar "do zero"
+npm run pi:isolated:reset
+
 # Overlay opcional para pilot de colony (/monitors, /remote, /colony)
 # (escopo user por padrão, sem sujar .pi/settings.json do repositório)
 npm run pi:pilot:on
@@ -155,6 +169,22 @@ npm test
 ```
 
 A skill `test-pi-extension` (em `@aretw0/pi-skills`) documenta como criar testes para suas próprias extensões.
+
+### Benchmark canônico — economia de contexto
+
+```bash
+npm run benchmark:context
+```
+
+O benchmark roda A/B reproduzível (`pi puro` vs `pi-stack default`) com prompt curto e gera artefato auditável em:
+
+- `docs/research/data/context-economy/<run-id>/results.json`
+
+Limites de segurança (bounded-by-default):
+
+- sem logs brutos no output
+- captura com teto de buffer por execução
+- apenas métricas resumidas (tokens, latência, custo, tool calls)
 
 ### Recursos Recomendados
 

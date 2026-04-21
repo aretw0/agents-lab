@@ -137,10 +137,11 @@ npm run pi:parity:project
 Para isolamento forte em estudos (sem sujar `~/.pi/agent`):
 
 ```bash
-# exemplo (PowerShell)
-$env:PI_CODING_AGENT_DIR = "$PWD/.sandbox/pi-agent"
-pi list
+npm run pi:isolated
+npm run pi:isolated:status
 ```
+
+(Equivalente manual: exportar `PI_CODING_AGENT_DIR=$PWD/.sandbox/pi-agent`.)
 
 Isso permite pesquisar e desenvolver sem confundir ausência de pacote com ausência de feature.
 

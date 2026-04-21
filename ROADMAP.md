@@ -2,6 +2,10 @@
 
 Planejamento e milestones do laboratório. Este é um documento vivo — evolui conforme o laboratório cresce.
 
+> Fonte canônica de execução diária: `.project/*`.
+> Este roadmap mantém direção macro; handoff fica em formato de delta curto.
+> Guia do fluxo: `docs/guides/project-canonical-pipeline.md`.
+
 ## Fase 0 — Fundação (concluída)
 
 **Objetivo:** Criar o solo que vai receber o brainstorm e as pesquisas futuras.
@@ -60,6 +64,10 @@ Planejamento e milestones do laboratório. Este é um documento vivo — evolui 
   - [x] Padronizar overrides locais para todos os classificadores empacotados
   - [x] Separar configuração versionável (`.pi/agents/`) de saída operacional de runtime (`.project/`)
   - [x] Abrir issue upstream com a reprodução consolidada e a hipótese causal
+  - [x] Confirmar recorrência `No tool call in response` + `Instructions are required` em runtime OpenAI-only
+  - [ ] Definir mitigação padrão de sessão para evitar flood de warnings (monitors off + reativação gradual)
+  - [ ] Subir correção upstream/fork para `classifyViaAgent` em providers que exigem `instructions`
+  - [ ] Revalidar monitores (hedge/fragility/unauthorized-action) após patch com budget controlado
 - [x] Primeiro experimento com `pi-agent-core`
 - [ ] Experimento com tool calling em Pi
   - [x] Validar baseline de `read`, `write` e `bash` no núcleo puro do Pi
