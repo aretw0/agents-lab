@@ -73,6 +73,13 @@ export const HEDGE_LEAN_BASE_CONTEXT = [
 	"assistant_text",
 ] as const;
 
+export const FRAGILITY_LEAN_BASE_CONTEXT = [
+	"assistant_text",
+	"user_text",
+	"tool_calls",
+	"custom_messages",
+] as const;
+
 export const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"You are a behavior monitor classifier.",
 	"Return your decision by calling classify_verdict exactly once.",

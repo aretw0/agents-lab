@@ -434,6 +434,59 @@ describe("integration: full flow", () => {
 		}
 	});
 
+	it("session_start strips heavy tool_results from fragility context", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors");
+		mkdirSync(monitorsDir, { recursive: true });
+
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify(
+				{
+					defaultProvider: "anthropic",
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		const monitorPath = join(monitorsDir, "fragility.monitor.json");
+		writeFileSync(
+			monitorPath,
+			JSON.stringify(
+				{
+					name: "fragility",
+					classify: {
+						context: [
+							"tool_results",
+							"assistant_text",
+							"user_text",
+							"tool_calls",
+							"custom_messages",
+						],
+						agent: "fragility-classifier",
+					},
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+
+		const result = simulateSessionStart(tmpDir);
+		assert.equal(result.provider, "anthropic");
+		assert.equal(result.fragilityChanged, true);
+
+		const written = JSON.parse(readFileSync(monitorPath, "utf8"));
+		assert.deepEqual(written.classify.context, [
+			"assistant_text",
+			"user_text",
+			"tool_calls",
+			"custom_messages",
+		]);
+	});
+
 	it("repara template legado dos classifiers no session_start", () => {
 		const piDir = join(tmpDir, ".pi");
 		const monitorsDir = join(piDir, "monitors");

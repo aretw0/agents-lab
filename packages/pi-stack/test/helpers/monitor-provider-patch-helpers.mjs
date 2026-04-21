@@ -37,6 +37,12 @@ const HEDGE_LEAN_BASE_CONTEXT = [
 	"custom_messages",
 	"assistant_text",
 ];
+const FRAGILITY_LEAN_BASE_CONTEXT = [
+	"assistant_text",
+	"user_text",
+	"tool_calls",
+	"custom_messages",
+];
 const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"You are a behavior monitor classifier.",
 	"Return your decision by calling classify_verdict exactly once.",
@@ -379,6 +385,52 @@ function ensureHedgeMonitorContext(cwd, includeConversationHistory) {
 	}).changed;
 }
 
+function normalizeFragilityContext(input) {
+	const raw = Array.isArray(input)
+		? input.filter((item) => typeof item === "string")
+		: [];
+	const normalized = new Set(raw);
+	normalized.delete("tool_results");
+	for (const key of FRAGILITY_LEAN_BASE_CONTEXT) normalized.add(key);
+
+	const ordered = [];
+	for (const key of FRAGILITY_LEAN_BASE_CONTEXT) {
+		if (normalized.has(key)) ordered.push(key);
+	}
+	for (const key of normalized) {
+		if (!ordered.includes(key)) ordered.push(key);
+	}
+	return ordered;
+}
+
+function ensureFragilityMonitorContext(cwd) {
+	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
+	if (!existsSync(monitorPath)) return { changed: false, details: [] };
+
+	let monitor;
+	try {
+		monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+
+	if (!monitor.classify || typeof monitor.classify !== "object") {
+		return { changed: false, details: [] };
+	}
+
+	const prev = Array.isArray(monitor.classify.context)
+		? monitor.classify.context.filter((item) => typeof item === "string")
+		: [];
+	const next = normalizeFragilityContext(prev);
+	if (JSON.stringify(prev) === JSON.stringify(next)) {
+		return { changed: false, details: [] };
+	}
+
+	monitor.classify.context = next;
+	writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+	return { changed: true, details: ["fragility-context=lean(no-tool_results)"] };
+}
+
 function simulateSessionStart(cwd) {
 	const hedgePolicy = {
 		includeConversationHistory:
@@ -387,6 +439,7 @@ function simulateSessionStart(cwd) {
 		when: detectHedgeWhen(cwd),
 	};
 	const hedgePatch = ensureHedgeMonitorPolicy(cwd, hedgePolicy);
+	const fragilityPatch = ensureFragilityMonitorContext(cwd);
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
@@ -394,6 +447,7 @@ function simulateSessionStart(cwd) {
 			provider,
 			hedgePolicy,
 			hedgeChanged: hedgePatch.changed,
+			fragilityChanged: fragilityPatch.changed,
 			created: [],
 			repaired: [],
 		};
@@ -407,6 +461,7 @@ function simulateSessionStart(cwd) {
 		provider,
 		hedgePolicy,
 		hedgeChanged: hedgePatch.changed,
+		fragilityChanged: fragilityPatch.changed,
 		created,
 		repaired,
 		repairedSystemPrompt,

@@ -87,6 +87,15 @@ describe("monitor context budget", () => {
       }
     }
   });
+
+  it("keeps fragility prefiltered away from tool_results payloads", () => {
+    const monitor = loadMonitor("fragility");
+    const context = monitor?.classify?.context ?? [];
+    assert.ok(
+      !context.includes("tool_results"),
+      "fragility should not include tool_results by default",
+    );
+  });
 });
 
 describe("fragility anti-false-positive calibration", () => {

@@ -35,6 +35,7 @@ import {
 	DEFAULT_HEDGE_WHEN,
 	DEFAULT_MODEL_BY_PROVIDER,
 	DEFAULT_THINKING,
+	FRAGILITY_LEAN_BASE_CONTEXT,
 	HEDGE_HISTORY_SETTING_PATH,
 	HEDGE_LEAN_BASE_CONTEXT,
 	HEDGE_PROJECT_CONTEXT_SETTING_PATH,
@@ -653,6 +654,58 @@ export function ensureHedgeMonitorContext(
 	}).changed;
 }
 
+function normalizeFragilityContext(input: unknown): string[] {
+	const raw = Array.isArray(input)
+		? input.filter((item): item is string => typeof item === "string")
+		: [];
+	const normalized = new Set(raw);
+	normalized.delete("tool_results");
+	for (const key of FRAGILITY_LEAN_BASE_CONTEXT) normalized.add(key);
+
+	const ordered: string[] = [];
+	for (const key of FRAGILITY_LEAN_BASE_CONTEXT) {
+		if (normalized.has(key)) ordered.push(key);
+	}
+	for (const key of normalized) {
+		if (!ordered.includes(key)) ordered.push(key);
+	}
+	return ordered;
+}
+
+export function ensureFragilityMonitorContext(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
+	if (!existsSync(monitorPath)) return { changed: false, details: [] };
+
+	let monitor: Record<string, unknown>;
+	try {
+		monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+	} catch {
+		return { changed: false, details: [] };
+	}
+
+	const classify = monitor["classify"];
+	if (!classify || typeof classify !== "object") {
+		return { changed: false, details: [] };
+	}
+
+	const prevContext = (classify as Record<string, unknown>)["context"];
+	const prevSerialized = JSON.stringify(
+		Array.isArray(prevContext)
+			? prevContext.filter((item): item is string => typeof item === "string")
+			: [],
+	);
+	const nextContext = normalizeFragilityContext(prevContext);
+	const nextSerialized = JSON.stringify(nextContext);
+	if (prevSerialized === nextSerialized) return { changed: false, details: [] };
+
+	(classify as Record<string, unknown>)["context"] = nextContext;
+	writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+	return { changed: true, details: ["fragility-context=lean(no-tool_results)"] };
+}
+
 function readHedgeMonitorState(cwd: string): {
 	when?: string;
 	hasConversationHistory: boolean;
@@ -922,16 +975,25 @@ export default function (pi: ExtensionAPI) {
 			when: detectHedgeWhen(ctx.cwd),
 		};
 		const hedgePatch = ensureHedgeMonitorPolicy(ctx.cwd, hedgePolicy);
+		const fragilityPatch = ensureFragilityMonitorContext(ctx.cwd);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
 
 		if (!model) {
+			const earlyDetails: string[] = [];
 			if (hedgePatch.changed) {
-				ctx.ui?.notify?.(
-					`monitor-provider-patch: hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`,
-					"info",
+				earlyDetails.push(
+					`hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`,
 				);
+			}
+			if (fragilityPatch.changed) {
+				earlyDetails.push(
+					`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (earlyDetails.length > 0) {
+				ctx.ui?.notify?.(`monitor-provider-patch: ${earlyDetails.join(", ")}`, "info");
 			}
 			return;
 		}
@@ -962,6 +1024,11 @@ export default function (pi: ExtensionAPI) {
 		if (legacyTemplateRepair.repaired.length > 0) {
 			details.push(
 				`corrigiu template legado em ${legacyTemplateRepair.repaired.length} override(s)`,
+			);
+		}
+		if (fragilityPatch.changed) {
+			details.push(
+				`fragility policy synced (${fragilityPatch.details.join(", ") || "ok"})`,
 			);
 		}
 		if (systemPromptRepair.repaired.length > 0) {
