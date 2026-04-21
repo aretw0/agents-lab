@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	renameSync,
+	statSync,
+	unlinkSync,
+	writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import type { ColonyPhase } from "./colony-pilot-runtime";
 
@@ -40,6 +48,103 @@ export type ColonyDeliveryModeShape =
 	| "patch-artifact"
 	| "apply-to-branch";
 
+export interface ProjectTasksLockOptions {
+	maxWaitMs?: number;
+	retryMs?: number;
+	staleMs?: number;
+}
+
+const DEFAULT_TASKS_LOCK_OPTIONS: Required<ProjectTasksLockOptions> = {
+	maxWaitMs: 1500,
+	retryMs: 25,
+	staleMs: 2 * 60_000,
+};
+
+function resolveLockOptions(
+	options?: ProjectTasksLockOptions,
+): Required<ProjectTasksLockOptions> {
+	const maxWaitMs = Number(options?.maxWaitMs);
+	const retryMs = Number(options?.retryMs);
+	const staleMs = Number(options?.staleMs);
+	return {
+		maxWaitMs:
+			Number.isFinite(maxWaitMs) && maxWaitMs >= 1
+				? Math.floor(maxWaitMs)
+				: DEFAULT_TASKS_LOCK_OPTIONS.maxWaitMs,
+		retryMs:
+			Number.isFinite(retryMs) && retryMs >= 1
+				? Math.floor(retryMs)
+				: DEFAULT_TASKS_LOCK_OPTIONS.retryMs,
+		staleMs:
+			Number.isFinite(staleMs) && staleMs >= 1
+				? Math.floor(staleMs)
+				: DEFAULT_TASKS_LOCK_OPTIONS.staleMs,
+	};
+}
+
+function isEexistError(error: unknown): boolean {
+	const code = (error as { code?: string } | undefined)?.code;
+	return code === "EEXIST";
+}
+
+function sleepSync(ms: number) {
+	const waitMs = Math.max(0, Math.floor(ms));
+	if (waitMs <= 0) return;
+	const end = Date.now() + waitMs;
+	while (Date.now() < end) {
+		// deterministic sync backoff
+	}
+}
+
+function acquireTasksLock(
+	lockPath: string,
+	options?: ProjectTasksLockOptions,
+): { release: () => void } {
+	const cfg = resolveLockOptions(options);
+	const startedAt = Date.now();
+	const token = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+	while (true) {
+		try {
+			writeFileSync(
+				lockPath,
+				JSON.stringify({ token, acquiredAt: new Date().toISOString() }),
+				{ flag: "wx" },
+			);
+			return {
+				release: () => {
+					try {
+						unlinkSync(lockPath);
+					} catch {
+						// best-effort lock release
+					}
+				},
+			};
+		} catch (error) {
+			if (!isEexistError(error)) throw error;
+
+			try {
+				const st = statSync(lockPath);
+				if (Date.now() - st.mtimeMs > cfg.staleMs) {
+					unlinkSync(lockPath);
+					continue;
+				}
+			} catch {
+				// lock vanished between checks, retry immediately
+				continue;
+			}
+
+			const elapsed = Date.now() - startedAt;
+			if (elapsed >= cfg.maxWaitMs) {
+				throw new Error(
+					`project tasks lock timeout after ${elapsed}ms (${path.basename(lockPath)})`,
+				);
+			}
+
+			sleepSync(Math.min(cfg.retryMs, cfg.maxWaitMs - elapsed));
+		}
+	}
+}
+
 export function readProjectTasksBlock(cwd: string): ProjectTasksBlock {
 	const p = path.join(cwd, ".project", "tasks.json");
 	if (!existsSync(p)) return { tasks: [] };
@@ -58,11 +163,28 @@ export function readProjectTasksBlock(cwd: string): ProjectTasksBlock {
 	}
 }
 
-export function writeProjectTasksBlock(cwd: string, block: ProjectTasksBlock) {
+export function writeProjectTasksBlock(
+	cwd: string,
+	block: ProjectTasksBlock,
+	lockOptions?: ProjectTasksLockOptions,
+) {
 	const dir = path.join(cwd, ".project");
 	mkdirSync(dir, { recursive: true });
 	const p = path.join(dir, "tasks.json");
-	writeFileSync(p, `${JSON.stringify({ tasks: block.tasks }, null, 2)}\n`);
+	const lockPath = path.join(dir, "tasks.lock");
+	const lock = acquireTasksLock(lockPath, lockOptions);
+	const tmp = `${p}.tmp-${process.pid}-${Date.now()}`;
+	try {
+		writeFileSync(tmp, `${JSON.stringify({ tasks: block.tasks }, null, 2)}\n`);
+		renameSync(tmp, p);
+	} finally {
+		try {
+			if (existsSync(tmp)) unlinkSync(tmp);
+		} catch {
+			// ignore tmp cleanup failure
+		}
+		lock.release();
+	}
 }
 
 export function sanitizeTaskSlug(input: string): string {

@@ -1319,6 +1319,32 @@
           "evidence": "`ensureRecoveryTaskForCandidate` auto-enfileira task de promoção; snapshot runtime preserva contexto reaplicável em failed/budget_exceeded."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-100",
+      "target": "TASK-BUD-010",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Hardening single-writer aplicado em `writeProjectTasksBlock` (`packages/pi-stack/extensions/colony-pilot-task-sync.ts`) com lock determinístico (`.project/tasks.lock`, timeout/retry/stale reclaim) e escrita atômica via arquivo temporário + rename. Cobertura de conflito básico adicionada em `packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts` (release normal, stale reclaim, timeout em lock fresco). Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 2 files passed, 70 tests passed. Consolidação em `docs/research/task-bud-010-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T22:58:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Atualizações concorrentes preservam consistência do board sem race evidente.",
+          "status": "passed",
+          "evidence": "Escrita agora protegida por lock single-writer + rename atômico."
+        },
+        {
+          "criterion": "Mecanismo de lock/fila/reconciliação é determinístico e reversível.",
+          "status": "passed",
+          "evidence": "Lock com retry/timeout/stale reclaim e cleanup explícito após escrita."
+        },
+        {
+          "criterion": "Testes cobrem fluxo de conflito básico e resultado esperado.",
+          "status": "passed",
+          "evidence": "Smoke `colony-pilot-task-sync-lock.test.ts` cobre timeout de lock fresco e reclaim de stale lock."
+        }
+      ]
     }
   ]
 }

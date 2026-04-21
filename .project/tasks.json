@@ -162,7 +162,7 @@
     {
       "id": "TASK-BUD-010",
       "description": "[P0] Implementar reconciliador single-writer para sync colony->.project/tasks com segurança em worktrees e merges.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-005",
         "TASK-BUD-007"
@@ -176,7 +176,8 @@
         "Mecanismo de lock/fila/reconciliação é determinístico e reversível.",
         "Testes cobrem fluxo de conflito básico e resultado esperado."
       ],
-      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree. c2 reportou lock/atomic/single-writer + testes de concorrência/no-auto-close; validar diffs efetivamente materializados no main antes de fechamento.\n[2026-04-21T22:47:00Z] Após fechamento de 046/047/052/051/013, TASK-BUD-010 permanece in-progress para consolidar hardening explícito de reconciliação concorrente (single-writer/lock) com evidência dedicada antes de fechamento."
+      "notes": "Derivado de REQ-BUD-006 e preocupação explícita com conflitos de worktree. c2 reportou lock/atomic/single-writer + testes de concorrência/no-auto-close; validar diffs efetivamente materializados no main antes de fechamento.\n[2026-04-21T22:47:00Z] Após fechamento de 046/047/052/051/013, TASK-BUD-010 permanece in-progress para consolidar hardening explícito de reconciliação concorrente (single-writer/lock) com evidência dedicada antes de fechamento.",
+      "verification": "VER-BUD-100"
     },
     {
       "id": "TASK-BUD-011",
