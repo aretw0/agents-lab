@@ -397,6 +397,19 @@
         "Quando houver dívida histórica, ela deve estar registrada em task/issue explícita com plano de backfill.",
         "Sessões de execução devem registrar decisões/requisitos no .project antes de encerrar handoff."
       ]
+    },
+    {
+      "id": "REQ-BUD-032",
+      "description": "A evolução do control plane deve manter intenção híbrida: soft intent distribuída (skills/prompts/presets) para cadência operacional e hard intent (tools/policies/gates) para enforcement determinístico e auditável.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe documentação operacional explícita da divisão de responsabilidades entre soft intent e hard intent.",
+        "Loops recorrentes de supervisão podem ser disparados por superfícies soft (prompts/scheduler), mas decisões de bloqueio/promoção usam apenas gates hard.",
+        "Mudanças de status canônico (.project/tasks) continuam exigindo evidência e revisão humana quando estratégico."
+      ]
     }
   ]
 }

@@ -836,6 +836,15 @@
       "method": "command",
       "evidence": "Loop L2 do control plane executado com duas pistas de readiness. isolated strict bloqueou por cold-start (`minUserTurns`, `minCompleteSignals`), global strict bloqueou por histórico (`classifyFailures`, `FAILED`, `BUDGET_EXCEEDED`), enquanto isolated warm (`minUserTurns=2`) ficou ready. Resultado formalizado como política operacional de duas pistas em docs/guides/subagent-readiness-gate.md e docs/guides/swarm-cleanroom-protocol.md. Evidência detalhada: docs/research/control-plane-loop-run-2026-04-21-l2.md.",
       "timestamp": "2026-04-21T14:03:30Z"
+    },
+    {
+      "id": "VER-BUD-069",
+      "target": "TASK-BUD-070",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Patrol recorrente configurado via scheduler prompt (id xchvdmmx, recurring 2h, scope instance). Documentação de contrato soft/hard e critérios de ajuste/parada registrada em docs/research/control-plane-patrol-pilot-2026-04-21.md; guias operacionais atualizados em docs/guides/session-triage.md e docs/guides/subagent-readiness-gate.md.",
+      "timestamp": "2026-04-21T14:09:00Z"
     }
   ]
 }

@@ -56,6 +56,7 @@ Regra prática:
 - `operational GO` permite continuar o loop em modo supervisionado.
 - `strict GO` é o gate para promoção de autonomia mais forte.
 - se `strict` bloquear por histórico (FAILED/BUDGET_EXCEEDED) ou cold start local, registrar bloqueios no board e seguir com mitigação explícita.
+- scheduler/prompt pode disparar esse check em cadência (soft intent), mas promoção/bloqueio continua dependente do resultado hard das tools.
 
 ## Quando strict falhar por pacote ausente
 

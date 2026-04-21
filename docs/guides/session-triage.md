@@ -66,6 +66,10 @@ Política prática para comandos longos:
 - comandos curtos/críticos (status, diff, commit): foreground com timeout explícito;
 - jobs longos: background intencional com PID/log + checkpoint após conclusão.
 
+Patrol recorrente (soft intent) é opcional para sessões long-run:
+- use scheduler prompt para cadência de observação;
+- mantenha decisão operacional em gates hard (GO/GO condicional/NO-GO).
+
 ## Governança
 
 - `.project/tasks` continua clock oficial
