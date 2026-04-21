@@ -908,6 +908,24 @@
       "method": "test",
       "evidence": "Gate hard por provider budget validado no colony-pilot. Evidências: (1) testes de bloqueio e override auditável em `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (`evaluateProviderBudgetGate bloqueia provider em BLOCK sem override` e `permite override auditável`); (2) execução de smoke: `node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 65 passed; (3) mensagem de bloqueio com ação corretiva em `packages/pi-stack/extensions/colony-pilot.ts` inclui ajuste de budget, override auditável (`budget-override:<motivo>`) e inspeção via `/quota-visibility budget`.",
       "timestamp": "2026-04-21T15:38:00Z"
+    },
+    {
+      "id": "VER-BUD-077",
+      "target": "TASK-BUD-020",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Pipeline de triagem validado com `node.exe scripts/session-triage.mjs --days 1 --limit 8` (seções Recent sessions, Branch-summary aggregation e Board pending split) e `--json` (campos `aggregate.nextSteps/inProgress/blocked` + `board.unlockNow/later`). Evidência consolidada em docs/research/task-bud-020-closure-2026-04-21.md.",
+      "timestamp": "2026-04-21T15:47:00Z"
+    },
+    {
+      "id": "VER-BUD-078",
+      "target": "TASK-BUD-021",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Control plane portátil validado por runtime + documentação. Runtime: `scheduler_governance_status` (owner/lease saudável), `colony_pilot_preflight` ok=true, `context_watch_status` warn com recomendação de micro-slice, `subagent_readiness_status(strict=true)` ready=true sem bloqueios. Protocolo: `docs/guides/swarm-cleanroom-protocol.md` com handoff/resume loop, leitura em duas pistas e compatibilidade multi-backend. Síntese em docs/research/task-bud-021-closure-2026-04-21.md.",
+      "timestamp": "2026-04-21T15:47:30Z"
     }
   ]
 }
