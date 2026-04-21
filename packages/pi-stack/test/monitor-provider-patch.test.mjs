@@ -111,6 +111,64 @@ describe("detectDefaultProvider", () => {
 	});
 });
 
+describe("detectFragilityWhen", () => {
+	let tmpDir;
+
+	beforeEach(() => {
+		tmpDir = mkdtempSync(join(tmpdir(), "mpp-test-"));
+	});
+
+	afterEach(() => {
+		rmSync(tmpDir, { recursive: true, force: true });
+	});
+
+	it("returns default when setting is missing", () => {
+		assert.equal(detectFragilityWhen(tmpDir), DEFAULT_FRAGILITY_WHEN);
+	});
+
+	it("reads fragilityWhen from piStack.monitorProviderPatch", () => {
+		const piDir = join(tmpDir, ".pi");
+		mkdirSync(piDir, { recursive: true });
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify(
+				{
+					piStack: {
+						monitorProviderPatch: {
+							fragilityWhen: "has_bash",
+						},
+					},
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+		assert.equal(detectFragilityWhen(tmpDir), "has_bash");
+	});
+
+	it("falls back to default for invalid value", () => {
+		const piDir = join(tmpDir, ".pi");
+		mkdirSync(piDir, { recursive: true });
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify(
+				{
+					piStack: {
+						monitorProviderPatch: {
+							fragilityWhen: "invalid-trigger",
+						},
+					},
+				},
+				null,
+				2,
+			) + "\n",
+			"utf8",
+		);
+		assert.equal(detectFragilityWhen(tmpDir), DEFAULT_FRAGILITY_WHEN);
+	});
+});
+
 describe("generateAgentYaml", () => {
 	it("generates correct YAML for hedge-classifier", () => {
 		const yaml = generateAgentYaml("hedge-classifier", COPILOT_MODEL);

@@ -28,11 +28,12 @@ Issue upstream: [davidorex/pi-project-workflows#1](https://github.com/davidorex/
 A extensão `monitor-provider-patch` agora:
 
 1. mantém `hedge.monitor.json` com `conversation_history` desabilitado por padrão (opt-in);
-2. resolve modelo de classifier por provider (`defaultProvider` + mapa configurável);
-3. garante overrides em `.pi/agents/` para os 5 classifiers;
-4. auto-repara overrides legados sem `prompt.system` (compat com OpenAI Codex Responses);
-5. avisa quando overrides existentes divergem do provider/modelo atual;
-6. fornece comando `/monitor-provider` para diagnosticar e sincronizar.
+2. calibra `fragility.monitor.json` para contexto lean e trigger padrão `has_file_writes` (overrideável);
+3. resolve modelo de classifier por provider (`defaultProvider` + mapa configurável);
+4. garante overrides em `.pi/agents/` para os 5 classifiers;
+5. auto-repara overrides legados sem `prompt.system` (compat com OpenAI Codex Responses);
+6. avisa quando overrides existentes divergem do provider/modelo atual;
+7. fornece comando `/monitor-provider` para diagnosticar e sincronizar.
 
 Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sovereign` (modo `audit`/`shadow`) para começar a convergência de semântica entre guardrails e monitores sem depender de runtime third-party para observabilidade básica.
 
@@ -76,7 +77,8 @@ Em `.pi/settings.json` (ou `~/.pi/agent/settings.json`):
         "github-copilot": "github-copilot/claude-haiku-4.5",
         "openai-codex": "openai-codex/gpt-5.4-mini"
       },
-      "hedgeConversationHistory": false
+      "hedgeConversationHistory": false,
+      "fragilityWhen": "has_file_writes"
     }
   }
 }
@@ -112,7 +114,8 @@ Config da primitiva first-party (`.pi/settings.json`):
     "monitorSovereign": {
       "enabled": false,
       "mode": "audit",
-      "reportMaxEntries": 40
+      "reportMaxEntries": 40,
+      "startupNotify": false
     }
   }
 }
