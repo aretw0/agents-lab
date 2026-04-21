@@ -1404,7 +1404,7 @@
     {
       "id": "TASK-CAL-2026-04-21-B",
       "description": "[P2] Mapear lições do squeez para perfil opcional de operação enxuta (não-default), separando o que vira padrão agnóstico do que fica como modo/tema opinativo.",
-      "status": "planned",
+      "status": "completed",
       "files": [
         "docs/research",
         "docs/guides",
@@ -1415,7 +1415,8 @@
         "Perfil opcional documentado sem alterar comportamento default da stack.",
         "Sem dependência rígida de um único estilo operacional."
       ],
-      "notes": "Referência inicial: https://github.com/claudioemmanuel/squeez. Executar só após fechar calibração hard de ruído/contexto."
+      "notes": "Referência inicial: https://github.com/claudioemmanuel/squeez. Executar só após fechar calibração hard de ruído/contexto.",
+      "verification": "VER-CAL-2026-04-21-B1"
     },
     {
       "id": "TASK-CAL-2026-04-21-C",

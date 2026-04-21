@@ -674,6 +674,32 @@
           "evidence": "vitest packages/pi-stack/test/smoke/subagent-readiness.test.ts (3/3) + provider-readiness smoke regressão (4/4)."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-B1",
+      "target": "TASK-CAL-2026-04-21-B",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T12:16:30.000Z",
+      "evidence": "Inventário explícito baseline vs opt-in publicado em docs/guides/opt-in-lean-profile-inventory.md; governança perfis marcada como opt-in-only (sem auto-apply) e descrição balance ajustada para general-purpose; cobertura smoke garante ausência de lock-in em routeModelRefs/providerBudgets e parse estrito de perfis.",
+      "criteria_results": [
+        {
+          "criterion": "Inventário explícito: lições baseline agnóstico vs opt-in",
+          "status": "passed",
+          "evidence": "Tabela de mapeamento em docs/guides/opt-in-lean-profile-inventory.md."
+        },
+        {
+          "criterion": "Perfil opcional documentado sem alterar comportamento default",
+          "status": "passed",
+          "evidence": "governance-profiles.ts agora explicita opt-in/no auto-apply; guia indica aplicação manual via /governance-profile."
+        },
+        {
+          "criterion": "Sem dependência rígida de um único estilo operacional",
+          "status": "passed",
+          "evidence": "smoke governance-profiles.test.ts valida que patches não hardcodam routeModelRefs/providerBudgets (preserva configuração do usuário)."
+        }
+      ]
     }
   ]
 }
