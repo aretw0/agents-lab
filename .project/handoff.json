@@ -1,21 +1,23 @@
 {
-  "timestamp": "2026-04-21T12:05:00Z",
-  "context": "Checkpoint pré-compactação (68% contexto). Entregas concluídas nesta sessão: TASK-BUD-061 promovida para superfície publicada (tool subagent_readiness_status + comando /subagent-readiness, smoke e docs), calibrações adicionais de fragility (guardrails + pattern hygiene + substantive-output guard), gate stability bounded-default e pipeline calibrate-repro com tails por classe. Estado operacional estável: classifyFailures=0 nos gates recentes.",
-  "current_phase": "pre-compact-checkpoint",
+  "timestamp": "2026-04-21T15:55:00Z",
+  "context": "Checkpoint de controle com contexto em ~62-64%. Fechamentos recentes concluídos e versionados: TASK-BUD-020 (triage pipeline), TASK-BUD-021 (control plane portátil), TASK-BUD-023 (ingestão provider-agnostic), TASK-BUD-024 (budget por provider) e TASK-BUD-025 (gate hard BLOCK+override auditável). Patrol recorrente soft intent ativo (xchvdmmx, 2h, instance) com decisão mantida em gates hard. Estado runtime no recorte atual: scheduler observe saudável, preflight ok=true, readiness strict ready=true, context-watch em warn (micro-slices recomendados).",
+  "current_phase": "controlled-checkpoint",
   "current_tasks": [
-    "TASK-CAL-2026-04-21-B"
+    "TASK-BUD-051",
+    "TASK-BUD-052",
+    "TASK-BUD-046"
   ],
   "blockers": [],
   "next_actions": [
-    "Compactar agora (limiar operacional ~70%) e retomar imediatamente deste checkpoint.",
-    "Após compactar: validar runtime pós-reload do slice mais recente da superfície publicada (se ainda não validado), depois iniciar TASK-CAL-2026-04-21-B em micro-slice documental (inventário baseline agnóstico vs perfil opt-in).",
-    "Manter cadence deterministic-first + commit atômico por slice."
+    "Não abrir frente grande até novo checkpoint (~68%). Priorizar registro/evidência leve apenas.",
+    "Fazer triagem dos in-progress legados de lotes unattended (046/051/052) e decidir: promover por evidência existente ou quebrar em micro-slices explícitos.",
+    "Se ainda houver janela, avançar somente documentação de fechamento/estado canônico (.project) antes de qualquer implementação adicional."
   ],
   "open_questions": [
-    "Nenhuma bloqueante para continuar após compactação."
+    "Qual lote unattended legado deve ser promovido/encerrado primeiro para reduzir dívida de candidate-only sem inflar contexto?"
   ],
   "key_decisions_pending": [
-    "DEC-BUD-025 follow-up: framing final do perfil opt-in (squeez learnings) sem alterar baseline default."
+    "DEC-BUD-027 follow-up: granularidade operacional de soft intent distribuída vs hard intent por superfície (scheduler/skills/prompts/tools)."
   ],
   "files_in_flux": []
 }
