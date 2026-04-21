@@ -538,6 +538,27 @@
           "evidence": "Suites executadas: node --test monitor-provider-patch + monitor-context-budget; vitest smoke monitor-sovereign-startup-output + guardrails-provider-budget-governor (10/10). Gate: monitor-stability-gate --tail-bytes 1200000 --min-user-turns 3 --max-classify-failures 0 => stable=true, classifyFailures=0."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-C3",
+      "target": "TASK-CAL-2026-04-21-C",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T10:56:45.000Z",
+      "evidence": "monitor-stability-gate ganhou auto-expansão de tail para reduzir falsos negativos de min-user-turns com saída bounded inicial. Cobertura adicionada em monitor-gates-regression e validação em sessão real mostrou tailAttempts progressivo 200k→400k→800k até userTurns>=3.",
+      "criteria_results": [
+        {
+          "criterion": "Comando único executa suíte determinística (tests+gates) sem depender de token real.",
+          "status": "passed",
+          "evidence": "node --test packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs => pass; novo caso de auto-expand validado."
+        },
+        {
+          "criterion": "Relatórios/gates reproduzíveis com comportamento estável mesmo em tails menores.",
+          "status": "passed",
+          "evidence": "scripts/monitor-stability-gate.mjs --tail-bytes 200000 --max-tail-bytes 1200000 --min-user-turns 3 --max-classify-failures 0 => stable=true, tailBytesUsed=800000, tailAttempts registrados."
+        }
+      ]
     }
   ]
 }
