@@ -459,6 +459,22 @@
         "Guia operacional de isolamento descreve fluxo unificado TUI+WEB em ambiente workspace-isolated.",
         "Adoção continua pragmática: sem publish automático, apenas fila de release preparada com riscos/limites claros."
       ]
+    },
+    {
+      "id": "REQ-BUD-036",
+      "description": "A stack deve oferecer trilha de devcontainer opcional para laboratório containerizado com isolamento local (`PI_CODING_AGENT_DIR` no workspace), pronta para usuários com Docker Desktop + Git + VS Code.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-035"
+      ],
+      "acceptance_criteria": [
+        "Blueprint de `.devcontainer` define usuário não-root, workdir correto e evita acoplamento ao `~/.pi` global.",
+        "Existe comando de entrada simplificado (estilo `farm`) para garantir usuário/workdir corretos ao anexar via Docker Desktop/VS Code.",
+        "Guia operacional cobre attach/terminal por plataforma (Linux: kitty; Windows: Windows Terminal PowerShell) e valida fluxo TUI+WEB unificado em isolamento."
+      ]
     }
   ]
 }

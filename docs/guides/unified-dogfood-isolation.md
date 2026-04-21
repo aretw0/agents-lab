@@ -53,6 +53,12 @@ Escolha explicitamente uma trilha:
 - modo escolhido (`.project-first` / adapter-first / mirror);
 - ação aplicada + verificação canônica em `.project/verification`.
 
+## Trilha futura: devcontainer opcional
+
+A estratégia de isolamento deste guia será espelhada em devcontainer (Docker Desktop + VS Code) para onboarding mínimo, mantendo os mesmos invariantes de runtime local.
+
+Referência de planejamento: `docs/research/devcontainer-blueprint-2026-04-21.md`.
+
 ## Regras de segurança operacional
 
 - sem publish direto a partir de rodada de dogfood;

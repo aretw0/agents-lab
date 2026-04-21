@@ -199,6 +199,13 @@
       "decision": "Operar em modo dual explícito: `.project-first` para governança local canônica, mas com onboarding adapter-first para usuários que não desejam migrar seu sistema de trabalho.",
       "rationale": "Usuários do pi-stack podem manter trabalho em sistemas diversos (Markdown/Obsidian, DB, API externa, web automation). A stack deve explicar claramente as duas opções: migrar para blocos canônicos ou integrar via adapters sem perder invariantes de hard intent/evidência.",
       "context": "Feedback do usuário (2026-04-21): risco de fricção quando o modelo mental Davidorex/.project não for desejado; necessidade de clareza operacional e prontidão multi-backend."
+    },
+    {
+      "id": "DEC-BUD-029",
+      "status": "decided",
+      "decision": "Adotar estratégia devcontainer-first como trilha opcional de distribuição do laboratório, com isolamento workspace-local (sem depender de `~/.pi` global) e entrada simplificada estilo `farm` para Docker Desktop.",
+      "rationale": "Facilita onboarding de usuários com stack mínima (Docker Desktop + Git + VS Code), reproduz ambiente user-like para dogfood TUI+WEB e reduz deriva de configuração global.",
+      "context": "Solicitação do usuário para preparar futuro devcontainer inspirado em refarm, mantendo pragmatismo e governança canônica."
     }
   ]
 }

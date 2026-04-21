@@ -1681,6 +1681,31 @@
       ],
       "notes": "Slice de preparação de release (sem publish) para garantir que as melhorias recentes entrem na próxima janela de lançamento.",
       "verification": "VER-BUD-083"
+    },
+    {
+      "id": "TASK-BUD-074",
+      "description": "[P1] Especificar blueprint de devcontainer para agents-lab (docker desktop onboarding + entrada estilo farm + isolamento de runtime pi local).",
+      "status": "planned",
+      "type": "chore",
+      "depends_on": [
+        "TASK-BUD-073"
+      ],
+      "references": [
+        "DEC-BUD-029",
+        "REQ-BUD-036"
+      ],
+      "acceptance_criteria": [
+        "Documento de design define estrutura `.devcontainer/` (Dockerfile/devcontainer.json/postCreate) alinhada ao fluxo do laboratório.",
+        "Runbook define comando de entrada/attach garantindo usuário e diretório corretos dentro do container.",
+        "Checklist de validação cobre dogfood isolado com TUI+WEB sem dependência de configuração global do host."
+      ],
+      "files": [
+        ".devcontainer/devcontainer.json",
+        ".devcontainer/Dockerfile",
+        "docs/guides/unified-dogfood-isolation.md",
+        "docs/research/devcontainer-blueprint-2026-04-21.md"
+      ],
+      "notes": "Registrar como próximo passo de maturidade. Implementação posterior em micro-slices para não desviar do backlog crítico atual."
     }
   ]
 }

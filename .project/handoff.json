@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-21T16:58:00Z",
-  "context": "Avanço de maturidade concluído em dois eixos: (1) contexto fresco para spawn/resume (TASK-BUD-071) e (2) onboarding dual-mode/mirror (TASK-BUD-072), agora com fila de release preparada via changeset (TASK-BUD-073). Incluído runbook de isolamento para dogfood unificado TUI+WEB (`docs/guides/unified-dogfood-isolation.md`).",
+  "timestamp": "2026-04-21T17:07:00Z",
+  "context": "Registro pragmático de expansão: adicionada trilha futura de devcontainer opcional para onboarding mínimo (Docker Desktop + Git + VS Code), sem desviar da execução atual. Capturados DEC-BUD-029, REQ-BUD-036 e TASK-BUD-074 com referência ao padrão `farm` e necessidade de manter isolamento workspace-local (`PI_CODING_AGENT_DIR`) para dogfood TUI+WEB.",
   "current_phase": "maturity-queue-prep",
   "current_tasks": [
     "TASK-BUD-046",
@@ -14,10 +14,11 @@
   "next_actions": [
     "Rodar 2-3 ciclos medindo redução de re-leitura com `context:preload` e registrar delta objetivo.",
     "Retomar reconciliação dos legados (046 -> 047 -> 052 -> 051) fechando por evidência quando possível.",
-    "Iniciar TASK-BUD-066 conectando contrato de primitives+adapters ao adapter de mirror Markdown (base `vault-seed`) com invariantes de idempotência."
+    "Planejar micro-slice inicial de TASK-BUD-074 (blueprint `.devcontainer`) sem implementar container completo no mesmo lote."
   ],
   "open_questions": [
-    "Qual contrato mínimo de espelho (`.project` -> vault) evita drift e permite replay determinístico?"
+    "Qual contrato mínimo de espelho (`.project` -> vault) evita drift e permite replay determinístico?",
+    "Qual UX de comando estilo `farm` melhor preserva usuário/workdir corretos em attach Docker Desktop no Windows e Linux?"
   ],
   "key_decisions_pending": [
     "Follow-up de DEC-BUD-028/DEC-BUD-027 para granularidade operacional de soft intent e sincronização mirror."
