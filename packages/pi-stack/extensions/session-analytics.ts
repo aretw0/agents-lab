@@ -11,6 +11,7 @@
  *   timeline     — chronological event sequence
  *   model-usage  — provider/model switches
  *   summary      — top-level session overview
+ *   outliers     — oversized message/tool payloads (context-risk triage)
  *
  * @capability-id session-analytics
  * @capability-criticality medium
@@ -109,6 +110,15 @@ export interface TimelineEvent {
   signal?: string;
 }
 
+export interface ContentOutlierEvent {
+  timestampIso: string;
+  role?: string;
+  toolName?: string;
+  textChars: number;
+  hasStackOverflow: boolean;
+  excerpt: string;
+}
+
 export function parseSignals(records: unknown[]): ColonySignalCount[] {
   const counts = new Map<string, number>();
   for (const rec of records) {
@@ -181,6 +191,50 @@ export function parseTimeline(records: unknown[], limit: number): TimelineEvent[
   return out;
 }
 
+export function parseContentOutliers(records: unknown[], limit: number, minChars: number): {
+  outliers: ContentOutlierEvent[];
+  stackOverflowHits: number;
+} {
+  const outliers: ContentOutlierEvent[] = [];
+  let stackOverflowHits = 0;
+
+  for (const rec of records) {
+    if (!rec || typeof rec !== "object") continue;
+    const r = rec as Record<string, unknown>;
+    if (r["type"] !== "message") continue;
+
+    const msg = r["message"] as Record<string, unknown> | undefined;
+    if (!msg) continue;
+
+    const role = typeof msg["role"] === "string" ? msg["role"] : undefined;
+    const toolName = typeof msg["toolName"] === "string" ? msg["toolName"] : undefined;
+    const text = extractTextContent(msg["content"]);
+    const textChars = text.length;
+    const hasStackOverflow = text.includes("Maximum call stack size exceeded")
+      || text.includes("wrapTextWithAnsi")
+      || text.includes("truncateToVisualLines");
+
+    if (hasStackOverflow) stackOverflowHits += 1;
+
+    if (textChars >= minChars || hasStackOverflow) {
+      outliers.push({
+        timestampIso: typeof r["timestamp"] === "string" ? r["timestamp"] : "",
+        role,
+        toolName,
+        textChars,
+        hasStackOverflow,
+        excerpt: text.slice(0, 120),
+      });
+    }
+  }
+
+  outliers.sort((a, b) => b.textChars - a.textChars);
+  return {
+    outliers: outliers.slice(0, limit),
+    stackOverflowHits,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Session file listing + age filter
 // ---------------------------------------------------------------------------
@@ -205,7 +259,7 @@ function listSessionFiles(dir: string, lookbackHours: number): string[] {
 // Query engine
 // ---------------------------------------------------------------------------
 
-export type QueryType = "signals" | "timeline" | "model-usage" | "summary";
+export type QueryType = "signals" | "timeline" | "model-usage" | "summary" | "outliers";
 
 export interface SessionAnalyticsResult {
   queryType: QueryType;
@@ -221,6 +275,7 @@ export function runQuery(
   lookbackHours: number,
   signalFilter: string | undefined,
   limit: number,
+  minChars = 20_000,
 ): SessionAnalyticsResult {
   const dir = sessionDir(cwd);
   const files = listSessionFiles(dir, lookbackHours);
@@ -250,6 +305,14 @@ export function runQuery(
     data = {
       modelChanges: changes.slice(0, limit),
       byProvider: Object.fromEntries([...byProvider.entries()].sort((a, b) => b[1] - a[1])),
+    };
+
+  } else if (queryType === "outliers") {
+    const d = parseContentOutliers(allRecords, limit, Math.max(1000, minChars));
+    data = {
+      minChars: Math.max(1000, minChars),
+      stackOverflowHits: d.stackOverflowHits,
+      outliers: d.outliers,
     };
 
   } else {
@@ -299,6 +362,7 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
           Type.Literal("timeline"),
           Type.Literal("model-usage"),
           Type.Literal("summary"),
+          Type.Literal("outliers"),
         ],
         { description: "Type of analytical query to run." }
       ),
@@ -311,11 +375,15 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
       limit: Type.Optional(
         Type.Number({ description: "Maximum records to return for timeline/model-usage. Default: 50." })
       ),
+      min_chars: Type.Optional(
+        Type.Number({ description: "Minimum text size (chars) to consider an outlier. Only for query_type=outliers. Default: 20000." })
+      ),
     }),
-    execute({ query_type, lookback_hours, signal_filter, limit }) {
+    execute({ query_type, lookback_hours, signal_filter, limit, min_chars }) {
       const hours = typeof lookback_hours === "number" && lookback_hours > 0 ? lookback_hours : 24;
       const cap = typeof limit === "number" && limit > 0 ? limit : 50;
-      const result = runQuery(process.cwd(), query_type, hours, signal_filter, cap);
+      const minChars = typeof min_chars === "number" && min_chars > 0 ? min_chars : 20_000;
+      const result = runQuery(process.cwd(), query_type, hours, signal_filter, cap, minChars);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
@@ -326,12 +394,12 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
   // ---- command: /session-analytics --------------------------------------
 
   pi.registerCommand("session-analytics", {
-    description: "Query session analytics. Usage: /session-analytics <signals|timeline|model-usage|summary> [--hours N] [--filter SIGNAL_NAMES]",
+    description: "Query session analytics. Usage: /session-analytics <signals|timeline|model-usage|summary|outliers> [--hours N] [--filter SIGNAL_NAMES] [--min-chars N]",
     handler: (args, ctx) => {
       const tokens = (args ?? "summary").trim().split(/\s+/);
       const subCmd = tokens[0].toLowerCase() as QueryType | string;
 
-      const VALID: QueryType[] = ["signals", "timeline", "model-usage", "summary"];
+      const VALID: QueryType[] = ["signals", "timeline", "model-usage", "summary", "outliers"];
       if (!VALID.includes(subCmd as QueryType)) {
         ctx.ui.notify(`Unknown subcommand '${subCmd}'. Use: ${VALID.join(" | ")}`, "warning");
         return;
@@ -340,6 +408,7 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
       let hours = 24;
       let signalFilter: string | undefined;
       let limit = 50;
+      let minChars = 20_000;
 
       for (let i = 1; i < tokens.length; i++) {
         if (tokens[i] === "--hours" && tokens[i + 1]) {
@@ -348,10 +417,12 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
           signalFilter = tokens[++i];
         } else if (tokens[i] === "--limit" && tokens[i + 1]) {
           limit = Number(tokens[++i]);
+        } else if (tokens[i] === "--min-chars" && tokens[i + 1]) {
+          minChars = Number(tokens[++i]);
         }
       }
 
-      const result = runQuery(process.cwd(), subCmd as QueryType, hours, signalFilter, limit);
+      const result = runQuery(process.cwd(), subCmd as QueryType, hours, signalFilter, limit, minChars);
       const lines: string[] = [
         `session-analytics: ${result.queryType}`,
         `scanned: ${result.filesScanned} file(s), lookback: ${result.lookbackHours}h`,
@@ -374,6 +445,15 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         lines.push("");
         for (const m of d.modelChanges.slice(0, 10)) {
           lines.push(`  ${m.timestampIso.slice(0, 19)} ${m.provider}/${m.modelId}`);
+        }
+      } else if (result.queryType === "outliers") {
+        const d = result.data as { minChars: number; stackOverflowHits: number; outliers: ContentOutlierEvent[] };
+        lines.push(`min_chars: ${d.minChars}`);
+        lines.push(`stack_overflow_hits: ${d.stackOverflowHits}`);
+        lines.push("");
+        for (const o of d.outliers.slice(0, 10)) {
+          const marker = o.hasStackOverflow ? "!" : "-";
+          lines.push(`  ${marker} ${o.timestampIso.slice(0, 19)} ${o.role ?? "?"}/${o.toolName ?? "-"} chars=${o.textChars}`);
         }
       } else {
         const d = result.data as Record<string, unknown>;

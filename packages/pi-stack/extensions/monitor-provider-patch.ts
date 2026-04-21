@@ -26,47 +26,24 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-
-/** Classifier names from @davidorex/pi-behavior-monitors */
-const CLASSIFIERS = [
-	"commit-hygiene-classifier",
-	"fragility-classifier",
-	"hedge-classifier",
-	"unauthorized-action-classifier",
-	"work-quality-classifier",
-] as const;
-
-/** Known safe defaults for provider-aware classifier model routing */
-const DEFAULT_MODEL_BY_PROVIDER: Record<string, string> = {
-	"github-copilot": "github-copilot/claude-haiku-4.5",
-	"openai-codex": "openai-codex/gpt-5.4-mini",
-};
-
-type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-const THINKING_LEVELS: ThinkingLevel[] = [
-	"off",
-	"minimal",
-	"low",
-	"medium",
-	"high",
-	"xhigh",
-];
-const DEFAULT_THINKING: ThinkingLevel = "off";
-
-const SETTINGS_ROOT = ["piStack", "monitorProviderPatch"];
-const HEDGE_HISTORY_SETTING_PATH = [
-	...SETTINGS_ROOT,
-	"hedgeConversationHistory",
-];
-const CLASSIFIER_MODEL_SETTING_PATH = [...SETTINGS_ROOT, "classifierModel"];
-const CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH = [
-	...SETTINGS_ROOT,
-	"classifierModelByProvider",
-];
-const CLASSIFIER_THINKING_SETTING_PATH = [
-	...SETTINGS_ROOT,
-	"classifierThinking",
-];
+import {
+	CLASSIFIERS,
+	CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH,
+	CLASSIFIER_MODEL_SETTING_PATH,
+	CLASSIFIER_SYSTEM_PROMPT_LINES,
+	CLASSIFIER_THINKING_SETTING_PATH,
+	DEFAULT_HEDGE_WHEN,
+	DEFAULT_MODEL_BY_PROVIDER,
+	DEFAULT_THINKING,
+	HEDGE_HISTORY_SETTING_PATH,
+	HEDGE_LEAN_BASE_CONTEXT,
+	HEDGE_PROJECT_CONTEXT_SETTING_PATH,
+	HEDGE_WHEN_PATTERNS,
+	HEDGE_WHEN_SETTING_PATH,
+	THINKING_LEVELS,
+	type ThinkingLevel,
+} from "./monitor-provider-config";
+import { ensureMonitorRuntimeClassifyContract } from "./monitor-runtime-contract";
 
 function parseCommandInput(input: string): { cmd: string; body: string } {
 	const trimmed = input.trim();
@@ -200,6 +177,26 @@ export function detectClassifierThinking(cwd: string): ThinkingLevel {
 	return DEFAULT_THINKING;
 }
 
+/** Detects hedge monitor trigger policy, defaults to has_bash. */
+export function detectHedgeWhen(cwd: string): string {
+	const value = detectStringSetting(cwd, HEDGE_WHEN_SETTING_PATH);
+	if (!value) return DEFAULT_HEDGE_WHEN;
+
+	if (HEDGE_WHEN_PATTERNS.includes(value as (typeof HEDGE_WHEN_PATTERNS)[number])) {
+		return value;
+	}
+
+	if (/^tool\(\w+\)$/.test(value)) return value;
+	if (/^every\(\d+\)$/.test(value)) return value;
+
+	return DEFAULT_HEDGE_WHEN;
+}
+
+/** Detects whether hedge should include project_vision/project_conventions. */
+export function detectHedgeIncludeProjectContext(cwd: string): boolean {
+	return detectBooleanSetting(cwd, HEDGE_PROJECT_CONTEXT_SETTING_PATH) ?? false;
+}
+
 /** Splits provider/model reference. */
 export function parseModelRef(
 	modelRef: string,
@@ -239,6 +236,8 @@ export function generateAgentYaml(
 		`  format: json`,
 		`  schema: ../schemas/verdict.schema.json`,
 		`prompt:`,
+		`  system: |-`,
+		...CLASSIFIER_SYSTEM_PROMPT_LINES.map((line) => `    ${line}`),
 		`  task:`,
 		`    template: ../monitors/${monitorName}/classify.md`,
 		``,
@@ -335,6 +334,11 @@ export function extractTemplateFromAgentYaml(
 	return match?.[1];
 }
 
+/** Returns true when classifier override already defines prompt.system. */
+export function hasSystemPromptInAgentYaml(content: string): boolean {
+	return /^\s{2}system:\s*/m.test(content);
+}
+
 function escapeRegExp(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -409,6 +413,58 @@ export function repairLegacyTemplateOverrides(cwd: string): {
 	return { repaired, skipped };
 }
 
+/**
+ * Repairs classifier overrides missing prompt.system.
+ *
+ * OpenAI Codex Responses requires `instructions` in payload; monitor runtime
+ * maps this from agent systemPrompt. Without prompt.system the classify call
+ * can fail with `{"detail":"Instructions are required"}`.
+ */
+export function repairMissingSystemPromptOverrides(cwd: string): {
+	repaired: string[];
+	skipped: string[];
+} {
+	const agentsDir = join(cwd, ".pi", "agents");
+	const repaired: string[] = [];
+	const skipped: string[] = [];
+
+	for (const classifier of CLASSIFIERS) {
+		const filePath = join(agentsDir, `${classifier}.agent.yaml`);
+		if (!existsSync(filePath)) continue;
+
+		let content = "";
+		try {
+			content = readFileSync(filePath, "utf8");
+		} catch {
+			skipped.push(classifier);
+			continue;
+		}
+
+		if (hasSystemPromptInAgentYaml(content)) continue;
+
+		const newline = content.includes("\r\n") ? "\r\n" : "\n";
+		const systemBlock = [
+			"  system: |-",
+			...CLASSIFIER_SYSTEM_PROMPT_LINES.map((line) => `    ${line}`),
+		].join(newline) + newline;
+
+		const next = content.replace(
+			/(^\s*prompt:\s*\r?\n)(\s{2}task:\s*\r?\n)/m,
+			`$1${systemBlock}$2`,
+		);
+
+		if (next === content) {
+			skipped.push(classifier);
+			continue;
+		}
+
+		writeFileSync(filePath, next, "utf8");
+		repaired.push(classifier);
+	}
+
+	return { repaired, skipped };
+}
+
 /** Returns current override model per classifier (if files exist). */
 export function readOverrideModels(
 	cwd: string,
@@ -468,57 +524,111 @@ export function checkModelAvailability(
 	return { ok: true, reason: "ok" };
 }
 
+export type HedgeMonitorPolicy = {
+	includeConversationHistory: boolean;
+	includeProjectContext: boolean;
+	when: string;
+};
+
+function normalizeHedgeContext(
+	input: unknown,
+	policy: HedgeMonitorPolicy,
+): string[] {
+	const raw = Array.isArray(input)
+		? input.filter((item): item is string => typeof item === "string")
+		: [];
+
+	const normalized = new Set(raw);
+	for (const key of HEDGE_LEAN_BASE_CONTEXT) normalized.add(key);
+
+	if (policy.includeConversationHistory) {
+		normalized.add("conversation_history");
+	} else {
+		normalized.delete("conversation_history");
+	}
+
+	if (policy.includeProjectContext) {
+		normalized.add("project_vision");
+		normalized.add("project_conventions");
+	} else {
+		normalized.delete("project_vision");
+		normalized.delete("project_conventions");
+	}
+
+	const ordered: string[] = [];
+	for (const key of HEDGE_LEAN_BASE_CONTEXT) {
+		if (normalized.has(key)) ordered.push(key);
+	}
+	if (normalized.has("conversation_history")) ordered.push("conversation_history");
+	if (normalized.has("project_vision")) ordered.push("project_vision");
+	if (normalized.has("project_conventions")) ordered.push("project_conventions");
+
+	for (const key of normalized) {
+		if (!ordered.includes(key)) ordered.push(key);
+	}
+
+	return ordered;
+}
+
 /**
- * Ensures the hedge monitor context includes or excludes conversation_history.
- * When `includeConversationHistory` is false (default), the field is removed.
- * When true, an empty array placeholder is added if the field is absent.
- * Returns true if the file was modified.
+ * Ensures hedge monitor follows a lean policy:
+ * - trigger (`when`) defaults to has_bash
+ * - conversation_history is opt-in
+ * - project_vision/project_conventions are opt-in
  */
-export function ensureHedgeMonitorContext(
+export function ensureHedgeMonitorPolicy(
 	cwd: string,
-	includeConversationHistory: boolean,
-): boolean {
+	policy: HedgeMonitorPolicy,
+): { changed: boolean; details: string[] } {
 	const monitorPath = join(cwd, ".pi", "monitors", "hedge.monitor.json");
-	if (!existsSync(monitorPath)) return false;
+	if (!existsSync(monitorPath)) return { changed: false, details: [] };
 
 	let monitor: Record<string, unknown>;
 	try {
 		monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
 	} catch {
-		return false;
+		return { changed: false, details: [] };
 	}
 
 	let changed = false;
+	const details: string[] = [];
 
-	// Legacy shape compatibility: remove/add top-level field if present.
+	const currentWhen = typeof monitor["when"] === "string" ? monitor["when"] : undefined;
+	if (currentWhen !== policy.when) {
+		monitor["when"] = policy.when;
+		changed = true;
+		details.push(`when=${policy.when}`);
+	}
+
 	const hasTopLevelHistory = "conversation_history" in monitor;
-	if (!includeConversationHistory && hasTopLevelHistory) {
+	if (!policy.includeConversationHistory && hasTopLevelHistory) {
 		delete monitor["conversation_history"];
 		changed = true;
-	} else if (includeConversationHistory && !hasTopLevelHistory) {
+	} else if (policy.includeConversationHistory && !hasTopLevelHistory) {
 		monitor["conversation_history"] = [];
 		changed = true;
 	}
 
-	// Current davidorex monitor shape: classify.context is an array of context keys.
 	const classify = monitor["classify"];
 	if (classify && typeof classify === "object") {
-		const context = (classify as Record<string, unknown>)["context"];
-		if (Array.isArray(context)) {
-			const hasContextHistory = context.includes("conversation_history");
+		const nextContext = normalizeHedgeContext(
+			(classify as Record<string, unknown>)["context"],
+			policy,
+		);
+		const prevContext = (classify as Record<string, unknown>)["context"];
+		const prevSerialized = JSON.stringify(
+			Array.isArray(prevContext)
+				? prevContext.filter((item): item is string => typeof item === "string")
+				: [],
+		);
+		const nextSerialized = JSON.stringify(nextContext);
 
-			if (!includeConversationHistory && hasContextHistory) {
-				(classify as Record<string, unknown>)["context"] = context.filter(
-					(item) => item !== "conversation_history",
-				);
-				changed = true;
-			} else if (includeConversationHistory && !hasContextHistory) {
-				(classify as Record<string, unknown>)["context"] = [
-					...context,
-					"conversation_history",
-				];
-				changed = true;
-			}
+		if (prevSerialized !== nextSerialized) {
+			(classify as Record<string, unknown>)["context"] = nextContext;
+			changed = true;
+			details.push(
+				`context=history:${policy.includeConversationHistory ? "on" : "off"},project:${policy.includeProjectContext ? "on" : "off"}`,
+			);
 		}
 	}
 
@@ -526,7 +636,55 @@ export function ensureHedgeMonitorContext(
 		writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
 	}
 
-	return changed;
+	return { changed, details };
+}
+
+/**
+ * Backward-compatible helper kept for tests/importers.
+ */
+export function ensureHedgeMonitorContext(
+	cwd: string,
+	includeConversationHistory: boolean,
+): boolean {
+	return ensureHedgeMonitorPolicy(cwd, {
+		includeConversationHistory,
+		includeProjectContext: false,
+		when: DEFAULT_HEDGE_WHEN,
+	}).changed;
+}
+
+function readHedgeMonitorState(cwd: string): {
+	when?: string;
+	hasConversationHistory: boolean;
+	hasProjectContext: boolean;
+	context: string[];
+} | null {
+	const monitorPath = join(cwd, ".pi", "monitors", "hedge.monitor.json");
+	if (!existsSync(monitorPath)) return null;
+
+	let monitor: Record<string, unknown>;
+	try {
+		monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+	} catch {
+		return null;
+	}
+
+	const classify = monitor["classify"];
+	const context =
+		classify && typeof classify === "object" && Array.isArray((classify as Record<string, unknown>)["context"])
+			? ((classify as Record<string, unknown>)["context"] as unknown[]).filter(
+				(item): item is string => typeof item === "string",
+			)
+			: [];
+
+	return {
+		when: typeof monitor["when"] === "string" ? monitor["when"] : undefined,
+		hasConversationHistory: context.includes("conversation_history"),
+		hasProjectContext:
+			context.includes("project_vision") ||
+			context.includes("project_conventions"),
+		context,
+	};
 }
 
 function buildStatusReport(
@@ -538,6 +696,10 @@ function buildStatusReport(
 	const resolution = resolveClassifierModel(cwd, provider);
 	const model = resolution.model;
 	const thinking = detectClassifierThinking(cwd);
+	const hedgeWhen = detectHedgeWhen(cwd);
+	const hedgeIncludeProjectContext = detectHedgeIncludeProjectContext(cwd);
+	const hedgeIncludeHistory =
+		detectBooleanSetting(cwd, HEDGE_HISTORY_SETTING_PATH) ?? false;
 	const explicit = detectStringSetting(cwd, CLASSIFIER_MODEL_SETTING_PATH);
 	const customMap =
 		detectStringMapSetting(cwd, CLASSIFIER_MODEL_BY_PROVIDER_SETTING_PATH) ??
@@ -554,6 +716,9 @@ function buildStatusReport(
 	lines.push(`defaultProvider: ${provider ?? "(não definido)"}`);
 	lines.push(`classifierThinking: ${thinking}`);
 	lines.push(`classifierModel (global): ${explicit ?? "(não definido)"}`);
+	lines.push(
+		`hedge policy (settings): when=${hedgeWhen}, conversation_history=${hedgeIncludeHistory ? "on" : "off"}, project_context=${hedgeIncludeProjectContext ? "on" : "off"}`,
+	);
 
 	if (model) {
 		const availability = checkModelAvailability(modelRegistry, model);
@@ -594,6 +759,14 @@ function buildStatusReport(
 		}
 	}
 
+	const hedgeState = readHedgeMonitorState(cwd);
+	if (hedgeState) {
+		lines.push("");
+		lines.push(
+			`hedge monitor (current): when=${hedgeState.when ?? "(none)"}, conversation_history=${hedgeState.hasConversationHistory ? "on" : "off"}, project_context=${hedgeState.hasProjectContext ? "on" : "off"}`,
+		);
+	}
+
 	return lines.join("\n");
 }
 
@@ -603,6 +776,9 @@ function buildTemplateSnippet(): string {
 			piStack: {
 				monitorProviderPatch: {
 					classifierThinking: "off",
+					hedgeWhen: "has_bash",
+					hedgeIncludeProjectContext: false,
+					hedgeConversationHistory: false,
 					classifierModelByProvider: {
 						"github-copilot": "github-copilot/claude-haiku-4.5",
 						"openai-codex": "openai-codex/gpt-5.4-mini",
@@ -738,17 +914,22 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("session_start", async (_event, ctx) => {
-		const includeHistory =
-			detectBooleanSetting(ctx.cwd, HEDGE_HISTORY_SETTING_PATH) ?? false;
-		const hedgeChanged = ensureHedgeMonitorContext(ctx.cwd, includeHistory);
+		const runtimeContract = ensureMonitorRuntimeClassifyContract(ctx.cwd);
+		const hedgePolicy: HedgeMonitorPolicy = {
+			includeConversationHistory:
+				detectBooleanSetting(ctx.cwd, HEDGE_HISTORY_SETTING_PATH) ?? false,
+			includeProjectContext: detectHedgeIncludeProjectContext(ctx.cwd),
+			when: detectHedgeWhen(ctx.cwd),
+		};
+		const hedgePatch = ensureHedgeMonitorPolicy(ctx.cwd, hedgePolicy);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
 
 		if (!model) {
-			if (hedgeChanged) {
+			if (hedgePatch.changed) {
 				ctx.ui?.notify?.(
-					`monitor-provider-patch: hedge conversation_history ${includeHistory ? "habilitado" : "removido"}`,
+					`monitor-provider-patch: hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`,
 					"info",
 				);
 			}
@@ -758,6 +939,7 @@ export default function (pi: ExtensionAPI) {
 		const thinking = detectClassifierThinking(ctx.cwd);
 		const { created } = ensureOverrides(ctx.cwd, model, thinking);
 		const legacyTemplateRepair = repairLegacyTemplateOverrides(ctx.cwd);
+		const systemPromptRepair = repairMissingSystemPromptOverrides(ctx.cwd);
 
 		const availability = checkModelAvailability(ctx.modelRegistry, model);
 		const overrides = readOverrideModels(ctx.cwd);
@@ -772,14 +954,19 @@ export default function (pi: ExtensionAPI) {
 		if (created.length > 0) {
 			details.push(`criou ${created.length} override(s) (${source})`);
 		}
-		if (hedgeChanged) {
+		if (hedgePatch.changed) {
 			details.push(
-				`hedge: conversation_history ${includeHistory ? "habilitado" : "removido"}`,
+				`hedge policy synced (${hedgePatch.details.join(", ") || "ok"})`,
 			);
 		}
 		if (legacyTemplateRepair.repaired.length > 0) {
 			details.push(
 				`corrigiu template legado em ${legacyTemplateRepair.repaired.length} override(s)`,
+			);
+		}
+		if (systemPromptRepair.repaired.length > 0) {
+			details.push(
+				`corrigiu prompt.system ausente em ${systemPromptRepair.repaired.length} override(s)`,
 			);
 		}
 
@@ -788,6 +975,11 @@ export default function (pi: ExtensionAPI) {
 		if (!availability.ok && availability.reason !== "unavailable") {
 			severity = "warning";
 			details.push(`modelo ${model} indisponivel (${availability.reason})`);
+		}
+		if (runtimeContract.repaired.length > 0) details.push(`runtime classify contract repaired (${runtimeContract.repaired.length})`);
+		if (runtimeContract.failed.length > 0) {
+			severity = "warning";
+			details.push(`runtime classify contract repair failed (${runtimeContract.failed.length})`);
 		}
 
 		if (mismatched.length > 0) {

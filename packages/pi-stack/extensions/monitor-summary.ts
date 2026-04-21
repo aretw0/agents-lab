@@ -8,21 +8,21 @@
  * - we want a compact default plus structured details on demand
  */
 
-import {
-	existsSync,
-	openSync,
-	readFileSync,
-	readSync,
-	readdirSync,
-	statSync,
-	closeSync,
-} from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
 } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import {
+	bumpClassifyFailureFromText,
+	cloneClassifyFailureSummary,
+	newClassifyFailureSummary,
+	scanSessionFileForClassifyFailures,
+	type ClassifyFailureScanState,
+	type ClassifyFailureSummary,
+} from "./monitor-observability";
 
 interface MonitorMeta {
 	name: string;
@@ -37,25 +37,13 @@ interface MonitorSummary {
 	enabled: number;
 	byEvent: Record<string, number>;
 	monitors: MonitorMeta[];
-	classifyFailures: {
-		total: number;
-		byMonitor: Record<string, number>;
-		lastAtIso?: string;
-		lastMonitor?: string;
-		lastError?: string;
-	};
+	classifyFailures: ClassifyFailureSummary;
 }
 
 interface RuntimeState {
 	summary: MonitorSummary;
-	scan: {
-		sessionFile?: string;
-		offset: number;
-	};
+	scan: ClassifyFailureScanState;
 }
-
-const CLASSIFY_FAIL_RE = /\[([a-z0-9-]+)\]\s+classify failed:/i;
-const MAX_SCAN_BYTES = 512_000;
 
 function extractText(message: unknown): string {
 	if (!message || typeof message !== "object") return "";
@@ -127,10 +115,7 @@ function summarizeMonitors(monitors: MonitorMeta[]): MonitorSummary {
 		enabled,
 		byEvent,
 		monitors,
-		classifyFailures: {
-			total: 0,
-			byMonitor: {},
-		},
+		classifyFailures: newClassifyFailureSummary(),
 	};
 }
 
@@ -162,99 +147,17 @@ function updateStatus(ctx: ExtensionContext, state: RuntimeState) {
 	);
 }
 
-function bumpClassifyFailure(
-	monitorNameRaw: string,
-	state: RuntimeState,
-	errorText?: string,
-): boolean {
-	const monitorName = monitorNameRaw.trim();
-	if (!monitorName) return false;
-	state.summary.classifyFailures.total += 1;
-	state.summary.classifyFailures.byMonitor[monitorName] =
-		(state.summary.classifyFailures.byMonitor[monitorName] ?? 0) + 1;
-	state.summary.classifyFailures.lastAtIso = new Date().toISOString();
-	state.summary.classifyFailures.lastMonitor = monitorName;
-	state.summary.classifyFailures.lastError =
-		errorText && errorText.trim().length > 0
-			? errorText.trim().slice(0, 300)
-			: undefined;
-	return true;
-}
-
-function bumpClassifyFailureFromText(
-	text: string,
-	state: RuntimeState,
-): boolean {
-	const m = text.match(CLASSIFY_FAIL_RE);
-	if (!m) return false;
-	return bumpClassifyFailure(m[1] ?? "", state, text);
-}
-
-function readTail(pathToFile: string, maxBytes = MAX_SCAN_BYTES): string {
-	const size = statSync(pathToFile).size;
-	if (size <= 0) return "";
-	const bytes = Math.max(1, Math.min(maxBytes, size));
-	const start = size - bytes;
-	const fd = openSync(pathToFile, "r");
-	try {
-		const buf = Buffer.alloc(bytes);
-		const read = readSync(fd, buf, 0, bytes, start);
-		return buf.slice(0, read).toString("utf8");
-	} finally {
-		closeSync(fd);
-	}
-}
-
-function scanSessionFileForClassifyFailures(
+function syncClassifyFailuresFromSession(
 	ctx: ExtensionContext,
 	state: RuntimeState,
 ): boolean {
-	const sessionFile = ctx.sessionManager?.getSessionFile?.();
-	if (!sessionFile || !existsSync(sessionFile)) return false;
-
-	const st = statSync(sessionFile);
-	if (st.size <= 0) {
-		state.scan = { sessionFile, offset: 0 };
-		return false;
-	}
-
-	let chunk = "";
-	let nextOffset = st.size;
-
-	if (
-		state.scan.sessionFile !== sessionFile ||
-		state.scan.offset <= 0 ||
-		state.scan.offset > st.size
-	) {
-		chunk = readTail(sessionFile);
-	} else {
-		const bytes = st.size - state.scan.offset;
-		if (bytes <= 0) {
-			state.scan = { sessionFile, offset: st.size };
-			return false;
-		}
-
-		const fd = openSync(sessionFile, "r");
-		try {
-			const buf = Buffer.alloc(bytes);
-			const read = readSync(fd, buf, 0, bytes, state.scan.offset);
-			chunk = buf.slice(0, read).toString("utf8");
-		} finally {
-			closeSync(fd);
-		}
-	}
-
-	state.scan = { sessionFile, offset: nextOffset };
-	if (!chunk) return false;
-
-	let changed = false;
-	const regex = /\[([a-z0-9-]+)\]\s+classify failed:[^\n\r]*/gi;
-	for (const match of chunk.matchAll(regex)) {
-		if (bumpClassifyFailure(match[1] ?? "", state, match[0])) {
-			changed = true;
-		}
-	}
-	return changed;
+	const result = scanSessionFileForClassifyFailures(
+		ctx.sessionManager?.getSessionFile?.(),
+		state.scan,
+		state.summary.classifyFailures,
+	);
+	state.scan = result.scan;
+	return result.changed;
 }
 
 export default function monitorSummaryExtension(pi: ExtensionAPI) {
@@ -264,10 +167,12 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 	};
 
 	function refresh(ctx: ExtensionContext) {
-		const classifyFailures = { ...state.summary.classifyFailures };
+		const classifyFailures = cloneClassifyFailureSummary(
+			state.summary.classifyFailures,
+		);
 		state.summary = summarizeMonitors(readMonitorFiles(ctx.cwd));
 		state.summary.classifyFailures = classifyFailures;
-		scanSessionFileForClassifyFailures(ctx, state);
+		syncClassifyFailuresFromSession(ctx, state);
 		updateStatus(ctx, state);
 	}
 
@@ -278,13 +183,17 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 	pi.on("message_end", (event, ctx) => {
 		const text = extractText((event as { message?: unknown }).message);
 		if (!text) return;
-		if (bumpClassifyFailureFromText(text, state)) updateStatus(ctx, state);
+		if (bumpClassifyFailureFromText(state.summary.classifyFailures, text)) {
+			updateStatus(ctx, state);
+		}
 	});
 
 	pi.on("tool_result", (event, ctx) => {
 		const text = extractText(event);
 		if (!text) return;
-		if (bumpClassifyFailureFromText(text, state)) updateStatus(ctx, state);
+		if (bumpClassifyFailureFromText(state.summary.classifyFailures, text)) {
+			updateStatus(ctx, state);
+		}
 	});
 
 	pi.registerTool({
