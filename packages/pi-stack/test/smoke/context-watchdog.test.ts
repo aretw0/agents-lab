@@ -25,6 +25,7 @@ describe("context-watchdog", () => {
 			checkpointPct: 999,
 			compactPct: 0,
 			cooldownMs: 1,
+			handoffFreshMaxAgeMs: 1,
 		});
 		expect(cfg.enabled).toBe(true);
 		expect(cfg.notify).toBe(true);
@@ -38,6 +39,7 @@ describe("context-watchdog", () => {
 		expect(cfg.autoCompactRequireIdle).toBe(true);
 		expect(cfg.autoResumeAfterCompact).toBe(true);
 		expect(cfg.autoResumeCooldownMs).toBe(30_000);
+		expect(cfg.handoffFreshMaxAgeMs).toBe(60_000);
 	});
 
 	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
@@ -163,6 +165,7 @@ describe("context-watchdog", () => {
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.autoCompact).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(true);
+		expect((control.patch.piStack as any).contextWatchdog.handoffFreshMaxAgeMs).toBe(30 * 60 * 1000);
 
 		const worker = buildContextWatchBootstrapPlan("agent-worker");
 		expect(worker.preset).toBe("agent-worker");
@@ -171,6 +174,7 @@ describe("context-watchdog", () => {
 		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
 		expect((worker.patch.piStack as any).contextWatchdog.autoCompact).toBe(false);
 		expect((worker.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(false);
+		expect((worker.patch.piStack as any).contextWatchdog.handoffFreshMaxAgeMs).toBe(30 * 60 * 1000);
 	});
 
 	it("applies bootstrap patch without clobbering unrelated settings", () => {

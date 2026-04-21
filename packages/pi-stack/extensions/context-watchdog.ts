@@ -36,6 +36,7 @@ export type ContextWatchdogConfig = {
 	autoCompactRequireIdle: boolean;
 	autoResumeAfterCompact: boolean;
 	autoResumeCooldownMs: number;
+	handoffFreshMaxAgeMs: number;
 };
 
 export type ContextWatchThresholds = {
@@ -72,6 +73,7 @@ const DEFAULT_CONFIG: ContextWatchdogConfig = {
 	autoCompactRequireIdle: true,
 	autoResumeAfterCompact: true,
 	autoResumeCooldownMs: 30_000,
+	handoffFreshMaxAgeMs: 30 * 60 * 1000,
 };
 
 function toFiniteNumber(value: unknown): number | undefined {
@@ -94,6 +96,7 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 	const cooldownMs = toFiniteNumber(cfg.cooldownMs);
 	const autoCompactCooldownMs = toFiniteNumber(cfg.autoCompactCooldownMs);
 	const autoResumeCooldownMs = toFiniteNumber(cfg.autoResumeCooldownMs);
+	const handoffFreshMaxAgeMs = toFiniteNumber(cfg.handoffFreshMaxAgeMs);
 
 	return {
 		enabled: toBoolean(cfg.enabled, DEFAULT_CONFIG.enabled),
@@ -115,6 +118,9 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 		autoResumeCooldownMs: autoResumeCooldownMs !== undefined
 			? Math.max(5_000, Math.floor(autoResumeCooldownMs))
 			: DEFAULT_CONFIG.autoResumeCooldownMs,
+		handoffFreshMaxAgeMs: handoffFreshMaxAgeMs !== undefined
+			? Math.max(60_000, Math.floor(handoffFreshMaxAgeMs))
+			: DEFAULT_CONFIG.handoffFreshMaxAgeMs,
 	};
 }
 
@@ -373,12 +379,15 @@ export function resolveHandoffFreshness(
 	};
 }
 
-export function buildAutoResumePromptFromHandoff(handoffInput: Record<string, unknown> | undefined): string {
+export function buildAutoResumePromptFromHandoff(
+	handoffInput: Record<string, unknown> | undefined,
+	maxFreshAgeMs = 30 * 60 * 1000,
+): string {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const freshness = resolveHandoffFreshness(timestamp);
+	const freshness = resolveHandoffFreshness(timestamp, Date.now(), maxFreshAgeMs);
 	const freshnessText = freshness.label === "unknown"
 		? "unknown"
 		: `${freshness.label}${freshness.ageMs !== undefined ? ` ageSec=${Math.ceil(freshness.ageMs / 1000)}` : ""}`;
@@ -435,6 +444,7 @@ export function buildContextWatchBootstrapPlan(
 						autoCompactRequireIdle: true,
 						autoResumeAfterCompact: false,
 						autoResumeCooldownMs: 30_000,
+						handoffFreshMaxAgeMs: 30 * 60 * 1000,
 					},
 				},
 			},
@@ -462,6 +472,7 @@ export function buildContextWatchBootstrapPlan(
 					autoCompactRequireIdle: true,
 					autoResumeAfterCompact: true,
 					autoResumeCooldownMs: 30_000,
+					handoffFreshMaxAgeMs: 30 * 60 * 1000,
 				},
 			},
 		},
@@ -821,7 +832,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					const nowAfterCompact = Date.now();
 					if (shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt)) {
 						lastAutoResumeAt = nowAfterCompact;
-						const resumePrompt = buildAutoResumePromptFromHandoff(readHandoffJson(ctx.cwd));
+						const resumePrompt = buildAutoResumePromptFromHandoff(
+							readHandoffJson(ctx.cwd),
+							config.handoffFreshMaxAgeMs,
+						);
 						pi.sendUserMessage(resumePrompt, { deliverAs: "followUp" });
 						ctx.ui.notify("context-watch: auto resume queued", "info");
 					}
@@ -875,7 +889,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		const handoff = readHandoffJson(ctx.cwd);
 		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
-		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs);
+		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -883,6 +897,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeEnabled: config.autoResumeAfterCompact,
 			autoResumeCooldownMs: config.autoResumeCooldownMs,
 			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
+			handoffFreshMaxAgeMs: config.handoffFreshMaxAgeMs,
 			handoffTimestamp,
 			handoffFreshness,
 		};
@@ -1028,7 +1043,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`action: ${assessment.action}`,
 					assessment.recommendation,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
-					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs}`,
+					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshness.ageMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffFreshness.ageMs / 1000)}` : ""}`,
 				].join("\n"),
 				assessment.severity,
