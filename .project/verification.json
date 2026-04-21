@@ -601,6 +601,27 @@
           "evidence": "node --test monitor-provider-patch.test.mjs e monitor-context-budget.test.mjs => pass; gate monitor-stability com tail adaptivo => stable=true classifyFailures=0."
         }
       ]
+    },
+    {
+      "id": "VER-CAL-2026-04-21-C4",
+      "target": "TASK-CAL-2026-04-21-C",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T11:35:10.000Z",
+      "evidence": "monitor-stability-gate defaults recalibrated para bounded-first (tailBytes=200k, maxTailBytes=1.2M) com auto-expansão determinística para evitar falso negativo de min-user-turns sem varredura pesada inicial.",
+      "criteria_results": [
+        {
+          "criterion": "Gate inicia com slice menor e expande somente quando necessário",
+          "status": "passed",
+          "evidence": "Execução real: tailAttempts 200k->400k, userTurns 2->3, stable=true."
+        },
+        {
+          "criterion": "Cobertura de regressão para defaults bounded",
+          "status": "passed",
+          "evidence": "monitor-gates-regression.test.mjs inclui caso 'uses bounded default tail thresholds' e suite 5/5 pass."
+        }
+      ]
     }
   ]
 }
