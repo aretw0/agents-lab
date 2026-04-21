@@ -28,6 +28,38 @@ Estrutura mínima:
 2. toda execução gera evidência auditável (mínimo: consumo e janela);
 3. fechamento de envelope exige revisão humana.
 
+## Contrato canônico task/event (backend-agnostic v1)
+
+Para sincronizar `.project`, GitHub/Gitea e SQLite sem lock-in, o envelope referencia um contrato comum de trabalho:
+
+### Entidade `task`
+- `id` (estável entre adapters)
+- `description`
+- `status` (`planned | in-progress | blocked | completed | cancelled`)
+- `priority` (`P0 | P1 | P2`)
+- `requiresHumanClose` (bool)
+- `verificationRef` (opcional; obrigatório para fechamento estratégico)
+- `updatedAt`
+
+### Entidade `task_event`
+- `eventId`
+- `taskId`
+- `type` (`start | progress | review | done_candidate | done_verified | recovery`)
+- `source` (`colony | scheduler | human | ci`)
+- `timestamp`
+- `evidenceRefs` (lista opcional)
+
+### Transições permitidas (núcleo)
+- `planned -> in-progress`
+- `in-progress -> blocked | completed`
+- `blocked -> in-progress | cancelled`
+- `completed -> in-progress` (somente quando `requiresHumanClose=true`, como reabertura/candidate)
+
+### Regras de governança
+- `done_candidate` nunca fecha task estratégica sozinho.
+- `done_verified` exige verificação canônica vinculada.
+- adapter pode enriquecer payload, mas não pode relaxar invariantes de budget/evidência/HITL.
+
 ## Implementação no ecossistema atual
 
 - live provider windows: `/usage`

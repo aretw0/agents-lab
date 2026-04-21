@@ -241,6 +241,14 @@
       "decision": "Tratar sinais de context-watchdog (warn/checkpoint/compact) como eventos operacionais explícitos no control-plane, com ação visível e auditável no handoff, em vez de depender apenas de superfície de status/footer.",
       "rationale": "Evita perda de timing de checkpoint/compact quando o aviso não aparece de forma saliente no fluxo principal e reduz risco de compactação tardia.",
       "context": "Feedback humano em 2026-04-21: aviso '[ctx] 52% warn · W50/C68/X72' ocorreu sem influenciar claramente a execução."
+    },
+    {
+      "id": "DEC-BUD-035",
+      "decision": "Fixar contrato canônico task/event (backend-agnostic) como camada de coordenação, mantendo `.project/tasks` como board macro atual e tratando GitHub/Gitea/SQLite como adapters equivalentes.",
+      "rationale": "Separar contrato de coordenação do backend de persistência preserva portabilidade e reduz lock-in sem abrir mão de governança hard intent já consolidada no `.project-first`.",
+      "status": "decided",
+      "context": "Fechamento de TASK-BUD-012 para preparar trilha de migração/integração multi-backend com semântica única de status e evidência.",
+      "task": "TASK-BUD-012"
     }
   ]
 }

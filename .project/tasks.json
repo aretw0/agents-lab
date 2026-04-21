@@ -206,7 +206,7 @@
     {
       "id": "TASK-BUD-012",
       "description": "[P1] Definir contrato backend-agnostic para clock de trabalho (task/event model + adapters) com piloto em `.project` e trilha para GitHub/Gitea/SQLite.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-007",
         "TASK-BUD-010"
@@ -222,7 +222,8 @@
         "Mapa de adapters alvo com capacidades mínimas e gaps (GitHub/Gitea/SQLite/local).",
         "Semântica de governança preservada: budget envelope, no auto-close, revisão humana."
       ],
-      "notes": "Derivado de REQ-BUD-007 e DEC-BUD-007."
+      "notes": "Derivado de REQ-BUD-007 e DEC-BUD-007.",
+      "verification": "VER-BUD-104"
     },
     {
       "id": "colony-c2",

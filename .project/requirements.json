@@ -555,6 +555,23 @@
         "Loop de continuidade agenda próxima iteração automaticamente após compactação, com checkpoint canônico antes de continuar.",
         "Política de segurança encerra o ciclo na segunda compactação e exige revisão humana do progresso."
       ]
+    },
+    {
+      "id": "REQ-BUD-042",
+      "description": "O control plane deve operar sobre um contrato canônico backend-agnostic de task/evento (com adapters), mantendo `.project` como adapter local inicial sem perder portabilidade para GitHub/Gitea/SQLite.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-007",
+        "REQ-BUD-009"
+      ],
+      "acceptance_criteria": [
+        "Contrato canônico define campos obrigatórios de task/evento e transições válidas de status.",
+        "Mapa de adapters explicita capacidades mínimas e gaps para `.project`, GitHub, Gitea e SQLite.",
+        "Invariantes de governança permanecem idênticos em qualquer adapter (budget envelope, no-auto-close estratégico, verificação canônica)."
+      ]
     }
   ]
 }

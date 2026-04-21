@@ -1418,6 +1418,32 @@
           "evidence": "Snapshot é read-only de `.project/tasks`; nenhum store paralelo é introduzido."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-104",
+      "target": "TASK-BUD-012",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Contrato backend-agnostic task/event formalizado em `docs/primitives/budget-envelope.md` (campos obrigatórios, transições e invariantes). Bridge atualizado em `docs/research/colony-project-task-bridge.md` com modelo canônico + mapa de adapters `.project`/GitHub/Gitea/SQLite e gaps mínimos. Governança canônica registrada em `.project` via `REQ-BUD-042` e `DEC-BUD-035`. `project-validate` executado com status clean.",
+      "timestamp": "2026-04-21T23:52:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Contrato canônico de task/evento documentado (campos obrigatórios, status transitions, invariantes).",
+          "status": "passed",
+          "evidence": "Seção 'Contrato canônico task/event (backend-agnostic v1)' em budget-envelope."
+        },
+        {
+          "criterion": "Mapa de adapters alvo com capacidades mínimas e gaps (GitHub/Gitea/SQLite/local).",
+          "status": "passed",
+          "evidence": "Tabela de adapters no bridge com persistência de task/evento e gap principal."
+        },
+        {
+          "criterion": "Semântica de governança preservada (budget envelope, no auto-close, revisão humana).",
+          "status": "passed",
+          "evidence": "Invariantes explícitos no contrato + decisão DEC-BUD-035 + requisito REQ-BUD-042."
+        }
+      ]
     }
   ]
 }
