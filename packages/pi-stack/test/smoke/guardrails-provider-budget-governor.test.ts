@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   detectProviderBudgetGovernorMisconfig,
   providerBudgetGovernorMisconfigReason,
+  shouldAnnounceStrictInteractiveMode,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core provider-budget governor misconfig", () => {
@@ -25,5 +26,19 @@ describe("guardrails-core provider-budget governor misconfig", () => {
     const message = providerBudgetGovernorMisconfigReason("missing-provider-budgets");
     expect(message).toMatch(/providerBudgetGovernor habilitado/i);
     expect(message).toMatch(/\.pi\/settings\.json/i);
+  });
+});
+
+describe("guardrails-core strict interactive notify calibration", () => {
+  it("announces only when strict mode is active and not yet announced", () => {
+    expect(shouldAnnounceStrictInteractiveMode(false, true)).toBe(true);
+  });
+
+  it("suppresses repeated strict-mode notify after first announcement", () => {
+    expect(shouldAnnounceStrictInteractiveMode(true, true)).toBe(false);
+  });
+
+  it("does not announce when strict mode is inactive", () => {
+    expect(shouldAnnounceStrictInteractiveMode(false, false)).toBe(false);
   });
 });

@@ -539,12 +539,20 @@ export function providerBudgetGovernorMisconfigReason(
   return "guardrails-core: providerBudgetGovernor misconfigured.";
 }
 
+export function shouldAnnounceStrictInteractiveMode(
+  alreadyAnnounced: boolean,
+  strictMode: boolean,
+): boolean {
+  return strictMode && !alreadyAnnounced;
+}
+
 // =============================================================================
 // Extension Entry
 // =============================================================================
 
 export default function (pi: ExtensionAPI) {
   let strictInteractiveMode = false;
+  let strictInteractiveAnnounced = false;
   let portConflictConfig: GuardrailsPortConflictConfig = { enabled: true, suggestedTestPort: 4173 };
   let providerBudgetGovernorConfig: ProviderBudgetGovernorConfig = {
     enabled: false,
@@ -591,6 +599,7 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("session_start", (_event, ctx) => {
     strictInteractiveMode = false;
+    strictInteractiveAnnounced = false;
     portConflictConfig = resolveGuardrailsPortConflictConfig(ctx.cwd);
     providerBudgetGovernorConfig = resolveProviderBudgetGovernorConfig(ctx.cwd);
     const quotaSettings = readQuotaBudgetSettings(ctx.cwd);
@@ -612,14 +621,20 @@ export default function (pi: ExtensionAPI) {
     const decision = classifyRouting(event.prompt ?? "");
     strictInteractiveMode = decision.strictMode;
 
-    if (!strictInteractiveMode) return undefined;
+    if (!strictInteractiveMode) {
+      ctx.ui?.setStatus?.("guardrails-core", undefined);
+      return undefined;
+    }
 
     const domains = decision.domains.length > 0 ? decision.domains.join(", ") : "(none)";
     ctx.ui?.setStatus?.("guardrails-core", "[guardrails] strict_interactive=on");
-    ctx.ui?.notify?.(
-      `guardrails-core: strict web mode ativo (interactive+sensitive). domains=${domains}`,
-      "info"
-    );
+    if (shouldAnnounceStrictInteractiveMode(strictInteractiveAnnounced, strictInteractiveMode)) {
+      strictInteractiveAnnounced = true;
+      ctx.ui?.notify?.(
+        `guardrails-core: strict web mode ativo (interactive+sensitive). domains=${domains}`,
+        "info"
+      );
+    }
 
     const hardPrompt = [
       event.systemPrompt,
