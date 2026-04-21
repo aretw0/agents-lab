@@ -345,6 +345,13 @@ export function shouldEmitAutoResumeAfterCompact(
 	return (nowMs - lastAutoResumeAt) >= config.autoResumeCooldownMs;
 }
 
+export function shouldRefreshHandoffBeforeAutoCompact(
+	assessment: ContextWatchAssessment,
+	config: ContextWatchdogConfig,
+): boolean {
+	return assessment.level === "compact" && config.autoResumeAfterCompact;
+}
+
 function truncateForPrompt(value: string, max = 180): string {
 	const s = String(value ?? "").trim().replace(/\s+/g, " ");
 	if (s.length <= max) return s;
@@ -390,6 +397,9 @@ export function buildAutoResumePromptFromHandoff(handoffInput: Record<string, un
 		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
 		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
 		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",
+		freshness.label === "stale"
+			? "note: handoff is stale; refresh checkpoint if resumed context conflicts."
+			: "note: handoff freshness acceptable for resume.",
 		"Keep micro-slice-only (1 file + 1 test) and preserve canonical board/verification flow.",
 	].join("\n");
 }
@@ -797,6 +807,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			hasPendingMessages: ctx.hasPendingMessages(),
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (autoCompactState.decision.trigger) {
+			if (shouldRefreshHandoffBeforeAutoCompact(assessment, config) && !handoffPath) {
+				handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
+			}
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;

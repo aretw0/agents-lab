@@ -14,6 +14,7 @@ import {
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
 	shouldEmitAutoResumeAfterCompact,
+	shouldRefreshHandoffBeforeAutoCompact,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 } from "../../extensions/context-watchdog";
@@ -147,6 +148,8 @@ describe("context-watchdog", () => {
 
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);
+		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg)).toBe(true);
+		expect(shouldRefreshHandoffBeforeAutoCompact(checkpoint, cfg)).toBe(false);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {
@@ -200,6 +203,7 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
+		expect(prompt).toContain("handoff is stale");
 		expect(prompt).not.toContain("Context-watch action:");
 
 		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any);
