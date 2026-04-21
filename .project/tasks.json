@@ -1925,6 +1925,39 @@
       ],
       "notes": "Pode começar como patch de curto prazo e evoluir para superfície first-party de recovery.\n[2026-04-21T20:58:00Z] Patch short-term aplicado no colony-pilot: captura snapshot de runtime em failed/budget_exceeded, persiste em .pi/colony-retention/runtime-artifacts/<colony-id>.runtime-snapshot.json e expõe runtimeSnapshotPath no retention record/artifacts.",
       "verification": "VER-BUD-093"
+    },
+    {
+      "id": "TASK-BUD-083",
+      "description": "[P1] Consolidar entendimento canônico de escopos de execução do pi (global vs por projeto vs isolado), incluindo impacto em pacotes/plugins carregados e estratégia de desenvolvimento sem overengineering.",
+      "status": "planned",
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/recommended-pi-stack.md",
+        "docs/research/pi-runtime-scope-model-2026-04-21.md"
+      ],
+      "acceptance_criteria": [
+        "Documento único descreve com exemplos como o pi resolve settings/pacotes em cada modo (global, project, isolated).",
+        "Fluxo operacional define quando alterar node_modules global vs workspace local vs package da stack.",
+        "Checklist de diagnóstico rápido evita alterações em local errado e explicita comando de verificação de contexto ativo."
+      ],
+      "notes": "Solicitação direta do usuário para eliminar ambiguidade sobre runtime scope e reduzir overengineering por confusão entre pi runtime, TypeScript package e node_modules."
+    },
+    {
+      "id": "TASK-BUD-084",
+      "description": "[P0] Implementar fila de intenção não-bloqueante no control plane para evitar desvio de trabalho ativo por prompts aleatórios durante long runs.",
+      "status": "planned",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/scheduler-governance.ts",
+        "docs/guides/agent-driver-charter.md",
+        "docs/research/control-plane-intent-queue-2026-04-21.md"
+      ],
+      "acceptance_criteria": [
+        "Quando houver execução ativa de long run, prompts fora do lane atual não interrompem o fluxo principal.",
+        "Solicitações rápidas do usuário/operador podem ser registradas como itens de fila com ACK curto e sem troca de foco imediata.",
+        "Fila é drenada apenas em janelas seguras (idle/sem conflito), com trilha auditável do que foi adiado e quando foi retomado."
+      ],
+      "notes": "Solicitação explícita do usuário: pragmatismo para escalar long runs; registrar rápido sem trocar de contexto, priorizando continuidade operacional."
     }
   ]
 }
