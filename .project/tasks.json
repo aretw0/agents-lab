@@ -1365,7 +1365,7 @@
     {
       "id": "TASK-BUD-061",
       "description": "[P1] Promover o gate de prontidão de subagentes (subagent-readiness) para superfície publicada da pi-stack via extensão/tool first-party (sem depender de scripts de laboratório).",
-      "status": "planned",
+      "status": "completed",
       "acceptance_criteria": [
         "Tool disponível na sessão de usuário final instalada via `pi install npm:@aretw0/pi-stack`.",
         "Retorna `ready`, checks e motivos de bloqueio em formato estruturado.",
@@ -1380,7 +1380,8 @@
         "packages/pi-stack/README.md",
         "docs/guides/subagent-readiness-gate.md",
         ".project/tasks.json"
-      ]
+      ],
+      "verification": "VER-BUD-061"
     },
     {
       "id": "TASK-CAL-2026-04-21-A",

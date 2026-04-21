@@ -643,6 +643,37 @@
           "evidence": "packages/pi-stack/test/calibrate-repro.test.mjs adiciona 'uses bounded default tails per step class' (6/6 pass)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-061",
+      "target": "TASK-BUD-061",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-21T11:57:00.000Z",
+      "evidence": "Gate de prontidão de subagentes promovido para superfície publicada via extensão first-party `subagent-readiness.ts` com tool `subagent_readiness_status` e comando `/subagent-readiness`. Manifest atualizado e smoke cobrindo cenário strict com pacotes pilot presentes/ausentes.",
+      "criteria_results": [
+        {
+          "criterion": "Tool disponível na sessão de usuário final instalada via pi-stack",
+          "status": "passed",
+          "evidence": "packages/pi-stack/package.json inclui ./extensions/subagent-readiness.ts em pi.extensions."
+        },
+        {
+          "criterion": "Retorna ready/checks/motivos de bloqueio em formato estruturado",
+          "status": "passed",
+          "evidence": "runSubagentReadiness retorna ready, checks e blockedReasons; tool expõe JSON determinístico."
+        },
+        {
+          "criterion": "Documentação diferenciando baseline e strict",
+          "status": "passed",
+          "evidence": "docs/guides/subagent-readiness-gate.md atualizado com superfície publicada e uso strict."
+        },
+        {
+          "criterion": "Smoke cobrindo pacotes pilot ausentes/presentes",
+          "status": "passed",
+          "evidence": "vitest packages/pi-stack/test/smoke/subagent-readiness.test.ts (3/3) + provider-readiness smoke regressão (4/4)."
+        }
+      ]
     }
   ]
 }
