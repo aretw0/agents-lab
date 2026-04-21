@@ -178,6 +178,13 @@
       "rationale": "Limites úteis variam por runtime efetivo (provider+model), e decisões de warning/compaction não podem assumir um único contexto window. Baseline deterministic-first evita custo desnecessário e mantém auditoria.",
       "status": "decided",
       "context": "Ajuste operacional para escalar com contexto lean sem lock-in de estilo ou provider."
+    },
+    {
+      "id": "DEC-BUD-026",
+      "decision": "Tratar sistema de tickets/projetos como detalhe de implementação: a coordenação deve ser baseada em primitivas canônicas (task/event/intent/evidence) com adapters pluggáveis, mantendo `.project` como adapter local atual e preservando interoperabilidade com superfícies first-party futuras, trackers Git e fluxos Markdown/Obsidian.",
+      "rationale": "Evita lock-in no backend atual, protege portabilidade de operação e permite que skills/processos com hard intent funcionem sobre múltiplas fontes de trabalho sem reescrever governança.",
+      "status": "decided",
+      "context": "Diretriz explícita do usuário para evolução first-party sem perder agnosticismo de ticket/project systems e suporte a caixa de notas em Markdown/Obsidian."
     }
   ]
 }

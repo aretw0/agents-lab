@@ -6,6 +6,13 @@ Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 1. **Canônico primeiro:** atualizar `.project/*`.
 2. **Derivados depois:** `HANDOFF.md` (delta curto) e `ROADMAP.md` (macro).
 
+## Diretriz de arquitetura (primitivas + adapters)
+- O board `.project/*` é o **adapter canônico local atual** (fonte oficial de trabalho no workspace).
+- A coordenação deve permanecer **backend-agnostic**: sistema de ticket/projeto é detalhe de implementação.
+- A evolução first-party futura não substitui essa regra; ela entra como mais um adapter.
+- Fluxos baseados em **Markdown/Obsidian** (ex.: inbox/caixa de notas) devem ser suportados via adapter, preservando os mesmos invariantes de governança (`no-auto-close`, evidência, revisão humana).
+- Skills/processos/extensões com **hard intent** devem consumir o contrato de primitivas (task/event/intent/evidence), não um backend específico.
+
 ## Loop operacional (5-10 min)
 1. Capturar mudanças no board canônico:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.

@@ -1509,6 +1509,25 @@
       ],
       "notes": "Motivado por feedback sobre reduzir back-and-forth de reload e acelerar bootstrap de agentes durante operação contínua.",
       "verification": "VER-BUD-065"
+    },
+    {
+      "id": "TASK-BUD-066",
+      "description": "[P1] Formalizar contrato de primitives+adapters para coordenação de trabalho (tracker-agnostic), incluindo adapter de referência para Markdown/Obsidian (caixa de notas) com suporte a fluxos de hard intent.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-012"
+      ],
+      "files": [
+        "docs/primitives/continuity-abstraction.md",
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/requirements.json"
+      ],
+      "acceptance_criteria": [
+        "Contrato canônico define entidades mínimas (task/event/intent/evidence), invariantes e transições sem acoplamento a backend específico.",
+        "Matriz de adapters explicita equivalência operacional entre `.project` (local), backends first-party futuros, trackers Git e Markdown/Obsidian.",
+        "Fluxo de hard intent (skill/processo/extensão) é documentado como camada sobre o contrato, sem depender de formato único de storage."
+      ],
+      "notes": "Derivada de DEC-BUD-026. Objetivo: tratar sistema de tickets como implementação e preservar interoperabilidade de operação."
     }
   ]
 }
