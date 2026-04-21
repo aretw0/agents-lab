@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-04-21T23:00:00Z",
-  "context": "TASK-BUD-010 concluída (VER-BUD-100) com hardening single-writer no task-sync: lock determinístico (`tasks.lock`) + escrita atômica (`tmp+rename`) + smoke de conflito básico. Contexto permanece em warn (61%), operação em micro-slices bounded-by-default.",
-  "current_phase": "post-hardening-closure",
+  "timestamp": "2026-04-21T23:10:00Z",
+  "context": "TASK-BUD-005 concluída (VER-BUD-101) com cobertura comportamental explícita do adapter opt-in colony->.project/tasks (createOnLaunch + candidate-only em requireHumanClose). Contexto em warn (62%), mantendo micro-slices bounded-by-default.",
+  "current_phase": "post-task-bud-005",
   "current_tasks": [
-    "TASK-BUD-005",
-    "TASK-BUD-007"
+    "TASK-BUD-007",
+    "TASK-BUD-008"
   ],
   "blockers": [
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Context-watch action: level=warn 61% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
-    "Retomar backlog estrutural TASK-BUD-005/TASK-BUD-007 com foco em consolidar adapter de sync sem expandir escopo.",
-    "Se atingir >=68%, registrar checkpoint canônico curto antes de novo slice maior."
+    "Context-watch action: level=warn 62% (micro-slice-only) · Keep micro-slices and avoid broad scans until checkpoint.",
+    "Avançar TASK-BUD-007 (single-board clock policy) usando evidência já consolidada em task-sync.",
+    "Checkpoint canônico curto imediato se contexto atingir >=68."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -22,19 +22,18 @@
     "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/colony-pilot-task-sync.ts",
-    "packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts",
-    "docs/research/task-bud-010-closure-2026-04-21.md",
+    "packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts",
+    "docs/research/task-bud-005-closure-2026-04-21.md",
     ".project/verification.json",
     ".project/tasks.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-21T23:00:00Z",
+      "atIso": "2026-04-21T23:10:00Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 61,
+      "percent": 62,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

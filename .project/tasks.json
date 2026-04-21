@@ -71,7 +71,7 @@
     {
       "id": "TASK-BUD-005",
       "description": "[P1] Implementar adapter inicial opcional para sincronizar eventos de colônia com tasks de projeto.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-004"
       ],
@@ -82,7 +82,8 @@
         "Criar tasks de execução quando sessão de colônia iniciar (opt-in).",
         "Marcar status final apenas em modo candidato, com confirmação humana para fechamento."
       ],
-      "notes": "Relacionado a REQ-BUD-005 e REQ-BUD-004. Adapter opt-in iniciado no colony-pilot com projectTaskSync (eventos de COLONY_SIGNAL -> .project/tasks, sem fechamento automático). Aguardando revisão humana."
+      "notes": "Relacionado a REQ-BUD-005 e REQ-BUD-004. Adapter opt-in iniciado no colony-pilot com projectTaskSync (eventos de COLONY_SIGNAL -> .project/tasks, sem fechamento automático). Aguardando revisão humana.",
+      "verification": "VER-BUD-101"
     },
     {
       "id": "TASK-BUD-006",
@@ -102,7 +103,7 @@
     {
       "id": "TASK-BUD-007",
       "description": "[P1] Definir e implementar política de single-board clock: .project/tasks como fonte oficial macro, com sync de eventos da colônia (start/progress/end) em modo opt-in.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-005"
       ],
@@ -116,7 +117,7 @@
         "Estado efêmero da colônia não substitui o board oficial.",
         "Fechamento continua human-in-the-loop."
       ],
-      "notes": "Relacionado a REQ-BUD-006."
+      "notes": "Relacionado a REQ-BUD-006.\n[2026-04-21T23:10:00Z] Dependência TASK-BUD-005 concluída (VER-BUD-101). Iniciada consolidação de política single-board clock com base no task-sync opt-in já validado."
     },
     {
       "id": "TASK-BUD-008",

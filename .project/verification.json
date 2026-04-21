@@ -1345,6 +1345,27 @@
           "evidence": "Smoke `colony-pilot-task-sync-lock.test.ts` cobre timeout de lock fresco e reclaim de stale lock."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-101",
+      "target": "TASK-BUD-005",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Adapter opt-in de sync colony->.project/tasks validado com cobertura comportamental em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts`: (1) cria task ao receber `launched` quando `createOnLaunch=true`; (2) não cria quando `createOnLaunch=false`; (3) `completed` permanece `in-progress` (candidate-only) quando `requireHumanClose=true`. Reforço de robustez single-writer/atômica coberto por `colony-pilot-task-sync-lock.test.ts`. Execução: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts packages/pi-stack/test/smoke/colony-pilot-task-sync-lock.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 3 files passed, 73 tests passed. Consolidação: `docs/research/task-bud-005-closure-2026-04-21.md`.",
+      "timestamp": "2026-04-21T23:08:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Criar tasks de execução quando sessão de colônia iniciar (opt-in).",
+          "status": "passed",
+          "evidence": "Teste cobre `createOnLaunch=true` criando task em fase `launched`."
+        },
+        {
+          "criterion": "Marcar status final apenas em modo candidato, com confirmação humana para fechamento.",
+          "status": "passed",
+          "evidence": "Teste cobre `requireHumanClose=true` mantendo status `in-progress` na fase `completed` com nota `candidate only`."
+        }
+      ]
     }
   ]
 }
