@@ -37,6 +37,13 @@ A extensão `monitor-provider-patch` agora:
 
 Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sovereign` (modo `audit`/`shadow`) para começar a convergência de semântica entre guardrails e monitores sem depender de runtime third-party para observabilidade básica.
 
+### Fonte distribuível vs override local
+
+- `packages/pi-stack/extensions/*` e defaults versionados da stack são a **fonte distribuível**.
+- `.pi/monitors/*` no workspace é **override local** (calibração rápida), útil para experimento e ajuste fino.
+- Override local **não** deve ser tratado como baseline de release.
+- Regra prática: quando um ajuste provar valor, promover para superfície versionada da stack e manter `.pi/monitors/*` apenas como exceção opt-in.
+
 ### Comando principal
 
 > Convenção do laboratório: não criar “doctor” paralelo por domínio.  

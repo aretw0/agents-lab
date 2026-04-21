@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-21T19:05:00Z",
-  "context": "Retomada pós-compact estabilizada: TASK-BUD-080 concluída com evidência canônica (VER-BUD-088). Guardrail bounded-by-default está documentado no playbook de contexto e no pipeline canônico.",
+  "timestamp": "2026-04-21T19:18:00Z",
+  "context": "Retomada pós-compact estabilizada e TASK-BUD-080 já concluída. TASK-BUD-079 entrou em execução com plano canônico e reforço documental de fonte distribuível vs override local para monitoria.",
   "current_phase": "post-compact-stabilization",
   "current_tasks": [
     "TASK-BUD-079",
@@ -9,7 +9,7 @@
   ],
   "blockers": [],
   "next_actions": [
-    "Executar micro-slice de TASK-BUD-079 para promover calibração distribuível fora de .pi/monitors local.",
+    "Implementar micro-slice técnico de TASK-BUD-079 em superfície versionada da pi-stack (sem depender de .pi/monitors local).",
     "Avançar design de TASK-BUD-078 (hard gate language-agnostic em verification).",
     "Planejar recorte mínimo de TASK-BUD-074 (devcontainer blueprint opcional)."
   ],
@@ -20,8 +20,9 @@
     "Calibrar política final de enforcement (advisory vs hard) para scan-bounds conforme maturidade operacional."
   ],
   "files_in_flux": [
-    ".project/verification.json",
     ".project/tasks.json",
-    ".project/handoff.json"
+    ".project/handoff.json",
+    "docs/guides/monitor-overrides.md",
+    "docs/research/task-bud-079-plan-2026-04-21.md"
   ]
 }

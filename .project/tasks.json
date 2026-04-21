@@ -1809,7 +1809,7 @@
     {
       "id": "TASK-BUD-079",
       "description": "[P1] Promover calibração de qualidade (soft intent de verificação) de runtime local `.pi/monitors` para superfície distribuível da pi-stack, sem depender de arquivos ignorados.",
-      "status": "planned",
+      "status": "in-progress",
       "type": "chore",
       "depends_on": [
         "TASK-BUD-077"
