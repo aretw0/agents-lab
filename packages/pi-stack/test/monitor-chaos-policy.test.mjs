@@ -22,7 +22,7 @@ const MONITORS = {
 describe("monitor chaos policy: trigger frequency", () => {
   it("keeps non-critical monitors behind selective when clauses", () => {
     assert.equal(MONITORS.commitHygiene.when, "has_file_writes");
-    assert.equal(MONITORS.fragility.when, "has_tool_results");
+    assert.equal(MONITORS.fragility.when, "has_file_writes");
     assert.equal(MONITORS.hedge.when, "has_bash");
   });
 

@@ -67,7 +67,10 @@ Trocar para lane mais enxuta quando ocorrer qualquer um:
 ## Ritual curto por sessão
 1. Escolher lane explicitamente no início.
 2. Manter WIP=1.
-3. Fechar com:
+3. Rodar calibração reproduzível:
+   - `npm run calibrate:repro` (determinístico/offline)
+   - `npm run calibrate:repro:canary` (opt-in, gera evidências em `.pi/reports`)
+4. Fechar com:
    - `npm run project:verification:check`
    - `project-validate`
    - `project-status`
