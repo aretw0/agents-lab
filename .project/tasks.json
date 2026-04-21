@@ -1543,6 +1543,25 @@
         "Guia curto de operação define política prática de background (foreground com timeout explícito para comandos curtos; background para jobs longos com PID/log e checkpoint)."
       ],
       "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1."
+    },
+    {
+      "id": "TASK-BUD-068",
+      "description": "[P1] Implementar Idea Inbox Primitive para capturar ideias livres (sessão + Markdown/Obsidian) e promover candidatos determinísticos para `.project/tasks` com revisão humana.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-066"
+      ],
+      "files": [
+        "docs/primitives/continuity-abstraction.md",
+        "scripts/session-triage.mjs",
+        "docs/guides/session-triage.md"
+      ],
+      "acceptance_criteria": [
+        "Pipeline aceita fonte de ideias em markdown (incluindo padrão Obsidian) e eventos de sessão, normalizando para um formato canônico de proposal.",
+        "Proposals viram tasks `planned` com descrição objetiva, AC mínimo e referência de origem, sem auto-close nem auto-priorização agressiva.",
+        "Fluxo inclui etapa explícita de revisão humana para promover prioridade/scope antes de execução autônoma."
+      ],
+      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável."
     }
   ]
 }
