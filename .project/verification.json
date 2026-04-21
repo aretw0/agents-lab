@@ -1163,6 +1163,32 @@
           "evidence": "`docs/guides/unattended-swarm-execution-plan.md` define estratégia snapshot-first com exceção `keep-worktree-on-failure` apenas em debug explícito."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-094",
+      "target": "TASK-BUD-046",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "evidence": "Reconciliação 046/047 atualizada com evidência em `docs/research/task-bud-046-047-reconciliation-2026-04-21.md`. Regressão do reconciliador/parsers executada com sucesso: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 2 files passed, 69 tests passed. TASK-BUD-046 mantida in-progress por falta de fechamento canônico integrado do lote A (inventário final consolidado).",
+      "timestamp": "2026-04-21T21:52:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Lote A executado com maxCost explícito e resumo de mudanças no board.",
+          "status": "failed",
+          "evidence": "Execução histórica existe em notas, mas ainda falta inventário final consolidado de lote A no formato de fechamento canônico."
+        },
+        {
+          "criterion": "Testes de reconciliador/concorrência rodam sem regressão.",
+          "status": "passed",
+          "evidence": "Smoke/parsers executados com sucesso (69 testes passados)."
+        },
+        {
+          "criterion": "Resultado permanece em estado candidato para revisão humana (sem auto-close P0).",
+          "status": "passed",
+          "evidence": "TASK-BUD-046 segue `in-progress` após reconciliação; sem auto-close."
+        }
+      ]
     }
   ]
 }

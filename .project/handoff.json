@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-04-21T21:42:00Z",
-  "context": "Pós-compact com loops estabilizados. TASK-BUD-081 concluída (VER-BUD-092) com watchdog operacional escrevendo trilha canônica no handoff. TASK-BUD-082 concluída (VER-BUD-093) com retenção snapshot-first para terminal states de colônia (`failed`/`budget_exceeded`) e recovery path determinístico via runtimeSnapshotPath.",
-  "current_phase": "active-post-compact",
+  "timestamp": "2026-04-21T21:54:00Z",
+  "context": "Loops estabilizados pós-reload. TASK-BUD-081 (VER-BUD-092) e TASK-BUD-082 (VER-BUD-093) concluídas. Reconciliação legada 046/047 avançou com relatório canônico (`docs/research/task-bud-046-047-reconciliation-2026-04-21.md`) e verificação parcial de 046 (VER-BUD-094): testes verdes, porém sem inventário final consolidado do lote A para fechamento.",
+  "current_phase": "legacy-reconciliation",
   "current_tasks": [
     "TASK-BUD-046",
     "TASK-BUD-047"
   ],
   "blockers": [
-    "legacy-reconciliation-pending"
+    "task-bud-046-missing-integrated-lote-a-closure"
   ],
   "next_actions": [
-    "Retomar reconciliação legada evidence-first: TASK-BUD-046 -> TASK-BUD-047 -> TASK-BUD-052 -> TASK-BUD-051.",
-    "Aplicar apenas updates mínimos canônicos na reconciliação (sem auto-close estratégico sem evidência).",
-    "Manter micro-slices bounded-by-default; checkpoint em >=68 e compact em >=72."
+    "Fechar evidência integrada de lote A para TASK-BUD-046 (inventário final + validação consolidada).",
+    "Concluir reconciliação final de TASK-BUD-047 após fechamento de 046 (dependência explícita).",
+    "Seguir sequência legada 052 -> 051 sem auto-close estratégico sem evidência determinística."
   ],
   "open_questions": [
     "Enforcement final de scan-bounds: advisory em warn ou hard em checkpoint?",
@@ -22,11 +22,9 @@
     "Política first-party definitiva de recovery para budget_exceeded/failed em worktree isolation."
   ],
   "files_in_flux": [
-    "docs/guides/unattended-swarm-execution-plan.md",
-    "docs/research/colony-worktree-retention-2026-04-21.md",
-    "docs/research/task-bud-082-closure-2026-04-21.md",
-    ".project/verification.json",
+    "docs/research/task-bud-046-047-reconciliation-2026-04-21.md",
     ".project/tasks.json",
+    ".project/verification.json",
     ".project/handoff.json"
   ]
 }
