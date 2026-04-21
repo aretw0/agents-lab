@@ -201,6 +201,9 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
 		expect(prompt).not.toContain("Context-watch action:");
+
+		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any);
+		expect(unknownPrompt).toContain("freshness=unknown");
 	});
 
 	it("computes handoff freshness deterministically", () => {

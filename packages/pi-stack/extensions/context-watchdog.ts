@@ -860,6 +860,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			hasPendingMessages: ctx.hasPendingMessages(),
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
+		const handoff = readHandoffJson(ctx.cwd);
+		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
+		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -867,6 +870,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeEnabled: config.autoResumeAfterCompact,
 			autoResumeCooldownMs: config.autoResumeCooldownMs,
 			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
+			handoffTimestamp,
+			handoffFreshness,
 		};
 	};
 
@@ -1011,6 +1016,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					assessment.recommendation,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs}`,
+					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshness.ageMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffFreshness.ageMs / 1000)}` : ""}`,
 				].join("\n"),
 				assessment.severity,
 			);
