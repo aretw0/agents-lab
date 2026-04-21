@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-04-21T16:03:00Z",
-  "context": "Checkpoint em ~66% de contexto: mantido modo conservador (registro/evidência, sem frente grande). Estado consolidado: TASK-BUD-020, 021, 023, 024 e 025 fechadas no main. TASK-BUD-047 recebeu consolidação parcial registrada (VER-BUD-079) porque os outcomes nucleares (020/024) já foram materializados; task segue in-progress até reconciliação integrada com TASK-BUD-046. Patrol soft intent (xchvdmmx) permanece ativo com gates hard.",
-  "current_phase": "controlled-checkpoint",
+  "timestamp": "2026-04-21T16:10:00Z",
+  "context": "Checkpoint em 68% de contexto. Mantido modo conservador: registro/evidência e reconciliação leve, sem frente nova. Entregas já fechadas no main: TASK-BUD-020, 021, 023, 024, 025. Consolidação parcial de legado registrada em TASK-BUD-047 (VER-BUD-079).",
+  "current_phase": "checkpoint-threshold",
   "current_tasks": [
     "TASK-BUD-046",
     "TASK-BUD-047",
-    "TASK-BUD-051",
-    "TASK-BUD-052"
+    "TASK-BUD-052",
+    "TASK-BUD-051"
   ],
   "blockers": [],
   "next_actions": [
-    "Não abrir implementação nova até checkpoint/compactação (~68%).",
-    "Priorizar reconciliação leve de legado na ordem: 046 -> 047 -> 052 -> 051, com verificação por evidência antes de qualquer código.",
-    "Quando retomar com janela confortável, decidir por task se fecha por evidência existente ou se quebra em micro-slice explícito."
+    "Compactar/handoff agora para preservar controle da janela.",
+    "Retomar por reconciliação leve de legado (046 -> 047 -> 052 -> 051), priorizando fechamento por evidência existente.",
+    "Evitar implementação nova até cair pressão de contexto e revalidar gates runtime."
   ],
   "open_questions": [
-    "Qual evidência mínima faltante para encerrar TASK-BUD-046 sem reabrir escopo técnico amplo?"
+    "Qual evidência mínima objetiva falta para encerrar TASK-BUD-046 sem reabrir escopo técnico amplo?"
   ],
   "key_decisions_pending": [
     "DEC-BUD-027 follow-up: granularidade operacional de soft intent distribuída vs hard intent por superfície."
