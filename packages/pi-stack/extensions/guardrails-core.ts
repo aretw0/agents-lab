@@ -10,7 +10,7 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve, relative, sep } from "node:path";
 import { analyzeQuota, parseProviderBudgets, safeNum, type ProviderBudgetMap, type ProviderBudgetStatus } from "./quota-visibility";
 import { parseBudgetOverrideReason } from "./colony-pilot";
@@ -539,6 +539,192 @@ export function providerBudgetGovernorMisconfigReason(
   return "guardrails-core: providerBudgetGovernor misconfigured.";
 }
 
+interface LongRunIntentQueueConfig {
+  enabled: boolean;
+  requireActiveLongRun: boolean;
+  maxItems: number;
+  forceNowPrefix: string;
+  autoDrainOnIdle: boolean;
+  autoDrainCooldownMs: number;
+  autoDrainBatchSize: number;
+}
+
+interface DeferredIntentItem {
+  id: string;
+  atIso: string;
+  text: string;
+  source: string;
+}
+
+interface DeferredIntentQueueStore {
+  version: number;
+  items: DeferredIntentItem[];
+}
+
+const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
+  enabled: true,
+  requireActiveLongRun: true,
+  maxItems: 50,
+  forceNowPrefix: "lane-now:",
+  autoDrainOnIdle: true,
+  autoDrainCooldownMs: 3000,
+  autoDrainBatchSize: 1,
+};
+function deferredIntentQueuePath(cwd: string): string {
+  return join(cwd, ".pi", "deferred-intents.json");
+}
+
+function readDeferredIntentQueue(cwd: string): DeferredIntentQueueStore {
+  const p = deferredIntentQueuePath(cwd);
+  if (!existsSync(p)) return { version: 1, items: [] };
+  try {
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    if (!Array.isArray(json?.items)) return { version: 1, items: [] };
+    const items = json.items
+      .filter((item: unknown): item is DeferredIntentItem => {
+        const row = item as DeferredIntentItem;
+        return Boolean(row?.id && typeof row?.text === "string" && row.text.trim().length > 0);
+      })
+      .map((row: DeferredIntentItem) => ({
+        id: row.id,
+        atIso: typeof row.atIso === "string" && row.atIso ? row.atIso : new Date().toISOString(),
+        text: row.text,
+        source: typeof row.source === "string" ? row.source : "interactive",
+      }));
+    return { version: 1, items };
+  } catch {
+    return { version: 1, items: [] };
+  }
+}
+
+function writeDeferredIntentQueue(cwd: string, store: DeferredIntentQueueStore): string {
+  const p = deferredIntentQueuePath(cwd);
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  writeFileSync(p, `${JSON.stringify(store, null, 2)}\n`, "utf8");
+  return p;
+}
+
+export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueueConfig {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.guardrailsCore?.longRunIntentQueue ?? {};
+    const maxItemsRaw = Number(cfg?.maxItems);
+    const autoDrainCooldownMsRaw = Number(cfg?.autoDrainCooldownMs);
+    const autoDrainBatchSizeRaw = Number(cfg?.autoDrainBatchSize);
+    return {
+      enabled: cfg?.enabled !== false,
+      requireActiveLongRun: cfg?.requireActiveLongRun !== false,
+      maxItems: Number.isFinite(maxItemsRaw) && maxItemsRaw > 0
+        ? Math.max(1, Math.min(500, Math.floor(maxItemsRaw)))
+        : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.maxItems,
+      forceNowPrefix: typeof cfg?.forceNowPrefix === "string" && cfg.forceNowPrefix.trim().length > 0
+        ? cfg.forceNowPrefix.trim().toLowerCase()
+        : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.forceNowPrefix,
+      autoDrainOnIdle: cfg?.autoDrainOnIdle !== false,
+      autoDrainCooldownMs: Number.isFinite(autoDrainCooldownMsRaw) && autoDrainCooldownMsRaw >= 0
+        ? Math.max(0, Math.floor(autoDrainCooldownMsRaw))
+        : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.autoDrainCooldownMs,
+      autoDrainBatchSize: Number.isFinite(autoDrainBatchSizeRaw) && autoDrainBatchSizeRaw > 0
+        ? Math.max(1, Math.min(10, Math.floor(autoDrainBatchSizeRaw)))
+        : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.autoDrainBatchSize,
+    };
+  } catch {
+    return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
+  }
+}
+
+export function shouldQueueInputForLongRun(
+  text: string,
+  activeLongRun: boolean,
+  cfg: LongRunIntentQueueConfig,
+): boolean {
+  if (!cfg.enabled) return false;
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (trimmed.toLowerCase().startsWith(cfg.forceNowPrefix)) return false;
+  if (trimmed.startsWith("/")) return false;
+  if (cfg.requireActiveLongRun && !activeLongRun) return false;
+  return true;
+}
+
+export function shouldAutoDrainDeferredIntent(
+  activeLongRun: boolean,
+  queuedCount: number,
+  nowMs: number,
+  lastAutoDrainAt: number,
+  cfg: LongRunIntentQueueConfig,
+): boolean {
+  if (!cfg.enabled || !cfg.autoDrainOnIdle) return false;
+  if (activeLongRun) return false;
+  if (queuedCount <= 0) return false;
+  return (nowMs - lastAutoDrainAt) >= cfg.autoDrainCooldownMs;
+}
+
+export function enqueueDeferredIntent(
+  cwd: string,
+  text: string,
+  source: string,
+  maxItems: number,
+): { queuePath: string; queuedCount: number; itemId: string } {
+  const queue = readDeferredIntentQueue(cwd);
+  const item: DeferredIntentItem = {
+    id: `intent-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+    atIso: new Date().toISOString(),
+    text: text.trim(),
+    source,
+  };
+  queue.items.push(item);
+  if (queue.items.length > maxItems) {
+    queue.items = queue.items.slice(-maxItems);
+  }
+  const queuePath = writeDeferredIntentQueue(cwd, queue);
+  return {
+    queuePath,
+    queuedCount: queue.items.length,
+    itemId: item.id,
+  };
+}
+
+export function dequeueDeferredIntent(
+  cwd: string,
+): { queuePath: string; queuedCount: number; item?: DeferredIntentItem } {
+  const queue = readDeferredIntentQueue(cwd);
+  const item = queue.items.shift();
+  const queuePath = writeDeferredIntentQueue(cwd, queue);
+  return {
+    queuePath,
+    queuedCount: queue.items.length,
+    item,
+  };
+}
+
+export function clearDeferredIntentQueue(cwd: string): { queuePath: string; cleared: number } {
+  const queue = readDeferredIntentQueue(cwd);
+  const cleared = queue.items.length;
+  const queuePath = writeDeferredIntentQueue(cwd, { version: 1, items: [] });
+  return { queuePath, cleared };
+}
+
+export function listDeferredIntents(cwd: string): DeferredIntentItem[] {
+  return readDeferredIntentQueue(cwd).items;
+}
+
+function getDeferredIntentQueueCount(cwd: string): number {
+  return readDeferredIntentQueue(cwd).items.length;
+}
+
+function updateLongRunLaneStatus(ctx: ExtensionContext, activeLongRun: boolean): void {
+  const queued = getDeferredIntentQueueCount(ctx.cwd);
+  if (queued <= 0 && !activeLongRun) {
+    ctx.ui?.setStatus?.("guardrails-core-lane", undefined);
+    return;
+  }
+  const lane = activeLongRun ? "active" : "idle";
+  ctx.ui?.setStatus?.("guardrails-core-lane", `[lane] ${lane} queued=${queued}`);
+}
+
 export function shouldAnnounceStrictInteractiveMode(
   alreadyAnnounced: boolean,
   strictMode: boolean,
@@ -563,6 +749,8 @@ export default function (pi: ExtensionAPI) {
   };
   let providerBudgetSnapshotCache: { at: number; key: string; snapshot: ProviderBudgetGovernorSnapshot } | undefined;
   let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
+  let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
+  let lastAutoDrainAt = 0;
 
   async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
     const quota = readQuotaBudgetSettings(ctx.cwd);
@@ -597,6 +785,51 @@ export default function (pi: ExtensionAPI) {
     return snapshot;
   }
 
+  function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop"): boolean {
+    const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+    const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
+    const nowMs = Date.now();
+
+    if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, longRunIntentQueueConfig)) {
+      updateLongRunLaneStatus(ctx, activeLongRun);
+      return false;
+    }
+
+    const maxBatch = Math.max(1, longRunIntentQueueConfig.autoDrainBatchSize);
+    let dispatched = 0;
+
+    while (dispatched < maxBatch) {
+      const popped = dequeueDeferredIntent(ctx.cwd);
+      if (!popped.item) break;
+
+      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-pop", {
+        atIso: new Date().toISOString(),
+        itemId: popped.item.id,
+        reason,
+        queuedCount: popped.queuedCount,
+        batchIndex: dispatched + 1,
+        batchSize: maxBatch,
+      });
+
+      pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+      dispatched += 1;
+
+      if (!ctx.isIdle() || ctx.hasPendingMessages()) {
+        break;
+      }
+    }
+
+    if (dispatched <= 0) {
+      updateLongRunLaneStatus(ctx, activeLongRun);
+      return false;
+    }
+
+    lastAutoDrainAt = nowMs;
+    updateLongRunLaneStatus(ctx, false);
+    ctx.ui.notify(`lane-queue: auto-dispatch ${dispatched} item(s)`, "info");
+    return true;
+  }
+
   pi.on("session_start", (_event, ctx) => {
     strictInteractiveMode = false;
     strictInteractiveAnnounced = false;
@@ -607,6 +840,7 @@ export default function (pi: ExtensionAPI) {
       providerBudgetGovernorConfig.enabled,
       quotaSettings.providerBudgets,
     );
+    longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
     if (providerBudgetGovernorMisconfig) {
       ctx.ui?.notify?.(
         providerBudgetGovernorMisconfigReason(providerBudgetGovernorMisconfig),
@@ -615,6 +849,8 @@ export default function (pi: ExtensionAPI) {
       ctx.ui?.setStatus?.("guardrails-core-budget", "[budget] governor-misconfig");
     }
     providerBudgetSnapshotCache = undefined;
+    lastAutoDrainAt = 0;
+    updateLongRunLaneStatus(ctx, false);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -649,6 +885,38 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on("input", async (event, ctx) => {
+    const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+    updateLongRunLaneStatus(ctx, activeLongRun);
+
+    if (
+      event.source === "interactive"
+      && shouldQueueInputForLongRun(event.text ?? "", activeLongRun, longRunIntentQueueConfig)
+    ) {
+      const queued = enqueueDeferredIntent(
+        ctx.cwd,
+        event.text ?? "",
+        event.source ?? "interactive",
+        longRunIntentQueueConfig.maxItems,
+      );
+      appendAuditEntry(ctx, "guardrails-core.long-run-intent-queued", {
+        atIso: new Date().toISOString(),
+        itemId: queued.itemId,
+        queuedCount: queued.queuedCount,
+        queuePath: queued.queuePath,
+        activeLongRun,
+      });
+      updateLongRunLaneStatus(ctx, activeLongRun);
+      ctx.ui.notify(
+        [
+          "Long-run ativo: solicitação registrada na fila sem trocar de foco.",
+          `queued=${queued.queuedCount}`,
+          `use '${longRunIntentQueueConfig.forceNowPrefix}<mensagem>' para forçar processamento imediato.`,
+        ].join("\n"),
+        "info",
+      );
+      return { action: "handled" as const };
+    }
+
     if (!providerBudgetGovernorConfig.enabled) return { action: "continue" as const };
     if (providerBudgetGovernorMisconfig) return { action: "continue" as const };
 
@@ -697,7 +965,6 @@ export default function (pi: ExtensionAPI) {
     );
     return { action: "handled" as const };
   });
-
   pi.on("before_provider_request", async (_event, ctx) => {
     if (!providerBudgetGovernorConfig.enabled) return undefined;
     if (providerBudgetGovernorMisconfig) {
@@ -766,11 +1033,74 @@ export default function (pi: ExtensionAPI) {
     return undefined;
   });
 
+  pi.registerCommand("lane-queue", {
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|list|pop|clear]",
+    handler: async (args, ctx) => {
+      const sub = (args ?? "").trim().toLowerCase().split(/\s+/)[0] || "status";
+
+      if (sub === "clear") {
+        const cleared = clearDeferredIntentQueue(ctx.cwd);
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages());
+        ctx.ui.notify(`lane-queue: cleared ${cleared.cleared} item(s).`, "info");
+        return;
+      }
+
+      if (sub === "list") {
+        const items = listDeferredIntents(ctx.cwd);
+        if (items.length === 0) {
+          ctx.ui.notify("lane-queue: empty", "info");
+          return;
+        }
+        const lines = [
+          `lane-queue: ${items.length} pending`,
+          ...items.slice(-10).map((item) => `- ${item.id} ${item.atIso} :: ${item.text.slice(0, 120)}`),
+        ];
+        ctx.ui.notify(lines.join("\n"), "info");
+        return;
+      }
+
+      if (sub === "pop") {
+        const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+        if (activeLongRun) {
+          ctx.ui.notify("lane-queue: long-run still active; pop blocked to avoid focus drift.", "warning");
+          return;
+        }
+        const popped = dequeueDeferredIntent(ctx.cwd);
+        updateLongRunLaneStatus(ctx, false);
+        if (!popped.item) {
+          ctx.ui.notify("lane-queue: empty", "info");
+          return;
+        }
+        appendAuditEntry(ctx, "guardrails-core.long-run-intent-pop", {
+          atIso: new Date().toISOString(),
+          itemId: popped.item.id,
+          queuedCount: popped.queuedCount,
+        });
+        ctx.ui.notify(`lane-queue: dispatching ${popped.item.id}`, "info");
+        pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+        return;
+      }
+
+      const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+      const queued = getDeferredIntentQueueCount(ctx.cwd);
+      ctx.ui.notify(
+        [
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs}`,
+          "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
+        ].join("\n"),
+        "info",
+      );
+    },
+  });
+
   pi.on("agent_end", (_event, ctx) => {
     if (strictInteractiveMode) {
       strictInteractiveMode = false;
       ctx.ui?.setStatus?.("guardrails-core", undefined);
     }
     ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
+    if (!tryAutoDrainDeferredIntent(ctx, "agent_end")) {
+      updateLongRunLaneStatus(ctx, false);
+    }
   });
 }
