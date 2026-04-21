@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	applyContextWatchBootstrapToSettings,
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
@@ -76,5 +77,20 @@ describe("context-watchdog", () => {
 		expect((worker.patch.piStack as any).contextWatchdog.checkpointPct).toBe(72);
 		expect((worker.patch.piStack as any).contextWatchdog.compactPct).toBe(78);
 		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
+	});
+
+	it("applies bootstrap patch without clobbering unrelated settings", () => {
+		const base = {
+			piStack: {
+				quotaVisibility: {
+					routeModelRefs: { "openai-codex": "openai-codex/gpt-5.3-codex" },
+				},
+			},
+		} as Record<string, unknown>;
+		const merged = applyContextWatchBootstrapToSettings(base, "agent-worker");
+		expect(merged.preset).toBe("agent-worker");
+		expect(((merged.settings.piStack as any).contextWatchdog.notify)).toBe(false);
+		expect(((merged.settings.piStack as any).quotaVisibility.routeModelRefs["openai-codex"]))
+			.toBe("openai-codex/gpt-5.3-codex");
 	});
 });

@@ -11,7 +11,7 @@
  * This extension is advisory only (no blocking).
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
@@ -241,6 +241,69 @@ export function buildContextWatchBootstrapPlan(
 	};
 }
 
+export function deepMergeSettings(
+	base: Record<string, unknown>,
+	patch: Record<string, unknown>,
+): Record<string, unknown> {
+	const out: Record<string, unknown> = { ...base };
+	for (const [k, v] of Object.entries(patch)) {
+		if (
+			v !== null &&
+			typeof v === "object" &&
+			!Array.isArray(v) &&
+			out[k] !== null &&
+			typeof out[k] === "object" &&
+			!Array.isArray(out[k])
+		) {
+			out[k] = deepMergeSettings(
+				out[k] as Record<string, unknown>,
+				v as Record<string, unknown>,
+			);
+		} else {
+			out[k] = v;
+		}
+	}
+	return out;
+}
+
+export function applyContextWatchBootstrapToSettings(
+	settings: Record<string, unknown>,
+	presetInput?: unknown,
+): {
+	preset: ContextWatchBootstrapPreset;
+	plan: ContextWatchBootstrapPlan;
+	settings: Record<string, unknown>;
+} {
+	const plan = buildContextWatchBootstrapPlan(presetInput);
+	return {
+		preset: plan.preset,
+		plan,
+		settings: deepMergeSettings(settings, plan.patch),
+	};
+}
+
+function projectSettingsPath(cwd: string): string {
+	return path.join(cwd, ".pi", "settings.json");
+}
+
+function readProjectSettings(cwd: string): Record<string, unknown> {
+	const filePath = projectSettingsPath(cwd);
+	if (!existsSync(filePath)) return {};
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+	} catch {
+		return {};
+	}
+}
+
+function writeProjectSettings(cwd: string, settings: Record<string, unknown>): string {
+	const filePath = projectSettingsPath(cwd);
+	mkdirSync(path.dirname(filePath), { recursive: true });
+	writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf8");
+	return filePath;
+}
+
 function readSettingsJson(cwd: string): Record<string, unknown> {
 	const candidates = [
 		path.join(cwd, ".pi", "settings.json"),
@@ -338,6 +401,24 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		);
 	};
 
+	const applyPreset = (ctx: ExtensionContext, presetInput?: unknown) => {
+		const merged = applyContextWatchBootstrapToSettings(
+			readProjectSettings(ctx.cwd),
+			presetInput,
+		);
+		const settingsPath = writeProjectSettings(ctx.cwd, merged.settings);
+		const piStack = (merged.settings.piStack as Record<string, unknown> | undefined) ?? {};
+		config = normalizeContextWatchdogConfig(piStack.contextWatchdog);
+		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
+		run(ctx, "message_end");
+		return {
+			preset: merged.preset,
+			settingsPath,
+			patch: merged.plan.patch,
+			notes: merged.plan.notes,
+		};
+	};
+
 	pi.on("session_start", (_event, ctx) => {
 		config = readWatchdogConfig(ctx.cwd);
 		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
@@ -371,22 +452,33 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		name: "context_watch_bootstrap",
 		label: "Context Watch Bootstrap",
 		description:
-			"Returns a portable long-run context-watch preset patch (control-plane or agent-worker).",
+			"Returns (or applies) a portable long-run context-watch preset patch (control-plane or agent-worker).",
 		parameters: Type.Object({
 			preset: Type.Optional(Type.String({ description: "control-plane | agent-worker" })),
+			apply: Type.Optional(Type.Boolean()),
 		}),
-		async execute(_toolCallId, params) {
-			const p = params as { preset?: string };
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = params as { preset?: string; apply?: boolean };
+			if (p.apply) {
+				const applied = applyPreset(ctx, p.preset);
+				return {
+					content: [{
+						type: "text",
+						text: JSON.stringify({ ...applied, applied: true, reloadRequired: false }, null, 2),
+					}],
+					details: { ...applied, applied: true, reloadRequired: false },
+				};
+			}
 			const plan = buildContextWatchBootstrapPlan(p.preset);
 			return {
-				content: [{ type: "text", text: JSON.stringify(plan, null, 2) }],
-				details: plan,
+				content: [{ type: "text", text: JSON.stringify({ ...plan, applied: false }, null, 2) }],
+				details: { ...plan, applied: false },
 			};
 		},
 	});
 
 	pi.registerCommand("context-watch", {
-		description: "Show/reset status or print bootstrap patch. Usage: /context-watch [status|reset|bootstrap [control-plane|agent-worker]]",
+		description: "Show/reset status, print bootstrap patch, or apply preset. Usage: /context-watch [status|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]",
 		handler: async (args, ctx) => {
 			const tokens = String(args ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean);
 			const sub = tokens[0] ?? "status";
@@ -405,6 +497,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						`context-watch bootstrap (${plan.preset})`,
 						JSON.stringify(plan.patch, null, 2),
 						...plan.notes.map((n) => `- ${n}`),
+					].join("\n"),
+					"info",
+				);
+				return;
+			}
+
+			if (sub === "apply") {
+				const applied = applyPreset(ctx, tokens[1]);
+				ctx.ui.notify(
+					[
+						`context-watch preset applied (${applied.preset})`,
+						`settings: ${applied.settingsPath}`,
+						"effective now for context-watchdog (no /reload required).",
+						...applied.notes.map((n) => `- ${n}`),
 					].join("\n"),
 					"info",
 				);
