@@ -2441,7 +2441,7 @@
         "`/lane-queue` expõe subcomandos de forma clara, incluindo `clear`, com exemplo curto de uso.",
         "Mensagens de status incluem dica de como esvaziar/listar fila quando `queued>0`."
       ],
-      "notes": "Backlog criado por solicitação explícita do usuário (2026-04-22): incluir lapidação de usabilidade da lane-queue para evitar fricção operacional.\n[2026-04-22T00:00:00Z] Micro-slice manual (subagent-first): comando `lane-queue` ganhou `help` explícito, fallback para subcomando desconhecido com usage orientado e dicas de discoverability no status (queued>0 => list/clear; queued=0 => add). Cobertura smoke estendida em guardrails-long-run-intent-queue.test.ts. Evidência: VER-BUD-138."
+      "notes": "Backlog criado por solicitação explícita do usuário (2026-04-22): incluir lapidação de usabilidade da lane-queue para evitar fricção operacional.\n[2026-04-22T00:00:00Z] Micro-slice manual (subagent-first): comando `lane-queue` ganhou `help` explícito, fallback para subcomando desconhecido com usage orientado e dicas de discoverability no status (queued>0 => list/clear; queued=0 => add). Cobertura smoke estendida em guardrails-long-run-intent-queue.test.ts. Evidência: VER-BUD-138.\n[2026-04-22T00:00:00Z] Follow-through de docs canônicas: charter + pipeline atualizados para refletir `help` explícito e discoverability em status (`list/clear` quando queued>0). Evidência: VER-BUD-140."
     },
     {
       "id": "TASK-BUD-106",

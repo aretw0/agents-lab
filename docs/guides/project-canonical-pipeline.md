@@ -95,6 +95,13 @@ Para manter velocidade de cruzeiro em long-run:
 - interrupção do usuário apenas em risco irreversível/perda de dados/conflito de objetivo;
 - assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.pragmatic-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
 
+### Discoverability operacional da lane-queue
+
+Quando houver deferimento de intenção durante long-run:
+- `/lane-queue help` deve ser o ponto de entrada para uso rápido;
+- `/lane-queue` (status) deve orientar ações concretas quando `queued>0` (`list`/`clear`);
+- `/lane-queue add <texto>` deve ser preferido para registrar pedido sem desviar o lane ativo.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).

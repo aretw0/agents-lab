@@ -152,7 +152,8 @@ Para manter loops longos estáveis:
 2. **Fila de lane (deferida):** use `/lane-queue` quando a mensagem deve esperar uma janela segura (idle) sem interromper o trabalho atual.
 3. **Forçar agora (escape hatch):** prefixe com `lane-now:` para processar imediatamente quando necessário.
 
-`/lane-queue` suporta `status|list|add <texto>|pop|clear` e mantém trilha auditável no runtime (`guardrails-core.long-run-intent-*`).
+`/lane-queue` suporta `status|help|list|add <texto>|pop|clear` e mantém trilha auditável no runtime (`guardrails-core.long-run-intent-*`).
+Quando `queued>0`, o status deve orientar discoverability explícita (`/lane-queue list` e `/lane-queue clear`).
 O auto-drain ocorre apenas em janela idle estável (cooldown + idleStableMs configuráveis).
 
 ### Policy no-obvious-questions (autonomia pragmática)

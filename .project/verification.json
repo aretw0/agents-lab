@@ -2349,6 +2349,32 @@
           "evidence": "Guia descreve scan tail-batch e recomendação de expansão progressiva quando necessário."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-140",
+      "target": "TASK-BUD-105",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Follow-through documental para lane-queue UX: `docs/guides/agent-driver-charter.md` e `docs/guides/project-canonical-pipeline.md` agora explicitam `/lane-queue help`, discoverability no status com `list/clear` quando `queued>0`, e uso de `add` para deferimento sem desvio de lane.",
+      "criteria_results": [
+        {
+          "criterion": "Usuário consegue descobrir como limpar fila sem ler código (help/usage em comando e docs).",
+          "status": "passed",
+          "evidence": "Charter e pipeline incluem fluxo operacional com `help` e ações de limpeza/listagem."
+        },
+        {
+          "criterion": "`/lane-queue` expõe subcomandos de forma clara, incluindo `clear`, com exemplo curto de uso.",
+          "status": "passed",
+          "evidence": "Documentação canônica descreve `status|help|list|add|pop|clear` e reforça discoverability."
+        },
+        {
+          "criterion": "Mensagens de status incluem dica de como esvaziar/listar fila quando `queued>0`.",
+          "status": "passed",
+          "evidence": "Pipeline/charter atualizados para refletir dica contextual no status (`list`/`clear`)."
+        }
+      ]
     }
   ]
 }
