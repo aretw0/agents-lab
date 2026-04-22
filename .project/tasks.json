@@ -2582,6 +2582,33 @@
         "Existe checklist de release/dogfooding para validar que melhorias de fábrica interna chegam como potencial reutilizável no pacote pi-stack."
       ],
       "notes": "Backlog solicitado pelo usuário (2026-04-22): manter foco na nossa fábrica sem perder objetivo de agnosticismo para entregar potencial real a quem usar a pi-stack fora do laboratório."
+    },
+    {
+      "id": "TASK-BUD-112",
+      "description": "[P1] Preparar pipeline de descoberta de trabalho repetitivo com gasto LLM para converter em pathways hard galvanizados (sem LLM/humano no loop) quando seguro.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-096",
+        "TASK-BUD-111"
+      ],
+      "references": [
+        "REQ-BUD-003",
+        "REQ-BUD-056",
+        "DEC-BUD-026",
+        "DEC-BUD-035"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/session-analytics-query.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/agent-driver-charter.md"
+      ],
+      "acceptance_criteria": [
+        "Modelo de classificação identifica padrões repetitivos de trabalho com evidência de consumo LLM (tokens/requests/custo) e ranking de oportunidade.",
+        "Cada candidato recebe proposta de pathway hard com gates de segurança/rollback e condição de equivalência funcional.",
+        "Roadmap de galvanização registra métricas de mitigação de uso LLM (baseline vs pós-automação) sem iniciar implementação prematura fora do foco de fábrica."
+      ],
+      "notes": "Solicitação explícita do usuário (2026-04-22): assimilar estratégia de mitigação máxima de uso LLM via automações hard para trabalhos repetitivos; registrar no backlog e não executar agora enquanto o foco permanece em liberar potencial de fábrica."
     }
   ]
 }

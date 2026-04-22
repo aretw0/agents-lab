@@ -792,6 +792,22 @@
         "Runbooks/skills priorizam contrato de primitivas + adapters em vez de dependências hard de um único board/ambiente.",
         "Existe trilha de backlog dedicada a transformar hardening interno em capabilities portáveis para usuários da pi-stack."
       ]
+    },
+    {
+      "id": "REQ-BUD-056",
+      "description": "A stack deve evoluir para identificar trabalho repetitivo que consumiu LLM/tokens e priorizar sua galvanização em pathways hard (automatizações determinísticas sem LLM/humano no loop), reduzindo custo recorrente sem perder governança.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-112"
+      ],
+      "acceptance_criteria": [
+        "Existe trilha analítica que correlaciona uso de LLM (tokens/requests/custo) com classes de trabalho repetitivo.",
+        "O sistema sugere candidatos de galvanização com critério explícito (frequência, previsibilidade, risco) e recomendação de pathway hard equivalente.",
+        "Backlog mantém pipeline de conversão (descoberta -> validação -> automação hard) com evidência de redução de consumo LLM ao longo do tempo."
+      ]
     }
   ]
 }
