@@ -746,6 +746,12 @@ export function resolveAutoDrainRetryDelayMs(
     idleSinceMs,
     cfg,
   );
+  if (gate === "active-long-run") {
+    // Keep lane-queue complementary to native follow-up semantics:
+    // if native follow-up is still draining (pending messages), retry later
+    // instead of giving up auto-drain entirely.
+    return Math.max(250, cfg.autoDrainIdleStableMs);
+  }
   if (gate !== "cooldown" && gate !== "idle-stability") return undefined;
   const waitMs = estimateAutoDrainWaitMs(
     activeLongRun,
