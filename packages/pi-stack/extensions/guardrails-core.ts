@@ -662,6 +662,33 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
+export type AutoDrainGateReason =
+  | "disabled"
+  | "empty"
+  | "active-long-run"
+  | "cooldown"
+  | "idle-stability"
+  | "ready";
+
+export function resolveAutoDrainGateReason(
+  activeLongRun: boolean,
+  queuedCount: number,
+  nowMs: number,
+  lastAutoDrainAt: number,
+  idleSinceMs: number,
+  cfg: LongRunIntentQueueConfig,
+): AutoDrainGateReason {
+  if (!cfg.enabled || !cfg.autoDrainOnIdle) return "disabled";
+  if (queuedCount <= 0) return "empty";
+  if (activeLongRun) return "active-long-run";
+  const cooldownRemaining = Math.max(0, cfg.autoDrainCooldownMs - (nowMs - lastAutoDrainAt));
+  const idleRemaining = Math.max(0, cfg.autoDrainIdleStableMs - idleSinceMs);
+  if (cooldownRemaining > 0 || idleRemaining > 0) {
+    return cooldownRemaining >= idleRemaining ? "cooldown" : "idle-stability";
+  }
+  return "ready";
+}
+
 export function estimateAutoDrainWaitMs(
   activeLongRun: boolean,
   queuedCount: number,
@@ -670,9 +697,15 @@ export function estimateAutoDrainWaitMs(
   idleSinceMs: number,
   cfg: LongRunIntentQueueConfig,
 ): number | undefined {
-  if (!cfg.enabled || !cfg.autoDrainOnIdle) return undefined;
-  if (queuedCount <= 0) return undefined;
-  if (activeLongRun) return undefined;
+  const gate = resolveAutoDrainGateReason(
+    activeLongRun,
+    queuedCount,
+    nowMs,
+    lastAutoDrainAt,
+    idleSinceMs,
+    cfg,
+  );
+  if (gate !== "cooldown" && gate !== "idle-stability" && gate !== "ready") return undefined;
   const cooldownRemaining = Math.max(0, cfg.autoDrainCooldownMs - (nowMs - lastAutoDrainAt));
   const idleRemaining = Math.max(0, cfg.autoDrainIdleStableMs - idleSinceMs);
   return Math.max(cooldownRemaining, idleRemaining);
@@ -705,6 +738,15 @@ export function resolveAutoDrainRetryDelayMs(
   idleSinceMs: number,
   cfg: LongRunIntentQueueConfig,
 ): number | undefined {
+  const gate = resolveAutoDrainGateReason(
+    activeLongRun,
+    queuedCount,
+    nowMs,
+    lastAutoDrainAt,
+    idleSinceMs,
+    cfg,
+  );
+  if (gate !== "cooldown" && gate !== "idle-stability") return undefined;
   const waitMs = estimateAutoDrainWaitMs(
     activeLongRun,
     queuedCount,
@@ -881,6 +923,14 @@ export default function (pi: ExtensionAPI) {
     const nowMs = Date.now();
     const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
 
+    const gate = resolveAutoDrainGateReason(
+      activeLongRun,
+      queuedCount,
+      nowMs,
+      lastAutoDrainAt,
+      idleSinceMs,
+      longRunIntentQueueConfig,
+    );
     const retryDelayMs = resolveAutoDrainRetryDelayMs(
       activeLongRun,
       queuedCount,
@@ -891,6 +941,13 @@ export default function (pi: ExtensionAPI) {
     );
     if (retryDelayMs !== undefined) {
       scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
+      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-deferred", {
+        atIso: new Date().toISOString(),
+        reason,
+        gate,
+        queuedCount,
+        retryDelayMs,
+      });
       updateLongRunLaneStatus(ctx, activeLongRun);
       return false;
     }
@@ -1227,6 +1284,14 @@ export default function (pi: ExtensionAPI) {
       const queued = items.length;
       const nowMs = Date.now();
       const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
+      const gate = resolveAutoDrainGateReason(
+        activeLongRun,
+        queued,
+        nowMs,
+        lastAutoDrainAt,
+        idleSinceMs,
+        longRunIntentQueueConfig,
+      );
       const waitMs = estimateAutoDrainWaitMs(
         activeLongRun,
         queued,
@@ -1247,7 +1312,7 @@ export default function (pi: ExtensionAPI) {
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} nextDrain=${nextDrain}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain}`,
           "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
         ].join("\n"),
         "info",

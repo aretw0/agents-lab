@@ -10,6 +10,7 @@ import {
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
+  resolveAutoDrainGateReason,
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
   shouldAutoDrainDeferredIntent,
@@ -159,6 +160,11 @@ describe("guardrails-core long-run intent queue", () => {
     expect(estimateAutoDrainWaitMs(false, 1, 500, 0, 1_200, cfg)).toBe(500);
     expect(estimateAutoDrainWaitMs(false, 1, 2_000, 0, 200, cfg)).toBe(600);
     expect(estimateAutoDrainWaitMs(true, 1, 2_000, 0, 1_200, cfg)).toBeUndefined();
+
+    expect(resolveAutoDrainGateReason(true, 1, 2_000, 0, 1_200, cfg)).toBe("active-long-run");
+    expect(resolveAutoDrainGateReason(false, 1, 500, 0, 1_200, cfg)).toBe("cooldown");
+    expect(resolveAutoDrainGateReason(false, 1, 2_000, 0, 200, cfg)).toBe("idle-stability");
+    expect(resolveAutoDrainGateReason(false, 1, 2_000, 0, 1_200, cfg)).toBe("ready");
 
     expect(resolveAutoDrainRetryDelayMs(false, 1, 500, 0, 1_200, cfg)).toBe(500);
     expect(resolveAutoDrainRetryDelayMs(false, 1, 2_000, 0, 200, cfg)).toBe(600);
