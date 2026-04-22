@@ -74,6 +74,10 @@ type SubagentReadinessResult = {
 	};
 	checks: Check[];
 	blockedReasons: string[];
+	blockedRecommendations: Array<{
+		check: string;
+		recommendation: string;
+	}>;
 };
 
 function normalizeOptions(input: SubagentReadinessOptions | undefined): Required<SubagentReadinessOptions> {
@@ -282,6 +286,28 @@ function readSettingsPackageSet(settingsPath: string): Set<string> {
 	return out;
 }
 
+export function recommendationForReadinessCheck(checkName: string): string {
+	if (checkName === "monitor-min-user-turns") {
+		return "Acione run controlado para gerar turnos suficientes (ex.: replay curto) antes de promover delegação.";
+	}
+	if (checkName === "monitor-max-classify-failures") {
+		return "Reduza ruído de monitor/classifier e rode novo ciclo curto até classifyFailures ficar dentro do limite.";
+	}
+	if (checkName === "colony-max-failed-signals") {
+		return "Corrija falhas recentes (FAILED) e prove janela limpa antes de habilitar lane assistida.";
+	}
+	if (checkName === "colony-max-budget-exceeded-signals") {
+		return "Ajuste budget envelope/provider route para evitar BUDGET_EXCEEDED no recorte de readiness.";
+	}
+	if (checkName === "colony-min-complete-signals") {
+		return "Execute ao menos uma run controlada com COMPLETE auditável no recorte atual de sessões.";
+	}
+	if (checkName.startsWith("pilot-package:")) {
+		return "Habilite pacotes de pilot obrigatórios e rode /reload (atalho: npm run pi:pilot:on:project).";
+	}
+	return "Rever threshold/configuração e repetir gate em janela controlada.";
+}
+
 export function runSubagentReadiness(
 	cwd: string,
 	input?: SubagentReadinessOptions,
@@ -360,7 +386,15 @@ export function runSubagentReadiness(
 	}
 
 	const ready = checks.every((c) => c.pass);
-	const blockedReasons = checks.filter((c) => !c.pass).map((c) => `${c.name} (${c.actual} vs ${c.expected})`);
+	const failedChecks = checks.filter((c) => !c.pass);
+	const blockedRecommendations = failedChecks.map((c) => ({
+		check: c.name,
+		recommendation: recommendationForReadinessCheck(c.name),
+	}));
+	const blockedReasons = failedChecks.map((c) => {
+		const recommendation = recommendationForReadinessCheck(c.name);
+		return `${c.name} (${c.actual} vs ${c.expected}) :: ${recommendation}`;
+	});
 
 	return {
 		generatedAtIso: new Date().toISOString(),
@@ -393,6 +427,7 @@ export function runSubagentReadiness(
 		},
 		checks,
 		blockedReasons,
+		blockedRecommendations,
 	};
 }
 
@@ -406,6 +441,12 @@ function formatResult(result: SubagentReadinessResult): string {
 	if (result.blockedReasons.length > 0) {
 		lines.push("blocked reasons:");
 		for (const reason of result.blockedReasons) lines.push(`  - ${reason}`);
+	}
+	if (result.blockedRecommendations.length > 0) {
+		lines.push("recommended actions:");
+		for (const entry of result.blockedRecommendations) {
+			lines.push(`  - ${entry.check}: ${entry.recommendation}`);
+		}
 	}
 	return lines.join("\n");
 }

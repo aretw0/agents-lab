@@ -58,6 +58,32 @@ Regra prática:
 - se `strict` bloquear por histórico (FAILED/BUDGET_EXCEEDED) ou cold start local, registrar bloqueios no board e seguir com mitigação explícita.
 - scheduler/prompt pode disparar esse check em cadência (soft intent), mas promoção/bloqueio continua dependente do resultado hard das tools.
 
+## Rollout em fases (isolado -> warm -> assistida) + rollback
+
+### Fase 1 — Isolado (controle)
+- rodar gate em `source=isolated` com janela curta (1 dia / 1 sessão);
+- objetivo: provar estabilidade básica sem ruído de histórico global.
+
+### Fase 2 — Warm (janela ampliada)
+- rodar `strict` em janela maior (`--days 7 --limit 20`) para evitar falso positivo de sessão única;
+- objetivo: evidenciar `COMPLETE` recente com pacotes de pilot obrigatórios e sem sinais críticos.
+
+### Fase 3 — Operação assistida (L2)
+- habilitar delegação de subagentes somente após `strict` passar de forma reprodutível;
+- registrar verificação canônica no board antes de promover lane.
+
+### Rollback explícito
+
+Retornar para L1 imediatamente quando ocorrer qualquer condição:
+- `subagent_readiness_status(strict=true)` volta para `ready=false`;
+- reaparecem sinais `FAILED`/`BUDGET_EXCEEDED` fora dos thresholds;
+- classify failures ultrapassam limite configurado.
+
+Ao rollback:
+1. pausar promoção de lane;
+2. registrar blocker com motivo acionável no board;
+3. reexecutar gate após mitigação explícita.
+
 ## Quando strict falhar por pacote ausente
 
 Ative pilot profile e recarregue a sessão:

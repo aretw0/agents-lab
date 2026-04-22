@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
 	extractPackageName,
+	recommendationForReadinessCheck,
 	runSubagentReadiness,
 } from "../../extensions/subagent-readiness";
 
@@ -31,6 +32,11 @@ describe("subagent-readiness extension", () => {
 		expect(extractPackageName("npm:@ifi/oh-pi-ant-colony")).toBe(
 			"@ifi/oh-pi-ant-colony",
 		);
+	});
+
+	it("returns actionable recommendation hints by check name", () => {
+		expect(recommendationForReadinessCheck("colony-min-complete-signals")).toContain("COMPLETE");
+		expect(recommendationForReadinessCheck("pilot-package:@ifi/oh-pi-ant-colony")).toContain("pi:pilot:on:project");
 	});
 
 	it("strict readiness passes with complete signal and required pilot packages", () => {
@@ -113,6 +119,11 @@ describe("subagent-readiness extension", () => {
 			expect(result.ready).toBe(false);
 			expect(
 				result.blockedReasons.some((r) => r.includes("pilot-package:@ifi/oh-pi-ant-colony")),
+			).toBe(true);
+			expect(
+				result.blockedRecommendations.some(
+					(r) => r.check.includes("pilot-package:@ifi/oh-pi-ant-colony") && r.recommendation.includes("pi:pilot:on:project"),
+				),
 			).toBe(true);
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
