@@ -1231,7 +1231,7 @@
       "id": "colony-c-ret-1",
       "description": "[COLONY:ant_colony] Ajustar governança\\n[COLONY_SIGNAL:COMPLETE] [c-ret-1]\",\u001b[39m",
       "status": "blocked",
-      "notes": "[2026-04-20T21:14:20.842Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.903Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-20T21:14:20.931Z] delivery-policy blocked completion: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.985Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T03:35:23.181Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.230Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T03:35:23.254Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.298Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T14:34:55.169Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.299Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T14:34:55.433Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.512Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T16:48:58.224Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.306Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T16:48:58.344Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.405Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T20:09:55.482Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.548Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T20:09:55.581Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.630Z] promotion queued automatically: colony-c-ret-1-promotion"
+      "notes": "[2026-04-21T03:35:23.181Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.230Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T03:35:23.254Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.298Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T14:34:55.169Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.299Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T14:34:55.433Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.512Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T16:48:58.224Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.306Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T16:48:58.344Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.405Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T20:09:55.482Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.548Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-21T20:09:55.581Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.630Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-22T11:18:08.875Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log\n[2026-04-22T11:18:08.938Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-22T11:18:08.984Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log\n[2026-04-22T11:18:09.043Z] promotion queued automatically: colony-c-ret-1-promotion"
     },
     {
       "id": "colony-c-ret-1-promotion",
@@ -1245,7 +1245,7 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-20T02:37:20.061Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.242Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.583Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.709Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T21:04:33.726Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:04:34.059Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.165Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.260Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.875Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.955Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-21T03:35:23.208Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.276Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.268Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.472Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T16:48:58.270Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.375Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T20:09:55.512Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.607Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary"
+      "notes": "[2026-04-20T02:37:20.061Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:37:20.242Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.583Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T03:31:53.709Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T21:04:33.726Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:04:34.059Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.165Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:10:07.260Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.875Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-20T21:14:20.955Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report\n[2026-04-21T03:35:23.208Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T03:35:23.276Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.268Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T14:34:55.472Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T16:48:58.270Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T16:48:58.375Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T20:09:55.512Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-21T20:09:55.607Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary\n[2026-04-22T11:18:08.910Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log\n[2026-04-22T11:18:09.015Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log"
     },
     {
       "id": "TASK-BUD-054",
@@ -1961,6 +1961,65 @@
       ],
       "notes": "Solicitação explícita do usuário: pragmatismo para escalar long runs; registrar rápido sem trocar de contexto, priorizando continuidade operacional.\n[2026-04-22T01:54:33.974Z] Micro-slice: auto-drain da lane-queue passou a re-agendar retry deterministico quando bloqueado por cooldown/idle-stability (resolveAutoDrainRetryDelayMs), evitando perda de retomada apos tentativa unica. Evidencia: VER-BUD-105 (commit 6238a3b).\n[2026-04-22T01:58:53.570Z] Micro-slice: gate explicito de auto-drain (resolveAutoDrainGateReason) publicado em status e auditoria de deferimento (long-run-intent-auto-drain-deferred), mantendo drain apenas em janela segura. Evidencia: VER-BUD-106 (commit 49e5bcb).",
       "verification": "VER-BUD-107"
+    },
+    {
+      "id": "TASK-BUD-085",
+      "description": "[P0] Implementar policy de autonomia pragmática para long runs (no-obvious-questions): assumir defaults seguros e só interromper o usuário em decisões irreversíveis/alto risco.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-084",
+        "TASK-BUD-083"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/guides/agent-driver-charter.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Ambiguidades de baixo risco (formato, ordem de execução, micro-escolhas de implementação) são resolvidas por default determinístico sem pedir confirmação.",
+        "Perguntas ao usuário ficam restritas a ações irreversíveis, risco de perda de dados, ou conflito de objetivo explícito.",
+        "Toda assunção automática fica auditável (note/audit log) para revisão posterior sem interromper o fluxo ativo."
+      ],
+      "notes": "Objetivo direto: reduzir interrupções óbvias e manter velocidade de cruzeiro com segurança."
+    },
+    {
+      "id": "TASK-BUD-086",
+      "description": "[P1] Maturar readiness de subagentes para produção assistida: criar trilha determinística de evidência COMPLETE e gate operacional (GO/NO-GO) para habilitação progressiva.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-084",
+        "TASK-BUD-018"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/subagent-readiness.ts",
+        "packages/pi-stack/test/smoke/subagent-readiness.test.ts",
+        "docs/guides/subagent-readiness-gate.md"
+      ],
+      "acceptance_criteria": [
+        "`subagent_readiness_status(strict=true)` passa em cenário controlado com evidência reprodutível de COMPLETE sem afrouxar guardrails críticos.",
+        "Falhas de readiness retornam motivo acionável (telemetria + recomendação de correção) sem ambiguidades.",
+        "Runbook define rollout em fases (isolado -> warm -> operação assistida) com critério explícito de rollback."
+      ],
+      "notes": "Atualmente strict falha por ausência de COMPLETE recente; esta task fecha esse gap de forma auditável."
+    },
+    {
+      "id": "TASK-BUD-087",
+      "description": "[P1] Centralizar first-parties por ondas (sem big-bang): inventariar overlaps com third-parties e definir plano de promoção/depreciação focado em estabilidade de long run.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-083"
+      ],
+      "files": [
+        "docs/guides/recommended-pi-stack.md",
+        "docs/research/pi-stack-user-surface-audit-2026-04-21.md",
+        "packages/pi-stack/extensions/index.ts"
+      ],
+      "acceptance_criteria": [
+        "Inventário identifica capacidades duplicadas e classifica: manter third-party, promover first-party, ou desativar overlap.",
+        "Plano de migração define sequência pequena/reversível com critérios de segurança (sem regressão de governança/context-watch).",
+        "Primeira onda aplicada com evidência mínima (smoke/regression) sem quebrar fluxo de long runs."
+      ],
+      "notes": "Foco em estabilidade operacional: menos superfície duplicada, menos comportamento inesperado em execuções longas."
     }
   ]
 }
