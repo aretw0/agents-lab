@@ -1756,6 +1756,58 @@
           "evidence": "Monitor-overrides reforça política curated-default com extras apenas via opt-in explícito."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-117",
+      "target": "TASK-BUD-098",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Gate de higiene de artefatos runtime implementado e validado: `scripts/pi-runtime-artifact-audit.mjs` detecta paths efêmeros rastreados (deny-by-default para `.pi/*`, com allowlist explícita de `.pi/settings.json` e `.pi/agents/*.yaml`) e marca `.sandbox/*`/`.pi-lens/*` como violação; modo `--strict` retorna falha para uso em CI/local; saída inclui remediação segura (`git rm --cached -- <path>`). Integrações aplicadas em `package.json` (`pi:artifact:audit`, `pi:artifact:audit:strict`, `test:pi:artifact:audit`) e rotina de higiene em `docs/guides/project-canonical-pipeline.md`; prevenção adicional em `.gitignore` para `.pi/deferred-intents.json`. Validação executada: `node --test scripts/test/pi-runtime-artifact-audit.test.mjs` (4/4 pass) e `node scripts/pi-runtime-artifact-audit.mjs --strict` (clean). Commits: `1ad4eba`, `48caf05`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Comando lista arquivos rastreados que violam policy de artefato efêmero.",
+          "status": "passed",
+          "evidence": "Scanner classifica violations por `path` e `reason`."
+        },
+        {
+          "criterion": "Modo gate retorna erro em CI/local quando houver violação na baseline oficial.",
+          "status": "passed",
+          "evidence": "`--strict` implementado com exit code não-zero para violations."
+        },
+        {
+          "criterion": "Saída inclui ação corretiva segura (untrack sem apagar working copy).",
+          "status": "passed",
+          "evidence": "`buildRemediationCommands` gera `git rm --cached -- <path>`."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-118",
+      "target": "TASK-BUD-091",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice inicial do gate de baseline curada: `packages/pi-stack/package-list.mjs` agora define `CURATED_DEFAULT` (allowlist oficial de distribuição) e `scripts/pi-parity.mjs` ganhou profile `curated-default` para auditar escopo project/user contra essa baseline. `package.json` inclui `pi:parity:curated` e teste dedicado `scripts/test/pi-parity-curated-profile.test.mjs` valida suporte ao novo profile. Validações: `node --test scripts/test/pi-parity-curated-profile.test.mjs` (1/1 pass) e `node scripts/pi-parity.mjs --scope project --profile curated-default --json` (resultado estruturado com missing/present). Commit: `a38c4a8`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Existe allowlist canônica de pacotes/capacidades oficiais da baseline.",
+          "status": "passed",
+          "evidence": "`CURATED_DEFAULT` adicionado como lista canônica de baseline."
+        },
+        {
+          "criterion": "Installer/baseline aplica apenas superfície oficial por padrão.",
+          "status": "skipped",
+          "evidence": "Ainda não aplicado no instalador neste micro-slice."
+        },
+        {
+          "criterion": "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado.",
+          "status": "skipped",
+          "evidence": "Documentação/flags de opt-in serão fechadas em slice seguinte."
+        }
+      ]
     }
   ]
 }

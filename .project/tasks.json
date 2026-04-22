@@ -2110,7 +2110,8 @@
         "Installer/baseline aplica apenas superfície oficial por padrão.",
         "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado."
       ],
-      "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate."
+      "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate.\n[2026-04-22T12:17:45.162Z] Slice 1 da baseline curada: allowlist oficial (CURATED_DEFAULT) + profile de auditoria parity (curated-default) materializados para gatear distribuição.",
+      "verification": "VER-BUD-118"
     },
     {
       "id": "TASK-BUD-092",
@@ -2253,7 +2254,7 @@
     {
       "id": "TASK-BUD-098",
       "description": "[P0] Implementar auditor de artefatos versionados indevidos (pi runtime hygiene) para detectar paths efêmeros rastreados e bloquear promoção da baseline curada.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-091"
       ],
@@ -2273,7 +2274,7 @@
         "Saída inclui ação corretiva segura (untrack sem apagar working copy)."
       ],
       "notes": "Foco em prevenção contínua para não repetir drift de versionamento.\n[2026-04-22T12:00:58.396Z] Priorizada para impedir regressão de artefatos pi não curados no git e bloquear promoção com drift de versionamento efêmero.\n[2026-04-22T12:07:28.771Z] Auditor/gate de artefatos efêmeros implementado (pi-runtime-artifact-audit + --strict + remediação). Evidência parcial: VER-BUD-115 (1ad4eba).",
-      "verification": "VER-BUD-115"
+      "verification": "VER-BUD-117"
     },
     {
       "id": "TASK-BUD-099",
