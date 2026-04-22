@@ -1574,6 +1574,32 @@
           "evidence": "Fica para slice documental dedicado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-110",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice de eliminação de semântica duplicada no task-sync: `colonyPhaseToProjectTaskStatus(...)` em `packages/pi-stack/extensions/colony-pilot-task-sync.ts` agora deriva status via contrato canônico (`colonyPhaseToCanonicalTaskEventType` + `canonicalTaskEventTypeToProjectTaskStatus`), mantendo uma única fonte de verdade para projeção phase/event -> board status. Smoke expandido em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` para validar transições terminais alinhadas ao envelope canônico (`done_verified -> completed`, `recovery -> blocked`) incluindo caso `budget_exceeded`. Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 1 file passed, 6 tests passed. Commit: `ad1fc8f`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Mesma semântica de status é reaproveitada por phase e event, reduzindo divergência entre adapters de ingestão e writer local."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "skipped",
+          "evidence": "Sem alteração documental neste slice."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "skipped",
+          "evidence": "Sem alteração documental neste slice."
+        }
+      ]
     }
   ]
 }
