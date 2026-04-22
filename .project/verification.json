@@ -2271,6 +2271,32 @@
           "evidence": "Novo teste valida supressão em intervalo curto e emissão quando gate muda ou intervalo expira."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-137",
+      "target": "TASK-BUD-106",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice local-first + tail-batch no `session-triage`: default de sessão mudou para `.sandbox/pi-agent/sessions/<workspaceKey>` (global só com `--allow-global-fallback`), parsing agora prioriza cauda por janela (`--tail-lines`, `--window`, `--expand`) e o relatório expõe métricas de truncamento com sugestão explícita de expansão progressiva. Teste: `npm run test:session-triage:delegation` => 3/3 pass, incluindo novo caso cobrindo source local e lineBudget tail-batch.",
+      "criteria_results": [
+        {
+          "criterion": "Por padrão, triage ignora store global e lê apenas `.sandbox/pi-agent/sessions` quando houver contexto isolado ativo.",
+          "status": "passed",
+          "evidence": "`resolveSessionScanConfig` usa local-sandbox por padrão; fallback global é opt-in (`--allow-global-fallback`)."
+        },
+        {
+          "criterion": "Pipeline começa em tail-batch recente com opção de expansão progressiva (`--expand`/`--window`).",
+          "status": "passed",
+          "evidence": "`parseSessionFile(file, lineBudget)` processa apenas cauda; CLI aceita `--tail-lines`, `--window` e `--expand`."
+        },
+        {
+          "criterion": "Saída inclui métrica de custo/contexto estimado e motivo para ampliar janela.",
+          "status": "passed",
+          "evidence": "Relatório inclui `scanWindow` (lineBudget, truncatedSessions, truncatedLinesTotal, suggestedNextWindow) e render human orienta `--window N` quando há truncamento."
+        }
+      ]
     }
   ]
 }

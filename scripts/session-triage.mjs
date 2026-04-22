@@ -30,6 +30,10 @@ function parseArgs(argv) {
     eventsPath: undefined,
     summaryStore: true,
     summaryStorePath: undefined,
+    tailLines: 160,
+    window: 1,
+    expand: false,
+    allowGlobalFallback: false,
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -68,10 +72,30 @@ function parseArgs(argv) {
       out.summaryStore = false;
       continue;
     }
+    if (a === "--tail-lines") {
+      out.tailLines = Number(argv[i + 1] ?? out.tailLines);
+      i++;
+      continue;
+    }
+    if (a === "--window") {
+      out.window = Number(argv[i + 1] ?? out.window);
+      i++;
+      continue;
+    }
+    if (a === "--expand") {
+      out.expand = true;
+      continue;
+    }
+    if (a === "--allow-global-fallback") {
+      out.allowGlobalFallback = true;
+      continue;
+    }
   }
 
   if (!Number.isFinite(out.days) || out.days <= 0) out.days = 1;
   if (!Number.isFinite(out.limit) || out.limit <= 0) out.limit = 8;
+  if (!Number.isFinite(out.tailLines) || out.tailLines <= 0) out.tailLines = 160;
+  if (!Number.isFinite(out.window) || out.window <= 0) out.window = 1;
   return out;
 }
 
@@ -95,6 +119,38 @@ function toSessionWorkspaceKey(absPath) {
     .map((s) => s.replace(/[^A-Za-z0-9._-]/g, "-"))
     .join("-");
   return `--${rest}--`;
+}
+
+function resolveSessionScanConfig(workspace, key, opts) {
+  const localSessionDir = path.join(workspace, ".sandbox", "pi-agent", "sessions", key);
+  const globalSessionDir = path.join(homedir(), ".pi", "agent", "sessions", key);
+  const effectiveWindow = Math.max(1, opts.expand ? Math.max(2, opts.window) : opts.window);
+  const lineBudget = Math.max(1, Math.floor(opts.tailLines)) * effectiveWindow;
+
+  if (existsSync(localSessionDir)) {
+    return {
+      sessionDir: localSessionDir,
+      sessionDirSource: "local-sandbox",
+      lineBudget,
+      effectiveWindow,
+    };
+  }
+
+  if (opts.allowGlobalFallback && existsSync(globalSessionDir)) {
+    return {
+      sessionDir: globalSessionDir,
+      sessionDirSource: "global-fallback",
+      lineBudget,
+      effectiveWindow,
+    };
+  }
+
+  return {
+    sessionDir: localSessionDir,
+    sessionDirSource: "local-sandbox-missing",
+    lineBudget,
+    effectiveWindow,
+  };
 }
 
 function extractText(content) {
@@ -321,10 +377,15 @@ function writeSummaryStore(storePath, entries, retentionDays = 30, maxEntries = 
   writeFileSync(storePath, JSON.stringify(payload, null, 2));
 }
 
-function parseSessionFile(filePath) {
-  const lines = readFileSync(filePath, "utf8")
+function parseSessionFile(filePath, lineBudget) {
+  const allLines = readFileSync(filePath, "utf8")
     .split(/\r?\n/)
     .filter(Boolean);
+
+  const effectiveLineBudget = Number.isFinite(lineBudget) && lineBudget > 0
+    ? Math.max(1, Math.floor(lineBudget))
+    : undefined;
+  const lines = effectiveLineBudget ? allLines.slice(-effectiveLineBudget) : allLines;
 
   const out = {
     file: path.basename(filePath),
@@ -336,6 +397,9 @@ function parseSessionFile(filePath) {
     colonySignals: {},
     toolingGaps: {},
     branchSummaries: [],
+    totalLineCount: allLines.length,
+    scannedLineCount: lines.length,
+    truncatedLineCount: Math.max(0, allLines.length - lines.length),
   };
 
   const signalCount = new Map();
@@ -560,6 +624,9 @@ function renderHuman(report) {
   lines.push("");
   lines.push(`Workspace: ${report.workspace}`);
   lines.push(`Session dir: ${report.sessionDir}`);
+  if (report.sources?.sessionDirSource) {
+    lines.push(`Session source: ${report.sources.sessionDirSource}`);
+  }
   if (report.sources?.canonicalEvents) {
     lines.push(`Canonical events: ${report.sources.canonicalEvents}`);
   }
@@ -567,6 +634,16 @@ function renderHuman(report) {
     lines.push(`Branch-summary store: ${report.sources.branchSummaryStore}`);
   }
   lines.push(`Scanned: ${report.sessions.length} file(s)`);
+  if (report.scanWindow) {
+    lines.push(
+      `Scan mode: ${report.scanWindow.mode} lines<=${report.scanWindow.lineBudget} (window=${report.scanWindow.window}, tailLines=${report.scanWindow.tailLines})`,
+    );
+    if (report.scanWindow.truncatedSessions > 0) {
+      lines.push(
+        `Scan budget hit in ${report.scanWindow.truncatedSessions} session(s) · use --window ${report.scanWindow.suggestedNextWindow} to expand if needed.`,
+      );
+    }
+  }
   lines.push("");
 
   lines.push("## Recent sessions");
@@ -579,6 +656,9 @@ function renderHuman(report) {
         .join(", ");
       lines.push(`- ${s.file}`);
       lines.push(`  - msgs: ${s.messageCount} (user ${s.userMessages}, assistant ${s.assistantMessages})`);
+      if (Number(s.truncatedLineCount) > 0) {
+        lines.push(`  - scan lines: ${s.scannedLineCount}/${s.totalLineCount} (tail-batch)`);
+      }
       const gaps = Object.entries(s.toolingGaps ?? {})
         .map(([k, v]) => `${k}:${v}`)
         .join(", ");
@@ -640,8 +720,9 @@ function renderHuman(report) {
 const opts = parseArgs(process.argv.slice(2));
 const workspace = path.resolve(opts.workspace);
 const key = toSessionWorkspaceKey(workspace);
-const sessionDir = path.join(homedir(), ".pi", "agent", "sessions", key);
 const cutoff = Date.now() - opts.days * 24 * 60 * 60 * 1000;
+const scanConfig = resolveSessionScanConfig(workspace, key, opts);
+const sessionDir = scanConfig.sessionDir;
 const summaryStorePath = opts.summaryStore
   ? path.resolve(opts.summaryStorePath ?? path.join(workspace, ".sandbox", "pi-agent", "triage", "branch-summary-store.json"))
   : null;
@@ -658,7 +739,7 @@ if (existsSync(sessionDir)) {
     .filter((f) => f.mtime >= cutoff)
     .sort((a, b) => b.mtime - a.mtime)
     .slice(0, opts.limit)
-    .map((f) => parseSessionFile(f.path));
+    .map((f) => parseSessionFile(f.path, scanConfig.lineBudget));
 }
 
 if (opts.eventsPath) {
@@ -707,6 +788,8 @@ for (const s of sessions) {
 
 const board = loadBoardPending(workspace);
 const toolingGaps = Object.fromEntries([...toolingGapTotals.entries()].sort((a, b) => a[0].localeCompare(b[0])));
+const truncatedSessions = sessions.filter((s) => Number(s?.truncatedLineCount) > 0).length;
+const truncatedLinesTotal = sessions.reduce((sum, s) => sum + (Number(s?.truncatedLineCount) || 0), 0);
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -716,8 +799,19 @@ const report = {
   sessionDir,
   sources: {
     piSessionJsonl: existsSync(sessionDir),
+    sessionDirSource: scanConfig.sessionDirSource,
     canonicalEvents: opts.eventsPath ? path.resolve(opts.eventsPath) : null,
     branchSummaryStore: summaryStorePath,
+  },
+  scanWindow: {
+    mode: "tail-batch",
+    tailLines: opts.tailLines,
+    window: scanConfig.effectiveWindow,
+    lineBudget: scanConfig.lineBudget,
+    expanded: opts.expand || scanConfig.effectiveWindow > 1,
+    truncatedSessions,
+    truncatedLinesTotal,
+    suggestedNextWindow: scanConfig.effectiveWindow + 1,
   },
   sessions,
   aggregate: {

@@ -2446,7 +2446,7 @@
     {
       "id": "TASK-BUD-106",
       "description": "[P0] Endurecer session-triage para modo local-first e tail-batch: analisar somente sessões do projeto isolado e começar pelo final (janela curta), expandindo para cima apenas sob necessidade explícita.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-020"
       ],
@@ -2460,7 +2460,7 @@
         "Pipeline começa em tail-batch recente (ex.: últimos N registros/mensagens finais) com opção de expansão progressiva (`--expand`/`--window`) em vez de scan completo.",
         "Saída inclui métrica de custo/contexto estimado e motivo quando houver necessidade de ampliar janela."
       ],
-      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput."
+      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137."
     }
   ]
 }
