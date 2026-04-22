@@ -526,6 +526,14 @@ export function evaluateColonyDeliveryEvidence(
 				"`",
 			"i",
 		).test(text);
+	const hasValidationSectionFencedCommand =
+		new RegExp(
+			`(?:^|\\n)\\s*(?:#{1,6}\\s*)?${validationHeadingTextPattern}\\s*(?::|-)?\\s*\\n[\\s\\S]{0,500}?` +
+				"```" +
+				`[\\s\\S]{0,500}?${commandLikePattern.source}[\\s\\S]{0,500}?` +
+				"```",
+			"i",
+		).test(text);
 
 	const evidence: ColonyPilotDeliveryEvidence = {
 		hasWorkspaceReport:
@@ -537,7 +545,9 @@ export function evaluateColonyDeliveryEvidence(
 			),
 		hasValidationCommandLog:
 			hasValidationInlineCommand ||
-			(hasValidationHeading && hasValidationSectionBacktickedCommand),
+			(hasValidationHeading &&
+				(hasValidationSectionBacktickedCommand ||
+					hasValidationSectionFencedCommand)),
 	};
 
 	if (!policy.enabled || phase !== "completed") {

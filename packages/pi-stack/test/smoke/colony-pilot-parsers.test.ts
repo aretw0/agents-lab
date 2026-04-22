@@ -994,6 +994,29 @@ describe("colony-pilot parsers", () => {
 		expect(ev.evidence.hasValidationCommandLog).toBe(true);
 	});
 
+	it("delivery evidence aceita command log em bloco fenced dentro da seção", () => {
+		const cfg = resolveColonyPilotDeliveryPolicy({
+			enabled: true,
+			requireFileInventory: true,
+			requireValidationCommandLog: true,
+		});
+
+		const report = [
+			"### 🧪 Workspace",
+			"Mode: isolated git worktree",
+			"**Tasks:** 12/12 done",
+			"final file inventory: files changed: packages/pi-stack/extensions/colony-pilot.ts",
+			"Validation command log:",
+			"```bash",
+			"/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+			"```",
+		].join("\n");
+
+		const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
+		expect(ev.ok).toBe(true);
+		expect(ev.evidence.hasValidationCommandLog).toBe(true);
+	});
+
 	it("delivery evidence não aceita heading com comando sem backticks", () => {
 		const cfg = resolveColonyPilotDeliveryPolicy({
 			enabled: true,

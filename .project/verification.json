@@ -2531,6 +2531,32 @@
           "evidence": "Runbook/documentação ainda pendentes para fechamento final da task."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-147",
+      "target": "TASK-BUD-107",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Hardening final do parser de delivery evidence: seção de validação agora aceita comandos em backticks inline/bullets e também bloco fenced (```...```) sob heading válido, mantendo bloqueio para menções fora da seção e para comandos sem backticks. Cobertura smoke atualizada com caso válido fenced e casos inválidos já existentes. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 70/70.",
+      "criteria_results": [
+        {
+          "criterion": "Final report de colônia sempre inclui seção de validação com comando literal em backticks quando houver testes executados.",
+          "status": "passed",
+          "evidence": "Parser exige contexto de seção de validação + comando em backticks (inline/bullet/fenced)."
+        },
+        {
+          "criterion": "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
+          "status": "passed",
+          "evidence": "Cenários válidos com variação de formatação (inclusive fenced block) passam no gate de evidence."
+        },
+        {
+          "criterion": "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção.",
+          "status": "passed",
+          "evidence": "Suite inclui casos válidos e inválidos; erro mantém guidance explícita de seção/backticks."
+        }
+      ]
     }
   ]
 }
