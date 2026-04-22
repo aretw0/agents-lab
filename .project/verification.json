@@ -1730,6 +1730,32 @@
           "evidence": "Remediation commands gerados com `git rm --cached` por arquivo."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-116",
+      "target": "TASK-BUD-099",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Runbook de remediação de artefatos já commitados foi materializado com trilha pragmática e segura: (1) `docs/guides/project-canonical-pipeline.md` ganhou seção dedicada com Cenário A (untrack-first com `git rm --cached`, preservando working copy) e Cenário B (rewrite histórico apenas com confirmação explícita + rotação prévia); (2) `docs/guides/monitor-overrides.md` recebeu checklist de higiene/opt-in alinhado ao curated-default; (3) checkpoint operacional registrado em `docs/research/context-checkpoint-2026-04-22-runtime-artifact-remediation.md`. Validação operacional executada: `node scripts/pi-runtime-artifact-audit.mjs --strict` => clean.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Runbook diferencia remediação leve (git rm --cached + ignore) de remediação pesada (rewrite de histórico).",
+          "status": "passed",
+          "evidence": "Seção de remediação no project-canonical-pipeline define Cenário A e Cenário B com gatilhos claros."
+        },
+        {
+          "criterion": "Fluxo inclui checklist de segurança para não perder alterações não commitadas.",
+          "status": "passed",
+          "evidence": "Primeiro passo do runbook exige `git status --short` e remediação padrão via untrack sem apagar cópia local."
+        },
+        {
+          "criterion": "Há orientação de opt-in para usuários que queiram versionar extras por decisão consciente.",
+          "status": "passed",
+          "evidence": "Monitor-overrides reforça política curated-default com extras apenas via opt-in explícito."
+        }
+      ]
     }
   ]
 }

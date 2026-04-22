@@ -2278,7 +2278,7 @@
     {
       "id": "TASK-BUD-099",
       "description": "[P0] Publicar runbook de remediação de artefatos já commitados (pi): preservar progresso local, de-indexar paths indevidos e orientar purge seletivo/rotação em caso sensível.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-098"
       ],
@@ -2295,7 +2295,8 @@
         "Fluxo inclui checklist de segurança para não perder alterações não commitadas.",
         "Há orientação de opt-in para usuários que queiram versionar extras por decisão consciente."
       ],
-      "notes": "Pragmatismo: resolver passado sem quebrar andamento atual."
+      "notes": "Pragmatismo: resolver passado sem quebrar andamento atual.\n[2026-04-22T12:11:55.146Z] Runbook de remediação leve/pesada publicado com foco em preservar working copy e rewrite apenas por confirmação explícita. Evidência parcial: VER-BUD-116 (7604add).",
+      "verification": "VER-BUD-116"
     },
     {
       "id": "TASK-BUD-100",
