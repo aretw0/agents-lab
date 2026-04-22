@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-22T22:49:00.000Z",
-  "context": "Deflação do colony-pilot segue firme em slices maiores: após delivery e budget, o domínio de baseline/settings também foi extraído para módulo próprio. Entry point permanece estável como orquestrador com wrappers públicos.",
+  "timestamp": "2026-04-22T23:00:00.000Z",
+  "context": "Modo 'domar colony-pilot' em execução contínua. Slice 4 entregue: model-policy extraído para módulo dedicado, reduzindo `colony-pilot.ts` de 3133 para 2529 linhas sem quebrar contrato público. Foco fábrica preservado.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -8,38 +8,39 @@
   ],
   "blockers": [],
   "next_actions": [
-    "TASK-BUD-114: implementar allowlist efetiva (promoted/skipped a partir de diff + scope policy).",
-    "TASK-BUD-116: próximo corte em command-surfaces/retention wiring mantendo wrappers estáveis.",
-    "Manter TASK-BUD-112 em backlog e TASK-BUD-115 planned, sem desviar foco de fábrica."
+    "TASK-BUD-116: extrair command-surface/status helpers ou retention wiring para reduzir mais acoplamento do entrypoint.",
+    "TASK-BUD-114: implementar allowlist efetiva promoted/skipped via diff + scope policy.",
+    "Manter TASK-BUD-112 em backlog e TASK-BUD-115 planned (sem desviar da trilha de fábrica)."
   ],
   "open_questions": [
-    "Qual domínio rende maior queda de complexidade no próximo corte: command-surfaces ou retention wiring?"
+    "Próximo corte de maior ROI: command-surface (UX) vs retention wiring (artifacts/candidate trail)?"
   ],
   "key_decisions_pending": [
-    "Default de automação allowlist (opt-in inicial vs default-on auditado)."
+    "Quando virar default a allowlist automática do promotion flow (opt-in inicial vs default-on auditado)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
     "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
     "packages/pi-stack/extensions/colony-pilot-budget-policy.ts",
     "packages/pi-stack/extensions/colony-pilot-baseline.ts",
+    "packages/pi-stack/extensions/colony-pilot-model-policy.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:49:00.000Z",
+      "atIso": "2026-04-22T23:00:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 24,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; continue larger bounded factory slices."
+      "recommendation": "Context healthy; continue larger bounded factory slices while finishing colony-pilot deflation."
     }
   ]
 }

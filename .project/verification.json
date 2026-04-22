@@ -3119,6 +3119,32 @@
           "evidence": "Teste smoke focado executado após extração: 72/72."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-170",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice 4 de deflação do colony-pilot concluído com extração de model-policy para `packages/pi-stack/extensions/colony-pilot-model-policy.ts` (resolver, evaluator, formatter e profiles). `colony-pilot.ts` manteve wrappers/re-exports e reduziu de 3133 para 2529 linhas. Regressão validada com `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Domínios delivery, budget, baseline e model-policy extraídos; entrypoint delega para módulos."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Wrappers no entrypoint preservam contrato importado por smoke tests."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "Suite smoke de parsers executada após extração com 72/72."
+        }
+      ]
     }
   ]
 }
