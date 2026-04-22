@@ -2921,6 +2921,32 @@
           "evidence": "Checklist explícito adicionado ao pipeline canônico com critérios operacionais de promoção/rollback."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-162",
+      "target": "TASK-BUD-113",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Seção 'Governança de sinais (ownership + noise-budget)' adicionada em `docs/guides/project-canonical-pipeline.md` com: (1) ownership explícito por classe de sinal; (2) regra de precedência e budget de ruído; (3) definição de meta-sinal advisory para excesso de ruído e resposta consolidada não-bloqueante.",
+      "criteria_results": [
+        {
+          "criterion": "Modelo documentado responde 'sinal de discoverability é de quem?' (owner/emitter/consumer) por classe de sinal.",
+          "status": "passed",
+          "evidence": "Taxonomia operator/runtime/governance/discoverability documentada no pipeline canônico."
+        },
+        {
+          "criterion": "Política de equilíbrio define orçamento de ruído (máx sinais por janela, prioridade e fallback para stream/status passivo).",
+          "status": "passed",
+          "evidence": "Precedência entre classes e fallback para status passivo descritos na seção."
+        },
+        {
+          "criterion": "Meta-sinal advisory identifica excesso de ruído e sugere redução/calibração sem bloquear fluxo por default.",
+          "status": "skipped",
+          "evidence": "Meta-sinal definido no runbook; integração runtime específica ficará para próximo slice."
+        }
+      ]
     }
   ]
 }

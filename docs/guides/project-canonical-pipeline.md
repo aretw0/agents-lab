@@ -135,6 +135,26 @@ Regras operacionais:
 - para scouts (`scout burst`), usar bloat-smell para mapear hotspots de split/síntese, mas registrar recomendação no board antes de escalar enforcement;
 - quando disparar smell recorrente, converter em micro-slice explícito (split de tarefa/arquivo) em vez de tratar como ruído transitório.
 
+### Governança de sinais (ownership + noise-budget)
+
+Objetivo: manter discoverability útil sem sobrecarregar o operador com sinais concorrentes.
+
+Ownership mínimo por classe:
+- **operator**: sinais de ação humana imediata (ex.: `reload-required`, `handoff-refresh-required`).
+- **runtime**: sinais técnicos de execução (ex.: bloat, budget, lane status).
+- **governance**: sinais de gate/promoção canônica (verification, readiness, preflight).
+- **discoverability**: dicas de uso (help/list/clear), sempre subordinadas ao contexto operacional ativo.
+
+Regras de noise-budget (advisory):
+- priorizar stream/status passivo; evitar notificação ativa para sinais de mesma classe na mesma janela curta;
+- quando houver conflito, precedência: `operator` > `governance` > `runtime` > `discoverability`;
+- limitar discoverability a momentos de intenção explícita (erro de comando, `queued>0`, primeira exposição de feature), sem repetição contínua.
+
+Meta-sinal de ruído excessivo (advisory):
+- detectar concentração de sinais de baixa prioridade em sequência curta e recomendar simplificação;
+- ação padrão: reduzir superfície para status passivo + 1 recomendação consolidada;
+- manter modo não-bloqueante por default para não travar throughput de fábrica.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).

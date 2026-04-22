@@ -2638,7 +2638,7 @@
         "Política de equilíbrio define orçamento de ruído (máx sinais por janela, prioridade e fallback para stream/status passivo).",
         "Meta-sinal advisory identifica excesso de ruído e sugere redução/calibração sem bloquear fluxo por default."
       ],
-      "notes": "Backlog solicitado pelo usuário (2026-04-22): tratar discoverability como sinal governável e incluir sinal de 'ruído demais' para manter equilíbrio e evitar atender todos sinais sem prioridade.\n[2026-04-22T00:00:00Z] Início de foco fábrica pós-reload: TASK-BUD-113 promovida para in-progress para atacar equilíbrio sinal/ruído em micro-slices, mantendo abordagem native-first e sem expansão de superfície desnecessária."
+      "notes": "Backlog solicitado pelo usuário (2026-04-22): tratar discoverability como sinal governável e incluir sinal de 'ruído demais' para manter equilíbrio e evitar atender todos sinais sem prioridade.\n[2026-04-22T00:00:00Z] Início de foco fábrica pós-reload: TASK-BUD-113 promovida para in-progress para atacar equilíbrio sinal/ruído em micro-slices, mantendo abordagem native-first e sem expansão de superfície desnecessária.\n[2026-04-22T00:00:00Z] Micro-slice de governança: pipeline canônico recebeu seção de ownership de sinais (operator/runtime/governance/discoverability), precedência de noise-budget e definição de meta-sinal advisory para ruído excessivo. Evidência: VER-BUD-162."
     }
   ]
 }
