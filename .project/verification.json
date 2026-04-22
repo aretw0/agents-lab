@@ -2505,6 +2505,32 @@
           "evidence": "Suite cobre casos válidos e inválidos (sem seção, sem backticks, fora de seção) e mantém guidance acionável."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-146",
+      "target": "TASK-BUD-108",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "`context-watchdog` ganhou escalonamento de cadência: segundo `warn` consecutivo promove ação para `write-checkpoint`, persiste handoff via gate de cooldown e força anúncio do evento de escalonamento. Cobertura smoke adicionada para `applyWarnCadenceEscalation` e regressão do módulo. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` => 14/14.",
+      "criteria_results": [
+        {
+          "criterion": "Agente recebe sinais de contexto (warn/checkpoint/compact) via stream/status passivo, sem depender de chamada explícita de tool para steering rotineiro.",
+          "status": "passed",
+          "evidence": "Cadência de warn agora dirige ação automática de checkpoint sem necessidade de tool-call explícito."
+        },
+        {
+          "criterion": "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
+          "status": "passed",
+          "evidence": "Segundo warn consecutivo escalona para `write-checkpoint` e grava handoff dentro do cooldown gate."
+        },
+        {
+          "criterion": "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado.",
+          "status": "skipped",
+          "evidence": "Runbook/documentação ainda pendentes para fechamento final da task."
+        }
+      ]
     }
   ]
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
+	applyWarnCadenceEscalation,
 	buildAutoCompactDiagnostics,
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
@@ -77,6 +78,25 @@ describe("context-watchdog", () => {
 		expect(evaluateContextWatch(60, thresholds).level).toBe("warn");
 		expect(evaluateContextWatch(68, thresholds).level).toBe("checkpoint");
 		expect(evaluateContextWatch(72, thresholds).level).toBe("compact");
+	});
+
+	it("escalates second warn to checkpoint action for controlled handoff", () => {
+		const warn = evaluateContextWatch(60, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
+		expect(warn.level).toBe("warn");
+		expect(warn.action).toBe("micro-slice-only");
+
+		const firstWarn = applyWarnCadenceEscalation(warn, 1);
+		expect(firstWarn.action).toBe("micro-slice-only");
+		expect(firstWarn.recommendation).toContain("micro-slices");
+
+		const secondWarn = applyWarnCadenceEscalation(warn, 2);
+		expect(secondWarn.action).toBe("write-checkpoint");
+		expect(secondWarn.recommendation).toContain("Second warn detected");
+		expect(secondWarn.severity).toBe("warning");
+
+		const checkpoint = evaluateContextWatch(68, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
+		expect(applyWarnCadenceEscalation(checkpoint, 2).action).toBe("write-checkpoint");
+		expect(applyWarnCadenceEscalation(checkpoint, 2).level).toBe("checkpoint");
 	});
 
 	it("announces on upward transitions and compact/checkpoint cooldown reminders", () => {

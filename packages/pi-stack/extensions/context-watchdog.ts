@@ -140,6 +140,20 @@ export type ContextWatchOperatorSignal = {
 	reasons: string[];
 };
 
+export function applyWarnCadenceEscalation(
+	assessment: ContextWatchAssessment,
+	warnStreak: number,
+): ContextWatchAssessment {
+	if (assessment.level !== "warn" || warnStreak < 2) return assessment;
+	return {
+		...assessment,
+		action: "write-checkpoint",
+		recommendation:
+			"Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume.",
+		severity: "warning",
+	};
+}
+
 export function resolveContextWatchOperatorSignal(input: {
 	reloadRequired?: boolean;
 	handoffManualRefreshRequired?: boolean;
@@ -221,6 +235,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let autoCompactInFlight = false;
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
 	let autoCompactRetryDueAt = 0;
+	let consecutiveWarnCount = 0;
 
 	const clearAutoCompactRetryTimer = () => {
 		if (!autoCompactRetryTimer) return;
@@ -250,7 +265,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			return;
 		}
 
-		const assessment = buildAssessment(ctx, config, thresholdOverrides);
+		const baseAssessment = buildAssessment(ctx, config, thresholdOverrides);
+		if (baseAssessment.level === "warn") {
+			consecutiveWarnCount += 1;
+		} else {
+			consecutiveWarnCount = 0;
+		}
+		const assessment = applyWarnCadenceEscalation(baseAssessment, consecutiveWarnCount);
 		lastAssessment = assessment;
 		const now = Date.now();
 		let handoffPath: string | undefined;
@@ -259,7 +280,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			ctx.ui.setStatus?.("context-watch", formatContextWatchStatus(assessment));
 		}
 
-		if (shouldAutoCheckpoint(assessment, config, now, lastAutoCheckpointAt)) {
+		const shouldCheckpointFromWarnCadence =
+			assessment.level === "warn" &&
+			assessment.action === "write-checkpoint" &&
+			(now - lastAutoCheckpointAt) >= config.cooldownMs;
+		if (
+			shouldAutoCheckpoint(assessment, config, now, lastAutoCheckpointAt) ||
+			shouldCheckpointFromWarnCadence
+		) {
 			handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
 			lastAutoCheckpointAt = now;
 		}
@@ -316,8 +344,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			elapsed,
 			config.cooldownMs,
 		);
+		const forceWarnCadenceAnnouncement =
+			assessment.level === "warn" &&
+			assessment.action === "write-checkpoint" &&
+			consecutiveWarnCount === 2;
 		lastAnnouncedLevel = assessment.level;
-		if (!announce) return;
+		if (!announce && !forceWarnCadenceAnnouncement) return;
 		lastAnnouncedAt = now;
 
 		const persistedPath = handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason);
@@ -405,6 +437,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAutoResumeAt = 0;
 		autoCompactInFlight = false;
 		clearAutoCompactRetryTimer();
+		consecutiveWarnCount = 0;
 		run(ctx, "session_start");
 	});
 
@@ -481,6 +514,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAutoResumeAt = 0;
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
+				consecutiveWarnCount = 0;
 				ctx.ui.notify("context-watch: state reset", "info");
 				return;
 			}
