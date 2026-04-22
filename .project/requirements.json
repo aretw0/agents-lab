@@ -776,6 +776,22 @@
         "Recomendação acionável sugere split/micro-slices para código e síntese/estruturação para texto, com opção de backlog quando indivisível.",
         "Sinal aparece no stream/status com ruído controlado e permanece sem bloqueio hard por padrão."
       ]
+    },
+    {
+      "id": "REQ-BUD-055",
+      "description": "A evolução da fábrica interna deve produzir capacidades agnósticas e reaproveitáveis na pi-stack, evitando acoplamento a rituais específicos do laboratório para que usuários externos capturem o mesmo potencial com seus próprios workflows/backends.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-111"
+      ],
+      "acceptance_criteria": [
+        "Cada avanço de governança/fábrica explicita fronteira entre lógica canônica reutilizável e convenções locais de operação.",
+        "Runbooks/skills priorizam contrato de primitivas + adapters em vez de dependências hard de um único board/ambiente.",
+        "Existe trilha de backlog dedicada a transformar hardening interno em capabilities portáveis para usuários da pi-stack."
+      ]
     }
   ]
 }

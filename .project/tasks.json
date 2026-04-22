@@ -2555,6 +2555,33 @@
       ],
       "notes": "Criada por sinal explícito de risco de bloat em arquivo único durante sessão (2026-04-22): manter saúde de manutenção e evitar crescimento monolítico do core.\n[2026-04-22T00:00:00Z] Micro-slice inicial de extração: utilitários/config de bloat-smell foram movidos para `packages/pi-stack/extensions/guardrails-core-bloat.ts`; `guardrails-core.ts` mantém wiring e re-export para contrato estável. Smoke focada verde (19/19). Evidência: VER-BUD-154.\n[2026-04-22T00:00:00Z] Micro-slice lane-queue: extração do domínio de fila longa para `packages/pi-stack/extensions/guardrails-core-lane-queue.ts` (config, auto-drain gates, queue storage/helpers), mantendo `guardrails-core.ts` como orquestrador e re-export para contrato estável. Smoke focada verde (19/19). Evidência: VER-BUD-155.\n[2026-04-22T00:00:00Z] Fronteiras modulares documentadas em `docs/guides/agent-driver-charter.md` com regra anti-reinflação do orquestrador; pronto para fechamento canônico do TASK-BUD-110. Evidência: VER-BUD-156.",
       "verification": "VER-BUD-156"
+    },
+    {
+      "id": "TASK-BUD-111",
+      "description": "[P1] Converter hardening da fábrica interna em blueprint agnóstico da pi-stack (primitivas + adapters), reduzindo dependência de convenções locais do laboratório.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-096"
+      ],
+      "references": [
+        "REQ-BUD-007",
+        "REQ-BUD-009",
+        "REQ-BUD-055",
+        "DEC-BUD-026",
+        "DEC-BUD-035"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/agent-driver-charter.md",
+        "packages/pi-stack/extensions",
+        "packages/lab-skills/skills/session-triage/SKILL.md"
+      ],
+      "acceptance_criteria": [
+        "Blueprint distingue explicitamente o que é canônico/portável (primitivas, gates, evidência) do que é convenção local do agents-lab.",
+        "Runbooks principais incluem trilha adapter-first para usuários externos sem perda de governança (no-auto-close, verification gate, budget discipline).",
+        "Existe checklist de release/dogfooding para validar que melhorias de fábrica interna chegam como potencial reutilizável no pacote pi-stack."
+      ],
+      "notes": "Backlog solicitado pelo usuário (2026-04-22): manter foco na nossa fábrica sem perder objetivo de agnosticismo para entregar potencial real a quem usar a pi-stack fora do laboratório."
     }
   ]
 }
