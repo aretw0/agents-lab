@@ -760,6 +760,22 @@
         "Aviso inclui ação recomendada: quebrar em micro-slices ou registrar backlog se não for possível dividir.",
         "Comportamento default é advisory (sem bloqueio hard), mantendo fluxo pragmático."
       ]
+    },
+    {
+      "id": "REQ-BUD-054",
+      "description": "A stack deve detectar e sinalizar badsmells de bloat tanto em código quanto em texto (docs/mensagens), priorizando advisory signal-first para manter clareza, foco e alinhamento narrativo sem bloquear fluxo por default.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-109"
+      ],
+      "acceptance_criteria": [
+        "Sinal advisory identifica mudanças amplas de código (ex.: arquivo único com alto volume/hunks) e também excesso textual (seções/respostas extensas, repetição, baixa densidade informacional).",
+        "Recomendação acionável sugere split/micro-slices para código e síntese/estruturação para texto, com opção de backlog quando indivisível.",
+        "Sinal aparece no stream/status com ruído controlado e permanece sem bloqueio hard por padrão."
+      ]
     }
   ]
 }

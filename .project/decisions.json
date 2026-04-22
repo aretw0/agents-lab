@@ -303,6 +303,13 @@
       "rationale": "Evita retrabalho quando colônias concluem execução técnica mas falham no gate de delivery evidence, preservando throughput via micro-slices diretos no main.",
       "context": "Feedback explícito do usuário para não depender de colônia enquanto houver risco de perda prática de trabalho por cleanup + candidate-only sem promoção determinística.",
       "task": "TASK-BUD-107"
+    },
+    {
+      "id": "DEC-BUD-043",
+      "status": "decided",
+      "decision": "Tratar bloat (código e texto) como smell operacional de qualidade/comunicação: emitir sinal advisory no runtime e orientar enxugamento/split, preservando modo não-bloqueante por default.",
+      "rationale": "Sustenta qualidade contínua do produto e da narrativa (incluindo materiais de documentação e posicionamento), reduzindo gordura que degrada manutenção, entendimento e venda de valor.",
+      "context": "Diretriz explícita do usuário para manter discurso alinhado e superfícies sempre saudáveis, com possibilidade futura de scouts marcarem oportunidades via sinais."
     }
   ]
 }
