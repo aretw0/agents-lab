@@ -623,6 +623,57 @@
         "Usuário sempre vê como interromper, pausar ou voltar para modo simples.",
         "Runbook de curadoria first-party prioriza remoção de overlap e redução de ruído antes de adicionar novas superfícies."
       ]
+    },
+    {
+      "id": "REQ-BUD-046",
+      "description": "A superfície padrão distribuída para usuários da pi-stack deve conter apenas capacidades curadas/validadas no ambiente isolado do agents-lab; capacidades não curadas ficam fora do default.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-091",
+        "TASK-BUD-092"
+      ],
+      "acceptance_criteria": [
+        "Existe lista canônica de capacidades/pacotes permitidos no default da distribuição.",
+        "Release baseline falha quando detectar capability ativa fora da lista curada.",
+        "Usuário ainda pode habilitar extras por opt-in explícito fora da baseline oficial."
+      ]
+    },
+    {
+      "id": "REQ-BUD-047",
+      "description": "O controle de drift entre ambiente isolado (curadoria) e superfície user-like deve ser auditado continuamente e bloquear promoção quando houver funcionalidades não maturadas no default.",
+      "type": "non-functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-092",
+        "TASK-BUD-093"
+      ],
+      "acceptance_criteria": [
+        "Paridade de superfície roda em gate reprodutível (CI/local) com saída acionável.",
+        "Diferenças são classificadas em: curada, experimental opt-in, não permitida.",
+        "Promoção da stack oficial exige relatório limpo ou exceção explícita auditada."
+      ]
+    },
+    {
+      "id": "REQ-BUD-048",
+      "description": "A política de distribuição deve comunicar claramente o que é oficial da curadoria e o que é extensão opcional do usuário, evitando discoverability enganosa no hatch.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-088",
+        "TASK-BUD-093"
+      ],
+      "acceptance_criteria": [
+        "Hatch/guia inicial diferencia explicitamente baseline curada vs extras opt-in.",
+        "Sugestões automáticas não recomendam capability fora da baseline oficial por padrão.",
+        "Runbook de suporte orienta como habilitar extras sem confundir com a oferta oficial."
+      ]
     }
   ]
 }

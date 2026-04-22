@@ -2088,6 +2088,75 @@
         "Runbook explicita quando sugerir swarm, quando sugerir delegação e quando ficar no modo simples."
       ],
       "notes": "Pragmatismo: otimizar legibilidade e confiança antes de ampliar superfície."
+    },
+    {
+      "id": "TASK-BUD-091",
+      "description": "[P0] Implementar gate de baseline curada na distribuição da pi-stack: impedir que defaults publiquem capacidades não maturadas no ambiente isolado.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-087"
+      ],
+      "references": [
+        "REQ-BUD-046",
+        "DEC-BUD-037"
+      ],
+      "files": [
+        "packages/pi-stack/install.mjs",
+        "packages/pi-stack/package-list.mjs",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "Existe allowlist canônica de pacotes/capacidades oficiais da baseline.",
+        "Installer/baseline aplica apenas superfície oficial por padrão.",
+        "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado."
+      ],
+      "notes": "Direção: coesão first-party + pragmatismo de distribuição."
+    },
+    {
+      "id": "TASK-BUD-092",
+      "description": "[P0] Criar hard gate de paridade curatorial (isolado vs user-like) para bloquear promoção da stack quando houver superfície default não curada.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-091"
+      ],
+      "references": [
+        "REQ-BUD-046",
+        "REQ-BUD-047"
+      ],
+      "files": [
+        "scripts/pi-parity.mjs",
+        "package.json",
+        "docs/guides/consumption-visibility-surfaces.md"
+      ],
+      "acceptance_criteria": [
+        "Comando de parity classifica diferenças em oficial/opt-in/não permitida.",
+        "CI/local falha quando detectar item não permitido na baseline oficial.",
+        "Relatório aponta ação corretiva: curar, mover para opt-in, ou remover do default."
+      ],
+      "notes": "Reforça disciplina de release: nada default sem maturação na curadoria."
+    },
+    {
+      "id": "TASK-BUD-093",
+      "description": "[P1] Ajustar discoverability/hatch para comunicar baseline oficial vs extras opt-in sem ruído e sem recomendação prematura de capacidades avançadas.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-088",
+        "TASK-BUD-092"
+      ],
+      "references": [
+        "REQ-BUD-048"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot-hatch.ts",
+        "docs/guides/recommended-pi-stack.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Hatch simple-first mostra apenas capacidades oficiais da baseline.",
+        "Extras opt-in aparecem em seção separada com linguagem explícita de experimental/opcional.",
+        "Sem CTA de swarm/delegação complexa no primeiro contato sem sinal de escala."
+      ],
+      "notes": "Complementa UX progressiva com política de curadoria enxuta."
     }
   ]
 }

@@ -257,6 +257,14 @@
       "rationale": "Evitar assustar usuários com swarm/delegação complexa no primeiro contato, mantendo confiança, interruptibilidade e eficiência de contexto em long runs.",
       "context": "Diretriz do usuário para lapidar UX da curadoria com pragmatismo, reduzir gordura e melhorar discoverability sem sacrificar autonomia.",
       "task": "TASK-BUD-088"
+    },
+    {
+      "id": "DEC-BUD-037",
+      "status": "decided",
+      "decision": "Congelar distribuição padrão da pi-stack em baseline curada: tudo que não estiver maturado no ambiente isolado fica fora do default e entra apenas por opt-in explícito.",
+      "rationale": "Reduzir gordura, evitar surpresa de comportamento em usuários e preservar confiança/estabilidade da fábrica autônoma.",
+      "context": "Diretriz do usuário para parar de liberar capacidades não curadas e manter coesão first-party com pragmatismo.",
+      "task": "TASK-BUD-091"
     }
   ]
 }
