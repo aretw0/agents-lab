@@ -135,6 +135,11 @@ import {
 	resolveModelPolicyProfile as resolveModelPolicyProfileImpl,
 } from "./colony-pilot-model-policy";
 import {
+	formatToolJsonOutput as formatToolJsonOutputImpl,
+	resolveColonyPilotCandidateRetentionConfig as resolveColonyPilotCandidateRetentionConfigImpl,
+	resolveColonyPilotOutputPolicy as resolveColonyPilotOutputPolicyImpl,
+} from "./colony-pilot-output-policy";
+import {
 	type QuotaVisibilityBudgetSettings,
 	parseColonyPilotSettings as parseColonyPilotSettingsImpl,
 	parseQuotaVisibilityBudgetSettings as parseQuotaVisibilityBudgetSettingsImpl,
@@ -224,23 +229,11 @@ export interface ColonyPilotOutputPolicyConfig {
 	maxInlineJsonChars: number;
 }
 
-const DEFAULT_OUTPUT_POLICY: ColonyPilotOutputPolicyConfig = {
-	compactLargeJson: true,
-	maxInlineJsonChars: 1800,
-};
-
 export interface ColonyPilotCandidateRetentionConfig {
 	enabled: boolean;
 	maxEntries: number;
 	maxAgeDays: number;
 }
-
-const DEFAULT_CANDIDATE_RETENTION_CONFIG: ColonyPilotCandidateRetentionConfig =
-	{
-		enabled: true,
-		maxEntries: 40,
-		maxAgeDays: 14,
-	};
 
 export interface AntColonyToolInput {
 	goal: string;
@@ -621,35 +614,13 @@ function parseQuotaVisibilityBudgetSettings(
 export function resolveColonyPilotOutputPolicy(
 	raw?: Partial<ColonyPilotOutputPolicyConfig>,
 ): ColonyPilotOutputPolicyConfig {
-	const maxInline =
-		typeof raw?.maxInlineJsonChars === "number" &&
-		Number.isFinite(raw.maxInlineJsonChars)
-			? Math.floor(raw.maxInlineJsonChars)
-			: DEFAULT_OUTPUT_POLICY.maxInlineJsonChars;
-
-	return {
-		compactLargeJson: raw?.compactLargeJson !== false,
-		maxInlineJsonChars: Math.max(400, Math.min(20_000, maxInline)),
-	};
+	return resolveColonyPilotOutputPolicyImpl(raw);
 }
 
 export function resolveColonyPilotCandidateRetentionConfig(
 	raw?: Partial<ColonyPilotCandidateRetentionConfig>,
 ): ColonyPilotCandidateRetentionConfig {
-	const maxEntriesRaw =
-		typeof raw?.maxEntries === "number" && Number.isFinite(raw.maxEntries)
-			? Math.floor(raw.maxEntries)
-			: DEFAULT_CANDIDATE_RETENTION_CONFIG.maxEntries;
-	const maxAgeDaysRaw =
-		typeof raw?.maxAgeDays === "number" && Number.isFinite(raw.maxAgeDays)
-			? Math.floor(raw.maxAgeDays)
-			: DEFAULT_CANDIDATE_RETENTION_CONFIG.maxAgeDays;
-
-	return {
-		enabled: raw?.enabled !== false,
-		maxEntries: Math.max(1, Math.min(500, maxEntriesRaw)),
-		maxAgeDays: Math.max(1, Math.min(365, maxAgeDaysRaw)),
-	};
+	return resolveColonyPilotCandidateRetentionConfigImpl(raw);
 }
 export type BaselineProfile = "default" | "phase2";
 export type ModelPolicyProfile =
@@ -756,20 +727,7 @@ export function formatToolJsonOutput(
 	data: unknown,
 	policy: ColonyPilotOutputPolicyConfig,
 ): string {
-	const pretty = JSON.stringify(data, null, 2);
-	if (!policy.compactLargeJson || pretty.length <= policy.maxInlineJsonChars) {
-		return pretty;
-	}
-
-	const maxPreview = Math.max(200, policy.maxInlineJsonChars - 120);
-	const preview = pretty.slice(0, maxPreview).trimEnd();
-	return [
-		`${label}: output compactado (${pretty.length} chars > ${policy.maxInlineJsonChars})`,
-		"preview:",
-		preview,
-		"...",
-		"(payload completo disponível em details)",
-	].join("\n");
+	return formatToolJsonOutputImpl(label, data, policy);
 }
 
 function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {

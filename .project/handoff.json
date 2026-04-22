@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-22T23:18:00.000Z",
-  "context": "Deflação do colony-pilot continua em micro-slices sob warn. Slice 7 extraiu parse/settings helpers para módulo dedicado (`colony-pilot-settings.ts`) e manteve entrypoint estável com wrappers.",
+  "timestamp": "2026-04-22T23:25:00.000Z",
+  "context": "Deflação do colony-pilot avançou em micro-slice 8 com extração de output/candidate-retention helpers para módulo dedicado; entrypoint caiu para 2277 linhas mantendo wrappers estáveis e smoke verde.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -10,29 +10,29 @@
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Manter micro-slices até checkpoint/compact.",
-    "TASK-BUD-116: próximo corte pequeno em retention/provider-budget formatting helpers.",
+    "Manter micro-slices até checkpoint/compact (context-watch em 66%).",
+    "TASK-BUD-116: próximo corte pequeno em helper de provider-budget formatting ou retention wiring residual.",
     "Após estabilizar deflação, retomar TASK-BUD-114 para allowlist efetiva promoted/skipped."
   ],
   "open_questions": [
-    "Próximo corte de menor risco: helper de provider-budget formatting ou bloco de retention wiring?"
+    "Vale extrair `formatProviderBudgetStatusLine` + snapshot helpers como próximo micro-corte ou partir para retention wiring diretamente?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
-    "packages/pi-stack/extensions/colony-pilot-settings.ts",
+    "packages/pi-stack/extensions/colony-pilot-output-policy.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T23:18:00.000Z",
+      "atIso": "2026-04-22T23:25:00.000Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 62,
+      "percent": 66,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
