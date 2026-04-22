@@ -2401,6 +2401,32 @@
           "evidence": "Suite inclui casos válidos existentes e novo caso inválido fora da seção de validação."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-142",
+      "target": "TASK-BUD-107",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Runbook `docs/guides/unattended-swarm-execution-plan.md` atualizado com política interim subagent-first (DEC-BUD-042), loop contínuo com checkpoint em contexto alto, e template de `Validation command log` em backticks para reduzir drift de formatação no COMPLETE.",
+      "criteria_results": [
+        {
+          "criterion": "Final report de colônia sempre inclui seção de validação com comando literal em backticks quando houver testes executados.",
+          "status": "passed",
+          "evidence": "Template determinístico atualizado com exemplos em backticks na seção `Validation command log`."
+        },
+        {
+          "criterion": "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
+          "status": "skipped",
+          "evidence": "Documento/runbook atualizado; validação end-to-end em execução nos próximos slices."
+        },
+        {
+          "criterion": "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção.",
+          "status": "skipped",
+          "evidence": "Nesta fatia foi apenas documentação operacional; cobertura de parser está em VER-BUD-141."
+        }
+      ]
     }
   ]
 }

@@ -2481,7 +2481,7 @@
         "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
         "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção."
       ],
-      "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente.\n[2026-04-22T00:00:00Z] Micro-slice inicial de hardening: delivery evidence não considera mais comando isolado fora de seção de validação como prova de validation log, reduzindo falso-positivo de COMPLETE. Cobertura smoke adicionada para caso inválido e regressão. Evidência: VER-BUD-141."
+      "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente.\n[2026-04-22T00:00:00Z] Micro-slice inicial de hardening: delivery evidence não considera mais comando isolado fora de seção de validação como prova de validation log, reduzindo falso-positivo de COMPLETE. Cobertura smoke adicionada para caso inválido e regressão. Evidência: VER-BUD-141.\n[2026-04-22T00:00:00Z] Runbook atualizado para modo estável subagent-first (DEC-BUD-042) e template determinístico com comandos em backticks na seção `Validation command log`, reduzindo falhas de promoção por evidência mal formatada. Evidência: VER-BUD-142."
     },
     {
       "id": "TASK-BUD-108",

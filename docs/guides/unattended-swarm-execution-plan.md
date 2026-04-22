@@ -9,6 +9,7 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
 - Sem auto-close de P0.
 - Sempre atualizar `.project/tasks.json` + mini-handoff de lote.
 - Spark-aware: default em cota normal; `gpt-5.3-codex-spark` só com gatilho explícito (`planning recovery` ou `scout burst`).
+- **Interim policy (DEC-BUD-042): subagent-first por padrão** até estabilizar materialização de colônia (TASK-BUD-107).
 
 ## Ordem recomendada (com dependências reais)
 1. **Lote A — TASK-BUD-010** (single-writer/reconciler).
@@ -39,6 +40,20 @@ Escopo: execução por lotes dos P0 `TASK-BUD-010`, `TASK-BUD-020`, `TASK-BUD-02
 3. Pós-run:
    - consolidar mini-handoff em `docs/research/`
    - atualizar notas no `.project/tasks.json`
+
+## Loop contínuo sem intervenção humana (modo estável)
+
+Enquanto a política subagent-first estiver ativa:
+1. Executar micro-slice (preferência: 1 arquivo + 1 teste).
+2. Rodar validação focada do slice.
+3. Atualizar board canônico (`tasks` + `verification`) e commitar.
+4. Repetir até `context_watch` em checkpoint/compact.
+5. Em checkpoint: escrever handoff curto e encerrar em idle para compact/resume.
+
+Escalonar para swarm somente quando:
+- TASK-BUD-107 concluída com evidência de materialização confiável;
+- sequência recente sem candidate-only por falha de delivery evidence;
+- gates de budget/preflight/readiness em verde.
 
 ## Checklist de evidência e rollback
 - Evidência mínima:
@@ -72,8 +87,8 @@ Final file inventory:
 - packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts
 
 Validation command log:
-- /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts
-- /mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts
+- `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`
+- `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-retention.test.ts`
 ```
 
 Regras:
