@@ -1986,7 +1986,7 @@
     {
       "id": "TASK-BUD-086",
       "description": "[P1] Maturar readiness de subagentes para produção assistida: criar trilha determinística de evidência COMPLETE e gate operacional (GO/NO-GO) para habilitação progressiva.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-084",
         "TASK-BUD-018"
@@ -2001,7 +2001,8 @@
         "Falhas de readiness retornam motivo acionável (telemetria + recomendação de correção) sem ambiguidades.",
         "Runbook define rollout em fases (isolado -> warm -> operação assistida) com critério explícito de rollback."
       ],
-      "notes": "Atualmente strict falha por ausência de COMPLETE recente; esta task fecha esse gap de forma auditável."
+      "notes": "Atualmente strict falha por ausência de COMPLETE recente; esta task fecha esse gap de forma auditável.",
+      "verification": "VER-BUD-130"
     },
     {
       "id": "TASK-BUD-087",
@@ -2164,7 +2165,7 @@
     {
       "id": "TASK-BUD-094",
       "description": "[P0] Formalizar e publicar envelope de long run (L1/L2/L3) com critérios objetivos de entrada, limites, stop conditions e marco de calibração da fábrica.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-085",
         "TASK-BUD-091"
@@ -2183,13 +2184,13 @@
         "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
         "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas."
       ],
-      "verification": "VER-BUD-129",
+      "verification": "VER-BUD-131",
       "notes": "[2026-04-22T11:46:58.791Z] Envelope L1/L2/L3 publicado no charter com gates, fallback e milestone objetivo de calibração/autonomia. Evidência: VER-BUD-114 (dd043d2).\n[2026-04-22T13:27:06.359Z] Marco L1 avancado: TASK-BUD-085/091/092 concluidas com evidencia canonica (VER-BUD-128/123/122). Pendencia de promocao L1->L2 permanece em TASK-BUD-086/TASK-BUD-096."
     },
     {
       "id": "TASK-BUD-095",
       "description": "[P1] Executar piloto de long run L1 (control-plane only) com cadence de checkpoint e evidência determinística de continuidade sem perguntas óbvias.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-094",
         "TASK-BUD-085"
@@ -2207,12 +2208,13 @@
         "Evidência registra decisões automáticas assumidas e pontos de interrupção realmente necessários.",
         "Resultado inclui relatório de gaps para promoção a L2."
       ],
-      "notes": "L1 é baseline obrigatório antes de abrir lane de subagentes."
+      "notes": "L1 é baseline obrigatório antes de abrir lane de subagentes.",
+      "verification": "VER-BUD-132"
     },
     {
       "id": "TASK-BUD-096",
       "description": "[P1] Executar gate de promoção L1->L2: habilitar lane de subagentes apenas após readiness strict passar com evidência reprodutível.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-086",
         "TASK-BUD-095"
@@ -2228,7 +2230,9 @@
         "`subagent_readiness_status(strict=true)` passa em janela definida com critérios estáveis.",
         "Runbook define rollback para retornar a L1 se sinais de falha reaparecerem.",
         "Promoção a L2 é registrada com verificação canônica (sem auto-close prematuro de itens estratégicos)."
-      ]
+      ],
+      "verification": "VER-BUD-133",
+      "notes": "[2026-04-22T13:34:39.022Z] Gate L1->L2 rodado em strict após 086/095: bloqueio atual em monitor-min-user-turns (1 vs >=3). Rerun pendente após elevar userTurns em janela controlada."
     },
     {
       "id": "TASK-BUD-097",

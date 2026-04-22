@@ -2089,6 +2089,110 @@
           "evidence": "Pacote L1 avançado com 085/091/092 fechadas; resta concluir 086/096 para promoção L1→L2."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-130",
+      "target": "TASK-BUD-086",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Readiness de subagentes maturada com trilha determinística e feedback acionável: `packages/pi-stack/extensions/subagent-readiness.ts` agora produz `blockedRecommendations` com remediação explícita por check (`recommendationForReadinessCheck`), mantendo telemetria objetiva (`actual vs expected`) e eliminando ambiguidade de diagnóstico. `formatResult` passou a exibir razões + ações recomendadas. Cobertura ampliada em `packages/pi-stack/test/smoke/subagent-readiness.test.ts` (4/4 pass), incluindo validação de hints acionáveis para checks críticos e pacote obrigatório ausente. Runbook atualizado em `docs/guides/subagent-readiness-gate.md` com rollout em fases (isolado -> warm -> operação assistida) e critérios explícitos de rollback para retorno a L1. Validação: `vitest run packages/pi-stack/test/smoke/subagent-readiness.test.ts` (4/4 pass). Commit: `a46c45b`.",
+      "criteria_results": [
+        {
+          "criterion": "`subagent_readiness_status(strict=true)` passa em cenário controlado com evidência reprodutível de COMPLETE sem afrouxar guardrails críticos.",
+          "status": "passed",
+          "evidence": "Smoke strict com COMPLETE + pacotes obrigatórios permanece passando."
+        },
+        {
+          "criterion": "Falhas de readiness retornam motivo acionável (telemetria + recomendação de correção) sem ambiguidades.",
+          "status": "passed",
+          "evidence": "Novo campo `blockedRecommendations` e mensagens com remediação por check."
+        },
+        {
+          "criterion": "Runbook define rollout em fases (isolado -> warm -> operação assistida) com critério explícito de rollback.",
+          "status": "passed",
+          "evidence": "Guia de readiness ganhou seção de fases + rollback operacional."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-131",
+      "target": "TASK-BUD-094",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Envelope objetivo L1/L2/L3 consolidado e publicado com critérios auditáveis em `docs/guides/agent-driver-charter.md`, incluindo gates por lane, stop conditions e fallback/rollback explícito. O pipeline canônico reforça política no-obvious-questions e rastreio de assunções (`docs/guides/project-canonical-pipeline.md`). Marco de calibração/autonomia está mensurável e ligado ao board canônico por tasks/verifications explícitas (TASK-BUD-085/086/091/092/095/096 com VER-BUD-128/130/123/122 etc.), permitindo promoção progressiva com evidência.",
+      "criteria_results": [
+        {
+          "criterion": "Documento define claramente L1(control-plane), L2(subagents), L3(swarm) com gates e limites auditáveis.",
+          "status": "passed",
+          "evidence": "Charter contém tabela por lane com entrada, limites, stop/fallback."
+        },
+        {
+          "criterion": "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
+          "status": "passed",
+          "evidence": "Seções de stop conditions + fallback no charter e rollout/rollback no guia de readiness."
+        },
+        {
+          "criterion": "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas.",
+          "status": "passed",
+          "evidence": "Milestone referenciado por IDs de task/verification e progresso registrado no board."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-132",
+      "target": "TASK-BUD-095",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Piloto L1 registrado em `docs/research/control-plane-l1-pilot-2026-04-22.md` com continuidade control-plane only, checkpoints de contexto e relatório explícito de gaps para promoção L2. Evidências do lote: commits atômicos (`9c5c6d6`, `a46c45b`, `f4028c1`) sem escalonamento para ambiguidades de baixo risco; policy no-obvious-questions + assunções auditáveis (`guardrails-core.pragmatic-autonomy-policy`, `guardrails-core.pragmatic-assumption-applied`) materializada. Snapshot operacional: `context_watch_status` em `checkpoint` (71%) com handoff fresh. Gap report objetivo para L2: `subagent_readiness_status(strict=true, source=isolated, days=1, limit=1)` retornou `ready=false` por `monitor-min-user-turns (1 vs >=3)`, com sinais positivos já estáveis (`COMPLETE=2`, `FAILED=0`, `BUDGET_EXCEEDED=0`).",
+      "criteria_results": [
+        {
+          "criterion": "Run L1 mantém progresso contínuo com checkpoints/handoffs sem interrupções de baixo risco.",
+          "status": "passed",
+          "evidence": "Lote executado com progresso contínuo, checkpoint explícito e sem perguntas óbvias para micro-escolhas."
+        },
+        {
+          "criterion": "Evidência registra decisões automáticas assumidas e pontos de interrupção realmente necessários.",
+          "status": "passed",
+          "evidence": "Policy/audits pragmáticos documentados e bloqueio L2 justificado por gate strict objetivo."
+        },
+        {
+          "criterion": "Resultado inclui relatório de gaps para promoção a L2.",
+          "status": "passed",
+          "evidence": "Documento do piloto lista gap de userTurns e plano de mitigação/reteste para promoção."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-133",
+      "target": "TASK-BUD-096",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Gate L1->L2 executado após fechamento de TASK-BUD-086/095, porém ainda bloqueado por threshold de monitor turns. Execução: `subagent_readiness_status(strict=true, source=isolated, days=1, limit=1)` => `ready=false`. Único check reprovado: `monitor-min-user-turns (1 vs >=3)`. Checks de risco/infra em verde (`COMPLETE=2`, `FAILED=0`, `BUDGET_EXCEEDED=0`, pacotes strict presentes). Próximo passo direto: elevar userTurns em janela controlada e rerodar strict gate para tentativa de promoção.",
+      "criteria_results": [
+        {
+          "criterion": "`subagent_readiness_status(strict=true)` passa em janela definida com critérios estáveis.",
+          "status": "skipped",
+          "evidence": "Gate ainda bloqueado por userTurns insuficiente no recorte."
+        },
+        {
+          "criterion": "Runbook define rollback para retornar a L1 se sinais de falha reaparecerem.",
+          "status": "passed",
+          "evidence": "Rollback explícito documentado em subagent-readiness-gate.md (fase/rollback)."
+        },
+        {
+          "criterion": "Promoção a L2 é registrada com verificação canônica (sem auto-close prematuro de itens estratégicos).",
+          "status": "passed",
+          "evidence": "Tentativa registrada como parcial (VER-BUD-133), sem promoção prematura."
+        }
+      ]
     }
   ]
 }
