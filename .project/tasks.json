@@ -1965,7 +1965,7 @@
     {
       "id": "TASK-BUD-085",
       "description": "[P0] Implementar policy de autonomia pragmática para long runs (no-obvious-questions): assumir defaults seguros e só interromper o usuário em decisões irreversíveis/alto risco.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-084",
         "TASK-BUD-083"
@@ -1980,7 +1980,7 @@
         "Perguntas ao usuário ficam restritas a ações irreversíveis, risco de perda de dados, ou conflito de objetivo explícito.",
         "Toda assunção automática fica auditável (note/audit log) para revisão posterior sem interromper o fluxo ativo."
       ],
-      "notes": "Objetivo direto: reduzir interrupções óbvias e manter velocidade de cruzeiro com segurança."
+      "notes": "Objetivo direto: reduzir interrupções óbvias e manter velocidade de cruzeiro com segurança.\n[2026-04-22T11:20:52.490Z] Priorizada como trilha imediata para velocidade de cruzeiro: reduzir perguntas obvias com defaults seguros e escalonamento apenas para risco irreversivel."
     },
     {
       "id": "TASK-BUD-086",
