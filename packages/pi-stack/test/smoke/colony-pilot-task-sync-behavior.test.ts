@@ -201,4 +201,23 @@ describe("colony-pilot task-sync behavior", () => {
 		expect(projected.status).toBe("completed");
 		expect(projected.notes ?? "").toContain("task_event type=done_verified source=ci");
 	});
+
+	it("keeps canonical eventId deterministic when timestamp is invalid", () => {
+		const first = buildCanonicalTaskEventFromColonySignal({
+			taskId: "TASK-BUD-018",
+			signal: { phase: "running", id: "colony-abc" },
+			requireHumanClose: true,
+			timestamp: "",
+			source: "colony",
+		});
+		const second = buildCanonicalTaskEventFromColonySignal({
+			taskId: "TASK-BUD-018",
+			signal: { phase: "running", id: "colony-abc" },
+			requireHumanClose: true,
+			timestamp: "",
+			source: "colony",
+		});
+		expect(first?.eventId).toBe(second?.eventId);
+		expect(first?.eventId).toContain("ts-unknown");
+	});
 });

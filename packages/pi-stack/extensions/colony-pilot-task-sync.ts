@@ -290,7 +290,7 @@ function canonicalTaskEventId(
 	const tsNum = Date.parse(timestamp);
 	const tsPart = Number.isFinite(tsNum)
 		? Math.floor(tsNum).toString(36)
-		: (sanitizeTaskSlug(timestamp).slice(0, 16) || Date.now().toString(36));
+		: (sanitizeTaskSlug(timestamp).slice(0, 16) || "ts-unknown");
 	return `${base}-${tsPart}`;
 }
 
