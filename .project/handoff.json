@@ -1,97 +1,40 @@
 {
-  "timestamp": "2026-04-22T22:05:56.726Z",
-  "context": "Warn-stage micro-slices mantidos com foco fábrica. TASK-BUD-113 concluída: governança de sinais formalizada (ownership + noise-budget) e meta-sinal runtime `signal-noise-excessive` integrado no context-watchdog em modo advisory/non-blocking.",
-  "current_phase": "factory-signal-governance-stable",
+  "timestamp": "2026-04-22T22:16:00.000Z",
+  "context": "Compact manual acionado pelo usuário e assimilado como aprendizado de primitiva: evitar medo de threshold (paralisia) sem atravessar limite de forma imprudente. Estado atual pós-compact: contexto saudável (ok).",
+  "current_phase": "factory-control-plane-hardening",
   "current_tasks": [
-    "TASK-BUD-112"
+    "TASK-BUD-114"
   ],
-  "blockers": [
-    "context-watch-checkpoint-required"
-  ],
+  "blockers": [],
   "next_actions": [
-    "Context-watch action: level=checkpoint 68% (write-checkpoint) · Write handoff checkpoint before the next large slice.",
-    "Manter micro-slices até sair de warn; evitar scans amplos.",
-    "Preservar TASK-BUD-112 apenas como preparação/backlog (sem execução prematura), conforme foco definido.",
-    "Próximo ganho de fábrica: especificar template de promoção seletiva worktree->main com allowlist, sem expandir escopo agora."
+    "Executar próximo micro-slice da TASK-BUD-114 mantendo foco fábrica.",
+    "Manter TASK-BUD-112 apenas em backlog/preparação.",
+    "Planejar TASK-BUD-115 (pre-compact calm-close) como evolução do control-plane long-run."
   ],
   "open_questions": [
-    "Qual envelope mínimo para automação de promoção seletiva sem reintroduzir ruído/custo operacional?"
+    "Qual heurística mínima de readiness/defer-count reduz paralisia sem aumentar compactação prematura?"
   ],
   "key_decisions_pending": [
-    "Quando ativar enforcement de discoverability/noise além do advisory passivo atual."
+    "Quando elevar pre-compact calm-close de advisory para policy mais assertiva (se necessário)."
   ],
   "files_in_flux": [
+    ".project/requirements.json",
     ".project/tasks.json",
-    ".project/verification.json",
-    ".project/handoff.json",
-    "packages/pi-stack/extensions/context-watchdog.ts",
-    "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+    ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:00:00.000Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 61,
+      "atIso": "2026-04-22T22:16:00.000Z",
+      "reason": "manual_compact_followup",
+      "level": "ok",
+      "percent": 15,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
-    },
-    {
-      "atIso": "2026-04-22T22:02:29.172Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 67,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
-    },
-    {
-      "atIso": "2026-04-22T22:03:00.668Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 68,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
-    },
-    {
-      "atIso": "2026-04-22T22:05:46.428Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 67,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
-    },
-    {
-      "atIso": "2026-04-22T22:05:56.726Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 68,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
+      "action": "continue",
+      "recommendation": "Context healthy after manual compact; continue factory micro-slices."
     }
   ]
 }

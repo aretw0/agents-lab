@@ -824,6 +824,23 @@
         "Runbooks definem equilíbrio de sinal/ruído (prioridade, supressão, cadência) para evitar overload no loop de execução.",
         "Há detecção advisory de ruído excessivo (meta-sinal) com recomendação de simplificação/calibração."
       ]
+    },
+    {
+      "id": "REQ-BUD-058",
+      "description": "O context-watch do control-plane deve evitar paralisia por threshold (fear mode): ao se aproximar de compact, deve priorizar fechamento calmo do micro-slice atual e disparar compactação em janela idle segura, sem cruzar limite de forma imprudente nem postergar indefinidamente.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "references": [
+        "REQ-BUD-041",
+        "REQ-BUD-057"
+      ],
+      "acceptance_criteria": [
+        "Existe estado explícito de pré-compactação (readiness) para orientar 'calm close' do slice corrente quando entrar em checkpoint/warn recorrente.",
+        "Quando o estado ficar apto e a sessão estiver idle, o compact pode ser disparado automaticamente sem depender de insistência manual.",
+        "Sinalização distingue cautela saudável de paralisia (ex.: excesso de adiamentos) e mantém comportamento default advisory/non-blocking."
+      ]
     }
   ]
 }
