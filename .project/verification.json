@@ -2011,6 +2011,32 @@
           "evidence": "`buildWebStateSummary` validado em smoke test dedicado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-127",
+      "target": "TASK-BUD-103",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Guia canônico de curadoria visual publicado em `docs/guides/control-plane-ux-curation.md` com: princípios de composição (summary-first, anti-duplicação, resize-first), tiers de densidade (narrow/medium/wide), checklist TUI/WEB e regra de admissão para novos widgets anti-clutter. Índice atualizado em `docs/guides/README.md` e referência operacional adicionada em `docs/guides/recommended-pi-stack.md` para conectar baseline curada ao runbook de UX.",
+      "criteria_results": [
+        {
+          "criterion": "Guia documenta regras de densidade adaptativa e prioridades de informação por superfície.",
+          "status": "passed",
+          "evidence": "Seções 'Princípios' e 'Tiers de densidade' descrevem prioridades e comportamento esperado por largura."
+        },
+        {
+          "criterion": "Inclui checklist de validação para resize (narrow/medium/wide) no TUI e WEB.",
+          "status": "passed",
+          "evidence": "Checklists explícitos TUI/WEB e bullets de resize adicionados."
+        },
+        {
+          "criterion": "Orienta como adicionar novos widgets sem quebrar semântica consolidada do control-plane.",
+          "status": "passed",
+          "evidence": "Seção 'Regra para novos widgets/superfícies' com perguntas de gate antes de admissão."
+        }
+      ]
     }
   ]
 }

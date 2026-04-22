@@ -2377,7 +2377,7 @@
     {
       "id": "TASK-BUD-103",
       "description": "[P1] Publicar guia de curadoria visual do control-plane (TUI+WEB) com padrões de composição, anti-clutter e checklist de resize.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-101",
         "TASK-BUD-102"
@@ -2394,7 +2394,8 @@
         "Guia documenta regras de densidade adaptativa e prioridades de informação por superfície.",
         "Inclui checklist de validação para resize (narrow/medium/wide) no TUI e WEB.",
         "Orienta como adicionar novos widgets sem quebrar semântica consolidada do control-plane."
-      ]
+      ],
+      "verification": "VER-BUD-127"
     }
   ]
 }
