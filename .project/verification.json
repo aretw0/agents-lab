@@ -2557,6 +2557,32 @@
           "evidence": "Suite inclui casos válidos e inválidos; erro mantém guidance explícita de seção/backticks."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-148",
+      "target": "TASK-BUD-108",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "`docs/guides/project-canonical-pipeline.md` agora define política `Steering signal-first (tool-surface diet)`: steering rotineiro por sinais passivos de stream/status (`warn/checkpoint/compact`, `operatorSignal`), `context_watch_status` restrito a diagnóstico explícito, e escalonamento no segundo warn para checkpoint/handoff.",
+      "criteria_results": [
+        {
+          "criterion": "Agente recebe sinais de contexto (warn/checkpoint/compact) via stream/status passivo, sem depender de chamada explícita de tool para steering rotineiro.",
+          "status": "passed",
+          "evidence": "Runbook explicita priorização de sinais passivos para steering diário."
+        },
+        {
+          "criterion": "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
+          "status": "passed",
+          "evidence": "Runbook incorpora regra de escalonamento no segundo warn."
+        },
+        {
+          "criterion": "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado.",
+          "status": "passed",
+          "evidence": "Seção nova explicita `context_watch_status` como diagnóstico/debug, não ritual por iteração."
+        }
+      ]
     }
   ]
 }

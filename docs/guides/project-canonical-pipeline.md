@@ -102,6 +102,15 @@ Quando houver deferimento de intenção durante long-run:
 - `/lane-queue` (status) deve orientar ações concretas quando `queued>0` (`list`/`clear`);
 - `/lane-queue add <texto>` deve ser preferido para registrar pedido sem desviar o lane ativo.
 
+### Steering signal-first (tool-surface diet)
+
+No loop canônico, steering diário deve priorizar **sinais passivos de stream/status** (ex.: `warn/checkpoint/compact`, `operatorSignal`) em vez de depender de tool-call manual.
+
+Regras operacionais:
+- `context_watch_status` fica como superfície de **diagnóstico explícito** (debug/inspeção), não como passo obrigatório por iteração;
+- no segundo `warn` consecutivo, a cadência deve escalar para checkpoint/handoff automático antes do compact;
+- sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).
