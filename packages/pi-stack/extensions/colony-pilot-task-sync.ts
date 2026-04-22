@@ -259,6 +259,27 @@ export function canonicalTaskEventTypeToProjectTaskStatus(
 	return "in-progress";
 }
 
+export function applyCanonicalTaskEventToProjectTask(
+	task: ProjectTaskItem,
+	event: Pick<CanonicalTaskEvent, "type" | "timestamp" | "source">,
+	options?: { maxNoteLines?: number; appendEventNote?: boolean },
+): ProjectTaskItem {
+	const nextStatus = canonicalTaskEventTypeToProjectTaskStatus(event.type);
+	const appendEventNote = options?.appendEventNote !== false;
+	const maxNoteLines = Number.isFinite(Number(options?.maxNoteLines))
+		? Math.max(1, Math.floor(Number(options?.maxNoteLines)))
+		: 20;
+	const noteLine = `[${event.timestamp}] task_event type=${event.type} source=${event.source}`;
+	const nextNotes = appendEventNote
+		? appendNote(task.notes, noteLine, maxNoteLines)
+		: task.notes;
+	return {
+		...task,
+		status: nextStatus,
+		notes: nextNotes,
+	};
+}
+
 function canonicalTaskEventId(
 	taskId: string,
 	signalId: string,

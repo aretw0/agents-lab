@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+	applyCanonicalTaskEventToProjectTask,
 	buildCanonicalTaskEventFromColonySignal,
 	canonicalTaskEventTypeToProjectTaskStatus,
 	colonyPhaseToCanonicalTaskEventType,
@@ -191,5 +192,13 @@ describe("colony-pilot task-sync behavior", () => {
 		expect(event?.timestamp).toBe("2026-04-22T02:30:00.000Z");
 		expect(event?.eventId).toContain("task-bud-018-colony-abc-running");
 		expect(event?.evidenceRefs).toEqual(["docs/research/colony-project-task-bridge.md"]);
+
+		const projected = applyCanonicalTaskEventToProjectTask(
+			{ id: "TASK-BUD-018", description: "adapter ingest", status: "planned" },
+			{ type: "done_verified", source: "ci", timestamp: "2026-04-22T02:31:00.000Z" },
+			{ maxNoteLines: 5 },
+		);
+		expect(projected.status).toBe("completed");
+		expect(projected.notes ?? "").toContain("task_event type=done_verified source=ci");
 	});
 });
