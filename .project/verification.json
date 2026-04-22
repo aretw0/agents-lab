@@ -2635,6 +2635,32 @@
           "evidence": "Documentação operacional pendente para fechamento da task."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-151",
+      "target": "TASK-BUD-108",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Fechamento de calibracao signal-first: (1) `context_watch_status` expõe `operatorSignal` e `/context-watch` mostra `operator-signal`; (2) segundo `warn` consecutivo escala para `write-checkpoint` com handoff automático; (3) runbook canônico documenta steering passivo e restringe tool-call de contexto para diagnóstico explícito. Evidências acumuladas: VER-BUD-144, VER-BUD-146, VER-BUD-148 + commits 47a8055, 48a3a5d, d5fc50f.",
+      "criteria_results": [
+        {
+          "criterion": "Agente recebe sinais de contexto (warn/checkpoint/compact) via stream/status passivo, sem depender de chamada explícita de tool para steering rotineiro.",
+          "status": "passed",
+          "evidence": "operatorSignal no status e política signal-first no pipeline canônico."
+        },
+        {
+          "criterion": "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
+          "status": "passed",
+          "evidence": "Escalonamento de segundo warn para write-checkpoint implementado e testado."
+        },
+        {
+          "criterion": "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado.",
+          "status": "passed",
+          "evidence": "Runbook atualizado com orientação explícita de uso diagnóstico para context_watch_status."
+        }
+      ]
     }
   ]
 }

@@ -2487,7 +2487,7 @@
     {
       "id": "TASK-BUD-108",
       "description": "[P0] Fazer tool-surface diet do control-plane: reduzir acesso direto a tools de steering (ex.: contexto) e migrar para sinais passivos no stream com política de desaceleração/checkpoint automática.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-107"
       ],
@@ -2502,7 +2502,8 @@
         "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
         "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado."
       ],
-      "notes": "Solicitação do usuário (2026-04-22): calibrar excelência contínua, minimizar interação manual e evitar dependência excessiva de tools que deveriam virar sinais de operação.\n[2026-04-22T00:00:00Z] Backlog adicionado para incluir sinal explícito de `reload-required`/intervenção humana no stream de steering, evitando surpresa quando runtime exigir ação manual para continuidade.\n[2026-04-22T00:00:00Z] Micro-slice inicial: `context_watch_status` agora expõe `operatorSignal` (reloadRequired/humanActionRequired/reasons) e `/context-watch` imprime `operator-signal` para steering passivo quando intervenção humana for necessária. Cobertura smoke adicionada para sinal de reload/manual refresh. Evidência: VER-BUD-144.\n[2026-04-22T00:00:00Z] Micro-slice de cadência: no segundo aviso `warn` consecutivo, watchdog escalona ação para `write-checkpoint` e persiste handoff automaticamente (com anúncio forçado na transição), reduzindo risco de encostar em compact sem fechamento de pontas. Evidência: VER-BUD-146.\n[2026-04-22T00:00:00Z] Runbook canônico atualizado com política signal-first/tool-diet: steering diário por sinais passivos (`warn/checkpoint/compact`, `operatorSignal`) e `context_watch_status` restrito a diagnóstico explícito. Evidência: VER-BUD-148."
+      "notes": "Solicitação do usuário (2026-04-22): calibrar excelência contínua, minimizar interação manual e evitar dependência excessiva de tools que deveriam virar sinais de operação.\n[2026-04-22T00:00:00Z] Backlog adicionado para incluir sinal explícito de `reload-required`/intervenção humana no stream de steering, evitando surpresa quando runtime exigir ação manual para continuidade.\n[2026-04-22T00:00:00Z] Micro-slice inicial: `context_watch_status` agora expõe `operatorSignal` (reloadRequired/humanActionRequired/reasons) e `/context-watch` imprime `operator-signal` para steering passivo quando intervenção humana for necessária. Cobertura smoke adicionada para sinal de reload/manual refresh. Evidência: VER-BUD-144.\n[2026-04-22T00:00:00Z] Micro-slice de cadência: no segundo aviso `warn` consecutivo, watchdog escalona ação para `write-checkpoint` e persiste handoff automaticamente (com anúncio forçado na transição), reduzindo risco de encostar em compact sem fechamento de pontas. Evidência: VER-BUD-146.\n[2026-04-22T00:00:00Z] Runbook canônico atualizado com política signal-first/tool-diet: steering diário por sinais passivos (`warn/checkpoint/compact`, `operatorSignal`) e `context_watch_status` restrito a diagnóstico explícito. Evidência: VER-BUD-148.",
+      "verification": "VER-BUD-151"
     },
     {
       "id": "TASK-BUD-109",
