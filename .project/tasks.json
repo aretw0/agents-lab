@@ -2482,6 +2482,26 @@
         "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção."
       ],
       "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente.\n[2026-04-22T00:00:00Z] Micro-slice inicial de hardening: delivery evidence não considera mais comando isolado fora de seção de validação como prova de validation log, reduzindo falso-positivo de COMPLETE. Cobertura smoke adicionada para caso inválido e regressão. Evidência: VER-BUD-141."
+    },
+    {
+      "id": "TASK-BUD-108",
+      "description": "[P0] Fazer tool-surface diet do control-plane: reduzir acesso direto a tools de steering (ex.: contexto) e migrar para sinais passivos no stream com política de desaceleração/checkpoint automática.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-107"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "docs/guides/agent-driver-charter.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Agente recebe sinais de contexto (warn/checkpoint/compact) via stream/status passivo, sem depender de chamada explícita de tool para steering rotineiro.",
+        "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
+        "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado."
+      ],
+      "notes": "Solicitação do usuário (2026-04-22): calibrar excelência contínua, minimizar interação manual e evitar dependência excessiva de tools que deveriam virar sinais de operação."
     }
   ]
 }
