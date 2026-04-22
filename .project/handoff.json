@@ -1,9 +1,8 @@
 {
-  "timestamp": "2026-04-22T17:33:00.000Z",
-  "context": "Compactação forçada executada e trilha recalibrada para potencial de fábrica: TASK-BUD-108 concluída; TASK-BUD-109 avançou com integração passiva de bloat-smell textual + código no runtime (status/audit sem hard-block por default). Contexto atual saudável e pronto para throughput disciplinado.",
-  "current_phase": "factory-calibration-precision-quality",
+  "timestamp": "2026-04-22T17:46:00.000Z",
+  "context": "Factory calibration em progresso com contexto saudável pós-compact: TASK-BUD-109 concluída (bloat-smell signal-first texto+código + runbook low-noise) e TASK-BUD-110 iniciada com primeira extração modular de `guardrails-core` para módulo dedicado de bloat (`guardrails-core-bloat.ts`) sem regressão de smoke.",
+  "current_phase": "factory-throughput-precision",
   "current_tasks": [
-    "TASK-BUD-109",
     "TASK-BUD-110",
     "TASK-BUD-096"
   ],
@@ -11,26 +10,27 @@
     "TASK-BUD-096 strict gate (monitor-min-user-turns)"
   ],
   "next_actions": [
-    "Fechar TASK-BUD-109 com slice documental (charter/pipeline/runbook) descrevendo calibração low-noise e uso por scouts.",
-    "Iniciar TASK-BUD-110 em micro-slices: extrair primeira fatia coesa de guardrails-core mantendo arquivo orquestrador fino.",
-    "Após fechamento 109/110 inicial, retomar TASK-BUD-096 com evidência strict para destravar trilha de swarm supervisionado."
+    "Continuar TASK-BUD-110 em micro-slices: extrair próximo domínio coeso (ex.: lane-queue ou budget-governor) mantendo contratos estáveis.",
+    "Adicionar guia curto de fronteiras modulares para prevenir re-inflar `guardrails-core.ts`.",
+    "Após avanço modular mínimo, retomar TASK-BUD-096 com execução strict e evidência canônica."
   ],
   "open_questions": [
-    "Quando elevar notifyOnTrigger de false para true em scouts sem degradar relação sinal/ruído?"
+    "Ordem de extração com melhor relação risco/ganho para o próximo slice de deflação (lane-queue vs budget-governor)."
   ],
   "key_decisions_pending": [
-    "Sequência de extração modular em TASK-BUD-110 (qual domínio extrair primeiro para maximizar ganho com baixo risco)."
+    "Critério objetivo de 'orchestrator enxuto' para fechamento do TASK-BUD-110 (limite de responsabilidades por arquivo)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/guardrails-core.ts",
-    "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
+    "packages/pi-stack/extensions/guardrails-core-bloat.ts",
+    "docs/guides/project-canonical-pipeline.md",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T17:33:00.000Z",
+      "atIso": "2026-04-22T17:46:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 18,
