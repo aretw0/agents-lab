@@ -2193,6 +2193,32 @@
           "evidence": "Tentativa registrada como parcial (VER-BUD-133), sem promoção prematura."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-134",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Último micro-slice de governança para drenagem segura em janela idle: `tryAutoDrainDeferredIntent` agora agenda backstop automático quando houve auto-dispatch parcial e ainda restam itens na fila (`shouldSchedulePostDispatchAutoDrain`), emitindo auditoria `guardrails-core.long-run-intent-auto-drain-backstop`. Isso evita estagnação eventual sem duplicar semântica nativa de follow-up (mantém dispatch em followUp e só reprograma tentativa idle para o restante). Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` com predicado determinístico de backstop. Validação: `vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 12/12 pass. Commit: `4f66b79`.",
+      "criteria_results": [
+        {
+          "criterion": "Drenagem segura em idle continua após dispatch parcial sem depender de intervenção manual.",
+          "status": "passed",
+          "evidence": "Backstop agenda novo auto-drain quando fila remanescente > 0."
+        },
+        {
+          "criterion": "Integração permanece complementar ao follow-up nativo (sem duplicar semântica).",
+          "status": "passed",
+          "evidence": "Dispatch continua via `deliverAs: followUp`; backstop apenas reprograma tentativa idle para pendências."
+        },
+        {
+          "criterion": "Comportamento coberto por teste determinístico.",
+          "status": "passed",
+          "evidence": "Novo teste `shouldSchedulePostDispatchAutoDrain` validando regra de agendamento."
+        }
+      ]
     }
   ]
 }
