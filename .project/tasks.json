@@ -2508,7 +2508,7 @@
     {
       "id": "TASK-BUD-109",
       "description": "[P1] Implementar bloat-smell advisory unificado (código + texto) com sinal passivo no stream para orientar split/síntese e preservar discurso enxuto em runtime, docs e materiais de posicionamento.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-108"
       ],
@@ -2527,7 +2527,8 @@
         "Sinal é advisory e passivo (stream/status), com recomendação acionável distinta para código (split/backlog) e texto (resumo/estrutura narrativa).",
         "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial."
       ],
-      "notes": "Backlog solicitado explicitamente pelo usuário (2026-04-22): manter saúde contínua de código e narrativa, incluindo documentação e textos de venda, com alinhamento à visão de entregar essas práticas no pi-stack.\n[2026-04-22T00:00:00Z] Micro-slice inicial: adicionadas heurísticas determinísticas `evaluateTextBloatSmell` e `evaluateCodeBloatSmell` em guardrails-core (thresholds calibráveis + recommendation advisory), com cobertura smoke para casos bloated/healthy. Evidência: VER-BUD-149.\n[2026-04-22T00:00:00Z] Micro-slice signal-first: bloat textual integrado ao stream/status passivo via `turn_end` (`guardrails-core-bloat`), com throttling determinístico (`shouldEmitBloatSmellSignal`) e trilha auditável (`guardrails-core.bloat-smell-text`), sem bloqueio hard por default. Evidência: VER-BUD-150.\n[2026-04-22T00:00:00Z] Micro-slice signal-first (código): tool-calls `edit`/`write` agora avaliam bloat de código com métricas determinísticas estimadas (`estimateCodeBloatFromEditInput`/`estimateCodeBloatFromWriteInput`) e emitem status passivo `guardrails-core-bloat-code` + audit trail `guardrails-core.bloat-smell-code` sob cooldown, mantendo notify default off. Evidência: VER-BUD-152."
+      "notes": "Backlog solicitado explicitamente pelo usuário (2026-04-22): manter saúde contínua de código e narrativa, incluindo documentação e textos de venda, com alinhamento à visão de entregar essas práticas no pi-stack.\n[2026-04-22T00:00:00Z] Micro-slice inicial: adicionadas heurísticas determinísticas `evaluateTextBloatSmell` e `evaluateCodeBloatSmell` em guardrails-core (thresholds calibráveis + recommendation advisory), com cobertura smoke para casos bloated/healthy. Evidência: VER-BUD-149.\n[2026-04-22T00:00:00Z] Micro-slice signal-first: bloat textual integrado ao stream/status passivo via `turn_end` (`guardrails-core-bloat`), com throttling determinístico (`shouldEmitBloatSmellSignal`) e trilha auditável (`guardrails-core.bloat-smell-text`), sem bloqueio hard por default. Evidência: VER-BUD-150.\n[2026-04-22T00:00:00Z] Micro-slice signal-first (código): tool-calls `edit`/`write` agora avaliam bloat de código com métricas determinísticas estimadas (`estimateCodeBloatFromEditInput`/`estimateCodeBloatFromWriteInput`) e emitem status passivo `guardrails-core-bloat-code` + audit trail `guardrails-core.bloat-smell-code` sob cooldown, mantendo notify default off. Evidência: VER-BUD-152.\n[2026-04-22T00:00:00Z] Fechamento operacional: pipeline canônico documenta calibração low-noise do bloat-smell (texto+código), incluindo uso em scouts (`scout burst`) e política notify gradual para preservar sinal/ruído de fábrica. Evidência: VER-BUD-153.",
+      "verification": "VER-BUD-153"
     },
     {
       "id": "TASK-BUD-110",

@@ -111,6 +111,19 @@ Regras operacionais:
 - no segundo `warn` consecutivo, a cadência deve escalar para checkpoint/handoff automático antes do compact;
 - sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle.
 
+### Bloat-smell advisory (calibrado, baixo ruído)
+
+Objetivo: preservar throughput de fábrica sem inflar resposta/código em silêncio.
+
+Regras operacionais:
+- manter bloat-smell em modo **advisory passivo** por padrão (status/audit; sem hard-block);
+- sinais de runtime esperados:
+  - texto: `guardrails-core-bloat`
+  - código: `guardrails-core-bloat-code`
+- manter `notifyOnTrigger=false` durante calibração inicial; promover para notify apenas após estabilidade de sinal/ruído;
+- para scouts (`scout burst`), usar bloat-smell para mapear hotspots de split/síntese, mas registrar recomendação no board antes de escalar enforcement;
+- quando disparar smell recorrente, converter em micro-slice explícito (split de tarefa/arquivo) em vez de tratar como ruído transitório.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).

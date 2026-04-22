@@ -2687,6 +2687,32 @@
           "evidence": "Slice atual focado em runtime/testes; documentação de calibração fica para fechamento final de TASK-BUD-109."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-153",
+      "target": "TASK-BUD-109",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Fechamento de TASK-BUD-109 consolidado: (1) heurísticas determinísticas de text/code bloat (`evaluateTextBloatSmell`, `evaluateCodeBloatSmell`) com thresholds configuráveis; (2) integração passiva em runtime/status para texto (`guardrails-core-bloat`) e código (`guardrails-core-bloat-code`) com audit trails (`guardrails-core.bloat-smell-text`/`guardrails-core.bloat-smell-code`) e cooldown determinístico; (3) runbook canônico atualizado em `docs/guides/project-canonical-pipeline.md` com seção de calibração low-noise e uso por scouts (`scout burst`) mantendo `notifyOnTrigger=false` na fase inicial.",
+      "criteria_results": [
+        {
+          "criterion": "Runtime detecta bloat de código (mudança ampla/hunks) e bloat textual (resposta/trecho documental excessivo ou repetitivo) com heurísticas determinísticas e calibráveis.",
+          "status": "passed",
+          "evidence": "Implementado em guardrails-core com config `bloatSmell.text` e `bloatSmell.code`."
+        },
+        {
+          "criterion": "Sinal é advisory e passivo (stream/status), com recomendação acionável distinta para código (split/backlog) e texto (resumo/estrutura narrativa).",
+          "status": "passed",
+          "evidence": "Status passivos e recomendações distintas sem hard-block por default."
+        },
+        {
+          "criterion": "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial.",
+          "status": "passed",
+          "evidence": "Seção 'Bloat-smell advisory (calibrado, baixo ruído)' adicionada ao pipeline canônico."
+        }
+      ]
     }
   ]
 }
