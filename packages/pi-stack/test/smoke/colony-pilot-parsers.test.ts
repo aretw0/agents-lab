@@ -1015,6 +1015,12 @@ describe("colony-pilot parsers", () => {
 		expect(ev.issues.some((i) => i.includes("validation command log"))).toBe(
 			true,
 		);
+		expect(
+			ev.issues.some(
+				(i) =>
+					i.includes("Validation command log") && i.includes("backticks"),
+			),
+		).toBe(true);
 	});
 
 	it("delivery evidence não aceita comando isolado fora de seção de validação", () => {

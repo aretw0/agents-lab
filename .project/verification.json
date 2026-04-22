@@ -2427,6 +2427,32 @@
           "evidence": "Nesta fatia foi apenas documentação operacional; cobertura de parser está em VER-BUD-141."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-143",
+      "target": "TASK-BUD-107",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "`evaluateColonyDeliveryEvidence` agora retorna guidance acionável quando falta validation command log: exige seção `Validation command log` com comandos em backticks. Smoke atualizado para afirmar presença desse guidance e evitar erro opaco. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (68/68 pass).",
+      "criteria_results": [
+        {
+          "criterion": "Final report de colônia sempre inclui seção de validação com comando literal em backticks quando houver testes executados.",
+          "status": "passed",
+          "evidence": "Mensagem de falha explicita formato esperado da seção e backticks."
+        },
+        {
+          "criterion": "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
+          "status": "skipped",
+          "evidence": "Slice focado em UX/diagnóstico da falha; cenário end-to-end válido permanece para próximo slice."
+        },
+        {
+          "criterion": "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção.",
+          "status": "passed",
+          "evidence": "Teste inválido com heading sem comando agora exige mensagem contendo seção esperada + backticks; casos válidos existentes preservados."
+        }
+      ]
     }
   ]
 }

@@ -541,7 +541,9 @@ export function evaluateColonyDeliveryEvidence(
 		issues.push("delivery evidence missing: file inventory");
 	}
 	if (policy.requireValidationCommandLog && !evidence.hasValidationCommandLog) {
-		issues.push("delivery evidence missing: validation command log");
+		issues.push(
+			"delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)",
+		);
 	}
 
 	return { ok: issues.length === 0, issues, evidence };
