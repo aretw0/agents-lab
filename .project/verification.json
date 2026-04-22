@@ -2297,6 +2297,32 @@
           "evidence": "Relatório inclui `scanWindow` (lineBudget, truncatedSessions, truncatedLinesTotal, suggestedNextWindow) e render human orienta `--window N` quando há truncamento."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-138",
+      "target": "TASK-BUD-105",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice de UX/discoverability na lane-queue sem depender de colônia: `guardrails-core` agora suporta `/lane-queue help`, responde subcomando desconhecido com uso explícito, e o status injeta dica contextual (`list/clear` quando queued>0; `add` quando vazio). Teste smoke atualizado com assertions de help/status tips. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 14/14 pass.",
+      "criteria_results": [
+        {
+          "criterion": "Usuário consegue descobrir como limpar fila sem ler código (help/usage em comando e docs).",
+          "status": "passed",
+          "evidence": "Comando `help` + fallback de subcomando desconhecido exibem usage com `clear`."
+        },
+        {
+          "criterion": "`/lane-queue` expõe subcomandos de forma clara, incluindo `clear`, com exemplo curto de uso.",
+          "status": "passed",
+          "evidence": "`buildLaneQueueHelpLines` centraliza usage e exemplos no handler."
+        },
+        {
+          "criterion": "Mensagens de status incluem dica de como esvaziar/listar fila quando `queued>0`.",
+          "status": "passed",
+          "evidence": "`buildLaneQueueStatusTips(queued)` adiciona dica de `/lane-queue list` e `/lane-queue clear` quando há itens."
+        }
+      ]
     }
   ]
 }

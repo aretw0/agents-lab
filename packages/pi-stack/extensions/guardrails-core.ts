@@ -716,6 +716,26 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
+export function buildLaneQueueHelpLines(): string[] {
+  return [
+    "lane-queue: deferred intents for long-run continuity.",
+    "usage: /lane-queue [status|help|list|add <text>|pop|clear]",
+    "examples: /lane-queue list · /lane-queue clear · /lane-queue add revisar isso depois",
+  ];
+}
+
+export function buildLaneQueueStatusTips(queued: number): string[] {
+  const tips = [
+    "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
+  ];
+  if (queued > 0) {
+    tips.push("tip: use /lane-queue list to inspect pending items and /lane-queue clear to reset queue.");
+  } else {
+    tips.push("tip: use /lane-queue add <text> to defer a request without breaking current long-run focus.");
+  }
+  return tips;
+}
+
 export type AutoDrainGateReason =
   | "disabled"
   | "empty"
@@ -1335,10 +1355,24 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|list|add <text>|pop|clear]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|pop|clear]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
+      const knownSubcommands = new Set(["status", "help", "list", "add", "pop", "clear"]);
+
+      if (sub === "help") {
+        ctx.ui.notify(buildLaneQueueHelpLines().join("\n"), "info");
+        return;
+      }
+
+      if (rawArgs.length > 0 && !knownSubcommands.has(sub)) {
+        ctx.ui.notify(
+          [`lane-queue: unknown subcommand '${sub}'.`, ...buildLaneQueueHelpLines()].join("\n"),
+          "warning",
+        );
+        return;
+      }
 
       if (sub === "clear") {
         const cleared = clearDeferredIntentQueue(ctx.cwd);
@@ -1350,7 +1384,7 @@ export default function (pi: ExtensionAPI) {
       if (sub === "add") {
         const text = parseLaneQueueAddText(rawArgs);
         if (!text) {
-          ctx.ui.notify("lane-queue: usage /lane-queue add <text>", "warning");
+          ctx.ui.notify("lane-queue: usage /lane-queue add <text> (tip: /lane-queue help)", "warning");
           return;
         }
 
@@ -1444,7 +1478,7 @@ export default function (pi: ExtensionAPI) {
       ctx.ui.notify(
         [
           `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain}`,
-          "tip: for same-turn streaming queue use native follow-up (Alt+Enter / app.message.followUp).",
+          ...buildLaneQueueStatusTips(queued),
         ].join("\n"),
         "info",
       );

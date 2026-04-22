@@ -10,6 +10,8 @@ import {
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
+  buildLaneQueueHelpLines,
+  buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
@@ -93,6 +95,18 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueAddText("ADD   item")).toBe("item");
     expect(parseLaneQueueAddText("list")).toBeUndefined();
     expect(parseLaneQueueAddText("add")).toBeUndefined();
+  });
+
+  it("builds help/status discoverability hints for lane-queue", () => {
+    const helpLines = buildLaneQueueHelpLines();
+    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|pop|clear]");
+
+    const queuedTips = buildLaneQueueStatusTips(2).join("\n");
+    expect(queuedTips).toContain("/lane-queue list");
+    expect(queuedTips).toContain("/lane-queue clear");
+
+    const emptyTips = buildLaneQueueStatusTips(0).join("\n");
+    expect(emptyTips).toContain("/lane-queue add <text>");
   });
 
   it("computes oldest queued intent age", () => {
