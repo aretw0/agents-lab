@@ -38,6 +38,12 @@ import {
 	type HandoffRefreshMode,
 } from "./context-watchdog-handoff";
 import {
+	resolveHandoffPrepDecision,
+	shouldEmitAutoResumeAfterCompact,
+	shouldRefreshHandoffBeforeAutoCompact,
+	type HandoffPrepReason,
+} from "./context-watchdog-resume";
+import {
 	applyContextWatchToHandoff,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
@@ -56,6 +62,9 @@ export {
 	latestContextWatchEvent,
 	resolveAutoCompactRetryDelayMs,
 	resolveHandoffFreshness,
+	resolveHandoffPrepDecision,
+	shouldEmitAutoResumeAfterCompact,
+	shouldRefreshHandoffBeforeAutoCompact,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	summarizeContextWatchEvent,
@@ -68,6 +77,7 @@ export type {
 	ContextWatchHandoffEvent,
 	ContextWatchHandoffReason,
 	HandoffFreshnessLabel,
+	HandoffPrepReason,
 	HandoffRefreshMode,
 };
 
@@ -296,37 +306,6 @@ export function shouldAutoCheckpoint(
 	if (!config.autoCheckpoint) return false;
 	if (assessment.level !== "checkpoint" && assessment.level !== "compact") return false;
 	return (nowMs - lastAutoCheckpointAt) >= config.cooldownMs;
-}
-
-export function shouldEmitAutoResumeAfterCompact(
-	config: ContextWatchdogConfig,
-	nowMs: number,
-	lastAutoResumeAt: number,
-): boolean {
-	if (!config.autoResumeAfterCompact) return false;
-	return (nowMs - lastAutoResumeAt) >= config.autoResumeCooldownMs;
-}
-
-export type HandoffPrepReason = "level-not-compact" | "auto-resume-off" | "fresh" | "stale" | "unknown";
-
-export function resolveHandoffPrepDecision(
-	assessment: ContextWatchAssessment,
-	config: ContextWatchdogConfig,
-	freshnessLabel: HandoffFreshnessLabel,
-): { refreshOnTrigger: boolean; reason: HandoffPrepReason } {
-	if (assessment.level !== "compact") return { refreshOnTrigger: false, reason: "level-not-compact" };
-	if (!config.autoResumeAfterCompact) return { refreshOnTrigger: false, reason: "auto-resume-off" };
-	if (freshnessLabel === "fresh") return { refreshOnTrigger: false, reason: "fresh" };
-	if (freshnessLabel === "stale") return { refreshOnTrigger: true, reason: "stale" };
-	return { refreshOnTrigger: true, reason: "unknown" };
-}
-
-export function shouldRefreshHandoffBeforeAutoCompact(
-	assessment: ContextWatchAssessment,
-	config: ContextWatchdogConfig,
-	freshnessLabel: HandoffFreshnessLabel = "unknown",
-): boolean {
-	return resolveHandoffPrepDecision(assessment, config, freshnessLabel).refreshOnTrigger;
 }
 
 
