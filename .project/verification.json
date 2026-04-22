@@ -1496,6 +1496,32 @@
           "evidence": "Gate reason + evento `auto-drain-deferred` tornam explícito quando a drenagem foi adiada por cooldown/idle-stability antes do auto-pop."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-107",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Fechamento técnico do TASK-BUD-084 consolidado com hardening incremental da lane-queue no control-plane: (1) enqueue/ACK sem troca de foco durante long-run (fluxo existente preservado); (2) auto-drain em janela segura com retry rearmado quando gate transitório bloqueia primeira tentativa (`resolveAutoDrainRetryDelayMs`, commit 6238a3b); (3) telemetria determinística de gate para observabilidade e auditoria (`resolveAutoDrainGateReason`, `gate=<reason>` no `/lane-queue status`, e evento `guardrails-core.long-run-intent-auto-drain-deferred`, commit 49e5bcb). Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-provider-budget-governor.test.ts` => 2 files passed, 15 tests passed.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Quando houver execução ativa de long run, prompts fora do lane atual não interrompem o fluxo principal.",
+          "status": "passed",
+          "evidence": "`shouldQueueInputForLongRun` + fluxo `pi.on(\"input\")` mantém deferimento para mensagens não-comando durante lane ativa; comportamento validado sem regressão nos smokes."
+        },
+        {
+          "criterion": "Solicitações rápidas do usuário/operador podem ser registradas como itens de fila com ACK curto e sem troca de foco imediata.",
+          "status": "passed",
+          "evidence": "Enqueue automático e `/lane-queue add` continuam emitindo ACK curto (`queued=<n>`) e não disparam troca imediata de foco."
+        },
+        {
+          "criterion": "Fila é drenada apenas em janelas seguras (idle/sem conflito), com trilha auditável do que foi adiado e quando foi retomado.",
+          "status": "passed",
+          "evidence": "Drain condicionado por idle/cooldown/idle-stability; quando bloqueado, retry é rearmado e auditado com gate reason; quando liberado, auto-pop auditável é emitido e follow-up é despachado."
+        }
+      ]
     }
   ]
 }
