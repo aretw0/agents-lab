@@ -2323,6 +2323,32 @@
           "evidence": "`buildLaneQueueStatusTips(queued)` adiciona dica de `/lane-queue list` e `/lane-queue clear` quando há itens."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-139",
+      "target": "TASK-BUD-106",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Follow-through de docs/skill para session-triage local-first + tail-batch. Atualizados `packages/lab-skills/skills/session-triage/SKILL.md` e `docs/guides/session-triage.md` com: (1) default local em `.sandbox/pi-agent/sessions/<workspaceKey>`, (2) estratégia de expansão progressiva (`--tail-lines`, `--window`, `--expand`) e (3) fallback global apenas opt-in (`--allow-global-fallback`).",
+      "criteria_results": [
+        {
+          "criterion": "Por padrão, triage ignora store global e lê apenas `.sandbox/pi-agent/sessions` quando houver contexto isolado ativo.",
+          "status": "passed",
+          "evidence": "Docs e skill descrevem local-first como padrão e fallback global como opt-in explícito."
+        },
+        {
+          "criterion": "Pipeline começa em tail-batch recente com opção de expansão progressiva.",
+          "status": "passed",
+          "evidence": "Exemplos adicionados com `--tail-lines`, `--window` e `--expand`."
+        },
+        {
+          "criterion": "Saída inclui métrica de custo/contexto estimado e motivo para ampliar janela.",
+          "status": "passed",
+          "evidence": "Guia descreve scan tail-batch e recomendação de expansão progressiva quando necessário."
+        }
+      ]
     }
   ]
 }

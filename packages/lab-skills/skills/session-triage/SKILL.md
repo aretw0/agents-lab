@@ -11,15 +11,16 @@ Use este skill quando o usuário disser que “já falou tudo no histórico” e
 
 ## Objetivo
 
-1. Ler histórico recente (por padrão: último 1 dia)
+1. Ler histórico recente em modo **local-first** (por padrão: último 1 dia)
 2. Extrair pendências explícitas (Next Steps / In Progress / Blocked)
 3. Reconciliar com `.project/tasks` (board canônico)
 4. Produzir split operacional:
    - **Unlock swarm now** (destrava throughput)
    - **Later stabilization** (pode esperar)
 
-> Nota de arquitetura: hoje a coleta está centrada em sessões locais do pi.
-> O desenho alvo é provider-agnostic (múltiplas plataformas), preservando o mesmo contrato de governança.
+> Nota de arquitetura: o modo padrão usa sessões locais do projeto isolado
+> (`.sandbox/pi-agent/sessions/<workspaceKey>`) com janela tail-batch.
+> O desenho alvo continua provider-agnostic (múltiplas plataformas), preservando o mesmo contrato de governança.
 
 ## Fluxo recomendado
 
@@ -35,10 +36,19 @@ Opcional JSON para automação:
 npm run session:triage:json
 ```
 
-Se precisar janela maior:
+Por padrão, a leitura é **tail-batch** (cauda da sessão) para economizar contexto.
+
+Expansão progressiva quando necessário (sem scan completo de primeira):
 
 ```bash
-node scripts/session-triage.mjs --days 2 --limit 12
+node scripts/session-triage.mjs --days 2 --limit 12 --tail-lines 200 --window 2
+node scripts/session-triage.mjs --days 2 --limit 12 --tail-lines 200 --expand
+```
+
+Fallback global é **opt-in** (evitar por padrão):
+
+```bash
+node scripts/session-triage.mjs --allow-global-fallback
 ```
 
 ### 2) Validar board canônico

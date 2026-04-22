@@ -35,6 +35,11 @@ Checklist de spawn rápido por modo:
 npm run session:triage
 ```
 
+Padrão atual de coleta (context-economy):
+- **local-first**: `.sandbox/pi-agent/sessions/<workspaceKey>`
+- **tail-batch**: lê só a cauda da sessão por janela, em vez de scan completo
+- fallback global só com `--allow-global-fallback`
+
 JSON (para automação):
 
 ```bash
@@ -66,7 +71,21 @@ npm run session:triage:events:json
 npm run session:triage:events:jsonl
 ```
 
-Por padrão, o script lê **último 1 dia** e até **8 sessões** mais recentes.
+Por padrão, o script lê **último 1 dia** e até **8 sessões** mais recentes, usando tail-batch.
+
+Flags úteis de janela progressiva:
+
+```bash
+# janela base (cauda curta)
+node scripts/session-triage.mjs --tail-lines 160 --window 1
+
+# ampliar sem scan completo direto
+node scripts/session-triage.mjs --tail-lines 200 --window 2
+node scripts/session-triage.mjs --tail-lines 200 --expand
+
+# fallback para store global (somente quando explicitamente desejado)
+node scripts/session-triage.mjs --allow-global-fallback
+```
 
 Também mantém um cache parseável de branch summaries em:
 

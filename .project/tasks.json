@@ -2460,7 +2460,7 @@
         "Pipeline começa em tail-batch recente (ex.: últimos N registros/mensagens finais) com opção de expansão progressiva (`--expand`/`--window`) em vez de scan completo.",
         "Saída inclui métrica de custo/contexto estimado e motivo quando houver necessidade de ampliar janela."
       ],
-      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137."
+      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137.\n[2026-04-22T00:00:00Z] Follow-through de documentação/skill: guia e SKILL de session-triage atualizados para refletir default local-first + tail-batch e flags de expansão progressiva/fallback opt-in. Evidência: VER-BUD-139."
     }
   ]
 }
