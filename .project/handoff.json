@@ -1,40 +1,37 @@
 {
-  "timestamp": "2026-04-22T21:30:00.000Z",
-  "context": "Foco fábrica preservado com formalização native-first: steer/follow-up nativo como padrão, lane-queue opt-in. Promoções concluídas: TASK-BUD-096 (L1->L2) e TASK-BUD-097 (L2->L3 supervisionado com evidência + recovery docs-only).",
-  "current_phase": "factory-throughput-native-first",
+  "timestamp": "2026-04-22T21:48:00.000Z",
+  "context": "Reload aplicado e política native-first efetivada no control-plane (`longRunIntentQueue.enabled=false`). Fábrica avançou com TASK-BUD-111 concluída: blueprint agnóstico reforçado por checklist de release/dogfooding para portabilidade.",
+  "current_phase": "factory-portability-hardening",
   "current_tasks": [
-    "TASK-BUD-111",
-    "TASK-BUD-112"
+    "TASK-BUD-112",
+    "TASK-BUD-113"
   ],
   "blockers": [
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Manter micro-slices (1 arquivo + 1 teste/doc) até sair de warn.",
-    "Avançar TASK-BUD-111 com blueprint adapter-first/checklist de release para portabilidade da fábrica.",
-    "Manter TASK-BUD-112 apenas em preparação (sem execução), conforme foco atual."
+    "Manter micro-slices (warn=58%) e evitar scans amplos até checkpoint.",
+    "Seguir foco fábrica com TASK-BUD-113 (governança de sinais/discoverability + noise-budget) sem abrir frentes largas.",
+    "Manter TASK-BUD-112 apenas em preparação/backlog, sem execução prematura."
   ],
   "open_questions": [
-    "Qual checklist mínimo de release comprova que hardening interno virou capacidade portável sem acoplamento local?"
+    "Qual modelo mínimo de ownership de sinais (operator/runtime/governance) reduz ruído sem perder discoverability?"
   ],
   "key_decisions_pending": [
-    "Quando e como tornar promoção seletiva de worktree->main automática com allowlist de escopo."
+    "Automatizar promoção seletiva de worktree->main com allowlist de escopo sem aumentar complexidade operacional."
   ],
   "files_in_flux": [
-    ".project/decisions.json",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json",
-    "docs/guides/project-canonical-pipeline.md",
-    "docs/guides/agent-driver-charter.md",
-    "docs/research/supervised-swarm-smoke-2026-04-22.md"
+    "docs/guides/project-canonical-pipeline.md"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T21:30:00.000Z",
+      "atIso": "2026-04-22T21:48:00.000Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 57,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

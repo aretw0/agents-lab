@@ -2895,6 +2895,32 @@
           "evidence": "Checklist de release ainda pendente para fechamento total do TASK-BUD-111."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-161",
+      "target": "TASK-BUD-111",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Blueprint agnóstico consolidado com checklist de release/dogfooding no `docs/guides/project-canonical-pipeline.md` (seção 'Checklist de release/dogfooding (portabilidade da fábrica)'). A seção formaliza separação canônico vs local, native-first default, preservação de governança, evidência de portabilidade e rollback explícito para promover hardening interno como capability reutilizável da pi-stack.",
+      "criteria_results": [
+        {
+          "criterion": "Blueprint distingue explicitamente o que é canônico/portável (primitivas, gates, evidência) do que é convenção local do agents-lab.",
+          "status": "passed",
+          "evidence": "Checklist exige separação canônico vs local antes de promoção."
+        },
+        {
+          "criterion": "Runbooks principais incluem trilha adapter-first para usuários externos sem perda de governança (no-auto-close, verification gate, budget discipline).",
+          "status": "passed",
+          "evidence": "Runbook reforça native-first/adapter-friendly com governança preservada em qualquer interface."
+        },
+        {
+          "criterion": "Existe checklist de release/dogfooding para validar que melhorias de fábrica interna chegam como potencial reutilizável no pacote pi-stack.",
+          "status": "passed",
+          "evidence": "Checklist explícito adicionado ao pipeline canônico com critérios operacionais de promoção/rollback."
+        }
+      ]
     }
   ]
 }

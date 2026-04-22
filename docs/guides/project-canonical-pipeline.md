@@ -34,6 +34,15 @@ Invariantes em ambos os modos:
 - verificação auditável (`verification`) antes de `completed`;
 - decisões/handoff curtos para retomada determinística.
 
+### Checklist de release/dogfooding (portabilidade da fábrica)
+
+Antes de promover hardening interno como capability da pi-stack:
+1. **Separar canônico vs local:** confirmar que a melhoria está em primitivas/adapters (não em convenção exclusiva do laboratório).
+2. **Native-first por padrão:** quando existir primitiva first-party (ex.: steer/follow-up), ela deve ser default; convenções extras ficam opt-in.
+3. **Governança preservada:** manter `no-auto-close`, `verification gate` e budget discipline em qualquer interface/runner.
+4. **Evidência de portabilidade:** registrar no board ao menos 1 verificação (`inspect`/`command`/`test`) provando que o ganho é reutilizável fora do agents-lab.
+5. **Rollback explícito:** documentar fallback seguro caso a promoção aumente ruído, custo ou acoplamento.
+
 ## Loop operacional (5-10 min)
 1. Capturar mudanças no board canônico:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.

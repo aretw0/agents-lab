@@ -2561,7 +2561,7 @@
     {
       "id": "TASK-BUD-111",
       "description": "[P1] Converter hardening da fábrica interna em blueprint agnóstico da pi-stack (primitivas + adapters), reduzindo dependência de convenções locais do laboratório.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-096"
       ],
@@ -2583,7 +2583,8 @@
         "Runbooks principais incluem trilha adapter-first para usuários externos sem perda de governança (no-auto-close, verification gate, budget discipline).",
         "Existe checklist de release/dogfooding para validar que melhorias de fábrica interna chegam como potencial reutilizável no pacote pi-stack."
       ],
-      "notes": "Backlog solicitado pelo usuário (2026-04-22): manter foco na nossa fábrica sem perder objetivo de agnosticismo para entregar potencial real a quem usar a pi-stack fora do laboratório.\n[2026-04-22T00:00:00Z] Formalização native-first: runbooks canônicos atualizados para priorizar steer/follow-up nativo e tratar lane-queue como opt-in (cross-turn/idle), preservando superfície first-party como padrão portável para usuários externos. Evidência: VER-BUD-160."
+      "notes": "Backlog solicitado pelo usuário (2026-04-22): manter foco na nossa fábrica sem perder objetivo de agnosticismo para entregar potencial real a quem usar a pi-stack fora do laboratório.\n[2026-04-22T00:00:00Z] Formalização native-first: runbooks canônicos atualizados para priorizar steer/follow-up nativo e tratar lane-queue como opt-in (cross-turn/idle), preservando superfície first-party como padrão portável para usuários externos. Evidência: VER-BUD-160.\n[2026-04-22T00:00:00Z] Checklist de release/dogfooding para portabilidade da fábrica adicionado ao pipeline canônico (separação canônico vs local, native-first default, governança preservada, evidência de portabilidade e rollback explícito). Evidência: VER-BUD-161.",
+      "verification": "VER-BUD-161"
     },
     {
       "id": "TASK-BUD-112",
