@@ -819,6 +819,13 @@ export function resolveAutoDrainRetryDelayMs(
   return waitMs;
 }
 
+export function shouldSchedulePostDispatchAutoDrain(
+  dispatched: number,
+  remainingQueuedCount: number,
+): boolean {
+  return dispatched > 0 && remainingQueuedCount > 0;
+}
+
 export function enqueueDeferredIntent(
   cwd: string,
   text: string,
@@ -1045,6 +1052,17 @@ export default function (pi: ExtensionAPI) {
     if (dispatched <= 0) {
       updateLongRunLaneStatus(ctx, activeLongRun);
       return false;
+    }
+
+    const remainingQueuedCount = getDeferredIntentQueueCount(ctx.cwd);
+    if (shouldSchedulePostDispatchAutoDrain(dispatched, remainingQueuedCount)) {
+      scheduleAutoDrainDeferredIntent(ctx, "idle_timer");
+      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-backstop", {
+        atIso: new Date().toISOString(),
+        reason,
+        dispatched,
+        remainingQueuedCount,
+      });
     }
 
     lastAutoDrainAt = nowMs;

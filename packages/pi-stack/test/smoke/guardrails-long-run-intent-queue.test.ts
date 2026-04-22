@@ -18,6 +18,7 @@ import {
   shouldQueueInputForLongRun,
   buildPragmaticAutonomySystemPrompt,
   summarizeAssumptionText,
+  shouldSchedulePostDispatchAutoDrain,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -176,6 +177,12 @@ describe("guardrails-core long-run intent queue", () => {
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
+  });
+
+  it("schedules post-dispatch backstop only when queue still has items", () => {
+    expect(shouldSchedulePostDispatchAutoDrain(0, 3)).toBe(false);
+    expect(shouldSchedulePostDispatchAutoDrain(1, 0)).toBe(false);
+    expect(shouldSchedulePostDispatchAutoDrain(1, 2)).toBe(true);
   });
 
   it("auto-drains only when idle, enabled and after cooldown", () => {
