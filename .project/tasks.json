@@ -2665,7 +2665,7 @@
         "Registro canônico inclui evidência de seleção (promoted vs skipped) com motivo auditável, sem auto-close estratégico.",
         "Fallback para L2 permanece explícito quando allowlist resultar em promoção vazia ou evidência insuficiente."
       ],
-      "notes": "Solicitação implícita do usuário (2026-04-22): movimento worktree->main deve ser mais automático que reescrever arquivo manualmente, mantendo governança e controle de escopo.\n[2026-04-22T00:00:00Z] Blueprint inicial registrado em `docs/research/worktree-selective-promotion-blueprint-2026-04-22.md` com fluxo de allowlist (`promoted` vs `skipped`), evidência canônica e fallback explícito para L2 quando promoção seletiva for vazia. Evidência: VER-BUD-165.\n[2026-04-22T00:00:00Z] Micro-slice runtime+docs: `evaluateColonyDeliveryEvidence` passou a exigir inventário de seleção (`Promoted file inventory` + `Skipped file inventory`) quando mode=`apply-to-branch`; parser dedicado exportado (`evaluateSelectivePromotionInventoryEvidence`) e smoke coverage adicionada. Pipeline canônico atualizado com contrato explícito de evidência. Evidência: VER-BUD-166."
+      "notes": "Solicitação implícita do usuário (2026-04-22): movimento worktree->main deve ser mais automático que reescrever arquivo manualmente, mantendo governança e controle de escopo.\n[2026-04-22T00:00:00Z] Blueprint inicial registrado em `docs/research/worktree-selective-promotion-blueprint-2026-04-22.md` com fluxo de allowlist (`promoted` vs `skipped`), evidência canônica e fallback explícito para L2 quando promoção seletiva for vazia. Evidência: VER-BUD-165.\n[2026-04-22T00:00:00Z] Micro-slice runtime+docs: `evaluateColonyDeliveryEvidence` passou a exigir inventário de seleção (`Promoted file inventory` + `Skipped file inventory`) quando mode=`apply-to-branch`; parser dedicado exportado (`evaluateSelectivePromotionInventoryEvidence`) e smoke coverage adicionada. Pipeline canônico atualizado com contrato explícito de evidência. Evidência: VER-BUD-166.\n[2026-04-22T00:00:00Z] Sinal de deflação atendido: extraído módulo coeso `packages/pi-stack/extensions/colony-pilot-delivery-policy.ts` (parse/resolve/evaluate/format de delivery), mantendo `colony-pilot.ts` como orquestrador com wrappers/re-exports estáveis para reduzir reinflação do arquivo principal. Evidência: VER-BUD-167."
     },
     {
       "id": "TASK-BUD-115",
@@ -2690,6 +2690,31 @@
         "Existe proteção anti-paralisia (detecção de adiamento repetido) com recomendação explícita e auditável para fechar slice + compactar."
       ],
       "notes": "Assimilado de feedback direto do usuário (2026-04-22): manter cautela ao cruzar threshold, mas sem deixar o modelo 'com medo' e travar; objetivo é fechar o que foi feito com calma e deixar o compact acontecer em idle."
+    },
+    {
+      "id": "TASK-BUD-116",
+      "description": "[P1] Desinflar `colony-pilot.ts` em módulos coesos (delivery-policy, budget-gates, command-surfaces, retention wiring), mantendo entrypoint orquestrador + contrato público estável.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-114"
+      ],
+      "references": [
+        "REQ-BUD-054",
+        "REQ-BUD-055",
+        "DEC-BUD-044"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "docs/guides/agent-driver-charter.md"
+      ],
+      "acceptance_criteria": [
+        "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+        "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+        "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado."
+      ],
+      "notes": "Criada após feedback do usuário (2026-04-22): arquivo está grande e deve ser quebrado em partes para sustentar fábrica long-run sem custo cognitivo excessivo. Slice inicial já entregue com extração de delivery-policy (VER-BUD-167)."
     }
   ]
 }

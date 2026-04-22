@@ -3041,6 +3041,32 @@
           "evidence": "Automação de aplicação allowlist ainda pendente para próximo slice."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-167",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Deflação inicial do `colony-pilot` executada: extraído `packages/pi-stack/extensions/colony-pilot-delivery-policy.ts` com contrato de delivery (parse override, resolver policy, evidência e formatação). `colony-pilot.ts` passou a delegar para o módulo coeso com wrappers/re-exports, reduzindo acoplamento no orquestrador. Regressão coberta por `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Fluxo de promoção seletiva mantém evidência promoted/skipped com motivo auditável.",
+          "status": "passed",
+          "evidence": "Gate em apply-to-branch permanece ativo via módulo extraído + smoke test."
+        },
+        {
+          "criterion": "Refatoração preserva contrato público existente de parser/evaluation no extension entrypoint.",
+          "status": "passed",
+          "evidence": "`colony-pilot.ts` mantém exports via wrappers; suíte smoke continua verde."
+        },
+        {
+          "criterion": "Automação full de allowlist (aplicação promoted/skipped por diff) concluída.",
+          "status": "skipped",
+          "evidence": "Pendente próximo slice da TASK-BUD-114."
+        }
+      ]
     }
   ]
 }

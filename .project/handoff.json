@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-22T22:25:00.000Z",
-  "context": "Foco fábrica mantido com contexto saudável. TASK-BUD-114 avançou no contrato runtime: apply-to-branch agora exige evidência de seleção (`Promoted file inventory` + `Skipped file inventory`) para evitar promoção opaca e reforçar trilha candidate/recovery quando faltar escopo explícito.",
+  "timestamp": "2026-04-22T22:34:00.000Z",
+  "context": "Feedback do usuário confirmado: `colony-pilot.ts` estava grande demais para manter ritmo de fábrica. Estratégia aplicada: split incremental com orquestrador estável. Slice entregue: extração do domínio de delivery para `colony-pilot-delivery-policy.ts`, mantendo wrappers/re-exports no entrypoint.",
   "current_phase": "factory-selective-promotion-hardening",
   "current_tasks": [
     "TASK-BUD-114"
@@ -8,26 +8,26 @@
   "blockers": [],
   "next_actions": [
     "Implementar allowlist efetiva de promoção (seleção automática promoted/skipped a partir do diff).",
-    "Persistir evidência promoted/skipped no retention/candidate trail sem auto-close estratégico.",
-    "Manter TASK-BUD-112 apenas em backlog/preparação; TASK-BUD-115 segue planejada para evolução de context-watch."
+    "Registrar motivo por arquivo skipped no trail canônico e retention.",
+    "Planejar próximos cortes de desinflação sob TASK-BUD-116 (budget-gates e command surface)."
   ],
   "open_questions": [
     "Qual formato mínimo de scopePolicy (docs-only vs globs) para aplicar allowlist sem falso positivo?"
   ],
   "key_decisions_pending": [
-    "Quando habilitar aplicação automática de allowlist por default versus manter opt-in inicial."
+    "Ativar automação de allowlist por default ou manter opt-in inicial com auditoria reforçada."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
     "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
-    "docs/guides/project-canonical-pipeline.md",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:25:00.000Z",
+      "atIso": "2026-04-22T22:34:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 24,
@@ -37,7 +37,7 @@
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; continue factory slices."
+      "recommendation": "Context healthy; continue larger factory slices with bounded scope."
     }
   ]
 }
