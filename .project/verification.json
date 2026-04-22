@@ -1470,6 +1470,32 @@
           "evidence": "Novo retry delay determinístico evita perda de drain por gate transitório e mantém dispatch somente quando waitMs=0."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-106",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice complementar de governança lane-queue em `packages/pi-stack/extensions/guardrails-core.ts`: nova classificação explícita `resolveAutoDrainGateReason(...)` (disabled|empty|active-long-run|cooldown|idle-stability|ready), usada para telemetria de status (`/lane-queue status` agora inclui `gate=<reason>`) e para auditoria determinística de deferimento (`guardrails-core.long-run-intent-auto-drain-deferred` com gate+retryDelayMs). Cobertura em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` validando classificação de gate e semântica de retry. Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 1 file passed, 8 tests passed. Commit: `49e5bcb`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Quando houver execução ativa de long run, prompts fora do lane atual não interrompem o fluxo principal.",
+          "status": "passed",
+          "evidence": "Gate `active-long-run` permanece explícito e preserva deferimento sem foco imediato."
+        },
+        {
+          "criterion": "Solicitações rápidas do usuário/operador podem ser registradas como itens de fila com ACK curto e sem troca de foco imediata.",
+          "status": "passed",
+          "evidence": "Sem regressão de enqueue/ACK; somente telemetria e auditoria foram enriquecidas."
+        },
+        {
+          "criterion": "Fila é drenada apenas em janelas seguras (idle/sem conflito), com trilha auditável do que foi adiado e quando foi retomado.",
+          "status": "passed",
+          "evidence": "Gate reason + evento `auto-drain-deferred` tornam explícito quando a drenagem foi adiada por cooldown/idle-stability antes do auto-pop."
+        }
+      ]
     }
   ]
 }
