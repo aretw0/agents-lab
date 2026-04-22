@@ -111,6 +111,13 @@ import {
 	resolveColonyPilotDeliveryPolicy as resolveColonyPilotDeliveryPolicyImpl,
 } from "./colony-pilot-delivery-policy";
 import {
+	collectAntColonyProviders as collectAntColonyProvidersImpl,
+	evaluateAntColonyBudgetPolicy as evaluateAntColonyBudgetPolicyImpl,
+	evaluateProviderBudgetGate as evaluateProviderBudgetGateImpl,
+	formatBudgetPolicyEvaluation as formatBudgetPolicyEvaluationImpl,
+	parseBudgetOverrideReason as parseBudgetOverrideReasonImpl,
+} from "./colony-pilot-budget-policy";
+import {
 	analyzeQuota,
 	type ProviderBudgetMap,
 	type ProviderBudgetStatus,
@@ -515,42 +522,14 @@ export function parseBudgetOverrideReason(
 	goal: string,
 	overrideToken: string,
 ): string | undefined {
-	const token = overrideToken.trim();
-	if (!token) return undefined;
-
-	const lowerGoal = goal.toLowerCase();
-	const lowerToken = token.toLowerCase();
-	const idx = lowerGoal.indexOf(lowerToken);
-	if (idx < 0) return undefined;
-
-	const raw = goal.slice(idx + token.length).trim();
-	if (!raw) return undefined;
-
-	const reason = raw.split(/[\r\n;]+/)[0]?.trim();
-	return reason && reason.length > 0 ? reason : undefined;
+	return parseBudgetOverrideReasonImpl(goal, overrideToken);
 }
 
 export function collectAntColonyProviders(
 	input: AntColonyToolInput,
 	currentModelRef?: string,
 ): string[] {
-	const out = new Set<string>();
-
-	const add = (modelRef?: string) => {
-		const provider = providerOf(modelRef);
-		if (provider) out.add(provider);
-	};
-
-	add(currentModelRef);
-	add(input.scoutModel);
-	add(input.workerModel);
-	add(input.soldierModel);
-	add(input.designWorkerModel);
-	add(input.multimodalWorkerModel);
-	add(input.backendWorkerModel);
-	add(input.reviewWorkerModel);
-
-	return [...out.values()].sort();
+	return collectAntColonyProvidersImpl(input, currentModelRef);
 }
 
 export interface ColonyPilotProviderBudgetGateEvaluation {
@@ -571,144 +550,28 @@ export function evaluateProviderBudgetGate(
 	allocationWarnings: string[],
 	policy: ColonyPilotBudgetPolicyConfig,
 ): ColonyPilotProviderBudgetGateEvaluation {
-	const consideredProviders = collectAntColonyProviders(input, currentModelRef);
-	if (statuses.length === 0) {
-		return {
-			ok: true,
-			checked: false,
-			issues: [],
-			consideredProviders,
-			blockedProviders: [],
-			allocationWarnings,
-		};
-	}
-
-	const blocked = statuses
-		.filter((s) => s.state === "blocked")
-		.filter(
-			(s) =>
-				consideredProviders.length === 0 ||
-				consideredProviders.includes(s.provider),
-		);
-
-	if (blocked.length === 0) {
-		return {
-			ok: true,
-			checked: true,
-			issues: [],
-			consideredProviders,
-			blockedProviders: [],
-			allocationWarnings,
-		};
-	}
-
-	const blockedProviders = blocked.map((s) => s.provider).sort();
-
-	if (policy.allowProviderBudgetOverride) {
-		const reason = parseBudgetOverrideReason(
-			goal,
-			policy.providerBudgetOverrideToken,
-		);
-		if (reason) {
-			return {
-				ok: true,
-				checked: true,
-				issues: [],
-				consideredProviders,
-				blockedProviders,
-				allocationWarnings,
-				overrideReason: reason,
-			};
-		}
-	}
-
-	const issues = [
-		`provider budget blocked for: ${blockedProviders.join(", ")}`,
-		policy.allowProviderBudgetOverride
-			? `override required in goal: '${policy.providerBudgetOverrideToken}<reason>'`
-			: "override disabled by policy",
-	];
-
-	return {
-		ok: false,
-		checked: true,
-		issues,
-		consideredProviders,
-		blockedProviders,
+	return evaluateProviderBudgetGateImpl(
+		input,
+		currentModelRef,
+		goal,
+		statuses,
 		allocationWarnings,
-	};
+		policy,
+	);
 }
 
 export function evaluateAntColonyBudgetPolicy(
 	input: AntColonyToolInput,
 	policy: ColonyPilotBudgetPolicyConfig,
 ): ColonyPilotBudgetPolicyEvaluation {
-	const issues: string[] = [];
-
-	let effectiveMax =
-		typeof input.maxCost === "number" && Number.isFinite(input.maxCost)
-			? input.maxCost
-			: undefined;
-
-	if (
-		(effectiveMax === undefined || effectiveMax <= 0) &&
-		policy.autoInjectMaxCost
-	) {
-		const injected = normalizeOptionalBudget(policy.defaultMaxCostUsd);
-		if (injected !== undefined) {
-			input.maxCost = injected;
-			effectiveMax = injected;
-		}
-	}
-
-	if (
-		policy.requireMaxCost &&
-		(effectiveMax === undefined || effectiveMax <= 0)
-	) {
-		issues.push(
-			"maxCost is required for ant_colony (set input.maxCost or configure budgetPolicy.defaultMaxCostUsd)",
-		);
-	}
-
-	if (effectiveMax !== undefined) {
-		const min = normalizeOptionalBudget(policy.minMaxCostUsd);
-		const cap = normalizeOptionalBudget(policy.hardCapUsd);
-
-		if (min !== undefined && effectiveMax < min) {
-			issues.push(`maxCost (${effectiveMax}) is below minMaxCostUsd (${min})`);
-		}
-
-		if (cap !== undefined && effectiveMax > cap) {
-			issues.push(`maxCost (${effectiveMax}) exceeds hardCapUsd (${cap})`);
-		}
-	}
-
-	return {
-		ok: issues.length === 0,
-		issues,
-		effectiveMaxCostUsd: effectiveMax,
-	};
+	return evaluateAntColonyBudgetPolicyImpl(input, policy);
 }
 
 function formatBudgetPolicyEvaluation(
 	policy: ColonyPilotBudgetPolicyConfig,
 	evaluation: ColonyPilotBudgetPolicyEvaluation,
 ): string[] {
-	return [
-		"budget-policy:",
-		`  enabled: ${policy.enabled ? "yes" : "no"}`,
-		`  enforceOnAntColonyTool: ${policy.enforceOnAntColonyTool ? "yes" : "no"}`,
-		`  requireMaxCost: ${policy.requireMaxCost ? "yes" : "no"}`,
-		`  autoInjectMaxCost: ${policy.autoInjectMaxCost ? "yes" : "no"}`,
-		`  defaultMaxCostUsd: ${policy.defaultMaxCostUsd ?? "(none)"}`,
-		`  hardCapUsd: ${policy.hardCapUsd ?? "(none)"}`,
-		`  minMaxCostUsd: ${policy.minMaxCostUsd ?? "(none)"}`,
-		`  enforceProviderBudgetBlock: ${policy.enforceProviderBudgetBlock ? "yes" : "no"}`,
-		`  providerBudgetLookbackDays: ${policy.providerBudgetLookbackDays}`,
-		`  allowProviderBudgetOverride: ${policy.allowProviderBudgetOverride ? "yes" : "no"}`,
-		`  providerBudgetOverrideToken: ${policy.providerBudgetOverrideToken}`,
-		`  effectiveMaxCostUsd: ${evaluation.effectiveMaxCostUsd ?? "(none)"}`,
-	];
+	return formatBudgetPolicyEvaluationImpl(policy, evaluation);
 }
 
 export interface ColonyModelPolicyEvaluation {

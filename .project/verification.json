@@ -3067,6 +3067,32 @@
           "evidence": "Pendente próximo slice da TASK-BUD-114."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-168",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Deflação incremental do `colony-pilot` avançada com extração de budget domain para `packages/pi-stack/extensions/colony-pilot-budget-policy.ts` (override reason, provider aggregation, provider budget gate, budget policy evaluation, formatter). `colony-pilot.ts` manteve wrappers/re-exports estáveis no entrypoint. Regressão: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Delivery + budget já extraídos para módulos dedicados; entrypoint ficou com delegação."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "APIs públicas preservadas por wrappers; smoke parsers verde sem ajuste de consumo externo."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "Suíte focada de colony-pilot parsers: 72/72 após extração."
+        }
+      ]
     }
   ]
 }

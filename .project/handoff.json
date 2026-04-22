@@ -1,33 +1,34 @@
 {
-  "timestamp": "2026-04-22T22:34:00.000Z",
-  "context": "Feedback do usuário confirmado: `colony-pilot.ts` estava grande demais para manter ritmo de fábrica. Estratégia aplicada: split incremental com orquestrador estável. Slice entregue: extração do domínio de delivery para `colony-pilot-delivery-policy.ts`, mantendo wrappers/re-exports no entrypoint.",
-  "current_phase": "factory-selective-promotion-hardening",
+  "timestamp": "2026-04-22T22:40:00.000Z",
+  "context": "Deflação de `colony-pilot.ts` confirmada como trilha ativa após feedback do usuário. Além do slice de delivery já extraído, o slice 2 moveu budget-gates/policy para módulo próprio, mantendo entrypoint estável e testado.",
+  "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
-    "TASK-BUD-114"
+    "TASK-BUD-114",
+    "TASK-BUD-116"
   ],
   "blockers": [],
   "next_actions": [
-    "Implementar allowlist efetiva de promoção (seleção automática promoted/skipped a partir do diff).",
-    "Registrar motivo por arquivo skipped no trail canônico e retention.",
-    "Planejar próximos cortes de desinflação sob TASK-BUD-116 (budget-gates e command surface)."
+    "TASK-BUD-114: implementar allowlist efetiva promoted/skipped a partir de scope policy + diff.",
+    "TASK-BUD-116: extrair próximo domínio (command-surfaces ou retention wiring) mantendo wrappers estáveis.",
+    "Manter TASK-BUD-112 em backlog/preparação; TASK-BUD-115 permanece planned."
   ],
   "open_questions": [
-    "Qual formato mínimo de scopePolicy (docs-only vs globs) para aplicar allowlist sem falso positivo?"
+    "Preferir próximo corte em command-surfaces (UX/comandos) ou retention wiring (artefatos/runtime snapshot) para maior redução de acoplamento?"
   ],
   "key_decisions_pending": [
-    "Ativar automação de allowlist por default ou manter opt-in inicial com auditoria reforçada."
+    "Quando ativar allowlist automática por default no promotion flow versus iniciar como opt-in auditado."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
     "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
-    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+    "packages/pi-stack/extensions/colony-pilot-budget-policy.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:34:00.000Z",
+      "atIso": "2026-04-22T22:40:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 24,
@@ -37,7 +38,7 @@
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; continue larger factory slices with bounded scope."
+      "recommendation": "Context healthy; larger factory slices remain safe with bounded scope."
     }
   ]
 }

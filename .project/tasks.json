@@ -2694,7 +2694,7 @@
     {
       "id": "TASK-BUD-116",
       "description": "[P1] Desinflar `colony-pilot.ts` em módulos coesos (delivery-policy, budget-gates, command-surfaces, retention wiring), mantendo entrypoint orquestrador + contrato público estável.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-114"
       ],
@@ -2706,6 +2706,7 @@
       "files": [
         "packages/pi-stack/extensions/colony-pilot.ts",
         "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
+        "packages/pi-stack/extensions/colony-pilot-budget-policy.ts",
         "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
         "docs/guides/agent-driver-charter.md"
       ],
@@ -2714,7 +2715,7 @@
         "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
         "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado."
       ],
-      "notes": "Criada após feedback do usuário (2026-04-22): arquivo está grande e deve ser quebrado em partes para sustentar fábrica long-run sem custo cognitivo excessivo. Slice inicial já entregue com extração de delivery-policy (VER-BUD-167)."
+      "notes": "Criada após feedback do usuário (2026-04-22): arquivo está grande e deve ser quebrado em partes para sustentar fábrica long-run sem custo cognitivo excessivo. Slice inicial já entregue com extração de delivery-policy (VER-BUD-167).\n[2026-04-22T00:00:00Z] Slice 2 de deflação: extraído `packages/pi-stack/extensions/colony-pilot-budget-policy.ts` (parse override, provider collection, budget gate, budget evaluation e format), mantendo `colony-pilot.ts` como orquestrador com wrappers/re-exports estáveis; smoke focada verde. Evidência: VER-BUD-168."
     }
   ]
 }
