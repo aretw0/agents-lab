@@ -1860,6 +1860,27 @@
           "evidence": "Smoke test atualizado e passando (8/8)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-121",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Hardening determinístico no contrato canônico task/event: `canonicalTaskEventId` em `packages/pi-stack/extensions/colony-pilot-task-sync.ts` não usa mais `Date.now()` quando timestamp é inválido; fallback agora é estável (`ts-unknown`), preservando reprodutibilidade backend-agnostic. Teste de smoke adicionado em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` valida que dois eventos com mesmos campos e timestamp inválido geram o mesmo `eventId` e incluem `ts-unknown`. Validação executada: `vitest run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 7/7 pass. Commit: `e7aaacd`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Event IDs canônicos devem ser determinísticos para mesmo payload.",
+          "status": "passed",
+          "evidence": "Fallback temporal agora é estável e não depende de relógio local."
+        },
+        {
+          "criterion": "Mudança coberta por teste de regressão.",
+          "status": "passed",
+          "evidence": "Novo caso de smoke verifica igualdade de IDs em chamadas repetidas com timestamp inválido."
+        }
+      ]
     }
   ]
 }
