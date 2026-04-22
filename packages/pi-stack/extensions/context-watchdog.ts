@@ -21,25 +21,6 @@ import {
 	type ContextThresholdOverrides,
 } from "./custom-footer";
 import {
-	buildAutoResumePromptFromHandoff,
-	handoffFreshnessAdvice,
-	handoffRefreshMode,
-	resolveHandoffFreshness,
-	toAgeSec,
-	type HandoffFreshnessLabel,
-} from "./context-watchdog-handoff";
-import {
-	buildAutoCompactDiagnostics,
-} from "./context-watchdog-auto-compact";
-import {
-	applyContextWatchToHandoff,
-	contextWatchEventAgeMs,
-	latestContextWatchEvent,
-	summarizeContextWatchEvent,
-	type ContextWatchHandoffReason,
-} from "./context-watchdog-handoff-events";
-
-export {
 	buildAutoCompactDiagnostics,
 	resolveAutoCompactRetryDelayMs,
 	shouldScheduleAutoCompactRetry,
@@ -47,8 +28,7 @@ export {
 	type ContextWatchAutoCompactDecision,
 	type ContextWatchAutoCompactDiagnostics,
 } from "./context-watchdog-auto-compact";
-
-export {
+import {
 	buildAutoResumePromptFromHandoff,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
@@ -57,8 +37,7 @@ export {
 	type HandoffFreshnessLabel,
 	type HandoffRefreshMode,
 } from "./context-watchdog-handoff";
-
-export {
+import {
 	applyContextWatchToHandoff,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
@@ -66,6 +45,31 @@ export {
 	type ContextWatchHandoffEvent,
 	type ContextWatchHandoffReason,
 } from "./context-watchdog-handoff-events";
+
+export {
+	applyContextWatchToHandoff,
+	buildAutoCompactDiagnostics,
+	buildAutoResumePromptFromHandoff,
+	contextWatchEventAgeMs,
+	handoffFreshnessAdvice,
+	handoffRefreshMode,
+	latestContextWatchEvent,
+	resolveAutoCompactRetryDelayMs,
+	resolveHandoffFreshness,
+	shouldScheduleAutoCompactRetry,
+	shouldTriggerAutoCompact,
+	summarizeContextWatchEvent,
+	toAgeSec,
+};
+
+export type {
+	ContextWatchAutoCompactDecision,
+	ContextWatchAutoCompactDiagnostics,
+	ContextWatchHandoffEvent,
+	ContextWatchHandoffReason,
+	HandoffFreshnessLabel,
+	HandoffRefreshMode,
+};
 
 export type ContextWatchdogLevel = "ok" | "warn" | "checkpoint" | "compact";
 
