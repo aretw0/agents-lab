@@ -578,9 +578,11 @@ function readSettingsJson(cwd: string): Record<string, unknown> {
 	return {};
 }
 
+export type ContextWatchHandoffReason = "session_start" | "message_end" | "auto_compact_prep";
+
 export type ContextWatchHandoffEvent = {
 	atIso: string;
-	reason: "session_start" | "message_end";
+	reason: ContextWatchHandoffReason;
 	level: ContextWatchdogLevel;
 	percent: number;
 	thresholds: ContextWatchThresholds;
@@ -620,9 +622,14 @@ function normalizeContextWatchEventList(value: unknown): ContextWatchHandoffEven
 		if (!Number.isFinite(percent) || !Number.isFinite(warnPct) || !Number.isFinite(checkpointPct) || !Number.isFinite(compactPct)) {
 			continue;
 		}
+		const reason = row.reason === "session_start"
+			? "session_start"
+			: row.reason === "auto_compact_prep"
+				? "auto_compact_prep"
+				: "message_end";
 		out.push({
 			atIso: typeof row.atIso === "string" && row.atIso ? row.atIso : new Date().toISOString(),
-			reason: row.reason === "session_start" ? "session_start" : "message_end",
+			reason,
 			level,
 			percent: Math.max(0, Math.min(100, Math.floor(percent))),
 			thresholds: {
@@ -663,7 +670,7 @@ function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
 export function applyContextWatchToHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	assessment: ContextWatchAssessment,
-	reason: "session_start" | "message_end",
+	reason: ContextWatchHandoffReason,
 	atIso: string,
 ): Record<string, unknown> {
 	const base = (handoffInput && typeof handoffInput === "object")
@@ -720,7 +727,7 @@ function writeHandoffJson(cwd: string, handoff: Record<string, unknown>): string
 function persistContextWatchHandoffEvent(
 	ctx: ExtensionContext,
 	assessment: ContextWatchAssessment,
-	reason: "session_start" | "message_end",
+	reason: ContextWatchHandoffReason,
 ): string | undefined {
 	if (assessment.level === "ok") return undefined;
 	const nowIso = new Date().toISOString();
@@ -803,7 +810,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}, safeDelayMs);
 	};
 
-	const run = (ctx: ExtensionContext, reason: "session_start" | "message_end") => {
+	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
 		if (!config.enabled) {
 			ctx.ui.setStatus?.("context-watch", "[ctx] disabled");
 			return;
@@ -832,7 +839,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (autoCompactState.decision.trigger) {
 			if (shouldRefreshHandoffBeforeAutoCompact(assessment, config) && !handoffPath) {
-				handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
+				handoffPath = persistContextWatchHandoffEvent(ctx, assessment, "auto_compact_prep");
 			}
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;

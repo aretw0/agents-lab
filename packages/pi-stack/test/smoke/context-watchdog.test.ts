@@ -249,12 +249,20 @@ describe("context-watchdog", () => {
 			"2026-04-21T21:30:00.000Z",
 		) as any;
 
+		const prep = applyContextWatchToHandoff(
+			next,
+			assessment,
+			"auto_compact_prep",
+			"2026-04-21T21:31:00.000Z",
+		) as any;
+
 		expect(next.timestamp).toBe("2026-04-21T21:30:00.000Z");
 		expect(next.next_actions[0]).toContain("Context-watch action:");
 		expect(next.next_actions[0]).toContain("checkpoint");
 		expect(next.blockers).toContain("context-watch-checkpoint-required");
 		expect(Array.isArray(next.context_watch_events)).toBe(true);
 		expect(next.context_watch_events.at(-1).action).toBe("write-checkpoint");
+		expect(prep.context_watch_events.at(-1).reason).toBe("auto_compact_prep");
 	});
 
 	it("cleans old context-watch blockers when level returns to ok", () => {
