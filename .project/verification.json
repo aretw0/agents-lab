@@ -1600,6 +1600,32 @@
           "evidence": "Sem alteração documental neste slice."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-111",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice de projeção canônica para ingestão adapter-first em `packages/pi-stack/extensions/colony-pilot-task-sync.ts`: helper `applyCanonicalTaskEventToProjectTask(...)` introduzido para aplicar payload `task_event` canônico em tarefa de board (status + nota) usando semântica centralizada de `canonicalTaskEventTypeToProjectTaskStatus`. Isso prepara caminho bidirecional para adapters externos (CI/GitHub/Gitea/SQLite/browser) sem duplicar regras no writer local. Cobertura adicionada em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` validando projeção de evento `done_verified` (source=ci) para `completed` com trilha em notes. Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 1 file passed, 6 tests passed. Commit: `7a5a23b`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Além do builder de evento, agora existe projector de ingestão evento->task para adapters externos reaproveitarem semântica única."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "skipped",
+          "evidence": "Sem mudança documental neste micro-slice."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "skipped",
+          "evidence": "Sem mudança documental neste micro-slice."
+        }
+      ]
     }
   ]
 }
