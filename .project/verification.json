@@ -2037,6 +2037,58 @@
           "evidence": "Seção 'Regra para novos widgets/superfícies' com perguntas de gate antes de admissão."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-128",
+      "target": "TASK-BUD-085",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Policy de autonomia pragmática (no-obvious-questions) materializada em `packages/pi-stack/extensions/guardrails-core.ts`: (1) `buildPragmaticAutonomySystemPrompt` injeta instrução determinística para resolver ambiguidades de baixo risco sem perguntar; (2) escalonamento fica restrito a ações irreversíveis/risco de perda de dados/segurança/conflito de objetivo; (3) assunções automáticas ficam auditáveis via `guardrails-core.pragmatic-autonomy-policy` e `guardrails-core.pragmatic-assumption-applied` (com preview truncado por `summarizeAssumptionText`). Em fluxo de long-run, mensagens não-comando passam a ser deferidas com nota explícita de assunção automática, preservando lane e evitando interrupção óbvia. Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` para defaults/config/prompt/summary. Validação: `vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 11/11 pass. Docs alinhadas: `docs/guides/agent-driver-charter.md` e `docs/guides/project-canonical-pipeline.md`. Commit: `9c5c6d6`.",
+      "criteria_results": [
+        {
+          "criterion": "Ambiguidades de baixo risco (formato, ordem de execução, micro-escolhas de implementação) são resolvidas por default determinístico sem pedir confirmação.",
+          "status": "passed",
+          "evidence": "Prompt de autonomia pragmática instruindo default seguro + deferimento automático de interrupções low-risk em long-run."
+        },
+        {
+          "criterion": "Perguntas ao usuário ficam restritas a ações irreversíveis, risco de perda de dados, ou conflito de objetivo explícito.",
+          "status": "passed",
+          "evidence": "Policy injetada lista explicitamente os únicos casos de escalonamento."
+        },
+        {
+          "criterion": "Toda assunção automática fica auditável (note/audit log) para revisão posterior sem interromper o fluxo ativo.",
+          "status": "passed",
+          "evidence": "Novos audit keys `guardrails-core.pragmatic-*` com payload determinístico."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-129",
+      "target": "TASK-BUD-094",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Consolidação do envelope L1/L2/L3 avançou com fechamento dos gates de lane L1 previstos no milestone do charter: TASK-BUD-085 (VER-BUD-128), TASK-BUD-091 (VER-BUD-123) e TASK-BUD-092 (VER-BUD-122) agora estão completed. O documento `docs/guides/agent-driver-charter.md` mantém definição objetiva de lanes/stop-conditions e foi atualizado com policy operacional no-obvious-questions + trilha auditável (`guardrails-core.pragmatic-*`). Pendência para fechamento integral de TASK-BUD-094 permanece na promoção L1→L2 vinculada a TASK-BUD-086/TASK-BUD-096.",
+      "criteria_results": [
+        {
+          "criterion": "Documento define claramente L1(control-plane), L2(subagents), L3(swarm) com gates e limites auditáveis.",
+          "status": "passed",
+          "evidence": "Charter já cobre lanes + gates e foi reforçado com policy no-obvious-questions."
+        },
+        {
+          "criterion": "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
+          "status": "passed",
+          "evidence": "Seções de stop conditions e fallback por lane já presentes no charter."
+        },
+        {
+          "criterion": "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas.",
+          "status": "skipped",
+          "evidence": "Pacote L1 avançado com 085/091/092 fechadas; resta concluir 086/096 para promoção L1→L2."
+        }
+      ]
     }
   ]
 }

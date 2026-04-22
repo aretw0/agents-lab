@@ -1965,7 +1965,7 @@
     {
       "id": "TASK-BUD-085",
       "description": "[P0] Implementar policy de autonomia pragmática para long runs (no-obvious-questions): assumir defaults seguros e só interromper o usuário em decisões irreversíveis/alto risco.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-084",
         "TASK-BUD-083"
@@ -1980,7 +1980,8 @@
         "Perguntas ao usuário ficam restritas a ações irreversíveis, risco de perda de dados, ou conflito de objetivo explícito.",
         "Toda assunção automática fica auditável (note/audit log) para revisão posterior sem interromper o fluxo ativo."
       ],
-      "notes": "Objetivo direto: reduzir interrupções óbvias e manter velocidade de cruzeiro com segurança.\n[2026-04-22T11:20:52.490Z] Priorizada como trilha imediata para velocidade de cruzeiro: reduzir perguntas obvias com defaults seguros e escalonamento apenas para risco irreversivel."
+      "notes": "Objetivo direto: reduzir interrupções óbvias e manter velocidade de cruzeiro com segurança.\n[2026-04-22T11:20:52.490Z] Priorizada como trilha imediata para velocidade de cruzeiro: reduzir perguntas obvias com defaults seguros e escalonamento apenas para risco irreversivel.",
+      "verification": "VER-BUD-128"
     },
     {
       "id": "TASK-BUD-086",
@@ -2182,8 +2183,8 @@
         "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
         "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas."
       ],
-      "verification": "VER-BUD-114",
-      "notes": "[2026-04-22T11:46:58.791Z] Envelope L1/L2/L3 publicado no charter com gates, fallback e milestone objetivo de calibração/autonomia. Evidência: VER-BUD-114 (dd043d2)."
+      "verification": "VER-BUD-129",
+      "notes": "[2026-04-22T11:46:58.791Z] Envelope L1/L2/L3 publicado no charter com gates, fallback e milestone objetivo de calibração/autonomia. Evidência: VER-BUD-114 (dd043d2).\n[2026-04-22T13:27:06.359Z] Marco L1 avancado: TASK-BUD-085/091/092 concluidas com evidencia canonica (VER-BUD-128/123/122). Pendencia de promocao L1->L2 permanece em TASK-BUD-086/TASK-BUD-096."
     },
     {
       "id": "TASK-BUD-095",
