@@ -1945,7 +1945,7 @@
     {
       "id": "TASK-BUD-084",
       "description": "[P0] Implementar fila de intenção não-bloqueante no control plane para evitar desvio de trabalho ativo por prompts aleatórios durante long runs.",
-      "status": "planned",
+      "status": "in-progress",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
         "packages/pi-stack/extensions/scheduler-governance.ts",
@@ -1957,7 +1957,8 @@
         "Solicitações rápidas do usuário/operador podem ser registradas como itens de fila com ACK curto e sem troca de foco imediata.",
         "Fila é drenada apenas em janelas seguras (idle/sem conflito), com trilha auditável do que foi adiado e quando foi retomado."
       ],
-      "notes": "Solicitação explícita do usuário: pragmatismo para escalar long runs; registrar rápido sem trocar de contexto, priorizando continuidade operacional."
+      "notes": "Solicitação explícita do usuário: pragmatismo para escalar long runs; registrar rápido sem trocar de contexto, priorizando continuidade operacional.\n[2026-04-22T01:54:33.974Z] Micro-slice: auto-drain da lane-queue passou a re-agendar retry deterministico quando bloqueado por cooldown/idle-stability (resolveAutoDrainRetryDelayMs), evitando perda de retomada apos tentativa unica. Evidencia: VER-BUD-105 (commit 6238a3b).",
+      "verification": "VER-BUD-105"
     }
   ]
 }

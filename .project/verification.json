@@ -1444,6 +1444,32 @@
           "evidence": "Invariantes explícitos no contrato + decisão DEC-BUD-035 + requisito REQ-BUD-042."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-105",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice de hardening da lane-queue aplicado em `packages/pi-stack/extensions/guardrails-core.ts`: auto-drain agora reage a gate transitório (cooldown/idle-stability) com re-schedule explícito em vez de tentativa única. Função nova `resolveAutoDrainRetryDelayMs(...)` cobre delay determinístico reaproveitando `estimateAutoDrainWaitMs(...)`. Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` validando cenários com retry necessário, sem retry e janela pronta para drain. Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 1 file passed, 8 tests passed. Commit: `6238a3b`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Quando houver execução ativa de long run, prompts fora do lane atual não interrompem o fluxo principal.",
+          "status": "passed",
+          "evidence": "Queue capture já existente foi preservada; mudança só endurece retomada automática em janela segura."
+        },
+        {
+          "criterion": "Solicitações rápidas do usuário/operador podem ser registradas como itens de fila com ACK curto e sem troca de foco imediata.",
+          "status": "passed",
+          "evidence": "Sem regressão no fluxo `/lane-queue add` e enqueue automático; smoke suite segue verde."
+        },
+        {
+          "criterion": "Fila é drenada apenas em janelas seguras (idle/sem conflito), com trilha auditável do que foi adiado e quando foi retomado.",
+          "status": "passed",
+          "evidence": "Novo retry delay determinístico evita perda de drain por gate transitório e mantém dispatch somente quando waitMs=0."
+        }
+      ]
     }
   ]
 }
