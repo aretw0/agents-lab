@@ -684,6 +684,121 @@ export function evaluateCodeBloatSmell(
   };
 }
 
+interface BloatSmellConfig {
+  enabled: boolean;
+  notifyOnTrigger: boolean;
+  cooldownMs: number;
+  text: {
+    enabled: boolean;
+    chars: number;
+    lines: number;
+    repeatedLineRatio: number;
+  };
+}
+
+const DEFAULT_BLOAT_SMELL_CONFIG: BloatSmellConfig = {
+  enabled: true,
+  notifyOnTrigger: false,
+  cooldownMs: 90_000,
+  text: {
+    enabled: true,
+    chars: 1200,
+    lines: 24,
+    repeatedLineRatio: 0.35,
+  },
+};
+
+export function resolveBloatSmellConfig(cwd: string): BloatSmellConfig {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return DEFAULT_BLOAT_SMELL_CONFIG;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.guardrailsCore?.bloatSmell ?? {};
+    const textCfg = cfg?.text ?? {};
+    const cooldownMsRaw = Number(cfg?.cooldownMs);
+    const charsRaw = Number(textCfg?.chars);
+    const linesRaw = Number(textCfg?.lines);
+    const repeatedRaw = Number(textCfg?.repeatedLineRatio);
+
+    return {
+      enabled: cfg?.enabled !== false,
+      notifyOnTrigger: cfg?.notifyOnTrigger === true,
+      cooldownMs: Number.isFinite(cooldownMsRaw)
+        ? Math.max(5_000, Math.min(600_000, Math.floor(cooldownMsRaw)))
+        : DEFAULT_BLOAT_SMELL_CONFIG.cooldownMs,
+      text: {
+        enabled: textCfg?.enabled !== false,
+        chars: Number.isFinite(charsRaw)
+          ? Math.max(200, Math.min(12_000, Math.floor(charsRaw)))
+          : DEFAULT_BLOAT_SMELL_CONFIG.text.chars,
+        lines: Number.isFinite(linesRaw)
+          ? Math.max(8, Math.min(300, Math.floor(linesRaw)))
+          : DEFAULT_BLOAT_SMELL_CONFIG.text.lines,
+        repeatedLineRatio: Number.isFinite(repeatedRaw)
+          ? Math.max(0.1, Math.min(0.9, repeatedRaw))
+          : DEFAULT_BLOAT_SMELL_CONFIG.text.repeatedLineRatio,
+      },
+    };
+  } catch {
+    return DEFAULT_BLOAT_SMELL_CONFIG;
+  }
+}
+
+export function shouldEmitBloatSmellSignal(
+  lastAtMs: number,
+  previousKey: string | undefined,
+  nextKey: string,
+  nowMs: number,
+  cooldownMs: number,
+): boolean {
+  if (!nextKey) return false;
+  if (previousKey !== nextKey) return true;
+  if (lastAtMs <= 0) return true;
+  return (nowMs - lastAtMs) >= Math.max(0, Math.floor(cooldownMs));
+}
+
+export function extractAssistantTextFromTurnMessage(message: unknown): string {
+  if (!message || typeof message !== "object") return "";
+  const row = message as Record<string, unknown>;
+  if (row.role !== "assistant") return "";
+
+  const chunks: string[] = [];
+  if (typeof row.text === "string" && row.text.trim().length > 0) {
+    chunks.push(row.text.trim());
+  }
+
+  const content = row.content;
+  if (typeof content === "string" && content.trim().length > 0) {
+    chunks.push(content.trim());
+  } else if (Array.isArray(content)) {
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const p = part as Record<string, unknown>;
+      const type = typeof p.type === "string" ? p.type.toLowerCase() : "";
+      const text = typeof p.text === "string" ? p.text : "";
+      if ((type === "text" || type === "output_text" || type === "markdown") && text.trim().length > 0) {
+        chunks.push(text.trim());
+      }
+    }
+  }
+
+  const parts = row.parts;
+  if (Array.isArray(parts)) {
+    for (const part of parts) {
+      if (!part || typeof part !== "object") continue;
+      const p = part as Record<string, unknown>;
+      const text = typeof p.text === "string" ? p.text : "";
+      if (text.trim().length > 0) chunks.push(text.trim());
+    }
+  }
+
+  return chunks.join("\n").trim();
+}
+
+export function buildTextBloatStatusLabel(assessment: TextBloatSmellAssessment): string {
+  return `[bloat] text chars=${assessment.metrics.chars} lines=${assessment.metrics.lines} rep=${assessment.metrics.repeatedLineRatio.toFixed(2)}`;
+}
+
 interface LongRunIntentQueueConfig {
   enabled: boolean;
   requireActiveLongRun: boolean;
@@ -1049,6 +1164,9 @@ export default function (pi: ExtensionAPI) {
   let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
   let pragmaticAutonomyConfig: PragmaticAutonomyConfig = DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+  let bloatSmellConfig: BloatSmellConfig = DEFAULT_BLOAT_SMELL_CONFIG;
+  let lastTextBloatSignalAt = 0;
+  let lastTextBloatSignalKey: string | undefined;
   let lastAutoDrainAt = 0;
   let lastAutoDrainDeferredAuditAt = 0;
   let lastAutoDrainDeferredGate: AutoDrainGateReason | undefined;
@@ -1219,6 +1337,7 @@ export default function (pi: ExtensionAPI) {
     );
     longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
     pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+    bloatSmellConfig = resolveBloatSmellConfig(ctx.cwd);
     if (providerBudgetGovernorMisconfig) {
       ctx.ui?.notify?.(
         providerBudgetGovernorMisconfigReason(providerBudgetGovernorMisconfig),
@@ -1230,9 +1349,12 @@ export default function (pi: ExtensionAPI) {
     lastAutoDrainAt = 0;
     lastAutoDrainDeferredAuditAt = 0;
     lastAutoDrainDeferredGate = undefined;
+    lastTextBloatSignalAt = 0;
+    lastTextBloatSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
     clearAutoDrainTimer();
     updateLongRunLaneStatus(ctx, false);
+    ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -1377,6 +1499,63 @@ export default function (pi: ExtensionAPI) {
     );
     return { action: "handled" as const };
   });
+
+  pi.on("turn_end", (event, ctx) => {
+    if (!bloatSmellConfig.enabled || !bloatSmellConfig.text.enabled) {
+      return;
+    }
+    const message = (event as unknown as { message?: unknown })?.message;
+    const assistantText = extractAssistantTextFromTurnMessage(message);
+    if (!assistantText) return;
+
+    const assessment = evaluateTextBloatSmell(assistantText, {
+      chars: bloatSmellConfig.text.chars,
+      lines: bloatSmellConfig.text.lines,
+      repeatedLineRatio: bloatSmellConfig.text.repeatedLineRatio,
+    });
+
+    if (!assessment.triggered) {
+      ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
+      return;
+    }
+
+    const statusLabel = buildTextBloatStatusLabel(assessment);
+    ctx.ui?.setStatus?.("guardrails-core-bloat", statusLabel);
+
+    const nowMs = Date.now();
+    const signalKey = assessment.reasons.join("|");
+    if (!shouldEmitBloatSmellSignal(
+      lastTextBloatSignalAt,
+      lastTextBloatSignalKey,
+      signalKey,
+      nowMs,
+      bloatSmellConfig.cooldownMs,
+    )) {
+      return;
+    }
+
+    appendAuditEntry(ctx, "guardrails-core.bloat-smell-text", {
+      atIso: new Date(nowMs).toISOString(),
+      reasons: assessment.reasons,
+      metrics: assessment.metrics,
+      recommendation: assessment.recommendation,
+      statusLabel,
+    });
+
+    if (bloatSmellConfig.notifyOnTrigger) {
+      ctx.ui.notify(
+        [
+          statusLabel,
+          assessment.recommendation,
+        ].join("\n"),
+        "info",
+      );
+    }
+
+    lastTextBloatSignalAt = nowMs;
+    lastTextBloatSignalKey = signalKey;
+  });
+
   pi.on("before_provider_request", async (_event, ctx) => {
     if (!providerBudgetGovernorConfig.enabled) return undefined;
     if (providerBudgetGovernorMisconfig) {
@@ -1582,6 +1761,7 @@ export default function (pi: ExtensionAPI) {
       ctx.ui?.setStatus?.("guardrails-core", undefined);
     }
     ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     lastLongRunBusyAt = Date.now();
     scheduleAutoDrainDeferredIntent(ctx, "agent_end");
     updateLongRunLaneStatus(ctx, false);

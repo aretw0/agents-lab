@@ -16,12 +16,16 @@ import {
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
   resolvePragmaticAutonomyConfig,
+  resolveBloatSmellConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
   buildPragmaticAutonomySystemPrompt,
   summarizeAssumptionText,
   evaluateTextBloatSmell,
   evaluateCodeBloatSmell,
+  extractAssistantTextFromTurnMessage,
+  buildTextBloatStatusLabel,
+  shouldEmitBloatSmellSignal,
   shouldSchedulePostDispatchAutoDrain,
   shouldEmitAutoDrainDeferredAudit,
 } from "../../extensions/guardrails-core";
@@ -55,6 +59,52 @@ describe("guardrails-core long-run intent queue", () => {
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
+  });
+
+  it("uses bloat-smell defaults and supports deterministic throttle keys", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-bloat-smell-default-"));
+    try {
+      const cfg = resolveBloatSmellConfig(cwd);
+      expect(cfg.enabled).toBe(true);
+      expect(cfg.notifyOnTrigger).toBe(false);
+      expect(cfg.cooldownMs).toBe(90_000);
+      expect(cfg.text.enabled).toBe(true);
+      expect(cfg.text.chars).toBe(1200);
+      expect(cfg.text.lines).toBe(24);
+
+      expect(shouldEmitBloatSmellSignal(0, undefined, "high-char-count:1200", 10_000, 90_000)).toBe(true);
+      expect(shouldEmitBloatSmellSignal(9_500, "same", "same", 10_000, 90_000)).toBe(false);
+      expect(shouldEmitBloatSmellSignal(9_500, "same", "changed", 10_000, 90_000)).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("extracts assistant text for bloat signal across message content shapes", () => {
+    const direct = extractAssistantTextFromTurnMessage({ role: "assistant", text: "resposta curta" });
+    expect(direct).toContain("resposta curta");
+
+    const contentParts = extractAssistantTextFromTurnMessage({
+      role: "assistant",
+      content: [
+        { type: "text", text: "linha 1" },
+        { type: "output_text", text: "linha 2" },
+      ],
+    });
+    expect(contentParts).toContain("linha 1");
+    expect(contentParts).toContain("linha 2");
+
+    const notAssistant = extractAssistantTextFromTurnMessage({ role: "user", text: "oi" });
+    expect(notAssistant).toBe("");
+  });
+
+  it("builds concise status label for text-bloat signal", () => {
+    const assessment = evaluateTextBloatSmell("a\n".repeat(40), { chars: 10, lines: 8, repeatedLineRatio: 0.9 });
+    const label = buildTextBloatStatusLabel(assessment);
+    expect(label).toContain("[bloat] text");
+    expect(label).toContain("chars=");
+    expect(label).toContain("lines=");
+    expect(label).toContain("rep=");
   });
 
   it("builds no-obvious-questions prompt only when policy is enabled", () => {

@@ -2609,6 +2609,32 @@
           "evidence": "Documentação/runbook pendente para fechamento final da task."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-150",
+      "target": "TASK-BUD-109",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Integração signal-first para bloat textual em `guardrails-core`: `turn_end` extrai texto do assistant (`extractAssistantTextFromTurnMessage`), avalia heurística (`evaluateTextBloatSmell`) e publica status passivo (`guardrails-core-bloat`) com throttle determinístico (`shouldEmitBloatSmellSignal`) + audit trail (`guardrails-core.bloat-smell-text`). Configurável por `.pi/settings.json` via `resolveBloatSmellConfig` (notify default off). Cobertura smoke adicionada para config/throttle/extract/status label. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 18/18.",
+      "criteria_results": [
+        {
+          "criterion": "Runtime detecta bloat de código (mudança ampla/hunks) e bloat textual (resposta/trecho documental excessivo ou repetitivo) com heurísticas determinísticas e calibráveis.",
+          "status": "passed",
+          "evidence": "Heurísticas de texto/código implementadas e calibráveis; sinal textual já integrado em runtime."
+        },
+        {
+          "criterion": "Sinal é advisory e passivo (stream/status), com recomendação acionável distinta para código (split/backlog) e texto (resumo/estrutura narrativa).",
+          "status": "skipped",
+          "evidence": "Texto já sinalizado em stream/status; integração runtime explícita do ramo de código ficará no próximo slice."
+        },
+        {
+          "criterion": "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial.",
+          "status": "skipped",
+          "evidence": "Documentação operacional pendente para fechamento da task."
+        }
+      ]
     }
   ]
 }
