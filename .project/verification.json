@@ -2479,6 +2479,32 @@
           "evidence": "Runbook/documentação ainda pendentes para fechamento total da task."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-145",
+      "target": "TASK-BUD-107",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "`evaluateColonyDeliveryEvidence` agora só considera validation command log quando existe heading de seção (`Validation command log` / equivalente) com comando em backticks (inline ou nas linhas subsequentes). Isso elimina falso-positivo por texto de instrução contendo comando em backticks fora de seção válida. Smoke atualizada para: (a) aceitar heading+bulletted backticks; (b) rejeitar heading com comando sem backticks; (c) manter rejeição para menção fora da seção. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 69/69.",
+      "criteria_results": [
+        {
+          "criterion": "Final report de colônia sempre inclui seção de validação com comando literal em backticks quando houver testes executados.",
+          "status": "passed",
+          "evidence": "Parser agora exige backticks em contexto de seção de validação."
+        },
+        {
+          "criterion": "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
+          "status": "skipped",
+          "evidence": "Reconhecimento de formato canônico robustecido; validação end-to-end de runs reais permanece pendente."
+        },
+        {
+          "criterion": "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção.",
+          "status": "passed",
+          "evidence": "Suite cobre casos válidos e inválidos (sem seção, sem backticks, fora de seção) e mantém guidance acionável."
+        }
+      ]
     }
   ]
 }

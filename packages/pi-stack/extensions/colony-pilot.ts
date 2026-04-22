@@ -501,17 +501,30 @@ export function evaluateColonyDeliveryEvidence(
 	phase: ColonyPhase,
 	policy: ColonyPilotDeliveryPolicyConfig,
 ): ColonyPilotDeliveryEvaluation {
-	const validationHeadingPattern =
-		/(?:validation\s+command\s+log|validation\s+commands?|comandos?\s+de\s+valida[cç][aã]o)/i;
+	const validationHeadingTextPattern =
+		"(?:validation\\s+command\\s+log|validation\\s+commands?|comandos?\\s+de\\s+valida[cç][aã]o)";
 	const commandLikePattern =
 		/(?:pnpm|npm|npx|vitest|node(?:\.exe)?\s+--test|\S*node(?:\.exe)?\s+\S+|tsc|pytest|go\s+test|cargo\s+test|dotnet\s+test|mvn\s+test|gradle(?:w)?\s+test|bun\s+test)\b/i;
-	const hasValidationHeading = validationHeadingPattern.test(text);
-	const hasCommandLikeLine =
-		new RegExp(`(?:^|\\n)\\s*(?:[-*]\\s*)?(?:` + "`" + `)?${commandLikePattern.source}`, "m").test(text);
+	const validationHeadingLinePattern = new RegExp(
+		`(?:^|\\n)\\s*(?:#{1,6}\\s*)?${validationHeadingTextPattern}\\s*(?::|-)?\\s*(?:\\n|$)`,
+		"i",
+	);
+	const hasValidationHeading = validationHeadingLinePattern.test(text);
 	const hasValidationInlineCommand =
 		new RegExp(
-			`(?:^|\\n)\\s*${validationHeadingPattern.source}\\s*[:\-]\\s*(?:` + "`" + `)?${commandLikePattern.source}`,
+			`(?:^|\\n)\\s*(?:#{1,6}\\s*)?${validationHeadingTextPattern}\\s*[:\\-]\\s*` +
+				"`" +
+				`${commandLikePattern.source}[^` + "`" + `]*` +
+				"`",
 			"im",
+		).test(text);
+	const hasValidationSectionBacktickedCommand =
+		new RegExp(
+			`(?:^|\\n)\\s*(?:#{1,6}\\s*)?${validationHeadingTextPattern}\\s*(?::|-)?\\s*\\n[\\s\\S]{0,400}?` +
+				"`" +
+				`${commandLikePattern.source}[^` + "`" + `]*` +
+				"`",
+			"i",
 		).test(text);
 
 	const evidence: ColonyPilotDeliveryEvidence = {
@@ -523,7 +536,8 @@ export function evaluateColonyDeliveryEvidence(
 				text,
 			),
 		hasValidationCommandLog:
-			hasValidationInlineCommand || (hasValidationHeading && hasCommandLikeLine),
+			hasValidationInlineCommand ||
+			(hasValidationHeading && hasValidationSectionBacktickedCommand),
 	};
 
 	if (!policy.enabled || phase !== "completed") {

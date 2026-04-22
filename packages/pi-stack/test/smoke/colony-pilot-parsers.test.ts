@@ -973,7 +973,28 @@ describe("colony-pilot parsers", () => {
 		expect(ev.ok).toBe(true);
 	});
 
-	it("delivery evidence aceita command log com heading + bullet sem backticks", () => {
+	it("delivery evidence aceita command log com heading + bullet em backticks", () => {
+		const cfg = resolveColonyPilotDeliveryPolicy({
+			enabled: true,
+			requireFileInventory: true,
+			requireValidationCommandLog: true,
+		});
+
+		const report = [
+			"### 🧪 Workspace",
+			"Mode: isolated git worktree",
+			"**Tasks:** 12/12 done",
+			"final file inventory: files changed: packages/pi-stack/extensions/colony-pilot.ts",
+			"Validation command log:",
+			"- `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`",
+		].join("\n");
+
+		const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
+		expect(ev.ok).toBe(true);
+		expect(ev.evidence.hasValidationCommandLog).toBe(true);
+	});
+
+	it("delivery evidence não aceita heading com comando sem backticks", () => {
 		const cfg = resolveColonyPilotDeliveryPolicy({
 			enabled: true,
 			requireFileInventory: true,
@@ -990,8 +1011,8 @@ describe("colony-pilot parsers", () => {
 		].join("\n");
 
 		const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
-		expect(ev.ok).toBe(true);
-		expect(ev.evidence.hasValidationCommandLog).toBe(true);
+		expect(ev.ok).toBe(false);
+		expect(ev.issues.some((i) => i.includes("backticks"))).toBe(true);
 	});
 
 	it("delivery evidence não aceita heading sem comando executável detectável", () => {
