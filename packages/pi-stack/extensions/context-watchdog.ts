@@ -351,11 +351,26 @@ export function shouldEmitAutoResumeAfterCompact(
 	return (nowMs - lastAutoResumeAt) >= config.autoResumeCooldownMs;
 }
 
+export type HandoffPrepReason = "level-not-compact" | "auto-resume-off" | "fresh" | "stale" | "unknown";
+
+export function resolveHandoffPrepDecision(
+	assessment: ContextWatchAssessment,
+	config: ContextWatchdogConfig,
+	freshnessLabel: HandoffFreshnessLabel,
+): { refreshOnTrigger: boolean; reason: HandoffPrepReason } {
+	if (assessment.level !== "compact") return { refreshOnTrigger: false, reason: "level-not-compact" };
+	if (!config.autoResumeAfterCompact) return { refreshOnTrigger: false, reason: "auto-resume-off" };
+	if (freshnessLabel === "fresh") return { refreshOnTrigger: false, reason: "fresh" };
+	if (freshnessLabel === "stale") return { refreshOnTrigger: true, reason: "stale" };
+	return { refreshOnTrigger: true, reason: "unknown" };
+}
+
 export function shouldRefreshHandoffBeforeAutoCompact(
 	assessment: ContextWatchAssessment,
 	config: ContextWatchdogConfig,
+	freshnessLabel: HandoffFreshnessLabel = "unknown",
 ): boolean {
-	return assessment.level === "compact" && config.autoResumeAfterCompact;
+	return resolveHandoffPrepDecision(assessment, config, freshnessLabel).refreshOnTrigger;
 }
 
 function truncateForPrompt(value: string, max = 180): string {
@@ -364,11 +379,13 @@ function truncateForPrompt(value: string, max = 180): string {
 	return `${s.slice(0, Math.max(0, max - 1))}…`;
 }
 
+export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
+
 export function resolveHandoffFreshness(
 	timestampIso: string | undefined,
 	nowMs = Date.now(),
 	maxFreshAgeMs = 30 * 60 * 1000,
-): { label: "fresh" | "stale" | "unknown"; ageMs?: number } {
+): { label: HandoffFreshnessLabel; ageMs?: number } {
 	if (!timestampIso) return { label: "unknown" };
 	const ts = Date.parse(timestampIso);
 	if (!Number.isFinite(ts)) return { label: "unknown" };
@@ -382,7 +399,7 @@ export function resolveHandoffFreshness(
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 
 export function handoffRefreshMode(
-	freshnessLabel: "fresh" | "stale" | "unknown",
+	freshnessLabel: HandoffFreshnessLabel,
 	autoResumeEnabled: boolean,
 ): HandoffRefreshMode {
 	if (freshnessLabel === "fresh") return "none";
@@ -391,7 +408,7 @@ export function handoffRefreshMode(
 }
 
 export function handoffFreshnessAdvice(
-	freshnessLabel: "fresh" | "stale" | "unknown",
+	freshnessLabel: HandoffFreshnessLabel,
 	autoResumeEnabled: boolean,
 ): string {
 	const mode = handoffRefreshMode(freshnessLabel, autoResumeEnabled);
@@ -887,7 +904,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			hasPendingMessages: ctx.hasPendingMessages(),
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (autoCompactState.decision.trigger) {
-			if (shouldRefreshHandoffBeforeAutoCompact(assessment, config) && !handoffPath) {
+			const handoffForPrep = readHandoffJson(ctx.cwd);
+			const handoffTsForPrep = typeof handoffForPrep.timestamp === "string" ? handoffForPrep.timestamp : undefined;
+			const handoffFreshnessForPrep = resolveHandoffFreshness(handoffTsForPrep, now, config.handoffFreshMaxAgeMs);
+			if (shouldRefreshHandoffBeforeAutoCompact(assessment, config, handoffFreshnessForPrep.label) && !handoffPath) {
 				handoffPath = persistContextWatchHandoffEvent(ctx, assessment, "auto_compact_prep");
 			}
 			clearAutoCompactRetryTimer();
@@ -964,6 +984,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffLastEventAgeMs = contextWatchEventAgeMs(handoffLastEvent, nowMs);
 		const handoffLastEventAgeSec = toAgeSec(handoffLastEventAgeMs);
 		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
+		const handoffPrep = resolveHandoffPrepDecision(assessment, config, handoffFreshness.label);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -978,6 +999,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
 			handoffRefreshMode: refreshMode,
 			handoffManualRefreshRequired: refreshMode === "manual",
+			handoffPrepRefreshOnTrigger: handoffPrep.refreshOnTrigger,
+			handoffPrepReason: handoffPrep.reason,
 			handoffLastEvent: handoffLastEvent ?? null,
 			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
 			handoffLastEventAgeMs,
@@ -1130,6 +1153,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
 					`handoff-refresh: mode=${autoCompact.handoffRefreshMode} manualRequired=${autoCompact.handoffManualRefreshRequired ? "yes" : "no"}`,
+					`handoff-prep: refreshOnTrigger=${autoCompact.handoffPrepRefreshOnTrigger ? "yes" : "no"} reason=${autoCompact.handoffPrepReason}`,
 				].join("\n"),
 				assessment.severity,
 			);

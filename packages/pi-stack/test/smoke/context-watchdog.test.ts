@@ -16,6 +16,7 @@ import {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	resolveHandoffFreshness,
+	resolveHandoffPrepDecision,
 	summarizeContextWatchEvent,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
@@ -157,6 +158,10 @@ describe("context-watchdog", () => {
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg)).toBe(true);
+		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "fresh")).toBe(false);
+		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "stale")).toBe(true);
+		expect(resolveHandoffPrepDecision(compact, cfg, "fresh").reason).toBe("fresh");
+		expect(resolveHandoffPrepDecision(compact, cfg, "stale").reason).toBe("stale");
 		expect(shouldRefreshHandoffBeforeAutoCompact(checkpoint, cfg)).toBe(false);
 	});
 
