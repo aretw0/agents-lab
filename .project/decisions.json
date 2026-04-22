@@ -265,6 +265,22 @@
       "rationale": "Reduzir gordura, evitar surpresa de comportamento em usuários e preservar confiança/estabilidade da fábrica autônoma.",
       "context": "Diretriz do usuário para parar de liberar capacidades não curadas e manter coesão first-party com pragmatismo.",
       "task": "TASK-BUD-091"
+    },
+    {
+      "id": "DEC-BUD-038",
+      "status": "decided",
+      "decision": "Adotar envelope de long run em 3 lanes com progressão por evidência: (L1) control-plane only -> (L2) subagents assistidos -> (L3) swarm supervisionado.",
+      "rationale": "Transformar autonomia em processo objetivo e incremental, reduzindo subjetividade e evitando salto prematuro para complexidade que degrade confiança/estabilidade.",
+      "context": "Solicitação do usuário para estabelecer long run até o próximo marco de calibração, precisão e autonomia da fábrica.",
+      "task": "TASK-BUD-094"
+    },
+    {
+      "id": "DEC-BUD-039",
+      "status": "decided",
+      "decision": "Aplicar política 'curated-default deny' para versionamento de artefatos pi: só config/board canônicos entram no git por padrão; runtime efêmero é local, com opt-in explícito para exceções.",
+      "rationale": "Evita vazamento de artefato indevido, reduz ruído no repositório e alinha experiência de usuários com a curadoria maturada.",
+      "context": "Necessidade explícita de impedir que usuários recebam por default itens não curados/indesejados, mantendo opção de ativação consciente.",
+      "task": "TASK-BUD-098"
     }
   ]
 }

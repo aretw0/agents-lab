@@ -2249,6 +2249,75 @@
         "Swarm roda em modo supervisionado com evidência de delivery/recovery e sem auto-close estratégico.",
         "Existe critério explícito de abort/rollback para retorno a L2 quando necessário."
       ]
+    },
+    {
+      "id": "TASK-BUD-098",
+      "description": "[P0] Implementar auditor de artefatos versionados indevidos (pi runtime hygiene) para detectar paths efêmeros rastreados e bloquear promoção da baseline curada.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-091"
+      ],
+      "references": [
+        "REQ-BUD-050",
+        "DEC-BUD-039"
+      ],
+      "files": [
+        "scripts/pi-runtime-artifact-audit.mjs",
+        "package.json",
+        ".gitignore",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Comando lista arquivos rastreados que violam policy de artefato efêmero.",
+        "Modo gate retorna erro em CI/local quando houver violação na baseline oficial.",
+        "Saída inclui ação corretiva segura (untrack sem apagar working copy)."
+      ],
+      "notes": "Foco em prevenção contínua para não repetir drift de versionamento."
+    },
+    {
+      "id": "TASK-BUD-099",
+      "description": "[P0] Publicar runbook de remediação de artefatos já commitados (pi): preservar progresso local, de-indexar paths indevidos e orientar purge seletivo/rotação em caso sensível.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-098"
+      ],
+      "references": [
+        "REQ-BUD-051"
+      ],
+      "files": [
+        "docs/guides/monitor-overrides.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/context-checkpoint-*.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook diferencia remediação leve (git rm --cached + ignore) de remediação pesada (rewrite de histórico).",
+        "Fluxo inclui checklist de segurança para não perder alterações não commitadas.",
+        "Há orientação de opt-in para usuários que queiram versionar extras por decisão consciente."
+      ],
+      "notes": "Pragmatismo: resolver passado sem quebrar andamento atual."
+    },
+    {
+      "id": "TASK-BUD-100",
+      "description": "[P1] Implementar perfil de distribuição 'strict-curated' com baseline oficial mínima e mecanismo opt-in documentado para extras de runtime/capability.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-091",
+        "TASK-BUD-098"
+      ],
+      "references": [
+        "REQ-BUD-050"
+      ],
+      "files": [
+        "packages/pi-stack/install.mjs",
+        "packages/pi-stack/package-list.mjs",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "Perfil strict-curated aplica apenas superfícies canônicas da curadoria.",
+        "Extras ficam fora do default e só entram por comando/flag explícita.",
+        "Documentação explica trade-off e como habilitar exceções sem confundir baseline oficial."
+      ],
+      "notes": "Conecta política de curadoria ao instalador/distribuição para usuários finais."
     }
   ]
 }

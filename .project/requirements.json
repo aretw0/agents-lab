@@ -674,6 +674,58 @@
         "Sugestões automáticas não recomendam capability fora da baseline oficial por padrão.",
         "Runbook de suporte orienta como habilitar extras sem confundir com a oferta oficial."
       ]
+    },
+    {
+      "id": "REQ-BUD-049",
+      "description": "Long runs devem operar com envelope objetivo por lane (control-plane only, subagent, swarm), incluindo critérios explícitos de entrada, limites operacionais, stop conditions e critérios de saída para o próximo marco de calibração.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-094",
+        "TASK-BUD-095",
+        "TASK-BUD-096",
+        "TASK-BUD-097"
+      ],
+      "acceptance_criteria": [
+        "Cada lane define pré-condições e limites (budget, contexto, governança) de forma auditável.",
+        "Stop conditions e rollback path são explícitos e acionáveis sem depender de interpretação subjetiva.",
+        "Existe milestone de calibração/autonomia com critérios mensuráveis para avançar de lane."
+      ]
+    },
+    {
+      "id": "REQ-BUD-050",
+      "description": "Artefatos de runtime do pi (sessões, reports, snapshots, estado efêmero) devem ser ignorados por padrão no git; versionamento só ocorre por opt-in explícito do usuário/projeto.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-098",
+        "TASK-BUD-100"
+      ],
+      "acceptance_criteria": [
+        "Baseline oficial mantém deny-by-default para paths efêmeros.",
+        "Existe mecanismo explícito de opt-in para quem quiser versionar artefatos adicionais.",
+        "Policy distingue claramente configuração canônica versionada vs runtime efêmero local."
+      ]
+    },
+    {
+      "id": "REQ-BUD-051",
+      "description": "Quando artefatos que deveriam ser ignorados já estiverem no histórico, deve existir fluxo canônico de remediação (de-index local + purge seletivo quando necessário) com guidance de risco para usuários.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-099"
+      ],
+      "acceptance_criteria": [
+        "Runbook cobre cenários: apenas untrack, limpeza de histórico, e rotação de credenciais em caso sensível.",
+        "Fluxo prioriza preservar progresso local sem perda de trabalho não commitado.",
+        "Comunicação para usuários deixa claro quando remediar automaticamente e quando pedir confirmação explícita."
+      ]
     }
   ]
 }
