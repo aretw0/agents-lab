@@ -20,6 +20,8 @@ import {
   shouldQueueInputForLongRun,
   buildPragmaticAutonomySystemPrompt,
   summarizeAssumptionText,
+  evaluateTextBloatSmell,
+  evaluateCodeBloatSmell,
   shouldSchedulePostDispatchAutoDrain,
   shouldEmitAutoDrainDeferredAudit,
 } from "../../extensions/guardrails-core";
@@ -71,6 +73,43 @@ describe("guardrails-core long-run intent queue", () => {
     );
     expect(summary).toContain("manter execução");
     expect(summary.length).toBeLessThanOrEqual(49);
+  });
+
+  it("detects text/code bloat smells with deterministic advisory output", () => {
+    const bloatedText = [
+      "Resumo:",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+      "Este trecho repete a mesma ideia para forçar bloat.",
+    ].join("\n");
+
+    const textAssessment = evaluateTextBloatSmell(bloatedText, {
+      chars: 80,
+      lines: 8,
+      repeatedLineRatio: 0.2,
+    });
+    expect(textAssessment.triggered).toBe(true);
+    expect(textAssessment.reasons.some((r) => r.startsWith("high-line-count"))).toBe(true);
+    expect(textAssessment.reasons.some((r) => r.startsWith("high-repetition"))).toBe(true);
+    expect(textAssessment.recommendation).toContain("text-bloat advisory");
+
+    const codeAssessment = evaluateCodeBloatSmell({ changedLines: 180, hunks: 10, filesTouched: 2 }, {
+      changedLines: 120,
+      hunks: 8,
+      filesTouched: 5,
+    });
+    expect(codeAssessment.triggered).toBe(true);
+    expect(codeAssessment.reasons).toContain("high-changed-lines:180");
+    expect(codeAssessment.reasons).toContain("high-hunks:10");
+    expect(codeAssessment.recommendation).toContain("code-bloat advisory");
+
+    const healthyText = evaluateTextBloatSmell("mensagem curta", { chars: 80, lines: 4, repeatedLineRatio: 0.5 });
+    expect(healthyText.triggered).toBe(false);
   });
 
   it("queues only normal text while long-run is active", () => {

@@ -2507,7 +2507,7 @@
     {
       "id": "TASK-BUD-109",
       "description": "[P1] Implementar bloat-smell advisory unificado (código + texto) com sinal passivo no stream para orientar split/síntese e preservar discurso enxuto em runtime, docs e materiais de posicionamento.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-108"
       ],
@@ -2526,7 +2526,7 @@
         "Sinal é advisory e passivo (stream/status), com recomendação acionável distinta para código (split/backlog) e texto (resumo/estrutura narrativa).",
         "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial."
       ],
-      "notes": "Backlog solicitado explicitamente pelo usuário (2026-04-22): manter saúde contínua de código e narrativa, incluindo documentação e textos de venda, com alinhamento à visão de entregar essas práticas no pi-stack."
+      "notes": "Backlog solicitado explicitamente pelo usuário (2026-04-22): manter saúde contínua de código e narrativa, incluindo documentação e textos de venda, com alinhamento à visão de entregar essas práticas no pi-stack.\n[2026-04-22T00:00:00Z] Micro-slice inicial: adicionadas heurísticas determinísticas `evaluateTextBloatSmell` e `evaluateCodeBloatSmell` em guardrails-core (thresholds calibráveis + recommendation advisory), com cobertura smoke para casos bloated/healthy. Evidência: VER-BUD-149."
     }
   ]
 }

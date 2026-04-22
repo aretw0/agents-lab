@@ -2583,6 +2583,32 @@
           "evidence": "Seção nova explicita `context_watch_status` como diagnóstico/debug, não ritual por iteração."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-149",
+      "target": "TASK-BUD-109",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice inicial de bloat-smell: `guardrails-core` ganhou `evaluateTextBloatSmell` (chars/lines/repetition) e `evaluateCodeBloatSmell` (changedLines/hunks/filesTouched) com thresholds calibráveis e recommendation advisory. Smoke adicionada cobrindo casos bloated/healthy para código e texto. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 15/15.",
+      "criteria_results": [
+        {
+          "criterion": "Runtime detecta bloat de código (mudança ampla/hunks) e bloat textual (resposta/trecho documental excessivo ou repetitivo) com heurísticas determinísticas e calibráveis.",
+          "status": "passed",
+          "evidence": "Heurísticas determinísticas implementadas e cobertas por smoke."
+        },
+        {
+          "criterion": "Sinal é advisory e passivo (stream/status), com recomendação acionável distinta para código (split/backlog) e texto (resumo/estrutura narrativa).",
+          "status": "skipped",
+          "evidence": "Neste slice foram implementadas heurísticas e recomendações; integração em stream/status ficará nos próximos slices."
+        },
+        {
+          "criterion": "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial.",
+          "status": "skipped",
+          "evidence": "Documentação/runbook pendente para fechamento final da task."
+        }
+      ]
     }
   ]
 }
