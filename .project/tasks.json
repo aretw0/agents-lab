@@ -2092,7 +2092,7 @@
     {
       "id": "TASK-BUD-091",
       "description": "[P0] Implementar gate de baseline curada na distribuição da pi-stack: impedir que defaults publiquem capacidades não maturadas no ambiente isolado.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-087"
       ],
@@ -2110,7 +2110,7 @@
         "Installer/baseline aplica apenas superfície oficial por padrão.",
         "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado."
       ],
-      "notes": "Direção: coesão first-party + pragmatismo de distribuição."
+      "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate."
     },
     {
       "id": "TASK-BUD-092",
