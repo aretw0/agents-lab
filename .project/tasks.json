@@ -2427,7 +2427,7 @@
     {
       "id": "TASK-BUD-105",
       "description": "[P1] Lapidar usabilidade da lane-queue: help explícito para usuário final, comando de limpeza descobrível e mensagens/UX anti-confusão no hatch/status.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-090"
       ],
@@ -2441,12 +2441,13 @@
         "`/lane-queue` expõe subcomandos de forma clara, incluindo `clear`, com exemplo curto de uso.",
         "Mensagens de status incluem dica de como esvaziar/listar fila quando `queued>0`."
       ],
-      "notes": "Backlog criado por solicitação explícita do usuário (2026-04-22): incluir lapidação de usabilidade da lane-queue para evitar fricção operacional.\n[2026-04-22T00:00:00Z] Micro-slice manual (subagent-first): comando `lane-queue` ganhou `help` explícito, fallback para subcomando desconhecido com usage orientado e dicas de discoverability no status (queued>0 => list/clear; queued=0 => add). Cobertura smoke estendida em guardrails-long-run-intent-queue.test.ts. Evidência: VER-BUD-138.\n[2026-04-22T00:00:00Z] Follow-through de docs canônicas: charter + pipeline atualizados para refletir `help` explícito e discoverability em status (`list/clear` quando queued>0). Evidência: VER-BUD-140."
+      "notes": "Backlog criado por solicitação explícita do usuário (2026-04-22): incluir lapidação de usabilidade da lane-queue para evitar fricção operacional.\n[2026-04-22T00:00:00Z] Micro-slice manual (subagent-first): comando `lane-queue` ganhou `help` explícito, fallback para subcomando desconhecido com usage orientado e dicas de discoverability no status (queued>0 => list/clear; queued=0 => add). Cobertura smoke estendida em guardrails-long-run-intent-queue.test.ts. Evidência: VER-BUD-138.\n[2026-04-22T00:00:00Z] Follow-through de docs canônicas: charter + pipeline atualizados para refletir `help` explícito e discoverability em status (`list/clear` quando queued>0). Evidência: VER-BUD-140.",
+      "verification": "VER-BUD-140"
     },
     {
       "id": "TASK-BUD-106",
       "description": "[P0] Endurecer session-triage para modo local-first e tail-batch: analisar somente sessões do projeto isolado e começar pelo final (janela curta), expandindo para cima apenas sob necessidade explícita.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-020"
       ],
@@ -2460,7 +2461,8 @@
         "Pipeline começa em tail-batch recente (ex.: últimos N registros/mensagens finais) com opção de expansão progressiva (`--expand`/`--window`) em vez de scan completo.",
         "Saída inclui métrica de custo/contexto estimado e motivo quando houver necessidade de ampliar janela."
       ],
-      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137.\n[2026-04-22T00:00:00Z] Follow-through de documentação/skill: guia e SKILL de session-triage atualizados para refletir default local-first + tail-batch e flags de expansão progressiva/fallback opt-in. Evidência: VER-BUD-139."
+      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137.\n[2026-04-22T00:00:00Z] Follow-through de documentação/skill: guia e SKILL de session-triage atualizados para refletir default local-first + tail-batch e flags de expansão progressiva/fallback opt-in. Evidência: VER-BUD-139.",
+      "verification": "VER-BUD-139"
     }
   ]
 }
