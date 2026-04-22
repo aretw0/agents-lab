@@ -1959,6 +1959,58 @@
           "evidence": "Guia de monitor-overrides documenta curated-default + extras apenas por opt-in explícito."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-125",
+      "target": "TASK-BUD-101",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Densidade adaptativa implementada no footer TUI em `packages/pi-stack/extensions/custom-footer.ts` com política wide/medium/narrow (`resolveFooterDensity`) e compactação de status por prioridade (budget/board/pilot/mon). Linha compacta agora reduz ruído sem perder sinais críticos em terminal estreito; labels de model/cwd/branch foram compactados deterministicamente. Linhas de painéis anexadas passam por `fitFooterPanelLines(...)`, evitando overflow visual em resize. Cobertura adicionada em `packages/pi-stack/test/smoke/custom-footer-registration.test.ts` para classificação de densidade, fit de largura e comportamento narrow de priorização de status. Validação: `vitest run packages/pi-stack/test/smoke/custom-footer-registration.test.ts` (29/29 pass). Commit: `75e802a`.",
+      "criteria_results": [
+        {
+          "criterion": "Linha compacta do footer prioriza sinais essenciais e degrada opcionalmente por largura sem perder status crítico.",
+          "status": "passed",
+          "evidence": "Compactação por tier e priorização de status críticos implementadas no builder."
+        },
+        {
+          "criterion": "Linhas de painel anexadas ao footer respeitam largura renderizada e não estouram visualmente.",
+          "status": "passed",
+          "evidence": "`fitFooterPanelLines` aplica `truncateToWidth` em todas as linhas de painel."
+        },
+        {
+          "criterion": "Smoke tests cobrem comportamento em largura estreita/média para evitar regressão de clutter.",
+          "status": "passed",
+          "evidence": "Novos testes para density helpers + cenário narrow adicionados e passando."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-126",
+      "target": "TASK-BUD-102",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "WEB gateway evoluído para dashboard responsivo summary-first em `packages/pi-stack/extensions/web-session-gateway.ts`: novo layout com cards KPI (board/colonies/signals/messages), seção de colônias recentes e raw JSON em `<details>` (progressive disclosure). Snapshot de `/api/state` agora inclui `summary` canônico derivado por `buildWebStateSummary(...)`, alinhando semântica com control-plane TUI. Cobertura adicionada em `packages/pi-stack/test/smoke/web-session-gateway.test.ts` para validar consolidação canônica do summary (board/colonies/ages/last role). Validação: `vitest run packages/pi-stack/test/smoke/web-session-gateway.test.ts` (7/7 pass). Commit: `75e802a`.",
+      "criteria_results": [
+        {
+          "criterion": "UI web exibe cards/resumo operacional sem depender de bloco JSON cru para leitura principal.",
+          "status": "passed",
+          "evidence": "HTML agora renderiza grid de KPIs summary-first."
+        },
+        {
+          "criterion": "Detalhes completos continuam disponíveis por seção colapsável, preservando auditabilidade.",
+          "status": "passed",
+          "evidence": "Raw JSON permanece disponível em seção `<details>`."
+        },
+        {
+          "criterion": "Testes cobrem helper de resumo canônico para consistência entre render/web API.",
+          "status": "passed",
+          "evidence": "`buildWebStateSummary` validado em smoke test dedicado."
+        }
+      ]
     }
   ]
 }

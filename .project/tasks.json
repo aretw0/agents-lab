@@ -2332,7 +2332,7 @@
     {
       "id": "TASK-BUD-101",
       "description": "[P0] Implementar densidade adaptativa no TUI do control-plane (custom-footer + painéis), com regras wide/medium/narrow para evitar clutter e overflow em resize.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-085",
         "TASK-BUD-094"
@@ -2349,12 +2349,13 @@
         "Linha compacta do footer prioriza sinais essenciais e degrada opcionalmente por largura sem perder status crítico.",
         "Linhas de painel anexadas ao footer respeitam largura renderizada e não estouram visualmente.",
         "Smoke tests cobrem comportamento em largura estreita/média para evitar regressão de clutter."
-      ]
+      ],
+      "verification": "VER-BUD-125"
     },
     {
       "id": "TASK-BUD-102",
       "description": "[P0] Evoluir WEB session gateway para dashboard responsivo summary-first com detalhes progressivos e semântica alinhada ao TUI.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-101"
       ],
@@ -2370,7 +2371,8 @@
         "UI web exibe cards/resumo operacional sem depender de bloco JSON cru para leitura principal.",
         "Detalhes completos continuam disponíveis por seção colapsável, preservando auditabilidade.",
         "Testes cobrem helper de resumo canônico para consistência entre render/web API."
-      ]
+      ],
+      "verification": "VER-BUD-126"
     },
     {
       "id": "TASK-BUD-103",
