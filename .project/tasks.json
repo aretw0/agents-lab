@@ -1930,7 +1930,7 @@
     {
       "id": "TASK-BUD-083",
       "description": "[P1] Consolidar entendimento canônico de escopos de execução do pi (global vs por projeto vs isolado), incluindo impacto em pacotes/plugins carregados e estratégia de desenvolvimento sem overengineering.",
-      "status": "planned",
+      "status": "completed",
       "files": [
         "docs/guides/project-canonical-pipeline.md",
         "docs/guides/recommended-pi-stack.md",
@@ -1941,7 +1941,8 @@
         "Fluxo operacional define quando alterar node_modules global vs workspace local vs package da stack.",
         "Checklist de diagnóstico rápido evita alterações em local errado e explicita comando de verificação de contexto ativo."
       ],
-      "notes": "Solicitação direta do usuário para eliminar ambiguidade sobre runtime scope e reduzir overengineering por confusão entre pi runtime, TypeScript package e node_modules."
+      "notes": "Solicitação direta do usuário para eliminar ambiguidade sobre runtime scope e reduzir overengineering por confusão entre pi runtime, TypeScript package e node_modules.",
+      "verification": "VER-BUD-113"
     },
     {
       "id": "TASK-BUD-084",

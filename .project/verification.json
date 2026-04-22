@@ -1652,6 +1652,32 @@
           "evidence": "Seção 'Migração incremental agents-lab -> Refarm (SQLite/browser)' adicionada com passos e fallback."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-113",
+      "target": "TASK-BUD-083",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Consolidação canônica de escopos de execução do pi materializada em `docs/research/pi-runtime-scope-model-2026-04-21.md` com matriz global/project/isolated, exemplos de resolução de settings/pacotes por modo, política de superfície de alteração (global node_modules vs workspace local/package source) e checklist diagnóstico com comando explícito de contexto ativo (`npm run pi:isolated:status`, `git rev-parse --show-toplevel`, `echo $PI_CODING_AGENT_DIR`). Guia de entrada atualizado em `docs/guides/recommended-pi-stack.md` para referenciar o modelo e reduzir ambiguidade operacional.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Documento único descreve com exemplos como o pi resolve settings/pacotes em cada modo (global, project, isolated).",
+          "status": "passed",
+          "evidence": "Novo documento de modelo de escopo inclui tabela e exemplos A/B/C por modo."
+        },
+        {
+          "criterion": "Fluxo operacional define quando alterar node_modules global vs workspace local vs package da stack.",
+          "status": "passed",
+          "evidence": "Seção dedicada 'Fluxo operacional: onde alterar cada coisa' com regras explícitas por superfície."
+        },
+        {
+          "criterion": "Checklist de diagnóstico rápido evita alterações em local errado e explicita comando de verificação de contexto ativo.",
+          "status": "passed",
+          "evidence": "Checklist inclui `npm run pi:isolated:status` + verificação de `PI_CODING_AGENT_DIR` e root git."
+        }
+      ]
     }
   ]
 }
