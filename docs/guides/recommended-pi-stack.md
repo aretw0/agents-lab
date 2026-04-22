@@ -62,6 +62,9 @@ Checklist de resize (first-class):
 - medium: resumo operacional completo sem depender de raw dump;
 - wide: detalhes adicionais sem duplicação confusa de status.
 
+Guia detalhado de curadoria visual:
+- [`control-plane-ux-curation.md`](./control-plane-ux-curation.md)
+
 ## O que está na stack
 
 ### Pacotes First-Party (`@aretw0/*`)
