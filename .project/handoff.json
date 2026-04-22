@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-22T21:48:00.000Z",
-  "context": "Reload aplicado e política native-first efetivada no control-plane (`longRunIntentQueue.enabled=false`). Fábrica avançou com TASK-BUD-111 concluída: blueprint agnóstico reforçado por checklist de release/dogfooding para portabilidade.",
-  "current_phase": "factory-portability-hardening",
+  "timestamp": "2026-04-22T22:00:00.000Z",
+  "context": "Warn-stage micro-slices mantidos com foco fábrica. TASK-BUD-113 concluída: governança de sinais formalizada (ownership + noise-budget) e meta-sinal runtime `signal-noise-excessive` integrado no context-watchdog em modo advisory/non-blocking.",
+  "current_phase": "factory-signal-governance-stable",
   "current_tasks": [
-    "TASK-BUD-112",
-    "TASK-BUD-113"
+    "TASK-BUD-112"
   ],
   "blockers": [
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Manter micro-slices (warn=58%) e evitar scans amplos até checkpoint.",
-    "Seguir foco fábrica com TASK-BUD-113 (governança de sinais/discoverability + noise-budget) sem abrir frentes largas.",
-    "Manter TASK-BUD-112 apenas em preparação/backlog, sem execução prematura."
+    "Manter micro-slices até sair de warn; evitar scans amplos.",
+    "Preservar TASK-BUD-112 apenas como preparação/backlog (sem execução prematura), conforme foco definido.",
+    "Próximo ganho de fábrica: especificar template de promoção seletiva worktree->main com allowlist, sem expandir escopo agora."
   ],
   "open_questions": [
-    "Qual modelo mínimo de ownership de sinais (operator/runtime/governance) reduz ruído sem perder discoverability?"
+    "Qual envelope mínimo para automação de promoção seletiva sem reintroduzir ruído/custo operacional?"
   ],
   "key_decisions_pending": [
-    "Automatizar promoção seletiva de worktree->main com allowlist de escopo sem aumentar complexidade operacional."
+    "Quando ativar enforcement de discoverability/noise além do advisory passivo atual."
   ],
   "files_in_flux": [
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json",
-    "docs/guides/project-canonical-pipeline.md"
+    "packages/pi-stack/extensions/context-watchdog.ts",
+    "packages/pi-stack/test/smoke/context-watchdog.test.ts"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T21:48:00.000Z",
+      "atIso": "2026-04-22T22:00:00.000Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 58,
+      "percent": 61,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

@@ -138,6 +138,7 @@ export type ContextWatchOperatorSignal = {
 	reloadRequired: boolean;
 	humanActionRequired: boolean;
 	reasons: string[];
+	noiseExcessive: boolean;
 };
 
 export function applyWarnCadenceEscalation(
@@ -154,19 +155,32 @@ export function applyWarnCadenceEscalation(
 	};
 }
 
+export function resolveContextWatchSignalNoiseExcessive(
+	announcementsInWindow: number,
+	maxAnnouncementsPerWindow: number,
+): boolean {
+	const announcements = Math.max(0, Math.floor(Number(announcementsInWindow ?? 0)));
+	const maxAllowed = Math.max(1, Math.floor(Number(maxAnnouncementsPerWindow ?? 1)));
+	return announcements > maxAllowed;
+}
+
 export function resolveContextWatchOperatorSignal(input: {
 	reloadRequired?: boolean;
 	handoffManualRefreshRequired?: boolean;
+	signalNoiseExcessive?: boolean;
 }): ContextWatchOperatorSignal {
 	const reloadRequired = input.reloadRequired === true;
 	const handoffManualRefreshRequired = input.handoffManualRefreshRequired === true;
+	const signalNoiseExcessive = input.signalNoiseExcessive === true;
 	const reasons: string[] = [];
 	if (reloadRequired) reasons.push("reload-required");
 	if (handoffManualRefreshRequired) reasons.push("handoff-refresh-required");
+	if (signalNoiseExcessive) reasons.push("signal-noise-excessive");
 	return {
 		reloadRequired,
 		humanActionRequired: reasons.length > 0,
 		reasons,
+		noiseExcessive: signalNoiseExcessive,
 	};
 }
 
@@ -236,6 +250,24 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
 	let autoCompactRetryDueAt = 0;
 	let consecutiveWarnCount = 0;
+	let announceWindowStartAt = 0;
+	let announceCountInWindow = 0;
+	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
+	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
+
+	const getAnnouncementsInWindow = (nowMs: number): number => {
+		if (announceWindowStartAt <= 0) return 0;
+		if ((nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) return 0;
+		return announceCountInWindow;
+	};
+
+	const markAnnouncement = (nowMs: number): void => {
+		if (announceWindowStartAt <= 0 || (nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) {
+			announceWindowStartAt = nowMs;
+			announceCountInWindow = 0;
+		}
+		announceCountInWindow += 1;
+	};
 
 	const clearAutoCompactRetryTimer = () => {
 		if (!autoCompactRetryTimer) return;
@@ -351,6 +383,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAnnouncedLevel = assessment.level;
 		if (!announce && !forceWarnCadenceAnnouncement) return;
 		lastAnnouncedAt = now;
+		markAnnouncement(now);
 
 		const persistedPath = handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason);
 		const label = reason === "session_start" ? "context-watch start" : "context-watch";
@@ -438,6 +471,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		autoCompactInFlight = false;
 		clearAutoCompactRetryTimer();
 		consecutiveWarnCount = 0;
+		announceWindowStartAt = 0;
+		announceCountInWindow = 0;
 		run(ctx, "session_start");
 	});
 
@@ -455,9 +490,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
+			const nowMs = Date.now();
 			const operatorSignal = resolveContextWatchOperatorSignal({
 				reloadRequired: false,
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
+				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
+					getAnnouncementsInWindow(nowMs),
+					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				),
 			});
 			const payload = {
 				...assessment,
@@ -515,6 +555,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;
+				announceWindowStartAt = 0;
+				announceCountInWindow = 0;
 				ctx.ui.notify("context-watch: state reset", "info");
 				return;
 			}
@@ -549,9 +591,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
+			const nowMs = Date.now();
 			const operatorSignal = resolveContextWatchOperatorSignal({
 				reloadRequired: false,
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
+				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
+					getAnnouncementsInWindow(nowMs),
+					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				),
 			});
 			ctx.ui.notify(
 				[

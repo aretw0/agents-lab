@@ -17,6 +17,7 @@ import {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	resolveContextWatchOperatorSignal,
+	resolveContextWatchSignalNoiseExcessive,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	summarizeContextWatchEvent,
@@ -254,6 +255,7 @@ describe("context-watchdog", () => {
 		});
 		expect(none.humanActionRequired).toBe(false);
 		expect(none.reasons).toEqual([]);
+		expect(none.noiseExcessive).toBe(false);
 
 		const manual = resolveContextWatchOperatorSignal({
 			reloadRequired: false,
@@ -269,6 +271,17 @@ describe("context-watchdog", () => {
 		});
 		expect(reload.humanActionRequired).toBe(true);
 		expect(reload.reasons).toContain("reload-required");
+
+		expect(resolveContextWatchSignalNoiseExcessive(4, 4)).toBe(false);
+		expect(resolveContextWatchSignalNoiseExcessive(5, 4)).toBe(true);
+		const noisy = resolveContextWatchOperatorSignal({
+			reloadRequired: false,
+			handoffManualRefreshRequired: false,
+			signalNoiseExcessive: true,
+		});
+		expect(noisy.humanActionRequired).toBe(true);
+		expect(noisy.noiseExcessive).toBe(true);
+		expect(noisy.reasons).toContain("signal-noise-excessive");
 	});
 
 	it("computes handoff freshness deterministically", () => {

@@ -2947,6 +2947,32 @@
           "evidence": "Meta-sinal definido no runbook; integração runtime específica ficará para próximo slice."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-163",
+      "target": "TASK-BUD-113",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Meta-sinal de ruído integrado em runtime no `context-watchdog`: contador de anúncios em janela (`SIGNAL_NOISE_WINDOW_MS`, `SIGNAL_NOISE_MAX_ANNOUNCEMENTS`) alimenta `operatorSignal` com reason `signal-noise-excessive` via `resolveContextWatchSignalNoiseExcessive(...)`, mantendo comportamento advisory/non-blocking. Ferramenta/comando `/context-watch` e `context_watch_status` agora expõem o sinal. Cobertura smoke atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` => 14/14.",
+      "criteria_results": [
+        {
+          "criterion": "Modelo documentado responde 'sinal de discoverability é de quem?' (owner/emitter/consumer) por classe de sinal.",
+          "status": "passed",
+          "evidence": "Taxonomia documentada no pipeline canônico (VER-BUD-162)."
+        },
+        {
+          "criterion": "Política de equilíbrio define orçamento de ruído (máx sinais por janela, prioridade e fallback para stream/status passivo).",
+          "status": "passed",
+          "evidence": "Noise-budget e precedência documentados + janela/budget implementados no watchdog."
+        },
+        {
+          "criterion": "Meta-sinal advisory identifica excesso de ruído e sugere redução/calibração sem bloquear fluxo por default.",
+          "status": "passed",
+          "evidence": "Reason `signal-noise-excessive` emitida em operatorSignal; política mantém fallback passivo e non-blocking."
+        }
+      ]
     }
   ]
 }
