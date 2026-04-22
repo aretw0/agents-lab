@@ -2214,7 +2214,7 @@
     {
       "id": "TASK-BUD-096",
       "description": "[P1] Executar gate de promoção L1->L2: habilitar lane de subagentes apenas após readiness strict passar com evidência reprodutível.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-086",
         "TASK-BUD-095"
@@ -2231,13 +2231,13 @@
         "Runbook define rollback para retornar a L1 se sinais de falha reaparecerem.",
         "Promoção a L2 é registrada com verificação canônica (sem auto-close prematuro de itens estratégicos)."
       ],
-      "verification": "VER-BUD-133",
-      "notes": "[2026-04-22T13:34:39.022Z] Gate L1->L2 rodado em strict após 086/095: bloqueio atual em monitor-min-user-turns (1 vs >=3). Rerun pendente após elevar userTurns em janela controlada."
+      "verification": "VER-BUD-157",
+      "notes": "[2026-04-22T13:34:39.022Z] Gate L1->L2 rodado em strict após 086/095: bloqueio atual em monitor-min-user-turns (1 vs >=3). Rerun pendente após elevar userTurns em janela controlada.\n[2026-04-22T00:00:00Z] Rerun strict em janela controlada (`source=isolated`, `days=1`, `limit=5`) passou com checks em verde: `userTurns=5`, `classifyFailures=0`, `FAILED=0`, `BUDGET_EXCEEDED=0`, `COMPLETE=2`, pacotes piloto presentes. Promoção L1->L2 apta para trilha supervisionada. Evidência: VER-BUD-157."
     },
     {
       "id": "TASK-BUD-097",
       "description": "[P1] Executar gate de promoção L2->L3: habilitar swarm supervisionado somente com baseline curada e preflight/governança em estado verde.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-091",
         "TASK-BUD-092",
@@ -2255,7 +2255,8 @@
         "Preflight de swarm, budget e scheduler governance passam antes do launch.",
         "Swarm roda em modo supervisionado com evidência de delivery/recovery e sem auto-close estratégico.",
         "Existe critério explícito de abort/rollback para retorno a L2 quando necessário."
-      ]
+      ],
+      "notes": "[2026-04-22T00:00:00Z] TASK-BUD-096 concluída (gate L1->L2 passed) e trilha L2->L3 iniciada. Pré-gates atuais em verde: `colony_pilot_preflight` => ok=true; `quota_visibility_provider_budgets(days=30)` => provider `openai-codex` estado `ok`; `scheduler_governance_status` sem owner estrangeiro ativo. Próximo passo: execução supervisionada controlada com evidência de delivery/recovery + rollback explícito. Evidência: VER-BUD-158."
     },
     {
       "id": "TASK-BUD-098",

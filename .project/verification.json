@@ -2791,6 +2791,58 @@
           "evidence": "Charter atualizado com fronteiras explícitas + regra de desenvolvimento modular por default."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-157",
+      "target": "TASK-BUD-096",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Gate L1->L2 rerodado com recorte controlado e reprodutível: `subagent_readiness_status(strict=true, source=isolated, days=1, limit=5)` => `ready=true`. Checks: `monitor-min-user-turns=5 (>=3)`, `monitor-max-classify-failures=0`, `colony-max-failed-signals=0`, `colony-max-budget-exceeded-signals=0`, `colony-min-complete-signals=2 (>=1)`, pacotes piloto obrigatórios presentes. Bloqueios vazios.",
+      "criteria_results": [
+        {
+          "criterion": "`subagent_readiness_status(strict=true)` passa em janela definida com critérios estáveis.",
+          "status": "passed",
+          "evidence": "Passou no recorte definido (`source=isolated, days=1, limit=5`) com todos checks em verde."
+        },
+        {
+          "criterion": "Runbook define rollback para retornar a L1 se sinais de falha reaparecerem.",
+          "status": "passed",
+          "evidence": "Rollback já documentado em `docs/guides/subagent-readiness-gate.md` e mantido sem alteração regressiva."
+        },
+        {
+          "criterion": "Promoção a L2 é registrada com verificação canônica (sem auto-close prematuro de itens estratégicos).",
+          "status": "passed",
+          "evidence": "Verificação canônica registrada como passed (VER-BUD-157) para formalizar promoção L1->L2."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-158",
+      "target": "TASK-BUD-097",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Pré-gates para promoção L2->L3 executados após fechamento de TASK-BUD-096: `colony_pilot_preflight` => `{ ok: true, failures: [] }`; `quota_visibility_provider_budgets(days=30)` => provider `openai-codex` em estado `ok` (projeção abaixo de WARN/HARD); `scheduler_governance_status` => `activeForeignOwner=false` com lease saudável. Trilha de swarm supervisionado apta para run controlada no próximo slice.",
+      "criteria_results": [
+        {
+          "criterion": "Preflight de swarm, budget e scheduler governance passam antes do launch.",
+          "status": "passed",
+          "evidence": "Preflight/budget/scheduler checks em verde no recorte atual."
+        },
+        {
+          "criterion": "Swarm roda em modo supervisionado com evidência de delivery/recovery e sem auto-close estratégico.",
+          "status": "skipped",
+          "evidence": "Execução supervisionada ainda não iniciada neste slice."
+        },
+        {
+          "criterion": "Existe critério explícito de abort/rollback para retorno a L2 quando necessário.",
+          "status": "passed",
+          "evidence": "Critério já documentado no protocolo/charter; será reaplicado na run supervisionada."
+        }
+      ]
     }
   ]
 }
