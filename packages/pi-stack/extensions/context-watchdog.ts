@@ -379,13 +379,25 @@ export function resolveHandoffFreshness(
 	};
 }
 
+export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
+
+export function handoffRefreshMode(
+	freshnessLabel: "fresh" | "stale" | "unknown",
+	autoResumeEnabled: boolean,
+): HandoffRefreshMode {
+	if (freshnessLabel === "fresh") return "none";
+	if (freshnessLabel === "unknown") return "unknown";
+	return autoResumeEnabled ? "auto-on-compact" : "manual";
+}
+
 export function handoffFreshnessAdvice(
 	freshnessLabel: "fresh" | "stale" | "unknown",
 	autoResumeEnabled: boolean,
 ): string {
-	if (freshnessLabel === "fresh") return "handoff fresh for resume.";
-	if (freshnessLabel === "unknown") return "handoff timestamp unavailable.";
-	if (autoResumeEnabled) {
+	const mode = handoffRefreshMode(freshnessLabel, autoResumeEnabled);
+	if (mode === "none") return "handoff fresh for resume.";
+	if (mode === "unknown") return "handoff timestamp unavailable.";
+	if (mode === "auto-on-compact") {
 		return "handoff stale; auto-refresh runs before auto-compact resume.";
 	}
 	return "handoff stale; refresh checkpoint before manual resume.";
@@ -951,6 +963,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffLastEvent = latestContextWatchEvent(handoff);
 		const handoffLastEventAgeMs = contextWatchEventAgeMs(handoffLastEvent, nowMs);
 		const handoffLastEventAgeSec = toAgeSec(handoffLastEventAgeMs);
+		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -963,6 +976,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffFreshness,
 			handoffFreshnessAgeSec,
 			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
+			handoffRefreshMode: refreshMode,
+			handoffManualRefreshRequired: refreshMode === "manual",
 			handoffLastEvent: handoffLastEvent ?? null,
 			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
 			handoffLastEventAgeMs,
@@ -1114,6 +1129,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
 					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
+					`handoff-refresh: mode=${autoCompact.handoffRefreshMode} manualRequired=${autoCompact.handoffManualRefreshRequired ? "yes" : "no"}`,
 				].join("\n"),
 				assessment.severity,
 			);

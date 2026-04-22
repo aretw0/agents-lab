@@ -8,6 +8,7 @@ import {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	handoffFreshnessAdvice,
+	handoffRefreshMode,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
 	toAgeSec,
@@ -230,6 +231,10 @@ describe("context-watchdog", () => {
 		const stale = resolveHandoffFreshness("2026-04-21T19:20:00.000Z", nowMs, 15 * 60 * 1000);
 		expect(stale.label).toBe("stale");
 
+		expect(handoffRefreshMode("fresh", true)).toBe("none");
+		expect(handoffRefreshMode("unknown", true)).toBe("unknown");
+		expect(handoffRefreshMode("stale", true)).toBe("auto-on-compact");
+		expect(handoffRefreshMode("stale", false)).toBe("manual");
 		expect(handoffFreshnessAdvice("fresh", true)).toContain("fresh");
 		expect(handoffFreshnessAdvice("unknown", true)).toContain("unavailable");
 		expect(handoffFreshnessAdvice("stale", true)).toContain("auto-refresh");
