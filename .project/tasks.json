@@ -2423,6 +2423,44 @@
         "Mensagem recomenda quebrar em micro-slices; quando não possível, orientar registro imediato no board/backlog.",
         "Cobertura de teste valida critérios de detecção e ausência de hard block por default."
       ]
+    },
+    {
+      "id": "TASK-BUD-105",
+      "description": "[P1] Lapidar usabilidade da lane-queue: help explícito para usuário final, comando de limpeza descobrível e mensagens/UX anti-confusão no hatch/status.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-090"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/guides/agent-driver-charter.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Usuário consegue descobrir como limpar fila sem ler código (help/usage em comando e docs).",
+        "`/lane-queue` expõe subcomandos de forma clara, incluindo `clear`, com exemplo curto de uso.",
+        "Mensagens de status incluem dica de como esvaziar/listar fila quando `queued>0`."
+      ],
+      "notes": "Backlog criado por solicitação explícita do usuário (2026-04-22): incluir lapidação de usabilidade da lane-queue para evitar fricção operacional."
+    },
+    {
+      "id": "TASK-BUD-106",
+      "description": "[P0] Endurecer session-triage para modo local-first e tail-batch: analisar somente sessões do projeto isolado e começar pelo final (janela curta), expandindo para cima apenas sob necessidade explícita.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-020"
+      ],
+      "files": [
+        "scripts/session-triage.mjs",
+        "packages/lab-skills/skills/session-triage/SKILL.md",
+        "docs/guides/session-triage.md"
+      ],
+      "acceptance_criteria": [
+        "Por padrão, triage ignora store global e lê apenas `.sandbox/pi-agent/sessions` quando houver contexto isolado ativo.",
+        "Pipeline começa em tail-batch recente (ex.: últimos N registros/mensagens finais) com opção de expansão progressiva (`--expand`/`--window`) em vez de scan completo.",
+        "Saída inclui métrica de custo/contexto estimado e motivo quando houver necessidade de ampliar janela."
+      ],
+      "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput."
     }
   ]
 }
