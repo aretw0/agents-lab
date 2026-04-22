@@ -7,6 +7,7 @@ import {
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
+	handoffFreshnessAdvice,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
@@ -224,6 +225,11 @@ describe("context-watchdog", () => {
 		expect(fresh.ageMs).toBe(600_000);
 		const stale = resolveHandoffFreshness("2026-04-21T19:20:00.000Z", nowMs, 15 * 60 * 1000);
 		expect(stale.label).toBe("stale");
+
+		expect(handoffFreshnessAdvice("fresh", true)).toContain("fresh");
+		expect(handoffFreshnessAdvice("unknown", true)).toContain("unavailable");
+		expect(handoffFreshnessAdvice("stale", true)).toContain("auto-refresh");
+		expect(handoffFreshnessAdvice("stale", false)).toContain("refresh checkpoint");
 	});
 
 	it("writes canonical action/event trail into handoff snapshot", () => {
