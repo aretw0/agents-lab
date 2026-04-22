@@ -2272,7 +2272,8 @@
         "Modo gate retorna erro em CI/local quando houver violação na baseline oficial.",
         "Saída inclui ação corretiva segura (untrack sem apagar working copy)."
       ],
-      "notes": "Foco em prevenção contínua para não repetir drift de versionamento.\n[2026-04-22T12:00:58.396Z] Priorizada para impedir regressão de artefatos pi não curados no git e bloquear promoção com drift de versionamento efêmero."
+      "notes": "Foco em prevenção contínua para não repetir drift de versionamento.\n[2026-04-22T12:00:58.396Z] Priorizada para impedir regressão de artefatos pi não curados no git e bloquear promoção com drift de versionamento efêmero.\n[2026-04-22T12:07:28.771Z] Auditor/gate de artefatos efêmeros implementado (pi-runtime-artifact-audit + --strict + remediação). Evidência parcial: VER-BUD-115 (1ad4eba).",
+      "verification": "VER-BUD-115"
     },
     {
       "id": "TASK-BUD-099",

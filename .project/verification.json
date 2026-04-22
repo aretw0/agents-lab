@@ -1704,6 +1704,32 @@
           "evidence": "Pacote objetivo do próximo marco referencia TASK-BUD-085/091/092/086/096."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-115",
+      "target": "TASK-BUD-098",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Implementado auditor de artefatos efêmeros rastreados em `scripts/pi-runtime-artifact-audit.mjs` com policy deny-by-default para `.pi/*` (allowlist: `.pi/settings.json`, `.pi/agents/*.yaml`) e bloqueio de `.sandbox/*`/`.pi-lens/*`. Modo `--strict` retorna exit 1 quando houver violação e saída inclui remediação segura (`git rm --cached -- <path>`). Integrações: scripts `pi:artifact:audit` e `pi:artifact:audit:strict` em `package.json`; checklist de higiene em `docs/guides/project-canonical-pipeline.md`; prevenção local adicionada em `.gitignore` para `.pi/deferred-intents.json`. Validação executada: `node --test scripts/test/pi-runtime-artifact-audit.test.mjs` (4 passed) e `node scripts/pi-runtime-artifact-audit.mjs --strict` (clean). Commit: `1ad4eba`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Comando lista arquivos rastreados que violam policy de artefato efêmero.",
+          "status": "passed",
+          "evidence": "Script imprime violations por path+reason e total auditado."
+        },
+        {
+          "criterion": "Modo gate retorna erro em CI/local quando houver violação na baseline oficial.",
+          "status": "passed",
+          "evidence": "Flag `--strict` implementada com exit code não-zero em caso de violations."
+        },
+        {
+          "criterion": "Saída inclui ação corretiva segura (untrack sem apagar working copy).",
+          "status": "passed",
+          "evidence": "Remediation commands gerados com `git rm --cached` por arquivo."
+        }
+      ]
     }
   ]
 }
