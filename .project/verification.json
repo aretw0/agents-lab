@@ -1834,6 +1834,32 @@
           "evidence": "Opt-in `--stack-full` documentado; falta ainda consolidar runbook de distribuição strict-curated end-to-end (TASK-BUD-100)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-120",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Consolidação final da drenagem segura em janela idle sem duplicar semântica nativa de follow-up: `resolveAutoDrainRetryDelayMs` passou a retornar retry determinístico também para gate `active-long-run` (bounded por `max(250, autoDrainIdleStableMs)`), evitando stall quando a fila nativa ainda está drenando (`ctx.hasPendingMessages()`) no instante do timer. Isso mantém lane-queue complementar ao follow-up nativo (não despacha prematuramente; apenas reprograma tentativa até idle). Cobertura atualizada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` com expectativa explícita de retry em `active-long-run` (800ms no fixture). Validação: `vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 8/8 pass. Commit: `2e51cc8`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Auto-drain não perde itens quando timer dispara enquanto follow-up nativo ainda está ativo.",
+          "status": "passed",
+          "evidence": "Gate `active-long-run` agora agenda retry em vez de retornar undefined."
+        },
+        {
+          "criterion": "Drenagem mantém janela idle estável e evita dispatch prematuro.",
+          "status": "passed",
+          "evidence": "Retry usa delay baseado em `autoDrainIdleStableMs` com piso 250ms."
+        },
+        {
+          "criterion": "Comportamento novo coberto por teste determinístico.",
+          "status": "passed",
+          "evidence": "Smoke test atualizado e passando (8/8)."
+        }
+      ]
     }
   ]
 }
