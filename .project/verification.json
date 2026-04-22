@@ -2219,6 +2219,32 @@
           "evidence": "Novo teste `shouldSchedulePostDispatchAutoDrain` validando regra de agendamento."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-135",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice de portabilidade backend-agnostic no contrato task/event: `buildCanonicalTaskEventFromColonySignal` agora normaliza `evidenceRefs` de forma determinística (`normalizeCanonicalEvidenceRefs`) com trim, remoção de vazios e deduplicação estável. Isso evita drift entre adapters (SQLite/GitHub/Gitea/local) por arrays inconsistentes de evidência. Cobertura adicionada em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` validando normalização canônica. Validação: `vitest run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 8/8 pass. Commit: `919fb77`.",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Envelope canônico fica mais estável ao padronizar evidenceRefs no builder de evento."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "passed",
+          "evidence": "Bridge documentada permanece válida; normalização reduz fricção entre adapters."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "passed",
+          "evidence": "Micro-slice compatível com trilha incremental já registrada em docs/research/colony-project-task-bridge.md."
+        }
+      ]
     }
   ]
 }
