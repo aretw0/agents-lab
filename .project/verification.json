@@ -2713,6 +2713,32 @@
           "evidence": "Seção 'Bloat-smell advisory (calibrado, baixo ruído)' adicionada ao pipeline canônico."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-154",
+      "target": "TASK-BUD-110",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice de deflação do guardrails-core: extração dos utilitários de bloat-smell para módulo coeso `packages/pi-stack/extensions/guardrails-core-bloat.ts` (config resolve/throttle/extract/estimate/labels). `guardrails-core.ts` preserva contrato por import + re-export e segue como orquestrador. Teste de regressão focado: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 19/19.",
+      "criteria_results": [
+        {
+          "criterion": "`guardrails-core.ts` vira orchestrator enxuto (wiring), com lógica pesada extraída para módulos coesos.",
+          "status": "passed",
+          "evidence": "Bloco de utilitários bloat foi extraído para módulo dedicado, reduzindo superfície interna do core."
+        },
+        {
+          "criterion": "Sem regressão funcional: smoke atual de guardrails continua verde após extração.",
+          "status": "passed",
+          "evidence": "Vitest smoke focado verde (19/19)."
+        },
+        {
+          "criterion": "Guia curto documenta fronteiras dos módulos e regra para novas features evitarem re-inflar arquivo único.",
+          "status": "skipped",
+          "evidence": "Documentação de fronteiras fica para slice de fechamento do TASK-BUD-110."
+        }
+      ]
     }
   ]
 }

@@ -2533,7 +2533,7 @@
     {
       "id": "TASK-BUD-110",
       "description": "[P1] Desinflar `guardrails-core.ts` por extração modular (signal/bloat, lane-queue, budget-governor, bash-guards) mantendo comportamento e contrato público estáveis.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-109"
       ],
@@ -2553,7 +2553,7 @@
         "Sem regressão funcional: smoke atual de guardrails continua verde após extração.",
         "Guia curto documenta fronteiras dos módulos e regra para novas features evitarem re-inflar arquivo único."
       ],
-      "notes": "Criada por sinal explícito de risco de bloat em arquivo único durante sessão (2026-04-22): manter saúde de manutenção e evitar crescimento monolítico do core."
+      "notes": "Criada por sinal explícito de risco de bloat em arquivo único durante sessão (2026-04-22): manter saúde de manutenção e evitar crescimento monolítico do core.\n[2026-04-22T00:00:00Z] Micro-slice inicial de extração: utilitários/config de bloat-smell foram movidos para `packages/pi-stack/extensions/guardrails-core-bloat.ts`; `guardrails-core.ts` mantém wiring e re-export para contrato estável. Smoke focada verde (19/19). Evidência: VER-BUD-154."
     }
   ]
 }
