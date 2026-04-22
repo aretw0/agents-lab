@@ -155,6 +155,32 @@ Para manter loops longos estáveis:
 `/lane-queue` suporta `status|list|add <texto>|pop|clear` e mantém trilha auditável no runtime (`guardrails-core.long-run-intent-*`).
 O auto-drain ocorre apenas em janela idle estável (cooldown + idleStableMs configuráveis).
 
+## Envelope objetivo de long run (L1/L2/L3)
+
+Para reduzir subjetividade, toda long run deve declarar lane ativa e respeitar os gates abaixo.
+
+| Lane | Escopo | Entrada mínima | Até onde vai | Quando parar/voltar |
+|------|--------|----------------|--------------|---------------------|
+| **L1 — Control-plane only** | execução direta no agente principal, micro-slices | `context_watch` < checkpoint, budget sem BLOCK, board canônico íntegro | até fechar milestone de continuidade sem perguntas óbvias (TASK-BUD-085) | retornar ao usuário só em risco irreversível/conflito de objetivo |
+| **L2 — Subagentes assistidos** | delegação limitada para investigação/implementação | L1 estável + `subagent_readiness_status(strict=true)` passando | até provar ganho de throughput com governança preservada (sem regressão de HITL) | qualquer falha de readiness/governança força fallback para L1 |
+| **L3 — Swarm supervisionado** | colônia com preflight e budget envelope explícitos | L2 estável + preflight/swarm governance em verde + baseline curada | até milestone de entrega com evidência determinística (delivery/recovery) | BLOCK de budget, falha de preflight ou evidência insuficiente => fallback L2 |
+
+### Stop conditions obrigatórias por lane
+
+1. **Budget BLOCK/WARN crítico** sem rota segura de handoff.
+2. **Contexto em checkpoint/compact** sem handoff recente.
+3. **Gate de governança quebrado** (`project-validate` não clean, preflight falhando, readiness estrito reprovado).
+4. **Sinal de confiança quebrada**: usuário pede pausa/interrupção ou objetivo fica ambíguo.
+
+### Próximo marco de calibração/autonomia (objetivo)
+
+Long run atual vai até cumprir este pacote mínimo:
+
+- `TASK-BUD-085` (no-obvious-questions) com evidência de autonomia pragmática;
+- `TASK-BUD-091` + `TASK-BUD-092` (baseline curada + parity hard gate);
+- `TASK-BUD-086` + `TASK-BUD-096` (promoção L1->L2 com readiness strict estável);
+- critérios de rollback documentados e testados para manter regressão sob controle.
+
 ## Referências de operação
 
 | Recurso | Uso |
