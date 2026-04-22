@@ -3171,6 +3171,32 @@
           "evidence": "Suíte smoke colony-pilot parsers permanece verde (72/72)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-172",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice 6 (micro) da deflação: helpers de command-surface extraídos para `packages/pi-stack/extensions/colony-pilot-command-surface.ts` (`updateStatusUI`, `primeManualRunbook`, `getCapabilities`, `requireCapabilities`, `tryOpenUrl`). `colony-pilot.ts` mantém wrappers/call-sites estáveis e caiu para 2368 linhas. Smoke regressão: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Entry point delega também command-surface helpers para módulo dedicado."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Sem mudança de contrato público do entrypoint; wrappers preservam assinatura."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "Suite smoke de parsers permanece verde após extração."
+        }
+      ]
     }
   ]
 }

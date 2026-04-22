@@ -108,6 +108,13 @@ import {
 	inspectAntColonyRuntime as inspectAntColonyRuntimeImpl,
 } from "./colony-pilot-artifacts";
 import {
+	getCapabilities as getCapabilitiesImpl,
+	primeManualRunbook as primeManualRunbookImpl,
+	requireCapabilities as requireCapabilitiesImpl,
+	tryOpenUrl as tryOpenUrlImpl,
+	updateStatusUI as updateStatusUIImpl,
+} from "./colony-pilot-command-surface";
+import {
 	applyProjectBaselineSettings as applyProjectBaselineSettingsImpl,
 	buildProjectBaselineSettings as buildProjectBaselineSettingsImpl,
 	deepMergeObjects as deepMergeObjectsImpl,
@@ -815,7 +822,7 @@ export function formatToolJsonOutput(
 }
 
 function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
-	ctx?.ui?.setStatus?.("colony-pilot", renderPilotStatus(state));
+	return updateStatusUIImpl(ctx, state);
 }
 
 function primeManualRunbook(
@@ -824,25 +831,11 @@ function primeManualRunbook(
 	steps: string[],
 	reason = "Auto-dispatch de slash commands entre extensões não é suportado de forma confiável pela API atual do pi.",
 ) {
-	if (steps.length === 0) return;
-
-	const text = [
-		title,
-		reason,
-		"",
-		"Execute na ordem:",
-		...steps.map((s) => `  - ${s}`),
-		"",
-		`Primei o editor com: ${steps[0]}`,
-	].join("\n");
-
-	ctx.ui.notify(text, "info");
-	ctx.ui.setEditorText?.(steps[0]);
+	return primeManualRunbookImpl(ctx, title, steps, reason);
 }
 
 function getCapabilities(pi: ExtensionAPI): PilotCapabilities {
-	const commands = pi.getCommands().map((c) => c.name);
-	return detectPilotCapabilities(commands);
+	return getCapabilitiesImpl(pi);
 }
 
 function requireCapabilities(
@@ -851,40 +844,11 @@ function requireCapabilities(
 	required: Array<keyof PilotCapabilities>,
 	action: string,
 ): boolean {
-	const missing = missingCapabilities(caps, required);
-	if (missing.length === 0) return true;
-
-	const lines = [
-		`Não posso preparar \`${action}\` porque faltam comandos no runtime atual:`,
-		...missing.map((m) => `  - ${m}: ${capabilityGuidance(m)}`),
-		"",
-		"Sem acoplamento ad hoc: valide a composição da stack e só então rode /reload.",
-		"Use /colony-pilot check para diagnóstico rápido.",
-	];
-
-	ctx.ui.notify(lines.join("\n"), "warning");
-	ctx.ui.setEditorText?.("/colony-pilot check");
-	return false;
+	return requireCapabilitiesImpl(ctx, caps, required, action);
 }
 
 async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
-	try {
-		if (process.platform === "win32") {
-			const r = await pi.exec("cmd", ["/c", "start", "", url], {
-				timeout: 5000,
-			});
-			return r.code === 0;
-		}
-		if (process.platform === "darwin") {
-			const r = await pi.exec("open", [url], { timeout: 5000 });
-			return r.code === 0;
-		}
-
-		const r = await pi.exec("xdg-open", [url], { timeout: 5000 });
-		return r.code === 0;
-	} catch {
-		return false;
-	}
+	return tryOpenUrlImpl(pi, url);
 }
 
 interface ProviderBudgetGateSnapshot {

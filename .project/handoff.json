@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-22T23:08:00.000Z",
-  "context": "Deflação do colony-pilot segue controlada. Slice 5 entregou extração de artifacts/runtime inspection para módulo próprio; entrypoint caiu para 2404 linhas mantendo comportamento e contrato estáveis. Context-watch em warn moderado, então manter micro-slices.",
+  "timestamp": "2026-04-22T23:12:00.000Z",
+  "context": "Deflação contínua do colony-pilot mantida em modo micro-slice devido warn ativo. Slice 6 concluiu extração de command-surface helpers para módulo dedicado, mantendo entrypoint estável e reduzindo `colony-pilot.ts` para 2368 linhas.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -10,26 +10,26 @@
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Continuar TASK-BUD-116 em micro-slices: extrair command-surface helpers (runbook/capability checks) ou retention wiring.",
-    "Manter TASK-BUD-114 pronta para allowlist efetiva promoted/skipped quando deflação atingir ponto estável.",
-    "Evitar scans amplos enquanto context-watch estiver em warn; checkpoint antes de qualquer slice maior."
+    "Continuar TASK-BUD-116 em micro-slices: extrair retention wiring restante (separar snapshot/gate wiring do entrypoint).",
+    "Evitar scan amplo enquanto warn; checkpoint antes de qualquer corte maior.",
+    "Retomar TASK-BUD-114 (allowlist efetiva promoted/skipped) após estabilizar deflação do entrypoint."
   ],
   "open_questions": [
-    "Próximo corte de maior ROI imediato: command-surface vs retention wiring?"
+    "No próximo corte, priorizar retention wiring puro ou dividir primeiro parse/settings helpers para queda incremental adicional?"
   ],
   "key_decisions_pending": [
-    "Quando virar default a allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
+    "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
-    "packages/pi-stack/extensions/colony-pilot-artifacts.ts",
+    "packages/pi-stack/extensions/colony-pilot-command-surface.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T23:08:00.000Z",
+      "atIso": "2026-04-22T23:12:00.000Z",
       "reason": "message_end",
       "level": "warn",
       "percent": 56,
