@@ -2092,7 +2092,7 @@
     {
       "id": "TASK-BUD-091",
       "description": "[P0] Implementar gate de baseline curada na distribuição da pi-stack: impedir que defaults publiquem capacidades não maturadas no ambiente isolado.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-087"
       ],
@@ -2111,12 +2111,12 @@
         "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado."
       ],
       "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate.\n[2026-04-22T12:17:45.162Z] Slice 1 da baseline curada: allowlist oficial (CURATED_DEFAULT) + profile de auditoria parity (curated-default) materializados para gatear distribuição.\n[2026-04-22T12:34:57.476Z] Slice 2: instalador passa a usar baseline curada por default (profile curated-default); stack-full virou opt-in explícito (--stack-full/--profile). Evidência parcial: VER-BUD-119.",
-      "verification": "VER-BUD-119"
+      "verification": "VER-BUD-123"
     },
     {
       "id": "TASK-BUD-092",
       "description": "[P0] Criar hard gate de paridade curatorial (isolado vs user-like) para bloquear promoção da stack quando houver superfície default não curada.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-091"
       ],
@@ -2134,7 +2134,8 @@
         "CI/local falha quando detectar item não permitido na baseline oficial.",
         "Relatório aponta ação corretiva: curar, mover para opt-in, ou remover do default."
       ],
-      "notes": "Reforça disciplina de release: nada default sem maturação na curadoria."
+      "notes": "Reforça disciplina de release: nada default sem maturação na curadoria.",
+      "verification": "VER-BUD-122"
     },
     {
       "id": "TASK-BUD-093",
@@ -2279,7 +2280,7 @@
     {
       "id": "TASK-BUD-099",
       "description": "[P0] Publicar runbook de remediação de artefatos já commitados (pi): preservar progresso local, de-indexar paths indevidos e orientar purge seletivo/rotação em caso sensível.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-098"
       ],
@@ -2297,7 +2298,7 @@
         "Há orientação de opt-in para usuários que queiram versionar extras por decisão consciente."
       ],
       "notes": "Pragmatismo: resolver passado sem quebrar andamento atual.\n[2026-04-22T12:11:55.146Z] Runbook de remediação leve/pesada publicado com foco em preservar working copy e rewrite apenas por confirmação explícita. Evidência parcial: VER-BUD-116 (7604add).",
-      "verification": "VER-BUD-116"
+      "verification": "VER-BUD-124"
     },
     {
       "id": "TASK-BUD-100",

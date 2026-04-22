@@ -1881,6 +1881,84 @@
           "evidence": "Novo caso de smoke verifica igualdade de IDs em chamadas repetidas com timestamp inválido."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-122",
+      "target": "TASK-BUD-092",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Hard gate de paridade curatorial implementado em `scripts/pi-parity.mjs`: resultado agora classifica drift em `official` (present/missing), `optIn` (managed fora da baseline) e `nonPermitted` (pacotes/sources fora da curadoria). O relatório inclui remediação explícita com decisões `curar`, `mover-para-opt-in`, `remover-do-default-ou-curar` e `commandHint`. Modo `--strict` bloqueia parity drift (missing official ou non-permitted), cobrindo gate local/CI para baseline oficial. Scripts npm adicionados: `pi:parity:curated:strict` e teste `test:pi:parity:curation-gate`. Cobertura: `scripts/test/pi-parity-curated-profile.test.mjs` + novo `scripts/test/pi-parity-curation-gate.test.mjs` (3/3 pass). Commit: `014327a`.",
+      "criteria_results": [
+        {
+          "criterion": "Comando de parity classifica diferenças em oficial/opt-in/não permitida.",
+          "status": "passed",
+          "evidence": "`classification` no payload/print inclui official, optIn e nonPermitted."
+        },
+        {
+          "criterion": "CI/local falha quando detectar item não permitido na baseline oficial.",
+          "status": "passed",
+          "evidence": "`--strict` bloqueia em drift; teste `pi-parity --strict blocks curated-default on non-permitted items` valida status=1."
+        },
+        {
+          "criterion": "Relatório aponta ação corretiva: curar, mover para opt-in, ou remover do default.",
+          "status": "passed",
+          "evidence": "`remediation` inclui decisões e command hints para cada classe de drift."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-123",
+      "target": "TASK-BUD-091",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Gate de baseline curada consolidado: (1) allowlist canônica `CURATED_DEFAULT` em `packages/pi-stack/package-list.mjs` (commit `a38c4a8`); (2) instalador aplica baseline oficial por default via `DEFAULT_INSTALL_PROFILE='curated-default'` e extras só por opt-in explícito (`--stack-full` / `--profile stack-full`) em `packages/pi-stack/install.mjs` (commit `c1d45a6`); (3) docs de consumo/paridade e stack recomendada explicitam baseline oficial + opt-in para extras (`docs/guides/recommended-pi-stack.md`, `docs/guides/consumption-visibility-surfaces.md`, commit `014327a`).",
+      "criteria_results": [
+        {
+          "criterion": "Existe allowlist canônica de pacotes/capacidades oficiais da baseline.",
+          "status": "passed",
+          "evidence": "`CURATED_DEFAULT` formaliza baseline oficial no package-list."
+        },
+        {
+          "criterion": "Installer/baseline aplica apenas superfície oficial por padrão.",
+          "status": "passed",
+          "evidence": "Install default mudou para `curated-default`; full stack requer flag explícita."
+        },
+        {
+          "criterion": "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado.",
+          "status": "passed",
+          "evidence": "Opt-in documentado por `--stack-full/--profile stack-full` nos guias e help do installer."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-124",
+      "target": "TASK-BUD-099",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Runbook de remediação de artefatos pi já commitados consolidado nos guias canônicos: `docs/guides/project-canonical-pipeline.md` diferencia Cenário A (remediação leve com `git rm --cached` + ignore, preservando working copy) e Cenário B (rewrite histórico apenas com confirmação explícita/risco sensível), com checklist inicial de segurança (`git status --short`). `docs/guides/monitor-overrides.md` reforça curated-default e extras por opt-in consciente. Checkpoint operacional registrado em `docs/research/context-checkpoint-2026-04-22-runtime-artifact-remediation.md`. Evidência de execução do gate: `node scripts/pi-runtime-artifact-audit.mjs --strict` clean. Commits de documentação: `7604add` + board parcial `c9c8d8f`.",
+      "criteria_results": [
+        {
+          "criterion": "Runbook diferencia remediação leve (git rm --cached + ignore) de remediação pesada (rewrite de histórico).",
+          "status": "passed",
+          "evidence": "Seção dedicada com Cenário A e Cenário B no pipeline canônico."
+        },
+        {
+          "criterion": "Fluxo inclui checklist de segurança para não perder alterações não commitadas.",
+          "status": "passed",
+          "evidence": "Passo inicial exige inspeção de estado local antes de remediar e prioriza untrack sem apagar cópia local."
+        },
+        {
+          "criterion": "Há orientação de opt-in para usuários que queiram versionar extras por decisão consciente.",
+          "status": "passed",
+          "evidence": "Guia de monitor-overrides documenta curated-default + extras apenas por opt-in explícito."
+        }
+      ]
     }
   ]
 }
