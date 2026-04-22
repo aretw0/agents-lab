@@ -2322,6 +2322,77 @@
         "Documentação explica trade-off e como habilitar exceções sem confundir baseline oficial."
       ],
       "notes": "Conecta política de curadoria ao instalador/distribuição para usuários finais."
+    },
+    {
+      "id": "colony-colony-a",
+      "description": "[COLONY:ant_colony] colony colony-a",
+      "status": "in-progress",
+      "notes": "[2026-04-22T13:02:07.301Z] colony colony-a phase=running"
+    },
+    {
+      "id": "TASK-BUD-101",
+      "description": "[P0] Implementar densidade adaptativa no TUI do control-plane (custom-footer + painéis), com regras wide/medium/narrow para evitar clutter e overflow em resize.",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-BUD-085",
+        "TASK-BUD-094"
+      ],
+      "references": [
+        "REQ-BUD-052",
+        "DEC-BUD-040"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/custom-footer.ts",
+        "packages/pi-stack/test/smoke/custom-footer-registration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Linha compacta do footer prioriza sinais essenciais e degrada opcionalmente por largura sem perder status crítico.",
+        "Linhas de painel anexadas ao footer respeitam largura renderizada e não estouram visualmente.",
+        "Smoke tests cobrem comportamento em largura estreita/média para evitar regressão de clutter."
+      ]
+    },
+    {
+      "id": "TASK-BUD-102",
+      "description": "[P0] Evoluir WEB session gateway para dashboard responsivo summary-first com detalhes progressivos e semântica alinhada ao TUI.",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-BUD-101"
+      ],
+      "references": [
+        "REQ-BUD-052",
+        "DEC-BUD-040"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/web-session-gateway.ts",
+        "packages/pi-stack/test/smoke/web-session-gateway.test.ts"
+      ],
+      "acceptance_criteria": [
+        "UI web exibe cards/resumo operacional sem depender de bloco JSON cru para leitura principal.",
+        "Detalhes completos continuam disponíveis por seção colapsável, preservando auditabilidade.",
+        "Testes cobrem helper de resumo canônico para consistência entre render/web API."
+      ]
+    },
+    {
+      "id": "TASK-BUD-103",
+      "description": "[P1] Publicar guia de curadoria visual do control-plane (TUI+WEB) com padrões de composição, anti-clutter e checklist de resize.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-101",
+        "TASK-BUD-102"
+      ],
+      "references": [
+        "REQ-BUD-052",
+        "DEC-BUD-040"
+      ],
+      "files": [
+        "docs/guides/recommended-pi-stack.md",
+        "docs/guides/README.md"
+      ],
+      "acceptance_criteria": [
+        "Guia documenta regras de densidade adaptativa e prioridades de informação por superfície.",
+        "Inclui checklist de validação para resize (narrow/medium/wide) no TUI e WEB.",
+        "Orienta como adicionar novos widgets sem quebrar semântica consolidada do control-plane."
+      ]
     }
   ]
 }

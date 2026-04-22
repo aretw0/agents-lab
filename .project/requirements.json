@@ -726,6 +726,24 @@
         "Fluxo prioriza preservar progresso local sem perda de trabalho não commitado.",
         "Comunicação para usuários deixa claro quando remediar automaticamente e quando pedir confirmação explícita."
       ]
+    },
+    {
+      "id": "REQ-BUD-052",
+      "description": "A curadoria da pi-stack deve oferecer control plane first-class e consolidado entre TUI e WEB: apresentação responsiva, sem clutter, com densidade adaptativa por largura e semântica consistente de status.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-101",
+        "TASK-BUD-102",
+        "TASK-BUD-103"
+      ],
+      "acceptance_criteria": [
+        "Footer/painéis TUI reduzem densidade automaticamente em larguras menores sem linhas visualmente poluídas.",
+        "Gateway WEB exibe visão summary-first com detalhes progressivos e boa legibilidade ao redimensionar viewport.",
+        "Semântica central (board clock, colônias, budget/health) aparece de forma consistente entre TUI e WEB, sem duplicação confusa."
+      ]
     }
   ]
 }

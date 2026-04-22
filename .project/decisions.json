@@ -281,6 +281,13 @@
       "rationale": "Evita vazamento de artefato indevido, reduz ruído no repositório e alinha experiência de usuários com a curadoria maturada.",
       "context": "Necessidade explícita de impedir que usuários recebam por default itens não curados/indesejados, mantendo opção de ativação consciente.",
       "task": "TASK-BUD-098"
+    },
+    {
+      "id": "DEC-BUD-040",
+      "status": "decided",
+      "decision": "Adotar UX adaptativa por densidade (wide/medium/narrow) e progressive disclosure no control-plane: resumo essencial sempre visível; detalhes sob demanda tanto no TUI quanto no WEB.",
+      "rationale": "Preserva legibilidade e confiança operacional quando a tela é redimensionada, reduz ruído em long-runs e melhora experiência para usuários novos sem perder poder para usuários avançados.",
+      "context": "Diretriz explícita do usuário para consolidar apresentação first-class no control plane (TUI+WEB), evitar clutter e usar exemplos curados da stack como baseline."
     }
   ]
 }
