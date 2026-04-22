@@ -3,6 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+	buildCanonicalTaskEventFromColonySignal,
+	colonyPhaseToCanonicalTaskEventType,
 	readProjectTasksBlock,
 	upsertProjectTaskFromColonySignal,
 	type ColonyTaskSyncConfigShape,
@@ -120,5 +122,30 @@ describe("colony-pilot task-sync behavior", () => {
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
+	});
+
+	it("maps colony signals into canonical task_event envelope for adapter portability", () => {
+		expect(colonyPhaseToCanonicalTaskEventType("launched", true)).toBe("start");
+		expect(colonyPhaseToCanonicalTaskEventType("running", true)).toBe("progress");
+		expect(colonyPhaseToCanonicalTaskEventType("task_done", true)).toBe("review");
+		expect(colonyPhaseToCanonicalTaskEventType("completed", true)).toBe("done_candidate");
+		expect(colonyPhaseToCanonicalTaskEventType("completed", false)).toBe("done_verified");
+		expect(colonyPhaseToCanonicalTaskEventType("budget_exceeded", true)).toBe("recovery");
+		expect(colonyPhaseToCanonicalTaskEventType("unknown", true)).toBeUndefined();
+
+		const event = buildCanonicalTaskEventFromColonySignal({
+			taskId: "TASK-BUD-018",
+			signal: { phase: "running", id: "colony-abc" },
+			requireHumanClose: true,
+			timestamp: "2026-04-22T02:30:00.000Z",
+			source: "colony",
+			evidenceRefs: ["docs/research/colony-project-task-bridge.md"],
+		});
+		expect(event).toBeDefined();
+		expect(event?.taskId).toBe("TASK-BUD-018");
+		expect(event?.type).toBe("progress");
+		expect(event?.timestamp).toBe("2026-04-22T02:30:00.000Z");
+		expect(event?.eventId).toContain("task-bud-018-colony-abc-running");
+		expect(event?.evidenceRefs).toEqual(["docs/research/colony-project-task-bridge.md"]);
 	});
 });

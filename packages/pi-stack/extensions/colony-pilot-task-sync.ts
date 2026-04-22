@@ -219,6 +219,85 @@ function colonyPhaseToProjectTaskStatus(
 	return "in-progress";
 }
 
+export type CanonicalTaskEventType =
+	| "start"
+	| "progress"
+	| "review"
+	| "done_candidate"
+	| "done_verified"
+	| "recovery";
+
+export type CanonicalTaskEventSource = "colony" | "scheduler" | "human" | "ci";
+
+export interface CanonicalTaskEvent {
+	eventId: string;
+	taskId: string;
+	type: CanonicalTaskEventType;
+	source: CanonicalTaskEventSource;
+	timestamp: string;
+	evidenceRefs?: string[];
+}
+
+export function colonyPhaseToCanonicalTaskEventType(
+	phase: ColonyPhase,
+	requireHumanClose: boolean,
+): CanonicalTaskEventType | undefined {
+	if (phase === "launched") return "start";
+	if (phase === "running" || phase === "scouting") return "progress";
+	if (phase === "task_done") return "review";
+	if (phase === "completed") return requireHumanClose ? "done_candidate" : "done_verified";
+	if (phase === "failed" || phase === "aborted" || phase === "budget_exceeded") {
+		return "recovery";
+	}
+	return undefined;
+}
+
+function canonicalTaskEventId(
+	taskId: string,
+	signalId: string,
+	phase: ColonyPhase,
+	timestamp: string,
+): string {
+	const base = sanitizeTaskSlug(`${taskId}-${signalId}-${phase}`) || "task-event";
+	const tsNum = Date.parse(timestamp);
+	const tsPart = Number.isFinite(tsNum)
+		? Math.floor(tsNum).toString(36)
+		: (sanitizeTaskSlug(timestamp).slice(0, 16) || Date.now().toString(36));
+	return `${base}-${tsPart}`;
+}
+
+export function buildCanonicalTaskEventFromColonySignal(options: {
+	taskId: string;
+	signal: { phase: ColonyPhase; id: string };
+	requireHumanClose: boolean;
+	timestamp?: string;
+	source?: CanonicalTaskEventSource;
+	evidenceRefs?: string[];
+}): CanonicalTaskEvent | undefined {
+	const type = colonyPhaseToCanonicalTaskEventType(
+		options.signal.phase,
+		options.requireHumanClose,
+	);
+	if (!type) return undefined;
+	const timestamp = options.timestamp ?? new Date().toISOString();
+	return {
+		eventId: canonicalTaskEventId(
+			options.taskId,
+			options.signal.id,
+			options.signal.phase,
+			timestamp,
+		),
+		taskId: options.taskId,
+		type,
+		source: options.source ?? "colony",
+		timestamp,
+		evidenceRefs:
+			Array.isArray(options.evidenceRefs) && options.evidenceRefs.length > 0
+				? options.evidenceRefs
+				: undefined,
+	};
+}
+
 export function upsertProjectTaskFromColonySignal(
 	cwd: string,
 	signal: { phase: ColonyPhase; id: string },
