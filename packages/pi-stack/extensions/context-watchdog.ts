@@ -134,6 +134,28 @@ export type ContextWatchAssessment = {
 	severity: "info" | "warning";
 };
 
+export type ContextWatchOperatorSignal = {
+	reloadRequired: boolean;
+	humanActionRequired: boolean;
+	reasons: string[];
+};
+
+export function resolveContextWatchOperatorSignal(input: {
+	reloadRequired?: boolean;
+	handoffManualRefreshRequired?: boolean;
+}): ContextWatchOperatorSignal {
+	const reloadRequired = input.reloadRequired === true;
+	const handoffManualRefreshRequired = input.handoffManualRefreshRequired === true;
+	const reasons: string[] = [];
+	if (reloadRequired) reasons.push("reload-required");
+	if (handoffManualRefreshRequired) reasons.push("handoff-refresh-required");
+	return {
+		reloadRequired,
+		humanActionRequired: reasons.length > 0,
+		reasons,
+	};
+}
+
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
 function persistContextWatchHandoffEvent(
@@ -400,9 +422,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
+			const operatorSignal = resolveContextWatchOperatorSignal({
+				reloadRequired: false,
+				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
+			});
 			const payload = {
 				...assessment,
 				autoCompact,
+				operatorSignal,
 			};
 			return {
 				content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
@@ -488,6 +515,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
+			const operatorSignal = resolveContextWatchOperatorSignal({
+				reloadRequired: false,
+				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
+			});
 			ctx.ui.notify(
 				[
 					formatContextWatchStatus(assessment),
@@ -495,6 +526,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					assessment.recommendation,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
+					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
 					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,

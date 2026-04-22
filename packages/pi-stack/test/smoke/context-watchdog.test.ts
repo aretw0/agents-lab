@@ -15,6 +15,7 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	resolveContextWatchOperatorSignal,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	summarizeContextWatchEvent,
@@ -224,6 +225,30 @@ describe("context-watchdog", () => {
 
 		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any, 5 * 60 * 1000, nowMs);
 		expect(unknownPrompt).toContain("freshness=unknown");
+	});
+
+	it("emits operator signal for manual intervention/reload steering", () => {
+		const none = resolveContextWatchOperatorSignal({
+			reloadRequired: false,
+			handoffManualRefreshRequired: false,
+		});
+		expect(none.humanActionRequired).toBe(false);
+		expect(none.reasons).toEqual([]);
+
+		const manual = resolveContextWatchOperatorSignal({
+			reloadRequired: false,
+			handoffManualRefreshRequired: true,
+		});
+		expect(manual.humanActionRequired).toBe(true);
+		expect(manual.reloadRequired).toBe(false);
+		expect(manual.reasons).toContain("handoff-refresh-required");
+
+		const reload = resolveContextWatchOperatorSignal({
+			reloadRequired: true,
+			handoffManualRefreshRequired: false,
+		});
+		expect(reload.humanActionRequired).toBe(true);
+		expect(reload.reasons).toContain("reload-required");
 	});
 
 	it("computes handoff freshness deterministically", () => {

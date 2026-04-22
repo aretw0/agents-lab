@@ -2453,6 +2453,32 @@
           "evidence": "Teste inválido com heading sem comando agora exige mensagem contendo seção esperada + backticks; casos válidos existentes preservados."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-144",
+      "target": "TASK-BUD-108",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "`context-watchdog` agora publica `operatorSignal` no payload de `context_watch_status` com `reloadRequired`, `humanActionRequired` e `reasons`, e `/context-watch` também exibe linha `operator-signal` para steering passivo. Smoke adicionada para `resolveContextWatchOperatorSignal` cobrindo none/manual/reload. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (13/13 pass).",
+      "criteria_results": [
+        {
+          "criterion": "Agente recebe sinais de contexto (warn/checkpoint/compact) via stream/status passivo, sem depender de chamada explícita de tool para steering rotineiro.",
+          "status": "passed",
+          "evidence": "Payload de status agora inclui `operatorSignal` consumível por stream/steering."
+        },
+        {
+          "criterion": "Ao receber warn, política reduz automaticamente tamanho de slice; no segundo aviso executa checkpoint/handoff antes de compact.",
+          "status": "skipped",
+          "evidence": "Já existe no watchdog; esta fatia focou sinalização de intervenção humana/reload."
+        },
+        {
+          "criterion": "Uso direto de tools de steering fica restrito a diagnóstico/debug explícito, com runbook documentado.",
+          "status": "skipped",
+          "evidence": "Runbook/documentação ainda pendentes para fechamento total da task."
+        }
+      ]
     }
   ]
 }
