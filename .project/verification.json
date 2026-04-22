@@ -2989,6 +2989,32 @@
           "evidence": "`colony-colony-a` removida de in-progress e marcada blocked com nota de reconciliação."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-165",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Blueprint inicial de promoção seletiva publicado em `docs/research/worktree-selective-promotion-blueprint-2026-04-22.md` com: (1) escopo declarado por policy (`docs-only`/`code-scope`), (2) seleção `promoted` vs `skipped`, (3) evidência canônica obrigatória (final/skipped inventory + validation command log), e (4) fallback explícito para L2 quando promoção seletiva for vazia.",
+      "criteria_results": [
+        {
+          "criterion": "Quando a run produzir mudanças fora de escopo declarado, o fluxo promove automaticamente apenas arquivos permitidos por allowlist explícita.",
+          "status": "passed",
+          "evidence": "Fluxo de interseção `candidateDiff ∩ allowlist(scopePolicy)` definido no blueprint."
+        },
+        {
+          "criterion": "Registro canônico inclui evidência de seleção (promoted vs skipped) com motivo auditável, sem auto-close estratégico.",
+          "status": "passed",
+          "evidence": "Blueprint exige `Final file inventory` e `Skipped file inventory` com motivo."
+        },
+        {
+          "criterion": "Fallback para L2 permanece explícito quando allowlist resultar em promoção vazia ou evidência insuficiente.",
+          "status": "passed",
+          "evidence": "Fallback/rollback documentado: promoção vazia ou evidência incompleta retorna `candidate/recovery required` e L2."
+        }
+      ]
     }
   ]
 }

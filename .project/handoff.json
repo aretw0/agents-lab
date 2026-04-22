@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-22T22:03:00.668Z",
+  "timestamp": "2026-04-22T22:05:56.726Z",
   "context": "Warn-stage micro-slices mantidos com foco fábrica. TASK-BUD-113 concluída: governança de sinais formalizada (ownership + noise-budget) e meta-sinal runtime `signal-noise-excessive` integrado no context-watchdog em modo advisory/non-blocking.",
   "current_phase": "factory-signal-governance-stable",
   "current_tasks": [
@@ -56,6 +56,32 @@
     },
     {
       "atIso": "2026-04-22T22:03:00.668Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 68,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-04-22T22:05:46.428Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 67,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
+    },
+    {
+      "atIso": "2026-04-22T22:05:56.726Z",
       "reason": "message_end",
       "level": "checkpoint",
       "percent": 68,

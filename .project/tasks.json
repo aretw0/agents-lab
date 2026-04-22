@@ -2644,7 +2644,7 @@
     {
       "id": "TASK-BUD-114",
       "description": "[P1] Automatizar promoção seletiva de worktree para branch principal com allowlist de escopo (docs-only/code-scope), evitando reescrita manual quando houver deriva fora de escopo.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-097"
       ],
@@ -2665,7 +2665,7 @@
         "Registro canônico inclui evidência de seleção (promoted vs skipped) com motivo auditável, sem auto-close estratégico.",
         "Fallback para L2 permanece explícito quando allowlist resultar em promoção vazia ou evidência insuficiente."
       ],
-      "notes": "Solicitação implícita do usuário (2026-04-22): movimento worktree->main deve ser mais automático que reescrever arquivo manualmente, mantendo governança e controle de escopo."
+      "notes": "Solicitação implícita do usuário (2026-04-22): movimento worktree->main deve ser mais automático que reescrever arquivo manualmente, mantendo governança e controle de escopo.\n[2026-04-22T00:00:00Z] Blueprint inicial registrado em `docs/research/worktree-selective-promotion-blueprint-2026-04-22.md` com fluxo de allowlist (`promoted` vs `skipped`), evidência canônica e fallback explícito para L2 quando promoção seletiva for vazia. Evidência: VER-BUD-165."
     }
   ]
 }
