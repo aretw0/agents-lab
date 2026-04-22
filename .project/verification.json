@@ -2973,6 +2973,22 @@
           "evidence": "Reason `signal-noise-excessive` emitida em operatorSignal; política mantém fallback passivo e non-blocking."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-164",
+      "target": "colony-colony-a",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Higiene de fábrica no board: task legado `colony-colony-a` estava `in-progress` sem colônia ativa correspondente no workspace atual e sem trilha canônica de promoção. Reclassificada para `blocked` como ruído histórico, preservando no-auto-close e evitando falso WIP em métricas operacionais.",
+      "criteria_results": [
+        {
+          "criterion": "Itens legados de colônia sem execução ativa não devem permanecer como WIP corrente do board.",
+          "status": "passed",
+          "evidence": "`colony-colony-a` removida de in-progress e marcada blocked com nota de reconciliação."
+        }
+      ]
     }
   ]
 }

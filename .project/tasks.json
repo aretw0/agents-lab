@@ -2333,8 +2333,8 @@
     {
       "id": "colony-colony-a",
       "description": "[COLONY:ant_colony] colony colony-a",
-      "status": "in-progress",
-      "notes": "[2026-04-22T13:02:07.301Z] colony colony-a phase=running"
+      "status": "blocked",
+      "notes": "[2026-04-22T13:02:07.301Z] colony colony-a phase=running\n[2026-04-22T00:00:00Z] Reconciliação de fábrica: item legado de colônia sem trilha ativa no workspace atual foi reclassificado como blocked (noise histórico), mantendo no-auto-close e sem promoção automática. Evidência: VER-BUD-164."
     },
     {
       "id": "TASK-BUD-101",
@@ -2640,6 +2640,32 @@
       ],
       "notes": "Backlog solicitado pelo usuário (2026-04-22): tratar discoverability como sinal governável e incluir sinal de 'ruído demais' para manter equilíbrio e evitar atender todos sinais sem prioridade.\n[2026-04-22T00:00:00Z] Início de foco fábrica pós-reload: TASK-BUD-113 promovida para in-progress para atacar equilíbrio sinal/ruído em micro-slices, mantendo abordagem native-first e sem expansão de superfície desnecessária.\n[2026-04-22T00:00:00Z] Micro-slice de governança: pipeline canônico recebeu seção de ownership de sinais (operator/runtime/governance/discoverability), precedência de noise-budget e definição de meta-sinal advisory para ruído excessivo. Evidência: VER-BUD-162.\n[2026-04-22T00:00:00Z] Micro-slice runtime: `context-watchdog` agora emite meta-sinal passivo `signal-noise-excessive` em `operatorSignal` quando excede budget de anúncios na janela, mantendo default não-bloqueante; cobertura smoke adicionada. Evidência: VER-BUD-163.",
       "verification": "VER-BUD-163"
+    },
+    {
+      "id": "TASK-BUD-114",
+      "description": "[P1] Automatizar promoção seletiva de worktree para branch principal com allowlist de escopo (docs-only/code-scope), evitando reescrita manual quando houver deriva fora de escopo.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-097"
+      ],
+      "references": [
+        "REQ-BUD-008",
+        "REQ-BUD-049",
+        "REQ-BUD-055",
+        "DEC-BUD-042",
+        "DEC-BUD-044"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "docs/guides/swarm-cleanroom-protocol.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Quando a run produzir mudanças fora de escopo declarado, o fluxo promove automaticamente apenas arquivos permitidos por allowlist explícita.",
+        "Registro canônico inclui evidência de seleção (promoted vs skipped) com motivo auditável, sem auto-close estratégico.",
+        "Fallback para L2 permanece explícito quando allowlist resultar em promoção vazia ou evidência insuficiente."
+      ],
+      "notes": "Solicitação implícita do usuário (2026-04-22): movimento worktree->main deve ser mais automático que reescrever arquivo manualmente, mantendo governança e controle de escopo."
     }
   ]
 }
