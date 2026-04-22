@@ -2020,6 +2020,74 @@
         "Primeira onda aplicada com evidência mínima (smoke/regression) sem quebrar fluxo de long runs."
       ],
       "notes": "Foco em estabilidade operacional: menos superfície duplicada, menos comportamento inesperado em execuções longas."
+    },
+    {
+      "id": "TASK-BUD-088",
+      "description": "[P0] Implementar hatch progressivo (simple-first): primeiro contato de sessão/projeto sem oferta direta de swarm, com escala explícita sob demanda.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-083"
+      ],
+      "references": [
+        "REQ-BUD-043"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot-hatch.ts",
+        "packages/pi-stack/extensions/custom-footer.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Primeiro hatch da sessão não mostra CTA de swarm por padrão.",
+        "UX inicial oferece apenas trilha simples (status/context/readiness básico + como escalar).",
+        "Comando/flag explícita permite promover para modo avançado na mesma sessão sem fricção."
+      ],
+      "notes": "Foco: não assustar no primeiro contato e preservar clareza de controle."
+    },
+    {
+      "id": "TASK-BUD-089",
+      "description": "[P1] Consolidar escada de escala operacional (manual -> delegação -> swarm) com critérios auditáveis e messaging de confiança/interruptibilidade.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-085",
+        "TASK-BUD-088"
+      ],
+      "references": [
+        "REQ-BUD-044"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/subagent-readiness.ts",
+        "docs/guides/agent-driver-charter.md"
+      ],
+      "acceptance_criteria": [
+        "Cada sugestão de escala expõe motivo objetivo (contexto, backlog, readiness, custo).",
+        "Sem sinal forte/solicitação explícita, manter lane simples por default.",
+        "Usuário recebe caminho curto para interromper ou reduzir escala sem perder progresso."
+      ],
+      "notes": "Foco: autonomia confiável sem sensação de perda de controle."
+    },
+    {
+      "id": "TASK-BUD-090",
+      "description": "[P1] Implementar política de discoverability enxuta no control-plane (sugestões mínimas e contextuais) e plano de de-ruído da curadoria.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-087",
+        "TASK-BUD-088"
+      ],
+      "references": [
+        "REQ-BUD-045"
+      ],
+      "files": [
+        "docs/guides/recommended-pi-stack.md",
+        "docs/guides/agent-driver-charter.md",
+        "docs/research/pi-stack-user-surface-audit-2026-04-21.md"
+      ],
+      "acceptance_criteria": [
+        "Sugestões padrão no hatch e no loop operacional são limitadas ao essencial por contexto.",
+        "Inventário de superfícies identifica e remove recomendações redundantes/ruidosas.",
+        "Runbook explicita quando sugerir swarm, quando sugerir delegação e quando ficar no modo simples."
+      ],
+      "notes": "Pragmatismo: otimizar legibilidade e confiança antes de ampliar superfície."
     }
   ]
 }

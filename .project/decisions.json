@@ -249,6 +249,14 @@
       "status": "decided",
       "context": "Fechamento de TASK-BUD-012 para preparar trilha de migração/integração multi-backend com semântica única de status e evidência.",
       "task": "TASK-BUD-012"
+    },
+    {
+      "id": "DEC-BUD-036",
+      "status": "decided",
+      "decision": "Adotar progressive disclosure como default do control-plane: simples primeiro, escala sob demanda ou por sinal forte de necessidade.",
+      "rationale": "Evitar assustar usuários com swarm/delegação complexa no primeiro contato, mantendo confiança, interruptibilidade e eficiência de contexto em long runs.",
+      "context": "Diretriz do usuário para lapidar UX da curadoria com pragmatismo, reduzir gordura e melhorar discoverability sem sacrificar autonomia.",
+      "task": "TASK-BUD-088"
     }
   ]
 }

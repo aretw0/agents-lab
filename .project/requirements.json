@@ -572,6 +572,57 @@
         "Mapa de adapters explicita capacidades mínimas e gaps para `.project`, GitHub, Gitea e SQLite.",
         "Invariantes de governança permanecem idênticos em qualquer adapter (budget envelope, no-auto-close estratégico, verificação canônica)."
       ]
+    },
+    {
+      "id": "REQ-BUD-043",
+      "description": "No primeiro hatch de sessão em um projeto novo, o control-plane deve iniciar em modo simples (sem CTA de swarm/delegação complexa por padrão), priorizando orientação mínima e comandos de recuperação/diagnóstico básicos.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-088"
+      ],
+      "acceptance_criteria": [
+        "Sessão/hatch inicial não exibe recomendação ativa de swarm por padrão.",
+        "A UX inicial mostra trilha simples: status, próximos passos básicos e como pedir escala explicitamente.",
+        "Existe opt-in explícito para habilitar recomendação avançada na mesma sessão."
+      ]
+    },
+    {
+      "id": "REQ-BUD-044",
+      "description": "A escalada de complexidade deve ser progressiva e orientada por sinais: manual/micro-slice -> delegação -> swarm, sem saltos automáticos que surpreendam o usuário.",
+      "type": "non-functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-089",
+        "TASK-BUD-085"
+      ],
+      "acceptance_criteria": [
+        "Recomendação de lane de execução explicita por que a próxima escala foi sugerida.",
+        "Sem pedido explícito ou sinal forte de escala, o sistema permanece em lane simples.",
+        "Toda escalada automática recomendada é auditável e reversível."
+      ]
+    },
+    {
+      "id": "REQ-BUD-045",
+      "description": "A experiência de curadoria deve maximizar discoverability útil com superfície mínima: sugestões certas no momento certo, sem gordura e com interruptibilidade clara.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-090",
+        "TASK-BUD-085",
+        "TASK-BUD-087"
+      ],
+      "acceptance_criteria": [
+        "Sugestões de control-plane são contextuais (problema atual, readiness, budget) e limitadas ao essencial.",
+        "Usuário sempre vê como interromper, pausar ou voltar para modo simples.",
+        "Runbook de curadoria first-party prioriza remoção de overlap e redução de ruído antes de adicionar novas superfícies."
+      ]
     }
   ]
 }
