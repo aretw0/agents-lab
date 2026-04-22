@@ -10,6 +10,7 @@
  * Profiles:
  * - stack-full: all managed packages from @aretw0/pi-stack installer (first + third-party)
  * - first-party: only @aretw0/* workspace packages
+ * - curated-default: strict curated baseline for distribution defaults
  *
  * Usage:
  *   node scripts/pi-parity.mjs
@@ -22,7 +23,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { FIRST_PARTY, PACKAGES, THIRD_PARTY } from "../packages/pi-stack/package-list.mjs";
+import { CURATED_DEFAULT, FIRST_PARTY, PACKAGES, THIRD_PARTY } from "../packages/pi-stack/package-list.mjs";
 
 const IS_WINDOWS = process.platform === "win32";
 const DEFAULT_SCOPE = "user";
@@ -31,6 +32,7 @@ const DEFAULT_PROFILE = "stack-full";
 const PROFILES = {
   "stack-full": PACKAGES,
   "first-party": FIRST_PARTY,
+  "curated-default": CURATED_DEFAULT,
 };
 
 function parseArgs(argv) {
@@ -72,11 +74,12 @@ Usage:
   npm run pi:parity
   node scripts/pi-parity.mjs --scope user --profile stack-full --strict
   node scripts/pi-parity.mjs --scope project --profile first-party
+  node scripts/pi-parity.mjs --scope project --profile curated-default
   node scripts/pi-parity.mjs --scope both --json
 
 Options:
   --scope <user|project|both>
-  --profile <stack-full|first-party>
+  --profile <stack-full|first-party|curated-default>
   --strict              Exit 1 when expected packages are missing
   --json                Emit machine-readable JSON
   -h, --help

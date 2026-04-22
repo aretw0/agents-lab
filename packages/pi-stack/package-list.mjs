@@ -33,5 +33,17 @@ export const THIRD_PARTY = [
   "@ifi/pi-web-remote",
 ];
 
+/**
+ * Curated default baseline for distribution (strict-curated intent):
+ * keep only capabilities already matured in isolated dogfood.
+ */
+export const CURATED_DEFAULT = [
+  ...FIRST_PARTY,
+  "@davidorex/pi-project-workflows",
+  "@ifi/oh-pi-extensions",
+  "@ifi/oh-pi-ant-colony",
+  "@ifi/pi-web-remote",
+];
+
 /** All managed packages */
 export const PACKAGES = [...FIRST_PARTY, ...THIRD_PARTY];
