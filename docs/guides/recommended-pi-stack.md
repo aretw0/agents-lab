@@ -6,14 +6,17 @@ O agents-lab publica e mantém sua própria stack curada como meta-pacote npm.
 **Esta é a forma recomendada de instalar a stack completa:**
 
 ```bash
-npx @aretw0/pi-stack          # instala globalmente
-npx @aretw0/pi-stack --local  # instala no projeto atual
+npx @aretw0/pi-stack               # instala baseline curada (default)
+npx @aretw0/pi-stack --local       # baseline curada no projeto atual
+npx @aretw0/pi-stack --stack-full  # opt-in explícito para stack completa
 ```
 
 Ou diretamente via pi:
 
 ```bash
 pi install npm:@aretw0/pi-stack
+# para auditoria de baseline curada:
+npm run pi:parity:curated
 ```
 
 **Via git** (sempre atualizado, sem esperar publish):

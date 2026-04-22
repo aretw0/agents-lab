@@ -23,9 +23,24 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import process from "node:process";
-import { FIRST_PARTY, THIRD_PARTY, PACKAGES } from "./package-list.mjs";
+import { CURATED_DEFAULT, FIRST_PARTY, THIRD_PARTY, PACKAGES } from "./package-list.mjs";
 
 const IS_WINDOWS = process.platform === "win32";
+
+export const DEFAULT_INSTALL_PROFILE = "curated-default";
+
+const INSTALL_PROFILES = {
+  "curated-default": CURATED_DEFAULT,
+  "stack-full": PACKAGES,
+};
+
+export function resolveInstallPackageList(profile = DEFAULT_INSTALL_PROFILE) {
+  const key = String(profile ?? DEFAULT_INSTALL_PROFILE).trim();
+  if (!Object.prototype.hasOwnProperty.call(INSTALL_PROFILES, key)) {
+    throw new Error(`Unknown install profile: ${profile}`);
+  }
+  return INSTALL_PROFILES[key];
+}
 
 /**
  * Known post-install filter patches.
@@ -195,6 +210,7 @@ function parseArgs(argv) {
 	let remove = false;
 	let help = false;
 	let baseline = false;
+	let profile = DEFAULT_INSTALL_PROFILE;
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
@@ -204,6 +220,14 @@ function parseArgs(argv) {
 				console.error("Error: --version requires a value");
 				process.exit(1);
 			}
+		} else if (arg === "--profile") {
+			profile = String(args[++i] ?? "").trim();
+			if (!profile) {
+				console.error("Error: --profile requires a value");
+				process.exit(1);
+			}
+		} else if (arg === "--stack-full") {
+			profile = "stack-full";
 		} else if (arg === "--local" || arg === "-l") {
 			local = true;
 		} else if (arg === "--remove" || arg === "-r") {
@@ -218,7 +242,12 @@ function parseArgs(argv) {
 		}
 	}
 
-	return { version, local, remove, help, baseline };
+	if (!Object.prototype.hasOwnProperty.call(INSTALL_PROFILES, profile)) {
+		console.error(`Error: invalid --profile '${profile}'. Use: ${Object.keys(INSTALL_PROFILES).join(" | ")}`);
+		process.exit(1);
+	}
+
+	return { version, local, remove, help, baseline, profile };
 }
 
 function printHelp() {
@@ -226,7 +255,9 @@ function printHelp() {
 pi-stack — install the @aretw0 curated pi stack
 
 Usage:
-  npx @aretw0/pi-stack                    Install all packages (global)
+  npx @aretw0/pi-stack                    Install curated default profile (global)
+  npx @aretw0/pi-stack --stack-full       Install full stack profile (global)
+  npx @aretw0/pi-stack --profile stack-full
   npx @aretw0/pi-stack --version 0.3.0    Pin @aretw0/* packages to a version
   npx @aretw0/pi-stack --local            Install to project .pi/settings.json
   npx @aretw0/pi-stack --local --baseline Apply theme + colony-pilot + claude-code defaults
@@ -234,6 +265,8 @@ Usage:
 
 Options:
   -v, --version <ver>   Pin @aretw0/* packages to a specific version
+  --profile <name>      Install profile: curated-default | stack-full
+  --stack-full          Alias for --profile stack-full
   -l, --local           Install project-locally instead of globally
   -b, --baseline        Merge default baseline settings (theme, colony-pilot, claude-code)
   -r, --remove          Remove all managed packages from pi
@@ -244,6 +277,9 @@ ${FIRST_PARTY.map((p) => `  • ${p}`).join("\n")}
 
 Third-party packages:
 ${THIRD_PARTY.map((p) => `  • ${p}`).join("\n")}
+
+Curated default profile:
+${CURATED_DEFAULT.map((p) => `  • ${p}`).join("\n")}
 `.trim());
 }
 
@@ -422,10 +458,11 @@ if (IS_MAIN) {
     process.exit(failures > 0 ? 1 : 0);
   }
 
-  console.log(`\n📦 Installing pi-stack packages into pi (${scope})...\n`);
+  const installPackages = resolveInstallPackageList(opts.profile);
+  console.log(`\n📦 Installing pi-stack packages into pi (${scope}) [profile=${opts.profile}]...\n`);
 
   let failures = 0;
-  for (const pkg of PACKAGES) {
+  for (const pkg of installPackages) {
     const suffix =
       opts.version && pkg.startsWith("@aretw0/") ? `@${opts.version}` : "";
     const source = `npm:${pkg}${suffix}`;
