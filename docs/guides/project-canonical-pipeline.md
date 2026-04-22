@@ -39,6 +39,7 @@ Invariantes em ambos os modos:
    - `decisions`, `requirements`, `tasks`, `verification`, `handoff`.
 2. Rodar higiene:
    - `npm run project:verification:check`
+   - `npm run pi:artifact:audit` (ou `:strict` no gate)
    - `project-validate`
    - `project-status`
 3. Atualizar derivados:

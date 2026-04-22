@@ -149,6 +149,7 @@ vite.config.ts.timestamp-*
 .pi/reports/
 .pi/snapshots/
 .pi/colony-retention/
+.pi/deferred-intents.json
 
 # Workspace-local isolated agent runtime (pi-isolated)
 .sandbox/
