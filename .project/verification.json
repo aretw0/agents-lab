@@ -2739,6 +2739,58 @@
           "evidence": "Documentação de fronteiras fica para slice de fechamento do TASK-BUD-110."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-155",
+      "target": "TASK-BUD-110",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice de modularização adicional: domínio lane-queue extraído de `guardrails-core.ts` para `packages/pi-stack/extensions/guardrails-core-lane-queue.ts` (resolve config, parsing/help, gate/wait/retry, queue storage, auto-drain helpers). `guardrails-core.ts` mantém apenas wiring com import + re-export, preservando API usada pelos testes. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 19/19.",
+      "criteria_results": [
+        {
+          "criterion": "`guardrails-core.ts` vira orchestrator enxuto (wiring), com lógica pesada extraída para módulos coesos.",
+          "status": "passed",
+          "evidence": "Bloat + lane-queue já em módulos dedicados (`guardrails-core-bloat.ts`, `guardrails-core-lane-queue.ts`)."
+        },
+        {
+          "criterion": "Sem regressão funcional: smoke atual de guardrails continua verde após extração.",
+          "status": "passed",
+          "evidence": "Smoke focada de guardrails long-run queue verde (19/19)."
+        },
+        {
+          "criterion": "Guia curto documenta fronteiras dos módulos e regra para novas features evitarem re-inflar arquivo único.",
+          "status": "skipped",
+          "evidence": "Documentação de fronteiras modular ainda pendente para fechamento final do TASK-BUD-110."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-156",
+      "target": "TASK-BUD-110",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Fechamento de modularização anti-bloat: `guardrails-core.ts` agora mantém papel de orquestrador com domínios extraídos para `guardrails-core-bloat.ts` e `guardrails-core-lane-queue.ts`; contrato público preservado via re-export; smoke focada de regressão verde (19/19). Guia de fronteiras e regra anti-reinflação documentados em `docs/guides/agent-driver-charter.md` (seção 'Fronteiras modulares do runtime-guardrails').",
+      "criteria_results": [
+        {
+          "criterion": "`guardrails-core.ts` vira orchestrator enxuto (wiring), com lógica pesada extraída para módulos coesos.",
+          "status": "passed",
+          "evidence": "Bloat e lane-queue extraídos para módulos dedicados; core permanece como composição de eventos/integrador."
+        },
+        {
+          "criterion": "Sem regressão funcional: smoke atual de guardrails continua verde após extração.",
+          "status": "passed",
+          "evidence": "`npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 19/19."
+        },
+        {
+          "criterion": "Guia curto documenta fronteiras dos módulos e regra para novas features evitarem re-inflar arquivo único.",
+          "status": "passed",
+          "evidence": "Charter atualizado com fronteiras explícitas + regra de desenvolvimento modular por default."
+        }
+      ]
     }
   ]
 }

@@ -168,6 +168,20 @@ Trilha auditável esperada no runtime:
 - `guardrails-core.pragmatic-autonomy-policy` (policy ativa por turno)
 - `guardrails-core.pragmatic-assumption-applied` (assunção automática aplicada)
 
+### Fronteiras modulares do runtime-guardrails (anti-bloat)
+
+Para preservar throughput e manutenção da fábrica, `guardrails-core.ts` deve operar como **orquestrador** (wiring/eventos), com domínios pesados extraídos em módulos coesos.
+
+Fronteiras atuais:
+- `guardrails-core-bloat.ts`: config + utilitários de bloat-smell (texto/código);
+- `guardrails-core-lane-queue.ts`: config e helpers da lane-queue (storage, gates, auto-drain);
+- `guardrails-core.ts`: composição de eventos (`input`, `turn_end`, `tool_call`, comandos) e integração entre domínios.
+
+Regra para novas features:
+- se a lógica for reutilizável/testável isoladamente, **nasce fora** de `guardrails-core.ts`;
+- manter contrato público estável via import/re-export quando necessário;
+- evitar inserir novos blocos de regra longa diretamente no orquestrador.
+
 ## Envelope objetivo de long run (L1/L2/L3)
 
 Para reduzir subjetividade, toda long run deve declarar lane ativa e respeitar os gates abaixo.
