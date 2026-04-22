@@ -645,6 +645,21 @@ function normalizeContextWatchEventList(value: unknown): ContextWatchHandoffEven
 	return out.slice(-CONTEXT_WATCH_EVENTS_MAX);
 }
 
+export function latestContextWatchEvent(
+	handoffInput: Record<string, unknown> | undefined,
+): Pick<ContextWatchHandoffEvent, "atIso" | "reason" | "level" | "action"> | undefined {
+	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
+	const events = normalizeContextWatchEventList(handoff[CONTEXT_WATCH_EVENTS_KEY]);
+	const last = events.at(-1);
+	if (!last) return undefined;
+	return {
+		atIso: last.atIso,
+		reason: last.reason,
+		level: last.level,
+		action: last.action,
+	};
+}
+
 function readHandoffJson(cwd: string): Record<string, unknown> {
 	const filePath = handoffFilePath(cwd);
 	if (!existsSync(filePath)) return {};
@@ -910,6 +925,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoff = readHandoffJson(ctx.cwd);
 		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
 		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
+		const handoffLastEvent = latestContextWatchEvent(handoff);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -921,6 +937,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffTimestamp,
 			handoffFreshness,
 			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
+			handoffLastEvent,
 		};
 	};
 
@@ -1066,6 +1083,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshness.ageMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffFreshness.ageMs / 1000)}` : ""}`,
+					autoCompact.handoffLastEvent
+						? `handoff-last-event: ${autoCompact.handoffLastEvent.reason} level=${autoCompact.handoffLastEvent.level} action=${autoCompact.handoffLastEvent.action} at=${autoCompact.handoffLastEvent.atIso}`
+						: "handoff-last-event: none",
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
 				].join("\n"),
 				assessment.severity,

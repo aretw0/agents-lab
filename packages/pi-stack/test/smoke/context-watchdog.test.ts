@@ -8,6 +8,7 @@ import {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	handoffFreshnessAdvice,
+	latestContextWatchEvent,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
@@ -263,6 +264,8 @@ describe("context-watchdog", () => {
 		expect(Array.isArray(next.context_watch_events)).toBe(true);
 		expect(next.context_watch_events.at(-1).action).toBe("write-checkpoint");
 		expect(prep.context_watch_events.at(-1).reason).toBe("auto_compact_prep");
+		expect(latestContextWatchEvent(prep)?.reason).toBe("auto_compact_prep");
+		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});
 
 	it("cleans old context-watch blockers when level returns to ok", () => {
