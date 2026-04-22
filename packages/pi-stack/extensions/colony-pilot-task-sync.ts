@@ -252,6 +252,15 @@ export function colonyPhaseToCanonicalTaskEventType(
 	return undefined;
 }
 
+export function canonicalTaskEventTypeToProjectTaskStatus(
+	type: CanonicalTaskEventType,
+): ProjectTaskStatus {
+	if (type === "recovery") return "blocked";
+	if (type === "done_verified") return "completed";
+	if (type === "done_candidate") return "in-progress";
+	return "in-progress";
+}
+
 function canonicalTaskEventId(
 	taskId: string,
 	signalId: string,

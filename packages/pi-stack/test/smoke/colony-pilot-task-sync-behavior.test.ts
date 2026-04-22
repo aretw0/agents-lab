@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	buildCanonicalTaskEventFromColonySignal,
+	canonicalTaskEventTypeToProjectTaskStatus,
 	colonyPhaseToCanonicalTaskEventType,
 	readProjectTasksBlock,
 	upsertProjectTaskFromColonySignal,
@@ -132,6 +133,13 @@ describe("colony-pilot task-sync behavior", () => {
 		expect(colonyPhaseToCanonicalTaskEventType("completed", false)).toBe("done_verified");
 		expect(colonyPhaseToCanonicalTaskEventType("budget_exceeded", true)).toBe("recovery");
 		expect(colonyPhaseToCanonicalTaskEventType("unknown", true)).toBeUndefined();
+
+		expect(canonicalTaskEventTypeToProjectTaskStatus("start")).toBe("in-progress");
+		expect(canonicalTaskEventTypeToProjectTaskStatus("progress")).toBe("in-progress");
+		expect(canonicalTaskEventTypeToProjectTaskStatus("review")).toBe("in-progress");
+		expect(canonicalTaskEventTypeToProjectTaskStatus("done_candidate")).toBe("in-progress");
+		expect(canonicalTaskEventTypeToProjectTaskStatus("done_verified")).toBe("completed");
+		expect(canonicalTaskEventTypeToProjectTaskStatus("recovery")).toBe("blocked");
 
 		const event = buildCanonicalTaskEventFromColonySignal({
 			taskId: "TASK-BUD-018",
