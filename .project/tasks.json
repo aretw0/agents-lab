@@ -2401,6 +2401,28 @@
         "Orienta como adicionar novos widgets sem quebrar semântica consolidada do control-plane."
       ],
       "verification": "VER-BUD-127"
+    },
+    {
+      "id": "TASK-BUD-104",
+      "description": "[P1] Implementar aviso automático de 'slice amplo' (arquivo único com múltiplas linhas/hunks) com recomendação de split ou backlog no fluxo canônico.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-085"
+      ],
+      "references": [
+        "REQ-BUD-053",
+        "DEC-BUD-041"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Detecção determinística sinaliza edição ampla em arquivo único com mensagem acionável no runtime.",
+        "Mensagem recomenda quebrar em micro-slices; quando não possível, orientar registro imediato no board/backlog.",
+        "Cobertura de teste valida critérios de detecção e ausência de hard block por default."
+      ]
     }
   ]
 }

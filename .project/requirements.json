@@ -744,6 +744,22 @@
         "Gateway WEB exibe visão summary-first com detalhes progressivos e boa legibilidade ao redimensionar viewport.",
         "Semântica central (board clock, colônias, budget/health) aparece de forma consistente entre TUI e WEB, sem duplicação confusa."
       ]
+    },
+    {
+      "id": "REQ-BUD-053",
+      "description": "O control-plane deve alertar automaticamente quando um slice tocar mudanças amplas em arquivo único (múltiplas linhas/hunks) e sugerir split em micro-slices ou backlog explícito.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-104"
+      ],
+      "acceptance_criteria": [
+        "Aviso automático aparece durante execução quando a mudança exceder limiar configurado de amplitude no arquivo.",
+        "Aviso inclui ação recomendada: quebrar em micro-slices ou registrar backlog se não for possível dividir.",
+        "Comportamento default é advisory (sem bloqueio hard), mantendo fluxo pragmático."
+      ]
     }
   ]
 }

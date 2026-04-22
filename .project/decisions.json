@@ -288,6 +288,13 @@
       "decision": "Adotar UX adaptativa por densidade (wide/medium/narrow) e progressive disclosure no control-plane: resumo essencial sempre visível; detalhes sob demanda tanto no TUI quanto no WEB.",
       "rationale": "Preserva legibilidade e confiança operacional quando a tela é redimensionada, reduz ruído em long-runs e melhora experiência para usuários novos sem perder poder para usuários avançados.",
       "context": "Diretriz explícita do usuário para consolidar apresentação first-class no control plane (TUI+WEB), evitar clutter e usar exemplos curados da stack como baseline."
+    },
+    {
+      "id": "DEC-BUD-041",
+      "decision": "Tratar edições amplas em arquivo único como sinal de risco de contexto/qualidade: emitir aviso automático e preferir quebra em micro-slices; se indivisível no momento, registrar backlog explícito.",
+      "rationale": "Mantém continuidade sem surpresa, reduz regressão de contexto e transforma exceções em trabalho rastreável no board canônico.",
+      "status": "decided",
+      "context": "Feedback direto do usuário para que esse aviso seja automático e não dependa de lembrete manual."
     }
   ]
 }
