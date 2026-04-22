@@ -2527,6 +2527,31 @@
         "Runbook documenta uso em modo calibrado (incluindo scouts) para mapear melhorias sem gerar ruído excessivo em fase inicial."
       ],
       "notes": "Backlog solicitado explicitamente pelo usuário (2026-04-22): manter saúde contínua de código e narrativa, incluindo documentação e textos de venda, com alinhamento à visão de entregar essas práticas no pi-stack.\n[2026-04-22T00:00:00Z] Micro-slice inicial: adicionadas heurísticas determinísticas `evaluateTextBloatSmell` e `evaluateCodeBloatSmell` em guardrails-core (thresholds calibráveis + recommendation advisory), com cobertura smoke para casos bloated/healthy. Evidência: VER-BUD-149.\n[2026-04-22T00:00:00Z] Micro-slice signal-first: bloat textual integrado ao stream/status passivo via `turn_end` (`guardrails-core-bloat`), com throttling determinístico (`shouldEmitBloatSmellSignal`) e trilha auditável (`guardrails-core.bloat-smell-text`), sem bloqueio hard por default. Evidência: VER-BUD-150."
+    },
+    {
+      "id": "TASK-BUD-110",
+      "description": "[P1] Desinflar `guardrails-core.ts` por extração modular (signal/bloat, lane-queue, budget-governor, bash-guards) mantendo comportamento e contrato público estáveis.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-109"
+      ],
+      "references": [
+        "REQ-BUD-053",
+        "REQ-BUD-054",
+        "DEC-BUD-041",
+        "DEC-BUD-043"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-*.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`guardrails-core.ts` vira orchestrator enxuto (wiring), com lógica pesada extraída para módulos coesos.",
+        "Sem regressão funcional: smoke atual de guardrails continua verde após extração.",
+        "Guia curto documenta fronteiras dos módulos e regra para novas features evitarem re-inflar arquivo único."
+      ],
+      "notes": "Criada por sinal explícito de risco de bloat em arquivo único durante sessão (2026-04-22): manter saúde de manutenção e evitar crescimento monolítico do core."
     }
   ]
 }
