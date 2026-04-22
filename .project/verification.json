@@ -1678,6 +1678,32 @@
           "evidence": "Checklist inclui `npm run pi:isolated:status` + verificação de `PI_CODING_AGENT_DIR` e root git."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-114",
+      "target": "TASK-BUD-094",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Envelope objetivo de long run formalizado no `docs/guides/agent-driver-charter.md`: definição explícita das lanes L1/L2/L3 (control-plane only, subagentes assistidos, swarm supervisionado) com critérios de entrada, limite de avanço, fallback por lane, stop conditions transversais e pacote objetivo do próximo marco de calibração/autonomia. Mudança reduz subjetividade de escalada e torna auditável o alcance da long run.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Documento define claramente L1(control-plane), L2(subagents), L3(swarm) com gates e limites auditáveis.",
+          "status": "passed",
+          "evidence": "Tabela L1/L2/L3 com entry gates e fallback foi adicionada ao charter."
+        },
+        {
+          "criterion": "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
+          "status": "passed",
+          "evidence": "Seção de stop conditions + fallback por lane incluída no documento."
+        },
+        {
+          "criterion": "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas.",
+          "status": "passed",
+          "evidence": "Pacote objetivo do próximo marco referencia TASK-BUD-085/091/092/086/096."
+        }
+      ]
     }
   ]
 }

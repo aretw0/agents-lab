@@ -2157,6 +2157,98 @@
         "Sem CTA de swarm/delegação complexa no primeiro contato sem sinal de escala."
       ],
       "notes": "Complementa UX progressiva com política de curadoria enxuta."
+    },
+    {
+      "id": "TASK-BUD-094",
+      "description": "[P0] Formalizar e publicar envelope de long run (L1/L2/L3) com critérios objetivos de entrada, limites, stop conditions e marco de calibração da fábrica.",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-BUD-085",
+        "TASK-BUD-091"
+      ],
+      "references": [
+        "REQ-BUD-049",
+        "DEC-BUD-038"
+      ],
+      "files": [
+        "docs/guides/agent-driver-charter.md",
+        "docs/guides/swarm-cleanroom-protocol.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Documento define claramente L1(control-plane), L2(subagents), L3(swarm) com gates e limites auditáveis.",
+        "Stop conditions incluem budget/context/governança e descrevem rollback em cada lane.",
+        "Marco de calibração/autonomia é mensurável e ligado a tarefas/verificações canônicas."
+      ],
+      "verification": "VER-BUD-114",
+      "notes": "[2026-04-22T11:46:58.791Z] Envelope L1/L2/L3 publicado no charter com gates, fallback e milestone objetivo de calibração/autonomia. Evidência: VER-BUD-114 (dd043d2)."
+    },
+    {
+      "id": "TASK-BUD-095",
+      "description": "[P1] Executar piloto de long run L1 (control-plane only) com cadence de checkpoint e evidência determinística de continuidade sem perguntas óbvias.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-094",
+        "TASK-BUD-085"
+      ],
+      "references": [
+        "REQ-BUD-049"
+      ],
+      "files": [
+        ".project/handoff.json",
+        "docs/research/context-checkpoint-*.md",
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Run L1 mantém progresso contínuo com checkpoints/handoffs sem interrupções de baixo risco.",
+        "Evidência registra decisões automáticas assumidas e pontos de interrupção realmente necessários.",
+        "Resultado inclui relatório de gaps para promoção a L2."
+      ],
+      "notes": "L1 é baseline obrigatório antes de abrir lane de subagentes."
+    },
+    {
+      "id": "TASK-BUD-096",
+      "description": "[P1] Executar gate de promoção L1->L2: habilitar lane de subagentes apenas após readiness strict passar com evidência reprodutível.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-086",
+        "TASK-BUD-095"
+      ],
+      "references": [
+        "REQ-BUD-049"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/subagent-readiness.ts",
+        "docs/guides/subagent-readiness-gate.md"
+      ],
+      "acceptance_criteria": [
+        "`subagent_readiness_status(strict=true)` passa em janela definida com critérios estáveis.",
+        "Runbook define rollback para retornar a L1 se sinais de falha reaparecerem.",
+        "Promoção a L2 é registrada com verificação canônica (sem auto-close prematuro de itens estratégicos)."
+      ]
+    },
+    {
+      "id": "TASK-BUD-097",
+      "description": "[P1] Executar gate de promoção L2->L3: habilitar swarm supervisionado somente com baseline curada e preflight/governança em estado verde.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-091",
+        "TASK-BUD-092",
+        "TASK-BUD-096"
+      ],
+      "references": [
+        "REQ-BUD-049"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "docs/guides/swarm-cleanroom-protocol.md",
+        "docs/guides/agent-driver-charter.md"
+      ],
+      "acceptance_criteria": [
+        "Preflight de swarm, budget e scheduler governance passam antes do launch.",
+        "Swarm roda em modo supervisionado com evidência de delivery/recovery e sem auto-close estratégico.",
+        "Existe critério explícito de abort/rollback para retorno a L2 quando necessário."
+      ]
     }
   ]
 }
