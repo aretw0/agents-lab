@@ -8,6 +8,7 @@ import {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	handoffFreshnessAdvice,
+	contextWatchEventAgeMs,
 	latestContextWatchEvent,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
@@ -267,6 +268,8 @@ describe("context-watchdog", () => {
 		expect(prep.context_watch_events.at(-1).reason).toBe("auto_compact_prep");
 		expect(latestContextWatchEvent(prep)?.reason).toBe("auto_compact_prep");
 		expect(summarizeContextWatchEvent(latestContextWatchEvent(prep))).toContain("auto_compact_prep");
+		expect(contextWatchEventAgeMs(latestContextWatchEvent(prep), Date.parse("2026-04-21T21:31:10.000Z"))).toBe(10_000);
+		expect(contextWatchEventAgeMs({ atIso: "bad-ts" } as any)).toBeUndefined();
 		expect(summarizeContextWatchEvent(latestContextWatchEvent({}))).toBe("none");
 		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});

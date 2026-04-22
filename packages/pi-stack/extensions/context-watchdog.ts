@@ -667,6 +667,16 @@ export function summarizeContextWatchEvent(
 	return `${event.reason} level=${event.level} action=${event.action} at=${event.atIso}`;
 }
 
+export function contextWatchEventAgeMs(
+	event: Pick<ContextWatchHandoffEvent, "atIso"> | undefined,
+	nowMs = Date.now(),
+): number | undefined {
+	if (!event?.atIso) return undefined;
+	const ts = Date.parse(event.atIso);
+	if (!Number.isFinite(ts)) return undefined;
+	return Math.max(0, nowMs - ts);
+}
+
 function readHandoffJson(cwd: string): Record<string, unknown> {
 	const filePath = handoffFilePath(cwd);
 	if (!existsSync(filePath)) return {};
@@ -933,6 +943,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
 		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
 		const handoffLastEvent = latestContextWatchEvent(handoff);
+		const handoffLastEventAgeMs = contextWatchEventAgeMs(handoffLastEvent, nowMs);
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -946,6 +957,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
 			handoffLastEvent: handoffLastEvent ?? null,
 			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
+			handoffLastEventAgeMs,
 		};
 	};
 
@@ -1091,7 +1103,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshness.ageMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffFreshness.ageMs / 1000)}` : ""}`,
-					`handoff-last-event: ${autoCompact.handoffLastEventSummary}`,
+					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffLastEventAgeMs / 1000)}` : ""}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
 				].join("\n"),
 				assessment.severity,
