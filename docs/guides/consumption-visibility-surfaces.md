@@ -73,7 +73,18 @@ Antes de concluir “não temos ferramenta X”, valide instalação real do usu
 pi list
 npm run pi:parity
 npm run pi:parity:project
+npm run pi:parity:curated
+npm run pi:parity:curated:strict
 ```
+
+No profile `curated-default`, o relatório classifica drift em três classes:
+- `official` (baseline oficial esperada)
+- `opt-in` (managed fora da baseline, habilitado só por escolha explícita)
+- `non-permitted` (fora da curadoria oficial)
+
+Gate prático de release (baseline oficial):
+- `--strict` bloqueia quando faltar item `official`;
+- em `curated-default`, também bloqueia qualquer `non-permitted`.
 
 Para a stack completa via installer, espera-se (além dos `@aretw0/*`) pacotes como:
 - `mitsupi`

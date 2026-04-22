@@ -80,7 +80,7 @@ Usage:
 Options:
   --scope <user|project|both>
   --profile <stack-full|first-party|curated-default>
-  --strict              Exit 1 when expected packages are missing
+  --strict              Exit 1 on parity drift (missing official or non-permitted items)
   --json                Emit machine-readable JSON
   -h, --help
 `.trim());
@@ -158,6 +158,35 @@ function detectSurfaces(configuredNames) {
   };
 }
 
+function buildCurationRemediation({ missing, optIn, nonPermittedPackages, nonPermittedSources }) {
+  const actions = [];
+  if (missing.length > 0) {
+    actions.push({
+      decision: "curar",
+      reason: "Pacotes oficiais ausentes na baseline selecionada.",
+      items: missing,
+      commandHint: "npx @aretw0/pi-stack --profile curated-default --local",
+    });
+  }
+  if (optIn.length > 0) {
+    actions.push({
+      decision: "mover-para-opt-in",
+      reason: "Pacotes managed fora da baseline oficial (opt-in explícito).",
+      items: optIn,
+      commandHint: "manter fora do default e habilitar só via --stack-full/--profile stack-full",
+    });
+  }
+  if (nonPermittedPackages.length > 0 || nonPermittedSources.length > 0) {
+    actions.push({
+      decision: "remover-do-default-ou-curar",
+      reason: "Itens não permitidos na baseline oficial detectados.",
+      items: [...nonPermittedPackages, ...nonPermittedSources.map((s) => `source:${s}`)],
+      commandHint: "remover de .pi/settings.json ou promover via curadoria explícita (package-list/install/docs)",
+    });
+  }
+  return actions;
+}
+
 function analyzeScope(scope, profile) {
   const settingsPath = getSettingsPath(scope);
   const settings = loadSettings(settingsPath);
@@ -185,6 +214,27 @@ function analyzeScope(scope, profile) {
   const extraManaged = configuredManaged.filter((p) => !expected.has(p));
   const extraOther = [...configuredNames].filter((p) => !managedSet.has(p)).sort();
 
+  const classification = {
+    official: {
+      present,
+      missing,
+    },
+    optIn: {
+      managed: extraManaged,
+    },
+    nonPermitted: {
+      packages: extraOther,
+      sources: unresolvedSources.filter((src) => typeof src === "string" && src.trim().length > 0),
+    },
+  };
+
+  const remediation = buildCurationRemediation({
+    missing,
+    optIn: extraManaged,
+    nonPermittedPackages: classification.nonPermitted.packages,
+    nonPermittedSources: classification.nonPermitted.sources,
+  });
+
   const surfaces = detectSurfaces(configuredNames);
 
   return {
@@ -200,6 +250,8 @@ function analyzeScope(scope, profile) {
     extraManaged,
     extraOther,
     unresolvedSources,
+    classification,
+    remediation,
     surfaces,
   };
 }
@@ -223,28 +275,39 @@ function printResult(result) {
       (result.missingCount > 0 ? `  ⚠ missing=${result.missingCount}` : "  ✓")
   );
 
-  if (result.missing.length > 0) {
-    console.log("missing managed packages:");
-    for (const name of result.missing) console.log(`  - ${name}`);
+  if (result.classification.official.missing.length > 0) {
+    console.log("official (missing):");
+    for (const name of result.classification.official.missing) console.log(`  - ${name}`);
   }
 
-  if (result.extraManaged.length > 0) {
-    console.log("extra managed packages (outside selected profile):");
-    for (const name of result.extraManaged) console.log(`  - ${name}`);
+  if (result.classification.optIn.managed.length > 0) {
+    console.log("opt-in (managed outside official baseline):");
+    for (const name of result.classification.optIn.managed) console.log(`  - ${name}`);
   }
 
-  if (result.extraOther.length > 0) {
-    console.log("other configured packages:");
-    for (const name of result.extraOther) console.log(`  - ${name}`);
+  if (result.classification.nonPermitted.packages.length > 0) {
+    console.log("non-permitted packages:");
+    for (const name of result.classification.nonPermitted.packages) console.log(`  - ${name}`);
   }
 
-  if (result.unresolvedSources.length > 0) {
-    console.log("unresolved package sources (name could not be inferred):");
-    for (const src of result.unresolvedSources) console.log(`  - ${src}`);
+  if (result.classification.nonPermitted.sources.length > 0) {
+    console.log("non-permitted unresolved sources:");
+    for (const src of result.classification.nonPermitted.sources) console.log(`  - ${src}`);
   }
 
   console.log("visibility surfaces:");
   for (const line of surfaceSummary(result.surfaces)) console.log(line);
+
+  if (result.remediation.length > 0) {
+    console.log("curation remediation:");
+    for (const action of result.remediation) {
+      console.log(`  - [${action.decision}] ${action.reason}`);
+      if (Array.isArray(action.items)) {
+        for (const item of action.items) console.log(`      • ${item}`);
+      }
+      if (action.commandHint) console.log(`      hint: ${action.commandHint}`);
+    }
+  }
 
   if (!result.surfaces.usageTracker || !result.surfaces.sessionBreakdown) {
     console.log("hint: user-like cost visibility usually expects both @ifi/oh-pi-extensions and mitsupi.");
@@ -275,9 +338,14 @@ function main() {
     for (const r of results) printResult(r);
   }
 
-  if (opts.strict) {
-    const hasMissing = results.some((r) => r.missingCount > 0);
-    process.exit(hasMissing ? 1 : 0);
+  const strictEnabled = opts.strict || process.argv.includes("--strict");
+  if (strictEnabled) {
+    const hasMissingOfficial = results.some((r) => r.classification.official.missing.length > 0);
+    const hasNonPermitted = results.some(
+      (r) => r.classification.nonPermitted.packages.length > 0 || r.classification.nonPermitted.sources.length > 0,
+    );
+    const shouldBlock = hasMissingOfficial || hasNonPermitted;
+    process.exit(shouldBlock ? 1 : 0);
   }
 }
 
