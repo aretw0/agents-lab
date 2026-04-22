@@ -1548,6 +1548,32 @@
           "evidence": "Será tratado em slice documental dedicado após estabilização do helper canônico."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-109",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice de semântica canônica para ingestão backend-agnostic em `packages/pi-stack/extensions/colony-pilot-task-sync.ts`: adicionado helper `canonicalTaskEventTypeToProjectTaskStatus(...)` para normalizar projeção de `task_event` em status de board (`start|progress|review|done_candidate -> in-progress`, `done_verified -> completed`, `recovery -> blocked`), preservando invariante HITL em `done_candidate`. Cobertura expandida em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` com asserts explícitos para mapeamento de fase->evento e evento->status. Validação: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 1 file passed, 5 tests passed. Commit: `b5a464c`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Agora existe mapeamento explícito evento->status para ingestão uniforme por adapters."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "skipped",
+          "evidence": "Sem alteração de documentação neste slice."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "skipped",
+          "evidence": "Fica para slice documental dedicado."
+        }
+      ]
     }
   ]
 }
