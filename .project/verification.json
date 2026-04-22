@@ -1808,6 +1808,32 @@
           "evidence": "Documentação/flags de opt-in serão fechadas em slice seguinte."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-119",
+      "target": "TASK-BUD-091",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice de enforcement da baseline curada no instalador: `packages/pi-stack/install.mjs` agora usa `DEFAULT_INSTALL_PROFILE='curated-default'` e resolve lista de instalação por profile (`curated-default` ou `stack-full` com opt-in explícito via `--stack-full`/`--profile`). `packages/pi-stack/package-list.mjs` expõe `CURATED_DEFAULT` como allowlist canônica. Cobertura adicionada em `packages/pi-stack/test/smoke/installer-profile.test.ts` (default curated, stack-full explícito, perfil inválido) e ajuste em `package-list.test.ts` para verificar export do `CURATED_DEFAULT`. Documentação atualizada em `docs/guides/recommended-pi-stack.md` indicando baseline curada por default e stack-full como opt-in. Validações: `vitest run installer-profile.test.ts package-list.test.ts` => 10 tests passed; `node --test scripts/test/pi-parity-curated-profile.test.mjs` => 1 pass.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Existe allowlist canônica de pacotes/capacidades oficiais da baseline.",
+          "status": "passed",
+          "evidence": "`CURATED_DEFAULT` formalizado em `package-list.mjs`."
+        },
+        {
+          "criterion": "Installer/baseline aplica apenas superfície oficial por padrão.",
+          "status": "passed",
+          "evidence": "Instalador muda default para profile `curated-default`; full stack só por flag explícita."
+        },
+        {
+          "criterion": "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado.",
+          "status": "skipped",
+          "evidence": "Opt-in `--stack-full` documentado; falta ainda consolidar runbook de distribuição strict-curated end-to-end (TASK-BUD-100)."
+        }
+      ]
     }
   ]
 }

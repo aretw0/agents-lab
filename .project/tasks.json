@@ -2110,8 +2110,8 @@
         "Installer/baseline aplica apenas superfície oficial por padrão.",
         "Capacidades fora da curadoria permanecem disponíveis só por opt-in explícito documentado."
       ],
-      "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate.\n[2026-04-22T12:17:45.162Z] Slice 1 da baseline curada: allowlist oficial (CURATED_DEFAULT) + profile de auditoria parity (curated-default) materializados para gatear distribuição.",
-      "verification": "VER-BUD-118"
+      "notes": "Direção: coesão first-party + pragmatismo de distribuição.\n[2026-04-22T11:41:38.844Z] Priorizada para cortar release de superfície não curada no default: baseline oficial passa a ser gateada por allowlist + parity hard gate.\n[2026-04-22T12:17:45.162Z] Slice 1 da baseline curada: allowlist oficial (CURATED_DEFAULT) + profile de auditoria parity (curated-default) materializados para gatear distribuição.\n[2026-04-22T12:34:57.476Z] Slice 2: instalador passa a usar baseline curada por default (profile curated-default); stack-full virou opt-in explícito (--stack-full/--profile). Evidência parcial: VER-BUD-119.",
+      "verification": "VER-BUD-119"
     },
     {
       "id": "TASK-BUD-092",
