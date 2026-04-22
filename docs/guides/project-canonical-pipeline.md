@@ -88,6 +88,13 @@ Invariantes em ambos os modos:
 - Use `inspect` para governança/doc/processo e `command/test` quando houver impacto executável.
 - Referência de contrato: `docs/primitives/quality-verification-gate.md`.
 
+## Política no-obvious-questions no loop canônico
+
+Para manter velocidade de cruzeiro em long-run:
+- ambiguidades de baixo risco devem ser resolvidas por default seguro/determinístico;
+- interrupção do usuário apenas em risco irreversível/perda de dados/conflito de objetivo;
+- assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.pragmatic-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).

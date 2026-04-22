@@ -539,6 +539,60 @@ export function providerBudgetGovernorMisconfigReason(
   return "guardrails-core: providerBudgetGovernor misconfigured.";
 }
 
+interface PragmaticAutonomyConfig {
+  enabled: boolean;
+  noObviousQuestions: boolean;
+  auditAssumptions: boolean;
+  maxAuditTextChars: number;
+}
+
+const DEFAULT_PRAGMATIC_AUTONOMY_CONFIG: PragmaticAutonomyConfig = {
+  enabled: true,
+  noObviousQuestions: true,
+  auditAssumptions: true,
+  maxAuditTextChars: 140,
+};
+
+export function resolvePragmaticAutonomyConfig(cwd: string): PragmaticAutonomyConfig {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    const cfg = json?.piStack?.guardrailsCore?.pragmaticAutonomy ?? {};
+    const maxAuditTextCharsRaw = Number(cfg?.maxAuditTextChars);
+    return {
+      enabled: cfg?.enabled !== false,
+      noObviousQuestions: cfg?.noObviousQuestions !== false,
+      auditAssumptions: cfg?.auditAssumptions !== false,
+      maxAuditTextChars: Number.isFinite(maxAuditTextCharsRaw) && maxAuditTextCharsRaw > 0
+        ? Math.max(40, Math.min(400, Math.floor(maxAuditTextCharsRaw)))
+        : DEFAULT_PRAGMATIC_AUTONOMY_CONFIG.maxAuditTextChars,
+    };
+  } catch {
+    return DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+  }
+}
+
+export function buildPragmaticAutonomySystemPrompt(
+  cfg: Pick<PragmaticAutonomyConfig, "enabled" | "noObviousQuestions">,
+): string | undefined {
+  if (!cfg.enabled || !cfg.noObviousQuestions) return undefined;
+  return [
+    "Pragmatic autonomy policy is active for this turn.",
+    "- Resolve low-risk ambiguities using deterministic safe defaults.",
+    "- Do not ask obvious/format/order questions when progress can continue safely.",
+    "- Escalate to user only for irreversible actions, data-loss risk, security risk, or explicit objective conflict.",
+    "- Keep automatic assumptions auditable through concise notes/audit entries.",
+  ].join("\n");
+}
+
+export function summarizeAssumptionText(text: string, maxChars: number): string {
+  const normalized = String(text ?? "").replace(/\s+/g, " ").trim();
+  const max = Math.max(20, Math.floor(maxChars));
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, max)}…`;
+}
+
 interface LongRunIntentQueueConfig {
   enabled: boolean;
   requireActiveLongRun: boolean;
@@ -864,6 +918,7 @@ export default function (pi: ExtensionAPI) {
   let providerBudgetSnapshotCache: { at: number; key: string; snapshot: ProviderBudgetGovernorSnapshot } | undefined;
   let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
+  let pragmaticAutonomyConfig: PragmaticAutonomyConfig = DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
   let lastAutoDrainAt = 0;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
@@ -1009,6 +1064,7 @@ export default function (pi: ExtensionAPI) {
       quotaSettings.providerBudgets,
     );
     longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
+    pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
     if (providerBudgetGovernorMisconfig) {
       ctx.ui?.notify?.(
         providerBudgetGovernorMisconfigReason(providerBudgetGovernorMisconfig),
@@ -1029,9 +1085,23 @@ export default function (pi: ExtensionAPI) {
     const decision = classifyRouting(event.prompt ?? "");
     strictInteractiveMode = decision.strictMode;
 
+    const systemPromptParts: string[] = [event.systemPrompt ?? ""];
+    const autonomyPrompt = buildPragmaticAutonomySystemPrompt(pragmaticAutonomyConfig);
+    if (autonomyPrompt) {
+      systemPromptParts.push("", autonomyPrompt);
+      if (pragmaticAutonomyConfig.auditAssumptions) {
+        appendAuditEntry(ctx, "guardrails-core.pragmatic-autonomy-policy", {
+          atIso: new Date().toISOString(),
+          noObviousQuestions: pragmaticAutonomyConfig.noObviousQuestions,
+          strictInteractiveMode,
+        });
+      }
+    }
+
     if (!strictInteractiveMode) {
       ctx.ui?.setStatus?.("guardrails-core", undefined);
-      return undefined;
+      if (!autonomyPrompt) return undefined;
+      return { systemPrompt: systemPromptParts.join("\n") };
     }
 
     const domains = decision.domains.length > 0 ? decision.domains.join(", ") : "(none)";
@@ -1044,16 +1114,15 @@ export default function (pi: ExtensionAPI) {
       );
     }
 
-    const hardPrompt = [
-      event.systemPrompt,
+    systemPromptParts.push(
       "",
       "Scoped hard routing guard (deterministic) is active for this turn.",
       "- For this task, start with web-browser CDP scripts only.",
       "- Do not use curl/wget/python-requests/r.jina.ai/npm view/registry.npmjs.org as primary path.",
       "- If CDP path fails, explain failure explicitly before proposing fallback.",
-    ].join("\n");
+    );
 
-    return { systemPrompt: hardPrompt };
+    return { systemPrompt: systemPromptParts.join("\n") };
   });
 
   pi.on("input", async (event, ctx) => {
@@ -1081,10 +1150,21 @@ export default function (pi: ExtensionAPI) {
         queuePath: queued.queuePath,
         activeLongRun,
       });
+      if (pragmaticAutonomyConfig.enabled && pragmaticAutonomyConfig.auditAssumptions) {
+        appendAuditEntry(ctx, "guardrails-core.pragmatic-assumption-applied", {
+          atIso: new Date().toISOString(),
+          assumption: "defer-noncritical-interrupt",
+          itemId: queued.itemId,
+          queuedCount: queued.queuedCount,
+          activeLongRun,
+          textPreview: summarizeAssumptionText(event.text ?? "", pragmaticAutonomyConfig.maxAuditTextChars),
+        });
+      }
       updateLongRunLaneStatus(ctx, activeLongRun);
       ctx.ui.notify(
         [
           "Long-run ativo: solicitação registrada na fila sem trocar de foco.",
+          "Assunção automática: ambiguidades de baixo risco foram deferidas sem interromper o lane atual.",
           `queued=${queued.queuedCount}`,
           `use '${longRunIntentQueueConfig.forceNowPrefix}<mensagem>' para forçar processamento imediato.`,
         ].join("\n"),

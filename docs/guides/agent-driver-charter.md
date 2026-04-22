@@ -155,6 +155,18 @@ Para manter loops longos estáveis:
 `/lane-queue` suporta `status|list|add <texto>|pop|clear` e mantém trilha auditável no runtime (`guardrails-core.long-run-intent-*`).
 O auto-drain ocorre apenas em janela idle estável (cooldown + idleStableMs configuráveis).
 
+### Policy no-obvious-questions (autonomia pragmática)
+
+Durante long-runs, o agente deve aplicar default seguro para ambiguidades de baixo risco sem interromper o usuário.
+Escalonar pergunta apenas para:
+- ação irreversível;
+- risco de perda de dados/segurança;
+- conflito explícito de objetivo.
+
+Trilha auditável esperada no runtime:
+- `guardrails-core.pragmatic-autonomy-policy` (policy ativa por turno)
+- `guardrails-core.pragmatic-assumption-applied` (assunção automática aplicada)
+
 ## Envelope objetivo de long run (L1/L2/L3)
 
 Para reduzir subjetividade, toda long run deve declarar lane ativa e respeitar os gates abaixo.

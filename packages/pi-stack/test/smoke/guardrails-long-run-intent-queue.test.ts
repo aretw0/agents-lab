@@ -13,8 +13,11 @@ import {
   resolveAutoDrainGateReason,
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
+  resolvePragmaticAutonomyConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
+  buildPragmaticAutonomySystemPrompt,
+  summarizeAssumptionText,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -33,6 +36,37 @@ describe("guardrails-core long-run intent queue", () => {
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
+  });
+
+  it("uses pragmatic autonomy defaults when settings are missing", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-pragmatic-autonomy-default-"));
+    try {
+      const cfg = resolvePragmaticAutonomyConfig(cwd);
+      expect(cfg.enabled).toBe(true);
+      expect(cfg.noObviousQuestions).toBe(true);
+      expect(cfg.auditAssumptions).toBe(true);
+      expect(cfg.maxAuditTextChars).toBe(140);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("builds no-obvious-questions prompt only when policy is enabled", () => {
+    const enabled = buildPragmaticAutonomySystemPrompt({ enabled: true, noObviousQuestions: true });
+    expect(enabled).toContain("Pragmatic autonomy policy is active");
+    expect(enabled).toContain("irreversible actions");
+
+    const disabled = buildPragmaticAutonomySystemPrompt({ enabled: false, noObviousQuestions: true });
+    expect(disabled).toBeUndefined();
+  });
+
+  it("summarizes assumption text deterministically", () => {
+    const summary = summarizeAssumptionText(
+      "  manter execução, sem perguntar formato agora, seguir com default seguro até checkpoint  ",
+      48,
+    );
+    expect(summary).toContain("manter execução");
+    expect(summary.length).toBeLessThanOrEqual(49);
   });
 
   it("queues only normal text while long-run is active", () => {
