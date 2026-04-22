@@ -660,6 +660,13 @@ export function latestContextWatchEvent(
 	};
 }
 
+export function summarizeContextWatchEvent(
+	event: Pick<ContextWatchHandoffEvent, "atIso" | "reason" | "level" | "action"> | undefined,
+): string {
+	if (!event) return "none";
+	return `${event.reason} level=${event.level} action=${event.action} at=${event.atIso}`;
+}
+
 function readHandoffJson(cwd: string): Record<string, unknown> {
 	const filePath = handoffFilePath(cwd);
 	if (!existsSync(filePath)) return {};
@@ -937,7 +944,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffTimestamp,
 			handoffFreshness,
 			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
-			handoffLastEvent,
+			handoffLastEvent: handoffLastEvent ?? null,
+			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
 		};
 	};
 
@@ -1083,9 +1091,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshness.ageMs !== undefined ? ` ageSec=${Math.ceil(autoCompact.handoffFreshness.ageMs / 1000)}` : ""}`,
-					autoCompact.handoffLastEvent
-						? `handoff-last-event: ${autoCompact.handoffLastEvent.reason} level=${autoCompact.handoffLastEvent.level} action=${autoCompact.handoffLastEvent.action} at=${autoCompact.handoffLastEvent.atIso}`
-						: "handoff-last-event: none",
+					`handoff-last-event: ${autoCompact.handoffLastEventSummary}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
 				].join("\n"),
 				assessment.severity,

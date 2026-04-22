@@ -13,6 +13,7 @@ import {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	resolveHandoffFreshness,
+	summarizeContextWatchEvent,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
 	shouldEmitAutoResumeAfterCompact,
@@ -265,6 +266,8 @@ describe("context-watchdog", () => {
 		expect(next.context_watch_events.at(-1).action).toBe("write-checkpoint");
 		expect(prep.context_watch_events.at(-1).reason).toBe("auto_compact_prep");
 		expect(latestContextWatchEvent(prep)?.reason).toBe("auto_compact_prep");
+		expect(summarizeContextWatchEvent(latestContextWatchEvent(prep))).toContain("auto_compact_prep");
+		expect(summarizeContextWatchEvent(latestContextWatchEvent({}))).toBe("none");
 		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});
 
