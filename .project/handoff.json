@@ -1,51 +1,46 @@
 {
-  "timestamp": "2026-04-21T22:35:43Z",
-  "context": "Checkpoint preparado após sequência de micro-slices para autonomia pragmática do control plane: lane-queue (deferimento sem desvio), auto-drain com cooldown+idle-stability, comando manual '/lane-queue add', e status com estimativa deterministicamente calculada de nextDrain. Também foi aplicado hardening de context-watch para auto-checkpoint/auto-compact com guardrails de idle/cooldown.",
-  "current_phase": "long-run-lane-hardening",
+  "timestamp": "2026-04-22T17:33:00.000Z",
+  "context": "Compactação forçada executada e trilha recalibrada para potencial de fábrica: TASK-BUD-108 concluída; TASK-BUD-109 avançou com integração passiva de bloat-smell textual + código no runtime (status/audit sem hard-block por default). Contexto atual saudável e pronto para throughput disciplinado.",
+  "current_phase": "factory-calibration-precision-quality",
   "current_tasks": [
-    "TASK-BUD-084",
-    "TASK-BUD-018"
+    "TASK-BUD-109",
+    "TASK-BUD-110",
+    "TASK-BUD-096"
   ],
   "blockers": [
-    "context-watch-warn-active"
+    "TASK-BUD-096 strict gate (monitor-min-user-turns)"
   ],
   "next_actions": [
-    "Manter micro-slices (1 arquivo + 1 teste) até abaixo do limiar de checkpoint; evitar scans amplos.",
-    "Consolidar TASK-BUD-084 com um último slice de governança (integração de drenagem segura em janela idle sem duplicar semântica nativa de follow-up).",
-    "Registrar evidência canônica de fechamento parcial no board (.project/tasks + verification) para refletir commits já aplicados.",
-    "Retomar TASK-BUD-018 após estabilizar a trilha de long-run autonomy e contexto saudável."
+    "Fechar TASK-BUD-109 com slice documental (charter/pipeline/runbook) descrevendo calibração low-noise e uso por scouts.",
+    "Iniciar TASK-BUD-110 em micro-slices: extrair primeira fatia coesa de guardrails-core mantendo arquivo orquestrador fino.",
+    "Após fechamento 109/110 inicial, retomar TASK-BUD-096 com evidência strict para destravar trilha de swarm supervisionado."
   ],
   "open_questions": [
-    "Política final: lane-queue deve permanecer apenas complementar ao follow-up nativo ou ganhar interoperabilidade explícita com fila nativa?",
-    "TASK-BUD-084 fecha em uma etapa única ou será dividido em sub-verifys (queue capture, idle drain, status UX)?"
+    "Quando elevar notifyOnTrigger de false para true em scouts sem degradar relação sinal/ruído?"
   ],
   "key_decisions_pending": [
-    "Enforcement final para compactação autônoma (advisory vs hard default) no control-plane.",
-    "Contrato final de drenagem de intenção deferida sem acoplamento pessoal às primitivas da stack."
+    "Sequência de extração modular em TASK-BUD-110 (qual domínio extrair primeiro para maximizar ganho com baixo risco)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/guardrails-core.ts",
     "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
-    "packages/pi-stack/extensions/context-watchdog.ts",
-    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
-    "docs/guides/agent-driver-charter.md",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-21T22:35:43Z",
+      "atIso": "2026-04-22T17:33:00.000Z",
       "reason": "message_end",
-      "level": "warn",
-      "percent": 67,
+      "level": "ok",
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+      "action": "continue",
+      "recommendation": "Context healthy."
     }
   ]
 }
