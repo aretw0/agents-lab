@@ -45,6 +45,17 @@ Além disso, o `pi-stack` agora inclui a primitiva **first-party** `monitor-sove
 - Override local **não** deve ser tratado como baseline de release.
 - Regra prática: quando um ajuste provar valor, promover para superfície versionada da stack e manter `.pi/monitors/*` apenas como exceção opt-in.
 
+### Higiene de versionamento (curated-default)
+
+Para a baseline oficial, artefatos efêmeros de runtime devem ficar fora do git por padrão.
+
+Checklist rápido:
+
+1. `npm run pi:artifact:audit` para inspecionar drift;
+2. `npm run pi:artifact:audit:strict` no gate;
+3. se houver arquivo indevido rastreado, usar `git rm --cached -- <path>` (sem apagar cópia local);
+4. só versionar extras de monitor/runtime por decisão explícita de opt-in do projeto.
+
 ### Comando principal
 
 > Convenção do laboratório: não criar “doctor” paralelo por domínio.  

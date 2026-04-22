@@ -100,6 +100,35 @@ Checklist operacional rápido:
 - registrar achado em 1–3 linhas no checkpoint;
 - adiar varredura profunda para sessão pós-compact com contexto saudável.
 
+## Remediação de artefatos pi já commitados (sem perder progresso)
+
+Quando descobrir que um artefato efêmero entrou no git por engano:
+
+### Cenário A — remediação leve (recomendado por padrão)
+
+Use quando não há dado sensível e o objetivo é apenas parar de versionar.
+
+1. confirmar trabalho local antes de qualquer ação:
+   - `git status --short`
+2. conferir violações da policy:
+   - `npm run pi:artifact:audit`
+3. remover do índice sem apagar cópia local:
+   - `git rm --cached -- <path>`
+4. garantir ignore para recorrência (`.gitignore`/baseline)
+5. validar novamente:
+   - `npm run pi:artifact:audit:strict`
+
+### Cenário B — remediação pesada (histórico)
+
+Use somente com confirmação explícita quando houver exposição sensível real.
+
+1. rotacionar credenciais primeiro;
+2. planejar rewrite de histórico (janela coordenada com time);
+3. executar purge seletivo e comunicar force-push;
+4. revalidar baseline com `pi:artifact:audit:strict`.
+
+> Regra de pragmatismo: prefira Cenário A sempre que possível; Cenário B só quando o risco justificar custo operacional.
+
 ## Política de retomada pós-compactação
 Retomar apenas com:
 1. `.project/handoff.json`
