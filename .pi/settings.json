@@ -120,6 +120,9 @@
 				"allowOverride": true,
 				"overrideToken": "budget-override:",
 				"recoveryCommands": ["doctor", "quota-visibility", "model", "login"]
+			},
+			"longRunIntentQueue": {
+				"enabled": false
 			}
 		},
 		"quotaVisibility": {
