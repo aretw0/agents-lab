@@ -150,6 +150,45 @@ function findLatestSessionJsonl(rootDir) {
 	return latest?.path;
 }
 
+function normalizeSlashes(inputPath) {
+	return String(inputPath || "").replace(/\\/g, "/");
+}
+
+function encodeSessionNamespaceFromPath(inputPath) {
+	const normalized = normalizeSlashes(path.resolve(inputPath));
+	const win = /^([A-Za-z]):\/(.*)$/.exec(normalized);
+	if (win) {
+		const drive = win[1].toUpperCase();
+		const rest = win[2].split("/").filter(Boolean).join("-");
+		return `--${drive}--${rest}--`;
+	}
+	const unix = normalized.split("/").filter(Boolean).join("-");
+	return `--${unix}--`;
+}
+
+function buildWorkspaceSessionNamespaceCandidates(workspacePath) {
+	const resolved = normalizeSlashes(path.resolve(workspacePath));
+	const candidates = new Set([encodeSessionNamespaceFromPath(resolved)]);
+	const mntWin = /^\/mnt\/([a-zA-Z])\/(.*)$/.exec(resolved);
+	if (mntWin) {
+		const drive = mntWin[1].toUpperCase();
+		const rest = mntWin[2].split("/").filter(Boolean).join("-");
+		candidates.add(`--${drive}--${rest}--`);
+	}
+	return [...candidates];
+}
+
+function resolveWorkspaceSessionRoot(globalSessionsDir, workspacePath) {
+	const namespaceCandidates = buildWorkspaceSessionNamespaceCandidates(workspacePath);
+	const dirCandidates = namespaceCandidates.map((name) => path.join(globalSessionsDir, name));
+	for (const dir of dirCandidates) {
+		if (existsSync(dir)) {
+			return { dir, dirCandidates };
+		}
+	}
+	return { dir: undefined, dirCandidates };
+}
+
 function resolveNonDestructiveDestination(destPath, sourcePath) {
 	if (!existsSync(destPath)) return { path: destPath, action: "copy" };
 
@@ -178,10 +217,20 @@ function resolveNonDestructiveDestination(destPath, sourcePath) {
 function adoptLatestSession(dryRun = false) {
 	const globalSessionsDir = path.join(GLOBAL_AGENT_DIR, "sessions");
 	const localSessionsDir = path.join(LOCAL_AGENT_DIR, "sessions");
+	const workspaceScope = resolveWorkspaceSessionRoot(globalSessionsDir, REPO_ROOT);
 
-	const latest = findLatestSessionJsonl(globalSessionsDir);
+	if (!workspaceScope.dir) {
+		console.log("pi-isolated: nenhum namespace global encontrado para este workspace (safety guard). ");
+		for (const candidate of workspaceScope.dirCandidates) {
+			console.log(`  expected: ${candidate}`);
+		}
+		return;
+	}
+
+	const latest = findLatestSessionJsonl(workspaceScope.dir);
 	if (!latest) {
-		console.log("pi-isolated: nenhum session .jsonl encontrado no global.");
+		console.log("pi-isolated: nenhuma sessão .jsonl encontrada no namespace deste workspace.");
+		console.log(`  scope: ${workspaceScope.dir}`);
 		return;
 	}
 
@@ -191,6 +240,7 @@ function adoptLatestSession(dryRun = false) {
 
 	if (dryRun) {
 		console.log("pi-isolated: dry-run adopt-latest");
+		console.log(`  scope:${workspaceScope.dir}`);
 		console.log(`  from: ${latest}`);
 		console.log(`  to:   ${resolved.path}`);
 		console.log(`  mode: ${resolved.action}`);
@@ -207,6 +257,7 @@ function adoptLatestSession(dryRun = false) {
 	copyFileSync(latest, resolved.path);
 
 	console.log("pi-isolated: sessão mais recente copiada para o sandbox local.");
+	console.log(`  scope:${workspaceScope.dir}`);
 	console.log(`  from: ${latest}`);
 	console.log(`  to:   ${resolved.path}`);
 	console.log(`  mode: ${resolved.action}`);
