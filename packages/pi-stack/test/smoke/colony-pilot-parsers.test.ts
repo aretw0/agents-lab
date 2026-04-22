@@ -20,6 +20,7 @@ import {
 	evaluateAntColonyModelPolicy,
 	evaluateColonyDeliveryEvidence,
 	evaluateHatchReadiness,
+	evaluateSelectivePromotionInventoryEvidence,
 	evaluateProviderBudgetGate,
 	executableProbe,
 	formatHatchDoctorSnapshot,
@@ -971,6 +972,63 @@ describe("colony-pilot parsers", () => {
 
 		const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
 		expect(ev.ok).toBe(true);
+	});
+
+	it("detecta inventário de promoção seletiva (promoted/skipped)", () => {
+		const report = [
+			"Promoted file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"Skipped file inventory:",
+			"- packages/pi-stack/extensions/colony-pilot.ts (out-of-scope)",
+		].join("\n");
+		const evidence = evaluateSelectivePromotionInventoryEvidence(report);
+		expect(evidence.hasPromotedFileInventory).toBe(true);
+		expect(evidence.hasSkippedFileInventory).toBe(true);
+		expect(evidence.hasSelectivePromotionInventory).toBe(true);
+	});
+
+	it("delivery evidence em apply-to-branch exige inventários promoted/skipped", () => {
+		const cfg = resolveColonyPilotDeliveryPolicy({
+			enabled: true,
+			mode: "apply-to-branch",
+			requireFileInventory: true,
+			requireValidationCommandLog: true,
+		});
+		const reportMissingSelection = [
+			"### 🧪 Workspace",
+			"Mode: isolated git worktree",
+			"**Tasks:** 12/12 done",
+			"final file inventory: files changed: docs/a.md, docs/b.md",
+			"Validation command log:",
+			"- `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`",
+		].join("\n");
+
+		const evMissing = evaluateColonyDeliveryEvidence(
+			reportMissingSelection,
+			"completed",
+			cfg,
+		);
+		expect(evMissing.ok).toBe(false);
+		expect(
+			evMissing.issues.some((i) => i.includes("selective promotion inventory")),
+		).toBe(true);
+
+		const reportWithSelection = [
+			"### 🧪 Workspace",
+			"Mode: isolated git worktree",
+			"**Tasks:** 12/12 done",
+			"final file inventory: files changed: docs/a.md, docs/b.md",
+			"Promoted file inventory:",
+			"- docs/a.md",
+			"Skipped file inventory:",
+			"- docs/b.md (out-of-scope)",
+			"Validation command log:",
+			"- `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts`",
+		].join("\n");
+
+		const evOk = evaluateColonyDeliveryEvidence(reportWithSelection, "completed", cfg);
+		expect(evOk.ok).toBe(true);
+		expect(evOk.evidence.hasSelectivePromotionInventory).toBe(true);
 	});
 
 	it("delivery evidence aceita command log com heading + bullet em backticks", () => {

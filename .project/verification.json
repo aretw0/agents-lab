@@ -3015,6 +3015,32 @@
           "evidence": "Fallback/rollback documentado: promoção vazia ou evidência incompleta retorna `candidate/recovery required` e L2."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-166",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice runtime+docs para promoção seletiva: `packages/pi-stack/extensions/colony-pilot.ts` agora detecta evidência `Promoted file inventory` e `Skipped file inventory` via `evaluateSelectivePromotionInventoryEvidence(...)`, e `evaluateColonyDeliveryEvidence(...)` exige esse par quando `deliveryPolicy.mode=apply-to-branch`. Cobertura adicionada em `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (detecção + fail/pass em apply-to-branch). Pipeline canônico recebeu seção 'Contrato de promoção seletiva (worktree -> main)'. Comando: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Registro canônico inclui evidência de seleção (promoted vs skipped) com motivo auditável, sem auto-close estratégico.",
+          "status": "passed",
+          "evidence": "Contrato e gate de evidência selective-inventory materializados (runtime + docs)."
+        },
+        {
+          "criterion": "Fallback para L2 permanece explícito quando allowlist resultar em promoção vazia ou evidência insuficiente.",
+          "status": "passed",
+          "evidence": "Ausência de promoted/skipped em apply-to-branch gera issue de delivery evidence, mantendo trilha candidate/recovery."
+        },
+        {
+          "criterion": "Quando a run produzir mudanças fora de escopo declarado, o fluxo promove automaticamente apenas arquivos permitidos por allowlist explícita.",
+          "status": "skipped",
+          "evidence": "Automação de aplicação allowlist ainda pendente para próximo slice."
+        }
+      ]
     }
   ]
 }

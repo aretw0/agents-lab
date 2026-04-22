@@ -155,6 +155,17 @@ Meta-sinal de ruído excessivo (advisory):
 - ação padrão: reduzir superfície para status passivo + 1 recomendação consolidada;
 - manter modo não-bloqueante por default para não travar throughput de fábrica.
 
+### Contrato de promoção seletiva (worktree -> main)
+
+Quando o delivery mode estiver em `apply-to-branch`, a evidência de conclusão deve explicitar seleção de escopo:
+- `Promoted file inventory`: arquivos efetivamente promovidos para o branch-alvo;
+- `Skipped file inventory`: arquivos não promovidos + motivo (`out-of-scope`, `unsafe`, `no-evidence` etc).
+
+Regras operacionais:
+- `Final file inventory` continua obrigatório como visão global;
+- ausência de `Promoted/Skipped file inventory` deve manter run em trilha de recovery/candidate (sem auto-close);
+- validação (`Validation command log`) permanece obrigatória quando o gate de delivery exigir.
+
 ## Guardrail de scan-bounds no loop longo
 Em sessões com `context_watch` em `warn`/`checkpoint`/`compact`:
 1. **Warn:** somente investigação bounded-by-default (sem busca ampla em logs/sessions).

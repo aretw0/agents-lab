@@ -496,6 +496,31 @@ export function resolveColonyPilotDeliveryPolicy(
 	};
 }
 
+export interface SelectivePromotionInventoryEvidence {
+	hasPromotedFileInventory: boolean;
+	hasSkippedFileInventory: boolean;
+	hasSelectivePromotionInventory: boolean;
+}
+
+export function evaluateSelectivePromotionInventoryEvidence(
+	text: string,
+): SelectivePromotionInventoryEvidence {
+	const hasPromotedFileInventory =
+		/(?:promoted\s+file\s+inventory|files?\s+promoted|arquivos?\s+promovid|invent[aá]rio\s+de\s+promov)/i.test(
+			text,
+		);
+	const hasSkippedFileInventory =
+		/(?:skipped\s+file\s+inventory|files?\s+skipped|arquivos?\s+(?:ignorad|pulad|n[aã]o\s+promovid)|invent[aá]rio\s+de\s+skip)/i.test(
+			text,
+		);
+	return {
+		hasPromotedFileInventory,
+		hasSkippedFileInventory,
+		hasSelectivePromotionInventory:
+			hasPromotedFileInventory && hasSkippedFileInventory,
+	};
+}
+
 export function evaluateColonyDeliveryEvidence(
 	text: string,
 	phase: ColonyPhase,
@@ -535,6 +560,8 @@ export function evaluateColonyDeliveryEvidence(
 			"i",
 		).test(text);
 
+	const selectivePromotionEvidence =
+		evaluateSelectivePromotionInventoryEvidence(text);
 	const evidence: ColonyPilotDeliveryEvidence = {
 		hasWorkspaceReport:
 			/###\s+🧪\s+Workspace|Mode:\s+(?:isolated|shared)/i.test(text),
@@ -548,6 +575,7 @@ export function evaluateColonyDeliveryEvidence(
 			(hasValidationHeading &&
 				(hasValidationSectionBacktickedCommand ||
 					hasValidationSectionFencedCommand)),
+		...selectivePromotionEvidence,
 	};
 
 	if (!policy.enabled || phase !== "completed") {
@@ -567,6 +595,11 @@ export function evaluateColonyDeliveryEvidence(
 	if (policy.requireValidationCommandLog && !evidence.hasValidationCommandLog) {
 		issues.push(
 			"delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)",
+		);
+	}
+	if (policy.mode === "apply-to-branch" && !evidence.hasSelectivePromotionInventory) {
+		issues.push(
+			"delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')",
 		);
 	}
 
@@ -1248,6 +1281,9 @@ export interface ColonyPilotDeliveryEvidence {
 	hasTaskSummary: boolean;
 	hasFileInventory: boolean;
 	hasValidationCommandLog: boolean;
+	hasPromotedFileInventory: boolean;
+	hasSkippedFileInventory: boolean;
+	hasSelectivePromotionInventory: boolean;
 }
 
 export interface ColonyPilotDeliveryEvaluation {

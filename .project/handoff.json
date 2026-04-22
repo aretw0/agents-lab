@@ -1,40 +1,43 @@
 {
-  "timestamp": "2026-04-22T22:16:00.000Z",
-  "context": "Compact manual acionado pelo usuário e assimilado como aprendizado de primitiva: evitar medo de threshold (paralisia) sem atravessar limite de forma imprudente. Estado atual pós-compact: contexto saudável (ok).",
-  "current_phase": "factory-control-plane-hardening",
+  "timestamp": "2026-04-22T22:25:00.000Z",
+  "context": "Foco fábrica mantido com contexto saudável. TASK-BUD-114 avançou no contrato runtime: apply-to-branch agora exige evidência de seleção (`Promoted file inventory` + `Skipped file inventory`) para evitar promoção opaca e reforçar trilha candidate/recovery quando faltar escopo explícito.",
+  "current_phase": "factory-selective-promotion-hardening",
   "current_tasks": [
     "TASK-BUD-114"
   ],
   "blockers": [],
   "next_actions": [
-    "Executar próximo micro-slice da TASK-BUD-114 mantendo foco fábrica.",
-    "Manter TASK-BUD-112 apenas em backlog/preparação.",
-    "Planejar TASK-BUD-115 (pre-compact calm-close) como evolução do control-plane long-run."
+    "Implementar allowlist efetiva de promoção (seleção automática promoted/skipped a partir do diff).",
+    "Persistir evidência promoted/skipped no retention/candidate trail sem auto-close estratégico.",
+    "Manter TASK-BUD-112 apenas em backlog/preparação; TASK-BUD-115 segue planejada para evolução de context-watch."
   ],
   "open_questions": [
-    "Qual heurística mínima de readiness/defer-count reduz paralisia sem aumentar compactação prematura?"
+    "Qual formato mínimo de scopePolicy (docs-only vs globs) para aplicar allowlist sem falso positivo?"
   ],
   "key_decisions_pending": [
-    "Quando elevar pre-compact calm-close de advisory para policy mais assertiva (se necessário)."
+    "Quando habilitar aplicação automática de allowlist por default versus manter opt-in inicial."
   ],
   "files_in_flux": [
-    ".project/requirements.json",
+    "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+    "docs/guides/project-canonical-pipeline.md",
     ".project/tasks.json",
+    ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:16:00.000Z",
-      "reason": "manual_compact_followup",
+      "atIso": "2026-04-22T22:25:00.000Z",
+      "reason": "message_end",
       "level": "ok",
-      "percent": 15,
+      "percent": 24,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy after manual compact; continue factory micro-slices."
+      "recommendation": "Context healthy; continue factory slices."
     }
   ]
 }
