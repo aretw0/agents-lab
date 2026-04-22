@@ -7,6 +7,7 @@ import {
 	buildCanonicalTaskEventFromColonySignal,
 	canonicalTaskEventTypeToProjectTaskStatus,
 	colonyPhaseToCanonicalTaskEventType,
+	normalizeCanonicalEvidenceRefs,
 	readProjectTasksBlock,
 	upsertProjectTaskFromColonySignal,
 	type ColonyTaskSyncConfigShape,
@@ -200,6 +201,21 @@ describe("colony-pilot task-sync behavior", () => {
 		);
 		expect(projected.status).toBe("completed");
 		expect(projected.notes ?? "").toContain("task_event type=done_verified source=ci");
+	});
+
+	it("normalizes canonical evidence refs deterministically", () => {
+		expect(normalizeCanonicalEvidenceRefs(undefined)).toBeUndefined();
+		expect(
+			normalizeCanonicalEvidenceRefs([
+				" docs/research/bridge.md ",
+				"",
+				"docs/research/bridge.md",
+				"docs/research/adapter.md",
+			]),
+		).toEqual([
+			"docs/research/bridge.md",
+			"docs/research/adapter.md",
+		]);
 	});
 
 	it("keeps canonical eventId deterministic when timestamp is invalid", () => {

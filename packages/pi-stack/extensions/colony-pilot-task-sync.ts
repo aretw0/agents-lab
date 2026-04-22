@@ -294,6 +294,17 @@ function canonicalTaskEventId(
 	return `${base}-${tsPart}`;
 }
 
+export function normalizeCanonicalEvidenceRefs(input: unknown): string[] | undefined {
+	if (!Array.isArray(input)) return undefined;
+	const refs = [...new Set(
+		input
+			.filter((x): x is string => typeof x === "string")
+			.map((x) => x.trim())
+			.filter((x) => x.length > 0),
+	)];
+	return refs.length > 0 ? refs : undefined;
+}
+
 export function buildCanonicalTaskEventFromColonySignal(options: {
 	taskId: string;
 	signal: { phase: ColonyPhase; id: string };
@@ -319,10 +330,7 @@ export function buildCanonicalTaskEventFromColonySignal(options: {
 		type,
 		source: options.source ?? "colony",
 		timestamp,
-		evidenceRefs:
-			Array.isArray(options.evidenceRefs) && options.evidenceRefs.length > 0
-				? options.evidenceRefs
-				: undefined,
+		evidenceRefs: normalizeCanonicalEvidenceRefs(options.evidenceRefs),
 	};
 }
 
