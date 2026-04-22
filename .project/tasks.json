@@ -2253,7 +2253,7 @@
     {
       "id": "TASK-BUD-098",
       "description": "[P0] Implementar auditor de artefatos versionados indevidos (pi runtime hygiene) para detectar paths efêmeros rastreados e bloquear promoção da baseline curada.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-091"
       ],
@@ -2272,7 +2272,7 @@
         "Modo gate retorna erro em CI/local quando houver violação na baseline oficial.",
         "Saída inclui ação corretiva segura (untrack sem apagar working copy)."
       ],
-      "notes": "Foco em prevenção contínua para não repetir drift de versionamento."
+      "notes": "Foco em prevenção contínua para não repetir drift de versionamento.\n[2026-04-22T12:00:58.396Z] Priorizada para impedir regressão de artefatos pi não curados no git e bloquear promoção com drift de versionamento efêmero."
     },
     {
       "id": "TASK-BUD-099",
