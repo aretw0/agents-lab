@@ -26,6 +26,17 @@ pi install https://github.com/aretw0/agents-lab
 
 ---
 
+## Escopo de runtime (global x projeto x isolado)
+
+Para evitar drift e overengineering ao desenvolver no agents-lab, use este guia canônico de escopo operacional:
+
+- [`../research/pi-runtime-scope-model-2026-04-21.md`](../research/pi-runtime-scope-model-2026-04-21.md)
+
+Ele cobre com exemplos:
+- como o pi resolve settings/pacotes por modo;
+- quando alterar global vs workspace local;
+- checklist rápido para confirmar contexto ativo antes de editar.
+
 ## O que está na stack
 
 ### Pacotes First-Party (`@aretw0/*`)
