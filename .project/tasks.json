@@ -342,7 +342,7 @@
     {
       "id": "TASK-BUD-018",
       "description": "[P1] Definir pacote de portabilidade para Refarm (SQLite/browser) e outros trackers via adapter canônico de task/event.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-012",
         "TASK-BUD-015",
@@ -358,7 +358,8 @@
         "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
         "Diretrizes de migração incremental do agents-lab para Refarm registradas."
       ],
-      "notes": "Foco no próximo passo do usuário (daily driver Refarm)."
+      "notes": "Foco no próximo passo do usuário (daily driver Refarm).\n[2026-04-22T02:18:37.731Z] Micro-slice inicial de portabilidade: colony-pilot-task-sync ganhou mapper canônico de task_event e builder de envelope backend-agnostic (fd59957), preparando adapters SQLite/browser sem alterar board writer atual. Evidencia: VER-BUD-108.",
+      "verification": "VER-BUD-108"
     },
     {
       "id": "TASK-BUD-019",

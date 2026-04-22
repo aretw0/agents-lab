@@ -1522,6 +1522,32 @@
           "evidence": "Drain condicionado por idle/cooldown/idle-stability; quando bloqueado, retry é rearmado e auditado com gate reason; quando liberado, auto-pop auditável é emitido e follow-up é despachado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-108",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Micro-slice inicial de portabilidade backend-agnostic no task-sync: `packages/pi-stack/extensions/colony-pilot-task-sync.ts` agora expõe mapeamento canônico de fase da colônia para `task_event` (`colonyPhaseToCanonicalTaskEventType`) e builder de envelope `buildCanonicalTaskEventFromColonySignal(...)` com `eventId/taskId/type/source/timestamp/evidenceRefs`. Objetivo: preparar adapter único para `.project`/GitHub/Gitea/SQLite sem alterar writer canônico atual. Cobertura adicionada em `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` validando classificação (`start|progress|review|done_candidate|done_verified|recovery`) e shape do evento canônico. Validação executada: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 1 file passed, 5 tests passed. Commit: `fd59957`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Contrato de evento canônico foi materializado em helper reutilizável para adapters; persistência SQLite fica como próximo slice."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "skipped",
+          "evidence": "Sem mudança documental neste micro-slice; foco foi base de runtime para adapter."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "skipped",
+          "evidence": "Será tratado em slice documental dedicado após estabilização do helper canônico."
+        }
+      ]
     }
   ]
 }
