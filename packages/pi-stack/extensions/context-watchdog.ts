@@ -382,12 +382,13 @@ export function resolveHandoffFreshness(
 export function buildAutoResumePromptFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	maxFreshAgeMs = 30 * 60 * 1000,
+	nowMs = Date.now(),
 ): string {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const freshness = resolveHandoffFreshness(timestamp, Date.now(), maxFreshAgeMs);
+	const freshness = resolveHandoffFreshness(timestamp, nowMs, maxFreshAgeMs);
 	const freshnessText = freshness.label === "unknown"
 		? "unknown"
 		: `${freshness.label}${freshness.ageMs !== undefined ? ` ageSec=${Math.ceil(freshness.ageMs / 1000)}` : ""}`;

@@ -193,6 +193,7 @@ describe("context-watchdog", () => {
 	});
 
 	it("builds compact auto-resume prompt from handoff freshness snapshot", () => {
+		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
 		const prompt = buildAutoResumePromptFromHandoff({
 			timestamp: "2026-04-21T20:20:00.000Z",
 			current_tasks: ["TASK-BUD-084", "TASK-BUD-018"],
@@ -201,16 +202,16 @@ describe("context-watchdog", () => {
 				"Context-watch action: level=compact 72% (compact-now)",
 				"Consolidar TASK-BUD-084 com micro-slice final",
 			],
-		} as any);
+		} as any, 5 * 60 * 1000, nowMs);
 		expect(prompt).toContain("ts=2026-04-21T20:20:00.000Z");
-		expect(prompt).toContain("freshness=");
+		expect(prompt).toContain("freshness=stale ageSec=600");
 		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
 		expect(prompt).toContain("handoff is stale");
 		expect(prompt).not.toContain("Context-watch action:");
 
-		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any);
+		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any, 5 * 60 * 1000, nowMs);
 		expect(unknownPrompt).toContain("freshness=unknown");
 	});
 
