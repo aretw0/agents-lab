@@ -501,14 +501,18 @@ export function evaluateColonyDeliveryEvidence(
 	phase: ColonyPhase,
 	policy: ColonyPilotDeliveryPolicyConfig,
 ): ColonyPilotDeliveryEvaluation {
-	const hasValidationHeading =
-		/(?:validation\s+command\s+log|validation\s+commands?|comandos?\s+de\s+valida[cç][aã]o)/i.test(
-			text,
-		);
+	const validationHeadingPattern =
+		/(?:validation\s+command\s+log|validation\s+commands?|comandos?\s+de\s+valida[cç][aã]o)/i;
+	const commandLikePattern =
+		/(?:pnpm|npm|npx|vitest|node(?:\.exe)?\s+--test|\S*node(?:\.exe)?\s+\S+|tsc|pytest|go\s+test|cargo\s+test|dotnet\s+test|mvn\s+test|gradle(?:w)?\s+test|bun\s+test)\b/i;
+	const hasValidationHeading = validationHeadingPattern.test(text);
 	const hasCommandLikeLine =
-		/(?:^|\n)\s*(?:[-*]\s*)?(?:`)?(?:pnpm|npm|npx|vitest|node(?:\.exe)?\s+--test|\S*node(?:\.exe)?\s+\S+|tsc|pytest|go\s+test|cargo\s+test|dotnet\s+test|mvn\s+test|gradle(?:w)?\s+test|bun\s+test)\b/m.test(
-			text,
-		);
+		new RegExp(`(?:^|\\n)\\s*(?:[-*]\\s*)?(?:` + "`" + `)?${commandLikePattern.source}`, "m").test(text);
+	const hasValidationInlineCommand =
+		new RegExp(
+			`(?:^|\\n)\\s*${validationHeadingPattern.source}\\s*[:\-]\\s*(?:` + "`" + `)?${commandLikePattern.source}`,
+			"im",
+		).test(text);
 
 	const evidence: ColonyPilotDeliveryEvidence = {
 		hasWorkspaceReport:
@@ -519,9 +523,7 @@ export function evaluateColonyDeliveryEvidence(
 				text,
 			),
 		hasValidationCommandLog:
-			/(?:`(?:pnpm|npm|npx|vitest|node(?:\.exe)?\s+--test|\S*node(?:\.exe)?\s+\S+|tsc)\b[^`]*`)/i.test(
-				text,
-			) || (hasValidationHeading && hasCommandLikeLine),
+			hasValidationInlineCommand || (hasValidationHeading && hasCommandLikeLine),
 	};
 
 	if (!policy.enabled || phase !== "completed") {

@@ -2467,7 +2467,7 @@
     {
       "id": "TASK-BUD-107",
       "description": "[P0] Estabilizar materialização de colônia: garantir delivery evidence determinística no COMPLETE (file inventory + validation command log) com auto-check interno antes de promover resultado.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-014"
       ],
@@ -2481,7 +2481,7 @@
         "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
         "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção."
       ],
-      "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente."
+      "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente.\n[2026-04-22T00:00:00Z] Micro-slice inicial de hardening: delivery evidence não considera mais comando isolado fora de seção de validação como prova de validation log, reduzindo falso-positivo de COMPLETE. Cobertura smoke adicionada para caso inválido e regressão. Evidência: VER-BUD-141."
     }
   ]
 }

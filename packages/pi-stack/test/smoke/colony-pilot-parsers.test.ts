@@ -1017,6 +1017,28 @@ describe("colony-pilot parsers", () => {
 		);
 	});
 
+	it("delivery evidence não aceita comando isolado fora de seção de validação", () => {
+		const cfg = resolveColonyPilotDeliveryPolicy({
+			enabled: true,
+			requireFileInventory: true,
+			requireValidationCommandLog: true,
+		});
+
+		const report = [
+			"### 🧪 Workspace",
+			"Mode: isolated git worktree",
+			"**Tasks:** 12/12 done",
+			"final file inventory: files changed: packages/pi-stack/extensions/colony-pilot.ts",
+			"Hard evidence requirements:",
+			"- section: validation command log with e.g. `npm run test:smoke`",
+		].join("\n");
+
+		const ev = evaluateColonyDeliveryEvidence(report, "completed", cfg);
+		expect(ev.ok).toBe(false);
+		expect(ev.evidence.hasValidationCommandLog).toBe(false);
+		expect(ev.issues.some((i) => i.includes("validation command log"))).toBe(true);
+	});
+
 	it("colonyPhaseToProjectTaskStatus respeita human close", () => {
 		expect(colonyPhaseToProjectTaskStatus("running", true)).toBe("in-progress");
 		expect(colonyPhaseToProjectTaskStatus("completed", true)).toBe(
