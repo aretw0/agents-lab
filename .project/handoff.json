@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-22T22:40:00.000Z",
-  "context": "Deflação de `colony-pilot.ts` confirmada como trilha ativa após feedback do usuário. Além do slice de delivery já extraído, o slice 2 moveu budget-gates/policy para módulo próprio, mantendo entrypoint estável e testado.",
+  "timestamp": "2026-04-22T22:49:00.000Z",
+  "context": "Deflação do colony-pilot segue firme em slices maiores: após delivery e budget, o domínio de baseline/settings também foi extraído para módulo próprio. Entry point permanece estável como orquestrador com wrappers públicos.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -8,27 +8,28 @@
   ],
   "blockers": [],
   "next_actions": [
-    "TASK-BUD-114: implementar allowlist efetiva promoted/skipped a partir de scope policy + diff.",
-    "TASK-BUD-116: extrair próximo domínio (command-surfaces ou retention wiring) mantendo wrappers estáveis.",
-    "Manter TASK-BUD-112 em backlog/preparação; TASK-BUD-115 permanece planned."
+    "TASK-BUD-114: implementar allowlist efetiva (promoted/skipped a partir de diff + scope policy).",
+    "TASK-BUD-116: próximo corte em command-surfaces/retention wiring mantendo wrappers estáveis.",
+    "Manter TASK-BUD-112 em backlog e TASK-BUD-115 planned, sem desviar foco de fábrica."
   ],
   "open_questions": [
-    "Preferir próximo corte em command-surfaces (UX/comandos) ou retention wiring (artefatos/runtime snapshot) para maior redução de acoplamento?"
+    "Qual domínio rende maior queda de complexidade no próximo corte: command-surfaces ou retention wiring?"
   ],
   "key_decisions_pending": [
-    "Quando ativar allowlist automática por default no promotion flow versus iniciar como opt-in auditado."
+    "Default de automação allowlist (opt-in inicial vs default-on auditado)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
     "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
     "packages/pi-stack/extensions/colony-pilot-budget-policy.ts",
+    "packages/pi-stack/extensions/colony-pilot-baseline.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T22:40:00.000Z",
+      "atIso": "2026-04-22T22:49:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 24,
@@ -38,7 +39,7 @@
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; larger factory slices remain safe with bounded scope."
+      "recommendation": "Context healthy; continue larger bounded factory slices."
     }
   ]
 }

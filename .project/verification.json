@@ -3093,6 +3093,32 @@
           "evidence": "Suíte focada de colony-pilot parsers: 72/72 após extração."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-169",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Deflação incremental avançou para baseline/settings: novo módulo `packages/pi-stack/extensions/colony-pilot-baseline.ts` concentra `resolveBaselineProfile`, `buildProjectBaselineSettings`, `deepMergeObjects` e `applyProjectBaselineSettings`; `colony-pilot.ts` mantém wrappers/re-exports para contrato público estável. Regressão preservada: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Delivery, budget e baseline já externalizados em módulos dedicados."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Funções continuam exportadas no entrypoint via wrappers; suíte de parser/baseline verde."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "Teste smoke focado executado após extração: 72/72."
+        }
+      ]
     }
   ]
 }
