@@ -1626,6 +1626,32 @@
           "evidence": "Sem mudança documental neste micro-slice."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-112",
+      "target": "TASK-BUD-018",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "TASK-BUD-018 consolidado com contrato adapter-first task/event backend-agnostic + trilha de migração Refarm. Runtime: `packages/pi-stack/extensions/colony-pilot-task-sync.ts` agora expõe envelope e projeção canônicos (`colonyPhaseToCanonicalTaskEventType`, `buildCanonicalTaskEventFromColonySignal`, `canonicalTaskEventTypeToProjectTaskStatus`, `applyCanonicalTaskEventToProjectTask`), eliminando duplicação de semântica phase/event->status e preparando ingestão uniforme por adapters externos. Documentação: `docs/research/colony-project-task-bridge.md` atualizado com (a) mapeamento explícito de `task_event.type` para `.project`/GitHub/Gitea/SQLite-browser; (b) roadmap incremental agents-lab -> Refarm (dual-write, replay determinístico, read-model paralelo, handoff opt-in, fallback seguro). Evidência de validação funcional dos helpers: `/mnt/c/Users/aretw/scoop/apps/nodejs/current/node.exe node_modules/vitest/vitest.mjs run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` => 1 file passed, 6 tests passed. Commits relevantes: `fd59957`, `b5a464c`, `ad1fc8f`, `7a5a23b`, `f567713`.",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "criteria_results": [
+        {
+          "criterion": "Especificação canônica cobre sync bidirecional task/event para backend SQLite/browser.",
+          "status": "passed",
+          "evidence": "Helpers canônicos de build/projeção evento<->status materializados no task-sync com semântica única reaproveitável por adapter SQLite/browser."
+        },
+        {
+          "criterion": "Mapa de compatibilidade para GitHub/Gitea/.project documentado.",
+          "status": "passed",
+          "evidence": "Tabela de mapeamento `task_event.type` por backend adicionada em docs/research/colony-project-task-bridge.md."
+        },
+        {
+          "criterion": "Diretrizes de migração incremental do agents-lab para Refarm registradas.",
+          "status": "passed",
+          "evidence": "Seção 'Migração incremental agents-lab -> Refarm (SQLite/browser)' adicionada com passos e fallback."
+        }
+      ]
     }
   ]
 }
