@@ -13,7 +13,7 @@
  * - Tracks state heuristically from emitted messages and tool outputs
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type {
 	ExtensionAPI,
@@ -135,12 +135,13 @@ import {
 	resolveModelPolicyProfile as resolveModelPolicyProfileImpl,
 } from "./colony-pilot-model-policy";
 import {
-	analyzeQuota,
-	type ProviderBudgetMap,
-	type ProviderBudgetStatus,
-	parseProviderBudgets,
-	safeNum,
-} from "./quota-visibility";
+	type QuotaVisibilityBudgetSettings,
+	parseColonyPilotSettings as parseColonyPilotSettingsImpl,
+	parseQuotaVisibilityBudgetSettings as parseQuotaVisibilityBudgetSettingsImpl,
+	readProjectSettings as readProjectSettingsImpl,
+	writeProjectSettings as writeProjectSettingsImpl,
+} from "./colony-pilot-settings";
+import { analyzeQuota, type ProviderBudgetStatus } from "./quota-visibility";
 
 export type {
 	ColonyModelReadiness,
@@ -607,48 +608,14 @@ interface ColonyPilotSettings {
 	candidateRetention?: Partial<ColonyPilotCandidateRetentionConfig>;
 }
 
-interface QuotaVisibilityBudgetSettings {
-	weeklyQuotaTokens?: number;
-	weeklyQuotaCostUsd?: number;
-	weeklyQuotaRequests?: number;
-	monthlyQuotaTokens?: number;
-	monthlyQuotaCostUsd?: number;
-	monthlyQuotaRequests?: number;
-	providerBudgets: ProviderBudgetMap;
-}
-
 function parseColonyPilotSettings(cwd: string): ColonyPilotSettings {
-	try {
-		const p = path.join(cwd, ".pi", "settings.json");
-		if (!existsSync(p)) return {};
-		const json = JSON.parse(readFileSync(p, "utf8"));
-		return json?.piStack?.colonyPilot ?? json?.extensions?.colonyPilot ?? {};
-	} catch {
-		return {};
-	}
+	return parseColonyPilotSettingsImpl<ColonyPilotSettings>(cwd);
 }
 
 function parseQuotaVisibilityBudgetSettings(
 	cwd: string,
 ): QuotaVisibilityBudgetSettings {
-	try {
-		const p = path.join(cwd, ".pi", "settings.json");
-		if (!existsSync(p)) return { providerBudgets: {} };
-		const json = JSON.parse(readFileSync(p, "utf8"));
-		const cfg = json?.piStack?.quotaVisibility ?? {};
-
-		return {
-			weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
-			weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
-			weeklyQuotaRequests: safeNum(cfg.weeklyQuotaRequests) || undefined,
-			monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
-			monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
-			monthlyQuotaRequests: safeNum(cfg.monthlyQuotaRequests) || undefined,
-			providerBudgets: parseProviderBudgets(cfg.providerBudgets),
-		};
-	} catch {
-		return { providerBudgets: {} };
-	}
+	return parseQuotaVisibilityBudgetSettingsImpl(cwd);
 }
 
 export function resolveColonyPilotOutputPolicy(
@@ -713,10 +680,6 @@ export function buildProjectBaselineSettings(
 	return buildProjectBaselineSettingsImpl(profile);
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-	return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
 export function deepMergeObjects<T extends Record<string, unknown>>(
 	base: T,
 	patch: Record<string, unknown>,
@@ -732,23 +695,11 @@ export function applyProjectBaselineSettings(
 }
 
 function readProjectSettings(cwd: string): Record<string, unknown> {
-	const p = path.join(cwd, ".pi", "settings.json");
-	if (!existsSync(p)) return {};
-	try {
-		const raw = JSON.parse(readFileSync(p, "utf8"));
-		return isPlainObject(raw) ? raw : {};
-	} catch {
-		return {};
-	}
+	return readProjectSettingsImpl(cwd);
 }
 
 function writeProjectSettings(cwd: string, data: Record<string, unknown>) {
-	const dir = path.join(cwd, ".pi");
-	mkdirSync(dir, { recursive: true });
-	writeFileSync(
-		path.join(dir, "settings.json"),
-		`${JSON.stringify(data, null, 2)}\n`,
-	);
+	return writeProjectSettingsImpl(cwd, data);
 }
 
 export function ensureRecoveryTaskForCandidate(

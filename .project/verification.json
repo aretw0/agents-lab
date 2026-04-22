@@ -3197,6 +3197,32 @@
           "evidence": "Suite smoke de parsers permanece verde após extração."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-173",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice 7 (micro) da deflação: parse/settings helpers extraídos para `packages/pi-stack/extensions/colony-pilot-settings.ts` (`parseColonyPilotSettings`, `parseQuotaVisibilityBudgetSettings`, `readProjectSettings`, `writeProjectSettings`). `colony-pilot.ts` manteve wrappers e reduziu para 2319 linhas. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Settings parsing/writing saiu do entrypoint para módulo dedicado."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Wrappers no entrypoint preservados; sem breaking surface."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "72/72 após extração."
+        }
+      ]
     }
   ]
 }
