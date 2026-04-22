@@ -697,6 +697,26 @@ export function shouldAutoDrainDeferredIntent(
   return waitMs !== undefined && waitMs === 0;
 }
 
+export function resolveAutoDrainRetryDelayMs(
+  activeLongRun: boolean,
+  queuedCount: number,
+  nowMs: number,
+  lastAutoDrainAt: number,
+  idleSinceMs: number,
+  cfg: LongRunIntentQueueConfig,
+): number | undefined {
+  const waitMs = estimateAutoDrainWaitMs(
+    activeLongRun,
+    queuedCount,
+    nowMs,
+    lastAutoDrainAt,
+    idleSinceMs,
+    cfg,
+  );
+  if (waitMs === undefined || waitMs <= 0) return undefined;
+  return waitMs;
+}
+
 export function enqueueDeferredIntent(
   cwd: string,
   text: string,
@@ -842,10 +862,13 @@ export default function (pi: ExtensionAPI) {
   function scheduleAutoDrainDeferredIntent(
     ctx: ExtensionContext,
     reason: "agent_end" | "lane_pop" | "idle_timer",
+    delayOverrideMs?: number,
   ): void {
     if (!longRunIntentQueueConfig.enabled || !longRunIntentQueueConfig.autoDrainOnIdle) return;
     clearAutoDrainTimer();
-    const delay = Math.max(0, longRunIntentQueueConfig.autoDrainIdleStableMs);
+    const delay = delayOverrideMs !== undefined
+      ? Math.max(0, Math.floor(delayOverrideMs))
+      : Math.max(0, longRunIntentQueueConfig.autoDrainIdleStableMs);
     autoDrainTimer = setTimeout(() => {
       autoDrainTimer = undefined;
       tryAutoDrainDeferredIntent(ctx, reason);
@@ -857,6 +880,20 @@ export default function (pi: ExtensionAPI) {
     const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
     const nowMs = Date.now();
     const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
+
+    const retryDelayMs = resolveAutoDrainRetryDelayMs(
+      activeLongRun,
+      queuedCount,
+      nowMs,
+      lastAutoDrainAt,
+      idleSinceMs,
+      longRunIntentQueueConfig,
+    );
+    if (retryDelayMs !== undefined) {
+      scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
+      updateLongRunLaneStatus(ctx, activeLongRun);
+      return false;
+    }
 
     if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, idleSinceMs, longRunIntentQueueConfig)) {
       updateLongRunLaneStatus(ctx, activeLongRun);

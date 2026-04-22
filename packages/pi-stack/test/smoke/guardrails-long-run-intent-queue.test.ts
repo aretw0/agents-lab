@@ -10,6 +10,7 @@ import {
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
+  resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
@@ -158,6 +159,11 @@ describe("guardrails-core long-run intent queue", () => {
     expect(estimateAutoDrainWaitMs(false, 1, 500, 0, 1_200, cfg)).toBe(500);
     expect(estimateAutoDrainWaitMs(false, 1, 2_000, 0, 200, cfg)).toBe(600);
     expect(estimateAutoDrainWaitMs(true, 1, 2_000, 0, 1_200, cfg)).toBeUndefined();
+
+    expect(resolveAutoDrainRetryDelayMs(false, 1, 500, 0, 1_200, cfg)).toBe(500);
+    expect(resolveAutoDrainRetryDelayMs(false, 1, 2_000, 0, 200, cfg)).toBe(600);
+    expect(resolveAutoDrainRetryDelayMs(false, 1, 2_000, 0, 1_200, cfg)).toBeUndefined();
+    expect(resolveAutoDrainRetryDelayMs(true, 1, 2_000, 0, 1_200, cfg)).toBeUndefined();
 
     expect(shouldAutoDrainDeferredIntent(false, 1, 2_000, 0, 1_200, cfg)).toBe(true);
     expect(shouldAutoDrainDeferredIntent(true, 1, 2_000, 0, 1_200, cfg)).toBe(false);
