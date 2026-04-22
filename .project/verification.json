@@ -2843,6 +2843,58 @@
           "evidence": "Critério já documentado no protocolo/charter; será reaplicado na run supervisionada."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-159",
+      "target": "TASK-BUD-097",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Run supervisionada disparada com `ant_colony` (`c1`, `maxCost=1.5`) em worktree isolada para smoke L2->L3. Evidência de execução/recovery: state file `colony-moajtbm1-2g4py/state.json` e status do worktree mostraram deriva fora de escopo docs-only (`CONTRIBUTING.md`, `README.md`, `docs/guides/agent-driver-charter.md`). Aplicado rollback operacional para L2 via promoção seletiva somente do artefato documental `docs/research/supervised-swarm-smoke-2026-04-22.md`, mantendo no-auto-close estratégico e registro explícito de abort/rollback.",
+      "criteria_results": [
+        {
+          "criterion": "Preflight de swarm, budget e scheduler governance passam antes do launch.",
+          "status": "passed",
+          "evidence": "Já validado em VER-BUD-158 com checks em verde no recorte da sessão."
+        },
+        {
+          "criterion": "Swarm roda em modo supervisionado com evidência de delivery/recovery e sem auto-close estratégico.",
+          "status": "passed",
+          "evidence": "Run c1 executada; recovery acionado ao detectar deriva, com promoção seletiva docs-only e sem auto-close."
+        },
+        {
+          "criterion": "Existe critério explícito de abort/rollback para retorno a L2 quando necessário.",
+          "status": "passed",
+          "evidence": "Arquivo `docs/research/supervised-swarm-smoke-2026-04-22.md` documenta critérios e procedimento de rollback para L2."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-160",
+      "target": "TASK-BUD-111",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Política native-first formalizada em runbooks canônicos: `docs/guides/project-canonical-pipeline.md` e `docs/guides/agent-driver-charter.md` agora explicitam steer/follow-up nativo como default e lane-queue como opt-in para deferimento cross-turn/idle. Decisão registrada em `DEC-BUD-044` para consolidar postura agnóstica e portável.",
+      "criteria_results": [
+        {
+          "criterion": "Blueprint distingue explicitamente o que é canônico/portável (primitivas, gates, evidência) do que é convenção local do agents-lab.",
+          "status": "passed",
+          "evidence": "Native-first baseado em primitivas first-party do pi; lane-queue rebaixada para opt-in local."
+        },
+        {
+          "criterion": "Runbooks principais incluem trilha adapter-first para usuários externos sem perda de governança (no-auto-close, verification gate, budget discipline).",
+          "status": "passed",
+          "evidence": "Runbooks atualizados mantendo governança e reduzindo dependência de convenção local."
+        },
+        {
+          "criterion": "Existe checklist de release/dogfooding para validar que melhorias de fábrica interna chegam como potencial reutilizável no pacote pi-stack.",
+          "status": "skipped",
+          "evidence": "Checklist de release ainda pendente para fechamento total do TASK-BUD-111."
+        }
+      ]
     }
   ]
 }

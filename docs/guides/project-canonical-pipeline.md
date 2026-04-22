@@ -97,10 +97,12 @@ Para manter velocidade de cruzeiro em long-run:
 
 ### Discoverability operacional da lane-queue
 
-Quando houver deferimento de intenção durante long-run:
-- `/lane-queue help` deve ser o ponto de entrada para uso rápido;
-- `/lane-queue` (status) deve orientar ações concretas quando `queued>0` (`list`/`clear`);
-- `/lane-queue add <texto>` deve ser preferido para registrar pedido sem desviar o lane ativo.
+Política operacional atual: **native-first**.
+
+Durante long-run:
+- priorizar steer/follow-up nativo (`Alt+Enter` / `app.message.followUp`) para continuidade de turno;
+- usar `lane-queue` apenas como trilha **opt-in** para deferimento cross-turn em janela idle;
+- quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata.
 
 ### Steering signal-first (tool-surface diet)
 

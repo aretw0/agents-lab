@@ -808,6 +808,22 @@
         "O sistema sugere candidatos de galvanização com critério explícito (frequência, previsibilidade, risco) e recomendação de pathway hard equivalente.",
         "Backlog mantém pipeline de conversão (descoberta -> validação -> automação hard) com evidência de redução de consumo LLM ao longo do tempo."
       ]
+    },
+    {
+      "id": "REQ-BUD-057",
+      "description": "A stack deve tratar discoverability como sinal governável (com ownership explícito) e operar com orçamento de ruído, incluindo meta-sinal para detectar excesso de sinais concorrentes.",
+      "type": "constraint",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "traces_to": [
+        "TASK-BUD-113"
+      ],
+      "acceptance_criteria": [
+        "Existe taxonomia de ownership de sinais (ex.: operator, runtime, governance) com responsabilidade clara por emissão/consumo.",
+        "Runbooks definem equilíbrio de sinal/ruído (prioridade, supressão, cadência) para evitar overload no loop de execução.",
+        "Há detecção advisory de ruído excessivo (meta-sinal) com recomendação de simplificação/calibração."
+      ]
     }
   ]
 }

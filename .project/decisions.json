@@ -310,6 +310,13 @@
       "decision": "Tratar bloat (código e texto) como smell operacional de qualidade/comunicação: emitir sinal advisory no runtime e orientar enxugamento/split, preservando modo não-bloqueante por default.",
       "rationale": "Sustenta qualidade contínua do produto e da narrativa (incluindo materiais de documentação e posicionamento), reduzindo gordura que degrada manutenção, entendimento e venda de valor.",
       "context": "Diretriz explícita do usuário para manter discurso alinhado e superfícies sempre saudáveis, com possibilidade futura de scouts marcarem oportunidades via sinais."
+    },
+    {
+      "id": "DEC-BUD-044",
+      "status": "decided",
+      "decision": "Adotar política native-first para continuidade de mensagem em long-runs: steer/follow-up nativo como padrão, com lane-queue apenas como mecanismo opt-in para deferimento cross-turn em janela idle.",
+      "rationale": "Reduz superfície operacional/cognitiva, minimiza ruído e mantém alinhamento com primitivas first-party do pi; lane-queue permanece disponível para casos específicos sem virar trilha principal.",
+      "context": "Feedback explícito do usuário (2026-04-22): dúvida sobre custo/benefício da lane-queue versus fluxo nativo e pedido de formalização com foco em throughput de fábrica."
     }
   ]
 }

@@ -148,9 +148,9 @@ Cada execução autônoma deve:
 
 Para manter loops longos estáveis:
 
-1. **Fila nativa do pi (mesmo turno):** use follow-up nativo (`Alt+Enter` / `app.message.followUp`) para enfileirar mensagens durante streaming.
-2. **Fila de lane (deferida):** use `/lane-queue` quando a mensagem deve esperar uma janela segura (idle) sem interromper o trabalho atual.
-3. **Forçar agora (escape hatch):** prefixe com `lane-now:` para processar imediatamente quando necessário.
+1. **Padrão native-first:** usar steer/follow-up nativo (`Alt+Enter` / `app.message.followUp`) como trilha principal.
+2. **Fila de lane (opt-in):** usar `/lane-queue` apenas quando houver deferimento cross-turn para janela idle sem interromper o trabalho atual.
+3. **Forçar agora (escape hatch):** prefixar com `lane-now:` quando processamento imediato for realmente necessário.
 
 `/lane-queue` suporta `status|help|list|add <texto>|pop|clear` e mantém trilha auditável no runtime (`guardrails-core.long-run-intent-*`).
 Quando `queued>0`, o status deve orientar discoverability explícita (`/lane-queue list` e `/lane-queue clear`).

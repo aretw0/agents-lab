@@ -1,46 +1,47 @@
 {
-  "timestamp": "2026-04-22T21:08:00.000Z",
-  "context": "Fábrica destravou promoção L1->L2: TASK-BUD-096 concluída com gate strict passando em recorte reprodutível (`source=isolated, days=1, limit=5`). Trilho seguinte já iniciado em TASK-BUD-097 com pré-gates L2->L3 verdes (preflight, budget, scheduler governance).",
-  "current_phase": "factory-supervised-swarm-readiness",
+  "timestamp": "2026-04-22T21:30:00.000Z",
+  "context": "Foco fábrica preservado com formalização native-first: steer/follow-up nativo como padrão, lane-queue opt-in. Promoções concluídas: TASK-BUD-096 (L1->L2) e TASK-BUD-097 (L2->L3 supervisionado com evidência + recovery docs-only).",
+  "current_phase": "factory-throughput-native-first",
   "current_tasks": [
-    "TASK-BUD-097",
     "TASK-BUD-111",
     "TASK-BUD-112"
   ],
   "blockers": [
-    "Nenhum bloqueio hard imediato para iniciar run supervisionada; falta apenas evidência de execução L2->L3 controlada."
+    "context-watch-warn-active"
   ],
   "next_actions": [
-    "Executar uma run supervisionada controlada para TASK-BUD-097 com evidência de delivery/recovery (sem auto-close estratégico).",
-    "Registrar verificação canônica pós-run (pass/fallback) com critérios de abort/rollback explícitos.",
-    "Manter disciplina de fábrica: micro-slices, validação focada e commit por etapa." 
+    "Manter micro-slices (1 arquivo + 1 teste/doc) até sair de warn.",
+    "Avançar TASK-BUD-111 com blueprint adapter-first/checklist de release para portabilidade da fábrica.",
+    "Manter TASK-BUD-112 apenas em preparação (sem execução), conforme foco atual."
   ],
   "open_questions": [
-    "Qual objetivo mínimo da run supervisionada oferece máxima evidência com custo baixo para fechar TASK-BUD-097?"
+    "Qual checklist mínimo de release comprova que hardening interno virou capacidade portável sem acoplamento local?"
   ],
   "key_decisions_pending": [
-    "Definir envelope padrão da primeira run supervisionada (escopo, maxCost, validação) para virar template repetível."
+    "Quando e como tornar promoção seletiva de worktree->main automática com allowlist de escopo."
   ],
   "files_in_flux": [
+    ".project/decisions.json",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json",
-    "packages/pi-stack/extensions/colony-pilot.ts",
-    "docs/guides/swarm-cleanroom-protocol.md"
+    "docs/guides/project-canonical-pipeline.md",
+    "docs/guides/agent-driver-charter.md",
+    "docs/research/supervised-swarm-smoke-2026-04-22.md"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T21:08:00.000Z",
+      "atIso": "2026-04-22T21:30:00.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 41,
+      "level": "warn",
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy."
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }
