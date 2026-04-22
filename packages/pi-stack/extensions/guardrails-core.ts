@@ -694,6 +694,12 @@ interface BloatSmellConfig {
     lines: number;
     repeatedLineRatio: number;
   };
+  code: {
+    enabled: boolean;
+    changedLines: number;
+    hunks: number;
+    filesTouched: number;
+  };
 }
 
 const DEFAULT_BLOAT_SMELL_CONFIG: BloatSmellConfig = {
@@ -706,6 +712,12 @@ const DEFAULT_BLOAT_SMELL_CONFIG: BloatSmellConfig = {
     lines: 24,
     repeatedLineRatio: 0.35,
   },
+  code: {
+    enabled: true,
+    changedLines: 120,
+    hunks: 8,
+    filesTouched: 5,
+  },
 };
 
 export function resolveBloatSmellConfig(cwd: string): BloatSmellConfig {
@@ -715,10 +727,14 @@ export function resolveBloatSmellConfig(cwd: string): BloatSmellConfig {
     const json = JSON.parse(readFileSync(p, "utf8"));
     const cfg = json?.piStack?.guardrailsCore?.bloatSmell ?? {};
     const textCfg = cfg?.text ?? {};
+    const codeCfg = cfg?.code ?? {};
     const cooldownMsRaw = Number(cfg?.cooldownMs);
     const charsRaw = Number(textCfg?.chars);
     const linesRaw = Number(textCfg?.lines);
     const repeatedRaw = Number(textCfg?.repeatedLineRatio);
+    const changedLinesRaw = Number(codeCfg?.changedLines);
+    const hunksRaw = Number(codeCfg?.hunks);
+    const filesTouchedRaw = Number(codeCfg?.filesTouched);
 
     return {
       enabled: cfg?.enabled !== false,
@@ -737,6 +753,18 @@ export function resolveBloatSmellConfig(cwd: string): BloatSmellConfig {
         repeatedLineRatio: Number.isFinite(repeatedRaw)
           ? Math.max(0.1, Math.min(0.9, repeatedRaw))
           : DEFAULT_BLOAT_SMELL_CONFIG.text.repeatedLineRatio,
+      },
+      code: {
+        enabled: codeCfg?.enabled !== false,
+        changedLines: Number.isFinite(changedLinesRaw)
+          ? Math.max(20, Math.min(10_000, Math.floor(changedLinesRaw)))
+          : DEFAULT_BLOAT_SMELL_CONFIG.code.changedLines,
+        hunks: Number.isFinite(hunksRaw)
+          ? Math.max(1, Math.min(200, Math.floor(hunksRaw)))
+          : DEFAULT_BLOAT_SMELL_CONFIG.code.hunks,
+        filesTouched: Number.isFinite(filesTouchedRaw)
+          ? Math.max(1, Math.min(200, Math.floor(filesTouchedRaw)))
+          : DEFAULT_BLOAT_SMELL_CONFIG.code.filesTouched,
       },
     };
   } catch {
@@ -795,8 +823,61 @@ export function extractAssistantTextFromTurnMessage(message: unknown): string {
   return chunks.join("\n").trim();
 }
 
+function countMeaningfulLines(text: string): number {
+  const normalized = String(text ?? "").replace(/\r\n/g, "\n").trim();
+  if (!normalized) return 0;
+  return normalized.split("\n").length;
+}
+
+export function estimateCodeBloatFromEditInput(input: unknown): {
+  changedLines: number;
+  hunks: number;
+  filesTouched: number;
+} {
+  const row = input as Record<string, unknown> | undefined;
+  const edits = Array.isArray(row?.edits) ? (row.edits as unknown[]) : [];
+
+  let changedLines = 0;
+  let hunks = 0;
+  for (const raw of edits) {
+    if (!raw || typeof raw !== "object") continue;
+    const editRow = raw as Record<string, unknown>;
+    const oldText = typeof editRow.oldText === "string" ? editRow.oldText : "";
+    const newText = typeof editRow.newText === "string" ? editRow.newText : "";
+    const oldLines = countMeaningfulLines(oldText);
+    const newLines = countMeaningfulLines(newText);
+    changedLines += Math.max(1, oldLines, newLines);
+    hunks += 1;
+  }
+
+  return {
+    changedLines,
+    hunks,
+    filesTouched: 1,
+  };
+}
+
+export function estimateCodeBloatFromWriteInput(input: unknown): {
+  changedLines: number;
+  hunks: number;
+  filesTouched: number;
+} {
+  const row = input as Record<string, unknown> | undefined;
+  const content = typeof row?.content === "string" ? row.content : "";
+  const lines = countMeaningfulLines(content);
+  return {
+    changedLines: lines,
+    hunks: lines > 0 ? 1 : 0,
+    filesTouched: 1,
+  };
+}
+
 export function buildTextBloatStatusLabel(assessment: TextBloatSmellAssessment): string {
   return `[bloat] text chars=${assessment.metrics.chars} lines=${assessment.metrics.lines} rep=${assessment.metrics.repeatedLineRatio.toFixed(2)}`;
+}
+
+export function buildCodeBloatStatusLabel(assessment: CodeBloatSmellAssessment): string {
+  return `[bloat] code lines=${assessment.metrics.changedLines} hunks=${assessment.metrics.hunks} files=${assessment.metrics.filesTouched}`;
 }
 
 interface LongRunIntentQueueConfig {
@@ -1167,6 +1248,8 @@ export default function (pi: ExtensionAPI) {
   let bloatSmellConfig: BloatSmellConfig = DEFAULT_BLOAT_SMELL_CONFIG;
   let lastTextBloatSignalAt = 0;
   let lastTextBloatSignalKey: string | undefined;
+  let lastCodeBloatSignalAt = 0;
+  let lastCodeBloatSignalKey: string | undefined;
   let lastAutoDrainAt = 0;
   let lastAutoDrainDeferredAuditAt = 0;
   let lastAutoDrainDeferredGate: AutoDrainGateReason | undefined;
@@ -1351,10 +1434,13 @@ export default function (pi: ExtensionAPI) {
     lastAutoDrainDeferredGate = undefined;
     lastTextBloatSignalAt = 0;
     lastTextBloatSignalKey = undefined;
+    lastCodeBloatSignalAt = 0;
+    lastCodeBloatSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
     clearAutoDrainTimer();
     updateLongRunLaneStatus(ctx, false);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -1621,6 +1707,61 @@ export default function (pi: ExtensionAPI) {
       return await guardBashPathReads(command, ctx);
     }
 
+    if (bloatSmellConfig.enabled && bloatSmellConfig.code.enabled) {
+      let metrics: { changedLines: number; hunks: number; filesTouched: number } | undefined;
+      let toolType: "edit" | "write" | undefined;
+
+      if (isToolCallEventType("edit", event)) {
+        metrics = estimateCodeBloatFromEditInput(event.input);
+        toolType = "edit";
+      } else if (isToolCallEventType("write", event)) {
+        metrics = estimateCodeBloatFromWriteInput(event.input);
+        toolType = "write";
+      }
+
+      if (metrics && toolType) {
+        const assessment = evaluateCodeBloatSmell(metrics, {
+          changedLines: bloatSmellConfig.code.changedLines,
+          hunks: bloatSmellConfig.code.hunks,
+          filesTouched: bloatSmellConfig.code.filesTouched,
+        });
+
+        if (!assessment.triggered) {
+          ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
+          return undefined;
+        }
+
+        const statusLabel = buildCodeBloatStatusLabel(assessment);
+        ctx.ui?.setStatus?.("guardrails-core-bloat-code", statusLabel);
+
+        const nowMs = Date.now();
+        const signalKey = `${toolType}:${assessment.reasons.join("|")}`;
+        if (shouldEmitBloatSmellSignal(
+          lastCodeBloatSignalAt,
+          lastCodeBloatSignalKey,
+          signalKey,
+          nowMs,
+          bloatSmellConfig.cooldownMs,
+        )) {
+          appendAuditEntry(ctx, "guardrails-core.bloat-smell-code", {
+            atIso: new Date(nowMs).toISOString(),
+            toolType,
+            reasons: assessment.reasons,
+            metrics: assessment.metrics,
+            recommendation: assessment.recommendation,
+            statusLabel,
+          });
+
+          if (bloatSmellConfig.notifyOnTrigger) {
+            ctx.ui.notify([statusLabel, assessment.recommendation].join("\n"), "info");
+          }
+
+          lastCodeBloatSignalAt = nowMs;
+          lastCodeBloatSignalKey = signalKey;
+        }
+      }
+    }
+
     return undefined;
   });
 
@@ -1762,6 +1903,7 @@ export default function (pi: ExtensionAPI) {
     }
     ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
     lastLongRunBusyAt = Date.now();
     scheduleAutoDrainDeferredIntent(ctx, "agent_end");
     updateLongRunLaneStatus(ctx, false);

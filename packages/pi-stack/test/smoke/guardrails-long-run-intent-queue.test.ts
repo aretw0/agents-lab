@@ -23,8 +23,11 @@ import {
   summarizeAssumptionText,
   evaluateTextBloatSmell,
   evaluateCodeBloatSmell,
+  estimateCodeBloatFromEditInput,
+  estimateCodeBloatFromWriteInput,
   extractAssistantTextFromTurnMessage,
   buildTextBloatStatusLabel,
+  buildCodeBloatStatusLabel,
   shouldEmitBloatSmellSignal,
   shouldSchedulePostDispatchAutoDrain,
   shouldEmitAutoDrainDeferredAudit,
@@ -71,6 +74,9 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.text.enabled).toBe(true);
       expect(cfg.text.chars).toBe(1200);
       expect(cfg.text.lines).toBe(24);
+      expect(cfg.code.enabled).toBe(true);
+      expect(cfg.code.changedLines).toBe(120);
+      expect(cfg.code.hunks).toBe(8);
 
       expect(shouldEmitBloatSmellSignal(0, undefined, "high-char-count:1200", 10_000, 90_000)).toBe(true);
       expect(shouldEmitBloatSmellSignal(9_500, "same", "same", 10_000, 90_000)).toBe(false);
@@ -105,6 +111,33 @@ describe("guardrails-core long-run intent queue", () => {
     expect(label).toContain("chars=");
     expect(label).toContain("lines=");
     expect(label).toContain("rep=");
+  });
+
+  it("estimates code-bloat metrics from edit/write payloads", () => {
+    const editMetrics = estimateCodeBloatFromEditInput({
+      path: "a.ts",
+      edits: [
+        { oldText: "a\nb", newText: "a\nb\nc" },
+        { oldText: "x", newText: "y" },
+      ],
+    });
+    expect(editMetrics.changedLines).toBeGreaterThanOrEqual(4);
+    expect(editMetrics.hunks).toBe(2);
+    expect(editMetrics.filesTouched).toBe(1);
+
+    const writeMetrics = estimateCodeBloatFromWriteInput({
+      path: "b.ts",
+      content: "linha1\nlinha2\nlinha3",
+    });
+    expect(writeMetrics.changedLines).toBe(3);
+    expect(writeMetrics.hunks).toBe(1);
+
+    const assessment = evaluateCodeBloatSmell(writeMetrics, { changedLines: 2, hunks: 1, filesTouched: 1 });
+    const label = buildCodeBloatStatusLabel(assessment);
+    expect(label).toContain("[bloat] code");
+    expect(label).toContain("lines=");
+    expect(label).toContain("hunks=");
+    expect(label).toContain("files=");
   });
 
   it("builds no-obvious-questions prompt only when policy is enabled", () => {
