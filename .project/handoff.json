@@ -1,39 +1,38 @@
 {
-  "timestamp": "2026-04-22T17:46:00.000Z",
-  "context": "Factory calibration em progresso com contexto saudável pós-compact: TASK-BUD-109 concluída (bloat-smell signal-first texto+código + runbook low-noise) e TASK-BUD-110 iniciada com primeira extração modular de `guardrails-core` para módulo dedicado de bloat (`guardrails-core-bloat.ts`) sem regressão de smoke.",
-  "current_phase": "factory-throughput-precision",
+  "timestamp": "2026-04-22T17:58:00.000Z",
+  "context": "Factory-calibration avançada com frente de deflação fechada: TASK-BUD-109 e TASK-BUD-110 concluídas. `guardrails-core.ts` agora atua como orquestrador com extrações coesas (`guardrails-core-bloat.ts`, `guardrails-core-lane-queue.ts`) e contrato público estável por re-export. Próxima alavanca para potencial de fábrica é destravar gate strict L1->L2 (TASK-BUD-096).",
+  "current_phase": "factory-unlock-l2-readiness",
   "current_tasks": [
-    "TASK-BUD-110",
-    "TASK-BUD-096"
+    "TASK-BUD-096",
+    "TASK-BUD-097"
   ],
   "blockers": [
-    "TASK-BUD-096 strict gate (monitor-min-user-turns)"
+    "TASK-BUD-096 strict gate: monitor-min-user-turns"
   ],
   "next_actions": [
-    "Continuar TASK-BUD-110 em micro-slices: extrair próximo domínio coeso (ex.: lane-queue ou budget-governor) mantendo contratos estáveis.",
-    "Adicionar guia curto de fronteiras modulares para prevenir re-inflar `guardrails-core.ts`.",
-    "Após avanço modular mínimo, retomar TASK-BUD-096 com execução strict e evidência canônica."
+    "Executar micro-slice dedicado ao TASK-BUD-096 com evidência strict reproduzível e atualização canônica de verification.",
+    "Após aprovação strict, promover trilha de swarm supervisionado (TASK-BUD-097) mantendo no-auto-close e preflight verde.",
+    "Preservar disciplina fábrica: 1 arquivo + 1 teste por slice, validate/commit a cada passo."
   ],
   "open_questions": [
-    "Ordem de extração com melhor relação risco/ganho para o próximo slice de deflação (lane-queue vs budget-governor)."
+    "Qual ajuste mínimo em monitor readiness resolve monitor-min-user-turns sem relaxar governança?"
   ],
   "key_decisions_pending": [
-    "Critério objetivo de 'orchestrator enxuto' para fechamento do TASK-BUD-110 (limite de responsabilidades por arquivo)."
+    "Critério objetivo de promoção L1->L2 após TASK-BUD-096 (janela de estabilidade e número de sinais completos)."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/guardrails-core.ts",
-    "packages/pi-stack/extensions/guardrails-core-bloat.ts",
-    "docs/guides/project-canonical-pipeline.md",
     ".project/tasks.json",
     ".project/verification.json",
-    ".project/handoff.json"
+    ".project/handoff.json",
+    "packages/pi-stack/extensions/monitor-sovereign.ts",
+    "packages/pi-stack/extensions/context-watchdog.ts"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T17:46:00.000Z",
+      "atIso": "2026-04-22T17:58:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 18,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
