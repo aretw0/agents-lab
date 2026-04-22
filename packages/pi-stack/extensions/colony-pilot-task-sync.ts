@@ -212,11 +212,9 @@ function colonyPhaseToProjectTaskStatus(
 	phase: ColonyPhase,
 	requireHumanClose: boolean,
 ): ProjectTaskStatus {
-	if (phase === "failed" || phase === "aborted" || phase === "budget_exceeded")
-		return "blocked";
-	if (phase === "completed")
-		return requireHumanClose ? "in-progress" : "completed";
-	return "in-progress";
+	const eventType = colonyPhaseToCanonicalTaskEventType(phase, requireHumanClose);
+	if (!eventType) return "in-progress";
+	return canonicalTaskEventTypeToProjectTaskStatus(eventType);
 }
 
 export type CanonicalTaskEventType =

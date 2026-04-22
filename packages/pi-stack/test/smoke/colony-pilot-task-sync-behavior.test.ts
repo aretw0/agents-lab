@@ -88,6 +88,42 @@ describe("colony-pilot task-sync behavior", () => {
 		}
 	});
 
+	it("maps completed/budget_exceeded through canonical event semantics in task status", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-terminal-semantics-"));
+		try {
+			const launch = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "launched", id: "c-terminal" },
+				{ config: cfg({ requireHumanClose: false }), source: "ant_colony" },
+			);
+			expect(launch.changed).toBe(true);
+
+			const doneVerified = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "completed", id: "c-terminal" },
+				{
+					config: cfg({ requireHumanClose: false }),
+					taskIdOverride: launch.taskId,
+					source: "ant_colony",
+				},
+			);
+			expect(doneVerified.status).toBe("completed");
+
+			const recovery = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "budget_exceeded", id: "c-terminal" },
+				{
+					config: cfg({ requireHumanClose: false }),
+					taskIdOverride: launch.taskId,
+					source: "ant_colony",
+				},
+			);
+			expect(recovery.status).toBe("blocked");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("updates same board task across start/progress/end without replacing canonical board", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-progress-"));
 		try {
