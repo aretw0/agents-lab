@@ -3145,6 +3145,32 @@
           "evidence": "Suite smoke de parsers executada após extração com 72/72."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-171",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice 5 de deflação: artifacts/runtime inspection extraído para `packages/pi-stack/extensions/colony-pilot-artifacts.ts` com `inspectAntColonyRuntime` e `formatArtifactsReport`; `colony-pilot.ts` delega via wrappers e reduziu de 2529 para 2404 linhas. Smoke regressão: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Domains delivery/budget/baseline/model-policy/artifacts externalizados."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Call-sites internos preservados via wrappers; sem mudança de assinatura pública consumida por smoke."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "Suíte smoke colony-pilot parsers permanece verde (72/72)."
+        }
+      ]
     }
   ]
 }
