@@ -295,6 +295,14 @@
       "rationale": "Mantém continuidade sem surpresa, reduz regressão de contexto e transforma exceções em trabalho rastreável no board canônico.",
       "status": "decided",
       "context": "Feedback direto do usuário para que esse aviso seja automático e não dependa de lembrete manual."
+    },
+    {
+      "id": "DEC-BUD-042",
+      "status": "decided",
+      "decision": "Adotar modo operacional subagent-first como padrão até estabilizar a materialização de colônias com evidência completa no primeiro COMPLETE.",
+      "rationale": "Evita retrabalho quando colônias concluem execução técnica mas falham no gate de delivery evidence, preservando throughput via micro-slices diretos no main.",
+      "context": "Feedback explícito do usuário para não depender de colônia enquanto houver risco de perda prática de trabalho por cleanup + candidate-only sem promoção determinística.",
+      "task": "TASK-BUD-107"
     }
   ]
 }

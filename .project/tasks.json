@@ -2463,6 +2463,25 @@
       ],
       "notes": "Solicitação explícita do usuário (2026-04-22): evitar ingestão burra de sessão inteira; priorizar parte final recente para preservar contexto e throughput.\n[2026-04-22T00:00:00Z] Micro-slice inicial: session-triage agora é local-first (usa `.sandbox/pi-agent/sessions/<workspaceKey>` por padrão, sem global), aplica tail-batch configurável (`--tail-lines`, `--window`, `--expand`) e reporta métricas de janela/truncamento com sugestão de expansão progressiva. Evidência: VER-BUD-137.\n[2026-04-22T00:00:00Z] Follow-through de documentação/skill: guia e SKILL de session-triage atualizados para refletir default local-first + tail-batch e flags de expansão progressiva/fallback opt-in. Evidência: VER-BUD-139.",
       "verification": "VER-BUD-139"
+    },
+    {
+      "id": "TASK-BUD-107",
+      "description": "[P0] Estabilizar materialização de colônia: garantir delivery evidence determinística no COMPLETE (file inventory + validation command log) com auto-check interno antes de promover resultado.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-014"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "docs/guides/unattended-swarm-execution-plan.md"
+      ],
+      "acceptance_criteria": [
+        "Final report de colônia sempre inclui seção de validação com comando literal em backticks quando houver testes executados.",
+        "Gate de delivery evidence para `apply-to-branch` deixa de falhar por ausência de template em cenários válidos de execução.",
+        "Teste smoke cobre caso de report válido e inválido, com mensagem acionável de correção."
+      ],
+      "notes": "Derivada de runs c1/c2 (2026-04-22): execução técnica concluída, porém risco recorrente de candidate-only quando template/evidência final fica inconsistente."
     }
   ]
 }
