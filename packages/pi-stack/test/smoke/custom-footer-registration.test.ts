@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import customFooterExtension, {
 	buildFooterLines,
 	collectFooterUsageTotals,
+	fitFooterPanelLines,
 	type ContextThresholdOverrides,
 	type FooterRenderInput,
 	fmt,
 	formatElapsed,
 	resolveContextThresholds,
+	resolveFooterDensity,
 } from "../../extensions/custom-footer";
 import { resetAuto, setMode } from "../../extensions/quota-panel";
 
@@ -139,6 +141,25 @@ describe("custom-footer — context thresholds", () => {
 	});
 });
 
+describe("custom-footer — density helpers", () => {
+	it("resolveFooterDensity classifica wide/medium/narrow", () => {
+		expect(resolveFooterDensity(140)).toBe("wide");
+		expect(resolveFooterDensity(90)).toBe("medium");
+		expect(resolveFooterDensity(60)).toBe("narrow");
+	});
+
+	it("fitFooterPanelLines respeita largura de render", () => {
+		const lines = fitFooterPanelLines([
+			"0123456789 0123456789 0123456789 0123456789",
+			"linha curta",
+		], 20);
+		expect(lines).toHaveLength(2);
+		for (const line of lines) {
+			expect(truncateToWidth(line, 20)).toBe(line);
+		}
+	});
+});
+
 describe("custom-footer — buildFooterLines", () => {
 	const plainTheme = { fg: (_color: string, text: string) => text };
 
@@ -241,6 +262,24 @@ describe("custom-footer — buildFooterLines", () => {
 			200,
 		);
 		expect(lines[1]).toContain("[board] ip=2 blk=1 plan=4");
+	});
+
+	it("modo narrow compacta status e sinaliza overflow de indicadores", () => {
+		const lines = buildFooterLines(
+			{
+				...baseInput,
+				budgetStatus: "✓openai:12% ✓copilot:38% ⚠codex:92%",
+				pilotStatus: "[pilot] monitors=off · web=on · colonies=12",
+				monitorSummaryStatus: "[mon] 5/5 · fail=0",
+				boardClockStatus: "[board] ip=2 blk=1 plan=4",
+			},
+			plainTheme,
+			64,
+		);
+			expect(lines[1]).toContain("✓openai:12% +2");
+		expect(lines[1]).toContain("[board] ip=2 blk=1");
+		expect(lines[1]).not.toContain("[pilot]");
+		expect(lines[1]).not.toContain("[mon]");
 	});
 
 	it("linha 2 não inclui budget quando ausente", () => {

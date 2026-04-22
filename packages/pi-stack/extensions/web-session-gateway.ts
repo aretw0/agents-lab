@@ -48,6 +48,33 @@ interface WebState {
 	recentMessages: Array<{ at: number; role: string; text: string }>;
 }
 
+export interface WebStateSummary {
+	monitorMode: "on" | "off" | "unknown";
+	board: {
+		exists: boolean;
+		total: number;
+		inProgress: number;
+		blocked: number;
+		planned: number;
+	};
+	colonies: {
+		tracked: number;
+		live: number;
+		failed: number;
+		lastPhase?: string;
+		lastAgeSec?: number;
+	};
+	signals: {
+		count: number;
+		lastAgeSec?: number;
+	};
+	messages: {
+		count: number;
+		lastRole?: string;
+		lastAgeSec?: number;
+	};
+}
+
 interface GatewayRuntime {
 	running: boolean;
 	startedAt?: number;
@@ -224,6 +251,55 @@ export function parsePromptPayload(
 	return { ok: true, message, deliverAs };
 }
 
+export function buildWebStateSummary(
+	state: Pick<
+		WebState,
+		"monitorMode" | "boardClock" | "colonies" | "recentSignals" | "recentMessages"
+	>,
+	nowMs = Date.now(),
+): WebStateSummary {
+	const lastSignal = state.recentSignals[state.recentSignals.length - 1];
+	const lastMessage = state.recentMessages[state.recentMessages.length - 1];
+	const sortedColonies = [...state.colonies].sort((a, b) => b.updatedAt - a.updatedAt);
+	const lastColony = sortedColonies[0];
+	const live = sortedColonies.filter((c) =>
+		c.phase !== "completed" &&
+		c.phase !== "failed" &&
+		c.phase !== "aborted" &&
+		c.phase !== "budget_exceeded",
+	).length;
+	const failed = sortedColonies.filter((c) =>
+		c.phase === "failed" || c.phase === "aborted" || c.phase === "budget_exceeded",
+	).length;
+
+	return {
+		monitorMode: state.monitorMode,
+		board: {
+			exists: state.boardClock.exists,
+			total: state.boardClock.total,
+			inProgress: state.boardClock.byStatus["in-progress"] ?? 0,
+			blocked: state.boardClock.byStatus.blocked ?? 0,
+			planned: state.boardClock.byStatus.planned ?? 0,
+		},
+		colonies: {
+			tracked: state.colonies.length,
+			live,
+			failed,
+			lastPhase: lastColony?.phase,
+			lastAgeSec: lastColony ? Math.max(0, Math.floor((nowMs - lastColony.updatedAt) / 1000)) : undefined,
+		},
+		signals: {
+			count: state.recentSignals.length,
+			lastAgeSec: lastSignal ? Math.max(0, Math.floor((nowMs - lastSignal.at) / 1000)) : undefined,
+		},
+		messages: {
+			count: state.recentMessages.length,
+			lastRole: lastMessage?.role,
+			lastAgeSec: lastMessage ? Math.max(0, Math.floor((nowMs - lastMessage.at) / 1000)) : undefined,
+		},
+	};
+}
+
 function renderHtml(): string {
 	return `<!doctype html>
 <html>
@@ -232,42 +308,141 @@ function renderHtml(): string {
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>pi session gateway</title>
   <style>
-    body{font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,sans-serif;background:#0b1020;color:#e6edf3;margin:0;padding:24px}
-    .card{background:#121a2b;border:1px solid #23314f;border-radius:12px;padding:16px;max-width:980px}
-    h1{margin:0 0 12px 0;font-size:20px}
-    pre{background:#0b1324;border:1px solid #223355;border-radius:8px;padding:12px;overflow:auto;max-height:70vh}
-    .muted{color:#9fb0cd}
+    :root { color-scheme: dark; }
+    body { font-family: ui-sans-serif,system-ui,Segoe UI,Roboto,sans-serif; background:#0b1020; color:#e6edf3; margin:0; padding:16px; }
+    .wrap { display:grid; gap:12px; max-width:1100px; margin:0 auto; }
+    .card { background:#121a2b; border:1px solid #23314f; border-radius:12px; padding:12px; }
+    .header { display:flex; justify-content:space-between; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+    h1 { margin:0; font-size:20px; }
+    .muted { color:#9fb0cd; }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .kpi { background:#0b1324; border:1px solid #223355; border-radius:10px; padding:10px; }
+    .kpi .k { font-size:12px; color:#9fb0cd; }
+    .kpi .v { font-size:18px; font-weight:600; margin-top:4px; }
+    .stack { display:grid; gap:8px; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip { background:#16223b; border:1px solid #2a3f66; border-radius:999px; padding:2px 8px; font-size:12px; white-space:nowrap; }
+    textarea, select, button { font: inherit; }
+    textarea { width:100%; min-height:78px; background:#0b1324; color:#e6edf3; border:1px solid #223355; border-radius:8px; padding:8px; }
+    select { background:#0b1324; color:#e6edf3; border:1px solid #223355; border-radius:8px; padding:6px; }
+    button { background:#1f6feb; color:white; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; }
+    pre { background:#0b1324; border:1px solid #223355; border-radius:8px; padding:10px; overflow:auto; max-height:46vh; }
+    details > summary { cursor:pointer; user-select:none; }
+    @media (max-width: 920px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 620px) { body { padding:10px; } .grid { grid-template-columns:1fr; } .controls { flex-direction:column; align-items:stretch !important; } }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>pi session gateway</h1>
-    <div class="muted">Atualização automática a cada 2s</div>
-    <pre id="out">loading...</pre>
-    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-      <textarea id="prompt" placeholder="Enviar mensagem para a sessão..." style="width:100%;min-height:80px;background:#0b1324;color:#e6edf3;border:1px solid #223355;border-radius:8px;padding:8px"></textarea>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select id="delivery" style="background:#0b1324;color:#e6edf3;border:1px solid #223355;border-radius:8px;padding:6px">
+  <div class="wrap">
+    <section class="card">
+      <div class="header">
+        <div>
+          <h1>pi session gateway</h1>
+          <div class="muted">summary-first · atualização automática a cada 2s</div>
+        </div>
+        <div class="muted" id="health">connecting...</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="grid" id="summaryGrid">
+        <div class="kpi"><div class="k">Board</div><div class="v" id="kBoard">-</div></div>
+        <div class="kpi"><div class="k">Colonies</div><div class="v" id="kColonies">-</div></div>
+        <div class="kpi"><div class="k">Signals</div><div class="v" id="kSignals">-</div></div>
+        <div class="kpi"><div class="k">Messages</div><div class="v" id="kMessages">-</div></div>
+      </div>
+    </section>
+
+    <section class="card stack">
+      <div><strong>Colonies (recentes)</strong></div>
+      <div id="colonyChips" class="chips"></div>
+      <div class="muted" id="colonyMeta"></div>
+    </section>
+
+    <section class="card stack">
+      <div><strong>Prompt</strong></div>
+      <textarea id="prompt" placeholder="Enviar mensagem para a sessão..."></textarea>
+      <div class="controls" style="display:flex;gap:8px;align-items:center">
+        <select id="delivery">
           <option value="followUp">followUp (seguro)</option>
           <option value="steer">steer (enquanto streama)</option>
         </select>
-        <button id="send" style="background:#1f6feb;color:white;border:none;border-radius:8px;padding:8px 12px;cursor:pointer">Enviar</button>
+        <button id="send">Enviar</button>
         <span id="sendStatus" class="muted"></span>
       </div>
-    </div>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary><strong>Raw JSON (auditoria)</strong></summary>
+        <pre id="raw">loading...</pre>
+      </details>
+    </section>
   </div>
 <script>
-  const out=document.getElementById('out');
+  const raw=document.getElementById('raw');
   const token=new URLSearchParams(location.search).get('t')||'';
+
+  function fmtAge(sec){
+    if(sec===undefined||sec===null) return 'n/a';
+    if(sec<60) return String(sec)+'s';
+    const m=Math.floor(sec/60);
+    const s=sec%60;
+    if(m<60) return String(m)+'m'+(s?String(s)+'s':'');
+    const h=Math.floor(m/60);
+    const rm=m%60;
+    return String(h)+'h'+(rm?String(rm)+'m':'');
+  }
+
+  function chip(text){ return '<span class="chip">'+text+'</span>'; }
+
+  function renderSummary(payload){
+    const summary=(payload&&payload.summary)||{};
+    const board=summary.board||{};
+    const colonies=summary.colonies||{};
+    const signals=summary.signals||{};
+    const messages=summary.messages||{};
+
+    document.getElementById('kBoard').textContent =
+      (board.exists ? ('ip='+String(board.inProgress||0)+' blk='+String(board.blocked||0)+' plan='+String(board.planned||0)) : 'board n/a');
+    document.getElementById('kColonies').textContent =
+      'live='+String(colonies.live||0)+' fail='+String(colonies.failed||0)+' total='+String(colonies.tracked||0);
+    document.getElementById('kSignals').textContent =
+      String(signals.count||0)+' · last '+fmtAge(signals.lastAgeSec);
+    document.getElementById('kMessages').textContent =
+      String(messages.count||0)+' · '+(messages.lastRole||'n/a')+' · '+fmtAge(messages.lastAgeSec);
+
+    document.getElementById('health').textContent =
+      'mode='+(payload.mode||'n/a')+' · monitor='+(summary.monitorMode||'unknown')+' · running='+(payload.running?'yes':'no');
+  }
+
+  function renderColonies(payload){
+    const state=(payload&&payload.state)||{};
+    const colonies=Array.isArray(state.colonies)?state.colonies.slice().sort((a,b)=>b.updatedAt-a.updatedAt):[];
+    const chips = colonies.slice(0,12).map(c=>chip(String(c.id)+':'+String(c.phase))).join('');
+    document.getElementById('colonyChips').innerHTML = chips || '<span class="muted">sem colônias rastreadas</span>';
+    const hidden=Math.max(0, colonies.length-12);
+    const extra=hidden>0?(' · +'+String(hidden)+' hidden') : '';
+    document.getElementById('colonyMeta').textContent = 'tracked='+String(colonies.length)+extra;
+  }
+
+  function renderRaw(payload){
+    raw.textContent = JSON.stringify(payload,null,2);
+  }
+
   async function tick(){
     try{
       const r=await fetch('/api/state?t='+encodeURIComponent(token));
       const j=await r.json();
-      out.textContent=JSON.stringify(j,null,2);
+      renderSummary(j);
+      renderColonies(j);
+      renderRaw(j);
     }catch(e){
-      out.textContent='error: '+String(e);
+      raw.textContent='error: '+String(e);
+      document.getElementById('health').textContent='offline';
     }
   }
+
   async function sendPrompt(){
     const message=(document.getElementById('prompt').value||'').trim();
     const deliverAs=document.getElementById('delivery').value;
@@ -290,6 +465,7 @@ function renderHtml(): string {
       status.textContent='erro: '+String(e);
     }
   }
+
   document.getElementById('send').addEventListener('click', sendPrompt);
   tick();
   setInterval(tick,2000);
@@ -361,6 +537,7 @@ function snapshot(config: GatewayConfig, rt: GatewayRuntime, state: WebState) {
 		startedAt: rt.startedAt,
 		accessUrl: url,
 		token: rt.token,
+		summary: buildWebStateSummary(state),
 		state,
 	};
 }

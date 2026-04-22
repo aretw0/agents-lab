@@ -40,6 +40,28 @@ Ele cobre com exemplos:
 - quando alterar global vs workspace local;
 - checklist rápido para confirmar contexto ativo antes de editar.
 
+## Control-plane UX (TUI + WEB) — baseline curada
+
+A baseline da curadoria agora segue densidade adaptativa (wide/medium/narrow):
+
+- **TUI footer/painéis**: prioriza sinais essenciais (board/budget/colony) e reduz ruído quando a largura diminui;
+- **WEB gateway**: dashboard **summary-first** com detalhes progressivos (raw JSON em seção colapsável);
+- **Semântica compartilhada**: board clock/estado de colônias/health de operação aparecem com o mesmo sentido nas duas superfícies.
+
+Comandos úteis para validação rápida da experiência:
+
+```bash
+/qp status
+/cpanel status
+/session-web start
+/session-web open
+```
+
+Checklist de resize (first-class):
+- narrow: sem linhas poluídas/estourando visualmente;
+- medium: resumo operacional completo sem depender de raw dump;
+- wide: detalhes adicionais sem duplicação confusa de status.
+
 ## O que está na stack
 
 ### Pacotes First-Party (`@aretw0/*`)

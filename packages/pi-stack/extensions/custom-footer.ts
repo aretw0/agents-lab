@@ -126,6 +126,97 @@ export function resolveContextThresholds(
   return resolved;
 }
 
+export type FooterDensity = "wide" | "medium" | "narrow";
+
+export function resolveFooterDensity(width: number): FooterDensity {
+  if (width < 76) return "narrow";
+  if (width < 118) return "medium";
+  return "wide";
+}
+
+function ellipsizeMiddle(text: string, maxChars: number): string {
+  const input = String(text ?? "");
+  const max = Math.max(4, Math.floor(maxChars));
+  if (input.length <= max) return input;
+  const head = Math.max(2, Math.ceil((max - 1) / 2));
+  const tail = Math.max(1, Math.floor((max - 1) / 2));
+  return `${input.slice(0, head)}…${input.slice(-tail)}`;
+}
+
+function compactBudgetStatus(status: string | undefined, density: FooterDensity): string | undefined {
+  if (!status) return undefined;
+  const tokens = status.split(/\s+/).filter(Boolean);
+  const maxTokens = density === "wide" ? 99 : density === "medium" ? 2 : 1;
+  if (tokens.length <= maxTokens) return status;
+  return `${tokens.slice(0, maxTokens).join(" ")} +${tokens.length - maxTokens}`;
+}
+
+function compactPilotStatus(status: string | undefined, density: FooterDensity): string | undefined {
+  if (!status) return undefined;
+  if (density === "wide") return status;
+
+  const normalized = status
+    .replace(/monitors=/gi, "m=")
+    .replace(/colonies=/gi, "col=")
+    .replace(/web=/gi, "w=")
+    .replace(/\s*·\s*/g, " ");
+
+  if (density === "medium") return normalized;
+
+  const m = normalized.match(/\bm=([^\s]+)/i)?.[1];
+  const w = normalized.match(/\bw=([^\s]+)/i)?.[1];
+  const c = normalized.match(/\bcol=([^\s]+)/i)?.[1];
+  const bits = [m ? `m:${m}` : "", w ? `w:${w}` : "", c ? `c:${c}` : ""].filter(Boolean);
+  return bits.length > 0 ? `[pilot] ${bits.join(" ")}` : "[pilot]";
+}
+
+function compactMonitorStatus(status: string | undefined, density: FooterDensity): string | undefined {
+  if (!status) return undefined;
+  if (density !== "narrow") return status;
+  const fail = status.match(/fail\s*=\s*([^\s]+)/i)?.[1];
+  const ratio = status.match(/\b(\d+\/\d+)\b/)?.[1];
+  const bits = [ratio ? `r:${ratio}` : "", fail ? `f:${fail}` : ""].filter(Boolean);
+  return bits.length > 0 ? `[mon] ${bits.join(" ")}` : "[mon]";
+}
+
+function compactBoardClockStatus(status: string | undefined, density: FooterDensity): string | undefined {
+  if (!status) return undefined;
+  if (density === "wide") return status;
+  const ip = status.match(/\bip=([^\s]+)/i)?.[1];
+  const blk = status.match(/\bblk=([^\s]+)/i)?.[1];
+  const plan = status.match(/\bplan=([^\s]+)/i)?.[1];
+  if (density === "medium") {
+    const bits = [ip ? `ip=${ip}` : "", blk ? `blk=${blk}` : "", plan ? `plan=${plan}` : ""].filter(Boolean);
+    return bits.length > 0 ? `[board] ${bits.join(" ")}` : "[board]";
+  }
+  const bits = [ip ? `ip=${ip}` : "", blk ? `blk=${blk}` : ""].filter(Boolean);
+  return bits.length > 0 ? `[board] ${bits.join(" ")}` : "[board]";
+}
+
+function compactModelLabel(modelProvider: string | null, modelId: string, density: FooterDensity): string {
+  const full = modelProvider ? `${modelProvider}/${modelId}` : modelId;
+  if (density === "wide") return full;
+  return ellipsizeMiddle(full, density === "medium" ? 34 : 22);
+}
+
+function compactBranchLabel(branch: string | null, density: FooterDensity): string | null {
+  if (!branch) return null;
+  const max = density === "wide" ? 42 : density === "medium" ? 22 : 14;
+  return ellipsizeMiddle(branch, max);
+}
+
+function compactCwdLabel(cwd: string, density: FooterDensity): string {
+  const parts = cwd.replace(/\\/g, "/").split("/").filter(Boolean);
+  if (parts.length === 0) return cwd;
+  const depth = density === "wide" ? 2 : 1;
+  const tail = parts.slice(-depth).join("/");
+  return tail || parts[parts.length - 1] || cwd;
+}
+
+export function fitFooterPanelLines(lines: string[], width: number): string[] {
+  return lines.map((line) => truncateToWidth(line, width));
+}
+
 function readContextThresholdOverrides(cwd: string): ContextThresholdOverrides | undefined {
   const candidates = [
     path.join(cwd, ".pi", "settings.json"),
@@ -177,6 +268,7 @@ export function buildFooterLines(
           contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, boardClockStatus, cwd,
           contextThresholdOverrides } = input;
 
+  const density = resolveFooterDensity(width);
   const thinkColor =
     thinkingLevel === "high" ? "warning"
     : thinkingLevel === "medium" ? "accent"
@@ -195,7 +287,7 @@ export function buildFooterLines(
         ? "warning"
         : "success";
 
-  const modelLabel = modelProvider ? `${modelProvider}/${modelId}` : modelId;
+  const modelLabel = compactModelLabel(modelProvider, modelId, density);
   const modelStr = `${theme.fg(thinkColor, "◆")} ${theme.fg("accent", modelLabel)}`;
 
   const tokenStats = [
@@ -209,11 +301,11 @@ export function buildFooterLines(
   const sep = theme.fg("dim", " | ");
   const line1Parts = [modelStr, tokenStats, elapsed];
 
-  const cwdParts = cwd.replace(/\\/g, "/").split("/");
-  const shortCwd = cwdParts.length > 2 ? cwdParts.slice(-2).join("/") : cwd;
+  const shortCwd = compactCwdLabel(cwd, density);
   const cwdStr = theme.fg("muted", `⌂ ${shortCwd}`);
 
-  let branchStr = branch ? theme.fg("accent", `⎇ ${branch}`) : "";
+  const compactBranch = compactBranchLabel(branch, density);
+  let branchStr = compactBranch ? theme.fg("accent", `⎇ ${compactBranch}`) : "";
   if (cachedPr) {
     const prLabel = theme.fg("success", `PR #${cachedPr.number}`);
     branchStr = branchStr
@@ -221,12 +313,23 @@ export function buildFooterLines(
       : hyperlink(cachedPr.url, prLabel);
   }
 
+  const statusCandidates = [
+    compactBudgetStatus(budgetStatus, density),
+    compactBoardClockStatus(boardClockStatus, density),
+    compactPilotStatus(pilotStatus, density),
+    compactMonitorStatus(monitorSummaryStatus, density),
+  ].filter((x): x is string => Boolean(x));
+
+  const statusMax = density === "wide" ? 4 : density === "medium" ? 3 : 2;
+  const visibleStatuses = statusCandidates.slice(0, statusMax);
+  const hiddenStatusCount = Math.max(0, statusCandidates.length - visibleStatuses.length);
+
   const line2Parts: string[] = [cwdStr];
   if (branchStr) line2Parts.push(branchStr);
-  if (budgetStatus) line2Parts.push(theme.fg("dim", budgetStatus));
-  if (pilotStatus) line2Parts.push(theme.fg("dim", pilotStatus));
-  if (monitorSummaryStatus) line2Parts.push(theme.fg("dim", monitorSummaryStatus));
-  if (boardClockStatus) line2Parts.push(theme.fg("dim", boardClockStatus));
+  for (const status of visibleStatuses) line2Parts.push(theme.fg("dim", status));
+  if (hiddenStatusCount > 0) {
+    line2Parts.push(theme.fg("dim", `+${hiddenStatusCount} status`));
+  }
 
   return [
     truncateToWidth(line1Parts.join(sep), width),
@@ -327,7 +430,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
           if (showColonyPanel) {
             panelLines.push(...buildColonyPanelLines(getColonyPanelSnapshot(), width));
           }
-          return [...baseLines, ...panelLines];
+          return [...baseLines, ...fitFooterPanelLines(panelLines, width)];
         },
       };
     });
