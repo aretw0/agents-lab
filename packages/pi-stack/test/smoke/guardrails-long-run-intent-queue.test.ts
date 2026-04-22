@@ -19,6 +19,7 @@ import {
   buildPragmaticAutonomySystemPrompt,
   summarizeAssumptionText,
   shouldSchedulePostDispatchAutoDrain,
+  shouldEmitAutoDrainDeferredAudit,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -183,6 +184,16 @@ describe("guardrails-core long-run intent queue", () => {
     expect(shouldSchedulePostDispatchAutoDrain(0, 3)).toBe(false);
     expect(shouldSchedulePostDispatchAutoDrain(1, 0)).toBe(false);
     expect(shouldSchedulePostDispatchAutoDrain(1, 2)).toBe(true);
+  });
+
+  it("throttles deferred auto-drain audit spam unless gate changes", () => {
+    const nowMs = 10_000;
+    const minIntervalMs = 1_500;
+
+    expect(shouldEmitAutoDrainDeferredAudit(0, undefined, "cooldown", nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitAutoDrainDeferredAudit(9_400, "cooldown", "cooldown", nowMs, minIntervalMs)).toBe(false);
+    expect(shouldEmitAutoDrainDeferredAudit(8_000, "cooldown", "cooldown", nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitAutoDrainDeferredAudit(9_400, "cooldown", "idle-stability", nowMs, minIntervalMs)).toBe(true);
   });
 
   it("auto-drains only when idle, enabled and after cooldown", () => {

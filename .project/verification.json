@@ -2245,6 +2245,32 @@
           "evidence": "Micro-slice compatível com trilha incremental já registrada em docs/research/colony-project-task-bridge.md."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-136",
+      "target": "TASK-BUD-084",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Micro-slice de governança/contexto para lane-queue: auto-drain deferred agora tem throttle determinístico de auditoria (`shouldEmitAutoDrainDeferredAudit`) para evitar spam de eventos repetidos durante janelas prolongadas de gate (`cooldown`/`idle-stability`/`active-long-run`). A lógica mantém re-schedule seguro sem perder retry, preserva semântica nativa de follow-up e reduz ruído operacional no board/sessão. Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` com caso de throttle por intervalo e bypass por mudança de gate. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 13/13 pass.",
+      "criteria_results": [
+        {
+          "criterion": "Drenagem segura continua reagendando retry em idle sem perder itens deferidos.",
+          "status": "passed",
+          "evidence": "Fluxo de `scheduleAutoDrainDeferredIntent` permanece intacto; throttle afeta apenas emissão de audit repetido."
+        },
+        {
+          "criterion": "Semântica complementar ao follow-up nativo é preservada sem duplicação de execução.",
+          "status": "passed",
+          "evidence": "Dispatch segue em `deliverAs: followUp`; mudança só reduz ruído de auditoria em gate repetido."
+        },
+        {
+          "criterion": "Ruído operacional/contextual por deferimento repetido é reduzido de forma determinística e testada.",
+          "status": "passed",
+          "evidence": "Novo teste valida supressão em intervalo curto e emissão quando gate muda ou intervalo expira."
+        }
+      ]
     }
   ]
 }

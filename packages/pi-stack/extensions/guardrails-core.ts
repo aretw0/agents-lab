@@ -826,6 +826,18 @@ export function shouldSchedulePostDispatchAutoDrain(
   return dispatched > 0 && remainingQueuedCount > 0;
 }
 
+export function shouldEmitAutoDrainDeferredAudit(
+  lastAuditAtMs: number,
+  previousGate: AutoDrainGateReason | undefined,
+  nextGate: AutoDrainGateReason,
+  nowMs: number,
+  minIntervalMs: number,
+): boolean {
+  if (previousGate !== nextGate) return true;
+  if (lastAuditAtMs <= 0) return true;
+  return nowMs - lastAuditAtMs >= Math.max(0, Math.floor(minIntervalMs));
+}
+
 export function enqueueDeferredIntent(
   cwd: string,
   text: string,
@@ -927,6 +939,8 @@ export default function (pi: ExtensionAPI) {
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
   let pragmaticAutonomyConfig: PragmaticAutonomyConfig = DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
   let lastAutoDrainAt = 0;
+  let lastAutoDrainDeferredAuditAt = 0;
+  let lastAutoDrainDeferredGate: AutoDrainGateReason | undefined;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
 
@@ -1009,17 +1023,28 @@ export default function (pi: ExtensionAPI) {
     );
     if (retryDelayMs !== undefined) {
       scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
-      appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-deferred", {
-        atIso: new Date().toISOString(),
-        reason,
+      if (shouldEmitAutoDrainDeferredAudit(
+        lastAutoDrainDeferredAuditAt,
+        lastAutoDrainDeferredGate,
         gate,
-        queuedCount,
-        retryDelayMs,
-      });
+        nowMs,
+        Math.max(1_000, longRunIntentQueueConfig.autoDrainIdleStableMs),
+      )) {
+        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-drain-deferred", {
+          atIso: new Date().toISOString(),
+          reason,
+          gate,
+          queuedCount,
+          retryDelayMs,
+        });
+        lastAutoDrainDeferredAuditAt = nowMs;
+      }
+      lastAutoDrainDeferredGate = gate;
       updateLongRunLaneStatus(ctx, activeLongRun);
       return false;
     }
 
+    lastAutoDrainDeferredGate = undefined;
     if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, idleSinceMs, longRunIntentQueueConfig)) {
       updateLongRunLaneStatus(ctx, activeLongRun);
       return false;
@@ -1092,6 +1117,8 @@ export default function (pi: ExtensionAPI) {
     }
     providerBudgetSnapshotCache = undefined;
     lastAutoDrainAt = 0;
+    lastAutoDrainDeferredAuditAt = 0;
+    lastAutoDrainDeferredGate = undefined;
     lastLongRunBusyAt = Date.now();
     clearAutoDrainTimer();
     updateLongRunLaneStatus(ctx, false);
