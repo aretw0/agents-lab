@@ -929,12 +929,14 @@ describe("colony-pilot parsers", () => {
 			mode: "apply-to-branch",
 			requireFileInventory: true,
 			requireValidationCommandLog: true,
+			enforceDerivedScopeDiffApplyEvidence: true,
 		});
 
 		expect(cfg.enabled).toBe(true);
 		expect(cfg.mode).toBe("apply-to-branch");
 		expect(cfg.requireFileInventory).toBe(true);
 		expect(cfg.requireValidationCommandLog).toBe(true);
+		expect(cfg.enforceDerivedScopeDiffApplyEvidence).toBe(true);
 	});
 
 	it("delivery evidence falha quando faltam evidências obrigatórias", () => {
@@ -1072,6 +1074,49 @@ describe("colony-pilot parsers", () => {
 		);
 	});
 
+	it("compliance explícita exige evidência de diff/apply para promoted files", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"Promoted file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"Skipped file inventory:",
+			"- (none)",
+		].join("\n");
+
+		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report);
+		expect(compliance).toBeDefined();
+		expect(compliance?.source).toBe("explicit-inventory");
+		expect(compliance?.requiresDiffApplyEvidence).toBe(true);
+		expect(compliance?.hasDiffApplyEvidence).toBe(false);
+		expect(
+			compliance?.issues.some((i) => i.includes("selective promotion apply evidence")),
+		).toBe(true);
+	});
+
+	it("compliance explícita passa quando há trilha diff/apply", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"Promoted file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"Skipped file inventory:",
+			"- (none)",
+			"Validation command log:",
+			"- `git diff -- docs/guides/project-canonical-pipeline.md > /tmp/promoted.patch`",
+			"- `git apply /tmp/promoted.patch`",
+		].join("\n");
+
+		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report);
+		expect(compliance).toBeDefined();
+		expect(compliance?.source).toBe("explicit-inventory");
+		expect(compliance?.requiresDiffApplyEvidence).toBe(true);
+		expect(compliance?.hasDiffApplyEvidence).toBe(true);
+		expect(compliance?.issues).toEqual([]);
+	});
+
 	it("compliance derivada de scope passa quando promoted é candidateDiff ∩ allowlist", () => {
 		const goal = "Aplicar no branch principal com escopo docs-only";
 		const report = [
@@ -1083,10 +1128,32 @@ describe("colony-pilot parsers", () => {
 		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report);
 		expect(compliance).toBeDefined();
 		expect(compliance?.source).toBe("derived-from-scope");
+		expect(compliance?.requiresDiffApplyEvidence).toBe(false);
+		expect(compliance?.hasDiffApplyEvidence).toBe(false);
 		expect(compliance?.promotedFiles).toEqual([
 			"docs/guides/project-canonical-pipeline.md",
 		]);
 		expect(compliance?.issues).toEqual([]);
+	});
+
+	it("compliance derivada pode exigir evidência diff/apply quando flag de enforcement está ativa", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+		].join("\n");
+
+		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report, {
+			enforceDerivedScopeDiffApplyEvidence: true,
+		});
+		expect(compliance).toBeDefined();
+		expect(compliance?.source).toBe("derived-from-scope");
+		expect(compliance?.requiresDiffApplyEvidence).toBe(true);
+		expect(compliance?.hasDiffApplyEvidence).toBe(false);
+		expect(
+			compliance?.issues.some((i) => i.includes("selective promotion apply evidence")),
+		).toBe(true);
 	});
 
 	it("delivery evidence em apply-to-branch exige inventários promoted/skipped", () => {

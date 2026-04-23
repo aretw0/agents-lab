@@ -11,6 +11,7 @@ export interface ColonyPilotDeliveryPolicyConfig {
 	requireFileInventory: boolean;
 	requireValidationCommandLog: boolean;
 	blockOnMissingEvidence: boolean;
+	enforceDerivedScopeDiffApplyEvidence: boolean;
 }
 
 export interface SelectivePromotionInventoryEvidence {
@@ -50,7 +51,13 @@ export interface SelectivePromotionScopeComplianceEvaluation {
 	promotedFiles: string[];
 	skippedFiles: string[];
 	source: "explicit-inventory" | "derived-from-scope";
+	hasDiffApplyEvidence: boolean;
+	requiresDiffApplyEvidence: boolean;
 	issues: string[];
+}
+
+export interface SelectivePromotionScopeComplianceOptions {
+	enforceDerivedScopeDiffApplyEvidence?: boolean;
 }
 
 export interface ColonyPilotDeliveryEvidence
@@ -75,6 +82,7 @@ export const DEFAULT_COLONY_PILOT_DELIVERY_POLICY: ColonyPilotDeliveryPolicyConf
 	requireFileInventory: false,
 	requireValidationCommandLog: false,
 	blockOnMissingEvidence: true,
+	enforceDerivedScopeDiffApplyEvidence: false,
 };
 
 export function parseDeliveryModeOverride(
@@ -111,6 +119,8 @@ export function resolveColonyPilotDeliveryPolicy(
 		requireFileInventory: raw?.requireFileInventory === true,
 		requireValidationCommandLog: raw?.requireValidationCommandLog === true,
 		blockOnMissingEvidence: raw?.blockOnMissingEvidence !== false,
+		enforceDerivedScopeDiffApplyEvidence:
+			raw?.enforceDerivedScopeDiffApplyEvidence === true,
 	};
 }
 
@@ -366,9 +376,23 @@ export function parseSelectivePromotionInventory(
 	};
 }
 
+function hasSelectivePromotionDiffApplyEvidence(text: string): boolean {
+	const hasExplicitDiffApply = /\bdiff\s*[\/\-]>?\s*apply\b/i.test(text);
+	const hasDiffEvidence =
+		/(?:\bgit\s+diff\b|diff\s+--git\b|\bpatch\b|\bunified\s+diff\b)/i.test(
+			text,
+		);
+	const hasApplyEvidence =
+		/(?:\bgit\s+apply\b|\bapply_patch\b|\bapplied\s+to\s+branch\b|\bpatch\s+applied\b)/i.test(
+			text,
+		);
+	return hasExplicitDiffApply || (hasDiffEvidence && hasApplyEvidence);
+}
+
 export function evaluateSelectivePromotionScopeCompliance(
 	goal: string,
 	text: string,
+	options?: SelectivePromotionScopeComplianceOptions,
 ): SelectivePromotionScopeComplianceEvaluation | undefined {
 	const scope = evaluateSelectivePromotionScope(goal, text);
 	if (!scope) return undefined;
@@ -382,6 +406,10 @@ export function evaluateSelectivePromotionScopeCompliance(
 	const skippedFiles = hasExplicitInventory
 		? parsed.skippedFiles
 		: scope.skippedFiles.map((row) => row.path);
+	const hasDiffApplyEvidence = hasSelectivePromotionDiffApplyEvidence(text);
+	const requiresDiffApplyEvidence =
+		hasExplicitInventory ||
+		(options?.enforceDerivedScopeDiffApplyEvidence === true && !hasExplicitInventory);
 
 	const issues: string[] = [];
 	if (scope.candidateFiles.length > 0 && promotedFiles.length === 0) {
@@ -423,6 +451,13 @@ export function evaluateSelectivePromotionScopeCompliance(
 				`delivery evidence invalid: promoted files not present in candidate diff: ${unknownPromoted.slice(0, 6).join(", ")}`,
 			);
 		}
+
+	}
+
+	if (scope.candidateFiles.length > 0 && promotedFiles.length > 0 && requiresDiffApplyEvidence && !hasDiffApplyEvidence) {
+		issues.push(
+			"delivery evidence missing: selective promotion apply evidence (expected diff/apply trace for promoted files)",
+		);
 	}
 
 	return {
@@ -433,6 +468,8 @@ export function evaluateSelectivePromotionScopeCompliance(
 		source: hasExplicitInventory
 			? "explicit-inventory"
 			: "derived-from-scope",
+		hasDiffApplyEvidence,
+		requiresDiffApplyEvidence,
 		issues,
 	};
 }

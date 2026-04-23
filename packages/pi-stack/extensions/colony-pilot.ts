@@ -613,7 +613,10 @@ export default function (pi: ExtensionAPI) {
 				? evaluateSelectivePromotionScopeImpl(guessedGoal, text)
 				: undefined;
 			const selectiveScopeCompliance = guessedGoal
-				? evaluateSelectivePromotionScopeComplianceImpl(guessedGoal, text)
+				? evaluateSelectivePromotionScopeComplianceImpl(guessedGoal, text, {
+					enforceDerivedScopeDiffApplyEvidence:
+						deliveryPolicyConfig.enforceDerivedScopeDiffApplyEvidence,
+				})
 				: undefined;
 
 			if (
@@ -670,11 +673,54 @@ export default function (pi: ExtensionAPI) {
 					goal: guessedGoal,
 					policy: selectiveScopeCompliance.policy,
 					source: selectiveScopeCompliance.source,
+					hasDiffApplyEvidence:
+						selectiveScopeCompliance.hasDiffApplyEvidence,
+					requiresDiffApplyEvidence:
+						selectiveScopeCompliance.requiresDiffApplyEvidence,
+					enforceDerivedScopeDiffApplyEvidence:
+						deliveryPolicyConfig.enforceDerivedScopeDiffApplyEvidence,
 					candidateFiles: selectiveScopeCompliance.candidateFiles,
 					promotedFiles: selectiveScopeCompliance.promotedFiles,
 					skippedFiles: selectiveScopeCompliance.skippedFiles,
 					issues: selectiveScopeCompliance.issues,
 				});
+			} else if (
+				deliveryPolicyConfig.mode === "apply-to-branch" &&
+				selectiveScopeCompliance
+			) {
+				pi.appendEntry("colony-pilot.selective-promotion-scope-approved", {
+					atIso: new Date().toISOString(),
+					colonyId: signal.id,
+					goal: guessedGoal,
+					policy: selectiveScopeCompliance.policy,
+					source: selectiveScopeCompliance.source,
+					hasDiffApplyEvidence:
+						selectiveScopeCompliance.hasDiffApplyEvidence,
+					requiresDiffApplyEvidence:
+						selectiveScopeCompliance.requiresDiffApplyEvidence,
+					enforceDerivedScopeDiffApplyEvidence:
+						deliveryPolicyConfig.enforceDerivedScopeDiffApplyEvidence,
+					candidateFiles: selectiveScopeCompliance.candidateFiles,
+					promotedFiles: selectiveScopeCompliance.promotedFiles,
+					skippedFiles: selectiveScopeCompliance.skippedFiles,
+				});
+
+				if (
+					!selectiveScopeCompliance.requiresDiffApplyEvidence &&
+					!selectiveScopeCompliance.hasDiffApplyEvidence &&
+					selectiveScopeCompliance.promotedFiles.length > 0
+				) {
+					pi.appendEntry("colony-pilot.selective-promotion-apply-evidence-advisory", {
+						atIso: new Date().toISOString(),
+						colonyId: signal.id,
+						goal: guessedGoal,
+						policy: selectiveScopeCompliance.policy,
+						source: selectiveScopeCompliance.source,
+						promotedFiles: selectiveScopeCompliance.promotedFiles,
+						reason:
+							"derived scope promotion approved without explicit diff/apply evidence (advisory)",
+					});
+				}
 			}
 
 			return { deliveryEval, selectiveScope, selectiveScopeCompliance };
