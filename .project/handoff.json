@@ -1,29 +1,16 @@
 {
-  "timestamp": "2026-04-23T19:15:00.000Z",
-  "context": "Micro-slice de continuidade concluída em modo warn. TASK-OPS-LOWDISK-001 foi formalmente fechado via gate de verificação (`VER-OPS-LOWDISK-004`) após limpeza segura e recuperação de espaço (~8.94 GB). TASK-BUD-119 segue avançando com suporte a `board.execute-next` no runtime intent consumer e smokes verdes.",
+  "timestamp": "2026-04-23T19:29:00.000Z",
+  "context": "Micro-slice em modo warn concluída com foco em TASK-BUD-125. Runtime ganhou trilha persistente de evidência (`.pi/guardrails-loop-evidence.json`) para reduzir dependência de parse de sessão e permitir comprovação direta de `loop-ready` e `board-auto-advance` com `runtimeCodeState/emLoop`. `/lane-queue status` agora expõe `evidenceBoardAuto` e `evidenceLoopReady` além dos marcadores PREPARADO/ATIVO_AQUI/EM_LOOP.",
   "next_actions": [
-    "Foco primário: fechar TASK-BUD-125 com evidência operacional real em runtime (`EM_LOOP=yes` + `guardrails-core.board-intent-auto-advance` + `runtimeCodeState=active`).",
-    "Expandir TASK-BUD-119 para próximo intent de valor operacional (board update/query) mantendo fallback manual e envelope tipado.",
-    "Iniciar TASK-BUD-126 apenas após capturar evidência operacional de loop para não dispersar foco loop-first."
+    "Capturar evidência operacional real de TASK-BUD-125 executando lane em condição ready e confirmar em status: `evidenceBoardAuto=* runtime=active emLoop=yes` + `evidenceLoopReady=* runtime=active`.",
+    "Quando evidência aparecer, registrar VER passed de TASK-BUD-125 e fechar task.",
+    "Continuar TASK-BUD-119 apenas após fechar evidência operacional de loop (evitar dispersão sob warn)."
   ],
   "blockers": [
     "context-watch-warn-active",
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
-    {
-      "atIso": "2026-04-23T19:03:00.000Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 57,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "micro-slice-only",
-      "recommendation": "Continue with bounded slices and focused verification."
-    },
     {
       "atIso": "2026-04-23T19:12:53.415Z",
       "reason": "message_end",
@@ -49,6 +36,19 @@
       },
       "action": "micro-slice-only",
       "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+    },
+    {
+      "atIso": "2026-04-23T19:29:00.000Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 62,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Stay micro-slice-only and checkpoint frequently while warn remains active."
     }
   ]
 }

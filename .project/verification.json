@@ -4326,6 +4326,15 @@
       "method": "command",
       "timestamp": "2026-04-23T19:10:00Z",
       "evidence": "Objetivo operacional atingido com evidência executável: (1) recuperação de espaço >2GB confirmada (`[math]::Round((Get-PSDrive -Name C).Free/1GB,2)` => 8,94 GB); (2) runbook/versionamento preventivo publicados (`scripts/host-disk-guard.mjs`, `docs/guides/host-disk-recovery.md`, scripts npm ops:disk:*); (3) validações focais retomadas e verdes após estabilização (`test:smoke` guardrails/session/board e `test:ops:disk-guard`)."
+    },
+    {
+      "id": "VER-BUD-233",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T19:28:00Z",
+      "evidence": "Micro-slice para destravar evidência operacional real: guardrails-core agora persiste snapshot runtime em `.pi/guardrails-loop-evidence.json` quando ocorre `loop-activation-ready` e quando há `board-intent-auto-advance` (task, runtimeCodeState, emLoop, markers). `/lane-queue status` passa a expor `evidenceBoardAuto` e `evidenceLoopReady` para leitura direta sem varredura ampla de sessão. Também foi adicionado suporte de intent `board.execute-next` no runtime path e docs atualizadas. Smokes focais: 42/42 (`guardrails-long-run-intent-queue`, `guardrails-intent-bus`, `guardrails-board-readiness`)."
     }
   ]
 }
