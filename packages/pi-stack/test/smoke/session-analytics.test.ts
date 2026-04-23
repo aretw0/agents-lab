@@ -1,9 +1,13 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   toSessionWorkspaceKey,
   parseSignals,
   parseModelChanges,
   parseTimeline,
+  readJsonlLines,
   runQuery,
 } from "../../extensions/session-analytics";
 
@@ -125,11 +129,56 @@ describe("session-analytics — parseTimeline", () => {
   });
 });
 
+describe("session-analytics — readJsonlLines (bounded tail scan)", () => {
+  it("lê janela de cauda para evitar varredura crua de arquivo gigante", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-tail-"));
+    try {
+      const file = join(dir, "sample.jsonl");
+      const rows = Array.from({ length: 3000 }, (_, i) =>
+        JSON.stringify({ type: "message", timestamp: `${i}`, message: { role: "user", content: `m-${i}` } }),
+      );
+      writeFileSync(file, `${rows.join("\n")}\n`, "utf8");
+
+      const parsed = readJsonlLines(file, { maxTailBytes: 120, maxLineChars: 2000, maxRecordsPerFile: 5000 });
+      expect(parsed.stats.tailWindowApplied).toBe(true);
+      expect(parsed.records.length).toBeGreaterThan(0);
+
+      const payload = JSON.stringify(parsed.records);
+      expect(payload).toContain("m-2999");
+      expect(payload).not.toContain("m-0");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("ignora linhas monstruosas acima do limite configurado", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-long-line-"));
+    try {
+      const file = join(dir, "sample.jsonl");
+      const hugeLine = "x".repeat(5000);
+      const lines = [
+        JSON.stringify({ type: "message", timestamp: "1", message: { role: "user", content: "ok-a" } }),
+        hugeLine,
+        JSON.stringify({ type: "message", timestamp: "2", message: { role: "assistant", content: "ok-b" } }),
+      ];
+      writeFileSync(file, `${lines.join("\n")}\n`, "utf8");
+
+      const parsed = readJsonlLines(file, { maxTailBytes: 20_000, maxLineChars: 1000, maxRecordsPerFile: 100 });
+      expect(parsed.stats.skippedLongLines).toBe(1);
+      expect(parsed.stats.parseErrors).toBe(0);
+      expect(parsed.stats.recordsParsed).toBe(2);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("session-analytics — runQuery (sem sessoes reais)", () => {
   it("retorna resultado vazio quando nao ha arquivos de sessao", () => {
     const result = runQuery("/nonexistent/path", "summary", 24, undefined, 50);
     expect(result.queryType).toBe("summary");
     expect(result.filesScanned).toBe(0);
+    expect(result.scan.maxTailBytes).toBeGreaterThan(0);
     const d = result.data as Record<string, unknown>;
     expect(d["sessionsFound"]).toBe(0);
   });
@@ -137,6 +186,7 @@ describe("session-analytics — runQuery (sem sessoes reais)", () => {
   it("resultado de signals tem estrutura correta mesmo sem sessoes", () => {
     const result = runQuery("/nonexistent/path", "signals", 24, undefined, 50);
     expect(result.queryType).toBe("signals");
+    expect(result.scan.parseErrors).toBe(0);
     const d = result.data as Record<string, unknown>;
     expect(d["signals"]).toEqual([]);
     expect(d["totalSignals"]).toBe(0);
