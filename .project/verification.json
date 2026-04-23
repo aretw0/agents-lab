@@ -3431,6 +3431,32 @@
           "evidence": "Smoke parsers 72/72 após mudança."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-182",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 18 (throughput) em `packages/pi-stack/extensions/colony-pilot.ts`: deduplicação de tipos locais via type aliases para tipos exportados pelos módulos extraídos (delivery/model/output/baseline/budget-eval/provider-gate-eval), reduzindo boilerplate sem alterar nomes de contrato público. Entry point caiu para 2001 linhas. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Contrato público permanece estável com nomes exportados preservados.",
+          "status": "passed",
+          "evidence": "Tipos públicos mantidos por aliases (`export type X = XImpl`)."
+        },
+        {
+          "criterion": "Deflação incremental reduz complexidade do entrypoint.",
+          "status": "passed",
+          "evidence": "`colony-pilot.ts` 2068 -> 2001 linhas."
+        },
+        {
+          "criterion": "Sem regressão funcional no parsing/policies cobertos por smoke.",
+          "status": "passed",
+          "evidence": "72/72 aprovado após deduplicação de tipos."
+        }
+      ]
     }
   ]
 }

@@ -96,6 +96,11 @@ import {
 	writeProjectTasksBlock,
 } from "./colony-pilot-task-sync";
 import {
+	type ColonyDeliveryMode as ColonyDeliveryModeImpl,
+	type ColonyPilotDeliveryEvidence as ColonyPilotDeliveryEvidenceImpl,
+	type ColonyPilotDeliveryEvaluation as ColonyPilotDeliveryEvaluationImpl,
+	type ColonyPilotDeliveryPolicyConfig as ColonyPilotDeliveryPolicyConfigImpl,
+	type SelectivePromotionInventoryEvidence as SelectivePromotionInventoryEvidenceImpl,
 	DEFAULT_COLONY_PILOT_DELIVERY_POLICY,
 	evaluateColonyDeliveryEvidence as evaluateColonyDeliveryEvidenceImpl,
 	evaluateSelectivePromotionInventoryEvidence as evaluateSelectivePromotionInventoryEvidenceImpl,
@@ -115,12 +120,15 @@ import {
 	updateStatusUI as updateStatusUIImpl,
 } from "./colony-pilot-command-surface";
 import {
+	type BaselineProfile as BaselineProfileImpl,
 	applyProjectBaselineSettings as applyProjectBaselineSettingsImpl,
 	buildProjectBaselineSettings as buildProjectBaselineSettingsImpl,
 	deepMergeObjects as deepMergeObjectsImpl,
 	resolveBaselineProfile as resolveBaselineProfileImpl,
 } from "./colony-pilot-baseline";
 import {
+	type ColonyPilotBudgetPolicyEvaluation as ColonyPilotBudgetPolicyEvaluationImpl,
+	type ColonyPilotProviderBudgetGateEvaluation as ColonyPilotProviderBudgetGateEvaluationImpl,
 	collectAntColonyProviders as collectAntColonyProvidersImpl,
 	evaluateAntColonyBudgetPolicy as evaluateAntColonyBudgetPolicyImpl,
 	evaluateProviderBudgetGate as evaluateProviderBudgetGateImpl,
@@ -128,6 +136,11 @@ import {
 	parseBudgetOverrideReason as parseBudgetOverrideReasonImpl,
 } from "./colony-pilot-budget-policy";
 import {
+	type ColonyAgentRole as ColonyAgentRoleImpl,
+	type ColonyModelPolicyEvaluation as ColonyModelPolicyEvaluationImpl,
+	type ColonyPilotModelPolicyConfig as ColonyPilotModelPolicyConfigImpl,
+	type ColonyRoleModelMap as ColonyRoleModelMapImpl,
+	type ModelPolicyProfile as ModelPolicyProfileImpl,
 	buildModelPolicyProfile as buildModelPolicyProfileImpl,
 	evaluateAntColonyModelPolicy as evaluateAntColonyModelPolicyImpl,
 	formatPolicyEvaluation as formatPolicyEvaluationImpl,
@@ -135,6 +148,8 @@ import {
 	resolveModelPolicyProfile as resolveModelPolicyProfileImpl,
 } from "./colony-pilot-model-policy";
 import {
+	type CandidateRetentionConfig as CandidateRetentionConfigImpl,
+	type OutputPolicyConfig as OutputPolicyConfigImpl,
 	formatToolJsonOutput as formatToolJsonOutputImpl,
 	resolveColonyPilotCandidateRetentionConfig as resolveColonyPilotCandidateRetentionConfigImpl,
 	resolveColonyPilotOutputPolicy as resolveColonyPilotOutputPolicyImpl,
@@ -234,16 +249,10 @@ const DEFAULT_DELIVERY_POLICY: ColonyPilotDeliveryPolicyConfig = {
 	...DEFAULT_COLONY_PILOT_DELIVERY_POLICY,
 };
 
-export interface ColonyPilotOutputPolicyConfig {
-	compactLargeJson: boolean;
-	maxInlineJsonChars: number;
-}
+export type ColonyPilotOutputPolicyConfig = OutputPolicyConfigImpl;
 
-export interface ColonyPilotCandidateRetentionConfig {
-	enabled: boolean;
-	maxEntries: number;
-	maxAgeDays: number;
-}
+export type ColonyPilotCandidateRetentionConfig =
+	CandidateRetentionConfigImpl;
 
 export interface AntColonyToolInput {
 	goal: string;
@@ -357,11 +366,8 @@ export function resolveColonyPilotProjectTaskSync(
 export const resolveColonyPilotDeliveryPolicy =
 	resolveColonyPilotDeliveryPolicyImpl;
 
-export interface SelectivePromotionInventoryEvidence {
-	hasPromotedFileInventory: boolean;
-	hasSkippedFileInventory: boolean;
-	hasSelectivePromotionInventory: boolean;
-}
+export type SelectivePromotionInventoryEvidence =
+	SelectivePromotionInventoryEvidenceImpl;
 
 export const evaluateSelectivePromotionInventoryEvidence =
 	evaluateSelectivePromotionInventoryEvidenceImpl;
@@ -387,15 +393,8 @@ export const parseBudgetOverrideReason = parseBudgetOverrideReasonImpl;
 
 export const collectAntColonyProviders = collectAntColonyProvidersImpl;
 
-export interface ColonyPilotProviderBudgetGateEvaluation {
-	ok: boolean;
-	checked: boolean;
-	issues: string[];
-	consideredProviders: string[];
-	blockedProviders: string[];
-	allocationWarnings: string[];
-	overrideReason?: string;
-}
+export type ColonyPilotProviderBudgetGateEvaluation =
+	ColonyPilotProviderBudgetGateEvaluationImpl;
 
 export function evaluateProviderBudgetGate(
 	input: AntColonyToolInput,
@@ -423,11 +422,7 @@ export function evaluateAntColonyBudgetPolicy(
 }
 
 
-export interface ColonyModelPolicyEvaluation {
-	ok: boolean;
-	issues: string[];
-	effectiveModels: Record<ColonyAgentRole, string | undefined>;
-}
+export type ColonyModelPolicyEvaluation = ColonyModelPolicyEvaluationImpl;
 
 export function evaluateAntColonyModelPolicy(
 	input: AntColonyToolInput,
@@ -447,42 +442,11 @@ export function evaluateAntColonyModelPolicy(
 }
 
 
-export type ColonyAgentRole =
-	| "queen"
-	| "scout"
-	| "worker"
-	| "soldier"
-	| "design"
-	| "multimodal"
-	| "backend"
-	| "review";
+export type ColonyAgentRole = ColonyAgentRoleImpl;
 
-export interface ColonyRoleModelMap {
-	scout?: string;
-	worker?: string;
-	soldier?: string;
-	design?: string;
-	multimodal?: string;
-	backend?: string;
-	review?: string;
-}
+export type ColonyRoleModelMap = ColonyRoleModelMapImpl;
 
-export interface ColonyPilotModelPolicyConfig {
-	enabled: boolean;
-	specializedRolesEnabled: boolean;
-	autoInjectRoleModels: boolean;
-	requireHealthyCurrentModel: boolean;
-	requireExplicitRoleModels: boolean;
-	requiredRoles: ColonyAgentRole[];
-	enforceFullModelRef: boolean;
-	allowMixedProviders: boolean;
-	allowedProviders: string[];
-	allowedProvidersByRole: Partial<Record<ColonyAgentRole, string[]>>;
-	roleModels: ColonyRoleModelMap;
-	sparkGateEnabled: boolean;
-	sparkAllowedGoalTriggers: string[];
-	sparkScoutOnlyTrigger: string;
-}
+export type ColonyPilotModelPolicyConfig = ColonyPilotModelPolicyConfigImpl;
 
 export interface ColonyPilotBudgetPolicyConfig {
 	enabled: boolean;
@@ -498,11 +462,8 @@ export interface ColonyPilotBudgetPolicyConfig {
 	providerBudgetOverrideToken: string;
 }
 
-export interface ColonyPilotBudgetPolicyEvaluation {
-	ok: boolean;
-	issues: string[];
-	effectiveMaxCostUsd?: number;
-}
+export type ColonyPilotBudgetPolicyEvaluation =
+	ColonyPilotBudgetPolicyEvaluationImpl;
 
 export interface ColonyPilotProjectTaskSyncConfig {
 	enabled: boolean;
@@ -516,36 +477,14 @@ export interface ColonyPilotProjectTaskSyncConfig {
 	recoveryTaskSuffix: string;
 }
 
-export type ColonyDeliveryMode =
-	| "report-only"
-	| "patch-artifact"
-	| "apply-to-branch";
+export type ColonyDeliveryMode = ColonyDeliveryModeImpl;
 
-export interface ColonyPilotDeliveryPolicyConfig {
-	enabled: boolean;
-	mode: ColonyDeliveryMode;
-	requireWorkspaceReport: boolean;
-	requireTaskSummary: boolean;
-	requireFileInventory: boolean;
-	requireValidationCommandLog: boolean;
-	blockOnMissingEvidence: boolean;
-}
+export type ColonyPilotDeliveryPolicyConfig =
+	ColonyPilotDeliveryPolicyConfigImpl;
 
-export interface ColonyPilotDeliveryEvidence {
-	hasWorkspaceReport: boolean;
-	hasTaskSummary: boolean;
-	hasFileInventory: boolean;
-	hasValidationCommandLog: boolean;
-	hasPromotedFileInventory: boolean;
-	hasSkippedFileInventory: boolean;
-	hasSelectivePromotionInventory: boolean;
-}
+export type ColonyPilotDeliveryEvidence = ColonyPilotDeliveryEvidenceImpl;
 
-export interface ColonyPilotDeliveryEvaluation {
-	ok: boolean;
-	issues: string[];
-	evidence: ColonyPilotDeliveryEvidence;
-}
+export type ColonyPilotDeliveryEvaluation = ColonyPilotDeliveryEvaluationImpl;
 
 interface ColonyPilotSettings {
 	preflight?: Partial<ColonyPilotPreflightConfig>;
@@ -563,14 +502,8 @@ export const resolveColonyPilotOutputPolicy =
 
 export const resolveColonyPilotCandidateRetentionConfig =
 	resolveColonyPilotCandidateRetentionConfigImpl;
-export type BaselineProfile = "default" | "phase2";
-export type ModelPolicyProfile =
-	| "copilot"
-	| "codex"
-	| "hybrid"
-	| "factory-strict"
-	| "factory-strict-copilot"
-	| "factory-strict-hybrid";
+export type BaselineProfile = BaselineProfileImpl;
+export type ModelPolicyProfile = ModelPolicyProfileImpl;
 
 export const resolveBaselineProfile = resolveBaselineProfileImpl;
 

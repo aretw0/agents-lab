@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T01:02:00.000Z",
-  "context": "Slice 17 da TASK-BUD-116 concluído: wrappers pass-through exportados no colony-pilot foram convertidos para aliases diretos dos módulos `*Impl`, reduzindo boilerplate e mantendo contrato público estável. Entry point caiu para 2068 linhas com smoke verde.",
+  "timestamp": "2026-04-23T01:05:00.000Z",
+  "context": "Slice 18 da TASK-BUD-116 concluído: deduplicação de tipos no colony-pilot entrypoint via aliases para tipos exportados dos módulos extraídos, mantendo contrato público e reduzindo ruído estrutural.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -11,12 +11,12 @@
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Seguir TASK-BUD-116 em micro-slices de baixo risco enquanto context-watch estiver em warn.",
-    "Retomar TASK-BUD-114 para wiring de allowlist efetiva promoted/skipped por diff.",
+    "Seguir TASK-BUD-116 em micro-slices de baixo risco até checkpoint.",
+    "Retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
     "Manter TASK-BUD-117 planejada para recalibração pós-compact/resume no context-watchdog."
   ],
   "open_questions": [
-    "Próximo micro-corte: limpar duplicações de tipos/export type aliases ou iniciar allowlist runtime (TASK-BUD-114)?"
+    "Próximo micro-corte no entrypoint: cleanup de tipos residuais locais (budget config/task sync) ou avanço em wiring de promoção seletiva?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
@@ -30,10 +30,10 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T01:02:00.000Z",
+      "atIso": "2026-04-23T01:05:00.000Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 52,
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
