@@ -3619,6 +3619,27 @@
           "evidence": "Teste `compliance derivada de scope passa quando promoted é candidateDiff ∩ allowlist` aprovado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-190",
+      "target": "TASK-BUD-117",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "`docs/guides/project-canonical-pipeline.md` agora inclui seção 'Cadência adaptativa pós-resume (anti-timidez residual)' explicitando contrato de uso de `context_watch_status.operatingCadence` e `postResumeRecalibrated` para liberar throughput quando contexto retorna a `ok`, sem perder segurança em `warn/checkpoint/compact`.",
+      "criteria_results": [
+        {
+          "criterion": "Contrato canônico documenta que micro-slice não deve ser herdado por inércia após resume saudável.",
+          "status": "passed",
+          "evidence": "Seção nova define `standard-slices` vs `micro-slice-only` por `operatingCadence`."
+        },
+        {
+          "criterion": "Guidance mantém comportamento advisory/non-blocking com foco em autonomia operacional.",
+          "status": "passed",
+          "evidence": "Texto explicita objetivo de evitar confirmação humana óbvia quando estado está saudável."
+        }
+      ]
     }
   ]
 }

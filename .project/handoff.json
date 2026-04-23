@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T02:15:30.000Z",
-  "context": "TASK-BUD-114 avançou com enforcement de escopo no fluxo apply-to-branch: compliance de inventário `Promoted/Skipped` agora valida allowlist + candidate diff e bloqueia evidência inválida (promoted fora de escopo/candidate). Integração runtime adicionou auditoria dedicada de não conformidade.",
+  "timestamp": "2026-04-23T02:18:30.000Z",
+  "context": "Execução continuada com foco fábrica: (A) TASK-BUD-114 recebeu enforcement de compliance de promoção seletiva (allowlist + candidate diff) para inventários explícitos/derivados; (B) TASK-BUD-117 ganhou documentação canônica de cadência adaptativa pós-resume (`operatingCadence`/`postResumeRecalibrated`).",
   "current_phase": "factory-selective-promotion-and-post-resume-recalibration",
   "current_tasks": [
     "TASK-BUD-114",
@@ -11,31 +11,32 @@
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Manter próximos cortes em micro-slice enquanto level=warn/checkpoint.",
-    "TASK-BUD-114: ligar compliance ao apply efetivo por diff (quando promoted válido) para fechar loop promoted vs skipped end-to-end.",
-    "TASK-BUD-117: opcional documentar contrato `operatingCadence/postResumeRecalibrated` no pipeline canônico.",
-    "TASK-BUD-116: somente ajustes oportunistas de baixo risco."
+    "Enquanto level=warn, manter micro-slices e checkpoint frequente.",
+    "TASK-BUD-114: próximo corte deve conectar compliance aprovado ao apply efetivo por diff para fechar promoted vs skipped end-to-end.",
+    "TASK-BUD-117: avaliar se falta expor o mesmo sinal de cadência em mais superfícies além tool/command (se houver consumo externo).",
+    "TASK-BUD-116: somente manutenção oportunista sem abrir frente de refactor grande."
   ],
   "open_questions": [
-    "Para inventory explícito com promoted vazio, manter sempre fallback recovery (atual) ou permitir exceções por policy explícita?"
+    "Classificação completa candidate->(promoted|skipped) deve ser estritamente exigida quando Final file inventory estiver presente (atual) ou sempre que houver apply-to-branch?"
   ],
   "key_decisions_pending": [
-    "Definir se enforcement de compliance deve exigir classificação completa candidate->(promoted|skipped) em todos modos apply-to-branch ou apenas quando Final file inventory estiver presente."
+    "Definir critério final de fechamento de TASK-BUD-114 para considerar 'promoção efetiva por diff/apply' concluída no runtime atual."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
     "packages/pi-stack/extensions/colony-pilot.ts",
     "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+    "docs/guides/project-canonical-pipeline.md",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T02:15:30.000Z",
+      "atIso": "2026-04-23T02:18:30.000Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 52,
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

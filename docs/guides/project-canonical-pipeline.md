@@ -214,3 +214,15 @@ Retomar apenas com:
 3. checkpoint curto em `docs/research/...` (se houver)
 
 Se esses três estiverem íntegros, não é necessário reconstruir contexto narrativo longo.
+
+### Cadência adaptativa pós-resume (anti-timidez residual)
+Após auto-compact/auto-resume, a cadência **não** deve herdar micro-slice por inércia.
+
+Contrato operacional:
+- consultar `context_watch_status` ao retomar;
+- usar `operatingCadence` como fonte de verdade de ritmo:
+  - `standard-slices` => retomar throughput normal (ex.: 2–4 arquivos + testes focados);
+  - `micro-slice-only` => manter cortes mínimos até checkpoint/compact estabilizar;
+- usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`).
+
+Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.
