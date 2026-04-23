@@ -4299,6 +4299,24 @@
       "method": "inspect",
       "timestamp": "2026-04-23T17:22:00Z",
       "evidence": "Mitigação preventiva implementada em código: novo runbook `docs/guides/host-disk-recovery.md` + utilitário `scripts/host-disk-guard.mjs` com dry-run por padrão, cap de remoção (`--max-delete-mb`), proteção de sessões por default e modo agressivo opt-in (`--include-sessions`). Scripts npm adicionados: `ops:disk:check`, `ops:disk:cleanup`, `ops:disk:cleanup:with-sessions`, `test:ops:disk-guard`. Teste unitário dedicado criado em `scripts/test/host-disk-guard.test.mjs` (execução pendente após estabilização de disco/runner)."
+    },
+    {
+      "id": "VER-BUD-232",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T19:01:00Z",
+      "evidence": "Intent bus/runtime consumer ampliado para suportar `board.execute-next` além de `board.execute-task` (parse/encode/summarize/prompt + decisão runtime `board-execute-next-ready|board-execute-next-board-not-ready` + status/notify no input path). Export helper `buildBoardExecuteNextIntentText` adicionado. Smokes focais verdes: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 42/42."
+    },
+    {
+      "id": "VER-OPS-LOWDISK-003",
+      "target": "TASK-OPS-LOWDISK-001",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-23T19:02:00Z",
+      "evidence": "Runbook operacional executado em host já reiniciado: `npm run -s ops:disk:check` (candidatos 58.48 MB), `npm run -s ops:disk:cleanup` (deleted 113 files / 58.48 MB), recheck sem pendências (`candidates: 0`). Espaço livre confirmado: `cmd.exe /c powershell -NoProfile -Command \"[math]::Round((Get-PSDrive -Name C).Free/1GB,2)\"` => `8,94` GB."
     }
   ]
 }

@@ -1,43 +1,41 @@
 {
-  "timestamp": "2026-04-23T17:36:00.000Z",
-  "context": "Usuário priorizou organização da casa com commits atômicos. Tentativa de iniciar fluxo de commit foi bloqueada por falha operacional do executor de shell (até comandos triviais como `echo` ficam sem retorno e entram em background sem output), compatível com degradação pós low-disk. Mudanças prontas foram preservadas e agrupadas para commit assim que o shell estabilizar.",
+  "timestamp": "2026-04-23T19:03:00.000Z",
+  "context": "Retomada pós-restart estabilizada. Execução pragmática concluída: housekeeping com commits atômicos já aplicado, limpeza segura de disco executada (`ops:disk:cleanup`) e margem livre confirmada (~8.94 GB). Em paralelo, micro-slice técnica avançou TASK-BUD-119: runtime consumer agora suporta `board.execute-next` além de `board.execute-task`, mantendo envelope tipado/auditoria no input path.",
   "next_actions": [
-    "Recuperar executor de shell (host free-space + reinício da sessão se necessário).",
-    "Executar sequência de commits atômicos planejada (ops disk guard, guardrails loop-ready observability, docs/handoff/project state).",
-    "Após commits, retomar validação focal e fechamento de TASK-BUD-125 com evidência operacional real.",
-    "Backlog futuro: TASK-OPS-TOOL-NAME-001 para remover nomenclatura `project_proxy_*`."
+    "Fechar TASK-BUD-125 com evidência operacional real em runtime (`EM_LOOP=yes` + `guardrails-core.board-intent-auto-advance` + `runtimeCodeState=active`).",
+    "Promover TASK-OPS-LOWDISK-001 para fechamento após decidir política para retenção dos dois JSONL grandes de sessão (181MB/129MB).",
+    "Continuar TASK-BUD-119 para intents adicionais de maior valor operacional (ex.: intents de board update/query) mantendo fallback manual.",
+    "Manter cadência micro-slice enquanto `context_watch` estiver em warn/checkpoint."
   ],
   "blockers": [
-    "low-disk-host-critical",
-    "shell-executor-stalled",
-    "factory-paused-by-operator"
+    "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T17:23:00.000Z",
+      "atIso": "2026-04-23T18:51:55.445Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 18,
+      "level": "warn",
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Use standard slices with low-disk safe commands until host free space is recovered."
+      "action": "write-checkpoint",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     },
     {
-      "atIso": "2026-04-23T17:36:00.000Z",
+      "atIso": "2026-04-23T19:03:00.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 21,
+      "level": "warn",
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Hold heavy operations and commits until shell executor is responsive again."
+      "action": "micro-slice-only",
+      "recommendation": "Continue with bounded slices and focused verification."
     }
   ]
 }
