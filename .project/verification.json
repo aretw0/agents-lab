@@ -4380,6 +4380,24 @@
       "method": "test",
       "timestamp": "2026-04-23T22:11:00Z",
       "evidence": "TASK-BUD-028 account-aware key entregue: `quota-visibility` introduziu parser canônico `provider[/account]` (`parseProviderAccountKey`, `buildProviderAccountKey`) e evaluator com matching por seletor em `buildProviderBudgetStatuses` (provider/account quando disponível + fallback provider-only). `QuotaUsageEvent` agora carrega `account` e `providerAccountKey`; filtro de budget em tool/report aceita `provider/account`. Docs atualizadas: `docs/primitives/conversation-event-canonical-schema.md` e `docs/guides/budget-governance.md`. Testes focais: `quota-visibility-parsers`, `quota-panel`, `provider-readiness` => 60/60 pass."
+    },
+    {
+      "id": "VER-BUD-239",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-04-23T22:13:00Z",
+      "evidence": "Evidência operacional real capturada no runtime ativo via `/lane-queue evidence`: `readyForTaskBud125: yes`, `boardAuto` com `runtime=active emLoop=yes` e `loopReady` com `runtime=active gate=ready`. Validação externa do snapshot persistido `.pi/guardrails-loop-evidence.json`: `npm run ops:loop-evidence:check` => `status: ok readyForTaskBud125: yes`; `npm run ops:loop-evidence:strict` => `status: ok` (exit 0). Critérios canônicos atendidos: `boardAuto.runtime=active`, `boardAuto.emLoop=yes`, `loopReady.runtime=active`."
+    },
+    {
+      "id": "VER-BUD-240",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T22:18:00Z",
+      "evidence": "Regressão para preservar marco de evidência operacional adicionada em `scripts/test/guardrails-loop-evidence-check.test.mjs`: novo caso garante que `readyForTaskBud125` permanece baseado em critérios canônicos (runtime active + emLoop=yes + loopReady active) mesmo quando `boardAuto.taskId` difere (`TASK-BUD-028` no cenário real). Execução: `npm run -s test:ops:loop-evidence` => 5/5 pass."
     }
   ]
 }

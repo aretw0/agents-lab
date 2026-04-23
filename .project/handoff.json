@@ -1,29 +1,17 @@
 {
-  "timestamp": "2026-04-23T22:14:00.000Z",
-  "context": "Intent `board.execute-task` TASK-BUD-028 executada em micro-slice: quota-visibility agora suporta chave canônica account-aware `provider[/account]` para budgets e matching de uso por conta quando identidade estiver presente, mantendo fallback provider-only para eventos sem account.",
+  "timestamp": "2026-04-23T22:19:00.000Z",
+  "context": "Marco principal alcançado e consolidado: TASK-BUD-125 foi concluída com evidência operacional real (`/lane-queue evidence` + `ops:loop-evidence:check/strict` em status ok). Nesta sequência também foi executada TASK-BUD-028 (account-aware `provider[/account]` com fallback provider-only) e adicionado teste de regressão para não perder o marco de readiness task-agnostic. Backlog de higiene pós-validação foi criado (TASK-OPS-HYGIENE-002).",
   "next_actions": [
-    "Validar manualmente no runtime com config de exemplo em `.pi/settings.json` (uma regra `provider/account` + uma `provider`) e executar `/quota-visibility budget` / `quota_visibility_provider_budgets` para conferir filtros por `provider/account`.",
-    "Manter TASK-BUD-028 em `in-progress` (no-auto-close) até revisão humana final da operação real multi-conta.",
-    "Retomar blocker principal de desbloqueio global: gerar evidência operacional real de TASK-BUD-125 (`readyForTaskBud125=yes` em `ops:loop-evidence:strict`)."
+    "Compactar agora e deixar sessão entrar em idle para auto-compact/auto-resume.",
+    "Após retomar, validar manualmente no runtime a operação account-aware de budgets (`/quota-visibility budget openai-codex/team-a` + provider-only fallback).",
+    "Planejar e executar TASK-OPS-HYGIENE-002 (limpeza de artefatos temporários de validação sem perder evidência relevante).",
+    "Próximo desbloqueio da escada: subagent strict readiness (resolver bloqueio atual `BUDGET_EXCEEDED=1`)."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "task-bud-125-operational-evidence-pending"
+    "context-watch-compact-required",
+    "subagent-readiness-strict-blocked-by-budget-exceeded"
   ],
   "context_watch_events": [
-    {
-      "atIso": "2026-04-23T22:05:37.610Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 68,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
-    },
     {
       "atIso": "2026-04-23T22:14:00.000Z",
       "reason": "message_end",
@@ -36,6 +24,19 @@
       },
       "action": "write-checkpoint",
       "recommendation": "Keep micro-slice-only and checkpoint before larger follow-up work."
+    },
+    {
+      "atIso": "2026-04-23T22:18:37.856Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 72,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

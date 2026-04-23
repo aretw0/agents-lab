@@ -2941,7 +2941,7 @@
     {
       "id": "TASK-BUD-125",
       "description": "[P0] Implementar gate de prontidão do board para long runs unattended (decomposição + ordem + stop-conditions) antes de escalar para subagentes/swarm.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-119"
       ],
@@ -2961,7 +2961,8 @@
         "Quando backlog não estiver suficientemente quebrado, o runtime registra bloqueio explícito de prontidão e recomenda decomposição mínima (sem tentativa cega de long run).",
         "Stop-conditions de long run são mapeadas para ações de recovery/retry claras (control plane -> subagentes -> swarm)."
       ],
-      "notes": "Criada a partir de feedback humano (2026-04-23): priorizar loop native-first e board-first; gargalo deve migrar para falta de backlog/decomposição, não para perguntas de objetivo macro.\n[2026-04-23T12:15:00Z] Priorizada como trilha imediata de desbloqueio (control-plane-first): objetivo é reduzir necessidade de macro-goal manual e deixar o board canônico dirigir execução unattended com critério explícito de prontidão/decomposição.\n[2026-04-23T12:22:00Z] Slice 1 (gate simples board-first): criado módulo `guardrails-core-board-readiness.ts` com avaliação determinística de prontidão (`ready`, `eligibleTaskIds`, `blockedByDependencies`, `recommendation`) sobre `.project/tasks`, e status `/lane-queue` agora expõe `boardReady/...` + `boardHint`/`boardNext` para reduzir necessidade de macro-goal manual. Smoke dedicada adicionada. Evidência: VER-BUD-216.\n[2026-04-23T09:58:00Z] Slice 2 (seleção executável + dispatch board-first): gate passou a calcular `nextTaskId` e política explícita de ordenação (`planned+deps+priority(P0..Pn)+id`), com novo `/lane-queue board-next` para executar/enfileirar a próxima task elegível sem macro-goal manual. Quando board não está pronto, comando registra bloqueio explícito com recomendação de decomposição/desbloqueio. Smokes focais verdes (34/34). Evidência: VER-BUD-218.\n[2026-04-23T10:19:00Z] Slice 4 (auto-advance seguro): executor de auto-drain agora pode avançar `nextTaskId` automaticamente apenas sob gate seguro (`idle + queue empty + loop running/healthy + stopCondition=none + board ready`), com dedupe por task e auditoria explícita de sucesso/falha (`board-intent-auto-advance`). Smokes focais verdes (36/36). Evidência: VER-BUD-220."
+      "notes": "Criada a partir de feedback humano (2026-04-23): priorizar loop native-first e board-first; gargalo deve migrar para falta de backlog/decomposição, não para perguntas de objetivo macro.\n[2026-04-23T12:15:00Z] Priorizada como trilha imediata de desbloqueio (control-plane-first): objetivo é reduzir necessidade de macro-goal manual e deixar o board canônico dirigir execução unattended com critério explícito de prontidão/decomposição.\n[2026-04-23T12:22:00Z] Slice 1 (gate simples board-first): criado módulo `guardrails-core-board-readiness.ts` com avaliação determinística de prontidão (`ready`, `eligibleTaskIds`, `blockedByDependencies`, `recommendation`) sobre `.project/tasks`, e status `/lane-queue` agora expõe `boardReady/...` + `boardHint`/`boardNext` para reduzir necessidade de macro-goal manual. Smoke dedicada adicionada. Evidência: VER-BUD-216.\n[2026-04-23T09:58:00Z] Slice 2 (seleção executável + dispatch board-first): gate passou a calcular `nextTaskId` e política explícita de ordenação (`planned+deps+priority(P0..Pn)+id`), com novo `/lane-queue board-next` para executar/enfileirar a próxima task elegível sem macro-goal manual. Quando board não está pronto, comando registra bloqueio explícito com recomendação de decomposição/desbloqueio. Smokes focais verdes (34/34). Evidência: VER-BUD-218.\n[2026-04-23T10:19:00Z] Slice 4 (auto-advance seguro): executor de auto-drain agora pode avançar `nextTaskId` automaticamente apenas sob gate seguro (`idle + queue empty + loop running/healthy + stopCondition=none + board ready`), com dedupe por task e auditoria explícita de sucesso/falha (`board-intent-auto-advance`). Smokes focais verdes (36/36). Evidência: VER-BUD-220.",
+      "verification": "VER-BUD-239"
     },
     {
       "id": "TASK-BUD-126",
@@ -3043,6 +3044,23 @@
         "Decisão de compatibilidade retroativa (aceitar labels legados em parsers/auditoria, se aplicável) documentada."
       ],
       "notes": "Backlog criado após feedback do usuário sobre coesão linguística dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP`."
+    },
+    {
+      "id": "TASK-OPS-HYGIENE-002",
+      "description": "[P1] Executar higiene pós-marco (loop/subagent/swarm): remover artefatos temporários de validação e consolidar superfícies canônicas sem gordura operacional.",
+      "status": "planned",
+      "files": [
+        ".sandbox/tmp",
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Inventário de artefatos temporários de validação (scripts ad-hoc, snapshots transitórios) é revisado e removido/arquivado com critério explícito.",
+        "Runtime artifacts efêmeros (`.pi/*.json` de sessão) permanecem fora de versionamento e política é documentada para prevenir recorrência.",
+        "Backlog/verification refletem o que é marco permanente vs experimento temporário, sem perder evidência relevante."
+      ],
+      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas."
     }
   ]
 }
