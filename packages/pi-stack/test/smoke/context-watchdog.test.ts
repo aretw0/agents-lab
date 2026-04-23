@@ -16,6 +16,7 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchSignalNoiseExcessive,
 	resolveHandoffFreshness,
@@ -300,6 +301,35 @@ describe("context-watchdog", () => {
 		expect(noisy.humanActionRequired).toBe(true);
 		expect(noisy.noiseExcessive).toBe(true);
 		expect(noisy.reasons).toContain("signal-noise-excessive");
+	});
+
+	it("resolves operating cadence with post-resume recalibration signal", () => {
+		expect(resolveContextWatchOperatingCadence({
+			assessmentLevel: "warn",
+			handoffLastEventLevel: "compact",
+		})).toEqual({
+			operatingCadence: "micro-slice-only",
+			postResumeRecalibrated: false,
+			reason: "level-warn",
+		});
+
+		expect(resolveContextWatchOperatingCadence({
+			assessmentLevel: "ok",
+			handoffLastEventLevel: "compact",
+		})).toEqual({
+			operatingCadence: "standard-slices",
+			postResumeRecalibrated: true,
+			reason: "recalibrated-from-compact",
+		});
+
+		expect(resolveContextWatchOperatingCadence({
+			assessmentLevel: "ok",
+			handoffLastEventLevel: "ok",
+		})).toEqual({
+			operatingCadence: "standard-slices",
+			postResumeRecalibrated: false,
+			reason: "healthy",
+		});
 	});
 
 	it("computes handoff freshness deterministically", () => {

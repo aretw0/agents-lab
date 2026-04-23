@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T01:58:00.000Z",
-  "context": "Slice de recalibração pós-resume iniciado (TASK-BUD-117): prompt de auto-resume do context-watchdog não força mais `micro-slice-only` fixo; guidance agora é adaptativo por estado (`context_watch_status`). Se último evento de context-watch já for `ok`, o prompt explicita throughput imediato com slices maiores.",
+  "timestamp": "2026-04-23T02:03:30.000Z",
+  "context": "TASK-BUD-117 avançou em 2 slices: (1) prompt de auto-resume agora usa cadência adaptativa e remove micro-slice fixo; (2) `context_watch_status` ganhou sinal auditável de cadência (`operatingCadence`, `postResumeRecalibrated`, `reason`) para eliminar timidez residual pós-compact quando nível volta para ok.",
   "current_phase": "factory-selective-promotion-and-post-resume-recalibration",
   "current_tasks": [
     "TASK-BUD-114",
@@ -9,18 +9,19 @@
   ],
   "blockers": [],
   "next_actions": [
-    "TASK-BUD-114: conectar `promotedFiles/skippedFiles` ao apply efetivo por diff/apply, mantendo fallback recovery quando promoted=0.",
-    "TASK-BUD-117: evoluir de recalibração de prompt para sinal auditável explícito em `context_watch_status` (ex.: operatingCadence/postResumeRecalibrated).",
-    "TASK-BUD-116: manter somente refactors oportunistas quando surgirem hotspots reais."
+    "TASK-BUD-117: opcionalmente documentar o novo contrato de cadência adaptativa em `docs/guides/project-canonical-pipeline.md`.",
+    "TASK-BUD-114: conectar avaliação `promotedFiles/skippedFiles` ao apply efetivo por diff/apply.",
+    "TASK-BUD-116: apenas micro-refactors oportunistas quando tocar hotspots reais."
   ],
   "open_questions": [
-    "No auto-resume, queremos que a checagem `context_watch_status` seja mandatória no prompt ou apenas recomendada quando last event != ok?"
+    "Auto-resume deve sempre mandar check explícito `context_watch_status` ou podemos pular quando último evento já é `ok`?"
   ],
   "key_decisions_pending": [
-    "Definir contrato canônico de cadência operacional no prompt: 2-4 arquivos (balanced) vs limites por lane/profile."
+    "Padronizar semântica de `standard-slices` por lane/profile (faixa alvo de arquivos/testes) para reduzir ambiguidade operacional."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+    "packages/pi-stack/extensions/context-watchdog.ts",
     "packages/pi-stack/test/smoke/context-watchdog.test.ts",
     ".project/tasks.json",
     ".project/verification.json",
@@ -28,10 +29,10 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T01:58:00.000Z",
+      "atIso": "2026-04-23T02:03:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 36,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

@@ -3577,6 +3577,27 @@
           "evidence": "Teste `builds compact auto-resume prompt from handoff freshness snapshot` atualizado para guidance adaptativo + sem instrução fixa antiga."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-188",
+      "target": "TASK-BUD-117",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "`context_watch_status` passou a expor sinal auditável de cadência (`operatingCadence`, `postResumeRecalibrated`, `reason`) com derivação determinística por `resolveContextWatchOperatingCadence` em `packages/pi-stack/extensions/context-watchdog.ts`. Também foi incluída linha de cadência no comando `/context-watch`. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` => 16/16.",
+      "criteria_results": [
+        {
+          "criterion": "Estado pós-resume saudável explicita que micro-slice não é obrigatório.",
+          "status": "passed",
+          "evidence": "`assessmentLevel=ok` + `handoffLastEventLevel=compact` retorna `operatingCadence=standard-slices` e `postResumeRecalibrated=true`."
+        },
+        {
+          "criterion": "Níveis de pressão mantêm orientação conservadora sem bloqueio hard.",
+          "status": "passed",
+          "evidence": "`assessmentLevel=warn|checkpoint|compact` retorna `operatingCadence=micro-slice-only` com reason por nível."
+        }
+      ]
     }
   ]
 }

@@ -141,6 +141,21 @@ export type ContextWatchOperatorSignal = {
 	noiseExcessive: boolean;
 };
 
+export type ContextWatchOperatingCadence = "standard-slices" | "micro-slice-only";
+
+export type ContextWatchOperatingCadenceSignal = {
+	operatingCadence: ContextWatchOperatingCadence;
+	postResumeRecalibrated: boolean;
+	reason:
+		| "healthy"
+		| "level-warn"
+		| "level-checkpoint"
+		| "level-compact"
+		| "recalibrated-from-warn"
+		| "recalibrated-from-checkpoint"
+		| "recalibrated-from-compact";
+};
+
 export function applyWarnCadenceEscalation(
 	assessment: ContextWatchAssessment,
 	warnStreak: number,
@@ -181,6 +196,62 @@ export function resolveContextWatchOperatorSignal(input: {
 		humanActionRequired: reasons.length > 0,
 		reasons,
 		noiseExcessive: signalNoiseExcessive,
+	};
+}
+
+export function resolveContextWatchOperatingCadence(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	handoffLastEventLevel?: ContextWatchdogLevel | null;
+}): ContextWatchOperatingCadenceSignal {
+	const level = input.assessmentLevel;
+	if (level === "warn") {
+		return {
+			operatingCadence: "micro-slice-only",
+			postResumeRecalibrated: false,
+			reason: "level-warn",
+		};
+	}
+	if (level === "checkpoint") {
+		return {
+			operatingCadence: "micro-slice-only",
+			postResumeRecalibrated: false,
+			reason: "level-checkpoint",
+		};
+	}
+	if (level === "compact") {
+		return {
+			operatingCadence: "micro-slice-only",
+			postResumeRecalibrated: false,
+			reason: "level-compact",
+		};
+	}
+
+	const previous = input.handoffLastEventLevel;
+	if (previous === "warn") {
+		return {
+			operatingCadence: "standard-slices",
+			postResumeRecalibrated: true,
+			reason: "recalibrated-from-warn",
+		};
+	}
+	if (previous === "checkpoint") {
+		return {
+			operatingCadence: "standard-slices",
+			postResumeRecalibrated: true,
+			reason: "recalibrated-from-checkpoint",
+		};
+	}
+	if (previous === "compact") {
+		return {
+			operatingCadence: "standard-slices",
+			postResumeRecalibrated: true,
+			reason: "recalibrated-from-compact",
+		};
+	}
+	return {
+		operatingCadence: "standard-slices",
+		postResumeRecalibrated: false,
+		reason: "healthy",
 	};
 }
 
@@ -499,10 +570,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 				),
 			});
+			const operatingCadence = resolveContextWatchOperatingCadence({
+				assessmentLevel: assessment.level,
+				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
+			});
 			const payload = {
 				...assessment,
 				autoCompact,
 				operatorSignal,
+				operatingCadence,
 			};
 			return {
 				content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
@@ -600,6 +676,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 				),
 			});
+			const operatingCadence = resolveContextWatchOperatingCadence({
+				assessmentLevel: assessment.level,
+				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
+			});
 			ctx.ui.notify(
 				[
 					formatContextWatchStatus(assessment),
@@ -608,6 +688,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
+					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
 					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
