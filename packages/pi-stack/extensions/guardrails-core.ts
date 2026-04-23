@@ -865,6 +865,60 @@ function updateLongRunLaneStatus(
   );
 }
 
+interface LoopActivationEvidenceState {
+  version: 1;
+  updatedAtIso: string;
+  lastLoopReady?: {
+    atIso: string;
+    markersLabel: string;
+    runtimeCodeState: RuntimeCodeActivationState;
+    boardAutoAdvanceGate: BoardAutoAdvanceGateReason;
+    nextTaskId?: string;
+  };
+  lastBoardAutoAdvance?: {
+    atIso: string;
+    taskId: string;
+    runtimeCodeState: RuntimeCodeActivationState;
+    markersLabel: string;
+    emLoop: boolean;
+  };
+}
+
+function loopActivationEvidencePath(cwd: string): string {
+  return join(cwd, ".pi", "guardrails-loop-evidence.json");
+}
+
+function readLoopActivationEvidence(cwd: string): LoopActivationEvidenceState {
+  const p = loopActivationEvidencePath(cwd);
+  if (!existsSync(p)) {
+    return {
+      version: 1,
+      updatedAtIso: new Date(0).toISOString(),
+    };
+  }
+  try {
+    const raw = JSON.parse(readFileSync(p, "utf8")) as Partial<LoopActivationEvidenceState>;
+    return {
+      version: 1,
+      updatedAtIso: typeof raw.updatedAtIso === "string" ? raw.updatedAtIso : new Date(0).toISOString(),
+      lastLoopReady: raw.lastLoopReady,
+      lastBoardAutoAdvance: raw.lastBoardAutoAdvance,
+    };
+  } catch {
+    return {
+      version: 1,
+      updatedAtIso: new Date(0).toISOString(),
+    };
+  }
+}
+
+function writeLoopActivationEvidence(cwd: string, state: LoopActivationEvidenceState): string {
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  const p = loopActivationEvidencePath(cwd);
+  writeFileSync(p, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  return p;
+}
+
 export function shouldAnnounceStrictInteractiveMode(
   alreadyAnnounced: boolean,
   strictMode: boolean,
@@ -974,6 +1028,44 @@ export default function (pi: ExtensionAPI) {
       currentSourceMtimeMs: readGuardrailsCoreSourceMtimeMs(),
       mtimeToleranceMs: 10,
     });
+  }
+
+  function recordLoopReadyEvidence(
+    ctx: ExtensionContext,
+    markersLabel: string,
+    runtimeCodeState: RuntimeCodeActivationState,
+    boardAutoAdvanceGate: BoardAutoAdvanceGateReason,
+    nextTaskId?: string,
+  ): void {
+    const evidence = readLoopActivationEvidence(ctx.cwd);
+    evidence.updatedAtIso = new Date().toISOString();
+    evidence.lastLoopReady = {
+      atIso: evidence.updatedAtIso,
+      markersLabel,
+      runtimeCodeState,
+      boardAutoAdvanceGate,
+      nextTaskId,
+    };
+    writeLoopActivationEvidence(ctx.cwd, evidence);
+  }
+
+  function recordBoardAutoAdvanceEvidence(
+    ctx: ExtensionContext,
+    taskId: string,
+    runtimeCodeState: RuntimeCodeActivationState,
+    markersLabel: string,
+    emLoop: boolean,
+  ): void {
+    const evidence = readLoopActivationEvidence(ctx.cwd);
+    evidence.updatedAtIso = new Date().toISOString();
+    evidence.lastBoardAutoAdvance = {
+      atIso: evidence.updatedAtIso,
+      taskId,
+      runtimeCodeState,
+      markersLabel,
+      emLoop,
+    };
+    writeLoopActivationEvidence(ctx.cwd, evidence);
   }
 
   function scheduleAutoDrainDeferredIntent(
@@ -1231,6 +1323,13 @@ export default function (pi: ExtensionAPI) {
         boardAutoAdvanceGate,
         nextTaskId: boardReadiness.nextTaskId,
       });
+      recordLoopReadyEvidence(
+        ctx,
+        loopMarkersLabel,
+        runtimeCodeState,
+        boardAutoAdvanceGate,
+        boardReadiness.nextTaskId,
+      );
       lastLoopActivationReadyAt = nowMs;
       lastLoopActivationReadyLabel = loopMarkersLabel;
       ctx.ui.notify(`loop-ready: ${loopMarkersLabel}`, "info");
@@ -1273,6 +1372,13 @@ export default function (pi: ExtensionAPI) {
         lastBoardAutoAdvanceTaskId = intent.taskId;
         lastBoardAutoAdvanceAt = nowMs;
         lastAutoDrainAt = nowMs;
+        recordBoardAutoAdvanceEvidence(
+          ctx,
+          intent.taskId,
+          runtimeCodeState,
+          loopMarkersLabel,
+          loopMarkers.emLoop,
+        );
         markLoopDispatch(ctx, `board-auto-${intent.taskId}`);
         updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
         ctx.ui.notify(
@@ -2217,6 +2323,7 @@ export default function (pi: ExtensionAPI) {
         ? `${lastBoardAutoAdvanceTaskId}@${Math.max(0, Math.ceil((nowMs - lastBoardAutoAdvanceAt) / 1000))}s`
         : "n/a";
       const runtimeCodeState: RuntimeCodeActivationState = currentRuntimeCodeState();
+      const loopEvidence = readLoopActivationEvidence(ctx.cwd);
       const loopMarkers = resolveLoopActivationMarkers({
         activeLongRun,
         queuedCount: queued,
@@ -2233,10 +2340,24 @@ export default function (pi: ExtensionAPI) {
       const loopReadyLast = lastLoopActivationReadyAt > 0
         ? `${Math.max(0, Math.ceil((nowMs - lastLoopActivationReadyAt) / 1000))}s`
         : "n/a";
+      const evidenceBoardAuto = loopEvidence.lastBoardAutoAdvance;
+      const evidenceBoardAutoAge = evidenceBoardAuto
+        ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceBoardAuto.atIso)) / 1000))}s`
+        : "n/a";
+      const evidenceBoardAutoSummary = evidenceBoardAuto
+        ? `${evidenceBoardAuto.taskId}@${evidenceBoardAutoAge} runtime=${evidenceBoardAuto.runtimeCodeState} emLoop=${evidenceBoardAuto.emLoop ? "yes" : "no"}`
+        : "n/a";
+      const evidenceLoopReady = loopEvidence.lastLoopReady;
+      const evidenceLoopReadyAge = evidenceLoopReady
+        ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceLoopReady.atIso)) / 1000))}s`
+        : "n/a";
+      const evidenceLoopReadySummary = evidenceLoopReady
+        ? `${evidenceLoopReadyAge} runtime=${evidenceLoopReady.runtimeCodeState} gate=${evidenceLoopReady.boardAutoAdvanceGate}`
+        : "n/a";
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} loopReadyLast=${loopReadyLast} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]
