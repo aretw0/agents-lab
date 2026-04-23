@@ -54,7 +54,33 @@ Adaptação local obrigatória:
 - abrir federação antes de estabilizar operação local;
 - compensar arquitetura frágil com compactação frequente.
 
-## Próximo micro-slice
+## Checklist GO/NO-GO — transição Modo 1 -> Modo 2
 
-1. Formalizar checklist GO/NO-GO de transição Modo 1 -> Modo 2.
-2. Definir envelope mínimo de telemetria para Modo 3 (status, readiness, budget, lease).
+### GO (todos obrigatórios)
+- `subagent_readiness_status(strict=true)` retorna `ready=true` por pelo menos 2 checks consecutivos.
+- Últimas runs controladas não apresentam `BUDGET_EXCEEDED` no recorte operacional.
+- Board canônico está íntegro (`project-validate` clean) e handoff atualizado.
+- Delegações curtas já demonstraram retorno auditável (evidência + status de task sem auto-close indevido).
+
+### NO-GO (qualquer item bloqueia)
+- readiness strict oscilando (`ready=false` recorrente) por causas não diagnosticadas.
+- falha de governança de budget (streak de bloqueio, retries exaustos sem contenção).
+- dependência de memória de subagente para decisão estratégica.
+- ausência de evidência canônica no parent control-plane.
+
+## Envelope mínimo de telemetria — Modo 3 (federação)
+
+Cada control-plane federado deve expor, no mínimo:
+
+- `instanceId`: identidade estável da instância (workspace/projeto).
+- `status`: `running|paused|degraded`.
+- `readiness`: resultado gate strict (`ready`, checks críticos, timestamp).
+- `budget`: estado resumido por provider/account (`ok|warn|block`).
+- `lease`: owner + heartbeat + expiração.
+- `workload`: fila pendente e task ativa (se houver).
+- `lastHandoffAtIso`: timestamp da última atualização canônica.
+
+Contrato de operação do coordenador (queen-of-queens):
+- nunca decidir por contexto implícito de worker;
+- sempre agir com base em telemetria explícita + evidência do board local;
+- isolar instância degradada sem interromper as saudáveis.
