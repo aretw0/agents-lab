@@ -1,46 +1,49 @@
 {
-  "timestamp": "2026-04-23T01:21:00.000Z",
-  "context": "Slice 20 da TASK-BUD-116 concluído em micro-slice: deduplicação de tipos de configuração no entrypoint colony-pilot por aliases para shapes dos módulos extraídos, mantendo contrato público e reduzindo bloat estrutural.",
-  "current_phase": "factory-colony-pilot-deflation",
+  "timestamp": "2026-04-23T01:33:00.000Z",
+  "context": "Pivot parcial para fábrica (TASK-BUD-114) em micro-slice: allowlist de escopo agora gera inventário seletivo automático (`promoted/skipped`) a partir de `Final file inventory` quando modo `apply-to-branch` não trouxer seções explícitas. Auditoria automática adicionada (`colony-pilot.selective-promotion-inventory`).",
+  "current_phase": "factory-selective-promotion-and-deflation",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116",
     "TASK-BUD-117"
   ],
   "blockers": [
-    "context-watch-warn-active"
+    "context-watch-checkpoint-required"
   ],
   "next_actions": [
-    "Manter micro-slices na TASK-BUD-116 enquanto context-watch permanecer em warn.",
-    "Retomar TASK-BUD-114 para wiring da allowlist efetiva promoted/skipped por diff.",
-    "Planejar execução de TASK-BUD-117 para recalibração pós-compact/resume no context-watchdog."
+    "Checkpoint escrito; manter próximos cortes em micro-slice até compact.",
+    "TASK-BUD-114: conectar avaliação de scope ao fluxo de promoção efetiva por diff/apply (hoje já há auto-inventory + audit).",
+    "TASK-BUD-116: continuar apenas limpeza incremental quando encostar em hotspots reais.",
+    "TASK-BUD-117 permanece planejada para recalibração pós-compact/resume."
   ],
   "open_questions": [
-    "Próximo micro-corte: deduplicar tipos/resolvers residuais de task-sync no entrypoint ou abrir slice mínimo da TASK-BUD-114?"
+    "Default da policy de scope no launch: exigir token explícito (`docs-only`/`code-scope`) ou inferir fallback seguro?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
     "Política de aceleração controlada pós-compact quando `level=ok` sem reintroduzir risco de overflow de contexto."
   ],
   "files_in_flux": [
+    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
     "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T01:21:00.000Z",
+      "atIso": "2026-04-23T01:33:00.000Z",
       "reason": "message_end",
-      "level": "warn",
-      "percent": 59,
+      "level": "checkpoint",
+      "percent": 71,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
     }
   ]
 }

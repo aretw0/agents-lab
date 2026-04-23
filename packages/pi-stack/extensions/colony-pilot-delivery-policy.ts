@@ -19,6 +19,24 @@ export interface SelectivePromotionInventoryEvidence {
 	hasSelectivePromotionInventory: boolean;
 }
 
+export interface SelectivePromotionScopePolicy {
+	mode: "docs-only" | "code-scope";
+	allowlist: string[];
+	raw: string;
+}
+
+export interface SelectivePromotionScopeSkippedFile {
+	path: string;
+	reason: "out-of-scope";
+}
+
+export interface SelectivePromotionScopeEvaluation {
+	policy: SelectivePromotionScopePolicy;
+	candidateFiles: string[];
+	promotedFiles: string[];
+	skippedFiles: SelectivePromotionScopeSkippedFile[];
+}
+
 export interface ColonyPilotDeliveryEvidence
 	extends SelectivePromotionInventoryEvidence {
 	hasWorkspaceReport: boolean;
@@ -78,6 +96,168 @@ export function resolveColonyPilotDeliveryPolicy(
 		requireValidationCommandLog: raw?.requireValidationCommandLog === true,
 		blockOnMissingEvidence: raw?.blockOnMissingEvidence !== false,
 	};
+}
+
+const SELECTIVE_PROMOTION_INVENTORY_MISSING_PREFIX =
+	"delivery evidence missing: selective promotion inventory";
+
+function normalizePathLike(input: string): string {
+	return input.trim().replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function escapeRegExp(input: string): string {
+	return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function globToRegExp(glob: string): RegExp {
+	const normalized = normalizePathLike(glob);
+	let out = "^";
+	for (let i = 0; i < normalized.length; i += 1) {
+		const ch = normalized[i]!;
+		if (ch === "*") {
+			const next = normalized[i + 1];
+			if (next === "*") {
+				out += ".*";
+				i += 1;
+			} else {
+				out += "[^/]*";
+			}
+			continue;
+		}
+		if (ch === "?") {
+			out += "[^/]";
+			continue;
+		}
+		out += escapeRegExp(ch);
+	}
+	out += "$";
+	return new RegExp(out, "i");
+}
+
+function extractInventoryPath(line: string): string | undefined {
+	const bullet = line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);
+	if (!bullet) return undefined;
+
+	let body = bullet[1]!.trim();
+	const backtick = body.match(/^`([^`]+)`/);
+	if (backtick?.[1]) {
+		body = backtick[1];
+	}
+
+	body = body.replace(/\s+-\s+.*$/, "").trim();
+	body = body.replace(/\s+\([^)]*\)\s*$/, "").trim();
+	body = body.replace(/^['"`]+|['"`]+$/g, "").trim();
+	body = normalizePathLike(body);
+
+	if (!body) return undefined;
+	if (!/[/.]/.test(body)) return undefined;
+	if (body.startsWith("**")) return undefined;
+	return body;
+}
+
+export function parseFinalFileInventory(text: string): string[] {
+	const lines = text.split(/\r?\n/);
+	const headingRe =
+		/^\s*(?:#{1,6}\s*)?(?:final\s+file\s+inventory|invent[aá]rio\s+final(?:\s+de\s+arquivos?)?)\s*:?\s*$/i;
+	const stopRe =
+		/^\s*(?:#{1,6}\s+\S|(?:promoted|skipped)\s+file\s+inventory\b|invent[aá]rio\s+de\s+(?:promov|skip))/i;
+
+	const start = lines.findIndex((line) => headingRe.test(line));
+	if (start < 0) return [];
+
+	const out: string[] = [];
+	for (let i = start + 1; i < lines.length; i += 1) {
+		const line = lines[i]!;
+		if (!line.trim()) continue;
+		if (stopRe.test(line)) break;
+		const p = extractInventoryPath(line);
+		if (p && !out.includes(p)) out.push(p);
+	}
+	return out;
+}
+
+export function parseSelectivePromotionScopePolicy(
+	goal: string,
+): SelectivePromotionScopePolicy | undefined {
+	if (!goal || typeof goal !== "string") return undefined;
+	if (/\bdocs-only\b/i.test(goal)) {
+		return {
+			mode: "docs-only",
+			raw: "docs-only",
+			allowlist: ["docs/**", "*.md", "*.mdx", "**/*.md", "**/*.mdx"],
+		};
+	}
+
+	const match = goal.match(/code-scope\s*:\s*([^\n]+)/i);
+	if (!match?.[1]) return undefined;
+	const raw = match[1].trim();
+	const allowlist = raw
+		.split(/[\s,]+/)
+		.map((token) => token.trim())
+		.map((token) => token.replace(/^[`'"(\[]+|[`'"\])]+$/g, ""))
+		.filter((token) => token.length > 0)
+		.map((token) => normalizePathLike(token));
+	if (allowlist.length === 0) return undefined;
+	return {
+		mode: "code-scope",
+		raw,
+		allowlist,
+	};
+}
+
+function matchesAllowlist(filePath: string, allowlist: string[]): boolean {
+	const normalized = normalizePathLike(filePath);
+	return allowlist.some((glob) => globToRegExp(glob).test(normalized));
+}
+
+export function evaluateSelectivePromotionScope(
+	goal: string,
+	text: string,
+): SelectivePromotionScopeEvaluation | undefined {
+	const policy = parseSelectivePromotionScopePolicy(goal);
+	if (!policy) return undefined;
+	const candidateFiles = parseFinalFileInventory(text);
+	if (candidateFiles.length === 0) {
+		return {
+			policy,
+			candidateFiles,
+			promotedFiles: [],
+			skippedFiles: [],
+		};
+	}
+
+	const promotedFiles: string[] = [];
+	const skippedFiles: SelectivePromotionScopeSkippedFile[] = [];
+	for (const file of candidateFiles) {
+		if (matchesAllowlist(file, policy.allowlist)) {
+			promotedFiles.push(file);
+		} else {
+			skippedFiles.push({ path: file, reason: "out-of-scope" });
+		}
+	}
+
+	return {
+		policy,
+		candidateFiles,
+		promotedFiles,
+		skippedFiles,
+	};
+}
+
+export function hasSelectivePromotionInventoryMissingIssue(
+	issues: string[],
+): boolean {
+	return issues.some((issue) =>
+		issue.startsWith(SELECTIVE_PROMOTION_INVENTORY_MISSING_PREFIX),
+	);
+}
+
+export function removeSelectivePromotionInventoryMissingIssue(
+	issues: string[],
+): string[] {
+	return issues.filter(
+		(issue) => !issue.startsWith(SELECTIVE_PROMOTION_INVENTORY_MISSING_PREFIX),
+	);
 }
 
 export function evaluateSelectivePromotionInventoryEvidence(

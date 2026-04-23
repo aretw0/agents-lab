@@ -105,8 +105,11 @@ import {
 	DEFAULT_COLONY_PILOT_DELIVERY_POLICY,
 	evaluateColonyDeliveryEvidence as evaluateColonyDeliveryEvidenceImpl,
 	evaluateSelectivePromotionInventoryEvidence as evaluateSelectivePromotionInventoryEvidenceImpl,
+	evaluateSelectivePromotionScope as evaluateSelectivePromotionScopeImpl,
 	formatDeliveryPolicyEvaluation as formatDeliveryPolicyEvaluationImpl,
+	hasSelectivePromotionInventoryMissingIssue as hasSelectivePromotionInventoryMissingIssueImpl,
 	parseDeliveryModeOverride as parseDeliveryModeOverrideImpl,
+	removeSelectivePromotionInventoryMissingIssue as removeSelectivePromotionInventoryMissingIssueImpl,
 	resolveColonyPilotDeliveryPolicy as resolveColonyPilotDeliveryPolicyImpl,
 } from "./colony-pilot-delivery-policy";
 import {
@@ -373,6 +376,9 @@ export type SelectivePromotionInventoryEvidence =
 export const evaluateSelectivePromotionInventoryEvidence =
 	evaluateSelectivePromotionInventoryEvidenceImpl;
 
+export const evaluateSelectivePromotionScope =
+	evaluateSelectivePromotionScopeImpl;
+
 export const evaluateColonyDeliveryEvidence =
 	evaluateColonyDeliveryEvidenceImpl;
 
@@ -589,6 +595,63 @@ export default function (pi: ExtensionAPI) {
 
 		const taskIdOverride = colonyTaskMap.get(signal.id);
 
+		const resolveCompletedDeliveryEvaluation = () => {
+			let deliveryEval = evaluateColonyDeliveryEvidence(
+				text,
+				signal.phase,
+				deliveryPolicyConfig,
+			);
+			const selectiveScope = guessedGoal
+				? evaluateSelectivePromotionScopeImpl(guessedGoal, text)
+				: undefined;
+
+			if (
+				deliveryPolicyConfig.mode === "apply-to-branch" &&
+				selectiveScope &&
+				selectiveScope.candidateFiles.length > 0 &&
+				hasSelectivePromotionInventoryMissingIssueImpl(deliveryEval.issues)
+			) {
+				const nextIssues = removeSelectivePromotionInventoryMissingIssueImpl(
+					deliveryEval.issues,
+				);
+				if (selectiveScope.promotedFiles.length === 0) {
+					nextIssues.push(
+						"delivery evidence missing: selective promotion resulted in zero promoted files (recovery required)",
+					);
+				}
+
+				deliveryEval = {
+					...deliveryEval,
+					ok: nextIssues.length === 0,
+					issues: nextIssues,
+					evidence: {
+						...deliveryEval.evidence,
+						hasPromotedFileInventory: true,
+						hasSkippedFileInventory: true,
+						hasSelectivePromotionInventory: true,
+					},
+				};
+
+				pi.appendEntry("colony-pilot.selective-promotion-inventory", {
+					atIso: new Date().toISOString(),
+					colonyId: signal.id,
+					goal: guessedGoal,
+					policy: selectiveScope.policy,
+					candidateFiles: selectiveScope.candidateFiles,
+					promotedFiles: selectiveScope.promotedFiles,
+					skippedFiles: selectiveScope.skippedFiles,
+					autoComputed: true,
+				});
+			}
+
+			return { deliveryEval, selectiveScope };
+		};
+
+		const completedDelivery =
+			signal.phase === "completed"
+				? resolveCompletedDeliveryEvaluation()
+				: undefined;
+
 		let syncResult: { taskId: string } | undefined;
 		if (projectTaskSyncConfig.enabled) {
 			syncResult = upsertProjectTaskFromColonySignal(ctx.cwd, signal, {
@@ -599,11 +662,7 @@ export default function (pi: ExtensionAPI) {
 			});
 
 			if (signal.phase === "completed") {
-				const deliveryEval = evaluateColonyDeliveryEvidence(
-					text,
-					signal.phase,
-					deliveryPolicyConfig,
-				);
+				const deliveryEval = completedDelivery!.deliveryEval;
 				const requiresPromotion =
 					deliveryPolicyConfig.mode !== "apply-to-branch" || !deliveryEval.ok;
 
@@ -670,14 +729,7 @@ export default function (pi: ExtensionAPI) {
 			signal.phase === "budget_exceeded";
 
 		if (isTerminalSignal && candidateRetentionConfig.enabled) {
-			const deliveryEval =
-				signal.phase === "completed"
-					? evaluateColonyDeliveryEvidence(
-							text,
-							signal.phase,
-							deliveryPolicyConfig,
-						)
-					: undefined;
+			const deliveryEval = completedDelivery?.deliveryEval;
 			const mirrors = buildAntColonyMirrorCandidates(ctx.cwd).map((p) => ({
 				path: p,
 				exists: existsSync(p),

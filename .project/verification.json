@@ -3509,6 +3509,32 @@
           "evidence": "72/72 aprovado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-185",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice runtime para promoção seletiva automática: `colony-pilot-delivery-policy.ts` ganhou parser de `Final file inventory`, parser de scope policy (`docs-only` e `code-scope:<globs>`), avaliação `promoted/skipped` por allowlist e helpers de reconciliação de issue de inventário seletivo. `colony-pilot.ts` passou a auto-reconciliar evidência em `apply-to-branch` e auditar `colony-pilot.selective-promotion-inventory` quando inventário não vier explícito no report. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 74/74.",
+      "criteria_results": [
+        {
+          "criterion": "Fluxo consegue derivar `promoted` vs `skipped` por allowlist quando há candidate diff no report.",
+          "status": "passed",
+          "evidence": "`evaluateSelectivePromotionScope` calcula interseção candidateDiff ∩ allowlist e classifica `out-of-scope`."
+        },
+        {
+          "criterion": "Evidência canônica de seleção fica disponível sem depender de edição manual do report.",
+          "status": "passed",
+          "evidence": "`colony-pilot.ts` emite audit entry `colony-pilot.selective-promotion-inventory` com policy/candidate/promoted/skipped autoComputed."
+        },
+        {
+          "criterion": "Fallback explícito permanece quando promoção seletiva resulta vazia.",
+          "status": "passed",
+          "evidence": "Reconciliação adiciona issue `zero promoted files (recovery required)` mantendo trilha de recovery."
+        }
+      ]
     }
   ]
 }

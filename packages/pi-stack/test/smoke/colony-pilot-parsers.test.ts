@@ -21,6 +21,7 @@ import {
 	evaluateColonyDeliveryEvidence,
 	evaluateHatchReadiness,
 	evaluateSelectivePromotionInventoryEvidence,
+	evaluateSelectivePromotionScope,
 	evaluateProviderBudgetGate,
 	executableProbe,
 	formatHatchDoctorSnapshot,
@@ -985,6 +986,53 @@ describe("colony-pilot parsers", () => {
 		expect(evidence.hasPromotedFileInventory).toBe(true);
 		expect(evidence.hasSkippedFileInventory).toBe(true);
 		expect(evidence.hasSelectivePromotionInventory).toBe(true);
+	});
+
+	it("avalia promoção seletiva automática com scope docs-only", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+			"- README.md",
+		].join("\n");
+
+		const scope = evaluateSelectivePromotionScope(goal, report);
+		expect(scope).toBeDefined();
+		expect(scope?.promotedFiles).toEqual([
+			"docs/guides/project-canonical-pipeline.md",
+			"README.md",
+		]);
+		expect(scope?.skippedFiles).toEqual([
+			{
+				path: "packages/pi-stack/extensions/colony-pilot.ts",
+				reason: "out-of-scope",
+			},
+		]);
+	});
+
+	it("avalia promoção seletiva automática com code-scope", () => {
+		const goal =
+			"Promover mudanças com code-scope: packages/pi-stack/extensions/**, docs/**";
+		const report = [
+			"Final file inventory:",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+			"- docs/guides/project-canonical-pipeline.md",
+			"- scripts/test/session-triage-delegation.test.mjs",
+		].join("\n");
+
+		const scope = evaluateSelectivePromotionScope(goal, report);
+		expect(scope).toBeDefined();
+		expect(scope?.promotedFiles).toEqual([
+			"packages/pi-stack/extensions/colony-pilot.ts",
+			"docs/guides/project-canonical-pipeline.md",
+		]);
+		expect(scope?.skippedFiles).toEqual([
+			{
+				path: "scripts/test/session-triage-delegation.test.mjs",
+				reason: "out-of-scope",
+			},
+		]);
 	});
 
 	it("delivery evidence em apply-to-branch exige inventários promoted/skipped", () => {
