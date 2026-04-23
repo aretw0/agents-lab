@@ -4344,6 +4344,15 @@
       "method": "test",
       "timestamp": "2026-04-23T19:46:00Z",
       "evidence": "Micro-slice de observabilidade para desbloquear prova operacional: adicionado subcomando `/lane-queue evidence` (help/status atualizados) e persistência local `.pi/guardrails-loop-evidence.json` já conectada ao runtime (`loop-activation-ready` + `board-intent-auto-advance`). Isso reduz incerteza de progresso e evita parse amplo de sessão para checar `runtimeCodeState/emLoop`. Smokes focais verdes: `guardrails-long-run-intent-queue`, `guardrails-intent-bus`, `guardrails-board-readiness` => 42/42."
+    },
+    {
+      "id": "VER-BUD-235",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T19:57:00Z",
+      "evidence": "Micro-slice de compact-threshold entregue: (1) `computeLoopEvidenceReadiness(...)` canônico para avaliar fechamento operacional (`runtime active` + `emLoop=yes` + `loop-ready active`) a partir do snapshot local; (2) `/lane-queue evidence` agora exibe `readyForTaskBud125=yes|no` + critérios explícitos e emite audit `guardrails-core.loop-evidence-status`; (3) help/docs sincronizados. Smokes focais: `guardrails-long-run-intent-queue`, `guardrails-intent-bus`, `guardrails-board-readiness` => 43/43."
     }
   ]
 }
