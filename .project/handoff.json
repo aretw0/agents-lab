@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-04-23T02:18:30.000Z",
-  "context": "Execução continuada com foco fábrica: (A) TASK-BUD-114 recebeu enforcement de compliance de promoção seletiva (allowlist + candidate diff) para inventários explícitos/derivados; (B) TASK-BUD-117 ganhou documentação canônica de cadência adaptativa pós-resume (`operatingCadence`/`postResumeRecalibrated`).",
-  "current_phase": "factory-selective-promotion-and-post-resume-recalibration",
+  "timestamp": "2026-04-23T02:27:30.000Z",
+  "context": "Backlog estratégico refinado por decisão humana: priorizar desbloqueio de potencial do control plane (loops autônomos confiáveis) antes de curadoria de canal Telegram. Telegram foi explicitamente posicionado para fase final de lapidação.",
+  "current_phase": "control-plane-autonomy-prioritized",
   "current_tasks": [
     "TASK-BUD-114",
-    "TASK-BUD-116",
-    "TASK-BUD-117"
+    "TASK-BUD-117",
+    "TASK-BUD-118",
+    "TASK-BUD-119",
+    "TASK-BUD-120",
+    "TASK-BUD-121"
   ],
   "blockers": [
     "context-watch-warn-active"
   ],
   "next_actions": [
-    "Enquanto level=warn, manter micro-slices e checkpoint frequente.",
-    "TASK-BUD-114: próximo corte deve conectar compliance aprovado ao apply efetivo por diff para fechar promoted vs skipped end-to-end.",
-    "TASK-BUD-117: avaliar se falta expor o mesmo sinal de cadência em mais superfícies além tool/command (se houver consumo externo).",
-    "TASK-BUD-116: somente manutenção oportunista sem abrir frente de refactor grande."
+    "Executar TASK-BUD-118 (núcleo de loop autônomo) como próximo desbloqueador de potencial.",
+    "Na sequência, atacar TASK-BUD-119 (intent bus canônico cross-extension).",
+    "Consolidar superfícies de confiança em TASK-BUD-120.",
+    "Manter TASK-BUD-121 (Telegram) no final, após maturidade do control plane."
   ],
   "open_questions": [
-    "Classificação completa candidate->(promoted|skipped) deve ser estritamente exigida quando Final file inventory estiver presente (atual) ou sempre que houver apply-to-branch?"
+    "Quais intents mínimas entram no primeiro milestone de TASK-BUD-118 para entregar valor rápido sem reinflação?"
   ],
   "key_decisions_pending": [
-    "Definir critério final de fechamento de TASK-BUD-114 para considerar 'promoção efetiva por diff/apply' concluída no runtime atual."
+    "Definir fronteira exata entre loop autônomo 'safe by default' e ações que continuam exigindo consentimento explícito do operador."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
-    "packages/pi-stack/extensions/colony-pilot.ts",
-    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
-    "docs/guides/project-canonical-pipeline.md",
+    ".project/requirements.json",
+    ".project/decisions.json",
     ".project/tasks.json",
-    ".project/verification.json",
-    ".project/handoff.json"
+    ".project/handoff.json",
+    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T02:18:30.000Z",
+      "atIso": "2026-04-23T02:27:30.000Z",
       "reason": "message_end",
       "level": "warn",
       "percent": 54,

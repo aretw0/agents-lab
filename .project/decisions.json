@@ -317,6 +317,14 @@
       "decision": "Adotar política native-first para continuidade de mensagem em long-runs: steer/follow-up nativo como padrão, com lane-queue apenas como mecanismo opt-in para deferimento cross-turn em janela idle.",
       "rationale": "Reduz superfície operacional/cognitiva, minimiza ruído e mantém alinhamento com primitivas first-party do pi; lane-queue permanece disponível para casos específicos sem virar trilha principal.",
       "context": "Feedback explícito do usuário (2026-04-22): dúvida sobre custo/benefício da lane-queue versus fluxo nativo e pedido de formalização com foco em throughput de fábrica."
+    },
+    {
+      "id": "DEC-BUD-045",
+      "decision": "Priorizar desbloqueio de potencial do control plane (loops autônomos confiáveis) antes de curar canal Telegram; Telegram entra apenas na fase final de lapidação.",
+      "rationale": "Maximiza ganho de autonomia com menor risco sistêmico: primeiro estabilizar núcleo de execução/retomada/gates, depois adicionar adapter de mensageria com limitações conhecidas.",
+      "status": "decided",
+      "context": "Diretriz explícita do usuário: backlogar Telegram para o final e focar no que reduz dependência de confirmações óbvias.",
+      "task": "TASK-BUD-118"
     }
   ]
 }

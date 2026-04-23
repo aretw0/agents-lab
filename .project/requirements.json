@@ -858,6 +858,43 @@
         "O estado de cautela pré-compact não persiste de forma indevida após compact/resume; existe reset/rebase determinístico de modo operacional.",
         "A sinalização distingue corretamente `cautela necessária` vs `timidez residual pós-compact`, mantendo comportamento default advisory/non-blocking."
       ]
+    },
+    {
+      "id": "REQ-BUD-060",
+      "description": "O control plane deve oferecer loops autônomos duráveis e confiáveis (intent queue + executor + retry/lease/stop-conditions), permitindo continuidade de execução sem depender de confirmação humana repetitiva para ações óbvias como 'prossiga/continue'.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "acceptance_criteria": [
+        "Existe runtime de loop com estado explícito (running/paused/degraded/completed) e retomada segura após compact/resume.",
+        "A execução de intents entre extensões ocorre por contrato canônico (não por encadeamento frágil de slash commands).",
+        "As ações automáticas permanecem auditáveis no board/handoff com guardrails de budget/delivery sem auto-close estratégico."
+      ],
+      "traces_to": [
+        "TASK-BUD-118",
+        "TASK-BUD-119",
+        "TASK-BUD-120"
+      ]
+    },
+    {
+      "id": "REQ-BUD-061",
+      "description": "A integração com Telegram deve ser curada como canal remoto do control plane apenas após a lapidação do loop autônomo principal, com contrato adapter-aware para limitações de mensageiro (semântica reduzida de UI/ações, latência, segurança e continuidade).",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-060"
+      ],
+      "acceptance_criteria": [
+        "Backlog posiciona Telegram explicitamente após marcos de maturidade do control plane.",
+        "Existe mapeamento explícito de capacidades TUI/Web -> Telegram (o que traduz, o que degrada, o que não é suportado).",
+        "Governança canônica (board/verification/handoff/budget/delivery) é preservada no canal Telegram sem bypass de guardrails."
+      ],
+      "traces_to": [
+        "TASK-BUD-121"
+      ]
     }
   ]
 }
