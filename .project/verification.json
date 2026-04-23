@@ -3666,6 +3666,32 @@
           "evidence": "Subcomandos `pause|resume` adicionados ao `/lane-queue` com atualização de status e audit."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-192",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-118 (lease/stop): `guardrails-core-lane-queue` adicionou sinais de lease/owner (`leaseOwner`, `leaseHeartbeatAtIso`, `leaseExpiresAtIso`, `leaseTtlMs`) e stop-condition explícita (`stopCondition`, `stopReason`) no runtime state persistido em `.pi/long-run-loop-state.json`, com normalização retrocompatível para estado legado. Teste smoke validado: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (20/20).",
+      "criteria_results": [
+        {
+          "criterion": "Runtime expõe sinal explícito de lease/owner para inspeção operacional.",
+          "status": "passed",
+          "evidence": "Estado agora persiste owner/heartbeat/expiry/ttl e renova lease a cada mutação."
+        },
+        {
+          "criterion": "Runtime expõe stop-condition explícita para pause/degraded/lease-expired.",
+          "status": "passed",
+          "evidence": "`stopCondition` e `stopReason` refletem `manual-pause`, `dispatch-failure` e condição `lease-expired` em leitura."
+        },
+        {
+          "criterion": "Comportamento segue determinístico e coberto por smoke focal.",
+          "status": "passed",
+          "evidence": "`guardrails-long-run-intent-queue.test.ts` ampliado para validar transições e lease timestamps."
+        }
+      ]
     }
   ]
 }

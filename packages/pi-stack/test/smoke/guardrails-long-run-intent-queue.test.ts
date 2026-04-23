@@ -290,10 +290,16 @@ describe("guardrails-core long-run intent queue", () => {
       const initial = readLongRunLoopRuntimeState(cwd);
       expect(initial.mode).toBe("running");
       expect(initial.health).toBe("healthy");
+      expect(initial.stopCondition).toBe("none");
+      expect(initial.stopReason).toBe("running");
+      expect(initial.leaseOwner).toContain("guardrails-core:");
+      expect(initial.leaseExpiresAtIso).toBeTruthy();
 
       const paused = setLongRunLoopRuntimeMode(cwd, "paused", "manual-pause").state;
       expect(paused.mode).toBe("paused");
       expect(paused.lastTransitionReason).toBe("manual-pause");
+      expect(paused.stopCondition).toBe("manual-pause");
+      expect(paused.stopReason).toBe("manual-pause");
 
       const degraded = markLongRunLoopRuntimeDegraded(
         cwd,
@@ -302,14 +308,24 @@ describe("guardrails-core long-run intent queue", () => {
       ).state;
       expect(degraded.health).toBe("degraded");
       expect(degraded.lastError).toContain("dispatch failed");
+      expect(degraded.stopCondition).toBe("manual-pause");
+
+      const resumed = setLongRunLoopRuntimeMode(cwd, "running", "manual-resume").state;
+      expect(resumed.mode).toBe("running");
+      expect(resumed.stopCondition).toBe("dispatch-failure");
+      expect(resumed.stopReason).toBe("manual-resume");
 
       const dispatched = markLongRunLoopRuntimeDispatch(cwd, "intent-123").state;
       expect(dispatched.health).toBe("healthy");
       expect(dispatched.lastDispatchItemId).toBe("intent-123");
       expect(dispatched.lastError).toBeUndefined();
+      expect(dispatched.stopCondition).toBe("none");
+      expect(dispatched.stopReason).toBe("running");
 
       const healthy = markLongRunLoopRuntimeHealthy(cwd, "manual-resume").state;
       expect(healthy.health).toBe("healthy");
+      expect(healthy.stopCondition).toBe("none");
+      expect(Date.parse(healthy.leaseExpiresAtIso)).toBeGreaterThan(Date.parse(healthy.leaseHeartbeatAtIso));
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
