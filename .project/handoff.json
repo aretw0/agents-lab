@@ -1,45 +1,45 @@
 {
-  "timestamp": "2026-04-22T23:42:00.000Z",
-  "context": "Deflação do colony-pilot avançou até slice 9 com extração de session helpers; entrypoint caiu para 2254 linhas mantendo wrappers e smoke verde. Context-watch atingiu checkpoint (68%) e pede handoff antes de novo slice maior.",
+  "timestamp": "2026-04-23T00:18:00.000Z",
+  "context": "Deflação do colony-pilot avançou até slice 10 com extração de provider-budget gate snapshot/format para módulo dedicado. Entry point caiu para 2209 linhas mantendo wrappers e smoke verde. Context-watch atingiu compact (72%).",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116"
   ],
   "blockers": [
-    "context-watch-checkpoint-required"
+    "context-watch-compact-required"
   ],
   "next_actions": [
-    "Checkpoint concluído; próximo corte deve permanecer micro-slice até eventual compact/resume.",
-    "TASK-BUD-116: extrair helper residual de provider-budget snapshot/format ou retention wiring mínimo.",
-    "Após estabilizar deflação do entrypoint, retomar TASK-BUD-114 para allowlist efetiva promoted/skipped."
+    "Compact now e retomar do handoff fresco.",
+    "Após resume, continuar TASK-BUD-116 em micro-slice mínimo (residual wiring).",
+    "Concluir deflação suficiente do entrypoint e voltar para TASK-BUD-114 (allowlist efetiva promoted/skipped)."
   ],
   "open_questions": [
-    "Próximo micro-corte de menor risco: provider-budget status helper ou residual retention wiring?"
+    "Qual residual entrega mais redução com menor risco pós-compact: wiring de retention ou cleanup de wrappers?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
-    "packages/pi-stack/extensions/colony-pilot-session-utils.ts",
+    "packages/pi-stack/extensions/colony-pilot-provider-budget-gate.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-22T23:42:00.000Z",
+      "atIso": "2026-04-23T00:18:00.000Z",
       "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 68,
+      "level": "compact",
+      "percent": 72,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

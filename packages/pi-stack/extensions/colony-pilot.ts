@@ -147,10 +147,16 @@ import {
 	writeProjectSettings as writeProjectSettingsImpl,
 } from "./colony-pilot-settings";
 import {
+	formatProviderBudgetStatusLine as formatProviderBudgetStatusLineImpl,
+	type ProviderBudgetGateCacheEntry,
+	type ProviderBudgetGateSnapshot,
+	resolveProviderBudgetGateSnapshot as resolveProviderBudgetGateSnapshotImpl,
+} from "./colony-pilot-provider-budget-gate";
+import {
 	extractText as extractTextImpl,
 	inferMonitorModeFromSessionFile as inferMonitorModeFromSessionFileImpl,
 } from "./colony-pilot-session-utils";
-import { analyzeQuota, type ProviderBudgetStatus } from "./quota-visibility";
+import { type ProviderBudgetStatus } from "./quota-visibility";
 
 export type {
 	ColonyModelReadiness,
@@ -737,22 +743,8 @@ async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
 	return tryOpenUrlImpl(pi, url);
 }
 
-interface ProviderBudgetGateSnapshot {
-	lookbackDays: number;
-	generatedAtIso: string;
-	budgets: ProviderBudgetStatus[];
-	allocationWarnings: string[];
-}
-
 function formatProviderBudgetStatusLine(status: ProviderBudgetStatus): string {
-	const capTokens = status.periodTokensCap
-		? Math.round(status.periodTokensCap).toLocaleString("en-US")
-		: "n/a";
-	const usedPct =
-		status.usedPctTokens !== undefined
-			? `${status.usedPctTokens.toFixed(1)}%`
-			: "n/a";
-	return `  - ${status.provider} (${status.period}) used=${Math.round(status.observedTokens).toLocaleString("en-US")} tok (${usedPct}) cap=${capTokens}`;
+	return formatProviderBudgetStatusLineImpl(status);
 }
 
 export default function (pi: ExtensionAPI) {
@@ -776,9 +768,7 @@ export default function (pi: ExtensionAPI) {
 	let preflightCache:
 		| { at: number; result: ColonyPilotPreflightResult }
 		| undefined;
-	let providerBudgetGateCache:
-		| { at: number; key: string; snapshot: ProviderBudgetGateSnapshot }
-		| undefined;
+	let providerBudgetGateCache: ProviderBudgetGateCacheEntry | undefined;
 
 	pi.on("session_start", (_event, ctx) => {
 		currentCtx = ctx;
@@ -997,49 +987,14 @@ export default function (pi: ExtensionAPI) {
 		ctx: ExtensionContext,
 	): Promise<ProviderBudgetGateSnapshot | undefined> {
 		const quotaCfg = parseQuotaVisibilityBudgetSettings(ctx.cwd);
-		if (Object.keys(quotaCfg.providerBudgets).length === 0) return undefined;
-
-		const cacheKey = JSON.stringify({
+		const resolved = await resolveProviderBudgetGateSnapshotImpl({
 			cwd: ctx.cwd,
-			days: budgetPolicyConfig.providerBudgetLookbackDays,
-			weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
-			weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
-			weeklyQuotaRequests: quotaCfg.weeklyQuotaRequests,
-			monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
-			monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
-			monthlyQuotaRequests: quotaCfg.monthlyQuotaRequests,
-			providerBudgets: quotaCfg.providerBudgets,
-		});
-
-		if (
-			providerBudgetGateCache &&
-			providerBudgetGateCache.key === cacheKey &&
-			Date.now() - providerBudgetGateCache.at < 30_000
-		) {
-			return providerBudgetGateCache.snapshot;
-		}
-
-		const status = await analyzeQuota({
-			days: budgetPolicyConfig.providerBudgetLookbackDays,
-			weeklyQuotaTokens: quotaCfg.weeklyQuotaTokens,
-			weeklyQuotaCostUsd: quotaCfg.weeklyQuotaCostUsd,
-			weeklyQuotaRequests: quotaCfg.weeklyQuotaRequests,
-			monthlyQuotaTokens: quotaCfg.monthlyQuotaTokens,
-			monthlyQuotaCostUsd: quotaCfg.monthlyQuotaCostUsd,
-			monthlyQuotaRequests: quotaCfg.monthlyQuotaRequests,
-			providerWindowHours: {},
-			providerBudgets: quotaCfg.providerBudgets,
-		});
-
-		const snapshot: ProviderBudgetGateSnapshot = {
 			lookbackDays: budgetPolicyConfig.providerBudgetLookbackDays,
-			generatedAtIso: status.source.generatedAtIso,
-			budgets: status.providerBudgets,
-			allocationWarnings: status.providerBudgetPolicy.allocationWarnings,
-		};
-
-		providerBudgetGateCache = { at: Date.now(), key: cacheKey, snapshot };
-		return snapshot;
+			quotaCfg,
+			cache: providerBudgetGateCache,
+		});
+		providerBudgetGateCache = resolved.cache;
+		return resolved.snapshot;
 	}
 
 	pi.on("message_end", (event, ctx) => {

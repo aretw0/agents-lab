@@ -3275,6 +3275,32 @@
           "evidence": "72/72 após extração."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-176",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-22T00:00:00Z",
+      "evidence": "Slice 10 (micro) da deflação: provider-budget snapshot/format helpers extraídos para `packages/pi-stack/extensions/colony-pilot-provider-budget-gate.ts` com manutenção do cache de 30s e dos call-sites no entrypoint via wrappers. `colony-pilot.ts` caiu para 2209 linhas. Teste: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` atua como orquestrador com módulos extraídos por domínio, sem reinflar bloco monolítico.",
+          "status": "passed",
+          "evidence": "Provider-budget gate snapshot/format removidos do entrypoint para módulo dedicado."
+        },
+        {
+          "criterion": "Exports públicos usados por tests/consumidores permanecem estáveis (ou com migração explícita).",
+          "status": "passed",
+          "evidence": "Assinaturas públicas mantidas no entrypoint por wrappers."
+        },
+        {
+          "criterion": "Smoke focada cobre regressão dos domínios extraídos e mantém comportamento operacional inalterado.",
+          "status": "passed",
+          "evidence": "72/72 após extração."
+        }
+      ]
     }
   ]
 }
