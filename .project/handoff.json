@@ -1,45 +1,48 @@
 {
-  "timestamp": "2026-04-23T02:03:30.000Z",
-  "context": "TASK-BUD-117 avançou em 2 slices: (1) prompt de auto-resume agora usa cadência adaptativa e remove micro-slice fixo; (2) `context_watch_status` ganhou sinal auditável de cadência (`operatingCadence`, `postResumeRecalibrated`, `reason`) para eliminar timidez residual pós-compact quando nível volta para ok.",
+  "timestamp": "2026-04-23T02:15:30.000Z",
+  "context": "TASK-BUD-114 avançou com enforcement de escopo no fluxo apply-to-branch: compliance de inventário `Promoted/Skipped` agora valida allowlist + candidate diff e bloqueia evidência inválida (promoted fora de escopo/candidate). Integração runtime adicionou auditoria dedicada de não conformidade.",
   "current_phase": "factory-selective-promotion-and-post-resume-recalibration",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116",
     "TASK-BUD-117"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-warn-active"
+  ],
   "next_actions": [
-    "TASK-BUD-117: opcionalmente documentar o novo contrato de cadência adaptativa em `docs/guides/project-canonical-pipeline.md`.",
-    "TASK-BUD-114: conectar avaliação `promotedFiles/skippedFiles` ao apply efetivo por diff/apply.",
-    "TASK-BUD-116: apenas micro-refactors oportunistas quando tocar hotspots reais."
+    "Manter próximos cortes em micro-slice enquanto level=warn/checkpoint.",
+    "TASK-BUD-114: ligar compliance ao apply efetivo por diff (quando promoted válido) para fechar loop promoted vs skipped end-to-end.",
+    "TASK-BUD-117: opcional documentar contrato `operatingCadence/postResumeRecalibrated` no pipeline canônico.",
+    "TASK-BUD-116: somente ajustes oportunistas de baixo risco."
   ],
   "open_questions": [
-    "Auto-resume deve sempre mandar check explícito `context_watch_status` ou podemos pular quando último evento já é `ok`?"
+    "Para inventory explícito com promoted vazio, manter sempre fallback recovery (atual) ou permitir exceções por policy explícita?"
   ],
   "key_decisions_pending": [
-    "Padronizar semântica de `standard-slices` por lane/profile (faixa alvo de arquivos/testes) para reduzir ambiguidade operacional."
+    "Definir se enforcement de compliance deve exigir classificação completa candidate->(promoted|skipped) em todos modos apply-to-branch ou apenas quando Final file inventory estiver presente."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/context-watchdog-handoff.ts",
-    "packages/pi-stack/extensions/context-watchdog.ts",
-    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
+    "packages/pi-stack/extensions/colony-pilot.ts",
+    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T02:03:30.000Z",
+      "atIso": "2026-04-23T02:15:30.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 40,
+      "level": "warn",
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy."
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }

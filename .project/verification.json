@@ -3598,6 +3598,27 @@
           "evidence": "`assessmentLevel=warn|checkpoint|compact` retorna `operatingCadence=micro-slice-only` com reason por nível."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-189",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Enforcement de escopo conectado ao fluxo de promoção em `apply-to-branch`: `evaluateSelectivePromotionScopeCompliance` valida inventário promoted/skipped explícito contra allowlist + candidate diff e injeta issues bloqueantes no delivery eval quando há promoted fora de escopo ou fora do candidate. Implementado em `colony-pilot-delivery-policy.ts` + integração no runtime em `colony-pilot.ts` com trilha de auditoria `colony-pilot.selective-promotion-scope-compliance`. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 77/77.",
+      "criteria_results": [
+        {
+          "criterion": "Inventário explícito promoted/skipped não pode burlar scope policy.",
+          "status": "passed",
+          "evidence": "Teste `compliance de promoção seletiva falha quando inventário promovido viola allowlist` aprovado."
+        },
+        {
+          "criterion": "Quando inventário explícito não vem, derivação por candidateDiff ∩ allowlist segue funcional.",
+          "status": "passed",
+          "evidence": "Teste `compliance derivada de scope passa quando promoted é candidateDiff ∩ allowlist` aprovado."
+        }
+      ]
     }
   ]
 }

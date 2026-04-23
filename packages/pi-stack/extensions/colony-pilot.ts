@@ -102,10 +102,12 @@ import {
 	type ColonyPilotDeliveryEvaluation as ColonyPilotDeliveryEvaluationImpl,
 	type ColonyPilotDeliveryPolicyConfig as ColonyPilotDeliveryPolicyConfigImpl,
 	type SelectivePromotionInventoryEvidence as SelectivePromotionInventoryEvidenceImpl,
+	type SelectivePromotionScopeComplianceEvaluation as SelectivePromotionScopeComplianceEvaluationImpl,
 	DEFAULT_COLONY_PILOT_DELIVERY_POLICY,
 	evaluateColonyDeliveryEvidence as evaluateColonyDeliveryEvidenceImpl,
 	evaluateSelectivePromotionInventoryEvidence as evaluateSelectivePromotionInventoryEvidenceImpl,
 	evaluateSelectivePromotionScope as evaluateSelectivePromotionScopeImpl,
+	evaluateSelectivePromotionScopeCompliance as evaluateSelectivePromotionScopeComplianceImpl,
 	formatDeliveryPolicyEvaluation as formatDeliveryPolicyEvaluationImpl,
 	hasSelectivePromotionInventoryMissingIssue as hasSelectivePromotionInventoryMissingIssueImpl,
 	parseDeliveryModeOverride as parseDeliveryModeOverrideImpl,
@@ -379,6 +381,12 @@ export const evaluateSelectivePromotionInventoryEvidence =
 export const evaluateSelectivePromotionScope =
 	evaluateSelectivePromotionScopeImpl;
 
+export type SelectivePromotionScopeComplianceEvaluation =
+	SelectivePromotionScopeComplianceEvaluationImpl;
+
+export const evaluateSelectivePromotionScopeCompliance =
+	evaluateSelectivePromotionScopeComplianceImpl;
+
 export const evaluateColonyDeliveryEvidence =
 	evaluateColonyDeliveryEvidenceImpl;
 
@@ -604,6 +612,9 @@ export default function (pi: ExtensionAPI) {
 			const selectiveScope = guessedGoal
 				? evaluateSelectivePromotionScopeImpl(guessedGoal, text)
 				: undefined;
+			const selectiveScopeCompliance = guessedGoal
+				? evaluateSelectivePromotionScopeComplianceImpl(guessedGoal, text)
+				: undefined;
 
 			if (
 				deliveryPolicyConfig.mode === "apply-to-branch" &&
@@ -614,11 +625,6 @@ export default function (pi: ExtensionAPI) {
 				const nextIssues = removeSelectivePromotionInventoryMissingIssueImpl(
 					deliveryEval.issues,
 				);
-				if (selectiveScope.promotedFiles.length === 0) {
-					nextIssues.push(
-						"delivery evidence missing: selective promotion resulted in zero promoted files (recovery required)",
-					);
-				}
 
 				deliveryEval = {
 					...deliveryEval,
@@ -644,7 +650,34 @@ export default function (pi: ExtensionAPI) {
 				});
 			}
 
-			return { deliveryEval, selectiveScope };
+			if (
+				deliveryPolicyConfig.mode === "apply-to-branch" &&
+				selectiveScopeCompliance &&
+				selectiveScopeCompliance.issues.length > 0
+			) {
+				const mergedIssues = Array.from(
+					new Set([...deliveryEval.issues, ...selectiveScopeCompliance.issues]),
+				);
+				deliveryEval = {
+					...deliveryEval,
+					ok: mergedIssues.length === 0,
+					issues: mergedIssues,
+				};
+
+				pi.appendEntry("colony-pilot.selective-promotion-scope-compliance", {
+					atIso: new Date().toISOString(),
+					colonyId: signal.id,
+					goal: guessedGoal,
+					policy: selectiveScopeCompliance.policy,
+					source: selectiveScopeCompliance.source,
+					candidateFiles: selectiveScopeCompliance.candidateFiles,
+					promotedFiles: selectiveScopeCompliance.promotedFiles,
+					skippedFiles: selectiveScopeCompliance.skippedFiles,
+					issues: selectiveScopeCompliance.issues,
+				});
+			}
+
+			return { deliveryEval, selectiveScope, selectiveScopeCompliance };
 		};
 
 		const completedDelivery =

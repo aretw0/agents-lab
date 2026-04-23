@@ -37,6 +37,22 @@ export interface SelectivePromotionScopeEvaluation {
 	skippedFiles: SelectivePromotionScopeSkippedFile[];
 }
 
+export interface SelectivePromotionInventoryParseResult {
+	hasPromotedFileInventory: boolean;
+	hasSkippedFileInventory: boolean;
+	promotedFiles: string[];
+	skippedFiles: string[];
+}
+
+export interface SelectivePromotionScopeComplianceEvaluation {
+	policy: SelectivePromotionScopePolicy;
+	candidateFiles: string[];
+	promotedFiles: string[];
+	skippedFiles: string[];
+	source: "explicit-inventory" | "derived-from-scope";
+	issues: string[];
+}
+
 export interface ColonyPilotDeliveryEvidence
 	extends SelectivePromotionInventoryEvidence {
 	hasWorkspaceReport: boolean;
@@ -270,6 +286,154 @@ export function evaluateSelectivePromotionScope(
 		candidateFiles,
 		promotedFiles,
 		skippedFiles,
+	};
+}
+
+function extractInlineSelectiveInventoryPaths(
+	line: string,
+	kind: "promoted" | "skipped",
+): string[] {
+	const re =
+		kind === "promoted"
+			? /(?:promoted\s+file\s+inventory|invent[aá]rio\s+de\s+promov\w*)\s*[:\-]\s*(.+)$/i
+			: /(?:skipped\s+file\s+inventory|invent[aá]rio\s+de\s+skip\w*)\s*[:\-]\s*(.+)$/i;
+	const match = line.match(re);
+	if (!match?.[1]) return [];
+	const tail = match[1].trim();
+	if (!tail) return [];
+	const out: string[] = [];
+	for (const token of tail.split(/[;,]/)) {
+		const p = normalizeInventoryPathCandidate(token);
+		if (p && !out.includes(p)) out.push(p);
+	}
+	return out;
+}
+
+export function parseSelectivePromotionInventory(
+	text: string,
+): SelectivePromotionInventoryParseResult {
+	const lines = text.split(/\r?\n/);
+	const promotedHeadingRe =
+		/^\s*(?:#{1,6}\s*)?(?:promoted\s+file\s+inventory|invent[aá]rio\s+de\s+promov\w*)(?:\s*[:\-]\s*.*)?$/i;
+	const skippedHeadingRe =
+		/^\s*(?:#{1,6}\s*)?(?:skipped\s+file\s+inventory|invent[aá]rio\s+de\s+skip\w*)(?:\s*[:\-]\s*.*)?$/i;
+	const sectionStopRe =
+		/^\s*(?:#{1,6}\s+\S|(?:final\s+file\s+inventory|invent[aá]rio\s+final(?:\s+de\s+arquivos?)?|validation\s+command\s+log|validation\s+commands?|comandos?\s+de\s+valida[cç][aã]o))/i;
+
+	let mode: "promoted" | "skipped" | undefined;
+	let hasPromotedFileInventory = false;
+	let hasSkippedFileInventory = false;
+	const promotedFiles: string[] = [];
+	const skippedFiles: string[] = [];
+
+	for (const line of lines) {
+		if (promotedHeadingRe.test(line)) {
+			hasPromotedFileInventory = true;
+			mode = "promoted";
+			for (const p of extractInlineSelectiveInventoryPaths(line, "promoted")) {
+				if (!promotedFiles.includes(p)) promotedFiles.push(p);
+			}
+			continue;
+		}
+		if (skippedHeadingRe.test(line)) {
+			hasSkippedFileInventory = true;
+			mode = "skipped";
+			for (const p of extractInlineSelectiveInventoryPaths(line, "skipped")) {
+				if (!skippedFiles.includes(p)) skippedFiles.push(p);
+			}
+			continue;
+		}
+
+		if (mode && sectionStopRe.test(line)) {
+			mode = undefined;
+			continue;
+		}
+		if (!mode || !line.trim()) continue;
+		const p = extractInventoryPath(line);
+		if (!p) continue;
+		if (mode === "promoted") {
+			if (!promotedFiles.includes(p)) promotedFiles.push(p);
+		} else if (!skippedFiles.includes(p)) {
+			skippedFiles.push(p);
+		}
+	}
+
+	return {
+		hasPromotedFileInventory,
+		hasSkippedFileInventory,
+		promotedFiles,
+		skippedFiles,
+	};
+}
+
+export function evaluateSelectivePromotionScopeCompliance(
+	goal: string,
+	text: string,
+): SelectivePromotionScopeComplianceEvaluation | undefined {
+	const scope = evaluateSelectivePromotionScope(goal, text);
+	if (!scope) return undefined;
+
+	const parsed = parseSelectivePromotionInventory(text);
+	const hasExplicitInventory =
+		parsed.hasPromotedFileInventory && parsed.hasSkippedFileInventory;
+	const promotedFiles = hasExplicitInventory
+		? parsed.promotedFiles
+		: scope.promotedFiles;
+	const skippedFiles = hasExplicitInventory
+		? parsed.skippedFiles
+		: scope.skippedFiles.map((row) => row.path);
+
+	const issues: string[] = [];
+	if (scope.candidateFiles.length > 0 && promotedFiles.length === 0) {
+		issues.push(
+			"delivery evidence missing: selective promotion resulted in zero promoted files (recovery required)",
+		);
+	}
+
+	const outOfScopePromoted = promotedFiles.filter(
+		(file) => !matchesAllowlist(file, scope.policy.allowlist),
+	);
+	if (outOfScopePromoted.length > 0) {
+		issues.push(
+			`delivery evidence invalid: promoted files out-of-scope for policy '${scope.policy.raw}': ${outOfScopePromoted.slice(0, 6).join(", ")}`,
+		);
+	}
+
+	if (scope.candidateFiles.length > 0 && hasExplicitInventory) {
+		const candidateSet = new Set(
+			scope.candidateFiles.map((file) => normalizePathLike(file)),
+		);
+		const classifiedSet = new Set(
+			[...promotedFiles, ...skippedFiles].map((file) => normalizePathLike(file)),
+		);
+		const unclassified = scope.candidateFiles.filter(
+			(file) => !classifiedSet.has(normalizePathLike(file)),
+		);
+		if (unclassified.length > 0) {
+			issues.push(
+				`delivery evidence invalid: selective promotion inventory missing classification for candidate files: ${unclassified.slice(0, 6).join(", ")}`,
+			);
+		}
+
+		const unknownPromoted = promotedFiles.filter(
+			(file) => !candidateSet.has(normalizePathLike(file)),
+		);
+		if (unknownPromoted.length > 0) {
+			issues.push(
+				`delivery evidence invalid: promoted files not present in candidate diff: ${unknownPromoted.slice(0, 6).join(", ")}`,
+			);
+		}
+	}
+
+	return {
+		policy: scope.policy,
+		candidateFiles: scope.candidateFiles,
+		promotedFiles,
+		skippedFiles,
+		source: hasExplicitInventory
+			? "explicit-inventory"
+			: "derived-from-scope",
+		issues,
 	};
 }
 

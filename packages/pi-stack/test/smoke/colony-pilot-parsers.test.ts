@@ -22,6 +22,7 @@ import {
 	evaluateHatchReadiness,
 	evaluateSelectivePromotionInventoryEvidence,
 	evaluateSelectivePromotionScope,
+	evaluateSelectivePromotionScopeCompliance,
 	evaluateProviderBudgetGate,
 	executableProbe,
 	formatHatchDoctorSnapshot,
@@ -1049,6 +1050,43 @@ describe("colony-pilot parsers", () => {
 				reason: "out-of-scope",
 			},
 		]);
+	});
+
+	it("compliance de promoção seletiva falha quando inventário promovido viola allowlist", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+			"Promoted file inventory:",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+			"Skipped file inventory:",
+			"- docs/guides/project-canonical-pipeline.md (reported skip)",
+		].join("\n");
+
+		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report);
+		expect(compliance).toBeDefined();
+		expect(compliance?.source).toBe("explicit-inventory");
+		expect(compliance?.issues.some((i) => i.includes("out-of-scope"))).toBe(
+			true,
+		);
+	});
+
+	it("compliance derivada de scope passa quando promoted é candidateDiff ∩ allowlist", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report = [
+			"Final file inventory:",
+			"- docs/guides/project-canonical-pipeline.md",
+			"- packages/pi-stack/extensions/colony-pilot.ts",
+		].join("\n");
+
+		const compliance = evaluateSelectivePromotionScopeCompliance(goal, report);
+		expect(compliance).toBeDefined();
+		expect(compliance?.source).toBe("derived-from-scope");
+		expect(compliance?.promotedFiles).toEqual([
+			"docs/guides/project-canonical-pipeline.md",
+		]);
+		expect(compliance?.issues).toEqual([]);
 	});
 
 	it("delivery evidence em apply-to-branch exige inventários promoted/skipped", () => {
