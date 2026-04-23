@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T00:52:00.000Z",
-  "context": "Execução em modo throughput: batch slices 13-15 concluído na TASK-BUD-116 com limpeza de wrappers internos residuais no entrypoint colony-pilot e delegação direta para módulos extraídos (`*Impl`). Feedback de timidez pós-compact também foi canonicamente assimilado via REQ-BUD-059 + TASK-BUD-117.",
+  "timestamp": "2026-04-23T00:55:00.000Z",
+  "context": "Continuidade em throughput: slice 16 da TASK-BUD-116 concluído com remoção de wrappers internos de settings/quota IO no colony-pilot entrypoint e delegação direta para módulos extraídos, mantendo smoke verde.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -9,12 +9,12 @@
   ],
   "blockers": [],
   "next_actions": [
-    "Continuar TASK-BUD-116 com mais cortes de deflação no entrypoint mantendo contrato público estável.",
-    "Retomar TASK-BUD-114 para wiring efetivo de allowlist promoted/skipped por diff.",
-    "Planejar implementação da TASK-BUD-117 (recalibração pós-compact/resume no context-watchdog)."
+    "Continuar TASK-BUD-116 com cortes coesos para reduzir o entrypoint mantendo contrato público estável.",
+    "Retomar TASK-BUD-114 para implementação da allowlist efetiva promoted/skipped por diff.",
+    "Planejar execução de TASK-BUD-117 no context-watchdog (recalibração pós-compact/resume)."
   ],
   "open_questions": [
-    "Qual próximo domínio de menor risco para reduzir `colony-pilot.ts` sem afetar exports públicos?"
+    "Próximo lote de deflação: consolidar exports pass-through restantes ou iniciar wiring seletivo de promoção (TASK-BUD-114)?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
@@ -22,17 +22,16 @@
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot.ts",
-    ".project/requirements.json",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T00:52:00.000Z",
+      "atIso": "2026-04-23T00:55:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 30,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

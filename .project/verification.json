@@ -3379,6 +3379,32 @@
           "evidence": "Smoke parsers verde (72/72)."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-180",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 16 (throughput) em `packages/pi-stack/extensions/colony-pilot.ts`: remoção de wrappers internos de settings/quota IO (`parseColonyPilotSettings`, `parseQuotaVisibilityBudgetSettings`, `readProjectSettings`, `writeProjectSettings`) e troca dos call-sites para uso direto dos módulos `*Impl`. Entry point: 2145 -> 2129 linhas. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Deflação incremental sem alterar contrato público esperado do entrypoint.",
+          "status": "passed",
+          "evidence": "Mudança limitada a wiring interno; exports públicos mantidos."
+        },
+        {
+          "criterion": "Comportamento operacional preservado após remoção de wrappers.",
+          "status": "passed",
+          "evidence": "Call-sites continuam delegando para mesmas implementações dos módulos extraídos."
+        },
+        {
+          "criterion": "Regressão coberta por smoke focada.",
+          "status": "passed",
+          "evidence": "72/72 aprovado."
+        }
+      ]
     }
   ]
 }

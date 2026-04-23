@@ -589,15 +589,6 @@ interface ColonyPilotSettings {
 	candidateRetention?: Partial<ColonyPilotCandidateRetentionConfig>;
 }
 
-function parseColonyPilotSettings(cwd: string): ColonyPilotSettings {
-	return parseColonyPilotSettingsImpl<ColonyPilotSettings>(cwd);
-}
-
-function parseQuotaVisibilityBudgetSettings(
-	cwd: string,
-): QuotaVisibilityBudgetSettings {
-	return parseQuotaVisibilityBudgetSettingsImpl(cwd);
-}
 
 export function resolveColonyPilotOutputPolicy(
 	raw?: Partial<ColonyPilotOutputPolicyConfig>,
@@ -653,13 +644,6 @@ export function applyProjectBaselineSettings(
 	return applyProjectBaselineSettingsImpl(existing, profile);
 }
 
-function readProjectSettings(cwd: string): Record<string, unknown> {
-	return readProjectSettingsImpl(cwd);
-}
-
-function writeProjectSettings(cwd: string, data: Record<string, unknown>) {
-	return writeProjectSettingsImpl(cwd, data);
-}
 
 export function ensureRecoveryTaskForCandidate(
 	cwd: string,
@@ -719,7 +703,7 @@ export default function (pi: ExtensionAPI) {
 		colonyTaskMap.clear();
 		colonyGoalMap.clear();
 
-		const settings = parseColonyPilotSettings(ctx.cwd);
+		const settings = parseColonyPilotSettingsImpl<ColonyPilotSettings>(ctx.cwd);
 		preflightConfig = resolveColonyPilotPreflightConfig(settings.preflight);
 		modelPolicyConfig = resolveColonyPilotModelPolicy(settings.modelPolicy);
 		budgetPolicyConfig = resolveColonyPilotBudgetPolicy(settings.budgetPolicy);
@@ -922,7 +906,7 @@ export default function (pi: ExtensionAPI) {
 	async function resolveProviderBudgetGateSnapshot(
 		ctx: ExtensionContext,
 	): Promise<ProviderBudgetGateSnapshot | undefined> {
-		const quotaCfg = parseQuotaVisibilityBudgetSettings(ctx.cwd);
+		const quotaCfg = parseQuotaVisibilityBudgetSettingsImpl(ctx.cwd);
 		const resolved = await resolveProviderBudgetGateSnapshotImpl({
 			cwd: ctx.cwd,
 			lookbackDays: budgetPolicyConfig.providerBudgetLookbackDays,
@@ -1327,10 +1311,10 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			const merged = applyProjectBaselineSettings(
-				readProjectSettings(ctx.cwd),
+				readProjectSettingsImpl(ctx.cwd),
 				profile,
 			);
-			writeProjectSettings(ctx.cwd, merged);
+			writeProjectSettingsImpl(ctx.cwd, merged);
 			return {
 				content: [
 					{
@@ -1534,11 +1518,11 @@ export default function (pi: ExtensionAPI) {
 				}
 
 				if (action === "apply") {
-					const existing = readProjectSettings(ctx.cwd);
+					const existing = readProjectSettingsImpl(ctx.cwd);
 					const merged = applyProjectBaselineSettings(existing, profile);
-					writeProjectSettings(ctx.cwd, merged as Record<string, unknown>);
+					writeProjectSettingsImpl(ctx.cwd, merged as Record<string, unknown>);
 
-					const settings = parseColonyPilotSettings(ctx.cwd);
+					const settings = parseColonyPilotSettingsImpl<ColonyPilotSettings>(ctx.cwd);
 					preflightConfig = resolveColonyPilotPreflightConfig(
 						settings.preflight,
 					);
@@ -1607,7 +1591,7 @@ export default function (pi: ExtensionAPI) {
 					{ goal: "hatch-check" },
 					budgetPolicyConfig,
 				);
-				const quotaCfg = parseQuotaVisibilityBudgetSettings(ctx.cwd);
+				const quotaCfg = parseQuotaVisibilityBudgetSettingsImpl(ctx.cwd);
 
 				const readiness = evaluateHatchReadiness({
 					capabilitiesMissing: missing,
@@ -1749,13 +1733,13 @@ export default function (pi: ExtensionAPI) {
 				}
 
 				if (action === "apply") {
-					const settings = readProjectSettings(ctx.cwd);
+					const settings = readProjectSettingsImpl(ctx.cwd);
 					const merged = deepMergeObjects(settings, {
 						piStack: {
 							colonyPilot: { modelPolicy: buildModelPolicyProfile(profile) },
 						},
 					});
-					writeProjectSettings(ctx.cwd, merged);
+					writeProjectSettingsImpl(ctx.cwd, merged);
 					const currentModelRef = ctx.model
 						? `${ctx.model.provider}/${ctx.model.id}`
 						: undefined;
@@ -1828,10 +1812,10 @@ export default function (pi: ExtensionAPI) {
 
 				if (act === "apply") {
 					const merged = applyProjectBaselineSettings(
-						readProjectSettings(ctx.cwd),
+						readProjectSettingsImpl(ctx.cwd),
 						profile,
 					);
-					writeProjectSettings(ctx.cwd, merged);
+					writeProjectSettingsImpl(ctx.cwd, merged);
 					ctx.ui.notify(
 						[
 							`Baseline (${profile}) aplicada em .pi/settings.json`,
