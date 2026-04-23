@@ -3327,6 +3327,32 @@
           "evidence": "72/72 aprovado após mudança."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-178",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 12 (micro, 1 arquivo): remoção de wrapper residual `formatProviderBudgetStatusLine` em `packages/pi-stack/extensions/colony-pilot.ts`, com uso direto de `formatProviderBudgetStatusLineImpl` no call-site do provider-budget gate. Smoke executada: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Micro-slice-only (1 file + 1 test) com baixo risco e sem mudança de comportamento.",
+          "status": "passed",
+          "evidence": "Mudança limitada a wrapper interno redundante + call-site direto."
+        },
+        {
+          "criterion": "`colony-pilot.ts` continua reduzindo bloat como orquestrador.",
+          "status": "passed",
+          "evidence": "Entry point reduziu de 2201 para 2197 linhas."
+        },
+        {
+          "criterion": "Regressão validada por smoke focada.",
+          "status": "passed",
+          "evidence": "72/72 aprovado."
+        }
+      ]
     }
   ]
 }

@@ -735,10 +735,6 @@ async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
 	return tryOpenUrlImpl(pi, url);
 }
 
-function formatProviderBudgetStatusLine(status: ProviderBudgetStatus): string {
-	return formatProviderBudgetStatusLineImpl(status);
-}
-
 export default function (pi: ExtensionAPI) {
 	const state: PilotState = createPilotState();
 
@@ -1100,7 +1096,7 @@ export default function (pi: ExtensionAPI) {
 			if (!providerGateEval.ok) {
 				const blockedRows = (snapshot?.budgets ?? [])
 					.filter((b) => providerGateEval.blockedProviders.includes(b.provider))
-					.map((b) => formatProviderBudgetStatusLine(b));
+					.map((b) => formatProviderBudgetStatusLineImpl(b));
 
 				const reason = `Blocked by colony-pilot provider-budget gate: ${providerGateEval.issues.join("; ")}`;
 				const msg = [

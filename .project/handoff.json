@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T00:24:00.000Z",
-  "context": "Auto-resume aplicado do handoff fresco e execução seguiu em micro-slice-only (1 arquivo + 1 teste). Slice 11 da TASK-BUD-116 concluiu limpeza residual de wiring em colony-pilot.ts (remoção de wrappers locais de session utils), mantendo contrato estável e smoke verde.",
+  "timestamp": "2026-04-23T00:38:00.000Z",
+  "context": "Micro-slice 12 concluído em modo 1-file+1-test: cleanup de wrapper residual em colony-pilot.ts com smoke verde e continuidade da deflação incremental.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -8,12 +8,12 @@
   ],
   "blockers": [],
   "next_actions": [
-    "Continuar TASK-BUD-116 em micro-slice mínimo (1 file + 1 test), priorizando residual de wrappers/re-exports sem risco.",
-    "Quando houver janela estável, retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
-    "Manter atualização canônica de verificação/handoff a cada slice."
+    "Seguir TASK-BUD-116 em micro-slice-only (1 file + 1 test), removendo wrappers internos residuais de baixo risco.",
+    "Após mais 1-2 cortes pequenos, retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
+    "Manter atualização canônica de verificação/handoff por slice."
   ],
   "open_questions": [
-    "Próximo micro-corte de menor risco: cleanup de wrapper residual no entrypoint ou início de wiring da allowlist (TASK-BUD-114)?"
+    "No próximo micro-corte, priorizar cleanup de wrappers internos de command-surface ou iniciar wiring mínimo da TASK-BUD-114?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
@@ -26,10 +26,10 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T00:24:00.000Z",
+      "atIso": "2026-04-23T00:38:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 13,
+      "percent": 26,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
