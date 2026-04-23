@@ -4416,6 +4416,15 @@
       "method": "test",
       "timestamp": "2026-04-23T22:52:00Z",
       "evidence": "Hardening complementar em `subagent-readiness`: no `strict=true`, quando `limit` não é informado, gate agora usa janela multi-sessão (`sessionLimit` default >=3) e computa `userTurns` como máximo no recorte para evitar falso-negativo quando o arquivo de sessão mais novo não contém mensagens do usuário (apenas sinais de automação). Cobertura adicionada em `subagent-readiness.test.ts` (`strict readiness defaults to multi-session window and avoids user-turn false negatives`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 6/6 pass."
+    },
+    {
+      "id": "VER-BUD-243",
+      "target": "TASK-BUD-127",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T23:01:00Z",
+      "evidence": "Hardening adicional em `subagent-readiness`: quando `userTurns < minUserTurns`, gate faz rescan com tail expandido (até 10MB) antes de bloquear, reduzindo falso-negativo causado por truncamento de tail em sessões longas. Implementado em `packages/pi-stack/extensions/subagent-readiness.ts`. Regressão adicionada em `packages/pi-stack/test/smoke/subagent-readiness.test.ts` (`strict readiness rescans larger tail before blocking on user turns`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 7/7 pass."
     }
   ]
 }

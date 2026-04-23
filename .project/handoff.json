@@ -1,42 +1,41 @@
 {
-  "timestamp": "2026-04-23T22:53:00.000Z",
-  "context": "Auto-run c1 terminou com sinal `DONE` e `colony_pilot_status` confirma fase `completed` (sem budget exceeded). Strict readiness evoluiu: check de COMPLETE deixou de bloquear; surgiu falso-negativo em `monitor-min-user-turns` quando sessão mais nova tinha só sinais automáticos. Foi implementado hardening em `subagent-readiness` para strict usar janela default de 3 sessões (quando `limit` não é informado) e `userTurns` por máximo da janela.",
+  "timestamp": "2026-04-23T23:02:00.000Z",
+  "context": "Após reload anterior, strict gate já refletiu parte do hardening (`sessionLimit: 3`), porém continuou bloqueando em `monitor-min-user-turns` (2/3) por truncamento do tail em sessão longa. Novo hardening foi aplicado em `subagent-readiness`: antes de bloquear, o gate faz rescan com tail expandido (até 10MB), reduzindo falso-negativo de userTurns. Teste de regressão específico adicionado e smoke focal passou (7/7).",
   "next_actions": [
-    "Executar `/reload` para ativar mudanças de runtime (`subagent-readiness` fallback COMPLETE + janela strict multi-sessão).",
-    "Após reload, rodar `subagent_readiness_status(strict=true)` e confirmar gate READY sem override manual.",
-    "Se strict passar, registrar verificação operacional da sessão e retomar TASK-OPS-HYGIENE-002.",
-    "Manter TASK-BUD-028 em validação humana final (no-auto-close)."
+    "Executar novo `/reload` para ativar a última mudança de runtime (rescan expandido de userTurns).",
+    "Após reload, rodar `subagent_readiness_status(strict=true)` e confirmar `ready: true` sem override manual.",
+    "Se strict passar, registrar verificação operacional e avançar para TASK-OPS-HYGIENE-002.",
+    "Manter TASK-BUD-028 e TASK-BUD-088 em no-auto-close até decisão humana."
   ],
   "blockers": [
-    "context-watch-checkpoint-required",
-    "runtime-reload-pending-for-subagent-readiness-fixes"
+    "runtime-reload-pending-for-subagent-readiness-rescan-fix"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T22:50:41.761Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 71,
+      "atIso": "2026-04-23T22:55:39.660Z",
+      "reason": "resume-check",
+      "level": "ok",
+      "percent": 12,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
+      "action": "continue",
+      "recommendation": "Context healthy; standard-slices habilitado pós-resume."
     },
     {
-      "atIso": "2026-04-23T22:53:00.000Z",
+      "atIso": "2026-04-23T23:02:00.000Z",
       "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 71,
+      "level": "ok",
+      "percent": 12,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "write-checkpoint",
-      "recommendation": "Checkpoint atualizado; manter micro-slice-only até compact/idle."
+      "action": "continue",
+      "recommendation": "Checkpoint atualizado com blocker único de reload runtime."
     }
   ]
 }
