@@ -4434,6 +4434,15 @@
       "method": "inspect",
       "timestamp": "2026-04-23T23:07:00Z",
       "evidence": "Validação operacional pós-reload: `subagent_readiness_status(strict=true)` retornou `ready=true` com `sessionLimit:3`, `userTurns:3`, `COMPLETE:8`, `BUDGET_EXCEEDED:0` e pacotes obrigatórios presentes. Confirma no runtime os hardenings aplicados para evitar falsos negativos no strict gate."
+    },
+    {
+      "id": "VER-BUD-245",
+      "target": "TASK-OPS-HYGIENE-002",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:13:00Z",
+      "evidence": "Micro-slice de higiene executada: `.sandbox/tmp` foi classificado e consolidado (keep: `extract-task.js`, `search-tasks-keyword.js`, `cleanup-ad-hoc.js`; archive: 26 scripts ad-hoc + 2 dumps) em `.sandbox/tmp/archive/2026-04-23/README.md`. Política operacional formalizada em `docs/guides/project-canonical-pipeline.md` (seção 'Higiene de scripts ad-hoc (.sandbox/tmp)')."
     }
   ]
 }

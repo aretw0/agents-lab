@@ -1,28 +1,28 @@
 {
-  "timestamp": "2026-04-23T23:08:00.000Z",
-  "context": "Reload aplicado e validação runtime concluída: `subagent_readiness_status(strict=true)` está READY após hardenings de `subagent-readiness` (fallback COMPLETE por retention + janela strict multi-sessão + rescan de tail expandido). Gate crítico de subagentes destravado sem override manual.",
+  "timestamp": "2026-04-23T23:27:00.000Z",
+  "context": "Direção estratégica alinhada com usuário: primeiro afiar fundamentos (playbook-first, sem misturar conceitos), depois evoluir para federação multi-control-plane. Gate strict de subagentes continua READY em runtime. Iniciado `TASK-OPS-HYGIENE-002` com limpeza real de `.sandbox/tmp` (classificação keep/archive) e política documentada no pipeline canônico.",
   "next_actions": [
-    "Decidir fechamento humano de TASK-BUD-127 (já verificada por testes e runtime).",
-    "Entrar em trilha de delegação progressiva: control-plane -> subagentes (runs pequenas com cap) -> swarm maior somente após sinais estáveis.",
-    "Atualizar evidência de loop readiness para remover estado stale em `.pi/guardrails-loop-evidence.json` (`ops:loop-evidence:strict` atualmente falha por staleness, não por critérios).",
-    "Executar TASK-OPS-HYGIENE-002 para limpeza de artefatos temporários mantendo evidência canônica."
+    "Concluir `TASK-OPS-HYGIENE-002`: decidir destino do utilitário transitório `cleanup-ad-hoc.js` (keep ou archive), e fechar checklist final de higiene.",
+    "Iniciar execução de `TASK-BUD-128`: rascunhar playbook de evolução em 3 modos (single CP, delegação descartável, federação) com mapeamento para `tuts-agentic-ai-examples`.",
+    "Tratar `loop-evidence` stale (freshness), mantendo em mente que critérios permanecem válidos.",
+    "Manter delegação progressiva (subagentes curtos e descartáveis) para reduzir pressão de contexto no control-plane principal."
   ],
   "blockers": [
     "loop-evidence-stale-needs-refresh"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T23:06:54.000Z",
-      "reason": "post-reload-validation",
+      "atIso": "2026-04-23T23:27:00.000Z",
+      "reason": "message_end",
       "level": "ok",
-      "percent": 19,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; standard-slices mantido."
+      "recommendation": "Context healthy; standard-slices ativo."
     }
   ]
 }

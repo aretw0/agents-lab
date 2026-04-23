@@ -283,6 +283,23 @@ Use somente com confirmação explícita quando houver exposição sensível rea
 
 > Regra de pragmatismo: prefira Cenário A sempre que possível; Cenário B só quando o risco justificar custo operacional.
 
+## Higiene de scripts ad-hoc (.sandbox/tmp)
+
+Para reduzir gordura operacional sem perder rastreabilidade:
+
+1. **Classificar por intenção**
+   - `keep`: utilitário recorrente (nome estável + uso repetido em sessões);
+   - `archive`: útil só como evidência de investigação pontual;
+   - `remove`: script descartável sem valor de reprodução.
+2. **Critério de permanência (keep)**
+   - deve ter propósito claro, entrada/saída previsível e não depender de caminho hardcoded de sessão única;
+   - idealmente substituir por superfície canônica (`board_query`, `session_analytics_query`, tools first-party) quando existir.
+3. **Política de runtime artifacts**
+   - arquivos efêmeros de runtime (`.pi/*.json` de sessão/loop) permanecem **fora de versionamento**;
+   - podem ser mantidos localmente para operação, mas não entram em commit.
+4. **Evidência mínima no board**
+   - registrar no `notes` da task de higiene o inventário resumido (`keep/archive/remove`) e o rational em 1–3 linhas.
+
 ## Política de retomada pós-compactação
 Retomar apenas com:
 1. `.project/handoff.json`

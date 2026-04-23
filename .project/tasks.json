@@ -3048,7 +3048,7 @@
     {
       "id": "TASK-OPS-HYGIENE-002",
       "description": "[P1] Executar higiene pós-marco (loop/subagent/swarm): remover artefatos temporários de validação e consolidar superfícies canônicas sem gordura operacional.",
-      "status": "planned",
+      "status": "in-progress",
       "files": [
         ".sandbox/tmp",
         "docs/guides/project-canonical-pipeline.md",
@@ -3060,7 +3060,7 @@
         "Runtime artifacts efêmeros (`.pi/*.json` de sessão) permanecem fora de versionamento e política é documentada para prevenir recorrência.",
         "Backlog/verification refletem o que é marco permanente vs experimento temporário, sem perder evidência relevante."
       ],
-      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas."
+      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js` (+ utilitário `cleanup-ad-hoc.js`), archive=26 scripts ad-hoc + 2 dumps de inventário movidos para `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`."
     },
     {
       "id": "TASK-BUD-127",
@@ -3083,6 +3083,25 @@
         "Existe teste de regressão cobrindo o cenário de fallback por retention e suíte smoke focal passa."
       ],
       "notes": "Criada durante auto-resume 2026-04-23 para destravar blocker recorrente de strict readiness sem depender de sinal COMPLETE no mesmo arquivo de sessão.\n[2026-04-23T22:31:00Z] Slice implementado + smoke focal verde. Situação operacional observada: colony signal ficou em `LAUNCHED` sem `COMPLETE` no recorte da sessão, causando falso-negativo no strict gate. Fallback por `.pi/colony-retention` adicionado para reduzir fragilidade de tail-only. Requer `/reload` para validação runtime neste control-plane.\n[2026-04-23T22:52:00Z] Hardening adicional: strict sem `limit` explícito agora amplia recorte para 3 sessões por padrão e calcula `userTurns` como máximo da janela, evitando novo falso-negativo quando a sessão mais recente contém apenas sinais de automação (sem turnos de usuário). Smoke focal atualizada e verde (6/6).\n[2026-04-23T23:01:00Z] Hardening adicional: antes de bloquear por `monitor-min-user-turns`, gate faz rescan com tail expandido (até 10MB) para reduzir falso-negativo por truncamento do tail em sessões longas. Regressão adicionada e smoke focal verde (7/7). Requer novo `/reload` para refletir esta mudança no runtime atual.\n[2026-04-23T23:07:00Z] Validação runtime pós-reload concluída: `subagent_readiness_status(strict=true)` retornou READY (userTurns=3, COMPLETE=8, BUDGET_EXCEEDED=0). Blocker de strict readiness foi removido sem override manual."
+    },
+    {
+      "id": "TASK-BUD-128",
+      "description": "[P1] Escrever playbook canônico de evolução agentic (single control-plane -> delegação -> A2A/federação) sem misturar conceitos, usando `tuts-agentic-ai-examples` como referência arquitetural.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-127"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/README.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Playbook separa claramente modos: (1) control-plane local do projeto, (2) subagentes/swarm descartáveis, (3) federação de múltiplos control-planes (queen-of-queens).",
+        "Cada modo define objetivos, limites, gate de entrada/saída e política de ciclo de vida (spawn/compact/kill/recreate) para evitar acoplamento indevido de contexto.",
+        "Documento inclui seção 'inspirado por' com mapeamento explícito de conceitos para `https://github.com/nilayparikh/tuts-agentic-ai-examples`, adaptado ao ecossistema pi/refarm sem cópia literal."
+      ],
+      "notes": "Solicitado pelo usuário (2026-04-23): priorizar fundamentos e clareza conceitual antes de escalar; agents-lab como laboratório para pi+refarm com baixa fricção."
     }
   ]
 }
