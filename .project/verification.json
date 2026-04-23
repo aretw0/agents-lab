@@ -3405,6 +3405,32 @@
           "evidence": "72/72 aprovado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-181",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 17 (throughput) em `packages/pi-stack/extensions/colony-pilot.ts`: wrappers exportados pass-through convertidos para aliases diretos (`const ... = ...Impl`) nos domínios delivery/model/output/baseline, removendo boilerplate no entrypoint. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Contrato público de exports permanece estável para consumidores/tests.",
+          "status": "passed",
+          "evidence": "Nomes exportados preservados; mudança apenas de implementação interna (wrapper -> alias)."
+        },
+        {
+          "criterion": "Deflação incremental mantém `colony-pilot.ts` como orquestrador.",
+          "status": "passed",
+          "evidence": "Entrypoint reduziu de 2129 para 2068 linhas sem reinjetar lógica de domínio."
+        },
+        {
+          "criterion": "Comportamento operacional não regressivo.",
+          "status": "passed",
+          "evidence": "Smoke parsers 72/72 após mudança."
+        }
+      ]
     }
   ]
 }

@@ -1,20 +1,22 @@
 {
-  "timestamp": "2026-04-23T00:55:00.000Z",
-  "context": "Continuidade em throughput: slice 16 da TASK-BUD-116 concluído com remoção de wrappers internos de settings/quota IO no colony-pilot entrypoint e delegação direta para módulos extraídos, mantendo smoke verde.",
+  "timestamp": "2026-04-23T01:02:00.000Z",
+  "context": "Slice 17 da TASK-BUD-116 concluído: wrappers pass-through exportados no colony-pilot foram convertidos para aliases diretos dos módulos `*Impl`, reduzindo boilerplate e mantendo contrato público estável. Entry point caiu para 2068 linhas com smoke verde.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116",
     "TASK-BUD-117"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-warn-active"
+  ],
   "next_actions": [
-    "Continuar TASK-BUD-116 com cortes coesos para reduzir o entrypoint mantendo contrato público estável.",
-    "Retomar TASK-BUD-114 para implementação da allowlist efetiva promoted/skipped por diff.",
-    "Planejar execução de TASK-BUD-117 no context-watchdog (recalibração pós-compact/resume)."
+    "Seguir TASK-BUD-116 em micro-slices de baixo risco enquanto context-watch estiver em warn.",
+    "Retomar TASK-BUD-114 para wiring de allowlist efetiva promoted/skipped por diff.",
+    "Manter TASK-BUD-117 planejada para recalibração pós-compact/resume no context-watchdog."
   ],
   "open_questions": [
-    "Próximo lote de deflação: consolidar exports pass-through restantes ou iniciar wiring seletivo de promoção (TASK-BUD-114)?"
+    "Próximo micro-corte: limpar duplicações de tipos/export type aliases ou iniciar allowlist runtime (TASK-BUD-114)?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
@@ -28,17 +30,17 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T00:55:00.000Z",
+      "atIso": "2026-04-23T01:02:00.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 46,
+      "level": "warn",
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy."
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }

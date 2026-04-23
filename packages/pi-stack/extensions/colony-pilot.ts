@@ -261,11 +261,7 @@ export interface AntColonyToolInput {
 
 /** Parse and validate a per-call delivery mode override from raw tool input.
  *  Returns the valid ColonyDeliveryMode if provided and recognized, else undefined. */
-export function parseDeliveryModeOverride(
-	input: unknown,
-): ColonyDeliveryMode | undefined {
-	return parseDeliveryModeOverrideImpl(input);
-}
+export const parseDeliveryModeOverride = parseDeliveryModeOverrideImpl;
 
 function extractRuntimeColonyId(signalId: string): string | undefined {
 	const raw = signalId.split("|")[1]?.trim();
@@ -275,11 +271,8 @@ function extractRuntimeColonyId(signalId: string): string | undefined {
 	return raw;
 }
 
-export function resolveColonyPilotModelPolicy(
-	raw?: Partial<ColonyPilotModelPolicyConfig>,
-): ColonyPilotModelPolicyConfig {
-	return resolveColonyPilotModelPolicyImpl(raw);
-}
+export const resolveColonyPilotModelPolicy =
+	resolveColonyPilotModelPolicyImpl;
 
 function normalizeOptionalBudget(value: unknown): number | undefined {
 	if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
@@ -361,11 +354,8 @@ export function resolveColonyPilotProjectTaskSync(
 	};
 }
 
-export function resolveColonyPilotDeliveryPolicy(
-	raw?: Partial<ColonyPilotDeliveryPolicyConfig>,
-): ColonyPilotDeliveryPolicyConfig {
-	return resolveColonyPilotDeliveryPolicyImpl(raw);
-}
+export const resolveColonyPilotDeliveryPolicy =
+	resolveColonyPilotDeliveryPolicyImpl;
 
 export interface SelectivePromotionInventoryEvidence {
 	hasPromotedFileInventory: boolean;
@@ -373,26 +363,14 @@ export interface SelectivePromotionInventoryEvidence {
 	hasSelectivePromotionInventory: boolean;
 }
 
-export function evaluateSelectivePromotionInventoryEvidence(
-	text: string,
-): SelectivePromotionInventoryEvidence {
-	return evaluateSelectivePromotionInventoryEvidenceImpl(text);
-}
+export const evaluateSelectivePromotionInventoryEvidence =
+	evaluateSelectivePromotionInventoryEvidenceImpl;
 
-export function evaluateColonyDeliveryEvidence(
-	text: string,
-	phase: ColonyPhase,
-	policy: ColonyPilotDeliveryPolicyConfig,
-): ColonyPilotDeliveryEvaluation {
-	return evaluateColonyDeliveryEvidenceImpl(text, phase, policy);
-}
+export const evaluateColonyDeliveryEvidence =
+	evaluateColonyDeliveryEvidenceImpl;
 
-export function formatDeliveryPolicyEvaluation(
-	policy: ColonyPilotDeliveryPolicyConfig,
-	evalResult: ColonyPilotDeliveryEvaluation,
-): string[] {
-	return formatDeliveryPolicyEvaluationImpl(policy, evalResult);
-}
+export const formatDeliveryPolicyEvaluation =
+	formatDeliveryPolicyEvaluationImpl;
 
 export function colonyPhaseToProjectTaskStatus(
 	phase: ColonyPhase,
@@ -405,19 +383,9 @@ export function colonyPhaseToProjectTaskStatus(
 	return "in-progress";
 }
 
-export function parseBudgetOverrideReason(
-	goal: string,
-	overrideToken: string,
-): string | undefined {
-	return parseBudgetOverrideReasonImpl(goal, overrideToken);
-}
+export const parseBudgetOverrideReason = parseBudgetOverrideReasonImpl;
 
-export function collectAntColonyProviders(
-	input: AntColonyToolInput,
-	currentModelRef?: string,
-): string[] {
-	return collectAntColonyProvidersImpl(input, currentModelRef);
-}
+export const collectAntColonyProviders = collectAntColonyProvidersImpl;
 
 export interface ColonyPilotProviderBudgetGateEvaluation {
 	ok: boolean;
@@ -590,17 +558,11 @@ interface ColonyPilotSettings {
 }
 
 
-export function resolveColonyPilotOutputPolicy(
-	raw?: Partial<ColonyPilotOutputPolicyConfig>,
-): ColonyPilotOutputPolicyConfig {
-	return resolveColonyPilotOutputPolicyImpl(raw);
-}
+export const resolveColonyPilotOutputPolicy =
+	resolveColonyPilotOutputPolicyImpl;
 
-export function resolveColonyPilotCandidateRetentionConfig(
-	raw?: Partial<ColonyPilotCandidateRetentionConfig>,
-): ColonyPilotCandidateRetentionConfig {
-	return resolveColonyPilotCandidateRetentionConfigImpl(raw);
-}
+export const resolveColonyPilotCandidateRetentionConfig =
+	resolveColonyPilotCandidateRetentionConfigImpl;
 export type BaselineProfile = "default" | "phase2";
 export type ModelPolicyProfile =
 	| "copilot"
@@ -610,25 +572,13 @@ export type ModelPolicyProfile =
 	| "factory-strict-copilot"
 	| "factory-strict-hybrid";
 
-export function resolveBaselineProfile(input?: string): BaselineProfile {
-	return resolveBaselineProfileImpl(input);
-}
+export const resolveBaselineProfile = resolveBaselineProfileImpl;
 
-export function resolveModelPolicyProfile(input?: string): ModelPolicyProfile {
-	return resolveModelPolicyProfileImpl(input);
-}
+export const resolveModelPolicyProfile = resolveModelPolicyProfileImpl;
 
-export function buildModelPolicyProfile(
-	profile: ModelPolicyProfile,
-): ColonyPilotModelPolicyConfig {
-	return buildModelPolicyProfileImpl(profile);
-}
+export const buildModelPolicyProfile = buildModelPolicyProfileImpl;
 
-export function buildProjectBaselineSettings(
-	profile: BaselineProfile = "default",
-) {
-	return buildProjectBaselineSettingsImpl(profile);
-}
+export const buildProjectBaselineSettings = buildProjectBaselineSettingsImpl;
 
 export function deepMergeObjects<T extends Record<string, unknown>>(
 	base: T,
@@ -637,12 +587,7 @@ export function deepMergeObjects<T extends Record<string, unknown>>(
 	return deepMergeObjectsImpl(base, patch);
 }
 
-export function applyProjectBaselineSettings(
-	existing: unknown,
-	profile: BaselineProfile = "default",
-) {
-	return applyProjectBaselineSettingsImpl(existing, profile);
-}
+export const applyProjectBaselineSettings = applyProjectBaselineSettingsImpl;
 
 
 export function ensureRecoveryTaskForCandidate(
@@ -659,13 +604,7 @@ export function ensureRecoveryTaskForCandidate(
 	return ensureRecoveryTaskForCandidateInternal(cwd, options);
 }
 
-export function formatToolJsonOutput(
-	label: string,
-	data: unknown,
-	policy: ColonyPilotOutputPolicyConfig,
-): string {
-	return formatToolJsonOutputImpl(label, data, policy);
-}
+export const formatToolJsonOutput = formatToolJsonOutputImpl;
 
 export default function (pi: ExtensionAPI) {
 	const state: PilotState = createPilotState();
