@@ -2992,13 +2992,14 @@
     {
       "id": "TASK-OPS-LOWDISK-001",
       "description": "[P0] Mitigar incidente de baixo espaço em disco no host de desenvolvimento sem perder continuidade do control-plane (limpeza segura + prevenção de recorrência).",
-      "status": "planned",
+      "status": "completed",
       "acceptance_criteria": [
         "Recuperar margem mínima de espaço livre (>2GB) com limpeza não destrutiva priorizando artefatos temporários/ephemerais.",
         "Registrar runbook de prevenção para evitar novas quedas por logs/background commands durante long-runs.",
         "Retomar validações focais pendentes do loop-first após estabilização, com checkpoint canônico e evidência."
       ],
-      "notes": "Criada após incidente de 2026-04-23: compactação manual em ~77% de contexto e host com <100MB livres; comandos de validação ficaram instáveis/timeout. Escopo imediato: estabilização operacional antes de reativar fábrica/swarm."
+      "notes": "Criada após incidente de 2026-04-23: compactação manual em ~77% de contexto e host com <100MB livres; comandos de validação ficaram instáveis/timeout. Escopo imediato: estabilização operacional antes de reativar fábrica/swarm.",
+      "verification": "VER-OPS-LOWDISK-004"
     },
     {
       "id": "TASK-OPS-TOOL-NAME-001",

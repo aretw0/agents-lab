@@ -1,29 +1,16 @@
 {
-  "timestamp": "2026-04-23T19:03:00.000Z",
-  "context": "Retomada pós-restart estabilizada. Execução pragmática concluída: housekeeping com commits atômicos já aplicado, limpeza segura de disco executada (`ops:disk:cleanup`) e margem livre confirmada (~8.94 GB). Em paralelo, micro-slice técnica avançou TASK-BUD-119: runtime consumer agora suporta `board.execute-next` além de `board.execute-task`, mantendo envelope tipado/auditoria no input path.",
+  "timestamp": "2026-04-23T19:15:00.000Z",
+  "context": "Micro-slice de continuidade concluída em modo warn. TASK-OPS-LOWDISK-001 foi formalmente fechado via gate de verificação (`VER-OPS-LOWDISK-004`) após limpeza segura e recuperação de espaço (~8.94 GB). TASK-BUD-119 segue avançando com suporte a `board.execute-next` no runtime intent consumer e smokes verdes.",
   "next_actions": [
-    "Fechar TASK-BUD-125 com evidência operacional real em runtime (`EM_LOOP=yes` + `guardrails-core.board-intent-auto-advance` + `runtimeCodeState=active`).",
-    "Promover TASK-OPS-LOWDISK-001 para fechamento após decidir política para retenção dos dois JSONL grandes de sessão (181MB/129MB).",
-    "Continuar TASK-BUD-119 para intents adicionais de maior valor operacional (ex.: intents de board update/query) mantendo fallback manual.",
-    "Manter cadência micro-slice enquanto `context_watch` estiver em warn/checkpoint."
+    "Foco primário: fechar TASK-BUD-125 com evidência operacional real em runtime (`EM_LOOP=yes` + `guardrails-core.board-intent-auto-advance` + `runtimeCodeState=active`).",
+    "Expandir TASK-BUD-119 para próximo intent de valor operacional (board update/query) mantendo fallback manual e envelope tipado.",
+    "Iniciar TASK-BUD-126 apenas após capturar evidência operacional de loop para não dispersar foco loop-first."
   ],
   "blockers": [
+    "context-watch-warn-active",
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
-    {
-      "atIso": "2026-04-23T18:51:55.445Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 55,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
-    },
     {
       "atIso": "2026-04-23T19:03:00.000Z",
       "reason": "message_end",
@@ -36,6 +23,32 @@
       },
       "action": "micro-slice-only",
       "recommendation": "Continue with bounded slices and focused verification."
+    },
+    {
+      "atIso": "2026-04-23T19:12:53.415Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 58,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
+    },
+    {
+      "atIso": "2026-04-23T19:15:00.000Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 60,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }
