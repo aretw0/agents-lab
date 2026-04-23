@@ -4353,6 +4353,15 @@
       "method": "test",
       "timestamp": "2026-04-23T19:57:00Z",
       "evidence": "Micro-slice de compact-threshold entregue: (1) `computeLoopEvidenceReadiness(...)` canônico para avaliar fechamento operacional (`runtime active` + `emLoop=yes` + `loop-ready active`) a partir do snapshot local; (2) `/lane-queue evidence` agora exibe `readyForTaskBud125=yes|no` + critérios explícitos e emite audit `guardrails-core.loop-evidence-status`; (3) help/docs sincronizados. Smokes focais: `guardrails-long-run-intent-queue`, `guardrails-intent-bus`, `guardrails-board-readiness` => 43/43."
+    },
+    {
+      "id": "VER-BUD-236",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T20:25:00Z",
+      "evidence": "Cultivo de protocolo de validação operacional: adicionado checker externo `scripts/guardrails-loop-evidence-check.mjs` (+ npm scripts `ops:loop-evidence:check|strict`) para avaliar `.pi/guardrails-loop-evidence.json` com critérios canônicos de fechamento (`boardAuto runtime=active`, `boardAuto emLoop=yes`, `loopReady runtime=active`) e janela de frescor (`--max-age-min`). Cobertura: `scripts/test/guardrails-loop-evidence-check.test.mjs` (4/4 pass). Execução real atual: `npm run -s ops:loop-evidence:check` => status=missing/readyForTaskBud125=no (evidência operacional ainda pendente)."
     }
   ]
 }

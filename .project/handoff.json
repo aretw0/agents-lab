@@ -1,35 +1,21 @@
 {
-  "timestamp": "2026-04-23T19:58:00.000Z",
-  "context": "Threshold de compactação cruzado conforme solicitado (`context_watch`=72%, level=compact). Slice concluída com foco em redução de ambiguidade para TASK-BUD-125: readiness canônica (`computeLoopEvidenceReadiness`) + `/lane-queue evidence` com `readyForTaskBud125` e critérios explícitos, evitando inspeção textual frágil de sessão.",
+  "timestamp": "2026-04-23T20:27:00.000Z",
+  "context": "Slice de cultivo executada para validar loop evidence de forma determinística (sem depender de parse amplo de sessão): protocolo operacional formalizado com checker CLI externo (`ops:loop-evidence:*`) + experimento documentado. Estado atual continua bloqueado por ausência de evidência runtime real (`.pi/guardrails-loop-evidence.json` missing).",
   "next_actions": [
-    "Compactar agora e retomar do checkpoint fresco.",
-    "Após retomar, executar ciclo mínimo para gerar evidência real em runtime e confirmar `readyForTaskBud125=yes` em `/lane-queue evidence`.",
-    "Quando `readyForTaskBud125=yes`, registrar VER passed e concluir TASK-BUD-125.",
-    "Só então avançar expansão de TASK-BUD-119 para novos intent types de board update/query."
+    "Executar ciclo mínimo no runtime ativo para produzir evidência real (transição loop-ready + board auto-advance).",
+    "Rodar `/lane-queue evidence` e `npm run ops:loop-evidence:check` até obter `readyForTaskBud125=yes` com freshness dentro da janela.",
+    "Quando pronto, registrar VER passed de TASK-BUD-125 e concluir task.",
+    "Após fechamento de TASK-BUD-125, retomar TASK-BUD-119 (intents board update/query)."
   ],
   "blockers": [
-    "context-watch-compact-required",
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T19:47:00.000Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 63,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Keep micro-slices and checkpoint after each evidence-oriented slice."
-    },
-    {
-      "atIso": "2026-04-23T19:56:32.515Z",
+      "atIso": "2026-04-23T19:59:54.702Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 72,
+      "percent": 73,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -39,17 +25,17 @@
       "recommendation": "Compact now and continue from checkpoint."
     },
     {
-      "atIso": "2026-04-23T19:58:00.000Z",
+      "atIso": "2026-04-23T20:27:00.000Z",
       "reason": "message_end",
-      "level": "compact",
-      "percent": 72,
+      "level": "ok",
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
+      "action": "continue",
+      "recommendation": "Context healthy; standard slices allowed."
     }
   ]
 }
