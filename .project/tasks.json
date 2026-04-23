@@ -3011,6 +3011,38 @@
         "Runbook de migração curto indicando substituição direta para `board_query`/`board_update`."
       ],
       "notes": "Backlog solicitado pelo usuário em 2026-04-23 para eliminar o nome `proxy` remanescente na tool surface."
+    },
+    {
+      "id": "TASK-OPS-CONFIG-CMD-001",
+      "description": "[P1] Criar comando dedicado para operar configurações de runtime (ex.: guardrails/long-run queue) sem edição manual de `.pi/settings.json`, com validação e audit trail.",
+      "status": "planned",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Existe comando explícito para ler/alterar chaves suportadas de config (get/set) com validação de tipo e faixa.",
+        "Mudança de config gera auditoria curta (quem/o quê/quando) e orientação de reload quando necessário.",
+        "Fluxo evita edição manual para toggles frequentes de operação e mantém fallback documentado para arquivo direto."
+      ],
+      "notes": "Backlog criado por solicitação do usuário para reduzir atrito e erro humano ao mexer em configs. Fora do escopo imediato de fechamento TASK-BUD-125."
+    },
+    {
+      "id": "TASK-UX-I18N-001",
+      "description": "[P2] Harmonizar labels canônicos de loop para inglês (CAPS) visando coesão e futura internacionalização.",
+      "status": "planned",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "`buildLoopActivationMarkersLabel` usa labels em inglês consistentes (ex.: READY/ACTIVE_HERE/IN_LOOP), mantendo semântica atual.",
+        "Smoke tests e docs são atualizados para a nova nomenclatura sem regressão funcional.",
+        "Decisão de compatibilidade retroativa (aceitar labels legados em parsers/auditoria, se aplicável) documentada."
+      ],
+      "notes": "Backlog criado após feedback do usuário sobre coesão linguística dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP`."
     }
   ]
 }
