@@ -83,6 +83,43 @@ test("assessLoopEvidence reports ready and fresh state", () => {
   }
 });
 
+test("assessLoopEvidence keeps readiness criteria task-agnostic (real board auto task may differ)", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-task-agnostic-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T21:52:43.461Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T21:52:43.461Z",
+        taskId: "TASK-BUD-028",
+        runtimeCodeState: "active",
+        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T21:52:43.446Z",
+        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-028",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const report = assessLoopEvidence({
+      cwd,
+      nowMs: Date.parse("2026-04-23T22:00:00.000Z"),
+      maxAgeMin: 30,
+    });
+
+    assert.equal(report.status, "ok");
+    assert.equal(report.readyForTaskBud125, true);
+    assert.equal(report.boardAuto?.taskId, "TASK-BUD-028");
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("assessLoopEvidence reports stale when updatedAt exceeds freshness window", () => {
   const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-stale-"));
   try {
