@@ -4407,6 +4407,15 @@
       "method": "test",
       "timestamp": "2026-04-23T22:31:00Z",
       "evidence": "`subagent-readiness` recebeu fallback determinístico de COMPLETE via `.pi/colony-retention` em `packages/pi-stack/extensions/subagent-readiness.ts` (`readRetentionCompleteSignals`, uso de `Math.max(sessionComplete, retentionComplete)` no check `colony-min-complete-signals`). Regressão adicionada em `packages/pi-stack/test/smoke/subagent-readiness.test.ts` (`strict readiness accepts COMPLETE fallback from colony retention snapshot`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 5/5 pass."
+    },
+    {
+      "id": "VER-BUD-242",
+      "target": "TASK-BUD-127",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T22:52:00Z",
+      "evidence": "Hardening complementar em `subagent-readiness`: no `strict=true`, quando `limit` não é informado, gate agora usa janela multi-sessão (`sessionLimit` default >=3) e computa `userTurns` como máximo no recorte para evitar falso-negativo quando o arquivo de sessão mais novo não contém mensagens do usuário (apenas sinais de automação). Cobertura adicionada em `subagent-readiness.test.ts` (`strict readiness defaults to multi-session window and avoids user-turn false negatives`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 6/6 pass."
     }
   ]
 }
