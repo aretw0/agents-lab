@@ -45,8 +45,14 @@ import {
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
   getDeferredIntentQueueCount,
+  readLongRunLoopRuntimeState,
+  setLongRunLoopRuntimeMode,
+  markLongRunLoopRuntimeDispatch,
+  markLongRunLoopRuntimeDegraded,
+  markLongRunLoopRuntimeHealthy,
   type LongRunIntentQueueConfig,
   type AutoDrainGateReason,
+  type LongRunLoopRuntimeState,
 } from "./guardrails-core-lane-queue";
 
 export {
@@ -76,6 +82,11 @@ export {
   clearDeferredIntentQueue,
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
+  readLongRunLoopRuntimeState,
+  setLongRunLoopRuntimeMode,
+  markLongRunLoopRuntimeDispatch,
+  markLongRunLoopRuntimeDegraded,
+  markLongRunLoopRuntimeHealthy,
 } from "./guardrails-core-lane-queue";
 
 // =============================================================================
@@ -746,14 +757,22 @@ export function evaluateCodeBloatSmell(
   };
 }
 
-function updateLongRunLaneStatus(ctx: ExtensionContext, activeLongRun: boolean): void {
+function updateLongRunLaneStatus(
+  ctx: ExtensionContext,
+  activeLongRun: boolean,
+  runtimeState?: LongRunLoopRuntimeState,
+): void {
   const queued = getDeferredIntentQueueCount(ctx.cwd);
-  if (queued <= 0 && !activeLongRun) {
+  const state = runtimeState ?? readLongRunLoopRuntimeState(ctx.cwd);
+  if (queued <= 0 && !activeLongRun && state.mode === "running" && state.health === "healthy") {
     ctx.ui?.setStatus?.("guardrails-core-lane", undefined);
     return;
   }
   const lane = activeLongRun ? "active" : "idle";
-  ctx.ui?.setStatus?.("guardrails-core-lane", `[lane] ${lane} queued=${queued}`);
+  ctx.ui?.setStatus?.(
+    "guardrails-core-lane",
+    `[lane] ${lane} queued=${queued} loop=${state.mode}/${state.health}`,
+  );
 }
 
 export function shouldAnnounceStrictInteractiveMode(
@@ -792,6 +811,14 @@ export default function (pi: ExtensionAPI) {
   let lastAutoDrainDeferredGate: AutoDrainGateReason | undefined;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
+  let longRunLoopRuntimeState: LongRunLoopRuntimeState = {
+    version: 1,
+    mode: "running",
+    health: "healthy",
+    updatedAtIso: new Date().toISOString(),
+    lastTransitionIso: new Date().toISOString(),
+    lastTransitionReason: "init",
+  };
 
   async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
     const quota = readQuotaBudgetSettings(ctx.cwd);
@@ -848,11 +875,44 @@ export default function (pi: ExtensionAPI) {
     }, delay);
   }
 
+  function setLoopMode(
+    ctx: ExtensionContext,
+    mode: "running" | "paused",
+    reason: string,
+  ): void {
+    const next = setLongRunLoopRuntimeMode(ctx.cwd, mode, reason);
+    longRunLoopRuntimeState = next.state;
+  }
+
+  function markLoopHealthy(ctx: ExtensionContext, reason: string): void {
+    const next = markLongRunLoopRuntimeHealthy(ctx.cwd, reason);
+    longRunLoopRuntimeState = next.state;
+  }
+
+  function markLoopDispatch(ctx: ExtensionContext, itemId: string): void {
+    const next = markLongRunLoopRuntimeDispatch(ctx.cwd, itemId);
+    longRunLoopRuntimeState = next.state;
+  }
+
+  function markLoopDegraded(
+    ctx: ExtensionContext,
+    reason: string,
+    errorText?: string,
+  ): void {
+    const next = markLongRunLoopRuntimeDegraded(ctx.cwd, reason, errorText);
+    longRunLoopRuntimeState = next.state;
+  }
+
   function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop" | "idle_timer"): boolean {
     const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
     const queuedCount = getDeferredIntentQueueCount(ctx.cwd);
     const nowMs = Date.now();
     const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
+
+    if (longRunLoopRuntimeState.mode === "paused") {
+      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
+      return false;
+    }
 
     const gate = resolveAutoDrainGateReason(
       activeLongRun,
@@ -889,13 +949,13 @@ export default function (pi: ExtensionAPI) {
         lastAutoDrainDeferredAuditAt = nowMs;
       }
       lastAutoDrainDeferredGate = gate;
-      updateLongRunLaneStatus(ctx, activeLongRun);
+      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
       return false;
     }
 
     lastAutoDrainDeferredGate = undefined;
     if (!shouldAutoDrainDeferredIntent(activeLongRun, queuedCount, nowMs, lastAutoDrainAt, idleSinceMs, longRunIntentQueueConfig)) {
-      updateLongRunLaneStatus(ctx, activeLongRun);
+      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
       return false;
     }
 
@@ -915,8 +975,29 @@ export default function (pi: ExtensionAPI) {
         batchSize: maxBatch,
       });
 
-      pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
-      dispatched += 1;
+      try {
+        pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+        markLoopDispatch(ctx, popped.item.id);
+        dispatched += 1;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
+        enqueueDeferredIntent(
+          ctx.cwd,
+          popped.item.text,
+          `auto-drain-retry:${reason}`,
+          longRunIntentQueueConfig.maxItems,
+        );
+        markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
+        appendAuditEntry(ctx, "guardrails-core.long-run-intent-auto-dispatch-failed", {
+          atIso: new Date().toISOString(),
+          reason,
+          itemId: popped.item.id,
+          error: message,
+        });
+        scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
+        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
+        return false;
+      }
 
       if (!ctx.isIdle() || ctx.hasPendingMessages()) {
         break;
@@ -924,7 +1005,7 @@ export default function (pi: ExtensionAPI) {
     }
 
     if (dispatched <= 0) {
-      updateLongRunLaneStatus(ctx, activeLongRun);
+      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
       return false;
     }
 
@@ -940,7 +1021,8 @@ export default function (pi: ExtensionAPI) {
     }
 
     lastAutoDrainAt = nowMs;
-    updateLongRunLaneStatus(ctx, false);
+    markLoopHealthy(ctx, "auto-drain-dispatch");
+    updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
     ctx.ui.notify(`lane-queue: auto-dispatch ${dispatched} item(s)`, "info");
     return true;
   }
@@ -975,7 +1057,8 @@ export default function (pi: ExtensionAPI) {
     lastCodeBloatSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
     clearAutoDrainTimer();
-    updateLongRunLaneStatus(ctx, false);
+    longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
+    updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
   });
@@ -1032,7 +1115,7 @@ export default function (pi: ExtensionAPI) {
       lastLongRunBusyAt = Date.now();
       clearAutoDrainTimer();
     }
-    updateLongRunLaneStatus(ctx, activeLongRun);
+    updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
 
     if (
       event.source === "interactive"
@@ -1061,7 +1144,7 @@ export default function (pi: ExtensionAPI) {
           textPreview: summarizeAssumptionText(event.text ?? "", pragmaticAutonomyConfig.maxAuditTextChars),
         });
       }
-      updateLongRunLaneStatus(ctx, activeLongRun);
+      updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
       ctx.ui.notify(
         [
           "Long-run ativo: solicitação registrada na fila sem trocar de foco.",
@@ -1303,11 +1386,11 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|pop|clear]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|pop|clear|pause|resume]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
-      const knownSubcommands = new Set(["status", "help", "list", "add", "pop", "clear"]);
+      const knownSubcommands = new Set(["status", "help", "list", "add", "pop", "clear", "pause", "resume"]);
 
       if (sub === "help") {
         ctx.ui.notify(buildLaneQueueHelpLines().join("\n"), "info");
@@ -1324,8 +1407,37 @@ export default function (pi: ExtensionAPI) {
 
       if (sub === "clear") {
         const cleared = clearDeferredIntentQueue(ctx.cwd);
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages());
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
         ctx.ui.notify(`lane-queue: cleared ${cleared.cleared} item(s).`, "info");
+        return;
+      }
+
+      if (sub === "pause") {
+        clearAutoDrainTimer();
+        setLoopMode(ctx, "paused", "manual-pause");
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
+        appendAuditEntry(ctx, "guardrails-core.long-run-loop-mode", {
+          atIso: new Date().toISOString(),
+          mode: longRunLoopRuntimeState.mode,
+          health: longRunLoopRuntimeState.health,
+          reason: longRunLoopRuntimeState.lastTransitionReason,
+        });
+        ctx.ui.notify("lane-queue: long-run loop paused (auto-drain off until resume)", "info");
+        return;
+      }
+
+      if (sub === "resume") {
+        setLoopMode(ctx, "running", "manual-resume");
+        markLoopHealthy(ctx, "manual-resume");
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
+        appendAuditEntry(ctx, "guardrails-core.long-run-loop-mode", {
+          atIso: new Date().toISOString(),
+          mode: longRunLoopRuntimeState.mode,
+          health: longRunLoopRuntimeState.health,
+          reason: longRunLoopRuntimeState.lastTransitionReason,
+        });
+        scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
+        ctx.ui.notify("lane-queue: long-run loop resumed", "info");
         return;
       }
 
@@ -1350,7 +1462,7 @@ export default function (pi: ExtensionAPI) {
           activeLongRun: !ctx.isIdle() || ctx.hasPendingMessages(),
           manual: true,
         });
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages());
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
         ctx.ui.notify(`lane-queue: queued ${queued.itemId} (total=${queued.queuedCount})`, "info");
         return;
       }
@@ -1376,7 +1488,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         const popped = dequeueDeferredIntent(ctx.cwd);
-        updateLongRunLaneStatus(ctx, false);
+        updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
         if (!popped.item) {
           ctx.ui.notify("lane-queue: empty", "info");
           return;
@@ -1388,6 +1500,7 @@ export default function (pi: ExtensionAPI) {
         });
         ctx.ui.notify(`lane-queue: dispatching ${popped.item.id}`, "info");
         pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
+        markLoopDispatch(ctx, popped.item.id);
         scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
         return;
       }
@@ -1422,10 +1535,13 @@ export default function (pi: ExtensionAPI) {
             ? "now"
             : `${Math.ceil(waitMs / 1000)}s`;
       const oldest = oldestAgeMs === undefined ? "n/a" : `${Math.ceil(oldestAgeMs / 1000)}s`;
+      const loopError = longRunLoopRuntimeState.lastError
+        ? ` lastError=${longRunLoopRuntimeState.lastError.slice(0, 120)}`
+        : "";
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...buildLaneQueueStatusTips(queued),
         ].join("\n"),
         "info",
@@ -1443,6 +1559,6 @@ export default function (pi: ExtensionAPI) {
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
     lastLongRunBusyAt = Date.now();
     scheduleAutoDrainDeferredIntent(ctx, "agent_end");
-    updateLongRunLaneStatus(ctx, false);
+    updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
   });
 }

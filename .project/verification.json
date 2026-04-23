@@ -3640,6 +3640,32 @@
           "evidence": "Texto explicita objetivo de evitar confirmação humana óbvia quando estado está saudável."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-191",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 1 do loop autônomo em guardrails-core: estado durável de runtime (`.pi/long-run-loop-state.json`) com `mode` running/paused e `health` healthy/degraded; comandos `/lane-queue pause|resume`; auto-drain respeita pausa e trata falha de dispatch com requeue + marcação degraded auditável. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 20/20.",
+      "criteria_results": [
+        {
+          "criterion": "Loop expõe estado explícito e persistente para retomada segura pós-resume.",
+          "status": "passed",
+          "evidence": "Helpers `read/set/markLongRunLoopRuntime*` persistem modo/health/transições em arquivo próprio."
+        },
+        {
+          "criterion": "Falha transitória em dispatch não perde intent e mantém trilha auditável.",
+          "status": "passed",
+          "evidence": "Auto-drain re-enfileira em erro, marca degraded e audita `long-run-intent-auto-dispatch-failed`."
+        },
+        {
+          "criterion": "Operador consegue pausar/retomar loop sem quebrar lane-queue.",
+          "status": "passed",
+          "evidence": "Subcomandos `pause|resume` adicionados ao `/lane-queue` com atualização de status e audit."
+        }
+      ]
     }
   ]
 }

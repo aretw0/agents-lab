@@ -24,6 +24,22 @@ interface DeferredIntentQueueStore {
   items: DeferredIntentItem[];
 }
 
+export type LongRunLoopRuntimeMode = "running" | "paused";
+export type LongRunLoopRuntimeHealth = "healthy" | "degraded";
+
+export interface LongRunLoopRuntimeState {
+  version: number;
+  mode: LongRunLoopRuntimeMode;
+  health: LongRunLoopRuntimeHealth;
+  updatedAtIso: string;
+  lastTransitionIso: string;
+  lastTransitionReason: string;
+  lastDispatchAtIso?: string;
+  lastDispatchItemId?: string;
+  lastErrorAtIso?: string;
+  lastError?: string;
+}
+
 export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   enabled: true,
   requireActiveLongRun: true,
@@ -37,6 +53,10 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
 
 function deferredIntentQueuePath(cwd: string): string {
   return join(cwd, ".pi", "deferred-intents.json");
+}
+
+function longRunLoopStatePath(cwd: string): string {
+  return join(cwd, ".pi", "long-run-loop-state.json");
 }
 
 function readDeferredIntentQueue(cwd: string): DeferredIntentQueueStore {
@@ -128,8 +148,8 @@ export function parseLaneQueueAddText(args: string): string | undefined {
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|pop|clear]",
-    "examples: /lane-queue list · /lane-queue clear · /lane-queue add revisar isso depois",
+    "usage: /lane-queue [status|help|list|add <text>|pop|clear|pause|resume]",
+    "examples: /lane-queue list · /lane-queue clear · /lane-queue pause · /lane-queue add revisar isso depois",
   ];
 }
 
@@ -326,4 +346,152 @@ export function oldestDeferredIntentAgeMs(items: DeferredIntentItem[], nowMs = D
 
 export function getDeferredIntentQueueCount(cwd: string): number {
   return readDeferredIntentQueue(cwd).items.length;
+}
+
+function normalizeRuntimeMode(value: unknown): LongRunLoopRuntimeMode {
+  return value === "paused" ? "paused" : "running";
+}
+
+function normalizeRuntimeHealth(value: unknown): LongRunLoopRuntimeHealth {
+  return value === "degraded" ? "degraded" : "healthy";
+}
+
+function normalizeRuntimeReason(value: unknown, fallback: string): string {
+  if (typeof value !== "string") return fallback;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, 200) : fallback;
+}
+
+function defaultLongRunLoopRuntimeState(nowIso = new Date().toISOString()): LongRunLoopRuntimeState {
+  return {
+    version: 1,
+    mode: "running",
+    health: "healthy",
+    updatedAtIso: nowIso,
+    lastTransitionIso: nowIso,
+    lastTransitionReason: "init",
+  };
+}
+
+function writeLongRunLoopRuntimeState(cwd: string, state: LongRunLoopRuntimeState): string {
+  const p = longRunLoopStatePath(cwd);
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  writeFileSync(p, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  return p;
+}
+
+export function readLongRunLoopRuntimeState(cwd: string): LongRunLoopRuntimeState {
+  const p = longRunLoopStatePath(cwd);
+  if (!existsSync(p)) return defaultLongRunLoopRuntimeState();
+  try {
+    const raw = JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown>;
+    const fallback = defaultLongRunLoopRuntimeState();
+    return {
+      version: 1,
+      mode: normalizeRuntimeMode(raw.mode),
+      health: normalizeRuntimeHealth(raw.health),
+      updatedAtIso:
+        typeof raw.updatedAtIso === "string" && raw.updatedAtIso
+          ? raw.updatedAtIso
+          : fallback.updatedAtIso,
+      lastTransitionIso:
+        typeof raw.lastTransitionIso === "string" && raw.lastTransitionIso
+          ? raw.lastTransitionIso
+          : fallback.lastTransitionIso,
+      lastTransitionReason: normalizeRuntimeReason(
+        raw.lastTransitionReason,
+        fallback.lastTransitionReason,
+      ),
+      lastDispatchAtIso:
+        typeof raw.lastDispatchAtIso === "string" && raw.lastDispatchAtIso
+          ? raw.lastDispatchAtIso
+          : undefined,
+      lastDispatchItemId:
+        typeof raw.lastDispatchItemId === "string" && raw.lastDispatchItemId
+          ? raw.lastDispatchItemId
+          : undefined,
+      lastErrorAtIso:
+        typeof raw.lastErrorAtIso === "string" && raw.lastErrorAtIso
+          ? raw.lastErrorAtIso
+          : undefined,
+      lastError:
+        typeof raw.lastError === "string" && raw.lastError.trim().length > 0
+          ? raw.lastError.trim().slice(0, 500)
+          : undefined,
+    };
+  } catch {
+    return defaultLongRunLoopRuntimeState();
+  }
+}
+
+function mutateLongRunLoopRuntimeState(
+  cwd: string,
+  mutator: (state: LongRunLoopRuntimeState, nowIso: string) => void,
+): { path: string; state: LongRunLoopRuntimeState } {
+  const nowIso = new Date().toISOString();
+  const state = readLongRunLoopRuntimeState(cwd);
+  mutator(state, nowIso);
+  state.updatedAtIso = nowIso;
+  const path = writeLongRunLoopRuntimeState(cwd, state);
+  return { path, state };
+}
+
+export function setLongRunLoopRuntimeMode(
+  cwd: string,
+  mode: LongRunLoopRuntimeMode,
+  reason: string,
+): { path: string; state: LongRunLoopRuntimeState } {
+  return mutateLongRunLoopRuntimeState(cwd, (state, nowIso) => {
+    const nextMode = normalizeRuntimeMode(mode);
+    if (state.mode !== nextMode) {
+      state.mode = nextMode;
+      state.lastTransitionIso = nowIso;
+      state.lastTransitionReason = normalizeRuntimeReason(reason, `mode:${nextMode}`);
+    }
+  });
+}
+
+export function markLongRunLoopRuntimeDispatch(
+  cwd: string,
+  itemId: string,
+): { path: string; state: LongRunLoopRuntimeState } {
+  return mutateLongRunLoopRuntimeState(cwd, (state, nowIso) => {
+    state.health = "healthy";
+    state.lastDispatchAtIso = nowIso;
+    state.lastDispatchItemId = itemId;
+    state.lastErrorAtIso = undefined;
+    state.lastError = undefined;
+  });
+}
+
+export function markLongRunLoopRuntimeDegraded(
+  cwd: string,
+  reason: string,
+  errorText?: string,
+): { path: string; state: LongRunLoopRuntimeState } {
+  return mutateLongRunLoopRuntimeState(cwd, (state, nowIso) => {
+    state.health = "degraded";
+    state.lastTransitionIso = nowIso;
+    state.lastTransitionReason = normalizeRuntimeReason(reason, "degraded");
+    state.lastErrorAtIso = nowIso;
+    state.lastError =
+      typeof errorText === "string" && errorText.trim().length > 0
+        ? errorText.trim().slice(0, 500)
+        : "unknown-error";
+  });
+}
+
+export function markLongRunLoopRuntimeHealthy(
+  cwd: string,
+  reason: string,
+): { path: string; state: LongRunLoopRuntimeState } {
+  return mutateLongRunLoopRuntimeState(cwd, (state, nowIso) => {
+    if (state.health !== "healthy") {
+      state.lastTransitionIso = nowIso;
+      state.lastTransitionReason = normalizeRuntimeReason(reason, "recovered");
+    }
+    state.health = "healthy";
+    state.lastErrorAtIso = undefined;
+    state.lastError = undefined;
+  });
 }

@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T02:27:30.000Z",
-  "context": "Backlog estratégico refinado por decisão humana: priorizar desbloqueio de potencial do control plane (loops autônomos confiáveis) antes de curadoria de canal Telegram. Telegram foi explicitamente posicionado para fase final de lapidação.",
+  "timestamp": "2026-04-23T02:53:30.000Z",
+  "context": "TASK-BUD-118 iniciado com slice funcional: lane-queue agora tem runtime state durável (`.pi/long-run-loop-state.json`) com `mode` running/paused e `health` healthy/degraded; auto-drain respeita pausa e re-enfileira em falha de dispatch com auditoria de degradação.",
   "current_phase": "control-plane-autonomy-prioritized",
   "current_tasks": [
     "TASK-BUD-114",
@@ -11,40 +11,41 @@
     "TASK-BUD-121"
   ],
   "blockers": [
-    "context-watch-warn-active"
+    "context-watch-compact-required"
   ],
   "next_actions": [
-    "Executar TASK-BUD-118 (núcleo de loop autônomo) como próximo desbloqueador de potencial.",
-    "Na sequência, atacar TASK-BUD-119 (intent bus canônico cross-extension).",
-    "Consolidar superfícies de confiança em TASK-BUD-120.",
-    "Manter TASK-BUD-121 (Telegram) no final, após maturidade do control plane."
+    "Compactar e retomar do handoff para continuar TASK-BUD-118 sem overflow.",
+    "TASK-BUD-118 próximo slice: adicionar sinal de lease/owner e stop-condition explícita no runtime do loop.",
+    "Depois seguir para TASK-BUD-119 (intent bus canônico).",
+    "Manter TASK-BUD-121 (Telegram) no final da lapidação do control plane."
   ],
   "open_questions": [
-    "Quais intents mínimas entram no primeiro milestone de TASK-BUD-118 para entregar valor rápido sem reinflação?"
+    "Qual contrato mínimo de lease do loop (owner, heartbeat, expiry) queremos para o próximo slice sem reinflação?"
   ],
   "key_decisions_pending": [
-    "Definir fronteira exata entre loop autônomo 'safe by default' e ações que continuam exigindo consentimento explícito do operador."
+    "Definir quais ações continuam exigindo consentimento explícito mesmo com loop autônomo ativo."
   ],
   "files_in_flux": [
-    ".project/requirements.json",
-    ".project/decisions.json",
+    "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+    "packages/pi-stack/extensions/guardrails-core.ts",
+    "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
     ".project/tasks.json",
-    ".project/handoff.json",
-    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts"
+    ".project/verification.json",
+    ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T02:27:30.000Z",
+      "atIso": "2026-04-23T02:53:30.000Z",
       "reason": "message_end",
-      "level": "warn",
-      "percent": 54,
+      "level": "compact",
+      "percent": 72,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

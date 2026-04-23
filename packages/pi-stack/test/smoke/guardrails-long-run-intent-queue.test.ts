@@ -31,6 +31,11 @@ import {
   shouldEmitBloatSmellSignal,
   shouldSchedulePostDispatchAutoDrain,
   shouldEmitAutoDrainDeferredAudit,
+  readLongRunLoopRuntimeState,
+  setLongRunLoopRuntimeMode,
+  markLongRunLoopRuntimeDegraded,
+  markLongRunLoopRuntimeDispatch,
+  markLongRunLoopRuntimeHealthy,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -221,7 +226,7 @@ describe("guardrails-core long-run intent queue", () => {
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|pop|clear]");
+    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|pop|clear|pause|resume]");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
     expect(queuedTips).toContain("/lane-queue list");
@@ -274,6 +279,37 @@ describe("guardrails-core long-run intent queue", () => {
       const cleared = clearDeferredIntentQueue(cwd);
       expect(cleared.cleared).toBe(1);
       expect(listDeferredIntents(cwd)).toHaveLength(0);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("persists long-run loop runtime mode/health transitions", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-long-run-loop-state-"));
+    try {
+      const initial = readLongRunLoopRuntimeState(cwd);
+      expect(initial.mode).toBe("running");
+      expect(initial.health).toBe("healthy");
+
+      const paused = setLongRunLoopRuntimeMode(cwd, "paused", "manual-pause").state;
+      expect(paused.mode).toBe("paused");
+      expect(paused.lastTransitionReason).toBe("manual-pause");
+
+      const degraded = markLongRunLoopRuntimeDegraded(
+        cwd,
+        "dispatch-failed:idle_timer",
+        "queue dispatch failed",
+      ).state;
+      expect(degraded.health).toBe("degraded");
+      expect(degraded.lastError).toContain("dispatch failed");
+
+      const dispatched = markLongRunLoopRuntimeDispatch(cwd, "intent-123").state;
+      expect(dispatched.health).toBe("healthy");
+      expect(dispatched.lastDispatchItemId).toBe("intent-123");
+      expect(dispatched.lastError).toBeUndefined();
+
+      const healthy = markLongRunLoopRuntimeHealthy(cwd, "manual-resume").state;
+      expect(healthy.health).toBe("healthy");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
