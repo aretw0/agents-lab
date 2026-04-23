@@ -52,8 +52,13 @@
     "pi-stack:user-surface": "node scripts/pi-stack-user-surface-audit.mjs",
     "pi:artifact:audit": "node scripts/pi-runtime-artifact-audit.mjs",
     "pi:artifact:audit:strict": "node scripts/pi-runtime-artifact-audit.mjs --strict",
+    "ops:disk:check": "node scripts/host-disk-guard.mjs",
+    "ops:disk:cleanup:dry": "node scripts/host-disk-guard.mjs",
+    "ops:disk:cleanup": "node scripts/host-disk-guard.mjs --apply",
+    "ops:disk:cleanup:with-sessions": "node scripts/host-disk-guard.mjs --apply --include-sessions --session-age-days=14 --keep-recent-sessions=20",
     "repo:complexity": "node scripts/repo-complexity-check.mjs --max-lines 1000",
     "repo:complexity:strict": "node scripts/repo-complexity-check.mjs --max-lines 1000 --strict",
+    "test:ops:disk-guard": "node --test scripts/test/host-disk-guard.test.mjs",
     "monitor:stability:evidence": "node scripts/monitor-stability-evidence.mjs --source auto",
     "monitor:stability:evidence:write": "node scripts/monitor-stability-evidence.mjs --source auto --write-report",
     "monitor:stability:gate": "node scripts/monitor-stability-gate.mjs --source auto --min-user-turns 3 --max-classify-failures 0",
@@ -76,6 +81,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
     "@marcfargas/pi-test-harness": "^0.5.0",
+    "@mariozechner/pi-coding-agent": "^0.69.0",
     "vitest": "^4.1.4"
   },
   "keywords": [
