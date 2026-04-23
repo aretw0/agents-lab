@@ -122,7 +122,7 @@
 				"recoveryCommands": ["doctor", "quota-visibility", "model", "login"]
 			},
 			"longRunIntentQueue": {
-				"enabled": false
+				"enabled": true
 			}
 		},
 		"quotaVisibility": {
