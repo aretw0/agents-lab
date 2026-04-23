@@ -3301,6 +3301,32 @@
           "evidence": "72/72 após extração."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-177",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 11 (micro) em 1 arquivo: `packages/pi-stack/extensions/colony-pilot.ts` removeu wrappers locais de session utils e passou a usar `extractTextImpl`/`inferMonitorModeFromSessionFileImpl` diretamente nos call-sites (residual wiring cleanup). Smoke executada: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Micro-slice-only (1 file + 1 test) sem alterar contrato público do entrypoint.",
+          "status": "passed",
+          "evidence": "Apenas `colony-pilot.ts` alterado no código; assinaturas/exportações públicas preservadas."
+        },
+        {
+          "criterion": "`colony-pilot.ts` continua como orquestrador com redução incremental de bloat.",
+          "status": "passed",
+          "evidence": "Wrappers redundantes removidos; 2209 -> 2201 linhas."
+        },
+        {
+          "criterion": "Regressão coberta por smoke focada.",
+          "status": "passed",
+          "evidence": "72/72 aprovado após mudança."
+        }
+      ]
     }
   ]
 }

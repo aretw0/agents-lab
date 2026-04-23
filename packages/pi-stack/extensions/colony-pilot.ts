@@ -697,14 +697,6 @@ export function ensureRecoveryTaskForCandidate(
 	return ensureRecoveryTaskForCandidateInternal(cwd, options);
 }
 
-function extractText(message: unknown): string {
-	return extractTextImpl(message);
-}
-
-function inferMonitorModeFromSessionFile(sessionFile?: string): MonitorMode {
-	return inferMonitorModeFromSessionFileImpl(sessionFile);
-}
-
 export function formatToolJsonOutput(
 	label: string,
 	data: unknown,
@@ -778,7 +770,7 @@ export default function (pi: ExtensionAPI) {
 		state.remoteClients = 0;
 		state.monitorMode = "unknown";
 		state.lastSessionFile = ctx.sessionManager.getSessionFile?.() ?? undefined;
-		state.monitorMode = inferMonitorModeFromSessionFile(state.lastSessionFile);
+		state.monitorMode = inferMonitorModeFromSessionFileImpl(state.lastSessionFile);
 		pendingColonyGoals.splice(0, pendingColonyGoals.length);
 		colonyTaskMap.clear();
 		colonyGoalMap.clear();
@@ -998,14 +990,14 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.on("message_end", (event, ctx) => {
-		const text = extractText((event as { message?: unknown }).message);
+		const text = extractTextImpl((event as { message?: unknown }).message);
 		if (!text) return;
 		if (applyTelemetryText(state, text)) updateStatusUI(ctx, state);
 		maybeSyncProjectTaskFromTelemetry(text, ctx);
 	});
 
 	pi.on("tool_result", (event, ctx) => {
-		const text = extractText(event);
+		const text = extractTextImpl(event);
 		if (!text) return;
 		if (applyTelemetryText(state, text)) updateStatusUI(ctx, state);
 		maybeSyncProjectTaskFromTelemetry(text, ctx);
