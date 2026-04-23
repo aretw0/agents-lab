@@ -865,7 +865,7 @@ function updateLongRunLaneStatus(
   );
 }
 
-interface LoopActivationEvidenceState {
+export interface LoopActivationEvidenceState {
   version: 1;
   updatedAtIso: string;
   lastLoopReady?: {
@@ -881,6 +881,30 @@ interface LoopActivationEvidenceState {
     runtimeCodeState: RuntimeCodeActivationState;
     markersLabel: string;
     emLoop: boolean;
+  };
+}
+
+export interface LoopEvidenceReadiness {
+  readyForTaskBud125: boolean;
+  criteria: string[];
+}
+
+export function computeLoopEvidenceReadiness(
+  evidence: LoopActivationEvidenceState,
+): LoopEvidenceReadiness {
+  const loopReady = evidence.lastLoopReady;
+  const boardAuto = evidence.lastBoardAutoAdvance;
+  const boardRuntimeActive = Boolean(boardAuto && boardAuto.runtimeCodeState === "active");
+  const boardEmLoop = Boolean(boardAuto && boardAuto.emLoop);
+  const loopRuntimeActive = Boolean(loopReady && loopReady.runtimeCodeState === "active");
+  const criteria = [
+    `boardAuto.runtime=active:${boardAuto ? (boardRuntimeActive ? "yes" : "no") : "n/a"}`,
+    `boardAuto.emLoop=yes:${boardAuto ? (boardEmLoop ? "yes" : "no") : "n/a"}`,
+    `loopReady.runtime=active:${loopReady ? (loopRuntimeActive ? "yes" : "no") : "n/a"}`,
+  ];
+  return {
+    readyForTaskBud125: boardRuntimeActive && boardEmLoop && loopRuntimeActive,
+    criteria,
   };
 }
 
@@ -2210,17 +2234,27 @@ export default function (pi: ExtensionAPI) {
         const evidence = readLoopActivationEvidence(ctx.cwd);
         const loopReady = evidence.lastLoopReady;
         const boardAuto = evidence.lastBoardAutoAdvance;
+        const readiness = computeLoopEvidenceReadiness(evidence);
         const lines = [
           "lane-queue: loop evidence",
           `updatedAt: ${evidence.updatedAtIso}`,
+          `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
           boardAuto
             ? `boardAuto: task=${boardAuto.taskId} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
             : "boardAuto: n/a",
           loopReady
             ? `loopReady: at=${loopReady.atIso} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
             : "loopReady: n/a",
+          `criteria: ${readiness.criteria.join(" | ")}`,
         ];
-        ctx.ui.notify(lines.join("\n"), "info");
+        appendAuditEntry(ctx, "guardrails-core.loop-evidence-status", {
+          atIso: new Date().toISOString(),
+          readyForTaskBud125: readiness.readyForTaskBud125,
+          boardAuto,
+          loopReady,
+          criteria: readiness.criteria,
+        });
+        ctx.ui.notify(lines.join("\n"), readiness.readyForTaskBud125 ? "info" : "warning");
         return;
       }
 

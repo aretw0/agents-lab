@@ -43,6 +43,7 @@ import {
   shouldEmitAutoDrainDeferredAudit,
   shouldEmitBoardAutoAdvanceGateAudit,
   shouldEmitLoopActivationAudit,
+  computeLoopEvidenceReadiness,
   readLongRunLoopRuntimeState,
   setLongRunLoopRuntimeMode,
   markLongRunLoopRuntimeDegraded,
@@ -521,6 +522,44 @@ describe("guardrails-core long-run intent queue", () => {
     expect(buildLoopActivationBlockerHint(reloadMarkers)).toContain("faça reload");
     expect(buildLoopActivationBlockerHint(queueBlockedMarkers)).toContain("esvazie fila");
     expect(buildLoopActivationBlockerHint(readyMarkers)).toBeUndefined();
+  });
+
+  it("computes deterministic loop evidence readiness for task-bud-125 closure", () => {
+    const ready = computeLoopEvidenceReadiness({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:00:00.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:00:00.000Z",
+        taskId: "TASK-BUD-125",
+        runtimeCodeState: "active",
+        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T18:59:59.000Z",
+        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+      },
+    });
+    expect(ready.readyForTaskBud125).toBe(true);
+    expect(ready.criteria.join(" |")).toContain("boardAuto.runtime=active:yes");
+
+    const blocked = computeLoopEvidenceReadiness({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:00:00.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:00:00.000Z",
+        taskId: "TASK-BUD-125",
+        runtimeCodeState: "reload-required",
+        markersLabel: "PREPARADO=yes ATIVO_AQUI=no EM_LOOP=no blocker=runtime-reload-required",
+        emLoop: false,
+      },
+      lastLoopReady: undefined,
+    });
+    expect(blocked.readyForTaskBud125).toBe(false);
+    expect(blocked.criteria.join(" |")).toContain("boardAuto.runtime=active:no");
   });
 
   it("auto-advances board task only when lane is idle, empty and healthy", () => {
