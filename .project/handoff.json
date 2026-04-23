@@ -1,41 +1,28 @@
 {
-  "timestamp": "2026-04-23T23:02:00.000Z",
-  "context": "Após reload anterior, strict gate já refletiu parte do hardening (`sessionLimit: 3`), porém continuou bloqueando em `monitor-min-user-turns` (2/3) por truncamento do tail em sessão longa. Novo hardening foi aplicado em `subagent-readiness`: antes de bloquear, o gate faz rescan com tail expandido (até 10MB), reduzindo falso-negativo de userTurns. Teste de regressão específico adicionado e smoke focal passou (7/7).",
+  "timestamp": "2026-04-23T23:08:00.000Z",
+  "context": "Reload aplicado e validação runtime concluída: `subagent_readiness_status(strict=true)` está READY após hardenings de `subagent-readiness` (fallback COMPLETE por retention + janela strict multi-sessão + rescan de tail expandido). Gate crítico de subagentes destravado sem override manual.",
   "next_actions": [
-    "Executar novo `/reload` para ativar a última mudança de runtime (rescan expandido de userTurns).",
-    "Após reload, rodar `subagent_readiness_status(strict=true)` e confirmar `ready: true` sem override manual.",
-    "Se strict passar, registrar verificação operacional e avançar para TASK-OPS-HYGIENE-002.",
-    "Manter TASK-BUD-028 e TASK-BUD-088 em no-auto-close até decisão humana."
+    "Decidir fechamento humano de TASK-BUD-127 (já verificada por testes e runtime).",
+    "Entrar em trilha de delegação progressiva: control-plane -> subagentes (runs pequenas com cap) -> swarm maior somente após sinais estáveis.",
+    "Atualizar evidência de loop readiness para remover estado stale em `.pi/guardrails-loop-evidence.json` (`ops:loop-evidence:strict` atualmente falha por staleness, não por critérios).",
+    "Executar TASK-OPS-HYGIENE-002 para limpeza de artefatos temporários mantendo evidência canônica."
   ],
   "blockers": [
-    "runtime-reload-pending-for-subagent-readiness-rescan-fix"
+    "loop-evidence-stale-needs-refresh"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T22:55:39.660Z",
-      "reason": "resume-check",
+      "atIso": "2026-04-23T23:06:54.000Z",
+      "reason": "post-reload-validation",
       "level": "ok",
-      "percent": 12,
+      "percent": 19,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; standard-slices habilitado pós-resume."
-    },
-    {
-      "atIso": "2026-04-23T23:02:00.000Z",
-      "reason": "message_end",
-      "level": "ok",
-      "percent": 12,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "continue",
-      "recommendation": "Checkpoint atualizado com blocker único de reload runtime."
+      "recommendation": "Context healthy; standard-slices mantido."
     }
   ]
 }

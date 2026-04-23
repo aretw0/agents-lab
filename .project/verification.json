@@ -4425,6 +4425,15 @@
       "method": "test",
       "timestamp": "2026-04-23T23:01:00Z",
       "evidence": "Hardening adicional em `subagent-readiness`: quando `userTurns < minUserTurns`, gate faz rescan com tail expandido (até 10MB) antes de bloquear, reduzindo falso-negativo causado por truncamento de tail em sessões longas. Implementado em `packages/pi-stack/extensions/subagent-readiness.ts`. Regressão adicionada em `packages/pi-stack/test/smoke/subagent-readiness.test.ts` (`strict readiness rescans larger tail before blocking on user turns`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 7/7 pass."
+    },
+    {
+      "id": "VER-BUD-244",
+      "target": "TASK-BUD-127",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:07:00Z",
+      "evidence": "Validação operacional pós-reload: `subagent_readiness_status(strict=true)` retornou `ready=true` com `sessionLimit:3`, `userTurns:3`, `COMPLETE:8`, `BUDGET_EXCEEDED:0` e pacotes obrigatórios presentes. Confirma no runtime os hardenings aplicados para evitar falsos negativos no strict gate."
     }
   ]
 }
