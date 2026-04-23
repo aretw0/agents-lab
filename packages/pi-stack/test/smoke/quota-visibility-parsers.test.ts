@@ -133,6 +133,22 @@ describe("quota-visibility parsers", () => {
     expect(budgets.invalid).toBeUndefined();
   });
 
+  it("parseProviderBudgets aceita chave provider/account com fallback provider-only", () => {
+    const budgets = parseProviderBudgets({
+      "openai-codex/team-a": {
+        owner: "squad-a",
+        weeklyQuotaTokens: 1000,
+      },
+      "openai-codex": {
+        weeklyQuotaTokens: 5000,
+      },
+    });
+
+    expect(budgets["openai-codex/team-a"]?.weeklyQuotaTokens).toBe(1000);
+    expect(budgets["openai-codex/team-a"]?.owner).toBe("squad-a");
+    expect(budgets["openai-codex"]?.weeklyQuotaTokens).toBe(5000);
+  });
+
   it("computeWindowStartScores soma janela circular corretamente", () => {
     const hourly = Array.from({ length: 24 }, () => 0);
     hourly[14] = 100;
@@ -174,6 +190,61 @@ describe("quota-visibility parsers", () => {
 
     expect(evalResult.allocationWarnings.length).toBeGreaterThan(0);
     expect(evalResult.allocationWarnings.join("\n")).toContain("shareTokensPct soma");
+  });
+
+  it("buildProviderBudgetStatuses aplica matcher account-aware com fallback provider-only", () => {
+    const now = Date.now();
+    const events: QuotaUsageEvent[] = [
+      {
+        timestampIso: new Date(now - 2 * 3600_000).toISOString(),
+        timestampMs: now - 2 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 1,
+        provider: "openai-codex",
+        account: "team-a",
+        providerAccountKey: "openai-codex/team-a",
+        model: "gpt-5",
+        tokens: 100,
+        costUsd: 0.1,
+        requests: 1,
+        sessionFile: "s1.jsonl",
+      },
+      {
+        timestampIso: new Date(now - 1 * 3600_000).toISOString(),
+        timestampMs: now - 1 * 3600_000,
+        dayLocal: "2026-04-14",
+        hourLocal: 2,
+        provider: "openai-codex",
+        model: "gpt-5",
+        tokens: 50,
+        costUsd: 0.05,
+        requests: 1,
+        sessionFile: "s1.jsonl",
+      },
+    ];
+
+    const evalResult = buildProviderBudgetStatuses(events, {
+      days: 7,
+      providerBudgets: {
+        "openai-codex/team-a": {
+          weeklyQuotaTokens: 200,
+        },
+        "openai-codex": {
+          weeklyQuotaTokens: 1000,
+        },
+      },
+    });
+
+    const accountBudget = evalResult.budgets.find(
+      (b) => b.providerAccountKey === "openai-codex/team-a"
+    );
+    const providerBudget = evalResult.budgets.find(
+      (b) => b.providerAccountKey === "openai-codex"
+    );
+
+    expect(accountBudget?.account).toBe("team-a");
+    expect(accountBudget?.observedTokens).toBe(100);
+    expect(providerBudget?.observedTokens).toBe(150);
   });
 
   it("buildProviderBudgetStatuses aplica shares e bloqueio por provider", () => {

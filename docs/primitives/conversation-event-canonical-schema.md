@@ -15,6 +15,8 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
   "schemaVersion": "1.0",
   "source": {
     "provider": "pi|telegram|whatsapp|matrix|signal|custom",
+    "account": "optional-account-id",
+    "providerAccountKey": "provider[/account]",
     "workspace": "optional-workspace-id",
     "channelId": "optional-channel-id",
     "threadId": "thread-123",
@@ -60,11 +62,16 @@ Contrato canônico para ingestão de conversas/threads de múltiplas plataformas
 3. `event.role` mapeado para vocabulário canônico.
 4. IDs externos devem ficar em `meta` (não substituir `event.id`).
 5. Resumos compactados de branch/sessão devem usar `event.type = "summary"`.
+6. `source.providerAccountKey` é canônico em formato `provider[/account]`:
+   - com identidade de conta disponível: `provider/account`;
+   - sem identidade de conta: fallback compatível `provider`.
 
 ## Mapeamento rápido por plataforma
 
 - **pi JSONL**
   - `source.provider = "pi"`
+  - `source.account` opcional quando origem expõe identidade (ex.: conta/tenant/perfil)
+  - `source.providerAccountKey = provider[/account]` com fallback provider-only
   - `event.role = message.role`
   - `event.text = content(text)`
   - `event.type = "message"` (ou `"signal"` quando detectar `COLONY_SIGNAL`)

@@ -51,7 +51,10 @@ Modelo de operação:
 - `requestSharePolicy`: `fixed` ou `remaining` (ex.: metade do disponível no momento);
 - `warnPct` / `hardPct`: thresholds operacionais (`WARN` / `BLOCK`).
 
-> Importante: no estado atual a separação é por **provider**. Separação por chave individual/conta no mesmo provider exige tagging adicional na ingestão de eventos (trilha futura provider-agnostic).
+> Importante: a chave canônica suportada é `provider[/account]`.
+> - Com identidade de conta disponível na ingestão, use budgets por `provider/account`.
+> - Sem identidade de conta, o sistema mantém fallback compatível por `provider`.
+> - Para cenários mistos, mantenha regra provider-only como baseline e refine por conta quando a origem emitir `account` de forma estável.
 
 ---
 

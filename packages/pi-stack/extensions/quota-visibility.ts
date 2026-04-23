@@ -71,6 +71,8 @@ export interface QuotaUsageEvent {
 	dayLocal: string;
 	hourLocal: number;
 	provider: string;
+	account?: string;
+	providerAccountKey?: string;
 	model: string;
 	tokens: number;
 	costUsd: number;
@@ -126,6 +128,8 @@ export type ProviderBudgetMap = Record<string, ProviderBudgetConfig>;
 
 export interface ProviderBudgetStatus {
 	provider: string;
+	account?: string;
+	providerAccountKey?: string;
 	owner?: string;
 	period: "weekly" | "monthly";
 	unit: "tokens-cost" | "requests";
@@ -324,7 +328,10 @@ export function formatBudgetStatusParts(
 		);
 		const icon =
 			b.state === "blocked" ? "✗" : b.state === "warning" ? "!" : "✓";
-		return `${icon}${shortProviderLabel(b.provider)}:${pct}%`;
+		const scope = b.account
+			? `${shortProviderLabel(b.provider)}@${b.account}`
+			: shortProviderLabel(b.provider);
+		return `${icon}${scope}:${pct}%`;
 	});
 }
 
@@ -342,6 +349,68 @@ function normalizeProvider(input: unknown): string {
 	if (typeof input !== "string") return "unknown";
 	const v = input.trim().toLowerCase();
 	return v || "unknown";
+}
+
+function normalizeAccountId(input: unknown): string | undefined {
+	if (typeof input !== "string") return undefined;
+	const value = input.trim().toLowerCase();
+	if (!value || value === "unknown") return undefined;
+	return value;
+}
+
+export interface ProviderAccountRef {
+	provider: string;
+	account?: string;
+	key: string;
+}
+
+export function buildProviderAccountKey(
+	provider: string,
+	account?: string,
+): string {
+	const normalizedProvider = normalizeProvider(provider);
+	const normalizedAccount = normalizeAccountId(account);
+	if (!normalizedAccount) return normalizedProvider;
+	return `${normalizedProvider}/${normalizedAccount}`;
+}
+
+export function parseProviderAccountKey(
+	input: unknown,
+): ProviderAccountRef | undefined {
+	if (typeof input !== "string") return undefined;
+	const raw = input.trim();
+	if (!raw) return undefined;
+
+	const slash = raw.indexOf("/");
+	const providerPart = slash === -1 ? raw : raw.slice(0, slash);
+	const accountPart = slash === -1 ? undefined : raw.slice(slash + 1);
+	const provider = normalizeProvider(providerPart);
+	if (!provider || provider === "unknown") return undefined;
+	const account = normalizeAccountId(accountPart);
+
+	return {
+		provider,
+		account,
+		key: buildProviderAccountKey(provider, account),
+	};
+}
+
+function resolveUsageEventAccount(
+	obj: Record<string, unknown>,
+	msg: Record<string, unknown>,
+): string | undefined {
+	return normalizeAccountId(
+		obj.account ??
+			obj.accountId ??
+			obj.account_id ??
+			obj.providerAccount ??
+			obj.provider_account ??
+			msg.account ??
+			msg.accountId ??
+			msg.account_id ??
+			msg.providerAccount ??
+			msg.provider_account,
+	);
 }
 
 function toDayLocal(d: Date): string {
@@ -498,8 +567,8 @@ export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 	const out: ProviderBudgetMap = {};
 
 	for (const [k, rawRule] of Object.entries(input as Record<string, unknown>)) {
-		const provider = normalizeProvider(k);
-		if (!provider || provider === "unknown") continue;
+		const key = parseProviderAccountKey(k);
+		if (!key) continue;
 		if (!rawRule || typeof rawRule !== "object") continue;
 
 		const ruleObj = rawRule as Record<string, unknown>;
@@ -547,7 +616,7 @@ export function parseProviderBudgets(input: unknown): ProviderBudgetMap {
 
 		if (!hasAny) continue;
 
-		out[provider] = {
+		out[key.key] = {
 			owner,
 			period,
 			unit,
@@ -786,34 +855,36 @@ export function buildProviderBudgetStatuses(
 	},
 ): { allocationWarnings: string[]; budgets: ProviderBudgetStatus[] } {
 	const allocationWarnings: string[] = [];
-	const providers = Object.keys(params.providerBudgets).map((p) =>
-		normalizeProvider(p),
-	);
-	if (providers.length === 0) return { allocationWarnings, budgets: [] };
+	const budgetRefs = Object.keys(params.providerBudgets)
+		.map((key) => parseProviderAccountKey(key))
+		.filter((row): row is ProviderAccountRef => Boolean(row));
+	if (budgetRefs.length === 0) return { allocationWarnings, budgets: [] };
 
-	const sumShareTokensWeekly = providers.reduce(
-		(acc, p) => acc + safeNum(params.providerBudgets[p]?.shareTokensPct),
+	const budgetKeys = budgetRefs.map((row) => row.key);
+	const sumShareTokensWeekly = budgetKeys.reduce(
+		(acc, key) => acc + safeNum(params.providerBudgets[key]?.shareTokensPct),
 		0,
 	);
-	const sumShareCostWeekly = providers.reduce(
-		(acc, p) => acc + safeNum(params.providerBudgets[p]?.shareCostPct),
+	const sumShareCostWeekly = budgetKeys.reduce(
+		(acc, key) => acc + safeNum(params.providerBudgets[key]?.shareCostPct),
 		0,
 	);
-	const sumShareTokensMonthly = providers.reduce(
-		(acc, p) => acc + safeNum(params.providerBudgets[p]?.shareMonthlyTokensPct),
+	const sumShareTokensMonthly = budgetKeys.reduce(
+		(acc, key) =>
+			acc + safeNum(params.providerBudgets[key]?.shareMonthlyTokensPct),
 		0,
 	);
-	const sumShareCostMonthly = providers.reduce(
-		(acc, p) => acc + safeNum(params.providerBudgets[p]?.shareMonthlyCostPct),
+	const sumShareCostMonthly = budgetKeys.reduce(
+		(acc, key) => acc + safeNum(params.providerBudgets[key]?.shareMonthlyCostPct),
 		0,
 	);
-	const sumShareRequestsWeekly = providers.reduce(
-		(acc, p) => acc + safeNum(params.providerBudgets[p]?.shareRequestsPct),
+	const sumShareRequestsWeekly = budgetKeys.reduce(
+		(acc, key) => acc + safeNum(params.providerBudgets[key]?.shareRequestsPct),
 		0,
 	);
-	const sumShareRequestsMonthly = providers.reduce(
-		(acc, p) =>
-			acc + safeNum(params.providerBudgets[p]?.shareMonthlyRequestsPct),
+	const sumShareRequestsMonthly = budgetKeys.reduce(
+		(acc, key) =>
+			acc + safeNum(params.providerBudgets[key]?.shareMonthlyRequestsPct),
 		0,
 	);
 
@@ -852,10 +923,13 @@ export function buildProviderBudgetStatuses(
 	const nowMs = now.getTime();
 	const dayMs = 24 * 60 * 60 * 1000;
 
-	const budgets: ProviderBudgetStatus[] = providers
-		.sort((a, b) => a.localeCompare(b))
-		.map((provider) => {
-			const rule = params.providerBudgets[provider] ?? {};
+	const budgets: ProviderBudgetStatus[] = budgetRefs
+		.sort((a, b) => a.key.localeCompare(b.key))
+		.map((budgetRef) => {
+			const provider = budgetRef.provider;
+			const account = budgetRef.account;
+			const providerAccountKey = budgetRef.key;
+			const rule = params.providerBudgets[providerAccountKey] ?? {};
 			const notes: string[] = [];
 
 			const inferredPeriod: "weekly" | "monthly" =
@@ -878,12 +952,16 @@ export function buildProviderBudgetStatuses(
 			const periodDays =
 				inferredPeriod === "monthly" ? daysInCurrentMonth(now) : 7;
 
-			const providerEvents = usageEvents.filter(
-				(e) =>
-					normalizeProvider(e.provider) === provider &&
-					e.timestampMs >= periodStart.getTime() &&
-					e.timestampMs <= nowMs,
-			);
+			const providerEvents = usageEvents.filter((e) => {
+				if (normalizeProvider(e.provider) !== provider) return false;
+				if (
+					e.timestampMs < periodStart.getTime() ||
+					e.timestampMs > nowMs
+				)
+					return false;
+				if (!account) return true;
+				return normalizeAccountId(e.account) === account;
+			});
 
 			const observedMessages = providerEvents.length;
 			const observedTokens = sumTokens(providerEvents);
@@ -1093,6 +1171,8 @@ export function buildProviderBudgetStatuses(
 
 			return {
 				provider,
+				account,
+				providerAccountKey,
 				owner: rule.owner,
 				period: inferredPeriod,
 				unit: rule.unit ?? "tokens-cost",
@@ -1248,6 +1328,11 @@ async function parseSessionFile(
 			const provider = normalizeProvider(
 				typeof obj.provider === "string" ? obj.provider : msg.provider,
 			);
+			const account = resolveUsageEventAccount(
+				obj as Record<string, unknown>,
+				msg as Record<string, unknown>,
+			);
+			const providerAccountKey = buildProviderAccountKey(provider, account);
 			const model =
 				typeof obj.model === "string"
 					? obj.model
@@ -1295,6 +1380,8 @@ async function parseSessionFile(
 				dayLocal: toDayLocal(ts),
 				hourLocal: hourLocal(ts),
 				provider,
+				account,
+				providerAccountKey,
 				model,
 				tokens: usage.totalTokens,
 				costUsd: usage.costTotalUsd,
@@ -1564,6 +1651,7 @@ function formatProviderBudgetLine(b: ProviderBudgetStatus): string {
 	const stateTag =
 		b.state === "blocked" ? "BLOCK" : b.state === "warning" ? "WARN" : "OK";
 	const owner = b.owner ? ` owner=${b.owner}` : "";
+	const target = b.account ? `${b.provider}/${b.account}` : b.provider;
 	const capTok =
 		b.periodTokensCap !== undefined ? fmt(b.periodTokensCap) : "n/a";
 	const capUsd =
@@ -1571,7 +1659,7 @@ function formatProviderBudgetLine(b: ProviderBudgetStatus): string {
 	const capReq =
 		b.periodRequestsCap !== undefined ? fmt(b.periodRequestsCap) : "n/a";
 	return [
-		`  - [${stateTag}] ${b.provider}${owner} | period=${b.period} | unit=${b.unit} | used=${fmt(b.observedTokens)} tok (${pct(b.usedPctTokens)}) / cap=${capTok}`,
+		`  - [${stateTag}] ${target}${owner} | period=${b.period} | unit=${b.unit} | used=${fmt(b.observedTokens)} tok (${pct(b.usedPctTokens)}) / cap=${capTok}`,
 		`    cost=${money(b.observedCostUsd)} (${pct(b.usedPctCost)}) / cap=${capUsd} | requests=${fmt(b.observedRequests)} (${pct(b.usedPctRequests)}) / cap=${capReq}`,
 		`    proj@end: tok=${fmt(b.projectedTokensEndOfPeriod)} (${pct(b.projectedPctTokens)}) | req=${fmt(b.projectedRequestsEndOfPeriod)} (${pct(b.projectedPctRequests)})`,
 		`    window: ${b.periodStartIso} -> ${b.periodEndIso}`,
@@ -1582,14 +1670,18 @@ function formatProviderBudgetsReport(
 	s: QuotaStatus,
 	provider?: string,
 ): string {
-	const normalized = provider ? normalizeProvider(provider) : undefined;
-	const rows = normalized
-		? s.providerBudgets.filter((b) => b.provider === normalized)
+	const selector = provider ? parseProviderAccountKey(provider) : undefined;
+	const rows = selector
+		? s.providerBudgets.filter((b) => {
+			if (b.provider !== selector.provider) return false;
+			if (!selector.account) return true;
+			return b.account === selector.account;
+		})
 		: s.providerBudgets;
 
 	if (rows.length === 0) {
-		return normalized
-			? `quota-visibility budget: provider '${normalized}' não configurado em providerBudgets.`
+		return selector
+			? `quota-visibility budget: provider '${selector.key}' não configurado em providerBudgets.`
 			: "quota-visibility budget: sem providerBudgets configurado.";
 	}
 
@@ -2003,9 +2095,13 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const p = params as { days?: number; provider?: string };
 			const status = await getStatus(ctx, { days: p.days });
-			const normalized = p.provider ? normalizeProvider(p.provider) : undefined;
-			const data = normalized
-				? status.providerBudgets.filter((b) => b.provider === normalized)
+			const selector = p.provider ? parseProviderAccountKey(p.provider) : undefined;
+			const data = selector
+				? status.providerBudgets.filter((b) => {
+					if (b.provider !== selector.provider) return false;
+					if (!selector.account) return true;
+					return b.account === selector.account;
+				})
 				: status.providerBudgets;
 
 			const payload = {
@@ -2025,7 +2121,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 					},
 				],
 				details: {
-					provider: normalized,
+					provider: selector?.key,
 					allocationWarnings: status.providerBudgetPolicy.allocationWarnings,
 					data,
 				},
