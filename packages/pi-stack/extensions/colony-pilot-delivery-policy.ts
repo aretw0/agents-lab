@@ -134,11 +134,8 @@ function globToRegExp(glob: string): RegExp {
 	return new RegExp(out, "i");
 }
 
-function extractInventoryPath(line: string): string | undefined {
-	const bullet = line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);
-	if (!bullet) return undefined;
-
-	let body = bullet[1]!.trim();
+function normalizeInventoryPathCandidate(raw: string): string | undefined {
+	let body = raw.trim();
 	const backtick = body.match(/^`([^`]+)`/);
 	if (backtick?.[1]) {
 		body = backtick[1];
@@ -155,10 +152,38 @@ function extractInventoryPath(line: string): string | undefined {
 	return body;
 }
 
+function extractInventoryPath(line: string): string | undefined {
+	const bullet = line.match(/^\s*(?:[-*]|\d+\.)\s+(.+)$/);
+	if (!bullet?.[1]) return undefined;
+	return normalizeInventoryPathCandidate(bullet[1]);
+}
+
+function extractInlineInventoryPaths(line: string): string[] {
+	const match = line.match(
+		/(?:final\s+file\s+inventory|invent[aá]rio\s+final(?:\s+de\s+arquivos?)?)\s*[:\-]\s*(.+)$/i,
+	);
+	if (!match?.[1]) return [];
+
+	const tail = match[1]
+		.trim()
+		.replace(
+			/^(?:files?\s+(?:changed|altered|touched)|arquivos?\s+alterad(?:os|as)?|arquivos?)\s*:\s*/i,
+			"",
+		);
+	if (!tail) return [];
+
+	const out: string[] = [];
+	for (const token of tail.split(/[;,]/)) {
+		const p = normalizeInventoryPathCandidate(token);
+		if (p && !out.includes(p)) out.push(p);
+	}
+	return out;
+}
+
 export function parseFinalFileInventory(text: string): string[] {
 	const lines = text.split(/\r?\n/);
 	const headingRe =
-		/^\s*(?:#{1,6}\s*)?(?:final\s+file\s+inventory|invent[aá]rio\s+final(?:\s+de\s+arquivos?)?)\s*:?\s*$/i;
+		/^\s*(?:#{1,6}\s*)?(?:final\s+file\s+inventory|invent[aá]rio\s+final(?:\s+de\s+arquivos?)?)(?:\s*[:\-]\s*.*)?$/i;
 	const stopRe =
 		/^\s*(?:#{1,6}\s+\S|(?:promoted|skipped)\s+file\s+inventory\b|invent[aá]rio\s+de\s+(?:promov|skip))/i;
 
@@ -166,6 +191,10 @@ export function parseFinalFileInventory(text: string): string[] {
 	if (start < 0) return [];
 
 	const out: string[] = [];
+	for (const p of extractInlineInventoryPaths(lines[start]!)) {
+		if (!out.includes(p)) out.push(p);
+	}
+
 	for (let i = start + 1; i < lines.length; i += 1) {
 		const line = lines[i]!;
 		if (!line.trim()) continue;

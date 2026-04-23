@@ -1011,6 +1011,22 @@ describe("colony-pilot parsers", () => {
 		]);
 	});
 
+	it("avalia promoção seletiva automática com inventário inline (files changed)", () => {
+		const goal = "Aplicar no branch principal com escopo docs-only";
+		const report =
+			"final file inventory: files changed: docs/a.md, packages/pi-stack/extensions/colony-pilot.ts, README.md";
+
+		const scope = evaluateSelectivePromotionScope(goal, report);
+		expect(scope).toBeDefined();
+		expect(scope?.promotedFiles).toEqual(["docs/a.md", "README.md"]);
+		expect(scope?.skippedFiles).toEqual([
+			{
+				path: "packages/pi-stack/extensions/colony-pilot.ts",
+				reason: "out-of-scope",
+			},
+		]);
+	});
+
 	it("avalia promoção seletiva automática com code-scope", () => {
 		const goal =
 			"Promover mudanças com code-scope: packages/pi-stack/extensions/**, docs/**";

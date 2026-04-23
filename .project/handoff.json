@@ -1,31 +1,26 @@
 {
-  "timestamp": "2026-04-23T01:33:00.000Z",
-  "context": "Pivot parcial para fábrica (TASK-BUD-114) em micro-slice: allowlist de escopo agora gera inventário seletivo automático (`promoted/skipped`) a partir de `Final file inventory` quando modo `apply-to-branch` não trouxer seções explícitas. Auditoria automática adicionada (`colony-pilot.selective-promotion-inventory`).",
+  "timestamp": "2026-04-23T01:40:30.000Z",
+  "context": "Auto-resume aplicado e micro-slice entregue em TASK-BUD-114: parser de `Final file inventory` agora cobre formato inline (`files changed: ...`), conectando avaliação de scope (`candidateDiff ∩ allowlist`) ao fluxo real de promoção seletiva sem depender de bullets explícitos.",
   "current_phase": "factory-selective-promotion-and-deflation",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116",
     "TASK-BUD-117"
   ],
-  "blockers": [
-    "context-watch-checkpoint-required"
-  ],
+  "blockers": [],
   "next_actions": [
-    "Checkpoint escrito; manter próximos cortes em micro-slice até compact.",
-    "TASK-BUD-114: conectar avaliação de scope ao fluxo de promoção efetiva por diff/apply (hoje já há auto-inventory + audit).",
-    "TASK-BUD-116: continuar apenas limpeza incremental quando encostar em hotspots reais.",
-    "TASK-BUD-117 permanece planejada para recalibração pós-compact/resume."
+    "TASK-BUD-114: ligar o resultado `promotedFiles/skippedFiles` ao apply efetivo por diff (etapa seguinte), mantendo fallback de recovery para promoção vazia.",
+    "TASK-BUD-116: apenas micro-ajustes oportunistas quando tocar hotspots de manutenção.",
+    "TASK-BUD-117: iniciar implementação da recalibração pós-compact/auto-resume no context-watchdog em 1 arquivo + 1 teste quando priorizado."
   ],
   "open_questions": [
-    "Default da policy de scope no launch: exigir token explícito (`docs-only`/`code-scope`) ou inferir fallback seguro?"
+    "Policy default para scope em apply-to-branch: manter estritamente opt-in por token no goal ou habilitar inferência controlada?"
   ],
   "key_decisions_pending": [
-    "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
-    "Política de aceleração controlada pós-compact quando `level=ok` sem reintroduzir risco de overflow de contexto."
+    "Como serializar inventário auto-computado no relatório final para consumo humano sem duplicar evidência já auditada em log."
   ],
   "files_in_flux": [
     "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
-    "packages/pi-stack/extensions/colony-pilot.ts",
     "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
     ".project/tasks.json",
     ".project/verification.json",
@@ -33,17 +28,17 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T01:33:00.000Z",
+      "atIso": "2026-04-23T01:40:30.000Z",
       "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 71,
+      "level": "ok",
+      "percent": 17,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
+      "action": "continue",
+      "recommendation": "Context healthy."
     }
   ]
 }

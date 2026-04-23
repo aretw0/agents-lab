@@ -3535,6 +3535,27 @@
           "evidence": "Reconciliação adiciona issue `zero promoted files (recovery required)` mantendo trilha de recovery."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-186",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Parser hardening em `packages/pi-stack/extensions/colony-pilot-delivery-policy.ts`: `parseFinalFileInventory` agora parseia inventário inline (`final file inventory: files changed: ...`) além de bullets. Isso permite que `evaluateSelectivePromotionScope` derive `candidateDiff` real para interseção com allowlist em relatórios compactos. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 75/75.",
+      "criteria_results": [
+        {
+          "criterion": "Formato inline de inventário final é reconhecido para promoção seletiva automática.",
+          "status": "passed",
+          "evidence": "Novo teste `avalia promoção seletiva automática com inventário inline (files changed)` aprovado."
+        },
+        {
+          "criterion": "Sem regressão no parser suite focal.",
+          "status": "passed",
+          "evidence": "Arquivo smoke focal 75/75 green."
+        }
+      ]
     }
   ]
 }
