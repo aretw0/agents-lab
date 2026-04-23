@@ -4398,6 +4398,15 @@
       "method": "test",
       "timestamp": "2026-04-23T22:18:00Z",
       "evidence": "Regressão para preservar marco de evidência operacional adicionada em `scripts/test/guardrails-loop-evidence-check.test.mjs`: novo caso garante que `readyForTaskBud125` permanece baseado em critérios canônicos (runtime active + emLoop=yes + loopReady active) mesmo quando `boardAuto.taskId` difere (`TASK-BUD-028` no cenário real). Execução: `npm run -s test:ops:loop-evidence` => 5/5 pass."
+    },
+    {
+      "id": "VER-BUD-241",
+      "target": "TASK-BUD-127",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T22:31:00Z",
+      "evidence": "`subagent-readiness` recebeu fallback determinístico de COMPLETE via `.pi/colony-retention` em `packages/pi-stack/extensions/subagent-readiness.ts` (`readRetentionCompleteSignals`, uso de `Math.max(sessionComplete, retentionComplete)` no check `colony-min-complete-signals`). Regressão adicionada em `packages/pi-stack/test/smoke/subagent-readiness.test.ts` (`strict readiness accepts COMPLETE fallback from colony retention snapshot`). Execução focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/subagent-readiness.test.ts` => 5/5 pass."
     }
   ]
 }

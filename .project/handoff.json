@@ -1,42 +1,42 @@
 {
-  "timestamp": "2026-04-23T22:19:00.000Z",
-  "context": "Marco principal alcançado e consolidado: TASK-BUD-125 foi concluída com evidência operacional real (`/lane-queue evidence` + `ops:loop-evidence:check/strict` em status ok). Nesta sequência também foi executada TASK-BUD-028 (account-aware `provider[/account]` com fallback provider-only) e adicionado teste de regressão para não perder o marco de readiness task-agnostic. Backlog de higiene pós-validação foi criado (TASK-OPS-HYGIENE-002).",
+  "timestamp": "2026-04-23T22:32:00.000Z",
+  "context": "Auto-resume slice avançou em dois pontos: (1) validação operacional de `quota_visibility_provider_budgets` com seletor account-aware (`openai-codex/team-a` retorna vazio sem regra específica e `openai-codex` retorna budget provider-only), confirmando compatibilidade de filtro; (2) hardening de `subagent_readiness_status(strict)` com fallback determinístico de COMPLETE via `.pi/colony-retention` para evitar falso-negativo quando o tail da sessão só traz `LAUNCHED`.",
   "next_actions": [
-    "Compactar agora e deixar sessão entrar em idle para auto-compact/auto-resume.",
-    "Após retomar, validar manualmente no runtime a operação account-aware de budgets (`/quota-visibility budget openai-codex/team-a` + provider-only fallback).",
-    "Planejar e executar TASK-OPS-HYGIENE-002 (limpeza de artefatos temporários de validação sem perder evidência relevante).",
-    "Próximo desbloqueio da escada: subagent strict readiness (resolver bloqueio atual `BUDGET_EXCEEDED=1`)."
+    "Executar `/reload` para ativar runtime da mudança em `subagent-readiness.ts`.",
+    "Após reload, rodar `subagent_readiness_status(strict=true)` e confirmar desbloqueio do check `colony-min-complete-signals` via fallback de retention.",
+    "Se strict ainda bloquear, inspecionar execução de colônia em fase `launched` sem `COMPLETE` e registrar task de runtime/pilot específica sem degradar thresholds de FAILED/BUDGET_EXCEEDED.",
+    "Manter TASK-BUD-028 em validação humana final (no-auto-close) e depois iniciar TASK-OPS-HYGIENE-002."
   ],
   "blockers": [
-    "context-watch-compact-required",
-    "subagent-readiness-strict-blocked-by-budget-exceeded"
+    "context-watch-checkpoint-required",
+    "subagent-readiness-strict-runtime-validation-pending-reload"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T22:14:00.000Z",
+      "atIso": "2026-04-23T22:30:44.660Z",
       "reason": "message_end",
       "level": "checkpoint",
-      "percent": 70,
+      "percent": 68,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "write-checkpoint",
-      "recommendation": "Keep micro-slice-only and checkpoint before larger follow-up work."
+      "recommendation": "Write handoff checkpoint before the next large slice."
     },
     {
-      "atIso": "2026-04-23T22:18:37.856Z",
+      "atIso": "2026-04-23T22:32:00.000Z",
       "reason": "message_end",
-      "level": "compact",
-      "percent": 72,
+      "level": "checkpoint",
+      "percent": 68,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
+      "action": "write-checkpoint",
+      "recommendation": "Checkpoint atualizado; manter micro-slice-only até compact/idle."
     }
   ]
 }
