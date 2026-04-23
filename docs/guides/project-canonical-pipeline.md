@@ -111,7 +111,54 @@ Política operacional atual: **native-first**.
 Durante long-run:
 - priorizar steer/follow-up nativo (`Alt+Enter` / `app.message.followUp`) para continuidade de turno;
 - usar `lane-queue` apenas como trilha **opt-in** para deferimento cross-turn em janela idle;
-- quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata.
+- quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata;
+- para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification`.
+- auto-advance só deve ocorrer em condição segura (`lane idle` + `queue empty` + `loop running/healthy` + `stopCondition=none` + board ready com `nextTaskId`), com dedupe de task e auditoria explícita.
+- para observação operacional, `/lane-queue status` deve expor `runtimeCode=<active|reload-required|unknown>`, `boardAutoGate=<reason>`, `boardAutoLast=<task@age|n/a>` e marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP` para diagnosticar por que o auto-advance não disparou (incluindo `dedupe-window` quando a mesma task foi disparada há pouco).
+- quando `boardAutoGate != ready`, registrar auditoria throttled (`guardrails-core.board-intent-auto-advance-deferred`) com razão e contexto mínimo para evidência de runtime sem spam.
+- eventos de auto-advance (`...auto-advance`, `...auto-advance-deferred`, `...auto-advance-failed`) devem carregar `runtimeCodeState` para comprovar se o comportamento observado já está com código ativo (`active`) ou ainda depende de reload (`reload-required`).
+- o runtime deve emitir `guardrails-core.loop-activation-state` (throttled por mudança de label) para registrar transições dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP` sem depender de comando manual.
+- quando houver transição para `EM_LOOP=yes`, emitir `guardrails-core.loop-activation-ready` uma vez por transição para facilitar detecção de “loop liberado” em tempo real.
+- quando `EM_LOOP=no`, expor `loopHint` alinhado ao `blocker` (reload/queue/gate/loop-state) para correção rápida sem investigação ampla.
+- `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
+- intents canônicos devem usar envelope tipado (`[intent:<type>]` + campos `key=value`, ex.: `board.execute-task`) para reduzir fragilidade de dispatch textual e manter auditabilidade entre extensões.
+- runtime deve consumir envelope no caminho de execução (input) além do prompt: envelope inválido/unsupported é rejeitado com audit explícita; envelope válido registra decisão (`ready`/`board-not-ready`/`next-mismatch`) antes da execução.
+
+### Retry resiliente para overload/rate-limit de provider
+
+Para preservar continuidade em long-run diante de erros transitórios (`server_is_overload`, `429`, `5xx`):
+
+- classificar falhas transitórias de provider explicitamente (não tratar tudo como falha fatal);
+- aplicar retry com backoff progressivo e cap de delay;
+- manter `maxAttempts` operacional **>= 10** antes de bloquear por streak;
+- manter auditoria curta com classe de erro + delay aplicado por tentativa.
+
+Configuração (`.pi/settings.json`):
+
+```json
+{
+  "piStack": {
+    "guardrailsCore": {
+      "longRunIntentQueue": {
+        "dispatchFailureBlockAfter": 3,
+        "providerTransientRetry": {
+          "enabled": true,
+          "maxAttempts": 10,
+          "baseDelayMs": 2000,
+          "maxDelayMs": 60000,
+          "backoffMultiplier": 2
+        }
+      }
+    }
+  }
+}
+```
+
+Notas operacionais:
+- para erro transitório, o threshold efetivo de block vira `max(dispatchFailureBlockAfter, maxAttempts)`;
+- para erro não transitório, mantém `dispatchFailureBlockAfter` normal;
+- status da lane continua mostrando `failStreak=n/<threshold>` para decisão rápida do operador;
+- quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`).
 
 ### Steering signal-first (tool-surface diet)
 
@@ -177,6 +224,26 @@ Checklist operacional rápido:
 - usar janela curta (`offset/limit`) e evitar fan-out recursivo;
 - registrar achado em 1–3 linhas no checkpoint;
 - adiar varredura profunda para sessão pós-compact com contexto saudável.
+
+## Proxy/index incremental para superfícies grandes (simple-first)
+
+Para sustentar long-runs com baixo custo de contexto, usar **query surfaces** antes de leitura crua.
+
+Ordem operacional recomendada:
+1. **Board canônico (`.project/*`)**
+   - preferir operações estruturadas (`append/update/query`) em vez de abrir blocos inteiros;
+   - para loops de tarefa/verificação, usar superfície dedicada (`board_query`, `board_update`) com resposta curta e cache incremental;
+   - fallback para leitura completa apenas quando a query não cobrir o caso.
+2. **Sessões/logs (`.pi/agent/sessions/*.jsonl`)**
+   - usar `session_analytics_query` como superfície padrão;
+   - leitura deve ser bounded-by-default (janela de cauda + limite por linha/records) para evitar explosão de contexto.
+3. **Fallback explícito**
+   - quando leitura crua for inevitável, registrar no handoff o motivo, escopo e limite usado (`offset/limit` ou arquivo único).
+
+Invariantes de segurança operacional:
+- query determinística e reprodutível (mesmos parâmetros => mesma resposta);
+- scan guard ativo para arquivos monstruosos (sem parse irrestrito);
+- sempre preferir resumo/index para triagem inicial, aprofundando só no arquivo/slice que bloqueia progresso.
 
 ## Remediação de artefatos pi já commitados (sem perder progresso)
 

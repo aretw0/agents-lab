@@ -13,6 +13,9 @@ import {
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
+  resolveAutoDrainRuntimeGateReason,
+  resolveLongRunLoopStopBoundary,
+  resolveDispatchFailureRuntimeGate,
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
   resolvePragmaticAutonomyConfig,
@@ -30,12 +33,27 @@ import {
   buildCodeBloatStatusLabel,
   shouldEmitBloatSmellSignal,
   shouldSchedulePostDispatchAutoDrain,
+  resolveBoardAutoAdvanceGateReason,
+  resolveLoopActivationMarkers,
+  buildLoopActivationMarkersLabel,
+  shouldAnnounceLoopActivationReady,
+  buildLoopActivationBlockerHint,
+  shouldAutoAdvanceBoardTask,
+  resolveRuntimeCodeActivationState,
   shouldEmitAutoDrainDeferredAudit,
+  shouldEmitBoardAutoAdvanceGateAudit,
+  shouldEmitLoopActivationAudit,
   readLongRunLoopRuntimeState,
   setLongRunLoopRuntimeMode,
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeDispatch,
   markLongRunLoopRuntimeHealthy,
+  buildProviderRetryExhaustedActionLines,
+  classifyLongRunDispatchFailure,
+  isProviderTransientRetryExhausted,
+  resolveDispatchFailureBlockAfter,
+  resolveLongRunProviderTransientRetryConfig,
+  resolveProviderTransientRetryDelayMs,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -51,6 +69,14 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainCooldownMs).toBe(3000);
       expect(cfg.autoDrainBatchSize).toBe(1);
       expect(cfg.autoDrainIdleStableMs).toBe(1500);
+      expect(cfg.dispatchFailureBlockAfter).toBe(3);
+
+      const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
+      expect(retryCfg.enabled).toBe(true);
+      expect(retryCfg.maxAttempts).toBe(10);
+      expect(retryCfg.baseDelayMs).toBe(2_000);
+      expect(retryCfg.maxDelayMs).toBe(60_000);
+      expect(retryCfg.backoffMultiplier).toBe(2);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -226,7 +252,7 @@ describe("guardrails-core long-run intent queue", () => {
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|pop|clear|pause|resume]");
+    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume]");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
     expect(queuedTips).toContain("/lane-queue list");
@@ -292,6 +318,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(initial.health).toBe("healthy");
       expect(initial.stopCondition).toBe("none");
       expect(initial.stopReason).toBe("running");
+      expect(initial.consecutiveDispatchFailures).toBe(0);
       expect(initial.leaseOwner).toContain("guardrails-core:");
       expect(initial.leaseExpiresAtIso).toBeTruthy();
 
@@ -308,10 +335,12 @@ describe("guardrails-core long-run intent queue", () => {
       ).state;
       expect(degraded.health).toBe("degraded");
       expect(degraded.lastError).toContain("dispatch failed");
+      expect(degraded.consecutiveDispatchFailures).toBe(1);
       expect(degraded.stopCondition).toBe("manual-pause");
 
       const resumed = setLongRunLoopRuntimeMode(cwd, "running", "manual-resume").state;
       expect(resumed.mode).toBe("running");
+      expect(resumed.consecutiveDispatchFailures).toBe(1);
       expect(resumed.stopCondition).toBe("dispatch-failure");
       expect(resumed.stopReason).toBe("manual-resume");
 
@@ -319,11 +348,20 @@ describe("guardrails-core long-run intent queue", () => {
       expect(dispatched.health).toBe("healthy");
       expect(dispatched.lastDispatchItemId).toBe("intent-123");
       expect(dispatched.lastError).toBeUndefined();
+      expect(dispatched.consecutiveDispatchFailures).toBe(0);
       expect(dispatched.stopCondition).toBe("none");
       expect(dispatched.stopReason).toBe("running");
 
+      const degradedAgain = markLongRunLoopRuntimeDegraded(
+        cwd,
+        "dispatch-failed:idle_timer",
+        "queue dispatch failed again",
+      ).state;
+      expect(degradedAgain.consecutiveDispatchFailures).toBe(1);
+
       const healthy = markLongRunLoopRuntimeHealthy(cwd, "manual-resume").state;
       expect(healthy.health).toBe("healthy");
+      expect(healthy.consecutiveDispatchFailures).toBe(0);
       expect(healthy.stopCondition).toBe("none");
       expect(Date.parse(healthy.leaseExpiresAtIso)).toBeGreaterThan(Date.parse(healthy.leaseHeartbeatAtIso));
     } finally {
@@ -349,6 +387,14 @@ describe("guardrails-core long-run intent queue", () => {
                 autoDrainCooldownMs: 8000,
                 autoDrainBatchSize: 4,
                 autoDrainIdleStableMs: 5000,
+                dispatchFailureBlockAfter: 5,
+                providerTransientRetry: {
+                  enabled: true,
+                  maxAttempts: 8,
+                  baseDelayMs: 1500,
+                  maxDelayMs: 120000,
+                  backoffMultiplier: 1.5,
+                },
               },
             },
           },
@@ -363,6 +409,14 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainCooldownMs).toBe(8000);
       expect(cfg.autoDrainBatchSize).toBe(4);
       expect(cfg.autoDrainIdleStableMs).toBe(5000);
+      expect(cfg.dispatchFailureBlockAfter).toBe(5);
+
+      const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
+      expect(retryCfg.enabled).toBe(true);
+      expect(retryCfg.maxAttempts).toBe(10);
+      expect(retryCfg.baseDelayMs).toBe(1500);
+      expect(retryCfg.maxDelayMs).toBe(120000);
+      expect(retryCfg.backoffMultiplier).toBe(1.5);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -382,6 +436,309 @@ describe("guardrails-core long-run intent queue", () => {
     expect(shouldEmitAutoDrainDeferredAudit(9_400, "cooldown", "cooldown", nowMs, minIntervalMs)).toBe(false);
     expect(shouldEmitAutoDrainDeferredAudit(8_000, "cooldown", "cooldown", nowMs, minIntervalMs)).toBe(true);
     expect(shouldEmitAutoDrainDeferredAudit(9_400, "cooldown", "idle-stability", nowMs, minIntervalMs)).toBe(true);
+  });
+
+  it("throttles board auto-advance gate audit unless gate changes", () => {
+    const nowMs = 10_000;
+    const minIntervalMs = 1_500;
+
+    expect(shouldEmitBoardAutoAdvanceGateAudit(0, undefined, "queued-intents", nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitBoardAutoAdvanceGateAudit(9_400, "queued-intents", "queued-intents", nowMs, minIntervalMs)).toBe(false);
+    expect(shouldEmitBoardAutoAdvanceGateAudit(8_000, "queued-intents", "queued-intents", nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitBoardAutoAdvanceGateAudit(9_400, "queued-intents", "board-not-ready", nowMs, minIntervalMs)).toBe(true);
+  });
+
+  it("throttles loop activation audit unless label changes", () => {
+    const nowMs = 10_000;
+    const minIntervalMs = 1_500;
+    const labelA = "PREPARADO=yes ATIVO_AQUI=no EM_LOOP=no blocker=runtime-reload-required";
+    const labelB = "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none";
+
+    expect(shouldEmitLoopActivationAudit(0, undefined, labelA, nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitLoopActivationAudit(9_400, labelA, labelA, nowMs, minIntervalMs)).toBe(false);
+    expect(shouldEmitLoopActivationAudit(8_000, labelA, labelA, nowMs, minIntervalMs)).toBe(true);
+    expect(shouldEmitLoopActivationAudit(9_400, labelA, labelB, nowMs, minIntervalMs)).toBe(true);
+  });
+
+  it("detects whether runtime code is active or reload-required", () => {
+    expect(resolveRuntimeCodeActivationState({ loadedSourceMtimeMs: 1000, currentSourceMtimeMs: 1000 })).toBe("active");
+    expect(resolveRuntimeCodeActivationState({ loadedSourceMtimeMs: 1000, currentSourceMtimeMs: 1008, mtimeToleranceMs: 10 })).toBe("active");
+    expect(resolveRuntimeCodeActivationState({ loadedSourceMtimeMs: 1000, currentSourceMtimeMs: 1020, mtimeToleranceMs: 10 })).toBe("reload-required");
+    expect(resolveRuntimeCodeActivationState({ loadedSourceMtimeMs: undefined, currentSourceMtimeMs: 1000 })).toBe("unknown");
+  });
+
+  it("builds loop activation markers for PREPARADO/ATIVO_AQUI/EM_LOOP", () => {
+    const readyMarkers = resolveLoopActivationMarkers({
+      activeLongRun: false,
+      queuedCount: 0,
+      loopMode: "running",
+      loopHealth: "healthy",
+      stopCondition: "none",
+      boardReady: true,
+      nextTaskId: "TASK-BUD-125",
+      boardAutoGate: "ready",
+      runtimeCodeState: "active",
+    });
+    expect(readyMarkers.preparado).toBe(true);
+    expect(readyMarkers.ativoAqui).toBe(true);
+    expect(readyMarkers.emLoop).toBe(true);
+    expect(readyMarkers.blocker).toBe("none");
+    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("PREPARADO=yes");
+    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("EM_LOOP=yes");
+    expect(shouldAnnounceLoopActivationReady(false, readyMarkers.emLoop)).toBe(true);
+
+    const reloadMarkers = resolveLoopActivationMarkers({
+      activeLongRun: false,
+      queuedCount: 0,
+      loopMode: "running",
+      loopHealth: "healthy",
+      stopCondition: "none",
+      boardReady: true,
+      nextTaskId: "TASK-BUD-125",
+      boardAutoGate: "ready",
+      runtimeCodeState: "reload-required",
+    });
+    expect(reloadMarkers.preparado).toBe(true);
+    expect(reloadMarkers.ativoAqui).toBe(false);
+    expect(reloadMarkers.emLoop).toBe(false);
+    expect(reloadMarkers.blocker).toBe("runtime-reload-required");
+    expect(shouldAnnounceLoopActivationReady(true, reloadMarkers.emLoop)).toBe(false);
+
+    const queueBlockedMarkers = resolveLoopActivationMarkers({
+      activeLongRun: false,
+      queuedCount: 2,
+      loopMode: "running",
+      loopHealth: "healthy",
+      stopCondition: "none",
+      boardReady: true,
+      nextTaskId: "TASK-BUD-125",
+      boardAutoGate: "queued-intents",
+      runtimeCodeState: "active",
+    });
+    expect(queueBlockedMarkers.emLoop).toBe(false);
+    expect(queueBlockedMarkers.blocker).toBe("queued-intents");
+
+    expect(buildLoopActivationBlockerHint(reloadMarkers)).toContain("faça reload");
+    expect(buildLoopActivationBlockerHint(queueBlockedMarkers)).toContain("esvazie fila");
+    expect(buildLoopActivationBlockerHint(readyMarkers)).toBeUndefined();
+  });
+
+  it("auto-advances board task only when lane is idle, empty and healthy", () => {
+    const ready = {
+      activeLongRun: false,
+      queuedCount: 0,
+      loopMode: "running" as const,
+      loopHealth: "healthy" as const,
+      stopCondition: "none" as const,
+      boardReady: true,
+      nextTaskId: "TASK-BUD-125",
+    };
+
+    expect(shouldAutoAdvanceBoardTask(ready)).toBe(true);
+    expect(resolveBoardAutoAdvanceGateReason(ready)).toBe("ready");
+
+    const activeLongRun = {
+      ...ready,
+      activeLongRun: true,
+    };
+    expect(shouldAutoAdvanceBoardTask(activeLongRun)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(activeLongRun)).toBe("active-long-run");
+
+    const queued = {
+      ...ready,
+      queuedCount: 1,
+    };
+    expect(shouldAutoAdvanceBoardTask(queued)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(queued)).toBe("queued-intents");
+
+    const paused = {
+      ...ready,
+      loopMode: "paused" as const,
+      stopCondition: "manual-pause" as const,
+    };
+    expect(shouldAutoAdvanceBoardTask(paused)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(paused)).toBe("loop-paused");
+
+    const degraded = {
+      ...ready,
+      loopHealth: "degraded" as const,
+      stopCondition: "dispatch-failure" as const,
+    };
+    expect(shouldAutoAdvanceBoardTask(degraded)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(degraded)).toBe("loop-degraded");
+
+    const notReady = {
+      ...ready,
+      boardReady: false,
+      nextTaskId: undefined,
+    };
+    expect(shouldAutoAdvanceBoardTask(notReady)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(notReady)).toBe("board-not-ready");
+
+    const missingTask = {
+      ...ready,
+      nextTaskId: "",
+    };
+    expect(shouldAutoAdvanceBoardTask(missingTask)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(missingTask)).toBe("missing-next-task-id");
+
+    const deduped = {
+      ...ready,
+      nowMs: 12_000,
+      lastTaskId: "TASK-BUD-125",
+      lastTaskAtMs: 10_700,
+      dedupeWindowMs: 2_000,
+    };
+    expect(shouldAutoAdvanceBoardTask(deduped)).toBe(false);
+    expect(resolveBoardAutoAdvanceGateReason(deduped)).toBe("dedupe-window");
+
+    const dedupeExpired = {
+      ...deduped,
+      nowMs: 13_100,
+    };
+    expect(shouldAutoAdvanceBoardTask(dedupeExpired)).toBe(true);
+    expect(resolveBoardAutoAdvanceGateReason(dedupeExpired)).toBe("ready");
+  });
+
+  it("applies lease-expired as explicit runtime auto-drain gate", () => {
+    const nowMs = Date.parse("2026-04-23T04:00:00.000Z");
+    const expiredState = {
+      leaseExpiresAtIso: "2026-04-23T03:59:59.000Z",
+      stopCondition: "none" as const,
+    };
+    const healthyState = {
+      leaseExpiresAtIso: "2026-04-23T04:10:00.000Z",
+      stopCondition: "none" as const,
+    };
+
+    expect(resolveAutoDrainRuntimeGateReason("ready", expiredState, nowMs)).toBe("lease-expired");
+    expect(resolveAutoDrainRuntimeGateReason("cooldown", expiredState, nowMs)).toBe("lease-expired");
+    expect(resolveAutoDrainRuntimeGateReason("ready", healthyState, nowMs)).toBe("ready");
+    expect(resolveAutoDrainRuntimeGateReason("active-long-run", healthyState, nowMs)).toBe("active-long-run");
+  });
+
+  it("classifies stop-condition boundary as blocking vs advisory", () => {
+    expect(resolveLongRunLoopStopBoundary({ mode: "running", stopCondition: "none" })).toBe("none");
+    expect(resolveLongRunLoopStopBoundary({ mode: "running", stopCondition: "dispatch-failure" })).toBe("advisory");
+    expect(
+      resolveLongRunLoopStopBoundary({ mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: 3 }),
+    ).toBe("blocking");
+    expect(
+      resolveLongRunLoopStopBoundary(
+        { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: 3 },
+        5,
+      ),
+    ).toBe("advisory");
+    expect(resolveLongRunLoopStopBoundary({ mode: "running", stopCondition: "lease-expired" })).toBe("blocking");
+    expect(resolveLongRunLoopStopBoundary({ mode: "paused", stopCondition: "manual-pause" })).toBe("blocking");
+  });
+
+  it("resolves dispatch-failure runtime gate based on failure streak threshold", () => {
+    expect(resolveDispatchFailureRuntimeGate({ mode: "running", stopCondition: "none" }, 3)).toBeUndefined();
+    expect(
+      resolveDispatchFailureRuntimeGate(
+        { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: 2 },
+        3,
+      ),
+    ).toBe("dispatch-failure-advisory");
+    expect(
+      resolveDispatchFailureRuntimeGate(
+        { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: 3 },
+        3,
+      ),
+    ).toBe("dispatch-failure-blocking");
+  });
+
+  it("supports prolonged advisory retries when threshold is configured to 10", () => {
+    const threshold = 10;
+    for (let failures = 1; failures < threshold; failures += 1) {
+      expect(
+        resolveDispatchFailureRuntimeGate(
+          { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: failures },
+          threshold,
+        ),
+      ).toBe("dispatch-failure-advisory");
+      expect(
+        resolveLongRunLoopStopBoundary(
+          { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: failures },
+          threshold,
+        ),
+      ).toBe("advisory");
+    }
+
+    expect(
+      resolveDispatchFailureRuntimeGate(
+        { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: threshold },
+        threshold,
+      ),
+    ).toBe("dispatch-failure-blocking");
+    expect(
+      resolveLongRunLoopStopBoundary(
+        { mode: "running", stopCondition: "dispatch-failure", consecutiveDispatchFailures: threshold },
+        threshold,
+      ),
+    ).toBe("blocking");
+  });
+
+  it("classifies provider transient errors and escalates block threshold to retry budget", () => {
+    expect(classifyLongRunDispatchFailure("server_is_overload")).toBe("provider-transient");
+    expect(classifyLongRunDispatchFailure("HTTP 429 too many requests")).toBe("provider-transient");
+    expect(classifyLongRunDispatchFailure("unexpected parser error")).toBe("other");
+
+    const cfg = {
+      enabled: true,
+      maxAttempts: 10,
+      baseDelayMs: 1000,
+      maxDelayMs: 8000,
+      backoffMultiplier: 2,
+    };
+
+    expect(
+      resolveDispatchFailureBlockAfter({ lastError: "server_is_overload" }, 3, cfg),
+    ).toBe(10);
+    expect(resolveDispatchFailureBlockAfter({ lastError: "bad json" }, 3, cfg)).toBe(3);
+
+    expect(
+      isProviderTransientRetryExhausted(
+        { consecutiveDispatchFailures: 10, lastError: "server_is_overload" },
+        10,
+        cfg,
+      ),
+    ).toBe(true);
+    expect(
+      isProviderTransientRetryExhausted(
+        { consecutiveDispatchFailures: 9, lastError: "server_is_overload" },
+        10,
+        cfg,
+      ),
+    ).toBe(false);
+    expect(
+      isProviderTransientRetryExhausted(
+        { consecutiveDispatchFailures: 11, lastError: "bad json" },
+        10,
+        cfg,
+      ),
+    ).toBe(false);
+
+    const actionLines = buildProviderRetryExhaustedActionLines();
+    expect(actionLines).toHaveLength(3);
+    expect(actionLines.join("\n")).toContain("/provider-readiness-matrix");
+    expect(actionLines.join("\n")).toContain("/lane-queue resume");
+  });
+
+  it("computes deterministic exponential retry delay for transient provider failures", () => {
+    const cfg = {
+      enabled: true,
+      maxAttempts: 10,
+      baseDelayMs: 1000,
+      maxDelayMs: 8000,
+      backoffMultiplier: 2,
+    };
+
+    expect(resolveProviderTransientRetryDelayMs(1, cfg)).toBe(1000);
+    expect(resolveProviderTransientRetryDelayMs(2, cfg)).toBe(2000);
+    expect(resolveProviderTransientRetryDelayMs(3, cfg)).toBe(4000);
+    expect(resolveProviderTransientRetryDelayMs(5, cfg)).toBe(8000);
   });
 
   it("auto-drains only when idle, enabled and after cooldown", () => {

@@ -10,6 +10,7 @@ export interface LongRunIntentQueueConfig {
   autoDrainCooldownMs: number;
   autoDrainBatchSize: number;
   autoDrainIdleStableMs: number;
+  dispatchFailureBlockAfter: number;
 }
 
 export interface DeferredIntentItem {
@@ -38,6 +39,7 @@ export interface LongRunLoopRuntimeState {
   leaseExpiresAtIso: string;
   stopCondition: LongRunLoopRuntimeStopCondition;
   stopReason: string;
+  consecutiveDispatchFailures: number;
   updatedAtIso: string;
   lastTransitionIso: string;
   lastTransitionReason: string;
@@ -56,6 +58,7 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   autoDrainCooldownMs: 3000,
   autoDrainBatchSize: 1,
   autoDrainIdleStableMs: 1500,
+  dispatchFailureBlockAfter: 3,
 };
 
 const DEFAULT_LONG_RUN_LOOP_LEASE_TTL_MS = 30_000;
@@ -108,6 +111,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const autoDrainCooldownMsRaw = Number(cfg?.autoDrainCooldownMs);
     const autoDrainBatchSizeRaw = Number(cfg?.autoDrainBatchSize);
     const autoDrainIdleStableMsRaw = Number(cfg?.autoDrainIdleStableMs);
+    const dispatchFailureBlockAfterRaw = Number(cfg?.dispatchFailureBlockAfter);
     return {
       enabled: cfg?.enabled !== false,
       requireActiveLongRun: cfg?.requireActiveLongRun !== false,
@@ -127,6 +131,10 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
       autoDrainIdleStableMs: Number.isFinite(autoDrainIdleStableMsRaw) && autoDrainIdleStableMsRaw >= 0
         ? Math.max(0, Math.floor(autoDrainIdleStableMsRaw))
         : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.autoDrainIdleStableMs,
+      dispatchFailureBlockAfter:
+        Number.isFinite(dispatchFailureBlockAfterRaw) && dispatchFailureBlockAfterRaw > 0
+          ? Math.max(1, Math.min(20, Math.floor(dispatchFailureBlockAfterRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.dispatchFailureBlockAfter,
     };
   } catch {
     return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
@@ -157,8 +165,8 @@ export function parseLaneQueueAddText(args: string): string | undefined {
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|pop|clear|pause|resume]",
-    "examples: /lane-queue list · /lane-queue clear · /lane-queue pause · /lane-queue add revisar isso depois",
+    "usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume]",
+    "examples: /lane-queue list · /lane-queue board-next · /lane-queue clear · /lane-queue add revisar isso depois",
   ];
 }
 
@@ -180,6 +188,9 @@ export type AutoDrainGateReason =
   | "active-long-run"
   | "cooldown"
   | "idle-stability"
+  | "lease-expired"
+  | "dispatch-failure-advisory"
+  | "dispatch-failure-blocking"
   | "ready";
 
 export function resolveAutoDrainGateReason(
@@ -199,6 +210,63 @@ export function resolveAutoDrainGateReason(
     return cooldownRemaining >= idleRemaining ? "cooldown" : "idle-stability";
   }
   return "ready";
+}
+
+export function isLongRunLoopLeaseExpired(
+  state: Pick<LongRunLoopRuntimeState, "leaseExpiresAtIso" | "stopCondition"> | undefined,
+  nowMs = Date.now(),
+): boolean {
+  if (!state) return false;
+  if (state.stopCondition === "lease-expired") return true;
+  const expiresAtMs = Date.parse(state.leaseExpiresAtIso);
+  return Number.isFinite(expiresAtMs) && expiresAtMs <= nowMs;
+}
+
+export function resolveAutoDrainRuntimeGateReason(
+  gate: AutoDrainGateReason,
+  state: Pick<LongRunLoopRuntimeState, "leaseExpiresAtIso" | "stopCondition"> | undefined,
+  nowMs = Date.now(),
+): AutoDrainGateReason {
+  if (isLongRunLoopLeaseExpired(state, nowMs)) return "lease-expired";
+  return gate;
+}
+
+export type LongRunLoopStopBoundary = "none" | "advisory" | "blocking";
+
+export function resolveLongRunLoopStopBoundary(
+  state:
+    | (Pick<LongRunLoopRuntimeState, "mode" | "stopCondition"> & {
+      consecutiveDispatchFailures?: number;
+    })
+    | undefined,
+  dispatchFailureBlockAfter = 3,
+): LongRunLoopStopBoundary {
+  if (!state) return "none";
+  if (state.mode === "paused") return "blocking";
+  if (state.stopCondition === "manual-pause" || state.stopCondition === "lease-expired") {
+    return "blocking";
+  }
+  if (state.stopCondition === "dispatch-failure") {
+    const threshold = Math.max(1, Math.floor(Number(dispatchFailureBlockAfter) || 3));
+    const failures = normalizeRuntimeFailureCount(state.consecutiveDispatchFailures);
+    return failures >= threshold ? "blocking" : "advisory";
+  }
+  return "none";
+}
+
+export function resolveDispatchFailureRuntimeGate(
+  state:
+    | (Pick<LongRunLoopRuntimeState, "mode" | "stopCondition"> & {
+      consecutiveDispatchFailures?: number;
+    })
+    | undefined,
+  dispatchFailureBlockAfter = 3,
+): AutoDrainGateReason | undefined {
+  if (!state || state.stopCondition !== "dispatch-failure") return undefined;
+  const boundary = resolveLongRunLoopStopBoundary(state, dispatchFailureBlockAfter);
+  if (boundary === "blocking") return "dispatch-failure-blocking";
+  if (boundary === "advisory") return "dispatch-failure-advisory";
+  return undefined;
 }
 
 export function estimateAutoDrainWaitMs(
@@ -281,6 +349,88 @@ export function shouldSchedulePostDispatchAutoDrain(
   return dispatched > 0 && remainingQueuedCount > 0;
 }
 
+export type BoardAutoAdvanceGateReason =
+  | "active-long-run"
+  | "queued-intents"
+  | "loop-paused"
+  | "loop-degraded"
+  | "stop-condition"
+  | "board-not-ready"
+  | "missing-next-task-id"
+  | "dedupe-window"
+  | "ready";
+
+export function resolveBoardAutoAdvanceGateReason(options: {
+  activeLongRun: boolean;
+  queuedCount: number;
+  loopMode: LongRunLoopRuntimeMode;
+  loopHealth: LongRunLoopRuntimeHealth;
+  stopCondition: LongRunLoopRuntimeStopCondition;
+  boardReady: boolean;
+  nextTaskId?: string;
+  nowMs?: number;
+  lastTaskId?: string;
+  lastTaskAtMs?: number;
+  dedupeWindowMs?: number;
+}): BoardAutoAdvanceGateReason {
+  if (options.activeLongRun) return "active-long-run";
+  if (options.queuedCount !== 0) return "queued-intents";
+  if (options.loopMode !== "running") return "loop-paused";
+  if (options.loopHealth !== "healthy") return "loop-degraded";
+  if (options.stopCondition !== "none") return "stop-condition";
+  if (!options.boardReady) return "board-not-ready";
+  const nextTaskId = typeof options.nextTaskId === "string" ? options.nextTaskId.trim() : "";
+  if (!nextTaskId) return "missing-next-task-id";
+
+  const dedupeWindowMs = Math.max(0, Math.floor(Number(options.dedupeWindowMs) || 0));
+  const nowMs = Number(options.nowMs);
+  const lastTaskAtMs = Number(options.lastTaskAtMs);
+  const lastTaskId = typeof options.lastTaskId === "string" ? options.lastTaskId.trim() : "";
+  if (
+    dedupeWindowMs > 0
+    && Number.isFinite(nowMs)
+    && Number.isFinite(lastTaskAtMs)
+    && lastTaskId.length > 0
+    && lastTaskId === nextTaskId
+    && nowMs - lastTaskAtMs < dedupeWindowMs
+  ) {
+    return "dedupe-window";
+  }
+
+  return "ready";
+}
+
+export function shouldAutoAdvanceBoardTask(options: {
+  activeLongRun: boolean;
+  queuedCount: number;
+  loopMode: LongRunLoopRuntimeMode;
+  loopHealth: LongRunLoopRuntimeHealth;
+  stopCondition: LongRunLoopRuntimeStopCondition;
+  boardReady: boolean;
+  nextTaskId?: string;
+  nowMs?: number;
+  lastTaskId?: string;
+  lastTaskAtMs?: number;
+  dedupeWindowMs?: number;
+}): boolean {
+  return resolveBoardAutoAdvanceGateReason(options) === "ready";
+}
+
+export type RuntimeCodeActivationState = "active" | "reload-required" | "unknown";
+
+export function resolveRuntimeCodeActivationState(options: {
+  loadedSourceMtimeMs?: number;
+  currentSourceMtimeMs?: number;
+  mtimeToleranceMs?: number;
+}): RuntimeCodeActivationState {
+  const loadedMtimeMs = Number(options.loadedSourceMtimeMs);
+  const currentMtimeMs = Number(options.currentSourceMtimeMs);
+  if (!Number.isFinite(loadedMtimeMs) || !Number.isFinite(currentMtimeMs)) return "unknown";
+  const toleranceMs = Math.max(0, Math.floor(Number(options.mtimeToleranceMs) || 0));
+  if (currentMtimeMs - loadedMtimeMs > toleranceMs) return "reload-required";
+  return "active";
+}
+
 export function shouldEmitAutoDrainDeferredAudit(
   lastAuditAtMs: number,
   previousGate: AutoDrainGateReason | undefined,
@@ -289,6 +439,119 @@ export function shouldEmitAutoDrainDeferredAudit(
   minIntervalMs: number,
 ): boolean {
   if (previousGate !== nextGate) return true;
+  if (lastAuditAtMs <= 0) return true;
+  return nowMs - lastAuditAtMs >= Math.max(0, Math.floor(minIntervalMs));
+}
+
+export function shouldEmitBoardAutoAdvanceGateAudit(
+  lastAuditAtMs: number,
+  previousGate: BoardAutoAdvanceGateReason | undefined,
+  nextGate: BoardAutoAdvanceGateReason,
+  nowMs: number,
+  minIntervalMs: number,
+): boolean {
+  if (previousGate !== nextGate) return true;
+  if (lastAuditAtMs <= 0) return true;
+  return nowMs - lastAuditAtMs >= Math.max(0, Math.floor(minIntervalMs));
+}
+
+export interface LoopActivationMarkers {
+  preparado: boolean;
+  ativoAqui: boolean;
+  emLoop: boolean;
+  blocker:
+    | "loop-not-ready"
+    | "runtime-reload-required"
+    | "runtime-state-unknown"
+    | "active-long-run"
+    | "queued-intents"
+    | "board-auto-gate"
+    | "none";
+}
+
+export function resolveLoopActivationMarkers(options: {
+  activeLongRun: boolean;
+  queuedCount: number;
+  loopMode: LongRunLoopRuntimeMode;
+  loopHealth: LongRunLoopRuntimeHealth;
+  stopCondition: LongRunLoopRuntimeStopCondition;
+  boardReady: boolean;
+  nextTaskId?: string;
+  boardAutoGate: BoardAutoAdvanceGateReason;
+  runtimeCodeState: RuntimeCodeActivationState;
+}): LoopActivationMarkers {
+  const hasNextTaskId = typeof options.nextTaskId === "string" && options.nextTaskId.trim().length > 0;
+  const preparado =
+    options.loopMode === "running"
+    && options.loopHealth === "healthy"
+    && options.stopCondition === "none"
+    && options.boardReady
+    && hasNextTaskId;
+
+  const ativoAqui = options.runtimeCodeState === "active";
+
+  const emLoop =
+    preparado
+    && ativoAqui
+    && !options.activeLongRun
+    && options.queuedCount === 0
+    && options.boardAutoGate === "ready";
+
+  let blocker: LoopActivationMarkers["blocker"] = "none";
+  if (!preparado) blocker = "loop-not-ready";
+  else if (options.runtimeCodeState === "reload-required") blocker = "runtime-reload-required";
+  else if (options.runtimeCodeState === "unknown") blocker = "runtime-state-unknown";
+  else if (options.activeLongRun) blocker = "active-long-run";
+  else if (options.queuedCount > 0) blocker = "queued-intents";
+  else if (options.boardAutoGate !== "ready") blocker = "board-auto-gate";
+
+  return {
+    preparado,
+    ativoAqui,
+    emLoop,
+    blocker,
+  };
+}
+
+export function buildLoopActivationMarkersLabel(markers: LoopActivationMarkers): string {
+  const yesNo = (value: boolean): string => (value ? "yes" : "no");
+  return `PREPARADO=${yesNo(markers.preparado)} ATIVO_AQUI=${yesNo(markers.ativoAqui)} EM_LOOP=${yesNo(markers.emLoop)} blocker=${markers.blocker}`;
+}
+
+export function shouldAnnounceLoopActivationReady(
+  previousEmLoop: boolean,
+  nextEmLoop: boolean,
+): boolean {
+  return !previousEmLoop && nextEmLoop;
+}
+
+export function buildLoopActivationBlockerHint(markers: LoopActivationMarkers): string | undefined {
+  switch (markers.blocker) {
+    case "runtime-reload-required":
+      return "loopHint: runtime carregado está atrás do código local; faça reload para ativar aqui.";
+    case "runtime-state-unknown":
+      return "loopHint: não foi possível confirmar ativação runtime; verifique /lane-queue status novamente.";
+    case "active-long-run":
+      return "loopHint: aguarde lane ficar idle para auto-advance board-first.";
+    case "queued-intents":
+      return "loopHint: esvazie fila deferred (pop/clear) para liberar auto-advance.";
+    case "board-auto-gate":
+      return "loopHint: board ainda não está em gate=ready; confira boardAutoGate/boardHint.";
+    case "loop-not-ready":
+      return "loopHint: loop/board ainda não está pronto (mode/health/stop/deps).";
+    default:
+      return undefined;
+  }
+}
+
+export function shouldEmitLoopActivationAudit(
+  lastAuditAtMs: number,
+  previousLabel: string | undefined,
+  nextLabel: string,
+  nowMs: number,
+  minIntervalMs: number,
+): boolean {
+  if (previousLabel !== nextLabel) return true;
   if (lastAuditAtMs <= 0) return true;
   return nowMs - lastAuditAtMs >= Math.max(0, Math.floor(minIntervalMs));
 }
@@ -390,6 +653,12 @@ function normalizeRuntimeLeaseOwner(value: unknown): string {
   return trimmed.length > 0 ? trimmed.slice(0, 120) : currentLongRunLoopLeaseOwner();
 }
 
+function normalizeRuntimeFailureCount(value: unknown): number {
+  const raw = Number(value);
+  if (!Number.isFinite(raw) || raw < 0) return 0;
+  return Math.max(0, Math.min(999, Math.floor(raw)));
+}
+
 function addMsToIso(baseIso: string, ms: number): string {
   const baseMs = Date.parse(baseIso);
   const safeBaseMs = Number.isFinite(baseMs) ? baseMs : Date.now();
@@ -438,6 +707,7 @@ function defaultLongRunLoopRuntimeState(nowIso = new Date().toISOString()): Long
     leaseExpiresAtIso: addMsToIso(nowIso, leaseTtlMs),
     stopCondition: "none",
     stopReason: "running",
+    consecutiveDispatchFailures: 0,
     updatedAtIso: nowIso,
     lastTransitionIso: nowIso,
     lastTransitionReason: "init",
@@ -492,6 +762,7 @@ export function readLongRunLoopRuntimeState(cwd: string): LongRunLoopRuntimeStat
       leaseExpiresAtIso,
       stopCondition,
       stopReason: normalizeRuntimeReason(raw.stopReason, defaultStopReason(stopCondition)),
+      consecutiveDispatchFailures: normalizeRuntimeFailureCount(raw.consecutiveDispatchFailures),
       updatedAtIso:
         typeof raw.updatedAtIso === "string" && raw.updatedAtIso
           ? raw.updatedAtIso
@@ -533,6 +804,7 @@ function mutateLongRunLoopRuntimeState(
   const nowIso = new Date().toISOString();
   const state = readLongRunLoopRuntimeState(cwd);
   mutator(state, nowIso);
+  state.consecutiveDispatchFailures = normalizeRuntimeFailureCount(state.consecutiveDispatchFailures);
   refreshRuntimeLease(state, nowIso);
   state.stopCondition = resolveRuntimeStopCondition(
     state.mode,
@@ -583,6 +855,7 @@ export function markLongRunLoopRuntimeDispatch(
     state.lastDispatchItemId = itemId;
     state.lastErrorAtIso = undefined;
     state.lastError = undefined;
+    state.consecutiveDispatchFailures = 0;
     state.stopCondition = state.mode === "paused" ? "manual-pause" : "none";
     state.stopReason = state.stopCondition === "none" ? "running" : defaultStopReason(state.stopCondition);
   });
@@ -602,6 +875,7 @@ export function markLongRunLoopRuntimeDegraded(
       typeof errorText === "string" && errorText.trim().length > 0
         ? errorText.trim().slice(0, 500)
         : "unknown-error";
+    state.consecutiveDispatchFailures = normalizeRuntimeFailureCount(state.consecutiveDispatchFailures) + 1;
     state.stopCondition = "dispatch-failure";
     state.stopReason = normalizeRuntimeReason(reason, defaultStopReason("dispatch-failure"));
   });
@@ -619,6 +893,7 @@ export function markLongRunLoopRuntimeHealthy(
     state.health = "healthy";
     state.lastErrorAtIso = undefined;
     state.lastError = undefined;
+    state.consecutiveDispatchFailures = 0;
     state.stopCondition = state.mode === "paused" ? "manual-pause" : "none";
     state.stopReason = state.stopCondition === "none" ? "running" : defaultStopReason(state.stopCondition);
   });
