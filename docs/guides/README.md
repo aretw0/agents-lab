@@ -32,6 +32,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [control-plane-ux-curation.md](./control-plane-ux-curation.md) | Padrão de UX do control-plane (TUI+WEB): densidade adaptativa, anti-clutter e checklist de resize |
 | [unified-dogfood-isolation.md](./unified-dogfood-isolation.md) | Runbook para dogfood em ambiente isolado com TUI + WEB unificados |
 | [colony-runtime-recovery.md](./colony-runtime-recovery.md) | Como localizar artefatos de colony (state/worktree/branch) e recuperar contexto após parada |
+| [host-disk-recovery.md](./host-disk-recovery.md) | Runbook de recuperação de espaço em disco (dry-run, limpeza segura, modo agressivo com proteção de sessões) |
 | [colony-provider-model-governance.md](./colony-provider-model-governance.md) | Governança de provider/model para colony e multi-agentes (usuário + dev) |
 | [swarm-cleanroom-protocol.md](./swarm-cleanroom-protocol.md) | Protocolo cleanroom para runs de swarm (pre-run, execução, promoção, reconciliação) |
 | [unattended-swarm-execution-plan.md](./unattended-swarm-execution-plan.md) | Plano de execução unattended por lotes P0 (OpenAI-only) com go/no-go e rollback |
