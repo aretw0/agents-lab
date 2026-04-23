@@ -36,6 +36,7 @@
 			"./extensions/provider-readiness.ts",
 			"./extensions/subagent-readiness.ts",
 			"./extensions/session-analytics.ts",
+			"./extensions/project-board-surface.ts",
 			"./extensions/handoff-advisor.ts",
 			"./extensions/quota-alerts.ts",
 			"./extensions/safe-boot.ts",
