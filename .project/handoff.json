@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-23T01:40:30.000Z",
-  "context": "Auto-resume aplicado e micro-slice entregue em TASK-BUD-114: parser de `Final file inventory` agora cobre formato inline (`files changed: ...`), conectando avaliação de scope (`candidateDiff ∩ allowlist`) ao fluxo real de promoção seletiva sem depender de bullets explícitos.",
-  "current_phase": "factory-selective-promotion-and-deflation",
+  "timestamp": "2026-04-23T01:58:00.000Z",
+  "context": "Slice de recalibração pós-resume iniciado (TASK-BUD-117): prompt de auto-resume do context-watchdog não força mais `micro-slice-only` fixo; guidance agora é adaptativo por estado (`context_watch_status`). Se último evento de context-watch já for `ok`, o prompt explicita throughput imediato com slices maiores.",
+  "current_phase": "factory-selective-promotion-and-post-resume-recalibration",
   "current_tasks": [
     "TASK-BUD-114",
     "TASK-BUD-116",
@@ -9,29 +9,29 @@
   ],
   "blockers": [],
   "next_actions": [
-    "TASK-BUD-114: ligar o resultado `promotedFiles/skippedFiles` ao apply efetivo por diff (etapa seguinte), mantendo fallback de recovery para promoção vazia.",
-    "TASK-BUD-116: apenas micro-ajustes oportunistas quando tocar hotspots de manutenção.",
-    "TASK-BUD-117: iniciar implementação da recalibração pós-compact/auto-resume no context-watchdog em 1 arquivo + 1 teste quando priorizado."
+    "TASK-BUD-114: conectar `promotedFiles/skippedFiles` ao apply efetivo por diff/apply, mantendo fallback recovery quando promoted=0.",
+    "TASK-BUD-117: evoluir de recalibração de prompt para sinal auditável explícito em `context_watch_status` (ex.: operatingCadence/postResumeRecalibrated).",
+    "TASK-BUD-116: manter somente refactors oportunistas quando surgirem hotspots reais."
   ],
   "open_questions": [
-    "Policy default para scope em apply-to-branch: manter estritamente opt-in por token no goal ou habilitar inferência controlada?"
+    "No auto-resume, queremos que a checagem `context_watch_status` seja mandatória no prompt ou apenas recomendada quando last event != ok?"
   ],
   "key_decisions_pending": [
-    "Como serializar inventário auto-computado no relatório final para consumo humano sem duplicar evidência já auditada em log."
+    "Definir contrato canônico de cadência operacional no prompt: 2-4 arquivos (balanced) vs limites por lane/profile."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/colony-pilot-delivery-policy.ts",
-    "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+    "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+    "packages/pi-stack/test/smoke/context-watchdog.test.ts",
     ".project/tasks.json",
     ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T01:40:30.000Z",
+      "atIso": "2026-04-23T01:58:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 17,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

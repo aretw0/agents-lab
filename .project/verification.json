@@ -3556,6 +3556,27 @@
           "evidence": "Arquivo smoke focal 75/75 green."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-187",
+      "target": "TASK-BUD-117",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Recalibração pós-resume implementada no prompt automático do context-watchdog: `buildAutoResumePromptFromHandoff` removeu instrução fixa de micro-slice-only e adotou cadência adaptativa baseada em estado (run `context_watch_status`: level=ok => slices padrão 2-4 arquivos; warn/checkpoint/compact => micro-slice). Também detecta `context_watch_events` com último nível `ok` para explicitar throughput imediato. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` => 15/15.",
+      "criteria_results": [
+        {
+          "criterion": "Prompt de auto-resume não perpetua micro-slice-only quando contexto já está saudável.",
+          "status": "passed",
+          "evidence": "Teste `resume prompt removes timidity when latest context-watch event is ok`."
+        },
+        {
+          "criterion": "Transição compact/resume mantém recomendação segura e adaptativa.",
+          "status": "passed",
+          "evidence": "Teste `builds compact auto-resume prompt from handoff freshness snapshot` atualizado para guidance adaptativo + sem instrução fixa antiga."
+        }
+      ]
     }
   ]
 }

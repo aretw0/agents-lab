@@ -2730,7 +2730,7 @@
     {
       "id": "TASK-BUD-117",
       "description": "[P1] Implementar recalibração pós-compact/auto-resume no context-watchdog para evitar timidez residual (micro-slice-only indevido) quando o contexto já voltou para faixa saudável.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-115"
       ],
@@ -2741,6 +2741,7 @@
       ],
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
         "packages/pi-stack/extensions/context-watchdog-policy.ts",
         "packages/pi-stack/test/smoke/context-watchdog.test.ts",
         "docs/guides/project-canonical-pipeline.md"
@@ -2750,7 +2751,7 @@
         "`context_watch_status` expõe sinal auditável de recalibração pós-resume (ex.: `postResumeRecalibrated`/`operatingCadence`) sem hard-block por default.",
         "Smoke cobre cenário de transição `compact -> resume -> ok` garantindo recomendação coerente com orçamento de contexto recuperado."
       ],
-      "notes": "Captura de feedback do usuário (2026-04-23): após compactação, o control-plane permanece tímido demais e insiste em micro-slices mesmo com espaço de contexto; objetivo é preservar segurança sem sacrificar throughput quando o estado já estiver saudável."
+      "notes": "Captura de feedback do usuário (2026-04-23): após compactação, o control-plane permanece tímido demais e insiste em micro-slices mesmo com espaço de contexto; objetivo é preservar segurança sem sacrificar throughput quando o estado já estiver saudável.\n[2026-04-23T00:00:00Z] Slice 1 (recalibração de prompt pós-resume): `buildAutoResumePromptFromHandoff` deixou de impor `micro-slice-only` fixo e passou para guidance adaptativo por estado (`context_watch_status`: level=ok -> slices padrão 2-4 arquivos; warn/checkpoint/compact -> micro-slice). Quando último evento em `context_watch_events` já for `ok`, o prompt explicita contexto saudável para throughput imediato. Smoke atualizada para cobrir ambos cenários. Evidência: VER-BUD-187."
     }
   ]
 }

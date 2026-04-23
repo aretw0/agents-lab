@@ -235,6 +235,7 @@ describe("context-watchdog", () => {
 				"Context-watch action: level=compact 72% (compact-now)",
 				"Consolidar TASK-BUD-084 com micro-slice final",
 			],
+			context_watch_events: [{ level: "compact" }],
 		} as any, 5 * 60 * 1000, nowMs);
 		expect(prompt).toContain("ts=2026-04-21T20:20:00.000Z");
 		expect(prompt).toContain("freshness=stale ageSec=600");
@@ -242,10 +243,27 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
 		expect(prompt).toContain("handoff is stale");
+		expect(prompt).toContain("Cadence: adaptive on resume");
+		expect(prompt).toContain("if level=ok, use standard slices");
+		expect(prompt).not.toContain("Keep micro-slice-only (1 file + 1 test)");
 		expect(prompt).not.toContain("Context-watch action:");
 
 		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any, 5 * 60 * 1000, nowMs);
 		expect(unknownPrompt).toContain("freshness=unknown");
+	});
+
+	it("resume prompt removes timidity when latest context-watch event is ok", () => {
+		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
+		const prompt = buildAutoResumePromptFromHandoff({
+			timestamp: "2026-04-21T20:29:00.000Z",
+			context_watch_events: [
+				{ level: "checkpoint" },
+				{ level: "ok" },
+			],
+		} as any, 5 * 60 * 1000, nowMs);
+		expect(prompt).toContain("freshness=fresh ageSec=60");
+		expect(prompt).toContain("Cadence: context already healthy");
+		expect(prompt).toContain("standard slices (2-4 files + focused tests)");
 	});
 
 	it("emits operator signal for manual intervention/reload steering", () => {

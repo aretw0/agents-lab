@@ -1,6 +1,8 @@
 export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 
+type ContextWatchdogLevel = "ok" | "warn" | "checkpoint" | "compact";
+
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
 
 function normalizeStringArray(value: unknown): string[] {
@@ -12,6 +14,37 @@ function truncateForPrompt(value: string, max = 180): string {
 	const s = String(value ?? "").trim().replace(/\s+/g, " ");
 	if (s.length <= max) return s;
 	return `${s.slice(0, Math.max(0, max - 1))}…`;
+}
+
+function latestContextWatchLevelFromHandoff(
+	handoffInput: Record<string, unknown>,
+): ContextWatchdogLevel | undefined {
+	const events = handoffInput.context_watch_events;
+	if (!Array.isArray(events) || events.length === 0) return undefined;
+	for (let i = events.length - 1; i >= 0; i -= 1) {
+		const row = events[i];
+		if (!row || typeof row !== "object") continue;
+		const level = (row as Record<string, unknown>).level;
+		if (
+			level === "ok" ||
+			level === "warn" ||
+			level === "checkpoint" ||
+			level === "compact"
+		) {
+			return level;
+		}
+	}
+	return undefined;
+}
+
+function buildResumeCadenceGuidanceLine(
+	handoffInput: Record<string, unknown>,
+): string {
+	const lastLevel = latestContextWatchLevelFromHandoff(handoffInput);
+	if (lastLevel === "ok") {
+		return "Cadence: context already healthy — proceed with standard slices (2-4 files + focused tests), preserving canonical board/verification flow.";
+	}
+	return "Cadence: adaptive on resume — check `context_watch_status`; if level=ok, use standard slices (2-4 files + focused tests); if warn/checkpoint/compact, keep micro-slice-only until checkpoint/compact stabilizes.";
 }
 
 export function resolveHandoffFreshness(
@@ -87,6 +120,6 @@ export function buildAutoResumePromptFromHandoff(
 		freshness.label === "stale"
 			? "note: handoff is stale; refresh checkpoint if resumed context conflicts."
 			: "note: handoff freshness acceptable for resume.",
-		"Keep micro-slice-only (1 file + 1 test) and preserve canonical board/verification flow.",
+		buildResumeCadenceGuidanceLine(handoff),
 	].join("\n");
 }
