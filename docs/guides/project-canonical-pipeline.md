@@ -122,6 +122,7 @@ Durante long-run:
 - quando `EM_LOOP=no`, expor `loopHint` alinhado ao `blocker` (reload/queue/gate/loop-state) para correção rápida sem investigação ampla.
 - `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
 - `/lane-queue evidence` deve mostrar o snapshot persistido mais recente (`boardAuto`/`loopReady`) para comprovação rápida sem varredura de JSONL, incluindo `readyForTaskBud125=yes|no` e critérios explícitos (`runtime active` + `emLoop=yes`).
+- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (humano) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita.
 - intents canônicos devem usar envelope tipado (`[intent:<type>]` + campos `key=value`, ex.: `board.execute-task` e `board.execute-next`) para reduzir fragilidade de dispatch textual e manter auditabilidade entre extensões.
 - runtime deve consumir envelope no caminho de execução (input) além do prompt: envelope inválido/unsupported é rejeitado com audit explícita; envelope válido registra decisão (`ready`/`board-not-ready`/`next-mismatch`/`next-ready`) antes da execução.
 
