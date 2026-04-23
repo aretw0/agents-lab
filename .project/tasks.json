@@ -2026,7 +2026,7 @@
     {
       "id": "TASK-BUD-088",
       "description": "[P0] Implementar hatch progressivo (simple-first): primeiro contato de sessão/projeto sem oferta direta de swarm, com escala explícita sob demanda.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-083"
       ],
@@ -2043,7 +2043,7 @@
         "UX inicial oferece apenas trilha simples (status/context/readiness básico + como escalar).",
         "Comando/flag explícita permite promover para modo avançado na mesma sessão sem fricção."
       ],
-      "notes": "Foco: não assustar no primeiro contato e preservar clareza de controle."
+      "notes": "Foco: não assustar no primeiro contato e preservar clareza de controle.\n[2026-04-23T21:30:00Z] Slice simple-first aplicada: `/colony-pilot hatch check` default em `mode: simple` sem CTA direta de swarm; trilha básica + comando explícito de escala (`--advanced`). Opt-in avançado mantém runbook com `/colony <goal>`. Status `colony-pilot-hatch` exposto para observabilidade no footer. Smokes focais: colony-pilot-hatch-e2e-harness + colony-pilot-parsers + custom-footer-registration (114/114)."
     },
     {
       "id": "TASK-BUD-089",

@@ -1,29 +1,15 @@
 {
-  "timestamp": "2026-04-23T20:27:00.000Z",
-  "context": "Slice de cultivo executada para validar loop evidence de forma determinística (sem depender de parse amplo de sessão): protocolo operacional formalizado com checker CLI externo (`ops:loop-evidence:*`) + experimento documentado. Estado atual continua bloqueado por ausência de evidência runtime real (`.pi/guardrails-loop-evidence.json` missing).",
+  "timestamp": "2026-04-23T21:36:00.000Z",
+  "context": "Execução da intent canônica `board.execute-task` para TASK-BUD-088 concluída em slice de código/teste: hatch progressivo simple-first aplicado no `colony-pilot` com escala avançada só por opt-in explícito (`--advanced`), além de status `colony-pilot-hatch` para observabilidade no footer e doc pipeline atualizada.",
   "next_actions": [
-    "Executar ciclo mínimo no runtime ativo para produzir evidência real (transição loop-ready + board auto-advance).",
-    "Rodar `/lane-queue evidence` e `npm run ops:loop-evidence:check` até obter `readyForTaskBud125=yes` com freshness dentro da janela.",
-    "Quando pronto, registrar VER passed de TASK-BUD-125 e concluir task.",
-    "Após fechamento de TASK-BUD-125, retomar TASK-BUD-119 (intents board update/query)."
+    "Validar manualmente no runtime: `/colony-pilot hatch check` (modo simple, sem CTA direta de swarm) e `/colony-pilot hatch check --advanced` (trilha avançada opt-in).",
+    "Se validação manual confirmar UX esperada, registrar nota final da task e manter no board (no-auto-close) até decisão humana de fechamento.",
+    "Retomar blocker principal pendente: evidência operacional real de TASK-BUD-125 (`readyForTaskBud125=yes`)."
   ],
   "blockers": [
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
-    {
-      "atIso": "2026-04-23T19:59:54.702Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 73,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
     {
       "atIso": "2026-04-23T20:27:00.000Z",
       "reason": "message_end",
@@ -36,6 +22,19 @@
       },
       "action": "continue",
       "recommendation": "Context healthy; standard slices allowed."
+    },
+    {
+      "atIso": "2026-04-23T21:36:00.000Z",
+      "reason": "message_end",
+      "level": "ok",
+      "percent": 22,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "continue",
+      "recommendation": "Standard slice completed with focused tests and checkpoint refresh."
     }
   ]
 }

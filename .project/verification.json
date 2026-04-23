@@ -4362,6 +4362,15 @@
       "method": "test",
       "timestamp": "2026-04-23T20:25:00Z",
       "evidence": "Cultivo de protocolo de validação operacional: adicionado checker externo `scripts/guardrails-loop-evidence-check.mjs` (+ npm scripts `ops:loop-evidence:check|strict`) para avaliar `.pi/guardrails-loop-evidence.json` com critérios canônicos de fechamento (`boardAuto runtime=active`, `boardAuto emLoop=yes`, `loopReady runtime=active`) e janela de frescor (`--max-age-min`). Cobertura: `scripts/test/guardrails-loop-evidence-check.test.mjs` (4/4 pass). Execução real atual: `npm run -s ops:loop-evidence:check` => status=missing/readyForTaskBud125=no (evidência operacional ainda pendente)."
+    },
+    {
+      "id": "VER-BUD-237",
+      "target": "TASK-BUD-088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T21:35:00Z",
+      "evidence": "Hatch progressivo (simple-first) implementado em `colony-pilot`: `/colony-pilot hatch check` agora reporta `mode: simple` por padrão sem CTA direta de swarm e com trilha básica + opt-in explícito (`/colony-pilot hatch check --advanced`). Modo avançado preserva runbook com `/colony <goal>`. `colony-pilot-hatch` status adicionado para observabilidade no footer (`custom-footer`). Documentação atualizada em `docs/guides/project-canonical-pipeline.md`. Smokes focais: `colony-pilot-hatch-e2e-harness`, `colony-pilot-parsers`, `custom-footer-registration` => 114/114 pass."
     }
   ]
 }
