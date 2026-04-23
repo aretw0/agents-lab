@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBoardExecuteTaskIntent,
+  buildBoardExecuteNextIntent,
   buildBoardExecuteTaskIntentText,
+  buildBoardExecuteNextIntentText,
   buildGuardrailsIntentSystemPrompt,
   encodeGuardrailsIntent,
   parseGuardrailsIntent,
@@ -25,6 +27,21 @@ describe("guardrails-core intent bus", () => {
     expect(parsed.intent?.type).toBe("board.execute-task");
     expect(parsed.intent?.taskId).toBe("TASK-BUD-125");
     expect(summarizeGuardrailsIntent(intent)).toContain("board.execute-task");
+  });
+
+  it("supports board.execute-next envelope deterministically", () => {
+    const intent = buildBoardExecuteNextIntent();
+    const text = encodeGuardrailsIntent(intent);
+    expect(text).toContain("[intent:board.execute-next]");
+    expect(text).not.toContain("task_id=");
+
+    const parsed = parseGuardrailsIntent(text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.intent?.type).toBe("board.execute-next");
+    expect(summarizeGuardrailsIntent(intent)).toContain("board.execute-next");
+
+    const helperText = buildBoardExecuteNextIntentText();
+    expect(helperText).toContain("[intent:board.execute-next]");
   });
 
   it("flags unsupported intent type deterministically", () => {
@@ -111,5 +128,23 @@ describe("guardrails-core intent bus", () => {
     });
     expect(mismatch.kind).toBe("board-execute-next-mismatch");
     expect(mismatch.expectedTaskId).toBe("TASK-BUD-126");
+
+    const nextText = buildBoardExecuteNextIntentText();
+    const nextReady = resolveGuardrailsIntentRuntimeDecision({
+      text: nextText,
+      parsed: parseGuardrailsIntent(nextText),
+      boardReady: true,
+      nextTaskId: "TASK-BUD-125",
+    });
+    expect(nextReady.kind).toBe("board-execute-next-ready");
+    expect(nextReady.taskId).toBe("TASK-BUD-125");
+
+    const nextNotReady = resolveGuardrailsIntentRuntimeDecision({
+      text: nextText,
+      parsed: parseGuardrailsIntent(nextText),
+      boardReady: false,
+      nextTaskId: undefined,
+    });
+    expect(nextNotReady.kind).toBe("board-execute-next-board-not-ready");
   });
 });

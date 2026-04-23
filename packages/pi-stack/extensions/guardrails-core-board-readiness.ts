@@ -4,6 +4,7 @@ import {
 } from "./colony-pilot-task-sync";
 import {
   buildBoardExecuteTaskIntent,
+  buildBoardExecuteNextIntent,
   encodeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
 
@@ -159,4 +160,8 @@ export function buildBoardExecuteTaskIntentText(taskId: string): string {
   const intent = buildBoardExecuteTaskIntent(taskId);
   if (!intent) return "[intent:board.execute-task]";
   return encodeGuardrailsIntent(intent);
+}
+
+export function buildBoardExecuteNextIntentText(): string {
+  return encodeGuardrailsIntent(buildBoardExecuteNextIntent());
 }

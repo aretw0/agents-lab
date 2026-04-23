@@ -8,7 +8,14 @@ export interface BoardExecuteTaskIntent {
   contract: "no-auto-close+verification";
 }
 
-export type GuardrailsIntent = BoardExecuteTaskIntent;
+export interface BoardExecuteNextIntent {
+  version: 1;
+  type: "board.execute-next";
+  mode: "board-first";
+  contract: "no-auto-close+verification";
+}
+
+export type GuardrailsIntent = BoardExecuteTaskIntent | BoardExecuteNextIntent;
 
 export interface ParsedGuardrailsIntent {
   ok: boolean;
@@ -61,12 +68,30 @@ export function buildBoardExecuteTaskIntent(taskId: string): BoardExecuteTaskInt
   };
 }
 
+export function buildBoardExecuteNextIntent(): BoardExecuteNextIntent {
+  return {
+    version: GUARDRAILS_INTENT_VERSION,
+    type: "board.execute-next",
+    mode: "board-first",
+    contract: "no-auto-close+verification",
+  };
+}
+
 export function encodeGuardrailsIntent(intent: GuardrailsIntent): string {
   if (intent.type === "board.execute-task") {
     return [
       `[intent:${intent.type}]`,
       `version=${intent.version}`,
       `task_id=${intent.taskId}`,
+      `mode=${intent.mode}`,
+      `contract=${intent.contract}`,
+    ].join("\n");
+  }
+
+  if (intent.type === "board.execute-next") {
+    return [
+      `[intent:${intent.type}]`,
+      `version=${intent.version}`,
       `mode=${intent.mode}`,
       `contract=${intent.contract}`,
     ].join("\n");
@@ -100,12 +125,19 @@ export function parseGuardrailsIntent(text: string): ParsedGuardrailsIntent {
     return { ok: true, intent, rawType: header };
   }
 
+  if (header === "board.execute-next") {
+    return { ok: true, intent: buildBoardExecuteNextIntent(), rawType: header };
+  }
+
   return { ok: false, reason: "unsupported-type", rawType: header };
 }
 
 export function summarizeGuardrailsIntent(intent: GuardrailsIntent): string {
   if (intent.type === "board.execute-task") {
     return `${intent.type} task=${intent.taskId} mode=${intent.mode}`;
+  }
+  if (intent.type === "board.execute-next") {
+    return `${intent.type} mode=${intent.mode}`;
   }
   return "unknown-intent";
 }
@@ -118,6 +150,16 @@ export function buildGuardrailsIntentSystemPrompt(intent: GuardrailsIntent): str
       "- execute this task as the primary lane objective, keeping changes minimal and reversible.",
       "- preserve contract: no-auto-close + verification evidence before any completion update.",
       "- if blocked, report explicit blocker + minimal decomposition proposal instead of broad reframing.",
+    ];
+  }
+
+  if (intent.type === "board.execute-next") {
+    return [
+      "Canonical intent envelope detected: board-first execution is active for this turn.",
+      `- intent: ${intent.type} (version=${intent.version})`,
+      "- execute the next eligible board task (planned + dependencies satisfied).",
+      "- preserve contract: no-auto-close + verification evidence before any completion update.",
+      "- if board is not ready, report blocker and suggest minimal decomposition to unblock next task.",
     ];
   }
 

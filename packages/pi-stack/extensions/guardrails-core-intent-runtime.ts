@@ -5,7 +5,9 @@ export type GuardrailsIntentRuntimeDecisionKind =
   | "invalid-envelope"
   | "board-execute-ready"
   | "board-execute-board-not-ready"
-  | "board-execute-next-mismatch";
+  | "board-execute-next-mismatch"
+  | "board-execute-next-ready"
+  | "board-execute-next-board-not-ready";
 
 export interface GuardrailsIntentRuntimeDecision {
   action: "continue" | "reject";
@@ -71,6 +73,27 @@ export function resolveGuardrailsIntentRuntimeDecision(
       action: "continue",
       kind: "board-execute-ready",
       taskId,
+      expectedTaskId,
+    };
+  }
+
+  if (input.parsed.intent.type === "board.execute-next") {
+    const expectedTaskId = typeof input.nextTaskId === "string" && input.nextTaskId.trim().length > 0
+      ? input.nextTaskId.trim()
+      : undefined;
+
+    if (!input.boardReady || !expectedTaskId) {
+      return {
+        action: "continue",
+        kind: "board-execute-next-board-not-ready",
+        expectedTaskId,
+      };
+    }
+
+    return {
+      action: "continue",
+      kind: "board-execute-next-ready",
+      taskId: expectedTaskId,
       expectedTaskId,
     };
   }

@@ -151,12 +151,14 @@ export {
 
 export {
   buildBoardExecuteTaskIntentText,
+  buildBoardExecuteNextIntentText,
   buildBoardReadinessStatusLabel,
   evaluateBoardLongRunReadiness,
 } from "./guardrails-core-board-readiness";
 
 export {
   buildBoardExecuteTaskIntent,
+  buildBoardExecuteNextIntent,
   buildGuardrailsIntentSystemPrompt,
   encodeGuardrailsIntent,
   parseGuardrailsIntent,
@@ -1570,9 +1572,15 @@ export default function (pi: ExtensionAPI) {
       return { action: "handled" as const };
     } else if (parsedInputIntent.ok && parsedInputIntent.intent) {
       const intentSummary = summarizeGuardrailsIntent(parsedInputIntent.intent);
-      const statusLine = intentRuntimeDecision.expectedTaskId && intentRuntimeDecision.expectedTaskId !== parsedInputIntent.intent.taskId
-        ? `[intent] ${parsedInputIntent.intent.type} task=${parsedInputIntent.intent.taskId} expected=${intentRuntimeDecision.expectedTaskId}`
-        : `[intent] ${parsedInputIntent.intent.type} task=${parsedInputIntent.intent.taskId}`;
+      const runtimeTaskId = intentRuntimeDecision.taskId;
+      const expectedTaskId = intentRuntimeDecision.expectedTaskId;
+      const statusLine = expectedTaskId && runtimeTaskId && expectedTaskId !== runtimeTaskId
+        ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId} expected=${expectedTaskId}`
+        : runtimeTaskId
+          ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId}`
+          : expectedTaskId
+            ? `[intent] ${parsedInputIntent.intent.type} expected=${expectedTaskId}`
+            : `[intent] ${parsedInputIntent.intent.type}`;
       ctx.ui?.setStatus?.("guardrails-core-intent", statusLine);
       appendAuditEntry(ctx, "guardrails-core.intent-envelope-runtime-consumed", {
         atIso: new Date().toISOString(),
@@ -1593,7 +1601,20 @@ export default function (pi: ExtensionAPI) {
         );
       } else if (intentRuntimeDecision.kind === "board-execute-next-mismatch") {
         ctx.ui.notify(
-          `guardrails-core: board.execute-task task=${parsedInputIntent.intent.taskId} difere do next=${intentRuntimeDecision.expectedTaskId}; seguindo por override explícito.`,
+          `guardrails-core: board.execute-task task=${runtimeTaskId ?? "n/a"} difere do next=${expectedTaskId ?? "n/a"}; seguindo por override explícito.`,
+          "info",
+        );
+      } else if (intentRuntimeDecision.kind === "board-execute-next-board-not-ready") {
+        ctx.ui.notify(
+          [
+            "guardrails-core: board.execute-next recebido com board não pronto.",
+            `boardHint: ${boardReadinessForIntent?.recommendation ?? "decompose planned work into executable slices."}`,
+          ].join("\n"),
+          "warning",
+        );
+      } else if (intentRuntimeDecision.kind === "board-execute-next-ready") {
+        ctx.ui.notify(
+          `guardrails-core: board.execute-next resolvido para next=${expectedTaskId ?? runtimeTaskId ?? "n/a"}.`,
           "info",
         );
       }
