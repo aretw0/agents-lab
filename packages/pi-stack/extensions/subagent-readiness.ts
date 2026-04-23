@@ -107,6 +107,9 @@ function normalizeOptions(input: SubagentReadinessOptions | undefined): Required
 
 	if (out.strict) {
 		out.minCompleteSignals = Math.max(out.minCompleteSignals, 1);
+		if (!Number.isFinite(input?.limit)) {
+			out.limit = Math.max(out.limit, 3);
+		}
 		out.requirePilotPackages = [
 			...new Set([...out.requirePilotPackages, ...STRICT_REQUIRED_PILOT_PACKAGES]),
 		];
@@ -365,20 +368,23 @@ export function runSubagentReadiness(
 	const sessionFiles = listRecentSessionFiles(agentDir, opts.days, opts.limit);
 	const latest = sessionFiles[0];
 
-	let userTurns = 0;
+	let latestUserTurns = 0;
 	let classifyFailures = 0;
+	let maxUserTurnsAcrossWindow = 0;
 	const colonySignals = new Map<string, number>();
 
 	for (const file of sessionFiles) {
 		const scan = scanSessionTail(file, opts.tailBytes);
+		maxUserTurnsAcrossWindow = Math.max(maxUserTurnsAcrossWindow, scan.userTurns);
 		if (file === latest) {
-			userTurns = scan.userTurns;
+			latestUserTurns = scan.userTurns;
 			classifyFailures = scan.classifyFailures;
 		}
 		for (const [k, v] of Object.entries(scan.signals)) {
 			colonySignals.set(k, (colonySignals.get(k) ?? 0) + v);
 		}
 	}
+	const userTurns = Math.max(latestUserTurns, maxUserTurnsAcrossWindow);
 
 	const projectSettingsPath = path.join(cwd, ".pi", "settings.json");
 	const agentSettingsPath = path.join(agentDir, "settings.json");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -139,6 +139,70 @@ describe("subagent-readiness extension", () => {
 
 			expect(result.ready).toBe(true);
 			expect(result.summary.colonySignals.COMPLETE).toBe(1);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	it("strict readiness defaults to multi-session window and avoids user-turn false negatives", () => {
+		const dir = makeWorkspace();
+		try {
+			writeFileSync(
+				join(dir, ".sandbox", "pi-agent", "settings.json"),
+				JSON.stringify(
+					{
+						packages: [
+							{ source: "npm:@ifi/oh-pi-ant-colony" },
+							{ source: "npm:@ifi/pi-web-remote" },
+						],
+					},
+					null,
+					2,
+				) + "\n",
+			);
+
+			const oldFile = join(
+				dir,
+				".sandbox",
+				"pi-agent",
+				"sessions",
+				"--fixture--",
+				"session-old.jsonl",
+			);
+			writeFileSync(
+				oldFile,
+				[
+					msg("user", "turn1"),
+					msg("user", "turn2"),
+					msg("user", "turn3"),
+					msg("assistant", "[COLONY_SIGNAL:COMPLETE] done"),
+				].join("\n") + "\n",
+			);
+
+			const newestFile = join(
+				dir,
+				".sandbox",
+				"pi-agent",
+				"sessions",
+				"--fixture--",
+				"session-new.jsonl",
+			);
+			writeFileSync(newestFile, [msg("assistant", "heartbeat")].join("\n") + "\n");
+
+			const now = Date.now() / 1000;
+			utimesSync(oldFile, now - 10, now - 10);
+			utimesSync(newestFile, now, now);
+
+			const result = runSubagentReadiness(dir, {
+				source: "isolated",
+				strict: true,
+				tailBytes: 200_000,
+				days: 1,
+			});
+
+			expect(result.ready).toBe(true);
+			expect(result.thresholds.sessionLimit).toBe(3);
+			expect(result.summary.monitor.userTurns).toBe(3);
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
