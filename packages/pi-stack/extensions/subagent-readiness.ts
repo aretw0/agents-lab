@@ -384,6 +384,23 @@ export function runSubagentReadiness(
 			colonySignals.set(k, (colonySignals.get(k) ?? 0) + v);
 		}
 	}
+
+	if (Math.max(latestUserTurns, maxUserTurnsAcrossWindow) < opts.minUserTurns) {
+		const expandedTailBytes = Math.max(opts.tailBytes * 4, 10_000_000);
+		if (expandedTailBytes > opts.tailBytes) {
+			for (const file of sessionFiles) {
+				const expanded = scanSessionTail(file, expandedTailBytes);
+				maxUserTurnsAcrossWindow = Math.max(maxUserTurnsAcrossWindow, expanded.userTurns);
+				if (file === latest) {
+					latestUserTurns = Math.max(latestUserTurns, expanded.userTurns);
+				}
+				if (Math.max(latestUserTurns, maxUserTurnsAcrossWindow) >= opts.minUserTurns) {
+					break;
+				}
+			}
+		}
+	}
+
 	const userTurns = Math.max(latestUserTurns, maxUserTurnsAcrossWindow);
 
 	const projectSettingsPath = path.join(cwd, ".pi", "settings.json");

@@ -208,6 +208,59 @@ describe("subagent-readiness extension", () => {
 		}
 	});
 
+	it("strict readiness rescans larger tail before blocking on user turns", () => {
+		const dir = makeWorkspace();
+		try {
+			writeFileSync(
+				join(dir, ".sandbox", "pi-agent", "settings.json"),
+				JSON.stringify(
+					{
+						packages: [
+							{ source: "npm:@ifi/oh-pi-ant-colony" },
+							{ source: "npm:@ifi/pi-web-remote" },
+						],
+					},
+					null,
+					2,
+				) + "\n",
+			);
+			const sessionFile = join(
+				dir,
+				".sandbox",
+				"pi-agent",
+				"sessions",
+				"--fixture--",
+				"session-tail-fallback.jsonl",
+			);
+			const lines = [
+				msg("user", "turn-early-1"),
+				msg("user", "turn-early-2"),
+				msg("user", "turn-early-3"),
+				msg("assistant", "[COLONY_SIGNAL:COMPLETE] done"),
+			];
+			for (let i = 0; i < 7_000; i += 1) {
+				lines.push(msg("assistant", `filler-${i} ${"x".repeat(40)}`));
+			}
+			lines.push(msg("assistant", "[COLONY_SIGNAL:COMPLETE] done-late"));
+			lines.push(msg("user", "turn-late-1"));
+			lines.push(msg("user", "turn-late-2"));
+			writeFileSync(sessionFile, lines.join("\n") + "\n");
+
+			const result = runSubagentReadiness(dir, {
+				source: "isolated",
+				strict: true,
+				tailBytes: 600_000,
+				days: 1,
+				limit: 1,
+			});
+
+			expect(result.ready).toBe(true);
+			expect(result.summary.monitor.userTurns).toBeGreaterThanOrEqual(3);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
 	it("strict readiness blocks when pilot packages are missing", () => {
 		const dir = makeWorkspace();
 		try {
