@@ -2002,11 +2002,11 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume|evidence]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
-      const knownSubcommands = new Set(["status", "help", "list", "add", "board-next", "pop", "clear", "pause", "resume"]);
+      const knownSubcommands = new Set(["status", "help", "list", "add", "board-next", "pop", "clear", "pause", "resume", "evidence"]);
 
       if (sub === "help") {
         ctx.ui.notify(buildLaneQueueHelpLines().join("\n"), "info");
@@ -2201,6 +2201,24 @@ export default function (pi: ExtensionAPI) {
         const lines = [
           `lane-queue: ${items.length} pending`,
           ...items.slice(-10).map((item) => `- ${item.id} ${item.atIso} :: ${item.text.slice(0, 120)}`),
+        ];
+        ctx.ui.notify(lines.join("\n"), "info");
+        return;
+      }
+
+      if (sub === "evidence") {
+        const evidence = readLoopActivationEvidence(ctx.cwd);
+        const loopReady = evidence.lastLoopReady;
+        const boardAuto = evidence.lastBoardAutoAdvance;
+        const lines = [
+          "lane-queue: loop evidence",
+          `updatedAt: ${evidence.updatedAtIso}`,
+          boardAuto
+            ? `boardAuto: task=${boardAuto.taskId} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
+            : "boardAuto: n/a",
+          loopReady
+            ? `loopReady: at=${loopReady.atIso} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
+            : "loopReady: n/a",
         ];
         ctx.ui.notify(lines.join("\n"), "info");
         return;

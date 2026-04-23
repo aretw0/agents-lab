@@ -165,8 +165,8 @@ export function parseLaneQueueAddText(args: string): string | undefined {
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume]",
-    "examples: /lane-queue list · /lane-queue board-next · /lane-queue clear · /lane-queue add revisar isso depois",
+    "usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume|evidence]",
+    "examples: /lane-queue list · /lane-queue board-next · /lane-queue evidence · /lane-queue add revisar isso depois",
   ];
 }
 
