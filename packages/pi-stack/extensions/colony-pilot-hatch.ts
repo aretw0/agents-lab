@@ -95,6 +95,30 @@ export function formatHatchReadiness(readiness: HatchReadiness): string[] {
 	];
 }
 
+export type HatchExperienceMode = "simple" | "advanced";
+
+export function formatHatchRunbook(mode: HatchExperienceMode): string[] {
+	if (mode === "advanced") {
+		return [
+			"advanced lane (explicit scale):",
+			"  - /monitors off",
+			"  - /colony <goal>  (ou ant_colony com maxCost)",
+			"  - /colony-pilot status",
+			"  - /quota-visibility budget 30",
+			"  - /colony-pilot stop --restore-monitors",
+		];
+	}
+
+	return [
+		"simple lane (default):",
+		"  - /status",
+		"  - /doctor",
+		"  - /colony-pilot check",
+		"  - /quota-visibility budget 30",
+		"  - when ready to scale: /colony-pilot hatch check --advanced",
+	];
+}
+
 export interface HatchDoctorIssue {
 	severity: "info" | "warn" | "blocker";
 	source: "runtime" | "environment" | "sovereignty";

@@ -34,6 +34,13 @@ Invariantes em ambos os modos:
 - verificação auditável (`verification`) antes de `completed`;
 - decisões/handoff curtos para retomada determinística.
 
+### Hatch progressivo (simple-first)
+
+Para primeiro contato de sessão/projeto, o hatch deve começar em trilha simples:
+- `/colony-pilot hatch check` => modo `simple` por padrão (sem CTA direta de swarm/delegação);
+- trilha inicial focada em diagnóstico/recuperação (`/status`, `/doctor`, `/colony-pilot check`, `/quota-visibility budget 30`);
+- escala avançada só por opt-in explícito (`/colony-pilot hatch check --advanced`).
+
 ### Checklist de release/dogfooding (portabilidade da fábrica)
 
 Antes de promover hardening interno como capability da pi-stack:

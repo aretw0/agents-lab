@@ -30,6 +30,7 @@ import type {
 	HatchCheckStatus,
 	HatchDoctorIssue,
 	HatchDoctorSnapshot,
+	HatchExperienceMode,
 	HatchReadiness,
 } from "./colony-pilot-hatch";
 import {
@@ -38,6 +39,7 @@ import {
 	evaluateHatchReadiness,
 	formatHatchDoctorSnapshot,
 	formatHatchReadiness,
+	formatHatchRunbook,
 } from "./colony-pilot-hatch";
 import type {
 	ColonyPhase,
@@ -187,6 +189,7 @@ export type {
 	HatchCheckStatus,
 	HatchDoctorIssue,
 	HatchDoctorSnapshot,
+	HatchExperienceMode,
 	HatchReadiness,
 	ModelAuthStatus,
 	MonitorMode,
@@ -208,6 +211,7 @@ export {
 	evaluateHatchReadiness,
 	formatHatchDoctorSnapshot,
 	formatHatchReadiness,
+	formatHatchRunbook,
 	missingCapabilities,
 	normalizeColonySignalId,
 	normalizeQuotedText,
@@ -1320,7 +1324,7 @@ export default function (pi: ExtensionAPI) {
 						"  tui                           Mostra como entrar/retomar sessão no TUI",
 						"  status                        Snapshot consolidado",
 						"  check                         Diagnóstico de capacidades + readiness de provider/model/budget para ant_colony",
-						"  hatch [check|doctor|apply] [default|phase2]  Onboarding guiado para deixar runtime pronto para swarm",
+						"  hatch [check|doctor|apply] [default|phase2] [--advanced]  Onboarding progressivo (simple-first; escala avançada opt-in)",
 						"  models <status|template|apply> [copilot|codex|hybrid|factory-strict|factory-strict-copilot|factory-strict-hybrid]  Política granular de modelos por classe",
 						"  preflight                     Executa gates duros (capabilities + executáveis) antes da colony",
 						"  baseline [show|apply] [default|phase2]  Baseline de .pi/settings.json (phase2 = mais estrito)",
@@ -1470,6 +1474,12 @@ export default function (pi: ExtensionAPI) {
 					.filter(Boolean);
 				const action = (tokens[0] ?? "check").toLowerCase();
 				const profile = resolveBaselineProfile(tokens[1] ?? "default");
+				const hatchMode: HatchExperienceMode = tokens.some((token) => {
+					const normalized = token.toLowerCase();
+					return normalized === "--advanced" || normalized === "advanced";
+				})
+					? "advanced"
+					: "simple";
 
 				if (action === "doctor") {
 					ctx.ui.notify(
@@ -1526,7 +1536,7 @@ export default function (pi: ExtensionAPI) {
 
 				if (action !== "check") {
 					ctx.ui.notify(
-						"Usage: /colony-pilot hatch [check|doctor|apply] [default|phase2]",
+						"Usage: /colony-pilot hatch [check|doctor|apply] [default|phase2] [--advanced]",
 						"warning",
 					);
 					return;
@@ -1571,20 +1581,27 @@ export default function (pi: ExtensionAPI) {
 
 				const lines = [
 					"colony-pilot hatch",
+					`mode: ${hatchMode} ${hatchMode === "simple" ? "(default simple-first, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
 					...formatHatchReadiness(readiness),
 					"",
-					"rotina mínima de uso:",
-					"  - /monitors off",
-					"  - /colony <goal>  (ou ant_colony com maxCost)",
-					"  - /colony-pilot status",
-					"  - /quota-visibility budget 30",
-					"  - /colony-pilot stop --restore-monitors",
+					...formatHatchRunbook(hatchMode),
 				];
+
+				if (hatchMode === "simple") {
+					lines.push(
+						"",
+						"scale opt-in: /colony-pilot hatch check --advanced",
+					);
+				}
 
 				if (!readiness.ready) {
 					lines.push("", "ação sugerida: /colony-pilot hatch apply default");
 				}
 
+				ctx.ui.setStatus?.(
+					"colony-pilot-hatch",
+					`[hatch] mode=${hatchMode}${readiness.ready ? "" : " !ready"}`,
+				);
 				ctx.ui.notify(lines.join("\n"), readiness.ready ? "info" : "warning");
 				return;
 			}

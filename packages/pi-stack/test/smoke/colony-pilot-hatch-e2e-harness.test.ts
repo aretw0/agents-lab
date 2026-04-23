@@ -134,7 +134,7 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
     expect(String(editorCalls[editorCalls.length - 1]?.args?.[0] ?? "")).toBe("/doctor hatch");
   });
 
-  it("hatch check reporta ready=yes para first-run mínimo", async () => {
+  it("hatch check default usa modo simples sem CTA direta de swarm", async () => {
     const cwd = tempCwdWithHatchSettings();
 
     t = await createTestSession({
@@ -147,9 +147,30 @@ describe("colony-pilot hatch e2e (pi-test-harness)", () => {
 
     const msg = lastNotifyMessage(t);
     expect(msg).toContain("colony-pilot hatch");
+    expect(msg).toContain("mode: simple");
     expect(msg).toContain("[PASS] runtime capabilities");
     expect(msg).toContain("[PASS] preflight executáveis");
     expect(msg).toContain("ready: yes");
-    expect(msg).toContain("rotina mínima de uso:");
+    expect(msg).toContain("simple lane (default):");
+    expect(msg).toContain("/colony-pilot hatch check --advanced");
+    expect(msg).not.toContain("/colony <goal>");
+  });
+
+  it("hatch check --advanced libera trilha avançada explicitamente", async () => {
+    const cwd = tempCwdWithHatchSettings();
+
+    t = await createTestSession({
+      cwd,
+      extensionFactories: [colonyPilot, fakePilotDepsExtension()],
+    });
+    patchHarnessAgentCompat(t);
+
+    await t.session.prompt("/colony-pilot hatch check --advanced");
+
+    const msg = lastNotifyMessage(t);
+    expect(msg).toContain("colony-pilot hatch");
+    expect(msg).toContain("mode: advanced");
+    expect(msg).toContain("advanced lane (explicit scale):");
+    expect(msg).toContain("/colony <goal>");
   });
 });

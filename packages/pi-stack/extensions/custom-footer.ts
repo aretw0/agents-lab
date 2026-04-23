@@ -179,6 +179,17 @@ function compactMonitorStatus(status: string | undefined, density: FooterDensity
   return bits.length > 0 ? `[mon] ${bits.join(" ")}` : "[mon]";
 }
 
+function compactHatchStatus(status: string | undefined, density: FooterDensity): string | undefined {
+  if (!status) return undefined;
+  if (density === "wide") return status;
+  const mode = status.match(/mode=([^\s]+)/i)?.[1];
+  const ready = /!ready/i.test(status) ? "!ready" : "ready";
+  if (density === "medium") {
+    return mode ? `[hatch] mode=${mode} ${ready}` : `[hatch] ${ready}`;
+  }
+  return mode ? `[hatch] ${mode}` : "[hatch]";
+}
+
 function compactBoardClockStatus(status: string | undefined, density: FooterDensity): string | undefined {
   if (!status) return undefined;
   if (density === "wide") return status;
@@ -253,6 +264,7 @@ export type FooterRenderInput = {
   branch: string | null;
   budgetStatus: string | undefined;
   pilotStatus: string | undefined;
+  hatchStatus?: string;
   monitorSummaryStatus: string | undefined;
   boardClockStatus?: string;
   cwd: string;
@@ -265,7 +277,7 @@ export function buildFooterLines(
   width: number,
 ): string[] {
   const { usageTotals, sessionStart, cachedPr, thinkingLevel, modelId, modelProvider,
-          contextPct, branch, budgetStatus, pilotStatus, monitorSummaryStatus, boardClockStatus, cwd,
+          contextPct, branch, budgetStatus, pilotStatus, hatchStatus, monitorSummaryStatus, boardClockStatus, cwd,
           contextThresholdOverrides } = input;
 
   const density = resolveFooterDensity(width);
@@ -317,6 +329,7 @@ export function buildFooterLines(
     compactBudgetStatus(budgetStatus, density),
     compactBoardClockStatus(boardClockStatus, density),
     compactPilotStatus(pilotStatus, density),
+    compactHatchStatus(hatchStatus, density),
     compactMonitorStatus(monitorSummaryStatus, density),
   ].filter((x): x is string => Boolean(x));
 
@@ -411,6 +424,7 @@ export default function customFooterExtension(pi: ExtensionAPI) {
               branch: footerData.getGitBranch(),
               budgetStatus: statuses?.get("quota-budgets"),
               pilotStatus: statuses?.get("colony-pilot"),
+              hatchStatus: statuses?.get("colony-pilot-hatch"),
               monitorSummaryStatus: statuses?.get("monitor-summary"),
               boardClockStatus: statuses?.get("board-clock"),
               cwd: process.cwd(),

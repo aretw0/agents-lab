@@ -27,6 +27,7 @@ import {
 	executableProbe,
 	formatHatchDoctorSnapshot,
 	formatHatchReadiness,
+	formatHatchRunbook,
 	formatToolJsonOutput,
 	missingCapabilities,
 	normalizeColonySignalId,
@@ -873,6 +874,17 @@ describe("colony-pilot parsers", () => {
 			"  - [WARN] provider budgets: desativado",
 			"ready: yes",
 		]);
+	});
+
+	it("formatHatchRunbook aplica simple-first por padrão e advanced por opt-in", () => {
+		const simple = formatHatchRunbook("simple").join("\n");
+		expect(simple).toContain("simple lane (default):");
+		expect(simple).toContain("/colony-pilot hatch check --advanced");
+		expect(simple).not.toContain("/colony <goal>");
+
+		const advanced = formatHatchRunbook("advanced").join("\n");
+		expect(advanced).toContain("advanced lane (explicit scale):");
+		expect(advanced).toContain("/colony <goal>");
 	});
 
 	it("buildHatchDoctorSnapshot agrega blockers e fixes determinísticos", () => {
