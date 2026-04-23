@@ -1,42 +1,16 @@
 {
-  "timestamp": "2026-04-23T19:29:00.000Z",
-  "context": "Micro-slice em modo warn concluída com foco em TASK-BUD-125. Runtime ganhou trilha persistente de evidência (`.pi/guardrails-loop-evidence.json`) para reduzir dependência de parse de sessão e permitir comprovação direta de `loop-ready` e `board-auto-advance` com `runtimeCodeState/emLoop`. `/lane-queue status` agora expõe `evidenceBoardAuto` e `evidenceLoopReady` além dos marcadores PREPARADO/ATIVO_AQUI/EM_LOOP.",
+  "timestamp": "2026-04-23T19:47:00.000Z",
+  "context": "Resposta ao sinal de incerteza do usuário: estamos avançando, com gargalo específico na coleta de evidência operacional real de TASK-BUD-125. Nesta fatia foi adicionado `/lane-queue evidence` para leitura objetiva do snapshot persistido (`.pi/guardrails-loop-evidence.json`), reduzindo ambiguidade sobre estado de loop sem varredura de sessão.",
   "next_actions": [
-    "Capturar evidência operacional real de TASK-BUD-125 executando lane em condição ready e confirmar em status: `evidenceBoardAuto=* runtime=active emLoop=yes` + `evidenceLoopReady=* runtime=active`.",
-    "Quando evidência aparecer, registrar VER passed de TASK-BUD-125 e fechar task.",
-    "Continuar TASK-BUD-119 apenas após fechar evidência operacional de loop (evitar dispersão sob warn)."
+    "Executar ciclo operacional curto para gerar evento real de auto-advance (`boardAutoGate=ready`) e confirmar via `/lane-queue evidence` que `runtimeCodeState=active` e `emLoop=yes`.",
+    "Com evidência persistida em mãos, registrar VER passed de TASK-BUD-125 e concluir task.",
+    "Em seguida retomar expansão de TASK-BUD-119 para intent de board update/query."
   ],
   "blockers": [
     "context-watch-warn-active",
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
-    {
-      "atIso": "2026-04-23T19:12:53.415Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 58,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
-    },
-    {
-      "atIso": "2026-04-23T19:15:00.000Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 60,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
-    },
     {
       "atIso": "2026-04-23T19:29:00.000Z",
       "reason": "message_end",
@@ -49,6 +23,19 @@
       },
       "action": "write-checkpoint",
       "recommendation": "Stay micro-slice-only and checkpoint frequently while warn remains active."
+    },
+    {
+      "atIso": "2026-04-23T19:47:00.000Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Keep micro-slices and checkpoint after each evidence-oriented slice."
     }
   ]
 }
