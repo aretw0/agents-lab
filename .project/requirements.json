@@ -841,6 +841,23 @@
         "Quando o estado ficar apto e a sessão estiver idle, o compact pode ser disparado automaticamente sem depender de insistência manual.",
         "Sinalização distingue cautela saudável de paralisia (ex.: excesso de adiamentos) e mantém comportamento default advisory/non-blocking."
       ]
+    },
+    {
+      "id": "REQ-BUD-059",
+      "description": "Após auto-resume de compactação, o control-plane deve recalibrar a cadência operacional com base no contexto atual (não no estado pré-compact), evitando viés de cautela excessiva que mantém micro-slice-only quando há orçamento de contexto saudável.",
+      "type": "functional",
+      "status": "accepted",
+      "priority": "should",
+      "source": "human",
+      "references": [
+        "REQ-BUD-041",
+        "REQ-BUD-058"
+      ],
+      "acceptance_criteria": [
+        "Quando `context_watch_status` retornar `level=ok` pós-resume, a recomendação padrão pode elevar throughput de forma explícita (ex.: permitir multi-slice controlado) sem perder checkpoints auditáveis.",
+        "O estado de cautela pré-compact não persiste de forma indevida após compact/resume; existe reset/rebase determinístico de modo operacional.",
+        "A sinalização distingue corretamente `cautela necessária` vs `timidez residual pós-compact`, mantendo comportamento default advisory/non-blocking."
+      ]
     }
   ]
 }

@@ -1,35 +1,36 @@
 {
-  "timestamp": "2026-04-23T00:38:00.000Z",
-  "context": "Micro-slice 12 concluído em modo 1-file+1-test: cleanup de wrapper residual em colony-pilot.ts com smoke verde e continuidade da deflação incremental.",
+  "timestamp": "2026-04-23T00:46:00.000Z",
+  "context": "Feedback operacional assimilado no board: pós-compact/auto-resume ainda mantém cadência tímida (micro-slice-only) mesmo com contexto saudável. Requisito e task dedicados criados para recalibração pós-resume sem perder governança advisory.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
-    "TASK-BUD-116"
+    "TASK-BUD-116",
+    "TASK-BUD-117"
   ],
   "blockers": [],
   "next_actions": [
-    "Seguir TASK-BUD-116 em micro-slice-only (1 file + 1 test), removendo wrappers internos residuais de baixo risco.",
-    "Após mais 1-2 cortes pequenos, retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
-    "Manter atualização canônica de verificação/handoff por slice."
+    "Seguir TASK-BUD-116 em cortes pequenos de deflação no entrypoint colony-pilot.",
+    "Retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
+    "Planejar implementação da TASK-BUD-117 (recalibração pós-compact/resume no context-watchdog)."
   ],
   "open_questions": [
-    "No próximo micro-corte, priorizar cleanup de wrappers internos de command-surface ou iniciar wiring mínimo da TASK-BUD-114?"
+    "Qual sinal mínimo de recalibração pós-resume será exposto em `context_watch_status` (ex.: operatingCadence/postResumeRecalibrated)?"
   ],
   "key_decisions_pending": [
-    "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado)."
+    "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
+    "Política de aceleração controlada pós-compact quando `level=ok` sem reintroduzir risco de overflow de contexto."
   ],
   "files_in_flux": [
-    "packages/pi-stack/extensions/colony-pilot.ts",
+    ".project/requirements.json",
     ".project/tasks.json",
-    ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T00:38:00.000Z",
+      "atIso": "2026-04-23T00:46:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 26,
+      "percent": 30,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
