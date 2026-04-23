@@ -3457,6 +3457,32 @@
           "evidence": "72/72 aprovado após deduplicação de tipos."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-183",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 19 (micro) em `packages/pi-stack/extensions/colony-pilot.ts`: removidos wrappers finais de delegação (`evaluateProviderBudgetGate`, `evaluateAntColonyBudgetPolicy`, `evaluateAntColonyModelPolicy`, `deepMergeObjects`) convertendo para aliases tipados diretos dos módulos `*Impl`, eliminando `return *Impl(...)` remanescente no entrypoint. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Entrypoint mantém contrato público com nomes/exportações estáveis.",
+          "status": "passed",
+          "evidence": "Aliases tipados preservam nomes exportados e assinaturas do entrypoint."
+        },
+        {
+          "criterion": "Deflação incremental reduz boilerplate estrutural no `colony-pilot.ts`.",
+          "status": "passed",
+          "evidence": "Arquivo reduziu de 2001 para 1978 linhas e zerou wrappers `return *Impl(...)`."
+        },
+        {
+          "criterion": "Sem regressão funcional nos parsers/policies cobertos.",
+          "status": "passed",
+          "evidence": "Smoke 72/72 após mudança."
+        }
+      ]
     }
   ]
 }

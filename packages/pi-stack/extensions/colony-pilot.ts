@@ -396,51 +396,30 @@ export const collectAntColonyProviders = collectAntColonyProvidersImpl;
 export type ColonyPilotProviderBudgetGateEvaluation =
 	ColonyPilotProviderBudgetGateEvaluationImpl;
 
-export function evaluateProviderBudgetGate(
+export const evaluateProviderBudgetGate: (
 	input: AntColonyToolInput,
 	currentModelRef: string | undefined,
 	goal: string,
 	statuses: ProviderBudgetStatus[],
 	allocationWarnings: string[],
 	policy: ColonyPilotBudgetPolicyConfig,
-): ColonyPilotProviderBudgetGateEvaluation {
-	return evaluateProviderBudgetGateImpl(
-		input,
-		currentModelRef,
-		goal,
-		statuses,
-		allocationWarnings,
-		policy,
-	);
-}
+) => ColonyPilotProviderBudgetGateEvaluation = evaluateProviderBudgetGateImpl;
 
-export function evaluateAntColonyBudgetPolicy(
+export const evaluateAntColonyBudgetPolicy: (
 	input: AntColonyToolInput,
 	policy: ColonyPilotBudgetPolicyConfig,
-): ColonyPilotBudgetPolicyEvaluation {
-	return evaluateAntColonyBudgetPolicyImpl(input, policy);
-}
-
+) => ColonyPilotBudgetPolicyEvaluation = evaluateAntColonyBudgetPolicyImpl;
 
 export type ColonyModelPolicyEvaluation = ColonyModelPolicyEvaluationImpl;
 
-export function evaluateAntColonyModelPolicy(
+export const evaluateAntColonyModelPolicy: (
 	input: AntColonyToolInput,
 	currentModelRef: string | undefined,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	modelRegistry: any,
 	policy: ColonyPilotModelPolicyConfig,
 	goal?: string,
-): ColonyModelPolicyEvaluation {
-	return evaluateAntColonyModelPolicyImpl(
-		input,
-		currentModelRef,
-		modelRegistry,
-		policy,
-		goal,
-	);
-}
-
+) => ColonyModelPolicyEvaluation = evaluateAntColonyModelPolicyImpl;
 
 export type ColonyAgentRole = ColonyAgentRoleImpl;
 
@@ -513,12 +492,10 @@ export const buildModelPolicyProfile = buildModelPolicyProfileImpl;
 
 export const buildProjectBaselineSettings = buildProjectBaselineSettingsImpl;
 
-export function deepMergeObjects<T extends Record<string, unknown>>(
+export const deepMergeObjects: <T extends Record<string, unknown>>(
 	base: T,
 	patch: Record<string, unknown>,
-): T {
-	return deepMergeObjectsImpl(base, patch);
-}
+) => T = deepMergeObjectsImpl;
 
 export const applyProjectBaselineSettings = applyProjectBaselineSettingsImpl;
 
