@@ -4443,6 +4443,15 @@
       "method": "inspect",
       "timestamp": "2026-04-23T23:13:00Z",
       "evidence": "Micro-slice de higiene executada: `.sandbox/tmp` foi classificado e consolidado (keep: `extract-task.js`, `search-tasks-keyword.js`, `cleanup-ad-hoc.js`; archive: 26 scripts ad-hoc + 2 dumps) em `.sandbox/tmp/archive/2026-04-23/README.md`. Política operacional formalizada em `docs/guides/project-canonical-pipeline.md` (seção 'Higiene de scripts ad-hoc (.sandbox/tmp)')."
+    },
+    {
+      "id": "VER-BUD-246",
+      "target": "TASK-BUD-128",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:28:00Z",
+      "evidence": "Draft inicial do playbook publicado em `docs/guides/control-plane-evolution-playbook.md` com 3 modos (single CP, delegação descartável, federação), gates de transição e anti-patterns. Inclui seção 'Inspirado por' mapeando padrões de `agents/` e trilha `a2a/` do repositório de referência `nilayparikh/tuts-agentic-ai-examples`. Índice atualizado em `docs/guides/README.md`."
     }
   ]
 }

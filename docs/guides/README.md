@@ -30,6 +30,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [quota-visibility.md](./quota-visibility.md) | Como auditar consumo/cota local, projetar burn semanal e exportar evidência para contestação |
 | [web-session-gateway.md](./web-session-gateway.md) | Gateway web first-party para observabilidade local da sessão (health/state/prompt) |
 | [control-plane-ux-curation.md](./control-plane-ux-curation.md) | Padrão de UX do control-plane (TUI+WEB): densidade adaptativa, anti-clutter e checklist de resize |
+| [control-plane-evolution-playbook.md](./control-plane-evolution-playbook.md) | Playbook de evolução em fases: single control-plane -> delegação descartável -> federação multi-control-plane |
 | [unified-dogfood-isolation.md](./unified-dogfood-isolation.md) | Runbook para dogfood em ambiente isolado com TUI + WEB unificados |
 | [colony-runtime-recovery.md](./colony-runtime-recovery.md) | Como localizar artefatos de colony (state/worktree/branch) e recuperar contexto após parada |
 | [host-disk-recovery.md](./host-disk-recovery.md) | Runbook de recuperação de espaço em disco (dry-run, limpeza segura, modo agressivo com proteção de sessões) |

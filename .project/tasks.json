@@ -3087,12 +3087,12 @@
     {
       "id": "TASK-BUD-128",
       "description": "[P1] Escrever playbook canônico de evolução agentic (single control-plane -> delegação -> A2A/federação) sem misturar conceitos, usando `tuts-agentic-ai-examples` como referência arquitetural.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-127"
       ],
       "files": [
-        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/control-plane-evolution-playbook.md",
         "docs/guides/README.md",
         ".project/handoff.json"
       ],
@@ -3101,7 +3101,7 @@
         "Cada modo define objetivos, limites, gate de entrada/saída e política de ciclo de vida (spawn/compact/kill/recreate) para evitar acoplamento indevido de contexto.",
         "Documento inclui seção 'inspirado por' com mapeamento explícito de conceitos para `https://github.com/nilayparikh/tuts-agentic-ai-examples`, adaptado ao ecossistema pi/refarm sem cópia literal."
       ],
-      "notes": "Solicitado pelo usuário (2026-04-23): priorizar fundamentos e clareza conceitual antes de escalar; agents-lab como laboratório para pi+refarm com baixa fricção."
+      "notes": "Solicitado pelo usuário (2026-04-23): priorizar fundamentos e clareza conceitual antes de escalar; agents-lab como laboratório para pi+refarm com baixa fricção.\n[2026-04-23T23:28:00Z] Slice inicial concluída: repositório de referência foi revisado (`agents` patterns + trilha `a2a`) e primeiro draft do playbook criado em `docs/guides/control-plane-evolution-playbook.md`, com separação em 3 modos e anti-patterns explícitos."
     }
   ]
 }
