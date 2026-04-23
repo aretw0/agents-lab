@@ -88,6 +88,7 @@ import {
 	resolveModelAuthStatus,
 } from "./colony-pilot-model-readiness";
 import {
+	type ColonyTaskSyncConfigShape as ColonyTaskSyncConfigShapeImpl,
 	appendNote,
 	ensureRecoveryTaskForCandidate as ensureRecoveryTaskForCandidateInternal,
 	extractColonyGoalFromMessageText,
@@ -128,6 +129,7 @@ import {
 } from "./colony-pilot-baseline";
 import {
 	type ColonyPilotBudgetPolicyEvaluation as ColonyPilotBudgetPolicyEvaluationImpl,
+	type ColonyPilotBudgetPolicyLike as ColonyPilotBudgetPolicyLikeImpl,
 	type ColonyPilotProviderBudgetGateEvaluation as ColonyPilotProviderBudgetGateEvaluationImpl,
 	collectAntColonyProviders as collectAntColonyProvidersImpl,
 	evaluateAntColonyBudgetPolicy as evaluateAntColonyBudgetPolicyImpl,
@@ -155,7 +157,6 @@ import {
 	resolveColonyPilotOutputPolicy as resolveColonyPilotOutputPolicyImpl,
 } from "./colony-pilot-output-policy";
 import {
-	type QuotaVisibilityBudgetSettings,
 	parseColonyPilotSettings as parseColonyPilotSettingsImpl,
 	parseQuotaVisibilityBudgetSettings as parseQuotaVisibilityBudgetSettingsImpl,
 	readProjectSettings as readProjectSettingsImpl,
@@ -427,34 +428,19 @@ export type ColonyRoleModelMap = ColonyRoleModelMapImpl;
 
 export type ColonyPilotModelPolicyConfig = ColonyPilotModelPolicyConfigImpl;
 
-export interface ColonyPilotBudgetPolicyConfig {
+export type ColonyPilotBudgetPolicyConfig = ColonyPilotBudgetPolicyLikeImpl & {
 	enabled: boolean;
 	enforceOnAntColonyTool: boolean;
-	requireMaxCost: boolean;
-	autoInjectMaxCost: boolean;
-	defaultMaxCostUsd?: number;
-	hardCapUsd?: number;
-	minMaxCostUsd?: number;
-	enforceProviderBudgetBlock: boolean;
-	providerBudgetLookbackDays: number;
-	allowProviderBudgetOverride: boolean;
-	providerBudgetOverrideToken: string;
-}
+};
 
 export type ColonyPilotBudgetPolicyEvaluation =
 	ColonyPilotBudgetPolicyEvaluationImpl;
 
-export interface ColonyPilotProjectTaskSyncConfig {
-	enabled: boolean;
-	createOnLaunch: boolean;
-	trackProgress: boolean;
-	markTerminalState: boolean;
-	taskIdPrefix: string;
-	requireHumanClose: boolean;
-	maxNoteLines: number;
-	autoQueueRecoveryOnCandidate: boolean;
-	recoveryTaskSuffix: string;
-}
+export type ColonyPilotProjectTaskSyncConfig =
+	ColonyTaskSyncConfigShapeImpl & {
+		enabled: boolean;
+		autoQueueRecoveryOnCandidate: boolean;
+	};
 
 export type ColonyDeliveryMode = ColonyDeliveryModeImpl;
 

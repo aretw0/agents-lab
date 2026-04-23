@@ -3483,6 +3483,32 @@
           "evidence": "Smoke 72/72 após mudança."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-184",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Slice 20 (micro) em `packages/pi-stack/extensions/colony-pilot.ts`: deduplicação adicional de tipos de configuração por aliases para shapes de módulos (`ColonyPilotBudgetPolicyConfig` -> `ColonyPilotBudgetPolicyLike` + campos obrigatórios; `ColonyPilotProjectTaskSyncConfig` -> `ColonyTaskSyncConfigShape` + campos locais) e limpeza de import type não usado. Smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "Contrato público preservado com mesmos nomes de tipos exportados no entrypoint.",
+          "status": "passed",
+          "evidence": "Mantidos `export type ColonyPilotBudgetPolicyConfig` e `export type ColonyPilotProjectTaskSyncConfig`."
+        },
+        {
+          "criterion": "Deflação incremental do entrypoint sem alteração comportamental.",
+          "status": "passed",
+          "evidence": "Mudança restrita a tipagem/imports; lógica runtime inalterada."
+        },
+        {
+          "criterion": "Regressão coberta por smoke focada.",
+          "status": "passed",
+          "evidence": "72/72 aprovado."
+        }
+      ]
     }
   ]
 }
