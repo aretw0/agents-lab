@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-23T00:46:00.000Z",
-  "context": "Feedback operacional assimilado no board: pós-compact/auto-resume ainda mantém cadência tímida (micro-slice-only) mesmo com contexto saudável. Requisito e task dedicados criados para recalibração pós-resume sem perder governança advisory.",
+  "timestamp": "2026-04-23T00:52:00.000Z",
+  "context": "Execução em modo throughput: batch slices 13-15 concluído na TASK-BUD-116 com limpeza de wrappers internos residuais no entrypoint colony-pilot e delegação direta para módulos extraídos (`*Impl`). Feedback de timidez pós-compact também foi canonicamente assimilado via REQ-BUD-059 + TASK-BUD-117.",
   "current_phase": "factory-colony-pilot-deflation",
   "current_tasks": [
     "TASK-BUD-114",
@@ -9,25 +9,27 @@
   ],
   "blockers": [],
   "next_actions": [
-    "Seguir TASK-BUD-116 em cortes pequenos de deflação no entrypoint colony-pilot.",
-    "Retomar TASK-BUD-114 para allowlist efetiva promoted/skipped por diff.",
+    "Continuar TASK-BUD-116 com mais cortes de deflação no entrypoint mantendo contrato público estável.",
+    "Retomar TASK-BUD-114 para wiring efetivo de allowlist promoted/skipped por diff.",
     "Planejar implementação da TASK-BUD-117 (recalibração pós-compact/resume no context-watchdog)."
   ],
   "open_questions": [
-    "Qual sinal mínimo de recalibração pós-resume será exposto em `context_watch_status` (ex.: operatingCadence/postResumeRecalibrated)?"
+    "Qual próximo domínio de menor risco para reduzir `colony-pilot.ts` sem afetar exports públicos?"
   ],
   "key_decisions_pending": [
     "Default de allowlist automática no promotion flow (opt-in inicial vs default-on auditado).",
     "Política de aceleração controlada pós-compact quando `level=ok` sem reintroduzir risco de overflow de contexto."
   ],
   "files_in_flux": [
+    "packages/pi-stack/extensions/colony-pilot.ts",
     ".project/requirements.json",
     ".project/tasks.json",
+    ".project/verification.json",
     ".project/handoff.json"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T00:46:00.000Z",
+      "atIso": "2026-04-23T00:52:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 30,

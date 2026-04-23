@@ -3353,6 +3353,32 @@
           "evidence": "72/72 aprovado."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-179",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Batch slices 13-15 executado em `packages/pi-stack/extensions/colony-pilot.ts`: remoção de wrappers internos residuais e delegação direta para módulos extraídos (`*Impl`) em policy/artifacts/command-surface. Regressão validada por smoke: `npm run test:smoke -- packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 72/72.",
+      "criteria_results": [
+        {
+          "criterion": "`colony-pilot.ts` permanece orquestrador enquanto lógica utilitária segue modularizada nos arquivos extraídos.",
+          "status": "passed",
+          "evidence": "Call-sites passaram a usar diretamente imports de `colony-pilot-*-*.ts` sem wrappers locais redundantes."
+        },
+        {
+          "criterion": "Contrato público permanece estável para funções exportadas usadas por consumidores/testes.",
+          "status": "passed",
+          "evidence": "Mudanças focadas em funções internas; exports públicos preservados."
+        },
+        {
+          "criterion": "Comportamento operacional mantido após limpeza de wiring.",
+          "status": "passed",
+          "evidence": "Smoke parsers verde (72/72)."
+        }
+      ]
     }
   ]
 }

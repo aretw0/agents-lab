@@ -454,12 +454,6 @@ export function evaluateAntColonyBudgetPolicy(
 	return evaluateAntColonyBudgetPolicyImpl(input, policy);
 }
 
-function formatBudgetPolicyEvaluation(
-	policy: ColonyPilotBudgetPolicyConfig,
-	evaluation: ColonyPilotBudgetPolicyEvaluation,
-): string[] {
-	return formatBudgetPolicyEvaluationImpl(policy, evaluation);
-}
 
 export interface ColonyModelPolicyEvaluation {
 	ok: boolean;
@@ -484,22 +478,6 @@ export function evaluateAntColonyModelPolicy(
 	);
 }
 
-function formatPolicyEvaluation(
-	policy: ColonyPilotModelPolicyConfig,
-	evalResult: ColonyModelPolicyEvaluation,
-): string[] {
-	return formatPolicyEvaluationImpl(policy, evalResult);
-}
-
-function inspectAntColonyRuntime(cwd: string) {
-	return inspectAntColonyRuntimeImpl(cwd);
-}
-
-function formatArtifactsReport(
-	data: ReturnType<typeof inspectAntColonyRuntime>,
-): string {
-	return formatArtifactsReportImpl(data);
-}
 
 export type ColonyAgentRole =
 	| "queen"
@@ -705,36 +683,6 @@ export function formatToolJsonOutput(
 	return formatToolJsonOutputImpl(label, data, policy);
 }
 
-function updateStatusUI(ctx: ExtensionContext | undefined, state: PilotState) {
-	return updateStatusUIImpl(ctx, state);
-}
-
-function primeManualRunbook(
-	ctx: ExtensionContext,
-	title: string,
-	steps: string[],
-	reason = "Auto-dispatch de slash commands entre extensões não é suportado de forma confiável pela API atual do pi.",
-) {
-	return primeManualRunbookImpl(ctx, title, steps, reason);
-}
-
-function getCapabilities(pi: ExtensionAPI): PilotCapabilities {
-	return getCapabilitiesImpl(pi);
-}
-
-function requireCapabilities(
-	ctx: ExtensionContext,
-	caps: PilotCapabilities,
-	required: Array<keyof PilotCapabilities>,
-	action: string,
-): boolean {
-	return requireCapabilitiesImpl(ctx, caps, required, action);
-}
-
-async function tryOpenUrl(pi: ExtensionAPI, url: string): Promise<boolean> {
-	return tryOpenUrlImpl(pi, url);
-}
-
 export default function (pi: ExtensionAPI) {
 	const state: PilotState = createPilotState();
 
@@ -788,15 +736,15 @@ export default function (pi: ExtensionAPI) {
 		preflightCache = undefined;
 		providerBudgetGateCache = undefined;
 
-		updateStatusUI(ctx, state);
+		updateStatusUIImpl(ctx, state);
 	});
 
 	pi.on("model_select", (_event, ctx) => {
-		updateStatusUI(ctx, state);
+		updateStatusUIImpl(ctx, state);
 	});
 
 	pi.on("turn_start", (_event, ctx) => {
-		updateStatusUI(ctx, state);
+		updateStatusUIImpl(ctx, state);
 	});
 
 	function maybeSyncProjectTaskFromTelemetry(
@@ -988,14 +936,14 @@ export default function (pi: ExtensionAPI) {
 	pi.on("message_end", (event, ctx) => {
 		const text = extractTextImpl((event as { message?: unknown }).message);
 		if (!text) return;
-		if (applyTelemetryText(state, text)) updateStatusUI(ctx, state);
+		if (applyTelemetryText(state, text)) updateStatusUIImpl(ctx, state);
 		maybeSyncProjectTaskFromTelemetry(text, ctx);
 	});
 
 	pi.on("tool_result", (event, ctx) => {
 		const text = extractTextImpl(event);
 		if (!text) return;
-		if (applyTelemetryText(state, text)) updateStatusUI(ctx, state);
+		if (applyTelemetryText(state, text)) updateStatusUIImpl(ctx, state);
 		maybeSyncProjectTaskFromTelemetry(text, ctx);
 	});
 
@@ -1010,7 +958,7 @@ export default function (pi: ExtensionAPI) {
 			if (!result || now - preflightCache!.at > 30_000) {
 				result = await runColonyPilotPreflight(
 					pi,
-					getCapabilities(pi),
+					getCapabilitiesImpl(pi),
 					preflightConfig,
 				);
 				preflightCache = { at: now, result };
@@ -1048,7 +996,7 @@ export default function (pi: ExtensionAPI) {
 				const reason = `Blocked by colony-pilot model-policy: ${evaluation.issues.join("; ")}`;
 				const msg = [
 					"ant_colony bloqueada por model-policy",
-					...formatPolicyEvaluation(modelPolicyConfig, evaluation),
+					...formatPolicyEvaluationImpl(modelPolicyConfig, evaluation),
 					"",
 					"issues:",
 					...evaluation.issues.map((i) => `  - ${i}`),
@@ -1068,7 +1016,7 @@ export default function (pi: ExtensionAPI) {
 				const reason = `Blocked by colony-pilot budget-policy: ${budgetEval.issues.join("; ")}`;
 				const msg = [
 					"ant_colony bloqueada por budget-policy",
-					...formatBudgetPolicyEvaluation(budgetPolicyConfig, budgetEval),
+					...formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
 					"",
 					"issues:",
 					...budgetEval.issues.map((i) => `  - ${i}`),
@@ -1101,7 +1049,7 @@ export default function (pi: ExtensionAPI) {
 				const reason = `Blocked by colony-pilot provider-budget gate: ${providerGateEval.issues.join("; ")}`;
 				const msg = [
 					"ant_colony bloqueada por provider-budget gate",
-					...formatBudgetPolicyEvaluation(
+					...formatBudgetPolicyEvaluationImpl(
 						budgetPolicyConfig,
 						budgetEval ??
 							evaluateAntColonyBudgetPolicy(toolInput, budgetPolicyConfig),
@@ -1215,7 +1163,7 @@ export default function (pi: ExtensionAPI) {
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const snapshot = snapshotPilotState(state);
 			const retentionSnapshot = readColonyRetentionSnapshot(ctx.cwd, 5);
-			const capabilities = getCapabilities(pi);
+			const capabilities = getCapabilitiesImpl(pi);
 			const currentModelRef = ctx.model
 				? `${ctx.model.provider}/${ctx.model.id}`
 				: undefined;
@@ -1306,7 +1254,7 @@ export default function (pi: ExtensionAPI) {
 			"Inspect colony runtime artifacts (workspace mirrors, state files, worktrees).",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const data = inspectAntColonyRuntime(ctx.cwd);
+			const data = inspectAntColonyRuntimeImpl(ctx.cwd);
 			return {
 				content: [
 					{
@@ -1329,7 +1277,7 @@ export default function (pi: ExtensionAPI) {
 		description: "Run hard preflight checks used to gate ant_colony execution.",
 		parameters: Type.Object({}),
 		async execute() {
-			const caps = getCapabilities(pi);
+			const caps = getCapabilitiesImpl(pi);
 			const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
 			preflightCache = { at: Date.now(), result };
 			return {
@@ -1406,7 +1354,7 @@ export default function (pi: ExtensionAPI) {
 			currentCtx = ctx;
 			const input = (args ?? "").trim();
 			const { cmd, body } = parseCommandInput(input);
-			const caps = getCapabilities(pi);
+			const caps = getCapabilitiesImpl(pi);
 
 			if (!cmd || cmd === "help") {
 				ctx.ui.notify(
@@ -1438,7 +1386,7 @@ export default function (pi: ExtensionAPI) {
 
 			if (cmd === "prep") {
 				const base = ["/monitors off", "/remote", "/colony <goal>"];
-				primeManualRunbook(
+				primeManualRunbookImpl(
 					ctx,
 					"Pilot direction:",
 					base,
@@ -1495,9 +1443,9 @@ export default function (pi: ExtensionAPI) {
 					"",
 					...formatModelReadiness(readiness),
 					"",
-					...formatPolicyEvaluation(modelPolicyConfig, policyEval),
+					...formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
 					"",
-					...formatBudgetPolicyEvaluation(budgetPolicyConfig, budgetEval),
+					...formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
 					"",
 					...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
 					"",
@@ -1727,9 +1675,9 @@ export default function (pi: ExtensionAPI) {
 					"",
 					...formatModelReadiness(readiness),
 					"",
-					...formatPolicyEvaluation(modelPolicyConfig, policyEval),
+					...formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
 					"",
-					...formatBudgetPolicyEvaluation(budgetPolicyConfig, budgetEval),
+					...formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
 					"",
 					...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
 					"",
@@ -1770,7 +1718,7 @@ export default function (pi: ExtensionAPI) {
 
 					const lines = [
 						"colony-pilot model policy status",
-						...formatPolicyEvaluation(modelPolicyConfig, evalResult),
+						...formatPolicyEvaluationImpl(modelPolicyConfig, evalResult),
 						...(evalResult.issues.length > 0
 							? ["", "issues:", ...evalResult.issues.map((i) => `  - ${i}`)]
 							: ["", "issues: (none)"]),
@@ -1826,7 +1774,7 @@ export default function (pi: ExtensionAPI) {
 							`Model policy (${profile}) aplicada em .pi/settings.json`,
 							"Recomendado: /reload",
 							"",
-							...formatPolicyEvaluation(modelPolicyConfig, evalResult),
+							...formatPolicyEvaluationImpl(modelPolicyConfig, evalResult),
 						].join("\n"),
 						evalResult.ok ? "info" : "warning",
 					);
@@ -1903,8 +1851,8 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (cmd === "artifacts") {
-				const data = inspectAntColonyRuntime(ctx.cwd);
-				ctx.ui.notify(formatArtifactsReport(data), "info");
+				const data = inspectAntColonyRuntimeImpl(ctx.cwd);
+				ctx.ui.notify(formatArtifactsReportImpl(data), "info");
 				return;
 			}
 
@@ -1957,7 +1905,7 @@ export default function (pi: ExtensionAPI) {
 
 				const sequence = buildRuntimeRunSequence(caps, goal);
 				state.monitorMode = "off";
-				updateStatusUI(ctx, state);
+				updateStatusUIImpl(ctx, state);
 
 				pendingColonyGoals.push({ goal, source: "manual", at: Date.now() });
 				while (pendingColonyGoals.length > 20) pendingColonyGoals.shift();
@@ -1972,7 +1920,7 @@ export default function (pi: ExtensionAPI) {
 							].join("\n")
 						: undefined;
 
-				primeManualRunbook(
+				primeManualRunbookImpl(
 					ctx,
 					"Pilot run pronto (manual assistido)",
 					sequence,
@@ -2008,9 +1956,9 @@ export default function (pi: ExtensionAPI) {
 					restoreMonitors: restore,
 				});
 				if (restore) state.monitorMode = "on";
-				updateStatusUI(ctx, state);
+				updateStatusUIImpl(ctx, state);
 
-				primeManualRunbook(
+				primeManualRunbookImpl(
 					ctx,
 					"Pilot stop pronto (manual assistido)",
 					sequence,
@@ -2025,13 +1973,13 @@ export default function (pi: ExtensionAPI) {
 					return;
 				}
 
-				if (!requireCapabilities(ctx, caps, ["monitors"], "monitors")) {
+				if (!requireCapabilitiesImpl(ctx, caps, ["monitors"], "monitors")) {
 					return;
 				}
 
 				state.monitorMode = mode;
-				updateStatusUI(ctx, state);
-				primeManualRunbook(
+				updateStatusUIImpl(ctx, state);
+				primeManualRunbookImpl(
 					ctx,
 					`Profile de monitores (${mode.toUpperCase()}) pronto`,
 					[`/monitors ${mode}`],
@@ -2056,7 +2004,7 @@ export default function (pi: ExtensionAPI) {
 					}
 
 					const cmd = caps.sessionWeb ? "/session-web start" : "/remote";
-					primeManualRunbook(
+					primeManualRunbookImpl(
 						ctx,
 						"Start do web session pronto",
 						[cmd],
@@ -2078,9 +2026,9 @@ export default function (pi: ExtensionAPI) {
 
 					state.remoteActive = false;
 					state.remoteClients = 0;
-					updateStatusUI(ctx, state);
+					updateStatusUIImpl(ctx, state);
 					const cmd = caps.sessionWeb ? "/session-web stop" : "/remote stop";
-					primeManualRunbook(
+					primeManualRunbookImpl(
 						ctx,
 						"Stop do web session pronto",
 						[cmd],
@@ -2098,7 +2046,7 @@ export default function (pi: ExtensionAPI) {
 						return;
 					}
 
-					const ok = await tryOpenUrl(pi, state.remoteUrl);
+					const ok = await tryOpenUrlImpl(pi, state.remoteUrl);
 					if (ok) {
 						ctx.ui.notify(`Abrindo browser: ${state.remoteUrl}`, "info");
 					} else {
@@ -2187,7 +2135,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("session_shutdown", () => {
-		updateStatusUI(currentCtx, {
+		updateStatusUIImpl(currentCtx, {
 			...state,
 			monitorMode: "unknown",
 			remoteActive: false,
