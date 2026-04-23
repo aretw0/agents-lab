@@ -4452,6 +4452,24 @@
       "method": "inspect",
       "timestamp": "2026-04-23T23:28:00Z",
       "evidence": "Draft inicial do playbook publicado em `docs/guides/control-plane-evolution-playbook.md` com 3 modos (single CP, delegação descartável, federação), gates de transição e anti-patterns. Inclui seção 'Inspirado por' mapeando padrões de `agents/` e trilha `a2a/` do repositório de referência `nilayparikh/tuts-agentic-ai-examples`. Índice atualizado em `docs/guides/README.md`."
+    },
+    {
+      "id": "VER-BUD-247",
+      "target": "TASK-OPS-HYGIENE-002",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:31:00Z",
+      "evidence": "Higiene pós-marco consolidada: `.sandbox/tmp` ficou com apenas helpers recorrentes (`extract-task.js`, `search-tasks-keyword.js`); scripts ad-hoc e dumps temporários foram arquivados em `.sandbox/tmp/archive/2026-04-23/` com README de classificação. Política de higiene/documentação de runtime artifacts foi formalizada em `docs/guides/project-canonical-pipeline.md`."
+    },
+    {
+      "id": "VER-BUD-248",
+      "target": "TASK-BUD-128",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:31:00Z",
+      "evidence": "Playbook evoluiu com critérios operacionais concretos: seção GO/NO-GO para transição Modo 1->2 e envelope mínimo de telemetria para Modo 3 (federation). Documento mantém separação de fases e contrato board-first/no-auto-close/verification."
     }
   ]
 }

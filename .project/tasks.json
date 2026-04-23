@@ -3048,7 +3048,7 @@
     {
       "id": "TASK-OPS-HYGIENE-002",
       "description": "[P1] Executar higiene pós-marco (loop/subagent/swarm): remover artefatos temporários de validação e consolidar superfícies canônicas sem gordura operacional.",
-      "status": "in-progress",
+      "status": "completed",
       "files": [
         ".sandbox/tmp",
         "docs/guides/project-canonical-pipeline.md",
@@ -3060,7 +3060,8 @@
         "Runtime artifacts efêmeros (`.pi/*.json` de sessão) permanecem fora de versionamento e política é documentada para prevenir recorrência.",
         "Backlog/verification refletem o que é marco permanente vs experimento temporário, sem perder evidência relevante."
       ],
-      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js` (+ utilitário `cleanup-ad-hoc.js`), archive=26 scripts ad-hoc + 2 dumps de inventário movidos para `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`."
+      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js`; archive=27 scripts ad-hoc (incluindo `cleanup-ad-hoc.js`) + 2 dumps de inventário em `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`.\n[2026-04-23T23:31:00Z] Task concluída com `VER-BUD-247` (passed).",
+      "verification": "VER-BUD-247"
     },
     {
       "id": "TASK-BUD-127",
@@ -3101,7 +3102,7 @@
         "Cada modo define objetivos, limites, gate de entrada/saída e política de ciclo de vida (spawn/compact/kill/recreate) para evitar acoplamento indevido de contexto.",
         "Documento inclui seção 'inspirado por' com mapeamento explícito de conceitos para `https://github.com/nilayparikh/tuts-agentic-ai-examples`, adaptado ao ecossistema pi/refarm sem cópia literal."
       ],
-      "notes": "Solicitado pelo usuário (2026-04-23): priorizar fundamentos e clareza conceitual antes de escalar; agents-lab como laboratório para pi+refarm com baixa fricção.\n[2026-04-23T23:28:00Z] Slice inicial concluída: repositório de referência foi revisado (`agents` patterns + trilha `a2a`) e primeiro draft do playbook criado em `docs/guides/control-plane-evolution-playbook.md`, com separação em 3 modos e anti-patterns explícitos."
+      "notes": "Solicitado pelo usuário (2026-04-23): priorizar fundamentos e clareza conceitual antes de escalar; agents-lab como laboratório para pi+refarm com baixa fricção.\n[2026-04-23T23:28:00Z] Slice inicial concluída: repositório de referência foi revisado (`agents` patterns + trilha `a2a`) e primeiro draft do playbook criado em `docs/guides/control-plane-evolution-playbook.md`, com separação em 3 modos e anti-patterns explícitos.\n[2026-04-23T23:31:00Z] Playbook refinado com checklist GO/NO-GO para transição Modo 1->2 e envelope mínimo de telemetria para Modo 3 (federação)."
     }
   ]
 }
