@@ -1,34 +1,33 @@
 {
-  "timestamp": "2026-04-23T02:59:30.000Z",
-  "context": "Auto-resume executado com micro-slice em TASK-BUD-118. Runtime do loop long-run agora tem sinal explícito de lease/owner e stop-condition no estado persistido, mantendo compatibilidade com snapshots legados.",
-  "current_phase": "control-plane-autonomy-prioritized",
-  "current_tasks": [
-    "TASK-BUD-114",
-    "TASK-BUD-117",
-    "TASK-BUD-118"
-  ],
-  "blockers": [],
+  "timestamp": "2026-04-23T17:36:00.000Z",
+  "context": "Usuário priorizou organização da casa com commits atômicos. Tentativa de iniciar fluxo de commit foi bloqueada por falha operacional do executor de shell (até comandos triviais como `echo` ficam sem retorno e entram em background sem output), compatível com degradação pós low-disk. Mudanças prontas foram preservadas e agrupadas para commit assim que o shell estabilizar.",
   "next_actions": [
-    "TASK-BUD-118 próximo micro-slice: aplicar stop-condition de lease-expired no auto-drain (gate explícito + audit).",
-    "TASK-BUD-114: conectar compliance aprovado ao apply efetivo por diff/apply.",
-    "TASK-BUD-117: fechar status no board após revisão rápida dos sinais pós-resume no fluxo atual."
+    "Recuperar executor de shell (host free-space + reinício da sessão se necessário).",
+    "Executar sequência de commits atômicos planejada (ops disk guard, guardrails loop-ready observability, docs/handoff/project state).",
+    "Após commits, retomar validação focal e fechamento de TASK-BUD-125 com evidência operacional real.",
+    "Backlog futuro: TASK-OPS-TOOL-NAME-001 para remover nomenclatura `project_proxy_*`."
   ],
-  "open_questions": [
-    "Qual TTL padrão de lease queremos promover para config de settings sem reinflar o comando surface agora?"
-  ],
-  "key_decisions_pending": [
-    "Definir fronteira final entre stop-condition advisory (degradado) vs bloqueante (lease-expired) no loop executor."
-  ],
-  "files_in_flux": [
-    "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
-    "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
-    ".project/tasks.json",
-    ".project/verification.json",
-    ".project/handoff.json"
+  "blockers": [
+    "low-disk-host-critical",
+    "shell-executor-stalled",
+    "factory-paused-by-operator"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T02:59:30.000Z",
+      "atIso": "2026-04-23T17:23:00.000Z",
+      "reason": "message_end",
+      "level": "ok",
+      "percent": 18,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "continue",
+      "recommendation": "Use standard slices with low-disk safe commands until host free space is recovered."
+    },
+    {
+      "atIso": "2026-04-23T17:36:00.000Z",
       "reason": "message_end",
       "level": "ok",
       "percent": 21,
@@ -38,7 +37,7 @@
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy."
+      "recommendation": "Hold heavy operations and commits until shell executor is responsive again."
     }
   ]
 }

@@ -325,6 +325,13 @@
       "status": "decided",
       "context": "Diretriz explícita do usuário: backlogar Telegram para o final e focar no que reduz dependência de confirmações óbvias.",
       "task": "TASK-BUD-118"
+    },
+    {
+      "id": "DEC-BUD-046",
+      "decision": "Operar em modo loop-first: priorizar desbloqueio de long runs controladas (control-plane -> subagentes -> colônia) e tratar side quests apenas quando bloquearem esse potencial.",
+      "rationale": "Objetivo primário do usuário é reduzir dependência de interação manual e aumentar throughput autônomo com confiabilidade; dispersão em side quests antes desse núcleo reduz velocidade e foco.",
+      "status": "decided",
+      "context": "Diretriz explícita do usuário (2026-04-23): backlogar tudo, manter foco em loops/fábrica e calibrar monitores para não atrapalhar aceleração sem iteração humana."
     }
   ]
 }

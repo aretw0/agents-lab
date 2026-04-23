@@ -3692,6 +3692,613 @@
           "evidence": "`guardrails-long-run-intent-queue.test.ts` ampliado para validar transições e lease timestamps."
         }
       ]
+    },
+    {
+      "id": "VER-BUD-193",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-118 (stop gate): auto-drain em `guardrails-core.ts` agora aplica gate de runtime `lease-expired` via `resolveAutoDrainRuntimeGateReason` antes de qualquer dispatch. Quando lease está expirado, o loop interrompe drenagem com audit throttled `guardrails-core.long-run-intent-auto-drain-stopped` (inclui `stopCondition`, `stopReason`, `leaseOwner`, `leaseExpiresAtIso`) e status `/lane-queue` passa a refletir `nextDrain=stopped:lease-expired`. Smoke focal validado: `npx vitest run \"packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts\"` (21/21).",
+      "criteria_results": [
+        {
+          "criterion": "Auto-drain respeita stop-condition de lease-expired com gate explícito antes de dispatch.",
+          "status": "passed",
+          "evidence": "`resolveAutoDrainRuntimeGateReason` promove gate para `lease-expired` quando expiry já venceu e `tryAutoDrainDeferredIntent` retorna sem dispatch."
+        },
+        {
+          "criterion": "Parada por lease-expired mantém trilha auditável de stop com contexto operacional mínimo.",
+          "status": "passed",
+          "evidence": "Audit `guardrails-core.long-run-intent-auto-drain-stopped` registra razão, gate, queue count e metadados de lease/stop state."
+        },
+        {
+          "criterion": "Superfície de status expõe estado de bloqueio de drenagem para operação manual segura.",
+          "status": "passed",
+          "evidence": "Comando `/lane-queue status` mostra `nextDrain=stopped:lease-expired` quando gate de runtime bloqueia auto-drain."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-194",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-114 (compliance->apply): `evaluateSelectivePromotionScopeCompliance` passou a exigir trilha `diff/apply` quando há inventário explícito com promoted files (`delivery evidence missing: selective promotion apply evidence`). A avaliação agora expõe `hasDiffApplyEvidence` e `colony-pilot.ts` registra auditoria positiva `colony-pilot.selective-promotion-scope-approved` quando compliance de `apply-to-branch` passa. Smoke focal validado: `npx vitest run \"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts\"` (79/79).",
+      "criteria_results": [
+        {
+          "criterion": "Compliance aprovado de promoção seletiva fica vinculado a evidência de apply efetivo (diff/apply).",
+          "status": "passed",
+          "evidence": "Inventário explícito com promoted sem trilha `diff/apply` agora gera issue bloqueante; com `git diff` + `git apply` a compliance passa."
+        },
+        {
+          "criterion": "Runtime audita explicitamente a aprovação de scope-compliance para apply-to-branch.",
+          "status": "passed",
+          "evidence": "`colony-pilot.selective-promotion-scope-approved` inclui source, candidate/promoted/skipped e `hasDiffApplyEvidence`."
+        },
+        {
+          "criterion": "Cobertura smoke valida rota sem evidência e rota com evidência de apply.",
+          "status": "passed",
+          "evidence": "`colony-pilot-parsers.test.ts` ganhou cenários explícitos de compliance com/sem `diff/apply` e permanece verde (79/79)."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-195",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-118 (boundary explícita): executor de auto-drain agora classifica stop-condition em fronteira operacional (`resolveLongRunLoopStopBoundary`) com `lease-expired/manual-pause` bloqueante e `dispatch-failure` advisory. Em modo advisory, o loop mantém retries e registra audit `guardrails-core.long-run-intent-auto-drain-advisory`; status `/lane-queue` passou a exibir `stop=<condition>/<boundary>`. Smoke focal validado: `npx vitest run \"packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts\"` (22/22).",
+      "criteria_results": [
+        {
+          "criterion": "Fronteira entre stop-condition bloqueante e advisory fica determinística no runtime.",
+          "status": "passed",
+          "evidence": "`resolveLongRunLoopStopBoundary` define `lease-expired/manual-pause => blocking` e `dispatch-failure => advisory`."
+        },
+        {
+          "criterion": "Dispatch-failure permanece advisory (sem travar loop), com trilha auditável explícita.",
+          "status": "passed",
+          "evidence": "`tryAutoDrainDeferredIntent` emite `guardrails-core.long-run-intent-auto-drain-advisory` e segue fluxo normal de retry/backoff."
+        },
+        {
+          "criterion": "Superfície de status expõe boundary para operação humana com baixo ruído.",
+          "status": "passed",
+          "evidence": "`/lane-queue status` inclui `stop=<stopCondition>/<boundary>` junto de gate/nextDrain."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-196",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-114 (decision boundary): `evaluateSelectivePromotionScopeCompliance` agora expõe `requiresDiffApplyEvidence` com enforcement explícito em `explicit-inventory` e comportamento advisory em `derived-from-scope`. `colony-pilot.ts` passa a auditar `colony-pilot.selective-promotion-apply-evidence-advisory` quando há promoted derivado sem trilha `diff/apply`, preservando fluxo sem hard-block. Smoke focal mantida verde: `npx vitest run \"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts\" \"packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts\"` (101/101).",
+      "criteria_results": [
+        {
+          "criterion": "Fronteira de enforcement para `diff/apply` fica explícita e auditável (explicit-only vs derived advisory).",
+          "status": "passed",
+          "evidence": "Compliance retorna `requiresDiffApplyEvidence=true` em `explicit-inventory` e `false` em `derived-from-scope`."
+        },
+        {
+          "criterion": "Fluxo derivado preserva autonomia sem bloqueio indevido, com trilha de recomendação operacional.",
+          "status": "passed",
+          "evidence": "Evento `colony-pilot.selective-promotion-apply-evidence-advisory` cobre promoted derivado sem diff/apply explícito."
+        },
+        {
+          "criterion": "Cobertura smoke confirma regressão-zero nos fluxos principais após decisão de fronteira.",
+          "status": "passed",
+          "evidence": "Parsers + guardrails smoke executados em conjunto e aprovados (101/101)."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-197",
+      "target": "TASK-BUD-117",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Fechamento TASK-BUD-117 (cadência pós-resume): smoke focal verde em `npx vitest run \"packages/pi-stack/test/smoke/context-watchdog.test.ts\"` (16/16), mantendo contrato de recalibração de cadência (`operatingCadence` + `postResumeRecalibrated`) para transições pós-compact/resume. Evidência operacional da sessão confirma comportamento adaptativo: em `level=ok` retorna `standard-slices`; sob pressão atual `level=warn` retorna `micro-slice-only` sem exigir intervenção humana.",
+      "criteria_results": [
+        {
+          "criterion": "Sinal auditável de cadência pós-resume permanece exposto e consistente.",
+          "status": "passed",
+          "evidence": "`context-watch` mantém `operatingCadence` e `postResumeRecalibrated` como contrato operacional."
+        },
+        {
+          "criterion": "Cobertura de transição compact/resume/ok permanece protegida por smoke.",
+          "status": "passed",
+          "evidence": "`context-watchdog.test.ts` validado localmente (16/16)."
+        },
+        {
+          "criterion": "Comportamento adaptativo evita herança indevida de micro-slice quando contexto está saudável.",
+          "status": "passed",
+          "evidence": "Sessão evidencia alternância coerente: `ok -> standard-slices` e `warn -> micro-slice-only`."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-198",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T00:00:00Z",
+      "evidence": "Micro-slice TASK-BUD-118 (failure-streak boundary): runtime state agora persiste `consecutiveDispatchFailures`; `resolveLongRunLoopStopBoundary` promove `dispatch-failure` de advisory para blocking após limiar (default=3). `guardrails-core` aplica gate `dispatch-failure-blocking` com stop auditável (`long-run-intent-auto-drain-stopped`) e status expõe `failStreak=<n>/<threshold>` + `nextDrain=stopped:dispatch-failure` quando aplicável. Smoke focal validado: `npx vitest run \"packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts\" \"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts\"` (101/101).",
+      "criteria_results": [
+        {
+          "criterion": "Dispatch-failure deixa de ser sempre advisory e passa a bloquear de forma determinística após N falhas consecutivas.",
+          "status": "passed",
+          "evidence": "`resolveLongRunLoopStopBoundary(..., dispatchFailureBlockAfter=3)` retorna `blocking` quando `consecutiveDispatchFailures >= 3`."
+        },
+        {
+          "criterion": "Executor respeita boundary bloqueante sem perder trilha auditável.",
+          "status": "passed",
+          "evidence": "`tryAutoDrainDeferredIntent` emite gate `dispatch-failure-blocking` e auditoria de stop com `consecutiveDispatchFailures` e `blockAfterFailures`."
+        },
+        {
+          "criterion": "Runtime mantém capacidade de recuperação ao zerar streak em dispatch/healthy.",
+          "status": "passed",
+          "evidence": "`markLongRunLoopRuntimeDispatch` e `markLongRunLoopRuntimeHealthy` resetam `consecutiveDispatchFailures` para 0; smoke cobre transições."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-199",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T04:42:35Z",
+      "evidence": "Slice 6 de TASK-BUD-118: `dispatchFailureBlockAfter` tornou-se configurável em `.pi/settings.json` (`piStack.guardrailsCore.longRunIntentQueue.dispatchFailureBlockAfter`), com default determinístico=3 e clamp [1..20]. `guardrails-core` deixou de usar constante local e passa a ler limiar da config para boundary/gates/auditoria/status (`failStreak=n/<threshold>`). Smoke focal: `npx vitest run \"packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts\" \"packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts\"` => 101/101.",
+      "criteria_results": [
+        {
+          "criterion": "Limiar de bloqueio por falha consecutiva é configurável via settings com fallback seguro.",
+          "status": "passed",
+          "evidence": "`resolveLongRunIntentQueueConfig` agora resolve `dispatchFailureBlockAfter` com default=3 e clamp [1..20]."
+        },
+        {
+          "criterion": "Executor usa limiar configurado em vez de constante hardcoded.",
+          "status": "passed",
+          "evidence": "`tryAutoDrainDeferredIntent` e `/lane-queue status` leem `longRunIntentQueueConfig.dispatchFailureBlockAfter`."
+        },
+        {
+          "criterion": "Regressão funcional controlada por smoke focal.",
+          "status": "passed",
+          "evidence": "101/101 testes passando (guardrails-long-run-intent-queue + colony-pilot-parsers)."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-200",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T04:42:35Z",
+      "evidence": "Slice opcional de enforcement em TASK-BUD-114: `colonyPilot.deliveryPolicy.enforceDerivedScopeDiffApplyEvidence` adicionado (default=false). `evaluateSelectivePromotionScopeCompliance` agora aceita options e pode exigir diff/apply também para `source=derived-from-scope` quando flag ativa; fluxo padrão permanece advisory (backward-compatible). `colony-pilot.ts` passa a propagar a flag na avaliação e registrar valor nos eventos de auditoria `scope-compliance`/`scope-approved`. Smoke focal atualizado e verde: 102/102 (`guardrails-long-run-intent-queue` + `colony-pilot-parsers`).",
+      "criteria_results": [
+        {
+          "criterion": "Fluxo derivado permanece advisory por padrão.",
+          "status": "passed",
+          "evidence": "default policy define `enforceDerivedScopeDiffApplyEvidence=false`; teste derivado padrão continua `requiresDiffApplyEvidence=false`."
+        },
+        {
+          "criterion": "Flag permite promover derivado para enforcement bloqueante quando habilitada.",
+          "status": "passed",
+          "evidence": "novo teste `compliance derivada pode exigir evidência diff/apply...` valida `requiresDiffApplyEvidence=true` e issue quando faltam evidências."
+        },
+        {
+          "criterion": "Integração do runtime colony-pilot usa a flag e mantém auditabilidade.",
+          "status": "passed",
+          "evidence": "`evaluateSelectivePromotionScopeComplianceImpl(..., { enforceDerivedScopeDiffApplyEvidence })` + campos audit adicionais."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-201",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T05:03:13Z",
+      "evidence": "Slice 1 de TASK-BUD-122 focado em superfície não-project (sessões/logs): `packages/pi-stack/extensions/session-analytics.ts` passou a operar com scan guard bounded-by-default (`readJsonlLines` com tail-window, limite de linha e cap de records por arquivo) e agrega telemetria de scan em `runQuery` (`totalBytesRead`, `tailWindowFiles`, `parseErrors`, `skippedLongLines`, etc). `/session-analytics` exibe resumo de scan-guard. Runbook atualizado em `docs/guides/project-canonical-pipeline.md` com estratégia simple-first (query surface -> fallback explícito).",
+      "criteria_results": [
+        {
+          "criterion": "Cobrir ao menos uma superfície não-project com leitura indexada/resumida.",
+          "status": "passed",
+          "evidence": "`session_analytics_query` agora usa janela de cauda bounded-by-default + limites de parse por linha/arquivo."
+        },
+        {
+          "criterion": "Fornecer trilha operacional para fallback e operação determinística.",
+          "status": "passed",
+          "evidence": "Guia canônico ganhou seção 'Proxy/index incremental para superfícies grandes (simple-first)' com ordem operacional e fallback explícito."
+        },
+        {
+          "criterion": "Validar comportamento de scan guard por teste focal.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 118/118."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-202",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T05:03:13Z",
+      "evidence": "Slice 2 de TASK-BUD-122: adicionada extensão `project-board-proxy` com operações bounded para `.project/tasks`/`.project/verification` (`project_proxy_query`, `project_proxy_update`), incluindo cache incremental por mtime (evita reparse de blocos inalterados), filtros determinísticos e update restrito (status/append note). Registrado no pacote (`packages/pi-stack/package.json`) e no runbook canônico (simple-first com proxy dedicado).",
+      "criteria_results": [
+        {
+          "criterion": "Cobrir `.project/tasks` e `.project/verification` com query/update estruturado sem leitura manual de bloco completo no fluxo do agente.",
+          "status": "passed",
+          "evidence": "`project_proxy_query` retorna payload curto com filtros/limit/meta de cache; `project_proxy_update` atualiza task status/note de forma restrita."
+        },
+        {
+          "criterion": "Incluir estratégia incremental/index leve.",
+          "status": "passed",
+          "evidence": "Leitura dos blocos via cache por `mtimeMs` com metadata `cacheHit` nas queries."
+        },
+        {
+          "criterion": "Validar por smoke focal mantendo regressão verde.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/project-board-proxy.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 121/121."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-203",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T05:12:11Z",
+      "evidence": "Slice 3 de simplificação da superfície: renomeada extensão para `project-board-surface` e tools para nomenclatura direta (`board_query`, `board_update`), removendo o termo `proxy` da superfície carregada sem perda de capacidade funcional (query/update bounded + cache incremental). Ajustados package wiring, import de smoke e guia canônico.",
+      "criteria_results": [
+        {
+          "criterion": "Superfície operacional usa naming simples e direto para reduzir fricção cognitiva.",
+          "status": "passed",
+          "evidence": "Tools registradas como `board_query` e `board_update`; docs atualizada para os novos nomes."
+        },
+        {
+          "criterion": "Wiring de extensão e testes permanece íntegro após rename.",
+          "status": "passed",
+          "evidence": "`packages/pi-stack/package.json` aponta para `extensions/project-board-surface.ts`; smoke import atualizado."
+        },
+        {
+          "criterion": "Regressão focal permanece verde.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` => 19/19."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-204",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T06:08:10Z",
+      "evidence": "Micro-slice de confiabilidade no board surface: adicionados aliases legados `project_proxy_query` e `project_proxy_update` apontando para `board_query`/`board_update` (novo naming simples), evitando quebra de automações antigas enquanto preserva linguagem direta para novos fluxos.",
+      "criteria_results": [
+        {
+          "criterion": "Nome simples segue como padrão para novos loops.",
+          "status": "passed",
+          "evidence": "tools primárias continuam `board_query` e `board_update`."
+        },
+        {
+          "criterion": "Compatibilidade retroativa evita interrupção de automações prévias.",
+          "status": "passed",
+          "evidence": "aliases legados registrados na extensão com mesmo contrato de parâmetros/execução."
+        },
+        {
+          "criterion": "Regressão focal permanece verde.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` => 19/19."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-205",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T06:38:22Z",
+      "evidence": "Micro-slice de confiabilidade do loop: extraída função canônica `resolveDispatchFailureRuntimeGate` em `guardrails-core-lane-queue` e aplicada no executor/status de `guardrails-core` para unificar decisão de gate dispatch-failure (advisory vs blocking por streak). Cobertura smoke ampliada para validar gate helper + transição de falha recorrente/reset.",
+      "criteria_results": [
+        {
+          "criterion": "Decisão de gate dispatch-failure fica centralizada e sem duplicação entre executor e status.",
+          "status": "passed",
+          "evidence": "`guardrails-core.ts` usa `resolveDispatchFailureRuntimeGate` em `tryAutoDrainDeferredIntent` e no status `/lane-queue`."
+        },
+        {
+          "criterion": "Regra de escalonamento por streak permanece determinística após refactor.",
+          "status": "passed",
+          "evidence": "novo teste `resolves dispatch-failure runtime gate based on failure streak threshold` cobre advisory->blocking por limiar."
+        },
+        {
+          "criterion": "Regressão focal verde após mudança de wiring.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` => 42/42."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-206",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-23T06:47:20Z",
+      "evidence": "Micro-slice de robustez para long-run board surface: `board_update` passou a persistir via `writeProjectTasksBlock` (lock + atomic rename) reutilizando infraestrutura de task-sync, reduzindo risco de race/corrupção em loops concorrentes (control-plane/subagentes/colônia).",
+      "criteria_results": [
+        {
+          "criterion": "Update de tasks no board surface usa escrita segura com lock/atomic para cenários concorrentes.",
+          "status": "passed",
+          "evidence": "`updateProjectTaskProxy` migrou para `readProjectTasksBlock` + `writeProjectTasksBlock` em `project-board-surface.ts`."
+        },
+        {
+          "criterion": "Capacidade funcional da superfície permanece estável.",
+          "status": "passed",
+          "evidence": "smoke `project-board-surface.test.ts` segue verde após migração."
+        },
+        {
+          "criterion": "Regressão focal preservada.",
+          "status": "passed",
+          "evidence": "`npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` => 19/19."
+        }
+      ]
+    },
+    {
+      "id": "VER-BUD-207",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T07:12:00Z",
+      "evidence": "Slice 6 (bounded notes): `board_update`/`updateProjectTaskProxy` agora aceita `max_note_lines` (`maxNoteLines`) e usa `appendNote` canônico para trim determinístico de notas, reduzindo crescimento não controlado do payload em loops long-run. Cobertura smoke adicionada em `project-board-surface.test.ts` para validar truncamento por linhas. Regressão focal: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (20/20 pass)."
+    },
+    {
+      "id": "VER-BUD-208",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T07:24:00Z",
+      "evidence": "Slice 8: cobertura de retry prolongado adicionada em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` para `dispatchFailureBlockAfter=10` (advisory nas falhas 1..9; blocking na 10ª) via `resolveDispatchFailureRuntimeGate` e `resolveLongRunLoopStopBoundary`. Validação: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (24/24 pass)."
+    },
+    {
+      "id": "VER-BUD-209",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T07:44:00Z",
+      "evidence": "Slice 1 implementado sem inflar arquivos grandes: novo módulo `packages/pi-stack/extensions/guardrails-core-provider-retry.ts` concentra classificação de falha transitória de provider (`server_is_overload`/429/5xx), resolução de threshold de bloqueio com mínimo operacional de 10 tentativas e cálculo de backoff exponencial com cap. `guardrails-core.ts` integrou policy no auto-drain (threshold dinâmico + `retryDelayMs` progressivo + audit fields `errorClass`/`retryDelayMs`). Smoke: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (26/26 pass)."
+    },
+    {
+      "id": "VER-BUD-210",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-23T07:49:00Z",
+      "evidence": "Runbook atualizado para adoção por usuários do pi-stack: seção 'Retry resiliente para overload/rate-limit de provider' adicionada em `docs/guides/project-canonical-pipeline.md` com política operacional (`maxAttempts>=10`, backoff progressivo, cap de delay, threshold efetivo por classe de erro) e exemplo de configuração em `.pi/settings.json` (`providerTransientRetry`)."
+    },
+    {
+      "id": "VER-BUD-211",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T07:58:00Z",
+      "evidence": "Slice 3: `packages/pi-stack/extensions/guardrails-core.ts` agora mostra `providerRetry=<policy>` em `/lane-queue status` (ex.: `10x@2s→60s`), aumentando discoverability operacional da política de continuidade para usuários do pi-stack. Regressão focal: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (26/26 pass)."
+    },
+    {
+      "id": "VER-BUD-212",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T08:36:00Z",
+      "evidence": "Slice 4: `guardrails-core.ts` passou a diferenciar explicitamente estado de exaustão de retry transitório (`nextDrain=stopped:retry-exhausted`) e exibir ação acionável no `/lane-queue status`. Auditoria de stop recebeu campos `providerRetryExhausted` e `actionHint`. Suporte lógico isolado em `guardrails-core-provider-retry.ts` via helper `isProviderTransientRetryExhausted`. Regressão: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (26/26 pass)."
+    },
+    {
+      "id": "VER-BUD-213",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T08:50:00Z",
+      "evidence": "Slice 5: `guardrails-core-provider-retry.ts` ganhou helper canônico `buildProviderRetryExhaustedActionLines` e `guardrails-core.ts` passou a reutilizar esse playbook curto em status (`/lane-queue`) e auditoria (`actionLines`) quando `nextDrain=stopped:retry-exhausted`. Runbook também reforçado em `docs/guides/project-canonical-pipeline.md` com sequência de 3 ações. Regressão: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (26/26 pass)."
+    },
+    {
+      "id": "VER-BUD-214",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "timestamp": "2026-04-23T11:56:00Z",
+      "evidence": "Go/no-go simples validado para uso contínuo assistido: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (46/46 pass); `project-validate` clean; `context_watch_status` level=ok (standard-slices); `provider_readiness_matrix` reportou openai-codex readiness=ready, budgetState=ok."
+    },
+    {
+      "id": "VER-BUD-215",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-23T12:10:00Z",
+      "evidence": "Gate de prontidão operacional consultado: `subagent_readiness_status(strict=true)` retornou `ready=false` com blocker `colony-min-complete-signals (0 vs >= 1)`. Interpretação: control plane simples está utilizável, porém escalação unattended para subagentes/swarm ainda requer ao menos uma run controlada com COMPLETE auditável no recorte atual."
+    },
+    {
+      "id": "VER-BUD-216",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T12:22:00Z",
+      "evidence": "Slice 1 board-first readiness gate: novo módulo `packages/pi-stack/extensions/guardrails-core-board-readiness.ts` avalia elegibilidade de tarefas planejadas no board (`ready/no-planned/no-eligible`, deps satisfeitas, recommendation) e foi integrado ao `/lane-queue status` via `boardReady`, `boardHint` e `boardNext`. Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts`. Regressão: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (29/29 pass)."
+    },
+    {
+      "id": "VER-BUD-217",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Slice intent-bus board-first: adicionado módulo tipado `guardrails-core-intent-bus.ts` com encode/parse/summarize de intent canônico (`[intent:board.execute-task]` + version/key-values); `/lane-queue board-next` passou a emitir intent tipado com auditoria (`intentType/intentVersion/intentSummary`) e fallback degradado auditável (`guardrails-core.board-intent-dispatch-failed` com requeue). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (34/34 pass).",
+      "timestamp": "2026-04-23T09:57:00Z"
+    },
+    {
+      "id": "VER-BUD-218",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Slice board-readiness execution path: `evaluateBoardLongRunReadiness` passou a ordenar elegíveis por `planned+deps+priority(P0..Pn)+id` com `nextTaskId/selectionPolicy`; novo `/lane-queue board-next` usa o gate para decidir execução/queue e registra bloqueio explícito quando board não está pronto. Smokes: `guardrails-board-readiness`, `guardrails-intent-bus`, `guardrails-long-run-intent-queue` (34/34 pass).",
+      "timestamp": "2026-04-23T09:58:00Z"
+    },
+    {
+      "id": "VER-BUD-219",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Slice 3 (intent consumer explícito): `before_agent_start` em `guardrails-core.ts` agora detecta envelope canônico via `parseGuardrailsIntent(event.prompt)` e injeta guidance determinístico por tipo (`buildGuardrailsIntentSystemPrompt`) com auditoria `guardrails-core.intent-envelope-detected`. Mantém native-first e só aplica quando intent tipado está presente. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (35/35 pass).",
+      "timestamp": "2026-04-23T10:05:00Z"
+    },
+    {
+      "id": "VER-BUD-220",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Slice 4 (auto-advance seguro board-first): executor em `guardrails-core.ts` passou a avançar `nextTaskId` automaticamente apenas sob gate seguro (`idle + queue empty + loop running/healthy + stopCondition=none + board ready`) usando helper canônico `shouldAutoAdvanceBoardTask` em `guardrails-core-lane-queue.ts`, com dedupe por task e auditoria (`guardrails-core.board-intent-auto-advance` / `...failed`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` (36/36 pass).",
+      "timestamp": "2026-04-23T10:19:00Z"
+    },
+    {
+      "id": "VER-BUD-221",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Intent bus ganhou consumer no caminho de execução (input) via `resolveGuardrailsIntentRuntimeDecision` com rejeição de envelope inválido/unsupported (`guardrails-core.intent-envelope-runtime-rejected`) e consumo auditável de envelopes válidos (`...runtime-consumed`) incluindo decisões ready/board-not-ready/next-mismatch. `long-run-intent-queued` agora preserva metadata de intent (`intentType/intentSummary`) para reduzir fallback manual cross-turn. Validação: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 37/37 pass.",
+      "timestamp": "2026-04-23T13:58:00Z"
+    },
+    {
+      "id": "VER-BUD-222",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Observabilidade do auto-advance board-first reforçada no lane status: novo gate canônico `resolveBoardAutoAdvanceGateReason` (`active-long-run|queued-intents|loop-paused|loop-degraded|stop-condition|board-not-ready|missing-next-task-id|ready`) e exposição em `/lane-queue status` via `boardAutoGate` + `boardAutoLast`. Mantida compatibilidade de decisão (`shouldAutoAdvanceBoardTask` delega para gate). Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 37/37 pass.",
+      "timestamp": "2026-04-23T14:10:00Z"
+    },
+    {
+      "id": "VER-BUD-223",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "evidence": "Observabilidade de gate no auto-advance aprimorada no runtime de auto-drain: quando `boardAutoAdvanceGate != ready`, `guardrails-core` agora emite auditoria throttled `guardrails-core.board-intent-auto-advance-deferred` com razão canônica (`boardAutoAdvanceGate`) e contexto (`boardReason`, `queuedCount`, `nextTaskId`, `selectionPolicy`). Isso fecha lacuna para evidência operacional em cenário real idle/empty sem depender só de leitura manual de status. Validação focal mantida verde: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 37/37.",
+      "timestamp": "2026-04-23T14:24:00Z"
+    },
+    {
+      "id": "VER-BUD-224",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Throttle canônico de auditoria para board auto-advance extraído para helper compartilhado `shouldEmitBoardAutoAdvanceGateAudit` (paridade com auto-drain throttle). `guardrails-core` passou a usar o helper ao emitir `guardrails-core.board-intent-auto-advance-deferred`, reduzindo drift e facilitando evidência de runtime sem spam. Cobertura adicionada em `guardrails-long-run-intent-queue.test.ts` para gate-change/interval semantics. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 38/38.",
+      "timestamp": "2026-04-23T14:51:00Z"
+    },
+    {
+      "id": "VER-BUD-225",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Gate de auto-advance agora incorpora dedupe no contrato canônico: `resolveBoardAutoAdvanceGateReason` ganhou razão explícita `dedupe-window` (com `nowMs/lastTaskId/lastTaskAtMs/dedupeWindowMs`), eliminando branch ad-hoc silenciosa no runtime. `guardrails-core` passou a usar o gate canônico tanto no auto-drain quanto em `/lane-queue status`, mantendo coerência de diagnóstico (`boardAutoGate`) e auditoria deferida (`guardrails-core.board-intent-auto-advance-deferred`). Cobertura estendida em smoke para `dedupe-window` e expiração de dedupe. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 38/38.",
+      "timestamp": "2026-04-23T15:09:00Z"
+    },
+    {
+      "id": "VER-BUD-226",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "`/lane-queue status` ganhou sinal operacional explícito de ativação de runtime (`runtimeCode=active|reload-required|unknown`) calculado por `resolveRuntimeCodeActivationState` (comparando mtime do código carregado em `session_start` vs arquivo atual). Isso reduz ambiguidade sobre 'já está ativo aqui no control plane?' após mudanças locais sem reload. Inclui hint acionável quando `reload-required`. Cobertura adicionada em smoke (`guardrails-long-run-intent-queue.test.ts`) para estados active/reload-required/unknown. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 39/39.",
+      "timestamp": "2026-04-23T15:33:00Z"
+    },
+    {
+      "id": "VER-BUD-227",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Auto-advance audits agora carregam `runtimeCodeState` (`active|reload-required|unknown`) em `guardrails-core.board-intent-auto-advance`, `...auto-advance-deferred`, `...auto-advance-failed` e `...auto-advance-blocked`, conectando evidência de loop ao estado real de ativação no control-plane. `guardrails-core.ts` passou a centralizar cálculo via `currentRuntimeCodeState()` (reuso em `/lane-queue status` e auto-drain), e notify de auto-advance inclui hint quando runtime está `reload-required`. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 39/39.",
+      "timestamp": "2026-04-23T15:55:00Z"
+    },
+    {
+      "id": "VER-BUD-228",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "`/lane-queue status` agora expõe marcadores operacionais diretos para loop: `PREPARADO`, `ATIVO_AQUI`, `EM_LOOP`, derivados por helper canônico (`resolveLoopActivationMarkers`) e serializados via `buildLoopActivationMarkersLabel`. Isso operacionaliza o pedido humano de saber quando já dá para usar as melhorias no control-plane para entrar em loop unattended. Cobertura adicionada em smoke (`guardrails-long-run-intent-queue.test.ts`) com cenários ready/reload-required/queued-blocked. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 40/40.",
+      "timestamp": "2026-04-23T16:03:00Z"
+    },
+    {
+      "id": "VER-BUD-229",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Runtime agora emite auditoria passiva de transição dos marcadores de loop (`guardrails-core.loop-activation-state`) diretamente no auto-drain, usando throttle canônico `shouldEmitLoopActivationAudit` (change-based + intervalo mínimo). Isso permite evidência de progresso para `PREPARADO/ATIVO_AQUI/EM_LOOP` sem depender de `/lane-queue status` manual. Cobertura adicionada em smoke para o throttle por label. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 41/41.",
+      "timestamp": "2026-04-23T16:13:00Z"
+    },
+    {
+      "id": "VER-BUD-230",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "evidence": "Runtime de auto-drain agora emite `guardrails-core.loop-activation-ready` na transição para `EM_LOOP=yes` (uma vez por transição), complementando `guardrails-core.loop-activation-state` e reduzindo latência para detectar loop liberado sem comando manual. Eventos de auto-advance também passaram a carregar `loopMarkers/loopMarkersLabel` para correlação direta com `PREPARADO/ATIVO_AQUI/EM_LOOP`. Validação focal: `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` => 41/41.",
+      "timestamp": "2026-04-23T16:40:00Z"
+    },
+    {
+      "id": "VER-OPS-LOWDISK-001",
+      "target": "TASK-OPS-LOWDISK-001",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T17:04:00Z",
+      "evidence": "Incidente operacional registrado: host reportado com <100MB livres após tentativa de validação/comandos. Ações imediatas nesta sessão: suspensão de runs pesados, interrupção de processos em background iniciados por timeout, checkpoint/handoff atualizado para retomada segura e backlog de mitigação criado antes de religar fábrica."
+    },
+    {
+      "id": "VER-BUD-231",
+      "target": "TASK-BUD-125",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T17:09:00Z",
+      "evidence": "Micro-slice de continuidade entregue sem run pesado (incidente low-disk): `/lane-queue status` agora inclui `loopReadyLast` e `loopReadyLabel`; auto-drain registra `lastLoopActivationReadyAt/Label` ao emitir `guardrails-core.loop-activation-ready`. Isso facilita provar transição `EM_LOOP=yes` na própria sessão sem varredura ampla de logs. Validação automatizada focal permanece pendente até estabilizar espaço em disco."
+    },
+    {
+      "id": "VER-OPS-LOWDISK-002",
+      "target": "TASK-OPS-LOWDISK-001",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-23T17:22:00Z",
+      "evidence": "Mitigação preventiva implementada em código: novo runbook `docs/guides/host-disk-recovery.md` + utilitário `scripts/host-disk-guard.mjs` com dry-run por padrão, cap de remoção (`--max-delete-mb`), proteção de sessões por default e modo agressivo opt-in (`--include-sessions`). Scripts npm adicionados: `ops:disk:check`, `ops:disk:cleanup`, `ops:disk:cleanup:with-sessions`, `test:ops:disk-guard`. Teste unitário dedicado criado em `scripts/test/host-disk-guard.test.mjs` (execução pendente após estabilização de disco/runner)."
     }
   ]
 }
