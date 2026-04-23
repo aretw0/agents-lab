@@ -286,6 +286,54 @@ function readSettingsPackageSet(settingsPath: string): Set<string> {
 	return out;
 }
 
+function readRetentionCompleteSignals(cwd: string, days: number): number {
+	const retentionRoot = path.join(cwd, ".pi", "colony-retention");
+	if (!existsSync(retentionRoot)) return 0;
+	const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+	let complete = 0;
+
+	let entries: ReturnType<typeof readdirSync>;
+	try {
+		entries = readdirSync(retentionRoot, { withFileTypes: true });
+	} catch {
+		return 0;
+	}
+
+	for (const entry of entries) {
+		if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+		const full = path.join(retentionRoot, entry.name);
+		let mtimeMs = 0;
+		try {
+			mtimeMs = statSync(full).mtimeMs;
+		} catch {
+			continue;
+		}
+		if (mtimeMs < cutoff) continue;
+
+		let parsed: Record<string, unknown> | undefined;
+		try {
+			parsed = JSON.parse(readFileSync(full, "utf8")) as Record<string, unknown>;
+		} catch {
+			continue;
+		}
+
+		const phase = typeof parsed.phase === "string" ? parsed.phase.trim().toLowerCase() : "";
+		if (phase !== "completed") continue;
+
+		const atIso =
+			typeof parsed.updatedAtIso === "string"
+				? parsed.updatedAtIso
+				: typeof parsed.capturedAtIso === "string"
+					? parsed.capturedAtIso
+					: undefined;
+		const atMs = atIso ? Date.parse(atIso) : Number.NaN;
+		if (Number.isFinite(atMs) && atMs < cutoff) continue;
+		complete += 1;
+	}
+
+	return complete;
+}
+
 export function recommendationForReadinessCheck(checkName: string): string {
 	if (checkName === "monitor-min-user-turns") {
 		return "Acione run controlado para gerar turnos suficientes (ex.: replay curto) antes de promover delegação.";
@@ -340,7 +388,12 @@ export function runSubagentReadiness(
 
 	const failedSignals = colonySignals.get("FAILED") ?? 0;
 	const budgetExceededSignals = colonySignals.get("BUDGET_EXCEEDED") ?? 0;
-	const completeSignals = colonySignals.get("COMPLETE") ?? 0;
+	const sessionCompleteSignals = colonySignals.get("COMPLETE") ?? 0;
+	const retentionCompleteSignals = readRetentionCompleteSignals(cwd, opts.days);
+	const completeSignals = Math.max(sessionCompleteSignals, retentionCompleteSignals);
+	if (completeSignals > sessionCompleteSignals) {
+		colonySignals.set("COMPLETE", completeSignals);
+	}
 
 	const checks: Check[] = [
 		{
