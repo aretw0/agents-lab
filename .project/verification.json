@@ -4371,6 +4371,15 @@
       "method": "test",
       "timestamp": "2026-04-23T21:35:00Z",
       "evidence": "Hatch progressivo (simple-first) implementado em `colony-pilot`: `/colony-pilot hatch check` agora reporta `mode: simple` por padrão sem CTA direta de swarm e com trilha básica + opt-in explícito (`/colony-pilot hatch check --advanced`). Modo avançado preserva runbook com `/colony <goal>`. `colony-pilot-hatch` status adicionado para observabilidade no footer (`custom-footer`). Documentação atualizada em `docs/guides/project-canonical-pipeline.md`. Smokes focais: `colony-pilot-hatch-e2e-harness`, `colony-pilot-parsers`, `custom-footer-registration` => 114/114 pass."
+    },
+    {
+      "id": "VER-BUD-238",
+      "target": "TASK-BUD-028",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-23T22:11:00Z",
+      "evidence": "TASK-BUD-028 account-aware key entregue: `quota-visibility` introduziu parser canônico `provider[/account]` (`parseProviderAccountKey`, `buildProviderAccountKey`) e evaluator com matching por seletor em `buildProviderBudgetStatuses` (provider/account quando disponível + fallback provider-only). `QuotaUsageEvent` agora carrega `account` e `providerAccountKey`; filtro de budget em tool/report aceita `provider/account`. Docs atualizadas: `docs/primitives/conversation-event-canonical-schema.md` e `docs/guides/budget-governance.md`. Testes focais: `quota-visibility-parsers`, `quota-panel`, `provider-readiness` => 60/60 pass."
     }
   ]
 }

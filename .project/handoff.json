@@ -1,40 +1,41 @@
 {
-  "timestamp": "2026-04-23T21:36:00.000Z",
-  "context": "Execução da intent canônica `board.execute-task` para TASK-BUD-088 concluída em slice de código/teste: hatch progressivo simple-first aplicado no `colony-pilot` com escala avançada só por opt-in explícito (`--advanced`), além de status `colony-pilot-hatch` para observabilidade no footer e doc pipeline atualizada.",
+  "timestamp": "2026-04-23T22:14:00.000Z",
+  "context": "Intent `board.execute-task` TASK-BUD-028 executada em micro-slice: quota-visibility agora suporta chave canônica account-aware `provider[/account]` para budgets e matching de uso por conta quando identidade estiver presente, mantendo fallback provider-only para eventos sem account.",
   "next_actions": [
-    "Validar manualmente no runtime: `/colony-pilot hatch check` (modo simple, sem CTA direta de swarm) e `/colony-pilot hatch check --advanced` (trilha avançada opt-in).",
-    "Se validação manual confirmar UX esperada, registrar nota final da task e manter no board (no-auto-close) até decisão humana de fechamento.",
-    "Retomar blocker principal pendente: evidência operacional real de TASK-BUD-125 (`readyForTaskBud125=yes`)."
+    "Validar manualmente no runtime com config de exemplo em `.pi/settings.json` (uma regra `provider/account` + uma `provider`) e executar `/quota-visibility budget` / `quota_visibility_provider_budgets` para conferir filtros por `provider/account`.",
+    "Manter TASK-BUD-028 em `in-progress` (no-auto-close) até revisão humana final da operação real multi-conta.",
+    "Retomar blocker principal de desbloqueio global: gerar evidência operacional real de TASK-BUD-125 (`readyForTaskBud125=yes` em `ops:loop-evidence:strict`)."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "task-bud-125-operational-evidence-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T20:27:00.000Z",
+      "atIso": "2026-04-23T22:05:37.610Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 18,
+      "level": "checkpoint",
+      "percent": 68,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy; standard slices allowed."
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
     },
     {
-      "atIso": "2026-04-23T21:36:00.000Z",
+      "atIso": "2026-04-23T22:14:00.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 22,
+      "level": "checkpoint",
+      "percent": 70,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Standard slice completed with focused tests and checkpoint refresh."
+      "action": "write-checkpoint",
+      "recommendation": "Keep micro-slice-only and checkpoint before larger follow-up work."
     }
   ]
 }
