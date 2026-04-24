@@ -20,6 +20,22 @@ export type AutoResumeDispatchReason =
 	| "lane-queue-pending"
 	| "send";
 
+export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReason): string {
+	switch (reason) {
+		case "send":
+			return "dispatched";
+		case "pending-messages":
+			return "suppressed: pending-messages";
+		case "recent-steer":
+			return "suppressed: recent-steer";
+		case "lane-queue-pending":
+			return "suppressed: lane-queue-pending";
+		case "auto-resume-off-or-cooldown":
+		default:
+			return "suppressed: cooldown-or-disabled";
+	}
+}
+
 export function shouldEmitAutoResumeAfterCompact(
 	config: ResumeConfigLike,
 	nowMs: number,

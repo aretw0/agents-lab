@@ -3444,7 +3444,8 @@
         "Mensagem de auto-resume para o modelo permanece execution-first (tasks/blockers/next) e nao inclui aviso de pressao de contexto/cadencia."
       ],
       "verification": "",
-      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, usuario colocou steer na lane-queue durante compactacao mas auto-resume ignorou e disparou board task. Usuario deve ter voz antes da fabrica retomar autonomia.\n[2026-04-24T00:00:00Z] Feedback humano assimilado: auto-resume deve validar steer/follow-up ainda pertinente antes de disparar mensagem; quando houver steer novo/pending queue, suprimir auto-resume. Prompt de auto-resume deve ser execution-first e sem ruído sobre pressão de contexto para evitar timidez desnecessária do modelo.\n[2026-04-24T00:00:00Z] Slice 2: `context_watch_status`/`/context-watch` agora expõem `auto-resume-last` (reason/dispatched/timestamp) para reduzir caixa-preta quando o auto-resume é suprimido por steer/pending queue."    },
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, usuario colocou steer na lane-queue durante compactacao mas auto-resume ignorou e disparou board task. Usuario deve ter voz antes da fabrica retomar autonomia.\n[2026-04-24T00:00:00Z] Feedback humano assimilado: auto-resume deve validar steer/follow-up ainda pertinente antes de disparar mensagem; quando houver steer novo/pending queue, suprimir auto-resume. Prompt de auto-resume deve ser execution-first e sem ruído sobre pressão de contexto para evitar timidez desnecessária do modelo.\n[2026-04-24T00:00:00Z] Slice 2: `context_watch_status`/`/context-watch` agora expõem `auto-resume-last` (reason/dispatched/timestamp) para reduzir caixa-preta quando o auto-resume é suprimido por steer/pending queue.\n[2026-04-24T00:00:00Z] Slice 3: adicionado resumo humano de razão (`describeAutoResumeDispatchReason`) para leitura operacional mais rápida no status/comando."
+    },
     {
       "id": "TASK-BUD-142",
       "description": "[P2] Investigar orphaned function_call_output sobrevivendo a compactacoes (mesmo call_id repetido)",
@@ -3510,7 +3511,7 @@
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas." 
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas."
     }
   ]
 }

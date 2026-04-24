@@ -16,6 +16,7 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	describeAutoResumeDispatchReason,
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
@@ -190,6 +191,7 @@ describe("context-watchdog", () => {
 			hasRecentSteerInput: false,
 			queuedLaneIntents: 0,
 		})).toEqual({ shouldDispatch: true, reason: "send" });
+		expect(describeAutoResumeDispatchReason("send")).toBe("dispatched");
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
 			hasPendingMessages: true,
@@ -208,6 +210,9 @@ describe("context-watchdog", () => {
 			hasRecentSteerInput: false,
 			queuedLaneIntents: 2,
 		})).toEqual({ shouldDispatch: false, reason: "lane-queue-pending" });
+		expect(describeAutoResumeDispatchReason("recent-steer")).toContain("recent-steer");
+		expect(describeAutoResumeDispatchReason("pending-messages")).toContain("pending-messages");
+		expect(describeAutoResumeDispatchReason("lane-queue-pending")).toContain("lane-queue-pending");
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg)).toBe(true);
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "fresh")).toBe(false);
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "stale")).toBe(true);

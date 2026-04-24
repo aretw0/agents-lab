@@ -60,10 +60,12 @@ import {
 	type HandoffRefreshMode,
 } from "./context-watchdog-handoff";
 import {
+	describeAutoResumeDispatchReason,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
 	shouldEmitAutoResumeAfterCompact,
 	shouldRefreshHandoffBeforeAutoCompact,
+	type AutoResumeDispatchReason,
 	type HandoffPrepReason,
 } from "./context-watchdog-resume";
 import {
@@ -100,6 +102,7 @@ export {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	describeAutoResumeDispatchReason,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
@@ -400,7 +403,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoResumeAt = 0;
 	let lastAutoResumeDecision: {
 		atIso: string;
-		reason: string;
+		reason: AutoResumeDispatchReason;
 		dispatched: boolean;
 		hasPendingMessages: boolean;
 		hasRecentSteerInput: boolean;
@@ -682,6 +685,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
 			autoResumeLastDecision: lastAutoResumeDecision,
 			autoResumeLastDecisionReason: lastAutoResumeDecision?.reason ?? "none",
+			autoResumeLastDecisionSummary: lastAutoResumeDecision
+				? describeAutoResumeDispatchReason(lastAutoResumeDecision.reason)
+				: "none",
 			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
 			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
 			handoffFreshMaxAgeMs: config.handoffFreshMaxAgeMs,
@@ -897,7 +903,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
-					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
+					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
