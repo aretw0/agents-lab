@@ -3127,7 +3127,8 @@
         "Testes focais de loop-evidence e smoke de lane-queue seguem verdes após mudança."
       ],
       "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime.\n[2026-04-24T00:25:00Z] Reload aplicado e check repetido, porém `ops:loop-evidence:strict` ainda reporta stale. Próxima validação depende de ciclo runtime que atualize heartbeat em operação real.
-[2026-04-24T00:38:00Z] Hardening complementar: heartbeat por snapshot em `session_start` + timer best-effort (1min com throttle de 5min) adicionado para manter freshness mesmo sem auto-advance recente. Testes focais permanecem verdes; requer novo `/reload` para validação runtime desta revisão."
+[2026-04-24T00:38:00Z] Hardening complementar: heartbeat por snapshot em `session_start` + timer best-effort (1min com throttle de 5min) adicionado para manter freshness mesmo sem auto-advance recente. Testes focais permanecem verdes; requer novo `/reload` para validação runtime desta revisão.
+[2026-04-24T00:47:00Z] Anti-masking aplicado: refresh por snapshot/timer agora exige lease ativa (não expirada) antes de atualizar `updatedAt`. Regressões verdes (`guardrails-long-run-intent-queue` 33/33 e `test:ops:loop-evidence` 5/5). `ops:loop-evidence:strict` segue stale até reload + ciclo runtime real."
     },
     {
       "id": "TASK-OPS-HYGIENE-003",

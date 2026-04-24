@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-24T00:39:00.000Z",
-  "context": "Diretriz estratégica reforçada pelo usuário foi assimilada: foco total em desbloquear operação de fábrica contínua (long runs estáveis + control-plane escalável), evitando side quests. Dois eixos ativos: (1) `TASK-BUD-129` para eliminar falso-stale de loop evidence; (2) `TASK-OPS-HYGIENE-003` para paridade de superfície lab<->usuário e governança de tools lab-only temporárias.",
+  "timestamp": "2026-04-24T00:49:00.000Z",
+  "context": "Foco fábrica-first mantido. `TASK-BUD-129` recebeu hardening extra para evitar falso-green: heartbeat de loop evidence por snapshot/timer só atualiza freshness quando runtime está running/healthy/none **e lease ativa (não expirada)**. Isso evita mascarar estado morto ao sair de sessão. Check strict ainda stale porque runtime novo ainda não carregou revisão via `/reload` e não executou ciclo operacional.",
   "next_actions": [
-    "Executar `/reload` para ativar a revisão mais recente de `TASK-BUD-129` (heartbeat por snapshot em session_start + timer best-effort).",
-    "Após reload, rodar `npm run -s ops:loop-evidence:strict` e confirmar freshness green sem relaxar critérios canônicos.",
-    "Se strict ficar green, registrar verificação runtime e fechar `TASK-BUD-129`; isso remove blocker principal de operação contínua.",
-    "Continuar `TASK-OPS-HYGIENE-003` com inventário objetivo das superfícies lab-only atuais e plano de graduação para sinais/tools canônicos."
+    "Executar `/reload` para carregar commit `fix(guardrails-core): keep loop evidence fresh via snapshot heartbeat timer` + guard lease-active.",
+    "Após reload, rodar `npm run -s ops:loop-evidence:strict` imediatamente (esperado: fresh se loop ativo) e novamente após >5 min para validar heartbeat throttled.",
+    "Se strict green em ambas janelas sem relaxar critérios, registrar verificação runtime e concluir `TASK-BUD-129`.",
+    "Em paralelo, seguir `TASK-OPS-HYGIENE-003` com inventário objetivo de superfícies lab-only e plano de graduação para superfície canônica."
   ],
   "blockers": [
     "runtime-reload-pending-for-loop-evidence-heartbeat-timer",
@@ -13,17 +13,17 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T00:39:00.000Z",
+      "atIso": "2026-04-24T00:49:00.000Z",
       "reason": "message_end",
-      "level": "warn",
-      "percent": 52,
+      "level": "ok",
+      "percent": 14,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+      "action": "standard-slices",
+      "recommendation": "Context healthy."
     }
   ]
 }
