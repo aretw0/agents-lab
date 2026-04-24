@@ -150,9 +150,12 @@ vite.config.ts.timestamp-*
 .pi/snapshots/
 .pi/colony-retention/
 .pi/deferred-intents.json
+.pi/long-run-loop-state.json
+.pi/guardrails-loop-evidence.json
 
 # Workspace-local isolated agent runtime (pi-isolated)
 .sandbox/
+tmp/
 
 # Pi versioned configuration + single-board clock
 # Policy: .pi/settings.json and .pi/agents/*.yaml are shared config — versioned.
