@@ -1,28 +1,28 @@
 {
-  "timestamp": "2026-04-23T23:33:00.000Z",
-  "context": "Execução avançou com foco foundations-first: `TASK-OPS-HYGIENE-002` foi concluída (verificação passed) com limpeza de `.sandbox/tmp` e política de higiene canônica documentada; `TASK-BUD-128` recebeu refinamento estrutural (checklist GO/NO-GO Modo 1->2 + envelope mínimo de telemetria para Modo 3/federação), mantendo separação de conceitos conforme direção do usuário.",
+  "timestamp": "2026-04-24T00:14:00.000Z",
+  "context": "Progresso contínuo em foundations-first: `TASK-OPS-HYGIENE-002` e `TASK-BUD-128` foram concluídas. Novo slice aberto em `TASK-BUD-129` para reduzir falso-stale de loop evidence: `guardrails-core` agora aplica heartbeat throttled (5 min) quando critérios canônicos continuam válidos, sem mascarar estado inválido. Testes focais verdes.",
   "next_actions": [
-    "Continuar `TASK-BUD-128`: transformar draft em runbook operacional com passos de rollout/rollback por modo e exemplos de sinais esperados.",
-    "Tratar staleness de `.pi/guardrails-loop-evidence.json` (freshness) para restabelecer `ops:loop-evidence:strict` em green.",
-    "Avaliar fechamento humano de `TASK-BUD-127` (já validada por testes + runtime).",
-    "Seguir delegação progressiva com subagentes descartáveis (spawn -> evidência -> kill) para aliviar pressão de contexto no control-plane principal."
+    "Executar `/reload` para ativar runtime de `TASK-BUD-129` (heartbeat de loop evidence).",
+    "Após reload, observar 1 ciclo operacional e reexecutar `npm run -s ops:loop-evidence:strict` para confirmar redução de stale.",
+    "Se strict ficar green por freshness, registrar verificação runtime e decidir fechamento de `TASK-BUD-129`.",
+    "Manter `TASK-BUD-127` em no-auto-close até decisão humana (tecnicamente pronta)."
   ],
   "blockers": [
-    "loop-evidence-stale-needs-refresh"
+    "runtime-reload-pending-for-loop-evidence-heartbeat"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-23T23:33:00.000Z",
+      "atIso": "2026-04-24T00:14:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 38,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "continue",
-      "recommendation": "Context healthy; standard-slices ativo para documentação e runbooks."
+      "recommendation": "Context healthy; standard-slices ativo."
     }
   ]
 }

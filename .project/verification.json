@@ -4470,6 +4470,24 @@
       "method": "inspect",
       "timestamp": "2026-04-23T23:31:00Z",
       "evidence": "Playbook evoluiu com critérios operacionais concretos: seção GO/NO-GO para transição Modo 1->2 e envelope mínimo de telemetria para Modo 3 (federation). Documento mantém separação de fases e contrato board-first/no-auto-close/verification."
+    },
+    {
+      "id": "VER-BUD-249",
+      "target": "TASK-BUD-128",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-23T23:36:00Z",
+      "evidence": "`docs/guides/control-plane-evolution-playbook.md` consolidado com: (1) separação explícita dos 3 modos (single control-plane, delegação descartável, federação), (2) gates/limites/ciclo de vida por modo, (3) seção 'Inspirado por' mapeando padrões de `agents/` e trilha `a2a/` de `nilayparikh/tuts-agentic-ai-examples`, além de rollout/rollback e sinais esperados por estágio. Índice atualizado em `docs/guides/README.md`."
+    },
+    {
+      "id": "VER-BUD-250",
+      "target": "TASK-BUD-129",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T00:11:00Z",
+      "evidence": "Heartbeat controlado de loop evidence implementado em `guardrails-core` (`refreshLoopEvidenceHeartbeat`, throttle 5min, guarda por critérios canônicos). Regressões focais verdes: `npm run -s test:ops:loop-evidence` => 5/5 pass; `npm run -s test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` => 32/32 pass. Pendência: validação runtime pós-reload para confirmar redução de stale em operação."
     }
   ]
 }
