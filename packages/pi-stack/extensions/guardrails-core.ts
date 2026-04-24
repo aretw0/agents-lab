@@ -1706,6 +1706,7 @@ export default function (pi: ExtensionAPI) {
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
     longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
+    setLoopMode(ctx, longRunLoopRuntimeState.mode, "session-start-lease-renew");
     refreshLoopEvidenceHeartbeatFromSnapshot(ctx);
     ensureLoopEvidenceHeartbeatTimer(ctx);
     updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);

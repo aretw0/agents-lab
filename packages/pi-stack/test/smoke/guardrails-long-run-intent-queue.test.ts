@@ -371,6 +371,45 @@ describe("guardrails-core long-run intent queue", () => {
     }
   });
 
+  it("renews long-run lease when mode is reasserted on session start", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-long-run-loop-lease-renew-"));
+    try {
+      mkdirSync(join(cwd, ".pi"), { recursive: true });
+      writeFileSync(
+        join(cwd, ".pi", "long-run-loop-state.json"),
+        JSON.stringify({
+          version: 1,
+          mode: "running",
+          health: "healthy",
+          leaseOwner: "guardrails-core:stale",
+          leaseTtlMs: 30_000,
+          leaseHeartbeatAtIso: "2026-04-23T21:52:43.462Z",
+          leaseExpiresAtIso: "2026-04-23T21:53:13.462Z",
+          stopCondition: "none",
+          stopReason: "running",
+          consecutiveDispatchFailures: 0,
+          updatedAtIso: "2026-04-23T21:52:43.462Z",
+          lastTransitionIso: "2026-04-23T21:52:41.934Z",
+          lastTransitionReason: "init",
+        }),
+      );
+
+      const expired = readLongRunLoopRuntimeState(cwd);
+      const nowMs = Date.parse("2026-04-24T01:00:00.000Z");
+      expect(resolveAutoDrainRuntimeGateReason("ready", expired, nowMs)).toBe("lease-expired");
+
+      const renewed = setLongRunLoopRuntimeMode(cwd, "running", "session-start-lease-renew").state;
+      expect(renewed.mode).toBe("running");
+      expect(renewed.health).toBe("healthy");
+      expect(renewed.stopCondition).toBe("none");
+      expect(Date.parse(renewed.leaseExpiresAtIso)).toBeGreaterThan(Date.now());
+      expect(renewed.leaseOwner).toContain("guardrails-core:");
+      expect(resolveAutoDrainRuntimeGateReason("ready", renewed, Date.now())).toBe("ready");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("reads configured values from .pi/settings.json", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-config-"));
     try {
