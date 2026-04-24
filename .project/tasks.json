@@ -946,11 +946,16 @@
     {
       "id": "TASK-BUD-043",
       "description": "[P1] Implementar dispatch de comportamento por intenção (skill routing): dado um prompt livre do usuário, inferir e ativar automaticamente a extensão/skill/agent mais adequada — análogo ao carregamento dinâmico de skills do Claude Code, mas no ecossistema pi. Complementa o portfolio routing advisor (TASK-BUD-027) que rota providers; este rota comportamentos.",
-      "status": "planned",
+      "status": "in-progress",
       "type": "feature",
       "depends_on": [
         "TASK-BUD-027",
         "TASK-BUD-036"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-behavior-routing.ts",
+        "packages/pi-stack/test/smoke/guardrails-behavior-routing.test.ts"
       ],
       "acceptance_criteria": [
         "Existe classificador de intenção (leve, determinístico) que mapeia prompt -> extensão candidata.",
@@ -958,7 +963,7 @@
         "Fallback seguro: se nenhuma skill bater com confiança suficiente, comportamento padrão é preservado.",
         "Auditável: log mostra qual skill foi selecionada e por quê."
       ],
-      "notes": "Originou de observação do usuário (2026-04-16): o pi-stack tem roteamento de provider mas não de comportamento. O Claude Code decide dinamicamente qual skill carregar baseado no contexto do prompt — lacuna equivalente existe no pi."
+      "notes": "Originou de observação do usuário (2026-04-16): o pi-stack tem roteamento de provider mas não de comportamento. O Claude Code decide dinamicamente qual skill carregar baseado no contexto do prompt — lacuna equivalente existe no pi.\n[2026-04-24T12:21:00Z] Slice 1 implementada: classificador determinístico de prompt livre (`classifyBehaviorRoute`) com seleção de skill candidata + fallback por confiança, injeção transparente de advisory no `before_agent_start`, status runtime `[behavior] <skill>` e audit `guardrails-core.behavior-route-selected`. Cobertura dedicada adicionada (`guardrails-behavior-routing.test.ts`). Evidência: VER-BUD-271."
     },
     {
       "id": "TASK-BUD-044",

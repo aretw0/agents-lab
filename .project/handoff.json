@@ -1,18 +1,21 @@
 {
-  "timestamp": "2026-04-24T12:17:30.000Z",
-  "context": "MODO FÁBRICA ON segue ativo com lane principal em `TASK-BUD-119`; nesta interrupção por envelope canônico (`board.execute-task TASK-BUD-040`) foi entregue slice de billing adapter para Copilot sem quebrar pipeline atual. `quota-visibility` agora injeta custo faturado externo de GitHub Copilot no sistema de budgets via fonte equivalente (`~/.pi/agent/billing/github-copilot-costs.json`, override `PI_COPILOT_BILLING_PATH`) com matcher account-aware `github-copilot[/account]`.",
+  "timestamp": "2026-04-24T12:22:30.000Z",
+  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-043` executado. Slice 1 de behavior/skill routing entregue com classificador determinístico para prompt livre (`guardrails-core-behavior-routing.ts`), integração transparente no `before_agent_start` do `guardrails-core` e auditoria explícita (`guardrails-core.behavior-route-selected`). Fallback seguro preservado quando confiança baixa; comportamento padrão não é interrompido.",
   "next_actions": [
-    "Retomar lane principal `TASK-BUD-119` após checkpoint desta task interruptiva (manter foco em confiabilidade de loop/lane).",
-    "Para validar `TASK-BUD-040` em runtime real, prover arquivo de billing externo e rodar `/quota-visibility budget github-copilot` para observar `external billing` + custo injetado.",
-    "Se runtime real confirmar leitura de custo faturado, promover `VER-BUD-270` para passed (decisão humana de fechamento preservada por contrato no-auto-close)."
+    "Executar `/reload` para ativar o roteamento de comportamento no runtime atual.",
+    "Validar em runtime com prompts livres de domínios diferentes (ex.: GitHub/web/.project) e confirmar status `[behavior] <skill>` + audit correspondente.",
+    "Continuar `TASK-BUD-043` em slice 2 para aumentar cobertura de rotas e reduzir ambiguidades (ex.: desempate entre `github` vs `pi-workflows`).",
+    "Retomar lane principal `TASK-BUD-119` após checkpoint de validação runtime deste interrupt task envelope."
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-pending-for-task-bud-043-behavior-routing"
+  ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:17:30.000Z",
+      "atIso": "2026-04-24T12:22:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 34,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

@@ -4668,6 +4668,15 @@
       "method": "test",
       "timestamp": "2026-04-24T12:16:30Z",
       "evidence": "Implementado adapter de billing externo para GitHub Copilot em `quota-visibility`: leitura de `~/.pi/agent/billing/github-copilot-costs.json` (ou `PI_COPILOT_BILLING_PATH`), parse de formatos `records|items|events|data`, normalização provider/account (`github-copilot[/account]`) e injeção no stream de `QuotaUsageEvent` para cálculo de budgets com custo real faturado. Cobertura: `quota-visibility-parsers.test.ts` com novo caso `extractCopilotBillingUsageEvents` (smoke 33/33 pass)."
+    },
+    {
+      "id": "VER-BUD-271",
+      "target": "TASK-BUD-043",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T12:21:00Z",
+      "evidence": "Slice 1 de skill routing entregue em `guardrails-core`: classificador determinístico de comportamento para prompt livre (`classifyBehaviorRoute`) com seleção de skill candidata (github/glab/web-browser/source-research/pi-project/pi-workflows/terminal-setup), fallback seguro por confiança mínima e auditoria `guardrails-core.behavior-route-selected`. O roteamento injeta advisory no system prompt de forma transparente (sem exigir nomeação explícita da skill) e publica status `[behavior] <skill>`. Cobertura adicionada em `guardrails-behavior-routing.test.ts` (5 testes); smokes verdes junto com intent-bus (11/11)."
     }
   ]
 }
