@@ -3343,6 +3343,28 @@
         "Runbook de distribuição define como manter skills sincronizadas com a evolução dos playbooks (evitando drift docs-only)."
       ],
       "notes": "Backlog aberto por diretriz humana (2026-04-24): guides internos não são distribuídos; práticas canônicas precisam viajar com a stack via skills/exemplos para disseminação operacional consistente."
+    },
+    {
+      "id": "TASK-BUD-139",
+      "description": "[P1] Instituir \"decision packet\" automático para tarefas em no-auto-close (resumo de evidência + opções de decisão humana).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-119"
+      ],
+      "references": [
+        "REQ-BUD-060"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        ".project/handoff.json",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Quando task estratégica atingir critérios técnicos, runtime/fluxo emite pacote compacto para decisão humana (close/keep-open/defer + riscos).",
+        "Pacote inclui evidências canônicas recentes (verification IDs, comandos/testes, blockers remanescentes) sem exigir pergunta explícita do usuário.",
+        "Processo preserva no-auto-close e reduz fricção: usuário só decide, não precisa pedir descoberta manual."
+      ],
+      "notes": "Backlog aberto por feedback humano (2026-04-24): hoje o usuário ainda precisa lembrar de perguntar pendências de decisão; objetivo é tornar esse checkpoint proativo e determinístico."
     }
   ]
 }

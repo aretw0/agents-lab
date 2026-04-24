@@ -4650,6 +4650,15 @@
       "method": "command",
       "timestamp": "2026-04-24T12:04:30Z",
       "evidence": "Checagem runtime do lease heartbeat timer após `fix(guardrails-core): keep running lease alive with periodic heartbeat timer`: leitura dupla de `.pi/long-run-loop-state.json` com 12s de intervalo mostrou renovação automática (`leaseHeartbeatAtIso` 12:04:12.481Z -> 12:04:22.512Z, `leaseExpiresAtIso` 12:04:42.481Z -> 12:04:52.512Z, `stopCondition=none`)."
+    },
+    {
+      "id": "VER-BUD-269",
+      "target": "TASK-BUD-139",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T12:11:00Z",
+      "evidence": "Feedback de governança assimilado: criada `TASK-BUD-139` para pacote proativo de decisão humana em tasks no-auto-close, reduzindo necessidade de o usuário perguntar manualmente pendências de fechamento."
     }
   ]
 }
