@@ -4497,6 +4497,15 @@
       "method": "inspect",
       "timestamp": "2026-04-24T00:26:00Z",
       "evidence": "`docs/guides/project-canonical-pipeline.md` atualizado com seção 'Higiene de superfície distribuída (lab x usuários)', explicitando paridade por padrão, exceções lab-only documentadas e critério de promoção para surface canônica/sinal operacional. Escopo de higiene foi registrado no board com follow-up dedicado."
+    },
+    {
+      "id": "VER-BUD-252",
+      "target": "TASK-OPS-HYGIENE-003",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T00:30:00Z",
+      "evidence": "Criado `docs/guides/lab-user-surface-parity.md` com baseline de paridade lab x usuário (paridade por padrão, exceções temporárias, critério de promoção/remoção, governança). Índice atualizado em `docs/guides/README.md`."
     }
   ]
 }

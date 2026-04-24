@@ -3137,6 +3137,7 @@
       ],
       "files": [
         "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/lab-user-surface-parity.md",
         "docs/guides/README.md",
         ".project/tasks.json",
         ".project/verification.json"
@@ -3146,7 +3147,7 @@
         "Existe política para tools/superfícies lab-only temporárias com critério de graduação para surface canônica (tool/comando/sinal operacional) ou remoção.",
         "Board registra evidência de revisão de escopo e próximo passo para inventário de diferenças lab x distribuído."
       ],
-      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários."
+      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência."
     }
   ]
 }

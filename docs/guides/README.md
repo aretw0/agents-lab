@@ -43,6 +43,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [extension-acceptance-checklist.md](./extension-acceptance-checklist.md) | Checklist para aceitar nova extensão sem aumentar fragmentação |
 | [first-party-assimilation-notes.md](./first-party-assimilation-notes.md) | Memória técnica de capacidades suprimidas por conflito para futura centralização first-party |
 | [ci-governance.md](./ci-governance.md) | Troubleshooting dos gates de soberania no CI (annotations, registry, criticality, owner) |
+| [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
 
 ### Embedding e Integração
 
