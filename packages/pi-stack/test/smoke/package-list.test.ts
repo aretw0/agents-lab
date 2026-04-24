@@ -22,7 +22,11 @@ describe("package-list integrity", () => {
     expect(Array.isArray(mod.PACKAGES)).toBe(true);
     expect(Array.isArray(mod.FIRST_PARTY)).toBe(true);
     expect(Array.isArray(mod.THIRD_PARTY)).toBe(true);
+    expect(Array.isArray(mod.STRICT_CURATED)).toBe(true);
     expect(Array.isArray(mod.CURATED_DEFAULT)).toBe(true);
+    expect(Array.isArray(mod.CURATED_RUNTIME)).toBe(true);
+    expect(Array.isArray(mod.RUNTIME_CAPABILITY_EXTRAS)).toBe(true);
+    expect(mod.CURATED_DEFAULT).toEqual(mod.STRICT_CURATED);
     expect(mod.PACKAGES.length).toBe(mod.FIRST_PARTY.length + mod.THIRD_PARTY.length);
   });
 

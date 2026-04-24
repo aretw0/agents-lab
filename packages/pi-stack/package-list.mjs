@@ -34,16 +34,33 @@ export const THIRD_PARTY = [
 ];
 
 /**
- * Curated default baseline for distribution (strict-curated intent):
- * keep only capabilities already matured in isolated dogfood.
+ * Official minimal baseline for distribution.
+ * Keeps only canonical curated surfaces (strict-curated profile).
  */
-export const CURATED_DEFAULT = [
+export const STRICT_CURATED = [
   ...FIRST_PARTY,
   "@davidorex/pi-project-workflows",
+];
+
+/**
+ * Runtime/capability extras that remain opt-in outside strict baseline.
+ */
+export const RUNTIME_CAPABILITY_EXTRAS = [
   "@ifi/oh-pi-extensions",
   "@ifi/oh-pi-ant-colony",
   "@ifi/pi-web-remote",
 ];
+
+/**
+ * Compatibility alias: curated-default now maps to strict-curated.
+ * Kept to avoid breaking existing scripts and docs.
+ */
+export const CURATED_DEFAULT = STRICT_CURATED;
+
+/**
+ * Strict baseline + curated runtime extras (still smaller than stack-full).
+ */
+export const CURATED_RUNTIME = [...STRICT_CURATED, ...RUNTIME_CAPABILITY_EXTRAS];
 
 /** All managed packages */
 export const PACKAGES = [...FIRST_PARTY, ...THIRD_PARTY];

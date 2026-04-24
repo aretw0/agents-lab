@@ -6,10 +6,23 @@ O agents-lab publica e mantém sua própria stack curada como meta-pacote npm.
 **Esta é a forma recomendada de instalar a stack completa:**
 
 ```bash
-npx @aretw0/pi-stack               # instala baseline curada (default)
-npx @aretw0/pi-stack --local       # baseline curada no projeto atual
-npx @aretw0/pi-stack --stack-full  # opt-in explícito para stack completa
+npx @aretw0/pi-stack                 # instala baseline strict-curated (default oficial mínima)
+npx @aretw0/pi-stack --local         # strict-curated no projeto atual
+npx @aretw0/pi-stack --runtime-extras # opt-in: baseline + extras de runtime/capability
+npx @aretw0/pi-stack --stack-full    # opt-in explícito para stack completa
 ```
+
+### Perfis de distribuição (baseline vs opt-in)
+
+| Perfil | Objetivo | Inclui | Quando usar |
+|---|---|---|---|
+| `strict-curated` (default) | baseline oficial mínima | first-party `@aretw0/*` + `@davidorex/pi-project-workflows` | produção/canais canônicos com menor superfície e menos drift |
+| `curated-runtime` (opt-in) | adicionar capacidades operacionais maduras sem ir para full | `strict-curated` + `@ifi/oh-pi-extensions` + `@ifi/oh-pi-ant-colony` + `@ifi/pi-web-remote` | quando o projeto precisa desses extras de runtime/capability explicitamente |
+| `stack-full` (opt-in) | cobertura máxima de ecossistema | todos os managed packages da stack | exploração, laboratório, compatibilidade ampla |
+
+Trade-off canônico:
+- quanto menor o perfil, menor risco de overlap/ruído e mais previsível a governança;
+- extras ficam fora do default e entram só por comando explícito (`--runtime-extras` ou `--profile ...`).
 
 Ou diretamente via pi:
 

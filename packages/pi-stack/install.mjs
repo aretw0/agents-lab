@@ -23,14 +23,25 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import process from "node:process";
-import { CURATED_DEFAULT, FIRST_PARTY, THIRD_PARTY, PACKAGES } from "./package-list.mjs";
+import {
+  STRICT_CURATED,
+  CURATED_DEFAULT,
+  CURATED_RUNTIME,
+  FIRST_PARTY,
+  THIRD_PARTY,
+  PACKAGES,
+} from "./package-list.mjs";
 
 const IS_WINDOWS = process.platform === "win32";
 
-export const DEFAULT_INSTALL_PROFILE = "curated-default";
+export const DEFAULT_INSTALL_PROFILE = "strict-curated";
 
 const INSTALL_PROFILES = {
+  "strict-curated": STRICT_CURATED,
+  // backward-compatible alias
   "curated-default": CURATED_DEFAULT,
+  // strict baseline + curated runtime/capability extras
+  "curated-runtime": CURATED_RUNTIME,
   "stack-full": PACKAGES,
 };
 
@@ -228,6 +239,10 @@ function parseArgs(argv) {
 				console.error("Error: --profile requires a value");
 				process.exit(1);
 			}
+		} else if (arg === "--strict-curated") {
+			profile = "strict-curated";
+		} else if (arg === "--runtime-extras") {
+			profile = "curated-runtime";
 		} else if (arg === "--stack-full") {
 			profile = "stack-full";
 		} else if (arg === "--local" || arg === "-l") {
@@ -257,9 +272,10 @@ function printHelp() {
 pi-stack — install the @aretw0 curated pi stack
 
 Usage:
-  npx @aretw0/pi-stack                    Install curated default profile (global)
+  npx @aretw0/pi-stack                    Install strict-curated profile (global, default)
+  npx @aretw0/pi-stack --runtime-extras   Install strict baseline + curated runtime extras
   npx @aretw0/pi-stack --stack-full       Install full stack profile (global)
-  npx @aretw0/pi-stack --profile stack-full
+  npx @aretw0/pi-stack --profile strict-curated
   npx @aretw0/pi-stack --version 0.3.0    Pin @aretw0/* packages to a version
   npx @aretw0/pi-stack --local            Install to project .pi/settings.json
   npx @aretw0/pi-stack --local --baseline Apply theme + colony-pilot + claude-code defaults
@@ -267,7 +283,9 @@ Usage:
 
 Options:
   -v, --version <ver>   Pin @aretw0/* packages to a specific version
-  --profile <name>      Install profile: curated-default | stack-full
+  --profile <name>      Install profile: strict-curated | curated-default | curated-runtime | stack-full
+  --strict-curated      Alias for --profile strict-curated (official minimal baseline)
+  --runtime-extras      Alias for --profile curated-runtime (explicit extras opt-in)
   --stack-full          Alias for --profile stack-full
   -l, --local           Install project-locally instead of globally
   -b, --baseline        Merge default baseline settings (theme, colony-pilot, claude-code)
@@ -280,8 +298,11 @@ ${FIRST_PARTY.map((p) => `  • ${p}`).join("\n")}
 Third-party packages:
 ${THIRD_PARTY.map((p) => `  • ${p}`).join("\n")}
 
-Curated default profile:
-${CURATED_DEFAULT.map((p) => `  • ${p}`).join("\n")}
+Strict-curated profile (default):
+${STRICT_CURATED.map((p) => `  • ${p}`).join("\n")}
+
+Curated runtime extras profile (opt-in):
+${CURATED_RUNTIME.map((p) => `  • ${p}`).join("\n")}
 `.trim());
 }
 
