@@ -3480,7 +3480,7 @@
     {
       "id": "TASK-BUD-144",
       "description": "[P1] Criar macro-APIs deterministicas para operacoes comuns de refactor/edicao (rename/imports/format) e reduzir mudanca na unha",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -3492,8 +3492,7 @@
         "Playbook descreve quando usar macro-API vs edicao pontual, com prioridade para caminhos galvanizados."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca."
-    },
+      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback."    },
     {
       "id": "TASK-BUD-145",
       "description": "[P2] Criar APIs seguras para mutacao em arquivo grande e para consultas estruturadas (ex.: SQL) com guardrails deterministico",

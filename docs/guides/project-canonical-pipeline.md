@@ -213,6 +213,21 @@ Contrato inicial (hard-pathway):
 
 Objetivo: transformar um soft-intent operacional em comportamento previsível e reproduzível, sem depender de acerto manual do agente.
 
+### Macro-APIs determinísticas (roadmap de refactor)
+
+Para reduzir edição "na unha" em fluxos repetitivos, priorizar superfície macro com contrato estável:
+
+- `refactor_rename_symbol`
+- `refactor_organize_imports`
+- `refactor_format_target`
+
+Contrato mínimo:
+- `dryRun=true` por default;
+- resposta com preview + escopo de arquivos afetados;
+- `apply` com trilha auditável e rollback mínimo.
+
+Referência de contrato inicial: `docs/research/task-bud-144-macro-api-contract-2026-04-24.md`.
+
 ### Steering signal-first (tool-surface diet)
 
 No loop canônico, steering diário deve priorizar **sinais passivos de stream/status** (ex.: `warn/checkpoint/compact`, `operatorSignal`) em vez de depender de tool-call manual.
