@@ -4677,6 +4677,15 @@
       "method": "test",
       "timestamp": "2026-04-24T12:21:00Z",
       "evidence": "Slice 1 de skill routing entregue em `guardrails-core`: classificador determinístico de comportamento para prompt livre (`classifyBehaviorRoute`) com seleção de skill candidata (github/glab/web-browser/source-research/pi-project/pi-workflows/terminal-setup), fallback seguro por confiança mínima e auditoria `guardrails-core.behavior-route-selected`. O roteamento injeta advisory no system prompt de forma transparente (sem exigir nomeação explícita da skill) e publica status `[behavior] <skill>`. Cobertura adicionada em `guardrails-behavior-routing.test.ts` (5 testes); smokes verdes junto com intent-bus (11/11)."
+    },
+    {
+      "id": "VER-BUD-272",
+      "target": "TASK-BUD-066",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T12:34:30Z",
+      "evidence": "Formalização do contrato primitives+adapters publicada em `docs/primitives/continuity-abstraction.md` com entidades canônicas (task/event/intent/evidence), invariantes, transições e adapter de referência Markdown/Obsidian. `docs/guides/project-canonical-pipeline.md` recebeu matriz operacional mínima + camada hard intent storage-agnostic. `REQ-BUD-062` adicionado em `.project/requirements.json` para rastrear o requisito canônico de interoperabilidade."
     }
   ]
 }

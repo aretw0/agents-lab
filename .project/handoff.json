@@ -1,21 +1,18 @@
 {
-  "timestamp": "2026-04-24T12:22:30.000Z",
-  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-043` executado. Slice 1 de behavior/skill routing entregue com classificador determinístico para prompt livre (`guardrails-core-behavior-routing.ts`), integração transparente no `before_agent_start` do `guardrails-core` e auditoria explícita (`guardrails-core.behavior-route-selected`). Fallback seguro preservado quando confiança baixa; comportamento padrão não é interrompido.",
+  "timestamp": "2026-04-24T12:35:30.000Z",
+  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-066` executado (board-first, no-auto-close). Slice documental de contrato tracker-agnostic entregue: `continuity-abstraction.md` formalizado com contrato canônico v1, transições e invariantes; matriz de adapters e camada hard intent storage-agnostic explicitadas no guia canônico; `REQ-BUD-062` adicionado para rastreabilidade em requirements.",
   "next_actions": [
-    "Executar `/reload` para ativar o roteamento de comportamento no runtime atual.",
-    "Validar em runtime com prompts livres de domínios diferentes (ex.: GitHub/web/.project) e confirmar status `[behavior] <skill>` + audit correspondente.",
-    "Continuar `TASK-BUD-043` em slice 2 para aumentar cobertura de rotas e reduzir ambiguidades (ex.: desempate entre `github` vs `pi-workflows`).",
-    "Retomar lane principal `TASK-BUD-119` após checkpoint de validação runtime deste interrupt task envelope."
+    "Revisar rapidamente o texto de `continuity-abstraction.md` e confirmar se o nível de formalização está adequado para virar base de adapters futuros.",
+    "Se aprovado, promover verificação de `TASK-BUD-066` para passed e submeter decisão humana de fechamento (no-auto-close preservado).",
+    "Retomar lane principal ativa após este interrupt task envelope (`TASK-BUD-119`), mantendo foco em desbloqueio de potencial."
   ],
-  "blockers": [
-    "runtime-reload-pending-for-task-bud-043-behavior-routing"
-  ],
+  "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:22:30.000Z",
+      "atIso": "2026-04-24T12:35:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 35,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
