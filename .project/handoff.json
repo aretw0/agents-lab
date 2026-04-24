@@ -1,32 +1,182 @@
 {
-  "timestamp": "2026-04-24T13:31:30.000Z",
+  "timestamp": "2026-04-24T14:44:36.779Z",
   "context": "Envelope board-first para `TASK-OPS-CONFIG-CMD-001` executado com micro-slice reversível: `guardrails-core` ganhou comando dedicado `/guardrails-config` para operar configuração de runtime sem editar JSON manualmente (`status|get|set`) com validação determinística de tipo/faixa em chaves suportadas, persistência segura em `.pi/settings.json`, audit trail (`guardrails-core.runtime-config-set`) e orientação de reload. `project-canonical-pipeline.md` documenta o fluxo canônico e fallback manual para chaves não suportadas.",
   "next_actions": [
+    "Context-watch action: level=compact 100% (compact-now) · Compact now and continue from checkpoint.",
     "Decisão humana de fechamento para `TASK-OPS-CONFIG-CMD-001` (evidência passed `VER-BUD-278`, no-auto-close preservado).",
     "Opcional pós-reload: validar no runtime atual com `/guardrails-config status`, `/guardrails-config get longRunIntentQueue.maxItems` e um `set` de teste.",
     "Pendências de decisão humana permanecem: `TASK-BUD-115`, `TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`; depois retomar lane principal `TASK-BUD-119`."
   ],
-  "blockers": [
-    "human-decision-required-for-task-ops-config-cmd-001-no-auto-close",
-    "human-decision-required-for-task-bud-115-no-auto-close",
-    "human-decision-required-for-task-bud-112-no-auto-close",
-    "human-decision-required-for-task-bud-104-no-auto-close",
-    "human-decision-required-for-task-bud-100-no-auto-close",
-    "human-decision-required-for-task-bud-087-no-auto-close"
-  ],
+  "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T13:31:30.000Z",
+      "atIso": "2026-04-24T13:39:13.500Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 100,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T13:55:01.771Z",
+      "reason": "session_start",
+      "level": "compact",
+      "percent": 100,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:01:27.999Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 60,
+      "percent": 65,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:01:49.959Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 76,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:09:40.476Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 89,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:23:17.621Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 70,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "write-checkpoint",
-      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-04-24T14:23:27.754Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 92,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:25:46.265Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 94,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:39:55.399Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 58,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:40:10.879Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 68,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-04-24T14:40:10.908Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 72,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    },
+    {
+      "atIso": "2026-04-24T14:44:36.779Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 100,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
-  ]
+  ],
+  "lastClosure": {
+    "atIso": "2026-04-24T15:48:07.266Z",
+    "closedTasks": [
+      "TASK-BUD-087",
+      "TASK-BUD-100",
+      "TASK-BUD-104",
+      "TASK-BUD-112",
+      "TASK-BUD-115",
+      "TASK-OPS-CONFIG-CMD-001"
+    ],
+    "closedBy": "human-explicit",
+    "removedBlockers": 7
+  }
 }
