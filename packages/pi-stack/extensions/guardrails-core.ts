@@ -63,6 +63,7 @@ import {
   markLongRunLoopRuntimeDispatch,
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeHealthy,
+  isLongRunLoopLeaseExpired,
   type LongRunIntentQueueConfig,
   type AutoDrainGateReason,
   type BoardAutoAdvanceGateReason,
@@ -138,6 +139,7 @@ export {
   markLongRunLoopRuntimeDispatch,
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeHealthy,
+  isLongRunLoopLeaseExpired,
 } from "./guardrails-core-lane-queue";
 
 export {
@@ -908,6 +910,16 @@ export function computeLoopEvidenceReadiness(
   };
 }
 
+export function shouldRefreshLoopEvidenceFromRuntimeSnapshot(
+  runtime: Pick<LongRunLoopRuntimeState, "mode" | "health" | "stopCondition" | "leaseExpiresAtIso">,
+  nowMs = Date.now(),
+): boolean {
+  if (runtime.mode !== "running" || runtime.health !== "healthy" || runtime.stopCondition !== "none") {
+    return false;
+  }
+  return !isLongRunLoopLeaseExpired(runtime, nowMs);
+}
+
 function loopActivationEvidencePath(cwd: string): string {
   return join(cwd, ".pi", "guardrails-loop-evidence.json");
 }
@@ -1132,7 +1144,7 @@ export default function (pi: ExtensionAPI) {
     if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
 
     const runtime = readLongRunLoopRuntimeState(ctx.cwd);
-    if (runtime.mode !== "running" || runtime.health !== "healthy" || runtime.stopCondition !== "none") return;
+    if (!shouldRefreshLoopEvidenceFromRuntimeSnapshot(runtime, nowMs)) return;
 
     const evidence = readLoopActivationEvidence(ctx.cwd);
     const readiness = computeLoopEvidenceReadiness(evidence);

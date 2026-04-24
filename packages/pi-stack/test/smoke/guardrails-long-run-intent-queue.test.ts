@@ -44,6 +44,7 @@ import {
   shouldEmitBoardAutoAdvanceGateAudit,
   shouldEmitLoopActivationAudit,
   computeLoopEvidenceReadiness,
+  shouldRefreshLoopEvidenceFromRuntimeSnapshot,
   readLongRunLoopRuntimeState,
   setLongRunLoopRuntimeMode,
   markLongRunLoopRuntimeDegraded,
@@ -560,6 +561,31 @@ describe("guardrails-core long-run intent queue", () => {
     });
     expect(blocked.readyForTaskBud125).toBe(false);
     expect(blocked.criteria.join(" |")).toContain("boardAuto.runtime=active:no");
+  });
+
+  it("refreshes loop-evidence snapshot only when runtime lease is still active", () => {
+    const nowMs = Date.parse("2026-04-24T00:45:00.000Z");
+
+    expect(shouldRefreshLoopEvidenceFromRuntimeSnapshot({
+      mode: "running",
+      health: "healthy",
+      stopCondition: "none",
+      leaseExpiresAtIso: "2026-04-24T00:45:20.000Z",
+    }, nowMs)).toBe(true);
+
+    expect(shouldRefreshLoopEvidenceFromRuntimeSnapshot({
+      mode: "running",
+      health: "healthy",
+      stopCondition: "none",
+      leaseExpiresAtIso: "2026-04-24T00:44:30.000Z",
+    }, nowMs)).toBe(false);
+
+    expect(shouldRefreshLoopEvidenceFromRuntimeSnapshot({
+      mode: "paused",
+      health: "healthy",
+      stopCondition: "manual-pause",
+      leaseExpiresAtIso: "2026-04-24T00:45:20.000Z",
+    }, nowMs)).toBe(false);
   });
 
   it("auto-advances board task only when lane is idle, empty and healthy", () => {
