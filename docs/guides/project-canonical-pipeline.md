@@ -400,7 +400,8 @@ Contrato operacional:
 - usar `operatingCadence` como fonte de verdade de ritmo:
   - `standard-slices` => retomar throughput normal (ex.: 2–4 arquivos + testes focados);
   - `micro-slice-only` => manter cortes mínimos até checkpoint/compact estabilizar;
-- usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`).
+- usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`);
+- quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
 
 Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.
 

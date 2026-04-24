@@ -398,6 +398,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
 	let lastAutoResumeAt = 0;
+	let lastAutoResumeDecision: {
+		atIso: string;
+		reason: string;
+		dispatched: boolean;
+		hasPendingMessages: boolean;
+		hasRecentSteerInput: boolean;
+		queuedLaneIntents: number;
+	} | null = null;
 	let lastInputAt = 0;
 	let lastAutoCompactTriggerAt = 0;
 	let autoCompactInFlight = false;
@@ -548,13 +556,25 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					autoCompactInFlight = false;
 					ctx.ui.notify("context-watch: auto compact completed", "info");
 					const nowAfterCompact = Date.now();
+					const hasPendingMessages = ctx.hasPendingMessages();
+					const hasRecentSteerInput = lastInputAt > lastAutoCompactTriggerAt;
+					const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
 						autoResumeReady,
-						hasPendingMessages: ctx.hasPendingMessages(),
-						hasRecentSteerInput: lastInputAt > lastAutoCompactTriggerAt,
-						queuedLaneIntents: readDeferredLaneQueueCount(ctx.cwd),
+						hasPendingMessages,
+						hasRecentSteerInput,
+						queuedLaneIntents,
 					});
+					const autoResumeSnapshot = {
+						atIso: new Date(nowAfterCompact).toISOString(),
+						reason: autoResumeDecision.reason,
+						dispatched: autoResumeDecision.shouldDispatch,
+						hasPendingMessages,
+						hasRecentSteerInput,
+						queuedLaneIntents,
+					};
+					lastAutoResumeDecision = autoResumeSnapshot;
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
 						const resumePrompt = buildAutoResumePromptFromHandoff(
@@ -567,11 +587,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 							"context-watchdog.auto-resume-suppressed",
 							{
-								atIso: new Date(nowAfterCompact).toISOString(),
-								reason: autoResumeDecision.reason,
-								hasPendingMessages: ctx.hasPendingMessages(),
-								hasRecentSteerInput: lastInputAt > lastAutoCompactTriggerAt,
-								queuedLaneIntents: readDeferredLaneQueueCount(ctx.cwd),
+								atIso: autoResumeSnapshot.atIso,
+								reason: autoResumeSnapshot.reason,
+								hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
+								hasRecentSteerInput: autoResumeSnapshot.hasRecentSteerInput,
+								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
 							},
 						);
 					}
@@ -660,6 +680,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeEnabled: config.autoResumeAfterCompact,
 			autoResumeCooldownMs: config.autoResumeCooldownMs,
 			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
+			autoResumeLastDecision: lastAutoResumeDecision,
+			autoResumeLastDecisionReason: lastAutoResumeDecision?.reason ?? "none",
+			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
+			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
 			handoffFreshMaxAgeMs: config.handoffFreshMaxAgeMs,
 			handoffTimestamp,
 			handoffFreshness,
@@ -709,6 +733,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAutoCheckpointAt = 0;
 		lastAutoCompactAt = 0;
 		lastAutoResumeAt = 0;
+		lastAutoResumeDecision = null;
 		lastInputAt = 0;
 		lastAutoCompactTriggerAt = 0;
 		autoCompactInFlight = false;
@@ -808,6 +833,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAutoCheckpointAt = 0;
 				lastAutoCompactAt = 0;
 				lastAutoResumeAt = 0;
+				lastAutoResumeDecision = null;
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;
@@ -871,6 +897,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
+					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,

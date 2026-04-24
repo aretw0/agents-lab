@@ -3435,7 +3435,7 @@
     {
       "id": "TASK-BUD-141",
       "description": "[P1] Auto-resume pos-compactacao deve verificar steer do usuario antes de despachar board",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "acceptance_criteria": [
         "Apos compactacao, auto-resume inspeciona lane-queue e pending messages antes do board auto-advance.",
@@ -3444,8 +3444,7 @@
         "Mensagem de auto-resume para o modelo permanece execution-first (tasks/blockers/next) e nao inclui aviso de pressao de contexto/cadencia."
       ],
       "verification": "",
-      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, usuario colocou steer na lane-queue durante compactacao mas auto-resume ignorou e disparou board task. Usuario deve ter voz antes da fabrica retomar autonomia.\n[2026-04-24T00:00:00Z] Feedback humano assimilado: auto-resume deve validar steer/follow-up ainda pertinente antes de disparar mensagem; quando houver steer novo/pending queue, suprimir auto-resume. Prompt de auto-resume deve ser execution-first e sem ruído sobre pressão de contexto para evitar timidez desnecessária do modelo."
-    },
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, usuario colocou steer na lane-queue durante compactacao mas auto-resume ignorou e disparou board task. Usuario deve ter voz antes da fabrica retomar autonomia.\n[2026-04-24T00:00:00Z] Feedback humano assimilado: auto-resume deve validar steer/follow-up ainda pertinente antes de disparar mensagem; quando houver steer novo/pending queue, suprimir auto-resume. Prompt de auto-resume deve ser execution-first e sem ruído sobre pressão de contexto para evitar timidez desnecessária do modelo.\n[2026-04-24T00:00:00Z] Slice 2: `context_watch_status`/`/context-watch` agora expõem `auto-resume-last` (reason/dispatched/timestamp) para reduzir caixa-preta quando o auto-resume é suprimido por steer/pending queue."    },
     {
       "id": "TASK-BUD-142",
       "description": "[P2] Investigar orphaned function_call_output sobrevivendo a compactacoes (mesmo call_id repetido)",
