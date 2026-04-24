@@ -1,18 +1,19 @@
 {
-  "timestamp": "2026-04-24T12:40:30.000Z",
-  "context": "Auto-resume reconciliado: estado canônico atual já avançou além do snapshot antigo. `TASK-BUD-087` foi executada com onda 1 aplicada e evidência técnica passada (`VER-BUD-273`), aguardando apenas decisão humana por contrato no-auto-close. `TASK-BUD-066` permanece in-progress com evidência parcial (`VER-BUD-272`).",
+  "timestamp": "2026-04-24T12:47:45.000Z",
+  "context": "Envelope board-first para `TASK-BUD-100` executado com slice mínima/reversível: distribuição agora tem perfil default `strict-curated` (baseline oficial mínima), perfil opt-in `curated-runtime` para extras de runtime/capability e `stack-full` para cobertura total; alias `curated-default` preservado por compatibilidade. Documentação de trade-off/opt-in atualizada e verificação técnica registrada como passed (`VER-BUD-274`).",
   "next_actions": [
-    "Decisão humana pendente: fechar ou manter aberta `TASK-BUD-087` (evidência já passed).",
-    "Se aprovado, retomar lane principal `TASK-BUD-119` (MODO FÁBRICA ON).",
-    "Opcional depois: completar/ajustar formalização de `TASK-BUD-066` para elevar verificação de partial -> passed."
+    "Decisão humana de fechamento para `TASK-BUD-100` (no-auto-close preservado; evidência já passed).",
+    "Opcional: decidir fechamento pendente de `TASK-BUD-087` (evidência passed `VER-BUD-273`).",
+    "Após decisões humanas, retomar lane principal `TASK-BUD-119`."
   ],
   "blockers": [
+    "human-decision-required-for-task-bud-100-no-auto-close",
     "human-decision-required-for-task-bud-087-no-auto-close"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:40:30.000Z",
-      "reason": "resume-reconcile",
+      "atIso": "2026-04-24T12:47:45.000Z",
+      "reason": "message_end",
       "level": "compact",
       "percent": 79,
       "thresholds": {

@@ -2324,7 +2324,7 @@
     {
       "id": "TASK-BUD-100",
       "description": "[P1] Implementar perfil de distribuição 'strict-curated' com baseline oficial mínima e mecanismo opt-in documentado para extras de runtime/capability.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-091",
         "TASK-BUD-098"
@@ -2342,7 +2342,7 @@
         "Extras ficam fora do default e só entram por comando/flag explícita.",
         "Documentação explica trade-off e como habilitar exceções sem confundir baseline oficial."
       ],
-      "notes": "Conecta política de curadoria ao instalador/distribuição para usuários finais."
+      "notes": "Conecta política de curadoria ao instalador/distribuição para usuários finais.\n[2026-04-24T12:46:45Z] Slice implementada: `strict-curated` virou perfil default no installer, mantendo alias compatível `curated-default`; novo perfil `curated-runtime` + flag `--runtime-extras` habilitam extras de runtime/capability apenas por opt-in explícito; guia recomendado documenta matriz de perfis e trade-offs. Smokes focais verdes: installer-profile + package-list + installer-filters (16/16)."
     },
     {
       "id": "colony-colony-a",

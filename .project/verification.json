@@ -4695,6 +4695,15 @@
       "method": "test",
       "timestamp": "2026-04-24T12:38:30Z",
       "evidence": "Centralização first-party por ondas aplicada sem big-bang: (1) inventário/classificação keep-promote-disable + matriz de overlap em `docs/research/pi-stack-user-surface-audit-2026-04-21.md`; (2) plano de migração em 3 ondas (reversível) documentado no audit e em `docs/guides/recommended-pi-stack.md`; (3) onda 1 aplicada no installer (`FILTER_PATCHES` adiciona `!extensions/watchdog.ts` para `@ifi/oh-pi-extensions`) priorizando stack first-party de context-watch. Regressões verdes: `installer-filters` + `conflict-filters` (6/6) e smoke `guardrails-long-run-intent-queue` (35/35)."
+    },
+    {
+      "id": "VER-BUD-274",
+      "target": "TASK-BUD-100",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-24T12:47:15Z",
+      "evidence": "Perfil de distribuição strict-curated implementado e validado. Mudanças: (1) `package-list.mjs` separa `STRICT_CURATED` (baseline oficial mínima), `RUNTIME_CAPABILITY_EXTRAS` e `CURATED_RUNTIME`; `CURATED_DEFAULT` mantido como alias compatível. (2) `install.mjs` default = `strict-curated`, com perfis explícitos `curated-runtime`/`stack-full` e flags `--runtime-extras`/`--strict-curated`; ajuda atualizada com baseline vs extras opt-in. (3) `recommended-pi-stack.md` documenta matriz de perfis, trade-offs e comandos de exceção. Testes: `installer-profile.test.ts`, `package-list.test.ts`, `installer-filters.test.ts` => 16/16 pass."
     }
   ]
 }
