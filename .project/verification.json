@@ -4632,6 +4632,15 @@
       "method": "inspect",
       "timestamp": "2026-04-24T11:55:00Z",
       "evidence": "Feedback humano assimilado no backlog: adicionada `TASK-BUD-138` para transformar playbooks/guides internos em superfícies distribuídas (skills + exemplos), preservando postura simple-first/outcome-agnostic e evitando dependência de docs locais não distribuídos."
+    },
+    {
+      "id": "VER-BUD-267",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T11:56:30Z",
+      "evidence": "Hardening adicional para evitar regressão de lease em estado idle: introduzido timer best-effort de lease heartbeat (`ensureLoopLeaseHeartbeatTimer`, intervalo 10s) enquanto loop está em modo running, além de refresh por input interativo. Objetivo: impedir `gate=lease-expired` após curtos períodos de inatividade com fila pendente. Regressões verdes (`guardrails-long-run-intent-queue` 35/35, `test:ops:loop-evidence` 5/5) e strict de loop-evidence permanece `status: ok`."
     }
   ]
 }

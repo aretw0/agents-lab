@@ -1,19 +1,21 @@
 {
-  "timestamp": "2026-04-24T11:56:00.000Z",
-  "context": "MODO FÁBRICA ON permanece ativo em `TASK-BUD-119`. Lease heartbeat por atividade já foi validado em runtime (sem falso `lease-expired` em estado ativo). Novo direcionamento humano assimilado sem desviar foco: guides internos que não são distribuídos devem virar superfícies distribuídas (skills/exemplos), agora ancorado em `TASK-BUD-138`.",
+  "timestamp": "2026-04-24T11:58:00.000Z",
+  "context": "MODO FÁBRICA ON ativo em `TASK-BUD-119`. Após novo feedback runtime (status idle ainda exibindo `gate=lease-expired`), foi entregue hardening adicional: timer de lease heartbeat (`ensureLoopLeaseHeartbeatTimer`, 10s best-effort) + refresh em input interativo, além do refresh por atividade já existente. Objetivo: evitar expiração de lease durante ciclo vivo com fila pendente e reduzir bloqueio indevido de auto-drain.",
   "next_actions": [
-    "Continuar `TASK-BUD-119` com próxima fatia de alto impacto: evidência compacta enqueue->force-now->dispatch no status/evidence.",
-    "Submeter decisão humana de fechamento para `TASK-BUD-129` (já tecnicamente validada).",
-    "Planejar kickoff de `TASK-BUD-131` (structured-first) após estabilizar a trilha de confiabilidade da lane.",
-    "Executar `TASK-BUD-138` em fase futura para converter playbooks críticos em skills/exemplos distribuídos (evitar docs-only)."
+    "Executar `/reload` para ativar o novo timer de lease heartbeat no runtime atual.",
+    "Revalidar em runtime: enviar `lane-now:<msg>` e checar `/lane-queue status` após >30s idle curto (esperado: sem `gate=lease-expired` espúrio enquanto loop estiver vivo).",
+    "Se runtime confirmar, continuar `TASK-BUD-119` para evidência compacta enqueue->force-now->dispatch em surface de status/evidence.",
+    "Manter foco no desbloqueio de potencial; backlog 130..138 segue planejado."
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-pending-for-lease-heartbeat-timer"
+  ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T11:56:00.000Z",
+      "atIso": "2026-04-24T11:58:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 32,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
