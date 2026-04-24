@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-04-24T12:35:30.000Z",
-  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-066` executado (board-first, no-auto-close). Slice documental de contrato tracker-agnostic entregue: `continuity-abstraction.md` formalizado com contrato canônico v1, transições e invariantes; matriz de adapters e camada hard intent storage-agnostic explicitadas no guia canônico; `REQ-BUD-062` adicionado para rastreabilidade em requirements.",
+  "timestamp": "2026-04-24T12:39:30.000Z",
+  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-087` executado (board-first, no-auto-close). Entrega da primeira onda de centralização first-party concluída sem big-bang: inventário de overlaps classificado (keep/promote/disable), plano de migração em 3 ondas documentado e aplicação concreta no installer (`!extensions/watchdog.ts` em `@ifi/oh-pi-extensions`) para reduzir overlap semântico com context-watch first-party.",
   "next_actions": [
-    "Revisar rapidamente o texto de `continuity-abstraction.md` e confirmar se o nível de formalização está adequado para virar base de adapters futuros.",
-    "Se aprovado, promover verificação de `TASK-BUD-066` para passed e submeter decisão humana de fechamento (no-auto-close preservado).",
-    "Retomar lane principal ativa após este interrupt task envelope (`TASK-BUD-119`), mantendo foco em desbloqueio de potencial."
+    "Aguardar decisão humana de fechamento para `TASK-BUD-087` (evidência técnica já passada em `VER-BUD-273`).",
+    "Após decisão, continuar onda 2 (overlaps semânticos planning/workflow) em task dedicada sem ampliar escopo desta rodada.",
+    "Retomar lane principal de execução (`TASK-BUD-119`) após checkpoint desta task interruptiva."
   ],
   "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:35:30.000Z",
+      "atIso": "2026-04-24T12:39:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 36,
+      "percent": 37,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

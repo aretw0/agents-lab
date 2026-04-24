@@ -2021,21 +2021,21 @@
     {
       "id": "TASK-BUD-087",
       "description": "[P1] Centralizar first-parties por ondas (sem big-bang): inventariar overlaps com third-parties e definir plano de promoção/depreciação focado em estabilidade de long run.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-083"
       ],
       "files": [
         "docs/guides/recommended-pi-stack.md",
         "docs/research/pi-stack-user-surface-audit-2026-04-21.md",
-        "packages/pi-stack/extensions/index.ts"
+        "packages/pi-stack/install.mjs"
       ],
       "acceptance_criteria": [
         "Inventário identifica capacidades duplicadas e classifica: manter third-party, promover first-party, ou desativar overlap.",
         "Plano de migração define sequência pequena/reversível com critérios de segurança (sem regressão de governança/context-watch).",
         "Primeira onda aplicada com evidência mínima (smoke/regression) sem quebrar fluxo de long runs."
       ],
-      "notes": "Foco em estabilidade operacional: menos superfície duplicada, menos comportamento inesperado em execuções longas."
+      "notes": "Foco em estabilidade operacional: menos superfície duplicada, menos comportamento inesperado em execuções longas.\n[2026-04-24T12:38:00Z] Inventário por ondas formalizado em `pi-stack-user-surface-audit-2026-04-21.md` com classificação keep/promote/disable e plano de 3 ondas (sem big-bang). Onda 1 aplicada no installer: filtro `!extensions/watchdog.ts` em `@ifi/oh-pi-extensions` para priorizar stack first-party de context-watch. Regressões verdes: `installer-filters` + `conflict-filters` (6/6) e smoke de long-run intent queue (35/35)."
     },
     {
       "id": "TASK-BUD-088",

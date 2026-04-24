@@ -4686,6 +4686,15 @@
       "method": "inspect",
       "timestamp": "2026-04-24T12:34:30Z",
       "evidence": "Formalização do contrato primitives+adapters publicada em `docs/primitives/continuity-abstraction.md` com entidades canônicas (task/event/intent/evidence), invariantes, transições e adapter de referência Markdown/Obsidian. `docs/guides/project-canonical-pipeline.md` recebeu matriz operacional mínima + camada hard intent storage-agnostic. `REQ-BUD-062` adicionado em `.project/requirements.json` para rastrear o requisito canônico de interoperabilidade."
+    },
+    {
+      "id": "VER-BUD-273",
+      "target": "TASK-BUD-087",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-24T12:38:30Z",
+      "evidence": "Centralização first-party por ondas aplicada sem big-bang: (1) inventário/classificação keep-promote-disable + matriz de overlap em `docs/research/pi-stack-user-surface-audit-2026-04-21.md`; (2) plano de migração em 3 ondas (reversível) documentado no audit e em `docs/guides/recommended-pi-stack.md`; (3) onda 1 aplicada no installer (`FILTER_PATCHES` adiciona `!extensions/watchdog.ts` para `@ifi/oh-pi-extensions`) priorizando stack first-party de context-watch. Regressões verdes: `installer-filters` + `conflict-filters` (6/6) e smoke `guardrails-long-run-intent-queue` (35/35)."
     }
   ]
 }
