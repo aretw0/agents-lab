@@ -2801,7 +2801,7 @@
         "Fallback manual permanece disponível quando capability não estiver pronta, com mensagem auditável.",
         "Smoke cobre rota feliz e rota degradada (capability ausente/negada) sem quebrar runbook operacional."
       ],
-      "notes": "Objetivo: integrar melhor o control plane ao ecossistema e reduzir fricção de automação long-run.\n[2026-04-23T12:08:00Z] Diretriz humana assimilada: long run deve ser native-first (steer/follow-up) e board-first (sem exigir macro-goal manual quando backlog já estiver pronto). TASK-BUD-119 passa a priorizar bus/intents para reduzir iterações humanas e habilitar execução prolongada orientada por board canônico, com interrupção apenas em stop-conditions reais.\n[2026-04-23T09:58:00Z] Slice 2 (intent bus tipado + fallback degradado): novo módulo `guardrails-core-intent-bus.ts` define envelope canônico (`[intent:<type>]` + `version/key=value`) com encode/parse/sumário para `board.execute-task`. `/lane-queue board-next` passou a emitir intent tipado com auditoria (`intentType`, `intentVersion`, `intentSummary`) e fallback auditável quando dispatch imediato falha (`guardrails-core.board-intent-dispatch-failed` + requeue). Smokes focais verdes (34/34). Evidência: VER-BUD-217.\n[2026-04-23T10:05:00Z] Slice 3 (intent consumer no executor): `guardrails-core.ts` agora consome envelope tipado em `before_agent_start` (`parseGuardrailsIntent`) e injeta guidance determinístico por tipo (`buildGuardrailsIntentSystemPrompt`) com auditoria `guardrails-core.intent-envelope-detected`, reduzindo dependência de interpretação textual frágil no arranque do turno. Smokes focais verdes (35/35). Evidência: VER-BUD-219.\n[2026-04-24T01:08:00Z] Sinal humano assimilado para backlog (sem interromper trilha atual): intents `lane-now:` adicionadas durante long run não estão ficando visíveis/observáveis na cadência esperada. Tratar depois como slice de confiabilidade de ingestão/observabilidade da lane-queue (confirmar enqueue, gatilhos de dispatch e telemetria de status).\n[2026-04-24T01:22:00Z] Slice iniciada: `lane-now` ganhou override explícito no `input` hook com branch dedicada (extração determinística via `extractForceNowText`, audit `guardrails-core.long-run-intent-force-now` e envio imediato `followUp`), reduzindo percepção de \"sumiço\" de mensagens durante long run. Evidência: VER-BUD-261."
+      "notes": "Objetivo: integrar melhor o control plane ao ecossistema e reduzir fricção de automação long-run.\n[2026-04-23T12:08:00Z] Diretriz humana assimilada: long run deve ser native-first (steer/follow-up) e board-first (sem exigir macro-goal manual quando backlog já estiver pronto). TASK-BUD-119 passa a priorizar bus/intents para reduzir iterações humanas e habilitar execução prolongada orientada por board canônico, com interrupção apenas em stop-conditions reais.\n[2026-04-23T09:58:00Z] Slice 2 (intent bus tipado + fallback degradado): novo módulo `guardrails-core-intent-bus.ts` define envelope canônico (`[intent:<type>]` + `version/key=value`) com encode/parse/sumário para `board.execute-task`. `/lane-queue board-next` passou a emitir intent tipado com auditoria (`intentType`, `intentVersion`, `intentSummary`) e fallback auditável quando dispatch imediato falha (`guardrails-core.board-intent-dispatch-failed` + requeue). Smokes focais verdes (34/34). Evidência: VER-BUD-217.\n[2026-04-23T10:05:00Z] Slice 3 (intent consumer no executor): `guardrails-core.ts` agora consome envelope tipado em `before_agent_start` (`parseGuardrailsIntent`) e injeta guidance determinístico por tipo (`buildGuardrailsIntentSystemPrompt`) com auditoria `guardrails-core.intent-envelope-detected`, reduzindo dependência de interpretação textual frágil no arranque do turno. Smokes focais verdes (35/35). Evidência: VER-BUD-219.\n[2026-04-24T01:08:00Z] Sinal humano assimilado para backlog (sem interromper trilha atual): intents `lane-now:` adicionadas durante long run não estão ficando visíveis/observáveis na cadência esperada. Tratar depois como slice de confiabilidade de ingestão/observabilidade da lane-queue (confirmar enqueue, gatilhos de dispatch e telemetria de status).\n[2026-04-24T01:22:00Z] Slice iniciada: `lane-now` ganhou override explícito no `input` hook com branch dedicada (extração determinística via `extractForceNowText`, audit `guardrails-core.long-run-intent-force-now` e envio imediato `followUp`), reduzindo percepção de \"sumiço\" de mensagens durante long run. Evidência: VER-BUD-261.\n[2026-04-24T01:33:00Z] Observabilidade reforçada: `/lane-queue status` agora exibe `laneNowLast=<idade/texto>` com último override imediato processado, reduzindo ambiguidade durante long runs (operador consegue confirmar ingestão sem abrir logs). Evidência: VER-BUD-262."
     },
     {
       "id": "TASK-BUD-120",
@@ -3298,6 +3298,26 @@
         "Checklist de readiness para v0.8.0 fica explícito no board, com itens obrigatórios e evidência canônica."
       ],
       "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta."
+    },
+    {
+      "id": "TASK-BUD-137",
+      "description": "[P1] Desacoplar naming legado `readyForTaskBud125` para chave canônica agnóstica de milestone.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-129"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "scripts/guardrails-loop-evidence-check.mjs",
+        "scripts/test/guardrails-loop-evidence-check.test.mjs",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Novo campo canônico (ex.: `readyForLoopEvidence`) substitui `readyForTaskBud125` nas superfícies operacionais.",
+        "Compatibilidade temporária mantida por janela curta (alias/deprecation message) sem quebrar scripts existentes.",
+        "Após janela de transição, remover chave legado de código/docs/testes e registrar migração no board."
+      ],
+      "notes": "Backlog aberto por feedback humano (2026-04-24): nome atual é específico de marco antigo e virou gordura cognitiva; objetivo é manter stack outcome-agnostic e sem acoplamento histórico."
     }
   ]
 }

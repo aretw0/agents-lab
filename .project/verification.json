@@ -4587,6 +4587,15 @@
       "method": "test",
       "timestamp": "2026-04-24T01:22:00Z",
       "evidence": "Slice de confiabilidade `lane-now` iniciada: novo helper canônico `extractForceNowText` + branch explícita no `input` hook do `guardrails-core` para override imediato via `pi.sendUserMessage(..., {deliverAs:'followUp'})`, com audit `guardrails-core.long-run-intent-force-now` e feedback de observabilidade ao operador. Smoke focal verde (`guardrails-long-run-intent-queue` 35/35) + regressão de loop-evidence 5/5 preservada."
+    },
+    {
+      "id": "VER-BUD-262",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T01:33:00Z",
+      "evidence": "Slice de observabilidade `lane-now` expandida: `guardrails-core` agora mantém telemetria em memória (`lastForceNowAt`, preview) e expõe em `/lane-queue status` via `laneNowLast=<idade/texto>`, facilitando diagnóstico de \"sumiço\" sem varredura de logs. Fluxo de override imediato (`extractForceNowText` + followUp) e auditoria canônica já ativa. Regressões verdes: smoke `guardrails-long-run-intent-queue` 35/35, `test:ops:loop-evidence` 5/5, strict runtime `status: ok`."
     }
   ]
 }

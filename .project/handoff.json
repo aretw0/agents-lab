@@ -1,20 +1,21 @@
 {
-  "timestamp": "2026-04-24T01:23:00.000Z",
-  "context": "Foco de desbloqueio mantido. Backlog estratégico (TASK-BUD-130..136) segue planejado para fases futuras sem desviar do core. Sinal crítico de execução foi tratado: watchdog `wrwucj04` foi desativado para não monopolizar cadência; retomada ativa de engenharia ocorreu em `TASK-BUD-119` com slice de confiabilidade/observabilidade de `lane-now` (override explícito + audit + follow-up imediato).",
+  "timestamp": "2026-04-24T01:34:00.000Z",
+  "context": "MODO FÁBRICA ON ativo para `TASK-BUD-119` (stop apenas em goal alcançado/blocker real/off explícito). Execução retomada em throughput normal sem watchdog chatty. Slice atual entregue: confiabilidade/observabilidade de `lane-now` com override imediato + telemetria explícita no status (`laneNowLast=<idade/texto>`), reduzindo sensação de mensagens \"sumindo\" durante long run.",
   "next_actions": [
-    "Submeter decisão humana de fechamento para `TASK-BUD-129` (evidência técnica já passada).",
-    "Continuar `TASK-BUD-119` com validação runtime do fluxo `lane-now` (comprovar visibilidade de dispatch em operação real).",
-    "Planejar kickoff de `TASK-BUD-131` para guardrail structured-first em arquivos canônicos (`.project/*.json`) evitando `write/edit` textual onde houver tool tipada.",
-    "Manter checks de loop-evidence em pontos de controle (manual/focal), sem voltar ao modo chatty de watchdog periódico.",
-    "Executar `TASK-BUD-135/136` apenas após estabilização dos desbloqueios de potencial (futuro, pré-0.8.0)."
+    "Validar runtime pós-reload do novo `laneNowLast` em operação real (`/lane-queue status` após um `lane-now:<msg>`).",
+    "Continuar `TASK-BUD-119` no próximo slice: consolidar trilha auditável enqueue->force-now->dispatch com resumo compacto no status/evidence.",
+    "Submeter decisão humana de fechamento de `TASK-BUD-129` (já tecnicamente validada) sem auto-close.",
+    "Preparar kickoff de `TASK-BUD-131` (structured-first) após estabilizar slices críticos de `TASK-BUD-119`."
   ],
-  "blockers": [],
+  "blockers": [
+    "runtime-reload-pending-for-lane-now-status-telemetry"
+  ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:23:00.000Z",
+      "atIso": "2026-04-24T01:34:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 25,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
