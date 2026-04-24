@@ -1,19 +1,20 @@
 {
-  "timestamp": "2026-04-24T01:18:00.000Z",
-  "context": "Brainstorm estratégico humano assimilado integralmente no backlog sem desviar o foco de fábrica: novas tasks `TASK-BUD-130..134` cobrem (a) surface slimming/deprecação de tools calibradas, (b) enforcement structured-first para artefatos estruturados, (c) roadmap de code-ops semânticas (rename seguro), (d) ticket systems externos GitHub/Gitea e (e) compute offload via GitHub Actions. Em paralelo, `TASK-BUD-129` atingiu validação runtime sustentada (strict green em múltiplos ciclos), com verificação `VER-BUD-259` passada; no-auto-close preservado para decisão humana.",
+  "timestamp": "2026-04-24T01:24:30.000Z",
+  "context": "Backlog estratégico expandido sem desviar foco de desbloqueio: além de `TASK-BUD-130..134`, foram adicionadas `TASK-BUD-135` (organização completa de presença do repositório no GitHub: docs drift/MDT + descrição/topics/metadados) e `TASK-BUD-136` (estrutura de releases GitHub pronta para formalizar v0.8.0). A prioridade operacional imediata permanece fábrica/control-plane; itens de repo/release ficam planejados para execução futura.",
   "next_actions": [
     "Submeter decisão humana de fechamento para `TASK-BUD-129` (já com evidência técnica passada).",
     "Manter watchdog `wrwucj04` ativo como sentinela leve enquanto avançamos no próximo desbloqueio.",
     "Retomar execução de `TASK-BUD-119` em slice de alto impacto (confiabilidade/observabilidade de ingestão `lane-now`), já ancorado no backlog.",
-    "Planejar kickoff de `TASK-BUD-131` para guardrail structured-first em arquivos canônicos (`.project/*.json`) evitando `write/edit` textual onde houver tool tipada."
+    "Planejar kickoff de `TASK-BUD-131` para guardrail structured-first em arquivos canônicos (`.project/*.json`) evitando `write/edit` textual onde houver tool tipada.",
+    "Executar `TASK-BUD-135/136` apenas após estabilização dos desbloqueios de potencial (futuro, pré-0.8.0)."
   ],
   "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:18:00.000Z",
+      "atIso": "2026-04-24T01:24:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 23,
+      "percent": 24,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

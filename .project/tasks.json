@@ -3259,6 +3259,45 @@
         "Modelo operacional inclui steer/intervenção humana clara (cancelar/retry/override) mantendo objetivo set-and-forget seguro."
       ],
       "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica."
+    },
+    {
+      "id": "TASK-BUD-135",
+      "description": "[P2] Organizar presença do repositório no GitHub (MDT/docs drift + metadata pública) com postura de distribuição clara e profissional.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-OPS-HYGIENE-003"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/README.md",
+        "README.md"
+      ],
+      "acceptance_criteria": [
+        "Existe checklist operacional para hygiene de repo no GitHub (incluindo drift de documentação/MDT) com rotina de revisão periódica.",
+        "Descrição, topics/tags e metadados laterais do repositório ficam alinhados ao posicionamento da stack (simple-first + outcome-agnostic).",
+        "Resultado fica registrado no board com evidência objetiva do antes/depois (sem bloquear o roadmap de desbloqueio atual)."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): organizar o repositório completo no GitHub para reduzir fricção de descoberta e manter coerência entre documentação interna e apresentação pública."
+    },
+    {
+      "id": "TASK-BUD-136",
+      "description": "[P2] Preparar estrutura de releases no GitHub para formalizar publicação da v0.8.0 (pipeline, notas e governança de versão).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-135"
+      ],
+      "files": [
+        ".github/workflows",
+        "package.json",
+        "docs/guides/budget-governance.md",
+        "docs/guides/control-plane-evolution-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Playbook define fluxo de release GitHub end-to-end (tag, changelog/release notes, artefatos e critérios de corte).",
+        "Existe automação mínima validada para criar/preparar release (draft ou publish gateado), sem quebrar governança atual.",
+        "Checklist de readiness para v0.8.0 fica explícito no board, com itens obrigatórios e evidência canônica."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta."
     }
   ]
 }

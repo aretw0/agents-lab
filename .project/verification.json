@@ -4569,6 +4569,15 @@
       "method": "command",
       "timestamp": "2026-04-24T01:17:00Z",
       "evidence": "Validação runtime sustentada após hardenings (`snapshot heartbeat` + lease-gated refresh + `session-start-lease-renew`): múltiplos ciclos de `npm run -s ops:loop-evidence:strict` retornaram `status: ok`, `stale: no`, `readyForTaskBud125: yes` (ageSec observado 74 -> 153 -> 255 -> 315 -> 463), confirmando fim do falso-stale por freshness sem relaxar critérios canônicos."
+    },
+    {
+      "id": "VER-BUD-260",
+      "target": "TASK-BUD-135",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T01:24:00Z",
+      "evidence": "Diretriz humana de organização completa do repositório no GitHub foi assimilada no backlog com desdobramento em `TASK-BUD-135` (higiene pública + metadata + docs drift/MDT) e `TASK-BUD-136` (estrutura de releases para v0.8.0), mantendo prioridade atual no desbloqueio de potencial/fábrica."
     }
   ]
 }
