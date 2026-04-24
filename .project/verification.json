@@ -4524,6 +4524,15 @@
       "method": "test",
       "timestamp": "2026-04-24T00:47:00Z",
       "evidence": "Hardening anti-masking aplicado: `shouldRefreshLoopEvidenceFromRuntimeSnapshot` agora exige lease ativa (usa `isLongRunLoopLeaseExpired`) antes de refrescar heartbeat por snapshot/timer. Cobertura adicionada em `guardrails-long-run-intent-queue.test.ts` (novo teste lease-active vs lease-expired). Testes verdes: smoke 33/33; `test:ops:loop-evidence` 5/5. Runtime check `ops:loop-evidence:strict` ainda stale (updatedAt 2026-04-23T21:52:43.461Z), aguardando `/reload` + ciclo real para validar refresh em operação."
+    },
+    {
+      "id": "VER-BUD-255",
+      "target": "TASK-BUD-129",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T00:57:00Z",
+      "evidence": "Auto-recovery hardening pós feedback operacional: em `session_start`, runtime agora reasserta modo atual via `setLoopMode(..., 'session-start-lease-renew')`, renovando lease sem depender de comando manual. Isso destrava heartbeat por snapshot/timer após reload prolongado. Cobertura adicionada: `renews long-run lease when mode is reasserted on session start` em `guardrails-long-run-intent-queue.test.ts`. Testes verdes: smoke 34/34 + `test:ops:loop-evidence` 5/5."
     }
   ]
 }

@@ -1,22 +1,22 @@
 {
-  "timestamp": "2026-04-24T00:49:00.000Z",
-  "context": "Foco fábrica-first mantido. `TASK-BUD-129` recebeu hardening extra para evitar falso-green: heartbeat de loop evidence por snapshot/timer só atualiza freshness quando runtime está running/healthy/none **e lease ativa (não expirada)**. Isso evita mascarar estado morto ao sair de sessão. Check strict ainda stale porque runtime novo ainda não carregou revisão via `/reload` e não executou ciclo operacional.",
+  "timestamp": "2026-04-24T00:58:00.000Z",
+  "context": "Feedback operacional incorporado: para evitar dependência de ping manual após long runs, `TASK-BUD-129` ganhou auto-recuperação via renew de lease no `session_start` (`session-start-lease-renew`) + watchdog recorrente workspace (`schedule_prompt` id `wrwucj04`, 3m) que reavalia `ops:loop-evidence:strict`. Objetivo: fábrica não parar por coordenação humana tardia.",
   "next_actions": [
-    "Executar `/reload` para carregar commit `fix(guardrails-core): keep loop evidence fresh via snapshot heartbeat timer` + guard lease-active.",
-    "Após reload, rodar `npm run -s ops:loop-evidence:strict` imediatamente (esperado: fresh se loop ativo) e novamente após >5 min para validar heartbeat throttled.",
-    "Se strict green em ambas janelas sem relaxar critérios, registrar verificação runtime e concluir `TASK-BUD-129`.",
-    "Em paralelo, seguir `TASK-OPS-HYGIENE-003` com inventário objetivo de superfícies lab-only e plano de graduação para superfície canônica."
+    "Executar `/reload` para ativar a nova revisão de `session-start-lease-renew`.",
+    "Após reload, rodar `npm run -s ops:loop-evidence:strict` para validar freshness imediata.",
+    "Aguardar watchdog `wrwucj04` confirmar estabilidade (>5min) sem intervenção manual.",
+    "Se checks ficarem green de forma sustentada, registrar verificação runtime final e concluir `TASK-BUD-129`."
   ],
   "blockers": [
-    "runtime-reload-pending-for-loop-evidence-heartbeat-timer",
-    "loop-evidence-stale-needs-runtime-validation"
+    "runtime-reload-pending-for-session-start-lease-renew",
+    "loop-evidence-runtime-stability-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T00:49:00.000Z",
+      "atIso": "2026-04-24T00:58:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 14,
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
