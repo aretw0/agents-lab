@@ -20,6 +20,7 @@ import {
 	copyFileSync,
 	existsSync,
 	mkdirSync,
+	readFileSync,
 	readdirSync,
 	rmSync,
 	statSync,
@@ -53,6 +54,7 @@ function parseArgs(argv) {
 		reset: false,
 		dryRun: false,
 		noAuthImport: false,
+		dev: false,
 		piArgs: [],
 	};
 
@@ -82,6 +84,10 @@ function parseArgs(argv) {
 			out.noAuthImport = true;
 			continue;
 		}
+		if (a === "--dev") {
+			out.dev = true;
+			continue;
+		}
 		if (a === "--") {
 			out.piArgs.push(...args.slice(i + 1));
 			break;
@@ -92,12 +98,33 @@ function parseArgs(argv) {
 	return out;
 }
 
+const LOOP_STATE_PATH = path.join(REPO_ROOT, ".pi", "long-run-loop-state.json");
+
+// Pausar o loop antes de iniciar pi (launcher domain — opera fora do runtime).
+// Espelha a lógica de scripts/pi-loop-pause.mjs; duplicado intencionalmente
+// para manter scripts autocontidos.
+function pauseLoopForDevSession(dryRun = false) {
+	if (!existsSync(LOOP_STATE_PATH)) return "state-missing";
+	let state;
+	try {
+		state = JSON.parse(readFileSync(LOOP_STATE_PATH, "utf8"));
+	} catch {
+		return "parse-error";
+	}
+	if (state.stopCondition === "manual-pause") return "already-paused";
+	if (dryRun) return "dry-run";
+	const next = { ...state, stopCondition: "manual-pause", updatedAtIso: new Date().toISOString() };
+	writeFileSync(LOOP_STATE_PATH, JSON.stringify(next, null, 2) + "\n", "utf8");
+	return "paused";
+}
+
 function printHelp() {
 	console.log([
 		"pi-isolated — launcher com PI_CODING_AGENT_DIR local do workspace",
 		"",
 		"Uso:",
 		"  npm run pi:isolated",
+		"  npm run pi:dev                  ← modo dev: pausa loop antes de iniciar",
 		"  npm run pi:isolated:resume",
 		"  npm run pi:isolated:status",
 		"  npm run pi:isolated:adopt-latest",
@@ -105,7 +132,10 @@ function printHelp() {
 		"  npm run pi:isolated:help",
 		"",
 		"Execução direta:",
-		"  node scripts/pi-isolated.mjs [status|help|adopt-latest] [--reset] [--dry-run] [--no-auth-import] [-- <args do pi>]",
+		"  node scripts/pi-isolated.mjs [status|help|adopt-latest] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
+		"",
+		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
+		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
 	].join("\n"));
 }
 
@@ -367,11 +397,14 @@ function run() {
 	const bin = process.execPath;
 	const launchArgs = [LOCAL_PI_CLI, ...opts.piArgs];
 
+	const devPauseResult = opts.dev ? pauseLoopForDevSession(opts.dryRun) : "skipped";
+
 	if (opts.dryRun) {
 		console.log("pi isolated dry-run");
 		console.log(`PI_CODING_AGENT_DIR=${LOCAL_AGENT_DIR}`);
 		console.log(`settings created: ${created ? "yes" : "no"}`);
 		console.log(`auth import:      ${authAction}`);
+		console.log(`loop pause:       ${devPauseResult}`);
 		console.log(`local cli:        ${LOCAL_PI_CLI}`);
 		console.log(`exec:             ${bin} ${launchArgs.join(" ")}`);
 		return;
@@ -382,6 +415,19 @@ function run() {
 		if (created) notes.push("created local settings");
 		if (authAction === "imported") notes.push("imported auth.json from global");
 		console.log(`pi-isolated: ${notes.join(", ")}`);
+	}
+
+	if (opts.dev) {
+		const devNotes = {
+			"paused": "⏸  loop pausado (--dev) — auto-dispatch desativado",
+			"already-paused": "⏸  loop já estava pausado",
+			"state-missing": "⚠  loop state não encontrado — pi nunca inicializou?",
+			"parse-error": "⚠  erro ao ler loop state — verifique .pi/long-run-loop-state.json",
+		};
+		console.log(`pi-isolated: ${devNotes[devPauseResult] ?? devPauseResult}`);
+		if (devPauseResult === "paused" || devPauseResult === "already-paused") {
+			console.log("pi-isolated: para retomar a fábrica depois: npm run pi:loop:resume");
+		}
 	}
 
 	console.log(
