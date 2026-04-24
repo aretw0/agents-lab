@@ -1,25 +1,27 @@
 {
-  "timestamp": "2026-04-24T12:39:30.000Z",
-  "context": "Envelope canônico `board.execute-task` para `TASK-BUD-087` executado (board-first, no-auto-close). Entrega da primeira onda de centralização first-party concluída sem big-bang: inventário de overlaps classificado (keep/promote/disable), plano de migração em 3 ondas documentado e aplicação concreta no installer (`!extensions/watchdog.ts` em `@ifi/oh-pi-extensions`) para reduzir overlap semântico com context-watch first-party.",
+  "timestamp": "2026-04-24T12:40:30.000Z",
+  "context": "Auto-resume reconciliado: estado canônico atual já avançou além do snapshot antigo. `TASK-BUD-087` foi executada com onda 1 aplicada e evidência técnica passada (`VER-BUD-273`), aguardando apenas decisão humana por contrato no-auto-close. `TASK-BUD-066` permanece in-progress com evidência parcial (`VER-BUD-272`).",
   "next_actions": [
-    "Aguardar decisão humana de fechamento para `TASK-BUD-087` (evidência técnica já passada em `VER-BUD-273`).",
-    "Após decisão, continuar onda 2 (overlaps semânticos planning/workflow) em task dedicada sem ampliar escopo desta rodada.",
-    "Retomar lane principal de execução (`TASK-BUD-119`) após checkpoint desta task interruptiva."
+    "Decisão humana pendente: fechar ou manter aberta `TASK-BUD-087` (evidência já passed).",
+    "Se aprovado, retomar lane principal `TASK-BUD-119` (MODO FÁBRICA ON).",
+    "Opcional depois: completar/ajustar formalização de `TASK-BUD-066` para elevar verificação de partial -> passed."
   ],
-  "blockers": [],
+  "blockers": [
+    "human-decision-required-for-task-bud-087-no-auto-close"
+  ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:39:30.000Z",
-      "reason": "message_end",
-      "level": "ok",
-      "percent": 37,
+      "atIso": "2026-04-24T12:40:30.000Z",
+      "reason": "resume-reconcile",
+      "level": "compact",
+      "percent": 79,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "standard-slices",
-      "recommendation": "Context healthy."
+      "action": "micro-slice-only",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
