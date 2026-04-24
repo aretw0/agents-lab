@@ -308,7 +308,9 @@ Regras:
 - **paridade por padrão**: o que usamos no laboratório deve refletir o que distribuímos (mesmo contrato operacional), salvo exceção explícita;
 - **exceção documentada**: tool/surface "lab-only" deve ter motivo, janela de validade e critério de graduação/remoção;
 - **sinal de operação**: quando um utilitário ad-hoc virar recorrente, promover para surface canônica (tool/comando/monitor) com evidência e runbook;
-- **evitar drift**: revisar periodicamente diferenças entre superfície local e distribuída e registrar backlog quando houver desvio intencional.
+- **evitar drift**: revisar periodicamente diferenças entre superfície local e distribuída e registrar backlog quando houver desvio intencional;
+- **outcome-agnostic + simple-first**: distribuição deve atender usuário iniciante (fluxo direto/manual) e usuário avançado (fábrica/board/control-plane) sem exigir adoção imediata da camada avançada;
+- **progressive disclosure**: features de governança avançada entram por opt-in e com trilha curta de onboarding.
 
 ## Política de retomada pós-compactação
 Retomar apenas com:
