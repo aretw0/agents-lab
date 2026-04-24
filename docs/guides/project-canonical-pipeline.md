@@ -181,6 +181,25 @@ Notas operacionais:
 - status da lane continua mostrando `failStreak=n/<threshold>` para decisão rápida do operador;
 - quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`).
 
+### Configuração operacional sem editar JSON manualmente
+
+Para ajustes frequentes de runtime (long-run queue + autonomia pragmática), preferir comando dedicado:
+
+- `/guardrails-config status`
+- `/guardrails-config get <key>`
+- `/guardrails-config set <key> <value>`
+
+Exemplos:
+- `/guardrails-config get longRunIntentQueue.maxItems`
+- `/guardrails-config set longRunIntentQueue.maxItems 80`
+- `/guardrails-config set longRunIntentQueue.enabled true`
+
+Contrato:
+- `set` valida tipo/faixa antes de gravar em `.pi/settings.json`;
+- cada mudança gera audit trail curto (`guardrails-core.runtime-config-set`);
+- comando informa se reload é recomendado/necessário para consistência da sessão;
+- fallback manual (`.pi/settings.json`) fica restrito a chaves não suportadas.
+
 ### Steering signal-first (tool-surface diet)
 
 No loop canônico, steering diário deve priorizar **sinais passivos de stream/status** (ex.: `warn/checkpoint/compact`, `operatorSignal`) em vez de depender de tool-call manual.

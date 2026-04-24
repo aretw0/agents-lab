@@ -20,6 +20,10 @@ import {
   resolveLongRunIntentQueueConfig,
   extractForceNowText,
   resolvePragmaticAutonomyConfig,
+  resolveGuardrailsRuntimeConfigSpec,
+  coerceGuardrailsRuntimeConfigValue,
+  readGuardrailsRuntimeConfigSnapshot,
+  buildGuardrailsRuntimeConfigSetResult,
   resolveBloatSmellConfig,
   shouldAutoDrainDeferredIntent,
   shouldQueueInputForLongRun,
@@ -95,6 +99,41 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.noObviousQuestions).toBe(true);
       expect(cfg.auditAssumptions).toBe(true);
       expect(cfg.maxAuditTextChars).toBe(140);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("supports runtime config get/set coercion with validation and immediate snapshot refresh", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-runtime-config-cmd-"));
+    try {
+      const spec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.maxItems");
+      expect(spec).toBeDefined();
+      if (!spec) return;
+
+      const valid = coerceGuardrailsRuntimeConfigValue("80", spec);
+      expect(valid.ok).toBe(true);
+      if (valid.ok) expect(valid.value).toBe(80);
+
+      const invalid = coerceGuardrailsRuntimeConfigValue("0", spec);
+      expect(invalid.ok).toBe(false);
+
+      const setResult = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.maxItems",
+        rawValue: "80",
+      });
+      expect(setResult.ok).toBe(true);
+
+      const snapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
+      expect(snapshot["longRunIntentQueue.maxItems"]).toBe(80);
+
+      const boolSpec = resolveGuardrailsRuntimeConfigSpec("pragmaticAutonomy.enabled");
+      expect(boolSpec).toBeDefined();
+      if (!boolSpec) return;
+      const boolOk = coerceGuardrailsRuntimeConfigValue("off", boolSpec);
+      expect(boolOk.ok).toBe(true);
+      if (boolOk.ok) expect(boolOk.value).toBe(false);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

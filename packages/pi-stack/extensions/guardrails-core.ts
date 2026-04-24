@@ -734,6 +734,372 @@ export function resolvePragmaticAutonomyConfig(cwd: string): PragmaticAutonomyCo
   }
 }
 
+export type GuardrailsRuntimeConfigValue = boolean | number | string;
+
+export interface GuardrailsRuntimeConfigSpec {
+  key: string;
+  path: string[];
+  type: "boolean" | "number" | "string";
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  reloadRequired: boolean;
+  description: string;
+}
+
+export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
+  {
+    key: "longRunIntentQueue.enabled",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "enabled"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Enable or disable long-run queue ingestion.",
+  },
+  {
+    key: "longRunIntentQueue.requireActiveLongRun",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "requireActiveLongRun"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Only queue inputs when long-run is active.",
+  },
+  {
+    key: "longRunIntentQueue.maxItems",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "maxItems"],
+    type: "number",
+    min: 1,
+    max: 500,
+    reloadRequired: false,
+    description: "Maximum deferred intents stored on disk.",
+  },
+  {
+    key: "longRunIntentQueue.autoDrainOnIdle",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "autoDrainOnIdle"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Auto-dispatch deferred intents when runtime is idle.",
+  },
+  {
+    key: "longRunIntentQueue.autoDrainCooldownMs",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "autoDrainCooldownMs"],
+    type: "number",
+    min: 250,
+    max: 180000,
+    reloadRequired: false,
+    description: "Cooldown between auto-drain attempts.",
+  },
+  {
+    key: "longRunIntentQueue.autoDrainIdleStableMs",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "autoDrainIdleStableMs"],
+    type: "number",
+    min: 250,
+    max: 120000,
+    reloadRequired: false,
+    description: "Required idle stability before auto-drain.",
+  },
+  {
+    key: "longRunIntentQueue.autoDrainBatchSize",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "autoDrainBatchSize"],
+    type: "number",
+    min: 1,
+    max: 20,
+    reloadRequired: false,
+    description: "How many deferred intents to dispatch per idle cycle.",
+  },
+  {
+    key: "longRunIntentQueue.dispatchFailureBlockAfter",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "dispatchFailureBlockAfter"],
+    type: "number",
+    min: 1,
+    max: 20,
+    reloadRequired: false,
+    description: "Failure streak threshold before stop-condition boundary.",
+  },
+  {
+    key: "longRunIntentQueue.forceNowPrefix",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "forceNowPrefix"],
+    type: "string",
+    minLength: 2,
+    maxLength: 40,
+    pattern: /^\S+$/,
+    reloadRequired: false,
+    description: "Immediate dispatch prefix (example: lane-now:).",
+  },
+  {
+    key: "pragmaticAutonomy.enabled",
+    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "enabled"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Enable pragmatic-autonomy policy.",
+  },
+  {
+    key: "pragmaticAutonomy.noObviousQuestions",
+    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "noObviousQuestions"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Prefer deterministic defaults for low-risk ambiguity.",
+  },
+  {
+    key: "pragmaticAutonomy.maxAuditTextChars",
+    path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "maxAuditTextChars"],
+    type: "number",
+    min: 40,
+    max: 400,
+    reloadRequired: false,
+    description: "Max chars for assumption audit summary.",
+  },
+];
+
+function readProjectPiSettings(cwd: string): Record<string, unknown> {
+  try {
+    const p = join(cwd, ".pi", "settings.json");
+    if (!existsSync(p)) return {};
+    return JSON.parse(readFileSync(p, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function writeProjectPiSettings(cwd: string, settings: Record<string, unknown>): string {
+  const p = join(cwd, ".pi", "settings.json");
+  mkdirSync(join(cwd, ".pi"), { recursive: true });
+  writeFileSync(p, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+  return p;
+}
+
+function readValueByPath(obj: Record<string, unknown>, path: string[]): unknown {
+  let cursor: unknown = obj;
+  for (const key of path) {
+    if (!cursor || typeof cursor !== "object") return undefined;
+    cursor = (cursor as Record<string, unknown>)[key];
+  }
+  return cursor;
+}
+
+function writeValueByPath(obj: Record<string, unknown>, path: string[], value: unknown): void {
+  let cursor: Record<string, unknown> = obj;
+  for (let i = 0; i < path.length - 1; i++) {
+    const key = path[i];
+    const next = cursor[key];
+    if (!next || typeof next !== "object" || Array.isArray(next)) {
+      cursor[key] = {};
+    }
+    cursor = cursor[key] as Record<string, unknown>;
+  }
+  cursor[path[path.length - 1]] = value;
+}
+
+export function resolveGuardrailsRuntimeConfigSpec(
+  key: string,
+): GuardrailsRuntimeConfigSpec | undefined {
+  const normalized = String(key ?? "").trim().toLowerCase();
+  if (!normalized) return undefined;
+  return GUARDRAILS_RUNTIME_CONFIG_SPECS.find((spec) => spec.key.toLowerCase() === normalized);
+}
+
+export function validateGuardrailsRuntimeConfigValue(
+  value: GuardrailsRuntimeConfigValue,
+  spec: GuardrailsRuntimeConfigSpec,
+): string | undefined {
+  if (spec.type === "number") {
+    if (!Number.isFinite(value as number) || !Number.isInteger(value as number)) {
+      return `${spec.key}: value must be an integer number.`;
+    }
+    if (spec.min !== undefined && (value as number) < spec.min) {
+      return `${spec.key}: value must be >= ${spec.min}.`;
+    }
+    if (spec.max !== undefined && (value as number) > spec.max) {
+      return `${spec.key}: value must be <= ${spec.max}.`;
+    }
+    return undefined;
+  }
+
+  if (spec.type === "string") {
+    const text = String(value ?? "").trim();
+    if (spec.minLength !== undefined && text.length < spec.minLength) {
+      return `${spec.key}: value length must be >= ${spec.minLength}.`;
+    }
+    if (spec.maxLength !== undefined && text.length > spec.maxLength) {
+      return `${spec.key}: value length must be <= ${spec.maxLength}.`;
+    }
+    if (spec.pattern && !spec.pattern.test(text)) {
+      return `${spec.key}: value does not match required format.`;
+    }
+    return undefined;
+  }
+
+  if (spec.type === "boolean" && typeof value !== "boolean") {
+    return `${spec.key}: value must be boolean.`;
+  }
+
+  return undefined;
+}
+
+export function coerceGuardrailsRuntimeConfigValue(
+  rawValue: string,
+  spec: GuardrailsRuntimeConfigSpec,
+): { ok: true; value: GuardrailsRuntimeConfigValue } | { ok: false; error: string } {
+  const raw = String(rawValue ?? "").trim();
+
+  if (spec.type === "boolean") {
+    const lower = raw.toLowerCase();
+    if (["true", "1", "yes", "on"].includes(lower)) {
+      return { ok: true, value: true };
+    }
+    if (["false", "0", "no", "off"].includes(lower)) {
+      return { ok: true, value: false };
+    }
+    return { ok: false, error: `${spec.key}: boolean expected (true|false).` };
+  }
+
+  if (spec.type === "number") {
+    const n = Number(raw);
+    if (!Number.isFinite(n) || !Number.isInteger(n)) {
+      return { ok: false, error: `${spec.key}: integer number expected.` };
+    }
+    const err = validateGuardrailsRuntimeConfigValue(n, spec);
+    if (err) return { ok: false, error: err };
+    return { ok: true, value: n };
+  }
+
+  const text = raw;
+  const err = validateGuardrailsRuntimeConfigValue(text, spec);
+  if (err) return { ok: false, error: err };
+  return { ok: true, value: text };
+}
+
+export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string, GuardrailsRuntimeConfigValue> {
+  const queueCfg = resolveLongRunIntentQueueConfig(cwd);
+  const autonomyCfg = resolvePragmaticAutonomyConfig(cwd);
+
+  return {
+    "longRunIntentQueue.enabled": queueCfg.enabled,
+    "longRunIntentQueue.requireActiveLongRun": queueCfg.requireActiveLongRun,
+    "longRunIntentQueue.maxItems": queueCfg.maxItems,
+    "longRunIntentQueue.autoDrainOnIdle": queueCfg.autoDrainOnIdle,
+    "longRunIntentQueue.autoDrainCooldownMs": queueCfg.autoDrainCooldownMs,
+    "longRunIntentQueue.autoDrainIdleStableMs": queueCfg.autoDrainIdleStableMs,
+    "longRunIntentQueue.autoDrainBatchSize": queueCfg.autoDrainBatchSize,
+    "longRunIntentQueue.dispatchFailureBlockAfter": queueCfg.dispatchFailureBlockAfter,
+    "longRunIntentQueue.forceNowPrefix": queueCfg.forceNowPrefix,
+    "pragmaticAutonomy.enabled": autonomyCfg.enabled,
+    "pragmaticAutonomy.noObviousQuestions": autonomyCfg.noObviousQuestions,
+    "pragmaticAutonomy.maxAuditTextChars": autonomyCfg.maxAuditTextChars,
+  };
+}
+
+export function buildGuardrailsConfigHelpLines(): string[] {
+  return [
+    "guardrails-config usage:",
+    "  /guardrails-config status",
+    "  /guardrails-config get <key>",
+    "  /guardrails-config set <key> <value>",
+    "",
+    "examples:",
+    "  /guardrails-config get longRunIntentQueue.maxItems",
+    "  /guardrails-config set longRunIntentQueue.maxItems 80",
+    "  /guardrails-config set longRunIntentQueue.enabled true",
+    "",
+    "fallback: edit .pi/settings.json manually only for unsupported keys.",
+  ];
+}
+
+function formatRuntimeConfigValue(value: unknown): string {
+  if (value === undefined) return "(unset)";
+  if (typeof value === "string") return `\"${value}\"`;
+  return String(value);
+}
+
+export function buildGuardrailsRuntimeConfigStatus(cwd: string): string[] {
+  const settings = readProjectPiSettings(cwd);
+  const effective = readGuardrailsRuntimeConfigSnapshot(cwd);
+  const lines: string[] = [
+    "guardrails-config status",
+    `settings: ${join(cwd, ".pi", "settings.json")}`,
+  ];
+
+  for (const spec of GUARDRAILS_RUNTIME_CONFIG_SPECS) {
+    const configured = readValueByPath(settings, spec.path);
+    const effectiveValue = effective[spec.key];
+    lines.push(
+      `- ${spec.key} = ${formatRuntimeConfigValue(effectiveValue)} | configured=${formatRuntimeConfigValue(configured)}`,
+    );
+  }
+
+  return lines;
+}
+
+export function buildGuardrailsRuntimeConfigGetLines(cwd: string, key: string): string[] {
+  const spec = resolveGuardrailsRuntimeConfigSpec(key);
+  if (!spec) {
+    return [
+      `guardrails-config: unsupported key '${key}'.`,
+      ...buildGuardrailsConfigHelpLines(),
+    ];
+  }
+
+  const settings = readProjectPiSettings(cwd);
+  const configured = readValueByPath(settings, spec.path);
+  const effective = readGuardrailsRuntimeConfigSnapshot(cwd)[spec.key];
+  return [
+    `guardrails-config get ${spec.key}`,
+    `type: ${spec.type}${spec.min !== undefined || spec.max !== undefined ? ` range=[${spec.min ?? "-inf"}, ${spec.max ?? "+inf"}]` : ""}`,
+    `description: ${spec.description}`,
+    `configured: ${formatRuntimeConfigValue(configured)}`,
+    `effective: ${formatRuntimeConfigValue(effective)}`,
+  ];
+}
+
+export function buildGuardrailsRuntimeConfigSetResult(params: {
+  cwd: string;
+  key: string;
+  rawValue: string;
+}): { ok: false; lines: string[] } | {
+  ok: true;
+  lines: string[];
+  spec: GuardrailsRuntimeConfigSpec;
+  oldConfigured: unknown;
+  newValue: GuardrailsRuntimeConfigValue;
+  settingsPath: string;
+} {
+  const spec = resolveGuardrailsRuntimeConfigSpec(params.key);
+  if (!spec) {
+    return {
+      ok: false,
+      lines: [
+        `guardrails-config: unsupported key '${params.key}'.`,
+        ...buildGuardrailsConfigHelpLines(),
+      ],
+    };
+  }
+
+  const coerced = coerceGuardrailsRuntimeConfigValue(params.rawValue, spec);
+  if (!coerced.ok) {
+    return { ok: false, lines: [coerced.error] };
+  }
+
+  const settings = readProjectPiSettings(params.cwd);
+  const oldConfigured = readValueByPath(settings, spec.path);
+  writeValueByPath(settings, spec.path, coerced.value);
+  const settingsPath = writeProjectPiSettings(params.cwd, settings);
+
+  return {
+    ok: true,
+    lines: [
+      `guardrails-config: set ${spec.key}=${formatRuntimeConfigValue(coerced.value)}.`,
+      `settings: ${settingsPath}`,
+      spec.reloadRequired
+        ? "reload: recommended (/reload) to apply this key in the current runtime."
+        : "reload: not required for this key (runtime reloaded config immediately).",
+    ],
+    spec,
+    oldConfigured,
+    newValue: coerced.value,
+    settingsPath,
+  };
+}
+
 export function buildPragmaticAutonomySystemPrompt(
   cfg: Pick<PragmaticAutonomyConfig, "enabled" | "noObviousQuestions">,
 ): string | undefined {
@@ -2332,6 +2698,86 @@ export default function (pi: ExtensionAPI) {
     }
 
     return undefined;
+  });
+
+  pi.registerCommand("guardrails-config", {
+    description: "Operate runtime config safely (get/set) for guardrails long-run/pragmatic autonomy without manual settings edits. Usage: /guardrails-config [status|help|get <key>|set <key> <value>]",
+    handler: async (args, ctx) => {
+      const rawArgs = String(args ?? "").trim();
+      const tokens = rawArgs.split(/\s+/).filter(Boolean);
+      const sub = (tokens[0] ?? "status").toLowerCase();
+
+      if (sub === "help") {
+        ctx.ui.notify(buildGuardrailsConfigHelpLines().join("\n"), "info");
+        return;
+      }
+
+      if (sub === "status") {
+        ctx.ui.notify(buildGuardrailsRuntimeConfigStatus(ctx.cwd).join("\n"), "info");
+        return;
+      }
+
+      if (sub === "get") {
+        const key = tokens[1];
+        if (!key) {
+          ctx.ui.notify("guardrails-config: usage /guardrails-config get <key>", "warning");
+          return;
+        }
+        const lines = buildGuardrailsRuntimeConfigGetLines(ctx.cwd, key);
+        const isUnsupported = lines[0]?.includes("unsupported key") === true;
+        ctx.ui.notify(lines.join("\n"), isUnsupported ? "warning" : "info");
+        return;
+      }
+
+      if (sub === "set") {
+        const key = tokens[1];
+        const rawValue = tokens.slice(2).join(" ");
+        if (!key || rawValue.length === 0) {
+          ctx.ui.notify("guardrails-config: usage /guardrails-config set <key> <value>", "warning");
+          return;
+        }
+
+        const before = readGuardrailsRuntimeConfigSnapshot(ctx.cwd);
+        const result = buildGuardrailsRuntimeConfigSetResult({ cwd: ctx.cwd, key, rawValue });
+        if (!result.ok) {
+          ctx.ui.notify(result.lines.join("\n"), "warning");
+          return;
+        }
+
+        // Re-read mutable configs so frequently tuned knobs apply now.
+        longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
+        pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+
+        const after = readGuardrailsRuntimeConfigSnapshot(ctx.cwd);
+        appendAuditEntry(ctx, "guardrails-core.runtime-config-set", {
+          atIso: new Date().toISOString(),
+          actor: "operator-command",
+          command: "guardrails-config set",
+          key: result.spec.key,
+          oldConfigured: result.oldConfigured,
+          newConfigured: result.newValue,
+          oldEffective: before[result.spec.key],
+          newEffective: after[result.spec.key],
+          settingsPath: result.settingsPath,
+          reloadRecommended: result.spec.reloadRequired,
+        });
+
+        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
+
+        const lines = [
+          ...result.lines,
+          `effective: ${formatRuntimeConfigValue(before[result.spec.key])} -> ${formatRuntimeConfigValue(after[result.spec.key])}`,
+          "fallback: unsupported keys can still be edited in .pi/settings.json (manual mode).",
+        ];
+        ctx.ui.notify(lines.join("\n"), "info");
+        return;
+      }
+
+      ctx.ui.notify(
+        [`guardrails-config: unknown subcommand '${sub}'.`, ...buildGuardrailsConfigHelpLines()].join("\n"),
+        "warning",
+      );
+    },
   });
 
   pi.registerCommand("lane-queue", {
