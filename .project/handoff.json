@@ -1,18 +1,19 @@
 {
-  "timestamp": "2026-04-24T12:47:45.000Z",
-  "context": "Envelope board-first para `TASK-BUD-100` executado com slice mínima/reversível: distribuição agora tem perfil default `strict-curated` (baseline oficial mínima), perfil opt-in `curated-runtime` para extras de runtime/capability e `stack-full` para cobertura total; alias `curated-default` preservado por compatibilidade. Documentação de trade-off/opt-in atualizada e verificação técnica registrada como passed (`VER-BUD-274`).",
+  "timestamp": "2026-04-24T12:57:30.000Z",
+  "context": "Envelope board-first para `TASK-BUD-104` executado: guardrails-core agora emite aviso automático para slice amplo em arquivo único (`guardrails-core-slice-width`) com recomendação acionável (split em micro-slices ou registrar backlog/board note), mantendo comportamento advisory (sem hard block). Cobertura smoke foi adicionada/validada e docs canônicas atualizadas.",
   "next_actions": [
-    "Decisão humana de fechamento para `TASK-BUD-100` (no-auto-close preservado; evidência já passed).",
-    "Opcional: decidir fechamento pendente de `TASK-BUD-087` (evidência passed `VER-BUD-273`).",
-    "Após decisões humanas, retomar lane principal `TASK-BUD-119`."
+    "Decisão humana de fechamento para `TASK-BUD-104` (evidência passed `VER-BUD-275`, no-auto-close preservado).",
+    "Ainda pendente de decisão humana: `TASK-BUD-100` (`VER-BUD-274`) e `TASK-BUD-087` (`VER-BUD-273`).",
+    "Após decisões humanas pendentes, retomar lane principal `TASK-BUD-119`."
   ],
   "blockers": [
+    "human-decision-required-for-task-bud-104-no-auto-close",
     "human-decision-required-for-task-bud-100-no-auto-close",
     "human-decision-required-for-task-bud-087-no-auto-close"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:47:45.000Z",
+      "atIso": "2026-04-24T12:57:30.000Z",
       "reason": "message_end",
       "level": "compact",
       "percent": 79,

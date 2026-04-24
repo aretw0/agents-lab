@@ -2421,7 +2421,7 @@
     {
       "id": "TASK-BUD-104",
       "description": "[P1] Implementar aviso automático de 'slice amplo' (arquivo único com múltiplas linhas/hunks) com recomendação de split ou backlog no fluxo canônico.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-085"
       ],
@@ -2438,7 +2438,8 @@
         "Detecção determinística sinaliza edição ampla em arquivo único com mensagem acionável no runtime.",
         "Mensagem recomenda quebrar em micro-slices; quando não possível, orientar registro imediato no board/backlog.",
         "Cobertura de teste valida critérios de detecção e ausência de hard block por default."
-      ]
+      ],
+      "notes": "[2026-04-24T12:56:15Z] Slice implementada em guardrails-core: nova avaliação determinística `evaluateWideSingleFileSlice` para arquivo único com múltiplos hunks/linhas, status runtime `guardrails-core-slice-width` e audit `guardrails-core.slice-wide-single-file` com recomendação acionável (split micro-slices ou backlog/board note). Fluxo permanece advisory (sem block). Cobertura adicionada em smoke (`guardrails-long-run-intent-queue`) validando critérios de trigger e não-trigger (1 arquivo vs múltiplos arquivos). Pipeline canônico documentado com novo sinal e ação padrão." 
     },
     {
       "id": "TASK-BUD-105",

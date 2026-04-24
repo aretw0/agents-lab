@@ -4704,6 +4704,15 @@
       "method": "test",
       "timestamp": "2026-04-24T12:47:15Z",
       "evidence": "Perfil de distribuição strict-curated implementado e validado. Mudanças: (1) `package-list.mjs` separa `STRICT_CURATED` (baseline oficial mínima), `RUNTIME_CAPABILITY_EXTRAS` e `CURATED_RUNTIME`; `CURATED_DEFAULT` mantido como alias compatível. (2) `install.mjs` default = `strict-curated`, com perfis explícitos `curated-runtime`/`stack-full` e flags `--runtime-extras`/`--strict-curated`; ajuda atualizada com baseline vs extras opt-in. (3) `recommended-pi-stack.md` documenta matriz de perfis, trade-offs e comandos de exceção. Testes: `installer-profile.test.ts`, `package-list.test.ts`, `installer-filters.test.ts` => 16/16 pass."
+    },
+    {
+      "id": "VER-BUD-275",
+      "target": "TASK-BUD-104",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-24T12:56:40Z",
+      "evidence": "Aviso automático de slice amplo implementado no runtime: `guardrails-core.ts` ganhou `evaluateWideSingleFileSlice` + `buildWideSingleFileSliceStatusLabel`, status `guardrails-core-slice-width` e audit `guardrails-core.slice-wide-single-file` com recomendação acionável (split micro-slices ou registrar backlog/board note). O comportamento permanece advisory (sem hard block por default). Documentação atualizada em `docs/guides/project-canonical-pipeline.md` com sinal e ação padrão. Teste smoke atualizado em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` cobrindo trigger e ausência de trigger para casos não elegíveis. Execução: 36/36 pass."
     }
   ]
 }
