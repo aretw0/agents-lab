@@ -4578,6 +4578,15 @@
       "method": "inspect",
       "timestamp": "2026-04-24T01:24:00Z",
       "evidence": "Diretriz humana de organização completa do repositório no GitHub foi assimilada no backlog com desdobramento em `TASK-BUD-135` (higiene pública + metadata + docs drift/MDT) e `TASK-BUD-136` (estrutura de releases para v0.8.0), mantendo prioridade atual no desbloqueio de potencial/fábrica."
+    },
+    {
+      "id": "VER-BUD-261",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T01:22:00Z",
+      "evidence": "Slice de confiabilidade `lane-now` iniciada: novo helper canônico `extractForceNowText` + branch explícita no `input` hook do `guardrails-core` para override imediato via `pi.sendUserMessage(..., {deliverAs:'followUp'})`, com audit `guardrails-core.long-run-intent-force-now` e feedback de observabilidade ao operador. Smoke focal verde (`guardrails-long-run-intent-queue` 35/35) + regressão de loop-evidence 5/5 preservada."
     }
   ]
 }
