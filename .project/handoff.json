@@ -1,19 +1,20 @@
 {
-  "timestamp": "2026-04-24T12:57:30.000Z",
-  "context": "Envelope board-first para `TASK-BUD-104` executado: guardrails-core agora emite aviso automático para slice amplo em arquivo único (`guardrails-core-slice-width`) com recomendação acionável (split em micro-slices ou registrar backlog/board note), mantendo comportamento advisory (sem hard block). Cobertura smoke foi adicionada/validada e docs canônicas atualizadas.",
+  "timestamp": "2026-04-24T13:11:00.000Z",
+  "context": "Envelope board-first para `TASK-BUD-112` executado com micro-slice canônica: adicionado pipeline de descoberta de trabalho repetitivo com gasto LLM via `session_analytics_query` (`query_type=galvanization`), incluindo ranking determinístico de oportunidades, proposta de pathway hard com gates (equivalência/rollback/verification) e roadmap baseline vs pós-automação. `quota-visibility` ganhou projeção de mitigação (`estimateHardPathwayMitigation`) para quantificar redução potencial de tokens/custo/requests.",
   "next_actions": [
-    "Decisão humana de fechamento para `TASK-BUD-104` (evidência passed `VER-BUD-275`, no-auto-close preservado).",
-    "Ainda pendente de decisão humana: `TASK-BUD-100` (`VER-BUD-274`) e `TASK-BUD-087` (`VER-BUD-273`).",
-    "Após decisões humanas pendentes, retomar lane principal `TASK-BUD-119`."
+    "Decisão humana de fechamento para `TASK-BUD-112` (evidência passed `VER-BUD-276`, contrato no-auto-close).",
+    "Opcional pós-reload: validar runtime `/session-analytics galvanization --hours 24 --limit 10` para inspeção operacional do ranking.",
+    "Após decisões humanas pendentes (`TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`), retomar lane principal `TASK-BUD-119`."
   ],
   "blockers": [
+    "human-decision-required-for-task-bud-112-no-auto-close",
     "human-decision-required-for-task-bud-104-no-auto-close",
     "human-decision-required-for-task-bud-100-no-auto-close",
     "human-decision-required-for-task-bud-087-no-auto-close"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T12:57:30.000Z",
+      "atIso": "2026-04-24T13:11:00.000Z",
       "reason": "message_end",
       "level": "compact",
       "percent": 79,

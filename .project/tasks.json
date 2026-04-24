@@ -2604,7 +2604,7 @@
     {
       "id": "TASK-BUD-112",
       "description": "[P1] Preparar pipeline de descoberta de trabalho repetitivo com gasto LLM para converter em pathways hard galvanizados (sem LLM/humano no loop) quando seguro.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-096",
         "TASK-BUD-111"
@@ -2617,7 +2617,7 @@
       ],
       "files": [
         "packages/pi-stack/extensions/quota-visibility.ts",
-        "packages/pi-stack/extensions/session-analytics-query.ts",
+        "packages/pi-stack/extensions/session-analytics.ts",
         "docs/guides/project-canonical-pipeline.md",
         "docs/guides/agent-driver-charter.md"
       ],
@@ -2626,7 +2626,7 @@
         "Cada candidato recebe proposta de pathway hard com gates de segurança/rollback e condição de equivalência funcional.",
         "Roadmap de galvanização registra métricas de mitigação de uso LLM (baseline vs pós-automação) sem iniciar implementação prematura fora do foco de fábrica."
       ],
-      "notes": "Solicitação explícita do usuário (2026-04-22): assimilar estratégia de mitigação máxima de uso LLM via automações hard para trabalhos repetitivos; registrar no backlog e não executar agora enquanto o foco permanece em liberar potencial de fábrica."
+      "notes": "Solicitação explícita do usuário (2026-04-22): assimilar estratégia de mitigação máxima de uso LLM via automações hard para trabalhos repetitivos; registrar no backlog e não executar agora enquanto o foco permanece em liberar potencial de fábrica.\n[2026-04-24T13:10:00Z] Slice pipeline entregue: `session_analytics_query` ganhou tipo `galvanization` com classificador determinístico (`deterministic-v1`) para padrões repetitivos + evidência de consumo (tokens/cost/requests), ranking e proposta de pathway hard (gates, equivalência, rollback). `quota-visibility` ganhou projeção baseline vs pós-automação (`estimateHardPathwayMitigation`) para roadmap de mitigação. Guias canônicos atualizados com fluxo advisory-first de descoberta -> proposta -> roadmap sem implementação prematura. Smokes verdes: session-analytics + quota-visibility (52/52)."
     },
     {
       "id": "TASK-BUD-113",

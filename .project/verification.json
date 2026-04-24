@@ -4713,6 +4713,15 @@
       "method": "test",
       "timestamp": "2026-04-24T12:56:40Z",
       "evidence": "Aviso automático de slice amplo implementado no runtime: `guardrails-core.ts` ganhou `evaluateWideSingleFileSlice` + `buildWideSingleFileSliceStatusLabel`, status `guardrails-core-slice-width` e audit `guardrails-core.slice-wide-single-file` com recomendação acionável (split micro-slices ou registrar backlog/board note). O comportamento permanece advisory (sem hard block por default). Documentação atualizada em `docs/guides/project-canonical-pipeline.md` com sinal e ação padrão. Teste smoke atualizado em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` cobrindo trigger e ausência de trigger para casos não elegíveis. Execução: 36/36 pass."
+    },
+    {
+      "id": "VER-BUD-276",
+      "target": "TASK-BUD-112",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-24T13:10:20Z",
+      "evidence": "Pipeline de descoberta de repetição budget-aware implementado. `session-analytics.ts` adiciona query_type `galvanization` com classificador determinístico (`parseGalvanizationCandidates`) que identifica padrões repetitivos e ranqueia oportunidades com evidência de consumo LLM (tokens/cost/requests), além de proposta de pathway hard com gates de segurança, equivalência e rollback. `quota-visibility.ts` adiciona `estimateHardPathwayMitigation` para projeção baseline vs pós-automação. Guias atualizados (`project-canonical-pipeline.md`, `agent-driver-charter.md`) com fluxo discovery->pathway->roadmap advisory-first. Testes: `session-analytics.test.ts` + `quota-visibility-parsers.test.ts` = 52/52 passed."
     }
   ]
 }
