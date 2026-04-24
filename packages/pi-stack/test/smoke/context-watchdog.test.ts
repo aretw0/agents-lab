@@ -16,6 +16,7 @@ import {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchSignalNoiseExcessive,
@@ -183,6 +184,30 @@ describe("context-watchdog", () => {
 
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			hasPendingMessages: false,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: true, reason: "send" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			hasPendingMessages: true,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: false, reason: "pending-messages" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			hasPendingMessages: false,
+			hasRecentSteerInput: true,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: false, reason: "recent-steer" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			hasPendingMessages: false,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 2,
+		})).toEqual({ shouldDispatch: false, reason: "lane-queue-pending" });
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg)).toBe(true);
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "fresh")).toBe(false);
 		expect(shouldRefreshHandoffBeforeAutoCompact(compact, cfg, "stale")).toBe(true);
@@ -279,7 +304,7 @@ describe("context-watchdog", () => {
 			.toBe("openai-codex/gpt-5.3-codex");
 	});
 
-	it("builds compact auto-resume prompt from handoff freshness snapshot", () => {
+	it("builds execution-focused auto-resume prompt from handoff snapshot", () => {
 		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
 		const prompt = buildAutoResumePromptFromHandoff({
 			timestamp: "2026-04-21T20:20:00.000Z",
@@ -291,22 +316,21 @@ describe("context-watchdog", () => {
 			],
 			context_watch_events: [{ level: "compact" }],
 		} as any, 5 * 60 * 1000, nowMs);
+		expect(prompt).toContain("auto-resume: continue from .project/handoff.json");
 		expect(prompt).toContain("ts=2026-04-21T20:20:00.000Z");
-		expect(prompt).toContain("freshness=stale ageSec=600");
 		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
-		expect(prompt).toContain("handoff is stale");
-		expect(prompt).toContain("Cadence: adaptive on resume");
-		expect(prompt).toContain("if level=ok, use standard slices");
-		expect(prompt).not.toContain("Keep micro-slice-only (1 file + 1 test)");
+		expect(prompt).toContain("execution: prioritize latest user steering/follow-up");
 		expect(prompt).not.toContain("Context-watch action:");
+		expect(prompt).not.toContain("freshness=");
+		expect(prompt).not.toContain("Cadence:");
 
 		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any, 5 * 60 * 1000, nowMs);
-		expect(unknownPrompt).toContain("freshness=unknown");
+		expect(unknownPrompt).toContain("focusTasks: none-listed");
 	});
 
-	it("resume prompt removes timidity when latest context-watch event is ok", () => {
+	it("resume prompt stays execution-focused even when context events are present", () => {
 		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
 		const prompt = buildAutoResumePromptFromHandoff({
 			timestamp: "2026-04-21T20:29:00.000Z",
@@ -315,9 +339,9 @@ describe("context-watchdog", () => {
 				{ level: "ok" },
 			],
 		} as any, 5 * 60 * 1000, nowMs);
-		expect(prompt).toContain("freshness=fresh ageSec=60");
-		expect(prompt).toContain("Cadence: context already healthy");
-		expect(prompt).toContain("standard slices (2-4 files + focused tests)");
+		expect(prompt).toContain("auto-resume: continue from .project/handoff.json");
+		expect(prompt).not.toContain("Cadence:");
+		expect(prompt).not.toContain("context already healthy");
 	});
 
 	it("emits operator signal for manual intervention/reload steering", () => {

@@ -201,6 +201,18 @@ Contrato:
 - comando informa se reload é recomendado/necessário para consistência da sessão;
 - fallback manual (`.pi/settings.json`) fica restrito a chaves não suportadas.
 
+### Roteamento determinístico de shell por host (evitar tentativa-e-erro)
+
+Para reduzir falhas de execução por mismatch de shell/PATH, o guardrails-core aplica perfil de host em runtime.
+
+Contrato inicial (hard-pathway):
+- em `Windows + Git Bash`, comandos node-family no tool `bash` (`node/npm/npx/pnpm/yarn/vitest`) devem usar `cmd.exe /c <comando>`;
+- comando bare (ex.: `npm run test`) nessa combinação é bloqueado com instrução determinística de fallback;
+- sessão registra perfil/ações em audit trail (`guardrails-core.shell-routing-profile`, `guardrails-core.shell-routing-block`) e status curto (`guardrails-core-shell`);
+- operador pode inspecionar/normalizar via `/shell-route status` e `/shell-route wrap <command>`.
+
+Objetivo: transformar um soft-intent operacional em comportamento previsível e reproduzível, sem depender de acerto manual do agente.
+
 ### Steering signal-first (tool-surface diet)
 
 No loop canônico, steering diário deve priorizar **sinais passivos de stream/status** (ex.: `warn/checkpoint/compact`, `operatorSignal`) em vez de depender de tool-call manual.

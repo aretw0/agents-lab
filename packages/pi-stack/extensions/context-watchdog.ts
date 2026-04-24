@@ -11,6 +11,7 @@
  * Supports autonomous checkpoint/compact actions with cooldown + idle guards.
  */
 
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
@@ -59,6 +60,7 @@ import {
 	type HandoffRefreshMode,
 } from "./context-watchdog-handoff";
 import {
+	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
 	shouldEmitAutoResumeAfterCompact,
 	shouldRefreshHandoffBeforeAutoCompact,
@@ -98,6 +100,7 @@ export {
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
+	resolveAutoResumeDispatchDecision,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	shouldAnnounceContextWatch,
@@ -350,6 +353,22 @@ function readWatchdogConfig(cwd: string): ContextWatchdogConfig {
 	return normalizeContextWatchdogConfig(piStack.contextWatchdog);
 }
 
+function readDeferredLaneQueueCount(cwd: string): number {
+	const queuePath = path.join(cwd, ".pi", "deferred-intents.json");
+	if (!existsSync(queuePath)) return 0;
+	try {
+		const json = JSON.parse(readFileSync(queuePath, "utf8"));
+		if (!Array.isArray(json?.items)) return 0;
+		return json.items.filter((item: unknown) => {
+			if (!item || typeof item !== "object") return false;
+			const row = item as { text?: unknown };
+			return typeof row.text === "string" && row.text.trim().length > 0;
+		}).length;
+	} catch {
+		return 0;
+	}
+}
+
 function buildAssessment(
 	ctx: ExtensionContext,
 	config: ContextWatchdogConfig,
@@ -379,6 +398,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
 	let lastAutoResumeAt = 0;
+	let lastInputAt = 0;
+	let lastAutoCompactTriggerAt = 0;
 	let autoCompactInFlight = false;
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
 	let autoCompactRetryDueAt = 0;
@@ -520,13 +541,21 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;
+			lastAutoCompactTriggerAt = now;
 			ctx.ui.notify("context-watch: auto compact triggered", "warning");
 			ctx.compact({
 				onComplete: () => {
 					autoCompactInFlight = false;
 					ctx.ui.notify("context-watch: auto compact completed", "info");
 					const nowAfterCompact = Date.now();
-					if (shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt)) {
+					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
+					const autoResumeDecision = resolveAutoResumeDispatchDecision({
+						autoResumeReady,
+						hasPendingMessages: ctx.hasPendingMessages(),
+						hasRecentSteerInput: lastInputAt > lastAutoCompactTriggerAt,
+						queuedLaneIntents: readDeferredLaneQueueCount(ctx.cwd),
+					});
+					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
 						const resumePrompt = buildAutoResumePromptFromHandoff(
 							readHandoffJson(ctx.cwd),
@@ -534,6 +563,17 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						);
 						pi.sendUserMessage(resumePrompt, { deliverAs: "followUp" });
 						ctx.ui.notify("context-watch: auto resume queued", "info");
+					} else {
+						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+							"context-watchdog.auto-resume-suppressed",
+							{
+								atIso: new Date(nowAfterCompact).toISOString(),
+								reason: autoResumeDecision.reason,
+								hasPendingMessages: ctx.hasPendingMessages(),
+								hasRecentSteerInput: lastInputAt > lastAutoCompactTriggerAt,
+								queuedLaneIntents: readDeferredLaneQueueCount(ctx.cwd),
+							},
+						);
 					}
 				},
 				onError: (error) => {
@@ -669,6 +709,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAutoCheckpointAt = 0;
 		lastAutoCompactAt = 0;
 		lastAutoResumeAt = 0;
+		lastInputAt = 0;
+		lastAutoCompactTriggerAt = 0;
 		autoCompactInFlight = false;
 		clearAutoCompactRetryTimer();
 		consecutiveWarnCount = 0;
@@ -677,6 +719,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
 		run(ctx, "session_start");
+	});
+
+	pi.on("input", (event) => {
+		const text = String(event.text ?? "").trim();
+		if (!text) return;
+		lastInputAt = Date.now();
 	});
 
 	pi.on("message_end", (_event, ctx) => {

@@ -101,6 +101,15 @@ import {
   buildBehaviorRouteSystemPrompt,
   classifyBehaviorRoute,
 } from "./guardrails-core-behavior-routing";
+import {
+  buildShellRoutingStatusLabel,
+  buildShellRoutingStatusLines,
+  buildShellRoutingSystemPrompt,
+  resolveBashCommandRoutingDecision,
+  resolveCommandRoutingProfile,
+  wrapCommandForHostShell,
+  type CommandRoutingProfile,
+} from "./guardrails-core-shell-routing";
 
 export {
   resolveBloatSmellConfig,
@@ -180,6 +189,19 @@ export {
 export {
   resolveGuardrailsIntentRuntimeDecision,
 } from "./guardrails-core-intent-runtime";
+
+export {
+  buildShellRoutingStatusLabel,
+  buildShellRoutingStatusLines,
+  buildShellRoutingSystemPrompt,
+  detectShellFamily,
+  isCmdWrappedCommand,
+  isNodeFamilyCommand,
+  parseFirstCommandToken,
+  resolveBashCommandRoutingDecision,
+  resolveCommandRoutingProfile,
+  wrapCommandForHostShell,
+} from "./guardrails-core-shell-routing";
 
 // =============================================================================
 // Read / Path Guard
@@ -1398,6 +1420,7 @@ export function shouldAnnounceStrictInteractiveMode(
 export default function (pi: ExtensionAPI) {
   let strictInteractiveMode = false;
   let strictInteractiveAnnounced = false;
+  let shellRoutingProfile: CommandRoutingProfile = resolveCommandRoutingProfile();
   let portConflictConfig: GuardrailsPortConflictConfig = { enabled: true, suggestedTestPort: 4173 };
   let providerBudgetGovernorConfig: ProviderBudgetGovernorConfig = {
     enabled: false,
@@ -2175,6 +2198,7 @@ export default function (pi: ExtensionAPI) {
     longRunProviderRetryConfig = resolveLongRunProviderTransientRetryConfig(ctx.cwd);
     pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
     bloatSmellConfig = resolveBloatSmellConfig(ctx.cwd);
+    shellRoutingProfile = resolveCommandRoutingProfile();
     if (providerBudgetGovernorMisconfig) {
       ctx.ui?.notify?.(
         providerBudgetGovernorMisconfigReason(providerBudgetGovernorMisconfig),
@@ -2220,6 +2244,16 @@ export default function (pi: ExtensionAPI) {
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
     ctx.ui?.setStatus?.("guardrails-core-slice-width", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-shell", buildShellRoutingStatusLabel(shellRoutingProfile));
+    if (shellRoutingProfile.preferCmdForNodeFamily) {
+      appendAuditEntry(ctx, "guardrails-core.shell-routing-profile", {
+        atIso: new Date().toISOString(),
+        profileId: shellRoutingProfile.profileId,
+        platform: shellRoutingProfile.platform,
+        shell: shellRoutingProfile.shell,
+        preferCmdForNodeFamily: shellRoutingProfile.preferCmdForNodeFamily,
+      });
+    }
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -2255,6 +2289,7 @@ export default function (pi: ExtensionAPI) {
     const behaviorRoute = parsedIntent.ok
       ? { kind: "none" as const }
       : classifyBehaviorRoute(event.prompt ?? "");
+    const shellRoutingPrompt = buildShellRoutingSystemPrompt(shellRoutingProfile);
     if (behaviorRoute.kind === "matched" && behaviorRoute.match) {
       systemPromptParts.push("", ...buildBehaviorRouteSystemPrompt(behaviorRoute.match));
       ctx.ui?.setStatus?.(
@@ -2272,9 +2307,13 @@ export default function (pi: ExtensionAPI) {
       ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     }
 
+    if (shellRoutingPrompt.length > 0) {
+      systemPromptParts.push("", ...shellRoutingPrompt);
+    }
+
     if (!strictInteractiveMode) {
       ctx.ui?.setStatus?.("guardrails-core", undefined);
-      if (!autonomyPrompt && !parsedIntent.ok) return undefined;
+      if (!autonomyPrompt && !parsedIntent.ok && shellRoutingPrompt.length === 0) return undefined;
       return { systemPrompt: systemPromptParts.join("\n") };
     }
 
@@ -2601,6 +2640,21 @@ export default function (pi: ExtensionAPI) {
     if (isToolCallEventType("bash", event)) {
       const command = event.input.command ?? "";
 
+      const shellRoutingDecision = resolveBashCommandRoutingDecision(command, shellRoutingProfile);
+      if (shellRoutingDecision.action === "block") {
+        appendAuditEntry(ctx, "guardrails-core.shell-routing-block", {
+          atIso: new Date().toISOString(),
+          profileId: shellRoutingProfile.profileId,
+          shell: shellRoutingProfile.shell,
+          firstToken: shellRoutingDecision.firstToken,
+          commandPreview: command.slice(0, 240),
+        });
+        return {
+          block: true,
+          reason: shellRoutingDecision.reason ?? "Blocked by guardrails-core (host-shell-routing).",
+        };
+      }
+
       // Shared policy primitive for bash guardrails (same trigger semantics as monitors)
       const matchedBashPolicy = evaluateBashGuardPolicies(command);
       if (matchedBashPolicy) {
@@ -2813,6 +2867,60 @@ export default function (pi: ExtensionAPI) {
         [`guardrails-config: unknown subcommand '${sub}'.`, ...buildGuardrailsConfigHelpLines()].join("\n"),
         "warning",
       );
+    },
+  });
+
+  pi.registerCommand("shell-route", {
+    description: "Show deterministic host shell routing profile or wrap a command. Usage: /shell-route [status|help|wrap <command>]",
+    handler: async (args, ctx) => {
+      const rawArgs = String(args ?? "").trim();
+      const tokens = rawArgs.split(/\s+/).filter(Boolean);
+      const sub = (tokens[0] ?? "status").toLowerCase();
+
+      if (sub === "help") {
+        ctx.ui.notify([
+          "shell-route usage:",
+          "  /shell-route status",
+          "  /shell-route wrap <command>",
+          "",
+          "example:",
+          "  /shell-route wrap npm run test:smoke",
+        ].join("\n"), "info");
+        return;
+      }
+
+      if (sub === "status") {
+        ctx.ui.notify(buildShellRoutingStatusLines(shellRoutingProfile).join("\n"), "info");
+        return;
+      }
+
+      if (sub === "wrap") {
+        const rawCommand = rawArgs.replace(/^wrap\b/i, "").trim();
+        if (!rawCommand) {
+          ctx.ui.notify("shell-route: usage /shell-route wrap <command>", "warning");
+          return;
+        }
+        const wrapped = wrapCommandForHostShell(rawCommand, shellRoutingProfile);
+        const lines = [
+          "shell-route wrap",
+          `input: ${rawCommand}`,
+          `output: ${wrapped.wrappedCommand}`,
+          `changed: ${wrapped.changed ? "yes" : "no"}`,
+          `reason: ${wrapped.reason}`,
+        ];
+        ctx.ui.notify(lines.join("\n"), "info");
+        appendAuditEntry(ctx, "guardrails-core.shell-routing-wrap", {
+          atIso: new Date().toISOString(),
+          profileId: shellRoutingProfile.profileId,
+          input: rawCommand,
+          output: wrapped.wrappedCommand,
+          changed: wrapped.changed,
+          reason: wrapped.reason,
+        });
+        return;
+      }
+
+      ctx.ui.notify("shell-route: unknown subcommand. Use /shell-route help", "warning");
     },
   });
 

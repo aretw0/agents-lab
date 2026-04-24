@@ -1,8 +1,6 @@
 export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 
-type ContextWatchdogLevel = "ok" | "warn" | "checkpoint" | "compact";
-
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
 
 function normalizeStringArray(value: unknown): string[] {
@@ -14,37 +12,6 @@ function truncateForPrompt(value: string, max = 180): string {
 	const s = String(value ?? "").trim().replace(/\s+/g, " ");
 	if (s.length <= max) return s;
 	return `${s.slice(0, Math.max(0, max - 1))}…`;
-}
-
-function latestContextWatchLevelFromHandoff(
-	handoffInput: Record<string, unknown>,
-): ContextWatchdogLevel | undefined {
-	const events = handoffInput.context_watch_events;
-	if (!Array.isArray(events) || events.length === 0) return undefined;
-	for (let i = events.length - 1; i >= 0; i -= 1) {
-		const row = events[i];
-		if (!row || typeof row !== "object") continue;
-		const level = (row as Record<string, unknown>).level;
-		if (
-			level === "ok" ||
-			level === "warn" ||
-			level === "checkpoint" ||
-			level === "compact"
-		) {
-			return level;
-		}
-	}
-	return undefined;
-}
-
-function buildResumeCadenceGuidanceLine(
-	handoffInput: Record<string, unknown>,
-): string {
-	const lastLevel = latestContextWatchLevelFromHandoff(handoffInput);
-	if (lastLevel === "ok") {
-		return "Cadence: context already healthy — proceed with standard slices (2-4 files + focused tests), preserving canonical board/verification flow.";
-	}
-	return "Cadence: adaptive on resume — check `context_watch_status`; if level=ok, use standard slices (2-4 files + focused tests); if warn/checkpoint/compact, keep micro-slice-only until checkpoint/compact stabilizes.";
 }
 
 export function resolveHandoffFreshness(
@@ -91,17 +58,13 @@ export function toAgeSec(valueMs: number | undefined): number | undefined {
 
 export function buildAutoResumePromptFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
-	maxFreshAgeMs = 30 * 60 * 1000,
-	nowMs = Date.now(),
+	_maxFreshAgeMs = 30 * 60 * 1000,
+	_nowMs = Date.now(),
 ): string {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const freshness = resolveHandoffFreshness(timestamp, nowMs, maxFreshAgeMs);
-	const freshnessText = freshness.label === "unknown"
-		? "unknown"
-		: `${freshness.label}${freshness.ageMs !== undefined ? ` ageSec=${Math.ceil(freshness.ageMs / 1000)}` : ""}`;
 	const tasks = normalizeStringArray(handoff.current_tasks).slice(0, 3);
 	const blockers = normalizeStringArray(handoff.blockers)
 		.filter((b) => !b.startsWith("context-watch-"))
@@ -113,13 +76,10 @@ export function buildAutoResumePromptFromHandoff(
 		.map((line) => truncateForPrompt(line, 120));
 
 	return [
-		`context-watch auto-resume: continue from .project/handoff.json (ts=${timestamp ?? "unknown"}, freshness=${freshnessText}).`,
+		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
 		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
 		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
 		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",
-		freshness.label === "stale"
-			? "note: handoff is stale; refresh checkpoint if resumed context conflicts."
-			: "note: handoff freshness acceptable for resume.",
-		buildResumeCadenceGuidanceLine(handoff),
+		"execution: prioritize latest user steering/follow-up; if none, proceed with listed tasks.",
 	].join("\n");
 }
