@@ -66,6 +66,41 @@ Saída:
 - **Query policy**: negar mutação (`INSERT/UPDATE/DELETE/DDL`) quando `forbidMutation=true`.
 - **Evidence trail**: registrar input normalizado + decisão + output + limites aplicados.
 
+## Matriz de decisão (operacional)
+
+### `safe_mutate_large_file`
+- `risk=low`: `touchedLines <= 40` e âncora única -> `apply` permitido (ainda com preview obrigatório).
+- `risk=medium`: `41..120` linhas -> `apply` apenas com confirmação explícita.
+- `risk=high`: `>120` linhas ou âncora ambígua -> bloquear e pedir split por blocos.
+
+### `structured_query_plan`
+- `risk=low`: `SELECT` com tables allowlist + limite de linhas.
+- `risk=medium`: joins amplos/subqueries sem índice conhecido -> gerar plano + recomendação de limite.
+- `risk=high`: mutação (`INSERT/UPDATE/DELETE/DDL`) com `forbidMutation=true` -> bloquear com razão canônica.
+
+## Exemplos de saída canônica
+
+```json
+{
+  "applied": false,
+  "changed": false,
+  "riskLevel": "high",
+  "reason": "blocked: blast-radius-exceeded",
+  "touchedLines": 184,
+  "maxTouchedLines": 120,
+  "rollbackToken": null
+}
+```
+
+```json
+{
+  "normalizedQuery": "SELECT id, status FROM tasks WHERE status = $1 ORDER BY id LIMIT $2",
+  "parameters": ["planned", 50],
+  "riskLevel": "low",
+  "safetyChecks": ["allowlist-ok", "limit-present", "mutation-forbidden-ok"]
+}
+```
+
 ## Rollback mínimo
 Para mutação aplicada:
 - `rollbackToken` + hash anterior do alvo,
