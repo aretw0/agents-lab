@@ -65,6 +65,8 @@ import {
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeHealthy,
   isLongRunLoopLeaseExpired,
+  shouldBlockRapidSameTaskRedispatch,
+  BOARD_RAPID_REDISPATCH_WINDOW_MS,
   type LongRunIntentQueueConfig,
   type AutoDrainGateReason,
   type BoardAutoAdvanceGateReason,
@@ -146,6 +148,8 @@ export {
   markLongRunLoopRuntimeDegraded,
   markLongRunLoopRuntimeHealthy,
   isLongRunLoopLeaseExpired,
+  shouldBlockRapidSameTaskRedispatch,
+  BOARD_RAPID_REDISPATCH_WINDOW_MS,
 } from "./guardrails-core-lane-queue";
 
 export {
@@ -1945,6 +1949,38 @@ export default function (pi: ExtensionAPI) {
 
       const intentText = encodeGuardrailsIntent(intent);
       const intentSummary = summarizeGuardrailsIntent(intent);
+
+      // Detect silent execution failure: same task dispatched again within the rapid
+      // re-dispatch window. Happens when a compacted session leaves orphaned
+      // function_call_output messages that cause pi to error on execution without
+      // the dispatch itself throwing (so consecutiveDispatchFailures stays at 0).
+      if (shouldBlockRapidSameTaskRedispatch({
+        taskId: intent.taskId,
+        lastDispatchItemId: longRunLoopRuntimeState.lastDispatchItemId,
+        lastDispatchAtIso: longRunLoopRuntimeState.lastDispatchAtIso,
+        nowMs,
+        windowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+      })) {
+        const sinceMs = nowMs - new Date(longRunLoopRuntimeState.lastDispatchAtIso!).getTime();
+        const message = `task ${intent.taskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
+        markLoopDegraded(ctx, `board-auto-rapid-redispatch:${intent.taskId}`, message);
+        appendAuditEntry(ctx, "guardrails-core.board-intent-rapid-redispatch-blocked", {
+          atIso: new Date(nowMs).toISOString(),
+          reason,
+          taskId: intent.taskId,
+          sinceLastDispatchMs: sinceMs,
+          rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+          consecutiveFailuresNow: longRunLoopRuntimeState.consecutiveDispatchFailures,
+          runtimeCodeState,
+        });
+        updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
+        ctx.ui.notify(
+          `lane-queue: rapid re-dispatch blocked for ${intent.taskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`,
+          "warning",
+        );
+        return false;
+      }
+
       try {
         pi.sendUserMessage(intentText, { deliverAs: "followUp" });
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance", {

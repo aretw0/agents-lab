@@ -63,6 +63,8 @@ import {
   resolveDispatchFailureBlockAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
+  shouldBlockRapidSameTaskRedispatch,
+  BOARD_RAPID_REDISPATCH_WINDOW_MS,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -953,5 +955,63 @@ describe("guardrails-core long-run intent queue", () => {
     expect(shouldAutoDrainDeferredIntent(false, 0, 2_000, 0, 1_200, cfg)).toBe(false);
     expect(shouldAutoDrainDeferredIntent(false, 1, 500, 0, 1_200, cfg)).toBe(false);
     expect(shouldAutoDrainDeferredIntent(false, 1, 2_000, 0, 200, cfg)).toBe(false);
+  });
+
+  it("blocks rapid same-task re-dispatch to catch silent execution failures", () => {
+    const nowMs = Date.now();
+    const recentIso = new Date(nowMs - 60_000).toISOString(); // 1 min ago (within 5 min window)
+    const staleIso = new Date(nowMs - 6 * 60_000).toISOString(); // 6 min ago (outside window)
+
+    // Should block: same task, within window
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-067",
+      lastDispatchItemId: "board-auto-TASK-BUD-067",
+      lastDispatchAtIso: recentIso,
+      nowMs,
+    })).toBe(true);
+
+    // Should NOT block: different task
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-068",
+      lastDispatchItemId: "board-auto-TASK-BUD-067",
+      lastDispatchAtIso: recentIso,
+      nowMs,
+    })).toBe(false);
+
+    // Should NOT block: same task but stale (outside 5 min window)
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-067",
+      lastDispatchItemId: "board-auto-TASK-BUD-067",
+      lastDispatchAtIso: staleIso,
+      nowMs,
+    })).toBe(false);
+
+    // Should NOT block: no prior dispatch
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-067",
+      lastDispatchItemId: undefined,
+      lastDispatchAtIso: undefined,
+      nowMs,
+    })).toBe(false);
+
+    // Should NOT block: lastDispatchItemId format doesn't match board-auto-* prefix
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-067",
+      lastDispatchItemId: "intent-TASK-BUD-067",
+      lastDispatchAtIso: recentIso,
+      nowMs,
+    })).toBe(false);
+
+    // Respects custom windowMs
+    expect(shouldBlockRapidSameTaskRedispatch({
+      taskId: "TASK-BUD-067",
+      lastDispatchItemId: "board-auto-TASK-BUD-067",
+      lastDispatchAtIso: recentIso,
+      nowMs,
+      windowMs: 30_000, // 30s window — 60s ago is outside
+    })).toBe(false);
+
+    // Constant is 5 minutes
+    expect(BOARD_RAPID_REDISPATCH_WINDOW_MS).toBe(5 * 60 * 1000);
   });
 });

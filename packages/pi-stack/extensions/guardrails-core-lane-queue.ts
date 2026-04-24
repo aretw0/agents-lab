@@ -360,6 +360,32 @@ export function shouldSchedulePostDispatchAutoDrain(
   return dispatched > 0 && remainingQueuedCount > 0;
 }
 
+// Default window for detecting rapid same-task re-dispatch (silent execution failure).
+// If the same board task is dispatched again within this window, it's likely that the
+// previous execution failed silently (e.g. orphaned function_call_output from a
+// compacted session) and the counter needs to be incremented rather than reset.
+export const BOARD_RAPID_REDISPATCH_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+export function shouldBlockRapidSameTaskRedispatch(options: {
+  taskId: string;
+  lastDispatchItemId?: string;
+  lastDispatchAtIso?: string;
+  nowMs?: number;
+  windowMs?: number;
+}): boolean {
+  const taskId = (options.taskId ?? "").trim();
+  if (!taskId) return false;
+  const lastItemId = (options.lastDispatchItemId ?? "").trim();
+  if (lastItemId !== `board-auto-${taskId}`) return false;
+  const lastAtMs = options.lastDispatchAtIso ? Date.parse(options.lastDispatchAtIso) : NaN;
+  if (!Number.isFinite(lastAtMs)) return false;
+  const nowMs = Number.isFinite(Number(options.nowMs)) ? Number(options.nowMs) : Date.now();
+  const windowMs = Number.isFinite(Number(options.windowMs)) && Number(options.windowMs) > 0
+    ? Number(options.windowMs)
+    : BOARD_RAPID_REDISPATCH_WINDOW_MS;
+  return nowMs - lastAtMs < windowMs;
+}
+
 export type BoardAutoAdvanceGateReason =
   | "active-long-run"
   | "queued-intents"
