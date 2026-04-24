@@ -95,6 +95,10 @@ import {
 import {
   resolveGuardrailsIntentRuntimeDecision,
 } from "./guardrails-core-intent-runtime";
+import {
+  buildBehaviorRouteSystemPrompt,
+  classifyBehaviorRoute,
+} from "./guardrails-core-behavior-routing";
 
 export {
   resolveBloatSmellConfig,
@@ -1753,6 +1757,7 @@ export default function (pi: ExtensionAPI) {
     ensureLoopLeaseHeartbeatTimer(ctx);
     updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
     ctx.ui?.setStatus?.("guardrails-core-intent", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
   });
@@ -1785,6 +1790,26 @@ export default function (pi: ExtensionAPI) {
         intentType: parsedIntent.intent.type,
         intentSummary: summarizeGuardrailsIntent(parsedIntent.intent),
       });
+    }
+
+    const behaviorRoute = parsedIntent.ok
+      ? { kind: "none" as const }
+      : classifyBehaviorRoute(event.prompt ?? "");
+    if (behaviorRoute.kind === "matched" && behaviorRoute.match) {
+      systemPromptParts.push("", ...buildBehaviorRouteSystemPrompt(behaviorRoute.match));
+      ctx.ui?.setStatus?.(
+        "guardrails-core-behavior",
+        `[behavior] ${behaviorRoute.match.skill} (${behaviorRoute.match.confidence})`,
+      );
+      appendAuditEntry(ctx, "guardrails-core.behavior-route-selected", {
+        atIso: new Date().toISOString(),
+        skill: behaviorRoute.match.skill,
+        confidence: behaviorRoute.match.confidence,
+        score: behaviorRoute.match.score,
+        reasons: behaviorRoute.match.reasons,
+      });
+    } else {
+      ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     }
 
     if (!strictInteractiveMode) {
@@ -2628,6 +2653,7 @@ export default function (pi: ExtensionAPI) {
     }
     ctx.ui?.setStatus?.("guardrails-core-budget", undefined);
     ctx.ui?.setStatus?.("guardrails-core-intent", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
     lastLongRunBusyAt = Date.now();
