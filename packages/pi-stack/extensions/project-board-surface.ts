@@ -65,11 +65,14 @@ interface BlockCacheEntry<T> {
   data: T;
 }
 
-export interface ProxyReadMeta {
+export interface BoardReadMeta {
   cacheHit: boolean;
   path: string;
   mtimeIso?: string;
 }
+
+/** @deprecated use BoardReadMeta */
+export type ProxyReadMeta = BoardReadMeta;
 
 const tasksCache = new Map<string, BlockCacheEntry<TasksBlock>>();
 const verificationCache = new Map<string, BlockCacheEntry<VerificationBlock>>();
@@ -156,7 +159,7 @@ function parseVerificationBlock(raw: string): VerificationBlock {
   }
 }
 
-function readTasksBlockCached(cwd: string): { block: TasksBlock; meta: ProxyReadMeta } {
+function readTasksBlockCached(cwd: string): { block: TasksBlock; meta: BoardReadMeta } {
   const p = tasksPath(cwd);
   if (!existsSync(p)) {
     return { block: { tasks: [] }, meta: { cacheHit: false, path: p } };
@@ -181,7 +184,7 @@ function readTasksBlockCached(cwd: string): { block: TasksBlock; meta: ProxyRead
 
 function readVerificationBlockCached(cwd: string): {
   block: VerificationBlock;
-  meta: ProxyReadMeta;
+  meta: BoardReadMeta;
 } {
   const p = verificationPath(cwd);
   if (!existsSync(p)) {
@@ -218,7 +221,7 @@ function shortText(text: string | undefined, max = 140): string | undefined {
   return trimmed.length <= max ? trimmed : `${trimmed.slice(0, max - 1)}…`;
 }
 
-export interface ProjectTaskProxyRow {
+export interface ProjectTaskBoardRow {
   id: string;
   status: string;
   description: string;
@@ -229,9 +232,12 @@ export interface ProjectTaskProxyRow {
 export interface ProjectTaskQueryResult {
   total: number;
   filtered: number;
-  rows: ProjectTaskProxyRow[];
-  meta: ProxyReadMeta;
+  rows: ProjectTaskBoardRow[];
+  meta: BoardReadMeta;
 }
+
+/** @deprecated use ProjectTaskBoardRow */
+export type ProjectTaskProxyRow = ProjectTaskBoardRow;
 
 export function queryProjectTasks(
   cwd: string,
@@ -257,7 +263,7 @@ export function queryProjectTasks(
     });
   }
 
-  const mapped: ProjectTaskProxyRow[] = rows.slice(0, limit).map((row) => ({
+  const mapped: ProjectTaskBoardRow[] = rows.slice(0, limit).map((row) => ({
     id: row.id,
     status: row.status,
     description: shortText(row.description, 180) ?? row.description,
@@ -273,7 +279,7 @@ export function queryProjectTasks(
   };
 }
 
-export interface ProjectVerificationProxyRow {
+export interface ProjectVerificationBoardRow {
   id: string;
   target?: string;
   status?: string;
@@ -285,9 +291,12 @@ export interface ProjectVerificationProxyRow {
 export interface ProjectVerificationQueryResult {
   total: number;
   filtered: number;
-  rows: ProjectVerificationProxyRow[];
-  meta: ProxyReadMeta;
+  rows: ProjectVerificationBoardRow[];
+  meta: BoardReadMeta;
 }
+
+/** @deprecated use ProjectVerificationBoardRow */
+export type ProjectVerificationProxyRow = ProjectVerificationBoardRow;
 
 export function queryProjectVerification(
   cwd: string,
@@ -339,7 +348,7 @@ function invalidateProjectBlockCaches(cwd: string): void {
   verificationCache.delete(verificationPath(cwd));
 }
 
-export function updateProjectTaskProxy(
+export function updateProjectTaskBoard(
   cwd: string,
   taskId: string,
   updates: {
@@ -347,7 +356,7 @@ export function updateProjectTaskProxy(
     appendNote?: string;
     maxNoteLines?: number;
   },
-): { ok: boolean; reason?: string; task?: ProjectTaskProxyRow } {
+): { ok: boolean; reason?: string; task?: ProjectTaskBoardRow } {
   const id = String(taskId ?? "").trim();
   if (!id) return { ok: false, reason: "missing-task-id" };
 
@@ -391,7 +400,7 @@ export function updateProjectTaskProxy(
   };
 }
 
-export default function projectBoardProxyExtension(pi: ExtensionAPI) {
+export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
   const queryParameters = Type.Object({
     entity: Type.Union([Type.Literal("tasks"), Type.Literal("verification")]),
     status: Type.Optional(Type.String({ description: "Filter by status." })),
@@ -439,15 +448,6 @@ export default function projectBoardProxyExtension(pi: ExtensionAPI) {
     execute: executeQuery,
   });
 
-  // Backward-compatible alias for prior naming.
-  pi.registerTool({
-    name: "project_proxy_query",
-    label: "Project Query (legacy alias)",
-    description:
-      "Legacy alias of board_query. Prefer board_query for new flows.",
-    parameters: queryParameters,
-    execute: executeQuery,
-  });
 
   const updateParameters = Type.Object({
     task_id: Type.String({ description: "Task id to update." }),
@@ -488,7 +488,7 @@ export default function projectBoardProxyExtension(pi: ExtensionAPI) {
       };
     }
 
-    const details = updateProjectTaskProxy(process.cwd(), task_id, {
+    const details = updateProjectTaskBoard(process.cwd(), task_id, {
       status,
       appendNote: append_note,
       maxNoteLines: max_note_lines,
@@ -508,13 +508,20 @@ export default function projectBoardProxyExtension(pi: ExtensionAPI) {
     execute: executeUpdate,
   });
 
-  // Backward-compatible alias for prior naming.
-  pi.registerTool({
-    name: "project_proxy_update",
-    label: "Project Update (legacy alias)",
-    description:
-      "Legacy alias of board_update. Prefer board_update for new flows.",
-    parameters: updateParameters,
-    execute: executeUpdate,
-  });
 }
+
+/** @deprecated use updateProjectTaskBoard */
+export function updateProjectTaskProxy(
+  cwd: string,
+  taskId: string,
+  updates: {
+    status?: ProjectTaskStatus;
+    appendNote?: string;
+    maxNoteLines?: number;
+  },
+): { ok: boolean; reason?: string; task?: ProjectTaskBoardRow } {
+  return updateProjectTaskBoard(cwd, taskId, updates);
+}
+
+/** @deprecated use projectBoardSurfaceExtension */
+export const projectBoardProxyExtension = projectBoardSurfaceExtension;

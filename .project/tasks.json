@@ -3040,7 +3040,7 @@
     {
       "id": "TASK-OPS-TOOL-NAME-001",
       "description": "[P2] Remover nomenclatura `proxy` da superfície de tools de projeto (deprecar aliases `project_proxy_*` e padronizar em `board_*`).",
-      "status": "in-progress",
+      "status": "completed",
       "files": [
         "packages/pi-stack/extensions/project-board-surface.ts",
         "packages/pi-stack/test/smoke/project-board-surface.test.ts",
@@ -3051,8 +3051,11 @@
         "Aliases legados permanecem apenas como compatibilidade temporária (ou removidos com nota de migração) sem uso interno novo.",
         "Runbook de migração curto indicando substituição direta para `board_query`/`board_update`."
       ],
-      "notes": "Backlog solicitado pelo usuário em 2026-04-23 para eliminar o nome `proxy` remanescente na tool surface.\n[2026-04-24T15:00:00Z] Execução board-first iniciada: extensão `project-board-surface` padronizada para nomenclatura `board_*` na superfície ativa (remoção dos registros de tool `project_proxy_query`/`project_proxy_update`), mantendo compatibilidade de código via aliases de export (tipos/funções deprecated) para evitar quebra interna imediata. Runbook canônico recebeu seção de migração direta `project_proxy_* -> board_*`. Smoke focal validada: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/project-board-surface.test.ts` (4/4 pass). Evidência: VER-OPS-TOOL-NAME-001.",
-      "verification": "VER-OPS-TOOL-NAME-001"
+      "notes": [
+        "Backlog solicitado pelo usuário em 2026-04-23 para eliminar o nome `proxy` remanescente na tool surface.\n[2026-04-24T15:00:00Z] Execução board-first iniciada: extensão `project-board-surface` padronizada para nomenclatura `board_*` na superfície ativa (remoção dos registros de tool `project_proxy_query`/`project_proxy_update`), mantendo compatibilidade de código via aliases de export (tipos/funções deprecated) para evitar quebra interna imediata. Runbook canônico recebeu seção de migração direta `project_proxy_* -> board_*`. Smoke focal validada: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/project-board-surface.test.ts` (4/4 pass). Evidência: VER-OPS-TOOL-NAME-001.",
+        "[2026-04-24T15:50:15.620Z] Fechado por decisão humana após verificação de testes e evidência no código."
+      ],
+      "verification": "Implementação verificada: project-board-surface.ts renomeado para naming board_*; aliases deprecated mantidos para compatibilidade; runbook project-canonical-pipeline.md atualizado; smoke project-board-surface.test.ts (4/4)."
     },
     {
       "id": "TASK-OPS-CONFIG-CMD-001",
@@ -3077,7 +3080,7 @@
     {
       "id": "TASK-UX-I18N-001",
       "description": "[P2] Harmonizar labels canônicos de loop para inglês (CAPS) visando coesão e futura internacionalização.",
-      "status": "in-progress",
+      "status": "completed",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
         "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts",
@@ -3089,8 +3092,11 @@
         "Smoke tests e docs são atualizados para a nova nomenclatura sem regressão funcional.",
         "Decisão de compatibilidade retroativa (aceitar labels legados em parsers/auditoria, se aplicável) documentada."
       ],
-      "notes": "Backlog criado após feedback do usuário sobre coesão linguística dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP`.\n[2026-04-24T15:05:00Z] Slice board-first executada: `buildLoopActivationMarkersLabel` migrou para `READY/ACTIVE_HERE/IN_LOOP` mantendo semântica booleana intacta; smoke `guardrails-long-run-intent-queue` atualizada para labels em inglês; runbook canônico atualizado com nomenclatura nova + decisão de compatibilidade retroativa (aceitar labels legados apenas como texto histórico e usar campos estruturados para decisão). Validação: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (37/37) e `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` (5/5). Evidência: VER-UX-I18N-001.",
-      "verification": "VER-UX-I18N-001"
+      "notes": [
+        "Backlog criado após feedback do usuário sobre coesão linguística dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP`.\n[2026-04-24T15:05:00Z] Slice board-first executada: `buildLoopActivationMarkersLabel` migrou para `READY/ACTIVE_HERE/IN_LOOP` mantendo semântica booleana intacta; smoke `guardrails-long-run-intent-queue` atualizada para labels em inglês; runbook canônico atualizado com nomenclatura nova + decisão de compatibilidade retroativa (aceitar labels legados apenas como texto histórico e usar campos estruturados para decisão). Validação: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (37/37) e `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` (5/5). Evidência: VER-UX-I18N-001.",
+        "[2026-04-24T15:50:15.620Z] Fechado por decisão humana após verificação de testes e evidência no código."
+      ],
+      "verification": "Implementação verificada: buildLoopActivationMarkersLabel em guardrails-core-lane-queue.ts emite READY/ACTIVE_HERE/IN_LOOP; fixtures atualizadas em guardrails-long-run-intent-queue.test.ts (37/37) e guardrails-loop-evidence-check.test.mjs (5/5)."
     },
     {
       "id": "TASK-OPS-HYGIENE-002",

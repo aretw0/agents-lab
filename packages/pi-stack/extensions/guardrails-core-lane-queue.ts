@@ -526,7 +526,7 @@ export function resolveLoopActivationMarkers(options: {
 
 export function buildLoopActivationMarkersLabel(markers: LoopActivationMarkers): string {
   const yesNo = (value: boolean): string => (value ? "yes" : "no");
-  return `PREPARADO=${yesNo(markers.preparado)} ATIVO_AQUI=${yesNo(markers.ativoAqui)} EM_LOOP=${yesNo(markers.emLoop)} blocker=${markers.blocker}`;
+  return `READY=${yesNo(markers.preparado)} ACTIVE_HERE=${yesNo(markers.ativoAqui)} IN_LOOP=${yesNo(markers.emLoop)} blocker=${markers.blocker}`;
 }
 
 export function shouldAnnounceLoopActivationReady(

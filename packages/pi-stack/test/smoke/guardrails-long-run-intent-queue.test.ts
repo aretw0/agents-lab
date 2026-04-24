@@ -568,8 +568,8 @@ describe("guardrails-core long-run intent queue", () => {
   it("throttles loop activation audit unless label changes", () => {
     const nowMs = 10_000;
     const minIntervalMs = 1_500;
-    const labelA = "PREPARADO=yes ATIVO_AQUI=no EM_LOOP=no blocker=runtime-reload-required";
-    const labelB = "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none";
+    const labelA = "READY=yes ACTIVE_HERE=no IN_LOOP=no blocker=runtime-reload-required";
+    const labelB = "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none";
 
     expect(shouldEmitLoopActivationAudit(0, undefined, labelA, nowMs, minIntervalMs)).toBe(true);
     expect(shouldEmitLoopActivationAudit(9_400, labelA, labelA, nowMs, minIntervalMs)).toBe(false);
@@ -584,7 +584,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(resolveRuntimeCodeActivationState({ loadedSourceMtimeMs: undefined, currentSourceMtimeMs: 1000 })).toBe("unknown");
   });
 
-  it("builds loop activation markers for PREPARADO/ATIVO_AQUI/EM_LOOP", () => {
+  it("builds loop activation markers for READY/ACTIVE_HERE/IN_LOOP", () => {
     const readyMarkers = resolveLoopActivationMarkers({
       activeLongRun: false,
       queuedCount: 0,
@@ -600,8 +600,8 @@ describe("guardrails-core long-run intent queue", () => {
     expect(readyMarkers.ativoAqui).toBe(true);
     expect(readyMarkers.emLoop).toBe(true);
     expect(readyMarkers.blocker).toBe("none");
-    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("PREPARADO=yes");
-    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("EM_LOOP=yes");
+    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("READY=yes");
+    expect(buildLoopActivationMarkersLabel(readyMarkers)).toContain("IN_LOOP=yes");
     expect(shouldAnnounceLoopActivationReady(false, readyMarkers.emLoop)).toBe(true);
 
     const reloadMarkers = resolveLoopActivationMarkers({
@@ -648,12 +648,12 @@ describe("guardrails-core long-run intent queue", () => {
         atIso: "2026-04-23T19:00:00.000Z",
         taskId: "TASK-BUD-125",
         runtimeCodeState: "active",
-        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
         emLoop: true,
       },
       lastLoopReady: {
         atIso: "2026-04-23T18:59:59.000Z",
-        markersLabel: "PREPARADO=yes ATIVO_AQUI=yes EM_LOOP=yes blocker=none",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
         runtimeCodeState: "active",
         boardAutoAdvanceGate: "ready",
         nextTaskId: "TASK-BUD-125",
@@ -669,7 +669,7 @@ describe("guardrails-core long-run intent queue", () => {
         atIso: "2026-04-23T19:00:00.000Z",
         taskId: "TASK-BUD-125",
         runtimeCodeState: "reload-required",
-        markersLabel: "PREPARADO=yes ATIVO_AQUI=no EM_LOOP=no blocker=runtime-reload-required",
+        markersLabel: "READY=yes ACTIVE_HERE=no IN_LOOP=no blocker=runtime-reload-required",
         emLoop: false,
       },
       lastLoopReady: undefined,

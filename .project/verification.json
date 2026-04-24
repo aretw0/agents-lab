@@ -4740,6 +4740,24 @@
       "method": "test",
       "timestamp": "2026-04-24T13:30:50Z",
       "evidence": "Comando dedicado de runtime config implementado em `guardrails-core.ts`: `/guardrails-config status|get|set`. O fluxo usa allowlist de chaves operacionais (`longRunIntentQueue.*` e `pragmaticAutonomy.*`), coercion/validação determinística de tipo/faixa, escrita segura em `.pi/settings.json` e fallback explícito para edição manual apenas de chaves não suportadas. `set` gera trilha auditável `guardrails-core.runtime-config-set` com actor/key/old-new/reloadRecommendation e recarrega configs mutáveis no runtime atual. Guia canônico atualizado em `project-canonical-pipeline.md` com contrato e exemplos. Smoke focal: `guardrails-long-run-intent-queue.test.ts` 37/37 passed."
+    },
+    {
+      "id": "VER-OPS-TOOL-NAME-001",
+      "target": "TASK-OPS-TOOL-NAME-001",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Tool surface de project board padronizada para naming `board_*`: removidos registros de `project_proxy_query`/`project_proxy_update` em `packages/pi-stack/extensions/project-board-surface.ts`; extensão e API pública renomeadas para `projectBoardSurface`/`updateProjectTaskBoard` com aliases de export deprecated para compatibilidade de código. Runbook atualizado com seção de migração direta (`project_proxy_* -> board_*`) em `docs/guides/project-canonical-pipeline.md`. Validação: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/project-board-surface.test.ts` => 1 file passed, 4 tests passed.",
+      "timestamp": "2026-04-24T15:00:30Z"
+    },
+    {
+      "id": "VER-UX-I18N-001",
+      "target": "TASK-UX-I18N-001",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Loop activation labels padronizadas para inglês (CAPS): `buildLoopActivationMarkersLabel` agora emite `READY/ACTIVE_HERE/IN_LOOP` preservando semântica booleana (`preparado`, `ativoAqui`, `emLoop`). Smoke e fixtures atualizadas para a nova nomenclatura em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts`; runbook canônico atualizado em `docs/guides/project-canonical-pipeline.md` com decisão de compatibilidade retroativa (labels legados permitidos apenas como histórico textual, decisão por campos estruturados). Validações executadas: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (37/37) e `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` (5/5).",
+      "timestamp": "2026-04-24T15:05:30Z"
     }
   ]
 }

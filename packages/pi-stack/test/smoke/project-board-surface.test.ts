@@ -5,12 +5,12 @@ import { describe, expect, it } from "vitest";
 import {
   queryProjectTasks,
   queryProjectVerification,
-  updateProjectTaskProxy,
+  updateProjectTaskBoard,
 } from "../../extensions/project-board-surface";
 
 describe("project-board-surface", () => {
   function seedWorkspace(): string {
-    const cwd = mkdtempSync(join(tmpdir(), "pi-project-proxy-"));
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-"));
     mkdirSync(join(cwd, ".project"), { recursive: true });
 
     writeFileSync(
@@ -108,10 +108,10 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("updateProjectTaskProxy atualiza status e append de nota", () => {
+  it("updateProjectTaskBoard atualiza status e append de nota", () => {
     const cwd = seedWorkspace();
     try {
-      const updated = updateProjectTaskProxy(cwd, "TASK-B", {
+      const updated = updateProjectTaskBoard(cwd, "TASK-B", {
         status: "in-progress",
         appendNote: "[2026-04-23T05:02:00Z] retomado via proxy",
       });
@@ -125,16 +125,16 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("updateProjectTaskProxy respeita maxNoteLines ao fazer append", () => {
+  it("updateProjectTaskBoard respeita maxNoteLines ao fazer append", () => {
     const cwd = seedWorkspace();
     try {
-      const first = updateProjectTaskProxy(cwd, "TASK-A", {
+      const first = updateProjectTaskBoard(cwd, "TASK-A", {
         appendNote: "linha-2",
         maxNoteLines: 2,
       });
       expect(first.ok).toBe(true);
 
-      const second = updateProjectTaskProxy(cwd, "TASK-A", {
+      const second = updateProjectTaskBoard(cwd, "TASK-A", {
         appendNote: "linha-3",
         maxNoteLines: 2,
       });

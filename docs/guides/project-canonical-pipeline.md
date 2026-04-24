@@ -133,12 +133,13 @@ Durante long-run:
 - quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata;
 - para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification`.
 - auto-advance só deve ocorrer em condição segura (`lane idle` + `queue empty` + `loop running/healthy` + `stopCondition=none` + board ready com `nextTaskId`), com dedupe de task e auditoria explícita.
-- para observação operacional, `/lane-queue status` deve expor `runtimeCode=<active|reload-required|unknown>`, `boardAutoGate=<reason>`, `boardAutoLast=<task@age|n/a>`, `evidenceBoardAuto=<task@age runtime emLoop|n/a>`, `evidenceLoopReady=<age runtime gate|n/a>` e marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP` para diagnosticar por que o auto-advance não disparou (incluindo `dedupe-window` quando a mesma task foi disparada há pouco).
+- para observação operacional, `/lane-queue status` deve expor `runtimeCode=<active|reload-required|unknown>`, `boardAutoGate=<reason>`, `boardAutoLast=<task@age|n/a>`, `evidenceBoardAuto=<task@age runtime emLoop|n/a>`, `evidenceLoopReady=<age runtime gate|n/a>` e marcadores `READY/ACTIVE_HERE/IN_LOOP` para diagnosticar por que o auto-advance não disparou (incluindo `dedupe-window` quando a mesma task foi disparada há pouco).
 - quando `boardAutoGate != ready`, registrar auditoria throttled (`guardrails-core.board-intent-auto-advance-deferred`) com razão e contexto mínimo para evidência de runtime sem spam.
 - eventos de auto-advance (`...auto-advance`, `...auto-advance-deferred`, `...auto-advance-failed`) devem carregar `runtimeCodeState` para comprovar se o comportamento observado já está com código ativo (`active`) ou ainda depende de reload (`reload-required`).
-- o runtime deve emitir `guardrails-core.loop-activation-state` (throttled por mudança de label) para registrar transições dos marcadores `PREPARADO/ATIVO_AQUI/EM_LOOP` sem depender de comando manual.
-- quando houver transição para `EM_LOOP=yes`, emitir `guardrails-core.loop-activation-ready` uma vez por transição para facilitar detecção de “loop liberado” em tempo real.
-- quando `EM_LOOP=no`, expor `loopHint` alinhado ao `blocker` (reload/queue/gate/loop-state) para correção rápida sem investigação ampla.
+- o runtime deve emitir `guardrails-core.loop-activation-state` (throttled por mudança de label) para registrar transições dos marcadores `READY/ACTIVE_HERE/IN_LOOP` sem depender de comando manual.
+- quando houver transição para `IN_LOOP=yes`, emitir `guardrails-core.loop-activation-ready` uma vez por transição para facilitar detecção de “loop liberado” em tempo real.
+- quando `IN_LOOP=no`, expor `loopHint` alinhado ao `blocker` (reload/queue/gate/loop-state) para correção rápida sem investigação ampla.
+- compatibilidade retroativa: snapshots/evidências antigas podem conter `PREPARADO/ATIVO_AQUI/EM_LOOP`; tratar `markersLabel` como texto histórico e usar campos estruturados (`runtimeCodeState`, `emLoop`, `boardAutoAdvanceGate`) como contrato canônico de decisão.
 - `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
 - `/lane-queue evidence` deve mostrar o snapshot persistido mais recente (`boardAuto`/`loopReady`) para comprovação rápida sem varredura de JSONL, incluindo `readyForTaskBud125=yes|no` e critérios explícitos (`runtime active` + `emLoop=yes`).
 - para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (humano) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita.
@@ -299,6 +300,19 @@ Invariantes de segurança operacional:
 - query determinística e reprodutível (mesmos parâmetros => mesma resposta);
 - scan guard ativo para arquivos monstruosos (sem parse irrestrito);
 - sempre preferir resumo/index para triagem inicial, aprofundando só no arquivo/slice que bloqueia progresso.
+
+### Migração curta: `project_proxy_*` -> `board_*`
+
+A superfície canônica de board usa apenas `board_query` e `board_update`.
+
+Substituição direta:
+- `project_proxy_query` -> `board_query`
+- `project_proxy_update` -> `board_update`
+
+Contrato de rollout:
+- novos fluxos **não** devem usar nomes `project_proxy_*`;
+- automações legadas devem migrar por substituição 1:1 dos nomes (mesmos parâmetros principais);
+- se houver runbook antigo com `project_proxy_*`, atualizar para `board_*` antes de marcar a trilha como estável.
 
 ## Remediação de artefatos pi já commitados (sem perder progresso)
 
