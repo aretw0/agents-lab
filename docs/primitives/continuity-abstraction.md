@@ -1,4 +1,4 @@
-# Primitiva: Continuidade como Abstração
+# Primitiva: Continuidade como Abstração (tracker-agnostic)
 
 ## Categoria
 
@@ -6,56 +6,96 @@ Memória / Coordenação / Governança
 
 ## Problema
 
-"Continuidade" costuma ficar acoplada ao lugar onde o trabalho está salvo (chat local, `.project`, issue tracker, banco local etc.).
-Isso trava portabilidade e força os agentes a dependerem de um único backend.
+Quando continuidade fica acoplada ao storage (chat local, `.project`, issue tracker, Markdown, DB), o fluxo quebra na troca de backend e os agentes perdem portabilidade.
 
-## Definição
+## Objetivo
 
-**Continuidade como Abstração** = contrato canônico de estado + eventos + gates, independente do backend.
+Definir um **contrato canônico** de coordenação que preserve a mesma semântica operacional em qualquer adapter.
 
-A continuidade deixa de ser "onde está" e passa a ser "qual semântica preservamos".
+---
 
-## Contrato canônico mínimo
+## Contrato canônico v1 (mínimo)
 
-- `workItem` (task/issue/card)
-- `event` (start/progress/review/done/recovery)
-- `evidence` (arquivos alterados, comandos de validação, custo)
-- `decisionGate` (ex.: no-auto-close, human approval)
-- `deliveryState` (`reported` | `artifact-produced` | `applied` | `recovery-required`)
+Entidades obrigatórias:
 
-## Invariantes
+1. **task**
+   - `id`, `title/description`, `status`, `priority`, `dependsOn[]`, `owner?`
+2. **event**
+   - `id`, `taskId`, `kind`, `atIso`, `actor`, `payload`
+3. **intent**
+   - `id?`, `type`, `version`, `mode`, `contract`, `taskId?`, `payload?`
+4. **evidence**
+   - `id`, `target`, `status`, `method`, `timestamp`, `artifacts?`, `summary`
+5. **decisionGate**
+   - `noAutoClose`, `requiresVerification`, `requiresHumanApproval`
+6. **deliveryState**
+   - `reported | artifact-produced | applied | recovery-required`
 
-1. **Backend-agnostic**: o mesmo fluxo deve funcionar em `.project`, GitHub/Gitea, SQLite, etc.
-2. **Runner-agnostic**: vale para TUI/Web/local e para CI runners.
-3. **No auto-close**: conclusão estratégica exige revisão humana.
-4. **Evidência obrigatória**: sem evidência mínima, estado deve ir para `recovery-required`.
-5. **Replay idempotente**: reprocessar eventos não pode corromper estado.
+### Transições de task (v1)
 
-## Adapters (camada de infraestrutura)
+- `planned -> in-progress`
+- `in-progress -> blocked | planned | completed`
+- `blocked -> in-progress | planned`
+- `completed` é terminal lógico (reabertura via evento explícito de rollback/reopen)
 
-- **Storage adapters**: `.project`, GitHub Issues/Projects, Gitea, SQLite (Refarm)
-- **Runner adapters**: sessão local, swarm em worktree, GitHub Actions/CI
-- **Projection adapters**: board, wiki, timeline, PR comments, dashboards
+### Invariantes
 
-Todos implementam o mesmo contrato; o usuário escolhe o backend/interface.
+1. **Backend-agnostic**: regra vale igual em `.project`, GitHub/Gitea, Markdown/Obsidian, SQLite.
+2. **Runner-agnostic**: sessão local, TUI/WEB, CI runner.
+3. **No auto-close estratégico**: conclusão final depende de decisão humana quando gate exigir.
+4. **Evidência obrigatória**: sem evidência mínima, estado final deve cair em `recovery-required`.
+5. **Replay idempotente**: reprocessar eventos não corrompe estado.
 
-## Modelo operacional sugerido
+---
 
-1. Agente decide próxima task elegível (prioridade + dependências + policy).
-2. Execução emite eventos canônicos.
-3. Adapter persiste no backend escolhido.
-4. Gate valida evidência/delivery.
-5. Humano aprova fechamento final.
+## Camada de hard intent (sobre o contrato)
 
-## Estado atual no agents-lab
+Hard intent **não depende de storage**. Ela opera sobre task/event/intent/evidence:
 
-- Backend local de referência: `.project` (`@davidorex/pi-project-workflows`)
-- Governança hard em evolução no `colony-pilot` (budget/delivery/no-auto-close)
-- Trilha de portabilidade: contratos e adapters para CI/PR/issues + Refarm/SQLite
+1. resolver próxima `task` elegível;
+2. emitir `intent` canônico (`board-first`, contrato explícito);
+3. registrar `event` de execução e progresso;
+4. anexar `evidence` validável;
+5. aplicar `decisionGate` antes de `completed`.
+
+Resultado: mesmas regras de governança em qualquer adapter.
+
+---
+
+## Matriz mínima de adapters equivalentes
+
+| Adapter | Persistência principal | Equivalência operacional | Observações |
+|---|---|---|---|
+| `.project` (local atual) | JSON blocks (`tasks/verification/handoff`) | referência canônica no workspace | baseline first-party local |
+| First-party future backend | API/DB first-party | deve preservar mesmas entidades/transições | semântica > tecnologia |
+| GitHub/Gitea trackers | issues/projects/milestones | mapear task/event/evidence por campos/labels/comments | requer política de sync e conflito |
+| Markdown/Obsidian | notas + frontmatter/checklists | task/event/evidence projetados em markdown estruturado | ótimo para captura/inbox e espelho humano |
+| SQLite/local app | tabelas/event journal | replay + auditoria robusta | útil para runners e automação local |
+
+---
+
+## Adapter de referência: Markdown/Obsidian (caixa de notas)
+
+Regras mínimas do adapter:
+
+- mapear `task` para nota com frontmatter estável (`id`, `status`, `priority`, `dependsOn`);
+- mapear `event` para journal append-only na nota (ou arquivo de eventos);
+- mapear `evidence` para bloco estruturado com `id/status/method/timestamp`;
+- manter `decisionGate` explícito (`no-auto-close`, `requiresHumanApproval`).
+
+O adapter pode ser **inbox-first** (captura) ou **mirror-first** (projeção), sem substituir o contrato canônico.
+
+---
+
+## Estado no agents-lab
+
+- adapter canônico local: `.project/*`;
+- governança hard ativa no control-plane (`intent`, `verification`, `no-auto-close`);
+- trilha de expansão: adapters externos (GitHub/Gitea/Markdown/Obsidian/SQLite) sem alterar semântica.
 
 ## Próximos incrementos
 
-1. consolidar `task/event contract` formal em schema/versioning;
-2. implementar adapter translacional issue/PR ↔ clock canônico;
-3. adicionar handoff determinístico entre sessões via event journal;
-4. validar portabilidade ponta-a-ponta em runner externo (CI).
+1. versionar formalmente o schema do contrato (`task/event/intent/evidence`);
+2. publicar mapa translacional de adapters (campo por campo);
+3. validar round-trip em pelo menos 2 adapters (ex.: `.project` + Markdown/Obsidian);
+4. promover decision packet para fechamento humano em tasks estratégicas.

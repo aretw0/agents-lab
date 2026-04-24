@@ -895,6 +895,25 @@
       "traces_to": [
         "TASK-BUD-121"
       ]
+    },
+    {
+      "id": "REQ-BUD-062",
+      "description": "A coordenação de trabalho deve formalizar contrato canônico tracker-agnostic de primitives+adapters (task/event/intent/evidence), com equivalência explícita para `.project`, trackers Git e Markdown/Obsidian, mantendo hard intent como camada independente de storage.",
+      "type": "integration",
+      "status": "accepted",
+      "priority": "must",
+      "source": "human",
+      "depends_on": [
+        "REQ-BUD-042"
+      ],
+      "acceptance_criteria": [
+        "Contrato canônico define entidades mínimas, invariantes e transições sem acoplamento a backend específico.",
+        "Matriz de adapters explicita equivalência operacional entre `.project`, first-party futuro, GitHub/Gitea e Markdown/Obsidian.",
+        "Fluxo de hard intent é descrito como camada sobre o contrato, sem depender de formato único de persistência."
+      ],
+      "traces_to": [
+        "TASK-BUD-066"
+      ]
     }
   ]
 }

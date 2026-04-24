@@ -12,6 +12,18 @@ Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 - A evolução first-party futura não substitui essa regra; ela entra como mais um adapter.
 - Fluxos baseados em **Markdown/Obsidian** (ex.: inbox/caixa de notas) devem ser suportados via adapter, preservando os mesmos invariantes de governança (`no-auto-close`, evidência, revisão humana).
 - Skills/processos/extensões com **hard intent** devem consumir o contrato de primitivas (task/event/intent/evidence), não um backend específico.
+- Referência formal do contrato + matriz de adapters: `docs/primitives/continuity-abstraction.md`.
+
+### Matriz operacional mínima de equivalência
+- `.project` (canônico local atual): fonte oficial de status/verificação/handoff.
+- First-party backend futuro: mesmo contrato canônico, novo adapter.
+- Git trackers (GitHub/Gitea): projeção/sync de task-event-evidence sem alterar governança.
+- Markdown/Obsidian: adapter de captura/espelho humano com frontmatter + journal estruturado.
+
+### Camada de hard intent (independente de storage)
+- `intent` resolve execução (ex.: board-first) sem acoplamento ao backend.
+- `event + evidence` registram progresso e validação de forma auditável.
+- `decisionGate` mantém `no-auto-close` e revisão humana para fechamento estratégico.
 
 ## Onboarding dual-mode (sem migração forçada)
 Use este framing com usuários novos:
