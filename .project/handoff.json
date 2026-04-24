@@ -1,21 +1,22 @@
 {
-  "timestamp": "2026-04-24T01:03:00.000Z",
-  "context": "Diretriz assimilada: apesar de fortalecer fábrica/control-plane, a distribuição deve permanecer outcome-agnostic e simples para iniciantes. Documentação de higiene/superfície distribuída foi atualizada com simple-first + progressive disclosure para não impor governança avançada como pré-requisito. Em paralelo, blocker de long-run (`TASK-BUD-129`) mostrou runtime green pós-reload no strict; watchdog recorrente continua rodando para estabilidade sustentada sem coordenação manual.",
+  "timestamp": "2026-04-24T01:09:00.000Z",
+  "context": "Diretriz assimilada: apesar de fortalecer fábrica/control-plane, a distribuição deve permanecer outcome-agnostic e simples para iniciantes. Documentação de higiene/superfície distribuída foi atualizada com simple-first + progressive disclosure para não impor governança avançada como pré-requisito. Em paralelo, blocker de long-run (`TASK-BUD-129`) mostrou runtime green pós-reload no strict; watchdog recorrente continua rodando para estabilidade sustentada sem coordenação manual. Novo sinal operacional capturado para backlog sem interromper trilha atual: mensagens `lane-now:` enfileiradas não estão surgindo/visíveis na cadência esperada.",
   "next_actions": [
     "Aguardar 1-2 ciclos do watchdog `wrwucj04` (3m) para confirmar green sustentado de `ops:loop-evidence:strict`.",
     "Se green sustentado, registrar verificação final de runtime e submeter decisão humana de fechamento de `TASK-BUD-129` (no-auto-close preservado).",
     "Continuar `TASK-OPS-HYGIENE-003` com inventário objetivo de superfícies lab-only remanescentes + plano de graduação/remoção.",
-    "Na documentação de distribuição, manter linguagem de onboarding 'comece simples, evolua para fábrica por opt-in' em novos guias/superfícies."
+    "Na documentação de distribuição, manter linguagem de onboarding 'comece simples, evolua para fábrica por opt-in' em novos guias/superfícies.",
+    "Planejar slice posterior em `TASK-BUD-119` para confiabilidade de ingestão/observabilidade do `lane-now` (enqueue->dispatch->telemetria), sem desviar foco imediato."
   ],
   "blockers": [
     "loop-evidence-runtime-stability-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:03:00.000Z",
+      "atIso": "2026-04-24T01:09:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 20,
+      "percent": 21,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
