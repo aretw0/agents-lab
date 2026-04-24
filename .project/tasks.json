@@ -2687,7 +2687,7 @@
     {
       "id": "TASK-BUD-115",
       "description": "[P1] Implementar 'pre-compact calm-close' no context-watchdog para reduzir paralisia perto do threshold e permitir compact automático em idle com evidência de checkpoint.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-113"
       ],
@@ -2706,7 +2706,7 @@
         "Após checkpoint adequado e janela idle, compactação pode ocorrer de forma previsível sem exigir gatilho manual recorrente.",
         "Existe proteção anti-paralisia (detecção de adiamento repetido) com recomendação explícita e auditável para fechar slice + compactar."
       ],
-      "notes": "Assimilado de feedback direto do usuário (2026-04-22): manter cautela ao cruzar threshold, mas sem deixar o modelo 'com medo' e travar; objetivo é fechar o que foi feito com calma e deixar o compact acontecer em idle."
+      "notes": "Assimilado de feedback direto do usuário (2026-04-22): manter cautela ao cruzar threshold, mas sem deixar o modelo 'com medo' e travar; objetivo é fechar o que foi feito com calma e deixar o compact acontecer em idle.\n[2026-04-24T13:22:40Z] Slice pre-compact calm-close implementada: `context_watch_status` agora expõe `autoCompact.calmCloseReady`, `checkpointEvidenceReady`, `deferCount/deferThreshold`, `antiParalysisTriggered` e `calmCloseRecommendation` em modo advisory (sem hard-block). Runtime passou a rastrear adiamentos repetidos de compact (`not-idle`/`pending-messages`/`cooldown`) e emitir trilha auditável `context-watchdog.pre-compact-calm-close` + recomendação explícita quando o threshold de defer é atingido. Guia canônico atualizado com protocolo de calm-close e leitura desses sinais."
     },
     {
       "id": "TASK-BUD-116",

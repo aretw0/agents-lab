@@ -4722,6 +4722,15 @@
       "method": "test",
       "timestamp": "2026-04-24T13:10:20Z",
       "evidence": "Pipeline de descoberta de repetição budget-aware implementado. `session-analytics.ts` adiciona query_type `galvanization` com classificador determinístico (`parseGalvanizationCandidates`) que identifica padrões repetitivos e ranqueia oportunidades com evidência de consumo LLM (tokens/cost/requests), além de proposta de pathway hard com gates de segurança, equivalência e rollback. `quota-visibility.ts` adiciona `estimateHardPathwayMitigation` para projeção baseline vs pós-automação. Guias atualizados (`project-canonical-pipeline.md`, `agent-driver-charter.md`) com fluxo discovery->pathway->roadmap advisory-first. Testes: `session-analytics.test.ts` + `quota-visibility-parsers.test.ts` = 52/52 passed."
+    },
+    {
+      "id": "VER-BUD-277",
+      "target": "TASK-BUD-115",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-24T13:23:10Z",
+      "evidence": "Pre-compact calm-close implementado no `context-watchdog`: status de `context_watch_status.autoCompact` agora inclui `calmCloseReady`, `checkpointEvidenceReady`, `deferCount`, `deferThreshold`, `antiParalysisTriggered` e `calmCloseRecommendation` (advisory-first). Detecção anti-paralisia adicionada com defer count para razões de adiamento e trilha auditável `context-watchdog.pre-compact-calm-close` quando limiar é atingido. Helpers determinísticos novos (`resolveCheckpointEvidenceReadyForCalmClose`, `resolvePreCompactCalmCloseSignal`, `isAutoCompactDeferralReason`) cobertos em smoke. Execução: `context-watchdog.test.ts` 17/17 passed."
     }
   ]
 }

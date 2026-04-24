@@ -1,12 +1,13 @@
 {
-  "timestamp": "2026-04-24T13:11:00.000Z",
-  "context": "Envelope board-first para `TASK-BUD-112` executado com micro-slice canônica: adicionado pipeline de descoberta de trabalho repetitivo com gasto LLM via `session_analytics_query` (`query_type=galvanization`), incluindo ranking determinístico de oportunidades, proposta de pathway hard com gates (equivalência/rollback/verification) e roadmap baseline vs pós-automação. `quota-visibility` ganhou projeção de mitigação (`estimateHardPathwayMitigation`) para quantificar redução potencial de tokens/custo/requests.",
+  "timestamp": "2026-04-24T13:23:50.000Z",
+  "context": "Envelope board-first para `TASK-BUD-115` executado: contexto pre-compact calm-close foi formalizado no runtime do context-watchdog com sinalização de readiness (`calmCloseReady`, `checkpointEvidenceReady`) e anti-paralisia (`deferCount/deferThreshold`, `antiParalysisTriggered`, `calmCloseRecommendation`) em `context_watch_status.autoCompact`, mantendo modo advisory (sem hard-block). Adiamentos repetidos agora geram trilha auditável `context-watchdog.pre-compact-calm-close` com recomendação explícita para fechar slice + deixar idle compactar.",
   "next_actions": [
-    "Decisão humana de fechamento para `TASK-BUD-112` (evidência passed `VER-BUD-276`, contrato no-auto-close).",
-    "Opcional pós-reload: validar runtime `/session-analytics galvanization --hours 24 --limit 10` para inspeção operacional do ranking.",
-    "Após decisões humanas pendentes (`TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`), retomar lane principal `TASK-BUD-119`."
+    "Decisão humana de fechamento para `TASK-BUD-115` (evidência passed `VER-BUD-277`, no-auto-close preservado).",
+    "Após `/reload`, validar runtime com `/context-watch` e `context_watch_status` observando `calmCloseReady/deferCount` durante faixa `compact`.",
+    "Continuam pendentes decisões humanas: `TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`; depois retomar lane principal `TASK-BUD-119`."
   ],
   "blockers": [
+    "human-decision-required-for-task-bud-115-no-auto-close",
     "human-decision-required-for-task-bud-112-no-auto-close",
     "human-decision-required-for-task-bud-104-no-auto-close",
     "human-decision-required-for-task-bud-100-no-auto-close",
@@ -14,17 +15,17 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T13:11:00.000Z",
+      "atIso": "2026-04-24T13:23:50.000Z",
       "reason": "message_end",
-      "level": "compact",
-      "percent": 79,
+      "level": "warn",
+      "percent": 60,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "micro-slice-only",
-      "recommendation": "Compact now and continue from checkpoint."
+      "action": "write-checkpoint",
+      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
     }
   ]
 }
