@@ -1,21 +1,19 @@
 {
-  "timestamp": "2026-04-24T11:33:30.000Z",
-  "context": "MODO FÁBRICA ON permanece ativo em `TASK-BUD-119`. Após validação runtime enviada pelo usuário, foi identificado sinal operacional importante: `lane-queue status` mostrava `gate=lease-expired` mesmo com loop ativo/saudável. Slice corretiva entregue: heartbeat de lease por atividade (`refreshLoopLeaseOnActivity`, throttled) em `before_agent_start`, `input` ativo e `/lane-queue status`, reduzindo falso stop em long runs.",
+  "timestamp": "2026-04-24T11:56:00.000Z",
+  "context": "MODO FÁBRICA ON permanece ativo em `TASK-BUD-119`. Lease heartbeat por atividade já foi validado em runtime (sem falso `lease-expired` em estado ativo). Novo direcionamento humano assimilado sem desviar foco: guides internos que não são distribuídos devem virar superfícies distribuídas (skills/exemplos), agora ancorado em `TASK-BUD-138`.",
   "next_actions": [
-    "Executar `/reload` para ativar heartbeat de lease por atividade no runtime atual.",
-    "Revalidar em runtime real: enviar `lane-now:<mensagem>` e checar `/lane-queue status` (esperado: `laneNowLast` atualizado e ausência de falso `gate=lease-expired` em operação ativa).",
-    "Continuar `TASK-BUD-119` com próxima fatia: evidência compacta de fluxo enqueue->force-now->dispatch no status/evidence.",
-    "Manter foco em desbloqueio de potencial; backlog futuro (`TASK-BUD-130..137`) permanece planejado."
+    "Continuar `TASK-BUD-119` com próxima fatia de alto impacto: evidência compacta enqueue->force-now->dispatch no status/evidence.",
+    "Submeter decisão humana de fechamento para `TASK-BUD-129` (já tecnicamente validada).",
+    "Planejar kickoff de `TASK-BUD-131` (structured-first) após estabilizar a trilha de confiabilidade da lane.",
+    "Executar `TASK-BUD-138` em fase futura para converter playbooks críticos em skills/exemplos distribuídos (evitar docs-only)."
   ],
-  "blockers": [
-    "runtime-reload-pending-for-loop-lease-activity-heartbeat"
-  ],
+  "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T11:33:30.000Z",
+      "atIso": "2026-04-24T11:56:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 31,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

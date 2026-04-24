@@ -3318,6 +3318,31 @@
         "Após janela de transição, remover chave legado de código/docs/testes e registrar migração no board."
       ],
       "notes": "Backlog aberto por feedback humano (2026-04-24): nome atual é específico de marco antigo e virou gordura cognitiva; objetivo é manter stack outcome-agnostic e sem acoplamento histórico."
+    },
+    {
+      "id": "TASK-BUD-138",
+      "description": "[P1] Converter boas práticas/playbooks de guides internos em superfícies distribuídas (skills + exemplos) para pi-stack.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-119",
+        "TASK-BUD-135"
+      ],
+      "references": [
+        "REQ-BUD-060"
+      ],
+      "files": [
+        "packages/pi-skills/skills",
+        "packages/lab-skills/skills",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/control-plane-evolution-playbook.md",
+        "packages/pi-stack/package-list.mjs"
+      ],
+      "acceptance_criteria": [
+        "Existe mapeamento explícito `guide -> skill/example` para conteúdos críticos de operação (loop, board-first, higiene, rollout/rollback), com prioridade por impacto.",
+        "Pelo menos o núcleo de práticas recorrentes é distribuído como skill versionada (não apenas documentação local), mantendo linguagem simple-first + progressive disclosure.",
+        "Runbook de distribuição define como manter skills sincronizadas com a evolução dos playbooks (evitando drift docs-only)."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): guides internos não são distribuídos; práticas canônicas precisam viajar com a stack via skills/exemplos para disseminação operacional consistente."
     }
   ]
 }

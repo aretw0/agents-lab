@@ -4623,6 +4623,15 @@
       "method": "command",
       "timestamp": "2026-04-24T11:47:10Z",
       "evidence": "Runtime check pós-reload para mitigação de lease heartbeat: `.pi/long-run-loop-state.json` mostra lease viva (`leaseHeartbeatAtIso=2026-04-24T11:46:38.587Z`, `leaseExpiresAtIso=2026-04-24T11:47:08.587Z`, `stopCondition=none`) após atividade; `npm run -s ops:loop-evidence:strict` segue green (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T11:46:59.345Z`)."
+    },
+    {
+      "id": "VER-BUD-266",
+      "target": "TASK-BUD-138",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T11:55:00Z",
+      "evidence": "Feedback humano assimilado no backlog: adicionada `TASK-BUD-138` para transformar playbooks/guides internos em superfícies distribuídas (skills + exemplos), preservando postura simple-first/outcome-agnostic e evitando dependência de docs locais não distribuídos."
     }
   ]
 }
