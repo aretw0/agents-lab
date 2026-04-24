@@ -176,6 +176,7 @@ export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
     "usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume|evidence]",
+    "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
     "examples: /lane-queue list · /lane-queue board-next · /lane-queue evidence · /lane-queue add revisar isso depois",
   ];
 }
