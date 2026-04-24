@@ -1006,6 +1006,7 @@ export default function (pi: ExtensionAPI) {
   let lastLoopEvidenceHeartbeatAt = 0;
   let lastForceNowAt = 0;
   let lastForceNowTextPreview: string | undefined;
+  let lastLoopLeaseRefreshAt = 0;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
@@ -1232,6 +1233,19 @@ export default function (pi: ExtensionAPI) {
   ): void {
     const next = markLongRunLoopRuntimeDegraded(ctx.cwd, reason, errorText);
     longRunLoopRuntimeState = next.state;
+  }
+
+  function refreshLoopLeaseOnActivity(
+    ctx: ExtensionContext,
+    reason: string,
+    minIntervalMs = 10_000,
+  ): void {
+    if (longRunLoopRuntimeState.mode !== "running") return;
+    const nowMs = Date.now();
+    if (nowMs - lastLoopLeaseRefreshAt < Math.max(1_000, minIntervalMs)) return;
+    const next = setLongRunLoopRuntimeMode(ctx.cwd, longRunLoopRuntimeState.mode, reason);
+    longRunLoopRuntimeState = next.state;
+    lastLoopLeaseRefreshAt = nowMs;
   }
 
   function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop" | "idle_timer"): boolean {
@@ -1709,6 +1723,7 @@ export default function (pi: ExtensionAPI) {
     lastLoopEvidenceHeartbeatAt = 0;
     lastForceNowAt = 0;
     lastForceNowTextPreview = undefined;
+    lastLoopLeaseRefreshAt = 0;
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
     longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
@@ -1724,6 +1739,7 @@ export default function (pi: ExtensionAPI) {
   pi.on("before_agent_start", async (event, ctx) => {
     lastLongRunBusyAt = Date.now();
     clearAutoDrainTimer();
+    refreshLoopLeaseOnActivity(ctx, "agent-start-lease-heartbeat", 5_000);
     const decision = classifyRouting(event.prompt ?? "");
     strictInteractiveMode = decision.strictMode;
 
@@ -1783,6 +1799,7 @@ export default function (pi: ExtensionAPI) {
     if (activeLongRun) {
       lastLongRunBusyAt = Date.now();
       clearAutoDrainTimer();
+      refreshLoopLeaseOnActivity(ctx, "input-activity-lease-heartbeat", 10_000);
     }
     updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
 
@@ -2430,6 +2447,9 @@ export default function (pi: ExtensionAPI) {
       }
 
       const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+      if (activeLongRun) {
+        refreshLoopLeaseOnActivity(ctx, "lane-status-lease-heartbeat", 10_000);
+      }
       const items = listDeferredIntents(ctx.cwd);
       const queued = items.length;
       const nowMs = Date.now();
