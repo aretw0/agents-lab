@@ -4596,6 +4596,15 @@
       "method": "test",
       "timestamp": "2026-04-24T01:33:00Z",
       "evidence": "Slice de observabilidade `lane-now` expandida: `guardrails-core` agora mantém telemetria em memória (`lastForceNowAt`, preview) e expõe em `/lane-queue status` via `laneNowLast=<idade/texto>`, facilitando diagnóstico de \"sumiço\" sem varredura de logs. Fluxo de override imediato (`extractForceNowText` + followUp) e auditoria canônica já ativa. Regressões verdes: smoke `guardrails-long-run-intent-queue` 35/35, `test:ops:loop-evidence` 5/5, strict runtime `status: ok`."
+    },
+    {
+      "id": "VER-BUD-263",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T01:36:00Z",
+      "evidence": "Discoverability reforçada para override imediato: `buildLaneQueueHelpLines` agora inclui instrução explícita `lane-now:<mensagem>` para bypass da fila durante long run. Smoke atualizada e verde (`guardrails-long-run-intent-queue` 35/35), mantendo regressões de loop-evidence verdes (5/5)."
     }
   ]
 }

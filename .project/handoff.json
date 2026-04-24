@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-04-24T01:34:00.000Z",
-  "context": "MODO FÁBRICA ON ativo para `TASK-BUD-119` (stop apenas em goal alcançado/blocker real/off explícito). Execução retomada em throughput normal sem watchdog chatty. Slice atual entregue: confiabilidade/observabilidade de `lane-now` com override imediato + telemetria explícita no status (`laneNowLast=<idade/texto>`), reduzindo sensação de mensagens \"sumindo\" durante long run.",
+  "timestamp": "2026-04-24T01:37:00.000Z",
+  "context": "MODO FÁBRICA ON segue ativo para `TASK-BUD-119`. Nesta rodada foram entregues dois incrementos de alto impacto para lane reliability: (1) telemetria de override imediato em `/lane-queue status` (`laneNowLast=<idade/texto>`), e (2) discoverability explícita no help com `lane-now:<mensagem>`. Objetivo: reduzir sensação de mensagens 'sumindo' e diminuir dependência de memória operacional.",
   "next_actions": [
-    "Validar runtime pós-reload do novo `laneNowLast` em operação real (`/lane-queue status` após um `lane-now:<msg>`).",
-    "Continuar `TASK-BUD-119` no próximo slice: consolidar trilha auditável enqueue->force-now->dispatch com resumo compacto no status/evidence.",
-    "Submeter decisão humana de fechamento de `TASK-BUD-129` (já tecnicamente validada) sem auto-close.",
-    "Preparar kickoff de `TASK-BUD-131` (structured-first) após estabilizar slices críticos de `TASK-BUD-119`."
+    "Aplicar `/reload` para ativar runtime da telemetria `laneNowLast` e da atualização de help.",
+    "Validar em runtime real: enviar `lane-now:<mensagem>` e rodar `/lane-queue status` para confirmar `laneNowLast` atualizado.",
+    "Se validação runtime passar, avançar próximo slice de `TASK-BUD-119`: trilha compacta enqueue->force-now->dispatch em superfície de evidence/status.",
+    "Manter foco em desbloqueio de potencial (sem side quests); itens 130..137 permanecem backlog planejado."
   ],
   "blockers": [
-    "runtime-reload-pending-for-lane-now-status-telemetry"
+    "runtime-reload-pending-for-task-bud-119-lane-now-telemetry"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:34:00.000Z",
+      "atIso": "2026-04-24T01:37:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 28,
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
