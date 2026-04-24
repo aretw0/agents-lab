@@ -247,7 +247,10 @@ No loop canônico, steering diário deve priorizar **sinais passivos de stream/s
 Regras operacionais:
 - `context_watch_status` fica como superfície de **diagnóstico explícito** (debug/inspeção), não como passo obrigatório por iteração;
 - no segundo `warn` consecutivo, a cadência deve escalar para checkpoint/handoff automático antes do compact;
-- sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle.
+- sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle;
+- delivery de `warn/checkpoint/compact` deve ser tratado como **invariante de steering passivo** (modo-independente), com fallback quando a superfície principal não estiver visível.
+
+Referência de contrato inicial: `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md`.
 
 ### Bloat-smell advisory (calibrado, baixo ruído)
 

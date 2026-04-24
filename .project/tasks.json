@@ -3517,11 +3517,12 @@
     {
       "id": "TASK-BUD-146",
       "description": "[P1] Garantir delivery de sinais de contexto como steering passivo independente de modo/superfície",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
-        "docs/guides/project-canonical-pipeline.md"
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md"
       ],
       "acceptance_criteria": [
         "Sinais de contexto críticos (warn/checkpoint/compact e recomendação) são emitidos por canal passivo de steering sem depender de tool call manual.",
@@ -3529,7 +3530,7 @@
         "Operador recebe mensagem curta e acionável para evitar continuidade cega com contexto alto, sem ruído excessivo."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): steering de contexto não deve depender de o agente chamar `context_watch_status`; deve existir sinal nativo e consistente para evitar insistência com contexto cheio."
+      "notes": "Backlog por feedback humano (2026-04-24): steering de contexto não deve depender de o agente chamar `context_watch_status`; deve existir sinal nativo e consistente para evitar insistência com contexto cheio.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato de invariante de steering passivo em `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md` (canal obrigatório, modo-independente, fallback determinístico, anti-ruído por cooldown)."
     }
   ]
 }
