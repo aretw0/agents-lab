@@ -300,6 +300,16 @@ Para reduzir gordura operacional sem perder rastreabilidade:
 4. **Evidência mínima no board**
    - registrar no `notes` da task de higiene o inventário resumido (`keep/archive/remove`) e o rational em 1–3 linhas.
 
+### Higiene de superfície distribuída (lab x usuários)
+
+A higiene operacional não é só `sandbox`; inclui o que está sendo distribuído para usuários.
+
+Regras:
+- **paridade por padrão**: o que usamos no laboratório deve refletir o que distribuímos (mesmo contrato operacional), salvo exceção explícita;
+- **exceção documentada**: tool/surface "lab-only" deve ter motivo, janela de validade e critério de graduação/remoção;
+- **sinal de operação**: quando um utilitário ad-hoc virar recorrente, promover para surface canônica (tool/comando/monitor) com evidência e runbook;
+- **evitar drift**: revisar periodicamente diferenças entre superfície local e distribuída e registrar backlog quando houver desvio intencional.
+
 ## Política de retomada pós-compactação
 Retomar apenas com:
 1. `.project/handoff.json`

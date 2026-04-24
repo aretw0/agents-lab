@@ -3060,7 +3060,8 @@
         "Runtime artifacts efêmeros (`.pi/*.json` de sessão) permanecem fora de versionamento e política é documentada para prevenir recorrência.",
         "Backlog/verification refletem o que é marco permanente vs experimento temporário, sem perder evidência relevante."
       ],
-      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js`; archive=28 scripts ad-hoc (incluindo `cleanup-ad-hoc.js` e `parse-tasks-json.js`) + 2 dumps de inventário em `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`.\n[2026-04-23T23:31:00Z] Task concluída com `VER-BUD-247` (passed).",
+      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js`; archive=28 scripts ad-hoc (incluindo `cleanup-ad-hoc.js` e `parse-tasks-json.js`) + 2 dumps de inventário em `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`.\n[2026-04-23T23:31:00Z] Task concluída com `VER-BUD-247` (passed).
+[2026-04-24T00:26:00Z] Escopo ampliado por feedback humano: higiene também cobre superfície distribuída aos usuários (não apenas sandbox). Follow-up aberto em `TASK-OPS-HYGIENE-003` para paridade lab<->usuário e governança de tools lab-only temporárias.",
       "verification": "VER-BUD-247"
     },
     {
@@ -3125,7 +3126,27 @@
         "Heartbeat não mascara estado inválido: atualização só ocorre se `lastLoopReady` + `lastBoardAutoAdvance` existirem e critérios ainda forem verdadeiros.",
         "Testes focais de loop-evidence e smoke de lane-queue seguem verdes após mudança."
       ],
-      "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime."
+      "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime.\n[2026-04-24T00:25:00Z] Reload aplicado e check repetido, porém `ops:loop-evidence:strict` ainda reporta stale. Próxima validação depende de ciclo runtime que atualize heartbeat em operação real."
+    },
+    {
+      "id": "TASK-OPS-HYGIENE-003",
+      "description": "[P1] Expandir higiene pós-marco para superfície distribuída (paridade lab<->usuário + governança de tools lab-only temporárias).",
+      "status": "in-progress",
+      "depends_on": [
+        "TASK-OPS-HYGIENE-002"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/README.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Guia canônico explicita que higiene cobre não só `.sandbox/tmp`, mas também superfícies distribuídas para usuários (paridade por padrão + exceções documentadas).",
+        "Existe política para tools/superfícies lab-only temporárias com critério de graduação para surface canônica (tool/comando/sinal operacional) ou remoção.",
+        "Board registra evidência de revisão de escopo e próximo passo para inventário de diferenças lab x distribuído."
+      ],
+      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários."
     }
   ]
 }

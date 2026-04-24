@@ -1,28 +1,28 @@
 {
-  "timestamp": "2026-04-24T00:14:00.000Z",
-  "context": "Progresso contínuo em foundations-first: `TASK-OPS-HYGIENE-002` e `TASK-BUD-128` foram concluídas. Novo slice aberto em `TASK-BUD-129` para reduzir falso-stale de loop evidence: `guardrails-core` agora aplica heartbeat throttled (5 min) quando critérios canônicos continuam válidos, sem mascarar estado inválido. Testes focais verdes.",
+  "timestamp": "2026-04-24T00:28:00.000Z",
+  "context": "Escopo de higiene foi assimilado conforme feedback humano: higiene não é só sandbox; também cobre superfície distribuída aos usuários e governança de tools lab-only temporárias. Isso virou `TASK-OPS-HYGIENE-003` (in-progress) e foi documentado no pipeline canônico. Em paralelo, `TASK-BUD-129` segue em progresso: heartbeat de loop-evidence já implementado/testado, mas validação runtime ainda pendente porque `ops:loop-evidence:strict` permanece stale após reload.",
   "next_actions": [
-    "Executar `/reload` para ativar runtime de `TASK-BUD-129` (heartbeat de loop evidence).",
-    "Após reload, observar 1 ciclo operacional e reexecutar `npm run -s ops:loop-evidence:strict` para confirmar redução de stale.",
-    "Se strict ficar green por freshness, registrar verificação runtime e decidir fechamento de `TASK-BUD-129`.",
-    "Manter `TASK-BUD-127` em no-auto-close até decisão humana (tecnicamente pronta)."
+    "Continuar `TASK-OPS-HYGIENE-003` com inventário explícito de diferenças lab x distribuído e critérios de promoção (tool/comando/sinal operacional).",
+    "Para `TASK-BUD-129`, executar um ciclo operacional que passe pelo runtime de lane/loop e revalidar `npm run -s ops:loop-evidence:strict` para confirmar redução do stale por freshness.",
+    "Registrar verificação runtime de `TASK-BUD-129` assim que strict ficar green em operação real.",
+    "Manter micro-slice-only enquanto `context_watch` estiver em warn."
   ],
   "blockers": [
-    "runtime-reload-pending-for-loop-evidence-heartbeat"
+    "loop-evidence-stale-needs-runtime-heartbeat-validation"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T00:14:00.000Z",
+      "atIso": "2026-04-24T00:28:00.000Z",
       "reason": "message_end",
-      "level": "ok",
-      "percent": 41,
+      "level": "warn",
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "continue",
-      "recommendation": "Context healthy; standard-slices ativo."
+      "action": "micro-slice-only",
+      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
     }
   ]
 }
