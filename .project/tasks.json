@@ -2801,8 +2801,7 @@
         "Fallback manual permanece disponível quando capability não estiver pronta, com mensagem auditável.",
         "Smoke cobre rota feliz e rota degradada (capability ausente/negada) sem quebrar runbook operacional."
       ],
-      "notes": "Objetivo: integrar melhor o control plane ao ecossistema e reduzir fricção de automação long-run.\n[2026-04-23T12:08:00Z] Diretriz humana assimilada: long run deve ser native-first (steer/follow-up) e board-first (sem exigir macro-goal manual quando backlog já estiver pronto). TASK-BUD-119 passa a priorizar bus/intents para reduzir iterações humanas e habilitar execução prolongada orientada por board canônico, com interrupção apenas em stop-conditions reais.\n[2026-04-23T09:58:00Z] Slice 2 (intent bus tipado + fallback degradado): novo módulo `guardrails-core-intent-bus.ts` define envelope canônico (`[intent:<type>]` + `version/key=value`) com encode/parse/sumário para `board.execute-task`. `/lane-queue board-next` passou a emitir intent tipado com auditoria (`intentType`, `intentVersion`, `intentSummary`) e fallback auditável quando dispatch imediato falha (`guardrails-core.board-intent-dispatch-failed` + requeue). Smokes focais verdes (34/34). Evidência: VER-BUD-217.\n[2026-04-23T10:05:00Z] Slice 3 (intent consumer no executor): `guardrails-core.ts` agora consome envelope tipado em `before_agent_start` (`parseGuardrailsIntent`) e injeta guidance determinístico por tipo (`buildGuardrailsIntentSystemPrompt`) com auditoria `guardrails-core.intent-envelope-detected`, reduzindo dependência de interpretação textual frágil no arranque do turno. Smokes focais verdes (35/35). Evidência: VER-BUD-219.
-[2026-04-24T01:08:00Z] Sinal humano assimilado para backlog (sem interromper trilha atual): intents `lane-now:` adicionadas durante long run não estão ficando visíveis/observáveis na cadência esperada. Tratar depois como slice de confiabilidade de ingestão/observabilidade da lane-queue (confirmar enqueue, gatilhos de dispatch e telemetria de status)."
+      "notes": "Objetivo: integrar melhor o control plane ao ecossistema e reduzir fricção de automação long-run.\n[2026-04-23T12:08:00Z] Diretriz humana assimilada: long run deve ser native-first (steer/follow-up) e board-first (sem exigir macro-goal manual quando backlog já estiver pronto). TASK-BUD-119 passa a priorizar bus/intents para reduzir iterações humanas e habilitar execução prolongada orientada por board canônico, com interrupção apenas em stop-conditions reais.\n[2026-04-23T09:58:00Z] Slice 2 (intent bus tipado + fallback degradado): novo módulo `guardrails-core-intent-bus.ts` define envelope canônico (`[intent:<type>]` + `version/key=value`) com encode/parse/sumário para `board.execute-task`. `/lane-queue board-next` passou a emitir intent tipado com auditoria (`intentType`, `intentVersion`, `intentSummary`) e fallback auditável quando dispatch imediato falha (`guardrails-core.board-intent-dispatch-failed` + requeue). Smokes focais verdes (34/34). Evidência: VER-BUD-217.\n[2026-04-23T10:05:00Z] Slice 3 (intent consumer no executor): `guardrails-core.ts` agora consome envelope tipado em `before_agent_start` (`parseGuardrailsIntent`) e injeta guidance determinístico por tipo (`buildGuardrailsIntentSystemPrompt`) com auditoria `guardrails-core.intent-envelope-detected`, reduzindo dependência de interpretação textual frágil no arranque do turno. Smokes focais verdes (35/35). Evidência: VER-BUD-219.\n[2026-04-24T01:08:00Z] Sinal humano assimilado para backlog (sem interromper trilha atual): intents `lane-now:` adicionadas durante long run não estão ficando visíveis/observáveis na cadência esperada. Tratar depois como slice de confiabilidade de ingestão/observabilidade da lane-queue (confirmar enqueue, gatilhos de dispatch e telemetria de status)."
     },
     {
       "id": "TASK-BUD-120",
@@ -3061,8 +3060,7 @@
         "Runtime artifacts efêmeros (`.pi/*.json` de sessão) permanecem fora de versionamento e política é documentada para prevenir recorrência.",
         "Backlog/verification refletem o que é marco permanente vs experimento temporário, sem perder evidência relevante."
       ],
-      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js`; archive=28 scripts ad-hoc (incluindo `cleanup-ad-hoc.js` e `parse-tasks-json.js`) + 2 dumps de inventário em `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`.\n[2026-04-23T23:31:00Z] Task concluída com `VER-BUD-247` (passed).
-[2026-04-24T00:26:00Z] Escopo ampliado por feedback humano: higiene também cobre superfície distribuída aos usuários (não apenas sandbox). Follow-up aberto em `TASK-OPS-HYGIENE-003` para paridade lab<->usuário e governança de tools lab-only temporárias.",
+      "notes": "Criada por solicitação do usuário para fazer higiene da gordura acumulada durante validações intensivas.\n[2026-04-23T23:10:00Z] Início da execução: inventário de scripts ad-hoc em `.sandbox/tmp` levantado (28 arquivos). Próximo micro-slice: classificar keep/archive/remove com critério explícito e registrar política no guia canônico.\n[2026-04-23T23:13:00Z] Classificação aplicada: keep=`extract-task.js`,`search-tasks-keyword.js`; archive=28 scripts ad-hoc (incluindo `cleanup-ad-hoc.js` e `parse-tasks-json.js`) + 2 dumps de inventário em `.sandbox/tmp/archive/2026-04-23/` com README de critérios. Política adicionada em `docs/guides/project-canonical-pipeline.md` na seção 'Higiene de scripts ad-hoc (.sandbox/tmp)`.\n[2026-04-23T23:31:00Z] Task concluída com `VER-BUD-247` (passed).\n[2026-04-24T00:26:00Z] Escopo ampliado por feedback humano: higiene também cobre superfície distribuída aos usuários (não apenas sandbox). Follow-up aberto em `TASK-OPS-HYGIENE-003` para paridade lab<->usuário e governança de tools lab-only temporárias.",
       "verification": "VER-BUD-247"
     },
     {
@@ -3127,11 +3125,7 @@
         "Heartbeat não mascara estado inválido: atualização só ocorre se `lastLoopReady` + `lastBoardAutoAdvance` existirem e critérios ainda forem verdadeiros.",
         "Testes focais de loop-evidence e smoke de lane-queue seguem verdes após mudança."
       ],
-      "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime.\n[2026-04-24T00:25:00Z] Reload aplicado e check repetido, porém `ops:loop-evidence:strict` ainda reporta stale. Próxima validação depende de ciclo runtime que atualize heartbeat em operação real.
-[2026-04-24T00:38:00Z] Hardening complementar: heartbeat por snapshot em `session_start` + timer best-effort (1min com throttle de 5min) adicionado para manter freshness mesmo sem auto-advance recente. Testes focais permanecem verdes; requer novo `/reload` para validação runtime desta revisão.
-[2026-04-24T00:47:00Z] Anti-masking aplicado: refresh por snapshot/timer agora exige lease ativa (não expirada) antes de atualizar `updatedAt`. Regressões verdes (`guardrails-long-run-intent-queue` 33/33 e `test:ops:loop-evidence` 5/5). `ops:loop-evidence:strict` segue stale até reload + ciclo runtime real.
-[2026-04-24T00:57:00Z] Hardening de auto-recuperação: `session_start` agora reasserta modo atual (`session-start-lease-renew`) para renovar lease sem depender de `/lane-queue resume`. Adicionado teste de regressão para lease-renew por reassert de modo. Watchdog recorrente criado (`schedule_prompt` id `wrwucj04`, 3m, scope=workspace) para checar `ops:loop-evidence:strict` sem depender de ping manual.
-[2026-04-24T01:02:10Z] Runtime pós-reload voltou a green no strict (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T00:59:15.896Z`, `readyForTaskBud125: yes`). Manter watchdog ativo para confirmar estabilidade sustentada sem coordenação manual."
+      "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime.\n[2026-04-24T00:25:00Z] Reload aplicado e check repetido, porém `ops:loop-evidence:strict` ainda reporta stale. Próxima validação depende de ciclo runtime que atualize heartbeat em operação real.\n[2026-04-24T00:38:00Z] Hardening complementar: heartbeat por snapshot em `session_start` + timer best-effort (1min com throttle de 5min) adicionado para manter freshness mesmo sem auto-advance recente. Testes focais permanecem verdes; requer novo `/reload` para validação runtime desta revisão.\n[2026-04-24T00:47:00Z] Anti-masking aplicado: refresh por snapshot/timer agora exige lease ativa (não expirada) antes de atualizar `updatedAt`. Regressões verdes (`guardrails-long-run-intent-queue` 33/33 e `test:ops:loop-evidence` 5/5). `ops:loop-evidence:strict` segue stale até reload + ciclo runtime real.\n[2026-04-24T00:57:00Z] Hardening de auto-recuperação: `session_start` agora reasserta modo atual (`session-start-lease-renew`) para renovar lease sem depender de `/lane-queue resume`. Adicionado teste de regressão para lease-renew por reassert de modo. Watchdog recorrente criado (`schedule_prompt` id `wrwucj04`, 3m, scope=workspace) para checar `ops:loop-evidence:strict` sem depender de ping manual.\n[2026-04-24T01:02:10Z] Runtime pós-reload voltou a green no strict (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T00:59:15.896Z`, `readyForTaskBud125: yes`). Manter watchdog ativo para confirmar estabilidade sustentada sem coordenação manual.\n[2026-04-24T01:17:00Z] Estabilidade sustentada confirmada por watchdog/checagens repetidas (`ageSec` 74->153->255->315->463) mantendo `status: ok` e critérios canônicos válidos. Verificação `VER-BUD-259` marcada como passed; fechamento da task segue dependente de decisão humana (no-auto-close)."
     },
     {
       "id": "TASK-OPS-HYGIENE-003",
@@ -3152,8 +3146,119 @@
         "Existe política para tools/superfícies lab-only temporárias com critério de graduação para surface canônica (tool/comando/sinal operacional) ou remoção.",
         "Board registra evidência de revisão de escopo e próximo passo para inventário de diferenças lab x distribuído."
       ],
-      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência.
-[2026-04-24T01:02:00Z] Escopo ampliado por diretriz de distribuição: guias agora explicitam postura outcome-agnostic + simple-first (progressive disclosure), preservando caminho simples para usuários iniciantes e opt-in para camada fábrica/control-plane."
+      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência.\n[2026-04-24T01:02:00Z] Escopo ampliado por diretriz de distribuição: guias agora explicitam postura outcome-agnostic + simple-first (progressive disclosure), preservando caminho simples para usuários iniciantes e opt-in para camada fábrica/control-plane."
+    },
+    {
+      "id": "TASK-BUD-130",
+      "description": "[P1] Reduzir gordura da superfície de tools após calibração (surface slimming + deprecation-by-default para lab-only recorrente).",
+      "status": "planned",
+      "depends_on": [
+        "TASK-OPS-HYGIENE-003"
+      ],
+      "references": [
+        "REQ-BUD-060"
+      ],
+      "files": [
+        "packages/pi-stack/package-list.mjs",
+        "docs/guides/lab-user-surface-parity.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Inventário classifica tools/superfícies em keep/deprecate/docs-only com racional operacional (frequência, valor recorrente, custo cognitivo).",
+        "Tools calibradas sem uso recorrente são removidas/desligadas da distribuição e substituídas por runbook/documentação quando apropriado.",
+        "Paridade lab↔usuário continua preservada sem impor superfície inchada para usuários iniciantes."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): após fase de calibração, reduzir ferramentas disponíveis que não agregam no contexto atual e manter distribuição simple-first/outcome-agnostic."
+    },
+    {
+      "id": "TASK-BUD-131",
+      "description": "[P0] Enforce structured-first mutations: impedir edição livre de arquivos estruturados quando existir tool tipada canônica.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-119"
+      ],
+      "references": [
+        "REQ-BUD-060",
+        "DEC-BUD-045"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/project-board-proxy.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Guardrail detecta alvo estruturado (ex.: `.project/*.json`) e orienta/bloqueia `write/edit` quando houver tool tipada equivalente (`board_*`, `read/write-block`, etc.).",
+        "Falha de governança gera mensagem auditável com caminho recomendado (tool canônica) em vez de edição textual frágil.",
+        "Runbook explicita política 'structured-first' para todos os artefatos estruturados críticos."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): agente não deve 'acertar JSON na mão' quando houver ferramenta precisa; objetivo é reduzir erro estrutural e aumentar confiabilidade para long runs."
+    },
+    {
+      "id": "TASK-BUD-132",
+      "description": "[P2] Evoluir de structured-first para code-ops semânticas (ex.: rename seguro multi-ocorrência) com ferramentas dedicadas.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-131"
+      ],
+      "references": [
+        "REQ-BUD-060"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/primitives/conversation-event-canonical-schema.md"
+      ],
+      "acceptance_criteria": [
+        "Backlog define operações semânticas prioritárias (rename symbol, move file, import updates) e critérios mínimos de segurança/escopo.",
+        "Existe estratégia de adoção incremental (fallback textual apenas quando operação semântica indisponível, com evidência).",
+        "Plano mantém stack outcome-agnostic: ganhos para avançados sem aumentar fricção para fluxo simples."
+      ],
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): no futuro, operações de código devem usar ferramentas estruturais para evitar mudanças manuais dispersas e inconsistentes."
+    },
+    {
+      "id": "TASK-BUD-133",
+      "description": "[P1] Suportar ticket systems externos (GitHub/Gitea) com espelhamento canônico para board local.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-119"
+      ],
+      "references": [
+        "REQ-BUD-061",
+        "REQ-BUD-060"
+      ],
+      "files": [
+        "packages/git-skills/skills/github/SKILL.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/control-plane-evolution-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Mapeamento canônico definido entre entidades externas (issue/label/status) e `.project/tasks` (ID, status, notas, evidência).",
+        "Fluxo de sincronização explicita direção, conflito e idempotência (board-first com mirrors externos ou inverso por política).",
+        "Execução preserva governança atual (no-auto-close estratégico, trilha auditável, fallback manual)."
+      ],
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): habilitar mirror para GitHub/Gitea sem perder board canônico e sem travar evolução local."
+    },
+    {
+      "id": "TASK-BUD-134",
+      "description": "[P2] Introduzir execução remota por GitHub Actions como acelerador de capacidade (compute offload) para desenvolvimento/validação.",
+      "status": "planned",
+      "depends_on": [
+        "TASK-BUD-133"
+      ],
+      "references": [
+        "REQ-BUD-061"
+      ],
+      "files": [
+        "docs/guides/control-plane-evolution-playbook.md",
+        "docs/guides/budget-governance.md",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Playbook define quais workloads vão para runners remotos (testes pesados, validações longas, jobs paralelos) e quais ficam locais.",
+        "Há trilha de evidência de execução remota no board/handoff (job id, resultado, artefatos) sem quebrar governança de budget/qualidade.",
+        "Modelo operacional inclui steer/intervenção humana clara (cancelar/retry/override) mantendo objetivo set-and-forget seguro."
+      ],
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica."
     }
   ]
 }

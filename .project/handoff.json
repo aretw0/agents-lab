@@ -1,22 +1,19 @@
 {
-  "timestamp": "2026-04-24T01:09:00.000Z",
-  "context": "Diretriz assimilada: apesar de fortalecer fábrica/control-plane, a distribuição deve permanecer outcome-agnostic e simples para iniciantes. Documentação de higiene/superfície distribuída foi atualizada com simple-first + progressive disclosure para não impor governança avançada como pré-requisito. Em paralelo, blocker de long-run (`TASK-BUD-129`) mostrou runtime green pós-reload no strict; watchdog recorrente continua rodando para estabilidade sustentada sem coordenação manual. Novo sinal operacional capturado para backlog sem interromper trilha atual: mensagens `lane-now:` enfileiradas não estão surgindo/visíveis na cadência esperada.",
+  "timestamp": "2026-04-24T01:18:00.000Z",
+  "context": "Brainstorm estratégico humano assimilado integralmente no backlog sem desviar o foco de fábrica: novas tasks `TASK-BUD-130..134` cobrem (a) surface slimming/deprecação de tools calibradas, (b) enforcement structured-first para artefatos estruturados, (c) roadmap de code-ops semânticas (rename seguro), (d) ticket systems externos GitHub/Gitea e (e) compute offload via GitHub Actions. Em paralelo, `TASK-BUD-129` atingiu validação runtime sustentada (strict green em múltiplos ciclos), com verificação `VER-BUD-259` passada; no-auto-close preservado para decisão humana.",
   "next_actions": [
-    "Aguardar 1-2 ciclos do watchdog `wrwucj04` (3m) para confirmar green sustentado de `ops:loop-evidence:strict`.",
-    "Se green sustentado, registrar verificação final de runtime e submeter decisão humana de fechamento de `TASK-BUD-129` (no-auto-close preservado).",
-    "Continuar `TASK-OPS-HYGIENE-003` com inventário objetivo de superfícies lab-only remanescentes + plano de graduação/remoção.",
-    "Na documentação de distribuição, manter linguagem de onboarding 'comece simples, evolua para fábrica por opt-in' em novos guias/superfícies.",
-    "Planejar slice posterior em `TASK-BUD-119` para confiabilidade de ingestão/observabilidade do `lane-now` (enqueue->dispatch->telemetria), sem desviar foco imediato."
+    "Submeter decisão humana de fechamento para `TASK-BUD-129` (já com evidência técnica passada).",
+    "Manter watchdog `wrwucj04` ativo como sentinela leve enquanto avançamos no próximo desbloqueio.",
+    "Retomar execução de `TASK-BUD-119` em slice de alto impacto (confiabilidade/observabilidade de ingestão `lane-now`), já ancorado no backlog.",
+    "Planejar kickoff de `TASK-BUD-131` para guardrail structured-first em arquivos canônicos (`.project/*.json`) evitando `write/edit` textual onde houver tool tipada."
   ],
-  "blockers": [
-    "loop-evidence-runtime-stability-pending"
-  ],
+  "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:09:00.000Z",
+      "atIso": "2026-04-24T01:18:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 21,
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
