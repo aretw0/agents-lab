@@ -21,6 +21,7 @@ import {
 import {
 	buildAutoCompactDiagnostics,
 	resolveAutoCompactRetryDelayMs,
+	isAutoCompactDeferralReason,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	type ContextWatchAutoCompactDecision,
@@ -107,6 +108,7 @@ export {
 	shouldTriggerAutoCompact,
 	summarizeContextWatchEvent,
 	toAgeSec,
+	isAutoCompactDeferralReason,
 };
 
 export type {
@@ -255,6 +257,66 @@ export function resolveContextWatchOperatingCadence(input: {
 	};
 }
 
+export type PreCompactCalmCloseSignal = {
+	calmCloseReady: boolean;
+	checkpointEvidenceReady: boolean;
+	deferCount: number;
+	deferThreshold: number;
+	antiParalysisTriggered: boolean;
+	recommendation: string;
+};
+
+export function resolveCheckpointEvidenceReadyForCalmClose(input: {
+	handoffLastEventLevel?: ContextWatchdogLevel | null;
+	handoffLastEventAgeMs?: number;
+	maxCheckpointAgeMs: number;
+}): boolean {
+	const level = input.handoffLastEventLevel;
+	if (level !== "checkpoint" && level !== "compact") return false;
+	const ageMs = input.handoffLastEventAgeMs;
+	if (ageMs === undefined || !Number.isFinite(ageMs)) return true;
+	const maxAgeMs = Math.max(60_000, Math.floor(Number(input.maxCheckpointAgeMs ?? 0)));
+	return ageMs <= maxAgeMs;
+}
+
+export function resolvePreCompactCalmCloseSignal(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	decisionReason: ContextWatchAutoCompactDecision["reason"];
+	checkpointEvidenceReady: boolean;
+	deferCount: number;
+	deferThreshold?: number;
+}): PreCompactCalmCloseSignal {
+	const deferCount = Math.max(0, Math.floor(Number(input.deferCount ?? 0)));
+	const deferThreshold = Math.max(2, Math.floor(Number(input.deferThreshold ?? 3)));
+	const inCompact = input.assessmentLevel === "compact";
+	const calmCloseReady = inCompact
+		&& input.checkpointEvidenceReady
+		&& input.decisionReason !== "feature-disabled";
+	const antiParalysisTriggered = calmCloseReady
+		&& isAutoCompactDeferralReason(input.decisionReason)
+		&& deferCount >= deferThreshold;
+
+	let recommendation = "calm-close: not required (context outside compact lane).";
+	if (inCompact && !input.checkpointEvidenceReady) {
+		recommendation = "calm-close: capture checkpoint evidence first, then let idle auto-compact run.";
+	} else if (antiParalysisTriggered) {
+		recommendation = "anti-paralysis: compact has been deferred repeatedly; close the current slice now and let idle auto-compact proceed.";
+	} else if (calmCloseReady && input.decisionReason === "trigger") {
+		recommendation = "calm-close ready: compact trigger available now (idle + checkpoint evidence present).";
+	} else if (calmCloseReady) {
+		recommendation = "calm-close ready: finish the active micro-slice and keep the session idle to allow auto-compact.";
+	}
+
+	return {
+		calmCloseReady,
+		checkpointEvidenceReady: input.checkpointEvidenceReady,
+		deferCount,
+		deferThreshold,
+		antiParalysisTriggered,
+		recommendation,
+	};
+}
+
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
 function persistContextWatchHandoffEvent(
@@ -321,10 +383,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let autoCompactRetryTimer: NodeJS.Timeout | undefined;
 	let autoCompactRetryDueAt = 0;
 	let consecutiveWarnCount = 0;
+	let compactDeferCount = 0;
+	let lastAntiParalysisAuditDeferCount = 0;
 	let announceWindowStartAt = 0;
 	let announceCountInWindow = 0;
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
+	const CALM_CLOSE_DEFER_THRESHOLD = 3;
 
 	const getAnnouncementsInWindow = (nowMs: number): number => {
 		if (announceWindowStartAt <= 0) return 0;
@@ -402,6 +467,49 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		if (
+			assessment.level === "compact"
+			&& !autoCompactState.decision.trigger
+			&& isAutoCompactDeferralReason(autoCompactState.decision.reason)
+		) {
+			compactDeferCount += 1;
+		} else {
+			compactDeferCount = 0;
+			lastAntiParalysisAuditDeferCount = 0;
+		}
+		const handoffForCalmClose = readHandoffJson(ctx.cwd);
+		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
+		const handoffEventAgeForCalmClose = contextWatchEventAgeMs(handoffEventForCalmClose, now);
+		const calmCloseSignal = resolvePreCompactCalmCloseSignal({
+			assessmentLevel: assessment.level,
+			decisionReason: autoCompactState.decision.reason,
+			checkpointEvidenceReady: resolveCheckpointEvidenceReadyForCalmClose({
+				handoffLastEventLevel: handoffEventForCalmClose?.level,
+				handoffLastEventAgeMs: handoffEventAgeForCalmClose,
+				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+			}),
+			deferCount: compactDeferCount,
+			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
+		});
+		if (
+			calmCloseSignal.antiParalysisTriggered
+			&& compactDeferCount >= CALM_CLOSE_DEFER_THRESHOLD
+			&& compactDeferCount % CALM_CLOSE_DEFER_THRESHOLD === 0
+			&& compactDeferCount !== lastAntiParalysisAuditDeferCount
+		) {
+			lastAntiParalysisAuditDeferCount = compactDeferCount;
+			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+				"context-watchdog.pre-compact-calm-close",
+				{
+					atIso: new Date(now).toISOString(),
+					deferCount: compactDeferCount,
+					deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
+					decisionReason: autoCompactState.decision.reason,
+					recommendation: calmCloseSignal.recommendation,
+				},
+			);
+			ctx.ui.notify(calmCloseSignal.recommendation, "warning");
+		}
 		if (autoCompactState.decision.trigger) {
 			const handoffForPrep = readHandoffJson(ctx.cwd);
 			const handoffTsForPrep = typeof handoffForPrep.timestamp === "string" ? handoffForPrep.timestamp : undefined;
@@ -470,7 +578,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		ctx.ui.notify(lines.join("\n"), assessment.severity);
 	};
 
-	const currentAutoCompactState = (ctx: ExtensionContext, assessment: ContextWatchAssessment) => {
+	const currentAutoCompactState = (
+		ctx: ExtensionContext,
+		assessment: ContextWatchAssessment,
+		deferCount = compactDeferCount,
+	) => {
 		const nowMs = Date.now();
 		const state = buildAutoCompactDiagnostics(assessment, config, {
 			nowMs,
@@ -489,6 +601,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffLastEventAgeSec = toAgeSec(handoffLastEventAgeMs);
 		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
 		const handoffPrep = resolveHandoffPrepDecision(assessment, config, handoffFreshness.label);
+		const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: handoffLastEvent?.level,
+			handoffLastEventAgeMs,
+			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+		});
+		const calmClose = resolvePreCompactCalmCloseSignal({
+			assessmentLevel: assessment.level,
+			decisionReason: state.decision.reason,
+			checkpointEvidenceReady,
+			deferCount,
+			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
+		});
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -509,6 +633,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
 			handoffLastEventAgeMs,
 			handoffLastEventAgeSec,
+			calmCloseReady: calmClose.calmCloseReady,
+			checkpointEvidenceReady: calmClose.checkpointEvidenceReady,
+			deferCount: calmClose.deferCount,
+			deferThreshold: calmClose.deferThreshold,
+			antiParalysisTriggered: calmClose.antiParalysisTriggered,
+			calmCloseRecommendation: calmClose.recommendation,
 		};
 	};
 
@@ -542,6 +672,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		autoCompactInFlight = false;
 		clearAutoCompactRetryTimer();
 		consecutiveWarnCount = 0;
+		compactDeferCount = 0;
+		lastAntiParalysisAuditDeferCount = 0;
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
 		run(ctx, "session_start");
@@ -631,6 +763,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;
+				compactDeferCount = 0;
+				lastAntiParalysisAuditDeferCount = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
 				ctx.ui.notify("context-watch: state reset", "info");
@@ -686,6 +820,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`action: ${assessment.action}`,
 					assessment.recommendation,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
+					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"}`,
+					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,

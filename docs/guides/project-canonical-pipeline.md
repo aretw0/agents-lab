@@ -358,3 +358,18 @@ Contrato operacional:
 - usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`).
 
 Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.
+
+### Pre-compact calm-close (anti-paralisia)
+Quando `context_watch_status.level=compact`, o fechamento deve ser calmo (sem pânico e sem travar):
+
+- observar no payload de `autoCompact`:
+  - `calmCloseReady`
+  - `checkpointEvidenceReady`
+  - `deferCount`/`deferThreshold`
+  - `antiParalysisTriggered`
+  - `calmCloseRecommendation`
+- regra prática:
+  1. finalizar o micro-slice em curso;
+  2. evitar abrir novos blocos amplos;
+  3. deixar a sessão em idle para o auto-compact disparar.
+- quando `deferCount` atingir o threshold repetidamente, tratar como sinal anti-paralisia: registrar recomendação auditável e priorizar checkpoint + idle compact em vez de manter adiamento indefinido.

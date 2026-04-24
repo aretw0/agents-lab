@@ -19,6 +19,9 @@ import {
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchSignalNoiseExcessive,
+	resolveCheckpointEvidenceReadyForCalmClose,
+	resolvePreCompactCalmCloseSignal,
+	isAutoCompactDeferralReason,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	summarizeContextWatchEvent,
@@ -186,6 +189,56 @@ describe("context-watchdog", () => {
 		expect(resolveHandoffPrepDecision(compact, cfg, "fresh").reason).toBe("fresh");
 		expect(resolveHandoffPrepDecision(compact, cfg, "stale").reason).toBe("stale");
 		expect(shouldRefreshHandoffBeforeAutoCompact(checkpoint, cfg)).toBe(false);
+	});
+
+	it("exposes calm-close readiness and anti-paralysis signal deterministically", () => {
+		expect(isAutoCompactDeferralReason("not-idle")).toBe(true);
+		expect(isAutoCompactDeferralReason("cooldown")).toBe(true);
+		expect(isAutoCompactDeferralReason("trigger")).toBe(false);
+
+		expect(resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: "checkpoint",
+			handoffLastEventAgeMs: 20_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toBe(true);
+		expect(resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: "warn",
+			handoffLastEventAgeMs: 20_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toBe(false);
+		expect(resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: "checkpoint",
+			handoffLastEventAgeMs: 120_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toBe(false);
+
+		const ready = resolvePreCompactCalmCloseSignal({
+			assessmentLevel: "compact",
+			decisionReason: "not-idle",
+			checkpointEvidenceReady: true,
+			deferCount: 2,
+			deferThreshold: 3,
+		});
+		expect(ready.calmCloseReady).toBe(true);
+		expect(ready.antiParalysisTriggered).toBe(false);
+		expect(ready.deferCount).toBe(2);
+
+		const antiParalysis = resolvePreCompactCalmCloseSignal({
+			assessmentLevel: "compact",
+			decisionReason: "pending-messages",
+			checkpointEvidenceReady: true,
+			deferCount: 3,
+			deferThreshold: 3,
+		});
+		expect(antiParalysis.antiParalysisTriggered).toBe(true);
+		expect(antiParalysis.recommendation).toContain("anti-paralysis");
+		const nonCompact = resolvePreCompactCalmCloseSignal({
+			assessmentLevel: "ok",
+			decisionReason: "level-not-compact",
+			checkpointEvidenceReady: false,
+			deferCount: 0,
+		});
+		expect(nonCompact.calmCloseReady).toBe(false);
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {

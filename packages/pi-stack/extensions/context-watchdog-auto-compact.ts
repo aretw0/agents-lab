@@ -22,6 +22,15 @@ export type ContextWatchAutoCompactDecision = {
 		| "trigger";
 };
 
+export function isAutoCompactDeferralReason(
+	reason: ContextWatchAutoCompactDecision["reason"],
+): boolean {
+	return reason === "not-idle"
+		|| reason === "pending-messages"
+		|| reason === "in-flight"
+		|| reason === "cooldown";
+}
+
 export function shouldScheduleAutoCompactRetry(decision: ContextWatchAutoCompactDecision): boolean {
 	if (decision.trigger) return false;
 	return decision.reason === "not-idle"
