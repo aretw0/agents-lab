@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-04-24T01:37:00.000Z",
-  "context": "MODO FÁBRICA ON segue ativo para `TASK-BUD-119`. Nesta rodada foram entregues dois incrementos de alto impacto para lane reliability: (1) telemetria de override imediato em `/lane-queue status` (`laneNowLast=<idade/texto>`), e (2) discoverability explícita no help com `lane-now:<mensagem>`. Objetivo: reduzir sensação de mensagens 'sumindo' e diminuir dependência de memória operacional.",
+  "timestamp": "2026-04-24T11:33:30.000Z",
+  "context": "MODO FÁBRICA ON permanece ativo em `TASK-BUD-119`. Após validação runtime enviada pelo usuário, foi identificado sinal operacional importante: `lane-queue status` mostrava `gate=lease-expired` mesmo com loop ativo/saudável. Slice corretiva entregue: heartbeat de lease por atividade (`refreshLoopLeaseOnActivity`, throttled) em `before_agent_start`, `input` ativo e `/lane-queue status`, reduzindo falso stop em long runs.",
   "next_actions": [
-    "Aplicar `/reload` para ativar runtime da telemetria `laneNowLast` e da atualização de help.",
-    "Validar em runtime real: enviar `lane-now:<mensagem>` e rodar `/lane-queue status` para confirmar `laneNowLast` atualizado.",
-    "Se validação runtime passar, avançar próximo slice de `TASK-BUD-119`: trilha compacta enqueue->force-now->dispatch em superfície de evidence/status.",
-    "Manter foco em desbloqueio de potencial (sem side quests); itens 130..137 permanecem backlog planejado."
+    "Executar `/reload` para ativar heartbeat de lease por atividade no runtime atual.",
+    "Revalidar em runtime real: enviar `lane-now:<mensagem>` e checar `/lane-queue status` (esperado: `laneNowLast` atualizado e ausência de falso `gate=lease-expired` em operação ativa).",
+    "Continuar `TASK-BUD-119` com próxima fatia: evidência compacta de fluxo enqueue->force-now->dispatch no status/evidence.",
+    "Manter foco em desbloqueio de potencial; backlog futuro (`TASK-BUD-130..137`) permanece planejado."
   ],
   "blockers": [
-    "runtime-reload-pending-for-task-bud-119-lane-now-telemetry"
+    "runtime-reload-pending-for-loop-lease-activity-heartbeat"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T01:37:00.000Z",
+      "atIso": "2026-04-24T11:33:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 29,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

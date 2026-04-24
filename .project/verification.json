@@ -4605,6 +4605,15 @@
       "method": "test",
       "timestamp": "2026-04-24T01:36:00Z",
       "evidence": "Discoverability reforçada para override imediato: `buildLaneQueueHelpLines` agora inclui instrução explícita `lane-now:<mensagem>` para bypass da fila durante long run. Smoke atualizada e verde (`guardrails-long-run-intent-queue` 35/35), mantendo regressões de loop-evidence verdes (5/5)."
+    },
+    {
+      "id": "VER-BUD-264",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T11:32:30Z",
+      "evidence": "Slice de confiabilidade adicional: heartbeat de lease do loop agora é renovado por atividade (`before_agent_start`, `input` com long-run ativo e `/lane-queue status`) via `refreshLoopLeaseOnActivity` (throttled), mitigando falso `gate=lease-expired` durante operação ativa. Regressões verdes: smoke `guardrails-long-run-intent-queue` 35/35 e `test:ops:loop-evidence` 5/5; strict loop-evidence permanece `status: ok`."
     }
   ]
 }
