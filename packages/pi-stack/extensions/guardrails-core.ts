@@ -992,6 +992,7 @@ export default function (pi: ExtensionAPI) {
   let lastLoopEvidenceHeartbeatAt = 0;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
+  let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
   let longRunLoopRuntimeState: LongRunLoopRuntimeState = {
     version: 1,
     mode: "running",
@@ -1124,6 +1125,53 @@ export default function (pi: ExtensionAPI) {
       boardAutoAdvanceGate,
       nextTaskId,
     });
+  }
+
+  function refreshLoopEvidenceHeartbeatFromSnapshot(ctx: ExtensionContext): void {
+    const nowMs = Date.now();
+    if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
+
+    const runtime = readLongRunLoopRuntimeState(ctx.cwd);
+    if (runtime.mode !== "running" || runtime.health !== "healthy" || runtime.stopCondition !== "none") return;
+
+    const evidence = readLoopActivationEvidence(ctx.cwd);
+    const readiness = computeLoopEvidenceReadiness(evidence);
+    if (!readiness.readyForTaskBud125 || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
+
+    const atIso = new Date(nowMs).toISOString();
+    evidence.updatedAtIso = atIso;
+    evidence.lastLoopReady = {
+      ...evidence.lastLoopReady,
+      atIso,
+    };
+    writeLoopActivationEvidence(ctx.cwd, evidence);
+    lastLoopEvidenceHeartbeatAt = nowMs;
+    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", {
+      atIso,
+      markersLabel: evidence.lastLoopReady.markersLabel,
+      runtimeCodeState: evidence.lastLoopReady.runtimeCodeState,
+      boardAutoAdvanceGate: evidence.lastLoopReady.boardAutoAdvanceGate,
+      nextTaskId: evidence.lastLoopReady.nextTaskId,
+      source: "snapshot-refresh",
+    });
+  }
+
+  function clearLoopEvidenceHeartbeatTimer(): void {
+    if (!loopEvidenceHeartbeatTimer) return;
+    clearInterval(loopEvidenceHeartbeatTimer);
+    loopEvidenceHeartbeatTimer = undefined;
+  }
+
+  function ensureLoopEvidenceHeartbeatTimer(ctx: ExtensionContext): void {
+    clearLoopEvidenceHeartbeatTimer();
+    loopEvidenceHeartbeatTimer = setInterval(() => {
+      try {
+        refreshLoopEvidenceHeartbeatFromSnapshot(ctx);
+      } catch {
+        // best-effort heartbeat; avoid interrupting runtime
+      }
+    }, 60_000);
+    loopEvidenceHeartbeatTimer.unref?.();
   }
 
   function scheduleAutoDrainDeferredIntent(
@@ -1642,8 +1690,12 @@ export default function (pi: ExtensionAPI) {
     lastCodeBloatSignalAt = 0;
     lastCodeBloatSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
+    lastLoopEvidenceHeartbeatAt = 0;
     clearAutoDrainTimer();
+    clearLoopEvidenceHeartbeatTimer();
     longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
+    refreshLoopEvidenceHeartbeatFromSnapshot(ctx);
+    ensureLoopEvidenceHeartbeatTimer(ctx);
     updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
     ctx.ui?.setStatus?.("guardrails-core-intent", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
