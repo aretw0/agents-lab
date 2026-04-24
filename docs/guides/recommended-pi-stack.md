@@ -170,6 +170,17 @@ A stack evolui em dois sentidos:
 
 O critério de entrada de um pacote de terceiro na stack é: **uso real + valor comprovado + sem overlap não resolvido**.
 
+### Centralização first-party por ondas (sem big-bang)
+
+Para preservar estabilidade de long-run, a migração segue ondas pequenas/reversíveis:
+
+- **Onda 1 (aplicada):** filtros de overlap de runtime crítico já maduros em first-party.
+  - exemplo atual: `watchdog` third-party filtrado em favor de `context-watchdog*` first-party.
+- **Onda 2 (planejada):** consolidar overlaps semânticos de planning/workflow com winner explícito por capability.
+- **Onda 3 (planejada):** depreciação documentada + janela curta de compatibilidade.
+
+Referência de inventário e decisões: `docs/research/pi-stack-user-surface-audit-2026-04-21.md`.
+
 ---
 
 ## Instalação Individual
