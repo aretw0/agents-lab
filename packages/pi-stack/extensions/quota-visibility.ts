@@ -183,6 +183,8 @@ export interface QuotaStatus {
 		scannedFiles: number;
 		parsedSessions: number;
 		parsedEvents: number;
+		externalBillingEvents?: number;
+		externalBillingSource?: string;
 		windowDays: number;
 		generatedAtIso: string;
 	};
@@ -254,6 +256,20 @@ const DEFAULT_TOOL_OUTPUT_POLICY: QuotaToolOutputPolicy = {
 	compactLargeJson: true,
 	maxInlineJsonChars: 1200,
 };
+
+const DEFAULT_COPILOT_BILLING_PATH = path.join(
+	homedir(),
+	".pi",
+	"agent",
+	"billing",
+	"github-copilot-costs.json",
+);
+
+export interface CopilotBillingExtractParams {
+	sourceFile: string;
+	windowStartMs: number;
+	windowEndMs?: number;
+}
 
 export function resolveQuotaToolOutputPolicy(
 	settings?: QuotaVisibilitySettings,
@@ -1413,6 +1429,151 @@ async function parseSessionFile(
 	};
 }
 
+function parseCopilotBillingTimestamp(raw: unknown): Date | undefined {
+	if (typeof raw !== "string") return undefined;
+	const ts = raw.trim();
+	if (!ts) return undefined;
+	const d = new Date(ts);
+	return Number.isFinite(d.getTime()) ? d : undefined;
+}
+
+function normalizeCopilotBillingModel(raw: unknown): string {
+	if (typeof raw !== "string") return "billing-adjustment";
+	const value = raw.trim();
+	return value.length > 0 ? value : "billing-adjustment";
+}
+
+function normalizeCopilotBillingRows(raw: unknown): Array<Record<string, unknown>> {
+	if (Array.isArray(raw)) {
+		return raw.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === "object");
+	}
+	if (!raw || typeof raw !== "object") return [];
+	const obj = raw as Record<string, unknown>;
+	const candidates = [obj.records, obj.items, obj.events, obj.data];
+	for (const candidate of candidates) {
+		if (!Array.isArray(candidate)) continue;
+		return candidate.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === "object");
+	}
+	return [];
+}
+
+export function extractCopilotBillingUsageEvents(
+	raw: unknown,
+	params: CopilotBillingExtractParams,
+): QuotaUsageEvent[] {
+	const rows = normalizeCopilotBillingRows(raw);
+	const endMs = Number.isFinite(params.windowEndMs)
+		? (params.windowEndMs as number)
+		: Date.now();
+	const out: QuotaUsageEvent[] = [];
+
+	for (const row of rows) {
+		const timestamp =
+			parseCopilotBillingTimestamp(row.timestampIso) ??
+			parseCopilotBillingTimestamp(row.timestamp) ??
+			parseCopilotBillingTimestamp(row.atIso) ??
+			parseCopilotBillingTimestamp(row.at) ??
+			parseCopilotBillingTimestamp(row.date);
+		if (!timestamp) continue;
+
+		const timestampMs = timestamp.getTime();
+		if (!Number.isFinite(timestampMs)) continue;
+		if (timestampMs < params.windowStartMs || timestampMs > endMs) continue;
+
+		const provider = normalizeProvider(row.provider ?? "github-copilot");
+		if (provider !== "github-copilot") continue;
+
+		const account = normalizeAccountId(
+			row.account ??
+				row.accountId ??
+				row.account_id ??
+				row.organization ??
+				row.org ??
+				row.orgId ??
+				row.org_id,
+		);
+		const providerAccountKey = buildProviderAccountKey(provider, account);
+
+		const costUsd = Math.max(
+			0,
+			safeNum(
+				row.costUsd ??
+					row.cost_usd ??
+					row.billedCostUsd ??
+					row.billed_cost_usd ??
+					row.amountUsd ??
+					row.amount_usd ??
+					row.cost,
+			),
+		);
+		const tokens = Math.max(
+			0,
+			safeNum(row.tokens ?? row.totalTokens ?? row.total_tokens),
+		);
+		const requests = Math.max(
+			0,
+			safeNum(
+				row.requests ??
+					row.requestCount ??
+					row.request_count ??
+					row.premiumRequests ??
+					row.premium_requests,
+			),
+		);
+		if (costUsd <= 0 && tokens <= 0 && requests <= 0) continue;
+
+		out.push({
+			timestampIso: timestamp.toISOString(),
+			timestampMs,
+			dayLocal: toDayLocal(timestamp),
+			hourLocal: hourLocal(timestamp),
+			provider,
+			account,
+			providerAccountKey,
+			model: normalizeCopilotBillingModel(row.model),
+			tokens,
+			costUsd,
+			requests,
+			sessionFile: params.sourceFile,
+		});
+	}
+
+	return out;
+}
+
+async function loadCopilotBillingUsageEvents(
+	days: number,
+): Promise<{ events: QuotaUsageEvent[]; sourcePath?: string }> {
+	const sourcePath =
+		typeof process.env.PI_COPILOT_BILLING_PATH === "string" &&
+		process.env.PI_COPILOT_BILLING_PATH.trim().length > 0
+			? process.env.PI_COPILOT_BILLING_PATH.trim()
+			: DEFAULT_COPILOT_BILLING_PATH;
+
+	let rawText = "";
+	try {
+		rawText = await fs.readFile(sourcePath, "utf8");
+	} catch {
+		return { events: [] };
+	}
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(rawText);
+	} catch {
+		return { events: [] };
+	}
+
+	const now = nowLocalMidnight();
+	const start = addDays(now, -(days - 1));
+	const events = extractCopilotBillingUsageEvents(parsed, {
+		sourceFile: sourcePath,
+		windowStartMs: start.getTime(),
+		windowEndMs: Date.now(),
+	});
+	return { events, sourcePath };
+}
+
 export function buildQuotaStatus(
 	sessions: SessionSample[],
 	usageEvents: QuotaUsageEvent[],
@@ -1592,7 +1753,12 @@ export async function analyzeQuota(params: {
 		usageEvents.push(...parsed.usageEvents);
 	}
 
-	return buildQuotaStatus(sessions, usageEvents, {
+	const copilotBilling = await loadCopilotBillingUsageEvents(params.days);
+	if (copilotBilling.events.length > 0) {
+		usageEvents.push(...copilotBilling.events);
+	}
+
+	const status = buildQuotaStatus(sessions, usageEvents, {
 		days: params.days,
 		sessionsRoot,
 		scannedFiles: filtered.length,
@@ -1605,6 +1771,11 @@ export async function analyzeQuota(params: {
 		providerWindowHours: params.providerWindowHours,
 		providerBudgets: params.providerBudgets,
 	});
+	if (copilotBilling.events.length > 0) {
+		status.source.externalBillingEvents = copilotBilling.events.length;
+		status.source.externalBillingSource = copilotBilling.sourcePath;
+	}
+	return status;
 }
 
 function pct(v?: number): string {
@@ -1794,6 +1965,11 @@ function formatStatusReport(s: QuotaStatus): string {
 	lines.push(
 		`window: ${s.source.windowDays}d | sessions: ${s.totals.sessions} | files: ${s.source.scannedFiles} | events: ${s.source.parsedEvents}`,
 	);
+	if ((s.source.externalBillingEvents ?? 0) > 0) {
+		lines.push(
+			`external billing: ${s.source.externalBillingEvents} event(s) | source: ${s.source.externalBillingSource ?? "n/a"}`,
+		);
+	}
 	lines.push(
 		`tokens: ${fmt(s.totals.tokens)} | cost: ${money(s.totals.costUsd)} | assistant msgs: ${fmt(s.totals.assistantMessages)}`,
 	);

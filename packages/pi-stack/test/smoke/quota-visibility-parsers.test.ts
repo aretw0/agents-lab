@@ -4,6 +4,7 @@ import quotaVisibilityExtension, {
   parseProviderWindowHours,
   parseProviderBudgets,
   computeWindowStartScores,
+  extractCopilotBillingUsageEvents,
   buildProviderWindowInsight,
   buildProviderBudgetStatuses,
   buildRouteAdvisory,
@@ -147,6 +148,43 @@ describe("quota-visibility parsers", () => {
     expect(budgets["openai-codex/team-a"]?.weeklyQuotaTokens).toBe(1000);
     expect(budgets["openai-codex/team-a"]?.owner).toBe("squad-a");
     expect(budgets["openai-codex"]?.weeklyQuotaTokens).toBe(5000);
+  });
+
+  it("extractCopilotBillingUsageEvents injeta custo real faturado (fonte externa) no provider github-copilot", () => {
+    const startMs = Date.parse("2026-04-20T00:00:00.000Z");
+    const endMs = Date.parse("2026-04-27T00:00:00.000Z");
+    const events = extractCopilotBillingUsageEvents({
+      records: [
+        {
+          timestampIso: "2026-04-24T11:00:00.000Z",
+          account: "team-alpha",
+          costUsd: 3.75,
+          requests: 12,
+          model: "copilot-billing-api",
+        },
+        {
+          timestampIso: "2026-04-10T11:00:00.000Z",
+          account: "team-alpha",
+          costUsd: 1.25,
+          requests: 3,
+        },
+      ],
+    }, {
+      sourceFile: "billing/github-copilot-costs.json",
+      windowStartMs: startMs,
+      windowEndMs: endMs,
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      provider: "github-copilot",
+      account: "team-alpha",
+      providerAccountKey: "github-copilot/team-alpha",
+      costUsd: 3.75,
+      requests: 12,
+      model: "copilot-billing-api",
+      sessionFile: "billing/github-copilot-costs.json",
+    });
   });
 
   it("computeWindowStartScores soma janela circular corretamente", () => {
