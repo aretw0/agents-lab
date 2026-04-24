@@ -989,6 +989,7 @@ export default function (pi: ExtensionAPI) {
   let lastLoopActivationEmLoop = false;
   let lastLoopActivationReadyAt = 0;
   let lastLoopActivationReadyLabel: string | undefined;
+  let lastLoopEvidenceHeartbeatAt = 0;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let longRunLoopRuntimeState: LongRunLoopRuntimeState = {
@@ -1090,6 +1091,39 @@ export default function (pi: ExtensionAPI) {
       emLoop,
     };
     writeLoopActivationEvidence(ctx.cwd, evidence);
+  }
+
+  function refreshLoopEvidenceHeartbeat(
+    ctx: ExtensionContext,
+    markersLabel: string,
+    runtimeCodeState: RuntimeCodeActivationState,
+    boardAutoAdvanceGate: BoardAutoAdvanceGateReason,
+    nextTaskId?: string,
+  ): void {
+    const nowMs = Date.now();
+    if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
+    const evidence = readLoopActivationEvidence(ctx.cwd);
+    const readiness = computeLoopEvidenceReadiness(evidence);
+    if (!readiness.readyForTaskBud125 || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
+
+    const atIso = new Date(nowMs).toISOString();
+    evidence.updatedAtIso = atIso;
+    evidence.lastLoopReady = {
+      atIso,
+      markersLabel,
+      runtimeCodeState,
+      boardAutoAdvanceGate,
+      nextTaskId,
+    };
+    writeLoopActivationEvidence(ctx.cwd, evidence);
+    lastLoopEvidenceHeartbeatAt = nowMs;
+    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", {
+      atIso,
+      markersLabel,
+      runtimeCodeState,
+      boardAutoAdvanceGate,
+      nextTaskId,
+    });
   }
 
   function scheduleAutoDrainDeferredIntent(
@@ -1359,6 +1393,16 @@ export default function (pi: ExtensionAPI) {
       ctx.ui.notify(`loop-ready: ${loopMarkersLabel}`, "info");
     }
     lastLoopActivationEmLoop = loopMarkers.emLoop;
+
+    if (loopMarkers.emLoop) {
+      refreshLoopEvidenceHeartbeat(
+        ctx,
+        loopMarkersLabel,
+        runtimeCodeState,
+        boardAutoAdvanceGate,
+        boardReadiness.nextTaskId,
+      );
+    }
 
     if (boardAutoAdvanceGate === "ready" && boardAutoAdvanceAllowed) {
       const nextTaskId = boardReadiness.nextTaskId;
