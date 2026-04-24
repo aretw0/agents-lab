@@ -4533,6 +4533,24 @@
       "method": "test",
       "timestamp": "2026-04-24T00:57:00Z",
       "evidence": "Auto-recovery hardening pós feedback operacional: em `session_start`, runtime agora reasserta modo atual via `setLoopMode(..., 'session-start-lease-renew')`, renovando lease sem depender de comando manual. Isso destrava heartbeat por snapshot/timer após reload prolongado. Cobertura adicionada: `renews long-run lease when mode is reasserted on session start` em `guardrails-long-run-intent-queue.test.ts`. Testes verdes: smoke 34/34 + `test:ops:loop-evidence` 5/5."
+    },
+    {
+      "id": "VER-BUD-256",
+      "target": "TASK-OPS-HYGIENE-003",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-24T01:02:00Z",
+      "evidence": "Guias de higiene/paridade atualizados para incorporar distribuição outcome-agnostic e simple-first: `docs/guides/lab-user-surface-parity.md` (seção nova) e `docs/guides/project-canonical-pipeline.md` (regras de superfície distribuída com progressive disclosure). Objetivo explícito: não impor camada avançada para usuários iniciantes, mantendo caminho de evolução para fábrica/control-plane."
+    },
+    {
+      "id": "VER-BUD-257",
+      "target": "TASK-BUD-129",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-24T01:02:10Z",
+      "evidence": "Runtime pós-reload confirmado com `npm run -s ops:loop-evidence:strict` em estado green (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T00:59:15.896Z`, `readyForTaskBud125: yes`). Watchdog recorrente workspace (`wrwucj04`, 3m) mantém monitoramento contínuo para estabilidade sustentada sem coordenação manual."
     }
   ]
 }

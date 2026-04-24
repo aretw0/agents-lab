@@ -3129,7 +3129,8 @@
       "notes": "Criada para tratar blocker recorrente `loop-evidence-stale-needs-refresh` observado com critérios válidos porém `updatedAt` envelhecido.\n[2026-04-24T00:11:00Z] Slice implementada: heartbeat throttled (5min) adicionado em `guardrails-core` para refrescar evidência quando loop permanece válido, sem mascarar estado inválido. Testes focais verdes (`test:ops:loop-evidence` 5/5 + smoke long-run-intent-queue 32/32). Requer `/reload` para validação runtime.\n[2026-04-24T00:25:00Z] Reload aplicado e check repetido, porém `ops:loop-evidence:strict` ainda reporta stale. Próxima validação depende de ciclo runtime que atualize heartbeat em operação real.
 [2026-04-24T00:38:00Z] Hardening complementar: heartbeat por snapshot em `session_start` + timer best-effort (1min com throttle de 5min) adicionado para manter freshness mesmo sem auto-advance recente. Testes focais permanecem verdes; requer novo `/reload` para validação runtime desta revisão.
 [2026-04-24T00:47:00Z] Anti-masking aplicado: refresh por snapshot/timer agora exige lease ativa (não expirada) antes de atualizar `updatedAt`. Regressões verdes (`guardrails-long-run-intent-queue` 33/33 e `test:ops:loop-evidence` 5/5). `ops:loop-evidence:strict` segue stale até reload + ciclo runtime real.
-[2026-04-24T00:57:00Z] Hardening de auto-recuperação: `session_start` agora reasserta modo atual (`session-start-lease-renew`) para renovar lease sem depender de `/lane-queue resume`. Adicionado teste de regressão para lease-renew por reassert de modo. Watchdog recorrente criado (`schedule_prompt` id `wrwucj04`, 3m, scope=workspace) para checar `ops:loop-evidence:strict` sem depender de ping manual."
+[2026-04-24T00:57:00Z] Hardening de auto-recuperação: `session_start` agora reasserta modo atual (`session-start-lease-renew`) para renovar lease sem depender de `/lane-queue resume`. Adicionado teste de regressão para lease-renew por reassert de modo. Watchdog recorrente criado (`schedule_prompt` id `wrwucj04`, 3m, scope=workspace) para checar `ops:loop-evidence:strict` sem depender de ping manual.
+[2026-04-24T01:02:10Z] Runtime pós-reload voltou a green no strict (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T00:59:15.896Z`, `readyForTaskBud125: yes`). Manter watchdog ativo para confirmar estabilidade sustentada sem coordenação manual."
     },
     {
       "id": "TASK-OPS-HYGIENE-003",
@@ -3150,7 +3151,8 @@
         "Existe política para tools/superfícies lab-only temporárias com critério de graduação para surface canônica (tool/comando/sinal operacional) ou remoção.",
         "Board registra evidência de revisão de escopo e próximo passo para inventário de diferenças lab x distribuído."
       ],
-      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência."
+      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência.
+[2026-04-24T01:02:00Z] Escopo ampliado por diretriz de distribuição: guias agora explicitam postura outcome-agnostic + simple-first (progressive disclosure), preservando caminho simples para usuários iniciantes e opt-in para camada fábrica/control-plane."
     }
   ]
 }

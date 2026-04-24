@@ -1,22 +1,21 @@
 {
-  "timestamp": "2026-04-24T00:58:00.000Z",
-  "context": "Feedback operacional incorporado: para evitar dependência de ping manual após long runs, `TASK-BUD-129` ganhou auto-recuperação via renew de lease no `session_start` (`session-start-lease-renew`) + watchdog recorrente workspace (`schedule_prompt` id `wrwucj04`, 3m) que reavalia `ops:loop-evidence:strict`. Objetivo: fábrica não parar por coordenação humana tardia.",
+  "timestamp": "2026-04-24T01:03:00.000Z",
+  "context": "Diretriz assimilada: apesar de fortalecer fábrica/control-plane, a distribuição deve permanecer outcome-agnostic e simples para iniciantes. Documentação de higiene/superfície distribuída foi atualizada com simple-first + progressive disclosure para não impor governança avançada como pré-requisito. Em paralelo, blocker de long-run (`TASK-BUD-129`) mostrou runtime green pós-reload no strict; watchdog recorrente continua rodando para estabilidade sustentada sem coordenação manual.",
   "next_actions": [
-    "Executar `/reload` para ativar a nova revisão de `session-start-lease-renew`.",
-    "Após reload, rodar `npm run -s ops:loop-evidence:strict` para validar freshness imediata.",
-    "Aguardar watchdog `wrwucj04` confirmar estabilidade (>5min) sem intervenção manual.",
-    "Se checks ficarem green de forma sustentada, registrar verificação runtime final e concluir `TASK-BUD-129`."
+    "Aguardar 1-2 ciclos do watchdog `wrwucj04` (3m) para confirmar green sustentado de `ops:loop-evidence:strict`.",
+    "Se green sustentado, registrar verificação final de runtime e submeter decisão humana de fechamento de `TASK-BUD-129` (no-auto-close preservado).",
+    "Continuar `TASK-OPS-HYGIENE-003` com inventário objetivo de superfícies lab-only remanescentes + plano de graduação/remoção.",
+    "Na documentação de distribuição, manter linguagem de onboarding 'comece simples, evolua para fábrica por opt-in' em novos guias/superfícies."
   ],
   "blockers": [
-    "runtime-reload-pending-for-session-start-lease-renew",
     "loop-evidence-runtime-stability-pending"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T00:58:00.000Z",
+      "atIso": "2026-04-24T01:03:00.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 18,
+      "percent": 20,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
