@@ -18,6 +18,7 @@ import {
   resolveDispatchFailureRuntimeGate,
   resolveAutoDrainRetryDelayMs,
   resolveLongRunIntentQueueConfig,
+  extractForceNowText,
   resolvePragmaticAutonomyConfig,
   resolveBloatSmellConfig,
   shouldAutoDrainDeferredIntent,
@@ -243,6 +244,14 @@ describe("guardrails-core long-run intent queue", () => {
     expect(shouldQueueInputForLongRun("/status", true, cfg)).toBe(false);
     expect(shouldQueueInputForLongRun("lane-now: processa agora", true, cfg)).toBe(false);
     expect(shouldQueueInputForLongRun("registrar isso", false, cfg)).toBe(false);
+  });
+
+  it("extracts lane-now override payload deterministically", () => {
+    const cfg = { forceNowPrefix: "lane-now:" };
+    expect(extractForceNowText("lane-now: processa agora", cfg)).toBe("processa agora");
+    expect(extractForceNowText("  LANE-NOW:   revisar já   ", cfg)).toBe("revisar já");
+    expect(extractForceNowText("lane-now:", cfg)).toBe("");
+    expect(extractForceNowText("normal text", cfg)).toBeUndefined();
   });
 
   it("parses explicit lane-queue add payloads", () => {

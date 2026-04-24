@@ -30,6 +30,7 @@ import {
 import {
   DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG,
   resolveLongRunIntentQueueConfig,
+  extractForceNowText,
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
   buildLaneQueueHelpLines,
@@ -107,6 +108,7 @@ export {
 
 export {
   resolveLongRunIntentQueueConfig,
+  extractForceNowText,
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
   buildLaneQueueHelpLines,
@@ -1856,6 +1858,34 @@ export default function (pi: ExtensionAPI) {
           `guardrails-core: board.execute-next resolvido para next=${expectedTaskId ?? runtimeTaskId ?? "n/a"}.`,
           "info",
         );
+      }
+    }
+
+    if (event.source === "interactive") {
+      const forceNowText = extractForceNowText(inputText, longRunIntentQueueConfig);
+      if (forceNowText !== undefined) {
+        if (!forceNowText) {
+          ctx.ui.notify(
+            `lane-now override vazio; use '${longRunIntentQueueConfig.forceNowPrefix}<mensagem>' para forçar processamento imediato.`,
+            "warning",
+          );
+          return { action: "handled" as const };
+        }
+
+        appendAuditEntry(ctx, "guardrails-core.long-run-intent-force-now", {
+          atIso: new Date().toISOString(),
+          activeLongRun,
+          textPreview: summarizeAssumptionText(forceNowText, pragmaticAutonomyConfig.maxAuditTextChars),
+        });
+
+        pi.sendUserMessage(forceNowText, { deliverAs: "followUp" });
+        ctx.ui.notify(
+          activeLongRun
+            ? "lane-now: override aplicado; mensagem enviada como follow-up imediato."
+            : "lane-now: override aplicado; mensagem enviada para processamento imediato.",
+          "info",
+        );
+        return { action: "handled" as const };
       }
     }
 

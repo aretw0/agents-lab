@@ -141,6 +141,16 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
   }
 }
 
+export function extractForceNowText(
+  text: string,
+  cfg: Pick<LongRunIntentQueueConfig, "forceNowPrefix">,
+): string | undefined {
+  const trimmed = String(text ?? "").trim();
+  if (!trimmed) return undefined;
+  if (!trimmed.toLowerCase().startsWith(cfg.forceNowPrefix)) return undefined;
+  return trimmed.slice(cfg.forceNowPrefix.length).trim();
+}
+
 export function shouldQueueInputForLongRun(
   text: string,
   activeLongRun: boolean,
@@ -149,7 +159,7 @@ export function shouldQueueInputForLongRun(
   if (!cfg.enabled) return false;
   const trimmed = text.trim();
   if (!trimmed) return false;
-  if (trimmed.toLowerCase().startsWith(cfg.forceNowPrefix)) return false;
+  if (extractForceNowText(trimmed, cfg) !== undefined) return false;
   if (trimmed.startsWith("/")) return false;
   if (cfg.requireActiveLongRun && !activeLongRun) return false;
   return true;
