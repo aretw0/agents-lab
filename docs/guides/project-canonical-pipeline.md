@@ -228,6 +228,18 @@ Contrato mínimo:
 
 Referência de contrato inicial: `docs/research/task-bud-144-macro-api-contract-2026-04-24.md`.
 
+### Mutação segura para arquivo grande e query estruturada (roadmap)
+
+Para operações de maior risco (arquivo extenso / SQL), usar pathway dedicado com preflight explícito.
+
+Contrato mínimo:
+- `dryRun=true` por default;
+- patch orientado a bloco/âncora (evitar substituição textual ampla);
+- limite de blast-radius (`maxTouchedLines`) com bloqueio explícito;
+- saída com `rollbackToken` + evidência (`preview`, limites aplicados, decisão).
+
+Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.
+
 ### Steering signal-first (tool-surface diet)
 
 No loop canônico, steering diário deve priorizar **sinais passivos de stream/status** (ex.: `warn/checkpoint/compact`, `operatorSignal`) em vez de depender de tool-call manual.

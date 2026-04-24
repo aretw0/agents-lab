@@ -3492,15 +3492,17 @@
         "Playbook descreve quando usar macro-API vs edicao pontual, com prioridade para caminhos galvanizados."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback."    },
+      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback."
+    },
     {
       "id": "TASK-BUD-145",
       "description": "[P2] Criar APIs seguras para mutacao em arquivo grande e para consultas estruturadas (ex.: SQL) com guardrails deterministico",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
-        "docs/guides/project-canonical-pipeline.md"
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md"
       ],
       "acceptance_criteria": [
         "Arquivos grandes ganham operacao de atualizacao por bloco/AST com validacao e rollback claro, reduzindo risco de corrupcao textual.",
@@ -3508,7 +3510,7 @@
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries)."
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas." 
     }
   ]
 }
