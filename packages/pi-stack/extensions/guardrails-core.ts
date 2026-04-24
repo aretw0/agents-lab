@@ -1010,6 +1010,7 @@ export default function (pi: ExtensionAPI) {
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
+  let loopLeaseHeartbeatTimer: NodeJS.Timeout | undefined;
   let longRunLoopRuntimeState: LongRunLoopRuntimeState = {
     version: 1,
     mode: "running",
@@ -1189,6 +1190,24 @@ export default function (pi: ExtensionAPI) {
       }
     }, 60_000);
     loopEvidenceHeartbeatTimer.unref?.();
+  }
+
+  function clearLoopLeaseHeartbeatTimer(): void {
+    if (!loopLeaseHeartbeatTimer) return;
+    clearInterval(loopLeaseHeartbeatTimer);
+    loopLeaseHeartbeatTimer = undefined;
+  }
+
+  function ensureLoopLeaseHeartbeatTimer(ctx: ExtensionContext): void {
+    clearLoopLeaseHeartbeatTimer();
+    loopLeaseHeartbeatTimer = setInterval(() => {
+      try {
+        refreshLoopLeaseOnActivity(ctx, "lease-heartbeat-timer", 5_000);
+      } catch {
+        // best-effort lease heartbeat; avoid interrupting runtime
+      }
+    }, 10_000);
+    loopLeaseHeartbeatTimer.unref?.();
   }
 
   function scheduleAutoDrainDeferredIntent(
@@ -1726,10 +1745,12 @@ export default function (pi: ExtensionAPI) {
     lastLoopLeaseRefreshAt = 0;
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
+    clearLoopLeaseHeartbeatTimer();
     longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
     setLoopMode(ctx, longRunLoopRuntimeState.mode, "session-start-lease-renew");
     refreshLoopEvidenceHeartbeatFromSnapshot(ctx);
     ensureLoopEvidenceHeartbeatTimer(ctx);
+    ensureLoopLeaseHeartbeatTimer(ctx);
     updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
     ctx.ui?.setStatus?.("guardrails-core-intent", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
@@ -1800,6 +1821,9 @@ export default function (pi: ExtensionAPI) {
       lastLongRunBusyAt = Date.now();
       clearAutoDrainTimer();
       refreshLoopLeaseOnActivity(ctx, "input-activity-lease-heartbeat", 10_000);
+    }
+    if (event.source === "interactive" && inputText.trim().length > 0) {
+      refreshLoopLeaseOnActivity(ctx, "interactive-input-lease-heartbeat", 10_000);
     }
     updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
 
