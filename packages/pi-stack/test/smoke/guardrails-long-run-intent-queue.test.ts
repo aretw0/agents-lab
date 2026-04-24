@@ -27,11 +27,13 @@ import {
   summarizeAssumptionText,
   evaluateTextBloatSmell,
   evaluateCodeBloatSmell,
+  evaluateWideSingleFileSlice,
   estimateCodeBloatFromEditInput,
   estimateCodeBloatFromWriteInput,
   extractAssistantTextFromTurnMessage,
   buildTextBloatStatusLabel,
   buildCodeBloatStatusLabel,
+  buildWideSingleFileSliceStatusLabel,
   shouldEmitBloatSmellSignal,
   shouldSchedulePostDispatchAutoDrain,
   resolveBoardAutoAdvanceGateReason,
@@ -190,6 +192,31 @@ describe("guardrails-core long-run intent queue", () => {
     );
     expect(summary).toContain("manter execução");
     expect(summary.length).toBeLessThanOrEqual(49);
+  });
+
+  it("detects wide single-file slice advisories without hard-block semantics", () => {
+    const triggered = evaluateWideSingleFileSlice(
+      { changedLines: 64, hunks: 4, filesTouched: 1 },
+      { changedLines: 40, hunks: 2 },
+    );
+    expect(triggered.triggered).toBe(true);
+    expect(triggered.reasons).toContain("wide-lines:64");
+    expect(triggered.reasons).toContain("wide-hunks:4");
+    expect(triggered.recommendation).toContain("split this file change into micro-slices");
+    const status = buildWideSingleFileSliceStatusLabel(triggered);
+    expect(status).toContain("[slice] wide-file");
+
+    const oneHunkOnly = evaluateWideSingleFileSlice(
+      { changedLines: 90, hunks: 1, filesTouched: 1 },
+      { changedLines: 40, hunks: 2 },
+    );
+    expect(oneHunkOnly.triggered).toBe(false);
+
+    const manyFiles = evaluateWideSingleFileSlice(
+      { changedLines: 90, hunks: 4, filesTouched: 2 },
+      { changedLines: 40, hunks: 2 },
+    );
+    expect(manyFiles.triggered).toBe(false);
   });
 
   it("detects text/code bloat smells with deterministic advisory output", () => {

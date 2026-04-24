@@ -199,9 +199,11 @@ Regras operacionais:
 - sinais de runtime esperados:
   - texto: `guardrails-core-bloat`
   - código: `guardrails-core-bloat-code`
+  - slice amplo em arquivo único: `guardrails-core-slice-width` (advisory)
 - manter `notifyOnTrigger=false` durante calibração inicial; promover para notify apenas após estabilidade de sinal/ruído;
 - para scouts (`scout burst`), usar bloat-smell para mapear hotspots de split/síntese, mas registrar recomendação no board antes de escalar enforcement;
 - quando disparar smell recorrente, converter em micro-slice explícito (split de tarefa/arquivo) em vez de tratar como ruído transitório.
+- para `guardrails-core-slice-width`, ação padrão é: (1) quebrar em micro-slices no mesmo arquivo; (2) se indivisível no momento, registrar backlog/nota no board antes de seguir.
 
 ### Governança de sinais (ownership + noise-budget)
 

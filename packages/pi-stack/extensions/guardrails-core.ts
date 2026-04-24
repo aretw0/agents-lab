@@ -776,6 +776,17 @@ export interface CodeBloatSmellAssessment {
   };
 }
 
+export interface WideSingleFileSliceAssessment {
+  triggered: boolean;
+  reasons: string[];
+  recommendation: string;
+  metrics: {
+    changedLines: number;
+    hunks: number;
+    filesTouched: number;
+  };
+}
+
 export function evaluateTextBloatSmell(
   text: string,
   thresholds?: Partial<{ chars: number; lines: number; repeatedLineRatio: number }>,
@@ -843,6 +854,48 @@ export function evaluateCodeBloatSmell(
       filesTouched,
     },
   };
+}
+
+export function evaluateWideSingleFileSlice(
+  metricsInput: { changedLines: number; hunks: number; filesTouched?: number },
+  thresholds?: Partial<{ changedLines: number; hunks: number }>,
+): WideSingleFileSliceAssessment {
+  const changedLines = Math.max(0, Math.floor(Number(metricsInput?.changedLines ?? 0)));
+  const hunks = Math.max(0, Math.floor(Number(metricsInput?.hunks ?? 0)));
+  const filesTouched = Math.max(0, Math.floor(Number(metricsInput?.filesTouched ?? 1)));
+
+  const changedLinesThreshold = Math.max(20, Math.floor(Number(thresholds?.changedLines ?? 40)));
+  const hunksThreshold = Math.max(2, Math.floor(Number(thresholds?.hunks ?? 3)));
+
+  const reasons: string[] = [];
+  if (filesTouched !== 1) {
+    reasons.push(`files-touched:${filesTouched}`);
+  }
+  if (changedLines >= changedLinesThreshold) {
+    reasons.push(`wide-lines:${changedLines}`);
+  }
+  if (hunks >= hunksThreshold) {
+    reasons.push(`wide-hunks:${hunks}`);
+  }
+
+  const triggered = filesTouched === 1 && changedLines >= changedLinesThreshold && hunks >= hunksThreshold;
+
+  return {
+    triggered,
+    reasons: triggered ? reasons.filter((reason) => reason.startsWith("wide-")) : reasons,
+    recommendation: triggered
+      ? "slice-wide advisory: split this file change into micro-slices; if indivisible, register backlog/board note now before continuing."
+      : "slice-width: healthy",
+    metrics: {
+      changedLines,
+      hunks,
+      filesTouched,
+    },
+  };
+}
+
+export function buildWideSingleFileSliceStatusLabel(assessment: WideSingleFileSliceAssessment): string {
+  return `[slice] wide-file lines=${assessment.metrics.changedLines} hunks=${assessment.metrics.hunks}`;
 }
 
 const GUARDRAILS_CORE_SOURCE_PATH = fileURLToPath(import.meta.url);
@@ -994,6 +1047,8 @@ export default function (pi: ExtensionAPI) {
   let lastTextBloatSignalKey: string | undefined;
   let lastCodeBloatSignalAt = 0;
   let lastCodeBloatSignalKey: string | undefined;
+  let lastWideSliceSignalAt = 0;
+  let lastWideSliceSignalKey: string | undefined;
   let lastAutoDrainAt = 0;
   let lastAutoDrainDeferredAuditAt = 0;
   let lastAutoDrainDeferredGate: AutoDrainGateReason | undefined;
@@ -1742,6 +1797,8 @@ export default function (pi: ExtensionAPI) {
     lastTextBloatSignalKey = undefined;
     lastCodeBloatSignalAt = 0;
     lastCodeBloatSignalKey = undefined;
+    lastWideSliceSignalAt = 0;
+    lastWideSliceSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
     lastLoopEvidenceHeartbeatAt = 0;
     lastForceNowAt = 0;
@@ -1760,6 +1817,7 @@ export default function (pi: ExtensionAPI) {
     ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-slice-width", undefined);
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
@@ -2193,6 +2251,44 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (metrics && toolType) {
+        const wideSliceAssessment = evaluateWideSingleFileSlice(metrics, {
+          changedLines: Math.max(20, Math.floor(bloatSmellConfig.code.changedLines * 0.4)),
+          hunks: Math.max(2, Math.floor(bloatSmellConfig.code.hunks * 0.5)),
+        });
+
+        if (!wideSliceAssessment.triggered) {
+          ctx.ui?.setStatus?.("guardrails-core-slice-width", undefined);
+        } else {
+          const wideSliceStatusLabel = buildWideSingleFileSliceStatusLabel(wideSliceAssessment);
+          ctx.ui?.setStatus?.("guardrails-core-slice-width", wideSliceStatusLabel);
+
+          const nowMs = Date.now();
+          const wideSliceSignalKey = `${toolType}:${wideSliceAssessment.reasons.join("|")}`;
+          if (shouldEmitBloatSmellSignal(
+            lastWideSliceSignalAt,
+            lastWideSliceSignalKey,
+            wideSliceSignalKey,
+            nowMs,
+            bloatSmellConfig.cooldownMs,
+          )) {
+            appendAuditEntry(ctx, "guardrails-core.slice-wide-single-file", {
+              atIso: new Date(nowMs).toISOString(),
+              toolType,
+              reasons: wideSliceAssessment.reasons,
+              metrics: wideSliceAssessment.metrics,
+              recommendation: wideSliceAssessment.recommendation,
+              statusLabel: wideSliceStatusLabel,
+            });
+
+            if (bloatSmellConfig.notifyOnTrigger) {
+              ctx.ui.notify([wideSliceStatusLabel, wideSliceAssessment.recommendation].join("\n"), "info");
+            }
+
+            lastWideSliceSignalAt = nowMs;
+            lastWideSliceSignalKey = wideSliceSignalKey;
+          }
+        }
+
         const assessment = evaluateCodeBloatSmell(metrics, {
           changedLines: bloatSmellConfig.code.changedLines,
           hunks: bloatSmellConfig.code.hunks,
@@ -2656,6 +2752,7 @@ export default function (pi: ExtensionAPI) {
     ctx.ui?.setStatus?.("guardrails-core-behavior", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat", undefined);
     ctx.ui?.setStatus?.("guardrails-core-bloat-code", undefined);
+    ctx.ui?.setStatus?.("guardrails-core-slice-width", undefined);
     lastLongRunBusyAt = Date.now();
     scheduleAutoDrainDeferredIntent(ctx, "agent_end");
     updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
