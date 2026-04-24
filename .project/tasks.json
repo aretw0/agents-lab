@@ -3418,6 +3418,45 @@
         "Processo preserva no-auto-close e reduz fricção: usuário só decide, não precisa pedir descoberta manual."
       ],
       "notes": "Backlog aberto por feedback humano (2026-04-24): hoje o usuário ainda precisa lembrar de perguntar pendências de decisão; objetivo é tornar esse checkpoint proativo e determinístico."
+    },
+    {
+      "id": "TASK-BUD-140",
+      "description": "[P1] Impedir que monitores sejam pausados sob pressao de memoria/safe-mode",
+      "status": "planned",
+      "priority": "p1",
+      "acceptance_criteria": [
+        "Monitores nao sao desativados automaticamente quando safe-mode ou heap warning e acionado.",
+        "Se algum monitor precisar ser suspenso, gera audit explicito com razao e duracao estimada.",
+        "Sob pressao, sistema fica mais conservador (nao menos)."
+      ],
+      "verification": "",
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, log mostra monitors paused durante heap 926MB + safe-mode. Referencia: sessao compactada TASK-BUD-067."
+    },
+    {
+      "id": "TASK-BUD-141",
+      "description": "[P1] Auto-resume pos-compactacao deve verificar steer do usuario antes de despachar board",
+      "status": "planned",
+      "priority": "p1",
+      "acceptance_criteria": [
+        "Apos compactacao, auto-resume inspeciona lane-queue e pending messages antes do board auto-advance.",
+        "Se houver steer pendente, ele e processado primeiro.",
+        "Audit documenta steer encontrado e acao tomada antes do board dispatch."
+      ],
+      "verification": "",
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, usuario colocou steer na lane-queue durante compactacao mas auto-resume ignorou e disparou board task. Usuario deve ter voz antes da fabrica retomar autonomia."
+    },
+    {
+      "id": "TASK-BUD-142",
+      "description": "[P2] Investigar orphaned function_call_output sobrevivendo a compactacoes (mesmo call_id repetido)",
+      "status": "planned",
+      "priority": "p2",
+      "acceptance_criteria": [
+        "Identificar se o orphan e preservado pelo algoritmo de compactacao do pi ou gerado novamente.",
+        "Se for bug do pi framework: documentar e abrir issue upstream.",
+        "Se for mitigavel: consumer detecta call_id ja visto e descarta com audit antes de redispatch."
+      ],
+      "verification": "",
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: call_id call_QJlU6a2DGglAm3NntokWyBwo repetiu-se mesmo apos Session compacted 4 times. Fix TASK-BUD-119 mitiga o loop mas nao resolve o orphan em si."
     }
   ]
 }
