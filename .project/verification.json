@@ -4614,6 +4614,15 @@
       "method": "test",
       "timestamp": "2026-04-24T11:32:30Z",
       "evidence": "Slice de confiabilidade adicional: heartbeat de lease do loop agora é renovado por atividade (`before_agent_start`, `input` com long-run ativo e `/lane-queue status`) via `refreshLoopLeaseOnActivity` (throttled), mitigando falso `gate=lease-expired` durante operação ativa. Regressões verdes: smoke `guardrails-long-run-intent-queue` 35/35 e `test:ops:loop-evidence` 5/5; strict loop-evidence permanece `status: ok`."
+    },
+    {
+      "id": "VER-BUD-265",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "command",
+      "timestamp": "2026-04-24T11:47:10Z",
+      "evidence": "Runtime check pós-reload para mitigação de lease heartbeat: `.pi/long-run-loop-state.json` mostra lease viva (`leaseHeartbeatAtIso=2026-04-24T11:46:38.587Z`, `leaseExpiresAtIso=2026-04-24T11:47:08.587Z`, `stopCondition=none`) após atividade; `npm run -s ops:loop-evidence:strict` segue green (`status: ok`, `stale: no`, `updatedAt: 2026-04-24T11:46:59.345Z`)."
     }
   ]
 }
