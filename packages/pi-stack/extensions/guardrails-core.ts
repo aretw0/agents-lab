@@ -1004,6 +1004,8 @@ export default function (pi: ExtensionAPI) {
   let lastLoopActivationReadyAt = 0;
   let lastLoopActivationReadyLabel: string | undefined;
   let lastLoopEvidenceHeartbeatAt = 0;
+  let lastForceNowAt = 0;
+  let lastForceNowTextPreview: string | undefined;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
@@ -1705,6 +1707,8 @@ export default function (pi: ExtensionAPI) {
     lastCodeBloatSignalKey = undefined;
     lastLongRunBusyAt = Date.now();
     lastLoopEvidenceHeartbeatAt = 0;
+    lastForceNowAt = 0;
+    lastForceNowTextPreview = undefined;
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
     longRunLoopRuntimeState = readLongRunLoopRuntimeState(ctx.cwd);
@@ -1872,10 +1876,14 @@ export default function (pi: ExtensionAPI) {
           return { action: "handled" as const };
         }
 
+        const nowIso = new Date().toISOString();
+        lastForceNowAt = Date.parse(nowIso);
+        lastForceNowTextPreview = summarizeAssumptionText(forceNowText, pragmaticAutonomyConfig.maxAuditTextChars);
+
         appendAuditEntry(ctx, "guardrails-core.long-run-intent-force-now", {
-          atIso: new Date().toISOString(),
+          atIso: nowIso,
           activeLongRun,
-          textPreview: summarizeAssumptionText(forceNowText, pragmaticAutonomyConfig.maxAuditTextChars),
+          textPreview: lastForceNowTextPreview,
         });
 
         pi.sendUserMessage(forceNowText, { deliverAs: "followUp" });
@@ -2513,6 +2521,9 @@ export default function (pi: ExtensionAPI) {
       const boardAutoLast = lastBoardAutoAdvanceTaskId
         ? `${lastBoardAutoAdvanceTaskId}@${Math.max(0, Math.ceil((nowMs - lastBoardAutoAdvanceAt) / 1000))}s`
         : "n/a";
+      const laneNowLast = lastForceNowAt > 0
+        ? `${Math.max(0, Math.ceil((nowMs - lastForceNowAt) / 1000))}s${lastForceNowTextPreview ? ` text='${lastForceNowTextPreview}'` : ""}`
+        : "n/a";
       const runtimeCodeState: RuntimeCodeActivationState = currentRuntimeCodeState();
       const loopEvidence = readLoopActivationEvidence(ctx.cwd);
       const loopMarkers = resolveLoopActivationMarkers({
@@ -2548,7 +2559,7 @@ export default function (pi: ExtensionAPI) {
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]
