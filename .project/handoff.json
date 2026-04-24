@@ -1,18 +1,19 @@
 {
-  "timestamp": "2026-04-24T00:31:00.000Z",
-  "context": "Escopo de higiene foi ampliado e já entrou em execução concreta: além da limpeza de sandbox concluída anteriormente, agora há baseline de paridade lab x usuário (`docs/guides/lab-user-surface-parity.md`) com regras de exceção lab-only e critério de promoção para surface canônica/sinal operacional (`TASK-OPS-HYGIENE-003`, in-progress). `TASK-BUD-129` continua pendente de validação runtime: mesmo após reload, `ops:loop-evidence:strict` permanece stale.",
+  "timestamp": "2026-04-24T00:39:00.000Z",
+  "context": "Diretriz estratégica reforçada pelo usuário foi assimilada: foco total em desbloquear operação de fábrica contínua (long runs estáveis + control-plane escalável), evitando side quests. Dois eixos ativos: (1) `TASK-BUD-129` para eliminar falso-stale de loop evidence; (2) `TASK-OPS-HYGIENE-003` para paridade de superfície lab<->usuário e governança de tools lab-only temporárias.",
   "next_actions": [
-    "Continuar `TASK-OPS-HYGIENE-003` com inventário explícito de diferenças lab x distribuído (quais superfícies ainda são lab-only e plano de graduação/remoção).",
-    "Para `TASK-BUD-129`, provocar ciclo runtime da lane/loop e reexecutar `npm run -s ops:loop-evidence:strict` até confirmar freshness em operação real.",
-    "Registrar verificação runtime de `TASK-BUD-129` quando stale for resolvido sem relaxar critérios canônicos.",
-    "Manter cadência micro-slice-only enquanto `context_watch` estiver em warn."
+    "Executar `/reload` para ativar a revisão mais recente de `TASK-BUD-129` (heartbeat por snapshot em session_start + timer best-effort).",
+    "Após reload, rodar `npm run -s ops:loop-evidence:strict` e confirmar freshness green sem relaxar critérios canônicos.",
+    "Se strict ficar green, registrar verificação runtime e fechar `TASK-BUD-129`; isso remove blocker principal de operação contínua.",
+    "Continuar `TASK-OPS-HYGIENE-003` com inventário objetivo das superfícies lab-only atuais e plano de graduação para sinais/tools canônicos."
   ],
   "blockers": [
-    "loop-evidence-stale-needs-runtime-heartbeat-validation"
+    "runtime-reload-pending-for-loop-evidence-heartbeat-timer",
+    "loop-evidence-stale-needs-runtime-validation"
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T00:31:00.000Z",
+      "atIso": "2026-04-24T00:39:00.000Z",
       "reason": "message_end",
       "level": "warn",
       "percent": 52,

@@ -4506,6 +4506,15 @@
       "method": "inspect",
       "timestamp": "2026-04-24T00:30:00Z",
       "evidence": "Criado `docs/guides/lab-user-surface-parity.md` com baseline de paridade lab x usuário (paridade por padrão, exceções temporárias, critério de promoção/remoção, governança). Índice atualizado em `docs/guides/README.md`."
+    },
+    {
+      "id": "VER-BUD-253",
+      "target": "TASK-BUD-129",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-24T00:38:00Z",
+      "evidence": "Hardening adicional em `guardrails-core`: heartbeat de evidência agora também roda por snapshot (`refreshLoopEvidenceHeartbeatFromSnapshot`) em `session_start` + timer best-effort (`ensureLoopEvidenceHeartbeatTimer`, unref) para reduzir stale em períodos sem auto-advance. Regressões focais seguem verdes: `test:ops:loop-evidence` 5/5 e smoke `guardrails-long-run-intent-queue` 32/32. Falta validação runtime pós-reload desta última mudança."
     }
   ]
 }
