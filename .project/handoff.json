@@ -1,12 +1,13 @@
 {
-  "timestamp": "2026-04-24T13:23:50.000Z",
-  "context": "Envelope board-first para `TASK-BUD-115` executado: contexto pre-compact calm-close foi formalizado no runtime do context-watchdog com sinalização de readiness (`calmCloseReady`, `checkpointEvidenceReady`) e anti-paralisia (`deferCount/deferThreshold`, `antiParalysisTriggered`, `calmCloseRecommendation`) em `context_watch_status.autoCompact`, mantendo modo advisory (sem hard-block). Adiamentos repetidos agora geram trilha auditável `context-watchdog.pre-compact-calm-close` com recomendação explícita para fechar slice + deixar idle compactar.",
+  "timestamp": "2026-04-24T13:31:30.000Z",
+  "context": "Envelope board-first para `TASK-OPS-CONFIG-CMD-001` executado com micro-slice reversível: `guardrails-core` ganhou comando dedicado `/guardrails-config` para operar configuração de runtime sem editar JSON manualmente (`status|get|set`) com validação determinística de tipo/faixa em chaves suportadas, persistência segura em `.pi/settings.json`, audit trail (`guardrails-core.runtime-config-set`) e orientação de reload. `project-canonical-pipeline.md` documenta o fluxo canônico e fallback manual para chaves não suportadas.",
   "next_actions": [
-    "Decisão humana de fechamento para `TASK-BUD-115` (evidência passed `VER-BUD-277`, no-auto-close preservado).",
-    "Após `/reload`, validar runtime com `/context-watch` e `context_watch_status` observando `calmCloseReady/deferCount` durante faixa `compact`.",
-    "Continuam pendentes decisões humanas: `TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`; depois retomar lane principal `TASK-BUD-119`."
+    "Decisão humana de fechamento para `TASK-OPS-CONFIG-CMD-001` (evidência passed `VER-BUD-278`, no-auto-close preservado).",
+    "Opcional pós-reload: validar no runtime atual com `/guardrails-config status`, `/guardrails-config get longRunIntentQueue.maxItems` e um `set` de teste.",
+    "Pendências de decisão humana permanecem: `TASK-BUD-115`, `TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`; depois retomar lane principal `TASK-BUD-119`."
   ],
   "blockers": [
+    "human-decision-required-for-task-ops-config-cmd-001-no-auto-close",
     "human-decision-required-for-task-bud-115-no-auto-close",
     "human-decision-required-for-task-bud-112-no-auto-close",
     "human-decision-required-for-task-bud-104-no-auto-close",
@@ -15,7 +16,7 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T13:23:50.000Z",
+      "atIso": "2026-04-24T13:31:30.000Z",
       "reason": "message_end",
       "level": "warn",
       "percent": 60,

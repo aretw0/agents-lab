@@ -3031,7 +3031,7 @@
     {
       "id": "TASK-OPS-CONFIG-CMD-001",
       "description": "[P1] Criar comando dedicado para operar configurações de runtime (ex.: guardrails/long-run queue) sem edição manual de `.pi/settings.json`, com validação e audit trail.",
-      "status": "planned",
+      "status": "in-progress",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
         "docs/guides/project-canonical-pipeline.md",
@@ -3042,7 +3042,7 @@
         "Mudança de config gera auditoria curta (quem/o quê/quando) e orientação de reload quando necessário.",
         "Fluxo evita edição manual para toggles frequentes de operação e mantém fallback documentado para arquivo direto."
       ],
-      "notes": "Backlog criado por solicitação do usuário para reduzir atrito e erro humano ao mexer em configs. Fora do escopo imediato de fechamento TASK-BUD-125."
+      "notes": "Backlog criado por solicitação do usuário para reduzir atrito e erro humano ao mexer em configs. Fora do escopo imediato de fechamento TASK-BUD-125.\n[2026-04-24T13:30:30Z] Slice entregue: novo comando `/guardrails-config` no `guardrails-core` com `status|get|set`, allowlist de chaves suportadas (longRunIntentQueue + pragmaticAutonomy), validação determinística de tipo/faixa e gravação segura em `.pi/settings.json` sem edição manual. Cada `set` gera audit trail `guardrails-core.runtime-config-set` (quem/o quê/quando, old/new, reload recommendation) e aplica refresh imediato das configs mutáveis. Pipeline canônico atualizado com runbook de uso e fallback manual para chaves não suportadas. Smoke focal verde: `guardrails-long-run-intent-queue` 37/37."
     },
     {
       "id": "TASK-UX-I18N-001",
