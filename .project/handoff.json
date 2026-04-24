@@ -1,21 +1,18 @@
 {
-  "timestamp": "2026-04-24T11:58:00.000Z",
-  "context": "MODO FÁBRICA ON ativo em `TASK-BUD-119`. Após novo feedback runtime (status idle ainda exibindo `gate=lease-expired`), foi entregue hardening adicional: timer de lease heartbeat (`ensureLoopLeaseHeartbeatTimer`, 10s best-effort) + refresh em input interativo, além do refresh por atividade já existente. Objetivo: evitar expiração de lease durante ciclo vivo com fila pendente e reduzir bloqueio indevido de auto-drain.",
+  "timestamp": "2026-04-24T12:17:30.000Z",
+  "context": "MODO FÁBRICA ON segue ativo com lane principal em `TASK-BUD-119`; nesta interrupção por envelope canônico (`board.execute-task TASK-BUD-040`) foi entregue slice de billing adapter para Copilot sem quebrar pipeline atual. `quota-visibility` agora injeta custo faturado externo de GitHub Copilot no sistema de budgets via fonte equivalente (`~/.pi/agent/billing/github-copilot-costs.json`, override `PI_COPILOT_BILLING_PATH`) com matcher account-aware `github-copilot[/account]`.",
   "next_actions": [
-    "Executar `/reload` para ativar o novo timer de lease heartbeat no runtime atual.",
-    "Revalidar em runtime: enviar `lane-now:<msg>` e checar `/lane-queue status` após >30s idle curto (esperado: sem `gate=lease-expired` espúrio enquanto loop estiver vivo).",
-    "Se runtime confirmar, continuar `TASK-BUD-119` para evidência compacta enqueue->force-now->dispatch em surface de status/evidence.",
-    "Manter foco no desbloqueio de potencial; backlog 130..138 segue planejado."
+    "Retomar lane principal `TASK-BUD-119` após checkpoint desta task interruptiva (manter foco em confiabilidade de loop/lane).",
+    "Para validar `TASK-BUD-040` em runtime real, prover arquivo de billing externo e rodar `/quota-visibility budget github-copilot` para observar `external billing` + custo injetado.",
+    "Se runtime real confirmar leitura de custo faturado, promover `VER-BUD-270` para passed (decisão humana de fechamento preservada por contrato no-auto-close)."
   ],
-  "blockers": [
-    "runtime-reload-pending-for-lease-heartbeat-timer"
-  ],
+  "blockers": [],
   "context_watch_events": [
     {
-      "atIso": "2026-04-24T11:58:00.000Z",
+      "atIso": "2026-04-24T12:17:30.000Z",
       "reason": "message_end",
       "level": "ok",
-      "percent": 33,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

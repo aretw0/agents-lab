@@ -886,12 +886,21 @@
       "type": "feature",
       "id": "TASK-BUD-040",
       "description": "[P1] Desenvolver um adapter de billing para o GitHub Copilot que consulte a API de custos (ou fonte externa equivalente) e injete o custo real faturado no sistema de budget.",
-      "status": "planned",
+      "status": "in-progress",
       "references": [
         "REQ-BUD-023",
         "DEC-BUD-017"
       ],
-      "files": []
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Adapter do GitHub Copilot injeta eventos de billing externo no pipeline de budget sem quebrar ingestão de sessões nativas.",
+        "Eventos de billing respeitam chave canônica provider/account (`github-copilot[/account]`) para matcher account-aware com fallback provider-only.",
+        "Smoke cobre parse/normalização do payload externo e validação de injeção no modelo de eventos de quota."
+      ],
+      "notes": "[2026-04-24T12:16:00Z] Slice implementada: `quota-visibility` agora lê fonte externa de billing do Copilot (`~/.pi/agent/billing/github-copilot-costs.json`, override opcional por `PI_COPILOT_BILLING_PATH`), normaliza payload (records/items/events/data) e injeta eventos `github-copilot` com custo real faturado no cálculo de provider budgets. Exportado helper `extractCopilotBillingUsageEvents` com teste dedicado em smoke (`quota-visibility-parsers` 33/33 pass)."
     },
     {
       "type": "bug",
