@@ -142,6 +142,15 @@ Cada execução autônoma deve:
 5. **Atualizar board**: notas com evidência; task candidata a fechamento (não auto-close P0)
 6. **Commit**: somente código testado e verificado; mensagem de commit com task ID
 
+### Discovery de trabalho repetitivo (budget-aware)
+
+Quando houver sinais de repetição com gasto recorrente de LLM:
+- usar `session_analytics_query` (`galvanization`) para levantar candidatos com ranking e evidência (`tokens/cost/requests`);
+- registrar proposta de pathway hard por candidato (gates + equivalência + rollback), sem ativar automaticamente;
+- manter roadmap baseline vs pós-automação no board para priorizar conversão com menor risco.
+
+Contrato: descoberta é **advisory-first**; promoção para hard pathway continua sob governança canônica (`no-auto-close`, `verification`, decisão humana quando estratégico).
+
 ---
 
 ## Mensagens durante long-runs (sem desviar o lane)

@@ -7,11 +7,12 @@
  * - Makes the session log a first-class data source queryable from the Control Plane.
  *
  * Query types:
- *   signals      — aggregate colony signal counts
- *   timeline     — chronological event sequence
- *   model-usage  — provider/model switches
- *   summary      — top-level session overview
- *   outliers     — oversized message/tool payloads (context-risk triage)
+ *   signals        — aggregate colony signal counts
+ *   timeline       — chronological event sequence
+ *   model-usage    — provider/model switches
+ *   summary        — top-level session overview
+ *   outliers       — oversized message/tool payloads (context-risk triage)
+ *   galvanization  — repetitive-work discovery + hard-pathway opportunity ranking
  *
  * @capability-id session-analytics
  * @capability-criticality medium
@@ -21,6 +22,7 @@ import { homedir } from "node:os";
 import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { extractUsage, estimateHardPathwayMitigation } from "./quota-visibility";
 
 // ---------------------------------------------------------------------------
 // Workspace key derivation (mirrors session-triage.mjs logic)
@@ -250,6 +252,256 @@ export interface ContentOutlierEvent {
   excerpt: string;
 }
 
+export interface GalvanizationCandidate {
+  rank: number;
+  patternKey: string;
+  label: string;
+  kind: "slash-command" | "prompt-pattern" | "tool-loop";
+  occurrences: number;
+  sessions: number;
+  evidence: {
+    tokens: number;
+    costUsd: number;
+    requests: number;
+    examplePrompts: string[];
+  };
+  opportunityScore: number;
+  pathway: {
+    proposal: string;
+    safetyGates: string[];
+    equivalenceCondition: string;
+    rollbackPlan: string;
+  };
+  mitigationProjection: ReturnType<typeof estimateHardPathwayMitigation>;
+}
+
+function normalizeWorkPatternText(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/`[^`]+`/g, "<code>")
+    .replace(/[a-z]:\\[^\s]+/gi, "<path>")
+    .replace(/\/?[a-z0-9._-]+(?:\/[a-z0-9._-]+){2,}/gi, "<path>")
+    .replace(/\b\d+\b/g, "<num>")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
+
+function classifyWorkPatternKind(text: string): "slash-command" | "prompt-pattern" {
+  if (text.trim().startsWith("/")) return "slash-command";
+  return "prompt-pattern";
+}
+
+export function parseGalvanizationCandidates(records: unknown[], limit: number): {
+  candidates: GalvanizationCandidate[];
+  roadmap: {
+    baseline: { tokens: number; costUsd: number; requests: number };
+    projectedAfterTopCandidates: { tokens: number; costUsd: number; requests: number };
+    mitigationPotential: { tokensSaved: number; costUsdSaved: number; requestsSaved: number };
+  };
+} {
+  type PatternBucket = {
+    key: string;
+    label: string;
+    kind: "slash-command" | "prompt-pattern" | "tool-loop";
+    occurrences: number;
+    sessions: Set<string>;
+    tokens: number;
+    costUsd: number;
+    requests: number;
+    examples: string[];
+  };
+
+  type PendingOccurrence = { patternKey: string; timestampIso: string; sessionKey: string };
+
+  const buckets = new Map<string, PatternBucket>();
+  const pendingUserPatterns: PendingOccurrence[] = [];
+
+  const ensureBucket = (
+    key: string,
+    label: string,
+    kind: "slash-command" | "prompt-pattern" | "tool-loop",
+  ): PatternBucket => {
+    let existing = buckets.get(key);
+    if (!existing) {
+      existing = {
+        key,
+        label,
+        kind,
+        occurrences: 0,
+        sessions: new Set<string>(),
+        tokens: 0,
+        costUsd: 0,
+        requests: 0,
+        examples: [],
+      };
+      buckets.set(key, existing);
+    }
+    return existing;
+  };
+
+  for (const rec of records) {
+    if (!rec || typeof rec !== "object") continue;
+    const r = rec as Record<string, unknown>;
+    const timestampIso = typeof r["timestamp"] === "string" ? r["timestamp"] : "";
+    const sessionKey = typeof r["_sessionFile"] === "string"
+      ? r["_sessionFile"]
+      : (timestampIso.slice(0, 10) || "unknown-session");
+
+    if (r["type"] === "message") {
+      const msg = r["message"] as Record<string, unknown> | undefined;
+      if (!msg) continue;
+
+      const role = typeof msg["role"] === "string" ? msg["role"] : "";
+      const text = extractTextContent(msg["content"]).trim();
+      const toolName = typeof msg["toolName"] === "string" ? msg["toolName"] : undefined;
+
+      if (role === "user" && text.length > 0) {
+        const normalized = normalizeWorkPatternText(text);
+        if (normalized.length < 6) continue;
+        const kind = classifyWorkPatternKind(text);
+        const key = `${kind}:${normalized}`;
+        const bucket = ensureBucket(key, text.slice(0, 120), kind);
+        bucket.occurrences += 1;
+        bucket.sessions.add(sessionKey);
+        if (bucket.examples.length < 3) bucket.examples.push(text.slice(0, 160));
+        pendingUserPatterns.push({ patternKey: key, timestampIso, sessionKey });
+        continue;
+      }
+
+      if (toolName) {
+        const key = `tool-loop:${toolName.toLowerCase()}`;
+        const bucket = ensureBucket(key, `tool:${toolName}`, "tool-loop");
+        bucket.occurrences += 1;
+        bucket.sessions.add(sessionKey);
+        bucket.requests += 1;
+        if (bucket.examples.length < 3 && text.length > 0) {
+          bucket.examples.push(text.slice(0, 160));
+        }
+      }
+
+      if (role === "assistant") {
+        const usage = extractUsage((msg as Record<string, unknown>)["usage"] ?? msg);
+        if (usage.totalTokens <= 0 && usage.costTotalUsd <= 0) continue;
+
+        const pending = pendingUserPatterns.shift();
+        if (!pending) continue;
+
+        const bucket = buckets.get(pending.patternKey);
+        if (!bucket) continue;
+        bucket.tokens += usage.totalTokens;
+        bucket.costUsd += usage.costTotalUsd;
+        bucket.requests += 1;
+      }
+      continue;
+    }
+
+    if (r["type"] === "tool_call") {
+      const toolName = typeof r["toolName"] === "string"
+        ? r["toolName"]
+        : typeof (r["tool"] as Record<string, unknown> | undefined)?.["name"] === "string"
+          ? ((r["tool"] as Record<string, unknown>)["name"] as string)
+          : undefined;
+      if (!toolName) continue;
+      const key = `tool-loop:${toolName.toLowerCase()}`;
+      const bucket = ensureBucket(key, `tool:${toolName}`, "tool-loop");
+      bucket.occurrences += 1;
+      bucket.sessions.add(sessionKey);
+      bucket.requests += 1;
+    }
+  }
+
+  const filtered = [...buckets.values()]
+    .filter((b) => b.occurrences >= 2)
+    .filter((b) => b.tokens > 0 || b.costUsd > 0 || b.requests >= 3);
+
+  const scored = filtered
+    .map((b) => {
+      const freqScore = Math.min(45, b.occurrences * 6);
+      const spendScore = Math.min(40, Math.log10(Math.max(1, b.tokens) + 1) * 10 + b.costUsd * 2.5);
+      const spreadScore = Math.min(15, b.sessions.size * 3);
+      const opportunityScore = Math.round(freqScore + spendScore + spreadScore);
+      const pathwayProposal = b.kind === "slash-command"
+        ? "Promover para comando/tool deterministic-first com input schema e execução idempotente."
+        : b.kind === "tool-loop"
+          ? "Extrair pipeline hard (script/workflow) com parâmetros explícitos e retries determinísticos."
+          : "Converter em template de intent + workflow fixo, com fallback manual apenas em exceções.";
+
+      const mitigationProjection = estimateHardPathwayMitigation({
+        baselineTokens: b.tokens,
+        baselineCostUsd: b.costUsd,
+        baselineRequests: b.requests,
+        automationCoveragePct: b.kind === "tool-loop" ? 0.85 : 0.75,
+        residualLlmPct: b.kind === "slash-command" ? 0.08 : 0.15,
+        riskBufferPct: 0.05,
+      });
+
+      return {
+        patternKey: b.key,
+        label: b.label,
+        kind: b.kind,
+        occurrences: b.occurrences,
+        sessions: b.sessions.size,
+        evidence: {
+          tokens: b.tokens,
+          costUsd: b.costUsd,
+          requests: b.requests,
+          examplePrompts: b.examples,
+        },
+        opportunityScore,
+        pathway: {
+          proposal: pathwayProposal,
+          safetyGates: [
+            "equivalence-check em fixture representativo antes de ativar",
+            "rollout em dry-run + fallback manual explícito",
+            "verification passed no board antes de promover como default",
+          ],
+          equivalenceCondition:
+            "Saída do pathway hard preserva resultado funcional e trilha de evidência do fluxo manual.",
+          rollbackPlan:
+            "Desativar pathway hard por flag/profile e retornar ao fluxo manual auditado sem perda de estado.",
+        },
+        mitigationProjection,
+      };
+    })
+    .sort((a, b) => b.opportunityScore - a.opportunityScore || b.evidence.tokens - a.evidence.tokens)
+    .slice(0, Math.max(1, limit))
+    .map((row, idx) => ({ rank: idx + 1, ...row }));
+
+  const baseline = scored.reduce(
+    (acc, row) => {
+      acc.tokens += row.evidence.tokens;
+      acc.costUsd += row.evidence.costUsd;
+      acc.requests += row.evidence.requests;
+      return acc;
+    },
+    { tokens: 0, costUsd: 0, requests: 0 },
+  );
+
+  const projectedAfterTopCandidates = scored.reduce(
+    (acc, row) => {
+      acc.tokens += row.mitigationProjection.projectedAfterHardPathway.tokens;
+      acc.costUsd += row.mitigationProjection.projectedAfterHardPathway.costUsd;
+      acc.requests += row.mitigationProjection.projectedAfterHardPathway.requests;
+      return acc;
+    },
+    { tokens: 0, costUsd: 0, requests: 0 },
+  );
+
+  return {
+    candidates: scored,
+    roadmap: {
+      baseline,
+      projectedAfterTopCandidates,
+      mitigationPotential: {
+        tokensSaved: Math.max(0, baseline.tokens - projectedAfterTopCandidates.tokens),
+        costUsdSaved: Math.max(0, baseline.costUsd - projectedAfterTopCandidates.costUsd),
+        requestsSaved: Math.max(0, baseline.requests - projectedAfterTopCandidates.requests),
+      },
+    },
+  };
+}
+
 export function parseSignals(records: unknown[]): ColonySignalCount[] {
   const counts = new Map<string, number>();
   for (const rec of records) {
@@ -390,7 +642,7 @@ function listSessionFiles(dir: string, lookbackHours: number): string[] {
 // Query engine
 // ---------------------------------------------------------------------------
 
-export type QueryType = "signals" | "timeline" | "model-usage" | "summary" | "outliers";
+export type QueryType = "signals" | "timeline" | "model-usage" | "summary" | "outliers" | "galvanization";
 
 export interface SessionAnalyticsScanSummary {
   maxTailBytes: number;
@@ -443,7 +695,11 @@ export function runQuery(
 
   for (const file of files) {
     const read = readJsonlLines(file, limits);
-    allRecords.push(...read.records);
+    const tagged = read.records.map((rec) => {
+      if (!rec || typeof rec !== "object") return rec;
+      return { ...(rec as Record<string, unknown>), _sessionFile: path.basename(file) };
+    });
+    allRecords.push(...tagged);
     scan.totalFileBytes += read.stats.fileSizeBytes;
     scan.totalBytesRead += read.stats.bytesRead;
     if (read.stats.tailWindowApplied) scan.tailWindowFiles += 1;
@@ -484,6 +740,18 @@ export function runQuery(
       outliers: d.outliers,
     };
 
+  } else if (queryType === "galvanization") {
+    const d = parseGalvanizationCandidates(allRecords, limit);
+    data = {
+      candidates: d.candidates,
+      roadmap: d.roadmap,
+      classificationModel: "deterministic-v1",
+      notes: [
+        "ranking usa frequência + evidência de consumo LLM (tokens/custo/requests)",
+        "pathways hard permanecem proposta; ativação exige gates/rollback/equivalência",
+      ],
+    };
+
   } else {
     // summary
     const signals = parseSignals(allRecords);
@@ -521,7 +789,7 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
     name: "session_analytics_query",
     label: "Session Analytics Query",
     description: [
-      "Query session logs for analytical data (signals, timeline, model-usage, summary).",
+      "Query session logs for analytical data (signals, timeline, model-usage, summary, outliers, galvanization).",
       "Used by swarms to inspect recent session history from the Control Plane.",
       "Returns structured JSON; no subprocess invocation.",
     ].join(" "),
@@ -533,6 +801,7 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
           Type.Literal("model-usage"),
           Type.Literal("summary"),
           Type.Literal("outliers"),
+          Type.Literal("galvanization"),
         ],
         { description: "Type of analytical query to run." }
       ),
@@ -564,12 +833,12 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
   // ---- command: /session-analytics --------------------------------------
 
   pi.registerCommand("session-analytics", {
-    description: "Query session analytics. Usage: /session-analytics <signals|timeline|model-usage|summary|outliers> [--hours N] [--filter SIGNAL_NAMES] [--min-chars N]",
+    description: "Query session analytics. Usage: /session-analytics <signals|timeline|model-usage|summary|outliers|galvanization> [--hours N] [--filter SIGNAL_NAMES] [--limit N] [--min-chars N]",
     handler: (args, ctx) => {
       const tokens = (args ?? "summary").trim().split(/\s+/);
       const subCmd = tokens[0].toLowerCase() as QueryType | string;
 
-      const VALID: QueryType[] = ["signals", "timeline", "model-usage", "summary", "outliers"];
+      const VALID: QueryType[] = ["signals", "timeline", "model-usage", "summary", "outliers", "galvanization"];
       if (!VALID.includes(subCmd as QueryType)) {
         ctx.ui.notify(`Unknown subcommand '${subCmd}'. Use: ${VALID.join(" | ")}`, "warning");
         return;
@@ -625,6 +894,30 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         for (const o of d.outliers.slice(0, 10)) {
           const marker = o.hasStackOverflow ? "!" : "-";
           lines.push(`  ${marker} ${o.timestampIso.slice(0, 19)} ${o.role ?? "?"}/${o.toolName ?? "-"} chars=${o.textChars}`);
+        }
+      } else if (result.queryType === "galvanization") {
+        const d = result.data as {
+          candidates: GalvanizationCandidate[];
+          roadmap: {
+            baseline: { tokens: number; costUsd: number; requests: number };
+            projectedAfterTopCandidates: { tokens: number; costUsd: number; requests: number };
+            mitigationPotential: { tokensSaved: number; costUsdSaved: number; requestsSaved: number };
+          };
+        };
+        lines.push(
+          `roadmap baseline: tok=${Math.round(d.roadmap.baseline.tokens)} cost=${d.roadmap.baseline.costUsd.toFixed(4)} req=${Math.round(d.roadmap.baseline.requests)}`,
+        );
+        lines.push(
+          `roadmap projected: tok=${Math.round(d.roadmap.projectedAfterTopCandidates.tokens)} cost=${d.roadmap.projectedAfterTopCandidates.costUsd.toFixed(4)} req=${Math.round(d.roadmap.projectedAfterTopCandidates.requests)}`,
+        );
+        lines.push(
+          `mitigation potential: tok_saved=${Math.round(d.roadmap.mitigationPotential.tokensSaved)} cost_saved=${d.roadmap.mitigationPotential.costUsdSaved.toFixed(4)} req_saved=${Math.round(d.roadmap.mitigationPotential.requestsSaved)}`,
+        );
+        lines.push("");
+        for (const c of d.candidates.slice(0, 8)) {
+          lines.push(
+            `  #${c.rank} score=${c.opportunityScore} kind=${c.kind} occ=${c.occurrences} tok=${Math.round(c.evidence.tokens)} cost=${c.evidence.costUsd.toFixed(4)} | ${c.label.slice(0, 70)}`,
+          );
         }
       } else {
         const d = result.data as Record<string, unknown>;

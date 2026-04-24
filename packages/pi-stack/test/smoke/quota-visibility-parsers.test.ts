@@ -12,6 +12,7 @@ import quotaVisibilityExtension, {
   formatBudgetStatusParts,
   resolveQuotaToolOutputPolicy,
   formatQuotaToolJsonOutput,
+  estimateHardPathwayMitigation,
   type QuotaUsageEvent,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
@@ -80,6 +81,22 @@ describe("quota-visibility extension — registration smoke", () => {
 });
 
 describe("quota-visibility parsers", () => {
+  it("estimateHardPathwayMitigation projeta baseline vs pós-automação", () => {
+    const projection = estimateHardPathwayMitigation({
+      baselineTokens: 10_000,
+      baselineCostUsd: 12.5,
+      baselineRequests: 200,
+      automationCoveragePct: 0.8,
+      residualLlmPct: 0.1,
+      riskBufferPct: 0.05,
+    });
+
+    expect(projection.baseline.tokens).toBe(10_000);
+    expect(projection.projectedAfterHardPathway.tokens).toBeLessThan(10_000);
+    expect(projection.delta.tokensSaved).toBeGreaterThan(0);
+    expect(projection.delta.costUsdSavedPct).toBeGreaterThan(0);
+  });
+
   it("extractUsage normaliza formatos de usage/cost", () => {
     const u = extractUsage({
       input: 100,

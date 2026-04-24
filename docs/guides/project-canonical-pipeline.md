@@ -205,6 +205,19 @@ Regras operacionais:
 - quando disparar smell recorrente, converter em micro-slice explícito (split de tarefa/arquivo) em vez de tratar como ruído transitório.
 - para `guardrails-core-slice-width`, ação padrão é: (1) quebrar em micro-slices no mesmo arquivo; (2) se indivisível no momento, registrar backlog/nota no board antes de seguir.
 
+### Pipeline de galvanização (repetitivo -> hard pathway)
+
+Objetivo: reduzir consumo recorrente de LLM sem perder governança.
+
+Fluxo canônico:
+1. **Descobrir** padrões repetitivos com evidência de consumo (`tokens/cost/requests`) via analytics (`session_analytics_query` tipo `galvanization`).
+2. **Classificar e ranquear** oportunidade por frequência + gasto observado (determinístico, advisory).
+3. **Propor pathway hard** por candidato com gates explícitos:
+   - equivalência funcional em fixture representativo;
+   - rollout em dry-run com rollback imediato;
+   - `verification` passed antes de promover default.
+4. **Roadmap de mitigação** registra baseline vs pós-automação projetado (`tokens/cost/requests`) para priorização, sem implementar hardening prematuro fora da lane ativa.
+
 ### Governança de sinais (ownership + noise-budget)
 
 Objetivo: manter discoverability útil sem sobrecarregar o operador com sinais concorrentes.

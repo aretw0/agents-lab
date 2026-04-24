@@ -9,6 +9,7 @@ import {
   parseTimeline,
   readJsonlLines,
   runQuery,
+  parseGalvanizationCandidates,
 } from "../../extensions/session-analytics";
 
 describe("session-analytics — toSessionWorkspaceKey", () => {
@@ -173,6 +174,55 @@ describe("session-analytics — readJsonlLines (bounded tail scan)", () => {
   });
 });
 
+describe("session-analytics — galvanization discovery", () => {
+  it("classifica padrões repetitivos com evidência de consumo e roadmap de mitigação", () => {
+    const records = [
+      {
+        type: "message",
+        timestamp: "2026-04-24T10:00:00Z",
+        _sessionFile: "s1.jsonl",
+        message: { role: "user", content: "Rodar /quota-visibility status e me resumir" },
+      },
+      {
+        type: "message",
+        timestamp: "2026-04-24T10:00:10Z",
+        _sessionFile: "s1.jsonl",
+        message: {
+          role: "assistant",
+          content: "ok",
+          usage: { inputTokens: 300, outputTokens: 120, cost: { total: 0.015 } },
+        },
+      },
+      {
+        type: "message",
+        timestamp: "2026-04-24T11:00:00Z",
+        _sessionFile: "s2.jsonl",
+        message: { role: "user", content: "Rodar /quota-visibility status e me resumir" },
+      },
+      {
+        type: "message",
+        timestamp: "2026-04-24T11:00:10Z",
+        _sessionFile: "s2.jsonl",
+        message: {
+          role: "assistant",
+          content: "ok",
+          usage: { inputTokens: 320, outputTokens: 110, cost: { total: 0.016 } },
+        },
+      },
+    ];
+
+    const result = parseGalvanizationCandidates(records, 5);
+    expect(result.candidates.length).toBeGreaterThan(0);
+
+    const top = result.candidates[0];
+    expect(top.occurrences).toBeGreaterThanOrEqual(2);
+    expect(top.evidence.tokens).toBeGreaterThan(0);
+    expect(top.pathway.safetyGates.length).toBeGreaterThan(0);
+    expect(result.roadmap.baseline.tokens).toBeGreaterThan(0);
+    expect(result.roadmap.mitigationPotential.tokensSaved).toBeGreaterThan(0);
+  });
+});
+
 describe("session-analytics — runQuery (sem sessoes reais)", () => {
   it("retorna resultado vazio quando nao ha arquivos de sessao", () => {
     const result = runQuery("/nonexistent/path", "summary", 24, undefined, 50);
@@ -190,5 +240,13 @@ describe("session-analytics — runQuery (sem sessoes reais)", () => {
     const d = result.data as Record<string, unknown>;
     expect(d["signals"]).toEqual([]);
     expect(d["totalSignals"]).toBe(0);
+  });
+
+  it("resultado de galvanization retorna estrutura roadmap mesmo sem sessoes", () => {
+    const result = runQuery("/nonexistent/path", "galvanization", 24, undefined, 50);
+    expect(result.queryType).toBe("galvanization");
+    const d = result.data as Record<string, unknown>;
+    expect(Array.isArray(d["candidates"])).toBe(true);
+    expect(d["classificationModel"]).toBe("deterministic-v1");
   });
 });
