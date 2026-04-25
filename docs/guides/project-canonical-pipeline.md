@@ -244,6 +244,7 @@ Implementação incremental atual:
 - reexport em `guardrails-core.ts` para superfície unificada da stack;
 - comando dry-first para operador: `/safe-mutation` (`help`, `large-file`, `query`) com audit trail (`guardrails-core.safe-mutation.*`);
 - seed de I/O estruturado (loam-inspired): `guardrails-core-structured-io.ts` com `structuredJsonRead`/`structuredJsonWrite` e selector canônico;
+- reexport de structured I/O em `guardrails-core.ts` para consumo unificado (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`);
 - smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts`, `guardrails-safe-mutation-registration.test.ts`, `guardrails-structured-io-contract.test.ts`.
 
 Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.

@@ -216,6 +216,12 @@ export {
   buildStructuredQueryPlanResult,
 } from "./guardrails-core-safe-mutation";
 
+export {
+  parseStructuredJsonSelector,
+  structuredJsonRead,
+  structuredJsonWrite,
+} from "./guardrails-core-structured-io";
+
 // =============================================================================
 // Read / Path Guard
 // =============================================================================
