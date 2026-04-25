@@ -1,0 +1,77 @@
+import { describe, expect, it, vi } from "vitest";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import guardrailsCore from "../../extensions/guardrails-core";
+
+function makeMockPi() {
+  return {
+    on: vi.fn(),
+    registerCommand: vi.fn(),
+    registerTool: vi.fn(),
+    sendUserMessage: vi.fn(),
+  } as unknown as Parameters<typeof guardrailsCore>[0];
+}
+
+function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+  const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([tool]) => tool?.name === name,
+  );
+  if (!call) throw new Error(`tool not found: ${name}`);
+  return call[0] as {
+    execute: (
+      toolCallId: string,
+      params: Record<string, unknown>,
+      signal: AbortSignal,
+      onUpdate: (update: unknown) => void,
+      ctx: any,
+    ) => Promise<{ details?: Record<string, unknown> }>;
+  };
+}
+
+describe("guardrails-core structured_io_json tool", () => {
+  it("registers structured_io_json tool", () => {
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const names = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([t]) => t?.name);
+    expect(names).toContain("structured_io_json");
+  });
+
+  it("keeps set operation dry-run by default and applies when dryRun=false", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-structured-tool-"));
+    const path = join(cwd, "data.json");
+    writeFileSync(path, JSON.stringify({ a: { b: 1 } }, null, 2), "utf8");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const tool = getTool(pi, "structured_io_json");
+
+    const dry = await tool.execute(
+      "tc-1",
+      { path: "data.json", selector: "a.b", operation: "set", payload: 2 },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((dry.details as any)?.applied).toBe(false);
+    expect((dry.details as any)?.reason).toBe("ok-preview");
+
+    const unchanged = JSON.parse(readFileSync(path, "utf8"));
+    expect(unchanged.a.b).toBe(1);
+
+    const apply = await tool.execute(
+      "tc-2",
+      { path: "data.json", selector: "a.b", operation: "set", payload: 2, dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((apply.details as any)?.applied).toBe(true);
+    expect((apply.details as any)?.reason).toBe("ok-applied");
+
+    const changed = JSON.parse(readFileSync(path, "utf8"));
+    expect(changed.a.b).toBe(2);
+
+    rmSync(cwd, { recursive: true, force: true });
+  });
+});
