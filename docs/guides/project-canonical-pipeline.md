@@ -238,6 +238,10 @@ Contrato mínimo:
 - limite de blast-radius (`maxTouchedLines`) com bloqueio explícito;
 - saída com `rollbackToken` + evidência (`preview`, limites aplicados, decisão).
 
+Implementação incremental atual:
+- helper first-party `packages/pi-stack/extensions/guardrails-core-safe-mutation.ts` com avaliação determinística de risco para mutação em arquivo grande/query (`assessLargeFileMutationRisk`, `assessStructuredQueryRisk`);
+- smoke de contrato: `packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts`.
+
 Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.
 
 ### Steering signal-first (tool-surface diet)

@@ -3503,6 +3503,8 @@
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-safe-mutation.ts",
+        "packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts",
         "docs/guides/project-canonical-pipeline.md",
         "docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md"
       ],
@@ -3512,8 +3514,7 @@
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior."
-    },
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`."    },
     {
       "id": "TASK-BUD-146",
       "description": "[P1] Garantir delivery de sinais de contexto como steering passivo independente de modo/superfície",
