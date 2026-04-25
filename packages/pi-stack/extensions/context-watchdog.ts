@@ -164,6 +164,48 @@ export type ContextWatchOperatingCadenceSignal = {
 		| "recalibrated-from-compact";
 };
 
+export type ContextWatchSteeringDelivery = "notify" | "fallback-status";
+
+export type ContextWatchSteeringDispatch = {
+	shouldSignal: boolean;
+	shouldPersist: boolean;
+	shouldNotify: boolean;
+	delivery: ContextWatchSteeringDelivery;
+};
+
+export function resolveContextWatchSteeringDispatch(input: {
+	notifyEnabled: boolean;
+	assessmentLevel: ContextWatchdogLevel;
+	lastAnnouncedLevel: ContextWatchdogLevel | null;
+	elapsedMs: number;
+	cooldownMs: number;
+	forceWarnCadenceAnnouncement: boolean;
+}): ContextWatchSteeringDispatch {
+	const announce = shouldAnnounceContextWatch(
+		input.lastAnnouncedLevel,
+		input.assessmentLevel,
+		input.elapsedMs,
+		input.cooldownMs,
+	);
+	const shouldSignal = announce || input.forceWarnCadenceAnnouncement;
+	if (!shouldSignal) {
+		return {
+			shouldSignal: false,
+			shouldPersist: false,
+			shouldNotify: false,
+			delivery: "fallback-status",
+		};
+	}
+
+	const shouldNotify = input.notifyEnabled || input.assessmentLevel === "checkpoint" || input.assessmentLevel === "compact";
+	return {
+		shouldSignal: true,
+		shouldPersist: true,
+		shouldNotify,
+		delivery: shouldNotify ? "notify" : "fallback-status",
+	};
+}
+
 export function applyWarnCadenceEscalation(
 	assessment: ContextWatchAssessment,
 	warnStreak: number,
@@ -409,6 +451,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		hasRecentSteerInput: boolean;
 		queuedLaneIntents: number;
 	} | null = null;
+	let lastSteeringSignal: {
+		atIso: string;
+		reason: ContextWatchHandoffReason;
+		level: ContextWatchdogLevel;
+		action: string;
+		delivery: ContextWatchSteeringDelivery;
+		notifyEnabled: boolean;
+	} | null = null;
 	let lastInputAt = 0;
 	let lastAutoCompactTriggerAt = 0;
 	let autoCompactInFlight = false;
@@ -462,6 +512,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
 		if (!config.enabled) {
 			ctx.ui.setStatus?.("context-watch", "[ctx] disabled");
+			ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] disabled");
 			return;
 		}
 
@@ -610,24 +661,27 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			clearAutoCompactRetryTimer();
 		}
 
-		if (!config.notify) return;
 		const elapsed = now - lastAnnouncedAt;
-		const announce = shouldAnnounceContextWatch(
-			lastAnnouncedLevel,
-			assessment.level,
-			elapsed,
-			config.cooldownMs,
-		);
 		const forceWarnCadenceAnnouncement =
 			assessment.level === "warn" &&
 			assessment.action === "write-checkpoint" &&
 			consecutiveWarnCount === 2;
+		const steeringDispatch = resolveContextWatchSteeringDispatch({
+			notifyEnabled: config.notify,
+			assessmentLevel: assessment.level,
+			lastAnnouncedLevel,
+			elapsedMs: elapsed,
+			cooldownMs: config.cooldownMs,
+			forceWarnCadenceAnnouncement,
+		});
 		lastAnnouncedLevel = assessment.level;
-		if (!announce && !forceWarnCadenceAnnouncement) return;
+		if (!steeringDispatch.shouldSignal) return;
 		lastAnnouncedAt = now;
 		markAnnouncement(now);
 
-		const persistedPath = handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason);
+		const persistedPath = steeringDispatch.shouldPersist
+			? (handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason))
+			: handoffPath;
 		const label = reason === "session_start" ? "context-watch start" : "context-watch";
 		const lines = [
 			`${label}: ${formatContextWatchStatus(assessment)}`,
@@ -638,7 +692,35 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const rel = path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/");
 			lines.push(`handoff: ${rel}`);
 		}
-		ctx.ui.notify(lines.join("\n"), assessment.severity);
+		const signalAtIso = new Date(now).toISOString();
+		lastSteeringSignal = {
+			atIso: signalAtIso,
+			reason,
+			level: assessment.level,
+			action: assessment.action,
+			delivery: steeringDispatch.delivery,
+			notifyEnabled: config.notify,
+		};
+		(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+			"context-watchdog.passive-steering-signal",
+			{
+				atIso: signalAtIso,
+				reason,
+				level: assessment.level,
+				action: assessment.action,
+				delivery: steeringDispatch.delivery,
+				notifyEnabled: config.notify,
+				persisted: Boolean(persistedPath),
+			},
+		);
+		if (steeringDispatch.shouldNotify) {
+			ctx.ui.notify(lines.join("\n"), assessment.severity);
+		} else {
+			ctx.ui.setStatus?.(
+				"context-watch-steering",
+				`[ctx-steer] ${assessment.level} · action=${assessment.action} · ${assessment.recommendation}`,
+			);
+		}
 	};
 
 	const currentAutoCompactState = (
@@ -690,6 +772,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				: "none",
 			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
 			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
+			steeringLastSignal: lastSteeringSignal,
+			steeringLastSignalSummary: lastSteeringSignal
+				? `${lastSteeringSignal.reason} level=${lastSteeringSignal.level} action=${lastSteeringSignal.action} delivery=${lastSteeringSignal.delivery} at=${lastSteeringSignal.atIso}`
+				: "none",
 			handoffFreshMaxAgeMs: config.handoffFreshMaxAgeMs,
 			handoffTimestamp,
 			handoffFreshness,
@@ -740,6 +826,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAutoCompactAt = 0;
 		lastAutoResumeAt = 0;
 		lastAutoResumeDecision = null;
+		lastSteeringSignal = null;
 		lastInputAt = 0;
 		lastAutoCompactTriggerAt = 0;
 		autoCompactInFlight = false;
@@ -840,6 +927,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAutoCompactAt = 0;
 				lastAutoResumeAt = 0;
 				lastAutoResumeDecision = null;
+				lastSteeringSignal = null;
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;
@@ -847,6 +935,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAntiParalysisAuditDeferCount = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
+				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
 				ctx.ui.notify("context-watch: state reset", "info");
 				return;
 			}
@@ -904,6 +993,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
+					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,

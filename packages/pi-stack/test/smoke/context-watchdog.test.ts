@@ -21,6 +21,7 @@ import {
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchSignalNoiseExcessive,
+	resolveContextWatchSteeringDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
 	resolvePreCompactCalmCloseSignal,
 	isAutoCompactDeferralReason,
@@ -347,6 +348,43 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("auto-resume: continue from .project/handoff.json");
 		expect(prompt).not.toContain("Cadence:");
 		expect(prompt).not.toContain("context already healthy");
+	});
+
+	it("resolves passive steering dispatch independently from notify-only mode", () => {
+		const warnFallback = resolveContextWatchSteeringDispatch({
+			notifyEnabled: false,
+			assessmentLevel: "warn",
+			lastAnnouncedLevel: null,
+			elapsedMs: 0,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(warnFallback.shouldSignal).toBe(true);
+		expect(warnFallback.shouldPersist).toBe(true);
+		expect(warnFallback.shouldNotify).toBe(false);
+		expect(warnFallback.delivery).toBe("fallback-status");
+
+		const checkpointCritical = resolveContextWatchSteeringDispatch({
+			notifyEnabled: false,
+			assessmentLevel: "checkpoint",
+			lastAnnouncedLevel: "warn",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(checkpointCritical.shouldSignal).toBe(true);
+		expect(checkpointCritical.shouldNotify).toBe(true);
+		expect(checkpointCritical.delivery).toBe("notify");
+
+		const noSignal = resolveContextWatchSteeringDispatch({
+			notifyEnabled: true,
+			assessmentLevel: "warn",
+			lastAnnouncedLevel: "warn",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(noSignal.shouldSignal).toBe(false);
 	});
 
 	it("emits operator signal for manual intervention/reload steering", () => {
