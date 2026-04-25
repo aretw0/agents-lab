@@ -250,9 +250,10 @@ Regras operacionais:
 - sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle;
 - delivery de `warn/checkpoint/compact` deve ser tratado como **invariante de steering passivo** (modo-independente), com fallback quando a superfície principal não estiver visível.
 
-Implementação atual (slice 2):
+Implementação atual (slice 2/3):
 - persistência de steering (`context_watch_events`/`next_actions`) independe de `notify`;
-- quando `notify=false`, `warn` usa fallback em status (`context-watch-steering`) em vez de silêncio;
+- status passivo (`context-watch-steering`) é atualizado em todo sinal emitido para manter visibilidade contínua;
+- quando `notify=false`, `warn` permanece em fallback de status (sem silêncio);
 - `checkpoint/compact` continuam notificados como sinal crítico mesmo com `notify=false`;
 - auditoria dedicada: `context-watchdog.passive-steering-signal`.
 

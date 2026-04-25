@@ -164,6 +164,12 @@ export type ContextWatchOperatingCadenceSignal = {
 		| "recalibrated-from-compact";
 };
 
+export function formatContextWatchSteeringStatus(
+	assessment: Pick<ContextWatchAssessment, "level" | "action" | "recommendation">,
+): string {
+	return `[ctx-steer] ${assessment.level} · action=${assessment.action} · ${assessment.recommendation}`;
+}
+
 export type ContextWatchSteeringDelivery = "notify" | "fallback-status";
 
 export type ContextWatchSteeringDispatch = {
@@ -713,13 +719,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				persisted: Boolean(persistedPath),
 			},
 		);
+		ctx.ui.setStatus?.("context-watch-steering", formatContextWatchSteeringStatus(assessment));
 		if (steeringDispatch.shouldNotify) {
 			ctx.ui.notify(lines.join("\n"), assessment.severity);
-		} else {
-			ctx.ui.setStatus?.(
-				"context-watch-steering",
-				`[ctx-steer] ${assessment.level} · action=${assessment.action} · ${assessment.recommendation}`,
-			);
 		}
 	};
 
@@ -874,6 +876,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			});
 			const payload = {
 				...assessment,
+				steeringStatus: formatContextWatchSteeringStatus(assessment),
 				autoCompact,
 				operatorSignal,
 				operatingCadence,
@@ -988,6 +991,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					formatContextWatchStatus(assessment),
 					`action: ${assessment.action}`,
 					assessment.recommendation,
+					`steering-status: ${formatContextWatchSteeringStatus(assessment)}`,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",

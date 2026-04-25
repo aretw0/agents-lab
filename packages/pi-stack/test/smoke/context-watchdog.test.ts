@@ -8,6 +8,7 @@ import {
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
+	formatContextWatchSteeringStatus,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
 	contextWatchEventAgeMs,
@@ -86,6 +87,14 @@ describe("context-watchdog", () => {
 		expect(evaluateContextWatch(60, thresholds).level).toBe("warn");
 		expect(evaluateContextWatch(68, thresholds).level).toBe("checkpoint");
 		expect(evaluateContextWatch(72, thresholds).level).toBe("compact");
+	});
+
+	it("formats passive steering status with short actionable text", () => {
+		expect(formatContextWatchSteeringStatus({
+			level: "warn",
+			action: "micro-slice-only",
+			recommendation: "Keep micro-slices and avoid broad scans until checkpoint.",
+		})).toContain("[ctx-steer] warn · action=micro-slice-only");
 	});
 
 	it("escalates second warn to checkpoint action for controlled handoff", () => {
