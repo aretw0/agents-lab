@@ -3075,7 +3075,7 @@
         "Backlog criado por solicitação do usuário para reduzir atrito e erro humano ao mexer em configs. Fora do escopo imediato de fechamento TASK-BUD-125.\n[2026-04-24T13:30:30Z] Slice entregue: novo comando `/guardrails-config` no `guardrails-core` com `status|get|set`, allowlist de chaves suportadas (longRunIntentQueue + pragmaticAutonomy), validação determinística de tipo/faixa e gravação segura em `.pi/settings.json` sem edição manual. Cada `set` gera audit trail `guardrails-core.runtime-config-set` (quem/o quê/quando, old/new, reload recommendation) e aplica refresh imediato das configs mutáveis. Pipeline canônico atualizado com runbook de uso e fallback manual para chaves não suportadas. Smoke focal verde: `guardrails-long-run-intent-queue` 37/37.",
         "[2026-04-24T15:47:59.307Z] Fechado por decisão humana explícita após verificação de evidência no código."
       ],
-      "verification": "Implementação verificada: /guardrails-config com 18 refs em guardrails-core.ts; status|get|set com allowlist, validação de tipo, auditoria, persist em .pi/settings.json."
+      "verification": "VER-BUD-278"
     },
     {
       "id": "TASK-UX-I18N-001",
