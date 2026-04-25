@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
 	assessLargeFileMutationRisk,
 	assessStructuredQueryRisk,
+	buildSafeLargeFileMutationResult,
+	buildStructuredQueryPlanResult,
 } from "../../extensions/guardrails-core-safe-mutation";
 
 describe("guardrails-core safe mutation contract", () => {
@@ -81,6 +83,47 @@ describe("guardrails-core safe mutation contract", () => {
 		});
 	});
 
+	it("builds canonical dry-first mutation result payload", () => {
+		const assessment = assessLargeFileMutationRisk({
+			touchedLines: 80,
+			maxTouchedLines: 120,
+			anchorState: "unique",
+			applyRequested: true,
+		});
+		const dry = buildSafeLargeFileMutationResult({
+			assessment,
+			dryRun: true,
+			changed: true,
+			preview: "@@ diff @@",
+			rollbackToken: "rb-123",
+		});
+		expect(dry).toMatchObject({
+			applied: false,
+			changed: false,
+			dryRun: true,
+			reason: "confirm-required-medium-risk",
+			rollbackToken: null,
+		});
+
+		const apply = buildSafeLargeFileMutationResult({
+			assessment: assessLargeFileMutationRisk({
+				touchedLines: 20,
+				maxTouchedLines: 120,
+				anchorState: "unique",
+				applyRequested: true,
+			}),
+			dryRun: false,
+			changed: true,
+			rollbackToken: "rb-ok",
+		});
+		expect(apply).toMatchObject({
+			applied: true,
+			changed: true,
+			dryRun: false,
+			rollbackToken: "rb-ok",
+		});
+	});
+
 	it("blocks mutation queries when forbidMutation is true", () => {
 		const blocked = assessStructuredQueryRisk({
 			normalizedQuery: "UPDATE tasks SET status='done' WHERE id=1",
@@ -105,5 +148,17 @@ describe("guardrails-core safe mutation contract", () => {
 			reason: "ok",
 		});
 		expect(low.safetyChecks).toContain("limit-present");
+
+		const plan = buildStructuredQueryPlanResult({
+			normalizedQuery: "SELECT id FROM tasks WHERE status = $1 LIMIT $2",
+			parameters: ["planned", 50],
+			assessment: low,
+		});
+		expect(plan).toMatchObject({
+			normalizedQuery: "SELECT id FROM tasks WHERE status = $1 LIMIT $2",
+			blocked: false,
+			riskLevel: "low",
+		});
+		expect(plan.parameters).toEqual(["planned", 50]);
 	});
 });

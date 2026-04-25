@@ -114,6 +114,44 @@ export function assessLargeFileMutationRisk(
 	};
 }
 
+export type SafeLargeFileMutationResult = {
+	applied: boolean;
+	changed: boolean;
+	riskLevel: SafeMutationRiskLevel;
+	decision: SafeMutationDecision;
+	reason: SafeLargeFileMutationAssessment["reason"];
+	touchedLines: number;
+	maxTouchedLines: number;
+	preview: string;
+	rollbackToken: string | null;
+	dryRun: boolean;
+};
+
+export function buildSafeLargeFileMutationResult(input: {
+	assessment: SafeLargeFileMutationAssessment;
+	dryRun?: boolean;
+	changed?: boolean;
+	preview?: string;
+	rollbackToken?: string | null;
+}): SafeLargeFileMutationResult {
+	const dryRun = input.dryRun !== false;
+	const assessment = input.assessment;
+	const applyAllowed = assessment.decision === "allow-apply";
+	const applied = !dryRun && applyAllowed;
+	return {
+		applied,
+		changed: applied ? input.changed === true : false,
+		riskLevel: assessment.riskLevel,
+		decision: assessment.decision,
+		reason: assessment.reason,
+		touchedLines: assessment.touchedLines,
+		maxTouchedLines: assessment.maxTouchedLines,
+		preview: String(input.preview ?? ""),
+		rollbackToken: applied ? (input.rollbackToken ?? null) : null,
+		dryRun,
+	};
+}
+
 export type StructuredQueryAssessmentInput = {
 	normalizedQuery: string;
 	forbidMutation?: boolean;
@@ -125,6 +163,30 @@ export type StructuredQueryAssessment = {
 	reason: "ok" | "blocked:mutation-forbidden";
 	safetyChecks: string[];
 };
+
+export type StructuredQueryPlanResult = {
+	normalizedQuery: string;
+	parameters: unknown[];
+	riskLevel: SafeMutationRiskLevel;
+	blocked: boolean;
+	reason: StructuredQueryAssessment["reason"];
+	safetyChecks: string[];
+};
+
+export function buildStructuredQueryPlanResult(input: {
+	normalizedQuery: string;
+	parameters?: unknown[];
+	assessment: StructuredQueryAssessment;
+}): StructuredQueryPlanResult {
+	return {
+		normalizedQuery: String(input.normalizedQuery ?? "").trim(),
+		parameters: Array.isArray(input.parameters) ? input.parameters : [],
+		riskLevel: input.assessment.riskLevel,
+		blocked: input.assessment.blocked,
+		reason: input.assessment.reason,
+		safetyChecks: [...input.assessment.safetyChecks],
+	};
+}
 
 function detectQueryKind(query: string): "select" | "mutation" | "other" {
 	const q = query.trim().toLowerCase();
