@@ -10,7 +10,7 @@ function makeMockPi() {
 }
 
 describe("guardrails-core safe-mutation registration", () => {
-  it("registers /safe-mutation command", () => {
+  it("registers /safe-mutation and /structured-io commands", () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
 
@@ -19,5 +19,6 @@ describe("guardrails-core safe-mutation registration", () => {
     );
 
     expect(commands).toContain("safe-mutation");
+    expect(commands).toContain("structured-io");
   });
 });

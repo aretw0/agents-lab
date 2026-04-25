@@ -116,6 +116,10 @@ import {
   assessStructuredQueryRisk,
   buildStructuredQueryPlanResult,
 } from "./guardrails-core-safe-mutation";
+import {
+  structuredJsonRead,
+  structuredJsonWrite,
+} from "./guardrails-core-structured-io";
 
 export {
   resolveBloatSmellConfig,
@@ -3065,6 +3069,160 @@ export default function (pi: ExtensionAPI) {
 
       ctx.ui.notify([
         `safe-mutation: unknown subcommand '${sub}'.`,
+        ...helpLines,
+      ].join("\n"), "warning");
+    },
+  });
+
+  pi.registerCommand("structured-io", {
+    description: "Structured JSON read/write with dry-first safeguards. Usage: /structured-io [help|json-read <path> <selector>|json-write <path> <selector> <set|remove> [payload] [--apply] [--max-lines N]]",
+    handler: async (args, ctx) => {
+      const rawArgs = String(args ?? "").trim();
+      const tokens = rawArgs.split(/\s+/).filter(Boolean);
+      const sub = (tokens[0] ?? "help").toLowerCase();
+
+      const helpLines = [
+        "structured-io usage:",
+        "  /structured-io json-read <path> <selector>",
+        "  /structured-io json-write <path> <selector> <set|remove> [payload] [--apply] [--max-lines N]",
+        "",
+        "examples:",
+        "  /structured-io json-read package.json scripts.test",
+        "  /structured-io json-write package.json scripts.test set \"vitest run\"",
+        "  /structured-io json-write package.json scripts.test set \"vitest run\" --apply",
+      ];
+
+      if (sub === "help") {
+        ctx.ui.notify(helpLines.join("\n"), "info");
+        return;
+      }
+
+      if (sub === "json-read") {
+        const targetPath = tokens[1];
+        const selector = tokens[2];
+        if (!targetPath || !selector) {
+          ctx.ui.notify(["structured-io: invalid json-read args.", ...helpLines].join("\n"), "warning");
+          return;
+        }
+
+        if (!isInsideCwd(targetPath, ctx.cwd)) {
+          ctx.ui.notify("structured-io: path outside cwd is not allowed.", "warning");
+          return;
+        }
+
+        const absolutePath = resolve(ctx.cwd, targetPath);
+        if (!existsSync(absolutePath)) {
+          ctx.ui.notify(`structured-io: file not found (${targetPath})`, "warning");
+          return;
+        }
+
+        const content = readFileSync(absolutePath, "utf8");
+        const result = structuredJsonRead({ content, selector });
+
+        appendAuditEntry(ctx, "guardrails-core.structured-io.json-read", {
+          atIso: new Date().toISOString(),
+          path: targetPath,
+          selector,
+          found: result.found,
+          reason: result.reason,
+          shape: result.shape,
+        });
+
+        const lines = [
+          "structured-io json-read",
+          `path=${targetPath} selector=${selector}`,
+          JSON.stringify(result, null, 2),
+        ];
+        ctx.ui.notify(lines.join("\n"), result.found ? "info" : "warning");
+        return;
+      }
+
+      if (sub === "json-write") {
+        const targetPath = tokens[1];
+        const selector = tokens[2];
+        const operation = String(tokens[3] ?? "").toLowerCase();
+        if (!targetPath || !selector || (operation !== "set" && operation !== "remove")) {
+          ctx.ui.notify(["structured-io: invalid json-write args.", ...helpLines].join("\n"), "warning");
+          return;
+        }
+
+        if (!isInsideCwd(targetPath, ctx.cwd)) {
+          ctx.ui.notify("structured-io: path outside cwd is not allowed.", "warning");
+          return;
+        }
+
+        const absolutePath = resolve(ctx.cwd, targetPath);
+        if (!existsSync(absolutePath)) {
+          ctx.ui.notify(`structured-io: file not found (${targetPath})`, "warning");
+          return;
+        }
+
+        const applyRequested = tokens.includes("--apply");
+        const maxLinesFlagIndex = tokens.findIndex((t) => t === "--max-lines");
+        const maxTouchedLines = maxLinesFlagIndex >= 0
+          ? Number(tokens[maxLinesFlagIndex + 1])
+          : 120;
+
+        const writeMatch = rawArgs.match(/^json-write\s+\S+\s+\S+\s+(set|remove)\s*(.*)$/i);
+        let payloadText = writeMatch?.[2] ?? "";
+        payloadText = payloadText.replace(/\s--apply\b/i, "").replace(/\s--max-lines\s+\d+\b/i, "").trim();
+
+        let payload: unknown = undefined;
+        if (operation === "set") {
+          if (!payloadText) {
+            ctx.ui.notify("structured-io: json-write set requires payload.", "warning");
+            return;
+          }
+          try {
+            payload = JSON.parse(payloadText);
+          } catch {
+            payload = payloadText;
+          }
+        }
+
+        const content = readFileSync(absolutePath, "utf8");
+        const result = structuredJsonWrite({
+          content,
+          selector,
+          operation: operation as "set" | "remove",
+          payload,
+          dryRun: !applyRequested,
+          maxTouchedLines,
+        });
+
+        if (result.applied && result.output) {
+          writeFileSync(absolutePath, `${result.output}\n`, "utf8");
+        }
+
+        appendAuditEntry(ctx, "guardrails-core.structured-io.json-write", {
+          atIso: new Date().toISOString(),
+          path: targetPath,
+          selector,
+          operation,
+          dryRun: !applyRequested,
+          maxTouchedLines,
+          applied: result.applied,
+          changed: result.changed,
+          blocked: result.blocked,
+          reason: result.reason,
+          riskLevel: result.riskLevel,
+          touchedLines: result.touchedLines,
+          rollbackToken: result.rollbackToken,
+        });
+
+        const lines = [
+          "structured-io json-write",
+          `path=${targetPath} selector=${selector} op=${operation} dryRun=${!applyRequested ? "yes" : "no"}`,
+          `result: applied=${result.applied ? "yes" : "no"} changed=${result.changed ? "yes" : "no"} blocked=${result.blocked ? "yes" : "no"} risk=${result.riskLevel} reason=${result.reason}`,
+          JSON.stringify(result, null, 2),
+        ];
+        const level = result.blocked ? "warning" : "info";
+        ctx.ui.notify(lines.join("\n"), level);
+        return;
+      }
+
+      ctx.ui.notify([
+        `structured-io: unknown subcommand '${sub}'.`,
         ...helpLines,
       ].join("\n"), "warning");
     },

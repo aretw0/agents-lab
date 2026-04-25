@@ -3596,7 +3596,8 @@
         "packages/pi-stack/extensions/guardrails-core-structured-io.ts",
         "packages/pi-stack/extensions/guardrails-core.ts",
         "packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts",
-        "packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts"
+        "packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts"
       ],
       "acceptance_criteria": [
         "Contrato canônico descreve operações de leitura/escrita estruturada por schema/AST (não string replace amplo), com dry-first por default.",
@@ -3604,7 +3605,7 @@
         "Plano de integração prevê evolução para operações de refactor tipo IDE (ex.: rename project-wide) com evidência auditável e baixo risco de contexto/corrupção."
       ],
       "verification": "",
-      "notes": "Backlog por steering humano (2026-04-25): referência `aretw0/loam` como direção para centralizar parser + escrita estruturada, evitando gargalo de tools simples em arquivo grande e tentativa de acerto manual na unha.\n[2026-04-25T00:00:00Z] Slice 1 (runtime helper): criado módulo `guardrails-core-structured-io.ts` com contrato inicial para JSON (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`) incluindo dry-run por default, cap de blast-radius e rollback token em apply; smoke dedicada `guardrails-structured-io-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 2 (surface unificada): helpers de structured I/O reexportados em `guardrails-core.ts` com smoke de superfície `guardrails-structured-io-reexport.test.ts` para consumo first-party consistente."
+      "notes": "Backlog por steering humano (2026-04-25): referência `aretw0/loam` como direção para centralizar parser + escrita estruturada, evitando gargalo de tools simples em arquivo grande e tentativa de acerto manual na unha.\n[2026-04-25T00:00:00Z] Slice 1 (runtime helper): criado módulo `guardrails-core-structured-io.ts` com contrato inicial para JSON (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`) incluindo dry-run por default, cap de blast-radius e rollback token em apply; smoke dedicada `guardrails-structured-io-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 2 (surface unificada): helpers de structured I/O reexportados em `guardrails-core.ts` com smoke de superfície `guardrails-structured-io-reexport.test.ts` para consumo first-party consistente.\n[2026-04-25T00:00:00Z] Slice 3 (interface operador): comando `/structured-io` adicionado no `guardrails-core` (`json-read`, `json-write`) com dry-run por default, apply explícito e audit trail `guardrails-core.structured-io.*`; smoke dedicada `guardrails-structured-io-command.test.ts`."
     }
   ]
 }
