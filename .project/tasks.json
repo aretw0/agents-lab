@@ -3533,6 +3533,51 @@
       ],
       "verification": "",
       "notes": "Backlog por feedback humano (2026-04-24): steering de contexto não deve depender de o agente chamar `context_watch_status`; deve existir sinal nativo e consistente para evitar insistência com contexto cheio.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato de invariante de steering passivo em `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md` (canal obrigatório, modo-independente, fallback determinístico, anti-ruído por cooldown).\n[2026-04-24T00:00:00Z] Slice 2 (runtime): `context-watchdog` desacoplou persistência/steering de `notify`; eventos/passive steering passam a ser registrados mesmo com `notify=false`, com fallback de status para `warn`, notificação crítica para `checkpoint/compact`, e trilha auditável `context-watchdog.passive-steering-signal`.\n[2026-04-25T00:00:00Z] Slice 3 (runtime): status passivo `context-watch-steering` passa a ser atualizado em todo sinal emitido (não apenas fallback), e `context_watch_status` inclui `steeringStatus` para diagnóstico rápido sem depender de inspeção manual extensa.\n[2026-04-25T00:00:00Z] Slice 4 (runtime+runbook): `context-watch-steering` agora é atualizado a cada avaliação (evita status stale fora de janela de announce) e runbook registra caveat de terminal (`Ctrl+Backspace` podendo mapear para `Ctrl+H` do pause em `pi-workflows`).\n[2026-04-25T00:00:00Z] Evidência pós-reload: `context_watch_status` retorna `steeringStatus` (`[ctx-steer] ok · action=continue · Context healthy.`), confirmando delivery passivo visível no runtime atual.\n[2026-04-25T00:00:00Z] Evidência de atalho acidental confirmada: `grep` em `node_modules/@davidorex/pi-workflows/dist/index.js:711` mostra mensagem de pause associada ao shortcut `Ctrl+H` (compatível com mapeamento `Ctrl+Backspace` em alguns terminais)."
+    },
+    {
+      "id": "TASK-BUD-147",
+      "description": "[P1] Revisar e curar monitores (incluindo pacote davidorex) antes da reativação, com gate explícito de custo/performance e plano de rollout seguro.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-126",
+        "TASK-BUD-140"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-sovereign.ts",
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "docs/guides/monitor-overrides.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Existe matriz de curadoria por monitor (keep/tune/disable) com impacto estimado de custo (classify/tool-calls) e performance (latência/ruído).",
+        "Reativação ocorre em fases (observe -> advisory -> enforce) com kill-switch documentado e sem surpresa operacional.",
+        "Smoke/canary controlado com monitores ligados demonstra estabilidade mínima (sem classify-fail recorrente e sem degradação relevante de throughput)."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-25): monitores ainda sem curadoria final; reativar só com confiança de que não viram tiro no pé em custos/performance, mesmo quando origem é pacote third-party."
+    },
+    {
+      "id": "TASK-BUD-148",
+      "description": "[P2] Consolidar trilha Squeez + MDT como perfil opcional de operação (captura -> triagem -> execução), mantendo baseline agnóstico da stack.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-CAL-2026-04-21-B",
+        "TASK-BUD-068"
+      ],
+      "files": [
+        "docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md",
+        "docs/guides/session-triage.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Existe mapa explícito do que entra no baseline vs perfil opt-in a partir de práticas Squeez/MDT.",
+        "Fluxo de captura de ideias e promoção para backlog (`planned`) fica padronizado sem acoplamento obrigatório a uma ferramenta única.",
+        "Runbook define métrica mínima de sucesso (redução de atrito de captura e sem aumento descontrolado de custo/contexto)."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default."
     }
   ]
 }
