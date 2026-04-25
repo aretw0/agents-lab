@@ -536,6 +536,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		if (config.status) {
 			ctx.ui.setStatus?.("context-watch", formatContextWatchStatus(assessment));
 		}
+		ctx.ui.setStatus?.("context-watch-steering", formatContextWatchSteeringStatus(assessment));
 
 		const shouldCheckpointFromWarnCadence =
 			assessment.level === "warn" &&
@@ -719,7 +720,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				persisted: Boolean(persistedPath),
 			},
 		);
-		ctx.ui.setStatus?.("context-watch-steering", formatContextWatchSteeringStatus(assessment));
 		if (steeringDispatch.shouldNotify) {
 			ctx.ui.notify(lines.join("\n"), assessment.severity);
 		}

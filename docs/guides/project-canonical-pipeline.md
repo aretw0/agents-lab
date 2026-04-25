@@ -250,14 +250,16 @@ Regras operacionais:
 - sinais de intervenção humana (`reload-required`, `handoff-refresh-required`) devem aparecer no stream para evitar surpresa de controle;
 - delivery de `warn/checkpoint/compact` deve ser tratado como **invariante de steering passivo** (modo-independente), com fallback quando a superfície principal não estiver visível.
 
-Implementação atual (slice 2/3):
+Implementação atual (slice 2/4):
 - persistência de steering (`context_watch_events`/`next_actions`) independe de `notify`;
-- status passivo (`context-watch-steering`) é atualizado em todo sinal emitido para manter visibilidade contínua;
+- status passivo (`context-watch-steering`) é atualizado continuamente por avaliação para evitar estado visual stale;
 - quando `notify=false`, `warn` permanece em fallback de status (sem silêncio);
 - `checkpoint/compact` continuam notificados como sinal crítico mesmo com `notify=false`;
 - auditoria dedicada: `context-watchdog.passive-steering-signal`.
 
 Referência de contrato inicial: `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md`.
+
+Nota operacional (atalhos): o pacote `pi-workflows` registra `Ctrl+H` para solicitar pause de workflow. Em alguns terminais, `Ctrl+Backspace` envia `Ctrl+H`; isso pode disparar pause acidental com a mensagem “Pause requested — workflow will pause after current step completes.”.
 
 ### Bloat-smell advisory (calibrado, baixo ruído)
 
