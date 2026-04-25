@@ -246,6 +246,7 @@ Implementação incremental atual:
 - smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts` e `guardrails-safe-mutation-registration.test.ts`.
 
 Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.
+Evolução planejada para I/O estruturado centralizado (loam-inspired): `docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md`.
 
 ### Steering signal-first (tool-surface diet)
 

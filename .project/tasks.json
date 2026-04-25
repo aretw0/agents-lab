@@ -3491,11 +3491,11 @@
       "acceptance_criteria": [
         "Fluxos recorrentes (renomear simbolo, organizar imports, formatar alvo) sao expostos como operacoes macro com contrato deterministico.",
         "Operacoes macro retornam diff resumido + trilha auditavel, reduzindo risco de erro por escrita manual em multiplos pontos.",
+        "Macro de rename opera em escopo de projeto (estilo IDE) com preview/dry-run e rollback mínimo, evitando substituição textual 'na unha'.",
         "Playbook descreve quando usar macro-API vs edicao pontual, com prioridade para caminhos galvanizados."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback."
-    },
+      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback.\n[2026-04-25T00:00:00Z] Steering humano assimilado: reforçar pathway de refactor tipo IDE (rename project-wide) para reduzir erro de substituição manual e evitar explosão de contexto em arquivo grande."    },
     {
       "id": "TASK-BUD-145",
       "description": "[P2] Criar APIs seguras para mutacao em arquivo grande e para consultas estruturadas (ex.: SQL) com guardrails deterministico",
@@ -3513,10 +3513,11 @@
       "acceptance_criteria": [
         "Arquivos grandes ganham operacao de atualizacao por bloco/AST com validacao e rollback claro, reduzindo risco de corrupcao textual.",
         "Consultas estruturadas recorrentes (incluindo SQL) podem usar interface tipada/canonica em vez de string ad-hoc sempre que possivel.",
+        "Leitura/escrita estruturada evita scan/substituição ampla 'na unha' para dados estruturados, com superfícies canônicas de acesso/mutação.",
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool.\n[2026-04-25T00:00:00Z] Slice 5 (surface unificada): helpers de safe mutation reexportados em `guardrails-core.ts` para consumo first-party consistente, com smoke `guardrails-safe-mutation-reexport.test.ts`.\n[2026-04-25T00:00:00Z] Slice 6 (interface operador): comando `/safe-mutation` adicionado no `guardrails-core` com pathway dry-first para `large-file` e `query`, com trilha auditável (`guardrails-core.safe-mutation.large-file` / `.query`) e smoke de registro `guardrails-safe-mutation-registration.test.ts`."    },
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool.\n[2026-04-25T00:00:00Z] Slice 5 (surface unificada): helpers de safe mutation reexportados em `guardrails-core.ts` para consumo first-party consistente, com smoke `guardrails-safe-mutation-reexport.test.ts`.\n[2026-04-25T00:00:00Z] Slice 6 (interface operador): comando `/safe-mutation` adicionado no `guardrails-core` com pathway dry-first para `large-file` e `query`, com trilha auditável (`guardrails-core.safe-mutation.large-file` / `.query`) e smoke de registro `guardrails-safe-mutation-registration.test.ts`.\n[2026-04-25T00:00:00Z] Steering humano assimilado: objetivo de médio prazo é centralizar parser/leitura/escrita estruturada para reduzir edições textuais manuais e risco de estouro de contexto."    },
     {
       "id": "TASK-BUD-146",
       "description": "[P1] Garantir delivery de sinais de contexto como steering passivo independente de modo/superfície",
@@ -3578,6 +3579,29 @@
         "Runbook define métrica mínima de sucesso: economia de contexto/custo na fábrica e redução de drift documental sem impacto relevante de performance."
       ],
       "verification": "",
-      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default. Correção de entendimento: `squeez` é otimizador de tokens/contexto via shaping de saída e memória de sessão; `mdt` é ferramenta de sincronização documental (template update/check), não motor de triagem de ideias."    }
+      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default. Correção de entendimento: `squeez` é otimizador de tokens/contexto via shaping de saída e memória de sessão; `mdt` é ferramenta de sincronização documental (template update/check), não motor de triagem de ideias."
+    },
+    {
+      "id": "TASK-BUD-149",
+      "description": "[P1] Definir primitiva de I/O estruturado (inspirada em loam) para leitura/escrita centralizada de arquivos estruturados e reduzir edição textual manual.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-144",
+        "TASK-BUD-145"
+      ],
+      "files": [
+        "docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "packages/pi-stack/extensions/guardrails-core.ts"
+      ],
+      "acceptance_criteria": [
+        "Contrato canônico descreve operações de leitura/escrita estruturada por schema/AST (não string replace amplo), com dry-first por default.",
+        "Superfície inclui pathway para mutação segura em dados estruturados (JSON/YAML/MD blocks/etc.) com preview, limites de blast-radius e rollback token.",
+        "Plano de integração prevê evolução para operações de refactor tipo IDE (ex.: rename project-wide) com evidência auditável e baixo risco de contexto/corrupção."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-25): referência `aretw0/loam` como direção para centralizar parser + escrita estruturada, evitando gargalo de tools simples em arquivo grande e tentativa de acerto manual na unha."
+    }
   ]
 }
