@@ -65,3 +65,14 @@ Ainda falta uma **primitiva de captura de ideias** (inbox) para transformar nota
 - Avançar primeiro no **Idea Inbox Primitive** (ganho de fluxo imediato para sessões com alta carga de ideias).
 - Tratar `mdt` como habilitador de consistência documental em segundo passo.
 - Manter qualquer inspiração de `squeez` no plano de primitivas first-party, sem lock-in de host.
+
+## Correção de entendimento (2026-04-25)
+
+Checagem direta em `README.md` dos repositórios confirmou o recorte correto:
+
+- `squeez` = **otimizador de tokens/contexto para CLIs de agentes** (compressão de output Bash, dedup de chamadas, intensidade adaptativa, memória de sessão, comandos de benchmark/budget).
+- `mdt` = **ferramenta de sincronização documental** (templates markdown, `update/check` para evitar doc drift em README/comentários/docs/CI).
+
+Implicação para o backlog:
+- ganhos de fábrica/custo devem mapear para trilha **squeez-inspired** (output shaping + policy first-party);
+- trilha `mdt` deve ficar explícita em **doc drift / single-source docs**, sem confundir com inbox/triagem de ideias.

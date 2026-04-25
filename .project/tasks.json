@@ -1592,7 +1592,7 @@
         "Proposals viram tasks `planned` com descrição objetiva, AC mínimo e referência de origem, sem auto-close nem auto-priorização agressiva.",
         "Fluxo inclui etapa explícita de revisão humana para promover prioridade/scope antes de execução autônoma."
       ],
-      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável. Alinhada ao modelo de intenção híbrida (DEC-BUD-027): soft intent distribuída em skills/prompts + hard intent de governança."
+      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável. Alinhada ao modelo de intenção híbrida (DEC-BUD-027): soft intent distribuída em skills/prompts + hard intent de governança. Correção de escopo (2026-04-25): Idea Inbox não depende de `mdt`; `mdt` entra na trilha de doc-drift/single-source docs."
     },
     {
       "id": "TASK-BUD-069",
@@ -3505,6 +3505,7 @@
         "packages/pi-stack/extensions/guardrails-core.ts",
         "packages/pi-stack/extensions/guardrails-core-safe-mutation.ts",
         "packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-safe-mutation-reexport.test.ts",
         "docs/guides/project-canonical-pipeline.md",
         "docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md"
       ],
@@ -3514,7 +3515,7 @@
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool."    },
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool.\n[2026-04-25T00:00:00Z] Slice 5 (surface unificada): helpers de safe mutation reexportados em `guardrails-core.ts` para consumo first-party consistente, com smoke `guardrails-safe-mutation-reexport.test.ts`."    },
     {
       "id": "TASK-BUD-146",
       "description": "[P1] Garantir delivery de sinais de contexto como steering passivo independente de modo/superfície",
@@ -3559,25 +3560,23 @@
     },
     {
       "id": "TASK-BUD-148",
-      "description": "[P2] Consolidar trilha Squeez + MDT como perfil opcional de operação (captura -> triagem -> execução), mantendo baseline agnóstico da stack.",
+      "description": "[P2] Consolidar perfil opcional inspirado em Squeez (economia de tokens/contexto) e adoção eventual de MDT para doc-drift (single-source docs), mantendo baseline agnóstico da stack.",
       "status": "planned",
       "priority": "p2",
       "depends_on": [
-        "TASK-CAL-2026-04-21-B",
-        "TASK-BUD-068"
+        "TASK-CAL-2026-04-21-B"
       ],
       "files": [
         "docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md",
-        "docs/guides/session-triage.md",
-        "docs/guides/project-canonical-pipeline.md"
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/monitor-overrides.md"
       ],
       "acceptance_criteria": [
-        "Existe mapa explícito do que entra no baseline vs perfil opt-in a partir de práticas Squeez/MDT.",
-        "Fluxo de captura de ideias e promoção para backlog (`planned`) fica padronizado sem acoplamento obrigatório a uma ferramenta única.",
-        "Runbook define métrica mínima de sucesso (redução de atrito de captura e sem aumento descontrolado de custo/contexto)."
+        "Existe mapa explícito do que entra no baseline vs perfil opt-in a partir de práticas Squeez (output shaping, dedup, adaptive intensity) sem lock-in host-bound.",
+        "Trilha de adoção de `mdt` fica explícita como doc-drift guard (single-source docs, update/check em CI), sem confundir com pipeline de ideias/backlog.",
+        "Runbook define métrica mínima de sucesso: economia de contexto/custo na fábrica e redução de drift documental sem impacto relevante de performance."
       ],
       "verification": "",
-      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default."
-    }
+      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default. Correção de entendimento: `squeez` é otimizador de tokens/contexto via shaping de saída e memória de sessão; `mdt` é ferramenta de sincronização documental (template update/check), não motor de triagem de ideias."    }
   ]
 }

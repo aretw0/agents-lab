@@ -203,6 +203,13 @@ export {
   wrapCommandForHostShell,
 } from "./guardrails-core-shell-routing";
 
+export {
+  assessLargeFileMutationRisk,
+  buildSafeLargeFileMutationResult,
+  assessStructuredQueryRisk,
+  buildStructuredQueryPlanResult,
+} from "./guardrails-core-safe-mutation";
+
 // =============================================================================
 // Read / Path Guard
 // =============================================================================
