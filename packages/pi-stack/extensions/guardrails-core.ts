@@ -110,6 +110,12 @@ import {
   wrapCommandForHostShell,
   type CommandRoutingProfile,
 } from "./guardrails-core-shell-routing";
+import {
+  assessLargeFileMutationRisk,
+  buildSafeLargeFileMutationResult,
+  assessStructuredQueryRisk,
+  buildStructuredQueryPlanResult,
+} from "./guardrails-core-safe-mutation";
 
 export {
   resolveBloatSmellConfig,
@@ -2928,6 +2934,133 @@ export default function (pi: ExtensionAPI) {
       }
 
       ctx.ui.notify("shell-route: unknown subcommand. Use /shell-route help", "warning");
+    },
+  });
+
+  pi.registerCommand("safe-mutation", {
+    description: "Dry-first risk assessment for large-file mutation and structured queries. Usage: /safe-mutation [help|large-file <touchedLines> <maxTouchedLines> <unique|missing|ambiguous> [--apply] [--confirm]|query <on|off> <sql>]",
+    handler: async (args, ctx) => {
+      const rawArgs = String(args ?? "").trim();
+      const tokens = rawArgs.split(/\s+/).filter(Boolean);
+      const sub = (tokens[0] ?? "help").toLowerCase();
+
+      const helpLines = [
+        "safe-mutation usage:",
+        "  /safe-mutation large-file <touchedLines> <maxTouchedLines> <unique|missing|ambiguous> [--apply] [--confirm]",
+        "  /safe-mutation query <on|off> <sql>",
+        "",
+        "examples:",
+        "  /safe-mutation large-file 80 120 unique --apply --confirm",
+        "  /safe-mutation query on SELECT id FROM tasks WHERE status='planned' LIMIT 50",
+      ];
+
+      if (sub === "help") {
+        ctx.ui.notify(helpLines.join("\n"), "info");
+        return;
+      }
+
+      if (sub === "large-file") {
+        const touchedLines = Number(tokens[1]);
+        const maxTouchedLines = Number(tokens[2]);
+        const anchorStateRaw = String(tokens[3] ?? "").toLowerCase();
+        const anchorState = anchorStateRaw === "unique" || anchorStateRaw === "missing" || anchorStateRaw === "ambiguous"
+          ? anchorStateRaw
+          : undefined;
+
+        if (!Number.isFinite(touchedLines) || !Number.isFinite(maxTouchedLines) || !anchorState) {
+          ctx.ui.notify([
+            "safe-mutation: invalid large-file arguments.",
+            ...helpLines,
+          ].join("\n"), "warning");
+          return;
+        }
+
+        const applyRequested = tokens.includes("--apply") || tokens.includes("apply");
+        const confirmed = tokens.includes("--confirm") || tokens.includes("confirm");
+        const assessment = assessLargeFileMutationRisk({
+          touchedLines,
+          maxTouchedLines,
+          anchorState,
+          applyRequested,
+          confirmed,
+        });
+        const result = buildSafeLargeFileMutationResult({
+          assessment,
+          dryRun: !applyRequested,
+          changed: applyRequested && assessment.decision === "allow-apply",
+          preview: "dry-first: canonical preview placeholder",
+          rollbackToken: applyRequested && assessment.decision === "allow-apply" ? `rb-${Date.now()}` : null,
+        });
+
+        appendAuditEntry(ctx, "guardrails-core.safe-mutation.large-file", {
+          atIso: new Date().toISOString(),
+          touchedLines: assessment.touchedLines,
+          maxTouchedLines: assessment.maxTouchedLines,
+          anchorState,
+          applyRequested,
+          confirmed,
+          riskLevel: assessment.riskLevel,
+          decision: assessment.decision,
+          reason: assessment.reason,
+          applied: result.applied,
+        });
+
+        const lines = [
+          "safe-mutation large-file",
+          `risk=${assessment.riskLevel} decision=${assessment.decision} reason=${assessment.reason}`,
+          JSON.stringify(result, null, 2),
+        ];
+        const level = assessment.decision === "allow-preview" || assessment.decision === "allow-apply"
+          ? "info"
+          : "warning";
+        ctx.ui.notify(lines.join("\n"), level);
+        return;
+      }
+
+      if (sub === "query") {
+        const mode = String(tokens[1] ?? "on").toLowerCase();
+        const forbidMutation = !["off", "false", "0", "no"].includes(mode);
+        const sql = rawArgs.replace(/^query\s+\S+\s*/i, "").trim();
+        if (!sql) {
+          ctx.ui.notify([
+            "safe-mutation: query requires SQL text.",
+            ...helpLines,
+          ].join("\n"), "warning");
+          return;
+        }
+
+        const assessment = assessStructuredQueryRisk({
+          normalizedQuery: sql,
+          forbidMutation,
+        });
+        const result = buildStructuredQueryPlanResult({
+          normalizedQuery: sql,
+          parameters: [],
+          assessment,
+        });
+
+        appendAuditEntry(ctx, "guardrails-core.safe-mutation.query", {
+          atIso: new Date().toISOString(),
+          forbidMutation,
+          riskLevel: assessment.riskLevel,
+          blocked: assessment.blocked,
+          reason: assessment.reason,
+          safetyChecks: assessment.safetyChecks,
+        });
+
+        const lines = [
+          "safe-mutation query",
+          `risk=${assessment.riskLevel} blocked=${assessment.blocked ? "yes" : "no"} reason=${assessment.reason}`,
+          JSON.stringify(result, null, 2),
+        ];
+        ctx.ui.notify(lines.join("\n"), assessment.blocked ? "warning" : "info");
+        return;
+      }
+
+      ctx.ui.notify([
+        `safe-mutation: unknown subcommand '${sub}'.`,
+        ...helpLines,
+      ].join("\n"), "warning");
     },
   });
 

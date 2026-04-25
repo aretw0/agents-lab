@@ -242,7 +242,8 @@ Implementação incremental atual:
 - helper first-party `packages/pi-stack/extensions/guardrails-core-safe-mutation.ts` com avaliação determinística de risco para mutação em arquivo grande/query (`assessLargeFileMutationRisk`, `assessStructuredQueryRisk`);
 - builders canônicos de payload dry-first (`buildSafeLargeFileMutationResult`, `buildStructuredQueryPlanResult`);
 - reexport em `guardrails-core.ts` para superfície unificada da stack;
-- smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts` e `guardrails-safe-mutation-reexport.test.ts`.
+- comando dry-first para operador: `/safe-mutation` (`help`, `large-file`, `query`) com audit trail (`guardrails-core.safe-mutation.*`);
+- smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts` e `guardrails-safe-mutation-registration.test.ts`.
 
 Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.
 
