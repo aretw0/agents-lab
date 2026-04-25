@@ -3584,7 +3584,7 @@
     {
       "id": "TASK-BUD-149",
       "description": "[P1] Definir primitiva de I/O estruturado (inspirada em loam) para leitura/escrita centralizada de arquivos estruturados e reduzir edição textual manual.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-144",
@@ -3593,7 +3593,8 @@
       "files": [
         "docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md",
         "docs/guides/project-canonical-pipeline.md",
-        "packages/pi-stack/extensions/guardrails-core.ts"
+        "packages/pi-stack/extensions/guardrails-core-structured-io.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts"
       ],
       "acceptance_criteria": [
         "Contrato canônico descreve operações de leitura/escrita estruturada por schema/AST (não string replace amplo), com dry-first por default.",
@@ -3601,7 +3602,7 @@
         "Plano de integração prevê evolução para operações de refactor tipo IDE (ex.: rename project-wide) com evidência auditável e baixo risco de contexto/corrupção."
       ],
       "verification": "",
-      "notes": "Backlog por steering humano (2026-04-25): referência `aretw0/loam` como direção para centralizar parser + escrita estruturada, evitando gargalo de tools simples em arquivo grande e tentativa de acerto manual na unha."
+      "notes": "Backlog por steering humano (2026-04-25): referência `aretw0/loam` como direção para centralizar parser + escrita estruturada, evitando gargalo de tools simples em arquivo grande e tentativa de acerto manual na unha.\n[2026-04-25T00:00:00Z] Slice 1 (runtime helper): criado módulo `guardrails-core-structured-io.ts` com contrato inicial para JSON (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`) incluindo dry-run por default, cap de blast-radius e rollback token em apply; smoke dedicada `guardrails-structured-io-contract.test.ts`."
     }
   ]
 }
