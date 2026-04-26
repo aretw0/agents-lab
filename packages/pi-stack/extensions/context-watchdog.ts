@@ -11,8 +11,9 @@
  * Supports autonomous checkpoint/compact actions with cooldown + idle guards.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
@@ -184,9 +185,26 @@ export type ContextWatchSteeringDispatch = {
 	delivery: ContextWatchSteeringDelivery;
 };
 
+function steeringLevelRank(level: ContextWatchdogLevel): number {
+	if (level === "ok") return 0;
+	if (level === "warn") return 1;
+	if (level === "checkpoint") return 2;
+	return 3;
+}
+
+function levelMeetsSteeringThreshold(
+	level: ContextWatchdogLevel,
+	threshold: "warn" | "checkpoint" | "compact",
+): boolean {
+	return steeringLevelRank(level) >= steeringLevelRank(threshold);
+}
+
 export function resolveContextWatchSteeringDispatch(input: {
-	notifyEnabled: boolean;
+	notifyEnabled?: boolean;
+	userNotifyEnabled?: boolean;
 	assessmentLevel: ContextWatchdogLevel;
+	modelSteeringFromLevel?: "warn" | "checkpoint" | "compact";
+	userNotifyFromLevel?: "warn" | "checkpoint" | "compact";
 	lastAnnouncedLevel: ContextWatchdogLevel | null;
 	elapsedMs: number;
 	cooldownMs: number;
@@ -198,7 +216,14 @@ export function resolveContextWatchSteeringDispatch(input: {
 		input.elapsedMs,
 		input.cooldownMs,
 	);
-	const shouldSignal = announce || input.forceWarnCadenceAnnouncement;
+	const modelSteeringFromLevel = input.modelSteeringFromLevel ?? "warn";
+	const userNotifyFromLevel = input.userNotifyFromLevel ?? "checkpoint";
+	const userNotifyEnabled = input.userNotifyEnabled ?? input.notifyEnabled ?? true;
+	const levelEligibleForSteering = levelMeetsSteeringThreshold(
+		input.assessmentLevel,
+		modelSteeringFromLevel,
+	);
+	const shouldSignal = (announce || input.forceWarnCadenceAnnouncement) && levelEligibleForSteering;
 	if (!shouldSignal) {
 		return {
 			shouldSignal: false,
@@ -208,8 +233,10 @@ export function resolveContextWatchSteeringDispatch(input: {
 		};
 	}
 
-	const isCriticalLevel = input.assessmentLevel === "checkpoint" || input.assessmentLevel === "compact";
-	const shouldNotify = isCriticalLevel;
+	const shouldNotify = userNotifyEnabled && levelMeetsSteeringThreshold(
+		input.assessmentLevel,
+		userNotifyFromLevel,
+	);
 	return {
 		shouldSignal: true,
 		shouldPersist: true,
@@ -442,6 +469,16 @@ export function resolveAntiParalysisDispatch(input: {
 	return { shouldNotify: true, reason: "emit" };
 }
 
+const CONTEXT_WATCHDOG_SOURCE_PATH = fileURLToPath(import.meta.url);
+
+function readContextWatchdogSourceMtimeMs(): number | undefined {
+	try {
+		return statSync(CONTEXT_WATCHDOG_SOURCE_PATH).mtimeMs;
+	} catch {
+		return undefined;
+	}
+}
+
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
 function persistContextWatchHandoffEvent(
@@ -514,6 +551,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	const AUTO_COMPACT_RETRY_DELAY_MS = 2_000;
 	let config = DEFAULT_CONFIG;
 	let thresholdOverrides: ContextThresholdOverrides | undefined;
+	let sourceMtimeMsAtSessionStart: number | undefined;
 	let lastAssessment: ContextWatchAssessment | null = null;
 	let lastAnnouncedLevel: ContextWatchdogLevel | null = null;
 	let lastAnnouncedAt = 0;
@@ -568,6 +606,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			announceCountInWindow = 0;
 		}
 		announceCountInWindow += 1;
+	};
+
+	const isReloadRequiredForSourceUpdate = (): boolean => {
+		if (!Number.isFinite(sourceMtimeMsAtSessionStart)) return false;
+		const current = readContextWatchdogSourceMtimeMs();
+		if (!Number.isFinite(current)) return false;
+		return (current as number) > (sourceMtimeMsAtSessionStart as number);
 	};
 
 	const clearAutoCompactRetryTimer = () => {
@@ -786,8 +831,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			assessment.action === "write-checkpoint" &&
 			consecutiveWarnCount === 2;
 		const steeringDispatch = resolveContextWatchSteeringDispatch({
-			notifyEnabled: config.notify,
+			userNotifyEnabled: config.notify,
 			assessmentLevel: assessment.level,
+			modelSteeringFromLevel: config.modelSteeringFromLevel,
+			userNotifyFromLevel: config.userNotifyFromLevel,
 			lastAnnouncedLevel,
 			elapsedMs: elapsed,
 			cooldownMs: config.cooldownMs,
@@ -951,6 +998,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	pi.on("session_start", (_event, ctx) => {
 		config = readWatchdogConfig(ctx.cwd);
 		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
+		sourceMtimeMsAtSessionStart = readContextWatchdogSourceMtimeMs();
 		lastAssessment = null;
 		lastAnnouncedLevel = null;
 		lastAnnouncedAt = 0;
@@ -995,7 +1043,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const autoCompact = currentAutoCompactState(ctx, assessment);
 			const nowMs = Date.now();
 			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired: false,
+				reloadRequired: isReloadRequiredForSourceUpdate(),
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
 				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
 					getAnnouncementsInWindow(nowMs),
@@ -1109,7 +1157,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const autoCompact = currentAutoCompactState(ctx, assessment);
 			const nowMs = Date.now();
 			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired: false,
+				reloadRequired: isReloadRequiredForSourceUpdate(),
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
 				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
 					getAnnouncementsInWindow(nowMs),
@@ -1126,6 +1174,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`action: ${assessment.action}`,
 					assessment.recommendation,
 					`steering-status: ${formatContextWatchSteeringStatus(assessment)}`,
+					`steering-thresholds: modelFrom=${config.modelSteeringFromLevel} userNotifyFrom=${config.userNotifyFromLevel} userNotifyEnabled=${config.notify ? "yes" : "no"}`,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
 					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"} dispatch=${autoCompact.antiParalysisDispatchReason} graceRemainingMs=${autoCompact.antiParalysisGraceRemainingMs ?? "n/a"} cooldownRemainingMs=${autoCompact.antiParalysisCooldownRemainingMs ?? "n/a"} notifyCount=${autoCompact.antiParalysisNotifyCountInWindow}/${autoCompact.antiParalysisMaxNotifiesPerWindow}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",

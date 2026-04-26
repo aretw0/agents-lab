@@ -4866,6 +4866,15 @@
       "method": "test",
       "timestamp": "2026-04-26T05:20:00Z",
       "evidence": "Context steering Slice 5: `resolveContextWatchSteeringDispatch` foi calibrado para emitir notify apenas em níveis críticos (`checkpoint`/`compact`), mantendo `warn` como steering passivo por status/persistência (delivery `fallback-status`) e reduzindo ruído que freava execução antes da janela de compactação. Cobertura ajustada em `context-watchdog.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 53/53 passed."
+    },
+    {
+      "id": "VER-BUD-291",
+      "target": "TASK-BUD-146",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T05:32:00Z",
+      "evidence": "Context steering Slice 6: semântica de dispatch explicitada com dois limiares (`modelSteeringFromLevel` e `userNotifyFromLevel`) para evitar contradição com `notify` legado, mantendo warn passivo e escalation progressiva. Também foi adicionado detector de reload necessário por mtime do source da extensão (`operatorSignal.reloadRequired`) em `context_watch_status` e `/context-watch`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 54/54 passed."
     }
   ]
 }

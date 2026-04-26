@@ -50,6 +50,8 @@ describe("context-watchdog", () => {
 		});
 		expect(cfg.enabled).toBe(true);
 		expect(cfg.notify).toBe(true);
+		expect(cfg.modelSteeringFromLevel).toBe("warn");
+		expect(cfg.userNotifyFromLevel).toBe("checkpoint");
 		expect(cfg.status).toBe(true);
 		expect(cfg.checkpointPct).toBe(99);
 		expect(cfg.compactPct).toBe(2);
@@ -61,6 +63,15 @@ describe("context-watchdog", () => {
 		expect(cfg.autoResumeAfterCompact).toBe(true);
 		expect(cfg.autoResumeCooldownMs).toBe(30_000);
 		expect(cfg.handoffFreshMaxAgeMs).toBe(60_000);
+	});
+
+	it("normalizes steering threshold fields and prevents contradictory ordering", () => {
+		const cfg = normalizeContextWatchdogConfig({
+			modelSteeringFromLevel: "checkpoint",
+			userNotifyFromLevel: "warn",
+		});
+		expect(cfg.modelSteeringFromLevel).toBe("checkpoint");
+		expect(cfg.userNotifyFromLevel).toBe("checkpoint");
 	});
 
 	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
@@ -496,7 +507,7 @@ describe("context-watchdog", () => {
 		expect(warnNotifyEnabled.delivery).toBe("fallback-status");
 
 		const checkpointCritical = resolveContextWatchSteeringDispatch({
-			notifyEnabled: false,
+			userNotifyEnabled: true,
 			assessmentLevel: "checkpoint",
 			lastAnnouncedLevel: "warn",
 			elapsedMs: 10_000,
@@ -507,6 +518,18 @@ describe("context-watchdog", () => {
 		expect(checkpointCritical.shouldNotify).toBe(true);
 		expect(checkpointCritical.delivery).toBe("notify");
 
+		const checkpointMuted = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: false,
+			assessmentLevel: "checkpoint",
+			lastAnnouncedLevel: "warn",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(checkpointMuted.shouldSignal).toBe(true);
+		expect(checkpointMuted.shouldNotify).toBe(false);
+		expect(checkpointMuted.delivery).toBe("fallback-status");
+
 		const noSignal = resolveContextWatchSteeringDispatch({
 			notifyEnabled: true,
 			assessmentLevel: "warn",
@@ -516,6 +539,18 @@ describe("context-watchdog", () => {
 			forceWarnCadenceAnnouncement: false,
 		});
 		expect(noSignal.shouldSignal).toBe(false);
+
+		const modelFromCheckpoint = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: true,
+			assessmentLevel: "warn",
+			modelSteeringFromLevel: "checkpoint",
+			userNotifyFromLevel: "compact",
+			lastAnnouncedLevel: null,
+			elapsedMs: 0,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(modelFromCheckpoint.shouldSignal).toBe(false);
 	});
 
 	it("emits operator signal for manual intervention/reload steering", () => {

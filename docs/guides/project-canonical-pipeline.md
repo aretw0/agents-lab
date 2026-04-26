@@ -277,6 +277,7 @@ Implementação atual (slice 2/4):
 - status passivo (`context-watch-steering`) é atualizado continuamente por avaliação para evitar estado visual stale;
 - `warn` permanece em fallback de status (sem notify textual) para evitar freio prematuro antes da janela de compactação;
 - `checkpoint/compact` continuam notificados como sinal crítico;
+- semântica de config explícita: `modelSteeringFromLevel` controla quando o modelo começa a receber steering passivo e `userNotifyFromLevel` controla quando notificar o operador (ambas em `contextWatchdog`), evitando ambiguidade com `notify` legado.
 - auditoria dedicada: `context-watchdog.passive-steering-signal`.
 
 Referência de contrato inicial: `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md`.
