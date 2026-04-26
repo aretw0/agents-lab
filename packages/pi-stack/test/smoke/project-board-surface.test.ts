@@ -243,4 +243,22 @@ describe("project-board-surface", () => {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
+
+  it("registers typed board tool schemas for limit and max_note_lines", () => {
+    const pi = makeMockPi();
+    projectBoardSurfaceExtension(pi);
+
+    const queryToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === "board_query",
+    );
+    const queryTool = queryToolCall?.[0] as any;
+    expect(queryTool?.parameters?.properties?.limit?.type).toBe("integer");
+
+    const updateToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === "board_update",
+    );
+    const updateTool = updateToolCall?.[0] as any;
+    expect(updateTool?.parameters?.properties?.task_id?.minLength).toBe(1);
+    expect(updateTool?.parameters?.properties?.max_note_lines?.type).toBe("integer");
+  });
 });

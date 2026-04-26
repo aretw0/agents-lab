@@ -4911,6 +4911,15 @@
       "method": "test",
       "timestamp": "2026-04-26T06:12:00Z",
       "evidence": "Context steering Slice 8: superfície `/guardrails-config` expandida para cobrir todo ciclo principal do `contextWatchdog` (enabled/status/cooldown/autoCheckpoint/autoCompact/autoCompactRequireIdle/autoCompactCooldown/autoResumeAfterCompact/autoResumeCooldown/handoffFreshMaxAge) além dos thresholds já existentes. Snapshot efetivo inclui os novos campos normalizados, mantendo `reloadRequired=true` para consistência runtime. Smoke atualizada em `guardrails-long-run-intent-queue.test.ts`; validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 68/68 passed."
+    },
+    {
+      "id": "VER-BUD-296",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T06:15:00Z",
+      "evidence": "Project board surface Slice 9: schema de tools endurecido com limites inteiros e campo obrigatório mais explícito (`board_query.limit` integer [1..200], `board_update.task_id` minLength=1, `board_update.max_note_lines` integer [1..200]). Smoke ampliada para validar contrato de schema registrado além do execute path. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 38/38 passed."
     }
   ]
 }

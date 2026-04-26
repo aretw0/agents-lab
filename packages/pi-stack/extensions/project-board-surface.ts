@@ -411,7 +411,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     ),
     search: Type.Optional(Type.String({ description: "Case-insensitive text search." })),
     limit: Type.Optional(
-      Type.Number({ description: "Max rows to return (default=20, cap=200)." }),
+      Type.Integer({
+        minimum: 1,
+        maximum: 200,
+        description: "Max rows to return (default=20, cap=200).",
+      }),
     ),
   });
 
@@ -468,7 +472,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
 
 
   const updateParameters = Type.Object({
-    task_id: Type.String({ description: "Task id to update." }),
+    task_id: Type.String({ minLength: 1, description: "Task id to update." }),
     status: Type.Optional(
       Type.Union(PROJECT_TASK_STATUSES.map((s) => Type.Literal(s))),
     ),
@@ -478,7 +482,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       }),
     ),
     max_note_lines: Type.Optional(
-      Type.Number({
+      Type.Integer({
+        minimum: 1,
+        maximum: 200,
         description: "Trim notes to last N lines after append (default=50, cap=200).",
       }),
     ),
