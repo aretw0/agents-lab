@@ -160,9 +160,31 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setNotify.ok).toBe(true);
 
+      const autoCompactCooldownSpec = resolveGuardrailsRuntimeConfigSpec("contextWatchdog.autoCompactCooldownMs");
+      expect(autoCompactCooldownSpec).toBeDefined();
+      if (!autoCompactCooldownSpec) return;
+      const autoCompactCooldownOk = coerceGuardrailsRuntimeConfigValue("120000", autoCompactCooldownSpec);
+      expect(autoCompactCooldownOk.ok).toBe(true);
+
+      const setAutoCompact = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "contextWatchdog.autoCompact",
+        rawValue: "false",
+      });
+      expect(setAutoCompact.ok).toBe(true);
+
+      const setAutoCompactCooldown = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "contextWatchdog.autoCompactCooldownMs",
+        rawValue: "120000",
+      });
+      expect(setAutoCompactCooldown.ok).toBe(true);
+
       const contextSnapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
+      expect(contextSnapshot["contextWatchdog.autoCompact"]).toBe(false);
+      expect(contextSnapshot["contextWatchdog.autoCompactCooldownMs"]).toBe(120000);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

@@ -194,6 +194,9 @@ Exemplos:
 - `/guardrails-config get longRunIntentQueue.maxItems`
 - `/guardrails-config set longRunIntentQueue.maxItems 80`
 - `/guardrails-config set longRunIntentQueue.enabled true`
+- `/guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint`
+- `/guardrails-config set contextWatchdog.userNotifyFromLevel compact`
+- `/guardrails-config set contextWatchdog.autoCompact false`
 
 Contrato:
 - `set` valida tipo/faixa antes de gravar em `.pi/settings.json`;
