@@ -18,6 +18,7 @@ describe("guardrails-core macro-refactor contract", () => {
     expect(result.supported).toBe(false);
     expect(result.applied).toBe(false);
     expect(result.request.scope).toBe("workspace");
+    expect(result.request.maxFiles).toBe(30);
     expect(result.riskLevel).toBe("high");
   });
 
@@ -80,5 +81,18 @@ describe("guardrails-core macro-refactor contract", () => {
     expect(invalidRange.blocked).toBe(true);
     expect(invalidRange.reason).toBe("invalid-target");
     expect(invalidRange.summary).toContain("invalid range");
+  });
+
+  it("normalizes invalid maxFiles to safe default", () => {
+    const result = buildRefactorRenameSymbolResult({
+      symbol: "OldName",
+      to: "NewName",
+      scope: "workspace",
+      maxFiles: Number.NaN as unknown as number,
+      dryRun: true,
+    });
+
+    expect(result.request.maxFiles).toBe(30);
+    expect(result.reason).toBe("preview-ready");
   });
 });

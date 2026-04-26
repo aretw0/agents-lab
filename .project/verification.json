@@ -4974,6 +4974,15 @@
       "method": "test",
       "timestamp": "2026-04-26T06:46:00Z",
       "evidence": "Project board surface Slice 10: `board_update` endurecido para falhar com reason explícita `missing-task-id` quando parâmetro obrigatório não é enviado. Smoke `project-board-surface.test.ts` ampliada com cenário de erro e regressões existentes preservadas. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 39/39 passed."
+    },
+    {
+      "id": "VER-BUD-303",
+      "target": "TASK-BUD-144",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T12:32:00Z",
+      "evidence": "Macro-refactor Slice 6: `buildRefactorRenameSymbolResult` endurecido para normalizar `maxFiles` inválido (fallback seguro=30), evitando `NaN` no contrato runtime quando comando recebe `--max-files` malformado. Cobertura ampliada em `guardrails-macro-refactor-contract.test.ts` e `guardrails-macro-refactor-command.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 41/41 passed."
     }
   ]
 }

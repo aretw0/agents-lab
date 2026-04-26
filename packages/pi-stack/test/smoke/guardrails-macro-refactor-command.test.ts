@@ -54,4 +54,22 @@ describe("guardrails-core macro-refactor command", () => {
     expect(message).toContain('"applyRequested": true');
     expect(message).toContain('"reason": "engine-unavailable"');
   });
+
+  it("normalizes invalid --max-files in command flow", async () => {
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const command = getCommand(pi, "macro-refactor");
+    const notify = vi.fn();
+
+    await command.handler("rename-symbol OldName NewName --scope workspace --max-files nope", {
+      cwd: process.cwd(),
+      ui: { notify },
+      hasUI: true,
+    });
+
+    const message = String(notify.mock.calls.at(-1)?.[0] ?? "");
+    expect(message).toContain("macro-refactor rename-symbol");
+    expect(message).toContain('"maxFiles": 30');
+    expect(message).toContain('"reason": "preview-ready"');
+  });
 });

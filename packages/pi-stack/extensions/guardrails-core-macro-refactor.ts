@@ -44,6 +44,12 @@ function normalizePath(pathInput: unknown): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
+function normalizeMaxFiles(value: unknown): number {
+  const raw = Number(value);
+  if (!Number.isFinite(raw)) return 30;
+  return Math.max(1, Math.min(200, Math.floor(raw)));
+}
+
 export function buildRefactorRenameSymbolResult(input: {
   symbol: unknown;
   to: unknown;
@@ -63,7 +69,7 @@ export function buildRefactorRenameSymbolResult(input: {
   const to = String(input.to ?? "").trim();
   const scope = normalizeScope(input.scope);
   const path = normalizePath(input.path);
-  const maxFiles = Math.max(1, Math.min(200, Math.floor(Number(input.maxFiles ?? 30))));
+  const maxFiles = normalizeMaxFiles(input.maxFiles ?? 30);
   const dryRun = normalizeDryRun(input.dryRun);
   const applyRequested = !dryRun;
 
