@@ -19,6 +19,7 @@ import {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
+	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
@@ -402,6 +403,8 @@ describe("context-watchdog", () => {
 		expect(envelope.diagnostics.blockers.inputCount).toBe(1);
 		expect(envelope.diagnostics.nextActions.inputCount).toBe(1);
 		expect(envelope.diagnostics.nextActions.truncatedCount).toBe(1);
+		expect(summarizeAutoResumePromptDiagnostics(envelope.diagnostics)).toContain("tasks(in=3,listed=2");
+		expect(summarizeAutoResumePromptDiagnostics(undefined)).toBe("none");
 	});
 
 	it("resolves passive steering dispatch independently from notify-only mode", () => {

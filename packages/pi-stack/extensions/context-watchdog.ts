@@ -56,7 +56,9 @@ import {
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
 	resolveHandoffFreshness,
+	summarizeAutoResumePromptDiagnostics,
 	toAgeSec,
+	type AutoResumePromptDiagnostics,
 	type HandoffFreshnessLabel,
 	type HandoffRefreshMode,
 } from "./context-watchdog-handoff";
@@ -100,6 +102,7 @@ export {
 	formatContextWatchStatus,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
+	summarizeAutoResumePromptDiagnostics,
 	latestContextWatchEvent,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
@@ -458,6 +461,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		hasPendingMessages: boolean;
 		hasRecentSteerInput: boolean;
 		queuedLaneIntents: number;
+		promptDiagnostics?: AutoResumePromptDiagnostics;
 	} | null = null;
 	let lastSteeringSignal: {
 		atIso: string;
@@ -629,7 +633,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						hasRecentSteerInput,
 						queuedLaneIntents,
 					});
-					const autoResumeSnapshot = {
+					const autoResumeSnapshot: {
+						atIso: string;
+						reason: AutoResumeDispatchReason;
+						dispatched: boolean;
+						hasPendingMessages: boolean;
+						hasRecentSteerInput: boolean;
+						queuedLaneIntents: number;
+						promptDiagnostics?: AutoResumePromptDiagnostics;
+					} = {
 						atIso: new Date(nowAfterCompact).toISOString(),
 						reason: autoResumeDecision.reason,
 						dispatched: autoResumeDecision.shouldDispatch,
@@ -637,18 +649,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						hasRecentSteerInput,
 						queuedLaneIntents,
 					};
-					lastAutoResumeDecision = autoResumeSnapshot;
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
 						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 							readHandoffJson(ctx.cwd),
 							config.handoffFreshMaxAgeMs,
 						);
+						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 							"context-watchdog.auto-resume-prompt",
 							{
 								atIso: autoResumeSnapshot.atIso,
 								diagnostics: resumeEnvelope.diagnostics,
+								diagnosticsSummary: summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics),
 								preview: resumeEnvelope.prompt.slice(0, 240),
 							},
 						);
@@ -666,6 +679,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							},
 						);
 					}
+					lastAutoResumeDecision = autoResumeSnapshot;
 				},
 				onError: (error) => {
 					autoCompactInFlight = false;
@@ -782,6 +796,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeLastDecisionSummary: lastAutoResumeDecision
 				? describeAutoResumeDispatchReason(lastAutoResumeDecision.reason)
 				: "none",
+			autoResumeLastPromptDiagnosticsSummary: summarizeAutoResumePromptDiagnostics(
+				lastAutoResumeDecision?.promptDiagnostics,
+			),
 			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
 			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
 			steeringLastSignal: lastSteeringSignal,
@@ -1007,6 +1024,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
+					`auto-resume-last-prompt: ${autoCompact.autoResumeLastPromptDiagnosticsSummary ?? "none"}`,
 					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,

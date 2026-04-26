@@ -100,6 +100,24 @@ export type AutoResumePromptEnvelope = {
 	diagnostics: AutoResumePromptDiagnostics;
 };
 
+export function summarizeAutoResumePromptDiagnostics(
+	diagnostics: AutoResumePromptDiagnostics | undefined,
+): string {
+	if (!diagnostics) return "none";
+	const summarizeCollection = (label: string, row: AutoResumePromptCollectionDiagnostics) => (
+		`${label}(in=${row.inputCount},listed=${row.listedCount},dedup=${row.dedupedCount},trunc=${row.truncatedCount},drop=${row.droppedByLimitCount})`
+	);
+	const global = diagnostics.globalTruncated
+		? `global=truncated(+${diagnostics.globalTruncatedChars})`
+		: "global=ok";
+	return [
+		summarizeCollection("tasks", diagnostics.tasks),
+		summarizeCollection("blockers", diagnostics.blockers),
+		summarizeCollection("next", diagnostics.nextActions),
+		global,
+	].join(" ");
+}
+
 const AUTO_RESUME_PROMPT_MAX_CHARS = 700;
 const TRUNCATION_MARKER_PREFIX = "[truncated:+";
 
