@@ -3462,7 +3462,7 @@
     {
       "id": "TASK-BUD-143",
       "description": "[P1] Galvanizar roteamento de shell por host para execucao deterministica de comandos (sem tentativa-e-erro do modelo)",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -3476,7 +3476,7 @@
         "Chamadas comuns (node/npm/npx/vitest) usam roteador deterministico por perfil sem depender de acerto manual de comando.",
         "Quando houver mismatch de runtime (ex.: bash sem node no PATH), operador recebe sinal curto e acao automatica/fallback previsivel."
       ],
-      "verification": "",
+      "verification": "VER-BUD-280",
       "notes": "Backlog por feedback humano (2026-04-24): o agente nao deve gastar ciclos acertando shell/comando; fluxo comum precisa ser galvanizado com execucao deterministica por ambiente.\n[2026-04-24T00:00:00Z] Slice iniciada: criado módulo `guardrails-core-shell-routing` com detecção de perfil de shell por host, política hard para `Windows+Git Bash` (node-family via `cmd.exe /c`), bloqueio determinístico de comandos bare no tool `bash`, status/audit de perfil e documentação canônica inicial.\n[2026-04-24T00:00:00Z] Evidência: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/guardrails-port-conflict.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 26/26 passed. Runtime atual precisa `/reload` para ativar os novos guards nesta sessão.\n[2026-04-24T00:00:00Z] Slice 2: comando `/shell-route` adicionado (`status|wrap|help`) para operador inspecionar perfil e normalizar comando sem tentativa-e-erro; helper `wrapCommandForHostShell` exposto no módulo de roteamento. Evidência: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 53/53 passed. Requer novo `/reload` para disponibilizar `/shell-route` no runtime atual.\n[2026-04-24T00:00:00Z] Slice 3: smoke de registro adicionada para garantir superfície canônica disponível (`/shell-route`, `/guardrails-config`, `/lane-queue`). Evidência: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 31/31 passed."
     },
     {
@@ -3627,6 +3627,25 @@
       ],
       "verification": "VER-BUD-279",
       "notes": "Backlog criado por feedback humano em 2026-04-25: prompt de auto-resume pós-compactação está chegando com formatação estranha e trechos com `...`, reduzindo clareza operacional.\n[2026-04-25T00:00:00Z] Slice 1 (prompt hygiene): `buildAutoResumePromptFromHandoff` agora normaliza payload para single-line canônica (remove artefatos markdown/backticks/controle, sanitiza `|`) e troca truncamento opaco por marcador explícito `[truncated:+N chars]`; reticências (`...`/`…`) viram marcador textual `[ellipsis]`. Smoke atualizada em `context-watchdog.test.ts` para cobrir artefatos + truncamento explícito.\n[2026-04-25T00:00:00Z] Slice 2 (determinismo de shape): prompt de auto-resume passou a deduplicar itens após normalização/truncamento (evita duplicatas semânticas como `` `TASK` `` vs `- TASK`), remover prefixos comuns de lista (`-`, `*`, `1)`), normalizar aspas envolventes e impor cap global de payload com marcador auditável `[auto-resume-prompt-truncated:+N chars]`.\n[2026-04-25T00:00:00Z] Slice 3 (observabilidade): novo envelope `buildAutoResumePromptEnvelopeFromHandoff` expõe diagnósticos estruturados (input/listed/dedup/truncation por seção + truncamento global) e `context-watchdog` passa a registrar audit `context-watchdog.auto-resume-prompt` antes do dispatch, facilitando triagem de formatação em runtime.\n[2026-04-25T00:00:00Z] Slice 4 (runbook): pipeline canônico documenta marcadores explícitos de truncamento no prompt de auto-resume e orienta inspeção do audit `context-watchdog.auto-resume-prompt` para debugging determinístico.\n[2026-04-25T00:00:00Z] Slice 5 (diagnóstico em status): `context-watchdog` passa a publicar resumo de diagnósticos do último prompt de auto-resume (`autoResumeLastPromptDiagnosticsSummary`) no payload/linha de status e no audit, usando helper canônico `summarizeAutoResumePromptDiagnostics`.\n[2026-04-25T00:00:00Z] Slice 6 (label hygiene): normalização de segmentos também remove prefixos redundantes de label (`next:`, `blockers:`, `focusTasks:`, `execution:`) para evitar composição duplicada (`next: next: ...`) no prompt final."
+    },
+    {
+      "id": "TASK-BUD-151",
+      "description": "[P1] Reduzir ruído do warning anti-paralysis em contexto alto para evitar repetição prematura após alerta de compactação.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-policy.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Warning anti-paralysis só dispara após grace window mínima depois do primeiro `compact-now`, evitando repetição imediata no mesmo ciclo.",
+        "Repetição do warning é limitada por cooldown e cap por janela (sem flood), mantendo sinal acionável e auditável.",
+        "Smoke cobre cenário de compact no limite + defer repetido, validando escalonamento progressivo em vez de spam inicial."
+      ],
+      "verification": "",
+      "notes": "Backlog criado por steering humano em 2026-04-26: warning anti-paralysis está exagerado e repetitivo (várias emissões seguidas logo após aviso de compact), gerando ruído sem dar tempo para o modelo encerrar micro-slice. Ajustar política para escalonamento mais gradual e menos spam."
     }
   ]
 }

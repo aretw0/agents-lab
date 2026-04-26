@@ -4767,6 +4767,15 @@
       "method": "test",
       "timestamp": "2026-04-25T23:30:00Z",
       "evidence": "Auto-resume prompt pós-compactação endurecido para evitar formatação estranha/reticências opacas. `buildAutoResumePromptFromHandoff` agora normaliza segmentos (single-line, remove markdown/backticks/controles, limpa labels redundantes), deduplica após normalização, substitui `...`/`…` por `[ellipsis]` e usa truncamento explícito (`[truncated:+N chars]` + `[auto-resume-prompt-truncated:+N chars]`). Observabilidade adicionada via envelope diagnóstico (`buildAutoResumePromptEnvelopeFromHandoff`) e audit `context-watchdog.auto-resume-prompt` com summary. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` e `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (52/52)."
+    },
+    {
+      "id": "VER-BUD-280",
+      "target": "TASK-BUD-143",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-26T02:34:00Z",
+      "evidence": "Roteamento determinístico de shell por host consolidado com módulo `guardrails-core-shell-routing`, comando `/shell-route` (`status|wrap|help`) e registro canônico em `guardrails-core`. Regressão pós-reload executada via `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 37/37 passed."
     }
   ]
 }
