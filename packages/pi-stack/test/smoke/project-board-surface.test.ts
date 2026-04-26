@@ -261,4 +261,26 @@ describe("project-board-surface", () => {
     expect(updateTool?.parameters?.properties?.task_id?.minLength).toBe(1);
     expect(updateTool?.parameters?.properties?.max_note_lines?.type).toBe("integer");
   });
+
+  it("board_update returns explicit error when task_id is missing", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update-missing-id",
+        { status: "in-progress" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(false);
+      expect((result.details as any)?.reason).toBe("missing-task-id");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
 });

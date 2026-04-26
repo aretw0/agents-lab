@@ -507,6 +507,14 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const appendNote = typeof params?.append_note === "string" ? params.append_note : undefined;
     const maxNoteLines = params?.max_note_lines;
 
+    if (!taskId) {
+      const out = { ok: false, reason: "missing-task-id" };
+      return {
+        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+        details: out,
+      };
+    }
+
     const hasUpdate =
       (typeof status === "string" && status.length > 0) ||
       (typeof appendNote === "string" && appendNote.trim().length > 0);
