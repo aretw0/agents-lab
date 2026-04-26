@@ -60,6 +60,17 @@ describe("guardrails-core safe mutation tools", () => {
     expect((largeFile.details as any)?.applied).toBe(true);
     expect((largeFile.details as any)?.decision).toBe("allow-apply");
 
+    const invalidCounts = await largeFileTool.execute(
+      "tc-safe-1-invalid",
+      { touchedLines: "nope", maxTouchedLines: 120.5, anchorState: "unique", dryRun: true } as any,
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect((invalidCounts.details as any)?.ok).toBe(false);
+    expect((invalidCounts.details as any)?.reason).toBe("invalid-line-counts");
+
     const queryTool = getTool(pi, "structured_query_plan");
     const query = await queryTool.execute(
       "tc-safe-2",

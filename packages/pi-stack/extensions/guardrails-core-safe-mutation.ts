@@ -31,11 +31,23 @@ export type SafeLargeFileMutationAssessment = {
 	maxTouchedLines: number;
 };
 
+function normalizeTouchedLines(input: unknown): number {
+	const raw = Number(input);
+	if (!Number.isFinite(raw)) return 0;
+	return Math.max(0, Math.floor(raw));
+}
+
+function normalizeMaxTouchedLines(input: unknown): number {
+	const raw = Number(input);
+	if (!Number.isFinite(raw)) return 1;
+	return Math.max(1, Math.floor(raw));
+}
+
 export function assessLargeFileMutationRisk(
 	input: SafeLargeFileMutationInput,
 ): SafeLargeFileMutationAssessment {
-	const touchedLines = Math.max(0, Math.floor(Number(input.touchedLines ?? 0)));
-	const maxTouchedLines = Math.max(1, Math.floor(Number(input.maxTouchedLines ?? 1)));
+	const touchedLines = normalizeTouchedLines(input.touchedLines);
+	const maxTouchedLines = normalizeMaxTouchedLines(input.maxTouchedLines);
 	const applyRequested = input.applyRequested === true;
 	const confirmed = input.confirmed === true;
 

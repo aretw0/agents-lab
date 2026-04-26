@@ -3144,10 +3144,36 @@ export default function (pi: ExtensionAPI) {
         };
       }
 
+      const touchedLines = Number(p.touchedLines);
+      const maxTouchedLines = Number(p.maxTouchedLines);
+      if (
+        !Number.isFinite(touchedLines)
+        || !Number.isFinite(maxTouchedLines)
+        || !Number.isInteger(touchedLines)
+        || !Number.isInteger(maxTouchedLines)
+        || touchedLines < 0
+        || maxTouchedLines < 1
+      ) {
+        const details = {
+          ok: false,
+          reason: "invalid-line-counts",
+          touchedLines,
+          maxTouchedLines,
+          expected: {
+            touchedLines: "integer >= 0",
+            maxTouchedLines: "integer >= 1",
+          },
+        };
+        return {
+          content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+          details,
+        };
+      }
+
       const dryRun = p.dryRun !== false;
       const assessment = assessLargeFileMutationRisk({
-        touchedLines: Number(p.touchedLines),
-        maxTouchedLines: Number(p.maxTouchedLines),
+        touchedLines,
+        maxTouchedLines,
         anchorState,
         applyRequested: !dryRun,
         confirmed: p.confirmed === true,
@@ -3270,9 +3296,17 @@ export default function (pi: ExtensionAPI) {
           ? anchorStateRaw
           : undefined;
 
-        if (!Number.isFinite(touchedLines) || !Number.isFinite(maxTouchedLines) || !anchorState) {
+        if (
+          !Number.isFinite(touchedLines)
+          || !Number.isFinite(maxTouchedLines)
+          || !Number.isInteger(touchedLines)
+          || !Number.isInteger(maxTouchedLines)
+          || touchedLines < 0
+          || maxTouchedLines < 1
+          || !anchorState
+        ) {
           ctx.ui.notify([
-            "safe-mutation: invalid large-file arguments.",
+            "safe-mutation: invalid large-file arguments (touchedLines>=0 integer, maxTouchedLines>=1 integer).",
             ...helpLines,
           ].join("\n"), "warning");
           return;

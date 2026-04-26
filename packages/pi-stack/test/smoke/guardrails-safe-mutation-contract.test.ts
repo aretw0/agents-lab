@@ -83,6 +83,18 @@ describe("guardrails-core safe mutation contract", () => {
 		});
 	});
 
+	it("normalizes invalid numeric inputs deterministically", () => {
+		const result = assessLargeFileMutationRisk({
+			touchedLines: Number.NaN as unknown as number,
+			maxTouchedLines: Number.NaN as unknown as number,
+			anchorState: "unique",
+			applyRequested: false,
+		});
+		expect(result.touchedLines).toBe(0);
+		expect(result.maxTouchedLines).toBe(1);
+		expect(result.decision).toBe("allow-preview");
+	});
+
 	it("builds canonical dry-first mutation result payload", () => {
 		const assessment = assessLargeFileMutationRisk({
 			touchedLines: 80,
