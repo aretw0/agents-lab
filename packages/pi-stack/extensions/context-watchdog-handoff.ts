@@ -8,17 +8,6 @@ function normalizeStringArray(value: unknown): string[] {
 	return value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
 }
 
-function dedupeStable(values: string[]): string[] {
-	const seen = new Set<string>();
-	const out: string[] = [];
-	for (const value of values) {
-		if (seen.has(value)) continue;
-		seen.add(value);
-		out.push(value);
-	}
-	return out;
-}
-
 function dropCommonListPrefix(text: string): string {
 	return text
 		.replace(/^[-*•]+\s+/, "")
@@ -90,37 +79,129 @@ export function toAgeSec(valueMs: number | undefined): number | undefined {
 	return Math.ceil(Math.max(0, Number(valueMs)) / 1000);
 }
 
-export function buildAutoResumePromptFromHandoff(
+export type AutoResumePromptCollectionDiagnostics = {
+	inputCount: number;
+	listedCount: number;
+	dedupedCount: number;
+	truncatedCount: number;
+	droppedByLimitCount: number;
+};
+
+export type AutoResumePromptDiagnostics = {
+	tasks: AutoResumePromptCollectionDiagnostics;
+	blockers: AutoResumePromptCollectionDiagnostics;
+	nextActions: AutoResumePromptCollectionDiagnostics;
+	globalTruncated: boolean;
+	globalTruncatedChars: number;
+};
+
+export type AutoResumePromptEnvelope = {
+	prompt: string;
+	diagnostics: AutoResumePromptDiagnostics;
+};
+
+const AUTO_RESUME_PROMPT_MAX_CHARS = 700;
+const TRUNCATION_MARKER_PREFIX = "[truncated:+";
+
+type PromptCollectionConfig = {
+	values: string[];
+	maxChars: number;
+	limit: number;
+};
+
+function preparePromptCollection(config: PromptCollectionConfig): {
+	values: string[];
+	diagnostics: AutoResumePromptCollectionDiagnostics;
+} {
+	const prepared: string[] = [];
+	const seen = new Set<string>();
+	let dedupedCount = 0;
+	let truncatedCount = 0;
+	for (const raw of config.values) {
+		const normalized = truncateForPrompt(raw, config.maxChars);
+		if (normalized.includes(TRUNCATION_MARKER_PREFIX)) {
+			truncatedCount += 1;
+		}
+		if (seen.has(normalized)) {
+			dedupedCount += 1;
+			continue;
+		}
+		seen.add(normalized);
+		prepared.push(normalized);
+	}
+	const droppedByLimitCount = Math.max(0, prepared.length - config.limit);
+	const listed = prepared.slice(0, config.limit);
+	return {
+		values: listed,
+		diagnostics: {
+			inputCount: config.values.length,
+			listedCount: listed.length,
+			dedupedCount,
+			truncatedCount,
+			droppedByLimitCount,
+		},
+	};
+}
+
+export function buildAutoResumePromptEnvelopeFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	_maxFreshAgeMs = 30 * 60 * 1000,
 	_nowMs = Date.now(),
-): string {
+): AutoResumePromptEnvelope {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const tasks = dedupeStable(normalizeStringArray(handoff.current_tasks)
-		.map((task) => truncateForPrompt(task, 48)))
-		.slice(0, 3);
-	const blockers = dedupeStable(normalizeStringArray(handoff.blockers)
-		.filter((b) => !b.startsWith("context-watch-"))
-		.map((b) => truncateForPrompt(b, 80)))
-		.slice(0, 2);
-	const next = dedupeStable(normalizeStringArray(handoff.next_actions)
-		.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
-		.map((line) => truncateForPrompt(line, 120)))
-		.slice(0, 2);
+	const tasksPrepared = preparePromptCollection({
+		values: normalizeStringArray(handoff.current_tasks),
+		maxChars: 48,
+		limit: 3,
+	});
+	const blockersPrepared = preparePromptCollection({
+		values: normalizeStringArray(handoff.blockers).filter((b) => !b.startsWith("context-watch-")),
+		maxChars: 80,
+		limit: 2,
+	});
+	const nextPrepared = preparePromptCollection({
+		values: normalizeStringArray(handoff.next_actions)
+			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX)),
+		maxChars: 120,
+		limit: 2,
+	});
 
 	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
-		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
-		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
-		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",
+		`focusTasks: ${tasksPrepared.values.length > 0 ? tasksPrepared.values.join(", ") : "none-listed"}`,
+		`blockers: ${blockersPrepared.values.length > 0 ? blockersPrepared.values.join(" | ") : "none"}`,
+		nextPrepared.values.length > 0
+			? `next: ${nextPrepared.values.join(" | ")}`
+			: "next: keep current lane intent",
 		"execution: prioritize latest user steering/follow-up; if none, proceed with listed tasks.",
 	];
-	const prompt = lines.join("\n");
-	const maxPromptChars = 700;
-	if (prompt.length <= maxPromptChars) return prompt;
-	const omitted = prompt.length - maxPromptChars;
-	return `${prompt.slice(0, maxPromptChars)}\n[auto-resume-prompt-truncated:+${omitted} chars]`;
+	const promptRaw = lines.join("\n");
+	const globalTruncated = promptRaw.length > AUTO_RESUME_PROMPT_MAX_CHARS;
+	const globalTruncatedChars = globalTruncated
+		? promptRaw.length - AUTO_RESUME_PROMPT_MAX_CHARS
+		: 0;
+	const prompt = globalTruncated
+		? `${promptRaw.slice(0, AUTO_RESUME_PROMPT_MAX_CHARS)}\n[auto-resume-prompt-truncated:+${globalTruncatedChars} chars]`
+		: promptRaw;
+	return {
+		prompt,
+		diagnostics: {
+			tasks: tasksPrepared.diagnostics,
+			blockers: blockersPrepared.diagnostics,
+			nextActions: nextPrepared.diagnostics,
+			globalTruncated,
+			globalTruncatedChars,
+		},
+	};
+}
+
+export function buildAutoResumePromptFromHandoff(
+	handoffInput: Record<string, unknown> | undefined,
+	maxFreshAgeMs = 30 * 60 * 1000,
+	nowMs = Date.now(),
+): string {
+	return buildAutoResumePromptEnvelopeFromHandoff(handoffInput, maxFreshAgeMs, nowMs).prompt;
 }

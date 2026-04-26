@@ -51,6 +51,7 @@ import {
 	shouldAutoCheckpoint,
 } from "./context-watchdog-policy";
 import {
+	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
@@ -88,6 +89,7 @@ export {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	buildAutoCompactDiagnostics,
+	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
 	contextWatchActionForLevel,
@@ -638,11 +640,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					lastAutoResumeDecision = autoResumeSnapshot;
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
-						const resumePrompt = buildAutoResumePromptFromHandoff(
+						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 							readHandoffJson(ctx.cwd),
 							config.handoffFreshMaxAgeMs,
 						);
-						pi.sendUserMessage(resumePrompt, { deliverAs: "followUp" });
+						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+							"context-watchdog.auto-resume-prompt",
+							{
+								atIso: autoResumeSnapshot.atIso,
+								diagnostics: resumeEnvelope.diagnostics,
+								preview: resumeEnvelope.prompt.slice(0, 240),
+							},
+						);
+						pi.sendUserMessage(resumeEnvelope.prompt, { deliverAs: "followUp" });
 						ctx.ui.notify("context-watch: auto resume queued", "info");
 					} else {
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(

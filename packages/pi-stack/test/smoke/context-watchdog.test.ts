@@ -4,6 +4,7 @@ import {
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
 	buildAutoCompactDiagnostics,
+	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
 	deriveContextWatchThresholds,
@@ -383,6 +384,24 @@ describe("context-watchdog", () => {
 		} as any);
 		expect(prompt.length).toBeGreaterThan(700);
 		expect(prompt).toContain("[auto-resume-prompt-truncated:+");
+	});
+
+	it("returns diagnostics envelope for auto-resume prompt generation", () => {
+		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
+			current_tasks: ["`TASK-BUD-150`", "- TASK-BUD-150", "TASK-BUD-151"],
+			blockers: ["context-watch-compact-required", "infra"],
+			next_actions: [
+				"Context-watch action: level=compact 72% (compact-now)",
+				"step with long payload " + "x".repeat(260),
+			],
+		} as any);
+		expect(envelope.prompt).toContain("focusTasks: TASK-BUD-150, TASK-BUD-151");
+		expect(envelope.prompt).toContain("blockers: infra");
+		expect(envelope.diagnostics.tasks.inputCount).toBe(3);
+		expect(envelope.diagnostics.tasks.dedupedCount).toBe(1);
+		expect(envelope.diagnostics.blockers.inputCount).toBe(1);
+		expect(envelope.diagnostics.nextActions.inputCount).toBe(1);
+		expect(envelope.diagnostics.nextActions.truncatedCount).toBe(1);
 	});
 
 	it("resolves passive steering dispatch independently from notify-only mode", () => {
