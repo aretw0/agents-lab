@@ -2959,6 +2959,135 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
+  pi.registerTool({
+    name: "safe_mutate_large_file",
+    label: "Safe Mutate Large File",
+    description: "Dry-first deterministic risk assessment for large-file mutation operations.",
+    parameters: Type.Object({
+      touchedLines: Type.Number({ minimum: 0 }),
+      maxTouchedLines: Type.Number({ minimum: 1 }),
+      anchorState: Type.String({ description: "unique | missing | ambiguous" }),
+      dryRun: Type.Optional(Type.Boolean()),
+      confirmed: Type.Optional(Type.Boolean()),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = params as {
+        touchedLines?: unknown;
+        maxTouchedLines?: unknown;
+        anchorState?: unknown;
+        dryRun?: unknown;
+        confirmed?: unknown;
+      };
+      const anchorState = String(p.anchorState ?? "").trim().toLowerCase();
+      if (anchorState !== "unique" && anchorState !== "missing" && anchorState !== "ambiguous") {
+        const details = {
+          ok: false,
+          reason: "invalid-anchor-state",
+          anchorState,
+          allowed: ["unique", "missing", "ambiguous"],
+        };
+        return {
+          content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+          details,
+        };
+      }
+
+      const dryRun = p.dryRun !== false;
+      const assessment = assessLargeFileMutationRisk({
+        touchedLines: Number(p.touchedLines),
+        maxTouchedLines: Number(p.maxTouchedLines),
+        anchorState,
+        applyRequested: !dryRun,
+        confirmed: p.confirmed === true,
+      });
+      const result = buildSafeLargeFileMutationResult({
+        assessment,
+        dryRun,
+      });
+
+      appendAuditEntry(ctx, "guardrails-core.safe-mutation.large-file", {
+        atIso: new Date().toISOString(),
+        via: "tool",
+        touchedLines: assessment.touchedLines,
+        maxTouchedLines: assessment.maxTouchedLines,
+        anchorState,
+        dryRun,
+        confirmed: p.confirmed === true,
+        riskLevel: assessment.riskLevel,
+        decision: assessment.decision,
+        reason: assessment.reason,
+      });
+
+      const details = {
+        ok: true,
+        anchorState,
+        ...result,
+      };
+      return {
+        content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+        details,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "structured_query_plan",
+    label: "Structured Query Plan",
+    description: "Deterministic structured query safety plan with optional mutation blocking.",
+    parameters: Type.Object({
+      query: Type.String(),
+      forbidMutation: Type.Optional(Type.Boolean()),
+    }),
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = params as {
+        query?: unknown;
+        forbidMutation?: unknown;
+      };
+      const query = String(p.query ?? "").trim();
+      if (!query) {
+        const details = {
+          ok: false,
+          reason: "missing-query",
+        };
+        return {
+          content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+          details,
+        };
+      }
+
+      const forbidMutation = p.forbidMutation !== false;
+      const assessment = assessStructuredQueryRisk({
+        normalizedQuery: query,
+        forbidMutation,
+      });
+      const result = buildStructuredQueryPlanResult({
+        normalizedQuery: query,
+        parameters: [],
+        assessment,
+      });
+
+      appendAuditEntry(ctx, "guardrails-core.safe-mutation.query", {
+        atIso: new Date().toISOString(),
+        via: "tool",
+        forbidMutation,
+        riskLevel: assessment.riskLevel,
+        blocked: assessment.blocked,
+        reason: assessment.reason,
+        safetyChecks: assessment.safetyChecks,
+      });
+
+      const details = {
+        ok: true,
+        forbidMutation,
+        ...result,
+      };
+      return {
+        content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+        details,
+      };
+    },
+  });
+
   pi.registerCommand("safe-mutation", {
     description: "Dry-first risk assessment for large-file mutation and structured queries. Usage: /safe-mutation [help|large-file <touchedLines> <maxTouchedLines> <unique|missing|ambiguous> [--apply] [--confirm]|query <on|off> <sql>]",
     handler: async (args, ctx) => {

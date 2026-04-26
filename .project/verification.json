@@ -4803,6 +4803,15 @@
       "method": "test",
       "timestamp": "2026-04-26T02:56:00Z",
       "evidence": "Structured I/O Slice 5: `parseStructuredJsonSelector` ampliado para notação com índice em bracket (`a.b[0].c`) e seletor raiz (`$`). `structuredJsonWrite` suporta replace do documento inteiro com selector `$` + `set` e bloqueia `remove` de raiz com `root-remove-unsupported`. Cobertura atualizada em contract/reexport/command/tool. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts` => 44/44 passed."
+    },
+    {
+      "id": "VER-BUD-284",
+      "target": "TASK-BUD-145",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T02:58:00Z",
+      "evidence": "Slice 7 de safe-mutation: `guardrails-core` passou a expor tools tipadas `safe_mutate_large_file` e `structured_query_plan` com respostas determinísticas dry-first/fallback, incluindo trilha de auditoria `guardrails-core.safe-mutation.*` para chamadas via tool. Cobertura adicionada em `guardrails-safe-mutation-tool.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-reexport.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 41/41 passed."
     }
   ]
 }
