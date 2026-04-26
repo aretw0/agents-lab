@@ -4,34 +4,127 @@ export type StructuredJsonSelectorParseResult =
   | { ok: true; steps: Array<string | number> }
   | { ok: false; reason: "empty-selector" | "invalid-segment" };
 
+function decodeSingleQuotedSelectorKey(rawLiteral: string): string | undefined {
+  if (!rawLiteral.startsWith("'") || !rawLiteral.endsWith("'")) return undefined;
+  const body = rawLiteral.slice(1, -1);
+  let out = "";
+  for (let i = 0; i < body.length; i += 1) {
+    const ch = body[i];
+    if (ch !== "\\") {
+      out += ch;
+      continue;
+    }
+
+    const next = body[i + 1];
+    if (next === undefined) return undefined;
+    out += next;
+    i += 1;
+  }
+  return out;
+}
+
+function decodeBracketSelectorKey(rawLiteral: string): string | undefined {
+  if (rawLiteral.startsWith('"') && rawLiteral.endsWith('"')) {
+    try {
+      const parsed = JSON.parse(rawLiteral);
+      return typeof parsed === "string" ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  if (rawLiteral.startsWith("'") && rawLiteral.endsWith("'")) {
+    return decodeSingleQuotedSelectorKey(rawLiteral);
+  }
+
+  return undefined;
+}
+
+function parseBracketStep(selector: string, startAt: number): {
+  ok: true;
+  value: string | number;
+  nextAt: number;
+} | {
+  ok: false;
+} {
+  const len = selector.length;
+  let i = startAt + 1;
+  if (i >= len) return { ok: false };
+
+  const first = selector[i];
+  if (first === '"' || first === "'") {
+    const quote = first;
+    i += 1;
+    let escaped = false;
+    while (i < len) {
+      const ch = selector[i];
+      if (escaped) {
+        escaped = false;
+        i += 1;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        i += 1;
+        continue;
+      }
+      if (ch === quote) break;
+      i += 1;
+    }
+    if (i >= len || selector[i] !== quote) return { ok: false };
+    const literal = selector.slice(startAt + 1, i + 1);
+    i += 1;
+    if (selector[i] !== "]") return { ok: false };
+    const decoded = decodeBracketSelectorKey(literal);
+    if (decoded === undefined) return { ok: false };
+    return { ok: true, value: decoded, nextAt: i + 1 };
+  }
+
+  const numStart = i;
+  while (i < len && /\d/.test(selector[i])) i += 1;
+  if (i === numStart || selector[i] !== "]") return { ok: false };
+  const index = Number(selector.slice(numStart, i));
+  return { ok: true, value: index, nextAt: i + 1 };
+}
+
 export function parseStructuredJsonSelector(selectorInput: string): StructuredJsonSelectorParseResult {
   const selector = String(selectorInput ?? "").trim();
   if (!selector) return { ok: false, reason: "empty-selector" };
   if (selector === "$") return { ok: true, steps: [] };
 
-  const raw = selector.split(".").map((s) => s.trim());
-  if (raw.length === 0 || raw.some((s) => s.length === 0)) {
-    return { ok: false, reason: "invalid-segment" };
-  }
-
   const steps: Array<string | number> = [];
-  for (const segment of raw) {
-    let cursor = segment;
+  let cursor = 0;
+  const len = selector.length;
 
-    if (!cursor.startsWith("[")) {
-      const baseMatch = cursor.match(/^[A-Za-z0-9_-]+/);
-      if (!baseMatch) return { ok: false, reason: "invalid-segment" };
-      const base = baseMatch[0];
-      steps.push(/^\d+$/.test(base) ? Number(base) : base);
-      cursor = cursor.slice(base.length);
+  while (cursor < len) {
+    if (selector[cursor] === ".") return { ok: false, reason: "invalid-segment" };
+
+    if (selector[cursor] === "[") {
+      const bracket = parseBracketStep(selector, cursor);
+      if (!bracket.ok) return { ok: false, reason: "invalid-segment" };
+      steps.push(bracket.value);
+      cursor = bracket.nextAt;
+    } else {
+      const start = cursor;
+      while (cursor < len && selector[cursor] !== "." && selector[cursor] !== "[") {
+        cursor += 1;
+      }
+      const token = selector.slice(start, cursor);
+      if (!/^[A-Za-z0-9_-]+$/.test(token)) return { ok: false, reason: "invalid-segment" };
+      steps.push(/^\d+$/.test(token) ? Number(token) : token);
     }
 
-    while (cursor.length > 0) {
-      const indexMatch = cursor.match(/^\[(\d+)\]/);
-      if (!indexMatch) return { ok: false, reason: "invalid-segment" };
-      steps.push(Number(indexMatch[1]));
-      cursor = cursor.slice(indexMatch[0].length);
+    while (cursor < len && selector[cursor] === "[") {
+      const bracket = parseBracketStep(selector, cursor);
+      if (!bracket.ok) return { ok: false, reason: "invalid-segment" };
+      steps.push(bracket.value);
+      cursor = bracket.nextAt;
     }
+
+    if (cursor >= len) break;
+    if (selector[cursor] !== ".") return { ok: false, reason: "invalid-segment" };
+    cursor += 1;
+    if (cursor >= len) return { ok: false, reason: "invalid-segment" };
   }
 
   return { ok: true, steps };

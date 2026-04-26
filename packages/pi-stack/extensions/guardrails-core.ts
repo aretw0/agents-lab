@@ -3636,7 +3636,7 @@ export default function (pi: ExtensionAPI) {
     description: "Dry-first structured JSON read/write with selector-based targeting and blast-radius caps.",
     parameters: Type.Object({
       path: Type.String({ description: "Path relativo ao projeto (dentro do cwd)." }),
-      selector: Type.String({ description: "Seletor canônico JSON (ex.: a.b.0.c)." }),
+      selector: Type.String({ description: "Seletor canônico JSON (ex.: a.b.0.c ou a[\"b.c\"].0)." }),
       operation: Type.Union([
         Type.Literal("read"),
         Type.Literal("set"),
@@ -3805,6 +3805,7 @@ export default function (pi: ExtensionAPI) {
         "  /structured-io json-read package.json scripts.test",
         "  /structured-io json-write package.json scripts.test set \"vitest run\"",
         "  /structured-io json-write package.json scripts.test set \"vitest run\" --apply",
+        "  /structured-io json-write data.json a[\"b.c\"] set 7 --apply",
       ];
 
       if (sub === "help") {

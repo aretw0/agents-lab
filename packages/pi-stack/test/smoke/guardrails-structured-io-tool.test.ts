@@ -114,4 +114,28 @@ describe("guardrails-core structured_io_json tool", () => {
 
     rmSync(cwd, { recursive: true, force: true });
   });
+
+  it("supports quoted-key selector syntax in tool mode", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-structured-tool-"));
+    const path = join(cwd, "data.json");
+    writeFileSync(path, JSON.stringify({ a: { "b.c": 1 } }, null, 2), "utf8");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const tool = getTool(pi, "structured_io_json");
+
+    const apply = await tool.execute(
+      "tc-quoted-selector",
+      { path: "data.json", selector: "a[\"b.c\"]", operation: "set", payload: 9, dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+
+    expect((apply.details as any)?.applied).toBe(true);
+    const changed = JSON.parse(readFileSync(path, "utf8"));
+    expect(changed.a["b.c"]).toBe(9);
+
+    rmSync(cwd, { recursive: true, force: true });
+  });
 });

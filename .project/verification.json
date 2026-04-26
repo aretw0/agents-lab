@@ -4920,6 +4920,15 @@
       "method": "test",
       "timestamp": "2026-04-26T06:15:00Z",
       "evidence": "Project board surface Slice 9: schema de tools endurecido com limites inteiros e campo obrigatório mais explícito (`board_query.limit` integer [1..200], `board_update.task_id` minLength=1, `board_update.max_note_lines` integer [1..200]). Smoke ampliada para validar contrato de schema registrado além do execute path. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 38/38 passed."
+    },
+    {
+      "id": "VER-BUD-297",
+      "target": "TASK-BUD-149",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T06:23:00Z",
+      "evidence": "Structured I/O Slice 7: `parseStructuredJsonSelector` endurecido para suportar bracket-quoted keys (`a[\"b.c\"]`, `['root.key']`) e manter validação determinística de segmentos inválidos. Cobertura ampliada em `guardrails-structured-io-contract/reexport/command/tool` para read/write com selector quoted em helper, comando e tool. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 47/47 passed."
     }
   ]
 }

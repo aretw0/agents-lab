@@ -15,11 +15,20 @@ describe("guardrails-core structured io contract", () => {
 			ok: true,
 			steps: ["a", "b", 0, "c"],
 		});
+		expect(parseStructuredJsonSelector("a[\"b.c\"][0].d")).toEqual({
+			ok: true,
+			steps: ["a", "b.c", 0, "d"],
+		});
+		expect(parseStructuredJsonSelector("['root.key']")).toEqual({
+			ok: true,
+			steps: ["root.key"],
+		});
 		expect(parseStructuredJsonSelector("$"))
 			.toEqual({ ok: true, steps: [] });
 		expect(parseStructuredJsonSelector(" ")).toEqual({ ok: false, reason: "empty-selector" });
 		expect(parseStructuredJsonSelector("a..b").ok).toBe(false);
 		expect(parseStructuredJsonSelector("a.b[*]").ok).toBe(false);
+		expect(parseStructuredJsonSelector("a[\"b.c\"").ok).toBe(false);
 	});
 
 	it("reads structured json values by selector", () => {
@@ -32,6 +41,12 @@ describe("guardrails-core structured io contract", () => {
 		expect(structuredJsonRead({ content, selector: "a.b[0].c" })).toMatchObject({
 			found: true,
 			value: 42,
+			shape: "number",
+		});
+		const quotedContent = JSON.stringify({ a: { "b.c": [{ d: 9 }] } });
+		expect(structuredJsonRead({ content: quotedContent, selector: "a[\"b.c\"][0].d" })).toMatchObject({
+			found: true,
+			value: 9,
 			shape: "number",
 		});
 		expect(structuredJsonRead({ content, selector: "$" })).toMatchObject({
@@ -111,6 +126,20 @@ describe("guardrails-core structured io contract", () => {
 		});
 		expect(result.applied).toBe(true);
 		expect(result.output).not.toContain('"b": 1');
+	});
+
+	it("supports quoted-key selectors in write path", () => {
+		const content = JSON.stringify({ a: { "b.c": 1 } }, null, 2);
+		const result = structuredJsonWrite({
+			content,
+			selector: "a[\"b.c\"]",
+			operation: "set",
+			payload: 7,
+			dryRun: false,
+			maxTouchedLines: 40,
+		});
+		expect(result.applied).toBe(true);
+		expect(result.output).toContain('"b.c": 7');
 	});
 
 	it("supports root selector for whole-document set and blocks root remove", () => {

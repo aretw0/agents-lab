@@ -15,15 +15,23 @@ describe("guardrails-core structured-io re-export", () => {
 			ok: true,
 			steps: ["a", "b", 0],
 		});
+		expect(parseStructuredJsonSelector("a[\"b.c\"][0]")).toEqual({
+			ok: true,
+			steps: ["a", "b.c", 0],
+		});
 		expect(parseStructuredJsonSelector("$")).toEqual({
 			ok: true,
 			steps: [],
 		});
 
-		const content = JSON.stringify({ a: { b: [10, 20] } });
+		const content = JSON.stringify({ a: { b: [10, 20], "b.c": [30] } });
 		expect(structuredJsonRead({ content, selector: "a.b.1" })).toMatchObject({
 			found: true,
 			value: 20,
+		});
+		expect(structuredJsonRead({ content, selector: "a[\"b.c\"].0" })).toMatchObject({
+			found: true,
+			value: 30,
 		});
 
 		const write = structuredJsonWrite({

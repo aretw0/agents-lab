@@ -90,4 +90,27 @@ describe("guardrails-core structured-io command", () => {
 
     rmSync(cwd, { recursive: true, force: true });
   });
+
+  it("accepts quoted-key selector syntax in command mode", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-structured-io-cmd-"));
+    const target = join(cwd, "data.json");
+    writeFileSync(target, JSON.stringify({ a: { "b.c": 1 } }, null, 2), "utf8");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const structuredIo = getCommand(pi, "structured-io");
+    const notify = vi.fn();
+
+    await structuredIo.handler('json-write data.json a["b.c"] set 11 --apply', {
+      cwd,
+      ui: { notify },
+      hasUI: true,
+    });
+
+    const content = JSON.parse(readFileSync(target, "utf8"));
+    expect(content.a["b.c"]).toBe(11);
+    expect(String(notify.mock.calls.at(-1)?.[0] ?? "")).toContain("applied=yes");
+
+    rmSync(cwd, { recursive: true, force: true });
+  });
 });
