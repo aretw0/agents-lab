@@ -4812,6 +4812,15 @@
       "method": "test",
       "timestamp": "2026-04-26T02:58:00Z",
       "evidence": "Slice 7 de safe-mutation: `guardrails-core` passou a expor tools tipadas `safe_mutate_large_file` e `structured_query_plan` com respostas determinísticas dry-first/fallback, incluindo trilha de auditoria `guardrails-core.safe-mutation.*` para chamadas via tool. Cobertura adicionada em `guardrails-safe-mutation-tool.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-reexport.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 41/41 passed."
+    },
+    {
+      "id": "VER-BUD-285",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T03:02:00Z",
+      "evidence": "Project board surface hardening: corrigida assinatura de execução de `board_query`/`board_update` para contrato canônico de tools e uso de `ctx.cwd` (evita fallback indevido para `verification` por parâmetros ignorados e elimina acoplamento a `process.cwd`). Smoke `project-board-surface.test.ts` ampliada com testes de execute path real via `registerTool`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 36/36 passed."
     }
   ]
 }

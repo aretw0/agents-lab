@@ -1,14 +1,36 @@
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
-import {
+import { describe, expect, it, vi } from "vitest";
+import projectBoardSurfaceExtension, {
   queryProjectTasks,
   queryProjectVerification,
   updateProjectTaskBoard,
 } from "../../extensions/project-board-surface";
 
 describe("project-board-surface", () => {
+  function makeMockPi() {
+    return {
+      registerTool: vi.fn(),
+    } as unknown as Parameters<typeof projectBoardSurfaceExtension>[0];
+  }
+
+  function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+    const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === name,
+    );
+    if (!call) throw new Error(`tool not found: ${name}`);
+    return call[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: any,
+      ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
+    };
+  }
+
   function seedWorkspace(): string {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-"));
     mkdirSync(join(cwd, ".project"), { recursive: true });
@@ -150,6 +172,51 @@ describe("project-board-surface", () => {
         ? raw.tasks.find((t) => t?.id === "TASK-A")
         : undefined;
       expect(taskA?.notes).toBe("linha-2\nlinha-3");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_query tool uses params and ctx.cwd (no implicit process cwd)", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query",
+        { entity: "tasks", status: "in-progress", limit: 5 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-A");
+      expect((result.details as any)?.meta?.path).toContain("tasks.json");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update tool uses params and ctx.cwd", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update",
+        { task_id: "TASK-B", status: "in-progress" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      const check = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
+      expect(check.rows.some((row) => row.id === "TASK-B")).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

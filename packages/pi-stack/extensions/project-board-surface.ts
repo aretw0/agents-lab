@@ -415,20 +415,26 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     ),
   });
 
-  const executeQuery = ({
-    entity,
-    status,
-    target,
-    search,
-    limit,
-  }: {
-    entity: "tasks" | "verification";
-    status?: string;
-    target?: string;
-    search?: string;
-    limit?: number;
-  }) => {
-    const cwd = process.cwd();
+  const executeQuery = (
+    _toolCallId: string,
+    params: {
+      entity?: "tasks" | "verification";
+      status?: string;
+      target?: string;
+      search?: string;
+      limit?: number;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const entity = params?.entity === "tasks" ? "tasks" : "verification";
+    const status = typeof params?.status === "string" ? params.status : undefined;
+    const target = typeof params?.target === "string" ? params.target : undefined;
+    const search = typeof params?.search === "string" ? params.search : undefined;
+    const limit = params?.limit;
+    const cwd = ctx.cwd;
+
     const details =
       entity === "tasks"
         ? queryProjectTasks(cwd, { status, search, limit })
@@ -466,20 +472,26 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     ),
   });
 
-  const executeUpdate = ({
-    task_id,
-    status,
-    append_note,
-    max_note_lines,
-  }: {
-    task_id: string;
-    status?: ProjectTaskStatus;
-    append_note?: string;
-    max_note_lines?: number;
-  }) => {
+  const executeUpdate = (
+    _toolCallId: string,
+    params: {
+      task_id?: string;
+      status?: ProjectTaskStatus;
+      append_note?: string;
+      max_note_lines?: number;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const taskId = String(params?.task_id ?? "").trim();
+    const status = params?.status;
+    const appendNote = typeof params?.append_note === "string" ? params.append_note : undefined;
+    const maxNoteLines = params?.max_note_lines;
+
     const hasUpdate =
       (typeof status === "string" && status.length > 0) ||
-      (typeof append_note === "string" && append_note.trim().length > 0);
+      (typeof appendNote === "string" && appendNote.trim().length > 0);
     if (!hasUpdate) {
       const out = { ok: false, reason: "no-updates-requested" };
       return {
@@ -488,10 +500,10 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       };
     }
 
-    const details = updateProjectTaskBoard(process.cwd(), task_id, {
+    const details = updateProjectTaskBoard(ctx.cwd, taskId, {
       status,
-      appendNote: append_note,
-      maxNoteLines: max_note_lines,
+      appendNote,
+      maxNoteLines,
     });
     return {
       content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
