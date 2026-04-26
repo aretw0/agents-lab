@@ -11,6 +11,14 @@ describe("guardrails-core structured-io re-export", () => {
 			ok: true,
 			steps: ["a", "b", 0],
 		});
+		expect(parseStructuredJsonSelector("a.b[0]")).toEqual({
+			ok: true,
+			steps: ["a", "b", 0],
+		});
+		expect(parseStructuredJsonSelector("$")).toEqual({
+			ok: true,
+			steps: [],
+		});
 
 		const content = JSON.stringify({ a: { b: [10, 20] } });
 		expect(structuredJsonRead({ content, selector: "a.b.1" })).toMatchObject({

@@ -7,19 +7,33 @@ export type StructuredJsonSelectorParseResult =
 export function parseStructuredJsonSelector(selectorInput: string): StructuredJsonSelectorParseResult {
   const selector = String(selectorInput ?? "").trim();
   if (!selector) return { ok: false, reason: "empty-selector" };
+  if (selector === "$") return { ok: true, steps: [] };
 
-  const raw = selector.split(".").map((s) => s.trim()).filter(Boolean);
-  if (raw.length === 0) return { ok: false, reason: "empty-selector" };
+  const raw = selector.split(".").map((s) => s.trim());
+  if (raw.length === 0 || raw.some((s) => s.length === 0)) {
+    return { ok: false, reason: "invalid-segment" };
+  }
 
   const steps: Array<string | number> = [];
   for (const segment of raw) {
-    if (!/^[A-Za-z0-9_-]+$/.test(segment)) return { ok: false, reason: "invalid-segment" };
-    if (/^\d+$/.test(segment)) {
-      steps.push(Number(segment));
-    } else {
-      steps.push(segment);
+    let cursor = segment;
+
+    if (!cursor.startsWith("[")) {
+      const baseMatch = cursor.match(/^[A-Za-z0-9_-]+/);
+      if (!baseMatch) return { ok: false, reason: "invalid-segment" };
+      const base = baseMatch[0];
+      steps.push(/^\d+$/.test(base) ? Number(base) : base);
+      cursor = cursor.slice(base.length);
+    }
+
+    while (cursor.length > 0) {
+      const indexMatch = cursor.match(/^\[(\d+)\]/);
+      if (!indexMatch) return { ok: false, reason: "invalid-segment" };
+      steps.push(Number(indexMatch[1]));
+      cursor = cursor.slice(indexMatch[0].length);
     }
   }
+
   return { ok: true, steps };
 }
 
@@ -91,6 +105,7 @@ export type StructuredJsonWriteResult = {
     | "invalid-selector"
     | "selector-parent-missing"
     | "selector-not-found"
+    | "root-remove-unsupported"
     | "blocked:blast-radius-exceeded";
   riskLevel: StructuredIoRiskLevel;
   touchedLines: number;
@@ -161,6 +176,85 @@ export function structuredJsonWrite(input: {
 
   const clone = JSON.parse(JSON.stringify(root)) as unknown;
   const steps = parsedSelector.steps;
+
+  if (steps.length === 0) {
+    if (input.operation === "remove") {
+      return {
+        applied: false,
+        changed: false,
+        blocked: true,
+        reason: "root-remove-unsupported",
+        riskLevel: "high",
+        touchedLines: 0,
+        maxTouchedLines,
+        preview: "",
+        rollbackToken: null,
+      };
+    }
+
+    const before = JSON.stringify(root);
+    const after = JSON.stringify(input.payload);
+    const changed = before !== after;
+    if (!changed) {
+      return {
+        applied: false,
+        changed: false,
+        blocked: false,
+        reason: "no-change",
+        riskLevel: "low",
+        touchedLines: 0,
+        maxTouchedLines,
+        preview: "",
+        rollbackToken: null,
+      };
+    }
+
+    const beforeText = JSON.stringify(root, null, 2);
+    const afterText = JSON.stringify(input.payload, null, 2) ?? "null";
+    const touchedLines = countTouchedLines(beforeText, afterText);
+    if (touchedLines > maxTouchedLines) {
+      return {
+        applied: false,
+        changed: false,
+        blocked: true,
+        reason: "blocked:blast-radius-exceeded",
+        riskLevel: "high",
+        touchedLines,
+        maxTouchedLines,
+        preview: afterText,
+        rollbackToken: null,
+      };
+    }
+
+    if (dryRun) {
+      return {
+        applied: false,
+        changed: true,
+        blocked: false,
+        reason: "ok-preview",
+        riskLevel: riskFromTouchedLines(touchedLines),
+        touchedLines,
+        maxTouchedLines,
+        output: afterText,
+        preview: afterText,
+        rollbackToken: null,
+      };
+    }
+
+    return {
+      applied: true,
+      changed: true,
+      blocked: false,
+      reason: "ok-applied",
+      riskLevel: riskFromTouchedLines(touchedLines),
+      touchedLines,
+      maxTouchedLines,
+      output: afterText,
+      preview: afterText,
+      rollbackToken: `rb-json-${Date.now()}`,
+    };
+  }
+
   const targetKey = steps.at(-1);
   const parentSteps = steps.slice(0, -1);
 

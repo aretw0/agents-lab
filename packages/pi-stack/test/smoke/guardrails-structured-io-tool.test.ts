@@ -74,4 +74,38 @@ describe("guardrails-core structured_io_json tool", () => {
 
     rmSync(cwd, { recursive: true, force: true });
   });
+
+  it("supports root selector for replacing whole JSON document", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-structured-tool-"));
+    const path = join(cwd, "data.json");
+    writeFileSync(path, JSON.stringify({ a: 1 }, null, 2), "utf8");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const tool = getTool(pi, "structured_io_json");
+
+    const apply = await tool.execute(
+      "tc-root",
+      { path: "data.json", selector: "$", operation: "set", payload: { b: 2 }, dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((apply.details as any)?.applied).toBe(true);
+
+    const changed = JSON.parse(readFileSync(path, "utf8"));
+    expect(changed).toEqual({ b: 2 });
+
+    const blocked = await tool.execute(
+      "tc-root-remove",
+      { path: "data.json", selector: "$", operation: "remove", dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((blocked.details as any)?.blocked).toBe(true);
+    expect((blocked.details as any)?.reason).toBe("root-remove-unsupported");
+
+    rmSync(cwd, { recursive: true, force: true });
+  });
 });

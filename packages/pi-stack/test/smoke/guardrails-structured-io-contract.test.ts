@@ -11,7 +11,14 @@ describe("guardrails-core structured io contract", () => {
 			ok: true,
 			steps: ["a", "b", 0, "c"],
 		});
+		expect(parseStructuredJsonSelector("a.b[0].c")).toEqual({
+			ok: true,
+			steps: ["a", "b", 0, "c"],
+		});
+		expect(parseStructuredJsonSelector("$"))
+			.toEqual({ ok: true, steps: [] });
 		expect(parseStructuredJsonSelector(" ")).toEqual({ ok: false, reason: "empty-selector" });
+		expect(parseStructuredJsonSelector("a..b").ok).toBe(false);
 		expect(parseStructuredJsonSelector("a.b[*]").ok).toBe(false);
 	});
 
@@ -21,6 +28,15 @@ describe("guardrails-core structured io contract", () => {
 			found: true,
 			value: 42,
 			shape: "number",
+		});
+		expect(structuredJsonRead({ content, selector: "a.b[0].c" })).toMatchObject({
+			found: true,
+			value: 42,
+			shape: "number",
+		});
+		expect(structuredJsonRead({ content, selector: "$" })).toMatchObject({
+			found: true,
+			shape: "object",
 		});
 		expect(structuredJsonRead({ content, selector: "a.b.2.c" })).toMatchObject({
 			found: false,
@@ -95,5 +111,30 @@ describe("guardrails-core structured io contract", () => {
 		});
 		expect(result.applied).toBe(true);
 		expect(result.output).not.toContain('"b": 1');
+	});
+
+	it("supports root selector for whole-document set and blocks root remove", () => {
+		const content = JSON.stringify({ a: 1 }, null, 2);
+		const setRoot = structuredJsonWrite({
+			content,
+			selector: "$",
+			operation: "set",
+			payload: { b: 2 },
+			dryRun: false,
+			maxTouchedLines: 40,
+		});
+		expect(setRoot.applied).toBe(true);
+		expect(setRoot.output).toContain('"b": 2');
+
+		const removeRoot = structuredJsonWrite({
+			content,
+			selector: "$",
+			operation: "remove",
+			dryRun: false,
+			maxTouchedLines: 40,
+		});
+		expect(removeRoot.applied).toBe(false);
+		expect(removeRoot.blocked).toBe(true);
+		expect(removeRoot.reason).toBe("root-remove-unsupported");
 	});
 });

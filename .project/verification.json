@@ -4794,6 +4794,15 @@
       "method": "test",
       "timestamp": "2026-04-26T02:50:00Z",
       "evidence": "Slice 2 de macro-APIs: adicionado módulo `guardrails-core-macro-refactor.ts` com contratos dry-first determinísticos (`refactor_rename_symbol`, `refactor_organize_imports`, `refactor_format_target`) e fallback explícito quando engine não está disponível. `guardrails-core` passou a registrar tools macro + comando `/macro-refactor` com audit `guardrails-core.macro-refactor.*`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 35/35 passed."
+    },
+    {
+      "id": "VER-BUD-283",
+      "target": "TASK-BUD-149",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T02:56:00Z",
+      "evidence": "Structured I/O Slice 5: `parseStructuredJsonSelector` ampliado para notação com índice em bracket (`a.b[0].c`) e seletor raiz (`$`). `structuredJsonWrite` suporta replace do documento inteiro com selector `$` + `set` e bloqueia `remove` de raiz com `root-remove-unsupported`. Cobertura atualizada em contract/reexport/command/tool. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts` => 44/44 passed."
     }
   ]
 }

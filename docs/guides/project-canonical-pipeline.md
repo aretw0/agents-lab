@@ -253,6 +253,7 @@ Implementação incremental atual:
 - seed de I/O estruturado (loam-inspired): `guardrails-core-structured-io.ts` com `structuredJsonRead`/`structuredJsonWrite` e selector canônico;
 - reexport de structured I/O em `guardrails-core.ts` para consumo unificado (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`);
 - comando operador `/structured-io` (`json-read`, `json-write`) com dry-run default, cap de blast-radius e audit trail (`guardrails-core.structured-io.*`);
+- seletores JSON aceitam índice em bracket (`a.b[0].c`) e seletor raiz (`$`) para replace de documento inteiro com `set`; `remove` na raiz é bloqueado explicitamente (`root-remove-unsupported`);
 - tool tipada `structured_io_json` (`read|set|remove`) para consumo determinístico por agentes/workflows, também dry-first por default;
 - smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts`, `guardrails-safe-mutation-registration.test.ts`, `guardrails-structured-io-contract.test.ts`, `guardrails-structured-io-command.test.ts`, `guardrails-structured-io-tool.test.ts`.
 
