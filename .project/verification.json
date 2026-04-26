@@ -4758,6 +4758,15 @@
       "method": "test",
       "evidence": "Loop activation labels padronizadas para inglês (CAPS): `buildLoopActivationMarkersLabel` agora emite `READY/ACTIVE_HERE/IN_LOOP` preservando semântica booleana (`preparado`, `ativoAqui`, `emLoop`). Smoke e fixtures atualizadas para a nova nomenclatura em `packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts`; runbook canônico atualizado em `docs/guides/project-canonical-pipeline.md` com decisão de compatibilidade retroativa (labels legados permitidos apenas como histórico textual, decisão por campos estruturados). Validações executadas: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts` (37/37) e `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` (5/5).",
       "timestamp": "2026-04-24T15:05:30Z"
+    },
+    {
+      "id": "VER-BUD-279",
+      "target": "TASK-BUD-150",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-25T23:30:00Z",
+      "evidence": "Auto-resume prompt pós-compactação endurecido para evitar formatação estranha/reticências opacas. `buildAutoResumePromptFromHandoff` agora normaliza segmentos (single-line, remove markdown/backticks/controles, limpa labels redundantes), deduplica após normalização, substitui `...`/`…` por `[ellipsis]` e usa truncamento explícito (`[truncated:+N chars]` + `[auto-resume-prompt-truncated:+N chars]`). Observabilidade adicionada via envelope diagnóstico (`buildAutoResumePromptEnvelopeFromHandoff`) e audit `context-watchdog.auto-resume-prompt` com summary. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` e `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (52/52)."
     }
   ]
 }
