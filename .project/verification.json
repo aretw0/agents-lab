@@ -4884,6 +4884,15 @@
       "method": "test",
       "timestamp": "2026-04-26T05:38:00Z",
       "evidence": "Macro-refactor Slice 4: `refactor_format_target` endurecido com schema de linhas inteiras (`rangeStartLine`/`rangeEndLine` em `Type.Integer`) e bloqueio explícito para range inválido (`rangeEndLine < rangeStartLine`) no contrato runtime. Smokes ampliadas (`guardrails-macro-refactor-contract.test.ts`, `guardrails-macro-refactor-tool.test.ts`) e validação focal executada: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 38/38 passed."
+    },
+    {
+      "id": "VER-BUD-293",
+      "target": "TASK-BUD-146",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T06:05:00Z",
+      "evidence": "Context steering Slice 7: `/guardrails-config` passou a suportar calibração de contexto com chaves `contextWatchdog.notify`, `contextWatchdog.modelSteeringFromLevel`, `contextWatchdog.userNotifyFromLevel`, `contextWatchdog.checkpointPct` e `contextWatchdog.compactPct` (com `reloadRequired=true`). Snapshot efetivo usa normalização do context-watchdog, incluindo ajuste determinístico de ordering entre model/user thresholds. Cobertura ampliada em `guardrails-long-run-intent-queue.test.ts` para spec/coerção/set/snapshot das novas chaves. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 68/68 passed."
     }
   ]
 }

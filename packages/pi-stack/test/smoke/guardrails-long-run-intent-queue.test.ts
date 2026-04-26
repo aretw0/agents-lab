@@ -136,6 +136,33 @@ describe("guardrails-core long-run intent queue", () => {
       const boolOk = coerceGuardrailsRuntimeConfigValue("off", boolSpec);
       expect(boolOk.ok).toBe(true);
       if (boolOk.ok) expect(boolOk.value).toBe(false);
+
+      const modelLevelSpec = resolveGuardrailsRuntimeConfigSpec("contextWatchdog.modelSteeringFromLevel");
+      expect(modelLevelSpec).toBeDefined();
+      if (!modelLevelSpec) return;
+      expect(modelLevelSpec.reloadRequired).toBe(true);
+      const modelLevelOk = coerceGuardrailsRuntimeConfigValue("checkpoint", modelLevelSpec);
+      expect(modelLevelOk.ok).toBe(true);
+      const modelLevelInvalid = coerceGuardrailsRuntimeConfigValue("soon", modelLevelSpec);
+      expect(modelLevelInvalid.ok).toBe(false);
+
+      const setModel = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "contextWatchdog.modelSteeringFromLevel",
+        rawValue: "checkpoint",
+      });
+      expect(setModel.ok).toBe(true);
+
+      const setNotify = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "contextWatchdog.userNotifyFromLevel",
+        rawValue: "warn",
+      });
+      expect(setNotify.ok).toBe(true);
+
+      const contextSnapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
+      expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
+      expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

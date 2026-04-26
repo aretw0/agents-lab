@@ -126,6 +126,9 @@ import {
   structuredJsonRead,
   structuredJsonWrite,
 } from "./guardrails-core-structured-io";
+import {
+  normalizeContextWatchdogConfig,
+} from "./context-watchdog-config";
 
 export {
   resolveBloatSmellConfig,
@@ -810,6 +813,8 @@ export interface GuardrailsRuntimeConfigSpec {
   description: string;
 }
 
+const CONTEXT_WATCH_STEERING_LEVEL_PATTERN = /^(warn|checkpoint|compact)$/;
+
 export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
   {
     key: "longRunIntentQueue.enabled",
@@ -909,6 +914,51 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
     max: 400,
     reloadRequired: false,
     description: "Max chars for assumption audit summary.",
+  },
+  {
+    key: "contextWatchdog.notify",
+    path: ["piStack", "contextWatchdog", "notify"],
+    type: "boolean",
+    reloadRequired: true,
+    description: "Enable/disable user-facing notify for context-watch steering.",
+  },
+  {
+    key: "contextWatchdog.modelSteeringFromLevel",
+    path: ["piStack", "contextWatchdog", "modelSteeringFromLevel"],
+    type: "string",
+    minLength: 4,
+    maxLength: 10,
+    pattern: CONTEXT_WATCH_STEERING_LEVEL_PATTERN,
+    reloadRequired: true,
+    description: "Context level where model steering starts (warn|checkpoint|compact).",
+  },
+  {
+    key: "contextWatchdog.userNotifyFromLevel",
+    path: ["piStack", "contextWatchdog", "userNotifyFromLevel"],
+    type: "string",
+    minLength: 4,
+    maxLength: 10,
+    pattern: CONTEXT_WATCH_STEERING_LEVEL_PATTERN,
+    reloadRequired: true,
+    description: "Context level where user notify starts (warn|checkpoint|compact).",
+  },
+  {
+    key: "contextWatchdog.checkpointPct",
+    path: ["piStack", "contextWatchdog", "checkpointPct"],
+    type: "number",
+    min: 1,
+    max: 99,
+    reloadRequired: true,
+    description: "Checkpoint threshold percent for context-watch evaluation.",
+  },
+  {
+    key: "contextWatchdog.compactPct",
+    path: ["piStack", "contextWatchdog", "compactPct"],
+    type: "number",
+    min: 2,
+    max: 100,
+    reloadRequired: true,
+    description: "Compact threshold percent for context-watch evaluation.",
   },
 ];
 
@@ -1033,6 +1083,9 @@ export function coerceGuardrailsRuntimeConfigValue(
 export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string, GuardrailsRuntimeConfigValue> {
   const queueCfg = resolveLongRunIntentQueueConfig(cwd);
   const autonomyCfg = resolvePragmaticAutonomyConfig(cwd);
+  const settings = readProjectPiSettings(cwd);
+  const piStack = (settings.piStack as Record<string, unknown> | undefined) ?? {};
+  const contextWatchCfg = normalizeContextWatchdogConfig(piStack.contextWatchdog);
 
   return {
     "longRunIntentQueue.enabled": queueCfg.enabled,
@@ -1047,6 +1100,11 @@ export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string,
     "pragmaticAutonomy.enabled": autonomyCfg.enabled,
     "pragmaticAutonomy.noObviousQuestions": autonomyCfg.noObviousQuestions,
     "pragmaticAutonomy.maxAuditTextChars": autonomyCfg.maxAuditTextChars,
+    "contextWatchdog.notify": contextWatchCfg.notify,
+    "contextWatchdog.modelSteeringFromLevel": contextWatchCfg.modelSteeringFromLevel,
+    "contextWatchdog.userNotifyFromLevel": contextWatchCfg.userNotifyFromLevel,
+    "contextWatchdog.checkpointPct": contextWatchCfg.checkpointPct ?? "(auto)",
+    "contextWatchdog.compactPct": contextWatchCfg.compactPct ?? "(auto)",
   };
 }
 
@@ -1061,6 +1119,8 @@ export function buildGuardrailsConfigHelpLines(): string[] {
     "  /guardrails-config get longRunIntentQueue.maxItems",
     "  /guardrails-config set longRunIntentQueue.maxItems 80",
     "  /guardrails-config set longRunIntentQueue.enabled true",
+    "  /guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint",
+    "  /guardrails-config set contextWatchdog.userNotifyFromLevel compact",
     "",
     "fallback: edit .pi/settings.json manually only for unsupported keys.",
   ];
