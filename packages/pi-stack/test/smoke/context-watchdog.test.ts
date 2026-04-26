@@ -27,6 +27,7 @@ import {
 	resolveContextWatchSteeringDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
 	resolvePreCompactCalmCloseSignal,
+	resolveAntiParalysisDispatch,
 	isAutoCompactDeferralReason,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
@@ -281,6 +282,64 @@ describe("context-watchdog", () => {
 			deferCount: 0,
 		});
 		expect(nonCompact.calmCloseReady).toBe(false);
+	});
+
+	it("gates anti-paralysis warning with grace/cooldown and window cap", () => {
+		expect(resolveAntiParalysisDispatch({
+			triggered: true,
+			nowMs: 100_000,
+			deferWindowStartedAtMs: 80_000,
+			graceWindowMs: 60_000,
+			lastNotifyAtMs: 0,
+			notifyCooldownMs: 300_000,
+			notifiesInWindow: 0,
+			maxNotifiesPerWindow: 1,
+		})).toMatchObject({
+			shouldNotify: false,
+			reason: "grace-window",
+		});
+
+		expect(resolveAntiParalysisDispatch({
+			triggered: true,
+			nowMs: 180_000,
+			deferWindowStartedAtMs: 80_000,
+			graceWindowMs: 60_000,
+			lastNotifyAtMs: 0,
+			notifyCooldownMs: 300_000,
+			notifiesInWindow: 0,
+			maxNotifiesPerWindow: 1,
+		})).toEqual({
+			shouldNotify: true,
+			reason: "emit",
+		});
+
+		expect(resolveAntiParalysisDispatch({
+			triggered: true,
+			nowMs: 220_000,
+			deferWindowStartedAtMs: 80_000,
+			graceWindowMs: 60_000,
+			lastNotifyAtMs: 180_000,
+			notifyCooldownMs: 300_000,
+			notifiesInWindow: 1,
+			maxNotifiesPerWindow: 2,
+		})).toMatchObject({
+			shouldNotify: false,
+			reason: "cooldown",
+		});
+
+		expect(resolveAntiParalysisDispatch({
+			triggered: true,
+			nowMs: 700_000,
+			deferWindowStartedAtMs: 80_000,
+			graceWindowMs: 60_000,
+			lastNotifyAtMs: 180_000,
+			notifyCooldownMs: 300_000,
+			notifiesInWindow: 2,
+			maxNotifiesPerWindow: 2,
+		})).toEqual({
+			shouldNotify: false,
+			reason: "max-notifies-reached",
+		});
 	});
 
 	it("builds portable bootstrap plans for control-plane and worker presets", () => {

@@ -325,6 +325,19 @@ export type PreCompactCalmCloseSignal = {
 	recommendation: string;
 };
 
+export type AntiParalysisDispatchDecision = {
+	shouldNotify: boolean;
+	reason:
+		| "not-triggered"
+		| "missing-window"
+		| "grace-window"
+		| "cooldown"
+		| "max-notifies-reached"
+		| "emit";
+	graceRemainingMs?: number;
+	cooldownRemainingMs?: number;
+};
+
 export function resolveCheckpointEvidenceReadyForCalmClose(input: {
 	handoffLastEventLevel?: ContextWatchdogLevel | null;
 	handoffLastEventAgeMs?: number;
@@ -374,6 +387,58 @@ export function resolvePreCompactCalmCloseSignal(input: {
 		antiParalysisTriggered,
 		recommendation,
 	};
+}
+
+export function resolveAntiParalysisDispatch(input: {
+	triggered: boolean;
+	nowMs: number;
+	deferWindowStartedAtMs: number;
+	graceWindowMs: number;
+	lastNotifyAtMs: number;
+	notifyCooldownMs: number;
+	notifiesInWindow: number;
+	maxNotifiesPerWindow: number;
+}): AntiParalysisDispatchDecision {
+	if (!input.triggered) {
+		return { shouldNotify: false, reason: "not-triggered" };
+	}
+
+	const startedAt = Math.floor(Number(input.deferWindowStartedAtMs ?? 0));
+	if (!Number.isFinite(startedAt) || startedAt <= 0) {
+		return { shouldNotify: false, reason: "missing-window" };
+	}
+
+	const nowMs = Math.floor(Number(input.nowMs ?? 0));
+	const graceWindowMs = Math.max(0, Math.floor(Number(input.graceWindowMs ?? 0)));
+	const elapsedInWindowMs = nowMs - startedAt;
+	if (elapsedInWindowMs < graceWindowMs) {
+		return {
+			shouldNotify: false,
+			reason: "grace-window",
+			graceRemainingMs: Math.max(0, graceWindowMs - elapsedInWindowMs),
+		};
+	}
+
+	const maxNotifiesPerWindow = Math.max(1, Math.floor(Number(input.maxNotifiesPerWindow ?? 1)));
+	const notifiesInWindow = Math.max(0, Math.floor(Number(input.notifiesInWindow ?? 0)));
+	if (notifiesInWindow >= maxNotifiesPerWindow) {
+		return {
+			shouldNotify: false,
+			reason: "max-notifies-reached",
+		};
+	}
+
+	const lastNotifyAtMs = Math.floor(Number(input.lastNotifyAtMs ?? 0));
+	const notifyCooldownMs = Math.max(0, Math.floor(Number(input.notifyCooldownMs ?? 0)));
+	if (lastNotifyAtMs > 0 && (nowMs - lastNotifyAtMs) < notifyCooldownMs) {
+		return {
+			shouldNotify: false,
+			reason: "cooldown",
+			cooldownRemainingMs: Math.max(0, notifyCooldownMs - (nowMs - lastNotifyAtMs)),
+		};
+	}
+
+	return { shouldNotify: true, reason: "emit" };
 }
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
@@ -478,12 +543,17 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let autoCompactRetryDueAt = 0;
 	let consecutiveWarnCount = 0;
 	let compactDeferCount = 0;
-	let lastAntiParalysisAuditDeferCount = 0;
+	let compactDeferWindowStartedAt = 0;
+	let antiParalysisNotifyCountInWindow = 0;
+	let lastAntiParalysisNotifyAt = 0;
 	let announceWindowStartAt = 0;
 	let announceCountInWindow = 0;
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
 	const CALM_CLOSE_DEFER_THRESHOLD = 3;
+	const ANTI_PARALYSIS_GRACE_WINDOW_MS = 2 * 60 * 1000;
+	const ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS = 5 * 60 * 1000;
+	const ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW = 1;
 
 	const getAnnouncementsInWindow = (nowMs: number): number => {
 		if (announceWindowStartAt <= 0) return 0;
@@ -568,10 +638,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			&& !autoCompactState.decision.trigger
 			&& isAutoCompactDeferralReason(autoCompactState.decision.reason)
 		) {
+			if (compactDeferCount === 0) {
+				compactDeferWindowStartedAt = now;
+				antiParalysisNotifyCountInWindow = 0;
+			}
 			compactDeferCount += 1;
 		} else {
 			compactDeferCount = 0;
-			lastAntiParalysisAuditDeferCount = 0;
+			compactDeferWindowStartedAt = 0;
+			antiParalysisNotifyCountInWindow = 0;
+			lastAntiParalysisNotifyAt = 0;
 		}
 		const handoffForCalmClose = readHandoffJson(ctx.cwd);
 		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
@@ -587,13 +663,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			deferCount: compactDeferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
 		});
-		if (
-			calmCloseSignal.antiParalysisTriggered
-			&& compactDeferCount >= CALM_CLOSE_DEFER_THRESHOLD
-			&& compactDeferCount % CALM_CLOSE_DEFER_THRESHOLD === 0
-			&& compactDeferCount !== lastAntiParalysisAuditDeferCount
-		) {
-			lastAntiParalysisAuditDeferCount = compactDeferCount;
+		const antiParalysisDispatch = resolveAntiParalysisDispatch({
+			triggered: calmCloseSignal.antiParalysisTriggered,
+			nowMs: now,
+			deferWindowStartedAtMs: compactDeferWindowStartedAt,
+			graceWindowMs: ANTI_PARALYSIS_GRACE_WINDOW_MS,
+			lastNotifyAtMs: lastAntiParalysisNotifyAt,
+			notifyCooldownMs: ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
+			notifiesInWindow: antiParalysisNotifyCountInWindow,
+			maxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
+		});
+		if (antiParalysisDispatch.shouldNotify) {
+			lastAntiParalysisNotifyAt = now;
+			antiParalysisNotifyCountInWindow += 1;
 			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 				"context-watchdog.pre-compact-calm-close",
 				{
@@ -602,6 +684,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
 					decisionReason: autoCompactState.decision.reason,
 					recommendation: calmCloseSignal.recommendation,
+					dispatchReason: antiParalysisDispatch.reason,
+					graceWindowMs: ANTI_PARALYSIS_GRACE_WINDOW_MS,
+					notifyCooldownMs: ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
+					notifyCountInWindow: antiParalysisNotifyCountInWindow,
+					maxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
 				},
 			);
 			ctx.ui.notify(calmCloseSignal.recommendation, "warning");
@@ -784,6 +871,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			deferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
 		});
+		const antiParalysisDispatch = resolveAntiParalysisDispatch({
+			triggered: calmClose.antiParalysisTriggered,
+			nowMs,
+			deferWindowStartedAtMs: compactDeferWindowStartedAt,
+			graceWindowMs: ANTI_PARALYSIS_GRACE_WINDOW_MS,
+			lastNotifyAtMs: lastAntiParalysisNotifyAt,
+			notifyCooldownMs: ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
+			notifiesInWindow: antiParalysisNotifyCountInWindow,
+			maxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
+		});
 		return {
 			...state,
 			retryScheduled: Boolean(autoCompactRetryTimer),
@@ -823,6 +920,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			deferCount: calmClose.deferCount,
 			deferThreshold: calmClose.deferThreshold,
 			antiParalysisTriggered: calmClose.antiParalysisTriggered,
+			antiParalysisDispatchReason: antiParalysisDispatch.reason,
+			antiParalysisGraceRemainingMs: antiParalysisDispatch.graceRemainingMs,
+			antiParalysisCooldownRemainingMs: antiParalysisDispatch.cooldownRemainingMs,
+			antiParalysisNotifyCountInWindow,
+			antiParalysisMaxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
 			calmCloseRecommendation: calmClose.recommendation,
 		};
 	};
@@ -862,7 +964,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		clearAutoCompactRetryTimer();
 		consecutiveWarnCount = 0;
 		compactDeferCount = 0;
-		lastAntiParalysisAuditDeferCount = 0;
+		compactDeferWindowStartedAt = 0;
+		antiParalysisNotifyCountInWindow = 0;
+		lastAntiParalysisNotifyAt = 0;
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
 		run(ctx, "session_start");
@@ -962,7 +1066,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;
 				compactDeferCount = 0;
-				lastAntiParalysisAuditDeferCount = 0;
+				compactDeferWindowStartedAt = 0;
+				antiParalysisNotifyCountInWindow = 0;
+				lastAntiParalysisNotifyAt = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
 				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
@@ -1020,7 +1126,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					assessment.recommendation,
 					`steering-status: ${formatContextWatchSteeringStatus(assessment)}`,
 					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
-					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"}`,
+					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"} dispatch=${autoCompact.antiParalysisDispatchReason} graceRemainingMs=${autoCompact.antiParalysisGraceRemainingMs ?? "n/a"} cooldownRemainingMs=${autoCompact.antiParalysisCooldownRemainingMs ?? "n/a"} notifyCount=${autoCompact.antiParalysisNotifyCountInWindow}/${autoCompact.antiParalysisMaxNotifiesPerWindow}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,

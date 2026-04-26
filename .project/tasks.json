@@ -3631,7 +3631,7 @@
     {
       "id": "TASK-BUD-151",
       "description": "[P1] Reduzir ruído do warning anti-paralysis em contexto alto para evitar repetição prematura após alerta de compactação.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -3644,8 +3644,7 @@
         "Repetição do warning é limitada por cooldown e cap por janela (sem flood), mantendo sinal acionável e auditável.",
         "Smoke cobre cenário de compact no limite + defer repetido, validando escalonamento progressivo em vez de spam inicial."
       ],
-      "verification": "",
-      "notes": "Backlog criado por steering humano em 2026-04-26: warning anti-paralysis está exagerado e repetitivo (várias emissões seguidas logo após aviso de compact), gerando ruído sem dar tempo para o modelo encerrar micro-slice. Ajustar política para escalonamento mais gradual e menos spam."
-    }
+      "verification": "VER-BUD-281",
+      "notes": "Backlog criado por steering humano em 2026-04-26: warning anti-paralysis está exagerado e repetitivo (várias emissões seguidas logo após aviso de compact), gerando ruído sem dar tempo para o modelo encerrar micro-slice. Ajustar política para escalonamento mais gradual e menos spam.\n[2026-04-26T00:00:00Z] Slice 1 (anti-paralysis cadence): `context-watchdog` passou a aplicar gate determinístico de emissão para anti-paralysis com grace window (2min após início do defer), cooldown entre avisos (5min) e cap por janela de defer (`maxNotifiesPerWindow=1`), evitando flood imediato após `compact-now`. Estado de status/tool agora expõe `antiParalysisDispatchReason` + remanescente de grace/cooldown + orçamento de notify. Smoke ampliada com `resolveAntiParalysisDispatch` cobrindo grace/cooldown/cap; regressão focal verde."    }
   ]
 }
