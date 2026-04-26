@@ -75,4 +75,21 @@ describe("guardrails-core macro-refactor tools", () => {
     expect((result.details as any)?.supported).toBe(false);
     expect((result.details as any)?.applied).toBe(false);
   });
+
+  it("blocks scoped rename without path anchor", async () => {
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const renameTool = getTool(pi, "refactor_rename_symbol");
+
+    const result = await renameTool.execute(
+      "tc-rename-2",
+      { symbol: "OldName", to: "NewName", scope: "file", dryRun: true },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect((result.details as any)?.blocked).toBe(true);
+    expect((result.details as any)?.reason).toBe("invalid-target");
+  });
 });

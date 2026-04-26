@@ -29,6 +29,14 @@ describe("guardrails-core macro-refactor contract", () => {
     expect(missingSymbol.blocked).toBe(true);
     expect(missingSymbol.reason).toBe("invalid-symbol");
 
+    const missingScopedPath = buildRefactorRenameSymbolResult({
+      symbol: "OldName",
+      to: "NewName",
+      scope: "file",
+    });
+    expect(missingScopedPath.blocked).toBe(true);
+    expect(missingScopedPath.reason).toBe("invalid-target");
+
     const outsidePath = buildRefactorRenameSymbolResult({
       symbol: "OldName",
       to: "NewName",

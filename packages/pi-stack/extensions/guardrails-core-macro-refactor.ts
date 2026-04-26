@@ -120,6 +120,23 @@ export function buildRefactorRenameSymbolResult(input: {
     };
   }
 
+  if ((scope === "file" || scope === "directory") && !path) {
+    return {
+      operation: "refactor_rename_symbol",
+      dryRun,
+      applyRequested,
+      applied: false,
+      supported: false,
+      reason: "invalid-target",
+      blocked: true,
+      riskLevel: "high",
+      request,
+      summary: `refactor rename: scope '${scope}' requires a path anchor inside cwd.`,
+      fallbackAction: "provide --path when using file/directory scope, or switch scope to workspace.",
+      rollbackToken: null,
+    };
+  }
+
   const riskLevel = riskFromScope(scope);
   return {
     operation: "refactor_rename_symbol",
