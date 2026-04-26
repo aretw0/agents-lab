@@ -12,6 +12,7 @@ function dropCommonListPrefix(text: string): string {
 	return text
 		.replace(/^[-*•]+\s+/, "")
 		.replace(/^\d+[.)]\s+/, "")
+		.replace(/^(next|blockers|focustasks|execution)\s*:\s*/i, "")
 		.trim();
 }
 

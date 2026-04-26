@@ -367,12 +367,15 @@ describe("context-watchdog", () => {
 			blockers: ["strange | blocker ... with compacted tail"],
 			next_actions: [
 				"1) \"Action with markdown `code` and newline\nsegment and very long payload \"" + "x".repeat(220),
+				"next: run focused slice",
 			],
 		} as any);
 		expect(prompt).toContain("focusTasks: TASK-BUD-150");
 		expect(prompt).not.toContain("TASK-BUD-150, TASK-BUD-150");
 		expect(prompt).toContain("blockers: strange / blocker [ellipsis] with compacted tail");
 		expect(prompt).toContain("[truncated:+");
+		expect(prompt).toContain("run focused slice");
+		expect(prompt).not.toContain("next: next:");
 		expect(prompt).not.toContain("...");
 		expect(prompt).not.toContain("…");
 	});
