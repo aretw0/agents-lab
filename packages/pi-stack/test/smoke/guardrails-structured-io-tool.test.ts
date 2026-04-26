@@ -33,8 +33,14 @@ describe("guardrails-core structured_io_json tool", () => {
   it("registers structured_io_json tool", () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
-    const names = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([t]) => t?.name);
-    expect(names).toContain("structured_io_json");
+    const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io_json");
+    expect(call).toBeTruthy();
+    const tool = call?.[0] as any;
+    const operationAnyOf = tool?.parameters?.properties?.operation?.anyOf ?? [];
+    const operationLiterals = operationAnyOf
+      .map((item: any) => item?.const)
+      .filter((value: unknown) => typeof value === "string");
+    expect(operationLiterals).toEqual(["read", "set", "remove"]);
   });
 
   it("keeps set operation dry-run by default and applies when dryRun=false", async () => {

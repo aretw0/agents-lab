@@ -4821,6 +4821,15 @@
       "method": "test",
       "timestamp": "2026-04-26T03:02:00Z",
       "evidence": "Project board surface hardening: corrigida assinatura de execução de `board_query`/`board_update` para contrato canônico de tools e uso de `ctx.cwd` (evita fallback indevido para `verification` por parâmetros ignorados e elimina acoplamento a `process.cwd`). Smoke `project-board-surface.test.ts` ampliada com testes de execute path real via `registerTool`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 36/36 passed."
+    },
+    {
+      "id": "VER-BUD-286",
+      "target": "TASK-BUD-149",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T03:04:00Z",
+      "evidence": "Structured I/O Slice 6: `structured_io_json` teve schema tipado endurecido no `guardrails-core` com `operation` em enum literal (`read|set|remove`) e `maxTouchedLines` como inteiro (`Type.Integer`). Smoke `guardrails-structured-io-tool.test.ts` agora valida contrato do schema registrado, mantendo regressão de command/tool verde. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 36/36 passed."
     }
   ]
 }
