@@ -4857,6 +4857,15 @@
       "method": "test",
       "timestamp": "2026-04-26T05:18:00Z",
       "evidence": "Project board surface Slice 8: `board_query` endurecido para falhar explicitamente com `missing-or-invalid-entity` quando parâmetro obrigatório não chega, evitando fallback silencioso para `verification`. Smoke `project-board-surface.test.ts` ampliada com caso de erro explícito e regressão execute-path preservada. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 37/37 passed."
+    },
+    {
+      "id": "VER-BUD-290",
+      "target": "TASK-BUD-146",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T05:20:00Z",
+      "evidence": "Context steering Slice 5: `resolveContextWatchSteeringDispatch` foi calibrado para emitir notify apenas em níveis críticos (`checkpoint`/`compact`), mantendo `warn` como steering passivo por status/persistência (delivery `fallback-status`) e reduzindo ruído que freava execução antes da janela de compactação. Cobertura ajustada em `context-watchdog.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 53/53 passed."
     }
   ]
 }

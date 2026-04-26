@@ -483,6 +483,18 @@ describe("context-watchdog", () => {
 		expect(warnFallback.shouldNotify).toBe(false);
 		expect(warnFallback.delivery).toBe("fallback-status");
 
+		const warnNotifyEnabled = resolveContextWatchSteeringDispatch({
+			notifyEnabled: true,
+			assessmentLevel: "warn",
+			lastAnnouncedLevel: null,
+			elapsedMs: 0,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(warnNotifyEnabled.shouldSignal).toBe(true);
+		expect(warnNotifyEnabled.shouldNotify).toBe(false);
+		expect(warnNotifyEnabled.delivery).toBe("fallback-status");
+
 		const checkpointCritical = resolveContextWatchSteeringDispatch({
 			notifyEnabled: false,
 			assessmentLevel: "checkpoint",

@@ -208,7 +208,8 @@ export function resolveContextWatchSteeringDispatch(input: {
 		};
 	}
 
-	const shouldNotify = input.notifyEnabled || input.assessmentLevel === "checkpoint" || input.assessmentLevel === "compact";
+	const isCriticalLevel = input.assessmentLevel === "checkpoint" || input.assessmentLevel === "compact";
+	const shouldNotify = isCriticalLevel;
 	return {
 		shouldSignal: true,
 		shouldPersist: true,

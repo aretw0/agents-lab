@@ -275,8 +275,8 @@ Regras operacionais:
 Implementação atual (slice 2/4):
 - persistência de steering (`context_watch_events`/`next_actions`) independe de `notify`;
 - status passivo (`context-watch-steering`) é atualizado continuamente por avaliação para evitar estado visual stale;
-- quando `notify=false`, `warn` permanece em fallback de status (sem silêncio);
-- `checkpoint/compact` continuam notificados como sinal crítico mesmo com `notify=false`;
+- `warn` permanece em fallback de status (sem notify textual) para evitar freio prematuro antes da janela de compactação;
+- `checkpoint/compact` continuam notificados como sinal crítico;
 - auditoria dedicada: `context-watchdog.passive-steering-signal`.
 
 Referência de contrato inicial: `docs/research/task-bud-146-context-steering-signal-invariant-2026-04-24.md`.
