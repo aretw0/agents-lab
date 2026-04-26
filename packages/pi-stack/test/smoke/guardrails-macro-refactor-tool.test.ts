@@ -48,6 +48,13 @@ describe("guardrails-core macro-refactor tools", () => {
       .map((item: any) => item?.const)
       .filter((value: unknown) => typeof value === "string");
     expect(scopeLiterals).toEqual(["file", "directory", "workspace"]);
+
+    const formatToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === "refactor_format_target",
+    );
+    const formatTool = formatToolCall?.[0] as any;
+    expect(formatTool?.parameters?.properties?.rangeStartLine?.type).toBe("integer");
+    expect(formatTool?.parameters?.properties?.rangeEndLine?.type).toBe("integer");
   });
 
   it("returns deterministic fallback when apply is requested", async () => {

@@ -3319,8 +3319,8 @@ export default function (pi: ExtensionAPI) {
     description: "Deterministic dry-first macro plan for format-target with explicit fallback.",
     parameters: Type.Object({
       path: Type.String({ description: "Target file path inside cwd." }),
-      rangeStartLine: Type.Optional(Type.Number({ minimum: 1 })),
-      rangeEndLine: Type.Optional(Type.Number({ minimum: 1 })),
+      rangeStartLine: Type.Optional(Type.Integer({ minimum: 1 })),
+      rangeEndLine: Type.Optional(Type.Integer({ minimum: 1 })),
       dryRun: Type.Optional(Type.Boolean()),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

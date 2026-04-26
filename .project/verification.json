@@ -4875,6 +4875,15 @@
       "method": "test",
       "timestamp": "2026-04-26T05:32:00Z",
       "evidence": "Context steering Slice 6: semântica de dispatch explicitada com dois limiares (`modelSteeringFromLevel` e `userNotifyFromLevel`) para evitar contradição com `notify` legado, mantendo warn passivo e escalation progressiva. Também foi adicionado detector de reload necessário por mtime do source da extensão (`operatorSignal.reloadRequired`) em `context_watch_status` e `/context-watch`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 54/54 passed."
+    },
+    {
+      "id": "VER-BUD-292",
+      "target": "TASK-BUD-144",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T05:38:00Z",
+      "evidence": "Macro-refactor Slice 4: `refactor_format_target` endurecido com schema de linhas inteiras (`rangeStartLine`/`rangeEndLine` em `Type.Integer`) e bloqueio explícito para range inválido (`rangeEndLine < rangeStartLine`) no contrato runtime. Smokes ampliadas (`guardrails-macro-refactor-contract.test.ts`, `guardrails-macro-refactor-tool.test.ts`) e validação focal executada: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 38/38 passed."
     }
   ]
 }

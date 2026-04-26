@@ -259,6 +259,27 @@ export function buildRefactorFormatTargetResult(input: {
     };
   }
 
+  if (
+    rangeStartLine !== undefined
+    && rangeEndLine !== undefined
+    && rangeEndLine < rangeStartLine
+  ) {
+    return {
+      operation: "refactor_format_target",
+      dryRun,
+      applyRequested,
+      applied: false,
+      supported: false,
+      reason: "invalid-target",
+      blocked: true,
+      riskLevel: "high",
+      request: { path, rangeStartLine, rangeEndLine },
+      summary: "format target: invalid range (rangeEndLine must be >= rangeStartLine).",
+      fallbackAction: "provide a valid range window or omit range for full-file preview.",
+      rollbackToken: null,
+    };
+  }
+
   return {
     operation: "refactor_format_target",
     dryRun,

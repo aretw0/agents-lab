@@ -59,4 +59,18 @@ describe("guardrails-core macro-refactor contract", () => {
     expect(format.reason).toBe("engine-unavailable");
     expect(format.riskLevel).toBe("low");
   });
+
+  it("blocks invalid format range windows", () => {
+    const invalidRange = buildRefactorFormatTargetResult({
+      path: "src/main.ts",
+      rangeStartLine: 20,
+      rangeEndLine: 10,
+      dryRun: true,
+      pathInsideCwd: true,
+    });
+
+    expect(invalidRange.blocked).toBe(true);
+    expect(invalidRange.reason).toBe("invalid-target");
+    expect(invalidRange.summary).toContain("invalid range");
+  });
 });
