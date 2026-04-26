@@ -3611,10 +3611,11 @@
     {
       "id": "TASK-BUD-150",
       "description": "[P1] Melhorar o prompt de auto-resume pós-compactação para evitar formatação estranha e truncamento opaco com reticências (`...`).",
-      "status": "planned",
+      "status": "in-progress",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-resume.ts",
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
         ".project/handoff.json"
       ],
       "acceptance_criteria": [
@@ -3623,7 +3624,7 @@
         "Smoke/regressão cobre montagem do resumo de handoff com conteúdo longo para garantir previsibilidade pós-compactação."
       ],
       "verification": "",
-      "notes": "Backlog criado por feedback humano em 2026-04-25: prompt de auto-resume pós-compactação está chegando com formatação estranha e trechos com `...`, reduzindo clareza operacional."
+      "notes": "Backlog criado por feedback humano em 2026-04-25: prompt de auto-resume pós-compactação está chegando com formatação estranha e trechos com `...`, reduzindo clareza operacional.\n[2026-04-25T00:00:00Z] Slice 1 (prompt hygiene): `buildAutoResumePromptFromHandoff` agora normaliza payload para single-line canônica (remove artefatos markdown/backticks/controle, sanitiza `|`) e troca truncamento opaco por marcador explícito `[truncated:+N chars]`; reticências (`...`/`…`) viram marcador textual `[ellipsis]`. Smoke atualizada em `context-watchdog.test.ts` para cobrir artefatos + truncamento explícito."
     }
   ]
 }

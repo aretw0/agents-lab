@@ -8,10 +8,24 @@ function normalizeStringArray(value: unknown): string[] {
 	return value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
 }
 
+function normalizePromptSegment(value: string): string {
+	const raw = String(value ?? "");
+	const withoutMarkdown = raw
+		.replace(/`([^`]+)`/g, "$1")
+		.replace(/[\u0000-\u001f\u007f]+/g, " ");
+	const singleLine = withoutMarkdown.replace(/\s+/g, " ").trim();
+	const normalizedPipes = singleLine.replace(/\|/g, " / ").replace(/\s+\/\s+/g, " / ");
+	return normalizedPipes
+		.replace(/\.\.\.+/g, "[ellipsis]")
+		.replace(/…+/g, "[ellipsis]");
+}
+
 function truncateForPrompt(value: string, max = 180): string {
-	const s = String(value ?? "").trim().replace(/\s+/g, " ");
+	const s = normalizePromptSegment(value);
 	if (s.length <= max) return s;
-	return `${s.slice(0, Math.max(0, max - 1))}…`;
+	const keep = Math.max(1, Math.floor(max));
+	const omitted = Math.max(0, s.length - keep);
+	return `${s.slice(0, keep)} [truncated:+${omitted} chars]`;
 }
 
 export function resolveHandoffFreshness(
@@ -65,7 +79,9 @@ export function buildAutoResumePromptFromHandoff(
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const tasks = normalizeStringArray(handoff.current_tasks).slice(0, 3);
+	const tasks = normalizeStringArray(handoff.current_tasks)
+		.slice(0, 3)
+		.map((task) => truncateForPrompt(task, 48));
 	const blockers = normalizeStringArray(handoff.blockers)
 		.filter((b) => !b.startsWith("context-watch-"))
 		.slice(0, 2)
