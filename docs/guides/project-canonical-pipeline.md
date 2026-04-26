@@ -226,6 +226,13 @@ Contrato mínimo:
 - resposta com preview + escopo de arquivos afetados;
 - `apply` com trilha auditável e rollback mínimo.
 
+Implementação incremental atual:
+- helper first-party `guardrails-core-macro-refactor.ts` com builders determinísticos para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`;
+- tools canônicas publicadas no guardrails-core com mesmo contrato (`refactor_rename_symbol`, `refactor_organize_imports`, `refactor_format_target`);
+- comando operador `/macro-refactor` (`rename-symbol`, `organize-imports`, `format-target`) para preview/apply explícito;
+- fallback explícito `engine-unavailable` quando LSP/formatter runtime não estiver disponível (sem apply silencioso);
+- trilha auditável `guardrails-core.macro-refactor.*` para inspeção de decisão/risco.
+
 Referência de contrato inicial: `docs/research/task-bud-144-macro-api-contract-2026-04-24.md`.
 
 ### Mutação segura para arquivo grande e query estruturada (roadmap)

@@ -4785,6 +4785,15 @@
       "method": "test",
       "timestamp": "2026-04-26T02:41:00Z",
       "evidence": "Cadência anti-paralysis recalibrada no `context-watchdog`: aviso só pode emitir após grace window de defer, respeitando cooldown e cap por janela para evitar spam pós-compact. Adicionado helper `resolveAntiParalysisDispatch` e observabilidade de dispatch no status/tool. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 53/53 passed."
+    },
+    {
+      "id": "VER-BUD-282",
+      "target": "TASK-BUD-144",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T02:50:00Z",
+      "evidence": "Slice 2 de macro-APIs: adicionado módulo `guardrails-core-macro-refactor.ts` com contratos dry-first determinísticos (`refactor_rename_symbol`, `refactor_organize_imports`, `refactor_format_target`) e fallback explícito quando engine não está disponível. `guardrails-core` passou a registrar tools macro + comando `/macro-refactor` com audit `guardrails-core.macro-refactor.*`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 35/35 passed."
     }
   ]
 }
