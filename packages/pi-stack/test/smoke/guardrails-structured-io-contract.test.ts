@@ -128,6 +128,20 @@ describe("guardrails-core structured io contract", () => {
 		expect(result.output).not.toContain('"b": 1');
 	});
 
+	it("normalizes invalid maxTouchedLines deterministically", () => {
+		const content = JSON.stringify({ a: { b: 1 } }, null, 2);
+		const result = structuredJsonWrite({
+			content,
+			selector: "a.b",
+			operation: "set",
+			payload: 2,
+			dryRun: false,
+			maxTouchedLines: Number.NaN as unknown as number,
+		});
+		expect(result.maxTouchedLines).toBe(120);
+		expect(result.applied).toBe(true);
+	});
+
 	it("supports quoted-key selectors in write path", () => {
 		const content = JSON.stringify({ a: { "b.c": 1 } }, null, 2);
 		const result = structuredJsonWrite({

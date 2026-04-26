@@ -225,6 +225,12 @@ function riskFromTouchedLines(lines: number): StructuredIoRiskLevel {
   return "high";
 }
 
+function normalizeMaxTouchedLines(input: unknown): number {
+  const raw = Number(input);
+  if (!Number.isFinite(raw)) return 120;
+  return Math.max(1, Math.floor(raw));
+}
+
 export function structuredJsonWrite(input: {
   content: string;
   selector: string;
@@ -234,7 +240,7 @@ export function structuredJsonWrite(input: {
   maxTouchedLines?: number;
 }): StructuredJsonWriteResult {
   const dryRun = input.dryRun !== false;
-  const maxTouchedLines = Math.max(1, Math.floor(Number(input.maxTouchedLines ?? 120)));
+  const maxTouchedLines = normalizeMaxTouchedLines(input.maxTouchedLines);
   const parsedSelector = parseStructuredJsonSelector(input.selector);
   if (!parsedSelector.ok) {
     return {

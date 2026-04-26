@@ -3875,13 +3875,20 @@ export default function (pi: ExtensionAPI) {
 
         const applyRequested = tokens.includes("--apply");
         const maxLinesFlagIndex = tokens.findIndex((t) => t === "--max-lines");
-        const maxTouchedLines = maxLinesFlagIndex >= 0
-          ? Number(tokens[maxLinesFlagIndex + 1])
-          : 120;
+        let maxTouchedLines = 120;
+        if (maxLinesFlagIndex >= 0) {
+          const rawMaxLines = tokens[maxLinesFlagIndex + 1];
+          const parsedMaxLines = Number(rawMaxLines);
+          if (!Number.isFinite(parsedMaxLines) || parsedMaxLines < 1) {
+            ctx.ui.notify("structured-io: --max-lines must be a positive integer.", "warning");
+            return;
+          }
+          maxTouchedLines = Math.floor(parsedMaxLines);
+        }
 
         const writeMatch = rawArgs.match(/^json-write\s+\S+\s+\S+\s+(set|remove)\s*(.*)$/i);
         let payloadText = writeMatch?.[2] ?? "";
-        payloadText = payloadText.replace(/\s--apply\b/i, "").replace(/\s--max-lines\s+\d+\b/i, "").trim();
+        payloadText = payloadText.replace(/\s--apply\b/i, "").replace(/\s--max-lines\s+\S+\b/i, "").trim();
 
         let payload: unknown = undefined;
         if (operation === "set") {
