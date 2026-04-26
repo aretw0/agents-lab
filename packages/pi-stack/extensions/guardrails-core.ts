@@ -2964,9 +2964,13 @@ export default function (pi: ExtensionAPI) {
     label: "Safe Mutate Large File",
     description: "Dry-first deterministic risk assessment for large-file mutation operations.",
     parameters: Type.Object({
-      touchedLines: Type.Number({ minimum: 0 }),
-      maxTouchedLines: Type.Number({ minimum: 1 }),
-      anchorState: Type.String({ description: "unique | missing | ambiguous" }),
+      touchedLines: Type.Integer({ minimum: 0 }),
+      maxTouchedLines: Type.Integer({ minimum: 1 }),
+      anchorState: Type.Union([
+        Type.Literal("unique"),
+        Type.Literal("missing"),
+        Type.Literal("ambiguous"),
+      ], { description: "unique | missing | ambiguous" }),
       dryRun: Type.Optional(Type.Boolean()),
       confirmed: Type.Optional(Type.Boolean()),
     }),
@@ -3035,7 +3039,7 @@ export default function (pi: ExtensionAPI) {
     label: "Structured Query Plan",
     description: "Deterministic structured query safety plan with optional mutation blocking.",
     parameters: Type.Object({
-      query: Type.String(),
+      query: Type.String({ minLength: 1 }),
       forbidMutation: Type.Optional(Type.Boolean()),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

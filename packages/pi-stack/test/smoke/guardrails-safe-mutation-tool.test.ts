@@ -31,9 +31,17 @@ describe("guardrails-core safe mutation tools", () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
 
-    const names = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool?.name);
+    const calls = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls;
+    const names = calls.map(([tool]) => tool?.name);
     expect(names).toContain("safe_mutate_large_file");
     expect(names).toContain("structured_query_plan");
+
+    const safeMutateTool = calls.find(([tool]) => tool?.name === "safe_mutate_large_file")?.[0] as any;
+    const anchorAnyOf = safeMutateTool?.parameters?.properties?.anchorState?.anyOf ?? [];
+    const anchorLiterals = anchorAnyOf
+      .map((item: any) => item?.const)
+      .filter((value: unknown) => typeof value === "string");
+    expect(anchorLiterals).toEqual(["unique", "missing", "ambiguous"]);
   });
 
   it("returns deterministic large-file and query plans", async () => {

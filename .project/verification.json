@@ -4839,6 +4839,15 @@
       "method": "test",
       "timestamp": "2026-04-26T05:15:00Z",
       "evidence": "Macro-refactor Slice 3: schema de `refactor_rename_symbol` endurecido com enum literal para `scope` (`file|directory|workspace`) e `maxFiles` inteiro. Adicionada smoke `guardrails-macro-refactor-command.test.ts` cobrindo `/macro-refactor` com dry-run default e fallback determinístico (`engine-unavailable`) no apply. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 37/37 passed."
+    },
+    {
+      "id": "VER-BUD-288",
+      "target": "TASK-BUD-145",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T05:17:00Z",
+      "evidence": "Safe-mutation Slice 8: schema das tools foi endurecido no `guardrails-core` (`safe_mutate_large_file.anchorState` como enum literal; `touchedLines`/`maxTouchedLines` como inteiro; `structured_query_plan.query` com `minLength=1`). Smoke `guardrails-safe-mutation-tool.test.ts` passou a validar contrato tipado registrado. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 39/39 passed."
     }
   ]
 }
