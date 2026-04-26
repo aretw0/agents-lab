@@ -221,4 +221,26 @@ describe("project-board-surface", () => {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
+
+  it("board_query returns explicit error when entity is missing", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query-missing",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(false);
+      expect((result.details as any)?.reason).toBe("missing-or-invalid-entity");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
 });

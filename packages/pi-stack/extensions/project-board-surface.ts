@@ -428,7 +428,19 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     _onUpdate: (update: unknown) => void,
     ctx: { cwd: string },
   ) => {
-    const entity = params?.entity === "tasks" ? "tasks" : "verification";
+    const entity = params?.entity;
+    if (entity !== "tasks" && entity !== "verification") {
+      const out = {
+        ok: false,
+        reason: "missing-or-invalid-entity",
+        allowed: ["tasks", "verification"],
+      };
+      return {
+        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+        details: out,
+      };
+    }
+
     const status = typeof params?.status === "string" ? params.status : undefined;
     const target = typeof params?.target === "string" ? params.target : undefined;
     const search = typeof params?.search === "string" ? params.search : undefined;
