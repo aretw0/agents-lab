@@ -3615,7 +3615,9 @@
       "files": [
         "packages/pi-stack/extensions/context-watchdog-resume.ts",
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
         "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/project-canonical-pipeline.md",
         ".project/handoff.json"
       ],
       "acceptance_criteria": [
@@ -3624,6 +3626,6 @@
         "Smoke/regressão cobre montagem do resumo de handoff com conteúdo longo para garantir previsibilidade pós-compactação."
       ],
       "verification": "",
-      "notes": "Backlog criado por feedback humano em 2026-04-25: prompt de auto-resume pós-compactação está chegando com formatação estranha e trechos com `...`, reduzindo clareza operacional.\n[2026-04-25T00:00:00Z] Slice 1 (prompt hygiene): `buildAutoResumePromptFromHandoff` agora normaliza payload para single-line canônica (remove artefatos markdown/backticks/controle, sanitiza `|`) e troca truncamento opaco por marcador explícito `[truncated:+N chars]`; reticências (`...`/`…`) viram marcador textual `[ellipsis]`. Smoke atualizada em `context-watchdog.test.ts` para cobrir artefatos + truncamento explícito.\n[2026-04-25T00:00:00Z] Slice 2 (determinismo de shape): prompt de auto-resume passou a deduplicar itens após normalização/truncamento (evita duplicatas semânticas como `` `TASK` `` vs `- TASK`), remover prefixos comuns de lista (`-`, `*`, `1)`), normalizar aspas envolventes e impor cap global de payload com marcador auditável `[auto-resume-prompt-truncated:+N chars]`.\n[2026-04-25T00:00:00Z] Slice 3 (observabilidade): novo envelope `buildAutoResumePromptEnvelopeFromHandoff` expõe diagnósticos estruturados (input/listed/dedup/truncation por seção + truncamento global) e `context-watchdog` passa a registrar audit `context-watchdog.auto-resume-prompt` antes do dispatch, facilitando triagem de formatação em runtime."    }
+      "notes": "Backlog criado por feedback humano em 2026-04-25: prompt de auto-resume pós-compactação está chegando com formatação estranha e trechos com `...`, reduzindo clareza operacional.\n[2026-04-25T00:00:00Z] Slice 1 (prompt hygiene): `buildAutoResumePromptFromHandoff` agora normaliza payload para single-line canônica (remove artefatos markdown/backticks/controle, sanitiza `|`) e troca truncamento opaco por marcador explícito `[truncated:+N chars]`; reticências (`...`/`…`) viram marcador textual `[ellipsis]`. Smoke atualizada em `context-watchdog.test.ts` para cobrir artefatos + truncamento explícito.\n[2026-04-25T00:00:00Z] Slice 2 (determinismo de shape): prompt de auto-resume passou a deduplicar itens após normalização/truncamento (evita duplicatas semânticas como `` `TASK` `` vs `- TASK`), remover prefixos comuns de lista (`-`, `*`, `1)`), normalizar aspas envolventes e impor cap global de payload com marcador auditável `[auto-resume-prompt-truncated:+N chars]`.\n[2026-04-25T00:00:00Z] Slice 3 (observabilidade): novo envelope `buildAutoResumePromptEnvelopeFromHandoff` expõe diagnósticos estruturados (input/listed/dedup/truncation por seção + truncamento global) e `context-watchdog` passa a registrar audit `context-watchdog.auto-resume-prompt` antes do dispatch, facilitando triagem de formatação em runtime.\n[2026-04-25T00:00:00Z] Slice 4 (runbook): pipeline canônico documenta marcadores explícitos de truncamento no prompt de auto-resume e orienta inspeção do audit `context-watchdog.auto-resume-prompt` para debugging determinístico."    }
   ]
 }
