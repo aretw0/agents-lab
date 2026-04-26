@@ -149,6 +149,19 @@ describe("guardrails-core safe mutation contract", () => {
 		expect(blocked.safetyChecks).toContain("mutation-detected");
 	});
 
+	it("blocks multi-statement queries deterministically", () => {
+		const blocked = assessStructuredQueryRisk({
+			normalizedQuery: "SELECT id FROM tasks; SELECT id FROM users",
+			forbidMutation: true,
+		});
+		expect(blocked).toMatchObject({
+			blocked: true,
+			riskLevel: "high",
+			reason: "blocked:multi-statement",
+		});
+		expect(blocked.safetyChecks).toContain("multi-statement-detected");
+	});
+
 	it("classifies select with limit as low risk", () => {
 		const low = assessStructuredQueryRisk({
 			normalizedQuery: "SELECT id FROM tasks WHERE status = $1 LIMIT $2",

@@ -172,7 +172,7 @@ export type StructuredQueryAssessmentInput = {
 export type StructuredQueryAssessment = {
 	riskLevel: SafeMutationRiskLevel;
 	blocked: boolean;
-	reason: "ok" | "blocked:mutation-forbidden";
+	reason: "ok" | "blocked:mutation-forbidden" | "blocked:multi-statement";
 	safetyChecks: string[];
 };
 
@@ -207,6 +207,51 @@ function detectQueryKind(query: string): "select" | "mutation" | "other" {
 	return "other";
 }
 
+function hasMultipleStatements(query: string): boolean {
+	const text = String(query ?? "").trim();
+	if (!text) return false;
+
+	let inSingle = false;
+	let inDouble = false;
+	let inBacktick = false;
+	let sawTerminator = false;
+
+	for (let i = 0; i < text.length; i += 1) {
+		const ch = text[i];
+		const prev = i > 0 ? text[i - 1] : "";
+
+		if (!inDouble && !inBacktick && ch === "'" && prev !== "\\") {
+			if (inSingle && text[i + 1] === "'") {
+				i += 1;
+				continue;
+			}
+			inSingle = !inSingle;
+			continue;
+		}
+		if (!inSingle && !inBacktick && ch === '"' && prev !== "\\") {
+			inDouble = !inDouble;
+			continue;
+		}
+		if (!inSingle && !inDouble && ch === "`") {
+			inBacktick = !inBacktick;
+			continue;
+		}
+
+		if (inSingle || inDouble || inBacktick) continue;
+
+		if (ch === ";") {
+			sawTerminator = true;
+			continue;
+		}
+
+		if (sawTerminator && /\S/.test(ch)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 export function assessStructuredQueryRisk(
 	input: StructuredQueryAssessmentInput,
 ): StructuredQueryAssessment {
@@ -214,6 +259,16 @@ export function assessStructuredQueryRisk(
 	const forbidMutation = input.forbidMutation !== false;
 	const kind = detectQueryKind(normalizedQuery);
 	const checks: string[] = [];
+
+	if (hasMultipleStatements(normalizedQuery)) {
+		checks.push("multi-statement-detected");
+		return {
+			riskLevel: "high",
+			blocked: true,
+			reason: "blocked:multi-statement",
+			safetyChecks: checks,
+		};
+	}
 
 	if (kind === "mutation" && forbidMutation) {
 		checks.push("mutation-detected");

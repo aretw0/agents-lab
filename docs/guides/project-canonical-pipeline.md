@@ -254,7 +254,7 @@ Implementação incremental atual:
 - builders canônicos de payload dry-first (`buildSafeLargeFileMutationResult`, `buildStructuredQueryPlanResult`);
 - reexport em `guardrails-core.ts` para superfície unificada da stack;
 - comando dry-first para operador: `/safe-mutation` (`help`, `large-file`, `query`) com audit trail (`guardrails-core.safe-mutation.*`) e validação explícita de contagem de linhas (`touchedLines/maxTouchedLines` inteiros em faixa);
-- tools tipadas `safe_mutate_large_file` e `structured_query_plan` para consumo determinístico em workflows/subagentes, mantendo os mesmos guardrails de risco/forbidMutation;
+- tools tipadas `safe_mutate_large_file` e `structured_query_plan` para consumo determinístico em workflows/subagentes, mantendo os mesmos guardrails de risco/forbidMutation e bloqueio explícito de query multi-statement;
 - seed de I/O estruturado (loam-inspired): `guardrails-core-structured-io.ts` com `structuredJsonRead`/`structuredJsonWrite` e selector canônico (inclui bracket-quoted key, ex.: `a["b.c"]`);
 - reexport de structured I/O em `guardrails-core.ts` para consumo unificado (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`);
 - comando operador `/structured-io` (`json-read`, `json-write`) com dry-run default, cap de blast-radius, validação de `--max-lines` (inteiro positivo) e audit trail (`guardrails-core.structured-io.*`);
