@@ -3523,7 +3523,7 @@
         "Cada operacao macro deixa evidencia (input normalizado, output, limites aplicados) para auditoria e reproducao."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool.\n[2026-04-25T00:00:00Z] Slice 5 (surface unificada): helpers de safe mutation reexportados em `guardrails-core.ts` para consumo first-party consistente, com smoke `guardrails-safe-mutation-reexport.test.ts`.\n[2026-04-25T00:00:00Z] Slice 6 (interface operador): comando `/safe-mutation` adicionado no `guardrails-core` com pathway dry-first para `large-file` e `query`, com trilha auditável (`guardrails-core.safe-mutation.large-file` / `.query`) e smoke de registro `guardrails-safe-mutation-registration.test.ts`.\n[2026-04-25T00:00:00Z] Steering humano assimilado: objetivo de médio prazo é centralizar parser/leitura/escrita estruturada para reduzir edições textuais manuais e risco de estouro de contexto.\n[2026-04-26T00:00:00Z] Slice 7 (tool surface tipada): `guardrails-core` agora publica tools `safe_mutate_large_file` e `structured_query_plan`, mantendo dry-first/forbidMutation por default e audit trail canônico (`guardrails-core.safe-mutation.*`) também para chamadas via tool. Smoke dedicada adicionada (`guardrails-safe-mutation-tool.test.ts`).\n[2026-04-26T00:00:00Z] Slice 8 (typed schema hardening): schemas das tools safe-mutation foram estreitados (`anchorState` literal enum; `touchedLines/maxTouchedLines` inteiros; `query` com `minLength=1`) e smoke valida contrato registrado para reduzir ambiguidade em chamadas automation-first.\n[2026-04-26T00:00:00Z] Slice 9 (numeric guardrail hardening): avaliação de mutação grande agora normaliza números inválidos (`NaN`) de forma determinística (`touchedLines=>0`, `maxTouchedLines=>1`) para evitar bypass implícito de blast-radius; tool `safe_mutate_large_file` e comando `/safe-mutation large-file` passaram a rejeitar payloads com contagem de linhas inválida (não-inteira/faixa fora do contrato) com reason explícita (`invalid-line-counts` / invalid args).\n[2026-04-26T00:00:00Z] Slice 10 (query plan hardening): `assessStructuredQueryRisk` agora bloqueia queries multi-statement com reason explícita (`blocked:multi-statement`), reduzindo risco de execução encadeada inesperada em planos estruturados. Smoke de contrato/tool ampliada para cobrir novo guardrail de segurança."
+      "notes": "Backlog por feedback humano (2026-04-24): trocar acerto manual de texto por contratos deterministicos em pontos de maior risco (arquivos longos e queries).\n[2026-04-24T00:00:00Z] Slice 1 (design contract): definido contrato canônico em `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md` com modelo dry-first, patch tipado por bloco, preflight de risco e trilha de rollback/evidência para mutação de arquivo grande e consultas estruturadas.\n[2026-04-24T00:00:00Z] Slice 2: adicionada matriz operacional de risco (low/medium/high) e exemplos de saída canônica para `safe_mutate_large_file` e `structured_query_plan`, facilitando implementação determinística posterior.\n[2026-04-25T00:00:00Z] Slice 3 (runtime helpers): criado módulo `guardrails-core-safe-mutation.ts` com avaliadores determinísticos `assessLargeFileMutationRisk` e `assessStructuredQueryRisk` (âncora/blast-radius/confirm medium risk + bloqueio de mutação quando `forbidMutation=true`) e smoke dedicada `guardrails-safe-mutation-contract.test.ts`.\n[2026-04-25T00:00:00Z] Slice 4 (payload canônico): adicionados builders dry-first `buildSafeLargeFileMutationResult` e `buildStructuredQueryPlanResult` para padronizar saída auditável de preview/apply sem acoplamento prematuro de tool.\n[2026-04-25T00:00:00Z] Slice 5 (surface unificada): helpers de safe mutation reexportados em `guardrails-core.ts` para consumo first-party consistente, com smoke `guardrails-safe-mutation-reexport.test.ts`.\n[2026-04-25T00:00:00Z] Slice 6 (interface operador): comando `/safe-mutation` adicionado no `guardrails-core` com pathway dry-first para `large-file` e `query`, com trilha auditável (`guardrails-core.safe-mutation.large-file` / `.query`) e smoke de registro `guardrails-safe-mutation-registration.test.ts`.\n[2026-04-25T00:00:00Z] Steering humano assimilado: objetivo de médio prazo é centralizar parser/leitura/escrita estruturada para reduzir edições textuais manuais e risco de estouro de contexto.\n[2026-04-26T00:00:00Z] Slice 7 (tool surface tipada): `guardrails-core` agora publica tools `safe_mutate_large_file` e `structured_query_plan`, mantendo dry-first/forbidMutation por default e audit trail canônico (`guardrails-core.safe-mutation.*`) também para chamadas via tool. Smoke dedicada adicionada (`guardrails-safe-mutation-tool.test.ts`).\n[2026-04-26T00:00:00Z] Slice 8 (typed schema hardening): schemas das tools safe-mutation foram estreitados (`anchorState` literal enum; `touchedLines/maxTouchedLines` inteiros; `query` com `minLength=1`) e smoke valida contrato registrado para reduzir ambiguidade em chamadas automation-first.\n[2026-04-26T00:00:00Z] Slice 9 (numeric guardrail hardening): avaliação de mutação grande agora normaliza números inválidos (`NaN`) de forma determinística (`touchedLines=>0`, `maxTouchedLines=>1`) para evitar bypass implícito de blast-radius; tool `safe_mutate_large_file` e comando `/safe-mutation large-file` passaram a rejeitar payloads com contagem de linhas inválida (não-inteira/faixa fora do contrato) com reason explícita (`invalid-line-counts` / invalid args).\n[2026-04-26T00:00:00Z] Slice 10 (query plan hardening): `assessStructuredQueryRisk` agora bloqueia queries multi-statement com reason explícita (`blocked:multi-statement`), reduzindo risco de execução encadeada inesperada em planos estruturados. Smoke de contrato/tool ampliada para cobrir novo guardrail de segurança.\n[2026-04-26T00:00:00Z] Slice 11 (empty-query guardrail): planos estruturados agora bloqueiam query vazia/whitespace com reason determinística (`blocked:empty-query`); surface da tool `structured_query_plan` foi alinhada para sempre retornar avaliação canônica (sem short-circuit `missing-query`) e preservar trilha de safetyChecks."
     },
     {
       "id": "TASK-BUD-146",
@@ -3652,6 +3652,64 @@
         "Smoke cobre cenário de compact no limite + defer repetido, validando escalonamento progressivo em vez de spam inicial."
       ],
       "verification": "VER-BUD-281",
-      "notes": "Backlog criado por steering humano em 2026-04-26: warning anti-paralysis está exagerado e repetitivo (várias emissões seguidas logo após aviso de compact), gerando ruído sem dar tempo para o modelo encerrar micro-slice. Ajustar política para escalonamento mais gradual e menos spam.\n[2026-04-26T00:00:00Z] Slice 1 (anti-paralysis cadence): `context-watchdog` passou a aplicar gate determinístico de emissão para anti-paralysis com grace window (2min após início do defer), cooldown entre avisos (5min) e cap por janela de defer (`maxNotifiesPerWindow=1`), evitando flood imediato após `compact-now`. Estado de status/tool agora expõe `antiParalysisDispatchReason` + remanescente de grace/cooldown + orçamento de notify. Smoke ampliada com `resolveAntiParalysisDispatch` cobrindo grace/cooldown/cap; regressão focal verde."    }
+      "notes": "Backlog criado por steering humano em 2026-04-26: warning anti-paralysis está exagerado e repetitivo (várias emissões seguidas logo após aviso de compact), gerando ruído sem dar tempo para o modelo encerrar micro-slice. Ajustar política para escalonamento mais gradual e menos spam.\n[2026-04-26T00:00:00Z] Slice 1 (anti-paralysis cadence): `context-watchdog` passou a aplicar gate determinístico de emissão para anti-paralysis com grace window (2min após início do defer), cooldown entre avisos (5min) e cap por janela de defer (`maxNotifiesPerWindow=1`), evitando flood imediato após `compact-now`. Estado de status/tool agora expõe `antiParalysisDispatchReason` + remanescente de grace/cooldown + orçamento de notify. Smoke ampliada com `resolveAntiParalysisDispatch` cobrindo grace/cooldown/cap; regressão focal verde."
+    },
+    {
+      "id": "TASK-BUD-152",
+      "description": "[P1] Implementar intents soft/hard de internacionalização para alinhar comunicação e geração de artefatos ao perfil do usuário",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Existe configuração canônica para idioma de comunicação e idioma de escrita de arquivos com distinção soft/hard intent.",
+        "Usuário pode estender regras por escopo/tipo de arquivo e habilitar geração opcional de traduções para arquivos selecionados.",
+        "Runbook documenta estratégia de coesão de i18n e integração opcional com mdt para detectar drift em trechos comuns multi-idioma."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-26): garantir coesão de internacionalização entre comunicação do agente e artefatos escritos, com política extensível e deterministicamente auditável."
+    },
+    {
+      "id": "TASK-BUD-153",
+      "description": "[P1] Calibrar execução ininterrupta multi-modo (nativo/container/PR-MR) com estratégia explícita para merge de board/settings",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog-storage.ts",
+        ".github/workflows/ci.yml",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Pipeline suporta operação contínua nos modos nativo e containerizado com trilha de decisão para execução direta ou via PR/MR.",
+        "Conflitos de merge em board/settings possuem política explícita (atomic write, lock, ou etapa geradora separada) para evitar corrupção/loop de conflito.",
+        "Runbook define modo fábrica em GitHub Actions com guardrails de segurança e continuidade, incluindo fallback manual determinístico."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-26): convergir para trabalho contínuo sem parada usando recursos atuais, endereçando blocker de merge/conflitos em board/settings entre ambientes e estratégias de entrega.\n[2026-04-26T00:00:00Z] Slice 1 (atomic settings/handoff writes): `guardrails-core.writeProjectPiSettings` e `context-watchdog-storage` (`writeProjectSettings`/`writeHandoffJson`) passaram a gravar JSON por temp+rename com fallback determinístico, reduzindo janela de corrupção/merge parcial em execuções concorrentes (nativo/container/factory). Smoke nova `context-watchdog-storage.test.ts` cobre ausência de artefato temp residual + leitura consistente pós-write."
+    },
+    {
+      "id": "TASK-BUD-154",
+      "description": "[P1] Expandir structured-io para superfícies AST-first (Markdown/LaTeX e formatos estruturados adicionais) sob API unificada",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-structured-io.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "API structured-io oferece pathway AST/schema para Markdown e LaTeX além de JSON, mantendo dry-first, blast-radius e rollback token.",
+        "Operações estruturadas evitam patch textual amplo quando parser/AST estiver disponível, com razões explícitas quando houver fallback.",
+        "Contratos/smokes cobrem leitura/mutação estruturada multi-formato com evidência auditável consistente."
+      ],
+      "verification": "",
+      "notes": "Backlog por steering humano (2026-04-26): levar structured-io ao extremo AST-first, incluindo Markdown e LaTeX, para reduzir manipulação textual frágil e manter coesão operacional em longa execução."
+    }
   ]
 }

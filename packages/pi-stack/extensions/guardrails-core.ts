@@ -11,7 +11,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { analyzeQuota, parseProviderBudgets, safeNum, type ProviderBudgetMap, type ProviderBudgetStatus } from "./quota-visibility";
@@ -1053,7 +1053,19 @@ function readProjectPiSettings(cwd: string): Record<string, unknown> {
 function writeProjectPiSettings(cwd: string, settings: Record<string, unknown>): string {
   const p = join(cwd, ".pi", "settings.json");
   mkdirSync(join(cwd, ".pi"), { recursive: true });
-  writeFileSync(p, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+  const content = `${JSON.stringify(settings, null, 2)}\n`;
+  const tempPath = `${p}.tmp-${process.pid}-${Date.now()}`;
+  try {
+    writeFileSync(tempPath, content, "utf8");
+    renameSync(tempPath, p);
+  } catch {
+    try {
+      rmSync(tempPath, { force: true });
+    } catch {
+      // ignore cleanup failure
+    }
+    writeFileSync(p, content, "utf8");
+  }
   return p;
 }
 
@@ -3222,17 +3234,6 @@ export default function (pi: ExtensionAPI) {
         forbidMutation?: unknown;
       };
       const query = String(p.query ?? "").trim();
-      if (!query) {
-        const details = {
-          ok: false,
-          reason: "missing-query",
-        };
-        return {
-          content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-          details,
-        };
-      }
-
       const forbidMutation = p.forbidMutation !== false;
       const assessment = assessStructuredQueryRisk({
         normalizedQuery: query,

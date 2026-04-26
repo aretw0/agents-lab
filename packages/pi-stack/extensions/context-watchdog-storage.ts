@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -16,7 +16,19 @@ export function readProjectSettings(cwd: string): Record<string, unknown> {
 export function writeProjectSettings(cwd: string, settings: Record<string, unknown>): string {
 	const filePath = path.join(cwd, ".pi", "settings.json");
 	mkdirSync(path.dirname(filePath), { recursive: true });
-	writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf8");
+	const content = `${JSON.stringify(settings, null, 2)}\n`;
+	const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+	try {
+		writeFileSync(tempPath, content, "utf8");
+		renameSync(tempPath, filePath);
+	} catch {
+		try {
+			rmSync(tempPath, { force: true });
+		} catch {
+			// ignore cleanup failure
+		}
+		writeFileSync(filePath, content, "utf8");
+	}
 	return filePath;
 }
 
@@ -53,6 +65,18 @@ export function readHandoffJson(cwd: string): Record<string, unknown> {
 export function writeHandoffJson(cwd: string, handoff: Record<string, unknown>): string {
 	const filePath = path.join(cwd, ".project", "handoff.json");
 	mkdirSync(path.dirname(filePath), { recursive: true });
-	writeFileSync(filePath, `${JSON.stringify(handoff, null, 2)}\n`, "utf8");
+	const content = `${JSON.stringify(handoff, null, 2)}\n`;
+	const tempPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+	try {
+		writeFileSync(tempPath, content, "utf8");
+		renameSync(tempPath, filePath);
+	} catch {
+		try {
+			rmSync(tempPath, { force: true });
+		} catch {
+			// ignore cleanup failure
+		}
+		writeFileSync(filePath, content, "utf8");
+	}
 	return filePath;
 }

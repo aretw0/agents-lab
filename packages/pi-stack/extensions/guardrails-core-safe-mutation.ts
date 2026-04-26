@@ -172,7 +172,7 @@ export type StructuredQueryAssessmentInput = {
 export type StructuredQueryAssessment = {
 	riskLevel: SafeMutationRiskLevel;
 	blocked: boolean;
-	reason: "ok" | "blocked:mutation-forbidden" | "blocked:multi-statement";
+	reason: "ok" | "blocked:mutation-forbidden" | "blocked:multi-statement" | "blocked:empty-query";
 	safetyChecks: string[];
 };
 
@@ -259,6 +259,16 @@ export function assessStructuredQueryRisk(
 	const forbidMutation = input.forbidMutation !== false;
 	const kind = detectQueryKind(normalizedQuery);
 	const checks: string[] = [];
+
+	if (!normalizedQuery) {
+		checks.push("empty-query");
+		return {
+			riskLevel: "high",
+			blocked: true,
+			reason: "blocked:empty-query",
+			safetyChecks: checks,
+		};
+	}
 
 	if (hasMultipleStatements(normalizedQuery)) {
 		checks.push("multi-statement-detected");

@@ -4983,6 +4983,24 @@
       "method": "test",
       "timestamp": "2026-04-26T12:32:00Z",
       "evidence": "Macro-refactor Slice 6: `buildRefactorRenameSymbolResult` endurecido para normalizar `maxFiles` inválido (fallback seguro=30), evitando `NaN` no contrato runtime quando comando recebe `--max-files` malformado. Cobertura ampliada em `guardrails-macro-refactor-contract.test.ts` e `guardrails-macro-refactor-command.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 41/41 passed."
+    },
+    {
+      "id": "VER-BUD-304",
+      "target": "TASK-BUD-145",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T12:38:00Z",
+      "evidence": "Safe-mutation Slice 11: `assessStructuredQueryRisk` endurecido para bloquear query vazia/whitespace (`blocked:empty-query` + safetyChecks `empty-query`). Tool `structured_query_plan` removendo short-circuit `missing-query` para usar avaliação canônica em todos os casos. Cobertura ampliada em `guardrails-safe-mutation-contract.test.ts` e `guardrails-safe-mutation-tool.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 42/42 passed."
+    },
+    {
+      "id": "VER-BUD-305",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T12:45:00Z",
+      "evidence": "TASK-BUD-153 Slice 1: escrita de `.pi/settings.json` e `.project/handoff.json` endurecida com temp+rename (atomic best-effort) em `guardrails-core` e `context-watchdog-storage`, com fallback determinístico e cleanup de temp em erro. Smoke nova `context-watchdog-storage.test.ts` valida ausência de artefatos `.tmp-*` residuais + leitura consistente; regressão de runtime config preservada. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 70/70 passed."
     }
   ]
 }

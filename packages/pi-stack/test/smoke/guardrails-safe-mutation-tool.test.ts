@@ -93,5 +93,16 @@ describe("guardrails-core safe mutation tools", () => {
 
     expect((multi.details as any)?.blocked).toBe(true);
     expect((multi.details as any)?.reason).toBe("blocked:multi-statement");
+
+    const empty = await queryTool.execute(
+      "tc-safe-4",
+      { query: "   ", forbidMutation: true },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect((empty.details as any)?.blocked).toBe(true);
+    expect((empty.details as any)?.reason).toBe("blocked:empty-query");
   });
 });
