@@ -361,17 +361,28 @@ describe("context-watchdog", () => {
 
 	it("normalizes formatting artifacts and uses explicit truncation markers", () => {
 		const prompt = buildAutoResumePromptFromHandoff({
-			current_tasks: ["`TASK-BUD-150`"],
+			current_tasks: ["`TASK-BUD-150`", "- TASK-BUD-150"],
 			blockers: ["strange | blocker ... with compacted tail"],
 			next_actions: [
-				"Action with markdown `code` and newline\nsegment and very long payload " + "x".repeat(220),
+				"1) \"Action with markdown `code` and newline\nsegment and very long payload \"" + "x".repeat(220),
 			],
 		} as any);
 		expect(prompt).toContain("focusTasks: TASK-BUD-150");
+		expect(prompt).not.toContain("TASK-BUD-150, TASK-BUD-150");
 		expect(prompt).toContain("blockers: strange / blocker [ellipsis] with compacted tail");
 		expect(prompt).toContain("[truncated:+");
 		expect(prompt).not.toContain("...");
 		expect(prompt).not.toContain("…");
+	});
+
+	it("caps final prompt length with explicit global truncation marker", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			current_tasks: ["TASK-BUD-150", "TASK-BUD-151", "TASK-BUD-152"],
+			blockers: ["b".repeat(400), "c".repeat(400)],
+			next_actions: ["n".repeat(400), "m".repeat(400)],
+		} as any);
+		expect(prompt.length).toBeGreaterThan(700);
+		expect(prompt).toContain("[auto-resume-prompt-truncated:+");
 	});
 
 	it("resolves passive steering dispatch independently from notify-only mode", () => {

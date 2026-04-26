@@ -8,14 +8,34 @@ function normalizeStringArray(value: unknown): string[] {
 	return value.filter((v): v is string => typeof v === "string" && v.trim().length > 0);
 }
 
+function dedupeStable(values: string[]): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const value of values) {
+		if (seen.has(value)) continue;
+		seen.add(value);
+		out.push(value);
+	}
+	return out;
+}
+
+function dropCommonListPrefix(text: string): string {
+	return text
+		.replace(/^[-*•]+\s+/, "")
+		.replace(/^\d+[.)]\s+/, "")
+		.trim();
+}
+
 function normalizePromptSegment(value: string): string {
 	const raw = String(value ?? "");
 	const withoutMarkdown = raw
 		.replace(/`([^`]+)`/g, "$1")
 		.replace(/[\u0000-\u001f\u007f]+/g, " ");
-	const singleLine = withoutMarkdown.replace(/\s+/g, " ").trim();
+	const deListed = dropCommonListPrefix(withoutMarkdown);
+	const singleLine = deListed.replace(/\s+/g, " ").trim();
 	const normalizedPipes = singleLine.replace(/\|/g, " / ").replace(/\s+\/\s+/g, " / ");
-	return normalizedPipes
+	const withoutWrappingQuotes = normalizedPipes.replace(/^(["'])(.*)\1$/, "$2");
+	return withoutWrappingQuotes
 		.replace(/\.\.\.+/g, "[ellipsis]")
 		.replace(/…+/g, "[ellipsis]");
 }
@@ -79,23 +99,28 @@ export function buildAutoResumePromptFromHandoff(
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
-	const tasks = normalizeStringArray(handoff.current_tasks)
-		.slice(0, 3)
-		.map((task) => truncateForPrompt(task, 48));
-	const blockers = normalizeStringArray(handoff.blockers)
+	const tasks = dedupeStable(normalizeStringArray(handoff.current_tasks)
+		.map((task) => truncateForPrompt(task, 48)))
+		.slice(0, 3);
+	const blockers = dedupeStable(normalizeStringArray(handoff.blockers)
 		.filter((b) => !b.startsWith("context-watch-"))
-		.slice(0, 2)
-		.map((b) => truncateForPrompt(b, 80));
-	const next = normalizeStringArray(handoff.next_actions)
+		.map((b) => truncateForPrompt(b, 80)))
+		.slice(0, 2);
+	const next = dedupeStable(normalizeStringArray(handoff.next_actions)
 		.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
-		.slice(0, 2)
-		.map((line) => truncateForPrompt(line, 120));
+		.map((line) => truncateForPrompt(line, 120)))
+		.slice(0, 2);
 
-	return [
+	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
 		`focusTasks: ${tasks.length > 0 ? tasks.join(", ") : "none-listed"}`,
 		`blockers: ${blockers.length > 0 ? blockers.join(" | ") : "none"}`,
 		next.length > 0 ? `next: ${next.join(" | ")}` : "next: keep current lane intent",
 		"execution: prioritize latest user steering/follow-up; if none, proceed with listed tasks.",
-	].join("\n");
+	];
+	const prompt = lines.join("\n");
+	const maxPromptChars = 700;
+	if (prompt.length <= maxPromptChars) return prompt;
+	const omitted = prompt.length - maxPromptChars;
+	return `${prompt.slice(0, maxPromptChars)}\n[auto-resume-prompt-truncated:+${omitted} chars]`;
 }
