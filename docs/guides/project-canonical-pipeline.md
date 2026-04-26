@@ -231,7 +231,8 @@ Implementação incremental atual:
 - tools canônicas publicadas no guardrails-core com mesmo contrato (`refactor_rename_symbol`, `refactor_organize_imports`, `refactor_format_target`);
 - comando operador `/macro-refactor` (`rename-symbol`, `organize-imports`, `format-target`) para preview/apply explícito;
 - fallback explícito `engine-unavailable` quando LSP/formatter runtime não estiver disponível (sem apply silencioso);
-- trilha auditável `guardrails-core.macro-refactor.*` para inspeção de decisão/risco.
+- trilha auditável `guardrails-core.macro-refactor.*` para inspeção de decisão/risco;
+- smoke de contrato/superfície: `guardrails-macro-refactor-contract.test.ts`, `guardrails-macro-refactor-tool.test.ts`, `guardrails-macro-refactor-command.test.ts`.
 
 Referência de contrato inicial: `docs/research/task-bud-144-macro-api-contract-2026-04-24.md`.
 

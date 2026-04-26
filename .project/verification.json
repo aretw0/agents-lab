@@ -4830,6 +4830,15 @@
       "method": "test",
       "timestamp": "2026-04-26T03:04:00Z",
       "evidence": "Structured I/O Slice 6: `structured_io_json` teve schema tipado endurecido no `guardrails-core` com `operation` em enum literal (`read|set|remove`) e `maxTouchedLines` como inteiro (`Type.Integer`). Smoke `guardrails-structured-io-tool.test.ts` agora valida contrato do schema registrado, mantendo regressão de command/tool verde. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 36/36 passed."
+    },
+    {
+      "id": "VER-BUD-287",
+      "target": "TASK-BUD-144",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T05:15:00Z",
+      "evidence": "Macro-refactor Slice 3: schema de `refactor_rename_symbol` endurecido com enum literal para `scope` (`file|directory|workspace`) e `maxFiles` inteiro. Adicionada smoke `guardrails-macro-refactor-command.test.ts` cobrindo `/macro-refactor` com dry-run default e fallback determinístico (`engine-unavailable`) no apply. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 37/37 passed."
     }
   ]
 }

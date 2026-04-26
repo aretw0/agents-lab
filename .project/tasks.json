@@ -3489,6 +3489,7 @@
         "packages/pi-stack/extensions/guardrails-core-macro-refactor.ts",
         "packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts",
         "packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts",
         "docs/guides/project-canonical-pipeline.md"
       ],
       "acceptance_criteria": [
@@ -3498,8 +3499,7 @@
         "Playbook descreve quando usar macro-API vs edicao pontual, com prioridade para caminhos galvanizados."
       ],
       "verification": "",
-      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback.\n[2026-04-25T00:00:00Z] Steering humano assimilado: reforçar pathway de refactor tipo IDE (rename project-wide) para reduzir erro de substituição manual e evitar explosão de contexto em arquivo grande.\n[2026-04-26T00:00:00Z] Slice 2 (runtime scaffold): nova primitiva `guardrails-core-macro-refactor.ts` define contratos determinísticos dry-first para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target` com fallback explícito `engine-unavailable`; `guardrails-core` agora publica tools homônimas e comando `/macro-refactor`, com trilha auditável `guardrails-core.macro-refactor.*` e smoke dedicada de contrato/superfície."
-    },
+      "notes": "Backlog por feedback humano (2026-04-24): evitar que o modelo tenha de 'acertar' comando/edicao em tarefas repetitivas que podem ser APIs de alta confianca.\n[2026-04-24T00:00:00Z] Slice 1 (design contract): documento `docs/research/task-bud-144-macro-api-contract-2026-04-24.md` define contrato dry-first/auditável para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target`, com rollout incremental e guardrails de blast-radius/rollback.\n[2026-04-25T00:00:00Z] Steering humano assimilado: reforçar pathway de refactor tipo IDE (rename project-wide) para reduzir erro de substituição manual e evitar explosão de contexto em arquivo grande.\n[2026-04-26T00:00:00Z] Slice 2 (runtime scaffold): nova primitiva `guardrails-core-macro-refactor.ts` define contratos determinísticos dry-first para `refactor_rename_symbol`, `refactor_organize_imports` e `refactor_format_target` com fallback explícito `engine-unavailable`; `guardrails-core` agora publica tools homônimas e comando `/macro-refactor`, com trilha auditável `guardrails-core.macro-refactor.*` e smoke dedicada de contrato/superfície.\n[2026-04-26T00:00:00Z] Slice 3 (surface hardening): schema da tool `refactor_rename_symbol` endurecido (`scope` literal enum + `maxFiles` inteiro) e smoke adicionada para `/macro-refactor` (dry-run default + apply fallback determinístico), reforçando previsibilidade do contrato operator/tool."    },
     {
       "id": "TASK-BUD-145",
       "description": "[P2] Criar APIs seguras para mutacao em arquivo grande e para consultas estruturadas (ex.: SQL) com guardrails deterministico",

@@ -38,6 +38,16 @@ describe("guardrails-core macro-refactor tools", () => {
     expect(tools).toContain("refactor_organize_imports");
     expect(tools).toContain("refactor_format_target");
     expect(commands).toContain("macro-refactor");
+
+    const renameToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === "refactor_rename_symbol",
+    );
+    const renameTool = renameToolCall?.[0] as any;
+    const scopeAnyOf = renameTool?.parameters?.properties?.scope?.anyOf ?? [];
+    const scopeLiterals = scopeAnyOf
+      .map((item: any) => item?.const)
+      .filter((value: unknown) => typeof value === "string");
+    expect(scopeLiterals).toEqual(["file", "directory", "workspace"]);
   });
 
   it("returns deterministic fallback when apply is requested", async () => {

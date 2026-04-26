@@ -3222,10 +3222,14 @@ export default function (pi: ExtensionAPI) {
     parameters: Type.Object({
       symbol: Type.String({ description: "Current symbol name." }),
       to: Type.String({ description: "New symbol name." }),
-      scope: Type.Optional(Type.String({ description: "file | directory | workspace" })),
+      scope: Type.Optional(Type.Union([
+        Type.Literal("file"),
+        Type.Literal("directory"),
+        Type.Literal("workspace"),
+      ], { description: "file | directory | workspace" })),
       path: Type.Optional(Type.String({ description: "Optional path anchor inside cwd." })),
       dryRun: Type.Optional(Type.Boolean()),
-      maxFiles: Type.Optional(Type.Number({ minimum: 1, maximum: 200 })),
+      maxFiles: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
     }),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = params as {
