@@ -3670,7 +3670,7 @@ export default function (pi: ExtensionAPI) {
     description: "Dry-first structured JSON read/write with selector-based targeting and blast-radius caps.",
     parameters: Type.Object({
       path: Type.String({ description: "Path relativo ao projeto (dentro do cwd)." }),
-      selector: Type.String({ description: "Seletor canônico JSON (ex.: a.b.0.c ou a[\"b.c\"].0)." }),
+      selector: Type.String({ description: "Seletor canônico JSON (ex.: a.b.0.c, $.a.b[0], a[\"b.c\"].0)." }),
       operation: Type.Union([
         Type.Literal("read"),
         Type.Literal("set"),

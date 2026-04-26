@@ -19,6 +19,10 @@ describe("guardrails-core structured-io re-export", () => {
 			ok: true,
 			steps: ["a", "b.c", 0],
 		});
+		expect(parseStructuredJsonSelector("$.a.b[0]")).toEqual({
+			ok: true,
+			steps: ["a", "b", 0],
+		});
 		expect(parseStructuredJsonSelector("$")).toEqual({
 			ok: true,
 			steps: [],
@@ -32,6 +36,10 @@ describe("guardrails-core structured-io re-export", () => {
 		expect(structuredJsonRead({ content, selector: "a[\"b.c\"].0" })).toMatchObject({
 			found: true,
 			value: 30,
+		});
+		expect(structuredJsonRead({ content, selector: "$.a.b.1" })).toMatchObject({
+			found: true,
+			value: 20,
 		});
 
 		const write = structuredJsonWrite({

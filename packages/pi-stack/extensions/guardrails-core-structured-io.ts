@@ -92,37 +92,48 @@ export function parseStructuredJsonSelector(selectorInput: string): StructuredJs
   if (!selector) return { ok: false, reason: "empty-selector" };
   if (selector === "$") return { ok: true, steps: [] };
 
+  let normalizedSelector = selector;
+  if (normalizedSelector.startsWith("$.")) {
+    normalizedSelector = normalizedSelector.slice(2);
+  } else if (normalizedSelector.startsWith("$[")) {
+    normalizedSelector = normalizedSelector.slice(1);
+  } else if (normalizedSelector.startsWith("$")) {
+    return { ok: false, reason: "invalid-segment" };
+  }
+
+  if (!normalizedSelector) return { ok: false, reason: "invalid-segment" };
+
   const steps: Array<string | number> = [];
   let cursor = 0;
-  const len = selector.length;
+  const len = normalizedSelector.length;
 
   while (cursor < len) {
-    if (selector[cursor] === ".") return { ok: false, reason: "invalid-segment" };
+    if (normalizedSelector[cursor] === ".") return { ok: false, reason: "invalid-segment" };
 
-    if (selector[cursor] === "[") {
-      const bracket = parseBracketStep(selector, cursor);
+    if (normalizedSelector[cursor] === "[") {
+      const bracket = parseBracketStep(normalizedSelector, cursor);
       if (!bracket.ok) return { ok: false, reason: "invalid-segment" };
       steps.push(bracket.value);
       cursor = bracket.nextAt;
     } else {
       const start = cursor;
-      while (cursor < len && selector[cursor] !== "." && selector[cursor] !== "[") {
+      while (cursor < len && normalizedSelector[cursor] !== "." && normalizedSelector[cursor] !== "[") {
         cursor += 1;
       }
-      const token = selector.slice(start, cursor);
+      const token = normalizedSelector.slice(start, cursor);
       if (!/^[A-Za-z0-9_-]+$/.test(token)) return { ok: false, reason: "invalid-segment" };
       steps.push(/^\d+$/.test(token) ? Number(token) : token);
     }
 
-    while (cursor < len && selector[cursor] === "[") {
-      const bracket = parseBracketStep(selector, cursor);
+    while (cursor < len && normalizedSelector[cursor] === "[") {
+      const bracket = parseBracketStep(normalizedSelector, cursor);
       if (!bracket.ok) return { ok: false, reason: "invalid-segment" };
       steps.push(bracket.value);
       cursor = bracket.nextAt;
     }
 
     if (cursor >= len) break;
-    if (selector[cursor] !== ".") return { ok: false, reason: "invalid-segment" };
+    if (normalizedSelector[cursor] !== ".") return { ok: false, reason: "invalid-segment" };
     cursor += 1;
     if (cursor >= len) return { ok: false, reason: "invalid-segment" };
   }

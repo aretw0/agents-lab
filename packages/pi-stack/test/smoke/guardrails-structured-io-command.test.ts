@@ -78,7 +78,7 @@ describe("guardrails-core structured-io command", () => {
     const structuredIo = getCommand(pi, "structured-io");
     const notify = vi.fn();
 
-    await structuredIo.handler("json-write data.json a.b[0].c set 9 --apply", {
+    await structuredIo.handler("json-write data.json $.a.b[0].c set 9 --apply", {
       cwd,
       ui: { notify },
       hasUI: true,

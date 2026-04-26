@@ -126,7 +126,7 @@ describe("guardrails-core structured_io_json tool", () => {
 
     const apply = await tool.execute(
       "tc-quoted-selector",
-      { path: "data.json", selector: "a[\"b.c\"]", operation: "set", payload: 9, dryRun: false },
+      { path: "data.json", selector: "$.a[\"b.c\"]", operation: "set", payload: 9, dryRun: false },
       undefined as unknown as AbortSignal,
       () => {},
       { cwd },

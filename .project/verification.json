@@ -4947,6 +4947,15 @@
       "method": "test",
       "timestamp": "2026-04-26T06:28:00Z",
       "evidence": "Safe-mutation Slice 9: hardening numérico para prevenir bypass de blast-radius com valores inválidos. `assessLargeFileMutationRisk` agora normaliza `NaN` deterministicamente (`touched=0`, `max=1`); `safe_mutate_large_file` passou a validar contagens inteiras/faixa e retornar `invalid-line-counts` quando bypassa schema; `/safe-mutation large-file` reforçou validação de argumentos inteiros válidos. Cobertura em `guardrails-safe-mutation-contract.test.ts` e `guardrails-safe-mutation-tool.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 40/40 passed."
+    },
+    {
+      "id": "VER-BUD-300",
+      "target": "TASK-BUD-149",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T06:42:00Z",
+      "evidence": "Structured I/O Slice 9: `parseStructuredJsonSelector` agora aceita prefixo de raiz JSONPath-like (`$.a.b[0]`, `$['root.key']`) mantendo rejeição determinística de segmentos inválidos (`$oops`, bracket incompleto). Cobertura ampliada em `guardrails-structured-io-contract/reexport/command/tool` incluindo read/write com seletor root-prefix. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 49/49 passed."
     }
   ]
 }
