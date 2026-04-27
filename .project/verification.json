@@ -5406,6 +5406,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:17:20Z",
       "evidence": "Introduced deterministic milestone-selection primitive `resolveLaneQueueBoardNextMilestoneSelection` with explicit precedence source (`explicit|default|cleared|none`) and wired it into lane `board-next` execution path. Runtime audits for board-next now include `milestoneSource` in blocked/queued/dispatch/dispatch-failed events for transparent decision lineage. Added smoke coverage in `guardrails-long-run-intent-queue.test.ts` for precedence resolution and parser clear semantics (`--no-milestone`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 86/86 passed."
+    },
+    {
+      "id": "VER-BUD-351",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:22:20Z",
+      "evidence": "Auto-advance path now aligns with canonical next-envelope semantics: in `guardrails-core.ts`, board auto-advance dispatch constructs `board.execute-next` (milestone-aware) while preserving resolved `nextTaskId` for rapid-redispatch detection, audit lineage, loop evidence, and operator notifications. This harmonizes auto-advance behavior with busy-lane/failure fallback queue behavior already migrated to `board.execute-next`. Added milestone field on auto-advance success/failure audits for explicit scope evidence. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 86/86 passed."
     }
   ]
 }

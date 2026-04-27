@@ -2180,15 +2180,13 @@ export default function (pi: ExtensionAPI) {
     }
 
     if (boardAutoAdvanceGate === "ready" && boardAutoAdvanceAllowed) {
-      const nextTaskId = boardReadiness.nextTaskId;
-
-      const intent = buildBoardExecuteTaskIntent(nextTaskId ?? "");
-      if (!intent) {
+      const nextTaskId = boardReadiness.nextTaskId ?? "";
+      if (!nextTaskId) {
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-blocked", {
           atIso: new Date().toISOString(),
           reason,
           boardReason: boardReadiness.reason,
-          nextTaskId,
+          nextTaskId: boardReadiness.nextTaskId,
           selectionPolicy: boardReadiness.selectionPolicy,
           runtimeCodeState,
         });
@@ -2196,6 +2194,7 @@ export default function (pi: ExtensionAPI) {
         return false;
       }
 
+      const intent = buildBoardExecuteNextIntent(boardReadiness.milestone);
       const intentText = encodeGuardrailsIntent(intent);
       const intentSummary = summarizeGuardrailsIntent(intent);
 
@@ -2204,16 +2203,16 @@ export default function (pi: ExtensionAPI) {
       // function_call_output messages that cause pi to error on execution without
       // the dispatch itself throwing (so consecutiveDispatchFailures stays at 0).
       if (shouldBlockRapidSameTaskRedispatch({
-        taskId: intent.taskId,
+        taskId: nextTaskId,
         lastDispatchItemId: longRunLoopRuntimeState.lastDispatchItemId,
         lastDispatchAtIso: longRunLoopRuntimeState.lastDispatchAtIso,
         nowMs,
         windowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
       })) {
         const sinceMs = nowMs - new Date(longRunLoopRuntimeState.lastDispatchAtIso!).getTime();
-        const message = `task ${intent.taskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
-        markLoopDegraded(ctx, `board-auto-rapid-redispatch:${intent.taskId}`, message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, `board-auto-rapid-redispatch:${intent.taskId}`, message, {
+        const message = `task ${nextTaskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
+        markLoopDegraded(ctx, `board-auto-rapid-redispatch:${nextTaskId}`, message);
+        const failureTrack = trackDispatchFailureFingerprint(ctx, `board-auto-rapid-redispatch:${nextTaskId}`, message, {
           errorClass: "tool-output-orphan",
           pauseAfterOverride: resolveDispatchFailurePauseAfter("tool-output-orphan", longRunIntentQueueConfig.identicalFailurePauseAfter, longRunIntentQueueConfig.orphanFailurePauseAfter),
           windowMsOverride: resolveDispatchFailureWindowMs("tool-output-orphan", longRunIntentQueueConfig.identicalFailureWindowMs, longRunIntentQueueConfig.orphanFailureWindowMs),
@@ -2221,7 +2220,7 @@ export default function (pi: ExtensionAPI) {
         appendAuditEntry(ctx, "guardrails-core.board-intent-rapid-redispatch-blocked", {
           atIso: new Date(nowMs).toISOString(),
           reason,
-          taskId: intent.taskId,
+          taskId: nextTaskId,
           sinceLastDispatchMs: sinceMs,
           rapidRedispatchWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
           consecutiveFailuresNow: longRunLoopRuntimeState.consecutiveDispatchFailures,
@@ -2234,7 +2233,7 @@ export default function (pi: ExtensionAPI) {
           runtimeCodeState,
         });
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${intent.taskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`, "warning");
+        if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${nextTaskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`, "warning");
         return false;
       }
 
@@ -2243,8 +2242,9 @@ export default function (pi: ExtensionAPI) {
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance", {
           atIso: new Date().toISOString(),
           reason,
-          taskId: intent.taskId,
+          taskId: nextTaskId,
           selectionPolicy: boardReadiness.selectionPolicy,
+          milestone: boardReadiness.milestone,
           intentType: intent.type,
           intentVersion: intent.version,
           intentSummary,
@@ -2252,22 +2252,22 @@ export default function (pi: ExtensionAPI) {
           loopMarkers,
           loopMarkersLabel,
         });
-        lastBoardAutoAdvanceTaskId = intent.taskId;
+        lastBoardAutoAdvanceTaskId = nextTaskId;
         lastBoardAutoAdvanceAt = nowMs;
         lastAutoDrainAt = nowMs;
         recordBoardAutoAdvanceEvidence(
           ctx,
-          intent.taskId,
+          nextTaskId,
           runtimeCodeState,
           loopMarkersLabel,
           loopMarkers.emLoop,
         );
-        markLoopDispatch(ctx, `board-auto-${intent.taskId}`);
+        markLoopDispatch(ctx, `board-auto-${nextTaskId}`);
         updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
         ctx.ui.notify(
           runtimeCodeState === "reload-required"
-            ? `lane-queue: auto-advance board task ${intent.taskId} (runtimeCode=${runtimeCodeState}; considere reload para ativar código mais novo)`
-            : `lane-queue: auto-advance board task ${intent.taskId}`,
+            ? `lane-queue: auto-advance board task ${nextTaskId} (runtimeCode=${runtimeCodeState}; considere reload para ativar código mais novo)`
+            : `lane-queue: auto-advance board task ${nextTaskId}`,
           "info",
         );
         return true;
@@ -2289,7 +2289,7 @@ export default function (pi: ExtensionAPI) {
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
           atIso: new Date().toISOString(),
           reason,
-          taskId: intent.taskId,
+          taskId: nextTaskId,
           error: message,
           errorClass,
           errorFingerprint: failureTrack.fingerprint,
