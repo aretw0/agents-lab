@@ -5262,6 +5262,15 @@
       "method": "test",
       "timestamp": "2026-04-27T16:34:00Z",
       "evidence": "Slices 211-225: `board_update` now enforces rationale-consistency gate by default on completion (`status=completed`) unless explicitly opted out via `require_rationale_consistency_on_complete=false`. This aligns completion-path behavior with the existing default rationale-on-complete gate. Tool smoke updated to expect completion-specific reason (`rationale-consistency-required-to-complete-task`) and to validate opt-out path preserving mismatch while still allowing closure when explicitly requested. Docs updated in `project-canonical-pipeline.md` to reflect default + opt-out semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 67/67 passed."
+    },
+    {
+      "id": "VER-BUD-335",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T16:39:00Z",
+      "evidence": "Slices 136-145: hardened dispatch failure fingerprint normalization for tool-call id variants. `normalizeDispatchFailureFingerprint` now normalizes call-id values containing dotted/slashed/colon suffixes and handles JSON-shaped key-value (`\"tool_call_id\":\"...\"`) without leaking raw ids, while preserving canonical `call_id=call_*` and `hex_*` masking. Smoke updated with JSON payload variant and complex-id streak continuity case. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed."
     }
   ]
 }

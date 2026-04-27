@@ -1192,12 +1192,17 @@ describe("guardrails-core long-run intent queue", () => {
   it("normalizes dispatch failure fingerprints deterministically", () => {
     const raw = "No tool call found for function call output with call_id call_QJlU6a2DGglAm3NntokWyBwo and hash 0123456789abcdef0123456789abcdef";
     const variant = "No tool call found for function call output with tool_call_id='alt-run-777' and hash 0123456789abcdef0123456789abcdef";
+    const jsonVariant = "No tool call found for function call output payload={\"tool_call_id\":\"alt.run/777\"} and hash 0123456789abcdef0123456789abcdef";
     const normalized = normalizeDispatchFailureFingerprint(raw, 200);
     const normalizedVariant = normalizeDispatchFailureFingerprint(variant, 200);
+    const normalizedJsonVariant = normalizeDispatchFailureFingerprint(jsonVariant, 200);
     expect(normalized).toContain("call_*");
     expect(normalized).toContain("hex_*");
     expect(normalized).not.toContain("call_QJlU6a2DGglAm3NntokWyBwo");
     expect(normalized).toBe(normalizedVariant);
+    expect(normalizedJsonVariant).toContain("call_*=call_*");
+    expect(normalizedJsonVariant).toContain("hex_*");
+    expect(normalizedJsonVariant).not.toContain("alt.run/777");
   });
 
   it("increments identical failure streak only inside configured window", () => {
@@ -1212,7 +1217,7 @@ describe("guardrails-core long-run intent queue", () => {
       lastFingerprint: first.fingerprint,
       lastFailureAtMs: 10_000,
       streak: first.streak,
-      nextErrorText: "No tool call found for function call output with tool_call_id='xyz-999'",
+      nextErrorText: "No tool call found for function call output with tool_call_id='xyz.999/phase-a'",
       nowMs: 20_000,
       windowMs: 60_000,
     });
