@@ -5244,6 +5244,15 @@
       "method": "test",
       "timestamp": "2026-04-27T16:04:00Z",
       "evidence": "Slices 181-210: completion-path rationale gates added to board surface. `updateProjectTaskBoard` now supports `requireRationaleOnComplete` and `requireRationaleConsistencyOnComplete`, with explicit reasons (`rationale-required-to-complete-sensitive-task`, `rationale-consistency-required-to-complete-task`). `board_update` adds `require_rationale_on_complete` and `require_rationale_consistency_on_complete`, and defaults to enforcing rationale when `status=completed` (opt-out via `require_rationale_on_complete=false`). Smoke expanded for function-level and tool-level completion gating, plus schema assertions. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 67/67 passed."
+    },
+    {
+      "id": "VER-BUD-333",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T16:31:00Z",
+      "evidence": "Read-path policy baseline for checkout cache assimilated: `packages/pi-stack/extensions/guardrails-core.ts` now allows outside reads under `.cache/checkouts` (while preserving sensitive-path blocks and prompt behavior for other outside paths). Unit coverage updated in `packages/pi-stack/test/read-guard.test.mjs` with Unix/Windows cache path assertions and decision-matrix expectation. Validation: `cmd.exe /c node --test packages/pi-stack/test/read-guard.test.mjs` => 24/24 pass; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 32/32 pass."
     }
   ]
 }

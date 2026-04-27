@@ -196,6 +196,7 @@ const SENSITIVE_PATHS = [
 
 const ALLOWED_OUTSIDE = [
   ".pi",
+  ".cache/checkouts",
   "node_modules/@mariozechner",
   "node_modules/@davidorex",
   "node_modules/@ifi",
