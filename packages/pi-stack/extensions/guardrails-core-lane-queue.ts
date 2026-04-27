@@ -307,7 +307,7 @@ export function resolveLaneQueueBoardNextMilestoneSelection(
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status [--milestone <label>|-m <label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]",
+    "usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence]",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
     "examples: /lane-queue status --no-milestone · /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue board-next --no-milestone · /lane-queue evidence",
   ];

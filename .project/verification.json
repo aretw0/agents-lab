@@ -5487,6 +5487,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:46:20Z",
       "evidence": "Runbook parity update in `docs/guides/project-canonical-pipeline.md`: documented milestone override support for `/lane-queue status` (`--milestone` forms + `--no-milestone`) and the new `statusMilestone=<label|n/a>@<source>` operational field to validate scoped readiness without dispatch. Sanity validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30 passed."
+    },
+    {
+      "id": "VER-BUD-360",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:48:20Z",
+      "evidence": "Usage/help parity updated for lane milestone flags: lane command description, board-next usage warning, and `buildLaneQueueHelpLines` now explicitly include short inline `-m=<label>` (matching parser support already in place). Runbook updated to mention short-inline syntax in board-next examples. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
     }
   ]
 }

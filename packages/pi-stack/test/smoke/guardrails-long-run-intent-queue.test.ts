@@ -563,7 +563,7 @@ describe("guardrails-core long-run intent queue", () => {
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status [--milestone <label>|-m <label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]");
+    expect(helpLines.join("\n")).toContain("/lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence]");
     expect(helpLines.join("\n")).toContain("lane-now:<mensagem>");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
