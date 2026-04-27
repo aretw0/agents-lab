@@ -526,6 +526,18 @@ Contrato operacional:
 
 Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.
 
+### Milestone mode (control-plane long-run)
+Para rodar um milestone quase unattended no control plane, operar com um contrato explícito:
+
+- **main quests**: manter 1–3 tasks P0/P1 como trilha principal (ex.: `TASK-BUD-119`, `TASK-BUD-141`, `TASK-BUD-155`, `TASK-BUD-156`);
+- **side quests**: intercalar slices curtos de preparo/primitive-first (`TASK-BUD-144/145/146/149/153`) apenas quando não quebrar continuidade da trilha principal;
+- **stop conditions válidas**: (a) dúvida de requisito não resolvível por default seguro, (b) risco de segurança/perda de dados, (c) reload necessário para ativar código novo, (d) falha de teste sem mitigação segura no lote;
+- **prova obrigatória**: todo incremento técnico do milestone precisa terminar com smoke focal verde (evidence em `verification`) antes de avançar para o próximo bloco;
+- **cadência recomendada**: lotes de 10–50 micro-slices, com checkpoint em board (`notes`) + `VER-*` parcial por lote;
+- **higiene de runtime**: preservar política `board-first`, steering do usuário com precedência, e usar `/lane-queue status` + `/context-watch` como telemetria passiva antes de escalar intervenção humana.
+
+Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
+
 ### Pre-compact calm-close (anti-paralisia)
 Quando `context_watch_status.level=compact`, o fechamento deve ser calmo (sem pânico e sem travar):
 

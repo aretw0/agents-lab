@@ -5226,6 +5226,15 @@
       "method": "test",
       "timestamp": "2026-04-27T15:47:00Z",
       "evidence": "Slices 126-135: canonicalized long-run dispatch failure fingerprinting for orphan tool output variants. `normalizeDispatchFailureFingerprint` now normalizes `call_id` and `tool_call_id` forms (with separator or whitespace) into stable token `call_id=call_*`, preserving existing `call_*` and `hex_*` masking. This prevents false streak resets when provider wording changes but failure semantics are identical. Smoke updates cover equivalence across variants and streak continuity with mixed formats. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed."
+    },
+    {
+      "id": "VER-BUD-331",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-27T15:58:00Z",
+      "evidence": "Milestone bootstrap definido para execução long-run no control plane: `TASK-BUD-157` criado como umbrella P0 com dependências das main quests (119/141/155/156), critérios de aceite de autonomia/segurança e policy de prova por smoke. Runbook atualizado em `docs/guides/project-canonical-pipeline.md` com seção `Milestone mode (control-plane long-run)` (main-vs-side quests, stop conditions, prova obrigatória e cadência por lote)."
     }
   ]
 }
