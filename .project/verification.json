@@ -5595,6 +5595,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:14:20Z",
       "evidence": "Input guardrail added for loop-evidence checker milestone gate: parseArgs now rejects empty `--expect-milestone` values with explicit error (`Invalid --expect-milestone: expected non-empty label`) instead of silently disabling expectation. CLI regression test added to assert non-zero exit and stderr message. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 9/9; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
+    },
+    {
+      "id": "VER-BUD-372",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:21:20Z",
+      "evidence": "Refactor slice for lane usage-string primitives: added `buildLaneQueueStatusUsage`, `buildLaneQueueBoardNextUsage`, and `buildLaneQueueEvidenceUsage` in `guardrails-core-lane-queue.ts`, exported/re-exported from guardrails core, and replaced hardcoded parse-error usage messages in core runtime with helper outputs. Added smoke assertions for helper outputs in `guardrails-long-run-intent-queue.test.ts`. Budget preserved (`guardrails-core.ts` under cap). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
     }
   ]
 }

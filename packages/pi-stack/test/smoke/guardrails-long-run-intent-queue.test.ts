@@ -13,6 +13,9 @@ import {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
+  buildLaneQueueStatusUsage,
+  buildLaneQueueBoardNextUsage,
+  buildLaneQueueEvidenceUsage,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
   resolveAutoDrainRuntimeGateReason,
@@ -571,6 +574,10 @@ describe("guardrails-core long-run intent queue", () => {
     const helpLines = buildLaneQueueHelpLines();
     expect(helpLines.join("\n")).toContain("/lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]");
     expect(helpLines.join("\n")).toContain("lane-now:<mensagem>");
+
+    expect(buildLaneQueueStatusUsage()).toContain("/lane-queue status");
+    expect(buildLaneQueueBoardNextUsage()).toContain("/lane-queue board-next");
+    expect(buildLaneQueueEvidenceUsage()).toContain("/lane-queue evidence");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
     expect(queuedTips).toContain("/lane-queue list");

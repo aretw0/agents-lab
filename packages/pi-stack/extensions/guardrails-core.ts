@@ -36,6 +36,9 @@ import {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
+  buildLaneQueueStatusUsage,
+  buildLaneQueueBoardNextUsage,
+  buildLaneQueueEvidenceUsage,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
   resolveAutoDrainRuntimeGateReason,
@@ -119,6 +122,9 @@ export {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
+  buildLaneQueueStatusUsage,
+  buildLaneQueueBoardNextUsage,
+  buildLaneQueueEvidenceUsage,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
   resolveAutoDrainRuntimeGateReason,
@@ -3218,10 +3224,7 @@ export default function (pi: ExtensionAPI) {
 
       if (sub === "board-next") {
         const parsedBoardNext = parseLaneQueueBoardNextMilestone(rawArgs);
-        if (parsedBoardNext.error) {
-          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]", "warning");
-          return;
-        }
+        if (parsedBoardNext.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueBoardNextUsage()}`, "warning"); return; }
         const boardNextSelection = resolveLaneQueueBoardNextMilestoneSelection(parsedBoardNext, longRunIntentQueueConfig.defaultBoardMilestone);
         const boardNextMilestone = boardNextSelection.milestone;
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: boardNextMilestone });
@@ -3356,10 +3359,7 @@ export default function (pi: ExtensionAPI) {
       }
       if (sub === "evidence") {
         const evidenceMilestoneParsed = parseLaneQueueBoardNextMilestone(rawArgs);
-        if (evidenceMilestoneParsed.error) {
-          ctx.ui.notify("lane-queue: usage /lane-queue evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]", "warning");
-          return;
-        }
+        if (evidenceMilestoneParsed.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueEvidenceUsage()}`, "warning"); return; }
         const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone);
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
         const evidence = readLoopActivationEvidence(ctx.cwd);
@@ -3493,16 +3493,10 @@ export default function (pi: ExtensionAPI) {
         ? `${longRunProviderRetryConfig.maxAttempts}x@${Math.ceil(longRunProviderRetryConfig.baseDelayMs / 1000)}s→${Math.ceil(longRunProviderRetryConfig.maxDelayMs / 1000)}s`
         : "off";
       const statusMilestoneParsed = parseLaneQueueBoardNextMilestone(rawArgs);
-      if (statusMilestoneParsed.error) {
-        ctx.ui.notify("lane-queue: usage /lane-queue status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]", "warning");
-        return;
-      }
+      if (statusMilestoneParsed.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueStatusUsage()}`, "warning"); return; }
       const statusMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(statusMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: statusMilestoneSelection.milestone });
       const boardReadinessLabel = buildBoardReadinessStatusLabel(boardReadiness);
-      const autoAdvanceDedupeMs = Math.max(
-        30_000,
-        longRunIntentQueueConfig.autoDrainIdleStableMs * 4,
-      );
+      const autoAdvanceDedupeMs = Math.max(30_000, longRunIntentQueueConfig.autoDrainIdleStableMs * 4);
       const boardAutoGate = resolveBoardAutoAdvanceGateReason({
         activeLongRun,
         queuedCount: queued,
