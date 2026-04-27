@@ -13,6 +13,7 @@ import {
   parseLaneQueueMilestoneScope,
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
+  evaluateLaneEvidenceMilestoneParity,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -552,6 +553,17 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("evidence -m=MS-LOCAL").milestone).toBe("MS-LOCAL");
     expect(parseLaneQueueBoardNextMilestone("evidence --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("evidence --no-milestone oops").error).toBe("invalid-board-next-args");
+  });
+
+  it("evaluates milestone parity for evidence diagnostics", () => {
+    const matched = evaluateLaneEvidenceMilestoneParity("MS-LOCAL", "MS-LOCAL", "MS-LOCAL");
+    expect(matched.matches).toBe(true);
+
+    const mismatched = evaluateLaneEvidenceMilestoneParity("MS-LOCAL", "MS-A", "MS-B");
+    expect(mismatched.matches).toBe(false);
+
+    const noExpected = evaluateLaneEvidenceMilestoneParity(undefined, "MS-A", "MS-B");
+    expect(noExpected.matches).toBe(true);
   });
 
   it("resolves board-next milestone selection precedence", () => {

@@ -236,6 +236,13 @@ export interface LaneQueueBoardNextMilestoneParseResult {
 
 export type LaneQueueBoardNextMilestoneSource = "explicit" | "default" | "cleared" | "none";
 
+export interface LaneEvidenceMilestoneParity {
+  expectedMilestone?: string;
+  boardAutoMilestone?: string;
+  loopReadyMilestone?: string;
+  matches: boolean;
+}
+
 export function parseLaneQueueMilestoneScope(args: string): LaneQueueBoardNextMilestoneParseResult {
   const trimmed = String(args ?? "").trim();
   if (!/^(board-next|status|evidence)(\s+|$)/i.test(trimmed)) return {};
@@ -312,6 +319,23 @@ export function resolveLaneQueueBoardNextMilestoneSelection(
   const normalizedDefault = normalizeMilestoneLabel(defaultMilestone);
   if (normalizedDefault) return { milestone: normalizedDefault, source: "default" };
   return { source: "none" };
+}
+
+export function evaluateLaneEvidenceMilestoneParity(
+  expectedMilestone: string | undefined,
+  boardAutoMilestone: string | undefined,
+  loopReadyMilestone: string | undefined,
+): LaneEvidenceMilestoneParity {
+  const expected = normalizeMilestoneLabel(expectedMilestone);
+  if (!expected) return { matches: true };
+  const boardAuto = normalizeMilestoneLabel(boardAutoMilestone);
+  const loopReady = normalizeMilestoneLabel(loopReadyMilestone);
+  return {
+    expectedMilestone: expected,
+    boardAutoMilestone: boardAuto,
+    loopReadyMilestone: loopReady,
+    matches: boardAuto === expected && loopReady === expected,
+  };
 }
 
 export function buildLaneQueueStatusUsage(): string {

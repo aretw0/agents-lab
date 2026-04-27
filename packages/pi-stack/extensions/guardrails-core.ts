@@ -36,6 +36,7 @@ import {
   parseLaneQueueMilestoneScope,
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
+  evaluateLaneEvidenceMilestoneParity,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -123,6 +124,7 @@ export {
   parseLaneQueueMilestoneScope,
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
+  evaluateLaneEvidenceMilestoneParity,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -3365,15 +3367,15 @@ export default function (pi: ExtensionAPI) {
         const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone);
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
         const evidence = readLoopActivationEvidence(ctx.cwd);
-        const loopReady = evidence.lastLoopReady;
-        const boardAuto = evidence.lastBoardAutoAdvance;
-        const readiness = computeLoopEvidenceReadiness(evidence);
+        const loopReady = evidence.lastLoopReady; const boardAuto = evidence.lastBoardAutoAdvance;
+        const readiness = computeLoopEvidenceReadiness(evidence); const milestoneParity = evaluateLaneEvidenceMilestoneParity(evidenceMilestoneSelection.milestone, boardAuto?.milestone, loopReady?.milestone);
         const lines = [
           "lane-queue: loop evidence",
           `updatedAt: ${evidence.updatedAtIso}`,
           `statusMilestone: ${evidenceMilestoneSelection.milestone ?? "n/a"}@${evidenceMilestoneSelection.source}`,
           `boardReadiness: ${buildBoardReadinessStatusLabel(boardReadiness)}`,
           `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
+          `scopeParity: expected=${milestoneParity.expectedMilestone ?? "n/a"} boardAuto=${milestoneParity.boardAutoMilestone ?? "n/a"} loopReady=${milestoneParity.loopReadyMilestone ?? "n/a"} matches=${milestoneParity.matches ? "yes" : "no"}`,
           boardAuto
             ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
             : "boardAuto: n/a",
@@ -3389,6 +3391,7 @@ export default function (pi: ExtensionAPI) {
           statusMilestone: evidenceMilestoneSelection.milestone,
           statusMilestoneSource: evidenceMilestoneSelection.source,
           boardReadiness,
+          milestoneParity,
           boardAuto,
           loopReady,
           criteria: readiness.criteria,
