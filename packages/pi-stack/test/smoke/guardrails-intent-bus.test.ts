@@ -34,14 +34,38 @@ describe("guardrails-core intent bus", () => {
     const text = encodeGuardrailsIntent(intent);
     expect(text).toContain("[intent:board.execute-next]");
     expect(text).not.toContain("task_id=");
+    expect(text).not.toContain("milestone=");
 
     const parsed = parseGuardrailsIntent(text);
     expect(parsed.ok).toBe(true);
     expect(parsed.intent?.type).toBe("board.execute-next");
+    expect((parsed.intent as any)?.milestone).toBeUndefined();
     expect(summarizeGuardrailsIntent(intent)).toContain("board.execute-next");
 
     const helperText = buildBoardExecuteNextIntentText();
     expect(helperText).toContain("[intent:board.execute-next]");
+  });
+
+  it("supports board.execute-next milestone scope in envelope", () => {
+    const intent = buildBoardExecuteNextIntent("  MS   ALPHA  ");
+    const text = encodeGuardrailsIntent(intent);
+    expect(text).toContain("[intent:board.execute-next]");
+    expect(text).toContain("milestone=MS ALPHA");
+
+    const parsed = parseGuardrailsIntent(text);
+    expect(parsed.ok).toBe(true);
+    expect(parsed.intent?.type).toBe("board.execute-next");
+    expect((parsed.intent as any)?.milestone).toBe("MS ALPHA");
+    expect(summarizeGuardrailsIntent(intent)).toContain("milestone=MS ALPHA");
+
+    const helperText = buildBoardExecuteNextIntentText("MS-LOCAL");
+    expect(helperText).toContain("milestone=MS-LOCAL");
+
+    if (parsed.intent) {
+      const lines = buildGuardrailsIntentSystemPrompt(parsed.intent);
+      expect(lines.join("\n")).toContain("milestone=MS ALPHA");
+      expect(lines.join("\n")).toContain("for milestone 'MS ALPHA'");
+    }
   });
 
   it("flags unsupported intent type deterministically", () => {

@@ -190,6 +190,6 @@ export function buildBoardExecuteTaskIntentText(taskId: string): string {
   return encodeGuardrailsIntent(intent);
 }
 
-export function buildBoardExecuteNextIntentText(): string {
-  return encodeGuardrailsIntent(buildBoardExecuteNextIntent());
+export function buildBoardExecuteNextIntentText(milestone?: string): string {
+  return encodeGuardrailsIntent(buildBoardExecuteNextIntent(milestone));
 }

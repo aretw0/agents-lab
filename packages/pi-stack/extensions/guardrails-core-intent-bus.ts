@@ -13,6 +13,7 @@ export interface BoardExecuteNextIntent {
   type: "board.execute-next";
   mode: "board-first";
   contract: "no-auto-close+verification";
+  milestone?: string;
 }
 
 export type GuardrailsIntent = BoardExecuteTaskIntent | BoardExecuteNextIntent;
@@ -32,6 +33,13 @@ export interface ParsedGuardrailsIntent {
 function normalizeTaskId(value: unknown): string | undefined {
   const id = typeof value === "string" ? value.trim() : "";
   return id.length > 0 ? id : undefined;
+}
+
+function normalizeMilestoneLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (!normalized) return undefined;
+  return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
 }
 
 function readIntentHeader(line: string): string | undefined {
@@ -68,12 +76,14 @@ export function buildBoardExecuteTaskIntent(taskId: string): BoardExecuteTaskInt
   };
 }
 
-export function buildBoardExecuteNextIntent(): BoardExecuteNextIntent {
+export function buildBoardExecuteNextIntent(milestone?: string): BoardExecuteNextIntent {
+  const normalizedMilestone = normalizeMilestoneLabel(milestone);
   return {
     version: GUARDRAILS_INTENT_VERSION,
     type: "board.execute-next",
     mode: "board-first",
     contract: "no-auto-close+verification",
+    ...(normalizedMilestone ? { milestone: normalizedMilestone } : {}),
   };
 }
 
@@ -93,6 +103,7 @@ export function encodeGuardrailsIntent(intent: GuardrailsIntent): string {
       `[intent:${intent.type}]`,
       `version=${intent.version}`,
       `mode=${intent.mode}`,
+      ...(intent.milestone ? [`milestone=${intent.milestone}`] : []),
       `contract=${intent.contract}`,
     ].join("\n");
   }
@@ -126,7 +137,11 @@ export function parseGuardrailsIntent(text: string): ParsedGuardrailsIntent {
   }
 
   if (header === "board.execute-next") {
-    return { ok: true, intent: buildBoardExecuteNextIntent(), rawType: header };
+    return {
+      ok: true,
+      intent: buildBoardExecuteNextIntent(fields.milestone),
+      rawType: header,
+    };
   }
 
   return { ok: false, reason: "unsupported-type", rawType: header };
@@ -137,7 +152,7 @@ export function summarizeGuardrailsIntent(intent: GuardrailsIntent): string {
     return `${intent.type} task=${intent.taskId} mode=${intent.mode}`;
   }
   if (intent.type === "board.execute-next") {
-    return `${intent.type} mode=${intent.mode}`;
+    return `${intent.type} mode=${intent.mode}${intent.milestone ? ` milestone=${intent.milestone}` : ""}`;
   }
   return "unknown-intent";
 }
@@ -156,8 +171,10 @@ export function buildGuardrailsIntentSystemPrompt(intent: GuardrailsIntent): str
   if (intent.type === "board.execute-next") {
     return [
       "Canonical intent envelope detected: board-first execution is active for this turn.",
-      `- intent: ${intent.type} (version=${intent.version})`,
-      "- execute the next eligible board task (planned + dependencies satisfied).",
+      `- intent: ${intent.type} (version=${intent.version})${intent.milestone ? ` milestone=${intent.milestone}` : ""}`,
+      intent.milestone
+        ? `- execute the next eligible board task for milestone '${intent.milestone}' (planned + dependencies satisfied).`
+        : "- execute the next eligible board task (planned + dependencies satisfied).",
       "- preserve contract: no-auto-close + verification evidence before any completion update.",
       "- if board is not ready, report blocker and suggest minimal decomposition to unblock next task.",
     ];
