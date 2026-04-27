@@ -5163,6 +5163,15 @@
       "method": "test",
       "timestamp": "2026-04-26T12:22:00Z",
       "evidence": "Slices 106-125: observabilidade operacional refinada para política efetiva de falha. `guardrails-core` agora persiste `lastDispatchFailurePauseAfterUsed` + `lastDispatchFailureWindowMsUsed` e expõe `failPolicy=<pauseAfter@windowMs|n/a>` em `/lane-queue status`, alinhado à última decisão real do pause gate. Reset de tracking consolidado em helper único (`resetDispatchFailureTrackingState`) e aplicado em `markLoopHealthy`, `markLoopDispatch` e `session_start`, reduzindo risco de stale state. Documentação canônica atualizada para incluir `failPolicy` na leitura de status. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; orçamento do orquestrador preservado (`guardrails-core.ts` 3596 linhas, <=3600)."
+    },
+    {
+      "id": "VER-BUD-324",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T12:29:00Z",
+      "evidence": "Auto-resume prompt truncation hardened for legibility: `packages/pi-stack/extensions/context-watchdog-handoff.ts` now preserves both head+tail when clipping long segments (`[snip] ... [truncated:+N chars]`) instead of head-only truncation, keeping actionable suffix context in `next:` lines. Added smoke coverage in `packages/pi-stack/test/smoke/context-watchdog.test.ts` for `[snip]` marker and tail-preservation scenario (`=> 38/38 passed`), while preserving explicit global truncation contract. Runbook updated in `docs/guides/project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 55/55 passed; plus focal continuity `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 99/99 passed."
     }
   ]
 }

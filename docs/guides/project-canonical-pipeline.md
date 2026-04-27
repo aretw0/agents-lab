@@ -506,7 +506,7 @@ Contrato operacional:
   - `micro-slice-only` => manter cortes mínimos até checkpoint/compact estabilizar;
 - usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`);
 - quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
-- prompt de auto-resume usa normalização canônica (single-line, sem artefatos markdown/backticks) e truncamento explícito (`[truncated:+N chars]`, `[auto-resume-prompt-truncated:+N chars]`) para evitar reticências opacas.
+- prompt de auto-resume usa normalização canônica (single-line, sem artefatos markdown/backticks) e truncamento explícito com preservação de cauda (`[snip] ... [truncated:+N chars]`, `[auto-resume-prompt-truncated:+N chars]`) para evitar reticências opacas e manter contexto operacional útil.
 - em triagem de qualidade de prompt, consultar audit `context-watchdog.auto-resume-prompt` para diagnosticar dedupe/truncation por seção (`tasks`, `blockers`, `nextActions`) antes de ajustar contrato de handoff.
 
 Objetivo: preservar segurança do contexto sem exigir confirmação humana para continuar quando o estado já está saudável.

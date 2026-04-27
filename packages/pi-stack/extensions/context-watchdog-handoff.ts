@@ -33,9 +33,19 @@ function normalizePromptSegment(value: string): string {
 function truncateForPrompt(value: string, max = 180): string {
 	const s = normalizePromptSegment(value);
 	if (s.length <= max) return s;
-	const keep = Math.max(1, Math.floor(max));
-	const omitted = Math.max(0, s.length - keep);
-	return `${s.slice(0, keep)} [truncated:+${omitted} chars]`;
+	const keep = Math.max(24, Math.floor(max));
+	if (keep < 48) {
+		const omitted = Math.max(0, s.length - keep);
+		return `${s.slice(0, keep)} [truncated:+${omitted} chars]`;
+	}
+	const tailKeep = Math.max(12, Math.floor(keep * 0.22));
+	const headKeep = Math.max(16, keep - tailKeep);
+	const preserved = Math.min(s.length, headKeep + tailKeep);
+	const omitted = Math.max(0, s.length - preserved);
+	if (omitted <= 0) return s;
+	const head = s.slice(0, headKeep).trimEnd();
+	const tail = s.slice(Math.max(0, s.length - tailKeep)).trimStart();
+	return `${head} [snip] ${tail} [truncated:+${omitted} chars]`;
 }
 
 export function resolveHandoffFreshness(

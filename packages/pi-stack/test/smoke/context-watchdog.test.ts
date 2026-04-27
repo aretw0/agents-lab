@@ -444,10 +444,22 @@ describe("context-watchdog", () => {
 		expect(prompt).not.toContain("TASK-BUD-150, TASK-BUD-150");
 		expect(prompt).toContain("blockers: strange / blocker [ellipsis] with compacted tail");
 		expect(prompt).toContain("[truncated:+");
+		expect(prompt).toContain("[snip]");
 		expect(prompt).toContain("run focused slice");
 		expect(prompt).not.toContain("next: next:");
 		expect(prompt).not.toContain("...");
 		expect(prompt).not.toContain("…");
+	});
+
+	it("preserves tail context when truncating long next actions", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			next_actions: [
+				"Validação opcional pós-reload executada em smoke: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts com telemetry completa e sem regressão operacional => 38/38 passed",
+			],
+		} as any);
+		expect(prompt).toContain("[snip]");
+		expect(prompt).toContain("38/38 passed");
+		expect(prompt).toContain("[truncated:+");
 	});
 
 	it("caps final prompt length with explicit global truncation marker", () => {
