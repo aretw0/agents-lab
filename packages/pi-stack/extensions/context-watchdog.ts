@@ -614,6 +614,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		atIso: string;
 		reason: AutoResumeDispatchReason;
 		dispatched: boolean;
+		reloadRequired: boolean;
 		checkpointEvidenceReady: boolean;
 		hasPendingMessages: boolean;
 		hasRecentSteerInput: boolean;
@@ -886,8 +887,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 					});
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
+					const reloadRequired = isReloadRequiredForSourceUpdate();
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
 						autoResumeReady,
+						reloadRequired,
 						checkpointEvidenceReady,
 						hasPendingMessages,
 						hasRecentSteerInput,
@@ -897,6 +900,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						atIso: string;
 						reason: AutoResumeDispatchReason;
 						dispatched: boolean;
+						reloadRequired: boolean;
 						checkpointEvidenceReady: boolean;
 						hasPendingMessages: boolean;
 						hasRecentSteerInput: boolean;
@@ -906,6 +910,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						atIso: new Date(nowAfterCompact).toISOString(),
 						reason: autoResumeDecision.reason,
 						dispatched: autoResumeDecision.shouldDispatch,
+						reloadRequired,
 						checkpointEvidenceReady,
 						hasPendingMessages,
 						hasRecentSteerInput,
@@ -938,6 +943,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 								hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
 								hasRecentSteerInput: autoResumeSnapshot.hasRecentSteerInput,
 								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
+								reloadRequired: autoResumeSnapshot.reloadRequired,
 								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
 							},
 						);
@@ -1091,6 +1097,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			),
 			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
 			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
+			autoResumeLastReloadRequired: lastAutoResumeDecision?.reloadRequired ?? false,
+			autoResumeLastCheckpointEvidenceReady: lastAutoResumeDecision?.checkpointEvidenceReady ?? true,
 			steeringLastSignal: lastSteeringSignal,
 			steeringLastSignalSummary: lastSteeringSignal
 				? `${lastSteeringSignal.reason} level=${lastSteeringSignal.level} action=${lastSteeringSignal.action} delivery=${lastSteeringSignal.delivery} at=${lastSteeringSignal.atIso}`
@@ -1340,7 +1348,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"} dispatch=${autoCompact.antiParalysisDispatchReason} graceRemainingMs=${autoCompact.antiParalysisGraceRemainingMs ?? "n/a"} cooldownRemainingMs=${autoCompact.antiParalysisCooldownRemainingMs ?? "n/a"} notifyCount=${autoCompact.antiParalysisNotifyCountInWindow}/${autoCompact.antiParalysisMaxNotifiesPerWindow}`,
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
-					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
+					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} reloadRequired=${autoCompact.autoResumeLastReloadRequired ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.autoResumeLastCheckpointEvidenceReady ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
 					`auto-resume-last-prompt: ${autoCompact.autoResumeLastPromptDiagnosticsSummary ?? "none"}`,
 					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,

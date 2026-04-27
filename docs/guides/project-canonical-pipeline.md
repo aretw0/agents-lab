@@ -528,7 +528,7 @@ Contrato operacional:
   - `standard-slices` => retomar throughput normal (ex.: 2–4 arquivos + testes focados);
   - `micro-slice-only` => manter cortes mínimos até checkpoint/compact estabilizar;
 - usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`);
-- quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `checkpoint-evidence-missing`, `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
+- quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `reload-required`, `checkpoint-evidence-missing`, `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
 - prompt de auto-resume usa normalização canônica (single-line, sem artefatos markdown/backticks) e truncamento explícito com preservação de cauda (`[snip] ... [truncated:+N chars]`, `[auto-resume-prompt-truncated:+N chars]`) para evitar reticências opacas e manter contexto operacional útil.
 - quando `current_tasks` não vier no handoff, o prompt tenta derivar `focusTasks` por IDs `TASK-*` presentes em `next_actions`/`blockers`/`context`, mantendo limite curto e dedupe.
 - quando alguma lista estoura limite (tasks/blockers/next), o prompt explicita overflow com `(+N more)` em vez de silêncio implícito.

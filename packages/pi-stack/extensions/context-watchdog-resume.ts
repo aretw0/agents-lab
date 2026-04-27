@@ -15,6 +15,7 @@ export type HandoffPrepReason = "level-not-compact" | "auto-resume-off" | "fresh
 
 export type AutoResumeDispatchReason =
 	| "auto-resume-off-or-cooldown"
+	| "reload-required"
 	| "checkpoint-evidence-missing"
 	| "pending-messages"
 	| "recent-steer"
@@ -25,6 +26,8 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 	switch (reason) {
 		case "send":
 			return "dispatched";
+		case "reload-required":
+			return "suppressed: reload-required";
 		case "checkpoint-evidence-missing":
 			return "suppressed: checkpoint-evidence-missing";
 		case "pending-messages":
@@ -50,6 +53,7 @@ export function shouldEmitAutoResumeAfterCompact(
 
 export function resolveAutoResumeDispatchDecision(input: {
 	autoResumeReady: boolean;
+	reloadRequired?: boolean;
 	checkpointEvidenceReady?: boolean;
 	hasPendingMessages: boolean;
 	hasRecentSteerInput: boolean;
@@ -57,6 +61,9 @@ export function resolveAutoResumeDispatchDecision(input: {
 }): { shouldDispatch: boolean; reason: AutoResumeDispatchReason } {
 	if (!input.autoResumeReady) {
 		return { shouldDispatch: false, reason: "auto-resume-off-or-cooldown" };
+	}
+	if (input.reloadRequired === true) {
+		return { shouldDispatch: false, reason: "reload-required" };
 	}
 	if (input.checkpointEvidenceReady === false) {
 		return { shouldDispatch: false, reason: "checkpoint-evidence-missing" };

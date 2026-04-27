@@ -251,12 +251,20 @@ describe("context-watchdog", () => {
 		})).toEqual({ shouldDispatch: true, reason: "send" });
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
+			reloadRequired: true,
+			hasPendingMessages: false,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: false, reason: "reload-required" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
 			checkpointEvidenceReady: false,
 			hasPendingMessages: false,
 			hasRecentSteerInput: false,
 			queuedLaneIntents: 0,
 		})).toEqual({ shouldDispatch: false, reason: "checkpoint-evidence-missing" });
 		expect(describeAutoResumeDispatchReason("send")).toBe("dispatched");
+		expect(describeAutoResumeDispatchReason("reload-required")).toContain("reload-required");
 		expect(describeAutoResumeDispatchReason("checkpoint-evidence-missing")).toContain("checkpoint-evidence-missing");
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
