@@ -2082,7 +2082,7 @@ export default function (pi: ExtensionAPI) {
 
     lastAutoDrainDeferredGate = undefined;
 
-    const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3 });
+    const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: longRunIntentQueueConfig.defaultBoardMilestone });
     const autoAdvanceDedupeMs = Math.max(
       30_000,
       longRunIntentQueueConfig.autoDrainIdleStableMs * 4,
@@ -3231,7 +3231,8 @@ export default function (pi: ExtensionAPI) {
           ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>]", "warning");
           return;
         }
-        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: parsedBoardNext.milestone });
+        const boardNextMilestone = parsedBoardNext.milestone ?? longRunIntentQueueConfig.defaultBoardMilestone;
+        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: boardNextMilestone });
         if (!boardReadiness.ready || !boardReadiness.nextTaskId) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
             atIso: new Date().toISOString(),
@@ -3239,10 +3240,10 @@ export default function (pi: ExtensionAPI) {
             recommendation: boardReadiness.recommendation,
             blockedByDependencies: boardReadiness.blockedByDependencies,
             planned: boardReadiness.totals.planned,
-            milestone: parsedBoardNext.milestone,
+            milestone: boardNextMilestone,
           });
           ctx.ui.notify([
-            `lane-queue: board-next blocked (${boardReadiness.reason}${parsedBoardNext.milestone ? `; milestone=${parsedBoardNext.milestone}` : ""})`,
+            `lane-queue: board-next blocked (${boardReadiness.reason}${boardNextMilestone ? `; milestone=${boardNextMilestone}` : ""})`,
             `boardHint: ${boardReadiness.recommendation}`,
           ].join("\n"), "warning");
           return;
@@ -3250,7 +3251,7 @@ export default function (pi: ExtensionAPI) {
         const nextTaskId = boardReadiness.nextTaskId;
         const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
         if (activeLongRun) {
-          const queuedIntent = buildBoardExecuteNextIntent(parsedBoardNext.milestone);
+          const queuedIntent = buildBoardExecuteNextIntent(boardNextMilestone);
           const queuedText = encodeGuardrailsIntent(queuedIntent);
           const queuedSummary = summarizeGuardrailsIntent(queuedIntent);
           const queued = enqueueDeferredIntent(
@@ -3270,7 +3271,7 @@ export default function (pi: ExtensionAPI) {
             queuePath: queued.queuePath,
             queuedCount: queued.queuedCount,
             selectionPolicy: boardReadiness.selectionPolicy,
-            milestone: parsedBoardNext.milestone,
+            milestone: boardNextMilestone,
             intentType: queuedIntent.type,
             intentVersion: queuedIntent.version,
             intentSummary: queuedSummary,
@@ -3296,13 +3297,12 @@ export default function (pi: ExtensionAPI) {
           );
           return;
         }
-        const intentText = encodeGuardrailsIntent(intent);
-        const intentSummary = summarizeGuardrailsIntent(intent);
+        const intentText = encodeGuardrailsIntent(intent); const intentSummary = summarizeGuardrailsIntent(intent);
         appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch", {
           atIso: new Date().toISOString(),
           taskId: intent.taskId,
           selectionPolicy: boardReadiness.selectionPolicy,
-          milestone: parsedBoardNext.milestone,
+          milestone: boardNextMilestone,
           deliverAs: "followUp",
           intentType: intent.type,
           intentVersion: intent.version,
@@ -3315,7 +3315,7 @@ export default function (pi: ExtensionAPI) {
           scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-          const fallbackIntent = buildBoardExecuteNextIntent(parsedBoardNext.milestone);
+          const fallbackIntent = buildBoardExecuteNextIntent(boardNextMilestone);
           const fallbackText = encodeGuardrailsIntent(fallbackIntent);
           const fallbackSummary = summarizeGuardrailsIntent(fallbackIntent);
           const queued = enqueueDeferredIntent(
@@ -3345,7 +3345,7 @@ export default function (pi: ExtensionAPI) {
             queuedCount: queued.queuedCount,
             deduped: queued.deduped,
             selectionPolicy: boardReadiness.selectionPolicy,
-            milestone: parsedBoardNext.milestone,
+            milestone: boardNextMilestone,
             intentType: fallbackIntent.type,
             intentVersion: fallbackIntent.version,
             intentSummary: fallbackSummary,
@@ -3497,7 +3497,7 @@ export default function (pi: ExtensionAPI) {
       const providerRetryPolicy = longRunProviderRetryConfig.enabled
         ? `${longRunProviderRetryConfig.maxAttempts}x@${Math.ceil(longRunProviderRetryConfig.baseDelayMs / 1000)}s→${Math.ceil(longRunProviderRetryConfig.maxDelayMs / 1000)}s`
         : "off";
-      const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3 });
+      const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: longRunIntentQueueConfig.defaultBoardMilestone });
       const boardReadinessLabel = buildBoardReadinessStatusLabel(boardReadiness);
       const autoAdvanceDedupeMs = Math.max(
         30_000,

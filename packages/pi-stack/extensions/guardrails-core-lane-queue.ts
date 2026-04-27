@@ -6,6 +6,7 @@ export interface LongRunIntentQueueConfig {
   requireActiveLongRun: boolean;
   maxItems: number;
   forceNowPrefix: string;
+  defaultBoardMilestone?: string;
   autoDrainOnIdle: boolean;
   autoDrainCooldownMs: number;
   autoDrainBatchSize: number;
@@ -75,6 +76,18 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
 
 const DEFAULT_LONG_RUN_LOOP_LEASE_TTL_MS = 30_000;
 
+function normalizeMilestoneLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  const unwrapped = trimmed.length >= 2
+    && ((trimmed.startsWith("\"") && trimmed.endsWith("\"")) || (trimmed.startsWith("'") && trimmed.endsWith("'")))
+    ? trimmed.slice(1, -1)
+    : trimmed;
+  const normalized = unwrapped.replace(/\s+/g, " ").trim();
+  if (!normalized) return undefined;
+  return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
+}
+
 function deferredIntentQueuePath(cwd: string): string {
   return join(cwd, ".pi", "deferred-intents.json");
 }
@@ -139,6 +152,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
       forceNowPrefix: typeof cfg?.forceNowPrefix === "string" && cfg.forceNowPrefix.trim().length > 0
         ? cfg.forceNowPrefix.trim().toLowerCase()
         : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.forceNowPrefix,
+      defaultBoardMilestone: normalizeMilestoneLabel(cfg?.defaultBoardMilestone),
       autoDrainOnIdle: cfg?.autoDrainOnIdle !== false,
       autoDrainCooldownMs: Number.isFinite(autoDrainCooldownMsRaw) && autoDrainCooldownMsRaw >= 0
         ? Math.max(0, Math.floor(autoDrainCooldownMsRaw))
@@ -233,26 +247,26 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
 
   const fromFlag = rest.match(/^--milestone\s+(.+)$/i)?.[1];
   if (fromFlag) {
-    const milestone = stripWrappedQuotes(fromFlag);
-    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromFlag));
+    return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromShortFlag = rest.match(/^-m\s+(.+)$/i)?.[1];
   if (fromShortFlag) {
-    const milestone = stripWrappedQuotes(fromShortFlag);
-    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromShortFlag));
+    return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromFlagInline = rest.match(/^--milestone=(.+)$/i)?.[1];
   if (fromFlagInline) {
-    const milestone = stripWrappedQuotes(fromFlagInline);
-    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromFlagInline));
+    return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromInline = rest.match(/^milestone=(.+)$/i)?.[1];
   if (fromInline) {
-    const milestone = stripWrappedQuotes(fromInline);
-    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromInline));
+    return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   return { error: "invalid-board-next-args" };

@@ -83,6 +83,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.requireActiveLongRun).toBe(true);
       expect(cfg.maxItems).toBe(50);
       expect(cfg.forceNowPrefix).toBe("lane-now:");
+      expect(cfg.defaultBoardMilestone).toBeUndefined();
       expect(cfg.autoDrainOnIdle).toBe(true);
       expect(cfg.autoDrainCooldownMs).toBe(3000);
       expect(cfg.autoDrainBatchSize).toBe(1);
@@ -486,7 +487,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next").milestone).toBeUndefined();
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone MS-LOCAL").milestone).toBe("MS-LOCAL");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone=MS-FLAG").milestone).toBe("MS-FLAG");
-    expect(parseLaneQueueBoardNextMilestone("board-next -m MS-SHORT").milestone).toBe("MS-SHORT");
+    expect(parseLaneQueueBoardNextMilestone("board-next -m \"MS   SHORT\"").milestone).toBe("MS SHORT");
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
@@ -790,6 +791,7 @@ describe("guardrails-core long-run intent queue", () => {
                 requireActiveLongRun: false,
                 maxItems: 99,
                 forceNowPrefix: "agora:",
+                defaultBoardMilestone: "  \"MS   DEFAULT\"  ",
                 autoDrainOnIdle: false,
                 autoDrainCooldownMs: 8000,
                 autoDrainBatchSize: 4,
@@ -818,6 +820,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.requireActiveLongRun).toBe(false);
       expect(cfg.maxItems).toBe(99);
       expect(cfg.forceNowPrefix).toBe("agora:");
+      expect(cfg.defaultBoardMilestone).toBe("MS DEFAULT");
       expect(cfg.autoDrainOnIdle).toBe(false);
       expect(cfg.autoDrainCooldownMs).toBe(8000);
       expect(cfg.autoDrainBatchSize).toBe(4);
