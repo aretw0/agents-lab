@@ -2615,11 +2615,13 @@ export default function (pi: ExtensionAPI) {
       refreshLoopLeaseOnActivity(ctx, "interactive-input-lease-heartbeat", 10_000);
     }
     updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-
     const maybeIntentEnvelope = inputText.trim().toLowerCase().startsWith("[intent:");
     const parsedInputIntent = parseGuardrailsIntent(inputText);
+    const intentMilestone = parsedInputIntent.ok && parsedInputIntent.intent?.type === "board.execute-next"
+      ? parsedInputIntent.intent.milestone
+      : undefined;
     const boardReadinessForIntent = maybeIntentEnvelope
-      ? evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 1 })
+      ? evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 1, milestone: intentMilestone })
       : undefined;
     const intentRuntimeDecision = resolveGuardrailsIntentRuntimeDecision({
       text: inputText,
@@ -2627,7 +2629,6 @@ export default function (pi: ExtensionAPI) {
       boardReady: boardReadinessForIntent?.ready,
       nextTaskId: boardReadinessForIntent?.nextTaskId,
     });
-
     if (intentRuntimeDecision.kind === "non-intent") {
       ctx.ui?.setStatus?.("guardrails-core-intent", undefined);
     } else if (intentRuntimeDecision.action === "reject") {
@@ -2649,13 +2650,15 @@ export default function (pi: ExtensionAPI) {
       const intentSummary = summarizeGuardrailsIntent(parsedInputIntent.intent);
       const runtimeTaskId = intentRuntimeDecision.taskId;
       const expectedTaskId = intentRuntimeDecision.expectedTaskId;
+      const scopedMilestone = intentRuntimeDecision.milestone ?? intentMilestone;
+      const statusSuffix = scopedMilestone ? ` milestone=${scopedMilestone}` : "";
       const statusLine = expectedTaskId && runtimeTaskId && expectedTaskId !== runtimeTaskId
-        ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId} expected=${expectedTaskId}`
+        ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId} expected=${expectedTaskId}${statusSuffix}`
         : runtimeTaskId
-          ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId}`
+          ? `[intent] ${parsedInputIntent.intent.type} task=${runtimeTaskId}${statusSuffix}`
           : expectedTaskId
-            ? `[intent] ${parsedInputIntent.intent.type} expected=${expectedTaskId}`
-            : `[intent] ${parsedInputIntent.intent.type}`;
+            ? `[intent] ${parsedInputIntent.intent.type} expected=${expectedTaskId}${statusSuffix}`
+            : `[intent] ${parsedInputIntent.intent.type}${statusSuffix}`;
       ctx.ui?.setStatus?.("guardrails-core-intent", statusLine);
       appendAuditEntry(ctx, "guardrails-core.intent-envelope-runtime-consumed", {
         atIso: new Date().toISOString(),
@@ -2664,6 +2667,7 @@ export default function (pi: ExtensionAPI) {
         intentSummary,
         boardReady: boardReadinessForIntent?.ready,
         boardNextTaskId: boardReadinessForIntent?.nextTaskId,
+        milestone: scopedMilestone,
       });
 
       if (intentRuntimeDecision.kind === "board-execute-board-not-ready") {
@@ -2682,19 +2686,18 @@ export default function (pi: ExtensionAPI) {
       } else if (intentRuntimeDecision.kind === "board-execute-next-board-not-ready") {
         ctx.ui.notify(
           [
-            "guardrails-core: board.execute-next recebido com board não pronto.",
+            `guardrails-core: board.execute-next recebido com board não pronto${scopedMilestone ? ` (milestone=${scopedMilestone})` : ""}.`,
             `boardHint: ${boardReadinessForIntent?.recommendation ?? "decompose planned work into executable slices."}`,
           ].join("\n"),
           "warning",
         );
       } else if (intentRuntimeDecision.kind === "board-execute-next-ready") {
         ctx.ui.notify(
-          `guardrails-core: board.execute-next resolvido para next=${expectedTaskId ?? runtimeTaskId ?? "n/a"}.`,
+          `guardrails-core: board.execute-next resolvido para next=${expectedTaskId ?? runtimeTaskId ?? "n/a"}${scopedMilestone ? ` (milestone=${scopedMilestone})` : ""}.`,
           "info",
         );
       }
     }
-
     if (event.source === "interactive") {
       const forceNowText = extractForceNowText(inputText, longRunIntentQueueConfig);
       if (forceNowText !== undefined) {

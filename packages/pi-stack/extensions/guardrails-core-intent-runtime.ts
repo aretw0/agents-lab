@@ -16,6 +16,7 @@ export interface GuardrailsIntentRuntimeDecision {
   rawType?: string;
   taskId?: string;
   expectedTaskId?: string;
+  milestone?: string;
 }
 
 export interface ResolveGuardrailsIntentRuntimeDecisionInput {
@@ -81,12 +82,14 @@ export function resolveGuardrailsIntentRuntimeDecision(
     const expectedTaskId = typeof input.nextTaskId === "string" && input.nextTaskId.trim().length > 0
       ? input.nextTaskId.trim()
       : undefined;
+    const milestone = input.parsed.intent.milestone;
 
     if (!input.boardReady || !expectedTaskId) {
       return {
         action: "continue",
         kind: "board-execute-next-board-not-ready",
         expectedTaskId,
+        milestone,
       };
     }
 
@@ -95,6 +98,7 @@ export function resolveGuardrailsIntentRuntimeDecision(
       kind: "board-execute-next-ready",
       taskId: expectedTaskId,
       expectedTaskId,
+      milestone,
     };
   }
 

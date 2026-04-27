@@ -162,6 +162,26 @@ describe("guardrails-core intent bus", () => {
     });
     expect(nextReady.kind).toBe("board-execute-next-ready");
     expect(nextReady.taskId).toBe("TASK-BUD-125");
+    expect(nextReady.milestone).toBeUndefined();
+
+    const nextScopedText = buildBoardExecuteNextIntentText("MS-LOCAL");
+    const nextScopedNotReady = resolveGuardrailsIntentRuntimeDecision({
+      text: nextScopedText,
+      parsed: parseGuardrailsIntent(nextScopedText),
+      boardReady: false,
+      nextTaskId: undefined,
+    });
+    expect(nextScopedNotReady.kind).toBe("board-execute-next-board-not-ready");
+    expect(nextScopedNotReady.milestone).toBe("MS-LOCAL");
+
+    const nextScopedReady = resolveGuardrailsIntentRuntimeDecision({
+      text: nextScopedText,
+      parsed: parseGuardrailsIntent(nextScopedText),
+      boardReady: true,
+      nextTaskId: "TASK-BUD-157",
+    });
+    expect(nextScopedReady.kind).toBe("board-execute-next-ready");
+    expect(nextScopedReady.milestone).toBe("MS-LOCAL");
 
     const nextNotReady = resolveGuardrailsIntentRuntimeDecision({
       text: nextText,
