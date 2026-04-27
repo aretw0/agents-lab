@@ -5730,6 +5730,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:15:35Z",
       "evidence": "Deterministic auto-resume checkpoint gate added. `context-watchdog-resume.ts`: new suppression reason `checkpoint-evidence-missing` in `AutoResumeDispatchReason` and `resolveAutoResumeDispatchDecision`. `context-watchdog.ts` now computes `checkpointEvidenceReady` from latest handoff event freshness before dispatching auto-resume after compact and records this field in suppression payload. Smoke updated (`context-watchdog.test.ts`) with checkpoint-missing branch and description string assertions. Runbook updated to include the new suppression reason in post-compact diagnostics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-387",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:18:10Z",
+      "evidence": "Decoupled compact checkpoint hard-intent from simple agents. `resolveCompactCheckpointPersistence` now supports `enabled` flag and returns `reason=disabled` when off. `context-watchdog.ts` wires this flag to `config.autoResumeAfterCompact`, so forced compact-checkpoint persistence is long-run scoped only. Smoke extended for disabled branch in `context-watchdog.test.ts`, and runbook clarified scope (`autoResumeAfterCompact=yes`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }

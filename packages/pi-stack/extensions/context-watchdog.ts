@@ -710,6 +710,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
 		const handoffEventAgeForCalmClose = contextWatchEventAgeMs(handoffEventForCalmClose, now);
 		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
+			enabled: config.autoResumeAfterCompact,
 			assessmentLevel: assessment.level,
 			handoffLastEventLevel: handoffEventForCalmClose?.level,
 			handoffLastEventAgeMs: handoffEventAgeForCalmClose,
@@ -953,6 +954,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
 		const handoffPrep = resolveHandoffPrepDecision(assessment, config, handoffFreshness.label);
 		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
+			enabled: config.autoResumeAfterCompact,
 			assessmentLevel: assessment.level,
 			handoffLastEventLevel: handoffLastEvent?.level,
 			handoffLastEventAgeMs,

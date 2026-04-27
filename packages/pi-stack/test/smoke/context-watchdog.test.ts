@@ -231,6 +231,13 @@ describe("context-watchdog", () => {
 			handoffLastEventAgeMs: 20_000,
 			maxCheckpointAgeMs: 60_000,
 		})).toEqual({ shouldPersist: false, reason: "level-not-compact" });
+		expect(resolveCompactCheckpointPersistence({
+			enabled: false,
+			assessmentLevel: "compact",
+			handoffLastEventLevel: "warn",
+			handoffLastEventAgeMs: 120_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toEqual({ shouldPersist: false, reason: "disabled" });
 
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);

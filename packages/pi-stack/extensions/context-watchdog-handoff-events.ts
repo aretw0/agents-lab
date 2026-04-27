@@ -27,6 +27,7 @@ export type ContextWatchHandoffEvent = {
 };
 
 export type CompactCheckpointPersistenceReason =
+	| "disabled"
 	| "level-not-compact"
 	| "missing-compact-event"
 	| "stale-compact-event"
@@ -108,11 +109,15 @@ function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
 }
 
 export function resolveCompactCheckpointPersistence(input: {
+	enabled?: boolean;
 	assessmentLevel: ContextWatchdogLevel;
 	handoffLastEventLevel?: ContextWatchdogLevel;
 	handoffLastEventAgeMs?: number;
 	maxCheckpointAgeMs?: number;
 }): { shouldPersist: boolean; reason: CompactCheckpointPersistenceReason } {
+	if (input.enabled === false) {
+		return { shouldPersist: false, reason: "disabled" };
+	}
 	if (input.assessmentLevel !== "compact") {
 		return { shouldPersist: false, reason: "level-not-compact" };
 	}
