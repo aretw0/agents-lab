@@ -5541,6 +5541,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:04:20Z",
       "evidence": "Milestone parser hardening in `guardrails-core-lane-queue.ts`: quote unwrap now detects unbalanced/mismatched quote wrappers and returns deterministic parse error instead of silently accepting malformed milestone labels. Applied across all accepted milestone forms (`--milestone`, `--milestone=`, `-m`, `-m=`, `milestone=`). Smoke coverage extended with malformed-quote cases in `guardrails-long-run-intent-queue.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-366",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:06:20Z",
+      "evidence": "Operational checker hardening for milestone parity: `scripts/guardrails-loop-evidence-check.mjs` now supports `--expect-milestone <label>` and emits `milestoneCheck` (expected vs boardAuto/loopReady, matches boolean). In strict mode, milestone mismatch now fails with non-zero exit in addition to stale/not-ready conditions. Added exported helper `evaluateMilestoneScopeMatch` with unit coverage in `scripts/test/guardrails-loop-evidence-check.test.mjs`. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 6/6; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }

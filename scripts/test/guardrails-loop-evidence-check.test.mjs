@@ -4,7 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { assessLoopEvidence, computeEvidenceReadiness } from "../guardrails-loop-evidence-check.mjs";
+import { assessLoopEvidence, computeEvidenceReadiness, evaluateMilestoneScopeMatch } from "../guardrails-loop-evidence-check.mjs";
 
 test("computeEvidenceReadiness returns ready only when active+emLoop criteria are met", () => {
   const ready = computeEvidenceReadiness({
@@ -122,6 +122,20 @@ test("assessLoopEvidence keeps readiness criteria task-agnostic (real board auto
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
+});
+
+test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopReady milestones", () => {
+  const matched = evaluateMilestoneScopeMatch({
+    boardAuto: { milestone: "MS LOCAL" },
+    loopReady: { milestone: "MS LOCAL" },
+  }, "MS   LOCAL");
+  assert.equal(matched.matches, true);
+
+  const mismatched = evaluateMilestoneScopeMatch({
+    boardAuto: { milestone: "MS-1" },
+    loopReady: { milestone: "MS-2" },
+  }, "MS-1");
+  assert.equal(mismatched.matches, false);
 });
 
 test("assessLoopEvidence reports stale when updatedAt exceeds freshness window", () => {

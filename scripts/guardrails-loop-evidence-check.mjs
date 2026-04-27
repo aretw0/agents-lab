@@ -7,6 +7,11 @@ import { pathToFileURL } from "node:url";
 
 const DEFAULT_MAX_AGE_MIN = 30;
 
+function normalizeMilestone(value) {
+  const text = String(value ?? "").trim();
+  return text.length > 0 ? text.replace(/\s+/g, " ") : undefined;
+}
+
 export function evidencePath(cwd = process.cwd()) {
   return path.join(cwd, ".pi", "guardrails-loop-evidence.json");
 }
@@ -124,6 +129,19 @@ export function assessLoopEvidence({ cwd = process.cwd(), nowMs = Date.now(), ma
   };
 }
 
+export function evaluateMilestoneScopeMatch(report, expectedMilestone) {
+  const expected = normalizeMilestone(expectedMilestone);
+  if (!expected) return { expectedMilestone: undefined, matches: true };
+  const boardAutoMilestone = normalizeMilestone(report?.boardAuto?.milestone);
+  const loopReadyMilestone = normalizeMilestone(report?.loopReady?.milestone);
+  return {
+    expectedMilestone: expected,
+    boardAutoMilestone,
+    loopReadyMilestone,
+    matches: boardAutoMilestone === expected && loopReadyMilestone === expected,
+  };
+}
+
 function parseArgs(argv) {
   const out = {
     cwd: process.cwd(),
@@ -131,6 +149,7 @@ function parseArgs(argv) {
     strict: false,
     json: false,
     help: false,
+    expectMilestone: undefined,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -149,6 +168,10 @@ function parseArgs(argv) {
       i += 1;
       const n = Number(argv[i]);
       if (Number.isFinite(n) && n >= 0) out.maxAgeMin = n;
+    } else if (a.startsWith("--expect-milestone=")) out.expectMilestone = normalizeMilestone(a.slice("--expect-milestone=".length));
+    else if (a === "--expect-milestone") {
+      i += 1;
+      out.expectMilestone = normalizeMilestone(argv[i]);
     } else {
       throw new Error(`Unknown argument: ${a}`);
     }
@@ -170,6 +193,7 @@ function printHelp() {
     "  --cwd <path>          Workspace root (default: process.cwd)",
     "  --max-age-min <n>     Freshness window in minutes (default: 30)",
     "  --strict              Exit 1 if missing/stale/not-ready",
+    "  --expect-milestone <label>  Also require boardAuto+loopReady milestone match",
     "  --json                JSON output",
     "  -h, --help",
   ].join("\n"));
@@ -217,11 +241,20 @@ function main() {
   }
 
   const report = assessLoopEvidence({ cwd: opts.cwd, maxAgeMin: opts.maxAgeMin });
+  const milestoneCheck = evaluateMilestoneScopeMatch(report, opts.expectMilestone);
+  const output = milestoneCheck.expectedMilestone
+    ? { ...report, milestoneCheck }
+    : report;
 
-  if (opts.json) console.log(JSON.stringify(report, null, 2));
-  else printTextReport(report);
+  if (opts.json) console.log(JSON.stringify(output, null, 2));
+  else {
+    printTextReport(report);
+    if (milestoneCheck.expectedMilestone) {
+      console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"}`);
+    }
+  }
 
-  if (opts.strict && shouldFailStrict(report)) process.exit(1);
+  if (opts.strict && (shouldFailStrict(report) || !milestoneCheck.matches)) process.exit(1);
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
