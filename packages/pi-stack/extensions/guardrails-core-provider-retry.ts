@@ -20,6 +20,11 @@ export const DEFAULT_LONG_RUN_PROVIDER_TRANSIENT_RETRY_CONFIG: LongRunProviderTr
 const PROVIDER_TRANSIENT_ERROR_RE =
   /(server[_-]?is[_-]?overload|overload(ed)?|\b429\b|rate.?limit|too\s+many\s+requests|capacity\s*reached|resource\s*exhausted|temporar(y|ily)\s*unavailable|\b5\d\d\b|internal\s*server\s*error)/i;
 
+const TOOL_OUTPUT_ORPHAN_ERROR_RE =
+  /(no\s+tool\s+call\s+found\s+for\s+function\s+call\s+output|function[_-]?call[_-]?output[^\n]*call[_-]?id|orphan(ed)?\s+function[_-]?call[_-]?output)/i;
+
+export type DispatchFailureClass = "provider-transient" | "tool-output-orphan" | "other";
+
 function normalizeBoolean(value: unknown, fallback: boolean): boolean {
   if (typeof value !== "boolean") return fallback;
   return value;
@@ -82,10 +87,12 @@ export function resolveLongRunProviderTransientRetryConfig(cwd: string): LongRun
   }
 }
 
-export function classifyLongRunDispatchFailure(errorText: string | undefined): "provider-transient" | "other" {
+export function classifyLongRunDispatchFailure(errorText: string | undefined): DispatchFailureClass {
   const text = String(errorText ?? "").trim();
   if (!text) return "other";
-  return PROVIDER_TRANSIENT_ERROR_RE.test(text) ? "provider-transient" : "other";
+  if (TOOL_OUTPUT_ORPHAN_ERROR_RE.test(text)) return "tool-output-orphan";
+  if (PROVIDER_TRANSIENT_ERROR_RE.test(text)) return "provider-transient";
+  return "other";
 }
 
 export function resolveProviderTransientRetryDelayMs(
@@ -126,5 +133,13 @@ export function buildProviderRetryExhaustedActionLines(): string[] {
     "action: run /provider-readiness-matrix to inspect healthy providers",
     "action: optionally switch via /handoff --execute --reason runtime-transient-overload",
     "action: after provider recovery, run /lane-queue resume",
+  ];
+}
+
+export function buildToolOutputOrphanRecoveryActionLines(): string[] {
+  return [
+    "action: run /reload to clear stale function_call_output context",
+    "action: run /lane-queue status to confirm failSig/failClass reset",
+    "action: resume dispatch via /lane-queue resume (or npm run pi:loop:resume)",
   ];
 }

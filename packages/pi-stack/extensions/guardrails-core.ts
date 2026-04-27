@@ -7,7 +7,6 @@
  * - read path protection (former read-guard)
  * - deterministic scoped web routing enforcement (former web-routing-guard)
  */
-
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
@@ -78,17 +77,16 @@ import {
 import {
   DEFAULT_LONG_RUN_PROVIDER_TRANSIENT_RETRY_CONFIG,
   buildProviderRetryExhaustedActionLines,
+  buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
+  type DispatchFailureClass,
   type LongRunProviderTransientRetryConfig,
 } from "./guardrails-core-provider-retry";
-import {
-  buildBoardReadinessStatusLabel,
-  evaluateBoardLongRunReadiness,
-} from "./guardrails-core-board-readiness";
+import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import {
   buildBoardExecuteTaskIntent,
   buildGuardrailsIntentSystemPrompt,
@@ -97,10 +95,7 @@ import {
   summarizeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
-import {
-  buildBehaviorRouteSystemPrompt,
-  classifyBehaviorRoute,
-} from "./guardrails-core-behavior-routing";
+import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardrails-core-behavior-routing";
 import {
   buildShellRoutingStatusLabel,
   buildShellRoutingSystemPrompt,
@@ -114,10 +109,7 @@ import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mu
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
-import {
-  readProjectSettings as readProjectSettingsImpl,
-  writeProjectSettings as writeProjectSettingsImpl,
-} from "./context-watchdog-storage";
+import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 
 export {
   resolveBloatSmellConfig,
@@ -128,7 +120,6 @@ export {
   buildTextBloatStatusLabel,
   buildCodeBloatStatusLabel,
 } from "./guardrails-core-bloat";
-
 export {
   resolveLongRunIntentQueueConfig,
   extractForceNowText,
@@ -171,23 +162,21 @@ export {
   computeIdenticalFailureStreak,
   shouldPauseOnIdenticalFailure,
 } from "./guardrails-core-lane-queue";
-
 export {
   buildProviderRetryExhaustedActionLines,
+  buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
 } from "./guardrails-core-provider-retry";
-
 export {
   buildBoardExecuteTaskIntentText,
   buildBoardExecuteNextIntentText,
   buildBoardReadinessStatusLabel,
   evaluateBoardLongRunReadiness,
 } from "./guardrails-core-board-readiness";
-
 export {
   buildBoardExecuteTaskIntent,
   buildBoardExecuteNextIntent,
@@ -196,7 +185,6 @@ export {
   parseGuardrailsIntent,
   summarizeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
-
 export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 export {
   buildShellRoutingStatusLabel,
@@ -210,33 +198,20 @@ export {
   resolveCommandRoutingProfile,
   wrapCommandForHostShell,
 } from "./guardrails-core-shell-routing";
-export {
-  formatDeliveryModePlan,
-  resolveDeliveryModePlan,
-} from "./guardrails-core-delivery-mode";
-export {
-  formatStateReconcilePlan,
-  resolveStateReconcilePlan,
-} from "./guardrails-core-state-reconcile";
-
+export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-core-delivery-mode";
+export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
 export {
   assessLargeFileMutationRisk,
   buildSafeLargeFileMutationResult,
   assessStructuredQueryRisk,
   buildStructuredQueryPlanResult,
 } from "./guardrails-core-safe-mutation";
-
 export {
   buildRefactorFormatTargetResult,
   buildRefactorOrganizeImportsResult,
   buildRefactorRenameSymbolResult,
 } from "./guardrails-core-macro-refactor";
-
-export {
-  parseStructuredJsonSelector,
-  structuredJsonRead,
-  structuredJsonWrite,
-} from "./guardrails-core-structured-io";
+export { parseStructuredJsonSelector, structuredJsonRead, structuredJsonWrite } from "./guardrails-core-structured-io";
 
 // =============================================================================
 // Read / Path Guard
@@ -1675,6 +1650,7 @@ export default function (pi: ExtensionAPI) {
   let lastDispatchFailureFingerprint: string | undefined;
   let lastDispatchFailureAt = 0;
   let identicalDispatchFailureStreak = 0;
+  let lastDispatchFailureClass: DispatchFailureClass = "other";
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
@@ -1909,6 +1885,7 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureFingerprint = undefined;
     lastDispatchFailureAt = 0;
     identicalDispatchFailureStreak = 0;
+    lastDispatchFailureClass = "other";
   }
 
   function markLoopDispatch(ctx: ExtensionContext, itemId: string): void {
@@ -1917,6 +1894,7 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureFingerprint = undefined;
     lastDispatchFailureAt = 0;
     identicalDispatchFailureStreak = 0;
+    lastDispatchFailureClass = "other";
   }
 
   function markLoopDegraded(ctx: ExtensionContext, reason: string, errorText?: string): void {
@@ -1924,12 +1902,10 @@ export default function (pi: ExtensionAPI) {
     longRunLoopRuntimeState = next.state;
   }
 
-  function trackDispatchFailureFingerprint(ctx: ExtensionContext, reason: string, errorText: string): {
-    fingerprint: string;
-    streak: number;
-    pauseTriggered: boolean;
-  } {
+  function trackDispatchFailureFingerprint(ctx: ExtensionContext, reason: string, errorText: string, options?: { errorClass?: DispatchFailureClass; pauseAfterOverride?: number }): { fingerprint: string; streak: number; pauseTriggered: boolean; errorClass: DispatchFailureClass; pauseAfterUsed: number } {
     const nowMs = Date.now();
+    const errorClass = options?.errorClass ?? "other";
+    const pauseAfterUsed = Number.isFinite(Number(options?.pauseAfterOverride)) && Number(options?.pauseAfterOverride) > 0 ? Math.max(1, Math.floor(Number(options?.pauseAfterOverride))) : longRunIntentQueueConfig.identicalFailurePauseAfter;
     const next = computeIdenticalFailureStreak({
       lastFingerprint: lastDispatchFailureFingerprint,
       lastFailureAtMs: lastDispatchFailureAt,
@@ -1941,21 +1917,22 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureFingerprint = next.fingerprint;
     lastDispatchFailureAt = nowMs;
     identicalDispatchFailureStreak = next.streak;
-    const pauseTriggered = longRunLoopRuntimeState.mode === "running"
-      && shouldPauseOnIdenticalFailure(next.streak, longRunIntentQueueConfig.identicalFailurePauseAfter);
+    lastDispatchFailureClass = errorClass;
+    const pauseTriggered = longRunLoopRuntimeState.mode === "running" && shouldPauseOnIdenticalFailure(next.streak, pauseAfterUsed);
     if (pauseTriggered) {
       setLoopMode(ctx, "paused", `identical-dispatch-failure:${reason}`);
       appendAuditEntry(ctx, "guardrails-core.long-run-identical-failure-pause", {
         atIso: new Date(nowMs).toISOString(),
         reason,
+        errorClass,
         streak: next.streak,
-        pauseAfter: longRunIntentQueueConfig.identicalFailurePauseAfter,
+        pauseAfter: pauseAfterUsed,
         windowMs: longRunIntentQueueConfig.identicalFailureWindowMs,
         fingerprint: next.fingerprint,
       });
-      ctx.ui.notify(`lane-queue: loop paused after ${next.streak} falhas idênticas (${reason}). run /lane-queue resume após correção.`, "warning");
+      ctx.ui.notify(`lane-queue: loop paused after ${next.streak} falhas idênticas (${reason}; class=${errorClass}). run /lane-queue resume após correção.`, "warning");
     }
-    return { fingerprint: next.fingerprint, streak: next.streak, pauseTriggered };
+    return { fingerprint: next.fingerprint, streak: next.streak, pauseTriggered, errorClass, pauseAfterUsed };
   }
 
   function refreshLoopLeaseOnActivity(
@@ -2302,14 +2279,20 @@ export default function (pi: ExtensionAPI) {
           },
         );
         markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, "board-auto-advance-dispatch-failed", message);
+        const errorClass = classifyLongRunDispatchFailure(message);
+        const failureTrack = trackDispatchFailureFingerprint(ctx, "board-auto-advance-dispatch-failed", message, {
+          errorClass,
+          pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
+        });
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
           atIso: new Date().toISOString(),
           reason,
           taskId: intent.taskId,
           error: message,
+          errorClass,
           errorFingerprint: failureTrack.fingerprint,
           identicalFailureStreak: failureTrack.streak,
+          pauseAfterUsed: failureTrack.pauseAfterUsed,
           pauseTriggered: failureTrack.pauseTriggered,
           queuedCount: queued.queuedCount,
           deduped: queued.deduped,
@@ -2321,7 +2304,9 @@ export default function (pi: ExtensionAPI) {
           loopMarkers,
           loopMarkersLabel,
         });
-        scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
+        if (!failureTrack.pauseTriggered) {
+          scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
+        }
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
         return false;
       }
@@ -2399,8 +2384,11 @@ export default function (pi: ExtensionAPI) {
           },
         );
         markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, `dispatch-failed:${reason}`, message);
         const errorClass = classifyLongRunDispatchFailure(message);
+        const failureTrack = trackDispatchFailureFingerprint(ctx, `dispatch-failed:${reason}`, message, {
+          errorClass,
+          pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
+        });
         const retryDelayMs =
           errorClass === "provider-transient" && longRunProviderRetryConfig.enabled
             ? resolveProviderTransientRetryDelayMs(
@@ -2417,11 +2405,14 @@ export default function (pi: ExtensionAPI) {
           identicalFailureStreak: failureTrack.streak,
           pauseTriggered: failureTrack.pauseTriggered,
           errorClass,
+          pauseAfterUsed: failureTrack.pauseAfterUsed,
           retryDelayMs,
           retryQueuedCount: retryQueued.queuedCount,
           retryDeduped: retryQueued.deduped,
         });
-        scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
+        if (!failureTrack.pauseTriggered) {
+          scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
+        }
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
         return false;
       }
@@ -2504,6 +2495,7 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureFingerprint = undefined;
     lastDispatchFailureAt = 0;
     identicalDispatchFailureStreak = 0;
+    lastDispatchFailureClass = "other";
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
     clearLoopLeaseHeartbeatTimer();
@@ -3336,13 +3328,19 @@ export default function (pi: ExtensionAPI) {
             },
           );
           markLoopDegraded(ctx, "board-intent-dispatch-failed", message);
-          const failureTrack = trackDispatchFailureFingerprint(ctx, "board-intent-dispatch-failed", message);
+          const errorClass = classifyLongRunDispatchFailure(message);
+          const failureTrack = trackDispatchFailureFingerprint(ctx, "board-intent-dispatch-failed", message, {
+            errorClass,
+            pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
+          });
           appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch-failed", {
             atIso: new Date().toISOString(),
             taskId: intent.taskId,
             error: message,
+            errorClass,
             errorFingerprint: failureTrack.fingerprint,
             identicalFailureStreak: failureTrack.streak,
+            pauseAfterUsed: failureTrack.pauseAfterUsed,
             pauseTriggered: failureTrack.pauseTriggered,
             fallbackQueued: true,
             queuedCount: queued.queuedCount,
@@ -3560,15 +3558,17 @@ export default function (pi: ExtensionAPI) {
         ? `${evidenceLoopReadyAge} runtime=${evidenceLoopReady.runtimeCodeState} gate=${evidenceLoopReady.boardAutoAdvanceGate}`
         : "n/a";
       const failSignature = !lastDispatchFailureFingerprint ? "n/a" : lastDispatchFailureFingerprint.length > 72 ? `${lastDispatchFailureFingerprint.slice(0, 72)}…` : lastDispatchFailureFingerprint;
+      const failClass = lastDispatchFailureFingerprint ? lastDispatchFailureClass : "n/a";
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms failClass=${failClass} failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]
             : []),
           ...(providerRetryExhausted ? buildProviderRetryExhaustedActionLines() : []),
+          ...(lastDispatchFailureClass === "tool-output-orphan" ? buildToolOutputOrphanRecoveryActionLines() : []),
           ...(runtimeCodeState === "reload-required"
             ? ["runtimeCodeHint: local guardrails-core mudou após session_start; faça reload para ativar tudo aqui no control plane."]
             : []),

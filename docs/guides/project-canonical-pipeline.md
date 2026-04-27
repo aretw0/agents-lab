@@ -210,8 +210,9 @@ Configuração (`.pi/settings.json`):
 Notas operacionais:
 - para erro transitório, o threshold efetivo de block vira `max(dispatchFailureBlockAfter, maxAttempts)`;
 - para erro não transitório, mantém `dispatchFailureBlockAfter` normal;
-- status da lane continua mostrando `failStreak=n/<threshold>` e `identicalFail=n/<pauseAfter>@<windowMs>` para decisão rápida do operador;
-- quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`).
+- status da lane continua mostrando `failStreak=n/<threshold>`, `identicalFail=n/<pauseAfter>@<windowMs>`, `failClass=<provider-transient|tool-output-orphan|other|n/a>` e `failSig=<fingerprint>` para decisão rápida do operador;
+- quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`);
+- quando `failClass=tool-output-orphan`, o status deve sugerir recuperação curta: `/reload` → `/lane-queue status` → `/lane-queue resume`.
 
 ### Configuração operacional sem editar JSON manualmente
 

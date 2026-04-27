@@ -58,6 +58,7 @@ import {
   markLongRunLoopRuntimeDispatch,
   markLongRunLoopRuntimeHealthy,
   buildProviderRetryExhaustedActionLines,
+  buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
@@ -1080,6 +1081,7 @@ describe("guardrails-core long-run intent queue", () => {
   it("classifies provider transient errors and escalates block threshold to retry budget", () => {
     expect(classifyLongRunDispatchFailure("server_is_overload")).toBe("provider-transient");
     expect(classifyLongRunDispatchFailure("HTTP 429 too many requests")).toBe("provider-transient");
+    expect(classifyLongRunDispatchFailure("No tool call found for function call output with call_id call_abc123")).toBe("tool-output-orphan");
     expect(classifyLongRunDispatchFailure("unexpected parser error")).toBe("other");
 
     const cfg = {
@@ -1121,6 +1123,11 @@ describe("guardrails-core long-run intent queue", () => {
     expect(actionLines).toHaveLength(3);
     expect(actionLines.join("\n")).toContain("/provider-readiness-matrix");
     expect(actionLines.join("\n")).toContain("/lane-queue resume");
+
+    const orphanActions = buildToolOutputOrphanRecoveryActionLines();
+    expect(orphanActions).toHaveLength(3);
+    expect(orphanActions.join("\n")).toContain("/reload");
+    expect(orphanActions.join("\n")).toContain("/lane-queue status");
   });
 
   it("computes deterministic exponential retry delay for transient provider failures", () => {

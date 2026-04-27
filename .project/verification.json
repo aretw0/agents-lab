@@ -5118,6 +5118,15 @@
       "method": "test",
       "timestamp": "2026-04-26T10:43:00Z",
       "evidence": "Slices 21-25: chave `longRunIntentQueue.dedupeWindowMs` promovida para superfície canônica `/guardrails-config` (spec + coerce/set + snapshot efetivo), help/UX atualizados e documentação canônica ajustada para comando explícito. Mantido budget do orquestrador no limite (`guardrails-core.ts` 3599 linhas no `wc -l`; smoke budget valida <=3600). Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed."
+    },
+    {
+      "id": "VER-BUD-319",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T11:11:00Z",
+      "evidence": "Slices 26-45: hardening para falhas de dispatch classe `tool-output-orphan` (assinatura `No tool call found for function call output ... call_id`). `guardrails-core-provider-retry` passou a classificar `tool-output-orphan` e expor `buildToolOutputOrphanRecoveryActionLines`. `guardrails-core` passou a registrar `lastDispatchFailureClass`, expor `failClass` no `/lane-queue status`, acoplar ações de recovery para órfão e aplicar pause threshold imediato (override=1) para essa classe; retries não são reagendados quando pause já foi acionado. Smokes incluem classificação e action-lines. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; budget guard OK (`guardrails-core.ts` <=3600)."
     }
   ]
 }
