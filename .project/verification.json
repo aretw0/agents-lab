@@ -5451,6 +5451,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:30:20Z",
       "evidence": "Updated guardrails-config help discoverability: added explicit example `set longRunIntentQueue.defaultBoardMilestone unset` to match the new clear aliases behavior. Regression sanity validated together with focal smoke bundle (`guardrails-core-orchestrator-budget`, `guardrails-long-run-intent-queue`, `installability`) => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-356",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:31:20Z",
+      "evidence": "Operational status observability improved: `lane-queue status` headline now includes `defaultMilestone=<label|n/a>` so operators can immediately see whether default milestone scoping is active. Regression sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 32/32 passed."
     }
   ]
 }
