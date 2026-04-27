@@ -37,6 +37,7 @@ import {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   evaluateLaneEvidenceMilestoneParity,
+  shouldWarnLaneEvidence,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -125,6 +126,7 @@ export {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   evaluateLaneEvidenceMilestoneParity,
+  shouldWarnLaneEvidence,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -3364,8 +3366,7 @@ export default function (pi: ExtensionAPI) {
       if (sub === "evidence") {
         const evidenceMilestoneParsed = parseLaneQueueMilestoneScope(rawArgs);
         if (evidenceMilestoneParsed.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueEvidenceUsage()}`, "warning"); return; }
-        const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone);
-        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
+        const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
         const evidence = readLoopActivationEvidence(ctx.cwd);
         const loopReady = evidence.lastLoopReady; const boardAuto = evidence.lastBoardAutoAdvance;
         const readiness = computeLoopEvidenceReadiness(evidence); const milestoneParity = evaluateLaneEvidenceMilestoneParity(evidenceMilestoneSelection.milestone, boardAuto?.milestone, loopReady?.milestone);
@@ -3396,7 +3397,7 @@ export default function (pi: ExtensionAPI) {
           loopReady,
           criteria: readiness.criteria,
         });
-        ctx.ui.notify(lines.join("\n"), readiness.readyForTaskBud125 ? "info" : "warning");
+        ctx.ui.notify(lines.join("\n"), shouldWarnLaneEvidence(readiness.readyForTaskBud125, milestoneParity) ? "warning" : "info");
         return;
       }
 

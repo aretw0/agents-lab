@@ -343,6 +343,13 @@ export function evaluateLaneEvidenceMilestoneParity(
   };
 }
 
+export function shouldWarnLaneEvidence(
+  readyForTaskBud125: boolean,
+  parity: Pick<LaneEvidenceMilestoneParity, "matches">,
+): boolean {
+  return !readyForTaskBud125 || !parity.matches;
+}
+
 export function buildLaneQueueStatusUsage(): string {
   return "/lane-queue status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]";
 }

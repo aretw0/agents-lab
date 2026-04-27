@@ -14,6 +14,7 @@ import {
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   evaluateLaneEvidenceMilestoneParity,
+  shouldWarnLaneEvidence,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusUsage,
   buildLaneQueueBoardNextUsage,
@@ -567,6 +568,12 @@ describe("guardrails-core long-run intent queue", () => {
     const noExpected = evaluateLaneEvidenceMilestoneParity(undefined, "MS-A", "MS-B");
     expect(noExpected.matches).toBe(true);
     expect(noExpected.reason).toBe("no-expectation");
+  });
+
+  it("escalates evidence notify when readiness/parity are degraded", () => {
+    expect(shouldWarnLaneEvidence(true, { matches: true })).toBe(false);
+    expect(shouldWarnLaneEvidence(false, { matches: true })).toBe(true);
+    expect(shouldWarnLaneEvidence(true, { matches: false })).toBe(true);
   });
 
   it("resolves board-next milestone selection precedence", () => {
