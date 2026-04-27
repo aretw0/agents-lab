@@ -14,6 +14,7 @@ import {
 	handoffRefreshMode,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
+	resolveCompactCheckpointPersistence,
 	toAgeSec,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
@@ -206,6 +207,30 @@ describe("context-watchdog", () => {
 		expect(diag.decision.reason).toBe("not-idle");
 		expect(diag.retryRecommended).toBe(true);
 		expect(diag.retryDelayMs).toBe(2_000);
+		expect(resolveCompactCheckpointPersistence({
+			assessmentLevel: "compact",
+			handoffLastEventLevel: "warn",
+			handoffLastEventAgeMs: 20_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toEqual({ shouldPersist: true, reason: "missing-compact-event" });
+		expect(resolveCompactCheckpointPersistence({
+			assessmentLevel: "compact",
+			handoffLastEventLevel: "compact",
+			handoffLastEventAgeMs: 120_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toEqual({ shouldPersist: true, reason: "stale-compact-event" });
+		expect(resolveCompactCheckpointPersistence({
+			assessmentLevel: "compact",
+			handoffLastEventLevel: "compact",
+			handoffLastEventAgeMs: 20_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toEqual({ shouldPersist: false, reason: "compact-event-fresh" });
+		expect(resolveCompactCheckpointPersistence({
+			assessmentLevel: "warn",
+			handoffLastEventLevel: "compact",
+			handoffLastEventAgeMs: 20_000,
+			maxCheckpointAgeMs: 60_000,
+		})).toEqual({ shouldPersist: false, reason: "level-not-compact" });
 
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 40_000, 0)).toBe(true);
 		expect(shouldEmitAutoResumeAfterCompact(cfg, 10_000, 0)).toBe(false);

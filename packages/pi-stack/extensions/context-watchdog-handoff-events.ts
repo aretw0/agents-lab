@@ -26,6 +26,12 @@ export type ContextWatchHandoffEvent = {
 	recommendation: string;
 };
 
+export type CompactCheckpointPersistenceReason =
+	| "level-not-compact"
+	| "missing-compact-event"
+	| "stale-compact-event"
+	| "compact-event-fresh";
+
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
 const CONTEXT_WATCH_BLOCKER_PREFIX = "context-watch-";
 const CONTEXT_WATCH_EVENTS_KEY = "context_watch_events";
@@ -99,6 +105,26 @@ function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
 	if (level === "checkpoint") return ["context-watch-checkpoint-required"];
 	if (level === "warn") return ["context-watch-warn-active"];
 	return [];
+}
+
+export function resolveCompactCheckpointPersistence(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	handoffLastEventLevel?: ContextWatchdogLevel;
+	handoffLastEventAgeMs?: number;
+	maxCheckpointAgeMs?: number;
+}): { shouldPersist: boolean; reason: CompactCheckpointPersistenceReason } {
+	if (input.assessmentLevel !== "compact") {
+		return { shouldPersist: false, reason: "level-not-compact" };
+	}
+	if (input.handoffLastEventLevel !== "compact") {
+		return { shouldPersist: true, reason: "missing-compact-event" };
+	}
+	const ageMs = Number(input.handoffLastEventAgeMs);
+	const maxAgeMs = Math.max(1_000, Math.floor(Number(input.maxCheckpointAgeMs ?? 60_000)));
+	if (!Number.isFinite(ageMs) || ageMs > maxAgeMs) {
+		return { shouldPersist: true, reason: "stale-compact-event" };
+	}
+	return { shouldPersist: false, reason: "compact-event-fresh" };
 }
 
 export function applyContextWatchToHandoff(

@@ -5676,6 +5676,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:43:20Z",
       "evidence": "Documentation parity follow-up: updated `docs/guides/project-canonical-pipeline.md` to explicitly state `/lane-queue evidence` notify severity policy (`warning` when `readyForTaskBud125=no` or `scopeParity.matches=no`), matching runtime behavior implemented via `shouldWarnLaneEvidence`. Validation sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30 passed."
+    },
+    {
+      "id": "VER-BUD-381",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:02:30Z",
+      "evidence": "Implemented hard-intent compact checkpoint persistence: new primitive `resolveCompactCheckpointPersistence` in `context-watchdog-handoff-events.ts` determines when compact-level sessions must force handoff write (`missing-compact-event` or `stale-compact-event`). `context-watchdog.ts` now applies this gate before compact steering and records audit entry `context-watchdog.compact-checkpoint-persist` when forced. Smoke coverage extended in `context-watchdog.test.ts` for all reason branches. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }

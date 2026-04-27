@@ -76,6 +76,7 @@ import {
 	applyContextWatchToHandoff,
 	contextWatchEventAgeMs,
 	latestContextWatchEvent,
+	resolveCompactCheckpointPersistence,
 	summarizeContextWatchEvent,
 	type ContextWatchHandoffEvent,
 	type ContextWatchHandoffReason,
@@ -105,6 +106,7 @@ export {
 	handoffRefreshMode,
 	summarizeAutoResumePromptDiagnostics,
 	latestContextWatchEvent,
+	resolveCompactCheckpointPersistence,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
@@ -698,6 +700,26 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffForCalmClose = readHandoffJson(ctx.cwd);
 		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
 		const handoffEventAgeForCalmClose = contextWatchEventAgeMs(handoffEventForCalmClose, now);
+		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
+			assessmentLevel: assessment.level,
+			handoffLastEventLevel: handoffEventForCalmClose?.level,
+			handoffLastEventAgeMs: handoffEventAgeForCalmClose,
+			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+		});
+		if (compactCheckpointPersistence.shouldPersist && !handoffPath) {
+			handoffPath = persistContextWatchHandoffEvent(ctx, assessment, reason);
+			lastAutoCheckpointAt = now;
+			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+				"context-watchdog.compact-checkpoint-persist",
+				{
+					atIso: new Date(now).toISOString(),
+					reason: compactCheckpointPersistence.reason,
+					eventLevel: handoffEventForCalmClose?.level ?? "none",
+					eventAgeMs: handoffEventAgeForCalmClose,
+					maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+				},
+			);
+		}
 		const calmCloseSignal = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
 			decisionReason: autoCompactState.decision.reason,
