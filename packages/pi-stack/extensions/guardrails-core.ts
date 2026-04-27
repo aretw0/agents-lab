@@ -34,6 +34,7 @@ import {
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
   parseLaneQueueBoardNextMilestone,
+  resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
@@ -116,6 +117,7 @@ export {
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
   parseLaneQueueBoardNextMilestone,
+  resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
@@ -3136,7 +3138,6 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
-
   pi.registerCommand("lane-queue", {
     description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]",
     handler: async (args, ctx) => {
@@ -3225,9 +3226,8 @@ export default function (pi: ExtensionAPI) {
           ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>|--no-milestone]", "warning");
           return;
         }
-        const boardNextMilestone = parsedBoardNext.clearMilestone
-          ? undefined
-          : parsedBoardNext.milestone ?? longRunIntentQueueConfig.defaultBoardMilestone;
+        const boardNextSelection = resolveLaneQueueBoardNextMilestoneSelection(parsedBoardNext, longRunIntentQueueConfig.defaultBoardMilestone);
+        const boardNextMilestone = boardNextSelection.milestone;
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: boardNextMilestone });
         if (!boardReadiness.ready || !boardReadiness.nextTaskId) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
@@ -3237,6 +3237,7 @@ export default function (pi: ExtensionAPI) {
             blockedByDependencies: boardReadiness.blockedByDependencies,
             planned: boardReadiness.totals.planned,
             milestone: boardNextMilestone,
+            milestoneSource: boardNextSelection.source,
           });
           ctx.ui.notify([
             `lane-queue: board-next blocked (${boardReadiness.reason}${boardNextMilestone ? `; milestone=${boardNextMilestone}` : ""})`,
@@ -3268,6 +3269,7 @@ export default function (pi: ExtensionAPI) {
             queuedCount: queued.queuedCount,
             selectionPolicy: boardReadiness.selectionPolicy,
             milestone: boardNextMilestone,
+            milestoneSource: boardNextSelection.source,
             intentType: queuedIntent.type,
             intentVersion: queuedIntent.version,
             intentSummary: queuedSummary,
@@ -3299,6 +3301,7 @@ export default function (pi: ExtensionAPI) {
           taskId: intent.taskId,
           selectionPolicy: boardReadiness.selectionPolicy,
           milestone: boardNextMilestone,
+          milestoneSource: boardNextSelection.source,
           deliverAs: "followUp",
           intentType: intent.type,
           intentVersion: intent.version,
@@ -3342,6 +3345,7 @@ export default function (pi: ExtensionAPI) {
             deduped: queued.deduped,
             selectionPolicy: boardReadiness.selectionPolicy,
             milestone: boardNextMilestone,
+            milestoneSource: boardNextSelection.source,
             intentType: fallbackIntent.type,
             intentVersion: fallbackIntent.version,
             intentSummary: fallbackSummary,

@@ -228,11 +228,15 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
-export function parseLaneQueueBoardNextMilestone(args: string): {
+export interface LaneQueueBoardNextMilestoneParseResult {
   milestone?: string;
   clearMilestone?: boolean;
   error?: "invalid-board-next-args";
-} {
+}
+
+export type LaneQueueBoardNextMilestoneSource = "explicit" | "default" | "cleared" | "none";
+
+export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNextMilestoneParseResult {
   const trimmed = String(args ?? "").trim();
   if (!/^board-next(\s+|$)/i.test(trimmed)) return {};
   const rest = trimmed.replace(/^board-next\b/i, "").trim();
@@ -281,6 +285,17 @@ export function parseLaneQueueBoardNextMilestone(args: string): {
   }
 
   return { error: "invalid-board-next-args" };
+}
+
+export function resolveLaneQueueBoardNextMilestoneSelection(
+  parsed: LaneQueueBoardNextMilestoneParseResult,
+  defaultMilestone: string | undefined,
+): { milestone?: string; source: LaneQueueBoardNextMilestoneSource } {
+  if (parsed.clearMilestone) return { source: "cleared" };
+  if (parsed.milestone) return { milestone: parsed.milestone, source: "explicit" };
+  const normalizedDefault = normalizeMilestoneLabel(defaultMilestone);
+  if (normalizedDefault) return { milestone: normalizedDefault, source: "default" };
+  return { source: "none" };
 }
 
 export function buildLaneQueueHelpLines(): string[] {

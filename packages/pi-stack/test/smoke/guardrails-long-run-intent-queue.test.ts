@@ -11,6 +11,7 @@ import {
   oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
   parseLaneQueueBoardNextMilestone,
+  resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
@@ -506,6 +507,29 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone oops").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
+  });
+
+  it("resolves board-next milestone selection precedence", () => {
+    const explicit = resolveLaneQueueBoardNextMilestoneSelection(
+      parseLaneQueueBoardNextMilestone("board-next -m MS-EXP"),
+      "MS-DEFAULT",
+    );
+    expect(explicit.source).toBe("explicit");
+    expect(explicit.milestone).toBe("MS-EXP");
+
+    const inherited = resolveLaneQueueBoardNextMilestoneSelection(
+      parseLaneQueueBoardNextMilestone("board-next"),
+      "\"MS   DEFAULT\"",
+    );
+    expect(inherited.source).toBe("default");
+    expect(inherited.milestone).toBe("MS DEFAULT");
+
+    const cleared = resolveLaneQueueBoardNextMilestoneSelection(
+      parseLaneQueueBoardNextMilestone("board-next --no-milestone"),
+      "MS-DEFAULT",
+    );
+    expect(cleared.source).toBe("cleared");
+    expect(cleared.milestone).toBeUndefined();
   });
 
   it("builds help/status discoverability hints for lane-queue", () => {
