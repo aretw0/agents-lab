@@ -538,8 +538,10 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("status --milestone MS-LOCAL").milestone).toBe("MS-LOCAL");
     expect(parseLaneQueueBoardNextMilestone("status --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("status --milestone \"\"").error).toBe("invalid-board-next-args");
+    expect(parseLaneQueueBoardNextMilestone("status nope").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("evidence -m=MS-LOCAL").milestone).toBe("MS-LOCAL");
     expect(parseLaneQueueBoardNextMilestone("evidence --no-milestone").clearMilestone).toBe(true);
+    expect(parseLaneQueueBoardNextMilestone("evidence --no-milestone oops").error).toBe("invalid-board-next-args");
   });
 
   it("resolves board-next milestone selection precedence", () => {
