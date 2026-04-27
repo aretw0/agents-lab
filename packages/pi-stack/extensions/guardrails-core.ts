@@ -1268,7 +1268,7 @@ export function buildGuardrailsRuntimeConfigSetResult(params: {
     };
   }
 
-  const coerced = coerceGuardrailsRuntimeConfigValue(params.rawValue, spec);
+  const rawValue = spec.key === "longRunIntentQueue.defaultBoardMilestone" && /^(unset|none|null)$/i.test(String(params.rawValue ?? "").trim()) ? "" : params.rawValue; const coerced = coerceGuardrailsRuntimeConfigValue(rawValue, spec);
   if (!coerced.ok) {
     return { ok: false, lines: [coerced.error] };
   }

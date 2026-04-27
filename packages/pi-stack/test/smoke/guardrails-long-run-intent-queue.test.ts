@@ -302,6 +302,30 @@ describe("guardrails-core long-run intent queue", () => {
     }
   });
 
+  it("supports unset alias for default milestone runtime config key", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-runtime-config-unset-"));
+    try {
+      const setDefault = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.defaultBoardMilestone",
+        rawValue: "MS-LOCAL",
+      });
+      expect(setDefault.ok).toBe(true);
+
+      const unsetDefault = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.defaultBoardMilestone",
+        rawValue: "unset",
+      });
+      expect(unsetDefault.ok).toBe(true);
+
+      const snapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
+      expect(snapshot["longRunIntentQueue.defaultBoardMilestone"]).toBe("(unset)");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("uses bloat-smell defaults and supports deterministic throttle keys", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-bloat-smell-default-"));
     try {
