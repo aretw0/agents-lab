@@ -3144,7 +3144,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>]|pop|clear|pause|resume|evidence]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>]|pop|clear|pause|resume|evidence]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
@@ -3228,7 +3228,7 @@ export default function (pi: ExtensionAPI) {
       if (sub === "board-next") {
         const parsedBoardNext = parseLaneQueueBoardNextMilestone(rawArgs);
         if (parsedBoardNext.error) {
-          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>]", "warning");
+          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>]", "warning");
           return;
         }
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: parsedBoardNext.milestone });

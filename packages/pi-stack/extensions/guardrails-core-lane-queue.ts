@@ -237,6 +237,12 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
     return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
   }
 
+  const fromShortFlag = rest.match(/^-m\s+(.+)$/i)?.[1];
+  if (fromShortFlag) {
+    const milestone = stripWrappedQuotes(fromShortFlag);
+    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+  }
+
   const fromFlagInline = rest.match(/^--milestone=(.+)$/i)?.[1];
   if (fromFlagInline) {
     const milestone = stripWrappedQuotes(fromFlagInline);
@@ -255,9 +261,9 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>]|pop|clear|pause|resume|evidence]",
+    "usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>]|pop|clear|pause|resume|evidence]",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
-    "examples: /lane-queue list · /lane-queue board-next --milestone \"MS-LOCAL\" · /lane-queue evidence · /lane-queue add revisar isso depois",
+    "examples: /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue evidence · /lane-queue add revisar isso depois",
   ];
 }
 
