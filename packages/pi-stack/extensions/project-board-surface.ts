@@ -41,6 +41,7 @@ interface TaskRecord {
   verification?: string;
   depends_on?: string[];
   files?: string[];
+  milestone?: string;
 }
 
 interface VerificationRecord {
@@ -146,6 +147,9 @@ function normalizeTaskRecord(value: unknown): TaskRecord | undefined {
       : undefined,
     files: Array.isArray(row.files)
       ? row.files.filter((x): x is string => typeof x === "string")
+      : undefined,
+    milestone: typeof row.milestone === "string" && row.milestone.trim().length > 0
+      ? row.milestone.trim()
       : undefined,
   };
 }
@@ -282,6 +286,15 @@ function normalizeRationaleText(value: unknown): string | undefined {
     .trim();
   if (!normalized) return undefined;
   return normalized.length <= 280 ? normalized : `${normalized.slice(0, 279)}…`;
+}
+
+function normalizeMilestoneLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) return "";
+  return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
 }
 
 function extractRationaleKindFromText(text: string | undefined): BoardRationaleKind | undefined {
@@ -454,6 +467,7 @@ export interface ProjectTaskBoardRow {
   id: string;
   status: string;
   description: string;
+  milestone?: string;
   verification?: string;
   dependsOnCount: number;
   rationaleRequired?: boolean;
@@ -480,6 +494,7 @@ export function queryProjectTasks(
   options?: {
     status?: string;
     search?: string;
+    milestone?: string;
     limit?: number;
     needsRationale?: boolean;
     rationaleRequired?: boolean;
@@ -489,6 +504,7 @@ export function queryProjectTasks(
   const { block, meta } = readTasksBlockCached(cwd);
   const statusFilter = typeof options?.status === "string" ? options.status.trim() : "";
   const search = typeof options?.search === "string" ? options.search.trim().toLowerCase() : "";
+  const milestoneFilter = normalizeMilestoneLabel(options?.milestone);
   const needsRationale = options?.needsRationale === true;
   const rationaleRequiredFilter = typeof options?.rationaleRequired === "boolean"
     ? options.rationaleRequired
@@ -511,11 +527,15 @@ export function queryProjectTasks(
 
   if (search) {
     rows = rows.filter((row) => {
-      const hay = [row.id, row.description, row.notes ?? "", row.verification ?? ""]
+      const hay = [row.id, row.description, row.notes ?? "", row.verification ?? "", row.milestone ?? ""]
         .join("\n")
         .toLowerCase();
       return hay.includes(search);
     });
+  }
+
+  if (typeof milestoneFilter === "string" && milestoneFilter.length > 0) {
+    rows = rows.filter((row) => (row.milestone ?? "") === milestoneFilter);
   }
 
   if (typeof rationaleRequiredFilter === "boolean") {
@@ -538,6 +558,7 @@ export function queryProjectTasks(
       id: row.id,
       status: row.status,
       description: shortText(row.description, 180) ?? row.description,
+      milestone: row.milestone,
       verification: row.verification,
       dependsOnCount: Array.isArray(row.depends_on) ? row.depends_on.length : 0,
       rationaleRequired,
@@ -561,6 +582,7 @@ export function queryProjectTasks(
 export interface ProjectVerificationBoardRow {
   id: string;
   target?: string;
+  milestone?: string;
   status?: string;
   method?: string;
   timestamp?: string;
@@ -590,6 +612,7 @@ export function queryProjectVerification(
     target?: string;
     status?: string;
     search?: string;
+    milestone?: string;
     limit?: number;
     needsRationale?: boolean;
     rationaleRequired?: boolean;
@@ -600,6 +623,7 @@ export function queryProjectVerification(
   const targetFilter = typeof options?.target === "string" ? options.target.trim() : "";
   const statusFilter = typeof options?.status === "string" ? options.status.trim() : "";
   const search = typeof options?.search === "string" ? options.search.trim().toLowerCase() : "";
+  const milestoneFilter = normalizeMilestoneLabel(options?.milestone);
   const needsRationale = options?.needsRationale === true;
   const rationaleRequiredFilter = typeof options?.rationaleRequired === "boolean"
     ? options.rationaleRequired
@@ -621,16 +645,30 @@ export function queryProjectVerification(
 
   if (search) {
     rows = rows.filter((row) => {
+      const linkedMilestone = (() => {
+        const target = typeof row.target === "string" ? row.target.trim() : "";
+        if (!target) return "";
+        return tasksById.get(target)?.milestone ?? "";
+      })();
       const hay = [
         row.id,
         row.target ?? "",
         row.status ?? "",
         row.method ?? "",
         row.evidence ?? "",
+        linkedMilestone,
       ]
         .join("\n")
         .toLowerCase();
       return hay.includes(search);
+    });
+  }
+
+  if (typeof milestoneFilter === "string" && milestoneFilter.length > 0) {
+    rows = rows.filter((row) => {
+      const target = typeof row.target === "string" ? row.target.trim() : "";
+      if (!target) return false;
+      return (tasksById.get(target)?.milestone ?? "") === milestoneFilter;
     });
   }
 
@@ -652,6 +690,11 @@ export function queryProjectVerification(
     rows: rows.slice(0, limit).map((row) => ({
       id: row.id,
       target: row.target,
+      milestone: (() => {
+        const target = typeof row.target === "string" ? row.target.trim() : "";
+        if (!target) return undefined;
+        return tasksById.get(target)?.milestone;
+      })(),
       status: row.status,
       method: row.method,
       timestamp: row.timestamp,
@@ -687,6 +730,7 @@ export function updateProjectTaskBoard(
     status?: ProjectTaskStatus;
     appendNote?: string;
     maxNoteLines?: number;
+    milestone?: string;
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
@@ -711,6 +755,13 @@ export function updateProjectTaskBoard(
 
   if (updates.status) {
     next.status = updates.status;
+  }
+
+  if (typeof updates.milestone === "string") {
+    const nextMilestone = normalizeMilestoneLabel(updates.milestone);
+    if (nextMilestone === undefined) return { ok: false, reason: "invalid-milestone" };
+    if (nextMilestone.length <= 0) delete (next as { milestone?: string }).milestone;
+    else (next as { milestone?: string }).milestone = nextMilestone;
   }
 
   const maxLinesRaw = Number(updates.maxNoteLines);
@@ -824,6 +875,7 @@ export function updateProjectTaskBoard(
       id: next.id,
       status: next.status,
       description: shortText(next.description, 180) ?? next.description,
+      milestone: next.milestone,
       verification: next.verification,
       dependsOnCount: Array.isArray(next.depends_on) ? next.depends_on.length : 0,
       rationaleRequired,
@@ -846,6 +898,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       }),
     ),
     search: Type.Optional(Type.String({ description: "Case-insensitive text search." })),
+    milestone: Type.Optional(Type.String({ description: "Filter by milestone label (user-defined semantic)." })),
     needs_rationale: Type.Optional(
       Type.Boolean({
         description: "When true, return only rationale-sensitive rows still missing rationale evidence.",
@@ -880,6 +933,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       status?: string;
       target?: string;
       search?: string;
+      milestone?: string;
       needs_rationale?: boolean;
       rationale_required?: boolean;
       rationale_consistency?: BoardRationaleConsistency;
@@ -905,6 +959,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const status = typeof params?.status === "string" ? params.status : undefined;
     const target = typeof params?.target === "string" ? params.target : undefined;
     const search = typeof params?.search === "string" ? params.search : undefined;
+    const milestone = typeof params?.milestone === "string" ? params.milestone : undefined;
     const needsRationale = params?.needs_rationale === true;
     const rationaleRequired = typeof params?.rationale_required === "boolean"
       ? params.rationale_required
@@ -915,8 +970,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
 
     const details =
       entity === "tasks"
-        ? queryProjectTasks(cwd, { status, search, needsRationale, rationaleRequired, rationaleConsistency, limit })
-        : queryProjectVerification(cwd, { target, status, search, needsRationale, rationaleRequired, rationaleConsistency, limit });
+        ? queryProjectTasks(cwd, { status, search, milestone, needsRationale, rationaleRequired, rationaleConsistency, limit })
+        : queryProjectVerification(cwd, { target, status, search, milestone, needsRationale, rationaleRequired, rationaleConsistency, limit });
     return {
       content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
       details,
@@ -948,6 +1003,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         minimum: 1,
         maximum: 200,
         description: "Trim notes to last N lines after append (default=50, cap=200).",
+      }),
+    ),
+    milestone: Type.Optional(
+      Type.String({
+        description: "Milestone label (user-defined semantic). Empty string clears milestone.",
       }),
     ),
     rationale_kind: Type.Optional(Type.Union(BOARD_RATIONALE_KINDS.map((kind) => Type.Literal(kind)))),
@@ -990,6 +1050,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       status?: ProjectTaskStatus;
       append_note?: string;
       max_note_lines?: number;
+      milestone?: string;
       rationale_kind?: BoardRationaleKind;
       rationale_text?: string;
       require_rationale_for_sensitive?: boolean;
@@ -1006,6 +1067,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const status = params?.status;
     const appendNote = typeof params?.append_note === "string" ? params.append_note : undefined;
     const maxNoteLines = params?.max_note_lines;
+    const milestone = typeof params?.milestone === "string" ? params.milestone : undefined;
     const rationaleKind = typeof params?.rationale_kind === "string" ? params.rationale_kind : undefined;
     const rationaleText = typeof params?.rationale_text === "string" ? params.rationale_text : undefined;
     const requireRationaleForSensitive = params?.require_rationale_for_sensitive === true;
@@ -1025,6 +1087,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const hasUpdate =
       (typeof status === "string" && status.length > 0) ||
       (typeof appendNote === "string" && appendNote.trim().length > 0) ||
+      typeof params?.milestone === "string" ||
       Boolean(params?.rationale_kind) ||
       Boolean(params?.rationale_text) ||
       Boolean(params?.require_rationale_for_sensitive) ||
@@ -1044,6 +1107,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       status,
       appendNote,
       maxNoteLines,
+      milestone,
       rationaleKind,
       rationaleText,
       requireRationaleForSensitive,
@@ -1062,7 +1126,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     name: "board_update",
     label: "Board Update",
     description:
-      "Update .project/tasks through a constrained board surface (status, notes, rationale, completion gates, optional consistency enforcement, and optional verification sync).",
+      "Update .project/tasks through a constrained board surface (status, milestone, notes, rationale, completion gates, optional consistency enforcement, and optional verification sync).",
     parameters: updateParameters,
     execute: executeUpdate,
   });
@@ -1077,6 +1141,7 @@ export function updateProjectTaskProxy(
     status?: ProjectTaskStatus;
     appendNote?: string;
     maxNoteLines?: number;
+    milestone?: string;
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;

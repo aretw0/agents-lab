@@ -183,6 +183,33 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("updateProjectTaskBoard can set and clear milestone label", () => {
+    const cwd = seedWorkspace();
+    try {
+      const setMilestone = updateProjectTaskBoard(cwd, "TASK-A", {
+        milestone: "MS-NATIVE-ALPHA",
+      });
+      expect(setMilestone.ok).toBe(true);
+      expect(setMilestone.task?.milestone).toBe("MS-NATIVE-ALPHA");
+
+      const clearMilestone = updateProjectTaskBoard(cwd, "TASK-A", {
+        milestone: "",
+      });
+      expect(clearMilestone.ok).toBe(true);
+      expect(clearMilestone.task?.milestone).toBeUndefined();
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks?: Array<{ id?: string; milestone?: string }>;
+      };
+      const taskA = Array.isArray(raw.tasks)
+        ? raw.tasks.find((t) => t?.id === "TASK-A")
+        : undefined;
+      expect(taskA?.milestone).toBeUndefined();
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("updateProjectTaskBoard registra rationale canônico em nota", () => {
     const cwd = seedWorkspace();
     try {
@@ -451,6 +478,28 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("queryProjectTasks supports milestone filter", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-milestone-tasks-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-M1", description: "Main quest", status: "in-progress", milestone: "MS-ALPHA" },
+          { id: "TASK-M2", description: "Side quest", status: "in-progress", milestone: "MS-BETA" },
+          { id: "TASK-M3", description: "No milestone", status: "in-progress" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const alpha = queryProjectTasks(cwd, { milestone: "MS-ALPHA", limit: 10 });
+      expect(alpha.filtered).toBe(1);
+      expect(alpha.rows[0]?.id).toBe("TASK-M1");
+      expect(alpha.rows[0]?.milestone).toBe("MS-ALPHA");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("queryProjectVerification filtra evidências sensíveis sem rationale", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-ver-"));
     try {
@@ -536,6 +585,32 @@ describe("project-board-surface", () => {
       const single = queryProjectVerification(cwd, { rationaleConsistency: "single-source", limit: 10 });
       expect(single.filtered).toBe(1);
       expect(single.rows[0]?.id).toBe("VER-V3");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("queryProjectVerification supports milestone filter", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-milestone-verification-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-MV1", description: "Main quest", status: "in-progress", milestone: "MS-NATIVE" },
+          { id: "TASK-MV2", description: "Side quest", status: "in-progress", milestone: "MS-REMOTE" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-MV1", target: "TASK-MV1", status: "partial", method: "inspect", evidence: "ok" },
+          { id: "VER-MV2", target: "TASK-MV2", status: "partial", method: "inspect", evidence: "ok" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const nativeOnly = queryProjectVerification(cwd, { milestone: "MS-NATIVE", limit: 10 });
+      expect(nativeOnly.filtered).toBe(1);
+      expect(nativeOnly.rows[0]?.id).toBe("VER-MV1");
+      expect(nativeOnly.rows[0]?.milestone).toBe("MS-NATIVE");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -771,6 +846,37 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("board_update tool can set and clear milestone", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const setResult = await updateTool.execute(
+        "tc-board-update-milestone-set",
+        { task_id: "TASK-A", milestone: "MS-LOCAL-BOSS" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((setResult.details as any)?.ok).toBe(true);
+      expect((setResult.details as any)?.task?.milestone).toBe("MS-LOCAL-BOSS");
+
+      const clearResult = await updateTool.execute(
+        "tc-board-update-milestone-clear",
+        { task_id: "TASK-A", milestone: "" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((clearResult.details as any)?.ok).toBe(true);
+      expect((clearResult.details as any)?.task?.milestone).toBeUndefined();
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_update tool can sync rationale to linked verification", async () => {
     const cwd = seedWorkspace();
     try {
@@ -860,6 +966,38 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.filtered).toBe(1);
       expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-Q1");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_query supports milestone filter for tasks", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-milestone-query-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-QM1", description: "Main quest", status: "in-progress", milestone: "MS-LOCAL" },
+          { id: "TASK-QM2", description: "Side quest", status: "in-progress", milestone: "MS-REMOTE" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query-milestone",
+        { entity: "tasks", milestone: "MS-LOCAL", limit: 10 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.filtered).toBe(1);
+      expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-QM1");
+      expect((result.details as any)?.rows?.[0]?.milestone).toBe("MS-LOCAL");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -961,6 +1099,7 @@ describe("project-board-surface", () => {
     );
     const queryTool = queryToolCall?.[0] as any;
     expect(queryTool?.parameters?.properties?.limit?.type).toBe("integer");
+    expect(queryTool?.parameters?.properties?.milestone?.type).toBe("string");
     expect(queryTool?.parameters?.properties?.needs_rationale?.type).toBe("boolean");
     expect(queryTool?.parameters?.properties?.rationale_required?.type).toBe("boolean");
     expect(queryTool?.parameters?.properties?.rationale_consistency).toBeDefined();
@@ -971,6 +1110,7 @@ describe("project-board-surface", () => {
     const updateTool = updateToolCall?.[0] as any;
     expect(updateTool?.parameters?.properties?.task_id?.minLength).toBe(1);
     expect(updateTool?.parameters?.properties?.max_note_lines?.type).toBe("integer");
+    expect(updateTool?.parameters?.properties?.milestone?.type).toBe("string");
     expect(updateTool?.parameters?.properties?.rationale_kind).toBeDefined();
     expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
     expect(updateTool?.parameters?.properties?.require_rationale_for_sensitive?.type).toBe("boolean");

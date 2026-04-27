@@ -5271,6 +5271,15 @@
       "method": "test",
       "timestamp": "2026-04-27T16:39:00Z",
       "evidence": "Slices 136-145: hardened dispatch failure fingerprint normalization for tool-call id variants. `normalizeDispatchFailureFingerprint` now normalizes call-id values containing dotted/slashed/colon suffixes and handles JSON-shaped key-value (`\"tool_call_id\":\"...\"`) without leaking raw ids, while preserving canonical `call_id=call_*` and `hex_*` masking. Smoke updated with JSON payload variant and complex-id streak continuity case. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed."
+    },
+    {
+      "id": "VER-BUD-336",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T16:54:00Z",
+      "evidence": "Milestone substrate generalized in board surface (user-defined semantics). Added `milestone` support across task parse/query/update: `queryProjectTasks(... milestone)`, `queryProjectVerification(... milestone)` via target-task join, `board_query` parameter `milestone`, and `board_update` set/clear (`milestone=\"\"` clears). Rows now expose milestone for both tasks and verification. Smoke expanded with milestone filters, set/clear behavior, tool-level schema checks, and docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 72/72 passed."
     }
   ]
 }
