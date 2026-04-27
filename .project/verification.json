@@ -5208,6 +5208,15 @@
       "method": "test",
       "timestamp": "2026-04-27T15:23:00Z",
       "evidence": "Slices 81-130: rationale-aware board flow now includes task<->verification parity and deterministic sync telemetry. `project-board-surface` gained `rationaleSource`, `rationaleSummary`, typed `ProjectTaskUpdateResult`, and `verificationSync` status envelope (`updated|already-present|missing-task-verification|not-found|skipped`). `board_update` now supports `sync_rationale_to_verification=true` to append `[rationale:<kind>] ...` into linked verification evidence with idempotent behavior; new guardrail `sync-requires-rationale-payload` blocks ambiguous sync calls. Query surfaces continue bounded and now expose source/summary for fast rationale debt triage. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 57/57 passed; focal cross-surface pack => 146/146 passed."
+    },
+    {
+      "id": "VER-BUD-329",
+      "target": "TASK-BUD-156",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T15:38:00Z",
+      "evidence": "Slices 131-180: board rationale pipeline hardened with consistency semantics and richer triage metadata. Added consistency model (`consistent|mismatch|single-source|none`) with per-row `rationaleConsistency` and aggregate `rationaleConsistencySummary` in both task/verification queries; exposed `rationale_consistency` filter in `board_query`. `board_update` gained `require_rationale_consistency` gate and now blocks mismatched task-note vs linked verification rationale (`rationale-consistency-mismatch`). Rationale extraction is now latest-tag-wins; task-note rationale append is idempotent (no duplicate rationale lines). Existing sync flow remains deterministic with explicit statuses and guardrails. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 64/64 passed; focal cross-surface pack => 153/153 passed."
     }
   ]
 }

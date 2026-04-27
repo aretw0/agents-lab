@@ -78,6 +78,15 @@ export interface BoardRationaleSummary {
   missingRationale: number;
 }
 
+export type BoardRationaleConsistency = "consistent" | "mismatch" | "single-source" | "none";
+
+export interface BoardRationaleConsistencySummary {
+  consistent: number;
+  mismatch: number;
+  singleSource: number;
+  none: number;
+}
+
 export interface BoardVerificationSyncResult {
   requested: boolean;
   status: "updated" | "already-present" | "not-found" | "missing-task-verification" | "skipped";
@@ -277,9 +286,13 @@ function normalizeRationaleText(value: unknown): string | undefined {
 
 function extractRationaleKindFromText(text: string | undefined): BoardRationaleKind | undefined {
   if (typeof text !== "string" || text.trim().length <= 0) return undefined;
-  const match = text.match(/\[rationale:([^\]]+)\]/i);
-  if (!match?.[1]) return undefined;
-  return normalizeRationaleKind(match[1]);
+  const matches = [...text.matchAll(/\[rationale:([^\]]+)\]/ig)];
+  if (matches.length <= 0) return undefined;
+  for (let i = matches.length - 1; i >= 0; i -= 1) {
+    const kind = normalizeRationaleKind(matches[i]?.[1]);
+    if (kind) return kind;
+  }
+  return undefined;
 }
 
 function hasRationaleText(text: string | undefined): boolean {
@@ -291,13 +304,56 @@ function buildTaskRationaleNote(kind: BoardRationaleKind, rationaleText: string)
   return `[rationale:${kind}] ${rationaleText}`;
 }
 
-function resolveTaskRationaleKind(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): BoardRationaleKind | undefined {
-  const directKind = extractRationaleKindFromText(task.notes);
-  if (directKind) return directKind;
+function appendRationaleToTaskNotes(currentNotes: string | undefined, rationaleNote: string, maxLines: number): { next: string; changed: boolean } {
+  const current = typeof currentNotes === "string" ? currentNotes.trim() : "";
+  if (!current) return { next: appendTaskNote(undefined, rationaleNote, maxLines) ?? rationaleNote, changed: true };
+  if (current.includes(rationaleNote)) return { next: current, changed: false };
+  const next = appendTaskNote(current, rationaleNote, maxLines) ?? current;
+  return { next, changed: next !== current };
+}
+
+function resolveRationaleConsistency(taskKind: BoardRationaleKind | undefined, verificationKind: BoardRationaleKind | undefined): BoardRationaleConsistency {
+  if (!taskKind && !verificationKind) return "none";
+  if (!taskKind || !verificationKind) return "single-source";
+  return taskKind === verificationKind ? "consistent" : "mismatch";
+}
+
+function summarizeRationaleConsistency(values: BoardRationaleConsistency[]): BoardRationaleConsistencySummary {
+  const summary: BoardRationaleConsistencySummary = {
+    consistent: 0,
+    mismatch: 0,
+    singleSource: 0,
+    none: 0,
+  };
+  for (const value of values) {
+    if (value === "consistent") summary.consistent += 1;
+    else if (value === "mismatch") summary.mismatch += 1;
+    else if (value === "single-source") summary.singleSource += 1;
+    else summary.none += 1;
+  }
+  return summary;
+}
+
+function resolveTaskNoteRationaleKind(task: TaskRecord): BoardRationaleKind | undefined {
+  return extractRationaleKindFromText(task.notes);
+}
+
+function resolveLinkedVerificationRationaleKind(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): BoardRationaleKind | undefined {
   const verificationId = typeof task.verification === "string" ? task.verification.trim() : "";
   if (!verificationId || !verificationsById) return undefined;
   const verification = verificationsById.get(verificationId);
   return extractRationaleKindFromText(verification?.evidence);
+}
+
+function resolveTaskRationaleKind(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): BoardRationaleKind | undefined {
+  return resolveTaskNoteRationaleKind(task) ?? resolveLinkedVerificationRationaleKind(task, verificationsById);
+}
+
+function resolveTaskRationaleConsistency(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): BoardRationaleConsistency {
+  return resolveRationaleConsistency(
+    resolveTaskNoteRationaleKind(task),
+    resolveLinkedVerificationRationaleKind(task, verificationsById),
+  );
 }
 
 function hasTaskRationale(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): boolean {
@@ -374,6 +430,26 @@ function isRationaleSensitiveVerification(verification: VerificationRecord): boo
   return /(refactor|rename|organize\s+imports|formatar|desinflar|hardening|(^|\W)(test|tests|smoke|vitest|e2e|spec)(\W|$))/i.test(textHaystack);
 }
 
+function resolveVerificationTaskNoteRationaleKind(verification: VerificationRecord, tasksById?: Map<string, TaskRecord>): BoardRationaleKind | undefined {
+  if (!tasksById) return undefined;
+  const target = typeof verification.target === "string" ? verification.target.trim() : "";
+  if (!target) return undefined;
+  const task = tasksById.get(target);
+  return task ? resolveTaskNoteRationaleKind(task) : undefined;
+}
+
+function resolveVerificationRationaleConsistency(verification: VerificationRecord, tasksById?: Map<string, TaskRecord>): BoardRationaleConsistency {
+  return resolveRationaleConsistency(
+    resolveVerificationTaskNoteRationaleKind(verification, tasksById),
+    extractRationaleKindFromText(verification.evidence),
+  );
+}
+
+function resolveVerificationRationaleSource(verification: VerificationRecord, tasksById?: Map<string, TaskRecord>): BoardRationaleSource {
+  if (hasRationaleText(verification.evidence)) return "verification-evidence";
+  return resolveVerificationTaskNoteRationaleKind(verification, tasksById) ? "task-note" : "none";
+}
+
 export interface ProjectTaskBoardRow {
   id: string;
   status: string;
@@ -384,6 +460,7 @@ export interface ProjectTaskBoardRow {
   hasRationale?: boolean;
   rationaleKind?: BoardRationaleKind;
   rationaleSource?: BoardRationaleSource;
+  rationaleConsistency?: BoardRationaleConsistency;
 }
 
 export interface ProjectTaskQueryResult {
@@ -391,6 +468,7 @@ export interface ProjectTaskQueryResult {
   filtered: number;
   rows: ProjectTaskBoardRow[];
   rationaleSummary?: BoardRationaleSummary;
+  rationaleConsistencySummary?: BoardRationaleConsistencySummary;
   meta: BoardReadMeta;
 }
 
@@ -399,7 +477,14 @@ export type ProjectTaskProxyRow = ProjectTaskBoardRow;
 
 export function queryProjectTasks(
   cwd: string,
-  options?: { status?: string; search?: string; limit?: number; needsRationale?: boolean; rationaleRequired?: boolean },
+  options?: {
+    status?: string;
+    search?: string;
+    limit?: number;
+    needsRationale?: boolean;
+    rationaleRequired?: boolean;
+    rationaleConsistency?: BoardRationaleConsistency;
+  },
 ): ProjectTaskQueryResult {
   const { block, meta } = readTasksBlockCached(cwd);
   const statusFilter = typeof options?.status === "string" ? options.status.trim() : "";
@@ -408,6 +493,13 @@ export function queryProjectTasks(
   const rationaleRequiredFilter = typeof options?.rationaleRequired === "boolean"
     ? options.rationaleRequired
     : undefined;
+  const rationaleConsistencyFilter =
+    options?.rationaleConsistency === "consistent"
+    || options?.rationaleConsistency === "mismatch"
+    || options?.rationaleConsistency === "single-source"
+    || options?.rationaleConsistency === "none"
+      ? options.rationaleConsistency
+      : undefined;
   const limit = normalizeLimit(options?.limit, 20);
   const verificationsById = new Map(readVerificationBlockCached(cwd).block.verifications.map((row) => [row.id, row] as const));
 
@@ -434,9 +526,14 @@ export function queryProjectTasks(
     rows = rows.filter((row) => isRationaleSensitiveTask(row) && !hasTaskRationale(row, verificationsById));
   }
 
+  if (rationaleConsistencyFilter) {
+    rows = rows.filter((row) => resolveTaskRationaleConsistency(row, verificationsById) === rationaleConsistencyFilter);
+  }
+
   const mapped: ProjectTaskBoardRow[] = rows.slice(0, limit).map((row) => {
     const rationaleRequired = isRationaleSensitiveTask(row);
     const hasRationale = hasTaskRationale(row, verificationsById);
+    const rationaleConsistency = resolveTaskRationaleConsistency(row, verificationsById);
     return {
       id: row.id,
       status: row.status,
@@ -447,6 +544,7 @@ export function queryProjectTasks(
       hasRationale,
       rationaleKind: resolveTaskRationaleKind(row, verificationsById),
       rationaleSource: resolveTaskRationaleSource(row, verificationsById),
+      rationaleConsistency,
     };
   });
 
@@ -455,6 +553,7 @@ export function queryProjectTasks(
     filtered: rows.length,
     rows: mapped,
     rationaleSummary: summarizeTaskRationale(rows, verificationsById),
+    rationaleConsistencySummary: summarizeRationaleConsistency(rows.map((row) => resolveTaskRationaleConsistency(row, verificationsById))),
     meta,
   };
 }
@@ -470,6 +569,7 @@ export interface ProjectVerificationBoardRow {
   hasRationale?: boolean;
   rationaleKind?: BoardRationaleKind;
   rationaleSource?: BoardRationaleSource;
+  rationaleConsistency?: BoardRationaleConsistency;
 }
 
 export interface ProjectVerificationQueryResult {
@@ -477,6 +577,7 @@ export interface ProjectVerificationQueryResult {
   filtered: number;
   rows: ProjectVerificationBoardRow[];
   rationaleSummary?: BoardRationaleSummary;
+  rationaleConsistencySummary?: BoardRationaleConsistencySummary;
   meta: BoardReadMeta;
 }
 
@@ -485,7 +586,15 @@ export type ProjectVerificationProxyRow = ProjectVerificationBoardRow;
 
 export function queryProjectVerification(
   cwd: string,
-  options?: { target?: string; status?: string; search?: string; limit?: number; needsRationale?: boolean; rationaleRequired?: boolean },
+  options?: {
+    target?: string;
+    status?: string;
+    search?: string;
+    limit?: number;
+    needsRationale?: boolean;
+    rationaleRequired?: boolean;
+    rationaleConsistency?: BoardRationaleConsistency;
+  },
 ): ProjectVerificationQueryResult {
   const { block, meta } = readVerificationBlockCached(cwd);
   const targetFilter = typeof options?.target === "string" ? options.target.trim() : "";
@@ -495,7 +604,15 @@ export function queryProjectVerification(
   const rationaleRequiredFilter = typeof options?.rationaleRequired === "boolean"
     ? options.rationaleRequired
     : undefined;
+  const rationaleConsistencyFilter =
+    options?.rationaleConsistency === "consistent"
+    || options?.rationaleConsistency === "mismatch"
+    || options?.rationaleConsistency === "single-source"
+    || options?.rationaleConsistency === "none"
+      ? options.rationaleConsistency
+      : undefined;
   const limit = normalizeLimit(options?.limit, 20);
+  const tasksById = new Map(readTasksBlockCached(cwd).block.tasks.map((row) => [row.id, row] as const));
 
   let rows = block.verifications;
 
@@ -525,6 +642,10 @@ export function queryProjectVerification(
     rows = rows.filter((row) => isRationaleSensitiveVerification(row) && !hasRationaleText(row.evidence));
   }
 
+  if (rationaleConsistencyFilter) {
+    rows = rows.filter((row) => resolveVerificationRationaleConsistency(row, tasksById) === rationaleConsistencyFilter);
+  }
+
   return {
     total: block.verifications.length,
     filtered: rows.length,
@@ -538,9 +659,11 @@ export function queryProjectVerification(
       rationaleRequired: isRationaleSensitiveVerification(row),
       hasRationale: hasRationaleText(row.evidence),
       rationaleKind: extractRationaleKindFromText(row.evidence),
-      rationaleSource: hasRationaleText(row.evidence) ? "verification-evidence" : "none",
+      rationaleSource: resolveVerificationRationaleSource(row, tasksById),
+      rationaleConsistency: resolveVerificationRationaleConsistency(row, tasksById),
     })),
     rationaleSummary: summarizeVerificationRationale(rows),
+    rationaleConsistencySummary: summarizeRationaleConsistency(rows.map((row) => resolveVerificationRationaleConsistency(row, tasksById))),
     meta,
   };
 }
@@ -567,6 +690,7 @@ export function updateProjectTaskBoard(
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
+    requireRationaleConsistency?: boolean;
     syncRationaleToVerification?: boolean;
   },
 ): ProjectTaskUpdateResult {
@@ -620,19 +744,13 @@ export function updateProjectTaskBoard(
     if (!kind) return { ok: false, reason: "invalid-rationale-kind" };
     if (!rationaleText) return { ok: false, reason: "invalid-rationale-text" };
     rationaleNoteForSync = buildTaskRationaleNote(kind, rationaleText);
-    next.notes = appendTaskNote(next.notes, rationaleNoteForSync, maxLines);
+    const mergedNote = appendRationaleToTaskNotes(next.notes, rationaleNoteForSync, maxLines);
+    next.notes = mergedNote.next;
   }
 
   const verificationRead = readVerificationBlockCached(cwd).block;
   const verificationMap = new Map(verificationRead.verifications.map((row) => [row.id, row] as const));
   const rationaleRequired = isRationaleSensitiveTask(next as TaskRecord);
-  const hasRationale = hasTaskRationale(next as TaskRecord, verificationMap);
-  if (updates.requireRationaleForSensitive === true && rationaleRequired && !hasRationale) {
-    return {
-      ok: false,
-      reason: "rationale-required-for-sensitive-task",
-    };
-  }
 
   let verificationSync: BoardVerificationSyncResult = {
     requested: updates.syncRationaleToVerification === true,
@@ -653,6 +771,7 @@ export function updateProjectTaskBoard(
           ...verificationRead.verifications[verificationIndex],
           evidence: merged.next,
         };
+        verificationMap.set(verificationId, verificationRead.verifications[verificationIndex]!);
         verificationSync = {
           requested: true,
           status: merged.changed ? "updated" : "already-present",
@@ -660,6 +779,21 @@ export function updateProjectTaskBoard(
         };
       }
     }
+  }
+
+  const hasRationale = hasTaskRationale(next as TaskRecord, verificationMap);
+  const rationaleConsistency = resolveTaskRationaleConsistency(next as TaskRecord, verificationMap);
+  if (updates.requireRationaleForSensitive === true && rationaleRequired && !hasRationale) {
+    return {
+      ok: false,
+      reason: "rationale-required-for-sensitive-task",
+    };
+  }
+  if (updates.requireRationaleConsistency === true && rationaleConsistency === "mismatch") {
+    return {
+      ok: false,
+      reason: "rationale-consistency-mismatch",
+    };
   }
 
   block.tasks[idx] = next;
@@ -681,6 +815,7 @@ export function updateProjectTaskBoard(
       hasRationale,
       rationaleKind: resolveTaskRationaleKind(next as TaskRecord, verificationMap),
       rationaleSource: resolveTaskRationaleSource(next as TaskRecord, verificationMap),
+      rationaleConsistency,
     },
     verificationSync,
   };
@@ -706,6 +841,14 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         description: "Filter by rationale sensitivity (true=sensitive, false=non-sensitive).",
       }),
     ),
+    rationale_consistency: Type.Optional(
+      Type.Union([
+        Type.Literal("consistent"),
+        Type.Literal("mismatch"),
+        Type.Literal("single-source"),
+        Type.Literal("none"),
+      ]),
+    ),
     limit: Type.Optional(
       Type.Integer({
         minimum: 1,
@@ -724,6 +867,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       search?: string;
       needs_rationale?: boolean;
       rationale_required?: boolean;
+      rationale_consistency?: BoardRationaleConsistency;
       limit?: number;
     },
     _signal: AbortSignal,
@@ -750,13 +894,14 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const rationaleRequired = typeof params?.rationale_required === "boolean"
       ? params.rationale_required
       : undefined;
+    const rationaleConsistency = params?.rationale_consistency;
     const limit = params?.limit;
     const cwd = ctx.cwd;
 
     const details =
       entity === "tasks"
-        ? queryProjectTasks(cwd, { status, search, needsRationale, rationaleRequired, limit })
-        : queryProjectVerification(cwd, { target, status, search, needsRationale, rationaleRequired, limit });
+        ? queryProjectTasks(cwd, { status, search, needsRationale, rationaleRequired, rationaleConsistency, limit })
+        : queryProjectVerification(cwd, { target, status, search, needsRationale, rationaleRequired, rationaleConsistency, limit });
     return {
       content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
       details,
@@ -801,6 +946,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         description: "When true, blocks update if a rationale-sensitive task still lacks rationale evidence after update.",
       }),
     ),
+    require_rationale_consistency: Type.Optional(
+      Type.Boolean({
+        description: "When true, blocks update if task-note rationale kind conflicts with linked verification rationale kind.",
+      }),
+    ),
     sync_rationale_to_verification: Type.Optional(
       Type.Boolean({
         description: "When true and rationale payload is provided, appends rationale note to linked verification evidence.",
@@ -818,6 +968,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationale_kind?: BoardRationaleKind;
       rationale_text?: string;
       require_rationale_for_sensitive?: boolean;
+      require_rationale_consistency?: boolean;
       sync_rationale_to_verification?: boolean;
     },
     _signal: AbortSignal,
@@ -831,6 +982,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const rationaleKind = typeof params?.rationale_kind === "string" ? params.rationale_kind : undefined;
     const rationaleText = typeof params?.rationale_text === "string" ? params.rationale_text : undefined;
     const requireRationaleForSensitive = params?.require_rationale_for_sensitive === true;
+    const requireRationaleConsistency = params?.require_rationale_consistency === true;
     const syncRationaleToVerification = params?.sync_rationale_to_verification === true;
 
     if (!taskId) {
@@ -846,6 +998,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       (typeof appendNote === "string" && appendNote.trim().length > 0) ||
       Boolean(params?.rationale_kind) ||
       Boolean(params?.rationale_text) ||
+      Boolean(params?.require_rationale_for_sensitive) ||
+      Boolean(params?.require_rationale_consistency) ||
       Boolean(params?.sync_rationale_to_verification);
     if (!hasUpdate) {
       const out = { ok: false, reason: "no-updates-requested" };
@@ -862,6 +1016,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationaleKind,
       rationaleText,
       requireRationaleForSensitive,
+      requireRationaleConsistency,
       syncRationaleToVerification,
     });
     return {
@@ -892,6 +1047,7 @@ export function updateProjectTaskProxy(
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
+    requireRationaleConsistency?: boolean;
     syncRationaleToVerification?: boolean;
   },
 ): ProjectTaskUpdateResult {

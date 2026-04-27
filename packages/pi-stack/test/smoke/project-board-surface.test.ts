@@ -105,7 +105,9 @@ describe("project-board-surface", () => {
       expect(first.filtered).toBe(1);
       expect(first.rows[0]?.id).toBe("TASK-A");
       expect(first.rows[0]?.rationaleSource).toBe("none");
+      expect(first.rows[0]?.rationaleConsistency).toBe("none");
       expect(first.rationaleSummary?.required).toBe(0);
+      expect(first.rationaleConsistencySummary?.none).toBe(1);
       expect(first.meta.cacheHit).toBe(false);
 
       const second = queryProjectTasks(cwd, { status: "in-progress", limit: 5 });
@@ -128,6 +130,7 @@ describe("project-board-surface", () => {
       expect(result.rows[0]?.id).toBe("VER-1");
       expect(result.rows[0]?.evidence).toContain("smoke");
       expect(result.rows[0]?.rationaleSource).toBe("none");
+      expect(result.rows[0]?.rationaleConsistency).toBe("none");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -222,6 +225,30 @@ describe("project-board-surface", () => {
         ? raw.verifications.find((row) => row?.id === "VER-1")
         : undefined;
       expect(ver1?.evidence).toContain("[rationale:risk-control] explicar mitigação para alteração de teste");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard retorna not-found quando task.verification não existe", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-sync-not-found-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-NF1", description: "Refactor", status: "in-progress", verification: "VER-NF1" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const updated = updateProjectTaskBoard(cwd, "TASK-NF1", {
+        rationaleKind: "refactor",
+        rationaleText: "registrar motivo",
+        syncRationaleToVerification: true,
+      });
+      expect(updated.ok).toBe(true);
+      expect(updated.verificationSync?.status).toBe("not-found");
+      expect(updated.verificationSync?.verificationId).toBe("VER-NF1");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -385,6 +412,45 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("queryProjectTasks supports rationaleConsistency filter", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-tasks-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-C1", description: "Refactor A", status: "in-progress", verification: "VER-C1", notes: "[rationale:refactor] motivo" },
+          { id: "TASK-C2", description: "Refactor B", status: "in-progress", verification: "VER-C2", notes: "[rationale:refactor] motivo" },
+          { id: "TASK-C3", description: "Refactor C", status: "in-progress", notes: "[rationale:refactor] motivo" },
+          { id: "TASK-C4", description: "Docs", status: "in-progress" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-C1", target: "TASK-C1", status: "partial", method: "inspect", evidence: "[rationale:refactor] ok" },
+          { id: "VER-C2", target: "TASK-C2", status: "partial", method: "inspect", evidence: "[rationale:test-change] divergiu" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const mismatch = queryProjectTasks(cwd, { rationaleConsistency: "mismatch", limit: 10 });
+      expect(mismatch.filtered).toBe(1);
+      expect(mismatch.rows[0]?.id).toBe("TASK-C2");
+
+      const consistent = queryProjectTasks(cwd, { rationaleConsistency: "consistent", limit: 10 });
+      expect(consistent.filtered).toBe(1);
+      expect(consistent.rows[0]?.id).toBe("TASK-C1");
+
+      const single = queryProjectTasks(cwd, { rationaleConsistency: "single-source", limit: 10 });
+      expect(single.filtered).toBe(1);
+      expect(single.rows[0]?.id).toBe("TASK-C3");
+
+      const none = queryProjectTasks(cwd, { rationaleConsistency: "none", limit: 10 });
+      expect(none.filtered).toBe(1);
+      expect(none.rows[0]?.id).toBe("TASK-C4");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("queryProjectVerification filtra evidências sensíveis sem rationale", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-ver-"));
     try {
@@ -440,6 +506,41 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("queryProjectVerification supports rationaleConsistency filter", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-verification-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-V1", description: "Refactor", status: "in-progress", notes: "[rationale:refactor] ok" },
+          { id: "TASK-V2", description: "Refactor", status: "in-progress", notes: "[rationale:refactor] mismatch" },
+          { id: "TASK-V3", description: "Refactor", status: "in-progress", notes: "[rationale:refactor] single" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-V1", target: "TASK-V1", status: "partial", method: "inspect", evidence: "[rationale:refactor] ok" },
+          { id: "VER-V2", target: "TASK-V2", status: "partial", method: "inspect", evidence: "[rationale:test-change] mismatch" },
+          { id: "VER-V3", target: "TASK-V3", status: "partial", method: "inspect", evidence: "sem rationale" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const mismatch = queryProjectVerification(cwd, { rationaleConsistency: "mismatch", limit: 10 });
+      expect(mismatch.filtered).toBe(1);
+      expect(mismatch.rows[0]?.id).toBe("VER-V2");
+
+      const consistent = queryProjectVerification(cwd, { rationaleConsistency: "consistent", limit: 10 });
+      expect(consistent.filtered).toBe(1);
+      expect(consistent.rows[0]?.id).toBe("VER-V1");
+
+      const single = queryProjectVerification(cwd, { rationaleConsistency: "single-source", limit: 10 });
+      expect(single.filtered).toBe(1);
+      expect(single.rows[0]?.id).toBe("VER-V3");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("updateProjectTaskBoard can enforce rationale for sensitive tasks", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-enforce-"));
     try {
@@ -474,6 +575,71 @@ describe("project-board-surface", () => {
       });
       expect(ok.ok).toBe(true);
       expect(ok.task?.hasRationale).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard can enforce rationale consistency", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-enforce-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-CC1", description: "Refactor", status: "in-progress", verification: "VER-CC1", notes: "[rationale:refactor] motivo" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-CC1", target: "TASK-CC1", status: "partial", method: "inspect", evidence: "[rationale:test-change] divergente" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const blocked = updateProjectTaskBoard(cwd, "TASK-CC1", {
+        status: "completed",
+        requireRationaleConsistency: true,
+      });
+      expect(blocked.ok).toBe(false);
+      expect(blocked.reason).toBe("rationale-consistency-mismatch");
+
+      const synced = updateProjectTaskBoard(cwd, "TASK-CC1", {
+        status: "completed",
+        rationaleKind: "refactor",
+        rationaleText: "alinhar rationale entre task e verificação",
+        syncRationaleToVerification: true,
+        requireRationaleConsistency: true,
+      });
+      expect(synced.ok).toBe(true);
+      expect(synced.task?.rationaleConsistency).toBe("consistent");
+      expect(synced.verificationSync?.status).toBe("updated");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard keeps single rationale note when same payload repeats", () => {
+    const cwd = seedWorkspace();
+    try {
+      const first = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+        rationaleText: "motivo repetido",
+      });
+      expect(first.ok).toBe(true);
+
+      const second = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+        rationaleText: "motivo repetido",
+      });
+      expect(second.ok).toBe(true);
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks?: Array<{ id?: string; notes?: string }>;
+      };
+      const taskA = Array.isArray(raw.tasks)
+        ? raw.tasks.find((row) => row.id === "TASK-A")
+        : undefined;
+      const occurrences = (taskA?.notes?.match(/\[rationale:refactor\] motivo repetido/g) ?? []).length;
+      expect(occurrences).toBe(1);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -632,6 +798,40 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("board_query supports rationale_consistency filter", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-query-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-QC1", description: "Refactor", status: "in-progress", verification: "VER-QC1", notes: "[rationale:refactor] ok" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-QC1", target: "TASK-QC1", status: "partial", method: "inspect", evidence: "[rationale:test-change] mismatch" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query-rationale-consistency",
+        { entity: "tasks", rationale_consistency: "mismatch", limit: 10 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.filtered).toBe(1);
+      expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-QC1");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_query supports rationale_required filter for verification", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-required-query-tool-"));
     try {
@@ -696,6 +896,7 @@ describe("project-board-surface", () => {
     expect(queryTool?.parameters?.properties?.limit?.type).toBe("integer");
     expect(queryTool?.parameters?.properties?.needs_rationale?.type).toBe("boolean");
     expect(queryTool?.parameters?.properties?.rationale_required?.type).toBe("boolean");
+    expect(queryTool?.parameters?.properties?.rationale_consistency).toBeDefined();
 
     const updateToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
       ([tool]) => tool?.name === "board_update",
@@ -706,6 +907,7 @@ describe("project-board-surface", () => {
     expect(updateTool?.parameters?.properties?.rationale_kind).toBeDefined();
     expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
     expect(updateTool?.parameters?.properties?.require_rationale_for_sensitive?.type).toBe("boolean");
+    expect(updateTool?.parameters?.properties?.require_rationale_consistency?.type).toBe("boolean");
     expect(updateTool?.parameters?.properties?.sync_rationale_to_verification?.type).toBe("boolean");
   });
 
@@ -790,6 +992,56 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect((ok.details as any)?.ok).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update can enforce rationale consistency mismatch", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-enforce-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-TC1", description: "Refactor", status: "in-progress", verification: "VER-TC1", notes: "[rationale:refactor] nota" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-TC1", target: "TASK-TC1", status: "partial", method: "inspect", evidence: "[rationale:test-change] divergente" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const blocked = await updateTool.execute(
+        "tc-board-update-consistency-blocked",
+        { task_id: "TASK-TC1", status: "completed", require_rationale_consistency: true },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((blocked.details as any)?.ok).toBe(false);
+      expect((blocked.details as any)?.reason).toBe("rationale-consistency-mismatch");
+
+      const resolved = await updateTool.execute(
+        "tc-board-update-consistency-resolved",
+        {
+          task_id: "TASK-TC1",
+          status: "completed",
+          require_rationale_consistency: true,
+          rationale_kind: "refactor",
+          rationale_text: "alinhar rationale",
+          sync_rationale_to_verification: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((resolved.details as any)?.ok).toBe(true);
+      expect((resolved.details as any)?.task?.rationaleConsistency).toBe("consistent");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
