@@ -434,6 +434,61 @@ describe("guardrails-core long-run intent queue", () => {
     }
   });
 
+  it("dedupes recent queue entries when dedupe options are provided", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-dedupe-"));
+    try {
+      const intentText = [
+        "[intent:board.execute-task]",
+        "version=1",
+        "task_id=TASK-BUD-119",
+        "mode=board-first",
+        "contract=no-auto-close+verification",
+      ].join("\n");
+
+      const first = enqueueDeferredIntent(cwd, intentText, "board-first-intent", 50, {
+        dedupeKey: intentText,
+        dedupeWindowMs: 60_000,
+      });
+      const second = enqueueDeferredIntent(cwd, intentText, "board-first-intent", 50, {
+        dedupeKey: intentText,
+        dedupeWindowMs: 60_000,
+      });
+
+      expect(first.deduped).toBe(false);
+      expect(second.deduped).toBe(true);
+      expect(second.itemId).toBe(first.itemId);
+      expect(listDeferredIntents(cwd)).toHaveLength(1);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("allows enqueue after dedupe window expires", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-dedupe-expire-"));
+    try {
+      const intentText = "[intent:board.execute-task]\nversion=1\ntask_id=TASK-BUD-119";
+      const first = enqueueDeferredIntent(cwd, intentText, "board-first-intent", 50, {
+        dedupeKey: intentText,
+        dedupeWindowMs: 5_000,
+      });
+      expect(first.deduped).toBe(false);
+
+      const queuePath = join(cwd, ".pi", "deferred-intents.json");
+      const json = JSON.parse(readFileSync(queuePath, "utf8"));
+      json.items[0].atIso = "2000-01-01T00:00:00.000Z";
+      writeFileSync(queuePath, `${JSON.stringify(json, null, 2)}\n`, "utf8");
+
+      const second = enqueueDeferredIntent(cwd, intentText, "board-first-intent", 50, {
+        dedupeKey: intentText,
+        dedupeWindowMs: 5_000,
+      });
+      expect(second.deduped).toBe(false);
+      expect(listDeferredIntents(cwd)).toHaveLength(2);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("supports list/pop/clear helpers for safe drain", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-drain-"));
     try {

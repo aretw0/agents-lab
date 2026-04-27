@@ -2229,6 +2229,10 @@ export default function (pi: ExtensionAPI) {
           intentText,
           "board-auto-advance-fallback",
           longRunIntentQueueConfig.maxItems,
+          {
+            dedupeKey: intentText,
+            dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+          },
         );
         markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
@@ -2237,6 +2241,7 @@ export default function (pi: ExtensionAPI) {
           taskId: intent.taskId,
           error: message,
           queuedCount: queued.queuedCount,
+          deduped: queued.deduped,
           selectionPolicy: boardReadiness.selectionPolicy,
           intentType: intent.type,
           intentVersion: intent.version,
@@ -2312,11 +2317,15 @@ export default function (pi: ExtensionAPI) {
         dispatched += 1;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        enqueueDeferredIntent(
+        const retryQueued = enqueueDeferredIntent(
           ctx.cwd,
           popped.item.text,
           `auto-drain-retry:${reason}`,
           longRunIntentQueueConfig.maxItems,
+          {
+            dedupeKey: popped.item.text,
+            dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+          },
         );
         markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
         const errorClass = classifyLongRunDispatchFailure(message);
@@ -2334,6 +2343,8 @@ export default function (pi: ExtensionAPI) {
           error: message,
           errorClass,
           retryDelayMs,
+          retryQueuedCount: retryQueued.queuedCount,
+          retryDeduped: retryQueued.deduped,
         });
         scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
@@ -3192,6 +3203,10 @@ export default function (pi: ExtensionAPI) {
             intentText,
             "board-first-intent",
             longRunIntentQueueConfig.maxItems,
+            {
+              dedupeKey: intentText,
+              dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+            },
           );
           appendAuditEntry(ctx, "guardrails-core.board-intent-queued", {
             atIso: new Date().toISOString(),
@@ -3203,10 +3218,13 @@ export default function (pi: ExtensionAPI) {
             intentType: intent.type,
             intentVersion: intent.version,
             intentSummary,
+            deduped: queued.deduped,
           });
           updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
           ctx.ui.notify(
-            `lane-queue: board-next queued ${intent.taskId} (total=${queued.queuedCount})`,
+            queued.deduped
+              ? `lane-queue: board-next ${intent.taskId} já estava na fila (total=${queued.queuedCount})`
+              : `lane-queue: board-next queued ${intent.taskId} (total=${queued.queuedCount})`,
             "info",
           );
           return;
@@ -3234,6 +3252,10 @@ export default function (pi: ExtensionAPI) {
             intentText,
             "board-first-intent-fallback",
             longRunIntentQueueConfig.maxItems,
+            {
+              dedupeKey: intentText,
+              dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+            },
           );
           markLoopDegraded(ctx, "board-intent-dispatch-failed", message);
           appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch-failed", {
@@ -3242,13 +3264,16 @@ export default function (pi: ExtensionAPI) {
             error: message,
             fallbackQueued: true,
             queuedCount: queued.queuedCount,
+            deduped: queued.deduped,
             selectionPolicy: boardReadiness.selectionPolicy,
             intentType: intent.type,
             intentVersion: intent.version,
             intentSummary,
           });
           ctx.ui.notify(
-            `lane-queue: board-next dispatch failed (${message}). fallback queued ${intent.taskId} (total=${queued.queuedCount})`,
+            queued.deduped
+              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para ${intent.taskId} (total=${queued.queuedCount})`
+              : `lane-queue: board-next dispatch failed (${message}). fallback queued ${intent.taskId} (total=${queued.queuedCount})`,
             "warning",
           );
         }

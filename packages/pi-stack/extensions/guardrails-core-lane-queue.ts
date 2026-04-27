@@ -600,17 +600,47 @@ export function shouldEmitLoopActivationAudit(
   return nowMs - lastAuditAtMs >= Math.max(0, Math.floor(minIntervalMs));
 }
 
+export interface DeferredIntentEnqueueOptions {
+  dedupeKey?: string;
+  dedupeWindowMs?: number;
+}
+
 export function enqueueDeferredIntent(
   cwd: string,
   text: string,
   source: string,
   maxItems: number,
-): { queuePath: string; queuedCount: number; itemId: string } {
+  options?: DeferredIntentEnqueueOptions,
+): { queuePath: string; queuedCount: number; itemId: string; deduped: boolean } {
   const queue = readDeferredIntentQueue(cwd);
+  const trimmedText = text.trim();
+  const dedupeKey = typeof options?.dedupeKey === "string" ? options.dedupeKey.trim() : "";
+  const dedupeWindowMs = Number.isFinite(Number(options?.dedupeWindowMs))
+    ? Math.max(0, Math.floor(Number(options?.dedupeWindowMs)))
+    : 0;
+
+  if (dedupeKey && dedupeWindowMs > 0) {
+    const nowMs = Date.now();
+    for (let index = queue.items.length - 1; index >= 0; index -= 1) {
+      const existing = queue.items[index];
+      if ((existing.text ?? "").trim() !== dedupeKey) continue;
+      const existingAtMs = Date.parse(existing.atIso);
+      if (!Number.isFinite(existingAtMs)) continue;
+      if (nowMs - existingAtMs <= dedupeWindowMs) {
+        return {
+          queuePath: deferredIntentQueuePath(cwd),
+          queuedCount: queue.items.length,
+          itemId: existing.id,
+          deduped: true,
+        };
+      }
+    }
+  }
+
   const item: DeferredIntentItem = {
     id: `intent-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
     atIso: new Date().toISOString(),
-    text: text.trim(),
+    text: trimmedText,
     source,
   };
   queue.items.push(item);
@@ -622,6 +652,7 @@ export function enqueueDeferredIntent(
     queuePath,
     queuedCount: queue.items.length,
     itemId: item.id,
+    deduped: false,
   };
 }
 

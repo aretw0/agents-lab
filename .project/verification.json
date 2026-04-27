@@ -5073,6 +5073,15 @@
       "method": "test",
       "timestamp": "2026-04-26T09:31:00Z",
       "evidence": "Slice 4 (rapid redispatch window configurável): adicionada chave `longRunIntentQueue.rapidRedispatchWindowMs` no pipeline de configuração runtime (resolve+clamp, snapshot, specs de `/guardrails-config`) e consumo no gate de bloqueio de re-dispatch rápido em `guardrails-core`. `lane-queue status` agora expõe `rapidWindowMs` para observabilidade operacional. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 70/70 passed; revalidação focal cross-surface (`shell-route`, `macro-refactor`, `structured-io`, `long-run`, budget, installability) => 86/86 passed."
+    },
+    {
+      "id": "VER-BUD-314",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T10:11:00Z",
+      "evidence": "Slice 5 (dedupe de intents canônicos em fila): `enqueueDeferredIntent` agora suporta `dedupeKey` + `dedupeWindowMs` com retorno `deduped`, e `guardrails-core` aplicou dedupe nos caminhos `board-first-intent`, `board-first-intent-fallback`, `board-auto-advance-fallback` e `auto-drain-retry`. Auditorias `board-intent-*` e `long-run-intent-auto-dispatch-failed` passaram a reportar `deduped`; notify de `/lane-queue board-next` distingue já-em-fila vs enfileirado. Cobertura adicionada para dedupe/expiração em `guardrails-long-run-intent-queue.test.ts`. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 72/72 passed; revalidação focal cross-surface => 88/88 passed."
     }
   ]
 }
