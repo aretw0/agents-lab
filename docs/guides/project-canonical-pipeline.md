@@ -160,6 +160,7 @@ Durante long-run:
 - para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification`.
 - auto-advance só deve ocorrer em condição segura (`lane idle` + `queue empty` + `loop running/healthy` + `stopCondition=none` + board ready com `nextTaskId`), com dedupe de task e auditoria explícita.
 - para observação operacional, `/lane-queue status` deve expor `runtimeCode=<active|reload-required|unknown>`, `boardAutoGate=<reason>`, `boardAutoLast=<task@age|n/a>`, `evidenceBoardAuto=<task@age runtime emLoop|n/a>`, `evidenceLoopReady=<age runtime gate|n/a>` e marcadores `READY/ACTIVE_HERE/IN_LOOP` para diagnosticar por que o auto-advance não disparou (incluindo `dedupe-window` quando a mesma task foi disparada há pouco).
+- filas de intents canônicos (`board.execute-task`) devem aplicar dedupe por janela (`rapidRedispatchWindowMs`) para reduzir re-enqueue redundante após falha silenciosa em sessão compactada.
 - quando `boardAutoGate != ready`, registrar auditoria throttled (`guardrails-core.board-intent-auto-advance-deferred`) com razão e contexto mínimo para evidência de runtime sem spam.
 - eventos de auto-advance (`...auto-advance`, `...auto-advance-deferred`, `...auto-advance-failed`) devem carregar `runtimeCodeState` para comprovar se o comportamento observado já está com código ativo (`active`) ou ainda depende de reload (`reload-required`).
 - o runtime deve emitir `guardrails-core.loop-activation-state` (throttled por mudança de label) para registrar transições dos marcadores `READY/ACTIVE_HERE/IN_LOOP` sem depender de comando manual.
@@ -189,6 +190,9 @@ Configuração (`.pi/settings.json`):
     "guardrailsCore": {
       "longRunIntentQueue": {
         "dispatchFailureBlockAfter": 3,
+        "rapidRedispatchWindowMs": 300000,
+        "identicalFailurePauseAfter": 3,
+        "identicalFailureWindowMs": 120000,
         "providerTransientRetry": {
           "enabled": true,
           "maxAttempts": 10,
@@ -205,7 +209,7 @@ Configuração (`.pi/settings.json`):
 Notas operacionais:
 - para erro transitório, o threshold efetivo de block vira `max(dispatchFailureBlockAfter, maxAttempts)`;
 - para erro não transitório, mantém `dispatchFailureBlockAfter` normal;
-- status da lane continua mostrando `failStreak=n/<threshold>` para decisão rápida do operador;
+- status da lane continua mostrando `failStreak=n/<threshold>` e `identicalFail=n/<pauseAfter>@<windowMs>` para decisão rápida do operador;
 - quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`).
 
 ### Configuração operacional sem editar JSON manualmente
@@ -220,6 +224,8 @@ Exemplos:
 - `/guardrails-config get longRunIntentQueue.maxItems`
 - `/guardrails-config set longRunIntentQueue.maxItems 80`
 - `/guardrails-config set longRunIntentQueue.enabled true`
+- `/guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3`
+- `/guardrails-config set longRunIntentQueue.identicalFailureWindowMs 120000`
 - `/guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint`
 - `/guardrails-config set contextWatchdog.userNotifyFromLevel compact`
 - `/guardrails-config set contextWatchdog.autoCompact false`

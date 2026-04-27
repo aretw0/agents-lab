@@ -65,6 +65,9 @@ import {
   resolveProviderTransientRetryDelayMs,
   shouldBlockRapidSameTaskRedispatch,
   BOARD_RAPID_REDISPATCH_WINDOW_MS,
+  normalizeDispatchFailureFingerprint,
+  computeIdenticalFailureStreak,
+  shouldPauseOnIdenticalFailure,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core long-run intent queue", () => {
@@ -82,6 +85,8 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainIdleStableMs).toBe(1500);
       expect(cfg.dispatchFailureBlockAfter).toBe(3);
       expect(cfg.rapidRedispatchWindowMs).toBe(BOARD_RAPID_REDISPATCH_WINDOW_MS);
+      expect(cfg.identicalFailurePauseAfter).toBe(3);
+      expect(cfg.identicalFailureWindowMs).toBe(120_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
@@ -151,6 +156,32 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setRapidWindow.ok).toBe(true);
 
+      const identicalPauseSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.identicalFailurePauseAfter");
+      expect(identicalPauseSpec).toBeDefined();
+      if (!identicalPauseSpec) return;
+      const identicalPauseOk = coerceGuardrailsRuntimeConfigValue("4", identicalPauseSpec);
+      expect(identicalPauseOk.ok).toBe(true);
+
+      const setIdenticalPause = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.identicalFailurePauseAfter",
+        rawValue: "4",
+      });
+      expect(setIdenticalPause.ok).toBe(true);
+
+      const identicalWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.identicalFailureWindowMs");
+      expect(identicalWindowSpec).toBeDefined();
+      if (!identicalWindowSpec) return;
+      const identicalWindowOk = coerceGuardrailsRuntimeConfigValue("90000", identicalWindowSpec);
+      expect(identicalWindowOk.ok).toBe(true);
+
+      const setIdenticalWindow = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.identicalFailureWindowMs",
+        rawValue: "90000",
+      });
+      expect(setIdenticalWindow.ok).toBe(true);
+
       const modelLevelSpec = resolveGuardrailsRuntimeConfigSpec("contextWatchdog.modelSteeringFromLevel");
       expect(modelLevelSpec).toBeDefined();
       if (!modelLevelSpec) return;
@@ -196,6 +227,8 @@ describe("guardrails-core long-run intent queue", () => {
 
       const contextSnapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
       expect(contextSnapshot["longRunIntentQueue.rapidRedispatchWindowMs"]).toBe(45000);
+      expect(contextSnapshot["longRunIntentQueue.identicalFailurePauseAfter"]).toBe(4);
+      expect(contextSnapshot["longRunIntentQueue.identicalFailureWindowMs"]).toBe(90000);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.autoCompact"]).toBe(false);
@@ -371,6 +404,10 @@ describe("guardrails-core long-run intent queue", () => {
       autoDrainCooldownMs: 3000,
       autoDrainBatchSize: 1,
       autoDrainIdleStableMs: 1500,
+      dispatchFailureBlockAfter: 3,
+      rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+      identicalFailurePauseAfter: 3,
+      identicalFailureWindowMs: 120_000,
     };
     expect(shouldQueueInputForLongRun("registrar isso", true, cfg)).toBe(true);
     expect(shouldQueueInputForLongRun("/status", true, cfg)).toBe(false);
@@ -449,8 +486,8 @@ describe("guardrails-core long-run intent queue", () => {
         dedupeKey: intentText,
         dedupeWindowMs: 60_000,
       });
-      const second = enqueueDeferredIntent(cwd, intentText, "board-first-intent", 50, {
-        dedupeKey: intentText,
+      const second = enqueueDeferredIntent(cwd, `${intentText}   `, "board-first-intent", 50, {
+        dedupeKey: `${intentText}\n\n`,
         dedupeWindowMs: 60_000,
       });
 
@@ -627,6 +664,8 @@ describe("guardrails-core long-run intent queue", () => {
                 autoDrainIdleStableMs: 5000,
                 dispatchFailureBlockAfter: 5,
                 rapidRedispatchWindowMs: 45_000,
+                identicalFailurePauseAfter: 6,
+                identicalFailureWindowMs: 90_000,
                 providerTransientRetry: {
                   enabled: true,
                   maxAttempts: 8,
@@ -650,6 +689,8 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainIdleStableMs).toBe(5000);
       expect(cfg.dispatchFailureBlockAfter).toBe(5);
       expect(cfg.rapidRedispatchWindowMs).toBe(45_000);
+      expect(cfg.identicalFailurePauseAfter).toBe(6);
+      expect(cfg.identicalFailureWindowMs).toBe(90_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
@@ -1044,6 +1085,52 @@ describe("guardrails-core long-run intent queue", () => {
     expect(resolveProviderTransientRetryDelayMs(5, cfg)).toBe(8000);
   });
 
+  it("normalizes dispatch failure fingerprints deterministically", () => {
+    const raw = "No tool call found for function call output with call_id call_QJlU6a2DGglAm3NntokWyBwo and hash 0123456789abcdef0123456789abcdef";
+    const normalized = normalizeDispatchFailureFingerprint(raw, 200);
+    expect(normalized).toContain("call_*");
+    expect(normalized).toContain("hex_*");
+    expect(normalized).not.toContain("call_QJlU6a2DGglAm3NntokWyBwo");
+  });
+
+  it("increments identical failure streak only inside configured window", () => {
+    const first = computeIdenticalFailureStreak({
+      nextErrorText: "No tool call found for function call output with call_id call_abc123",
+      nowMs: 10_000,
+      windowMs: 60_000,
+    });
+    expect(first.streak).toBe(1);
+
+    const second = computeIdenticalFailureStreak({
+      lastFingerprint: first.fingerprint,
+      lastFailureAtMs: 10_000,
+      streak: first.streak,
+      nextErrorText: "No tool call found for function call output with call_id call_xyz999",
+      nowMs: 20_000,
+      windowMs: 60_000,
+    });
+    expect(second.withinWindow).toBe(true);
+    expect(second.streak).toBe(2);
+
+    const third = computeIdenticalFailureStreak({
+      lastFingerprint: second.fingerprint,
+      lastFailureAtMs: 20_000,
+      streak: second.streak,
+      nextErrorText: "No tool call found for function call output with call_id call_zzz",
+      nowMs: 90_500,
+      windowMs: 60_000,
+    });
+    expect(third.withinWindow).toBe(false);
+    expect(third.streak).toBe(1);
+  });
+
+  it("pauses only when identical failure streak reaches threshold", () => {
+    expect(shouldPauseOnIdenticalFailure(1, 3)).toBe(false);
+    expect(shouldPauseOnIdenticalFailure(2, 3)).toBe(false);
+    expect(shouldPauseOnIdenticalFailure(3, 3)).toBe(true);
+    expect(shouldPauseOnIdenticalFailure(4, 3)).toBe(true);
+  });
+
   it("auto-drains only when idle, enabled and after cooldown", () => {
     const cfg = {
       enabled: true,
@@ -1054,6 +1141,10 @@ describe("guardrails-core long-run intent queue", () => {
       autoDrainCooldownMs: 1000,
       autoDrainBatchSize: 1,
       autoDrainIdleStableMs: 800,
+      dispatchFailureBlockAfter: 3,
+      rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+      identicalFailurePauseAfter: 3,
+      identicalFailureWindowMs: 120_000,
     };
 
     expect(estimateAutoDrainWaitMs(false, 1, 2_000, 0, 1_200, cfg)).toBe(0);

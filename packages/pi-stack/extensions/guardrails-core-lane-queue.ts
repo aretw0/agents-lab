@@ -12,6 +12,8 @@ export interface LongRunIntentQueueConfig {
   autoDrainIdleStableMs: number;
   dispatchFailureBlockAfter: number;
   rapidRedispatchWindowMs: number;
+  identicalFailurePauseAfter: number;
+  identicalFailureWindowMs: number;
 }
 
 export interface DeferredIntentItem {
@@ -61,6 +63,8 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   autoDrainIdleStableMs: 1500,
   dispatchFailureBlockAfter: 3,
   rapidRedispatchWindowMs: 5 * 60 * 1000,
+  identicalFailurePauseAfter: 3,
+  identicalFailureWindowMs: 2 * 60 * 1000,
 };
 
 const DEFAULT_LONG_RUN_LOOP_LEASE_TTL_MS = 30_000;
@@ -115,6 +119,8 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const autoDrainIdleStableMsRaw = Number(cfg?.autoDrainIdleStableMs);
     const dispatchFailureBlockAfterRaw = Number(cfg?.dispatchFailureBlockAfter);
     const rapidRedispatchWindowMsRaw = Number(cfg?.rapidRedispatchWindowMs);
+    const identicalFailurePauseAfterRaw = Number(cfg?.identicalFailurePauseAfter);
+    const identicalFailureWindowMsRaw = Number(cfg?.identicalFailureWindowMs);
     return {
       enabled: cfg?.enabled !== false,
       requireActiveLongRun: cfg?.requireActiveLongRun !== false,
@@ -142,6 +148,14 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
         Number.isFinite(rapidRedispatchWindowMsRaw) && rapidRedispatchWindowMsRaw >= 1_000
           ? Math.max(1_000, Math.min(30 * 60 * 1000, Math.floor(rapidRedispatchWindowMsRaw)))
           : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.rapidRedispatchWindowMs,
+      identicalFailurePauseAfter:
+        Number.isFinite(identicalFailurePauseAfterRaw) && identicalFailurePauseAfterRaw > 0
+          ? Math.max(1, Math.min(20, Math.floor(identicalFailurePauseAfterRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.identicalFailurePauseAfter,
+      identicalFailureWindowMs:
+        Number.isFinite(identicalFailureWindowMsRaw) && identicalFailureWindowMsRaw >= 1_000
+          ? Math.max(1_000, Math.min(10 * 60 * 1000, Math.floor(identicalFailureWindowMsRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.identicalFailureWindowMs,
     };
   } catch {
     return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
@@ -393,6 +407,66 @@ export function shouldBlockRapidSameTaskRedispatch(options: {
   return nowMs - lastAtMs < windowMs;
 }
 
+export function normalizeDispatchFailureFingerprint(errorText: string, maxChars = 160): string {
+  const cap = Math.max(40, Math.floor(Number(maxChars) || 160));
+  const normalized = String(errorText ?? "")
+    .toLowerCase()
+    .replace(/call_[a-z0-9_-]+/g, "call_*")
+    .replace(/[0-9a-f]{12,}/g, "hex_*")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, cap);
+  return normalized || "unknown-error";
+}
+
+export interface IdenticalFailureStreakInput {
+  lastFingerprint?: string;
+  lastFailureAtMs?: number;
+  streak?: number;
+  nextErrorText: string;
+  nowMs?: number;
+  windowMs?: number;
+}
+
+export interface IdenticalFailureStreakResult {
+  fingerprint: string;
+  streak: number;
+  matchedPrevious: boolean;
+  withinWindow: boolean;
+}
+
+export function computeIdenticalFailureStreak(
+  input: IdenticalFailureStreakInput,
+): IdenticalFailureStreakResult {
+  const fingerprint = normalizeDispatchFailureFingerprint(input.nextErrorText);
+  const previousFingerprint = (input.lastFingerprint ?? "").trim();
+  const nowMs = Number.isFinite(Number(input.nowMs)) ? Number(input.nowMs) : Date.now();
+  const previousAtMs = Number(input.lastFailureAtMs);
+  const windowMs = Number.isFinite(Number(input.windowMs)) && Number(input.windowMs) >= 1_000
+    ? Math.floor(Number(input.windowMs))
+    : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.identicalFailureWindowMs;
+
+  const matchedPrevious = previousFingerprint.length > 0 && previousFingerprint === fingerprint;
+  const withinWindow =
+    matchedPrevious
+    && Number.isFinite(previousAtMs)
+    && nowMs - previousAtMs <= windowMs;
+  const previousStreak = Number.isFinite(Number(input.streak)) ? Math.max(0, Math.floor(Number(input.streak))) : 0;
+
+  return {
+    fingerprint,
+    streak: withinWindow ? previousStreak + 1 : 1,
+    matchedPrevious,
+    withinWindow,
+  };
+}
+
+export function shouldPauseOnIdenticalFailure(streak: number, pauseAfter: number): boolean {
+  const safeStreak = Number.isFinite(Number(streak)) ? Math.max(0, Math.floor(Number(streak))) : 0;
+  const threshold = Number.isFinite(Number(pauseAfter)) ? Math.max(1, Math.floor(Number(pauseAfter))) : 3;
+  return safeStreak >= threshold;
+}
+
 export type BoardAutoAdvanceGateReason =
   | "active-long-run"
   | "queued-intents"
@@ -605,6 +679,10 @@ export interface DeferredIntentEnqueueOptions {
   dedupeWindowMs?: number;
 }
 
+function normalizeDeferredIntentDedupeKey(text: string): string {
+  return String(text ?? "").replace(/\s+/g, " ").trim();
+}
+
 export function enqueueDeferredIntent(
   cwd: string,
   text: string,
@@ -614,7 +692,9 @@ export function enqueueDeferredIntent(
 ): { queuePath: string; queuedCount: number; itemId: string; deduped: boolean } {
   const queue = readDeferredIntentQueue(cwd);
   const trimmedText = text.trim();
-  const dedupeKey = typeof options?.dedupeKey === "string" ? options.dedupeKey.trim() : "";
+  const dedupeKey = typeof options?.dedupeKey === "string"
+    ? normalizeDeferredIntentDedupeKey(options.dedupeKey)
+    : "";
   const dedupeWindowMs = Number.isFinite(Number(options?.dedupeWindowMs))
     ? Math.max(0, Math.floor(Number(options?.dedupeWindowMs)))
     : 0;
@@ -623,7 +703,7 @@ export function enqueueDeferredIntent(
     const nowMs = Date.now();
     for (let index = queue.items.length - 1; index >= 0; index -= 1) {
       const existing = queue.items[index];
-      if ((existing.text ?? "").trim() !== dedupeKey) continue;
+      if (normalizeDeferredIntentDedupeKey(existing.text ?? "") !== dedupeKey) continue;
       const existingAtMs = Date.parse(existing.atIso);
       if (!Number.isFinite(existingAtMs)) continue;
       if (nowMs - existingAtMs <= dedupeWindowMs) {
