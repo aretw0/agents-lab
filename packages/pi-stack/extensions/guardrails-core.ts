@@ -1633,6 +1633,8 @@ export default function (pi: ExtensionAPI) {
   let lastDispatchFailureAt = 0;
   let identicalDispatchFailureStreak = 0;
   let lastDispatchFailureClass: DispatchFailureClass = "other";
+  let lastDispatchFailurePauseAfterUsed = 0;
+  let lastDispatchFailureWindowMsUsed = 0;
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
@@ -1861,22 +1863,25 @@ export default function (pi: ExtensionAPI) {
     longRunLoopRuntimeState = next.state;
   }
 
-  function markLoopHealthy(ctx: ExtensionContext, reason: string): void {
-    const next = markLongRunLoopRuntimeHealthy(ctx.cwd, reason);
-    longRunLoopRuntimeState = next.state;
+  function resetDispatchFailureTrackingState(): void {
     lastDispatchFailureFingerprint = undefined;
     lastDispatchFailureAt = 0;
     identicalDispatchFailureStreak = 0;
     lastDispatchFailureClass = "other";
+    lastDispatchFailurePauseAfterUsed = 0;
+    lastDispatchFailureWindowMsUsed = 0;
+  }
+
+  function markLoopHealthy(ctx: ExtensionContext, reason: string): void {
+    const next = markLongRunLoopRuntimeHealthy(ctx.cwd, reason);
+    longRunLoopRuntimeState = next.state;
+    resetDispatchFailureTrackingState();
   }
 
   function markLoopDispatch(ctx: ExtensionContext, itemId: string): void {
     const next = markLongRunLoopRuntimeDispatch(ctx.cwd, itemId);
     longRunLoopRuntimeState = next.state;
-    lastDispatchFailureFingerprint = undefined;
-    lastDispatchFailureAt = 0;
-    identicalDispatchFailureStreak = 0;
-    lastDispatchFailureClass = "other";
+    resetDispatchFailureTrackingState();
   }
 
   function markLoopDegraded(ctx: ExtensionContext, reason: string, errorText?: string): void {
@@ -1901,6 +1906,8 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureAt = nowMs;
     identicalDispatchFailureStreak = next.streak;
     lastDispatchFailureClass = errorClass;
+    lastDispatchFailurePauseAfterUsed = pauseAfterUsed;
+    lastDispatchFailureWindowMsUsed = windowMsUsed;
     const pauseTriggered = longRunLoopRuntimeState.mode === "running" && shouldPauseOnIdenticalFailure(next.streak, pauseAfterUsed);
     if (pauseTriggered) {
       setLoopMode(ctx, "paused", `identical-dispatch-failure:${reason}`);
@@ -2484,10 +2491,7 @@ export default function (pi: ExtensionAPI) {
     lastForceNowAt = 0;
     lastForceNowTextPreview = undefined;
     lastLoopLeaseRefreshAt = 0;
-    lastDispatchFailureFingerprint = undefined;
-    lastDispatchFailureAt = 0;
-    identicalDispatchFailureStreak = 0;
-    lastDispatchFailureClass = "other";
+    resetDispatchFailureTrackingState();
     clearAutoDrainTimer();
     clearLoopEvidenceHeartbeatTimer();
     clearLoopLeaseHeartbeatTimer();
@@ -3549,10 +3553,13 @@ export default function (pi: ExtensionAPI) {
         : "n/a";
       const failSignature = !lastDispatchFailureFingerprint ? "n/a" : lastDispatchFailureFingerprint.length > 72 ? `${lastDispatchFailureFingerprint.slice(0, 72)}…` : lastDispatchFailureFingerprint;
       const failClass = lastDispatchFailureFingerprint ? lastDispatchFailureClass : "n/a";
+      const failPolicy = lastDispatchFailureFingerprint && lastDispatchFailurePauseAfterUsed > 0 && lastDispatchFailureWindowMsUsed > 0
+        ? `${lastDispatchFailurePauseAfterUsed}@${lastDispatchFailureWindowMsUsed}ms`
+        : "n/a";
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms orphanPauseAfter=${longRunIntentQueueConfig.orphanFailurePauseAfter}@${longRunIntentQueueConfig.orphanFailureWindowMs}ms failClass=${failClass} failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms orphanPauseAfter=${longRunIntentQueueConfig.orphanFailurePauseAfter}@${longRunIntentQueueConfig.orphanFailureWindowMs}ms failClass=${failClass} failPolicy=${failPolicy} failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]

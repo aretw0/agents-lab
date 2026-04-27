@@ -5154,6 +5154,15 @@
       "method": "test",
       "timestamp": "2026-04-26T12:13:00Z",
       "evidence": "Slices 86-105: policy orphan ganhou janela configurável `longRunIntentQueue.orphanFailureWindowMs` (default 120000ms, clamp [1000..600000]) com wiring em runtime spec/snapshot/help e aplicação efetiva no tracking classificado + rapid redispatch block via `resolveDispatchFailureWindowMs`. `trackDispatchFailureFingerprint` passou a aceitar `windowMsOverride` e audits agora carregam `windowMsUsed` para auto-advance/auto-drain/board-fallback. Status `/lane-queue` exibe `orphanPauseAfter=<n>@<windowMs>`. Docs e smokes atualizadas para defaults, set/get snapshot e override de janela orphan. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; orçamento do orquestrador preservado (`guardrails-core.ts` 3589 linhas)."
+    },
+    {
+      "id": "VER-BUD-323",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T12:22:00Z",
+      "evidence": "Slices 106-125: observabilidade operacional refinada para política efetiva de falha. `guardrails-core` agora persiste `lastDispatchFailurePauseAfterUsed` + `lastDispatchFailureWindowMsUsed` e expõe `failPolicy=<pauseAfter@windowMs|n/a>` em `/lane-queue status`, alinhado à última decisão real do pause gate. Reset de tracking consolidado em helper único (`resetDispatchFailureTrackingState`) e aplicado em `markLoopHealthy`, `markLoopDispatch` e `session_start`, reduzindo risco de stale state. Documentação canônica atualizada para incluir `failPolicy` na leitura de status. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; orçamento do orquestrador preservado (`guardrails-core.ts` 3596 linhas, <=3600)."
     }
   ]
 }
