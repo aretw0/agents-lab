@@ -61,6 +61,16 @@ describe("guardrails-core intent bus", () => {
     const helperText = buildBoardExecuteNextIntentText("MS-LOCAL");
     expect(helperText).toContain("milestone=MS-LOCAL");
 
+    const parsedQuoted = parseGuardrailsIntent([
+      "[intent:board.execute-next]",
+      "version=1",
+      "mode=board-first",
+      "milestone=\"MS QUOTED\"",
+      "contract=no-auto-close+verification",
+    ].join("\n"));
+    expect(parsedQuoted.ok).toBe(true);
+    expect((parsedQuoted.intent as any)?.milestone).toBe("MS QUOTED");
+
     if (parsed.intent) {
       const lines = buildGuardrailsIntentSystemPrompt(parsed.intent);
       expect(lines.join("\n")).toContain("milestone=MS ALPHA");

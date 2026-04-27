@@ -37,7 +37,12 @@ function normalizeTaskId(value: unknown): string | undefined {
 
 function normalizeMilestoneLabel(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const normalized = value.replace(/\s+/g, " ").trim();
+  const trimmed = value.trim();
+  const unwrapped = trimmed.length >= 2
+    && ((trimmed.startsWith("\"") && trimmed.endsWith("\"")) || (trimmed.startsWith("'") && trimmed.endsWith("'")))
+    ? trimmed.slice(1, -1)
+    : trimmed;
+  const normalized = unwrapped.replace(/\s+/g, " ").trim();
   if (!normalized) return undefined;
   return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
 }

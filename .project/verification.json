@@ -5325,6 +5325,15 @@
       "method": "test",
       "timestamp": "2026-04-27T20:29:30Z",
       "evidence": "Runtime now honors milestone-scoped `board.execute-next` envelope during intent consumption. In `guardrails-core.ts`, intent handling derives `intentMilestone` from parsed envelope and evaluates board readiness with `{ sampleLimit: 1, milestone }`, ensuring next-task resolution is scoped at runtime. `guardrails-core-intent-runtime.ts` now propagates optional `milestone` in `board-execute-next-ready` and `board-execute-next-board-not-ready` decisions. Status/audit/notify include milestone context for operational evidence. Smoke coverage updated in `packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts` (scoped ready/not-ready decision assertions). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 84/84 passed."
+    },
+    {
+      "id": "VER-BUD-342",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T20:31:20Z",
+      "evidence": "Parser hardening for milestone-scoped intent envelopes: `normalizeMilestoneLabel` in `guardrails-core-intent-bus.ts` now strips outer single/double quotes before normalization so manual envelopes like `milestone=\"MS QUOTED\"` resolve correctly. Added smoke assertion in `guardrails-intent-bus.test.ts` for quoted milestone parse. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 39/39 passed."
     }
   ]
 }
