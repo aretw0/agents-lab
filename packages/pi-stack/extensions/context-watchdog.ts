@@ -150,10 +150,16 @@ export type ContextWatchAssessment = {
 	severity: "info" | "warning";
 };
 
+export type ContextWatchOperatorSignalReason =
+	| "reload-required"
+	| "handoff-refresh-required"
+	| "signal-noise-excessive"
+	| "compact-checkpoint-required";
+
 export type ContextWatchOperatorSignal = {
 	reloadRequired: boolean;
 	humanActionRequired: boolean;
-	reasons: string[];
+	reasons: ContextWatchOperatorSignalReason[];
 	noiseExcessive: boolean;
 };
 
@@ -274,14 +280,17 @@ export function resolveContextWatchOperatorSignal(input: {
 	reloadRequired?: boolean;
 	handoffManualRefreshRequired?: boolean;
 	signalNoiseExcessive?: boolean;
+	compactCheckpointPersistRequired?: boolean;
 }): ContextWatchOperatorSignal {
 	const reloadRequired = input.reloadRequired === true;
 	const handoffManualRefreshRequired = input.handoffManualRefreshRequired === true;
 	const signalNoiseExcessive = input.signalNoiseExcessive === true;
-	const reasons: string[] = [];
+	const compactCheckpointPersistRequired = input.compactCheckpointPersistRequired === true;
+	const reasons: ContextWatchOperatorSignalReason[] = [];
 	if (reloadRequired) reasons.push("reload-required");
 	if (handoffManualRefreshRequired) reasons.push("handoff-refresh-required");
 	if (signalNoiseExcessive) reasons.push("signal-noise-excessive");
+	if (compactCheckpointPersistRequired) reasons.push("compact-checkpoint-required");
 	return {
 		reloadRequired,
 		humanActionRequired: reasons.length > 0,
@@ -1079,6 +1088,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					getAnnouncementsInWindow(nowMs),
 					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 				),
+				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
 			});
 			const operatingCadence = resolveContextWatchOperatingCadence({
 				assessmentLevel: assessment.level,
@@ -1193,6 +1203,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					getAnnouncementsInWindow(nowMs),
 					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 				),
+				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
 			});
 			const operatingCadence = resolveContextWatchOperatingCadence({
 				assessmentLevel: assessment.level,

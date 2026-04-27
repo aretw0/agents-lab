@@ -657,6 +657,14 @@ describe("context-watchdog", () => {
 		expect(noisy.humanActionRequired).toBe(true);
 		expect(noisy.noiseExcessive).toBe(true);
 		expect(noisy.reasons).toContain("signal-noise-excessive");
+
+		const compactCheckpoint = resolveContextWatchOperatorSignal({
+			reloadRequired: false,
+			handoffManualRefreshRequired: false,
+			compactCheckpointPersistRequired: true,
+		});
+		expect(compactCheckpoint.humanActionRequired).toBe(true);
+		expect(compactCheckpoint.reasons).toContain("compact-checkpoint-required");
 	});
 
 	it("resolves operating cadence with post-resume recalibration signal", () => {

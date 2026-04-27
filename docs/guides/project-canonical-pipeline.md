@@ -366,7 +366,7 @@ Fluxo canônico:
 Objetivo: manter discoverability útil sem sobrecarregar o operador com sinais concorrentes.
 
 Ownership mínimo por classe:
-- **operator**: sinais de ação humana imediata (ex.: `reload-required`, `handoff-refresh-required`).
+- **operator**: sinais de ação humana imediata (ex.: `reload-required`, `handoff-refresh-required`, `compact-checkpoint-required`).
 - **runtime**: sinais técnicos de execução (ex.: bloat, budget, lane status).
 - **governance**: sinais de gate/promoção canônica (verification, readiness, preflight).
 - **discoverability**: dicas de uso (help/list/clear), sempre subordinadas ao contexto operacional ativo.
