@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -136,6 +137,89 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
     loopReady: { milestone: "MS-2" },
   }, "MS-1");
   assert.equal(mismatched.matches, false);
+});
+
+test("cli json output includes milestoneCheck when expect-milestone is provided", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        milestone: "MS-LOCAL",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+        milestone: "MS-LOCAL",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--json",
+      "--expect-milestone",
+      "MS-LOCAL",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 0);
+    const parsed = JSON.parse(cli.stdout);
+    assert.equal(parsed.milestoneCheck.expectedMilestone, "MS-LOCAL");
+    assert.equal(parsed.milestoneCheck.matches, true);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("cli strict mode fails on milestone mismatch", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-fail-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        milestone: "MS-A",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+        milestone: "MS-B",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--strict",
+      "--expect-milestone",
+      "MS-A",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 1);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
 });
 
 test("assessLoopEvidence reports stale when updatedAt exceeds freshness window", () => {

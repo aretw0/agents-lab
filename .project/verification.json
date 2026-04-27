@@ -5559,6 +5559,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:07:20Z",
       "evidence": "Runbook updated to include strict milestone-scope parity gate for loop evidence checker: `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone \"<label>\"` in `docs/guides/project-canonical-pipeline.md`. Validation sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
+    },
+    {
+      "id": "VER-BUD-368",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:09:20Z",
+      "evidence": "Added CLI-level regression coverage for milestone expectation gate in `scripts/test/guardrails-loop-evidence-check.test.mjs`: (1) spawn script with `--json --expect-milestone` and assert `milestoneCheck.matches=true`; (2) spawn with `--strict --expect-milestone` and mismatched evidence milestones asserting exit code 1. This validates subprocess contract end-to-end, not only helper logic. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 8/8; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }
