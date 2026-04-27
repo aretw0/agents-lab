@@ -63,6 +63,7 @@
     "ops:disk:cleanup:with-sessions": "node scripts/host-disk-guard.mjs --apply --include-sessions --session-age-days=14 --keep-recent-sessions=20",
     "ops:loop-evidence:check": "node scripts/guardrails-loop-evidence-check.mjs",
     "ops:loop-evidence:strict": "node scripts/guardrails-loop-evidence-check.mjs --strict --max-age-min=30",
+    "ops:loop-evidence:strict:default-milestone": "node scripts/guardrails-loop-evidence-check.mjs --strict --max-age-min=30 --expect-milestone=@default",
     "repo:complexity": "node scripts/repo-complexity-check.mjs --max-lines 1000",
     "repo:complexity:strict": "node scripts/repo-complexity-check.mjs --max-lines 1000 --strict",
     "test:ops:disk-guard": "node --test scripts/test/host-disk-guard.test.mjs",

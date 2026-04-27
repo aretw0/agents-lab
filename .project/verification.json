@@ -5622,6 +5622,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:25:20Z",
       "evidence": "Loop-evidence checker now supports `--expect-milestone @default` bridge to runtime config: resolves `defaultBoardMilestone` from `.pi/settings.json` using normalized label; exits with explicit error when @default is requested but unset. Added CLI E2E tests for success (`@default` resolved and `milestoneCheck.matches=true`) and failure (missing default emits error + exit 1), plus existing expectation/mismatch tests remain green. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 11/11; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
+    },
+    {
+      "id": "VER-BUD-375",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:26:20Z",
+      "evidence": "Operational ergonomics update: added npm shortcut `ops:loop-evidence:strict:default-milestone` in `package.json` to run strict loop-evidence gate with `--expect-milestone=@default`, reducing manual command surface for milestone-scoped unattended checks. Runbook (`project-canonical-pipeline.md`) updated with shortcut guidance. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 11/11; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }
