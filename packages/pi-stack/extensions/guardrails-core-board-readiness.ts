@@ -13,6 +13,7 @@ export interface BoardLongRunReadiness {
   reason: "ready" | "no-planned-tasks" | "no-eligible-planned-tasks";
   recommendation: string;
   selectionPolicy: string;
+  milestone?: string;
   nextTaskId?: string;
   totals: {
     tasks: number;
@@ -132,6 +133,7 @@ export function evaluateBoardLongRunReadiness(
       selectionPolicy: milestoneFilter
         ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
         : "planned+deps+priority(P0..Pn)+id",
+      milestone: milestoneFilter,
       nextTaskId: eligibleTaskIds[0],
       totals: counts,
       eligibleTaskIds: eligibleTaskIds.slice(0, sampleLimit),
@@ -150,6 +152,7 @@ export function evaluateBoardLongRunReadiness(
       selectionPolicy: milestoneFilter
         ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
         : "planned+deps+priority(P0..Pn)+id",
+      milestone: milestoneFilter,
       nextTaskId: undefined,
       totals: counts,
       eligibleTaskIds: [],
@@ -171,6 +174,7 @@ export function evaluateBoardLongRunReadiness(
     selectionPolicy: milestoneFilter
       ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
       : "planned+deps+priority(P0..Pn)+id",
+    milestone: milestoneFilter,
     nextTaskId: undefined,
     totals: counts,
     eligibleTaskIds: [],
@@ -178,18 +182,10 @@ export function evaluateBoardLongRunReadiness(
   };
 }
 
-function extractMilestoneScopeFromSelectionPolicy(selectionPolicy: string): string | undefined {
-  const match = String(selectionPolicy ?? "").match(/\bmilestone\((.+)\)$/i);
-  if (!match?.[1]) return undefined;
-  const scope = match[1].trim();
-  return scope.length > 0 ? scope : undefined;
-}
-
 export function buildBoardReadinessStatusLabel(readiness: BoardLongRunReadiness): string {
   const eligible = readiness.eligibleTaskIds.length;
   const nextTask = readiness.nextTaskId ? ` next=${readiness.nextTaskId}` : "";
-  const milestoneScope = extractMilestoneScopeFromSelectionPolicy(readiness.selectionPolicy);
-  const scope = milestoneScope ? ` scope=${milestoneScope}` : "";
+  const scope = readiness.milestone ? ` scope=${readiness.milestone}` : "";
   return `boardReady=${readiness.ready ? "yes" : "no"} eligible=${eligible} planned=${readiness.totals.planned} blockedDeps=${readiness.blockedByDependencies}${nextTask}${scope}`;
 }
 

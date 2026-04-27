@@ -5379,6 +5379,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:01:30Z",
       "evidence": "Default milestone scope wiring for unattended loop: `resolveLongRunIntentQueueConfig` now reads optional `defaultBoardMilestone` from `piStack.guardrailsCore.longRunIntentQueue.defaultBoardMilestone` with deterministic normalization. Lane parser normalization was unified for all milestone forms (`--milestone`, `--milestone=`, `-m`, `milestone=`). In orchestrator path, auto-drain/auto-advance readiness and `/lane-queue status` now evaluate board readiness with default milestone when configured; `/lane-queue board-next` uses explicit milestone override or falls back to default scope for readiness/audit/queue fallback semantics. Docs updated in canonical pipeline guide for default milestone unattended operation. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 78/78 passed; plus `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts` => 7/7 passed."
+    },
+    {
+      "id": "VER-BUD-348",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:04:20Z",
+      "evidence": "Readiness contract hardened with explicit milestone field. `BoardLongRunReadiness` now carries optional `milestone`, set by `evaluateBoardLongRunReadiness` on all return branches. `buildBoardReadinessStatusLabel` uses this structured field directly instead of parsing scope from `selectionPolicy`. Smoke updated in `guardrails-board-readiness.test.ts` for scoped/non-scoped milestone assertions and label behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 85/85 passed."
     }
   ]
 }

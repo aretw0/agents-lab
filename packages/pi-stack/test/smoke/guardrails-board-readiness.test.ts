@@ -33,6 +33,7 @@ describe("guardrails-core board readiness", () => {
       expect(readiness.eligibleTaskIds).toEqual(["TASK-B", "TASK-C"]);
       expect(readiness.nextTaskId).toBe("TASK-B");
       expect(readiness.selectionPolicy).toContain("planned+deps+priority");
+      expect(readiness.milestone).toBeUndefined();
       expect(buildBoardReadinessStatusLabel(readiness)).toContain("boardReady=yes");
       expect(buildBoardReadinessStatusLabel(readiness)).toContain("next=TASK-B");
       expect(buildBoardReadinessStatusLabel(readiness)).not.toContain("scope=");
@@ -72,6 +73,7 @@ describe("guardrails-core board readiness", () => {
       expect(alpha.ready).toBe(true);
       expect(alpha.eligibleTaskIds).toEqual(["TASK-B"]);
       expect(alpha.nextTaskId).toBe("TASK-B");
+      expect(alpha.milestone).toBe("MS-ALPHA");
       expect(alpha.selectionPolicy).toContain("milestone(MS-ALPHA)");
       expect(buildBoardReadinessStatusLabel(alpha)).toContain("scope=MS-ALPHA");
     } finally {
@@ -90,6 +92,7 @@ describe("guardrails-core board readiness", () => {
       const alpha = evaluateBoardLongRunReadiness(cwd, { milestone: "MS-ALPHA" });
       expect(alpha.ready).toBe(false);
       expect(alpha.reason).toBe("no-planned-tasks");
+      expect(alpha.milestone).toBe("MS-ALPHA");
       expect(alpha.selectionPolicy).toContain("milestone(MS-ALPHA)");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
