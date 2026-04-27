@@ -530,6 +530,8 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"\"").error).toBe("invalid-board-next-args");
+    expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS-OPEN").error).toBe("invalid-board-next-args");
+    expect(parseLaneQueueBoardNextMilestone("board-next -m='MS-CLOSE").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone oops").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");

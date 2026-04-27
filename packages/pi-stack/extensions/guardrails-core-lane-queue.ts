@@ -242,14 +242,15 @@ export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNe
   const rest = trimmed.replace(/^(?:board-next|status|evidence)\b/i, "").trim();
   if (!rest) return {};
 
-  const stripWrappedQuotes = (value: string): string => {
+  const stripWrappedQuotes = (value: string): string | undefined => {
     const text = value.trim();
-    if (
-      text.length >= 2
-      && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))
-    ) {
-      return text.slice(1, -1).trim();
-    }
+    if (!text) return text;
+    const first = text[0];
+    const last = text[text.length - 1];
+    const firstIsQuote = first === "\"" || first === "'";
+    const lastIsQuote = last === "\"" || last === "'";
+    if ((firstIsQuote || lastIsQuote) && !(firstIsQuote && lastIsQuote && first === last)) return undefined;
+    if (firstIsQuote) return text.slice(1, -1).trim();
     return text;
   };
 
@@ -262,31 +263,36 @@ export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNe
 
   const fromFlag = rest.match(/^--milestone\s+(.+)$/i)?.[1];
   if (fromFlag) {
-    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromFlag));
+    const unwrapped = stripWrappedQuotes(fromFlag);
+    const milestone = normalizeMilestoneLabel(unwrapped);
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromShortFlag = rest.match(/^-m\s+(.+)$/i)?.[1];
   if (fromShortFlag) {
-    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromShortFlag));
+    const unwrapped = stripWrappedQuotes(fromShortFlag);
+    const milestone = normalizeMilestoneLabel(unwrapped);
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromShortFlagInline = rest.match(/^-m=(.+)$/i)?.[1];
   if (fromShortFlagInline) {
-    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromShortFlagInline));
+    const unwrapped = stripWrappedQuotes(fromShortFlagInline);
+    const milestone = normalizeMilestoneLabel(unwrapped);
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromFlagInline = rest.match(/^--milestone=(.+)$/i)?.[1];
   if (fromFlagInline) {
-    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromFlagInline));
+    const unwrapped = stripWrappedQuotes(fromFlagInline);
+    const milestone = normalizeMilestoneLabel(unwrapped);
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
   const fromInline = rest.match(/^milestone=(.+)$/i)?.[1];
   if (fromInline) {
-    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromInline));
+    const unwrapped = stripWrappedQuotes(fromInline);
+    const milestone = normalizeMilestoneLabel(unwrapped);
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
