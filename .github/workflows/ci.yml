@@ -83,6 +83,15 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-fund --no-audit
 
+      - name: Factory mode advisory (runtime/channel)
+        run: |
+          CHANNEL="direct-branch"
+          if [ "${{ github.event_name }}" = "pull_request" ] || [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            CHANNEL="pull-request"
+          fi
+          echo "factory-mode runtime=ci provider=github-actions channel=${CHANNEL}"
+          echo "fallback: if governance gates fail, execute locally with /delivery-mode and promote via reviewed PR"
+
       - name: Rodar smoke tests
         run: npx vitest run
 

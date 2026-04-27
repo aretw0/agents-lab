@@ -55,6 +55,13 @@ Para calibrar execução contínua entre máquina local, container e CI:
 - override explícito opcional: `PI_DELIVERY_CHANNEL=direct|pr|mr`;
 - quando houver paralelismo entre ambientes, manter escrita lock-aware+atômica para `.pi/settings.json` e `.project/handoff.json` (evita corrupção parcial/conflito de merge por arquivo truncado).
 
+#### GitHub Actions (modo fábrica guardado)
+
+- em `pull_request*`, tratar canal padrão como `pull-request` (promoção revisável);
+- em `push` para branch protegida, permitir `direct-branch` somente quando gates de governança/qualidade estiverem verdes;
+- logar no job um advisory curto (`runtime=ci provider=github-actions channel=...`) para trilha operacional;
+- fallback determinístico quando gate falhar: executar local/container com `/delivery-mode`, corrigir, e promover por PR revisado.
+
 ### Hatch progressivo (simple-first)
 
 Para primeiro contato de sessão/projeto, o hatch deve começar em trilha simples:
