@@ -595,6 +595,41 @@ describe("guardrails-core long-run intent queue", () => {
     }
   });
 
+  it("dedupes board.execute-next milestone envelopes with reordered fields", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-dedupe-next-ms-"));
+    try {
+      const firstText = [
+        "[intent:board.execute-next]",
+        "version=1",
+        "mode=board-first",
+        "milestone=MS-LOCAL",
+        "contract=no-auto-close+verification",
+      ].join("\n");
+      const secondText = [
+        "[intent:board.execute-next]",
+        "contract=no-auto-close+verification",
+        "milestone=MS-LOCAL",
+        "mode=board-first",
+        "version=1",
+      ].join("\n");
+
+      const first = enqueueDeferredIntent(cwd, firstText, "board-first-intent", 50, {
+        dedupeKey: firstText,
+        dedupeWindowMs: 60_000,
+      });
+      const second = enqueueDeferredIntent(cwd, secondText, "board-first-intent", 50, {
+        dedupeKey: secondText,
+        dedupeWindowMs: 60_000,
+      });
+
+      expect(first.deduped).toBe(false);
+      expect(second.deduped).toBe(true);
+      expect(listDeferredIntents(cwd)).toHaveLength(1);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("allows enqueue after dedupe window expires", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-dedupe-expire-"));
     try {

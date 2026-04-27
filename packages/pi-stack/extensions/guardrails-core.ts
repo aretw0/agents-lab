@@ -90,7 +90,7 @@ import {
   type LongRunProviderTransientRetryConfig,
 } from "./guardrails-core-provider-retry";
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
-import { buildBoardExecuteTaskIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
+import { buildBoardExecuteTaskIntent, buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardrails-core-behavior-routing";
 import { buildShellRoutingStatusLabel, buildShellRoutingSystemPrompt, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
@@ -3248,16 +3248,51 @@ export default function (pi: ExtensionAPI) {
           ].join("\n"), "warning");
           return;
         }
-        const intent = buildBoardExecuteTaskIntent(boardReadiness.nextTaskId);
+        const nextTaskId = boardReadiness.nextTaskId;
+        const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
+        if (activeLongRun) {
+          const queuedIntent = buildBoardExecuteNextIntent(parsedBoardNext.milestone);
+          const queuedText = encodeGuardrailsIntent(queuedIntent);
+          const queuedSummary = summarizeGuardrailsIntent(queuedIntent);
+          const queued = enqueueDeferredIntent(
+            ctx.cwd,
+            queuedText,
+            "board-first-intent",
+            longRunIntentQueueConfig.maxItems,
+            {
+              dedupeKey: queuedText,
+              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
+            },
+          );
+          appendAuditEntry(ctx, "guardrails-core.board-intent-queued", {
+            atIso: new Date().toISOString(),
+            itemId: queued.itemId,
+            taskId: nextTaskId,
+            queuePath: queued.queuePath,
+            queuedCount: queued.queuedCount,
+            selectionPolicy: boardReadiness.selectionPolicy,
+            milestone: parsedBoardNext.milestone,
+            intentType: queuedIntent.type,
+            intentVersion: queuedIntent.version,
+            intentSummary: queuedSummary,
+            deduped: queued.deduped,
+          });
+          updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
+          ctx.ui.notify(queued.deduped
+            ? `lane-queue: board-next intent já estava na fila (next=${nextTaskId}; total=${queued.queuedCount})`
+            : `lane-queue: board-next queued next=${nextTaskId} (total=${queued.queuedCount})`, "info");
+          return;
+        }
+        const intent = buildBoardExecuteTaskIntent(nextTaskId);
         if (!intent) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
             atIso: new Date().toISOString(),
             reason: "invalid-next-task-id",
-            taskId: boardReadiness.nextTaskId,
+            taskId: nextTaskId,
             selectionPolicy: boardReadiness.selectionPolicy,
           });
           ctx.ui.notify(
-            `lane-queue: board-next blocked (invalid next task id). fallback: run task manually ${boardReadiness.nextTaskId}`,
+            `lane-queue: board-next blocked (invalid next task id). fallback: run task manually ${nextTaskId}`,
             "warning",
           );
           return;
@@ -3265,41 +3300,6 @@ export default function (pi: ExtensionAPI) {
 
         const intentText = encodeGuardrailsIntent(intent);
         const intentSummary = summarizeGuardrailsIntent(intent);
-        const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-        if (activeLongRun) {
-          const queued = enqueueDeferredIntent(
-            ctx.cwd,
-            intentText,
-            "board-first-intent",
-            longRunIntentQueueConfig.maxItems,
-            {
-              dedupeKey: intentText,
-              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-            },
-          );
-          appendAuditEntry(ctx, "guardrails-core.board-intent-queued", {
-            atIso: new Date().toISOString(),
-            itemId: queued.itemId,
-            taskId: intent.taskId,
-            queuePath: queued.queuePath,
-            queuedCount: queued.queuedCount,
-            selectionPolicy: boardReadiness.selectionPolicy,
-            milestone: parsedBoardNext.milestone,
-            intentType: intent.type,
-            intentVersion: intent.version,
-            intentSummary,
-            deduped: queued.deduped,
-          });
-          updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-          ctx.ui.notify(
-            queued.deduped
-              ? `lane-queue: board-next ${intent.taskId} já estava na fila (total=${queued.queuedCount})`
-              : `lane-queue: board-next queued ${intent.taskId} (total=${queued.queuedCount})`,
-            "info",
-          );
-          return;
-        }
-
         appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch", {
           atIso: new Date().toISOString(),
           taskId: intent.taskId,
