@@ -5550,6 +5550,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:06:20Z",
       "evidence": "Operational checker hardening for milestone parity: `scripts/guardrails-loop-evidence-check.mjs` now supports `--expect-milestone <label>` and emits `milestoneCheck` (expected vs boardAuto/loopReady, matches boolean). In strict mode, milestone mismatch now fails with non-zero exit in addition to stale/not-ready conditions. Added exported helper `evaluateMilestoneScopeMatch` with unit coverage in `scripts/test/guardrails-loop-evidence-check.test.mjs`. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 6/6; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
+    },
+    {
+      "id": "VER-BUD-367",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:07:20Z",
+      "evidence": "Runbook updated to include strict milestone-scope parity gate for loop evidence checker: `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone \"<label>\"` in `docs/guides/project-canonical-pipeline.md`. Validation sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }
