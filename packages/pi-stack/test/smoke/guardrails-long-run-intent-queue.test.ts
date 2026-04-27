@@ -62,6 +62,7 @@ import {
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
+  resolveDispatchFailurePauseAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
   shouldBlockRapidSameTaskRedispatch,
@@ -1083,6 +1084,9 @@ describe("guardrails-core long-run intent queue", () => {
     expect(classifyLongRunDispatchFailure("HTTP 429 too many requests")).toBe("provider-transient");
     expect(classifyLongRunDispatchFailure("No tool call found for function call output with call_id call_abc123")).toBe("tool-output-orphan");
     expect(classifyLongRunDispatchFailure("unexpected parser error")).toBe("other");
+    expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3)).toBe(1);
+    expect(resolveDispatchFailurePauseAfter("provider-transient", 3)).toBe(3);
+    expect(resolveDispatchFailurePauseAfter("other", 0)).toBe(3);
 
     const cfg = {
       enabled: true,

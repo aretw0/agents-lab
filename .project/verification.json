@@ -5127,6 +5127,15 @@
       "method": "test",
       "timestamp": "2026-04-26T11:11:00Z",
       "evidence": "Slices 26-45: hardening para falhas de dispatch classe `tool-output-orphan` (assinatura `No tool call found for function call output ... call_id`). `guardrails-core-provider-retry` passou a classificar `tool-output-orphan` e expor `buildToolOutputOrphanRecoveryActionLines`. `guardrails-core` passou a registrar `lastDispatchFailureClass`, expor `failClass` no `/lane-queue status`, acoplar ações de recovery para órfão e aplicar pause threshold imediato (override=1) para essa classe; retries não são reagendados quando pause já foi acionado. Smokes incluem classificação e action-lines. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; budget guard OK (`guardrails-core.ts` <=3600)."
+    },
+    {
+      "id": "VER-BUD-320",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T11:17:00Z",
+      "evidence": "Slices 46-65: política de pause por classe foi consolidada via `resolveDispatchFailurePauseAfter` (orphan => 1) e aplicada nos fluxos de dispatch (board-auto-advance, auto-drain retry, board-next fallback). Rapid redispatch block passou a gerar fingerprint/streak com classe `tool-output-orphan`, registrando `errorFingerprint`, `pauseAfterUsed` e `pauseTriggered` em audit; notify redundante é suprimido quando pausa já disparou. Documentação atualizada para refletir pause imediato em orphan. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed; budget guard verde (`guardrails-core.ts` <=3600)."
     }
   ]
 }

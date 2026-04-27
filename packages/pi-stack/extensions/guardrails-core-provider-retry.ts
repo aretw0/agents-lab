@@ -25,6 +25,17 @@ const TOOL_OUTPUT_ORPHAN_ERROR_RE =
 
 export type DispatchFailureClass = "provider-transient" | "tool-output-orphan" | "other";
 
+export function resolveDispatchFailurePauseAfter(
+  errorClass: DispatchFailureClass,
+  configuredPauseAfter: number,
+): number {
+  const base = Number.isFinite(Number(configuredPauseAfter)) && Number(configuredPauseAfter) > 0
+    ? Math.max(1, Math.floor(Number(configuredPauseAfter)))
+    : 3;
+  if (errorClass === "tool-output-orphan") return 1;
+  return base;
+}
+
 function normalizeBoolean(value: unknown, fallback: boolean): boolean {
   if (typeof value !== "boolean") return fallback;
   return value;

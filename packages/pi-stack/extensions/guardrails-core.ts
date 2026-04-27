@@ -81,6 +81,7 @@ import {
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
+  resolveDispatchFailurePauseAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
   type DispatchFailureClass,
@@ -168,6 +169,7 @@ export {
   classifyLongRunDispatchFailure,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
+  resolveDispatchFailurePauseAfter,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
 } from "./guardrails-core-provider-retry";
@@ -1935,6 +1937,11 @@ export default function (pi: ExtensionAPI) {
     return { fingerprint: next.fingerprint, streak: next.streak, pauseTriggered, errorClass, pauseAfterUsed };
   }
 
+  function trackClassifiedDispatchFailure(ctx: ExtensionContext, reason: string, errorText: string) {
+    const errorClass = classifyLongRunDispatchFailure(errorText);
+    return trackDispatchFailureFingerprint(ctx, reason, errorText, { errorClass, pauseAfterOverride: resolveDispatchFailurePauseAfter(errorClass, longRunIntentQueueConfig.identicalFailurePauseAfter) });
+  }
+
   function refreshLoopLeaseOnActivity(
     ctx: ExtensionContext,
     reason: string,
@@ -2216,6 +2223,7 @@ export default function (pi: ExtensionAPI) {
         const sinceMs = nowMs - new Date(longRunLoopRuntimeState.lastDispatchAtIso!).getTime();
         const message = `task ${intent.taskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
         markLoopDegraded(ctx, `board-auto-rapid-redispatch:${intent.taskId}`, message);
+        const failureTrack = trackDispatchFailureFingerprint(ctx, `board-auto-rapid-redispatch:${intent.taskId}`, message, { errorClass: "tool-output-orphan", pauseAfterOverride: resolveDispatchFailurePauseAfter("tool-output-orphan", longRunIntentQueueConfig.identicalFailurePauseAfter) });
         appendAuditEntry(ctx, "guardrails-core.board-intent-rapid-redispatch-blocked", {
           atIso: new Date(nowMs).toISOString(),
           reason,
@@ -2223,13 +2231,15 @@ export default function (pi: ExtensionAPI) {
           sinceLastDispatchMs: sinceMs,
           rapidRedispatchWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
           consecutiveFailuresNow: longRunLoopRuntimeState.consecutiveDispatchFailures,
+          errorClass: failureTrack.errorClass,
+          errorFingerprint: failureTrack.fingerprint,
+          identicalFailureStreak: failureTrack.streak,
+          pauseAfterUsed: failureTrack.pauseAfterUsed,
+          pauseTriggered: failureTrack.pauseTriggered,
           runtimeCodeState,
         });
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-        ctx.ui.notify(
-          `lane-queue: rapid re-dispatch blocked for ${intent.taskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`,
-          "warning",
-        );
+        if (!failureTrack.pauseTriggered) ctx.ui.notify(`lane-queue: rapid re-dispatch blocked for ${intent.taskId} (${Math.round(sinceMs / 1000)}s since last dispatch) — possible silent execution failure. Investigate session state then run: npm run pi:loop:resume`, "warning");
         return false;
       }
 
@@ -2279,11 +2289,8 @@ export default function (pi: ExtensionAPI) {
           },
         );
         markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
-        const errorClass = classifyLongRunDispatchFailure(message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, "board-auto-advance-dispatch-failed", message, {
-          errorClass,
-          pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
-        });
+        const failureTrack = trackClassifiedDispatchFailure(ctx, "board-auto-advance-dispatch-failed", message);
+        const errorClass = failureTrack.errorClass;
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
           atIso: new Date().toISOString(),
           reason,
@@ -2304,9 +2311,7 @@ export default function (pi: ExtensionAPI) {
           loopMarkers,
           loopMarkersLabel,
         });
-        if (!failureTrack.pauseTriggered) {
-          scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
-        }
+        if (!failureTrack.pauseTriggered) scheduleAutoDrainDeferredIntent(ctx, "idle_timer", longRunIntentQueueConfig.autoDrainIdleStableMs);
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
         return false;
       }
@@ -2384,11 +2389,8 @@ export default function (pi: ExtensionAPI) {
           },
         );
         markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
-        const errorClass = classifyLongRunDispatchFailure(message);
-        const failureTrack = trackDispatchFailureFingerprint(ctx, `dispatch-failed:${reason}`, message, {
-          errorClass,
-          pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
-        });
+        const failureTrack = trackClassifiedDispatchFailure(ctx, `dispatch-failed:${reason}`, message);
+        const errorClass = failureTrack.errorClass;
         const retryDelayMs =
           errorClass === "provider-transient" && longRunProviderRetryConfig.enabled
             ? resolveProviderTransientRetryDelayMs(
@@ -2410,9 +2412,7 @@ export default function (pi: ExtensionAPI) {
           retryQueuedCount: retryQueued.queuedCount,
           retryDeduped: retryQueued.deduped,
         });
-        if (!failureTrack.pauseTriggered) {
-          scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
-        }
+        if (!failureTrack.pauseTriggered) scheduleAutoDrainDeferredIntent(ctx, "idle_timer", retryDelayMs);
         updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
         return false;
       }
@@ -3328,11 +3328,8 @@ export default function (pi: ExtensionAPI) {
             },
           );
           markLoopDegraded(ctx, "board-intent-dispatch-failed", message);
-          const errorClass = classifyLongRunDispatchFailure(message);
-          const failureTrack = trackDispatchFailureFingerprint(ctx, "board-intent-dispatch-failed", message, {
-            errorClass,
-            pauseAfterOverride: errorClass === "tool-output-orphan" ? 1 : undefined,
-          });
+          const failureTrack = trackClassifiedDispatchFailure(ctx, "board-intent-dispatch-failed", message);
+          const errorClass = failureTrack.errorClass;
           appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch-failed", {
             atIso: new Date().toISOString(),
             taskId: intent.taskId,
