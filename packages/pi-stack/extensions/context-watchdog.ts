@@ -929,6 +929,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffLastEventAgeSec = toAgeSec(handoffLastEventAgeMs);
 		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
 		const handoffPrep = resolveHandoffPrepDecision(assessment, config, handoffFreshness.label);
+		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
+			assessmentLevel: assessment.level,
+			handoffLastEventLevel: handoffLastEvent?.level,
+			handoffLastEventAgeMs,
+			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+		});
 		const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
 			handoffLastEventLevel: handoffLastEvent?.level,
 			handoffLastEventAgeMs,
@@ -996,6 +1002,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			antiParalysisNotifyCountInWindow,
 			antiParalysisMaxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
 			calmCloseRecommendation: calmClose.recommendation,
+			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
+			compactCheckpointPersistReason: compactCheckpointPersistence.reason,
 		};
 	};
 
@@ -1211,6 +1219,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`handoff-advice: ${autoCompact.handoffAdvice}`,
 					`handoff-refresh: mode=${autoCompact.handoffRefreshMode} manualRequired=${autoCompact.handoffManualRefreshRequired ? "yes" : "no"}`,
 					`handoff-prep: refreshOnTrigger=${autoCompact.handoffPrepRefreshOnTrigger ? "yes" : "no"} reason=${autoCompact.handoffPrepReason}`,
+					`compact-checkpoint-persist: recommended=${autoCompact.compactCheckpointPersistRecommended ? "yes" : "no"} reason=${autoCompact.compactCheckpointPersistReason}`,
 				].join("\n"),
 				assessment.severity,
 			);

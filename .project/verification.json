@@ -5685,6 +5685,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:02:30Z",
       "evidence": "Implemented hard-intent compact checkpoint persistence: new primitive `resolveCompactCheckpointPersistence` in `context-watchdog-handoff-events.ts` determines when compact-level sessions must force handoff write (`missing-compact-event` or `stale-compact-event`). `context-watchdog.ts` now applies this gate before compact steering and records audit entry `context-watchdog.compact-checkpoint-persist` when forced. Smoke coverage extended in `context-watchdog.test.ts` for all reason branches. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-382",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:05:05Z",
+      "evidence": "Added explicit operator diagnostics for compact checkpoint hard-intent in `context-watchdog.ts`: `currentAutoCompactState` now computes and exposes `compactCheckpointPersistRecommended` and `compactCheckpointPersistReason` (from `resolveCompactCheckpointPersistence`), and `/context-watch status` prints `compact-checkpoint-persist: recommended=<yes|no> reason=<...>`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }
