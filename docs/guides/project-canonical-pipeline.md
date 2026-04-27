@@ -193,6 +193,7 @@ Configuração (`.pi/settings.json`):
         "rapidRedispatchWindowMs": 300000,
         "dedupeWindowMs": 120000,
         "identicalFailurePauseAfter": 3,
+        "orphanFailurePauseAfter": 1,
         "identicalFailureWindowMs": 120000,
         "providerTransientRetry": {
           "enabled": true,
@@ -212,7 +213,7 @@ Notas operacionais:
 - para erro não transitório, mantém `dispatchFailureBlockAfter` normal;
 - status da lane continua mostrando `failStreak=n/<threshold>`, `identicalFail=n/<pauseAfter>@<windowMs>`, `failClass=<provider-transient|tool-output-orphan|other|n/a>` e `failSig=<fingerprint>` para decisão rápida do operador;
 - quando o retry transitório esgotar, o status deve sinalizar `nextDrain=stopped:retry-exhausted` com 3 ações curtas: diagnosticar providers (`/provider-readiness-matrix`), opcionalmente trocar (`/handoff --execute ...`) e retomar (`/lane-queue resume`);
-- quando `failClass=tool-output-orphan`, o loop aplica pausa imediata (threshold efetivo = 1) e o status sugere recuperação curta: `/reload` → `/lane-queue status` → `/lane-queue resume`.
+- quando `failClass=tool-output-orphan`, o loop aplica pausa no threshold configurado (`orphanFailurePauseAfter`, default=1) e o status sugere recuperação curta: `/reload` → `/lane-queue status` → `/lane-queue resume`.
 
 ### Configuração operacional sem editar JSON manualmente
 
@@ -227,6 +228,7 @@ Exemplos:
 - `/guardrails-config set longRunIntentQueue.maxItems 80`
 - `/guardrails-config set longRunIntentQueue.enabled true`
 - `/guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3`
+- `/guardrails-config set longRunIntentQueue.orphanFailurePauseAfter 1`
 - `/guardrails-config set longRunIntentQueue.identicalFailureWindowMs 120000`
 - `/guardrails-config set longRunIntentQueue.dedupeWindowMs 120000`
 - `/guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint`

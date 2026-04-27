@@ -89,6 +89,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.rapidRedispatchWindowMs).toBe(BOARD_RAPID_REDISPATCH_WINDOW_MS);
       expect(cfg.dedupeWindowMs).toBe(120_000);
       expect(cfg.identicalFailurePauseAfter).toBe(3);
+      expect(cfg.orphanFailurePauseAfter).toBe(1);
       expect(cfg.identicalFailureWindowMs).toBe(120_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
@@ -185,6 +186,19 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setIdenticalPause.ok).toBe(true);
 
+      const orphanPauseSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.orphanFailurePauseAfter");
+      expect(orphanPauseSpec).toBeDefined();
+      if (!orphanPauseSpec) return;
+      const orphanPauseOk = coerceGuardrailsRuntimeConfigValue("2", orphanPauseSpec);
+      expect(orphanPauseOk.ok).toBe(true);
+
+      const setOrphanPause = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.orphanFailurePauseAfter",
+        rawValue: "2",
+      });
+      expect(setOrphanPause.ok).toBe(true);
+
       const identicalWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.identicalFailureWindowMs");
       expect(identicalWindowSpec).toBeDefined();
       if (!identicalWindowSpec) return;
@@ -245,6 +259,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(contextSnapshot["longRunIntentQueue.rapidRedispatchWindowMs"]).toBe(45000);
       expect(contextSnapshot["longRunIntentQueue.dedupeWindowMs"]).toBe(50000);
       expect(contextSnapshot["longRunIntentQueue.identicalFailurePauseAfter"]).toBe(4);
+      expect(contextSnapshot["longRunIntentQueue.orphanFailurePauseAfter"]).toBe(2);
       expect(contextSnapshot["longRunIntentQueue.identicalFailureWindowMs"]).toBe(90000);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
@@ -425,6 +440,7 @@ describe("guardrails-core long-run intent queue", () => {
       rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
       dedupeWindowMs: 120_000,
       identicalFailurePauseAfter: 3,
+      orphanFailurePauseAfter: 1,
       identicalFailureWindowMs: 120_000,
     };
     expect(shouldQueueInputForLongRun("registrar isso", true, cfg)).toBe(true);
@@ -719,6 +735,7 @@ describe("guardrails-core long-run intent queue", () => {
                 rapidRedispatchWindowMs: 45_000,
                 dedupeWindowMs: 50_000,
                 identicalFailurePauseAfter: 6,
+                orphanFailurePauseAfter: 2,
                 identicalFailureWindowMs: 90_000,
                 providerTransientRetry: {
                   enabled: true,
@@ -745,6 +762,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.rapidRedispatchWindowMs).toBe(45_000);
       expect(cfg.dedupeWindowMs).toBe(50_000);
       expect(cfg.identicalFailurePauseAfter).toBe(6);
+      expect(cfg.orphanFailurePauseAfter).toBe(2);
       expect(cfg.identicalFailureWindowMs).toBe(90_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
@@ -1085,6 +1103,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(classifyLongRunDispatchFailure("No tool call found for function call output with call_id call_abc123")).toBe("tool-output-orphan");
     expect(classifyLongRunDispatchFailure("unexpected parser error")).toBe("other");
     expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3)).toBe(1);
+    expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3, 2)).toBe(2);
     expect(resolveDispatchFailurePauseAfter("provider-transient", 3)).toBe(3);
     expect(resolveDispatchFailurePauseAfter("other", 0)).toBe(3);
 
@@ -1209,6 +1228,7 @@ describe("guardrails-core long-run intent queue", () => {
       rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
       dedupeWindowMs: 120_000,
       identicalFailurePauseAfter: 3,
+      orphanFailurePauseAfter: 1,
       identicalFailureWindowMs: 120_000,
     };
 

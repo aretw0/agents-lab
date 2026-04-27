@@ -28,11 +28,15 @@ export type DispatchFailureClass = "provider-transient" | "tool-output-orphan" |
 export function resolveDispatchFailurePauseAfter(
   errorClass: DispatchFailureClass,
   configuredPauseAfter: number,
+  orphanPauseAfter = 1,
 ): number {
   const base = Number.isFinite(Number(configuredPauseAfter)) && Number(configuredPauseAfter) > 0
     ? Math.max(1, Math.floor(Number(configuredPauseAfter)))
     : 3;
-  if (errorClass === "tool-output-orphan") return 1;
+  const orphan = Number.isFinite(Number(orphanPauseAfter)) && Number(orphanPauseAfter) > 0
+    ? Math.max(1, Math.floor(Number(orphanPauseAfter)))
+    : 1;
+  if (errorClass === "tool-output-orphan") return orphan;
   return base;
 }
 
