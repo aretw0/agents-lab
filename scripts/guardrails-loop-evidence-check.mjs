@@ -12,6 +12,17 @@ function normalizeMilestone(value) {
   return text.length > 0 ? text.replace(/\s+/g, " ") : undefined;
 }
 
+function resolveDefaultMilestoneFromSettings(cwd) {
+  const settingsPath = path.join(cwd, ".pi", "settings.json");
+  if (!existsSync(settingsPath)) return undefined;
+  try {
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+    return normalizeMilestone(settings?.piStack?.guardrailsCore?.longRunIntentQueue?.defaultBoardMilestone);
+  } catch {
+    return undefined;
+  }
+}
+
 export function evidencePath(cwd = process.cwd()) {
   return path.join(cwd, ".pi", "guardrails-loop-evidence.json");
 }
@@ -198,7 +209,7 @@ function printHelp() {
     "  --cwd <path>          Workspace root (default: process.cwd)",
     "  --max-age-min <n>     Freshness window in minutes (default: 30)",
     "  --strict              Exit 1 if missing/stale/not-ready",
-    "  --expect-milestone <label>  Also require boardAuto+loopReady milestone match",
+    "  --expect-milestone <label|@default>  Also require boardAuto+loopReady milestone match",
     "  --json                JSON output",
     "  -h, --help",
   ].join("\n"));
@@ -246,7 +257,14 @@ function main() {
   }
 
   const report = assessLoopEvidence({ cwd: opts.cwd, maxAgeMin: opts.maxAgeMin });
-  const milestoneCheck = evaluateMilestoneScopeMatch(report, opts.expectMilestone);
+  const expectedMilestone = opts.expectMilestone === "@default"
+    ? resolveDefaultMilestoneFromSettings(opts.cwd)
+    : opts.expectMilestone;
+  if (opts.expectMilestone === "@default" && !expectedMilestone) {
+    console.error("Invalid --expect-milestone=@default: no defaultBoardMilestone found in .pi/settings.json");
+    process.exit(1);
+  }
+  const milestoneCheck = evaluateMilestoneScopeMatch(report, expectedMilestone);
   const output = milestoneCheck.expectedMilestone
     ? { ...report, milestoneCheck }
     : report;

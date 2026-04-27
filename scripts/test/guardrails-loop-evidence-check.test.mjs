@@ -189,6 +189,96 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
   }
 });
 
+test("cli resolves @default milestone expectation from settings", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-default-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "settings.json"), `${JSON.stringify({
+      piStack: {
+        guardrailsCore: {
+          longRunIntentQueue: {
+            defaultBoardMilestone: "MS   DEFAULT",
+          },
+        },
+      },
+    }, null, 2)}\n`, "utf8");
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        milestone: "MS DEFAULT",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+        milestone: "MS DEFAULT",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--json",
+      "--expect-milestone",
+      "@default",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 0);
+    const parsed = JSON.parse(cli.stdout);
+    assert.equal(parsed.milestoneCheck.expectedMilestone, "MS DEFAULT");
+    assert.equal(parsed.milestoneCheck.matches, true);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("cli fails when @default milestone expectation is requested but missing", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-default-missing-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--expect-milestone",
+      "@default",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 1);
+    assert.match(cli.stderr, /no defaultBoardMilestone/i);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("cli rejects empty expect-milestone values", () => {
   const cli = spawnSync(process.execPath, [
     join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),

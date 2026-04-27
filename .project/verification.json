@@ -5613,6 +5613,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:23:20Z",
       "evidence": "Parser primitive naming cleanup: introduced generic `parseLaneQueueMilestoneScope` in lane-queue module and retained backward-compatible alias `parseLaneQueueBoardNextMilestone` as wrapper. Guardrails core migrated to use generic parser for board-next/status/evidence paths; smoke adds explicit alias-equivalence assertion. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 82/82 passed."
+    },
+    {
+      "id": "VER-BUD-374",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:25:20Z",
+      "evidence": "Loop-evidence checker now supports `--expect-milestone @default` bridge to runtime config: resolves `defaultBoardMilestone` from `.pi/settings.json` using normalized label; exits with explicit error when @default is requested but unset. Added CLI E2E tests for success (`@default` resolved and `milestoneCheck.matches=true`) and failure (missing default emits error + exit 1), plus existing expectation/mismatch tests remain green. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 11/11; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }
