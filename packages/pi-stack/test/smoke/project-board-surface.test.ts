@@ -1130,7 +1130,17 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect((blocked.details as any)?.ok).toBe(false);
-      expect((blocked.details as any)?.reason).toBe("rationale-consistency-mismatch");
+      expect((blocked.details as any)?.reason).toBe("rationale-consistency-required-to-complete-task");
+
+      const optOut = await updateTool.execute(
+        "tc-board-update-consistency-optout",
+        { task_id: "TASK-TC1", status: "completed", require_rationale_consistency_on_complete: false },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((optOut.details as any)?.ok).toBe(true);
+      expect((optOut.details as any)?.task?.rationaleConsistency).toBe("mismatch");
 
       const resolved = await updateTool.execute(
         "tc-board-update-consistency-resolved",

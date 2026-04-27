@@ -1011,7 +1011,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const requireRationaleForSensitive = params?.require_rationale_for_sensitive === true;
     const requireRationaleConsistency = params?.require_rationale_consistency === true;
     const requireRationaleOnComplete = status === "completed" && params?.require_rationale_on_complete !== false;
-    const requireRationaleConsistencyOnComplete = params?.require_rationale_consistency_on_complete === true;
+    const requireRationaleConsistencyOnComplete = status === "completed" && params?.require_rationale_consistency_on_complete !== false;
     const syncRationaleToVerification = params?.sync_rationale_to_verification === true;
 
     if (!taskId) {

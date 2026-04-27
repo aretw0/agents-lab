@@ -432,7 +432,7 @@ Contratos úteis (rationale-aware):
 - `board_update ... require_rationale_for_sensitive=true` bloqueia update quando a task é sensível e continua sem rationale após aplicar payload (reason=`rationale-required-for-sensitive-task`).
 - `board_update ... require_rationale_consistency=true` bloqueia update quando kind do rationale em task e VER vinculada divergem (reason=`rationale-consistency-mismatch`).
 - ao marcar `status=completed`, `board_update` aplica por padrão gate de rationale para task sensível (reason=`rationale-required-to-complete-sensitive-task`); override explícito: `require_rationale_on_complete=false`.
-- `board_update ... require_rationale_consistency_on_complete=true` bloqueia fechamento quando existe mismatch task↔VER (reason=`rationale-consistency-required-to-complete-task`).
+- ao marcar `status=completed`, `board_update` também aplica por padrão gate de consistência task↔VER (reason=`rationale-consistency-required-to-complete-task`); override explícito: `require_rationale_consistency_on_complete=false`.
 - `board_update` retorna `verificationSync` (`updated|already-present|missing-task-verification|not-found|skipped`) para auditoria rápida da propagação em VER.
 - quando `sync_rationale_to_verification=true` sem payload de rationale, update falha com `sync-requires-rationale-payload` (evita sync ambíguo).
 

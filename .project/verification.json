@@ -5253,6 +5253,15 @@
       "method": "test",
       "timestamp": "2026-04-27T16:31:00Z",
       "evidence": "Read-path policy baseline for checkout cache assimilated: `packages/pi-stack/extensions/guardrails-core.ts` now allows outside reads under `.cache/checkouts` (while preserving sensitive-path blocks and prompt behavior for other outside paths). Unit coverage updated in `packages/pi-stack/test/read-guard.test.mjs` with Unix/Windows cache path assertions and decision-matrix expectation. Validation: `cmd.exe /c node --test packages/pi-stack/test/read-guard.test.mjs` => 24/24 pass; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 32/32 pass."
+    },
+    {
+      "id": "VER-BUD-334",
+      "target": "TASK-BUD-156",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T16:34:00Z",
+      "evidence": "Slices 211-225: `board_update` now enforces rationale-consistency gate by default on completion (`status=completed`) unless explicitly opted out via `require_rationale_consistency_on_complete=false`. This aligns completion-path behavior with the existing default rationale-on-complete gate. Tool smoke updated to expect completion-specific reason (`rationale-consistency-required-to-complete-task`) and to validate opt-out path preserving mismatch while still allowing closure when explicitly requested. Docs updated in `project-canonical-pipeline.md` to reflect default + opt-out semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 67/67 passed."
     }
   ]
 }
