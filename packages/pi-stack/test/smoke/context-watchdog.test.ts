@@ -26,6 +26,7 @@ import {
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
 	describeContextWatchDeterministicStopHint,
+	resolveContextWatchOperatorActionPlan,
 	resolveContextWatchSignalNoiseExcessive,
 	shouldEmitDeterministicStopSignal,
 	resolveContextWatchSteeringDispatch,
@@ -723,6 +724,39 @@ describe("context-watchdog", () => {
 			reason: "none",
 			action: "none",
 		})).toBeUndefined();
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: false, reason: "none", action: "none" },
+			operatorSignal: { reasons: [] },
+		})).toEqual({
+			blocking: false,
+			kind: "none",
+			summary: "no operator action required",
+		});
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: true, reason: "reload-required", action: "reload-and-resume" },
+			operatorSignal: { reasons: ["reload-required"] },
+		})).toEqual({
+			blocking: true,
+			kind: "reload",
+			summary: "reload required before continuing long-run",
+			commandHint: "/reload",
+		});
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: true, reason: "compact-checkpoint-required", action: "persist-checkpoint-and-compact" },
+			operatorSignal: { reasons: ["compact-checkpoint-required"] },
+		})).toEqual({
+			blocking: true,
+			kind: "checkpoint-compact",
+			summary: "persist checkpoint and compact before next slice",
+		});
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: false, reason: "none", action: "none" },
+			operatorSignal: { reasons: ["handoff-refresh-required"] },
+		})).toEqual({
+			blocking: false,
+			kind: "handoff-refresh",
+			summary: "refresh handoff checkpoint before manual resume",
+		});
 		expect(shouldEmitDeterministicStopSignal(false, 120_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 30_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 120_000, 0, 60_000)).toBe(true);
