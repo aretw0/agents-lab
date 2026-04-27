@@ -558,12 +558,15 @@ describe("guardrails-core long-run intent queue", () => {
   it("evaluates milestone parity for evidence diagnostics", () => {
     const matched = evaluateLaneEvidenceMilestoneParity("MS-LOCAL", "MS-LOCAL", "MS-LOCAL");
     expect(matched.matches).toBe(true);
+    expect(matched.reason).toBe("match");
 
     const mismatched = evaluateLaneEvidenceMilestoneParity("MS-LOCAL", "MS-A", "MS-B");
     expect(mismatched.matches).toBe(false);
+    expect(mismatched.reason).toBe("mismatch");
 
     const noExpected = evaluateLaneEvidenceMilestoneParity(undefined, "MS-A", "MS-B");
     expect(noExpected.matches).toBe(true);
+    expect(noExpected.reason).toBe("no-expectation");
   });
 
   it("resolves board-next milestone selection precedence", () => {

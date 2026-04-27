@@ -236,11 +236,14 @@ export interface LaneQueueBoardNextMilestoneParseResult {
 
 export type LaneQueueBoardNextMilestoneSource = "explicit" | "default" | "cleared" | "none";
 
+export type LaneEvidenceMilestoneParityReason = "no-expectation" | "match" | "mismatch";
+
 export interface LaneEvidenceMilestoneParity {
   expectedMilestone?: string;
   boardAutoMilestone?: string;
   loopReadyMilestone?: string;
   matches: boolean;
+  reason: LaneEvidenceMilestoneParityReason;
 }
 
 export function parseLaneQueueMilestoneScope(args: string): LaneQueueBoardNextMilestoneParseResult {
@@ -327,14 +330,16 @@ export function evaluateLaneEvidenceMilestoneParity(
   loopReadyMilestone: string | undefined,
 ): LaneEvidenceMilestoneParity {
   const expected = normalizeMilestoneLabel(expectedMilestone);
-  if (!expected) return { matches: true };
+  if (!expected) return { matches: true, reason: "no-expectation" };
   const boardAuto = normalizeMilestoneLabel(boardAutoMilestone);
   const loopReady = normalizeMilestoneLabel(loopReadyMilestone);
+  const matches = boardAuto === expected && loopReady === expected;
   return {
     expectedMilestone: expected,
     boardAutoMilestone: boardAuto,
     loopReadyMilestone: loopReady,
-    matches: boardAuto === expected && loopReady === expected,
+    matches,
+    reason: matches ? "match" : "mismatch",
   };
 }
 

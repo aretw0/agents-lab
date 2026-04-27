@@ -3375,7 +3375,7 @@ export default function (pi: ExtensionAPI) {
           `statusMilestone: ${evidenceMilestoneSelection.milestone ?? "n/a"}@${evidenceMilestoneSelection.source}`,
           `boardReadiness: ${buildBoardReadinessStatusLabel(boardReadiness)}`,
           `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
-          `scopeParity: expected=${milestoneParity.expectedMilestone ?? "n/a"} boardAuto=${milestoneParity.boardAutoMilestone ?? "n/a"} loopReady=${milestoneParity.loopReadyMilestone ?? "n/a"} matches=${milestoneParity.matches ? "yes" : "no"}`,
+          `scopeParity: expected=${milestoneParity.expectedMilestone ?? "n/a"} boardAuto=${milestoneParity.boardAutoMilestone ?? "n/a"} loopReady=${milestoneParity.loopReadyMilestone ?? "n/a"} matches=${milestoneParity.matches ? "yes" : "no"} reason=${milestoneParity.reason}`,
           boardAuto
             ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
             : "boardAuto: n/a",
