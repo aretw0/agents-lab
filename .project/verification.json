@@ -5739,6 +5739,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:18:10Z",
       "evidence": "Decoupled compact checkpoint hard-intent from simple agents. `resolveCompactCheckpointPersistence` now supports `enabled` flag and returns `reason=disabled` when off. `context-watchdog.ts` wires this flag to `config.autoResumeAfterCompact`, so forced compact-checkpoint persistence is long-run scoped only. Smoke extended for disabled branch in `context-watchdog.test.ts`, and runbook clarified scope (`autoResumeAfterCompact=yes`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-388",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:22:30Z",
+      "evidence": "Added deterministic stop signaling for context-watch hard-intent. `context-watchdog.ts` now exposes `resolveContextWatchDeterministicStopSignal` and wires it to runtime/status surfaces: passive runtime status key `context-watch-operator` plus `deterministic-stop` lines in `/context-watch status` and `context_watch_status` payload. Reasons are explicit (`reload-required`, `compact-checkpoint-required`) and action strings are deterministic. Smoke updated with reason/action assertions in `context-watchdog.test.ts`; runbook updated to mention deterministic-stop usage. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }

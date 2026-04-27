@@ -24,6 +24,7 @@ import {
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
+	resolveContextWatchDeterministicStopSignal,
 	resolveContextWatchSignalNoiseExcessive,
 	resolveContextWatchSteeringDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
@@ -680,6 +681,23 @@ describe("context-watchdog", () => {
 		});
 		expect(compactCheckpoint.humanActionRequired).toBe(true);
 		expect(compactCheckpoint.reasons).toContain("compact-checkpoint-required");
+
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "ok",
+			operatorSignal: { reasons: [] },
+		})).toEqual({ required: false, reason: "none", action: "none" });
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "warn",
+			operatorSignal: { reasons: ["reload-required"] },
+		})).toEqual({ required: true, reason: "reload-required", action: "reload-and-resume" });
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "compact",
+			operatorSignal: { reasons: ["compact-checkpoint-required"] },
+		})).toEqual({
+			required: true,
+			reason: "compact-checkpoint-required",
+			action: "persist-checkpoint-and-compact",
+		});
 	});
 
 	it("resolves operating cadence with post-resume recalibration signal", () => {
