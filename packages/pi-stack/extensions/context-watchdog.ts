@@ -908,6 +908,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				delivery: steeringDispatch.delivery,
 				notifyEnabled: config.notify,
 				persisted: Boolean(persistedPath),
+				compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
+				compactCheckpointPersistReason: compactCheckpointPersistence.reason,
 			},
 		);
 		if (steeringDispatch.shouldNotify) {

@@ -5712,6 +5712,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:10:25Z",
       "evidence": "Operator hard-intent escalation wired for compact checkpoint reliability. `context-watchdog.ts`: introduced typed `ContextWatchOperatorSignalReason` and extended `resolveContextWatchOperatorSignal` with `compactCheckpointPersistRequired`; both `/context-watch status` and `context_watch_status` now set it from `autoCompact.compactCheckpointPersistRecommended`, producing `compact-checkpoint-required` in operator reasons. Smoke updated in `context-watchdog.test.ts` and runbook ownership examples updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-385",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:11:45Z",
+      "evidence": "Extended passive steering audit payload in `context-watchdog.ts`: `context-watchdog.passive-steering-signal` now includes `compactCheckpointPersistRecommended` and `compactCheckpointPersistReason`, preserving compact hard-intent state in log evidence when signals are emitted. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }
