@@ -5496,6 +5496,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:48:20Z",
       "evidence": "Usage/help parity updated for lane milestone flags: lane command description, board-next usage warning, and `buildLaneQueueHelpLines` now explicitly include short inline `-m=<label>` (matching parser support already in place). Runbook updated to mention short-inline syntax in board-next examples. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-361",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:49:20Z",
+      "evidence": "Status-arg guardrail added: `/lane-queue status` now rejects invalid milestone argument tails by checking parser error and emitting explicit usage (`status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]`) instead of silently falling back to default scope. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
     }
   ]
 }

@@ -3483,7 +3483,12 @@ export default function (pi: ExtensionAPI) {
       const providerRetryPolicy = longRunProviderRetryConfig.enabled
         ? `${longRunProviderRetryConfig.maxAttempts}x@${Math.ceil(longRunProviderRetryConfig.baseDelayMs / 1000)}s→${Math.ceil(longRunProviderRetryConfig.maxDelayMs / 1000)}s`
         : "off";
-      const statusMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(parseLaneQueueBoardNextMilestone(rawArgs), longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: statusMilestoneSelection.milestone });
+      const statusMilestoneParsed = parseLaneQueueBoardNextMilestone(rawArgs);
+      if (statusMilestoneParsed.error) {
+        ctx.ui.notify("lane-queue: usage /lane-queue status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]", "warning");
+        return;
+      }
+      const statusMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(statusMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: statusMilestoneSelection.milestone });
       const boardReadinessLabel = buildBoardReadinessStatusLabel(boardReadiness);
       const autoAdvanceDedupeMs = Math.max(
         30_000,
