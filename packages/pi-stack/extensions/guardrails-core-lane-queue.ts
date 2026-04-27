@@ -238,8 +238,8 @@ export type LaneQueueBoardNextMilestoneSource = "explicit" | "default" | "cleare
 
 export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNextMilestoneParseResult {
   const trimmed = String(args ?? "").trim();
-  if (!/^(board-next|status)(\s+|$)/i.test(trimmed)) return {};
-  const rest = trimmed.replace(/^(?:board-next|status)\b/i, "").trim();
+  if (!/^(board-next|status|evidence)(\s+|$)/i.test(trimmed)) return {};
+  const rest = trimmed.replace(/^(?:board-next|status|evidence)\b/i, "").trim();
   if (!rest) return {};
 
   const stripWrappedQuotes = (value: string): string => {
@@ -307,9 +307,9 @@ export function resolveLaneQueueBoardNextMilestoneSelection(
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence]",
+    "usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
-    "examples: /lane-queue status --no-milestone · /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue board-next --no-milestone · /lane-queue evidence",
+    "examples: /lane-queue status --no-milestone · /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue board-next --no-milestone · /lane-queue evidence -m=MS-LOCAL",
   ];
 }
 

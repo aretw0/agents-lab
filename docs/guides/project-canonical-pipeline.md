@@ -160,6 +160,7 @@ Durante long-run:
 - para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification` (quando a lane já está ocupada, enfileira `board.execute-next` para reavaliar o next no momento do dispatch).
 - opcionalmente, usar escopo por milestone user-defined: `/lane-queue board-next --milestone "<label>"` (ou `-m "<label>"` / `-m=<label>`) para restringir seleção ao recorte atual sem fixar semântica de release no core.
 - para diagnóstico sem dispatch, `/lane-queue status` aceita o mesmo override (`--milestone|--milestone=|-m|-m=|--no-milestone`) e expõe `statusMilestone=<label|n/a>@<source>` (`explicit|default|cleared|none`).
+- `/lane-queue evidence` também aceita override de milestone com o mesmo contrato e inclui `boardReadiness` scoped + `boardHint` quando não há elegível no recorte informado.
 - para unattended contínuo focado em milestone, pode-se definir `piStack.guardrailsCore.longRunIntentQueue.defaultBoardMilestone` em `.pi/settings.json`; quando presente, status/auto-advance/board-next sem flag herdam esse escopo por default.
 - operação via comando: `/guardrails-config set longRunIntentQueue.defaultBoardMilestone "MS-LOCAL"` (limpeza: `unset|none|null`).
 - quando for necessário ignorar o default em uma execução pontual, usar `/lane-queue board-next --no-milestone` (ou `/lane-queue status --no-milestone` para apenas validar readiness sem disparo).

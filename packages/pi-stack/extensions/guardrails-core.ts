@@ -3135,7 +3135,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
@@ -3355,6 +3355,13 @@ export default function (pi: ExtensionAPI) {
         return;
       }
       if (sub === "evidence") {
+        const evidenceMilestoneParsed = parseLaneQueueBoardNextMilestone(rawArgs);
+        if (evidenceMilestoneParsed.error) {
+          ctx.ui.notify("lane-queue: usage /lane-queue evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]", "warning");
+          return;
+        }
+        const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone);
+        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
         const evidence = readLoopActivationEvidence(ctx.cwd);
         const loopReady = evidence.lastLoopReady;
         const boardAuto = evidence.lastBoardAutoAdvance;
@@ -3362,6 +3369,8 @@ export default function (pi: ExtensionAPI) {
         const lines = [
           "lane-queue: loop evidence",
           `updatedAt: ${evidence.updatedAtIso}`,
+          `statusMilestone: ${evidenceMilestoneSelection.milestone ?? "n/a"}@${evidenceMilestoneSelection.source}`,
+          `boardReadiness: ${buildBoardReadinessStatusLabel(boardReadiness)}`,
           `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
           boardAuto
             ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
@@ -3370,10 +3379,14 @@ export default function (pi: ExtensionAPI) {
             ? `loopReady: at=${loopReady.atIso}${loopReady.milestone ? ` milestone=${loopReady.milestone}` : ""} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
             : "loopReady: n/a",
           `criteria: ${readiness.criteria.join(" | ")}`,
+          ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
         ];
         appendAuditEntry(ctx, "guardrails-core.loop-evidence-status", {
           atIso: new Date().toISOString(),
           readyForTaskBud125: readiness.readyForTaskBud125,
+          statusMilestone: evidenceMilestoneSelection.milestone,
+          statusMilestoneSource: evidenceMilestoneSelection.source,
+          boardReadiness,
           boardAuto,
           loopReady,
           criteria: readiness.criteria,
