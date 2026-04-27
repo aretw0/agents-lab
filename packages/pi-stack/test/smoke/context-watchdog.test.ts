@@ -462,6 +462,27 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("[truncated:+");
 	});
 
+	it("derives focusTasks from next_actions when current_tasks are missing", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			next_actions: [
+				"Retomar lane principal TASK-BUD-119 depois do reload",
+				"Pendências de decisão humana permanecem: TASK-BUD-115, TASK-BUD-112",
+			],
+		} as any);
+		expect(prompt).toContain("focusTasks: TASK-BUD-119, TASK-BUD-115, TASK-BUD-112");
+	});
+
+	it("annotates omitted list items with explicit +N more marker", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			current_tasks: ["TASK-BUD-101", "TASK-BUD-102", "TASK-BUD-103", "TASK-BUD-104"],
+			blockers: ["b1", "b2", "b3"],
+			next_actions: ["n1", "n2", "n3"],
+		} as any);
+		expect(prompt).toContain("focusTasks: TASK-BUD-101, TASK-BUD-102, TASK-BUD-103 (+1 more)");
+		expect(prompt).toContain("blockers: b1 | b2 (+1 more)");
+		expect(prompt).toContain("next: n1 | n2 (+1 more)");
+	});
+
 	it("caps final prompt length with explicit global truncation marker", () => {
 		const prompt = buildAutoResumePromptFromHandoff({
 			current_tasks: ["TASK-BUD-150", "TASK-BUD-151", "TASK-BUD-152"],

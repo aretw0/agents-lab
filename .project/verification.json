@@ -5172,6 +5172,15 @@
       "method": "test",
       "timestamp": "2026-04-27T12:29:00Z",
       "evidence": "Auto-resume prompt truncation hardened for legibility: `packages/pi-stack/extensions/context-watchdog-handoff.ts` now preserves both head+tail when clipping long segments (`[snip] ... [truncated:+N chars]`) instead of head-only truncation, keeping actionable suffix context in `next:` lines. Added smoke coverage in `packages/pi-stack/test/smoke/context-watchdog.test.ts` for `[snip]` marker and tail-preservation scenario (`=> 38/38 passed`), while preserving explicit global truncation contract. Runbook updated in `docs/guides/project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 55/55 passed; plus focal continuity `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 99/99 passed."
+    },
+    {
+      "id": "VER-BUD-325",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T12:38:00Z",
+      "evidence": "Auto-resume prompt envelope hardened with deterministic continuity hints: (a) when `current_tasks` is empty, `focusTasks` is derived from `TASK-*` IDs found in `next_actions`/`blockers`/`context`; (b) per-list overflow is now explicit via `(+N more)` for tasks/blockers/next; (c) `next_actions` local truncation budget raised to 140 chars while preserving `[snip]` + `[truncated:+N chars]` markers. Files: `packages/pi-stack/extensions/context-watchdog-handoff.ts`, `packages/pi-stack/test/smoke/context-watchdog.test.ts`, `docs/guides/project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 57/57 passed; focal continuity `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 101/101 passed."
     }
   ]
 }

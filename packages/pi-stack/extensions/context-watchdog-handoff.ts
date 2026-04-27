@@ -172,6 +172,27 @@ function preparePromptCollection(config: PromptCollectionConfig): {
 	};
 }
 
+function extractTaskIdsFromTextLines(values: string[], limit = 3): string[] {
+	const ids: string[] = [];
+	const seen = new Set<string>();
+	for (const value of values) {
+		const matches = String(value ?? "").toUpperCase().match(/TASK-[A-Z0-9-]+/g) ?? [];
+		for (const id of matches) {
+			if (seen.has(id)) continue;
+			seen.add(id);
+			ids.push(id);
+			if (ids.length >= limit) return ids;
+		}
+	}
+	return ids;
+}
+
+function formatPromptList(values: string[], droppedByLimitCount: number, fallback: string, separator: string): string {
+	if (values.length <= 0) return fallback;
+	const base = values.join(separator);
+	return droppedByLimitCount > 0 ? `${base} (+${droppedByLimitCount} more)` : base;
+}
+
 export function buildAutoResumePromptEnvelopeFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	_maxFreshAgeMs = 30 * 60 * 1000,
@@ -181,8 +202,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
+	const rawCurrentTasks = normalizeStringArray(handoff.current_tasks);
+	const derivedTaskHints = rawCurrentTasks.length > 0
+		? []
+		: extractTaskIdsFromTextLines([
+			...normalizeStringArray(handoff.next_actions),
+			...normalizeStringArray(handoff.blockers),
+			typeof handoff.context === "string" ? handoff.context : "",
+		]);
 	const tasksPrepared = preparePromptCollection({
-		values: normalizeStringArray(handoff.current_tasks),
+		values: rawCurrentTasks.length > 0 ? rawCurrentTasks : derivedTaskHints,
 		maxChars: 48,
 		limit: 3,
 	});
@@ -194,16 +223,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	const nextPrepared = preparePromptCollection({
 		values: normalizeStringArray(handoff.next_actions)
 			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX)),
-		maxChars: 120,
+		maxChars: 140,
 		limit: 2,
 	});
 
 	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
-		`focusTasks: ${tasksPrepared.values.length > 0 ? tasksPrepared.values.join(", ") : "none-listed"}`,
-		`blockers: ${blockersPrepared.values.length > 0 ? blockersPrepared.values.join(" | ") : "none"}`,
+		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
+		`blockers: ${formatPromptList(blockersPrepared.values, blockersPrepared.diagnostics.droppedByLimitCount, "none", " | ")}`,
 		nextPrepared.values.length > 0
-			? `next: ${nextPrepared.values.join(" | ")}`
+			? `next: ${formatPromptList(nextPrepared.values, nextPrepared.diagnostics.droppedByLimitCount, "keep current lane intent", " | ")}`
 			: "next: keep current lane intent",
 		"execution: prioritize latest user steering/follow-up; if none, proceed with listed tasks.",
 	];
