@@ -533,6 +533,9 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone oops").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
+    expect(parseLaneQueueBoardNextMilestone("status --milestone MS-LOCAL").milestone).toBe("MS-LOCAL");
+    expect(parseLaneQueueBoardNextMilestone("status --no-milestone").clearMilestone).toBe(true);
+    expect(parseLaneQueueBoardNextMilestone("status --milestone \"\"").error).toBe("invalid-board-next-args");
   });
 
   it("resolves board-next milestone selection precedence", () => {
@@ -560,7 +563,7 @@ describe("guardrails-core long-run intent queue", () => {
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]");
+    expect(helpLines.join("\n")).toContain("/lane-queue [status [--milestone <label>|-m <label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]");
     expect(helpLines.join("\n")).toContain("lane-now:<mensagem>");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");
