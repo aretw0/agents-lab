@@ -33,6 +33,7 @@ import {
   extractForceNowText,
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
+  parseLaneQueueBoardNextMilestone,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
@@ -115,6 +116,7 @@ export {
   extractForceNowText,
   shouldQueueInputForLongRun,
   parseLaneQueueAddText,
+  parseLaneQueueBoardNextMilestone,
   buildLaneQueueHelpLines,
   buildLaneQueueStatusTips,
   resolveAutoDrainGateReason,
@@ -3134,17 +3136,13 @@ export default function (pi: ExtensionAPI) {
   });
 
   registerGuardrailsShellRouteSurface(pi, appendAuditEntry, () => shellRoutingProfile);
-
   registerGuardrailsDeliverySurface(pi, appendAuditEntry);
-
   registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
-
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
-
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume|evidence]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>]|pop|clear|pause|resume|evidence]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
@@ -3226,7 +3224,12 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (sub === "board-next") {
-        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5 });
+        const parsedBoardNext = parseLaneQueueBoardNextMilestone(rawArgs);
+        if (parsedBoardNext.error) {
+          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>]", "warning");
+          return;
+        }
+        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: parsedBoardNext.milestone });
         if (!boardReadiness.ready || !boardReadiness.nextTaskId) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
             atIso: new Date().toISOString(),
@@ -3234,17 +3237,14 @@ export default function (pi: ExtensionAPI) {
             recommendation: boardReadiness.recommendation,
             blockedByDependencies: boardReadiness.blockedByDependencies,
             planned: boardReadiness.totals.planned,
+            milestone: parsedBoardNext.milestone,
           });
-          ctx.ui.notify(
-            [
-              `lane-queue: board-next blocked (${boardReadiness.reason})`,
-              `boardHint: ${boardReadiness.recommendation}`,
-            ].join("\n"),
-            "warning",
-          );
+          ctx.ui.notify([
+            `lane-queue: board-next blocked (${boardReadiness.reason}${parsedBoardNext.milestone ? `; milestone=${parsedBoardNext.milestone}` : ""})`,
+            `boardHint: ${boardReadiness.recommendation}`,
+          ].join("\n"), "warning");
           return;
         }
-
         const intent = buildBoardExecuteTaskIntent(boardReadiness.nextTaskId);
         if (!intent) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
@@ -3263,7 +3263,6 @@ export default function (pi: ExtensionAPI) {
         const intentText = encodeGuardrailsIntent(intent);
         const intentSummary = summarizeGuardrailsIntent(intent);
         const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-
         if (activeLongRun) {
           const queued = enqueueDeferredIntent(
             ctx.cwd,
@@ -3282,6 +3281,7 @@ export default function (pi: ExtensionAPI) {
             queuePath: queued.queuePath,
             queuedCount: queued.queuedCount,
             selectionPolicy: boardReadiness.selectionPolicy,
+            milestone: parsedBoardNext.milestone,
             intentType: intent.type,
             intentVersion: intent.version,
             intentSummary,
@@ -3301,13 +3301,13 @@ export default function (pi: ExtensionAPI) {
           atIso: new Date().toISOString(),
           taskId: intent.taskId,
           selectionPolicy: boardReadiness.selectionPolicy,
+          milestone: parsedBoardNext.milestone,
           deliverAs: "followUp",
           intentType: intent.type,
           intentVersion: intent.version,
           intentSummary,
         });
         ctx.ui.notify(`lane-queue: board-next dispatch ${intent.taskId}`, "info");
-
         try {
           pi.sendUserMessage(intentText, { deliverAs: "followUp" });
           markLoopDispatch(ctx, `board-${intent.taskId}`);
@@ -3341,6 +3341,7 @@ export default function (pi: ExtensionAPI) {
             queuedCount: queued.queuedCount,
             deduped: queued.deduped,
             selectionPolicy: boardReadiness.selectionPolicy,
+            milestone: parsedBoardNext.milestone,
             intentType: intent.type,
             intentVersion: intent.version,
             intentSummary,
@@ -3352,10 +3353,8 @@ export default function (pi: ExtensionAPI) {
             "warning",
           );
         }
-
         return;
       }
-
       if (sub === "list") {
         const items = listDeferredIntents(ctx.cwd);
         if (items.length === 0) {

@@ -158,6 +158,7 @@ Durante long-run:
 - usar `lane-queue` apenas como trilha **opt-in** para deferimento cross-turn em janela idle;
 - quando `lane-queue` for usada, `/lane-queue` (status) deve orientar ações concretas com `queued>0` (`list`/`clear`) e `/lane-queue help` deve manter discoverability imediata;
 - para board-first unattended, usar `/lane-queue board-next`: seleciona deterministicamente a próxima task elegível (`planned + deps satisfeitas + prioridade [P0..Pn] + id`) e injeta intent canônico com contrato `no-auto-close + verification`.
+- opcionalmente, usar escopo por milestone user-defined: `/lane-queue board-next --milestone "<label>"` para restringir seleção ao recorte atual sem fixar semântica de release no core.
 - auto-advance só deve ocorrer em condição segura (`lane idle` + `queue empty` + `loop running/healthy` + `stopCondition=none` + board ready com `nextTaskId`), com dedupe de task e auditoria explícita.
 - para observação operacional, `/lane-queue status` deve expor `runtimeCode=<active|reload-required|unknown>`, `boardAutoGate=<reason>`, `boardAutoLast=<task@age|n/a>`, `evidenceBoardAuto=<task@age runtime emLoop|n/a>`, `evidenceLoopReady=<age runtime gate|n/a>` e marcadores `READY/ACTIVE_HERE/IN_LOOP` para diagnosticar por que o auto-advance não disparou (incluindo `dedupe-window` quando a mesma task foi disparada há pouco).
 - filas de intents canônicos (`board.execute-task`) devem aplicar dedupe por janela (`rapidRedispatchWindowMs`) para reduzir re-enqueue redundante após falha silenciosa em sessão compactada.

@@ -27,6 +27,7 @@ export interface ProjectTaskItem {
 	assigned_agent?: string;
 	verification?: string;
 	notes?: string;
+	milestone?: string;
 }
 
 export interface ProjectTasksBlock {

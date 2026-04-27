@@ -58,6 +58,42 @@ describe("guardrails-core board readiness", () => {
     }
   });
 
+  it("supports milestone-scoped readiness selection", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-board-milestone-ready-"));
+    try {
+      seedTasks(cwd, [
+        { id: "TASK-A", description: "base", status: "completed", milestone: "MS-ALPHA" },
+        { id: "TASK-B", description: "[P1] alpha", status: "planned", depends_on: ["TASK-A"], milestone: "MS-ALPHA" },
+        { id: "TASK-C", description: "[P0] beta", status: "planned", milestone: "MS-BETA" },
+      ]);
+
+      const alpha = evaluateBoardLongRunReadiness(cwd, { sampleLimit: 3, milestone: "MS-ALPHA" });
+      expect(alpha.ready).toBe(true);
+      expect(alpha.eligibleTaskIds).toEqual(["TASK-B"]);
+      expect(alpha.nextTaskId).toBe("TASK-B");
+      expect(alpha.selectionPolicy).toContain("milestone(MS-ALPHA)");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("returns no-planned-tasks when milestone scope has no planned tasks", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-board-milestone-empty-"));
+    try {
+      seedTasks(cwd, [
+        { id: "TASK-A", description: "alpha done", status: "completed", milestone: "MS-ALPHA" },
+        { id: "TASK-B", description: "beta planned", status: "planned", milestone: "MS-BETA" },
+      ]);
+
+      const alpha = evaluateBoardLongRunReadiness(cwd, { milestone: "MS-ALPHA" });
+      expect(alpha.ready).toBe(false);
+      expect(alpha.reason).toBe("no-planned-tasks");
+      expect(alpha.selectionPolicy).toContain("milestone(MS-ALPHA)");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("builds canonical board execute intent text", () => {
     const text = buildBoardExecuteTaskIntentText("TASK-BUD-125");
     expect(text).toContain("[intent:board.execute-task]");

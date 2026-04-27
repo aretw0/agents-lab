@@ -55,6 +55,15 @@ function getStatusCounts(tasks: ProjectTaskItem[]): BoardLongRunReadiness["total
   };
 }
 
+function normalizeMilestoneLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) return undefined;
+  return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
+}
+
 function resolvePriorityRank(task: ProjectTaskItem): number {
   const description = typeof task.description === "string" ? task.description : "";
   const match = description.match(/\[(P\d+)\]/i);
@@ -75,9 +84,10 @@ function compareEligibleTasks(a: ProjectTaskItem, b: ProjectTaskItem): number {
 
 export function evaluateBoardLongRunReadiness(
   cwd: string,
-  options?: { sampleLimit?: number },
+  options?: { sampleLimit?: number; milestone?: string },
 ): BoardLongRunReadiness {
   const sampleLimit = clampSampleLimit(options?.sampleLimit, 3);
+  const milestoneFilter = normalizeMilestoneLabel(options?.milestone);
   const tasks = readProjectTasksBlock(cwd).tasks.filter(
     (task) => normalizeTaskId(task.id) !== undefined,
   );
@@ -90,7 +100,11 @@ export function evaluateBoardLongRunReadiness(
       .filter((id): id is string => Boolean(id)),
   );
 
-  const planned = tasks.filter((t) => t.status === "planned");
+  const planned = tasks.filter((t) => {
+    if (t.status !== "planned") return false;
+    if (!milestoneFilter) return true;
+    return normalizeMilestoneLabel(t.milestone) === milestoneFilter;
+  });
   const eligible = planned
     .filter((task) => {
       const deps = normalizeDependsOn(task.depends_on);
@@ -112,8 +126,12 @@ export function evaluateBoardLongRunReadiness(
       ready: true,
       reason: "ready",
       recommendation:
-        "board ready: execute next planned task(s) with dependencies satisfied.",
-      selectionPolicy: "planned+deps+priority(P0..Pn)+id",
+        milestoneFilter
+          ? `board ready: execute next planned task(s) for milestone '${milestoneFilter}' with dependencies satisfied.`
+          : "board ready: execute next planned task(s) with dependencies satisfied.",
+      selectionPolicy: milestoneFilter
+        ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
+        : "planned+deps+priority(P0..Pn)+id",
       nextTaskId: eligibleTaskIds[0],
       totals: counts,
       eligibleTaskIds: eligibleTaskIds.slice(0, sampleLimit),
@@ -126,8 +144,12 @@ export function evaluateBoardLongRunReadiness(
       ready: false,
       reason: "no-planned-tasks",
       recommendation:
-        "board not ready: add/decompose planned tasks before unattended long-run.",
-      selectionPolicy: "planned+deps+priority(P0..Pn)+id",
+        milestoneFilter
+          ? `board not ready: add/decompose planned tasks for milestone '${milestoneFilter}' before unattended long-run.`
+          : "board not ready: add/decompose planned tasks before unattended long-run.",
+      selectionPolicy: milestoneFilter
+        ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
+        : "planned+deps+priority(P0..Pn)+id",
       nextTaskId: undefined,
       totals: counts,
       eligibleTaskIds: [],
@@ -140,9 +162,15 @@ export function evaluateBoardLongRunReadiness(
     reason: "no-eligible-planned-tasks",
     recommendation:
       blockedByDependencies > 0
-        ? "board not ready: unblock dependency chain or decompose next executable slice."
-        : "board not ready: decompose planned work into executable slices.",
-    selectionPolicy: "planned+deps+priority(P0..Pn)+id",
+        ? milestoneFilter
+          ? `board not ready: unblock dependency chain for milestone '${milestoneFilter}' or decompose next executable slice.`
+          : "board not ready: unblock dependency chain or decompose next executable slice."
+        : milestoneFilter
+          ? `board not ready: decompose planned work into executable slices for milestone '${milestoneFilter}'.`
+          : "board not ready: decompose planned work into executable slices.",
+    selectionPolicy: milestoneFilter
+      ? `planned+deps+priority(P0..Pn)+id+milestone(${milestoneFilter})`
+      : "planned+deps+priority(P0..Pn)+id",
     nextTaskId: undefined,
     totals: counts,
     eligibleTaskIds: [],

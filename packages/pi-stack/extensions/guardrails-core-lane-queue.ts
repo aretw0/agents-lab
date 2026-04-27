@@ -214,12 +214,44 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
+export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: string; error?: "invalid-board-next-args" } {
+  const trimmed = String(args ?? "").trim();
+  if (!/^board-next(\s+|$)/i.test(trimmed)) return {};
+  const rest = trimmed.replace(/^board-next\b/i, "").trim();
+  if (!rest) return {};
+
+  const stripWrappedQuotes = (value: string): string => {
+    const text = value.trim();
+    if (
+      text.length >= 2
+      && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))
+    ) {
+      return text.slice(1, -1).trim();
+    }
+    return text;
+  };
+
+  const fromFlag = rest.match(/^--milestone\s+(.+)$/i)?.[1];
+  if (fromFlag) {
+    const milestone = stripWrappedQuotes(fromFlag);
+    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+  }
+
+  const fromInline = rest.match(/^milestone=(.+)$/i)?.[1];
+  if (fromInline) {
+    const milestone = stripWrappedQuotes(fromInline);
+    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+  }
+
+  return { error: "invalid-board-next-args" };
+}
+
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|board-next|pop|clear|pause|resume|evidence]",
+    "usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>]|pop|clear|pause|resume|evidence]",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
-    "examples: /lane-queue list · /lane-queue board-next · /lane-queue evidence · /lane-queue add revisar isso depois",
+    "examples: /lane-queue list · /lane-queue board-next --milestone \"MS-LOCAL\" · /lane-queue evidence · /lane-queue add revisar isso depois",
   ];
 }
 
