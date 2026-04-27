@@ -229,6 +229,18 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setIdenticalWindow.ok).toBe(true);
 
+      const defaultMilestoneSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.defaultBoardMilestone");
+      expect(defaultMilestoneSpec).toBeDefined();
+      if (!defaultMilestoneSpec) return;
+      const defaultMilestoneOk = coerceGuardrailsRuntimeConfigValue("\"MS   LOCAL\"", defaultMilestoneSpec);
+      expect(defaultMilestoneOk.ok).toBe(true);
+      const setDefaultMilestone = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.defaultBoardMilestone",
+        rawValue: "\"MS   LOCAL\"",
+      });
+      expect(setDefaultMilestone.ok).toBe(true);
+
       const modelLevelSpec = resolveGuardrailsRuntimeConfigSpec("contextWatchdog.modelSteeringFromLevel");
       expect(modelLevelSpec).toBeDefined();
       if (!modelLevelSpec) return;
@@ -279,6 +291,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(contextSnapshot["longRunIntentQueue.orphanFailurePauseAfter"]).toBe(2);
       expect(contextSnapshot["longRunIntentQueue.identicalFailureWindowMs"]).toBe(90000);
       expect(contextSnapshot["longRunIntentQueue.orphanFailureWindowMs"]).toBe(70000);
+      expect(contextSnapshot["longRunIntentQueue.defaultBoardMilestone"]).toBe("MS LOCAL");
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.autoCompact"]).toBe(false);
@@ -490,12 +503,14 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next -m \"MS   SHORT\"").milestone).toBe("MS SHORT");
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
+    expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone").clearMilestone).toBe(true);
+    expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone oops").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
   });
 
   it("builds help/status discoverability hints for lane-queue", () => {
     const helpLines = buildLaneQueueHelpLines();
-    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>]|pop|clear|pause|resume|evidence]");
+    expect(helpLines.join("\n")).toContain("/lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]");
     expect(helpLines.join("\n")).toContain("lane-now:<mensagem>");
 
     const queuedTips = buildLaneQueueStatusTips(2).join("\n");

@@ -228,7 +228,11 @@ export function parseLaneQueueAddText(args: string): string | undefined {
   return text.length > 0 ? text : undefined;
 }
 
-export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: string; error?: "invalid-board-next-args" } {
+export function parseLaneQueueBoardNextMilestone(args: string): {
+  milestone?: string;
+  clearMilestone?: boolean;
+  error?: "invalid-board-next-args";
+} {
   const trimmed = String(args ?? "").trim();
   if (!/^board-next(\s+|$)/i.test(trimmed)) return {};
   const rest = trimmed.replace(/^board-next\b/i, "").trim();
@@ -244,6 +248,13 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
     }
     return text;
   };
+
+  if (/^--no-milestone$/i.test(rest)) {
+    return { clearMilestone: true };
+  }
+  if (/^--no-milestone\s+/i.test(rest)) {
+    return { error: "invalid-board-next-args" };
+  }
 
   const fromFlag = rest.match(/^--milestone\s+(.+)$/i)?.[1];
   if (fromFlag) {
@@ -275,9 +286,9 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
 export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
-    "usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>]|pop|clear|pause|resume|evidence]",
+    "usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
-    "examples: /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue evidence · /lane-queue add revisar isso depois",
+    "examples: /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue board-next --no-milestone · /lane-queue evidence",
   ];
 }
 

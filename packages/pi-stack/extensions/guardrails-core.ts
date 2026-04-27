@@ -870,16 +870,8 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
     reloadRequired: false,
     description: "Window used to aggregate tool-output-orphan dispatch failures.",
   },
-  {
-    key: "longRunIntentQueue.forceNowPrefix",
-    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "forceNowPrefix"],
-    type: "string",
-    minLength: 2,
-    maxLength: 40,
-    pattern: /^\S+$/,
-    reloadRequired: false,
-    description: "Immediate dispatch prefix (example: lane-now:).",
-  },
+  { key: "longRunIntentQueue.forceNowPrefix", path: ["piStack", "guardrailsCore", "longRunIntentQueue", "forceNowPrefix"], type: "string", minLength: 2, maxLength: 40, pattern: /^\S+$/, reloadRequired: false, description: "Immediate dispatch prefix (example: lane-now:)." },
+  { key: "longRunIntentQueue.defaultBoardMilestone", path: ["piStack", "guardrailsCore", "longRunIntentQueue", "defaultBoardMilestone"], type: "string", maxLength: 120, reloadRequired: false, description: "Default milestone scope for board readiness/board-next when none is passed." },
   {
     key: "pragmaticAutonomy.enabled",
     path: ["piStack", "guardrailsCore", "pragmaticAutonomy", "enabled"],
@@ -1160,6 +1152,7 @@ export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string,
     "longRunIntentQueue.identicalFailureWindowMs": queueCfg.identicalFailureWindowMs,
     "longRunIntentQueue.orphanFailureWindowMs": queueCfg.orphanFailureWindowMs,
     "longRunIntentQueue.forceNowPrefix": queueCfg.forceNowPrefix,
+    "longRunIntentQueue.defaultBoardMilestone": queueCfg.defaultBoardMilestone ?? "(unset)",
     "pragmaticAutonomy.enabled": autonomyCfg.enabled,
     "pragmaticAutonomy.noObviousQuestions": autonomyCfg.noObviousQuestions,
     "pragmaticAutonomy.maxAuditTextChars": autonomyCfg.maxAuditTextChars,
@@ -1196,6 +1189,7 @@ export function buildGuardrailsConfigHelpLines(): string[] {
     "  /guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3",
     "  /guardrails-config set longRunIntentQueue.orphanFailurePauseAfter 1",
     "  /guardrails-config set longRunIntentQueue.orphanFailureWindowMs 120000",
+    "  /guardrails-config set longRunIntentQueue.defaultBoardMilestone \"MS-LOCAL\"",
     "  /guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint",
     "  /guardrails-config set contextWatchdog.userNotifyFromLevel compact",
     "",
@@ -3144,7 +3138,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
 
   pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>]|pop|clear|pause|resume|evidence]",
+    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status|help|list|add <text>|board-next [--milestone <label>|-m <label>|--no-milestone]|pop|clear|pause|resume|evidence]",
     handler: async (args, ctx) => {
       const rawArgs = String(args ?? "").trim();
       const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
@@ -3228,10 +3222,12 @@ export default function (pi: ExtensionAPI) {
       if (sub === "board-next") {
         const parsedBoardNext = parseLaneQueueBoardNextMilestone(rawArgs);
         if (parsedBoardNext.error) {
-          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>]", "warning");
+          ctx.ui.notify("lane-queue: usage /lane-queue board-next [--milestone <label>|-m <label>|--no-milestone]", "warning");
           return;
         }
-        const boardNextMilestone = parsedBoardNext.milestone ?? longRunIntentQueueConfig.defaultBoardMilestone;
+        const boardNextMilestone = parsedBoardNext.clearMilestone
+          ? undefined
+          : parsedBoardNext.milestone ?? longRunIntentQueueConfig.defaultBoardMilestone;
         const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: boardNextMilestone });
         if (!boardReadiness.ready || !boardReadiness.nextTaskId) {
           appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
