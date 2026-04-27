@@ -186,7 +186,7 @@ function printTextReport(report) {
   console.log(`criteria: ${report.criteria.join(" | ")}`);
 
   if (report.boardAuto) {
-    console.log(`boardAuto: task=${report.boardAuto.taskId} runtime=${report.boardAuto.runtimeCodeState} emLoop=${report.boardAuto.emLoop ? "yes" : "no"} at=${report.boardAuto.atIso}`);
+    console.log(`boardAuto: task=${report.boardAuto.taskId}${report.boardAuto.milestone ? ` milestone=${report.boardAuto.milestone}` : ""} runtime=${report.boardAuto.runtimeCodeState} emLoop=${report.boardAuto.emLoop ? "yes" : "no"} at=${report.boardAuto.atIso}`);
   } else {
     console.log("boardAuto: n/a");
   }

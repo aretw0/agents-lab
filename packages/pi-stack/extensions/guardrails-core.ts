@@ -1500,6 +1500,7 @@ export interface LoopActivationEvidenceState {
   lastBoardAutoAdvance?: {
     atIso: string;
     taskId: string;
+    milestone?: string;
     runtimeCodeState: RuntimeCodeActivationState;
     markersLabel: string;
     emLoop: boolean;
@@ -1723,6 +1724,7 @@ export default function (pi: ExtensionAPI) {
   function recordBoardAutoAdvanceEvidence(
     ctx: ExtensionContext,
     taskId: string,
+    milestone: string | undefined,
     runtimeCodeState: RuntimeCodeActivationState,
     markersLabel: string,
     emLoop: boolean,
@@ -1732,6 +1734,7 @@ export default function (pi: ExtensionAPI) {
     evidence.lastBoardAutoAdvance = {
       atIso: evidence.updatedAtIso,
       taskId,
+      milestone,
       runtimeCodeState,
       markersLabel,
       emLoop,
@@ -2258,6 +2261,7 @@ export default function (pi: ExtensionAPI) {
         recordBoardAutoAdvanceEvidence(
           ctx,
           nextTaskId,
+          boardReadiness.milestone,
           runtimeCodeState,
           loopMarkersLabel,
           loopMarkers.emLoop,
@@ -3368,7 +3372,7 @@ export default function (pi: ExtensionAPI) {
           `updatedAt: ${evidence.updatedAtIso}`,
           `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
           boardAuto
-            ? `boardAuto: task=${boardAuto.taskId} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
+            ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
             : "boardAuto: n/a",
           loopReady
             ? `loopReady: at=${loopReady.atIso} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
@@ -3536,7 +3540,7 @@ export default function (pi: ExtensionAPI) {
         ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceBoardAuto.atIso)) / 1000))}s`
         : "n/a";
       const evidenceBoardAutoSummary = evidenceBoardAuto
-        ? `${evidenceBoardAuto.taskId}@${evidenceBoardAutoAge} runtime=${evidenceBoardAuto.runtimeCodeState} emLoop=${evidenceBoardAuto.emLoop ? "yes" : "no"}`
+        ? `${evidenceBoardAuto.taskId}${evidenceBoardAuto.milestone ? `[${evidenceBoardAuto.milestone}]` : ""}@${evidenceBoardAutoAge} runtime=${evidenceBoardAuto.runtimeCodeState} emLoop=${evidenceBoardAuto.emLoop ? "yes" : "no"}`
         : "n/a";
       const evidenceLoopReady = loopEvidence.lastLoopReady;
       const evidenceLoopReadyAge = evidenceLoopReady

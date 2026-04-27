@@ -56,6 +56,7 @@ test("assessLoopEvidence reports ready and fresh state", () => {
       lastBoardAutoAdvance: {
         atIso: "2026-04-23T19:59:30.000Z",
         taskId: "TASK-BUD-125",
+        milestone: "MS-LOCAL",
         runtimeCodeState: "active",
         markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
         emLoop: true,
@@ -78,6 +79,7 @@ test("assessLoopEvidence reports ready and fresh state", () => {
     assert.equal(report.status, "ok");
     assert.equal(report.stale, false);
     assert.equal(report.readyForTaskBud125, true);
+    assert.equal(report.boardAuto?.milestone, "MS-LOCAL");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
