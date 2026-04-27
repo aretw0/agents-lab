@@ -177,6 +177,118 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("updateProjectTaskBoard registra rationale canônico em nota", () => {
+    const cwd = seedWorkspace();
+    try {
+      const updated = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+        rationaleText: "desacoplar helper para reduzir risco de regressão",
+      });
+      expect(updated.ok).toBe(true);
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks?: Array<{ id?: string; notes?: string }>;
+      };
+      const taskA = Array.isArray(raw.tasks)
+        ? raw.tasks.find((t) => t?.id === "TASK-A")
+        : undefined;
+      expect(taskA?.notes).toContain("[rationale:refactor] desacoplar helper para reduzir risco de regressão");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard rejeita rationale parcial", () => {
+    const cwd = seedWorkspace();
+    try {
+      const missingText = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+      });
+      expect(missingText.ok).toBe(false);
+      expect(missingText.reason).toBe("missing-rationale-text");
+
+      const missingKind = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleText: "ajuste de segurança",
+      });
+      expect(missingKind.ok).toBe(false);
+      expect(missingKind.reason).toBe("missing-rationale-kind");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("queryProjectTasks filtra itens sensíveis sem rationale quando needsRationale=true", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-tasks-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          {
+            id: "TASK-R1",
+            description: "Refactor do roteador de shell",
+            status: "in-progress",
+            verification: "VER-R1",
+            files: ["packages/pi-stack/extensions/guardrails-core-shell-routing.ts"],
+          },
+          {
+            id: "TASK-R2",
+            description: "Refactor do parser",
+            status: "in-progress",
+            notes: "[rationale:refactor] reduzir acoplamento",
+          },
+          {
+            id: "TASK-R3",
+            description: "Atualizar teste legado",
+            status: "in-progress",
+            verification: "VER-R3",
+          },
+          {
+            id: "TASK-R4",
+            description: "Atualizar docs",
+            status: "in-progress",
+          },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-R1", target: "TASK-R1", status: "partial", method: "inspect", evidence: "refactor aplicado" },
+          { id: "VER-R3", target: "TASK-R3", status: "partial", method: "test", evidence: "rationale: estabilizar suite flaky" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const result = queryProjectTasks(cwd, { needsRationale: true, limit: 10 });
+      expect(result.filtered).toBe(1);
+      expect(result.rows[0]?.id).toBe("TASK-R1");
+      expect(result.rows[0]?.rationaleRequired).toBe(true);
+      expect(result.rows[0]?.hasRationale).toBe(false);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("queryProjectVerification filtra evidências sensíveis sem rationale", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-ver-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({ tasks: [] }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-X1", target: "TASK-X1", status: "partial", method: "inspect", evidence: "refactor aplicado sem detalhe" },
+          { id: "VER-X2", target: "TASK-X2", status: "partial", method: "test", evidence: "[rationale:test-change] reduzir flakiness no smoke" },
+          { id: "VER-X3", target: "TASK-X3", status: "partial", method: "inspect", evidence: "docs atualizados" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const result = queryProjectVerification(cwd, { needsRationale: true, limit: 10 });
+      expect(result.filtered).toBe(1);
+      expect(result.rows[0]?.id).toBe("VER-X1");
+      expect(result.rows[0]?.hasRationale).toBe(false);
+      expect(result.rows[0]?.rationaleRequired).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_query tool uses params and ctx.cwd (no implicit process cwd)", async () => {
     const cwd = seedWorkspace();
     try {
@@ -208,7 +320,12 @@ describe("project-board-surface", () => {
 
       const result = await updateTool.execute(
         "tc-board-update",
-        { task_id: "TASK-B", status: "in-progress" },
+        {
+          task_id: "TASK-B",
+          status: "in-progress",
+          rationale_kind: "refactor",
+          rationale_text: "garantir motivo comunicável no ticket",
+        },
         undefined as unknown as AbortSignal,
         () => {},
         { cwd },
@@ -217,6 +334,45 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.ok).toBe(true);
       const check = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
       expect(check.rows.some((row) => row.id === "TASK-B")).toBe(true);
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks?: Array<{ id?: string; notes?: string }>;
+      };
+      const taskB = Array.isArray(raw.tasks)
+        ? raw.tasks.find((t) => t?.id === "TASK-B")
+        : undefined;
+      expect(taskB?.notes).toContain("[rationale:refactor] garantir motivo comunicável no ticket");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_query supports needs_rationale filter for tasks", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-query-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-Q1", description: "Refactor crítico", status: "in-progress" },
+          { id: "TASK-Q2", description: "Refactor com motivo", status: "in-progress", notes: "[rationale:refactor] reduzir risco" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query-rationale",
+        { entity: "tasks", needs_rationale: true, limit: 10 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.filtered).toBe(1);
+      expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-Q1");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -244,7 +400,7 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("registers typed board tool schemas for limit and max_note_lines", () => {
+  it("registers typed board tool schemas for rationale-aware params", () => {
     const pi = makeMockPi();
     projectBoardSurfaceExtension(pi);
 
@@ -253,6 +409,7 @@ describe("project-board-surface", () => {
     );
     const queryTool = queryToolCall?.[0] as any;
     expect(queryTool?.parameters?.properties?.limit?.type).toBe("integer");
+    expect(queryTool?.parameters?.properties?.needs_rationale?.type).toBe("boolean");
 
     const updateToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
       ([tool]) => tool?.name === "board_update",
@@ -260,6 +417,30 @@ describe("project-board-surface", () => {
     const updateTool = updateToolCall?.[0] as any;
     expect(updateTool?.parameters?.properties?.task_id?.minLength).toBe(1);
     expect(updateTool?.parameters?.properties?.max_note_lines?.type).toBe("integer");
+    expect(updateTool?.parameters?.properties?.rationale_kind).toBeDefined();
+    expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
+  });
+
+  it("board_update returns explicit error for partial rationale payload", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update-rationale-partial",
+        { task_id: "TASK-A", rationale_kind: "refactor" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(false);
+      expect((result.details as any)?.reason).toBe("missing-rationale-text");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 
   it("board_update returns explicit error when task_id is missing", async () => {
