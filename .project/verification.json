@@ -5640,6 +5640,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:30:20Z",
       "evidence": "Added milestone scope parity signal to lane evidence diagnostics. New primitive `evaluateLaneEvidenceMilestoneParity` in lane-queue module computes expected/boardAuto/loopReady normalized match state; core evidence output now includes `scopeParity: expected=... boardAuto=... loopReady=... matches=yes|no` and audit payload captures `milestoneParity`. Smoke coverage added in `guardrails-long-run-intent-queue.test.ts` for match, mismatch, and no-expected behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 83/83 passed."
+    },
+    {
+      "id": "VER-BUD-377",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:32:20Z",
+      "evidence": "Enhanced loop-evidence checker diagnostics with explicit reason codes for milestone parity. `evaluateMilestoneScopeMatch` now emits `reason` (`no-expectation|match|mismatch`), text output appends `reason=...`, and JSON contract includes the field. Tests updated to assert reason semantics in helper and CLI JSON flows. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 11/11; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30."
     }
   ]
 }

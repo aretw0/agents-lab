@@ -142,14 +142,16 @@ export function assessLoopEvidence({ cwd = process.cwd(), nowMs = Date.now(), ma
 
 export function evaluateMilestoneScopeMatch(report, expectedMilestone) {
   const expected = normalizeMilestone(expectedMilestone);
-  if (!expected) return { expectedMilestone: undefined, matches: true };
+  if (!expected) return { expectedMilestone: undefined, matches: true, reason: "no-expectation" };
   const boardAutoMilestone = normalizeMilestone(report?.boardAuto?.milestone);
   const loopReadyMilestone = normalizeMilestone(report?.loopReady?.milestone);
+  const matches = boardAutoMilestone === expected && loopReadyMilestone === expected;
   return {
     expectedMilestone: expected,
     boardAutoMilestone,
     loopReadyMilestone,
-    matches: boardAutoMilestone === expected && loopReadyMilestone === expected,
+    matches,
+    reason: matches ? "match" : "mismatch",
   };
 }
 
@@ -273,7 +275,7 @@ function main() {
   else {
     printTextReport(report);
     if (milestoneCheck.expectedMilestone) {
-      console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"}`);
+      console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"} reason=${milestoneCheck.reason}`);
     }
   }
 

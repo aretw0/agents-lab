@@ -131,12 +131,14 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
     loopReady: { milestone: "MS LOCAL" },
   }, "MS   LOCAL");
   assert.equal(matched.matches, true);
+  assert.equal(matched.reason, "match");
 
   const mismatched = evaluateMilestoneScopeMatch({
     boardAuto: { milestone: "MS-1" },
     loopReady: { milestone: "MS-2" },
   }, "MS-1");
   assert.equal(mismatched.matches, false);
+  assert.equal(mismatched.reason, "mismatch");
 
   const noExpectation = evaluateMilestoneScopeMatch({
     boardAuto: { milestone: "MS-A" },
@@ -144,6 +146,7 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
   }, undefined);
   assert.equal(noExpectation.matches, true);
   assert.equal(noExpectation.expectedMilestone, undefined);
+  assert.equal(noExpectation.reason, "no-expectation");
 });
 
 test("cli json output includes milestoneCheck when expect-milestone is provided", () => {
@@ -184,6 +187,7 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
     const parsed = JSON.parse(cli.stdout);
     assert.equal(parsed.milestoneCheck.expectedMilestone, "MS-LOCAL");
     assert.equal(parsed.milestoneCheck.matches, true);
+    assert.equal(parsed.milestoneCheck.reason, "match");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -236,6 +240,7 @@ test("cli resolves @default milestone expectation from settings", () => {
     const parsed = JSON.parse(cli.stdout);
     assert.equal(parsed.milestoneCheck.expectedMilestone, "MS DEFAULT");
     assert.equal(parsed.milestoneCheck.matches, true);
+    assert.equal(parsed.milestoneCheck.reason, "match");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
