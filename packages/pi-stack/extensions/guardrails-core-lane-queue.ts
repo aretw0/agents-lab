@@ -272,6 +272,12 @@ export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNe
     return milestone ? { milestone } : { error: "invalid-board-next-args" };
   }
 
+  const fromShortFlagInline = rest.match(/^-m=(.+)$/i)?.[1];
+  if (fromShortFlagInline) {
+    const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromShortFlagInline));
+    return milestone ? { milestone } : { error: "invalid-board-next-args" };
+  }
+
   const fromFlagInline = rest.match(/^--milestone=(.+)$/i)?.[1];
   if (fromFlagInline) {
     const milestone = normalizeMilestoneLabel(stripWrappedQuotes(fromFlagInline));

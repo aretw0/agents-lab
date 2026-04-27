@@ -525,6 +525,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next").milestone).toBeUndefined();
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone MS-LOCAL").milestone).toBe("MS-LOCAL");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone=MS-FLAG").milestone).toBe("MS-FLAG");
+    expect(parseLaneQueueBoardNextMilestone("board-next -m=MS-SHORT-FLAG").milestone).toBe("MS-SHORT-FLAG");
     expect(parseLaneQueueBoardNextMilestone("board-next -m \"MS   SHORT\"").milestone).toBe("MS SHORT");
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
