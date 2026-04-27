@@ -189,6 +189,17 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
   }
 });
 
+test("cli rejects empty expect-milestone values", () => {
+  const cli = spawnSync(process.execPath, [
+    join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+    "--expect-milestone",
+    "",
+  ], { encoding: "utf8" });
+
+  assert.equal(cli.status, 1);
+  assert.match(cli.stderr, /Invalid --expect-milestone/i);
+});
+
 test("cli strict mode fails on milestone mismatch", () => {
   const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-fail-"));
   try {

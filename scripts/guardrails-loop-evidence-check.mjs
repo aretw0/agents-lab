@@ -168,10 +168,15 @@ function parseArgs(argv) {
       i += 1;
       const n = Number(argv[i]);
       if (Number.isFinite(n) && n >= 0) out.maxAgeMin = n;
-    } else if (a.startsWith("--expect-milestone=")) out.expectMilestone = normalizeMilestone(a.slice("--expect-milestone=".length));
-    else if (a === "--expect-milestone") {
+    } else if (a.startsWith("--expect-milestone=")) {
+      const expected = normalizeMilestone(a.slice("--expect-milestone=".length));
+      if (!expected) throw new Error("Invalid --expect-milestone: expected non-empty label");
+      out.expectMilestone = expected;
+    } else if (a === "--expect-milestone") {
       i += 1;
-      out.expectMilestone = normalizeMilestone(argv[i]);
+      const expected = normalizeMilestone(argv[i]);
+      if (!expected) throw new Error("Invalid --expect-milestone: expected non-empty label");
+      out.expectMilestone = expected;
     } else {
       throw new Error(`Unknown argument: ${a}`);
     }
