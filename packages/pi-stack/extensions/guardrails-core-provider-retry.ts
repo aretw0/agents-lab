@@ -36,8 +36,21 @@ export function resolveDispatchFailurePauseAfter(
   const orphan = Number.isFinite(Number(orphanPauseAfter)) && Number(orphanPauseAfter) > 0
     ? Math.max(1, Math.floor(Number(orphanPauseAfter)))
     : 1;
-  if (errorClass === "tool-output-orphan") return orphan;
-  return base;
+  return errorClass === "tool-output-orphan" ? orphan : base;
+}
+
+export function resolveDispatchFailureWindowMs(
+  errorClass: DispatchFailureClass,
+  configuredWindowMs: number,
+  orphanWindowMs = configuredWindowMs,
+): number {
+  const base = Number.isFinite(Number(configuredWindowMs)) && Number(configuredWindowMs) >= 1_000
+    ? Math.max(1_000, Math.floor(Number(configuredWindowMs)))
+    : 120_000;
+  const orphan = Number.isFinite(Number(orphanWindowMs)) && Number(orphanWindowMs) >= 1_000
+    ? Math.max(1_000, Math.floor(Number(orphanWindowMs)))
+    : base;
+  return errorClass === "tool-output-orphan" ? orphan : base;
 }
 
 function normalizeBoolean(value: unknown, fallback: boolean): boolean {

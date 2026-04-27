@@ -63,6 +63,7 @@ import {
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveDispatchFailurePauseAfter,
+  resolveDispatchFailureWindowMs,
   resolveLongRunProviderTransientRetryConfig,
   resolveProviderTransientRetryDelayMs,
   shouldBlockRapidSameTaskRedispatch,
@@ -91,6 +92,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.identicalFailurePauseAfter).toBe(3);
       expect(cfg.orphanFailurePauseAfter).toBe(1);
       expect(cfg.identicalFailureWindowMs).toBe(120_000);
+      expect(cfg.orphanFailureWindowMs).toBe(120_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
@@ -199,6 +201,19 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setOrphanPause.ok).toBe(true);
 
+      const orphanWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.orphanFailureWindowMs");
+      expect(orphanWindowSpec).toBeDefined();
+      if (!orphanWindowSpec) return;
+      const orphanWindowOk = coerceGuardrailsRuntimeConfigValue("70000", orphanWindowSpec);
+      expect(orphanWindowOk.ok).toBe(true);
+
+      const setOrphanWindow = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.orphanFailureWindowMs",
+        rawValue: "70000",
+      });
+      expect(setOrphanWindow.ok).toBe(true);
+
       const identicalWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.identicalFailureWindowMs");
       expect(identicalWindowSpec).toBeDefined();
       if (!identicalWindowSpec) return;
@@ -261,6 +276,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(contextSnapshot["longRunIntentQueue.identicalFailurePauseAfter"]).toBe(4);
       expect(contextSnapshot["longRunIntentQueue.orphanFailurePauseAfter"]).toBe(2);
       expect(contextSnapshot["longRunIntentQueue.identicalFailureWindowMs"]).toBe(90000);
+      expect(contextSnapshot["longRunIntentQueue.orphanFailureWindowMs"]).toBe(70000);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.autoCompact"]).toBe(false);
@@ -442,6 +458,7 @@ describe("guardrails-core long-run intent queue", () => {
       identicalFailurePauseAfter: 3,
       orphanFailurePauseAfter: 1,
       identicalFailureWindowMs: 120_000,
+      orphanFailureWindowMs: 120_000,
     };
     expect(shouldQueueInputForLongRun("registrar isso", true, cfg)).toBe(true);
     expect(shouldQueueInputForLongRun("/status", true, cfg)).toBe(false);
@@ -737,6 +754,7 @@ describe("guardrails-core long-run intent queue", () => {
                 identicalFailurePauseAfter: 6,
                 orphanFailurePauseAfter: 2,
                 identicalFailureWindowMs: 90_000,
+                orphanFailureWindowMs: 70_000,
                 providerTransientRetry: {
                   enabled: true,
                   maxAttempts: 8,
@@ -764,6 +782,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.identicalFailurePauseAfter).toBe(6);
       expect(cfg.orphanFailurePauseAfter).toBe(2);
       expect(cfg.identicalFailureWindowMs).toBe(90_000);
+      expect(cfg.orphanFailureWindowMs).toBe(70_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
@@ -1106,6 +1125,8 @@ describe("guardrails-core long-run intent queue", () => {
     expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3, 2)).toBe(2);
     expect(resolveDispatchFailurePauseAfter("provider-transient", 3)).toBe(3);
     expect(resolveDispatchFailurePauseAfter("other", 0)).toBe(3);
+    expect(resolveDispatchFailureWindowMs("tool-output-orphan", 120_000, 70_000)).toBe(70_000);
+    expect(resolveDispatchFailureWindowMs("provider-transient", 120_000, 70_000)).toBe(120_000);
 
     const cfg = {
       enabled: true,
@@ -1230,6 +1251,7 @@ describe("guardrails-core long-run intent queue", () => {
       identicalFailurePauseAfter: 3,
       orphanFailurePauseAfter: 1,
       identicalFailureWindowMs: 120_000,
+      orphanFailureWindowMs: 120_000,
     };
 
     expect(estimateAutoDrainWaitMs(false, 1, 2_000, 0, 1_200, cfg)).toBe(0);

@@ -16,6 +16,7 @@ export interface LongRunIntentQueueConfig {
   identicalFailurePauseAfter: number;
   orphanFailurePauseAfter: number;
   identicalFailureWindowMs: number;
+  orphanFailureWindowMs: number;
 }
 
 export interface DeferredIntentItem {
@@ -69,6 +70,7 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   identicalFailurePauseAfter: 3,
   orphanFailurePauseAfter: 1,
   identicalFailureWindowMs: 2 * 60 * 1000,
+  orphanFailureWindowMs: 2 * 60 * 1000,
 };
 
 const DEFAULT_LONG_RUN_LOOP_LEASE_TTL_MS = 30_000;
@@ -127,6 +129,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const identicalFailurePauseAfterRaw = Number(cfg?.identicalFailurePauseAfter);
     const orphanFailurePauseAfterRaw = Number(cfg?.orphanFailurePauseAfter);
     const identicalFailureWindowMsRaw = Number(cfg?.identicalFailureWindowMs);
+    const orphanFailureWindowMsRaw = Number(cfg?.orphanFailureWindowMs);
     return {
       enabled: cfg?.enabled !== false,
       requireActiveLongRun: cfg?.requireActiveLongRun !== false,
@@ -170,6 +173,10 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
         Number.isFinite(identicalFailureWindowMsRaw) && identicalFailureWindowMsRaw >= 1_000
           ? Math.max(1_000, Math.min(10 * 60 * 1000, Math.floor(identicalFailureWindowMsRaw)))
           : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.identicalFailureWindowMs,
+      orphanFailureWindowMs:
+        Number.isFinite(orphanFailureWindowMsRaw) && orphanFailureWindowMsRaw >= 1_000
+          ? Math.max(1_000, Math.min(10 * 60 * 1000, Math.floor(orphanFailureWindowMsRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.orphanFailureWindowMs,
     };
   } catch {
     return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
