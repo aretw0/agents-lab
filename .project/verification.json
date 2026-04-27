@@ -5001,6 +5001,15 @@
       "method": "test",
       "timestamp": "2026-04-26T12:45:00Z",
       "evidence": "TASK-BUD-153 Slice 1: escrita de `.pi/settings.json` e `.project/handoff.json` endurecida com temp+rename (atomic best-effort) em `guardrails-core` e `context-watchdog-storage`, com fallback determinístico e cleanup de temp em erro. Smoke nova `context-watchdog-storage.test.ts` valida ausência de artefatos `.tmp-*` residuais + leitura consistente; regressão de runtime config preservada. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 70/70 passed."
+    },
+    {
+      "id": "VER-BUD-306",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T22:18:00Z",
+      "evidence": "TASK-BUD-153 slices 2/3: (a) lock-aware atomic writes para `.pi/settings.json` e `.project/handoff.json` com stale-reclaim/timeout determinístico em `context-watchdog-storage` + adoção centralizada no `guardrails-core`; (b) decisão multi-modo deterministicamente auditável via `guardrails-core-delivery-mode.ts` + tool `delivery_mode_plan` + comando `/delivery-mode` (native/container/ci e direct/PR/MR). Runbook atualizado com seção de operação multi-ambiente. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-delivery-mode.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 91/91 passed."
     }
   ]
 }

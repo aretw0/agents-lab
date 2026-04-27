@@ -46,6 +46,15 @@ Invariantes em ambos os modos:
 - verificação auditável (`verification`) antes de `completed`;
 - decisões/handoff curtos para retomada determinística.
 
+### Modo de entrega multi-ambiente (native/container/CI)
+
+Para calibrar execução contínua entre máquina local, container e CI:
+
+- usar `/delivery-mode` (ou tool `delivery_mode_plan`) para obter plano determinístico de runtime (`native|container|ci`) e canal de promoção (`direct-branch|pull-request|merge-request`);
+- sinais de CI nativos (`GITHUB_ACTIONS`, `GITLAB_CI`, `GITHUB_EVENT_NAME`, `CI_MERGE_REQUEST_IID`) têm precedência alta;
+- override explícito opcional: `PI_DELIVERY_CHANNEL=direct|pr|mr`;
+- quando houver paralelismo entre ambientes, manter escrita lock-aware+atômica para `.pi/settings.json` e `.project/handoff.json` (evita corrupção parcial/conflito de merge por arquivo truncado).
+
 ### Hatch progressivo (simple-first)
 
 Para primeiro contato de sessão/projeto, o hatch deve começar em trilha simples:

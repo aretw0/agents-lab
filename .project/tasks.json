@@ -3679,8 +3679,12 @@
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-delivery-mode.ts",
         "packages/pi-stack/extensions/project-board-surface.ts",
         "packages/pi-stack/extensions/context-watchdog-storage.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-storage.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-delivery-mode.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts",
         ".github/workflows/ci.yml",
         "docs/guides/project-canonical-pipeline.md"
       ],
@@ -3690,7 +3694,7 @@
         "Runbook define modo fábrica em GitHub Actions com guardrails de segurança e continuidade, incluindo fallback manual determinístico."
       ],
       "verification": "",
-      "notes": "Backlog por steering humano (2026-04-26): convergir para trabalho contínuo sem parada usando recursos atuais, endereçando blocker de merge/conflitos em board/settings entre ambientes e estratégias de entrega.\n[2026-04-26T00:00:00Z] Slice 1 (atomic settings/handoff writes): `guardrails-core.writeProjectPiSettings` e `context-watchdog-storage` (`writeProjectSettings`/`writeHandoffJson`) passaram a gravar JSON por temp+rename com fallback determinístico, reduzindo janela de corrupção/merge parcial em execuções concorrentes (nativo/container/factory). Smoke nova `context-watchdog-storage.test.ts` cobre ausência de artefato temp residual + leitura consistente pós-write."
+      "notes": "Backlog por steering humano (2026-04-26): convergir para trabalho contínuo sem parada usando recursos atuais, endereçando blocker de merge/conflitos em board/settings entre ambientes e estratégias de entrega.\n[2026-04-26T00:00:00Z] Slice 1 (atomic settings/handoff writes): `guardrails-core.writeProjectPiSettings` e `context-watchdog-storage` (`writeProjectSettings`/`writeHandoffJson`) passaram a gravar JSON por temp+rename com fallback determinístico, reduzindo janela de corrupção/merge parcial em execuções concorrentes (nativo/container/factory). Smoke nova `context-watchdog-storage.test.ts` cobre ausência de artefato temp residual + leitura consistente pós-write.\n[2026-04-26T00:00:00Z] Slice 2 (lock-aware settings/handoff): `context-watchdog-storage` evoluiu para lock síncrono com stale-reclaim/timeout determinístico (`settings.lock`/`handoff.lock`) envolvendo write atômico; `guardrails-core` passou a reutilizar writer centralizado para runtime-config, alinhando política de merge-safety entre comandos e watchdog. Smoke de storage ampliada para stale-lock recovery + active-lock timeout.\n[2026-04-26T00:00:00Z] Slice 3 (multi-mode decision trail): nova primitiva `guardrails-core-delivery-mode.ts` resolve plano determinístico de execução/promoção (`native|container|ci` + `direct-branch|pull-request|merge-request`) via sinais de ambiente/override (`PI_DELIVERY_CHANNEL`), com superfície `delivery_mode_plan` e comando `/delivery-mode` para operação native/container/CI sem heurística ad-hoc. Runbook atualizado com matriz de uso e guardrails de escrita lock-aware."
     },
     {
       "id": "TASK-BUD-154",
