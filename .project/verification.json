@@ -5046,6 +5046,15 @@
       "method": "inspect",
       "timestamp": "2026-04-26T08:26:00Z",
       "evidence": "TASK-BUD-155 slice 2: runbook canônico atualizado com seção `Budget de reinflação do orchestrator (guardrails-core.ts)` em `docs/guides/project-canonical-pipeline.md`, explicitando regra primitive-first, extração via `registerGuardrails*Surface` e preservação de contrato público com smoke focal."
+    },
+    {
+      "id": "VER-BUD-311",
+      "target": "TASK-BUD-155",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T08:28:00Z",
+      "evidence": "TASK-BUD-155 slice 3: smoke de budget do orchestrator adicionada (`guardrails-core-orchestrator-budget.test.ts`) com teto <=4300 linhas e assert de wiring de surfaces extraídas. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-state-reconcile-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 40/40 passed."
     }
   ]
 }
