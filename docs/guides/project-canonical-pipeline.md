@@ -562,4 +562,5 @@ Quando `context_watch_status.level=compact`, o fechamento deve ser calmo (sem p�
   1. finalizar o micro-slice em curso;
   2. evitar abrir novos blocos amplos;
   3. deixar a sessão em idle para o auto-compact disparar.
+- hard intent de continuidade: em `compact`, se `compact-checkpoint-persist: recommended=yes` (ver `/context-watch status`), persistir handoff antes de encerrar/parar mesmo quando houver cooldown de announce/checkpoint.
 - quando `deferCount` atingir o threshold repetidamente, tratar como sinal anti-paralisia: registrar recomendação auditável e priorizar checkpoint + idle compact em vez de manter adiamento indefinido.

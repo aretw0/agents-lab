@@ -5694,6 +5694,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:05:05Z",
       "evidence": "Added explicit operator diagnostics for compact checkpoint hard-intent in `context-watchdog.ts`: `currentAutoCompactState` now computes and exposes `compactCheckpointPersistRecommended` and `compactCheckpointPersistReason` (from `resolveCompactCheckpointPersistence`), and `/context-watch status` prints `compact-checkpoint-persist: recommended=<yes|no> reason=<...>`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-383",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:06:05Z",
+      "evidence": "Updated canonical runbook to codify compact hard-intent behavior: when `/context-watch status` shows `compact-checkpoint-persist: recommended=yes`, handoff must be persisted before pausing/stopping even under checkpoint announce cooldown. Location: `docs/guides/project-canonical-pipeline.md` (Pre-compact calm-close section). Validation sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30 passed."
     }
   ]
 }
