@@ -101,7 +101,6 @@ import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
-
 export {
   resolveBloatSmellConfig,
   shouldEmitBloatSmellSignal,
@@ -3297,7 +3296,6 @@ export default function (pi: ExtensionAPI) {
           );
           return;
         }
-
         const intentText = encodeGuardrailsIntent(intent);
         const intentSummary = summarizeGuardrailsIntent(intent);
         appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch", {
@@ -3317,13 +3315,16 @@ export default function (pi: ExtensionAPI) {
           scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
+          const fallbackIntent = buildBoardExecuteNextIntent(parsedBoardNext.milestone);
+          const fallbackText = encodeGuardrailsIntent(fallbackIntent);
+          const fallbackSummary = summarizeGuardrailsIntent(fallbackIntent);
           const queued = enqueueDeferredIntent(
             ctx.cwd,
-            intentText,
+            fallbackText,
             "board-first-intent-fallback",
             longRunIntentQueueConfig.maxItems,
             {
-              dedupeKey: intentText,
+              dedupeKey: fallbackText,
               dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
             },
           );
@@ -3345,14 +3346,14 @@ export default function (pi: ExtensionAPI) {
             deduped: queued.deduped,
             selectionPolicy: boardReadiness.selectionPolicy,
             milestone: parsedBoardNext.milestone,
-            intentType: intent.type,
-            intentVersion: intent.version,
-            intentSummary,
+            intentType: fallbackIntent.type,
+            intentVersion: fallbackIntent.version,
+            intentSummary: fallbackSummary,
           });
           ctx.ui.notify(
             queued.deduped
-              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para ${intent.taskId} (total=${queued.queuedCount})`
-              : `lane-queue: board-next dispatch failed (${message}). fallback queued ${intent.taskId} (total=${queued.queuedCount})`,
+              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para next=${intent.taskId} (total=${queued.queuedCount})`
+              : `lane-queue: board-next dispatch failed (${message}). fallback queued next=${intent.taskId} (total=${queued.queuedCount})`,
             "warning",
           );
         }
@@ -3371,7 +3372,6 @@ export default function (pi: ExtensionAPI) {
         ctx.ui.notify(lines.join("\n"), "info");
         return;
       }
-
       if (sub === "evidence") {
         const evidence = readLoopActivationEvidence(ctx.cwd);
         const loopReady = evidence.lastLoopReady;

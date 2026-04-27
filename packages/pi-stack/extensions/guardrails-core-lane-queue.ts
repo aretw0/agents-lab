@@ -237,6 +237,12 @@ export function parseLaneQueueBoardNextMilestone(args: string): { milestone?: st
     return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
   }
 
+  const fromFlagInline = rest.match(/^--milestone=(.+)$/i)?.[1];
+  if (fromFlagInline) {
+    const milestone = stripWrappedQuotes(fromFlagInline);
+    return milestone.length > 0 ? { milestone } : { error: "invalid-board-next-args" };
+  }
+
   const fromInline = rest.match(/^milestone=(.+)$/i)?.[1];
   if (fromInline) {
     const milestone = stripWrappedQuotes(fromInline);

@@ -485,6 +485,7 @@ describe("guardrails-core long-run intent queue", () => {
   it("parses optional board-next milestone scope", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next").milestone).toBeUndefined();
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone MS-LOCAL").milestone).toBe("MS-LOCAL");
+    expect(parseLaneQueueBoardNextMilestone("board-next --milestone=MS-FLAG").milestone).toBe("MS-FLAG");
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
