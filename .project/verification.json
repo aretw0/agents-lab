@@ -5217,6 +5217,15 @@
       "method": "test",
       "timestamp": "2026-04-27T15:38:00Z",
       "evidence": "Slices 131-180: board rationale pipeline hardened with consistency semantics and richer triage metadata. Added consistency model (`consistent|mismatch|single-source|none`) with per-row `rationaleConsistency` and aggregate `rationaleConsistencySummary` in both task/verification queries; exposed `rationale_consistency` filter in `board_query`. `board_update` gained `require_rationale_consistency` gate and now blocks mismatched task-note vs linked verification rationale (`rationale-consistency-mismatch`). Rationale extraction is now latest-tag-wins; task-note rationale append is idempotent (no duplicate rationale lines). Existing sync flow remains deterministic with explicit statuses and guardrails. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 64/64 passed; focal cross-surface pack => 153/153 passed."
+    },
+    {
+      "id": "VER-BUD-330",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T15:47:00Z",
+      "evidence": "Slices 126-135: canonicalized long-run dispatch failure fingerprinting for orphan tool output variants. `normalizeDispatchFailureFingerprint` now normalizes `call_id` and `tool_call_id` forms (with separator or whitespace) into stable token `call_id=call_*`, preserving existing `call_*` and `hex_*` masking. This prevents false streak resets when provider wording changes but failure semantics are identical. Smoke updates cover equivalence across variants and streak continuity with mixed formats. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed."
     }
   ]
 }

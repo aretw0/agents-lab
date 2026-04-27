@@ -432,6 +432,7 @@ export function normalizeDispatchFailureFingerprint(errorText: string, maxChars 
   const cap = Math.max(40, Math.floor(Number(maxChars) || 160));
   const normalized = String(errorText ?? "")
     .toLowerCase()
+    .replace(/\b(?:tool[_-]?)?call[_-]?id\b(?:\s*[:=]\s*|\s+)["']?[a-z0-9_-]{3,}["']?/g, "call_id=call_*")
     .replace(/call_[a-z0-9_-]+/g, "call_*")
     .replace(/[0-9a-f]{12,}/g, "hex_*")
     .replace(/\s+/g, " ")
