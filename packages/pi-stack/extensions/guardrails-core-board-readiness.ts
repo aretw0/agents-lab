@@ -178,10 +178,19 @@ export function evaluateBoardLongRunReadiness(
   };
 }
 
+function extractMilestoneScopeFromSelectionPolicy(selectionPolicy: string): string | undefined {
+  const match = String(selectionPolicy ?? "").match(/\bmilestone\((.+)\)$/i);
+  if (!match?.[1]) return undefined;
+  const scope = match[1].trim();
+  return scope.length > 0 ? scope : undefined;
+}
+
 export function buildBoardReadinessStatusLabel(readiness: BoardLongRunReadiness): string {
   const eligible = readiness.eligibleTaskIds.length;
   const nextTask = readiness.nextTaskId ? ` next=${readiness.nextTaskId}` : "";
-  return `boardReady=${readiness.ready ? "yes" : "no"} eligible=${eligible} planned=${readiness.totals.planned} blockedDeps=${readiness.blockedByDependencies}${nextTask}`;
+  const milestoneScope = extractMilestoneScopeFromSelectionPolicy(readiness.selectionPolicy);
+  const scope = milestoneScope ? ` scope=${milestoneScope}` : "";
+  return `boardReady=${readiness.ready ? "yes" : "no"} eligible=${eligible} planned=${readiness.totals.planned} blockedDeps=${readiness.blockedByDependencies}${nextTask}${scope}`;
 }
 
 export function buildBoardExecuteTaskIntentText(taskId: string): string {

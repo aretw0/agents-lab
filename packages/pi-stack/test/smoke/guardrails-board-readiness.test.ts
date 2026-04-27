@@ -35,6 +35,7 @@ describe("guardrails-core board readiness", () => {
       expect(readiness.selectionPolicy).toContain("planned+deps+priority");
       expect(buildBoardReadinessStatusLabel(readiness)).toContain("boardReady=yes");
       expect(buildBoardReadinessStatusLabel(readiness)).toContain("next=TASK-B");
+      expect(buildBoardReadinessStatusLabel(readiness)).not.toContain("scope=");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -72,6 +73,7 @@ describe("guardrails-core board readiness", () => {
       expect(alpha.eligibleTaskIds).toEqual(["TASK-B"]);
       expect(alpha.nextTaskId).toBe("TASK-B");
       expect(alpha.selectionPolicy).toContain("milestone(MS-ALPHA)");
+      expect(buildBoardReadinessStatusLabel(alpha)).toContain("scope=MS-ALPHA");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

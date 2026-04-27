@@ -5343,6 +5343,15 @@
       "method": "test",
       "timestamp": "2026-04-27T20:36:20Z",
       "evidence": "Lane queue board-next now enqueues `board.execute-next` (with optional milestone scope) when long-run lane is busy, instead of snapshotting `board.execute-task`; this keeps next-task resolution runtime-scoped and reduces stale explicit overrides across turns. Snapshot `nextTaskId` remains in audit/notify for observability. Added canonical dedupe smoke for `board.execute-next` milestone envelopes with reordered key-value fields in `guardrails-long-run-intent-queue.test.ts`. Updated canonical pipeline docs to clarify queued behavior under active lane. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 85/85 passed."
+    },
+    {
+      "id": "VER-BUD-344",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T20:40:30Z",
+      "evidence": "Board readiness status label now surfaces milestone scope explicitly when selection policy is milestone-scoped. `buildBoardReadinessStatusLabel` extracts `milestone(...)` scope and appends `scope=<label>` to status output, improving operational diagnosis without manual parsing. Smoke coverage updated in `packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts` for both scoped and non-scoped labels. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 85/85 passed."
     }
   ]
 }
