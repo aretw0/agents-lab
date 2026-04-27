@@ -10,7 +10,7 @@
  * @capability-criticality medium
  */
 
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
@@ -68,6 +68,20 @@ interface TasksBlock {
 
 interface VerificationBlock {
   verifications: VerificationRecord[];
+}
+
+export type BoardRationaleSource = "task-note" | "verification-evidence" | "none";
+
+export interface BoardRationaleSummary {
+  required: number;
+  withRationale: number;
+  missingRationale: number;
+}
+
+export interface BoardVerificationSyncResult {
+  requested: boolean;
+  status: "updated" | "already-present" | "not-found" | "missing-task-verification" | "skipped";
+  verificationId?: string;
 }
 
 interface BlockCacheEntry<T> {
@@ -221,6 +235,13 @@ function readVerificationBlockCached(cwd: string): {
   };
 }
 
+function writeVerificationBlock(cwd: string, block: VerificationBlock): string {
+  const p = verificationPath(cwd);
+  mkdirSync(path.dirname(p), { recursive: true });
+  writeFileSync(p, `${JSON.stringify({ verifications: block.verifications }, null, 2)}\n`, "utf8");
+  return p;
+}
+
 function normalizeLimit(input: unknown, fallback = 20): number {
   const raw = Number(input);
   if (!Number.isFinite(raw) || raw <= 0) return fallback;
@@ -287,6 +308,51 @@ function hasTaskRationale(task: TaskRecord, verificationsById?: Map<string, Veri
   return hasRationaleText(verification?.evidence);
 }
 
+function resolveTaskRationaleSource(task: TaskRecord, verificationsById?: Map<string, VerificationRecord>): BoardRationaleSource {
+  if (hasRationaleText(task.notes)) return "task-note";
+  const verificationId = typeof task.verification === "string" ? task.verification.trim() : "";
+  if (!verificationId || !verificationsById) return "none";
+  const verification = verificationsById.get(verificationId);
+  return hasRationaleText(verification?.evidence) ? "verification-evidence" : "none";
+}
+
+function appendRationaleToVerificationEvidence(currentEvidence: string | undefined, rationaleNote: string): { next: string; changed: boolean } {
+  const current = typeof currentEvidence === "string" ? currentEvidence.trim() : "";
+  if (!current) return { next: rationaleNote, changed: true };
+  if (current.includes(rationaleNote)) return { next: current, changed: false };
+  return { next: `${current}\n${rationaleNote}`, changed: true };
+}
+
+function summarizeTaskRationale(rows: TaskRecord[], verificationsById: Map<string, VerificationRecord>): BoardRationaleSummary {
+  let required = 0;
+  let withRationale = 0;
+  for (const row of rows) {
+    if (!isRationaleSensitiveTask(row)) continue;
+    required += 1;
+    if (hasTaskRationale(row, verificationsById)) withRationale += 1;
+  }
+  return {
+    required,
+    withRationale,
+    missingRationale: Math.max(0, required - withRationale),
+  };
+}
+
+function summarizeVerificationRationale(rows: VerificationRecord[]): BoardRationaleSummary {
+  let required = 0;
+  let withRationale = 0;
+  for (const row of rows) {
+    if (!isRationaleSensitiveVerification(row)) continue;
+    required += 1;
+    if (hasRationaleText(row.evidence)) withRationale += 1;
+  }
+  return {
+    required,
+    withRationale,
+    missingRationale: Math.max(0, required - withRationale),
+  };
+}
+
 function isRationaleSensitiveTask(task: TaskRecord): boolean {
   const textHaystack = [task.id, task.description, task.notes ?? ""].join("\n").toLowerCase();
   const fileHaystack = Array.isArray(task.files)
@@ -317,12 +383,14 @@ export interface ProjectTaskBoardRow {
   rationaleRequired?: boolean;
   hasRationale?: boolean;
   rationaleKind?: BoardRationaleKind;
+  rationaleSource?: BoardRationaleSource;
 }
 
 export interface ProjectTaskQueryResult {
   total: number;
   filtered: number;
   rows: ProjectTaskBoardRow[];
+  rationaleSummary?: BoardRationaleSummary;
   meta: BoardReadMeta;
 }
 
@@ -378,6 +446,7 @@ export function queryProjectTasks(
       rationaleRequired,
       hasRationale,
       rationaleKind: resolveTaskRationaleKind(row, verificationsById),
+      rationaleSource: resolveTaskRationaleSource(row, verificationsById),
     };
   });
 
@@ -385,6 +454,7 @@ export function queryProjectTasks(
     total: block.tasks.length,
     filtered: rows.length,
     rows: mapped,
+    rationaleSummary: summarizeTaskRationale(rows, verificationsById),
     meta,
   };
 }
@@ -399,12 +469,14 @@ export interface ProjectVerificationBoardRow {
   rationaleRequired?: boolean;
   hasRationale?: boolean;
   rationaleKind?: BoardRationaleKind;
+  rationaleSource?: BoardRationaleSource;
 }
 
 export interface ProjectVerificationQueryResult {
   total: number;
   filtered: number;
   rows: ProjectVerificationBoardRow[];
+  rationaleSummary?: BoardRationaleSummary;
   meta: BoardReadMeta;
 }
 
@@ -466,7 +538,9 @@ export function queryProjectVerification(
       rationaleRequired: isRationaleSensitiveVerification(row),
       hasRationale: hasRationaleText(row.evidence),
       rationaleKind: extractRationaleKindFromText(row.evidence),
+      rationaleSource: hasRationaleText(row.evidence) ? "verification-evidence" : "none",
     })),
+    rationaleSummary: summarizeVerificationRationale(rows),
     meta,
   };
 }
@@ -474,6 +548,13 @@ export function queryProjectVerification(
 function invalidateProjectBlockCaches(cwd: string): void {
   tasksCache.delete(tasksPath(cwd));
   verificationCache.delete(verificationPath(cwd));
+}
+
+export interface ProjectTaskUpdateResult {
+  ok: boolean;
+  reason?: string;
+  task?: ProjectTaskBoardRow;
+  verificationSync?: BoardVerificationSyncResult;
 }
 
 export function updateProjectTaskBoard(
@@ -486,8 +567,9 @@ export function updateProjectTaskBoard(
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
+    syncRationaleToVerification?: boolean;
   },
-): { ok: boolean; reason?: string; task?: ProjectTaskBoardRow } {
+): ProjectTaskUpdateResult {
   const id = String(taskId ?? "").trim();
   if (!id) return { ok: false, reason: "missing-task-id" };
 
@@ -518,6 +600,12 @@ export function updateProjectTaskBoard(
 
   const hasRationaleKind = typeof updates.rationaleKind === "string" && updates.rationaleKind.trim().length > 0;
   const hasRationaleTextInput = typeof updates.rationaleText === "string" && updates.rationaleText.trim().length > 0;
+  if (updates.syncRationaleToVerification === true && (!hasRationaleKind || !hasRationaleTextInput)) {
+    return {
+      ok: false,
+      reason: "sync-requires-rationale-payload",
+    };
+  }
   if (hasRationaleKind !== hasRationaleTextInput) {
     return {
       ok: false,
@@ -525,15 +613,18 @@ export function updateProjectTaskBoard(
     };
   }
 
+  let rationaleNoteForSync: string | undefined;
   if (hasRationaleKind && hasRationaleTextInput) {
     const kind = normalizeRationaleKind(updates.rationaleKind);
     const rationaleText = normalizeRationaleText(updates.rationaleText);
     if (!kind) return { ok: false, reason: "invalid-rationale-kind" };
     if (!rationaleText) return { ok: false, reason: "invalid-rationale-text" };
-    next.notes = appendTaskNote(next.notes, buildTaskRationaleNote(kind, rationaleText), maxLines);
+    rationaleNoteForSync = buildTaskRationaleNote(kind, rationaleText);
+    next.notes = appendTaskNote(next.notes, rationaleNoteForSync, maxLines);
   }
 
-  const verificationMap = new Map(readVerificationBlockCached(cwd).block.verifications.map((row) => [row.id, row] as const));
+  const verificationRead = readVerificationBlockCached(cwd).block;
+  const verificationMap = new Map(verificationRead.verifications.map((row) => [row.id, row] as const));
   const rationaleRequired = isRationaleSensitiveTask(next as TaskRecord);
   const hasRationale = hasTaskRationale(next as TaskRecord, verificationMap);
   if (updates.requireRationaleForSensitive === true && rationaleRequired && !hasRationale) {
@@ -543,8 +634,39 @@ export function updateProjectTaskBoard(
     };
   }
 
+  let verificationSync: BoardVerificationSyncResult = {
+    requested: updates.syncRationaleToVerification === true,
+    status: "skipped",
+  };
+  if (updates.syncRationaleToVerification === true && rationaleNoteForSync) {
+    const verificationId = typeof next.verification === "string" ? next.verification.trim() : "";
+    if (!verificationId) {
+      verificationSync = { requested: true, status: "missing-task-verification" };
+    } else {
+      const verificationIndex = verificationRead.verifications.findIndex((row) => row.id === verificationId);
+      if (verificationIndex < 0) {
+        verificationSync = { requested: true, status: "not-found", verificationId };
+      } else {
+        const currentEvidence = verificationRead.verifications[verificationIndex]?.evidence;
+        const merged = appendRationaleToVerificationEvidence(currentEvidence, rationaleNoteForSync);
+        verificationRead.verifications[verificationIndex] = {
+          ...verificationRead.verifications[verificationIndex],
+          evidence: merged.next,
+        };
+        verificationSync = {
+          requested: true,
+          status: merged.changed ? "updated" : "already-present",
+          verificationId,
+        };
+      }
+    }
+  }
+
   block.tasks[idx] = next;
   writeProjectTasksBlock(cwd, block);
+  if (verificationSync.status === "updated") {
+    writeVerificationBlock(cwd, verificationRead);
+  }
   invalidateProjectBlockCaches(cwd);
 
   return {
@@ -558,7 +680,9 @@ export function updateProjectTaskBoard(
       rationaleRequired,
       hasRationale,
       rationaleKind: resolveTaskRationaleKind(next as TaskRecord, verificationMap),
+      rationaleSource: resolveTaskRationaleSource(next as TaskRecord, verificationMap),
     },
+    verificationSync,
   };
 }
 
@@ -677,6 +801,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         description: "When true, blocks update if a rationale-sensitive task still lacks rationale evidence after update.",
       }),
     ),
+    sync_rationale_to_verification: Type.Optional(
+      Type.Boolean({
+        description: "When true and rationale payload is provided, appends rationale note to linked verification evidence.",
+      }),
+    ),
   });
 
   const executeUpdate = (
@@ -689,6 +818,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationale_kind?: BoardRationaleKind;
       rationale_text?: string;
       require_rationale_for_sensitive?: boolean;
+      sync_rationale_to_verification?: boolean;
     },
     _signal: AbortSignal,
     _onUpdate: (update: unknown) => void,
@@ -701,6 +831,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const rationaleKind = typeof params?.rationale_kind === "string" ? params.rationale_kind : undefined;
     const rationaleText = typeof params?.rationale_text === "string" ? params.rationale_text : undefined;
     const requireRationaleForSensitive = params?.require_rationale_for_sensitive === true;
+    const syncRationaleToVerification = params?.sync_rationale_to_verification === true;
 
     if (!taskId) {
       const out = { ok: false, reason: "missing-task-id" };
@@ -714,7 +845,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       (typeof status === "string" && status.length > 0) ||
       (typeof appendNote === "string" && appendNote.trim().length > 0) ||
       Boolean(params?.rationale_kind) ||
-      Boolean(params?.rationale_text);
+      Boolean(params?.rationale_text) ||
+      Boolean(params?.sync_rationale_to_verification);
     if (!hasUpdate) {
       const out = { ok: false, reason: "no-updates-requested" };
       return {
@@ -730,6 +862,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationaleKind,
       rationaleText,
       requireRationaleForSensitive,
+      syncRationaleToVerification,
     });
     return {
       content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
@@ -741,7 +874,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     name: "board_update",
     label: "Board Update",
     description:
-      "Update .project/tasks through a constrained board surface (status, append note, and rationale note).",
+      "Update .project/tasks through a constrained board surface (status, notes, rationale, optional sensitive-task enforcement, and optional verification sync).",
     parameters: updateParameters,
     execute: executeUpdate,
   });
@@ -759,8 +892,9 @@ export function updateProjectTaskProxy(
     rationaleKind?: BoardRationaleKind;
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
+    syncRationaleToVerification?: boolean;
   },
-): { ok: boolean; reason?: string; task?: ProjectTaskBoardRow } {
+): ProjectTaskUpdateResult {
   return updateProjectTaskBoard(cwd, taskId, updates);
 }
 

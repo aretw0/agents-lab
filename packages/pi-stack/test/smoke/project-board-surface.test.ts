@@ -104,6 +104,8 @@ describe("project-board-surface", () => {
       expect(first.total).toBe(3);
       expect(first.filtered).toBe(1);
       expect(first.rows[0]?.id).toBe("TASK-A");
+      expect(first.rows[0]?.rationaleSource).toBe("none");
+      expect(first.rationaleSummary?.required).toBe(0);
       expect(first.meta.cacheHit).toBe(false);
 
       const second = queryProjectTasks(cwd, { status: "in-progress", limit: 5 });
@@ -125,6 +127,7 @@ describe("project-board-surface", () => {
       expect(result.filtered).toBe(1);
       expect(result.rows[0]?.id).toBe("VER-1");
       expect(result.rows[0]?.evidence).toContain("smoke");
+      expect(result.rows[0]?.rationaleSource).toBe("none");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -185,6 +188,8 @@ describe("project-board-surface", () => {
         rationaleText: "desacoplar helper para reduzir risco de regressão",
       });
       expect(updated.ok).toBe(true);
+      expect(updated.task?.rationaleSource).toBe("task-note");
+      expect(updated.verificationSync?.status).toBe("skipped");
 
       const raw = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
         tasks?: Array<{ id?: string; notes?: string }>;
@@ -193,6 +198,66 @@ describe("project-board-surface", () => {
         ? raw.tasks.find((t) => t?.id === "TASK-A")
         : undefined;
       expect(taskA?.notes).toContain("[rationale:refactor] desacoplar helper para reduzir risco de regressão");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard sincroniza rationale com evidência de verificação vinculada", () => {
+    const cwd = seedWorkspace();
+    try {
+      const updated = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "risk-control",
+        rationaleText: "explicar mitigação para alteração de teste",
+        syncRationaleToVerification: true,
+      });
+      expect(updated.ok).toBe(true);
+      expect(updated.verificationSync?.status).toBe("updated");
+      expect(updated.verificationSync?.verificationId).toBe("VER-1");
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "verification.json"), "utf8")) as {
+        verifications?: Array<{ id?: string; evidence?: string }>;
+      };
+      const ver1 = Array.isArray(raw.verifications)
+        ? raw.verifications.find((row) => row?.id === "VER-1")
+        : undefined;
+      expect(ver1?.evidence).toContain("[rationale:risk-control] explicar mitigação para alteração de teste");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard não duplica rationale ao sincronizar novamente", () => {
+    const cwd = seedWorkspace();
+    try {
+      const first = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+        rationaleText: "motivo estável",
+        syncRationaleToVerification: true,
+      });
+      expect(first.ok).toBe(true);
+      expect(first.verificationSync?.status).toBe("updated");
+
+      const second = updateProjectTaskBoard(cwd, "TASK-A", {
+        rationaleKind: "refactor",
+        rationaleText: "motivo estável",
+        syncRationaleToVerification: true,
+      });
+      expect(second.ok).toBe(true);
+      expect(second.verificationSync?.status).toBe("already-present");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard exige payload de rationale para sync com verificação", () => {
+    const cwd = seedWorkspace();
+    try {
+      const blocked = updateProjectTaskBoard(cwd, "TASK-A", {
+        syncRationaleToVerification: true,
+      });
+      expect(blocked.ok).toBe(false);
+      expect(blocked.reason).toBe("sync-requires-rationale-payload");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -261,6 +326,8 @@ describe("project-board-surface", () => {
       expect(result.rows[0]?.id).toBe("TASK-R1");
       expect(result.rows[0]?.rationaleRequired).toBe(true);
       expect(result.rows[0]?.hasRationale).toBe(false);
+      expect(result.rationaleSummary?.required).toBe(1);
+      expect(result.rationaleSummary?.missingRationale).toBe(1);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -286,7 +353,9 @@ describe("project-board-surface", () => {
       const k1 = result.rows.find((row) => row.id === "TASK-K1");
       const k2 = result.rows.find((row) => row.id === "TASK-K2");
       expect(k1?.rationaleKind).toBe("refactor");
+      expect(k1?.rationaleSource).toBe("task-note");
       expect(k2?.rationaleKind).toBe("test-change");
+      expect(k2?.rationaleSource).toBe("verification-evidence");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -334,6 +403,8 @@ describe("project-board-surface", () => {
       expect(result.rows[0]?.id).toBe("VER-X1");
       expect(result.rows[0]?.hasRationale).toBe(false);
       expect(result.rows[0]?.rationaleRequired).toBe(true);
+      expect(result.rationaleSummary?.required).toBe(1);
+      expect(result.rationaleSummary?.missingRationale).toBe(1);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -359,6 +430,7 @@ describe("project-board-surface", () => {
       const allRows = queryProjectVerification(cwd, { limit: 10 });
       const verS2 = allRows.rows.find((row) => row.id === "VER-S2");
       expect(verS2?.rationaleKind).toBe("risk-control");
+      expect(verS2?.rationaleSource).toBe("verification-evidence");
 
       const nonSensitive = queryProjectVerification(cwd, { rationaleRequired: false, limit: 10 });
       expect(nonSensitive.filtered).toBe(2);
@@ -450,6 +522,7 @@ describe("project-board-surface", () => {
       );
 
       expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.verificationSync?.status).toBe("skipped");
       const check = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
       expect(check.rows.some((row) => row.id === "TASK-B")).toBe(true);
 
@@ -460,6 +533,69 @@ describe("project-board-surface", () => {
         ? raw.tasks.find((t) => t?.id === "TASK-B")
         : undefined;
       expect(taskB?.notes).toContain("[rationale:refactor] garantir motivo comunicável no ticket");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update tool can sync rationale to linked verification", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update-sync-verification",
+        {
+          task_id: "TASK-A",
+          rationale_kind: "test-change",
+          rationale_text: "explicar mudança sensível no teste",
+          sync_rationale_to_verification: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.verificationSync?.status).toBe("updated");
+      expect((result.details as any)?.verificationSync?.verificationId).toBe("VER-1");
+
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "verification.json"), "utf8")) as {
+        verifications?: Array<{ id?: string; evidence?: string }>;
+      };
+      const ver1 = Array.isArray(raw.verifications)
+        ? raw.verifications.find((row) => row?.id === "VER-1")
+        : undefined;
+      expect(ver1?.evidence).toContain("[rationale:test-change] explicar mudança sensível no teste");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update reports missing task verification when sync is requested", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update-sync-missing-verification",
+        {
+          task_id: "TASK-B",
+          rationale_kind: "refactor",
+          rationale_text: "registrar motivo comunicável",
+          sync_rationale_to_verification: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.verificationSync?.status).toBe("missing-task-verification");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -570,6 +706,29 @@ describe("project-board-surface", () => {
     expect(updateTool?.parameters?.properties?.rationale_kind).toBeDefined();
     expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
     expect(updateTool?.parameters?.properties?.require_rationale_for_sensitive?.type).toBe("boolean");
+    expect(updateTool?.parameters?.properties?.sync_rationale_to_verification?.type).toBe("boolean");
+  });
+
+  it("board_update returns explicit error when sync is requested without rationale payload", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const result = await updateTool.execute(
+        "tc-board-update-sync-no-rationale",
+        { task_id: "TASK-A", sync_rationale_to_verification: true },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(false);
+      expect((result.details as any)?.reason).toBe("sync-requires-rationale-payload");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 
   it("board_update returns explicit error for partial rationale payload", async () => {
