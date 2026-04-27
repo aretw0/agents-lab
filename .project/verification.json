@@ -5514,6 +5514,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:53:20Z",
       "evidence": "Milestone evidence parity implemented across loop-evidence surfaces: `LoopActivationEvidenceState.lastBoardAutoAdvance` now records optional `milestone`; auto-advance recorder passes `boardReadiness.milestone`; lane status/evidence summaries include milestone in board auto line; external checker (`scripts/guardrails-loop-evidence-check.mjs`) prints boardAuto milestone when present. Added regression assertion in `scripts/test/guardrails-loop-evidence-check.test.mjs` (`report.boardAuto?.milestone === \"MS-LOCAL\"`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81; `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 5/5."
+    },
+    {
+      "id": "VER-BUD-363",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:56:20Z",
+      "evidence": "Extended loop-evidence scope parity to loopReady channel: `LoopActivationEvidenceState.lastLoopReady` now includes optional `milestone`, propagated by `recordLoopReadyEvidence` and runtime heartbeats (`refreshLoopEvidenceHeartbeat`). Snapshot-refresh audit includes milestone passthrough. Human/operator surfaces updated: `/lane-queue evidence` loopReady line includes milestone when present, lane status `evidenceLoopReady` summary includes milestone, and `scripts/guardrails-loop-evidence-check.mjs` text report shows loopReady milestone. Regression test updated in `scripts/test/guardrails-loop-evidence-check.test.mjs` with `loopReady.milestone` assertion. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81; `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 5/5."
     }
   ]
 }

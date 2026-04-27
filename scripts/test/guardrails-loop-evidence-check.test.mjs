@@ -67,6 +67,7 @@ test("assessLoopEvidence reports ready and fresh state", () => {
         runtimeCodeState: "active",
         boardAutoAdvanceGate: "ready",
         nextTaskId: "TASK-BUD-125",
+        milestone: "MS-LOCAL",
       },
     }, null, 2)}\n`, "utf8");
 
@@ -80,6 +81,7 @@ test("assessLoopEvidence reports ready and fresh state", () => {
     assert.equal(report.stale, false);
     assert.equal(report.readyForTaskBud125, true);
     assert.equal(report.boardAuto?.milestone, "MS-LOCAL");
+    assert.equal(report.loopReady?.milestone, "MS-LOCAL");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

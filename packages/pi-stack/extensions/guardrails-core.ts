@@ -1496,6 +1496,7 @@ export interface LoopActivationEvidenceState {
     runtimeCodeState: RuntimeCodeActivationState;
     boardAutoAdvanceGate: BoardAutoAdvanceGateReason;
     nextTaskId?: string;
+    milestone?: string;
   };
   lastBoardAutoAdvance?: {
     atIso: string;
@@ -1702,13 +1703,7 @@ export default function (pi: ExtensionAPI) {
     });
   }
 
-  function recordLoopReadyEvidence(
-    ctx: ExtensionContext,
-    markersLabel: string,
-    runtimeCodeState: RuntimeCodeActivationState,
-    boardAutoAdvanceGate: BoardAutoAdvanceGateReason,
-    nextTaskId?: string,
-  ): void {
+  function recordLoopReadyEvidence(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void {
     const evidence = readLoopActivationEvidence(ctx.cwd);
     evidence.updatedAtIso = new Date().toISOString();
     evidence.lastLoopReady = {
@@ -1717,6 +1712,7 @@ export default function (pi: ExtensionAPI) {
       runtimeCodeState,
       boardAutoAdvanceGate,
       nextTaskId,
+      milestone,
     };
     writeLoopActivationEvidence(ctx.cwd, evidence);
   }
@@ -1742,13 +1738,7 @@ export default function (pi: ExtensionAPI) {
     writeLoopActivationEvidence(ctx.cwd, evidence);
   }
 
-  function refreshLoopEvidenceHeartbeat(
-    ctx: ExtensionContext,
-    markersLabel: string,
-    runtimeCodeState: RuntimeCodeActivationState,
-    boardAutoAdvanceGate: BoardAutoAdvanceGateReason,
-    nextTaskId?: string,
-  ): void {
+  function refreshLoopEvidenceHeartbeat(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void {
     const nowMs = Date.now();
     if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
     const evidence = readLoopActivationEvidence(ctx.cwd);
@@ -1763,6 +1753,7 @@ export default function (pi: ExtensionAPI) {
       runtimeCodeState,
       boardAutoAdvanceGate,
       nextTaskId,
+      milestone,
     };
     writeLoopActivationEvidence(ctx.cwd, evidence);
     lastLoopEvidenceHeartbeatAt = nowMs;
@@ -1772,6 +1763,7 @@ export default function (pi: ExtensionAPI) {
       runtimeCodeState,
       boardAutoAdvanceGate,
       nextTaskId,
+      milestone,
     });
   }
 
@@ -1788,10 +1780,7 @@ export default function (pi: ExtensionAPI) {
 
     const atIso = new Date(nowMs).toISOString();
     evidence.updatedAtIso = atIso;
-    evidence.lastLoopReady = {
-      ...evidence.lastLoopReady,
-      atIso,
-    };
+    evidence.lastLoopReady = { ...evidence.lastLoopReady, atIso };
     writeLoopActivationEvidence(ctx.cwd, evidence);
     lastLoopEvidenceHeartbeatAt = nowMs;
     appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", {
@@ -1800,6 +1789,7 @@ export default function (pi: ExtensionAPI) {
       runtimeCodeState: evidence.lastLoopReady.runtimeCodeState,
       boardAutoAdvanceGate: evidence.lastLoopReady.boardAutoAdvanceGate,
       nextTaskId: evidence.lastLoopReady.nextTaskId,
+      milestone: evidence.lastLoopReady.milestone,
       source: "snapshot-refresh",
     });
   }
@@ -2166,6 +2156,7 @@ export default function (pi: ExtensionAPI) {
         runtimeCodeState,
         boardAutoAdvanceGate,
         boardReadiness.nextTaskId,
+        boardReadiness.milestone,
       );
       lastLoopActivationReadyAt = nowMs;
       lastLoopActivationReadyLabel = loopMarkersLabel;
@@ -2180,6 +2171,7 @@ export default function (pi: ExtensionAPI) {
         runtimeCodeState,
         boardAutoAdvanceGate,
         boardReadiness.nextTaskId,
+        boardReadiness.milestone,
       );
     }
 
@@ -3375,7 +3367,7 @@ export default function (pi: ExtensionAPI) {
             ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
             : "boardAuto: n/a",
           loopReady
-            ? `loopReady: at=${loopReady.atIso} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
+            ? `loopReady: at=${loopReady.atIso}${loopReady.milestone ? ` milestone=${loopReady.milestone}` : ""} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
             : "loopReady: n/a",
           `criteria: ${readiness.criteria.join(" | ")}`,
         ];
@@ -3547,7 +3539,7 @@ export default function (pi: ExtensionAPI) {
         ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceLoopReady.atIso)) / 1000))}s`
         : "n/a";
       const evidenceLoopReadySummary = evidenceLoopReady
-        ? `${evidenceLoopReadyAge} runtime=${evidenceLoopReady.runtimeCodeState} gate=${evidenceLoopReady.boardAutoAdvanceGate}`
+        ? `${evidenceLoopReadyAge}${evidenceLoopReady.milestone ? ` milestone=${evidenceLoopReady.milestone}` : ""} runtime=${evidenceLoopReady.runtimeCodeState} gate=${evidenceLoopReady.boardAutoAdvanceGate}`
         : "n/a";
       const failSignature = !lastDispatchFailureFingerprint ? "n/a" : lastDispatchFailureFingerprint.length > 72 ? `${lastDispatchFailureFingerprint.slice(0, 72)}…` : lastDispatchFailureFingerprint;
       const failClass = lastDispatchFailureFingerprint ? lastDispatchFailureClass : "n/a";

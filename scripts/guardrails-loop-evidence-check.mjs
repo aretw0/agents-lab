@@ -192,7 +192,7 @@ function printTextReport(report) {
   }
 
   if (report.loopReady) {
-    console.log(`loopReady: runtime=${report.loopReady.runtimeCodeState} gate=${report.loopReady.boardAutoAdvanceGate} next=${report.loopReady.nextTaskId ?? "n/a"} at=${report.loopReady.atIso}`);
+    console.log(`loopReady: runtime=${report.loopReady.runtimeCodeState} gate=${report.loopReady.boardAutoAdvanceGate} next=${report.loopReady.nextTaskId ?? "n/a"}${report.loopReady.milestone ? ` milestone=${report.loopReady.milestone}` : ""} at=${report.loopReady.atIso}`);
   } else {
     console.log("loopReady: n/a");
   }
