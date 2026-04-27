@@ -790,9 +790,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					const hasPendingMessages = ctx.hasPendingMessages();
 					const hasRecentSteerInput = lastInputAt > lastAutoCompactTriggerAt;
 					const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
+					const handoffAfterCompact = readHandoffJson(ctx.cwd);
+					const handoffEventAfterCompact = latestContextWatchEvent(handoffAfterCompact);
+					const handoffEventAgeAfterCompact = contextWatchEventAgeMs(handoffEventAfterCompact, nowAfterCompact);
+					const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
+						handoffLastEventLevel: handoffEventAfterCompact?.level,
+						handoffLastEventAgeMs: handoffEventAgeAfterCompact,
+						maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+					});
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
 						autoResumeReady,
+						checkpointEvidenceReady,
 						hasPendingMessages,
 						hasRecentSteerInput,
 						queuedLaneIntents,
@@ -801,6 +810,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						atIso: string;
 						reason: AutoResumeDispatchReason;
 						dispatched: boolean;
+						checkpointEvidenceReady: boolean;
 						hasPendingMessages: boolean;
 						hasRecentSteerInput: boolean;
 						queuedLaneIntents: number;
@@ -809,6 +819,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						atIso: new Date(nowAfterCompact).toISOString(),
 						reason: autoResumeDecision.reason,
 						dispatched: autoResumeDecision.shouldDispatch,
+						checkpointEvidenceReady,
 						hasPendingMessages,
 						hasRecentSteerInput,
 						queuedLaneIntents,
@@ -840,6 +851,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 								hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
 								hasRecentSteerInput: autoResumeSnapshot.hasRecentSteerInput,
 								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
+								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
 							},
 						);
 					}

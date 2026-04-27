@@ -15,6 +15,7 @@ export type HandoffPrepReason = "level-not-compact" | "auto-resume-off" | "fresh
 
 export type AutoResumeDispatchReason =
 	| "auto-resume-off-or-cooldown"
+	| "checkpoint-evidence-missing"
 	| "pending-messages"
 	| "recent-steer"
 	| "lane-queue-pending"
@@ -24,6 +25,8 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 	switch (reason) {
 		case "send":
 			return "dispatched";
+		case "checkpoint-evidence-missing":
+			return "suppressed: checkpoint-evidence-missing";
 		case "pending-messages":
 			return "suppressed: pending-messages";
 		case "recent-steer":
@@ -47,12 +50,16 @@ export function shouldEmitAutoResumeAfterCompact(
 
 export function resolveAutoResumeDispatchDecision(input: {
 	autoResumeReady: boolean;
+	checkpointEvidenceReady?: boolean;
 	hasPendingMessages: boolean;
 	hasRecentSteerInput: boolean;
 	queuedLaneIntents: number;
 }): { shouldDispatch: boolean; reason: AutoResumeDispatchReason } {
 	if (!input.autoResumeReady) {
 		return { shouldDispatch: false, reason: "auto-resume-off-or-cooldown" };
+	}
+	if (input.checkpointEvidenceReady === false) {
+		return { shouldDispatch: false, reason: "checkpoint-evidence-missing" };
 	}
 	if (input.hasPendingMessages) {
 		return { shouldDispatch: false, reason: "pending-messages" };

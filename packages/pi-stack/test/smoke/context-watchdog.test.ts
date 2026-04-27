@@ -240,7 +240,15 @@ describe("context-watchdog", () => {
 			hasRecentSteerInput: false,
 			queuedLaneIntents: 0,
 		})).toEqual({ shouldDispatch: true, reason: "send" });
+		expect(resolveAutoResumeDispatchDecision({
+			autoResumeReady: true,
+			checkpointEvidenceReady: false,
+			hasPendingMessages: false,
+			hasRecentSteerInput: false,
+			queuedLaneIntents: 0,
+		})).toEqual({ shouldDispatch: false, reason: "checkpoint-evidence-missing" });
 		expect(describeAutoResumeDispatchReason("send")).toBe("dispatched");
+		expect(describeAutoResumeDispatchReason("checkpoint-evidence-missing")).toContain("checkpoint-evidence-missing");
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
 			hasPendingMessages: true,
