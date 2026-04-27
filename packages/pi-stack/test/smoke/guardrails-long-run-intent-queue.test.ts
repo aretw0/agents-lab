@@ -504,6 +504,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueBoardNextMilestone("board-next -m \"MS   SHORT\"").milestone).toBe("MS SHORT");
     expect(parseLaneQueueBoardNextMilestone("board-next milestone=MS-REMOTE").milestone).toBe("MS-REMOTE");
     expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"MS QUOTED\"").milestone).toBe("MS QUOTED");
+    expect(parseLaneQueueBoardNextMilestone("board-next --milestone \"\"").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone").clearMilestone).toBe(true);
     expect(parseLaneQueueBoardNextMilestone("board-next --no-milestone oops").error).toBe("invalid-board-next-args");
     expect(parseLaneQueueBoardNextMilestone("board-next --oops").error).toBe("invalid-board-next-args");
@@ -878,6 +879,28 @@ describe("guardrails-core long-run intent queue", () => {
       expect(retryCfg.baseDelayMs).toBe(1500);
       expect(retryCfg.maxDelayMs).toBe(120000);
       expect(retryCfg.backoffMultiplier).toBe(1.5);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("ignores blank/quoted-empty default milestone config", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-default-ms-empty-"));
+    try {
+      mkdirSync(join(cwd, ".pi"), { recursive: true });
+      writeFileSync(
+        join(cwd, ".pi", "settings.json"),
+        JSON.stringify({
+          piStack: {
+            guardrailsCore: {
+              longRunIntentQueue: {
+                defaultBoardMilestone: "\"\"",
+              },
+            },
+          },
+        }),
+      );
+      expect(resolveLongRunIntentQueueConfig(cwd).defaultBoardMilestone).toBeUndefined();
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
