@@ -137,6 +137,13 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
     loopReady: { milestone: "MS-2" },
   }, "MS-1");
   assert.equal(mismatched.matches, false);
+
+  const noExpectation = evaluateMilestoneScopeMatch({
+    boardAuto: { milestone: "MS-A" },
+    loopReady: { milestone: "MS-B" },
+  }, undefined);
+  assert.equal(noExpectation.matches, true);
+  assert.equal(noExpectation.expectedMilestone, undefined);
 });
 
 test("cli json output includes milestoneCheck when expect-milestone is provided", () => {

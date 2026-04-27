@@ -5577,6 +5577,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:11:20Z",
       "evidence": "Regression coverage expanded for scoped status/evidence parser errors in `guardrails-long-run-intent-queue.test.ts`: now explicitly asserts `status nope` and `evidence --no-milestone oops` return `invalid-board-next-args`, preventing accidental silent fallback behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-370",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:13:20Z",
+      "evidence": "Expanded helper semantics coverage for `evaluateMilestoneScopeMatch` in loop-evidence checker tests: added no-expectation case to assert explicit no-op behavior (`matches=true`, `expectedMilestone=undefined`) when milestone gating is not requested. Validation: `cmd.exe /c node --test scripts/test/guardrails-loop-evidence-check.test.mjs` => 8/8 passed."
     }
   ]
 }
