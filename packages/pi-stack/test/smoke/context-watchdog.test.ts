@@ -25,6 +25,7 @@ import {
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
+	describeContextWatchDeterministicStopHint,
 	resolveContextWatchSignalNoiseExcessive,
 	shouldEmitDeterministicStopSignal,
 	resolveContextWatchSteeringDispatch,
@@ -699,6 +700,11 @@ describe("context-watchdog", () => {
 			assessmentLevel: "warn",
 			operatorSignal: { reasons: ["reload-required"] },
 		})).toEqual({ required: true, reason: "reload-required", action: "reload-and-resume" });
+		expect(describeContextWatchDeterministicStopHint({
+			required: true,
+			reason: "reload-required",
+			action: "reload-and-resume",
+		})).toContain("/reload");
 		expect(resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: "compact",
 			operatorSignal: { reasons: ["compact-checkpoint-required"] },
@@ -707,6 +713,16 @@ describe("context-watchdog", () => {
 			reason: "compact-checkpoint-required",
 			action: "persist-checkpoint-and-compact",
 		});
+		expect(describeContextWatchDeterministicStopHint({
+			required: true,
+			reason: "compact-checkpoint-required",
+			action: "persist-checkpoint-and-compact",
+		})).toContain("persist checkpoint evidence");
+		expect(describeContextWatchDeterministicStopHint({
+			required: false,
+			reason: "none",
+			action: "none",
+		})).toBeUndefined();
 		expect(shouldEmitDeterministicStopSignal(false, 120_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 30_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 120_000, 0, 60_000)).toBe(true);

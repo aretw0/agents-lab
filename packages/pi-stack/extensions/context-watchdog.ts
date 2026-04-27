@@ -327,6 +327,19 @@ export function resolveContextWatchDeterministicStopSignal(input: {
 	return { required: false, reason: "none", action: "none" };
 }
 
+export function describeContextWatchDeterministicStopHint(
+	signal: ContextWatchDeterministicStopSignal,
+): string | undefined {
+	if (!signal.required) return undefined;
+	if (signal.reason === "reload-required") {
+		return "run /reload, then continue from handoff checkpoint.";
+	}
+	if (signal.reason === "compact-checkpoint-required") {
+		return "persist checkpoint evidence and compact before continuing.";
+	}
+	return undefined;
+}
+
 export function shouldEmitDeterministicStopSignal(
 	required: boolean,
 	nowMs: number,
@@ -791,6 +804,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			assessmentLevel: assessment.level,
 			operatorSignal,
 		});
+		const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 		ctx.ui.setStatus?.(
 			"context-watch-operator",
 			deterministicStop.required
@@ -812,7 +826,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			);
 			if (config.notify) {
 				ctx.ui.notify(
-					`context-watch deterministic-stop: reason=${deterministicStop.reason} action=${deterministicStop.action}`,
+					`context-watch deterministic-stop: reason=${deterministicStop.reason} action=${deterministicStop.action}${deterministicStopHint ? ` · ${deterministicStopHint}` : ""}`,
 					"warning",
 				);
 			}
@@ -992,6 +1006,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			deterministicStop.required
 				? `deterministic-stop: required=yes reason=${deterministicStop.reason} action=${deterministicStop.action}`
 				: "deterministic-stop: required=no",
+			deterministicStopHint ? `deterministic-stop hint: ${deterministicStopHint}` : "",
 		];
 		if (persistedPath) {
 			const rel = path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/");
@@ -1021,6 +1036,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStopRequired: deterministicStop.required,
 				deterministicStopReason: deterministicStop.reason,
 				deterministicStopAction: deterministicStop.action,
+				deterministicStopHint,
 			},
 		);
 		if (steeringDispatch.shouldNotify) {
@@ -1211,6 +1227,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				operatorSignal,
 			});
+			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 			const operatingCadence = resolveContextWatchOperatingCadence({
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
@@ -1221,6 +1238,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				autoCompact,
 				operatorSignal,
 				deterministicStop,
+				deterministicStopHint,
 				operatingCadence,
 			};
 			return {
@@ -1333,6 +1351,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				operatorSignal,
 			});
+			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 			const operatingCadence = resolveContextWatchOperatingCadence({
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
@@ -1353,6 +1372,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
 					`deterministic-stop: required=${deterministicStop.required ? "yes" : "no"} reason=${deterministicStop.reason} action=${deterministicStop.action}`,
+					deterministicStopHint ? `deterministic-stop hint: ${deterministicStopHint}` : "",
 					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
 					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
 					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,

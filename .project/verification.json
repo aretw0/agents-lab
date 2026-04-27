@@ -5766,6 +5766,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:27:50Z",
       "evidence": "Auto-resume dispatch now enforces deterministic reload gating. `context-watchdog-resume.ts` adds reason `reload-required` and corresponding suppression path in `resolveAutoResumeDispatchDecision`; `context-watchdog.ts` passes `reloadRequired=isReloadRequiredForSourceUpdate()` during post-compact decision and includes `reloadRequired` + `checkpointEvidenceReady` in auto-resume last diagnostics/suppression payloads. Smoke assertions updated for new reason in `context-watchdog.test.ts`; runbook suppression list updated. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-391",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:31:10Z",
+      "evidence": "Added deterministic stop hint primitive and surfaced actionable guidance across status surfaces. `context-watchdog.ts`: `describeContextWatchDeterministicStopHint` maps stop reasons to explicit actions (`/reload` or checkpoint+compact) and is included in runtime notify strings, `/context-watch status` output, and `context_watch_status` payload (`deterministicStopHint`). Smoke assertions added for hint semantics in `context-watchdog.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }
