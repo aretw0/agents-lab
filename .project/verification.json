@@ -5091,6 +5091,24 @@
       "method": "test",
       "timestamp": "2026-04-26T10:27:00Z",
       "evidence": "Slices 6-10: hardening de falha idêntica + dedupe resiliente no loop board-first. Implementado: (a) config `longRunIntentQueue.identicalFailurePauseAfter`/`identicalFailureWindowMs` com clamp e `/guardrails-config`; (b) fingerprint normalizado + streak determinístico (`computeIdenticalFailureStreak`, `shouldPauseOnIdenticalFailure`); (c) pausa automática do loop em falhas idênticas recorrentes com audit dedicado; (d) observabilidade em `/lane-queue status` (`identicalFail` + `failSig`); (e) dedupe de enfileiramento whitespace-tolerant para intents canônicos. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 75/75 passed; revalidação focal cross-surface => 91/91 passed."
+    },
+    {
+      "id": "VER-BUD-316",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T10:34:00Z",
+      "evidence": "Slices 11-15 (dedupe canônico configurável): `LongRunIntentQueueConfig` ganhou `dedupeWindowMs`; caminhos de dedupe em `guardrails-core` migraram para esse knob dedicado; normalização de dedupe para envelopes `[intent:*]` passou a canonicalizar campos `key=value` (ordem-insensível) antes da comparação, reduzindo duplicação por variação de ordem/whitespace. Status `/lane-queue` expõe `dedupeWindowMs` e docs canônicos incluem o parâmetro. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed."
+    },
+    {
+      "id": "VER-BUD-317",
+      "target": "TASK-BUD-119",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T10:35:00Z",
+      "evidence": "Slices 16-20: introduzido `longRunIntentQueue.dedupeWindowMs` (janela dedicada de dedupe), aplicado nos caminhos de enqueue/fallback/retry de intents canônicos no `guardrails-core`, com visibilidade em `/lane-queue status`. Dedupe de envelopes `[intent:*]` agora canonicaliza campos `key=value` por ordenação para tratar reordenação como equivalente semântica. Runbook atualizado para novo knob e limitação atual de configuração via JSON para esta chave. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 76/76 passed; focal cross-surface => 92/92 passed."
     }
   ]
 }

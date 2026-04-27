@@ -12,6 +12,7 @@ export interface LongRunIntentQueueConfig {
   autoDrainIdleStableMs: number;
   dispatchFailureBlockAfter: number;
   rapidRedispatchWindowMs: number;
+  dedupeWindowMs: number;
   identicalFailurePauseAfter: number;
   identicalFailureWindowMs: number;
 }
@@ -63,6 +64,7 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   autoDrainIdleStableMs: 1500,
   dispatchFailureBlockAfter: 3,
   rapidRedispatchWindowMs: 5 * 60 * 1000,
+  dedupeWindowMs: 2 * 60 * 1000,
   identicalFailurePauseAfter: 3,
   identicalFailureWindowMs: 2 * 60 * 1000,
 };
@@ -119,6 +121,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const autoDrainIdleStableMsRaw = Number(cfg?.autoDrainIdleStableMs);
     const dispatchFailureBlockAfterRaw = Number(cfg?.dispatchFailureBlockAfter);
     const rapidRedispatchWindowMsRaw = Number(cfg?.rapidRedispatchWindowMs);
+    const dedupeWindowMsRaw = Number(cfg?.dedupeWindowMs);
     const identicalFailurePauseAfterRaw = Number(cfg?.identicalFailurePauseAfter);
     const identicalFailureWindowMsRaw = Number(cfg?.identicalFailureWindowMs);
     return {
@@ -148,6 +151,10 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
         Number.isFinite(rapidRedispatchWindowMsRaw) && rapidRedispatchWindowMsRaw >= 1_000
           ? Math.max(1_000, Math.min(30 * 60 * 1000, Math.floor(rapidRedispatchWindowMsRaw)))
           : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.rapidRedispatchWindowMs,
+      dedupeWindowMs:
+        Number.isFinite(dedupeWindowMsRaw) && dedupeWindowMsRaw >= 1_000
+          ? Math.max(1_000, Math.min(30 * 60 * 1000, Math.floor(dedupeWindowMsRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.dedupeWindowMs,
       identicalFailurePauseAfter:
         Number.isFinite(identicalFailurePauseAfterRaw) && identicalFailurePauseAfterRaw > 0
           ? Math.max(1, Math.min(20, Math.floor(identicalFailurePauseAfterRaw)))
@@ -680,7 +687,30 @@ export interface DeferredIntentEnqueueOptions {
 }
 
 function normalizeDeferredIntentDedupeKey(text: string): string {
-  return String(text ?? "").replace(/\s+/g, " ").trim();
+  const normalized = String(text ?? "").replace(/\r/g, "").trim();
+  if (!normalized) return "";
+
+  const lines = normalized
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  if (lines.length > 0 && /^\[intent:[a-z0-9._-]+\]$/i.test(lines[0])) {
+    const header = lines[0].toLowerCase();
+    const fields = lines
+      .slice(1)
+      .filter((line) => line.includes("="))
+      .map((line) => {
+        const eq = line.indexOf("=");
+        const key = line.slice(0, eq).trim().toLowerCase();
+        const value = line.slice(eq + 1).trim();
+        return `${key}=${value}`;
+      })
+      .sort();
+    return [header, ...fields].join("\n");
+  }
+
+  return normalized.replace(/\s+/g, " ");
 }
 
 export function enqueueDeferredIntent(

@@ -191,6 +191,7 @@ Configuração (`.pi/settings.json`):
       "longRunIntentQueue": {
         "dispatchFailureBlockAfter": 3,
         "rapidRedispatchWindowMs": 300000,
+        "dedupeWindowMs": 120000,
         "identicalFailurePauseAfter": 3,
         "identicalFailureWindowMs": 120000,
         "providerTransientRetry": {
@@ -226,6 +227,7 @@ Exemplos:
 - `/guardrails-config set longRunIntentQueue.enabled true`
 - `/guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3`
 - `/guardrails-config set longRunIntentQueue.identicalFailureWindowMs 120000`
+- `longRunIntentQueue.dedupeWindowMs` (até publicar no `/guardrails-config`) via `.pi/settings.json`
 - `/guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint`
 - `/guardrails-config set contextWatchdog.userNotifyFromLevel compact`
 - `/guardrails-config set contextWatchdog.autoCompact false`

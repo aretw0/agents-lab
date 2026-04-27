@@ -2296,7 +2296,7 @@ export default function (pi: ExtensionAPI) {
           longRunIntentQueueConfig.maxItems,
           {
             dedupeKey: intentText,
-            dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+            dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
           },
         );
         markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
@@ -2393,7 +2393,7 @@ export default function (pi: ExtensionAPI) {
           longRunIntentQueueConfig.maxItems,
           {
             dedupeKey: popped.item.text,
-            dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+            dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
           },
         );
         markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
@@ -3281,7 +3281,7 @@ export default function (pi: ExtensionAPI) {
             longRunIntentQueueConfig.maxItems,
             {
               dedupeKey: intentText,
-              dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
             },
           );
           appendAuditEntry(ctx, "guardrails-core.board-intent-queued", {
@@ -3330,7 +3330,7 @@ export default function (pi: ExtensionAPI) {
             longRunIntentQueueConfig.maxItems,
             {
               dedupeKey: intentText,
-              dedupeWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
+              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
             },
           );
           markLoopDegraded(ctx, "board-intent-dispatch-failed", message);
@@ -3561,7 +3561,7 @@ export default function (pi: ExtensionAPI) {
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]

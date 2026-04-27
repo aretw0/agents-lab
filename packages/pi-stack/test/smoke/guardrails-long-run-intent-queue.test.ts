@@ -85,6 +85,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainIdleStableMs).toBe(1500);
       expect(cfg.dispatchFailureBlockAfter).toBe(3);
       expect(cfg.rapidRedispatchWindowMs).toBe(BOARD_RAPID_REDISPATCH_WINDOW_MS);
+      expect(cfg.dedupeWindowMs).toBe(120_000);
       expect(cfg.identicalFailurePauseAfter).toBe(3);
       expect(cfg.identicalFailureWindowMs).toBe(120_000);
 
@@ -406,6 +407,7 @@ describe("guardrails-core long-run intent queue", () => {
       autoDrainIdleStableMs: 1500,
       dispatchFailureBlockAfter: 3,
       rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+      dedupeWindowMs: 120_000,
       identicalFailurePauseAfter: 3,
       identicalFailureWindowMs: 120_000,
     };
@@ -494,6 +496,41 @@ describe("guardrails-core long-run intent queue", () => {
       expect(first.deduped).toBe(false);
       expect(second.deduped).toBe(true);
       expect(second.itemId).toBe(first.itemId);
+      expect(listDeferredIntents(cwd)).toHaveLength(1);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("dedupes canonical intent envelopes despite key order differences", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-intent-queue-dedupe-order-"));
+    try {
+      const firstText = [
+        "[intent:board.execute-task]",
+        "version=1",
+        "task_id=TASK-BUD-119",
+        "mode=board-first",
+        "contract=no-auto-close+verification",
+      ].join("\n");
+      const secondText = [
+        "[intent:board.execute-task]",
+        "contract=no-auto-close+verification",
+        "mode=board-first",
+        "task_id=TASK-BUD-119",
+        "version=1",
+      ].join("\n");
+
+      const first = enqueueDeferredIntent(cwd, firstText, "board-first-intent", 50, {
+        dedupeKey: firstText,
+        dedupeWindowMs: 60_000,
+      });
+      const second = enqueueDeferredIntent(cwd, secondText, "board-first-intent", 50, {
+        dedupeKey: secondText,
+        dedupeWindowMs: 60_000,
+      });
+
+      expect(first.deduped).toBe(false);
+      expect(second.deduped).toBe(true);
       expect(listDeferredIntents(cwd)).toHaveLength(1);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
@@ -664,6 +701,7 @@ describe("guardrails-core long-run intent queue", () => {
                 autoDrainIdleStableMs: 5000,
                 dispatchFailureBlockAfter: 5,
                 rapidRedispatchWindowMs: 45_000,
+                dedupeWindowMs: 50_000,
                 identicalFailurePauseAfter: 6,
                 identicalFailureWindowMs: 90_000,
                 providerTransientRetry: {
@@ -689,6 +727,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainIdleStableMs).toBe(5000);
       expect(cfg.dispatchFailureBlockAfter).toBe(5);
       expect(cfg.rapidRedispatchWindowMs).toBe(45_000);
+      expect(cfg.dedupeWindowMs).toBe(50_000);
       expect(cfg.identicalFailurePauseAfter).toBe(6);
       expect(cfg.identicalFailureWindowMs).toBe(90_000);
 
@@ -1143,6 +1182,7 @@ describe("guardrails-core long-run intent queue", () => {
       autoDrainIdleStableMs: 800,
       dispatchFailureBlockAfter: 3,
       rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+      dedupeWindowMs: 120_000,
       identicalFailurePauseAfter: 3,
       identicalFailureWindowMs: 120_000,
     };
