@@ -5748,6 +5748,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:22:30Z",
       "evidence": "Added deterministic stop signaling for context-watch hard-intent. `context-watchdog.ts` now exposes `resolveContextWatchDeterministicStopSignal` and wires it to runtime/status surfaces: passive runtime status key `context-watch-operator` plus `deterministic-stop` lines in `/context-watch status` and `context_watch_status` payload. Reasons are explicit (`reload-required`, `compact-checkpoint-required`) and action strings are deterministic. Smoke updated with reason/action assertions in `context-watchdog.test.ts`; runbook updated to mention deterministic-stop usage. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-389",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T23:25:10Z",
+      "evidence": "Added cooldown-aware deterministic stop runtime emission. `context-watchdog.ts` introduces `shouldEmitDeterministicStopSignal` and emits audit event `context-watchdog.deterministic-stop-signal` when required stop conditions persist (`reload-required` / `compact-checkpoint-required`), with notify warning when user notifications are enabled. State reset/session_start now resets deterministic-stop cooldown marker. Smoke assertions added for helper gating behavior in `context-watchdog.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }

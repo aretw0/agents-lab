@@ -26,6 +26,7 @@ import {
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
 	resolveContextWatchSignalNoiseExcessive,
+	shouldEmitDeterministicStopSignal,
 	resolveContextWatchSteeringDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
 	resolvePreCompactCalmCloseSignal,
@@ -698,6 +699,9 @@ describe("context-watchdog", () => {
 			reason: "compact-checkpoint-required",
 			action: "persist-checkpoint-and-compact",
 		});
+		expect(shouldEmitDeterministicStopSignal(false, 120_000, 0, 60_000)).toBe(false);
+		expect(shouldEmitDeterministicStopSignal(true, 30_000, 0, 60_000)).toBe(false);
+		expect(shouldEmitDeterministicStopSignal(true, 120_000, 0, 60_000)).toBe(true);
 	});
 
 	it("resolves operating cadence with post-resume recalibration signal", () => {

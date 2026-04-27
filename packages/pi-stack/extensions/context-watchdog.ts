@@ -327,6 +327,19 @@ export function resolveContextWatchDeterministicStopSignal(input: {
 	return { required: false, reason: "none", action: "none" };
 }
 
+export function shouldEmitDeterministicStopSignal(
+	required: boolean,
+	nowMs: number,
+	lastSignalAtMs: number,
+	cooldownMs: number,
+): boolean {
+	if (!required) return false;
+	const now = Math.max(0, Math.floor(Number(nowMs ?? 0)));
+	const last = Math.max(0, Math.floor(Number(lastSignalAtMs ?? 0)));
+	const cooldown = Math.max(1_000, Math.floor(Number(cooldownMs ?? 60_000)));
+	return (now - last) >= cooldown;
+}
+
 export function resolveContextWatchOperatingCadence(input: {
 	assessmentLevel: ContextWatchdogLevel;
 	handoffLastEventLevel?: ContextWatchdogLevel | null;
@@ -601,6 +614,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		atIso: string;
 		reason: AutoResumeDispatchReason;
 		dispatched: boolean;
+		checkpointEvidenceReady: boolean;
 		hasPendingMessages: boolean;
 		hasRecentSteerInput: boolean;
 		queuedLaneIntents: number;
@@ -626,6 +640,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAntiParalysisNotifyAt = 0;
 	let announceWindowStartAt = 0;
 	let announceCountInWindow = 0;
+	let lastDeterministicStopSignalAt = 0;
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
 	const CALM_CLOSE_DEFER_THRESHOLD = 3;
@@ -781,6 +796,26 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				? `[ctx-op] stop ${deterministicStop.reason} -> ${deterministicStop.action}`
 				: "[ctx-op] ok",
 		);
+		if (shouldEmitDeterministicStopSignal(deterministicStop.required, now, lastDeterministicStopSignalAt, config.cooldownMs)) {
+			lastDeterministicStopSignalAt = now;
+			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+				"context-watchdog.deterministic-stop-signal",
+				{
+					atIso: new Date(now).toISOString(),
+					reason,
+					assessmentLevel: assessment.level,
+					stopReason: deterministicStop.reason,
+					stopAction: deterministicStop.action,
+					operatorReasons: operatorSignal.reasons,
+				},
+			);
+			if (config.notify) {
+				ctx.ui.notify(
+					`context-watch deterministic-stop: reason=${deterministicStop.reason} action=${deterministicStop.action}`,
+					"warning",
+				);
+			}
+		}
 		const calmCloseSignal = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
 			decisionReason: autoCompactState.decision.reason,
@@ -1130,6 +1165,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAntiParalysisNotifyAt = 0;
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
+		lastDeterministicStopSignalAt = 0;
 		run(ctx, "session_start");
 	});
 
@@ -1238,6 +1274,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAntiParalysisNotifyAt = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
+				lastDeterministicStopSignalAt = 0;
 				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
 				ctx.ui.setStatus?.("context-watch-operator", "[ctx-op] reset");
 				ctx.ui.notify("context-watch: state reset", "info");
