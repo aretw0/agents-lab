@@ -5019,6 +5019,15 @@
       "method": "inspect",
       "timestamp": "2026-04-26T22:22:00Z",
       "evidence": "TASK-BUD-153 slice 4: CI adiciona advisory de factory-mode (`runtime=ci provider=github-actions channel=...`) diferenciando PR/push em `.github/workflows/ci.yml`; runbook canônico documenta fallback manual determinístico quando gates falham. Verificação sintática: `cmd.exe /c node -e \"const fs=require('fs'); const y=require('yaml'); y.parse(fs.readFileSync('.github/workflows/ci.yml','utf8')); console.log('ok')\"` => ok."
+    },
+    {
+      "id": "VER-BUD-308",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T23:06:00Z",
+      "evidence": "TASK-BUD-153 slice 5: extraída superfície de delivery/state de `guardrails-core.ts` para módulo dedicado `guardrails-core-delivery-surface.ts` (comandos `/delivery-mode` e `/state-reconcile`, tools `delivery_mode_plan` e `state_reconcile_plan`), preservando contrato público por registro via orchestrator. Verificação smoke: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-state-reconcile.test.ts packages/pi-stack/test/smoke/guardrails-state-reconcile-surface.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 88/88 passed."
     }
   ]
 }

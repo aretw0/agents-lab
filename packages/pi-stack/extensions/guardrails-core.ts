@@ -111,11 +111,7 @@ import {
   wrapCommandForHostShell,
   type CommandRoutingProfile,
 } from "./guardrails-core-shell-routing";
-import {
-  formatDeliveryModePlan,
-  resolveDeliveryModePlan,
-  type DeliveryChannel,
-} from "./guardrails-core-delivery-mode";
+import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
 import {
   assessLargeFileMutationRisk,
   buildSafeLargeFileMutationResult,
@@ -235,6 +231,11 @@ export {
   formatDeliveryModePlan,
   resolveDeliveryModePlan,
 } from "./guardrails-core-delivery-mode";
+
+export {
+  formatStateReconcilePlan,
+  resolveStateReconcilePlan,
+} from "./guardrails-core-state-reconcile";
 
 export {
   assessLargeFileMutationRisk,
@@ -3112,108 +3113,7 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  pi.registerTool({
-    name: "delivery_mode_plan",
-    label: "Delivery Mode Plan",
-    description: "Deterministic plan for runtime mode (native/container/ci) and promotion channel (direct/PR/MR).",
-    parameters: Type.Object({
-      preferChannel: Type.Optional(Type.Union([
-        Type.Literal("direct-branch"),
-        Type.Literal("pull-request"),
-        Type.Literal("merge-request"),
-      ])),
-    }),
-    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const preferred = String((params as { preferChannel?: unknown }).preferChannel ?? "").trim().toLowerCase();
-      const preferChannel = preferred === "direct-branch" || preferred === "pull-request" || preferred === "merge-request"
-        ? (preferred as DeliveryChannel)
-        : undefined;
-      const plan = resolveDeliveryModePlan({ preferChannel });
-      appendAuditEntry(ctx, "guardrails-core.delivery-mode-plan", {
-        atIso: new Date().toISOString(),
-        via: "tool",
-        preferChannel: preferChannel ?? null,
-        runtimeMode: plan.runtimeMode,
-        deliveryChannel: plan.deliveryChannel,
-        ciProvider: plan.ciProvider,
-        confidence: plan.confidence,
-        signals: plan.signals,
-      });
-      const details = {
-        ok: true,
-        ...plan,
-      };
-      return {
-        content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-        details,
-      };
-    },
-  });
-
-  pi.registerCommand("delivery-mode", {
-    description: "Show deterministic runtime delivery mode (native/container/ci + direct/PR/MR). Usage: /delivery-mode [status|json|help] [--channel direct|pr|mr]",
-    handler: async (args, ctx) => {
-      const rawArgs = String(args ?? "").trim();
-      const tokens = rawArgs.split(/\s+/).filter(Boolean);
-      const sub = (tokens[0] ?? "status").toLowerCase();
-
-      const parseChannel = (value: string | undefined): DeliveryChannel | undefined => {
-        const normalized = String(value ?? "").trim().toLowerCase();
-        if (!normalized) return undefined;
-        if (["direct", "direct-branch", "branch"].includes(normalized)) return "direct-branch";
-        if (["pr", "pull-request", "pull_request"].includes(normalized)) return "pull-request";
-        if (["mr", "merge-request", "merge_request"].includes(normalized)) return "merge-request";
-        return undefined;
-      };
-
-      const channelFlagIndex = tokens.findIndex((t) => t === "--channel" || t === "--prefer");
-      const preferChannel = channelFlagIndex >= 0 ? parseChannel(tokens[channelFlagIndex + 1]) : undefined;
-
-      if ((tokens.includes("--channel") || tokens.includes("--prefer")) && !preferChannel) {
-        ctx.ui.notify("delivery-mode: invalid --channel value. Use direct|pr|mr", "warning");
-        return;
-      }
-
-      if (sub === "help") {
-        ctx.ui.notify([
-          "delivery-mode usage:",
-          "  /delivery-mode status [--channel direct|pr|mr]",
-          "  /delivery-mode json [--channel direct|pr|mr]",
-          "",
-          "examples:",
-          "  /delivery-mode",
-          "  /delivery-mode json --channel pr",
-        ].join("\n"), "info");
-        return;
-      }
-
-      if (sub !== "status" && sub !== "json") {
-        ctx.ui.notify("delivery-mode: unknown subcommand. Use /delivery-mode help", "warning");
-        return;
-      }
-
-      const plan = resolveDeliveryModePlan({ preferChannel });
-      appendAuditEntry(ctx, "guardrails-core.delivery-mode-plan", {
-        atIso: new Date().toISOString(),
-        via: "command",
-        command: "delivery-mode",
-        subcommand: sub,
-        preferChannel: preferChannel ?? null,
-        runtimeMode: plan.runtimeMode,
-        deliveryChannel: plan.deliveryChannel,
-        ciProvider: plan.ciProvider,
-        confidence: plan.confidence,
-        signals: plan.signals,
-      });
-
-      if (sub === "json") {
-        ctx.ui.notify(JSON.stringify({ ok: true, ...plan }, null, 2), "info");
-        return;
-      }
-
-      ctx.ui.notify(formatDeliveryModePlan(plan).join("\n"), "info");
-    },
-  });
+  registerGuardrailsDeliverySurface(pi, appendAuditEntry);
 
   pi.registerTool({
     name: "safe_mutate_large_file",
