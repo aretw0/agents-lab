@@ -10,6 +10,7 @@ import {
   listDeferredIntents,
   oldestDeferredIntentAgeMs,
   parseLaneQueueAddText,
+  parseLaneQueueMilestoneScope,
   parseLaneQueueBoardNextMilestone,
   resolveLaneQueueBoardNextMilestoneSelection,
   buildLaneQueueHelpLines,
@@ -522,6 +523,12 @@ describe("guardrails-core long-run intent queue", () => {
     expect(parseLaneQueueAddText("ADD   item")).toBe("item");
     expect(parseLaneQueueAddText("list")).toBeUndefined();
     expect(parseLaneQueueAddText("add")).toBeUndefined();
+  });
+
+  it("keeps milestone parser alias compatibility", () => {
+    expect(parseLaneQueueMilestoneScope("board-next --milestone MS-LOCAL")).toEqual(
+      parseLaneQueueBoardNextMilestone("board-next --milestone MS-LOCAL"),
+    );
   });
 
   it("parses optional board-next milestone scope", () => {

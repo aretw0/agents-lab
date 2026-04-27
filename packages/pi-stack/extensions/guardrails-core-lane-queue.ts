@@ -236,7 +236,7 @@ export interface LaneQueueBoardNextMilestoneParseResult {
 
 export type LaneQueueBoardNextMilestoneSource = "explicit" | "default" | "cleared" | "none";
 
-export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNextMilestoneParseResult {
+export function parseLaneQueueMilestoneScope(args: string): LaneQueueBoardNextMilestoneParseResult {
   const trimmed = String(args ?? "").trim();
   if (!/^(board-next|status|evidence)(\s+|$)/i.test(trimmed)) return {};
   const rest = trimmed.replace(/^(?:board-next|status|evidence)\b/i, "").trim();
@@ -297,6 +297,10 @@ export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNe
   }
 
   return { error: "invalid-board-next-args" };
+}
+
+export function parseLaneQueueBoardNextMilestone(args: string): LaneQueueBoardNextMilestoneParseResult {
+  return parseLaneQueueMilestoneScope(args);
 }
 
 export function resolveLaneQueueBoardNextMilestoneSelection(

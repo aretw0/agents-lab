@@ -5604,6 +5604,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:21:20Z",
       "evidence": "Refactor slice for lane usage-string primitives: added `buildLaneQueueStatusUsage`, `buildLaneQueueBoardNextUsage`, and `buildLaneQueueEvidenceUsage` in `guardrails-core-lane-queue.ts`, exported/re-exported from guardrails core, and replaced hardcoded parse-error usage messages in core runtime with helper outputs. Added smoke assertions for helper outputs in `guardrails-long-run-intent-queue.test.ts`. Budget preserved (`guardrails-core.ts` under cap). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-373",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:23:20Z",
+      "evidence": "Parser primitive naming cleanup: introduced generic `parseLaneQueueMilestoneScope` in lane-queue module and retained backward-compatible alias `parseLaneQueueBoardNextMilestone` as wrapper. Guardrails core migrated to use generic parser for board-next/status/evidence paths; smoke adds explicit alias-equivalence assertion. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 82/82 passed."
     }
   ]
 }
