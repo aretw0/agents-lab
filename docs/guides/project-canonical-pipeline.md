@@ -69,7 +69,8 @@ Para manter a stack pronta para jornadas rasas e profundas sem acoplamento opina
 - tratar `guardrails-core.ts` como **orquestrador de wiring**; lógica nova deve nascer em primitiva/surface dedicada (`guardrails-core-*.ts`);
 - quando uma mudança adicionar bloco grande no core (ordem de dezenas de linhas), priorizar extração no mesmo ciclo ou no slice imediatamente seguinte;
 - commands/tools novos devem registrar via módulo de superfície (`registerGuardrails*Surface`) para reduzir drift e facilitar adoção parcial pelos usuários;
-- manter smoke focal de contrato/superfície ao extrair, garantindo que API pública permaneça estável.
+- manter smoke focal de contrato/superfície ao extrair, garantindo que API pública permaneça estável;
+- manter guard executável de budget (`guardrails-core-orchestrator-budget.test.ts`) e apertar o teto em ratchet progressivo (estado atual: `<=3600` linhas no orchestrator).
 
 ### Hatch progressivo (simple-first)
 
