@@ -1192,6 +1192,7 @@ export function buildGuardrailsConfigHelpLines(): string[] {
     "  /guardrails-config set longRunIntentQueue.orphanFailurePauseAfter 1",
     "  /guardrails-config set longRunIntentQueue.orphanFailureWindowMs 120000",
     "  /guardrails-config set longRunIntentQueue.defaultBoardMilestone \"MS-LOCAL\"",
+    "  /guardrails-config set longRunIntentQueue.defaultBoardMilestone unset",
     "  /guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint",
     "  /guardrails-config set contextWatchdog.userNotifyFromLevel compact",
     "",
@@ -2194,8 +2195,7 @@ export default function (pi: ExtensionAPI) {
         return false;
       }
 
-      const intent = buildBoardExecuteNextIntent(boardReadiness.milestone);
-      const intentText = encodeGuardrailsIntent(intent);
+      const intent = buildBoardExecuteNextIntent(boardReadiness.milestone); const intentText = encodeGuardrailsIntent(intent);
       const intentSummary = summarizeGuardrailsIntent(intent);
 
       // Detect silent execution failure: same task dispatched again within the rapid
