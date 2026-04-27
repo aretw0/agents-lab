@@ -62,6 +62,15 @@ Para calibrar execução contínua entre máquina local, container e CI:
 - logar no job um advisory curto (`runtime=ci provider=github-actions channel=...`) para trilha operacional;
 - fallback determinístico quando gate falhar: executar local/container com `/delivery-mode`, corrigir, e promover por PR revisado.
 
+### Budget de reinflação do orchestrator (`guardrails-core.ts`)
+
+Para manter a stack pronta para jornadas rasas e profundas sem acoplamento opinativo:
+
+- tratar `guardrails-core.ts` como **orquestrador de wiring**; lógica nova deve nascer em primitiva/surface dedicada (`guardrails-core-*.ts`);
+- quando uma mudança adicionar bloco grande no core (ordem de dezenas de linhas), priorizar extração no mesmo ciclo ou no slice imediatamente seguinte;
+- commands/tools novos devem registrar via módulo de superfície (`registerGuardrails*Surface`) para reduzir drift e facilitar adoção parcial pelos usuários;
+- manter smoke focal de contrato/superfície ao extrair, garantindo que API pública permaneça estável.
+
 ### Hatch progressivo (simple-first)
 
 Para primeiro contato de sessão/projeto, o hatch deve começar em trilha simples:

@@ -5028,6 +5028,24 @@
       "method": "test",
       "timestamp": "2026-04-26T23:06:00Z",
       "evidence": "TASK-BUD-153 slice 5: extraída superfície de delivery/state de `guardrails-core.ts` para módulo dedicado `guardrails-core-delivery-surface.ts` (comandos `/delivery-mode` e `/state-reconcile`, tools `delivery_mode_plan` e `state_reconcile_plan`), preservando contrato público por registro via orchestrator. Verificação smoke: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-state-reconcile.test.ts packages/pi-stack/test/smoke/guardrails-state-reconcile-surface.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 88/88 passed."
+    },
+    {
+      "id": "VER-BUD-309",
+      "target": "TASK-BUD-155",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-26T08:25:00Z",
+      "evidence": "TASK-BUD-155 slice 1: extração da superfície safe-mutation para `guardrails-core-safe-mutation-surface.ts` mantendo contratos de comando/tool no orchestrator. Validação: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-reexport.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 82/82 passed."
+    },
+    {
+      "id": "VER-BUD-310",
+      "target": "TASK-BUD-155",
+      "target_type": "task",
+      "status": "partial",
+      "method": "inspect",
+      "timestamp": "2026-04-26T08:26:00Z",
+      "evidence": "TASK-BUD-155 slice 2: runbook canônico atualizado com seção `Budget de reinflação do orchestrator (guardrails-core.ts)` em `docs/guides/project-canonical-pipeline.md`, explicitando regra primitive-first, extração via `registerGuardrails*Surface` e preservação de contrato público com smoke focal."
     }
   ]
 }
