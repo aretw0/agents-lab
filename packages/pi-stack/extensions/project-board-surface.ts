@@ -691,6 +691,8 @@ export function updateProjectTaskBoard(
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
     requireRationaleConsistency?: boolean;
+    requireRationaleOnComplete?: boolean;
+    requireRationaleConsistencyOnComplete?: boolean;
     syncRationaleToVerification?: boolean;
   },
 ): ProjectTaskUpdateResult {
@@ -783,6 +785,19 @@ export function updateProjectTaskBoard(
 
   const hasRationale = hasTaskRationale(next as TaskRecord, verificationMap);
   const rationaleConsistency = resolveTaskRationaleConsistency(next as TaskRecord, verificationMap);
+  const completingTask = next.status === "completed";
+  if (updates.requireRationaleOnComplete === true && completingTask && rationaleRequired && !hasRationale) {
+    return {
+      ok: false,
+      reason: "rationale-required-to-complete-sensitive-task",
+    };
+  }
+  if (updates.requireRationaleConsistencyOnComplete === true && completingTask && rationaleConsistency === "mismatch") {
+    return {
+      ok: false,
+      reason: "rationale-consistency-required-to-complete-task",
+    };
+  }
   if (updates.requireRationaleForSensitive === true && rationaleRequired && !hasRationale) {
     return {
       ok: false,
@@ -951,6 +966,16 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         description: "When true, blocks update if task-note rationale kind conflicts with linked verification rationale kind.",
       }),
     ),
+    require_rationale_on_complete: Type.Optional(
+      Type.Boolean({
+        description: "When true, blocks transition to completed for rationale-sensitive tasks still missing rationale evidence.",
+      }),
+    ),
+    require_rationale_consistency_on_complete: Type.Optional(
+      Type.Boolean({
+        description: "When true, blocks transition to completed when task-note and linked verification rationale kinds diverge.",
+      }),
+    ),
     sync_rationale_to_verification: Type.Optional(
       Type.Boolean({
         description: "When true and rationale payload is provided, appends rationale note to linked verification evidence.",
@@ -969,6 +994,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationale_text?: string;
       require_rationale_for_sensitive?: boolean;
       require_rationale_consistency?: boolean;
+      require_rationale_on_complete?: boolean;
+      require_rationale_consistency_on_complete?: boolean;
       sync_rationale_to_verification?: boolean;
     },
     _signal: AbortSignal,
@@ -983,6 +1010,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const rationaleText = typeof params?.rationale_text === "string" ? params.rationale_text : undefined;
     const requireRationaleForSensitive = params?.require_rationale_for_sensitive === true;
     const requireRationaleConsistency = params?.require_rationale_consistency === true;
+    const requireRationaleOnComplete = status === "completed" && params?.require_rationale_on_complete !== false;
+    const requireRationaleConsistencyOnComplete = params?.require_rationale_consistency_on_complete === true;
     const syncRationaleToVerification = params?.sync_rationale_to_verification === true;
 
     if (!taskId) {
@@ -1000,6 +1029,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       Boolean(params?.rationale_text) ||
       Boolean(params?.require_rationale_for_sensitive) ||
       Boolean(params?.require_rationale_consistency) ||
+      Boolean(params?.require_rationale_on_complete) ||
+      Boolean(params?.require_rationale_consistency_on_complete) ||
       Boolean(params?.sync_rationale_to_verification);
     if (!hasUpdate) {
       const out = { ok: false, reason: "no-updates-requested" };
@@ -1017,6 +1048,8 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       rationaleText,
       requireRationaleForSensitive,
       requireRationaleConsistency,
+      requireRationaleOnComplete,
+      requireRationaleConsistencyOnComplete,
       syncRationaleToVerification,
     });
     return {
@@ -1029,7 +1062,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     name: "board_update",
     label: "Board Update",
     description:
-      "Update .project/tasks through a constrained board surface (status, notes, rationale, optional sensitive-task enforcement, and optional verification sync).",
+      "Update .project/tasks through a constrained board surface (status, notes, rationale, completion gates, optional consistency enforcement, and optional verification sync).",
     parameters: updateParameters,
     execute: executeUpdate,
   });
@@ -1048,6 +1081,8 @@ export function updateProjectTaskProxy(
     rationaleText?: string;
     requireRationaleForSensitive?: boolean;
     requireRationaleConsistency?: boolean;
+    requireRationaleOnComplete?: boolean;
+    requireRationaleConsistencyOnComplete?: boolean;
     syncRationaleToVerification?: boolean;
   },
 ): ProjectTaskUpdateResult {

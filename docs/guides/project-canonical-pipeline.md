@@ -431,6 +431,8 @@ Contratos úteis (rationale-aware):
 - `board_update ... sync_rationale_to_verification=true` replica o rationale no `evidence` da VER vinculada (`task.verification`) quando houver, para manter task/VER alinhadas.
 - `board_update ... require_rationale_for_sensitive=true` bloqueia update quando a task é sensível e continua sem rationale após aplicar payload (reason=`rationale-required-for-sensitive-task`).
 - `board_update ... require_rationale_consistency=true` bloqueia update quando kind do rationale em task e VER vinculada divergem (reason=`rationale-consistency-mismatch`).
+- ao marcar `status=completed`, `board_update` aplica por padrão gate de rationale para task sensível (reason=`rationale-required-to-complete-sensitive-task`); override explícito: `require_rationale_on_complete=false`.
+- `board_update ... require_rationale_consistency_on_complete=true` bloqueia fechamento quando existe mismatch task↔VER (reason=`rationale-consistency-required-to-complete-task`).
 - `board_update` retorna `verificationSync` (`updated|already-present|missing-task-verification|not-found|skipped`) para auditoria rápida da propagação em VER.
 - quando `sync_rationale_to_verification=true` sem payload de rationale, update falha com `sync-requires-rationale-payload` (evita sync ambíguo).
 
@@ -529,7 +531,8 @@ Objetivo: preservar segurança do contexto sem exigir confirmação humana para 
 ### Milestone mode (control-plane long-run)
 Para rodar um milestone quase unattended no control plane, operar com um contrato explícito:
 
-- **main quests**: manter 1–3 tasks P0/P1 como trilha principal (ex.: `TASK-BUD-119`, `TASK-BUD-141`, `TASK-BUD-155`, `TASK-BUD-156`);
+- **semântica de milestone é user-defined**: pode ser release (minor/patch), épico interno, janela operacional ou outro alvo local; o fluxo não assume release específica.
+- **main quests**: manter 1–3 tasks P0/P1 como trilha principal (exemplos locais: `TASK-BUD-119`, `TASK-BUD-141`, `TASK-BUD-155`, `TASK-BUD-156`);
 - **side quests**: intercalar slices curtos de preparo/primitive-first (`TASK-BUD-144/145/146/149/153`) apenas quando não quebrar continuidade da trilha principal;
 - **stop conditions válidas**: (a) dúvida de requisito não resolvível por default seguro, (b) risco de segurança/perda de dados, (c) reload necessário para ativar código novo, (d) falha de teste sem mitigação segura no lote;
 - **prova obrigatória**: todo incremento técnico do milestone precisa terminar com smoke focal verde (evidence em `verification`) antes de avançar para o próximo bloco;

@@ -5235,6 +5235,15 @@
       "method": "inspect",
       "timestamp": "2026-04-27T15:58:00Z",
       "evidence": "Milestone bootstrap definido para execução long-run no control plane: `TASK-BUD-157` criado como umbrella P0 com dependências das main quests (119/141/155/156), critérios de aceite de autonomia/segurança e policy de prova por smoke. Runbook atualizado em `docs/guides/project-canonical-pipeline.md` com seção `Milestone mode (control-plane long-run)` (main-vs-side quests, stop conditions, prova obrigatória e cadência por lote)."
+    },
+    {
+      "id": "VER-BUD-332",
+      "target": "TASK-BUD-156",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T16:04:00Z",
+      "evidence": "Slices 181-210: completion-path rationale gates added to board surface. `updateProjectTaskBoard` now supports `requireRationaleOnComplete` and `requireRationaleConsistencyOnComplete`, with explicit reasons (`rationale-required-to-complete-sensitive-task`, `rationale-consistency-required-to-complete-task`). `board_update` adds `require_rationale_on_complete` and `require_rationale_consistency_on_complete`, and defaults to enforcing rationale when `status=completed` (opt-out via `require_rationale_on_complete=false`). Smoke expanded for function-level and tool-level completion gating, plus schema assertions. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 67/67 passed."
     }
   ]
 }

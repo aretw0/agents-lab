@@ -580,6 +580,37 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("updateProjectTaskBoard can enforce rationale on completion", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-complete-enforce-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-EC1", description: "Refactor crítico", status: "in-progress" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const blocked = updateProjectTaskBoard(cwd, "TASK-EC1", {
+        status: "completed",
+        requireRationaleOnComplete: true,
+      });
+      expect(blocked.ok).toBe(false);
+      expect(blocked.reason).toBe("rationale-required-to-complete-sensitive-task");
+
+      const ok = updateProjectTaskBoard(cwd, "TASK-EC1", {
+        status: "completed",
+        requireRationaleOnComplete: true,
+        rationaleKind: "refactor",
+        rationaleText: "explicar motivo antes do fechamento",
+      });
+      expect(ok.ok).toBe(true);
+      expect(ok.task?.status).toBe("completed");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("updateProjectTaskBoard can enforce rationale consistency", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-enforce-"));
     try {
@@ -612,6 +643,42 @@ describe("project-board-surface", () => {
       expect(synced.ok).toBe(true);
       expect(synced.task?.rationaleConsistency).toBe("consistent");
       expect(synced.verificationSync?.status).toBe("updated");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard can enforce rationale consistency on completion", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-consistency-complete-enforce-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-CEC1", description: "Refactor", status: "in-progress", verification: "VER-CEC1", notes: "[rationale:refactor] motivo" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-CEC1", target: "TASK-CEC1", status: "partial", method: "inspect", evidence: "[rationale:test-change] divergente" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const blocked = updateProjectTaskBoard(cwd, "TASK-CEC1", {
+        status: "completed",
+        requireRationaleConsistencyOnComplete: true,
+      });
+      expect(blocked.ok).toBe(false);
+      expect(blocked.reason).toBe("rationale-consistency-required-to-complete-task");
+
+      const ok = updateProjectTaskBoard(cwd, "TASK-CEC1", {
+        status: "completed",
+        requireRationaleConsistencyOnComplete: true,
+        rationaleKind: "refactor",
+        rationaleText: "alinhar rationale entre task e verificação",
+        syncRationaleToVerification: true,
+      });
+      expect(ok.ok).toBe(true);
+      expect(ok.task?.rationaleConsistency).toBe("consistent");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -908,6 +975,8 @@ describe("project-board-surface", () => {
     expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
     expect(updateTool?.parameters?.properties?.require_rationale_for_sensitive?.type).toBe("boolean");
     expect(updateTool?.parameters?.properties?.require_rationale_consistency?.type).toBe("boolean");
+    expect(updateTool?.parameters?.properties?.require_rationale_on_complete?.type).toBe("boolean");
+    expect(updateTool?.parameters?.properties?.require_rationale_consistency_on_complete?.type).toBe("boolean");
     expect(updateTool?.parameters?.properties?.sync_rationale_to_verification?.type).toBe("boolean");
   });
 
@@ -976,7 +1045,7 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect((blocked.details as any)?.ok).toBe(false);
-      expect((blocked.details as any)?.reason).toBe("rationale-required-for-sensitive-task");
+      expect((blocked.details as any)?.reason).toBe("rationale-required-to-complete-sensitive-task");
 
       const ok = await updateTool.execute(
         "tc-board-update-enforce-ok",
@@ -992,6 +1061,43 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect((ok.details as any)?.ok).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update enforces rationale on complete by default", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-complete-tool-default-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [{ id: "TASK-TCOMP1", description: "Refactor do orchestrator", status: "in-progress" }],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const blocked = await updateTool.execute(
+        "tc-board-update-complete-default-blocked",
+        { task_id: "TASK-TCOMP1", status: "completed" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((blocked.details as any)?.ok).toBe(false);
+      expect((blocked.details as any)?.reason).toBe("rationale-required-to-complete-sensitive-task");
+
+      const optOut = await updateTool.execute(
+        "tc-board-update-complete-default-optout",
+        { task_id: "TASK-TCOMP1", status: "completed", require_rationale_on_complete: false },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((optOut.details as any)?.ok).toBe(true);
+      expect((optOut.details as any)?.task?.status).toBe("completed");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
