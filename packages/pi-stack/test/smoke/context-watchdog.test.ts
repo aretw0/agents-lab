@@ -451,10 +451,22 @@ describe("context-watchdog", () => {
 		expect(prompt).not.toContain("…");
 	});
 
-	it("preserves tail context when truncating long next actions", () => {
+	it("keeps medium command next-actions readable without opaque truncation", () => {
 		const prompt = buildAutoResumePromptFromHandoff({
 			next_actions: [
-				"Validação opcional pós-reload executada em smoke: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts com telemetry completa e sem regressão operacional => 38/38 passed",
+				"Validação opcional pós-reload executada em smoke: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 38/38 passed",
+			],
+		} as any);
+		expect(prompt).toContain("cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts");
+		expect(prompt).toContain("38/38 passed");
+		expect(prompt).not.toContain("[truncated:+");
+		expect(prompt).not.toContain("[snip]");
+	});
+
+	it("preserves tail context when truncating very long next actions", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			next_actions: [
+				"Validação opcional pós-reload executada em smoke: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts com telemetry completa e sem regressão operacional " + "x".repeat(260) + " => 38/38 passed",
 			],
 		} as any);
 		expect(prompt).toContain("[snip]");

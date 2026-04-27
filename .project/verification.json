@@ -5298,6 +5298,15 @@
       "method": "test",
       "timestamp": "2026-04-27T17:16:30Z",
       "evidence": "Milestone propagation hardened in colony task-sync path. `upsertProjectTaskFromColonySignal` now accepts optional milestone label and normalizes it deterministically before create/update writes; `ensureRecoveryTaskForCandidate` inherits/backfills milestone from source task to recovery task to preserve user-defined milestone scoping through candidate-promotion flows. Tests updated: `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` (new milestone propagation case) and `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (recovery milestone inherit/backfill assertions). Validation command: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 90/90 passed."
+    },
+    {
+      "id": "VER-BUD-339",
+      "target": "TASK-BUD-150",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-27T20:20:30Z",
+      "evidence": "Auto-resume prompt hardening for command readability: `buildAutoResumePromptEnvelopeFromHandoff` now applies an expanded per-item truncation window for command-like next actions (`cmd.exe /c`, `npx vitest run`, `npm/pnpm/yarn`). Medium command actions are preserved without opaque truncation while very long actions still keep explicit `[snip]` + `[truncated:+N chars]` markers. Updated smoke tests in `packages/pi-stack/test/smoke/context-watchdog.test.ts` and validated with `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 62/62 passed."
     }
   ]
 }

@@ -136,6 +136,7 @@ type PromptCollectionConfig = {
 	values: string[];
 	maxChars: number;
 	limit: number;
+	maxCharsForValue?: (value: string, defaultMaxChars: number) => number;
 };
 
 function preparePromptCollection(config: PromptCollectionConfig): {
@@ -147,7 +148,10 @@ function preparePromptCollection(config: PromptCollectionConfig): {
 	let dedupedCount = 0;
 	let truncatedCount = 0;
 	for (const raw of config.values) {
-		const normalized = truncateForPrompt(raw, config.maxChars);
+		const maxChars = config.maxCharsForValue
+			? config.maxCharsForValue(raw, config.maxChars)
+			: config.maxChars;
+		const normalized = truncateForPrompt(raw, maxChars);
 		if (normalized.includes(TRUNCATION_MARKER_PREFIX)) {
 			truncatedCount += 1;
 		}
@@ -170,6 +174,16 @@ function preparePromptCollection(config: PromptCollectionConfig): {
 			droppedByLimitCount,
 		},
 	};
+}
+
+function shouldPreferLongerCommandWindow(value: string): boolean {
+	const normalized = String(value ?? "").toLowerCase();
+	if (!normalized) return false;
+	return /\bcmd\.exe\s*\/c\b/.test(normalized)
+		|| /\bnpx\s+vitest\s+run\b/.test(normalized)
+		|| /\bnpm\s+run\b/.test(normalized)
+		|| /\bpnpm\s+/.test(normalized)
+		|| /\byarn\s+/.test(normalized);
 }
 
 function extractTaskIdsFromTextLines(values: string[], limit = 3): string[] {
@@ -225,6 +239,11 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 			.filter((line) => !line.startsWith(CONTEXT_WATCH_ACTION_PREFIX)),
 		maxChars: 140,
 		limit: 2,
+		maxCharsForValue: (value, defaultMaxChars) => (
+			shouldPreferLongerCommandWindow(value)
+				? Math.max(defaultMaxChars, 220)
+				: defaultMaxChars
+		),
 	});
 
 	const lines = [
