@@ -5469,6 +5469,15 @@
       "method": "test",
       "timestamp": "2026-04-27T21:41:20Z",
       "evidence": "Milestone-scope diagnostics expanded to lane status path. `parseLaneQueueBoardNextMilestone` now recognizes both `board-next` and `status` command prefixes, enabling scoped readiness checks with `--milestone` / `-m` / `--no-milestone` on `/lane-queue status`. Guardrails runtime status now resolves readiness against the effective selection and surfaces `statusMilestone=<label|n/a>@<source>` to distinguish explicit/default/cleared scope. Lane help/usage updated accordingly. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 81/81 passed."
+    },
+    {
+      "id": "VER-BUD-358",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T21:45:20Z",
+      "evidence": "Canonical dispatch parity completed for board-next immediate path: in `guardrails-core.ts`, idle-lane `board-next` now dispatches `board.execute-next` (milestone-aware) instead of `board.execute-task` snapshot, while keeping `nextTaskId` in audit/notify/loop markers for operator observability. This aligns immediate dispatch with queued fallback and auto-advance semantics under a single next-envelope contract. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-intent-bus.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 88/88 passed."
     }
   ]
 }

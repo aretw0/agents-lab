@@ -91,7 +91,7 @@ import {
   type LongRunProviderTransientRetryConfig,
 } from "./guardrails-core-provider-retry";
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
-import { buildBoardExecuteTaskIntent, buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
+import { buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardrails-core-behavior-routing";
 import { buildShellRoutingStatusLabel, buildShellRoutingSystemPrompt, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
@@ -3281,24 +3281,10 @@ export default function (pi: ExtensionAPI) {
             : `lane-queue: board-next queued next=${nextTaskId} (total=${queued.queuedCount})`, "info");
           return;
         }
-        const intent = buildBoardExecuteTaskIntent(nextTaskId);
-        if (!intent) {
-          appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
-            atIso: new Date().toISOString(),
-            reason: "invalid-next-task-id",
-            taskId: nextTaskId,
-            selectionPolicy: boardReadiness.selectionPolicy,
-          });
-          ctx.ui.notify(
-            `lane-queue: board-next blocked (invalid next task id). fallback: run task manually ${nextTaskId}`,
-            "warning",
-          );
-          return;
-        }
-        const intentText = encodeGuardrailsIntent(intent); const intentSummary = summarizeGuardrailsIntent(intent);
+        const intent = buildBoardExecuteNextIntent(boardNextMilestone); const intentText = encodeGuardrailsIntent(intent); const intentSummary = summarizeGuardrailsIntent(intent);
         appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch", {
           atIso: new Date().toISOString(),
-          taskId: intent.taskId,
+          taskId: nextTaskId,
           selectionPolicy: boardReadiness.selectionPolicy,
           milestone: boardNextMilestone,
           milestoneSource: boardNextSelection.source,
@@ -3307,10 +3293,10 @@ export default function (pi: ExtensionAPI) {
           intentVersion: intent.version,
           intentSummary,
         });
-        ctx.ui.notify(`lane-queue: board-next dispatch ${intent.taskId}`, "info");
+        ctx.ui.notify(`lane-queue: board-next dispatch ${nextTaskId}`, "info");
         try {
           pi.sendUserMessage(intentText, { deliverAs: "followUp" });
-          markLoopDispatch(ctx, `board-${intent.taskId}`);
+          markLoopDispatch(ctx, `board-${nextTaskId}`);
           scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
@@ -3332,7 +3318,7 @@ export default function (pi: ExtensionAPI) {
           const errorClass = failureTrack.errorClass;
           appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch-failed", {
             atIso: new Date().toISOString(),
-            taskId: intent.taskId,
+            taskId: nextTaskId,
             error: message,
             errorClass,
             errorFingerprint: failureTrack.fingerprint,
@@ -3352,8 +3338,8 @@ export default function (pi: ExtensionAPI) {
           });
           ctx.ui.notify(
             queued.deduped
-              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para next=${intent.taskId} (total=${queued.queuedCount})`
-              : `lane-queue: board-next dispatch failed (${message}). fallback queued next=${intent.taskId} (total=${queued.queuedCount})`,
+              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para next=${nextTaskId} (total=${queued.queuedCount})`
+              : `lane-queue: board-next dispatch failed (${message}). fallback queued next=${nextTaskId} (total=${queued.queuedCount})`,
             "warning",
           );
         }
