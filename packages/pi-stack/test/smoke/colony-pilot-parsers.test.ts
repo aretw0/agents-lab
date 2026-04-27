@@ -1352,6 +1352,7 @@ describe("colony-pilot parsers", () => {
 						id: "colony-c1",
 						status: "in-progress",
 						description: "[COLONY] test",
+						milestone: "MS-LOCAL",
 					},
 				],
 			}),
@@ -1384,6 +1385,7 @@ describe("colony-pilot parsers", () => {
 		);
 		expect(recovery).toBeDefined();
 		expect(recovery.status).toBe("planned");
+		expect(recovery.milestone).toBe("MS-LOCAL");
 		expect(recovery.notes).toMatch(/auto-queued/);
 		expect(recovery.notes).toMatch(/file inventory/);
 
@@ -1401,6 +1403,7 @@ describe("colony-pilot parsers", () => {
 						id: "colony-c1",
 						status: "in-progress",
 						description: "[COLONY] test",
+						milestone: "MS-LOCAL",
 					},
 					{
 						id: "colony-c1-promotion",
@@ -1436,6 +1439,7 @@ describe("colony-pilot parsers", () => {
 			(t: { id: string }) => t.id === "colony-c1-promotion",
 		);
 		expect(promotions.length).toBe(1);
+		expect(promotions[0]?.milestone).toBe("MS-LOCAL");
 
 		rmSync(dir, { recursive: true, force: true });
 	});

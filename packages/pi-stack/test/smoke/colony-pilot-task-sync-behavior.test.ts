@@ -45,6 +45,40 @@ describe("colony-pilot task-sync behavior", () => {
 		}
 	});
 
+	it("propagates milestone labels into created/updated synced tasks", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-milestone-"));
+		try {
+			const launch = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "launched", id: "c-ms" },
+				{
+					config: cfg({ createOnLaunch: true }),
+					source: "ant_colony",
+					milestone: "  MS   LOCAL  ",
+				},
+			);
+			expect(launch.changed).toBe(true);
+
+			const progress = upsertProjectTaskFromColonySignal(
+				cwd,
+				{ phase: "running", id: "c-ms" },
+				{
+					config: cfg(),
+					taskIdOverride: launch.taskId,
+					source: "ant_colony",
+					milestone: "MS-REMOTE",
+				},
+			);
+			expect(progress.changed).toBe(true);
+
+			const block = readProjectTasksBlock(cwd);
+			const task = block.tasks.find((t) => t.id === launch.taskId);
+			expect(task?.milestone).toBe("MS-REMOTE");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("does not create task on launched when createOnLaunch is disabled", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "pi-task-sync-no-launch-"));
 		try {

@@ -5289,6 +5289,15 @@
       "method": "test",
       "timestamp": "2026-04-27T17:08:00Z",
       "evidence": "Milestone-scope substrate advanced from board metadata into control-plane selection. Added `milestone?: string` to canonical task item shape (`colony-pilot-task-sync`), milestone-aware board readiness (`evaluateBoardLongRunReadiness(... milestone)`), and lane command parsing for scoped execution (`/lane-queue board-next --milestone <label>` or `milestone=<label>`). Audits for blocked/queued/dispatch/failed board intents now include milestone when provided. Lane help/docs updated for discoverability. Smoke expanded for lane parser/help and board-readiness milestone behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/guardrails-board-readiness.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 126/126 passed."
+    },
+    {
+      "id": "VER-BUD-338",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T17:16:30Z",
+      "evidence": "Milestone propagation hardened in colony task-sync path. `upsertProjectTaskFromColonySignal` now accepts optional milestone label and normalizes it deterministically before create/update writes; `ensureRecoveryTaskForCandidate` inherits/backfills milestone from source task to recovery task to preserve user-defined milestone scoping through candidate-promotion flows. Tests updated: `packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts` (new milestone propagation case) and `packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` (recovery milestone inherit/backfill assertions). Validation command: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-task-sync-behavior.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts` => 90/90 passed."
     }
   ]
 }

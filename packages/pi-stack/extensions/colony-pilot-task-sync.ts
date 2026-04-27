@@ -209,6 +209,13 @@ export function appendNote(
 	return keep.join("\n");
 }
 
+function normalizeMilestoneLabel(input: unknown): string | undefined {
+	if (typeof input !== "string") return undefined;
+	const normalized = input.replace(/\s+/g, " ").trim();
+	if (!normalized) return undefined;
+	return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
+}
+
 function colonyPhaseToProjectTaskStatus(
 	phase: ColonyPhase,
 	requireHumanClose: boolean,
@@ -343,6 +350,7 @@ export function upsertProjectTaskFromColonySignal(
 		goal?: string;
 		taskIdOverride?: string;
 		source?: "ant_colony" | "manual";
+		milestone?: string;
 	},
 ): { changed: boolean; taskId: string; status: ProjectTaskStatus } {
 	const cfg = options.config;
@@ -367,6 +375,7 @@ export function upsertProjectTaskFromColonySignal(
 		signal.phase === "budget_exceeded";
 	const origin = options.source ?? "manual";
 	const goalLabel = options.goal?.trim() || `colony ${signal.id}`;
+	const milestone = normalizeMilestoneLabel(options.milestone);
 
 	const line =
 		signal.phase === "completed" && cfg.requireHumanClose
@@ -383,6 +392,7 @@ export function upsertProjectTaskFromColonySignal(
 			description: `[COLONY:${origin}] ${goalLabel}`,
 			status: nextStatus,
 			notes: appendNote(undefined, line, cfg.maxNoteLines),
+			...(milestone ? { milestone } : {}),
 		});
 		writeProjectTasksBlock(cwd, block);
 		return { changed: true, taskId, status: nextStatus };
@@ -400,6 +410,11 @@ export function upsertProjectTaskFromColonySignal(
 
 	if (cfg.trackProgress) {
 		current.notes = appendNote(current.notes, line, cfg.maxNoteLines);
+		changed = true;
+	}
+
+	if (milestone && current.milestone !== milestone) {
+		current.milestone = milestone;
 		changed = true;
 	}
 
@@ -426,6 +441,9 @@ export function ensureRecoveryTaskForCandidate(
 		sanitizeTaskSlug(`${options.sourceTaskId}-${suffix}`) ||
 		`${options.sourceTaskId}-promotion`;
 	const idx = block.tasks.findIndex((t) => t.id === recoveryTaskId);
+	const sourceMilestone = normalizeMilestoneLabel(
+		block.tasks.find((t) => t.id === options.sourceTaskId)?.milestone,
+	);
 	const now = new Date().toISOString();
 	const issueLine =
 		options.issues.length > 0
@@ -448,6 +466,7 @@ export function ensureRecoveryTaskForCandidate(
 			depends_on: [options.sourceTaskId],
 			acceptance_criteria: checklist,
 			notes: appendNote(undefined, line, options.config.maxNoteLines),
+			...(sourceMilestone ? { milestone: sourceMilestone } : {}),
 		});
 		writeProjectTasksBlock(cwd, block);
 		return { taskId: recoveryTaskId, changed: true };
@@ -466,6 +485,9 @@ export function ensureRecoveryTaskForCandidate(
 		task.acceptance_criteria.length === 0
 	) {
 		task.acceptance_criteria = checklist;
+	}
+	if (sourceMilestone && task.milestone !== sourceMilestone) {
+		task.milestone = sourceMilestone;
 	}
 	writeProjectTasksBlock(cwd, block);
 	return { taskId: recoveryTaskId, changed: true };
