@@ -67,7 +67,6 @@ import {
   markLongRunLoopRuntimeHealthy,
   isLongRunLoopLeaseExpired,
   shouldBlockRapidSameTaskRedispatch,
-  BOARD_RAPID_REDISPATCH_WINDOW_MS,
   type LongRunIntentQueueConfig,
   type AutoDrainGateReason,
   type BoardAutoAdvanceGateReason,
@@ -885,6 +884,15 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
     description: "Failure streak threshold before stop-condition boundary.",
   },
   {
+    key: "longRunIntentQueue.rapidRedispatchWindowMs",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "rapidRedispatchWindowMs"],
+    type: "number",
+    min: 1_000,
+    max: 1_800_000,
+    reloadRequired: false,
+    description: "Window used to block rapid same-task board redispatch after silent failures.",
+  },
+  {
     key: "longRunIntentQueue.forceNowPrefix",
     path: ["piStack", "guardrailsCore", "longRunIntentQueue", "forceNowPrefix"],
     type: "string",
@@ -1167,6 +1175,7 @@ export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string,
     "longRunIntentQueue.autoDrainIdleStableMs": queueCfg.autoDrainIdleStableMs,
     "longRunIntentQueue.autoDrainBatchSize": queueCfg.autoDrainBatchSize,
     "longRunIntentQueue.dispatchFailureBlockAfter": queueCfg.dispatchFailureBlockAfter,
+    "longRunIntentQueue.rapidRedispatchWindowMs": queueCfg.rapidRedispatchWindowMs,
     "longRunIntentQueue.forceNowPrefix": queueCfg.forceNowPrefix,
     "pragmaticAutonomy.enabled": autonomyCfg.enabled,
     "pragmaticAutonomy.noObviousQuestions": autonomyCfg.noObviousQuestions,
@@ -2158,7 +2167,7 @@ export default function (pi: ExtensionAPI) {
         lastDispatchItemId: longRunLoopRuntimeState.lastDispatchItemId,
         lastDispatchAtIso: longRunLoopRuntimeState.lastDispatchAtIso,
         nowMs,
-        windowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+        windowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
       })) {
         const sinceMs = nowMs - new Date(longRunLoopRuntimeState.lastDispatchAtIso!).getTime();
         const message = `task ${intent.taskId} re-dispatched ${Math.round(sinceMs / 1000)}s after last — possible silent execution failure (orphaned function_call_output?)`;
@@ -2168,7 +2177,7 @@ export default function (pi: ExtensionAPI) {
           reason,
           taskId: intent.taskId,
           sinceLastDispatchMs: sinceMs,
-          rapidRedispatchWindowMs: BOARD_RAPID_REDISPATCH_WINDOW_MS,
+          rapidRedispatchWindowMs: longRunIntentQueueConfig.rapidRedispatchWindowMs,
           consecutiveFailuresNow: longRunLoopRuntimeState.consecutiveDispatchFailures,
           runtimeCodeState,
         });
@@ -3446,7 +3455,7 @@ export default function (pi: ExtensionAPI) {
 
       ctx.ui.notify(
         [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
+          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
           ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
           ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
             ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]

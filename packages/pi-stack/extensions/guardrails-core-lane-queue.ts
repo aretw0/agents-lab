@@ -11,6 +11,7 @@ export interface LongRunIntentQueueConfig {
   autoDrainBatchSize: number;
   autoDrainIdleStableMs: number;
   dispatchFailureBlockAfter: number;
+  rapidRedispatchWindowMs: number;
 }
 
 export interface DeferredIntentItem {
@@ -59,6 +60,7 @@ export const DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG: LongRunIntentQueueConfig = {
   autoDrainBatchSize: 1,
   autoDrainIdleStableMs: 1500,
   dispatchFailureBlockAfter: 3,
+  rapidRedispatchWindowMs: 5 * 60 * 1000,
 };
 
 const DEFAULT_LONG_RUN_LOOP_LEASE_TTL_MS = 30_000;
@@ -112,6 +114,7 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
     const autoDrainBatchSizeRaw = Number(cfg?.autoDrainBatchSize);
     const autoDrainIdleStableMsRaw = Number(cfg?.autoDrainIdleStableMs);
     const dispatchFailureBlockAfterRaw = Number(cfg?.dispatchFailureBlockAfter);
+    const rapidRedispatchWindowMsRaw = Number(cfg?.rapidRedispatchWindowMs);
     return {
       enabled: cfg?.enabled !== false,
       requireActiveLongRun: cfg?.requireActiveLongRun !== false,
@@ -135,6 +138,10 @@ export function resolveLongRunIntentQueueConfig(cwd: string): LongRunIntentQueue
         Number.isFinite(dispatchFailureBlockAfterRaw) && dispatchFailureBlockAfterRaw > 0
           ? Math.max(1, Math.min(20, Math.floor(dispatchFailureBlockAfterRaw)))
           : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.dispatchFailureBlockAfter,
+      rapidRedispatchWindowMs:
+        Number.isFinite(rapidRedispatchWindowMsRaw) && rapidRedispatchWindowMsRaw >= 1_000
+          ? Math.max(1_000, Math.min(30 * 60 * 1000, Math.floor(rapidRedispatchWindowMsRaw)))
+          : DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG.rapidRedispatchWindowMs,
     };
   } catch {
     return DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;

@@ -81,6 +81,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainBatchSize).toBe(1);
       expect(cfg.autoDrainIdleStableMs).toBe(1500);
       expect(cfg.dispatchFailureBlockAfter).toBe(3);
+      expect(cfg.rapidRedispatchWindowMs).toBe(BOARD_RAPID_REDISPATCH_WINDOW_MS);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
@@ -137,6 +138,19 @@ describe("guardrails-core long-run intent queue", () => {
       expect(boolOk.ok).toBe(true);
       if (boolOk.ok) expect(boolOk.value).toBe(false);
 
+      const rapidWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.rapidRedispatchWindowMs");
+      expect(rapidWindowSpec).toBeDefined();
+      if (!rapidWindowSpec) return;
+      const rapidWindowOk = coerceGuardrailsRuntimeConfigValue("45000", rapidWindowSpec);
+      expect(rapidWindowOk.ok).toBe(true);
+
+      const setRapidWindow = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.rapidRedispatchWindowMs",
+        rawValue: "45000",
+      });
+      expect(setRapidWindow.ok).toBe(true);
+
       const modelLevelSpec = resolveGuardrailsRuntimeConfigSpec("contextWatchdog.modelSteeringFromLevel");
       expect(modelLevelSpec).toBeDefined();
       if (!modelLevelSpec) return;
@@ -181,6 +195,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(setAutoCompactCooldown.ok).toBe(true);
 
       const contextSnapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
+      expect(contextSnapshot["longRunIntentQueue.rapidRedispatchWindowMs"]).toBe(45000);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.userNotifyFromLevel"]).toBe("checkpoint");
       expect(contextSnapshot["contextWatchdog.autoCompact"]).toBe(false);
@@ -556,6 +571,7 @@ describe("guardrails-core long-run intent queue", () => {
                 autoDrainBatchSize: 4,
                 autoDrainIdleStableMs: 5000,
                 dispatchFailureBlockAfter: 5,
+                rapidRedispatchWindowMs: 45_000,
                 providerTransientRetry: {
                   enabled: true,
                   maxAttempts: 8,
@@ -578,6 +594,7 @@ describe("guardrails-core long-run intent queue", () => {
       expect(cfg.autoDrainBatchSize).toBe(4);
       expect(cfg.autoDrainIdleStableMs).toBe(5000);
       expect(cfg.dispatchFailureBlockAfter).toBe(5);
+      expect(cfg.rapidRedispatchWindowMs).toBe(45_000);
 
       const retryCfg = resolveLongRunProviderTransientRetryConfig(cwd);
       expect(retryCfg.enabled).toBe(true);
