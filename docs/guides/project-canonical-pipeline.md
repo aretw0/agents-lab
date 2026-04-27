@@ -227,7 +227,7 @@ Exemplos:
 - `/guardrails-config set longRunIntentQueue.enabled true`
 - `/guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3`
 - `/guardrails-config set longRunIntentQueue.identicalFailureWindowMs 120000`
-- `longRunIntentQueue.dedupeWindowMs` (até publicar no `/guardrails-config`) via `.pi/settings.json`
+- `/guardrails-config set longRunIntentQueue.dedupeWindowMs 120000`
 - `/guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint`
 - `/guardrails-config set contextWatchdog.userNotifyFromLevel compact`
 - `/guardrails-config set contextWatchdog.autoCompact false`

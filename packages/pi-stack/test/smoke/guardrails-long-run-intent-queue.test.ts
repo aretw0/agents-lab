@@ -157,6 +157,19 @@ describe("guardrails-core long-run intent queue", () => {
       });
       expect(setRapidWindow.ok).toBe(true);
 
+      const dedupeWindowSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.dedupeWindowMs");
+      expect(dedupeWindowSpec).toBeDefined();
+      if (!dedupeWindowSpec) return;
+      const dedupeWindowOk = coerceGuardrailsRuntimeConfigValue("50000", dedupeWindowSpec);
+      expect(dedupeWindowOk.ok).toBe(true);
+
+      const setDedupeWindow = buildGuardrailsRuntimeConfigSetResult({
+        cwd,
+        key: "longRunIntentQueue.dedupeWindowMs",
+        rawValue: "50000",
+      });
+      expect(setDedupeWindow.ok).toBe(true);
+
       const identicalPauseSpec = resolveGuardrailsRuntimeConfigSpec("longRunIntentQueue.identicalFailurePauseAfter");
       expect(identicalPauseSpec).toBeDefined();
       if (!identicalPauseSpec) return;
@@ -228,6 +241,7 @@ describe("guardrails-core long-run intent queue", () => {
 
       const contextSnapshot = readGuardrailsRuntimeConfigSnapshot(cwd);
       expect(contextSnapshot["longRunIntentQueue.rapidRedispatchWindowMs"]).toBe(45000);
+      expect(contextSnapshot["longRunIntentQueue.dedupeWindowMs"]).toBe(50000);
       expect(contextSnapshot["longRunIntentQueue.identicalFailurePauseAfter"]).toBe(4);
       expect(contextSnapshot["longRunIntentQueue.identicalFailureWindowMs"]).toBe(90000);
       expect(contextSnapshot["contextWatchdog.modelSteeringFromLevel"]).toBe("checkpoint");

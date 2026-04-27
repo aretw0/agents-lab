@@ -96,9 +96,7 @@ import {
   parseGuardrailsIntent,
   summarizeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
-import {
-  resolveGuardrailsIntentRuntimeDecision,
-} from "./guardrails-core-intent-runtime";
+import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 import {
   buildBehaviorRouteSystemPrompt,
   classifyBehaviorRoute,
@@ -115,9 +113,7 @@ import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-su
 import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
-import {
-  normalizeContextWatchdogConfig,
-} from "./context-watchdog-config";
+import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import {
   readProjectSettings as readProjectSettingsImpl,
   writeProjectSettings as writeProjectSettingsImpl,
@@ -201,10 +197,7 @@ export {
   summarizeGuardrailsIntent,
 } from "./guardrails-core-intent-bus";
 
-export {
-  resolveGuardrailsIntentRuntimeDecision,
-} from "./guardrails-core-intent-runtime";
-
+export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 export {
   buildShellRoutingStatusLabel,
   buildShellRoutingStatusLines,
@@ -217,12 +210,10 @@ export {
   resolveCommandRoutingProfile,
   wrapCommandForHostShell,
 } from "./guardrails-core-shell-routing";
-
 export {
   formatDeliveryModePlan,
   resolveDeliveryModePlan,
 } from "./guardrails-core-delivery-mode";
-
 export {
   formatStateReconcilePlan,
   resolveStateReconcilePlan,
@@ -898,6 +889,15 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
     description: "Window used to block rapid same-task board redispatch after silent failures.",
   },
   {
+    key: "longRunIntentQueue.dedupeWindowMs",
+    path: ["piStack", "guardrailsCore", "longRunIntentQueue", "dedupeWindowMs"],
+    type: "number",
+    min: 1_000,
+    max: 1_800_000,
+    reloadRequired: false,
+    description: "Window used to dedupe equivalent deferred intents before enqueue.",
+  },
+  {
     key: "longRunIntentQueue.identicalFailurePauseAfter",
     path: ["piStack", "guardrailsCore", "longRunIntentQueue", "identicalFailurePauseAfter"],
     type: "number",
@@ -1199,6 +1199,7 @@ export function readGuardrailsRuntimeConfigSnapshot(cwd: string): Record<string,
     "longRunIntentQueue.autoDrainBatchSize": queueCfg.autoDrainBatchSize,
     "longRunIntentQueue.dispatchFailureBlockAfter": queueCfg.dispatchFailureBlockAfter,
     "longRunIntentQueue.rapidRedispatchWindowMs": queueCfg.rapidRedispatchWindowMs,
+    "longRunIntentQueue.dedupeWindowMs": queueCfg.dedupeWindowMs,
     "longRunIntentQueue.identicalFailurePauseAfter": queueCfg.identicalFailurePauseAfter,
     "longRunIntentQueue.identicalFailureWindowMs": queueCfg.identicalFailureWindowMs,
     "longRunIntentQueue.forceNowPrefix": queueCfg.forceNowPrefix,
@@ -1234,6 +1235,7 @@ export function buildGuardrailsConfigHelpLines(): string[] {
     "  /guardrails-config get longRunIntentQueue.maxItems",
     "  /guardrails-config set longRunIntentQueue.maxItems 80",
     "  /guardrails-config set longRunIntentQueue.enabled true",
+    "  /guardrails-config set longRunIntentQueue.dedupeWindowMs 120000",
     "  /guardrails-config set longRunIntentQueue.identicalFailurePauseAfter 3",
     "  /guardrails-config set contextWatchdog.modelSteeringFromLevel checkpoint",
     "  /guardrails-config set contextWatchdog.userNotifyFromLevel compact",
