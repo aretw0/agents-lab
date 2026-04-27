@@ -5667,6 +5667,15 @@
       "method": "test",
       "timestamp": "2026-04-27T22:42:20Z",
       "evidence": "Introduced `shouldWarnLaneEvidence` primitive in `guardrails-core-lane-queue.ts` and wired `/lane-queue evidence` notify severity in orchestrator to use it (`warning` when readiness is false OR milestone parity mismatch). This removes inline severity branching and centralizes diagnostics policy. Smoke coverage added in `guardrails-long-run-intent-queue.test.ts` for all policy branches. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 84/84 passed."
+    },
+    {
+      "id": "VER-BUD-380",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T22:43:20Z",
+      "evidence": "Documentation parity follow-up: updated `docs/guides/project-canonical-pipeline.md` to explicitly state `/lane-queue evidence` notify severity policy (`warning` when `readyForTaskBud125=no` or `scopeParity.matches=no`), matching runtime behavior implemented via `shouldWarnLaneEvidence`. Validation sanity: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/installability.test.ts` => 30/30 passed."
     }
   ]
 }
