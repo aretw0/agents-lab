@@ -5190,6 +5190,15 @@
       "method": "test",
       "timestamp": "2026-04-27T12:51:00Z",
       "evidence": "Slices 1-30 for rationale-aware board flow implemented in `project-board-surface`: added canonical rationale kinds (`refactor|test-change|risk-control|other`), `board_update` support for `rationale_kind` + `rationale_text` (stored as `[rationale:<kind>] ...` note), explicit guardrails for partial/invalid rationale payloads, and `board_query needs_rationale=true` filtering for tasks/verifications that are rationale-sensitive but missing communicable reason. Query rows now expose `rationaleRequired` and `hasRationale`, including verification-evidence linkage from task `verification` IDs. Docs updated in `project-canonical-pipeline.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 45/45 passed; focal cross-surface pack => 134/134 passed."
+    },
+    {
+      "id": "VER-BUD-327",
+      "target": "TASK-BUD-156",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-27T13:00:00Z",
+      "evidence": "Slices 31-80: rationale-aware board contracts expanded with deterministic filtering/enforcement. `project-board-surface` now exposes `rationaleKind` in task/verification rows, supports `rationale_required` filter in `board_query`, and adds opt-in write gate `require_rationale_for_sensitive` in `board_update`/`updateProjectTaskBoard` that blocks sensitive-task updates without communicable rationale (reason=`rationale-required-for-sensitive-task`) before persistence. Added extraction/linking helpers (`extractRationaleKindFromText`, `resolveTaskRationaleKind`) and preserved compatibility with existing `needs_rationale` + partial rationale guards. Docs updated (`project-canonical-pipeline.md`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 51/51 passed; focal cross-surface pack => 140/140 passed."
     }
   ]
 }

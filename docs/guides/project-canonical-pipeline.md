@@ -423,7 +423,9 @@ A superfície canônica de board usa apenas `board_query` e `board_update`.
 
 Contratos úteis (rationale-aware):
 - `board_query ... needs_rationale=true` retorna apenas linhas sensíveis (refactor/test-change) ainda sem motivo comunicável registrado.
+- `board_query ... rationale_required=true|false` permite auditar somente itens sensíveis ou não sensíveis, mantendo triagem determinística.
 - `board_update ... rationale_kind=<refactor|test-change|risk-control|other> rationale_text="..."` grava nota canônica no ticket (`[rationale:<kind>] ...`) para manter trilha auditável junto de VER.
+- `board_update ... require_rationale_for_sensitive=true` bloqueia update quando a task é sensível e continua sem rationale após aplicar payload (reason=`rationale-required-for-sensitive-task`).
 
 Substituição direta:
 - `project_proxy_query` -> `board_query`

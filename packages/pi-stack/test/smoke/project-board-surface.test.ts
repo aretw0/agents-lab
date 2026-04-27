@@ -266,6 +266,56 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("queryProjectTasks expõe rationaleKind derivado de nota ou verificação", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-kind-tasks-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-K1", description: "Refactor do módulo", status: "in-progress", notes: "[rationale:refactor] separar responsabilidades" },
+          { id: "TASK-K2", description: "Ajuste de teste legado", status: "in-progress", verification: "VER-K2" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-K2", target: "TASK-K2", status: "partial", method: "test", evidence: "[rationale:test-change] estabilizar suite" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const result = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
+      const k1 = result.rows.find((row) => row.id === "TASK-K1");
+      const k2 = result.rows.find((row) => row.id === "TASK-K2");
+      expect(k1?.rationaleKind).toBe("refactor");
+      expect(k2?.rationaleKind).toBe("test-change");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("queryProjectTasks supports rationaleRequired filter", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-required-tasks-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-S1", description: "Refactor do parser", status: "in-progress" },
+          { id: "TASK-S2", description: "Atualizar docs", status: "in-progress" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const sensitive = queryProjectTasks(cwd, { rationaleRequired: true, limit: 10 });
+      expect(sensitive.filtered).toBe(1);
+      expect(sensitive.rows[0]?.id).toBe("TASK-S1");
+
+      const nonSensitive = queryProjectTasks(cwd, { rationaleRequired: false, limit: 10 });
+      expect(nonSensitive.filtered).toBe(1);
+      expect(nonSensitive.rows[0]?.id).toBe("TASK-S2");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("queryProjectVerification filtra evidências sensíveis sem rationale", () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-ver-"));
     try {
@@ -284,6 +334,74 @@ describe("project-board-surface", () => {
       expect(result.rows[0]?.id).toBe("VER-X1");
       expect(result.rows[0]?.hasRationale).toBe(false);
       expect(result.rows[0]?.rationaleRequired).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("queryProjectVerification supports rationaleRequired filter and rationaleKind", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-required-ver-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({ tasks: [] }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-S1", target: "TASK-S1", status: "partial", method: "inspect", evidence: "refactor aplicado" },
+          { id: "VER-S2", target: "TASK-S2", status: "partial", method: "inspect", evidence: "[rationale:risk-control] mitigar regressão" },
+          { id: "VER-S3", target: "TASK-S3", status: "partial", method: "inspect", evidence: "docs atualizados" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const sensitive = queryProjectVerification(cwd, { rationaleRequired: true, limit: 10 });
+      expect(sensitive.filtered).toBe(1);
+      expect(sensitive.rows[0]?.id).toBe("VER-S1");
+
+      const allRows = queryProjectVerification(cwd, { limit: 10 });
+      const verS2 = allRows.rows.find((row) => row.id === "VER-S2");
+      expect(verS2?.rationaleKind).toBe("risk-control");
+
+      const nonSensitive = queryProjectVerification(cwd, { rationaleRequired: false, limit: 10 });
+      expect(nonSensitive.filtered).toBe(2);
+      expect(nonSensitive.rows.some((row) => row.id === "VER-S3")).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updateProjectTaskBoard can enforce rationale for sensitive tasks", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-enforce-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [
+          { id: "TASK-E1", description: "Refactor crítico", status: "in-progress" },
+        ],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const blocked = updateProjectTaskBoard(cwd, "TASK-E1", {
+        status: "completed",
+        requireRationaleForSensitive: true,
+      });
+      expect(blocked.ok).toBe(false);
+      expect(blocked.reason).toBe("rationale-required-for-sensitive-task");
+
+      const rawAfterBlocked = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks?: Array<{ id?: string; status?: string }>;
+      };
+      const stillInProgress = Array.isArray(rawAfterBlocked.tasks)
+        ? rawAfterBlocked.tasks.find((row) => row.id === "TASK-E1")
+        : undefined;
+      expect(stillInProgress?.status).toBe("in-progress");
+
+      const ok = updateProjectTaskBoard(cwd, "TASK-E1", {
+        status: "completed",
+        requireRationaleForSensitive: true,
+        rationaleKind: "refactor",
+        rationaleText: "mudança estrutural com risco controlado",
+      });
+      expect(ok.ok).toBe(true);
+      expect(ok.task?.hasRationale).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -378,6 +496,37 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("board_query supports rationale_required filter for verification", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-required-query-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({ tasks: [] }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({
+        verifications: [
+          { id: "VER-Q1", target: "TASK-Q1", status: "partial", method: "inspect", evidence: "refactor sem rationale" },
+          { id: "VER-Q2", target: "TASK-Q2", status: "partial", method: "inspect", evidence: "docs" },
+        ],
+      }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const queryTool = getTool(pi, "board_query");
+
+      const result = await queryTool.execute(
+        "tc-board-query-rationale-required",
+        { entity: "verification", rationale_required: true, limit: 10 },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.filtered).toBe(1);
+      expect((result.details as any)?.rows?.[0]?.id).toBe("VER-Q1");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("board_query returns explicit error when entity is missing", async () => {
     const cwd = seedWorkspace();
     try {
@@ -410,6 +559,7 @@ describe("project-board-surface", () => {
     const queryTool = queryToolCall?.[0] as any;
     expect(queryTool?.parameters?.properties?.limit?.type).toBe("integer");
     expect(queryTool?.parameters?.properties?.needs_rationale?.type).toBe("boolean");
+    expect(queryTool?.parameters?.properties?.rationale_required?.type).toBe("boolean");
 
     const updateToolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
       ([tool]) => tool?.name === "board_update",
@@ -419,6 +569,7 @@ describe("project-board-surface", () => {
     expect(updateTool?.parameters?.properties?.max_note_lines?.type).toBe("integer");
     expect(updateTool?.parameters?.properties?.rationale_kind).toBeDefined();
     expect(updateTool?.parameters?.properties?.rationale_text?.type).toBe("string");
+    expect(updateTool?.parameters?.properties?.require_rationale_for_sensitive?.type).toBe("boolean");
   });
 
   it("board_update returns explicit error for partial rationale payload", async () => {
@@ -438,6 +589,48 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.ok).toBe(false);
       expect((result.details as any)?.reason).toBe("missing-rationale-text");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_update can enforce rationale for sensitive tasks", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-rationale-enforce-tool-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), `${JSON.stringify({
+        tasks: [{ id: "TASK-T1", description: "Refactor do orchestrator", status: "in-progress" }],
+      }, null, 2)}\n`, "utf8");
+      writeFileSync(join(cwd, ".project", "verification.json"), `${JSON.stringify({ verifications: [] }, null, 2)}\n`, "utf8");
+
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const updateTool = getTool(pi, "board_update");
+
+      const blocked = await updateTool.execute(
+        "tc-board-update-enforce-blocked",
+        { task_id: "TASK-T1", status: "completed", require_rationale_for_sensitive: true },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((blocked.details as any)?.ok).toBe(false);
+      expect((blocked.details as any)?.reason).toBe("rationale-required-for-sensitive-task");
+
+      const ok = await updateTool.execute(
+        "tc-board-update-enforce-ok",
+        {
+          task_id: "TASK-T1",
+          status: "completed",
+          require_rationale_for_sensitive: true,
+          rationale_kind: "refactor",
+          rationale_text: "justificativa comunicável da mudança",
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect((ok.details as any)?.ok).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
