@@ -60,6 +60,7 @@
     "ops:disk:check": "node scripts/host-disk-guard.mjs",
     "ops:disk:cleanup:dry": "node scripts/host-disk-guard.mjs",
     "ops:disk:strict": "node scripts/host-disk-guard.mjs --strict",
+    "ops:disk:strict:warn": "node scripts/host-disk-guard.mjs --strict --strict-on=warn",
     "ops:disk:cleanup": "node scripts/host-disk-guard.mjs --apply",
     "ops:disk:cleanup:with-sessions": "node scripts/host-disk-guard.mjs --apply --include-sessions --session-age-days=14 --keep-recent-sessions=20",
     "ops:loop-evidence:check": "node scripts/guardrails-loop-evidence-check.mjs",
