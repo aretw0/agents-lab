@@ -169,6 +169,48 @@ test("computeLoopEvidenceStrictFailures explains strict blockers deterministical
   assert.match(describeLoopEvidenceStrictFailure("milestone-mismatch"), /defaultBoardMilestone|loop scope/);
 });
 
+test("cli json output includes inactive milestone gate when no expectation is provided", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-inactive-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--json",
+      "--max-age-min",
+      "9999999",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 0);
+    const parsed = JSON.parse(cli.stdout);
+    assert.equal(parsed.milestoneGate, "inactive");
+    assert.equal(parsed.milestoneCheck.reason, "no-expectation");
+    assert.equal(parsed.milestoneCheck.matches, true);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("cli json output includes milestoneCheck when expect-milestone is provided", () => {
   const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-"));
   try {
@@ -207,6 +249,7 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
 
     assert.equal(cli.status, 0);
     const parsed = JSON.parse(cli.stdout);
+    assert.equal(parsed.milestoneGate, "active");
     assert.equal(parsed.milestoneCheck.expectedMilestone, "MS-LOCAL");
     assert.equal(parsed.milestoneCheck.matches, true);
     assert.equal(parsed.milestoneCheck.reason, "match");
@@ -225,7 +268,7 @@ test("cli resolves @default milestone expectation from settings", () => {
       piStack: {
         guardrailsCore: {
           longRunIntentQueue: {
-            defaultBoardMilestone: "MS   DEFAULT",
+            defaultBoardMilestone: "\"MS   DEFAULT\"",
           },
         },
       },

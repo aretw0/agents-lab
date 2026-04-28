@@ -9,7 +9,13 @@ const DEFAULT_MAX_AGE_MIN = 30;
 
 function normalizeMilestone(value) {
   const text = String(value ?? "").trim();
-  return text.length > 0 ? text.replace(/\s+/g, " ") : undefined;
+  if (!text) return undefined;
+  const unwrapped = text.length >= 2
+    && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))
+    ? text.slice(1, -1)
+    : text;
+  const normalized = unwrapped.replace(/\s+/g, " ").trim();
+  return normalized.length > 0 ? normalized : undefined;
 }
 
 function resolveDefaultMilestoneFromSettings(cwd) {
@@ -297,15 +303,17 @@ function main() {
   const milestoneCheck = evaluateMilestoneScopeMatch(report, expectedMilestone);
   const strictFailures = computeLoopEvidenceStrictFailures(report, milestoneCheck);
   const strictFailureHints = strictFailures.map((code) => ({ code, hint: describeLoopEvidenceStrictFailure(code) }));
-  const output = milestoneCheck.expectedMilestone
-    ? { ...report, milestoneCheck, strictFailures, strictFailureHints }
-    : { ...report, strictFailures, strictFailureHints };
+  const milestoneGate = milestoneCheck.expectedMilestone ? "active" : "inactive";
+  const output = { ...report, milestoneGate, milestoneCheck, strictFailures, strictFailureHints };
 
   if (opts.json) console.log(JSON.stringify(output, null, 2));
   else {
     printTextReport(report);
+    console.log(`milestoneGate: ${milestoneGate}`);
     if (milestoneCheck.expectedMilestone) {
       console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"} reason=${milestoneCheck.reason}`);
+    } else {
+      console.log(`milestoneCheck: expected=n/a matches=yes reason=${milestoneCheck.reason}`);
     }
     console.log(`strictFailures: ${strictFailures.length > 0 ? strictFailures.join(",") : "none"}`);
     for (const row of strictFailureHints) console.log(`strictHint(${row.code}): ${row.hint}`);
