@@ -247,13 +247,17 @@ export function formatMachineMaintenanceGate(gate: MachineMaintenanceGate): stri
 	].join(" · ");
 }
 
+function resolveContextCwd(ctx: Pick<ExtensionContext, "cwd"> | undefined): string {
+	return typeof ctx?.cwd === "string" && ctx.cwd.length > 0 ? ctx.cwd : process.cwd();
+}
+
 function persistGateToHandoff(ctx: ExtensionContext, gate: MachineMaintenanceGate): void {
 	const nextActions = gate.shouldStop
 		? ["Machine maintenance: checkpoint-and-stop until memory/disk pressure recovers."]
 		: gate.shouldCheckpoint
 			? ["Machine maintenance: pause long-runs; continue only recovery/cleanup slices."]
 			: ["Machine maintenance: continue bounded work; avoid heavy loops if warn/unknown persists."];
-	writeHandoffJson(ctx.cwd, {
+	writeHandoffJson(resolveContextCwd(ctx), {
 		timestamp: gate.generatedAtIso,
 		context: `machine-maintenance gate ${gate.severity}: ${gate.recommendation}`,
 		next_actions: nextActions,
@@ -275,7 +279,7 @@ export default function machineMaintenanceExtension(pi: ExtensionAPI) {
 	let lastSeverity: MachineMaintenanceSeverity = "ok";
 
 	function sample(ctx: ExtensionContext, reason: "session_start" | "message_end" | "tool") {
-		const gate = readMachineMaintenanceGate(ctx.cwd);
+		const gate = readMachineMaintenanceGate(resolveContextCwd(ctx));
 		const now = Date.now();
 		const changed = gate.severity !== lastSeverity;
 		if (reason === "session_start" || changed || now - lastStatusAt > 60_000) {
@@ -304,12 +308,12 @@ export default function machineMaintenanceExtension(pi: ExtensionAPI) {
 		parameters: Type.Object({
 			persistHandoff: Type.Optional(Type.Boolean({ default: false })),
 		}),
-		async execute(args, ctx) {
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const gate = sample(ctx, "tool");
-			if (args?.persistHandoff === true) persistGateToHandoff(ctx, gate);
+			if (params?.persistHandoff === true) persistGateToHandoff(ctx, gate);
 			return {
 				content: [{ type: "text", text: formatMachineMaintenanceGate(gate) }],
-				details: { ...gate, persistedHandoff: args?.persistHandoff === true },
+				details: { ...gate, persistedHandoff: params?.persistHandoff === true },
 			};
 		},
 	});

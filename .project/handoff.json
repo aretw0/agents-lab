@@ -1,182 +1,26 @@
 {
-  "timestamp": "2026-04-24T14:44:36.779Z",
-  "context": "Envelope board-first para `TASK-OPS-CONFIG-CMD-001` executado com micro-slice reversível: `guardrails-core` ganhou comando dedicado `/guardrails-config` para operar configuração de runtime sem editar JSON manualmente (`status|get|set`) com validação determinística de tipo/faixa em chaves suportadas, persistência segura em `.pi/settings.json`, audit trail (`guardrails-core.runtime-config-set`) e orientação de reload. `project-canonical-pipeline.md` documenta o fluxo canônico e fallback manual para chaves não suportadas.",
+  "timestamp": "2026-04-28T18:23:00.000Z",
+  "context": "Machine maintenance pillar advanced from standalone primitive to long-run preflight gate. The previous runtime error (`path`/`ctx.cwd` undefined) was fixed in source by using the canonical pi tool execute signature and cwd fallback. Colony preflight now evaluates machine maintenance before ant_colony/long-run dispatch, default-blocking at warn+ so low-resource hosts degrade gracefully instead of competing aggressively with other workloads (e.g. refarm devcontainer). Live disk strict probe currently reports block-long-run: C: free ~765.52MB / 99.84% used. Current pi process still needs /reload to use the patched extension implementation.",
   "next_actions": [
-    "Context-watch action: level=compact 100% (compact-now) · Compact now and continue from checkpoint.",
-    "Decisão humana de fechamento para `TASK-OPS-CONFIG-CMD-001` (evidência passed `VER-BUD-278`, no-auto-close preservado).",
-    "Opcional pós-reload: validar no runtime atual com `/guardrails-config status`, `/guardrails-config get longRunIntentQueue.maxItems` e um `set` de teste.",
-    "Pendências de decisão humana permanecem: `TASK-BUD-115`, `TASK-BUD-112`, `TASK-BUD-104`, `TASK-BUD-100`, `TASK-BUD-087`; depois retomar lane principal `TASK-BUD-119`."
+    "Do not start ant_colony, broad test suites, builds, or large scans while disk-pressure-block-long-run persists.",
+    "Run /reload so the current pi runtime loads the patched `machine_maintenance_status` and colony preflight code.",
+    "After reload, call `machine_maintenance_status` and `colony_pilot_preflight` before any escalation.",
+    "Free disk outside irreversible session deletion if possible; session cleanup requires explicit operator approval because local/global session JSONL are continuity evidence.",
+    "Later slice: add bounded hung-process detection via pi-owned background registry, not broad process scans/tasklist."
   ],
-  "blockers": [],
-  "context_watch_events": [
-    {
-      "atIso": "2026-04-24T13:39:13.500Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 100,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T13:55:01.771Z",
-      "reason": "session_start",
-      "level": "compact",
-      "percent": 100,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:01:27.999Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 65,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:01:49.959Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 76,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:09:40.476Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 89,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:23:17.621Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 70,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
-    },
-    {
-      "atIso": "2026-04-24T14:23:27.754Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 92,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:25:46.265Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 94,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:39:55.399Z",
-      "reason": "message_end",
-      "level": "warn",
-      "percent": 58,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "micro-slice-only",
-      "recommendation": "Keep micro-slices and avoid broad scans until checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:40:10.879Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 68,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
-    },
-    {
-      "atIso": "2026-04-24T14:40:10.908Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 72,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    },
-    {
-      "atIso": "2026-04-24T14:44:36.779Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 100,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
-    }
+  "blockers": [
+    "disk-pressure-block-long-run",
+    "reload-required",
+    "host-memory-pressure-observed",
+    "monitor-curation-rollout-gate-open"
   ],
-  "lastClosure": {
-    "atIso": "2026-04-24T15:48:07.266Z",
-    "closedTasks": [
-      "TASK-BUD-087",
-      "TASK-BUD-100",
-      "TASK-BUD-104",
-      "TASK-BUD-112",
-      "TASK-BUD-115",
-      "TASK-OPS-CONFIG-CMD-001"
-    ],
-    "closedBy": "human-explicit",
-    "removedBlockers": 7
-  }
+  "completed_this_resume": [
+    "Fixed `machine_maintenance_status` execute signature to canonical pi tool args and added cwd fallback.",
+    "Added smoke coverage proving `machine_maintenance_status` executes with canonical signature.",
+    "Integrated machine maintenance gate into `colony-pilot` preflight with `enforceMachineMaintenance=true` and default block threshold `warn`.",
+    "Updated colony preflight/status formatting to expose machine maintenance severity/action.",
+    "Added regression coverage that colony preflight blocks when machine maintenance blocks.",
+    "Validation passed: `cmd.exe /c npm run test:smoke -- packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-preflight-e2e-harness.test.ts` => 3 files, 88 tests passed.",
+    "Live resource probe: `cmd.exe /c npm run ops:disk:strict` => exit 1, `disk-pressure-block-long-run`, free ~765.52MB, volatile candidates negligible without touching protected session evidence."
+  ]
 }

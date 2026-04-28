@@ -914,6 +914,7 @@ export default function (pi: ExtensionAPI) {
 					pi,
 					getCapabilitiesImpl(pi),
 					preflightConfig,
+					ctx.cwd,
 				);
 				preflightCache = { at: now, result };
 			}
@@ -1230,9 +1231,9 @@ export default function (pi: ExtensionAPI) {
 		label: "Colony Pilot Preflight",
 		description: "Run hard preflight checks used to gate ant_colony execution.",
 		parameters: Type.Object({}),
-		async execute() {
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const caps = getCapabilitiesImpl(pi);
-			const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
+			const result = await runColonyPilotPreflight(pi, caps, preflightConfig, ctx.cwd);
 			preflightCache = { at: Date.now(), result };
 			return {
 				content: [
@@ -1551,6 +1552,7 @@ export default function (pi: ExtensionAPI) {
 					pi,
 					caps,
 					preflightConfig,
+					ctx.cwd,
 				);
 				preflightCache = { at: Date.now(), result: preflight };
 
@@ -1757,7 +1759,7 @@ export default function (pi: ExtensionAPI) {
 			}
 
 			if (cmd === "preflight") {
-				const result = await runColonyPilotPreflight(pi, caps, preflightConfig);
+				const result = await runColonyPilotPreflight(pi, caps, preflightConfig, ctx.cwd);
 				preflightCache = { at: Date.now(), result };
 				ctx.ui.notify(
 					formatPreflightResult(result),
@@ -1854,6 +1856,7 @@ export default function (pi: ExtensionAPI) {
 					pi,
 					caps,
 					preflightConfig,
+					ctx.cwd,
 				);
 				preflightCache = { at: Date.now(), result: preflight };
 				if (!preflight.ok) {

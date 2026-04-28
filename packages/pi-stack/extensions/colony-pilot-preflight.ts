@@ -1,18 +1,30 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import type { PilotCapabilities } from "./colony-pilot-runtime";
 import { missingCapabilities } from "./colony-pilot-runtime";
+import {
+	formatMachineMaintenanceGate,
+	readMachineMaintenanceGate,
+	type MachineMaintenanceGate,
+	type MachineMaintenanceSeverity,
+} from "./machine-maintenance";
 
 export interface ColonyPilotPreflightConfig {
 	enabled: boolean;
 	enforceOnAntColonyTool: boolean;
 	requiredExecutables: string[];
 	requireColonyCapabilities: Array<keyof PilotCapabilities>;
+	enforceMachineMaintenance: boolean;
+	machineMaintenanceBlockOn: Exclude<MachineMaintenanceSeverity, "unknown">;
 }
 
 export interface ColonyPilotPreflightResult {
 	ok: boolean;
 	missingExecutables: string[];
 	missingCapabilities: Array<keyof PilotCapabilities>;
+	machineMaintenance?: Pick<
+		MachineMaintenanceGate,
+		"severity" | "action" | "canStartLongRun" | "blockers" | "recommendation"
+	>;
 	failures: string[];
 	checkedAt: number;
 }
@@ -22,7 +34,31 @@ const DEFAULT_PREFLIGHT_CONFIG: ColonyPilotPreflightConfig = {
 	enforceOnAntColonyTool: true,
 	requiredExecutables: ["node", "git", "npm"],
 	requireColonyCapabilities: ["colony", "colonyStop"],
+	enforceMachineMaintenance: true,
+	machineMaintenanceBlockOn: "warn",
 };
+
+function normalizeMachineMaintenanceBlockOn(
+	value: unknown,
+): Exclude<MachineMaintenanceSeverity, "unknown"> {
+	return value === "ok" ||
+		value === "warn" ||
+		value === "pause" ||
+		value === "block"
+		? value
+		: DEFAULT_PREFLIGHT_CONFIG.machineMaintenanceBlockOn;
+}
+
+function severityRank(value: MachineMaintenanceSeverity): number {
+	const rank: Record<MachineMaintenanceSeverity, number> = {
+		ok: 0,
+		unknown: 1,
+		warn: 2,
+		pause: 3,
+		block: 4,
+	};
+	return rank[value] ?? rank.unknown;
+}
 
 function normalizeCapabilitiesList(
 	value: unknown,
@@ -61,6 +97,10 @@ export function resolveColonyPilotPreflightConfig(
 		requireColonyCapabilities: normalizeCapabilitiesList(
 			raw?.requireColonyCapabilities,
 		),
+		enforceMachineMaintenance: raw?.enforceMachineMaintenance !== false,
+		machineMaintenanceBlockOn: normalizeMachineMaintenanceBlockOn(
+			raw?.machineMaintenanceBlockOn,
+		),
 	};
 }
 
@@ -88,6 +128,7 @@ export async function runColonyPilotPreflight(
 	pi: ExtensionAPI,
 	caps: PilotCapabilities,
 	config: ColonyPilotPreflightConfig,
+	cwd = process.cwd(),
 ): Promise<ColonyPilotPreflightResult> {
 	const missingCaps = missingCapabilities(
 		caps,
@@ -115,10 +156,27 @@ export async function runColonyPilotPreflight(
 		failures.push(`missing executables: ${missingExecutables.join(", ")}`);
 	}
 
+	let machineMaintenance: ColonyPilotPreflightResult["machineMaintenance"];
+	if (config.enforceMachineMaintenance) {
+		const gate = readMachineMaintenanceGate(cwd);
+		machineMaintenance = {
+			severity: gate.severity,
+			action: gate.action,
+			canStartLongRun: gate.canStartLongRun,
+			blockers: gate.blockers,
+			recommendation: gate.recommendation,
+		};
+		const comparableSeverity = gate.severity === "unknown" ? "warn" : gate.severity;
+		if (severityRank(comparableSeverity) >= severityRank(config.machineMaintenanceBlockOn)) {
+			failures.push(`machine maintenance: ${formatMachineMaintenanceGate(gate)}`);
+		}
+	}
+
 	return {
 		ok: failures.length === 0,
 		missingCapabilities: missingCaps,
 		missingExecutables,
+		machineMaintenance,
 		failures,
 		checkedAt: Date.now(),
 	};
@@ -132,6 +190,7 @@ export function formatPreflightResult(
 		`ok: ${result.ok ? "yes" : "no"}`,
 		`missingCapabilities: ${result.missingCapabilities.length > 0 ? result.missingCapabilities.join(", ") : "(none)"}`,
 		`missingExecutables: ${result.missingExecutables.length > 0 ? result.missingExecutables.join(", ") : "(none)"}`,
+		`machineMaintenance: ${result.machineMaintenance ? `${result.machineMaintenance.severity} / ${result.machineMaintenance.action}` : "(disabled)"}`,
 		`checkedAt: ${new Date(result.checkedAt).toISOString()}`,
 	];
 

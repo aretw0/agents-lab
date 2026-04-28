@@ -50,6 +50,7 @@ import {
 	resolveColonyPilotProjectTaskSync,
 	resolveModelAuthStatus,
 	resolveModelPolicyProfile,
+	runColonyPilotPreflight,
 } from "../../extensions/colony-pilot";
 
 describe("colony-pilot parsers", () => {
@@ -274,6 +275,42 @@ describe("colony-pilot parsers", () => {
 		expect(cfg.enforceOnAntColonyTool).toBe(true);
 		expect(cfg.requiredExecutables).toEqual(["node", "pnpm"]);
 		expect(cfg.requireColonyCapabilities).toEqual(["colony", "colonyStop"]);
+		expect(cfg.enforceMachineMaintenance).toBe(true);
+		expect(cfg.machineMaintenanceBlockOn).toBe("warn");
+	});
+
+	it("runColonyPilotPreflight bloqueia long-run quando machine maintenance bloqueia", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "pi-preflight-machine-"));
+		try {
+			mkdirSync(join(cwd, ".pi"), { recursive: true });
+			writeFileSync(
+				join(cwd, ".pi", "settings.json"),
+				JSON.stringify({
+					piStack: {
+						machineMaintenance: {
+							memoryBlockFreeMb: 999_999_999,
+						},
+					},
+				}),
+			);
+
+			const result = await runColonyPilotPreflight(
+				{ exec: async () => ({ code: 0 }) } as any,
+				{ monitors: true, remote: false, sessionWeb: false, colony: true, colonyStop: true },
+				resolveColonyPilotPreflightConfig({
+					requiredExecutables: [],
+					requireColonyCapabilities: ["colony"],
+					enforceMachineMaintenance: true,
+				}),
+				cwd,
+			);
+
+			expect(result.ok).toBe(false);
+			expect(result.machineMaintenance?.severity).toBe("block");
+			expect(result.failures.join("\n")).toContain("machine maintenance");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
 	});
 
 	it("executableProbe usa powershell para npm no Windows", () => {
