@@ -62,6 +62,10 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 	}
 }
 
+export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReason): boolean {
+	return reason === "reload-required" || reason === "checkpoint-evidence-missing";
+}
+
 export function shouldEmitAutoResumeAfterCompact(
 	config: ResumeConfigLike,
 	nowMs: number,

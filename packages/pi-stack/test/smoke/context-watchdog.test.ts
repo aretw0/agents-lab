@@ -21,6 +21,7 @@ import {
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	shouldNotifyAutoResumeSuppression,
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
@@ -272,6 +273,9 @@ describe("context-watchdog", () => {
 		expect(describeAutoResumeDispatchHint("send")).toBeUndefined();
 		expect(describeAutoResumeDispatchHint("reload-required")).toContain("/reload");
 		expect(describeAutoResumeDispatchHint("checkpoint-evidence-missing")).toContain("checkpoint");
+		expect(shouldNotifyAutoResumeSuppression("send")).toBe(false);
+		expect(shouldNotifyAutoResumeSuppression("checkpoint-evidence-missing")).toBe(true);
+		expect(shouldNotifyAutoResumeSuppression("reload-required")).toBe(true);
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
 			hasPendingMessages: true,

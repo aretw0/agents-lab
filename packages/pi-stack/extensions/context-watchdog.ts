@@ -66,6 +66,7 @@ import {
 import {
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
 	shouldEmitAutoResumeAfterCompact,
@@ -113,6 +114,7 @@ export {
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
@@ -1011,6 +1013,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
 							},
 						);
+						if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
+							ctx.ui.notify(
+								`context-watch: auto resume suppressed (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
+								"warning",
+							);
+						}
 					}
 					lastAutoResumeDecision = autoResumeSnapshot;
 				},

@@ -530,6 +530,7 @@ Contrato operacional:
 - usar `postResumeRecalibrated=true` como evidência de que houve retorno para ritmo padrão após pressão anterior (`warn/checkpoint/compact`);
 - quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `reload-required`, `checkpoint-evidence-missing`, `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
 - usar `autoResumeLastDecisionHint`/`auto-resume-last hint` para ação imediata sem mapear reason manualmente.
+- em supressões críticas (`reload-required`, `checkpoint-evidence-missing`) o runtime pode emitir notify warning explícito para evitar silêncio operacional.
 - prompt de auto-resume usa normalização canônica (single-line, sem artefatos markdown/backticks) e truncamento explícito com preservação de cauda (`[snip] ... [truncated:+N chars]`, `[auto-resume-prompt-truncated:+N chars]`) para evitar reticências opacas e manter contexto operacional útil.
 - quando `current_tasks` não vier no handoff, o prompt tenta derivar `focusTasks` por IDs `TASK-*` presentes em `next_actions`/`blockers`/`context`, mantendo limite curto e dedupe.
 - quando alguma lista estoura limite (tasks/blockers/next), o prompt explicita overflow com `(+N more)` em vez de silêncio implícito.

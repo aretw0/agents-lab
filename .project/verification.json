@@ -5802,6 +5802,15 @@
       "method": "test",
       "timestamp": "2026-04-28T00:22:15Z",
       "evidence": "Added deterministic auto-resume hint surface for direct operator action. `context-watchdog-resume.ts` introduces `describeAutoResumeDispatchHint` (reason->action hint). `context-watchdog.ts` stores hint in `autoResumeSnapshot`, includes it in `context-watchdog.auto-resume-suppressed` audit, exposes `autoResumeLastDecisionHint` in autoCompact diagnostics, and prints `auto-resume-last hint` in `/context-watch status`; tool payload now carries this via `autoCompact`. Runbook updated to reference `autoResumeLastDecisionHint`. Smoke updated in `context-watchdog.test.ts` with hint assertions. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-395",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-28T00:24:55Z",
+      "evidence": "Added anti-silent suppression gate for auto-resume: `shouldNotifyAutoResumeSuppression` in `context-watchdog-resume.ts` marks critical suppression reasons (`reload-required`, `checkpoint-evidence-missing`). `context-watchdog.ts` now emits warning notify with actionable hint when those suppressions occur after compact, while preserving structured audit entry (`context-watchdog.auto-resume-suppressed`). Smoke assertions added in `context-watchdog.test.ts`; runbook updated to call out critical-suppression notify behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }
