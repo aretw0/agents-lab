@@ -11,6 +11,13 @@ Centralize guardrail behavior under `/monitors` with explicit profile governance
 - noisy steering that blocks good milestone work,
 - mode-coupling regressions (control-plane vs subagent/swarm).
 
+Two always-on pillars now govern long runs:
+
+1. **Behavior monitors** — protect authorization, intent alignment, fragility, commit hygiene, and on-demand quality review.
+2. **Machine maintenance monitors** — protect the workstation itself (memory, disk, runaway processes, hung tests/builds) and must pause/cancel work gracefully when resources cannot be recycled safely.
+
+The project board/milestone/task loop remains the canonical planning substrate, but these two monitor pillars are operational gates: if the environment cannot sustain the run, the correct behavior is graceful stop + checkpoint rather than repeatedly hitting the wall.
+
 ---
 
 ## Current snapshot
@@ -23,7 +30,7 @@ Monitors discovered (project local):
 - `commit-hygiene` (event=`agent_end`, when=`has_file_writes`, ceiling=2, L1:advisory)
 - `work-quality` (event=`command`, when=`always`, ceiling=3, on-demand)
 
-All currently disabled (intentional during review).
+Current runtime after reload: behavior monitors are enabled for live calibration/observation. Rollout remains gated: keep changes small, watch noise/cost, and rollback with `/monitors off` if they interfere with safe progress.
 
 Profiles present in `.pi/monitors/profiles/`:
 
@@ -89,7 +96,7 @@ Profiles present in `.pi/monitors/profiles/`:
 
 ## Activation gate (must pass)
 
-Before switching to default-on:
+Before treating monitors as stable default-on:
 
 - [ ] Profile rationale published (why this profile, for which mode)
 - [x] Deterministic prefilter for `unauthorized-action` implemented in runtime contract patch (read/status/query/read-only shell bypass)
@@ -97,6 +104,7 @@ Before switching to default-on:
 - [ ] Cost budget target defined (classify calls / hour by mode)
 - [ ] Smoke pass with monitors ON in control-plane canonical loop
 - [ ] Rollback command documented (`/monitors off` + profile fallback)
+- [ ] Machine maintenance monitor gate defined: memory/disk/process pressure can pause/cancel long-runs gracefully with checkpoint evidence
 
 ---
 
