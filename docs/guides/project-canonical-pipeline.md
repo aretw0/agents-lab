@@ -346,8 +346,8 @@ Regras operacionais:
 Implementação atual (slice 2/4):
 - persistência de steering (`context_watch_events`/`next_actions`) independe de `notify`;
 - status passivo (`context-watch-steering`) é atualizado continuamente por avaliação para evitar estado visual stale;
-- `warn` permanece em fallback de status (sem notify textual) para evitar freio prematuro antes da janela de compactação;
-- `checkpoint/compact` continuam notificados como sinal crítico;
+- `warn/checkpoint` permanecem em fallback de status/telemetria (sem notify textual) para evitar perturbação prematura antes da janela de compactação;
+- `compact` é o único nível notificado por padrão (instrução clara de wrap-up + checkpoint + idle).
 - semântica de config explícita: `modelSteeringFromLevel` controla quando o modelo começa a receber steering passivo e `userNotifyFromLevel` controla quando notificar o operador (ambas em `contextWatchdog`), evitando ambiguidade com `notify` legado.
 - auditoria dedicada: `context-watchdog.passive-steering-signal`.
 

@@ -245,8 +245,8 @@ export function resolveContextWatchSteeringDispatch(input: {
 		input.elapsedMs,
 		input.cooldownMs,
 	);
-	const modelSteeringFromLevel = input.modelSteeringFromLevel ?? "warn";
-	const userNotifyFromLevel = input.userNotifyFromLevel ?? "checkpoint";
+	const modelSteeringFromLevel = input.modelSteeringFromLevel ?? "compact";
+	const userNotifyFromLevel = input.userNotifyFromLevel ?? "compact";
 	const userNotifyEnabled = input.userNotifyEnabled ?? input.notifyEnabled ?? true;
 	const levelEligibleForSteering = levelMeetsSteeringThreshold(
 		input.assessmentLevel,

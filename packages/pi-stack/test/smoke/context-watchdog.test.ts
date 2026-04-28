@@ -57,8 +57,8 @@ describe("context-watchdog", () => {
 		});
 		expect(cfg.enabled).toBe(true);
 		expect(cfg.notify).toBe(true);
-		expect(cfg.modelSteeringFromLevel).toBe("warn");
-		expect(cfg.userNotifyFromLevel).toBe("checkpoint");
+		expect(cfg.modelSteeringFromLevel).toBe("compact");
+		expect(cfg.userNotifyFromLevel).toBe("compact");
 		expect(cfg.status).toBe(true);
 		expect(cfg.checkpointPct).toBe(99);
 		expect(cfg.compactPct).toBe(2);
@@ -422,6 +422,8 @@ describe("context-watchdog", () => {
 		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(68);
 		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(72);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
+		expect((control.patch.piStack as any).contextWatchdog.modelSteeringFromLevel).toBe("compact");
+		expect((control.patch.piStack as any).contextWatchdog.userNotifyFromLevel).toBe("compact");
 		expect((control.patch.piStack as any).contextWatchdog.autoCompact).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.handoffFreshMaxAgeMs).toBe(30 * 60 * 1000);
@@ -431,6 +433,8 @@ describe("context-watchdog", () => {
 		expect((worker.patch.piStack as any).contextWatchdog.checkpointPct).toBe(72);
 		expect((worker.patch.piStack as any).contextWatchdog.compactPct).toBe(78);
 		expect((worker.patch.piStack as any).contextWatchdog.notify).toBe(false);
+		expect((worker.patch.piStack as any).contextWatchdog.modelSteeringFromLevel).toBe("compact");
+		expect((worker.patch.piStack as any).contextWatchdog.userNotifyFromLevel).toBe("compact");
 		expect((worker.patch.piStack as any).contextWatchdog.autoCompact).toBe(false);
 		expect((worker.patch.piStack as any).contextWatchdog.autoResumeAfterCompact).toBe(false);
 		expect((worker.patch.piStack as any).contextWatchdog.handoffFreshMaxAgeMs).toBe(30 * 60 * 1000);
@@ -585,77 +589,66 @@ describe("context-watchdog", () => {
 		expect(summarizeAutoResumePromptDiagnostics(undefined)).toBe("none");
 	});
 
-	it("resolves passive steering dispatch independently from notify-only mode", () => {
-		const warnFallback = resolveContextWatchSteeringDispatch({
+	it("keeps warn/checkpoint passive by default and signals only at compact lane", () => {
+		const warnDefault = resolveContextWatchSteeringDispatch({
+			notifyEnabled: true,
+			assessmentLevel: "warn",
+			lastAnnouncedLevel: null,
+			elapsedMs: 0,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(warnDefault.shouldSignal).toBe(false);
+		expect(warnDefault.shouldNotify).toBe(false);
+
+		const checkpointDefault = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: true,
+			assessmentLevel: "checkpoint",
+			lastAnnouncedLevel: "warn",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(checkpointDefault.shouldSignal).toBe(false);
+		expect(checkpointDefault.shouldNotify).toBe(false);
+
+		const compactNotify = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: true,
+			assessmentLevel: "compact",
+			lastAnnouncedLevel: "checkpoint",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(compactNotify.shouldSignal).toBe(true);
+		expect(compactNotify.shouldNotify).toBe(true);
+		expect(compactNotify.delivery).toBe("notify");
+
+		const compactMuted = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: false,
+			assessmentLevel: "compact",
+			lastAnnouncedLevel: "checkpoint",
+			elapsedMs: 10_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+		});
+		expect(compactMuted.shouldSignal).toBe(true);
+		expect(compactMuted.shouldNotify).toBe(false);
+		expect(compactMuted.delivery).toBe("fallback-status");
+
+		const legacyWarnMode = resolveContextWatchSteeringDispatch({
 			notifyEnabled: false,
 			assessmentLevel: "warn",
+			modelSteeringFromLevel: "warn",
+			userNotifyFromLevel: "checkpoint",
 			lastAnnouncedLevel: null,
 			elapsedMs: 0,
 			cooldownMs: 600_000,
 			forceWarnCadenceAnnouncement: false,
 		});
-		expect(warnFallback.shouldSignal).toBe(true);
-		expect(warnFallback.shouldPersist).toBe(true);
-		expect(warnFallback.shouldNotify).toBe(false);
-		expect(warnFallback.delivery).toBe("fallback-status");
-
-		const warnNotifyEnabled = resolveContextWatchSteeringDispatch({
-			notifyEnabled: true,
-			assessmentLevel: "warn",
-			lastAnnouncedLevel: null,
-			elapsedMs: 0,
-			cooldownMs: 600_000,
-			forceWarnCadenceAnnouncement: false,
-		});
-		expect(warnNotifyEnabled.shouldSignal).toBe(true);
-		expect(warnNotifyEnabled.shouldNotify).toBe(false);
-		expect(warnNotifyEnabled.delivery).toBe("fallback-status");
-
-		const checkpointCritical = resolveContextWatchSteeringDispatch({
-			userNotifyEnabled: true,
-			assessmentLevel: "checkpoint",
-			lastAnnouncedLevel: "warn",
-			elapsedMs: 10_000,
-			cooldownMs: 600_000,
-			forceWarnCadenceAnnouncement: false,
-		});
-		expect(checkpointCritical.shouldSignal).toBe(true);
-		expect(checkpointCritical.shouldNotify).toBe(true);
-		expect(checkpointCritical.delivery).toBe("notify");
-
-		const checkpointMuted = resolveContextWatchSteeringDispatch({
-			userNotifyEnabled: false,
-			assessmentLevel: "checkpoint",
-			lastAnnouncedLevel: "warn",
-			elapsedMs: 10_000,
-			cooldownMs: 600_000,
-			forceWarnCadenceAnnouncement: false,
-		});
-		expect(checkpointMuted.shouldSignal).toBe(true);
-		expect(checkpointMuted.shouldNotify).toBe(false);
-		expect(checkpointMuted.delivery).toBe("fallback-status");
-
-		const noSignal = resolveContextWatchSteeringDispatch({
-			notifyEnabled: true,
-			assessmentLevel: "warn",
-			lastAnnouncedLevel: "warn",
-			elapsedMs: 10_000,
-			cooldownMs: 600_000,
-			forceWarnCadenceAnnouncement: false,
-		});
-		expect(noSignal.shouldSignal).toBe(false);
-
-		const modelFromCheckpoint = resolveContextWatchSteeringDispatch({
-			userNotifyEnabled: true,
-			assessmentLevel: "warn",
-			modelSteeringFromLevel: "checkpoint",
-			userNotifyFromLevel: "compact",
-			lastAnnouncedLevel: null,
-			elapsedMs: 0,
-			cooldownMs: 600_000,
-			forceWarnCadenceAnnouncement: false,
-		});
-		expect(modelFromCheckpoint.shouldSignal).toBe(false);
+		expect(legacyWarnMode.shouldSignal).toBe(true);
+		expect(legacyWarnMode.shouldNotify).toBe(false);
+		expect(legacyWarnMode.delivery).toBe("fallback-status");
 	});
 
 	it("emits operator signal for manual intervention/reload steering", () => {
