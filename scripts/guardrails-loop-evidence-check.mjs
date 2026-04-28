@@ -240,8 +240,19 @@ function printTextReport(report) {
   }
 }
 
-function shouldFailStrict(report) {
-  return report.status !== "ok" || report.stale || !report.readyForTaskBud125;
+export function computeLoopEvidenceStrictFailures(report, milestoneCheck) {
+  const failures = [];
+  if (report.status === "missing") failures.push("evidence-missing");
+  else if (report.status === "invalid-json") failures.push("evidence-invalid-json");
+  else if (report.status !== "ok") failures.push(`evidence-${report.status}`);
+  if (report.stale) failures.push("evidence-stale");
+  if (!report.readyForTaskBud125) failures.push("readiness-not-ready");
+  if (milestoneCheck && milestoneCheck.matches === false) failures.push("milestone-mismatch");
+  return [...new Set(failures)];
+}
+
+function shouldFailStrict(report, milestoneCheck) {
+  return computeLoopEvidenceStrictFailures(report, milestoneCheck).length > 0;
 }
 
 function main() {
@@ -267,9 +278,10 @@ function main() {
     process.exit(1);
   }
   const milestoneCheck = evaluateMilestoneScopeMatch(report, expectedMilestone);
+  const strictFailures = computeLoopEvidenceStrictFailures(report, milestoneCheck);
   const output = milestoneCheck.expectedMilestone
-    ? { ...report, milestoneCheck }
-    : report;
+    ? { ...report, milestoneCheck, strictFailures }
+    : { ...report, strictFailures };
 
   if (opts.json) console.log(JSON.stringify(output, null, 2));
   else {
@@ -277,9 +289,10 @@ function main() {
     if (milestoneCheck.expectedMilestone) {
       console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"} reason=${milestoneCheck.reason}`);
     }
+    console.log(`strictFailures: ${strictFailures.length > 0 ? strictFailures.join(",") : "none"}`);
   }
 
-  if (opts.strict && (shouldFailStrict(report) || !milestoneCheck.matches)) process.exit(1);
+  if (opts.strict && shouldFailStrict(report, milestoneCheck)) process.exit(1);
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;

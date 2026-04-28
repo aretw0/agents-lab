@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { assessLoopEvidence, computeEvidenceReadiness, evaluateMilestoneScopeMatch } from "../guardrails-loop-evidence-check.mjs";
+import { assessLoopEvidence, computeEvidenceReadiness, computeLoopEvidenceStrictFailures, evaluateMilestoneScopeMatch } from "../guardrails-loop-evidence-check.mjs";
 
 test("computeEvidenceReadiness returns ready only when active+emLoop criteria are met", () => {
   const ready = computeEvidenceReadiness({
@@ -149,6 +149,25 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
   assert.equal(noExpectation.reason, "no-expectation");
 });
 
+test("computeLoopEvidenceStrictFailures explains strict blockers deterministically", () => {
+  const failures = computeLoopEvidenceStrictFailures(
+    { status: "stale", stale: true, readyForTaskBud125: false },
+    { matches: false },
+  );
+  assert.deepEqual(failures, ["evidence-stale", "readiness-not-ready", "milestone-mismatch"]);
+
+  const missing = computeLoopEvidenceStrictFailures(
+    { status: "missing", stale: true, readyForTaskBud125: false },
+  );
+  assert.deepEqual(missing, ["evidence-missing", "evidence-stale", "readiness-not-ready"]);
+
+  const ready = computeLoopEvidenceStrictFailures(
+    { status: "ok", stale: false, readyForTaskBud125: true },
+    { matches: true },
+  );
+  assert.deepEqual(ready, []);
+});
+
 test("cli json output includes milestoneCheck when expect-milestone is provided", () => {
   const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-"));
   try {
@@ -179,6 +198,8 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
       "--cwd",
       cwd,
       "--json",
+      "--max-age-min",
+      "9999999",
       "--expect-milestone",
       "MS-LOCAL",
     ], { encoding: "utf8" });
@@ -188,6 +209,7 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
     assert.equal(parsed.milestoneCheck.expectedMilestone, "MS-LOCAL");
     assert.equal(parsed.milestoneCheck.matches, true);
     assert.equal(parsed.milestoneCheck.reason, "match");
+    assert.deepEqual(parsed.strictFailures, []);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -330,6 +352,7 @@ test("cli strict mode fails on milestone mismatch", () => {
     ], { encoding: "utf8" });
 
     assert.equal(cli.status, 1);
+    assert.match(cli.stdout, /strictFailures: .*milestone-mismatch/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

@@ -149,6 +149,24 @@ Para manter velocidade de cruzeiro em long-run:
 - interrupção do usuário apenas em risco irreversível/perda de dados/conflito de objetivo;
 - assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.pragmatic-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
 
+### Storage pressure antes de long-run
+
+Long-runs maiores só são confiáveis quando o ambiente ainda tem folga de armazenamento. Antes de lote grande, ou quando o host estiver perto do limite, usar o gate dry-first:
+
+```bash
+npm run ops:disk:check
+# equivalente: node scripts/host-disk-guard.mjs
+```
+
+Contrato atual:
+- `host-disk-guard` é **dry-run por default** e não remove sessões sem opt-in explícito;
+- saída inclui `disk: severity=ok|warn|block-long-run|unknown`, espaço livre, uso percentual e recomendação acionável;
+- saída inclui inventário volátil bounded: `bgArtifacts`, `reports`, `sessions` (sandbox) e `globalSessions` (namespace global do workspace);
+- se `severity=block-long-run`, pausar lotes grandes/benchmarks/e2e/browser e fazer cleanup dry-run + confirmação humana antes de continuar;
+- logs `/tmp/oh-pi-bg-*` são candidatos seguros de temp artifact, mas sessões JSONL são evidência e permanecem protegidas salvo `--include-sessions` explícito.
+
+Evitar diagnósticos ad-hoc amplos (`du`/`grep`/`find` sobre C:, home, `node_modules`, AppData) durante long-run: preferir `host-disk-guard` e comandos focais com limite de saída.
+
 ### Discoverability operacional da lane-queue
 
 Política operacional atual: **native-first**.
@@ -175,7 +193,7 @@ Durante long-run:
 - compatibilidade retroativa: snapshots/evidências antigas podem conter `PREPARADO/ATIVO_AQUI/EM_LOOP`; tratar `markersLabel` como texto histórico e usar campos estruturados (`runtimeCodeState`, `emLoop`, `boardAutoAdvanceGate`) como contrato canônico de decisão.
 - `/lane-queue status` deve exibir `loopReadyLast` e `loopReadyLabel` para evidenciar a última transição de loop liberado dentro da sessão atual.
 - `/lane-queue evidence` deve mostrar o snapshot persistido mais recente (`boardAuto`/`loopReady`) para comprovação rápida sem varredura de JSONL, incluindo `readyForTaskBud125=yes|no` e critérios explícitos (`runtime active` + `emLoop=yes`).
-- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (humano) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `npm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada.
+- para gate operacional fora do TUI, usar `npm run ops:loop-evidence:check` (humano) e `npm run ops:loop-evidence:strict` (CI/rollback gate) sobre `.pi/guardrails-loop-evidence.json` com janela de frescor explícita; quando operar por milestone, pode-se exigir paridade de escopo via `node scripts/guardrails-loop-evidence-check.mjs --strict --expect-milestone "<label>"` ou usar `npm run ops:loop-evidence:strict:default-milestone` para validar contra `defaultBoardMilestone` configurada; a saída expõe `strictFailures` para ação direta (`evidence-stale`, `readiness-not-ready`, `milestone-mismatch`, etc.) sem leitura manual do JSON.
 - intents canônicos devem usar envelope tipado (`[intent:<type>]` + campos `key=value`, ex.: `board.execute-task` e `board.execute-next`; opcional `milestone=<label>` em `board.execute-next`) para reduzir fragilidade de dispatch textual e manter auditabilidade entre extensões.
 - runtime deve consumir envelope no caminho de execução (input) além do prompt: envelope inválido/unsupported é rejeitado com audit explícita; envelope válido registra decisão (`ready`/`board-not-ready`/`next-mismatch`/`next-ready`) antes da execução.
 

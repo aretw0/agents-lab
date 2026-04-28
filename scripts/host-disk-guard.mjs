@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { existsSync, readdirSync, statSync, unlinkSync } from "node:fs";
+import { existsSync, readdirSync, statSync, statfsSync, unlinkSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 
@@ -21,6 +21,8 @@ function parseArgs(argv) {
     sessionAgeDays: 7,
     reportsAgeDays: 14,
     maxDeleteMb: 2048,
+    warnFreeMb: 10 * 1024,
+    blockFreeMb: 5 * 1024,
     help: false,
   };
 
@@ -37,6 +39,10 @@ function parseArgs(argv) {
       out.reportsAgeDays = Math.max(1, Math.floor(Number(arg.split("=")[1] || "1")));
     } else if (arg.startsWith("--max-delete-mb=")) {
       out.maxDeleteMb = Math.max(128, Math.floor(Number(arg.split("=")[1] || "128")));
+    } else if (arg.startsWith("--warn-free-mb=")) {
+      out.warnFreeMb = Math.max(512, Math.floor(Number(arg.split("=")[1] || "512")));
+    } else if (arg.startsWith("--block-free-mb=")) {
+      out.blockFreeMb = Math.max(128, Math.floor(Number(arg.split("=")[1] || "128")));
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -62,6 +68,8 @@ function printHelp() {
     "  --session-age-days=N       Session candidate age threshold (default: 7)",
     "  --reports-age-days=N       .pi/reports age threshold (default: 14)",
     "  --max-delete-mb=N          Hard cap for total deletion in apply mode (default: 2048)",
+    "  --warn-free-mb=N           Warn threshold for workspace filesystem free space (default: 10240)",
+    "  --block-free-mb=N          Block-long-run threshold for free space (default: 5120)",
     "  --json                     JSON output",
     "  -h, --help",
     "",
@@ -110,6 +118,41 @@ function walkFiles(rootDir) {
   return files;
 }
 
+function readWorkspaceDiskPressure(cwd, opts) {
+  try {
+    const fsStat = statfsSync(cwd);
+    const totalBytes = Number(fsStat.blocks) * Number(fsStat.bsize);
+    const freeBytes = Number(fsStat.bavail) * Number(fsStat.bsize);
+    const freeMb = toMb(freeBytes);
+    const totalMb = toMb(totalBytes);
+    const usedPct = totalBytes > 0
+      ? Math.round((1 - (freeBytes / totalBytes)) * 10_000) / 100
+      : 0;
+    const blockFreeMb = Math.min(opts.warnFreeMb, opts.blockFreeMb);
+    const severity = freeMb <= blockFreeMb
+      ? "block-long-run"
+      : freeMb <= opts.warnFreeMb
+        ? "warn"
+        : "ok";
+    const recommendation = severity === "block-long-run"
+      ? "pause large long-runs; run dry cleanup and confirm deletions before continuing"
+      : severity === "warn"
+        ? "continue only with bounded/focal work; cleanup soon"
+        : "safe to continue bounded work";
+    return { totalMb, freeMb, usedPct, warnFreeMb: opts.warnFreeMb, blockFreeMb, severity, recommendation };
+  } catch (error) {
+    return {
+      totalMb: 0,
+      freeMb: 0,
+      usedPct: 0,
+      warnFreeMb: opts.warnFreeMb,
+      blockFreeMb: Math.min(opts.warnFreeMb, opts.blockFreeMb),
+      severity: "unknown",
+      recommendation: `disk pressure unavailable: ${String(error?.message ?? error)}`,
+    };
+  }
+}
+
 function gatherBgArtifacts() {
   const roots = Array.from(new Set([tmpdir(), "/tmp"]));
   const out = [];
@@ -154,8 +197,29 @@ function gatherReports(cwd) {
   return out;
 }
 
-function gatherSessions(cwd) {
-  const root = join(cwd, ".sandbox", "pi-agent", "sessions");
+function normalizeSlashes(inputPath) {
+  return String(inputPath || "").replace(/\\/g, "/");
+}
+
+function encodeSessionNamespaceFromPath(inputPath) {
+  const normalized = normalizeSlashes(resolve(inputPath));
+  const win = /^([A-Za-z]):\/(.*)$/.exec(normalized);
+  if (win) {
+    const drive = win[1].toUpperCase();
+    const rest = win[2].split("/").filter(Boolean).join("-");
+    return `--${drive}--${rest}--`;
+  }
+  const mntWin = /^\/mnt\/([a-zA-Z])\/(.*)$/.exec(normalized);
+  if (mntWin) {
+    const drive = mntWin[1].toUpperCase();
+    const rest = mntWin[2].split("/").filter(Boolean).join("-");
+    return `--${drive}--${rest}--`;
+  }
+  const unix = normalized.split("/").filter(Boolean).join("-");
+  return `--${unix}--`;
+}
+
+function gatherSessionFiles(root, className) {
   const out = [];
   for (const file of walkFiles(root)) {
     if (!file.toLowerCase().endsWith(".jsonl")) continue;
@@ -165,12 +229,21 @@ function gatherSessions(cwd) {
       path: file,
       bytes: st.size,
       ageDays: (Date.now() - st.mtimeMs) / (24 * 60 * 60 * 1000),
-      class: "session-jsonl",
+      class: className,
       mtimeMs: st.mtimeMs,
     });
   }
   out.sort((a, b) => b.mtimeMs - a.mtimeMs);
   return out;
+}
+
+function gatherSessions(cwd) {
+  return gatherSessionFiles(join(cwd, ".sandbox", "pi-agent", "sessions"), "session-jsonl");
+}
+
+function gatherGlobalWorkspaceSessions(cwd) {
+  const root = join(homedir(), ".pi", "agent", "sessions", encodeSessionNamespaceFromPath(cwd));
+  return gatherSessionFiles(root, "global-session-jsonl");
 }
 
 function selectCandidates(all, opts) {
@@ -241,10 +314,11 @@ export function planDiskGuard(cwd, opts) {
     bg: gatherBgArtifacts(),
     reports: gatherReports(cwd),
     sessions: gatherSessions(cwd),
+    globalSessions: gatherGlobalWorkspaceSessions(cwd),
   };
   const selection = selectCandidates(all, opts);
 
-  const topSessions = [...all.sessions]
+  const formatTopSessions = (rows) => [...rows]
     .sort((a, b) => b.bytes - a.bytes)
     .slice(0, 10)
     .map((x) => ({
@@ -253,16 +327,27 @@ export function planDiskGuard(cwd, opts) {
       ageDays: Math.round(x.ageDays * 10) / 10,
     }));
 
+  const topSessions = formatTopSessions(all.sessions);
+  const topGlobalSessions = formatTopSessions(all.globalSessions);
+
+  const disk = readWorkspaceDiskPressure(cwd, opts);
+
   return {
     generatedAtIso: new Date().toISOString(),
     cwd,
     options: opts,
+    disk,
     inventory: {
       bgArtifactCount: all.bg.length,
+      bgArtifactTotalMb: toMb(all.bg.reduce((sum, x) => sum + x.bytes, 0)),
       reportCount: all.reports.length,
+      reportTotalMb: toMb(all.reports.reduce((sum, x) => sum + x.bytes, 0)),
       sessionCount: all.sessions.length,
       sessionTotalMb: toMb(all.sessions.reduce((sum, x) => sum + x.bytes, 0)),
+      globalSessionCount: all.globalSessions.length,
+      globalSessionTotalMb: toMb(all.globalSessions.reduce((sum, x) => sum + x.bytes, 0)),
       topSessions,
+      topGlobalSessions,
     },
     candidateSummary: {
       deletableCount: selection.deletable.length,
@@ -284,12 +369,19 @@ export function planDiskGuard(cwd, opts) {
 function printHuman(report, applyResult) {
   console.log("host-disk-guard");
   console.log(`generated: ${report.generatedAtIso}`);
-  console.log(`sessionTotalMb: ${report.inventory.sessionTotalMb}`);
+  console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
+  console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
   console.log(`protected: ${report.candidateSummary.protectedCount} files / ${report.candidateSummary.protectedMb} MB`);
   if (report.inventory.topSessions.length > 0) {
-    console.log("top session files:");
+    console.log("top sandbox session files:");
     for (const row of report.inventory.topSessions) {
+      console.log(`- ${row.path} (${row.sizeMb} MB, age=${row.ageDays}d)`);
+    }
+  }
+  if (report.inventory.topGlobalSessions.length > 0) {
+    console.log("top global session files:");
+    for (const row of report.inventory.topGlobalSessions) {
       console.log(`- ${row.path} (${row.sizeMb} MB, age=${row.ageDays}d)`);
     }
   }
