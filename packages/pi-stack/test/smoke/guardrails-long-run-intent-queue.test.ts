@@ -1096,6 +1096,7 @@ describe("guardrails-core long-run intent queue", () => {
         nextTaskId: "TASK-BUD-125",
       },
     });
+    expect(ready.readyForLoopEvidence).toBe(true);
     expect(ready.readyForTaskBud125).toBe(true);
     expect(ready.criteria.join(" |")).toContain("boardAuto.runtime=active:yes");
 
@@ -1111,7 +1112,7 @@ describe("guardrails-core long-run intent queue", () => {
       },
       lastLoopReady: undefined,
     });
-    expect(blocked.readyForTaskBud125).toBe(false);
+    expect(blocked.readyForLoopEvidence).toBe(false);
     expect(blocked.criteria.join(" |")).toContain("boardAuto.runtime=active:no");
   });
 

@@ -1520,10 +1520,7 @@ export interface LoopActivationEvidenceState {
   };
 }
 
-export interface LoopEvidenceReadiness {
-  readyForTaskBud125: boolean;
-  criteria: string[];
-}
+export interface LoopEvidenceReadiness { readyForLoopEvidence: boolean; readyForTaskBud125: boolean; criteria: string[]; }
 
 export function computeLoopEvidenceReadiness(
   evidence: LoopActivationEvidenceState,
@@ -1538,10 +1535,8 @@ export function computeLoopEvidenceReadiness(
     `boardAuto.emLoop=yes:${boardAuto ? (boardEmLoop ? "yes" : "no") : "n/a"}`,
     `loopReady.runtime=active:${loopReady ? (loopRuntimeActive ? "yes" : "no") : "n/a"}`,
   ];
-  return {
-    readyForTaskBud125: boardRuntimeActive && boardEmLoop && loopRuntimeActive,
-    criteria,
-  };
+  const readyForLoopEvidence = boardRuntimeActive && boardEmLoop && loopRuntimeActive;
+  return { readyForLoopEvidence, readyForTaskBud125: readyForLoopEvidence, criteria };
 }
 
 export function shouldRefreshLoopEvidenceFromRuntimeSnapshot(
@@ -1755,7 +1750,7 @@ export default function (pi: ExtensionAPI) {
     if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
     const evidence = readLoopActivationEvidence(ctx.cwd);
     const readiness = computeLoopEvidenceReadiness(evidence);
-    if (!readiness.readyForTaskBud125 || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
+    if (!readiness.readyForLoopEvidence || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
 
     const atIso = new Date(nowMs).toISOString();
     evidence.updatedAtIso = atIso;
@@ -1788,7 +1783,7 @@ export default function (pi: ExtensionAPI) {
 
     const evidence = readLoopActivationEvidence(ctx.cwd);
     const readiness = computeLoopEvidenceReadiness(evidence);
-    if (!readiness.readyForTaskBud125 || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
+    if (!readiness.readyForLoopEvidence || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
 
     const atIso = new Date(nowMs).toISOString();
     evidence.updatedAtIso = atIso;
@@ -3375,7 +3370,8 @@ export default function (pi: ExtensionAPI) {
           `updatedAt: ${evidence.updatedAtIso}`,
           `statusMilestone: ${evidenceMilestoneSelection.milestone ?? "n/a"}@${evidenceMilestoneSelection.source}`,
           `boardReadiness: ${buildBoardReadinessStatusLabel(boardReadiness)}`,
-          `readyForTaskBud125: ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
+          `readyForLoopEvidence: ${readiness.readyForLoopEvidence ? "yes" : "no"}`,
+          `readyForTaskBud125(deprecated): ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
           `scopeParity: expected=${milestoneParity.expectedMilestone ?? "n/a"} boardAuto=${milestoneParity.boardAutoMilestone ?? "n/a"} loopReady=${milestoneParity.loopReadyMilestone ?? "n/a"} matches=${milestoneParity.matches ? "yes" : "no"} reason=${milestoneParity.reason}`,
           boardAuto
             ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
@@ -3388,6 +3384,7 @@ export default function (pi: ExtensionAPI) {
         ];
         appendAuditEntry(ctx, "guardrails-core.loop-evidence-status", {
           atIso: new Date().toISOString(),
+          readyForLoopEvidence: readiness.readyForLoopEvidence,
           readyForTaskBud125: readiness.readyForTaskBud125,
           statusMilestone: evidenceMilestoneSelection.milestone,
           statusMilestoneSource: evidenceMilestoneSelection.source,
@@ -3397,7 +3394,7 @@ export default function (pi: ExtensionAPI) {
           loopReady,
           criteria: readiness.criteria,
         });
-        ctx.ui.notify(lines.join("\n"), shouldWarnLaneEvidence(readiness.readyForTaskBud125, milestoneParity) ? "warning" : "info");
+        ctx.ui.notify(lines.join("\n"), shouldWarnLaneEvidence(readiness.readyForLoopEvidence, milestoneParity) ? "warning" : "info");
         return;
       }
 

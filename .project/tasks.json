@@ -3352,7 +3352,7 @@
     {
       "id": "TASK-BUD-137",
       "description": "[P1] Desacoplar naming legado `readyForTaskBud125` para chave canônica agnóstica de milestone.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-129"
       ],
@@ -3367,7 +3367,7 @@
         "Compatibilidade temporária mantida por janela curta (alias/deprecation message) sem quebrar scripts existentes.",
         "Após janela de transição, remover chave legado de código/docs/testes e registrar migração no board."
       ],
-      "notes": "Backlog aberto por feedback humano (2026-04-24): nome atual é específico de marco antigo e virou gordura cognitiva; objetivo é manter stack outcome-agnostic e sem acoplamento histórico."
+      "notes": "Backlog aberto por feedback humano (2026-04-24): nome atual é específico de marco antigo e virou gordura cognitiva; objetivo é manter stack outcome-agnostic e sem acoplamento histórico.\n[2026-04-28T13:05:00Z] Slice 1 canonical readiness naming: introduced `readyForLoopEvidence` in loop-evidence checker and guardrails runtime surfaces while keeping `readyForTaskBud125` as deprecated compatibility alias. `/lane-queue evidence` and ops checker text now prefer canonical naming; JSON still carries alias during transition. Validation: loop-evidence node tests 14/14 and focal vitest package smoke 84/84 passed.\n[rationale:risk-control] `readyForTaskBud125` leaked a historical task id into operational API surfaces; replacing it with outcome-based `readyForLoopEvidence` reduces cognitive coupling while a temporary compatibility alias prevents breaking existing scripts."
     },
     {
       "id": "TASK-BUD-138",

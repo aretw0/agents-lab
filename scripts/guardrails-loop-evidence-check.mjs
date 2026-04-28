@@ -74,8 +74,10 @@ export function computeEvidenceReadiness(evidence) {
     `loopReady.runtime=active:${loopReady ? (loopRuntimeActive ? "yes" : "no") : "n/a"}`,
   ];
 
+  const readyForLoopEvidence = boardRuntimeActive && boardEmLoop && loopRuntimeActive;
   return {
-    readyForTaskBud125: boardRuntimeActive && boardEmLoop && loopRuntimeActive,
+    readyForLoopEvidence,
+    readyForTaskBud125: readyForLoopEvidence,
     criteria,
   };
 }
@@ -90,6 +92,7 @@ export function assessLoopEvidence({ cwd = process.cwd(), nowMs = Date.now(), ma
       updatedAtIso: undefined,
       ageSec: undefined,
       stale: true,
+      readyForLoopEvidence: false,
       readyForTaskBud125: false,
       criteria: [
         "boardAuto.runtime=active:n/a",
@@ -109,6 +112,7 @@ export function assessLoopEvidence({ cwd = process.cwd(), nowMs = Date.now(), ma
       updatedAtIso: undefined,
       ageSec: undefined,
       stale: true,
+      readyForLoopEvidence: false,
       readyForTaskBud125: false,
       criteria: [
         "boardAuto.runtime=active:n/a",
@@ -139,6 +143,7 @@ export function assessLoopEvidence({ cwd = process.cwd(), nowMs = Date.now(), ma
     updatedAtIso,
     ageSec,
     stale,
+    readyForLoopEvidence: readiness.readyForLoopEvidence,
     readyForTaskBud125: readiness.readyForTaskBud125,
     criteria: readiness.criteria,
     boardAuto: loaded.evidence.lastBoardAutoAdvance,
@@ -233,7 +238,8 @@ function printTextReport(report) {
   console.log(`updatedAt: ${report.updatedAtIso ?? "n/a"}`);
   console.log(`ageSec: ${report.ageSec ?? "n/a"}`);
   console.log(`stale: ${report.stale ? "yes" : "no"}`);
-  console.log(`readyForTaskBud125: ${report.readyForTaskBud125 ? "yes" : "no"}`);
+  console.log(`readyForLoopEvidence: ${report.readyForLoopEvidence ? "yes" : "no"}`);
+  console.log(`readyForTaskBud125(deprecated): ${report.readyForTaskBud125 ? "yes" : "no"}`);
   console.log(`criteria: ${report.criteria.join(" | ")}`);
 
   if (report.boardAuto) {
@@ -255,7 +261,7 @@ export function computeLoopEvidenceStrictFailures(report, milestoneCheck, option
   else if (report.status === "invalid-json") failures.push("evidence-invalid-json");
   else if (report.status !== "ok") failures.push(`evidence-${report.status}`);
   if (report.stale) failures.push("evidence-stale");
-  if (!report.readyForTaskBud125) failures.push("readiness-not-ready");
+  if (!report.readyForLoopEvidence) failures.push("readiness-not-ready");
   if (milestoneCheck && milestoneCheck.matches === false) failures.push("milestone-mismatch");
   if (options.requireMilestoneGate && !milestoneCheck?.expectedMilestone) failures.push("milestone-gate-inactive");
   return [...new Set(failures)];

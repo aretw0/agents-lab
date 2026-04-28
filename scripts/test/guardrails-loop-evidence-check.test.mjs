@@ -18,6 +18,7 @@ test("computeEvidenceReadiness returns ready only when active+emLoop criteria ar
     },
   });
 
+  assert.equal(ready.readyForLoopEvidence, true);
   assert.equal(ready.readyForTaskBud125, true);
   assert.ok(ready.criteria.includes("boardAuto.runtime=active:yes"));
 
@@ -31,7 +32,7 @@ test("computeEvidenceReadiness returns ready only when active+emLoop criteria ar
     },
   });
 
-  assert.equal(notReady.readyForTaskBud125, false);
+  assert.equal(notReady.readyForLoopEvidence, false);
   assert.ok(notReady.criteria.includes("boardAuto.runtime=active:no"));
 });
 
@@ -40,7 +41,7 @@ test("assessLoopEvidence reports missing evidence file", () => {
   try {
     const report = assessLoopEvidence({ cwd, nowMs: Date.parse("2026-04-23T20:00:00.000Z") });
     assert.equal(report.status, "missing");
-    assert.equal(report.readyForTaskBud125, false);
+    assert.equal(report.readyForLoopEvidence, false);
     assert.equal(report.stale, true);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
@@ -80,7 +81,7 @@ test("assessLoopEvidence reports ready and fresh state", () => {
 
     assert.equal(report.status, "ok");
     assert.equal(report.stale, false);
-    assert.equal(report.readyForTaskBud125, true);
+    assert.equal(report.readyForLoopEvidence, true);
     assert.equal(report.boardAuto?.milestone, "MS-LOCAL");
     assert.equal(report.loopReady?.milestone, "MS-LOCAL");
   } finally {
@@ -118,7 +119,7 @@ test("assessLoopEvidence keeps readiness criteria task-agnostic (real board auto
     });
 
     assert.equal(report.status, "ok");
-    assert.equal(report.readyForTaskBud125, true);
+    assert.equal(report.readyForLoopEvidence, true);
     assert.equal(report.boardAuto?.taskId, "TASK-BUD-028");
   } finally {
     rmSync(cwd, { recursive: true, force: true });
@@ -151,25 +152,25 @@ test("evaluateMilestoneScopeMatch requires parity between boardAuto and loopRead
 
 test("computeLoopEvidenceStrictFailures explains strict blockers deterministically", () => {
   const failures = computeLoopEvidenceStrictFailures(
-    { status: "stale", stale: true, readyForTaskBud125: false },
+    { status: "stale", stale: true, readyForLoopEvidence: false },
     { matches: false },
   );
   assert.deepEqual(failures, ["evidence-stale", "readiness-not-ready", "milestone-mismatch"]);
 
   const inactiveGate = computeLoopEvidenceStrictFailures(
-    { status: "ok", stale: false, readyForTaskBud125: true },
+    { status: "ok", stale: false, readyForLoopEvidence: true },
     { matches: true, reason: "no-expectation" },
     { requireMilestoneGate: true },
   );
   assert.deepEqual(inactiveGate, ["milestone-gate-inactive"]);
 
   const missing = computeLoopEvidenceStrictFailures(
-    { status: "missing", stale: true, readyForTaskBud125: false },
+    { status: "missing", stale: true, readyForLoopEvidence: false },
   );
   assert.deepEqual(missing, ["evidence-missing", "evidence-stale", "readiness-not-ready"]);
 
   const ready = computeLoopEvidenceStrictFailures(
-    { status: "ok", stale: false, readyForTaskBud125: true },
+    { status: "ok", stale: false, readyForLoopEvidence: true },
     { matches: true },
   );
   assert.deepEqual(ready, []);
@@ -483,7 +484,7 @@ test("assessLoopEvidence reports stale when updatedAt exceeds freshness window",
 
     assert.equal(report.status, "stale");
     assert.equal(report.stale, true);
-    assert.equal(report.readyForTaskBud125, true);
+    assert.equal(report.readyForLoopEvidence, true);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

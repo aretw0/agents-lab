@@ -344,10 +344,10 @@ export function evaluateLaneEvidenceMilestoneParity(
 }
 
 export function shouldWarnLaneEvidence(
-  readyForTaskBud125: boolean,
+  readyForLoopEvidence: boolean,
   parity: Pick<LaneEvidenceMilestoneParity, "matches">,
 ): boolean {
-  return !readyForTaskBud125 || !parity.matches;
+  return !readyForLoopEvidence || !parity.matches;
 }
 
 export function buildLaneQueueStatusUsage(): string {
