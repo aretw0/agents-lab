@@ -55,6 +55,24 @@ test("planDiskGuard keeps sessions protected by default", () => {
   }
 });
 
+test("planDiskGuard class filter can isolate bg artifacts", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
+  try {
+    const reportsDir = join(cwd, ".pi", "reports");
+    mkdirSync(reportsDir, { recursive: true });
+    const oldReport = join(reportsDir, "old-report.json");
+    writeFileSync(oldReport, "{}\n", "utf8");
+    const oldDate = daysAgo(21);
+    utimesSync(oldReport, oldDate, oldDate);
+
+    const report = planDiskGuard(cwd, defaultOpts({ classes: ["bg-artifact"] }));
+    const reportRows = report.deletable.filter((row) => row.class === "pi-report");
+    assert.equal(reportRows.length, 0);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
 test("planDiskGuard includes old sessions when includeSessions=true", () => {
   const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
   try {

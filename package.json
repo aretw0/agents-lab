@@ -59,6 +59,8 @@
     "pi:artifact:audit:strict": "node scripts/pi-runtime-artifact-audit.mjs --strict",
     "ops:disk:check": "node scripts/host-disk-guard.mjs",
     "ops:disk:cleanup:dry": "node scripts/host-disk-guard.mjs",
+    "ops:disk:cleanup:bg:dry": "node scripts/host-disk-guard.mjs --classes=bg-artifact",
+    "ops:disk:cleanup:bg": "node scripts/host-disk-guard.mjs --apply --classes=bg-artifact",
     "ops:disk:strict": "node scripts/host-disk-guard.mjs --strict",
     "ops:disk:strict:warn": "node scripts/host-disk-guard.mjs --strict --strict-on=warn",
     "ops:disk:cleanup": "node scripts/host-disk-guard.mjs --apply",

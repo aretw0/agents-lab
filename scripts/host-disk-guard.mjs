@@ -25,6 +25,7 @@ function parseArgs(argv) {
     blockFreeMb: 5 * 1024,
     strict: false,
     strictOn: "block-long-run",
+    classes: ["bg-artifact", "pi-report", "session-jsonl"],
     help: false,
   };
 
@@ -37,6 +38,13 @@ function parseArgs(argv) {
     else if (arg.startsWith("--strict-on=")) {
       const value = String(arg.split("=")[1] || "").trim();
       out.strictOn = value === "warn" ? "warn" : "block-long-run";
+    } else if (arg.startsWith("--classes=")) {
+      const raw = String(arg.split("=")[1] || "").trim();
+      const allowed = new Set(["bg-artifact", "pi-report", "session-jsonl"]);
+      const parsed = raw.split(",").map((x) => x.trim()).filter(Boolean);
+      const classes = parsed.filter((x) => allowed.has(x));
+      if (classes.length === 0) throw new Error("Invalid --classes. Use comma-separated bg-artifact,pi-report,session-jsonl");
+      out.classes = Array.from(new Set(classes));
     }
     else if (arg.startsWith("--keep-recent-sessions=")) {
       out.keepRecentSessions = Math.max(0, Math.floor(Number(arg.split("=")[1] || "0")));
@@ -79,6 +87,7 @@ function printHelp() {
     "  --block-free-mb=N          Block-long-run threshold for free space (default: 5120)",
     "  --strict                   Exit 1 when disk pressure reaches strict threshold",
     "  --strict-on=warn|block-long-run  Strict threshold (default: block-long-run)",
+    "  --classes=a,b,c            Candidate classes (bg-artifact,pi-report,session-jsonl)",
     "  --json                     JSON output",
     "  -h, --help",
     "",
@@ -258,24 +267,37 @@ function gatherGlobalWorkspaceSessions(cwd) {
 function selectCandidates(all, opts) {
   const reportCutoffDays = Math.max(1, opts.reportsAgeDays);
   const sessionCutoffDays = Math.max(1, opts.sessionAgeDays);
+  const enabledClasses = new Set(Array.isArray(opts.classes) ? opts.classes : ["bg-artifact", "pi-report", "session-jsonl"]);
 
-  const bg = all.bg.map((x) => ({ ...x, canDelete: true, reason: "safe-temp-artifact" }));
-
-  const reports = all.reports.map((x) => ({
+  const bg = all.bg.map((x) => ({
     ...x,
-    canDelete: x.ageDays >= reportCutoffDays,
-    reason: x.ageDays >= reportCutoffDays
-      ? `older-than-${reportCutoffDays}d`
-      : "recent-report-keep",
+    canDelete: enabledClasses.has("bg-artifact"),
+    reason: enabledClasses.has("bg-artifact") ? "safe-temp-artifact" : "class-filter-excluded",
   }));
+
+  const reports = all.reports.map((x) => {
+    const oldEnough = x.ageDays >= reportCutoffDays;
+    const classEnabled = enabledClasses.has("pi-report");
+    return {
+      ...x,
+      canDelete: classEnabled && oldEnough,
+      reason: !classEnabled
+        ? "class-filter-excluded"
+        : oldEnough
+          ? `older-than-${reportCutoffDays}d`
+          : "recent-report-keep",
+    };
+  });
 
   const sessions = all.sessions.map((x, idx) => {
     const oldEnough = x.ageDays >= sessionCutoffDays;
     const beyondKeep = idx >= Math.max(0, opts.keepRecentSessions);
     const selectedByAge = oldEnough && beyondKeep;
-    const canDelete = opts.includeSessions && selectedByAge;
+    const classEnabled = enabledClasses.has("session-jsonl");
+    const canDelete = classEnabled && opts.includeSessions && selectedByAge;
     let reason = "session-protected";
-    if (!opts.includeSessions) reason = "requires---include-sessions";
+    if (!classEnabled) reason = "class-filter-excluded";
+    else if (!opts.includeSessions) reason = "requires---include-sessions";
     else if (!oldEnough) reason = "recent-session-keep";
     else if (!beyondKeep) reason = `keep-recent-${opts.keepRecentSessions}`;
     else reason = `older-than-${sessionCutoffDays}d`;
