@@ -18,6 +18,14 @@ Two always-on pillars now govern long runs:
 
 The project board/milestone/task loop remains the canonical planning substrate, but these two monitor pillars are operational gates: if the environment cannot sustain the run, the correct behavior is graceful stop + checkpoint rather than repeatedly hitting the wall.
 
+First-party machine gate primitive:
+
+- extension: `packages/pi-stack/extensions/machine-maintenance.ts`
+- tool: `machine_maintenance_status`
+- checks: OS memory (`freemem/totalmem`) + workspace filesystem free space (`statfs`) only
+- actions: `continue` → `bounded-work-only` → `pause-long-runs` → `checkpoint-and-stop`
+- non-goals for first slice: process table scans, cleanup mutation, broad filesystem walks
+
 ---
 
 ## Current snapshot
