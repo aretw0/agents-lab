@@ -1,5 +1,7 @@
 # Monitor Overrides — Classifiers sem lock-in de provider
 
+> Para curadoria operacional de perfis/ruído/custo e rollout default-on, ver `docs/guides/monitor-curation-master-plan.md`.
+
 Este guia cobre como manter os classifiers dos monitors funcionando ao alternar entre providers (ex.: GitHub Copilot ↔ OpenAI Codex) sem atrito.
 
 ## Problema original
