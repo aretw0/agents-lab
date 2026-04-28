@@ -65,6 +65,7 @@ import {
 } from "./context-watchdog-handoff";
 import {
 	describeAutoResumeDispatchReason,
+	describeAutoResumeDispatchHint,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
 	shouldEmitAutoResumeAfterCompact,
@@ -111,6 +112,7 @@ export {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
+	describeAutoResumeDispatchHint,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
@@ -958,6 +960,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					const autoResumeSnapshot: {
 						atIso: string;
 						reason: AutoResumeDispatchReason;
+						hint?: string;
 						dispatched: boolean;
 						reloadRequired: boolean;
 						checkpointEvidenceReady: boolean;
@@ -968,6 +971,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					} = {
 						atIso: new Date(nowAfterCompact).toISOString(),
 						reason: autoResumeDecision.reason,
+						hint: describeAutoResumeDispatchHint(autoResumeDecision.reason),
 						dispatched: autoResumeDecision.shouldDispatch,
 						reloadRequired,
 						checkpointEvidenceReady,
@@ -999,6 +1003,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							{
 								atIso: autoResumeSnapshot.atIso,
 								reason: autoResumeSnapshot.reason,
+								hint: autoResumeSnapshot.hint,
 								hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
 								hasRecentSteerInput: autoResumeSnapshot.hasRecentSteerInput,
 								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
@@ -1158,6 +1163,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeLastDecisionSummary: lastAutoResumeDecision
 				? describeAutoResumeDispatchReason(lastAutoResumeDecision.reason)
 				: "none",
+			autoResumeLastDecisionHint: lastAutoResumeDecision?.hint
+				?? describeAutoResumeDispatchHint(lastAutoResumeDecision?.reason ?? "send"),
 			autoResumeLastPromptDiagnosticsSummary: summarizeAutoResumePromptDiagnostics(
 				lastAutoResumeDecision?.promptDiagnostics,
 			),
@@ -1421,6 +1428,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
 					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
 					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} reloadRequired=${autoCompact.autoResumeLastReloadRequired ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.autoResumeLastCheckpointEvidenceReady ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
+					autoCompact.autoResumeLastDecisionHint ? `auto-resume-last hint: ${autoCompact.autoResumeLastDecisionHint}` : "",
 					`auto-resume-last-prompt: ${autoCompact.autoResumeLastPromptDiagnosticsSummary ?? "none"}`,
 					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
 					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,

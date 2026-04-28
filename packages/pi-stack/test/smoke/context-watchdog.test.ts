@@ -20,6 +20,7 @@ import {
 	parseContextBootstrapPreset,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
+	describeAutoResumeDispatchHint,
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
@@ -268,6 +269,9 @@ describe("context-watchdog", () => {
 		expect(describeAutoResumeDispatchReason("send")).toBe("dispatched");
 		expect(describeAutoResumeDispatchReason("reload-required")).toContain("reload-required");
 		expect(describeAutoResumeDispatchReason("checkpoint-evidence-missing")).toContain("checkpoint-evidence-missing");
+		expect(describeAutoResumeDispatchHint("send")).toBeUndefined();
+		expect(describeAutoResumeDispatchHint("reload-required")).toContain("/reload");
+		expect(describeAutoResumeDispatchHint("checkpoint-evidence-missing")).toContain("checkpoint");
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
 			hasPendingMessages: true,

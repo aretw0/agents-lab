@@ -42,6 +42,26 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 	}
 }
 
+export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason): string | undefined {
+	switch (reason) {
+		case "reload-required":
+			return "run /reload and continue from handoff checkpoint";
+		case "checkpoint-evidence-missing":
+			return "persist or refresh handoff checkpoint evidence before resume";
+		case "pending-messages":
+			return "wait until pending messages drain before auto-resume";
+		case "recent-steer":
+			return "recent user steer detected: wait for next idle window";
+		case "lane-queue-pending":
+			return "drain lane queue before auto-resume dispatch";
+		case "auto-resume-off-or-cooldown":
+			return "auto-resume disabled or still in cooldown window";
+		case "send":
+		default:
+			return undefined;
+	}
+}
+
 export function shouldEmitAutoResumeAfterCompact(
 	config: ResumeConfigLike,
 	nowMs: number,

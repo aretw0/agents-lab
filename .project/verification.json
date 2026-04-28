@@ -5793,6 +5793,15 @@
       "method": "test",
       "timestamp": "2026-04-27T23:46:05Z",
       "evidence": "Introduced deterministic operator action-plan primitive in `context-watchdog.ts`: `resolveContextWatchOperatorActionPlan` summarizes stop context into actionable tuple (`kind`, `blocking`, optional `commandHint`). Runtime now publishes `context-watch-operator` from action-plan; steering notify/audit include action-plan fields; `/context-watch status` prints `operator-action`; `context_watch_status` payload includes structured `operatorAction`. Smoke assertions extended in `context-watchdog.test.ts` for all action-plan branches and helper interactions. Runbook updated with `operatorAction` usage guidance. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-394",
+      "target": "TASK-BUD-141",
+      "target_type": "task",
+      "status": "partial",
+      "method": "test",
+      "timestamp": "2026-04-28T00:22:15Z",
+      "evidence": "Added deterministic auto-resume hint surface for direct operator action. `context-watchdog-resume.ts` introduces `describeAutoResumeDispatchHint` (reason->action hint). `context-watchdog.ts` stores hint in `autoResumeSnapshot`, includes it in `context-watchdog.auto-resume-suppressed` audit, exposes `autoResumeLastDecisionHint` in autoCompact diagnostics, and prints `auto-resume-last hint` in `/context-watch status`; tool payload now carries this via `autoCompact`. Runbook updated to reference `autoResumeLastDecisionHint`. Smoke updated in `context-watchdog.test.ts` with hint assertions. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
     }
   ]
 }
