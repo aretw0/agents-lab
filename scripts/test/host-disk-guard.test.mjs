@@ -24,7 +24,7 @@ function defaultOpts(overrides = {}) {
     blockFreeMb: 512,
     strict: false,
     strictOn: "block-long-run",
-    classes: ["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"],
+    classes: ["bg-artifact", "generated-cache", "pi-report", "session-jsonl", "global-session-jsonl"],
     help: false,
     ...overrides,
   };
@@ -90,6 +90,25 @@ test("planDiskGuard class filter can isolate bg artifacts", () => {
     assert.equal(reportRows.length, 0);
     assert.ok(report.candidateSummary.byClass);
     assert.ok(Array.isArray(report.candidateSummary.byClass.protected));
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("planDiskGuard includes generated caches as safe cleanup candidates", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
+  try {
+    const viteDir = join(cwd, "node_modules", ".vite");
+    mkdirSync(viteDir, { recursive: true });
+    const cacheFile = join(viteDir, "cache.bin");
+    writeFileSync(cacheFile, "cache\n", "utf8");
+
+    const report = planDiskGuard(cwd, defaultOpts({ classes: ["generated-cache"] }));
+    const cacheRows = report.deletable.filter((row) => row.class === "generated-cache");
+    assert.equal(cacheRows.length, 1);
+    assert.ok(cacheRows[0].path.endsWith("node_modules/.vite/cache.bin"));
+    assert.equal(report.inventory.generatedCacheCount, 1);
+    assert.ok(report.inventory.generatedCacheTotalMb >= 0);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -179,6 +198,7 @@ test("planDiskGuard reports bounded workspace disk pressure", () => {
     assert.ok(["ok", "warn", "block-long-run", "unknown"].includes(report.disk.severity));
     assert.equal(typeof report.inventory.bgArtifactTotalMb, "number");
     assert.equal(typeof report.inventory.reportTotalMb, "number");
+    assert.equal(typeof report.inventory.generatedCacheTotalMb, "number");
     assert.equal(typeof report.inventory.sessionTotalMb, "number");
     assert.equal(typeof report.inventory.globalSessionTotalMb, "number");
     assert.ok(Array.isArray(report.inventory.topGlobalSessions));

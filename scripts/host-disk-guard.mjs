@@ -26,7 +26,7 @@ function parseArgs(argv) {
     blockFreeMb: 5 * 1024,
     strict: false,
     strictOn: "block-long-run",
-    classes: ["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"],
+    classes: ["bg-artifact", "generated-cache", "pi-report", "session-jsonl", "global-session-jsonl"],
     help: false,
   };
 
@@ -42,10 +42,10 @@ function parseArgs(argv) {
       out.strictOn = value === "warn" ? "warn" : "block-long-run";
     } else if (arg.startsWith("--classes=")) {
       const raw = String(arg.split("=")[1] || "").trim();
-      const allowed = new Set(["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"]);
+      const allowed = new Set(["bg-artifact", "generated-cache", "pi-report", "session-jsonl", "global-session-jsonl"]);
       const parsed = raw.split(",").map((x) => x.trim()).filter(Boolean);
       const classes = parsed.filter((x) => allowed.has(x));
-      if (classes.length === 0) throw new Error("Invalid --classes. Use comma-separated bg-artifact,pi-report,session-jsonl");
+      if (classes.length === 0) throw new Error("Invalid --classes. Use comma-separated bg-artifact,generated-cache,pi-report,session-jsonl,global-session-jsonl");
       out.classes = Array.from(new Set(classes));
     }
     else if (arg.startsWith("--keep-recent-sessions=")) {
@@ -90,7 +90,7 @@ function printHelp() {
     "  --block-free-mb=N          Block-long-run threshold for free space (default: 5120)",
     "  --strict                   Exit 1 when disk pressure reaches strict threshold",
     "  --strict-on=warn|block-long-run  Strict threshold (default: block-long-run)",
-    "  --classes=a,b,c            Candidate classes (bg-artifact,pi-report,session-jsonl,global-session-jsonl)",
+    "  --classes=a,b,c            Candidate classes (bg-artifact,generated-cache,pi-report,session-jsonl,global-session-jsonl)",
     "  --json                     JSON output",
     "  -h, --help",
     "",
@@ -227,6 +227,41 @@ function gatherReports(cwd) {
   return out;
 }
 
+function gatherGeneratedCaches(cwd) {
+  const roots = [
+    join(cwd, "node_modules", ".vite"),
+    join(cwd, "packages", "pi-stack", "node_modules", ".vite"),
+    join(cwd, ".vitest"),
+    join(cwd, ".cache", "vitest"),
+  ];
+
+  const piDir = join(cwd, ".pi");
+  if (existsSync(piDir)) {
+    try {
+      for (const entry of readdirSync(piDir, { withFileTypes: true })) {
+        if (/^tmp[-_.]/i.test(entry.name)) roots.push(join(piDir, entry.name));
+      }
+    } catch {
+      // ignore unreadable .pi root
+    }
+  }
+
+  const out = [];
+  for (const root of Array.from(new Set(roots))) {
+    for (const file of walkFiles(root)) {
+      const st = safeStat(file);
+      if (!st) continue;
+      out.push({
+        path: file,
+        bytes: st.size,
+        ageDays: (Date.now() - st.mtimeMs) / (24 * 60 * 60 * 1000),
+        class: "generated-cache",
+      });
+    }
+  }
+  return out;
+}
+
 function normalizeSlashes(inputPath) {
   return String(inputPath || "").replace(/\\/g, "/");
 }
@@ -279,12 +314,18 @@ function gatherGlobalWorkspaceSessions(cwd) {
 function selectCandidates(all, opts) {
   const reportCutoffDays = Math.max(1, opts.reportsAgeDays);
   const sessionCutoffDays = Math.max(1, opts.sessionAgeDays);
-  const enabledClasses = new Set(Array.isArray(opts.classes) ? opts.classes : ["bg-artifact", "pi-report", "session-jsonl"]);
+  const enabledClasses = new Set(Array.isArray(opts.classes) ? opts.classes : ["bg-artifact", "generated-cache", "pi-report", "session-jsonl"]);
 
   const bg = all.bg.map((x) => ({
     ...x,
     canDelete: enabledClasses.has("bg-artifact"),
     reason: enabledClasses.has("bg-artifact") ? "safe-temp-artifact" : "class-filter-excluded",
+  }));
+
+  const generatedCaches = all.generatedCaches.map((x) => ({
+    ...x,
+    canDelete: enabledClasses.has("generated-cache"),
+    reason: enabledClasses.has("generated-cache") ? "safe-generated-cache" : "class-filter-excluded",
   }));
 
   const reports = all.reports.map((x) => {
@@ -331,7 +372,7 @@ function selectCandidates(all, opts) {
     return { ...x, canDelete, reason };
   });
 
-  const allRows = [...bg, ...reports, ...sessions, ...globalSessions];
+  const allRows = [...bg, ...generatedCaches, ...reports, ...sessions, ...globalSessions];
   const deletable = allRows.filter((x) => x.canDelete).sort((a, b) => b.bytes - a.bytes);
   const dryOnly = allRows.filter((x) => !x.canDelete).sort((a, b) => b.bytes - a.bytes);
 
@@ -384,6 +425,7 @@ export function planDiskGuard(cwd, opts) {
   const all = {
     bg: gatherBgArtifacts(),
     reports: gatherReports(cwd),
+    generatedCaches: gatherGeneratedCaches(cwd),
     sessions: gatherSessions(cwd),
     globalSessions: gatherGlobalWorkspaceSessions(cwd),
   };
@@ -420,6 +462,8 @@ export function planDiskGuard(cwd, opts) {
       bgArtifactTotalMb: toMb(all.bg.reduce((sum, x) => sum + x.bytes, 0)),
       reportCount: all.reports.length,
       reportTotalMb: toMb(all.reports.reduce((sum, x) => sum + x.bytes, 0)),
+      generatedCacheCount: all.generatedCaches.length,
+      generatedCacheTotalMb: toMb(all.generatedCaches.reduce((sum, x) => sum + x.bytes, 0)),
       sessionCount: all.sessions.length,
       sessionTotalMb: toMb(all.sessions.reduce((sum, x) => sum + x.bytes, 0)),
       globalSessionCount: all.globalSessions.length,
@@ -479,7 +523,7 @@ function printHuman(report, applyResult, strictFailures = []) {
   console.log(`generated: ${report.generatedAtIso}`);
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
   console.log(`projectedAfterApply: severity=${report.projected.severityAfterApply} free=${report.projected.freeMbAfterApply}MB recommendation=${report.projected.recommendationAfterApply}`);
-  console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
+  console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB generatedCaches=${report.inventory.generatedCacheTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
   for (const row of report.candidateSummary.byClass.deletable) {
     console.log(`  - class ${row.class}: ${row.count} files / ${row.totalMb} MB`);
