@@ -17,6 +17,7 @@ function parseArgs(argv) {
     json: false,
     apply: false,
     includeSessions: false,
+    includeGlobalSessions: false,
     keepRecentSessions: 20,
     sessionAgeDays: 7,
     reportsAgeDays: 14,
@@ -25,7 +26,7 @@ function parseArgs(argv) {
     blockFreeMb: 5 * 1024,
     strict: false,
     strictOn: "block-long-run",
-    classes: ["bg-artifact", "pi-report", "session-jsonl"],
+    classes: ["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"],
     help: false,
   };
 
@@ -33,6 +34,7 @@ function parseArgs(argv) {
     if (arg === "--json") out.json = true;
     else if (arg === "--apply") out.apply = true;
     else if (arg === "--include-sessions") out.includeSessions = true;
+    else if (arg === "--include-global-sessions") out.includeGlobalSessions = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
     else if (arg === "--strict") out.strict = true;
     else if (arg.startsWith("--strict-on=")) {
@@ -40,7 +42,7 @@ function parseArgs(argv) {
       out.strictOn = value === "warn" ? "warn" : "block-long-run";
     } else if (arg.startsWith("--classes=")) {
       const raw = String(arg.split("=")[1] || "").trim();
-      const allowed = new Set(["bg-artifact", "pi-report", "session-jsonl"]);
+      const allowed = new Set(["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"]);
       const parsed = raw.split(",").map((x) => x.trim()).filter(Boolean);
       const classes = parsed.filter((x) => allowed.has(x));
       if (classes.length === 0) throw new Error("Invalid --classes. Use comma-separated bg-artifact,pi-report,session-jsonl");
@@ -78,7 +80,8 @@ function printHelp() {
     "",
     "Flags:",
     "  --apply                    Apply cleanup plan (default: dry-run)",
-    "  --include-sessions         Allow deleting old session jsonl files",
+    "  --include-sessions         Allow deleting old sandbox session jsonl files",
+    "  --include-global-sessions  Allow deleting old global workspace session jsonl files",
     "  --keep-recent-sessions=N   Keep newest N session files (default: 20)",
     "  --session-age-days=N       Session candidate age threshold (default: 7)",
     "  --reports-age-days=N       .pi/reports age threshold (default: 14)",
@@ -87,7 +90,7 @@ function printHelp() {
     "  --block-free-mb=N          Block-long-run threshold for free space (default: 5120)",
     "  --strict                   Exit 1 when disk pressure reaches strict threshold",
     "  --strict-on=warn|block-long-run  Strict threshold (default: block-long-run)",
-    "  --classes=a,b,c            Candidate classes (bg-artifact,pi-report,session-jsonl)",
+    "  --classes=a,b,c            Candidate classes (bg-artifact,pi-report,session-jsonl,global-session-jsonl)",
     "  --json                     JSON output",
     "  -h, --help",
     "",
@@ -304,7 +307,22 @@ function selectCandidates(all, opts) {
     return { ...x, canDelete, reason };
   });
 
-  const allRows = [...bg, ...reports, ...sessions];
+  const globalSessions = all.globalSessions.map((x, idx) => {
+    const oldEnough = x.ageDays >= sessionCutoffDays;
+    const beyondKeep = idx >= Math.max(0, opts.keepRecentSessions);
+    const selectedByAge = oldEnough && beyondKeep;
+    const classEnabled = enabledClasses.has("global-session-jsonl");
+    const canDelete = classEnabled && opts.includeGlobalSessions && selectedByAge;
+    let reason = "global-session-protected";
+    if (!classEnabled) reason = "class-filter-excluded";
+    else if (!opts.includeGlobalSessions) reason = "requires---include-global-sessions";
+    else if (!oldEnough) reason = "recent-session-keep";
+    else if (!beyondKeep) reason = `keep-recent-${opts.keepRecentSessions}`;
+    else reason = `older-than-${sessionCutoffDays}d`;
+    return { ...x, canDelete, reason };
+  });
+
+  const allRows = [...bg, ...reports, ...sessions, ...globalSessions];
   const deletable = allRows.filter((x) => x.canDelete).sort((a, b) => b.bytes - a.bytes);
   const dryOnly = allRows.filter((x) => !x.canDelete).sort((a, b) => b.bytes - a.bytes);
 

@@ -166,7 +166,7 @@ Contrato atual:
 - para gate determinístico em automações, usar `npm run ops:disk:strict` (exit 1 quando `severity=block-long-run`) ou `npm run ops:disk:strict:warn` para modo conservador (warn+block).
 - logs `/tmp/oh-pi-bg-*` são candidatos seguros de temp artifact, mas sessões JSONL são evidência e permanecem protegidas salvo `--include-sessions` explícito;
 - para dry-run focado apenas em temporários seguros, usar `npm run ops:disk:cleanup:bg:dry` (equivale a `--classes=bg-artifact`);
-- para diagnóstico dry-run por classe, usar também `npm run ops:disk:cleanup:reports:dry` e `npm run ops:disk:cleanup:sessions:dry` (sessões somente preview com parâmetros explícitos).
+- para diagnóstico dry-run por classe, usar também `npm run ops:disk:cleanup:reports:dry`, `npm run ops:disk:cleanup:sessions:dry` (sandbox) e `npm run ops:disk:cleanup:global-sessions:dry` (namespace global); para revisão mais agressiva sem apply, usar `ops:disk:cleanup:global-sessions:review` (age=7d, keepRecent=4). Sessões ficam em preview explícito antes de qualquer apply.
 
 Evitar diagnósticos ad-hoc amplos (`du`/`grep`/`find` sobre C:, home, `node_modules`, AppData) durante long-run: preferir `host-disk-guard` e comandos focais com limite de saída.
 

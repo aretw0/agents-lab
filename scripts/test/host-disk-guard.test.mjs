@@ -15,6 +15,7 @@ function defaultOpts(overrides = {}) {
     json: false,
     apply: false,
     includeSessions: false,
+    includeGlobalSessions: false,
     keepRecentSessions: 20,
     sessionAgeDays: 7,
     reportsAgeDays: 14,
@@ -23,10 +24,28 @@ function defaultOpts(overrides = {}) {
     blockFreeMb: 512,
     strict: false,
     strictOn: "block-long-run",
-    classes: ["bg-artifact", "pi-report", "session-jsonl"],
+    classes: ["bg-artifact", "pi-report", "session-jsonl", "global-session-jsonl"],
     help: false,
     ...overrides,
   };
+}
+
+function encodeSessionNamespaceFromPath(inputPath) {
+  const normalized = String(inputPath || "").replace(/\\/g, "/");
+  const win = /^([A-Za-z]):\/(.*)$/.exec(normalized);
+  if (win) {
+    const drive = win[1].toUpperCase();
+    const rest = win[2].split("/").filter(Boolean).join("-");
+    return `--${drive}--${rest}--`;
+  }
+  const mntWin = /^\/mnt\/([a-zA-Z])\/(.*)$/.exec(normalized);
+  if (mntWin) {
+    const drive = mntWin[1].toUpperCase();
+    const rest = mntWin[2].split("/").filter(Boolean).join("-");
+    return `--${drive}--${rest}--`;
+  }
+  const unix = normalized.split("/").filter(Boolean).join("-");
+  return `--${unix}--`;
 }
 
 test("planDiskGuard keeps sessions protected by default", () => {
@@ -73,6 +92,41 @@ test("planDiskGuard class filter can isolate bg artifacts", () => {
     assert.ok(Array.isArray(report.candidateSummary.byClass.protected));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("planDiskGuard can include old global workspace sessions when explicitly enabled", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "disk-guard-test-"));
+  const fakeHome = mkdtempSync(join(tmpdir(), "disk-guard-home-"));
+  const previousHome = process.env.HOME;
+  const previousUserProfile = process.env.USERPROFILE;
+  process.env.HOME = fakeHome;
+  process.env.USERPROFILE = fakeHome;
+  try {
+    const namespace = encodeSessionNamespaceFromPath(cwd);
+    const globalDir = join(fakeHome, ".pi", "agent", "sessions", namespace);
+    mkdirSync(globalDir, { recursive: true });
+
+    const oldGlobalSession = join(globalDir, "old-global.jsonl");
+    writeFileSync(oldGlobalSession, "{}\n", "utf8");
+    const oldDate = daysAgo(21);
+    utimesSync(oldGlobalSession, oldDate, oldDate);
+
+    const report = planDiskGuard(cwd, defaultOpts({
+      classes: ["global-session-jsonl"],
+      includeGlobalSessions: true,
+      keepRecentSessions: 0,
+      sessionAgeDays: 14,
+    }));
+
+    const globalRows = report.deletable.filter((row) => row.class === "global-session-jsonl");
+    assert.equal(globalRows.length, 1);
+    assert.ok(globalRows[0].path.endsWith("old-global.jsonl"));
+  } finally {
+    process.env.HOME = previousHome;
+    process.env.USERPROFILE = previousUserProfile;
+    rmSync(cwd, { recursive: true, force: true });
+    rmSync(fakeHome, { recursive: true, force: true });
   }
 });
 
