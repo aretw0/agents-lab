@@ -156,6 +156,13 @@ test("computeLoopEvidenceStrictFailures explains strict blockers deterministical
   );
   assert.deepEqual(failures, ["evidence-stale", "readiness-not-ready", "milestone-mismatch"]);
 
+  const inactiveGate = computeLoopEvidenceStrictFailures(
+    { status: "ok", stale: false, readyForTaskBud125: true },
+    { matches: true, reason: "no-expectation" },
+    { requireMilestoneGate: true },
+  );
+  assert.deepEqual(inactiveGate, ["milestone-gate-inactive"]);
+
   const missing = computeLoopEvidenceStrictFailures(
     { status: "missing", stale: true, readyForTaskBud125: false },
   );
@@ -167,6 +174,7 @@ test("computeLoopEvidenceStrictFailures explains strict blockers deterministical
   );
   assert.deepEqual(ready, []);
   assert.match(describeLoopEvidenceStrictFailure("milestone-mismatch"), /defaultBoardMilestone|loop scope/);
+  assert.match(describeLoopEvidenceStrictFailure("milestone-gate-inactive"), /defaultBoardMilestone|--expect-milestone/);
 });
 
 test("cli json output includes inactive milestone gate when no expectation is provided", () => {
@@ -206,6 +214,47 @@ test("cli json output includes inactive milestone gate when no expectation is pr
     assert.equal(parsed.milestoneGate, "inactive");
     assert.equal(parsed.milestoneCheck.reason, "no-expectation");
     assert.equal(parsed.milestoneCheck.matches, true);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("cli strict mode can require an active milestone gate", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "loop-evidence-cli-ms-required-"));
+  try {
+    mkdirSync(join(cwd, ".pi"), { recursive: true });
+    writeFileSync(join(cwd, ".pi", "guardrails-loop-evidence.json"), `${JSON.stringify({
+      version: 1,
+      updatedAtIso: "2026-04-23T19:59:30.000Z",
+      lastBoardAutoAdvance: {
+        atIso: "2026-04-23T19:59:30.000Z",
+        taskId: "TASK-BUD-125",
+        runtimeCodeState: "active",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        emLoop: true,
+      },
+      lastLoopReady: {
+        atIso: "2026-04-23T19:59:20.000Z",
+        markersLabel: "READY=yes ACTIVE_HERE=yes IN_LOOP=yes blocker=none",
+        runtimeCodeState: "active",
+        boardAutoAdvanceGate: "ready",
+        nextTaskId: "TASK-BUD-125",
+      },
+    }, null, 2)}\n`, "utf8");
+
+    const cli = spawnSync(process.execPath, [
+      join(process.cwd(), "scripts", "guardrails-loop-evidence-check.mjs"),
+      "--cwd",
+      cwd,
+      "--strict",
+      "--max-age-min",
+      "9999999",
+      "--require-milestone-gate",
+    ], { encoding: "utf8" });
+
+    assert.equal(cli.status, 1);
+    assert.match(cli.stdout, /milestoneGate: inactive/);
+    assert.match(cli.stdout, /strictFailures: .*milestone-gate-inactive/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

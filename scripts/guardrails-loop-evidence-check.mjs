@@ -169,12 +169,14 @@ function parseArgs(argv) {
     json: false,
     help: false,
     expectMilestone: undefined,
+    requireMilestoneGate: false,
   };
 
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--strict") out.strict = true;
     else if (a === "--json") out.json = true;
+    else if (a === "--require-milestone-gate") out.requireMilestoneGate = true;
     else if (a === "--help" || a === "-h") out.help = true;
     else if (a.startsWith("--cwd=")) out.cwd = path.resolve(a.slice("--cwd=".length));
     else if (a === "--cwd") {
@@ -218,6 +220,7 @@ function printHelp() {
     "  --max-age-min <n>     Freshness window in minutes (default: 30)",
     "  --strict              Exit 1 if missing/stale/not-ready",
     "  --expect-milestone <label|@default>  Also require boardAuto+loopReady milestone match",
+    "  --require-milestone-gate  Strict failure when no milestone expectation is active",
     "  --json                JSON output",
     "  -h, --help",
   ].join("\n"));
@@ -246,7 +249,7 @@ function printTextReport(report) {
   }
 }
 
-export function computeLoopEvidenceStrictFailures(report, milestoneCheck) {
+export function computeLoopEvidenceStrictFailures(report, milestoneCheck, options = {}) {
   const failures = [];
   if (report.status === "missing") failures.push("evidence-missing");
   else if (report.status === "invalid-json") failures.push("evidence-invalid-json");
@@ -254,6 +257,7 @@ export function computeLoopEvidenceStrictFailures(report, milestoneCheck) {
   if (report.stale) failures.push("evidence-stale");
   if (!report.readyForTaskBud125) failures.push("readiness-not-ready");
   if (milestoneCheck && milestoneCheck.matches === false) failures.push("milestone-mismatch");
+  if (options.requireMilestoneGate && !milestoneCheck?.expectedMilestone) failures.push("milestone-gate-inactive");
   return [...new Set(failures)];
 }
 
@@ -269,13 +273,15 @@ export function describeLoopEvidenceStrictFailure(code) {
       return "check boardAuto/loopReady criteria and /lane-queue evidence for runtime/IN_LOOP gaps";
     case "milestone-mismatch":
       return "rerun with matching --expect-milestone or align defaultBoardMilestone/loop scope";
+    case "milestone-gate-inactive":
+      return "set defaultBoardMilestone or pass --expect-milestone <label|@default> before enforcing milestone loop hard gate";
     default:
       return "inspect loop evidence status and criteria";
   }
 }
 
-function shouldFailStrict(report, milestoneCheck) {
-  return computeLoopEvidenceStrictFailures(report, milestoneCheck).length > 0;
+function shouldFailStrict(report, milestoneCheck, options) {
+  return computeLoopEvidenceStrictFailures(report, milestoneCheck, options).length > 0;
 }
 
 function main() {
@@ -301,7 +307,7 @@ function main() {
     process.exit(1);
   }
   const milestoneCheck = evaluateMilestoneScopeMatch(report, expectedMilestone);
-  const strictFailures = computeLoopEvidenceStrictFailures(report, milestoneCheck);
+  const strictFailures = computeLoopEvidenceStrictFailures(report, milestoneCheck, { requireMilestoneGate: opts.requireMilestoneGate });
   const strictFailureHints = strictFailures.map((code) => ({ code, hint: describeLoopEvidenceStrictFailure(code) }));
   const milestoneGate = milestoneCheck.expectedMilestone ? "active" : "inactive";
   const output = { ...report, milestoneGate, milestoneCheck, strictFailures, strictFailureHints };
@@ -319,7 +325,7 @@ function main() {
     for (const row of strictFailureHints) console.log(`strictHint(${row.code}): ${row.hint}`);
   }
 
-  if (opts.strict && shouldFailStrict(report, milestoneCheck)) process.exit(1);
+  if (opts.strict && shouldFailStrict(report, milestoneCheck, { requireMilestoneGate: opts.requireMilestoneGate })) process.exit(1);
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
