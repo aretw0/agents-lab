@@ -61,6 +61,8 @@
     "ops:disk:cleanup:dry": "node scripts/host-disk-guard.mjs",
     "ops:disk:cleanup:bg:dry": "node scripts/host-disk-guard.mjs --classes=bg-artifact",
     "ops:disk:cleanup:bg": "node scripts/host-disk-guard.mjs --apply --classes=bg-artifact",
+    "ops:disk:cleanup:reports:dry": "node scripts/host-disk-guard.mjs --classes=pi-report",
+    "ops:disk:cleanup:sessions:dry": "node scripts/host-disk-guard.mjs --classes=session-jsonl --include-sessions --session-age-days=14 --keep-recent-sessions=20",
     "ops:disk:strict": "node scripts/host-disk-guard.mjs --strict",
     "ops:disk:strict:warn": "node scripts/host-disk-guard.mjs --strict --strict-on=warn",
     "ops:disk:cleanup": "node scripts/host-disk-guard.mjs --apply",

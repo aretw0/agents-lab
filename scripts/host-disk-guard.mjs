@@ -340,6 +340,19 @@ function applyDeletion(rows, maxDeleteMb) {
   };
 }
 
+function summarizeCandidatesByClass(rows) {
+  const out = {};
+  for (const row of rows) {
+    const key = String(row.class || "unknown");
+    if (!out[key]) {
+      out[key] = { class: key, count: 0, totalMb: 0 };
+    }
+    out[key].count += 1;
+    out[key].totalMb = Math.round((out[key].totalMb + toMb(row.bytes || 0)) * 100) / 100;
+  }
+  return Object.values(out).sort((a, b) => b.totalMb - a.totalMb);
+}
+
 export function planDiskGuard(cwd, opts) {
   const all = {
     bg: gatherBgArtifacts(),
@@ -385,6 +398,10 @@ export function planDiskGuard(cwd, opts) {
       deletableMb: toMb(selection.deletable.reduce((sum, x) => sum + x.bytes, 0)),
       protectedCount: selection.dryOnly.length,
       protectedMb: toMb(selection.dryOnly.reduce((sum, x) => sum + x.bytes, 0)),
+      byClass: {
+        deletable: summarizeCandidatesByClass(selection.deletable),
+        protected: summarizeCandidatesByClass(selection.dryOnly),
+      },
     },
     deletable: selection.deletable.map((x) => ({
       class: x.class,
@@ -429,7 +446,13 @@ function printHuman(report, applyResult, strictFailures = []) {
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
   console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
+  for (const row of report.candidateSummary.byClass.deletable) {
+    console.log(`  - class ${row.class}: ${row.count} files / ${row.totalMb} MB`);
+  }
   console.log(`protected: ${report.candidateSummary.protectedCount} files / ${report.candidateSummary.protectedMb} MB`);
+  for (const row of report.candidateSummary.byClass.protected) {
+    console.log(`  - class ${row.class}: ${row.count} files / ${row.totalMb} MB`);
+  }
   if (report.inventory.topSessions.length > 0) {
     console.log("top sandbox session files:");
     for (const row of report.inventory.topSessions) {

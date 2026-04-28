@@ -23,6 +23,7 @@ function defaultOpts(overrides = {}) {
     blockFreeMb: 512,
     strict: false,
     strictOn: "block-long-run",
+    classes: ["bg-artifact", "pi-report", "session-jsonl"],
     help: false,
     ...overrides,
   };
@@ -68,6 +69,8 @@ test("planDiskGuard class filter can isolate bg artifacts", () => {
     const report = planDiskGuard(cwd, defaultOpts({ classes: ["bg-artifact"] }));
     const reportRows = report.deletable.filter((row) => row.class === "pi-report");
     assert.equal(reportRows.length, 0);
+    assert.ok(report.candidateSummary.byClass);
+    assert.ok(Array.isArray(report.candidateSummary.byClass.protected));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -124,6 +127,7 @@ test("planDiskGuard reports bounded workspace disk pressure", () => {
     assert.equal(report.disk.warnFreeMb, 1024);
     assert.equal(report.disk.blockFreeMb, 512);
     assert.ok(report.disk.recommendation.length > 0);
+    assert.ok(Array.isArray(report.candidateSummary.byClass.deletable));
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }

@@ -161,11 +161,12 @@ npm run ops:disk:check
 Contrato atual:
 - `host-disk-guard` é **dry-run por default** e não remove sessões sem opt-in explícito;
 - saída inclui `disk: severity=ok|warn|block-long-run|unknown`, espaço livre, uso percentual e recomendação acionável;
-- saída inclui inventário volátil bounded: `bgArtifacts`, `reports`, `sessions` (sandbox) e `globalSessions` (namespace global do workspace);
+- saída inclui inventário volátil bounded: `bgArtifacts`, `reports`, `sessions` (sandbox) e `globalSessions` (namespace global do workspace), além de resumo de candidatos por classe (`byClass`) para priorização segura;
 - se `severity=block-long-run`, pausar lotes grandes/benchmarks/e2e/browser e fazer cleanup dry-run + confirmação humana antes de continuar;
 - para gate determinístico em automações, usar `npm run ops:disk:strict` (exit 1 quando `severity=block-long-run`) ou `npm run ops:disk:strict:warn` para modo conservador (warn+block).
 - logs `/tmp/oh-pi-bg-*` são candidatos seguros de temp artifact, mas sessões JSONL são evidência e permanecem protegidas salvo `--include-sessions` explícito;
-- para dry-run focado apenas em temporários seguros, usar `npm run ops:disk:cleanup:bg:dry` (equivale a `--classes=bg-artifact`).
+- para dry-run focado apenas em temporários seguros, usar `npm run ops:disk:cleanup:bg:dry` (equivale a `--classes=bg-artifact`);
+- para diagnóstico dry-run por classe, usar também `npm run ops:disk:cleanup:reports:dry` e `npm run ops:disk:cleanup:sessions:dry` (sessões somente preview com parâmetros explícitos).
 
 Evitar diagnósticos ad-hoc amplos (`du`/`grep`/`find` sobre C:, home, `node_modules`, AppData) durante long-run: preferir `host-disk-guard` e comandos focais com limite de saída.
 
