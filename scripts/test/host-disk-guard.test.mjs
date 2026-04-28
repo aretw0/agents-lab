@@ -4,7 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { planDiskGuard } from "../host-disk-guard.mjs";
+import { computeDiskGuardStrictFailures, planDiskGuard } from "../host-disk-guard.mjs";
 
 function daysAgo(days) {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -21,6 +21,8 @@ function defaultOpts(overrides = {}) {
     maxDeleteMb: 2048,
     warnFreeMb: 1024,
     blockFreeMb: 512,
+    strict: false,
+    strictOn: "block-long-run",
     help: false,
     ...overrides,
   };
@@ -71,6 +73,20 @@ test("planDiskGuard includes old sessions when includeSessions=true", () => {
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
+});
+
+test("computeDiskGuardStrictFailures enforces deterministic strict thresholds", () => {
+  const reportBlock = { disk: { severity: "block-long-run" } };
+  const reportWarn = { disk: { severity: "warn" } };
+  const reportOk = { disk: { severity: "ok" } };
+  const reportUnknown = { disk: { severity: "unknown" } };
+
+  assert.deepEqual(computeDiskGuardStrictFailures(reportBlock, defaultOpts({ strict: true })), ["disk-pressure-block-long-run"]);
+  assert.deepEqual(computeDiskGuardStrictFailures(reportWarn, defaultOpts({ strict: true })), []);
+  assert.deepEqual(computeDiskGuardStrictFailures(reportWarn, defaultOpts({ strict: true, strictOn: "warn" })), ["disk-pressure-warn"]);
+  assert.deepEqual(computeDiskGuardStrictFailures(reportOk, defaultOpts({ strict: true, strictOn: "warn" })), []);
+  assert.deepEqual(computeDiskGuardStrictFailures(reportUnknown, defaultOpts({ strict: true })), ["disk-severity-unknown"]);
+  assert.deepEqual(computeDiskGuardStrictFailures(reportBlock, defaultOpts({ strict: false })), []);
 });
 
 test("planDiskGuard reports bounded workspace disk pressure", () => {

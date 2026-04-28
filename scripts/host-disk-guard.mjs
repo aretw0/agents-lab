@@ -23,6 +23,8 @@ function parseArgs(argv) {
     maxDeleteMb: 2048,
     warnFreeMb: 10 * 1024,
     blockFreeMb: 5 * 1024,
+    strict: false,
+    strictOn: "block-long-run",
     help: false,
   };
 
@@ -31,6 +33,11 @@ function parseArgs(argv) {
     else if (arg === "--apply") out.apply = true;
     else if (arg === "--include-sessions") out.includeSessions = true;
     else if (arg === "--help" || arg === "-h") out.help = true;
+    else if (arg === "--strict") out.strict = true;
+    else if (arg.startsWith("--strict-on=")) {
+      const value = String(arg.split("=")[1] || "").trim();
+      out.strictOn = value === "warn" ? "warn" : "block-long-run";
+    }
     else if (arg.startsWith("--keep-recent-sessions=")) {
       out.keepRecentSessions = Math.max(0, Math.floor(Number(arg.split("=")[1] || "0")));
     } else if (arg.startsWith("--session-age-days=")) {
@@ -70,6 +77,8 @@ function printHelp() {
     "  --max-delete-mb=N          Hard cap for total deletion in apply mode (default: 2048)",
     "  --warn-free-mb=N           Warn threshold for workspace filesystem free space (default: 10240)",
     "  --block-free-mb=N          Block-long-run threshold for free space (default: 5120)",
+    "  --strict                   Exit 1 when disk pressure reaches strict threshold",
+    "  --strict-on=warn|block-long-run  Strict threshold (default: block-long-run)",
     "  --json                     JSON output",
     "  -h, --help",
     "",
@@ -366,7 +375,33 @@ export function planDiskGuard(cwd, opts) {
   };
 }
 
-function printHuman(report, applyResult) {
+export function computeDiskGuardStrictFailures(report, opts = {}) {
+  if (!opts.strict) return [];
+  const severity = String(report?.disk?.severity || "unknown");
+  const strictOn = opts.strictOn === "warn" ? "warn" : "block-long-run";
+  if (severity === "unknown") return ["disk-severity-unknown"];
+  if (strictOn === "warn") {
+    return severity === "warn" || severity === "block-long-run"
+      ? [`disk-pressure-${severity}`]
+      : [];
+  }
+  return severity === "block-long-run" ? ["disk-pressure-block-long-run"] : [];
+}
+
+export function describeDiskGuardStrictFailure(code) {
+  switch (code) {
+    case "disk-severity-unknown":
+      return "disk pressure unavailable; resolve filesystem probe before unattended long-run";
+    case "disk-pressure-warn":
+      return "reduce workload to bounded slices and schedule cleanup soon";
+    case "disk-pressure-block-long-run":
+      return "pause large long-runs and run dry cleanup before continuing";
+    default:
+      return "inspect disk pressure report and cleanup candidates";
+  }
+}
+
+function printHuman(report, applyResult, strictFailures = []) {
   console.log("host-disk-guard");
   console.log(`generated: ${report.generatedAtIso}`);
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
@@ -388,6 +423,10 @@ function printHuman(report, applyResult) {
 
   if (!applyResult) {
     console.log("mode: dry-run");
+    if (strictFailures.length > 0) {
+      console.log(`strictFailures: ${strictFailures.join(",")}`);
+      for (const code of strictFailures) console.log(`strictHint(${code}): ${describeDiskGuardStrictFailure(code)}`);
+    }
     return;
   }
 
@@ -395,6 +434,10 @@ function printHuman(report, applyResult) {
   console.log(`deleted: ${applyResult.deleted.length} files / ${toMb(applyResult.deletedBytes)} MB`);
   if (applyResult.skipped.length > 0) {
     console.log(`skipped: ${applyResult.skipped.length}`);
+  }
+  if (strictFailures.length > 0) {
+    console.log(`strictFailures: ${strictFailures.join(",")}`);
+    for (const code of strictFailures) console.log(`strictHint(${code}): ${describeDiskGuardStrictFailure(code)}`);
   }
 }
 
@@ -425,11 +468,16 @@ function main() {
     applyResult = applyDeletion(resolved, opts.maxDeleteMb);
   }
 
+  const strictFailures = computeDiskGuardStrictFailures(report, opts);
+  const strictFailureHints = strictFailures.map((code) => ({ code, hint: describeDiskGuardStrictFailure(code) }));
+
   if (opts.json) {
-    console.log(JSON.stringify({ report, applyResult }, null, 2));
+    console.log(JSON.stringify({ report, applyResult, strictFailures, strictFailureHints }, null, 2));
   } else {
-    printHuman(report, applyResult);
+    printHuman(report, applyResult, strictFailures);
   }
+
+  if (strictFailures.length > 0) process.exit(1);
 }
 
 const isMain = process.argv[1]
