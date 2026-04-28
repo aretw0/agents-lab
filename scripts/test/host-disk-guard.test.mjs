@@ -170,7 +170,11 @@ test("planDiskGuard reports bounded workspace disk pressure", () => {
     const report = planDiskGuard(cwd, defaultOpts());
 
     assert.ok(report.disk);
+    assert.ok(report.projected);
+    assert.equal(typeof report.projected.freeMbAfterApply, "number");
+    assert.ok(["ok", "warn", "block-long-run", "unknown"].includes(report.projected.severityAfterApply));
     assert.equal(typeof report.disk.freeMb, "number");
+    assert.ok(report.projected.freeMbAfterApply >= report.disk.freeMb);
     assert.equal(typeof report.disk.usedPct, "number");
     assert.ok(["ok", "warn", "block-long-run", "unknown"].includes(report.disk.severity));
     assert.equal(typeof report.inventory.bgArtifactTotalMb, "number");

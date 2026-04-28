@@ -139,6 +139,23 @@ function walkFiles(rootDir) {
   return files;
 }
 
+function resolveDiskSeverity(freeMb, warnFreeMb, blockFreeMb) {
+  if (!Number.isFinite(freeMb)) return "unknown";
+  if (freeMb <= blockFreeMb) return "block-long-run";
+  if (freeMb <= warnFreeMb) return "warn";
+  return "ok";
+}
+
+function resolveDiskRecommendation(severity) {
+  return severity === "block-long-run"
+    ? "pause large long-runs; run dry cleanup and confirm deletions before continuing"
+    : severity === "warn"
+      ? "continue only with bounded/focal work; cleanup soon"
+      : severity === "ok"
+        ? "safe to continue bounded work"
+        : "disk pressure unavailable";
+}
+
 function readWorkspaceDiskPressure(cwd, opts) {
   try {
     const fsStat = statfsSync(cwd);
@@ -150,16 +167,8 @@ function readWorkspaceDiskPressure(cwd, opts) {
       ? Math.round((1 - (freeBytes / totalBytes)) * 10_000) / 100
       : 0;
     const blockFreeMb = Math.min(opts.warnFreeMb, opts.blockFreeMb);
-    const severity = freeMb <= blockFreeMb
-      ? "block-long-run"
-      : freeMb <= opts.warnFreeMb
-        ? "warn"
-        : "ok";
-    const recommendation = severity === "block-long-run"
-      ? "pause large long-runs; run dry cleanup and confirm deletions before continuing"
-      : severity === "warn"
-        ? "continue only with bounded/focal work; cleanup soon"
-        : "safe to continue bounded work";
+    const severity = resolveDiskSeverity(freeMb, opts.warnFreeMb, blockFreeMb);
+    const recommendation = resolveDiskRecommendation(severity);
     return { totalMb, freeMb, usedPct, warnFreeMb: opts.warnFreeMb, blockFreeMb, severity, recommendation };
   } catch (error) {
     return {
@@ -393,12 +402,19 @@ export function planDiskGuard(cwd, opts) {
   const topGlobalSessions = formatTopSessions(all.globalSessions);
 
   const disk = readWorkspaceDiskPressure(cwd, opts);
+  const projectedFreeMb = toMb(((Number(disk.freeMb) || 0) * MB) + selection.deletable.reduce((sum, x) => sum + x.bytes, 0));
+  const projectedSeverity = resolveDiskSeverity(projectedFreeMb, disk.warnFreeMb, disk.blockFreeMb);
 
   return {
     generatedAtIso: new Date().toISOString(),
     cwd,
     options: opts,
     disk,
+    projected: {
+      freeMbAfterApply: projectedFreeMb,
+      severityAfterApply: projectedSeverity,
+      recommendationAfterApply: resolveDiskRecommendation(projectedSeverity),
+    },
     inventory: {
       bgArtifactCount: all.bg.length,
       bgArtifactTotalMb: toMb(all.bg.reduce((sum, x) => sum + x.bytes, 0)),
@@ -462,6 +478,7 @@ function printHuman(report, applyResult, strictFailures = []) {
   console.log("host-disk-guard");
   console.log(`generated: ${report.generatedAtIso}`);
   console.log(`disk: severity=${report.disk.severity} free=${report.disk.freeMb}MB used=${report.disk.usedPct}% recommendation=${report.disk.recommendation}`);
+  console.log(`projectedAfterApply: severity=${report.projected.severityAfterApply} free=${report.projected.freeMbAfterApply}MB recommendation=${report.projected.recommendationAfterApply}`);
   console.log(`volatile: bgArtifacts=${report.inventory.bgArtifactTotalMb}MB reports=${report.inventory.reportTotalMb}MB sessions=${report.inventory.sessionTotalMb}MB globalSessions=${report.inventory.globalSessionTotalMb}MB`);
   console.log(`candidates: ${report.candidateSummary.deletableCount} files / ${report.candidateSummary.deletableMb} MB`);
   for (const row of report.candidateSummary.byClass.deletable) {
