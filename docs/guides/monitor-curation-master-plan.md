@@ -92,7 +92,7 @@ Profiles present in `.pi/monitors/profiles/`:
 Before switching to default-on:
 
 - [ ] Profile rationale published (why this profile, for which mode)
-- [ ] Deterministic prefilter for `unauthorized-action` implemented
+- [x] Deterministic prefilter for `unauthorized-action` implemented in runtime contract patch (read/status/query/read-only shell bypass)
 - [ ] Noisy false-positive classes documented + mitigation rules
 - [ ] Cost budget target defined (classify calls / hour by mode)
 - [ ] Smoke pass with monitors ON in control-plane canonical loop
