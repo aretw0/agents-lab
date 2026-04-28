@@ -26,8 +26,8 @@ export interface ClassifyFailureScanState {
 	offset: number;
 }
 
-const CLASSIFY_FAIL_RE = /\[([a-z0-9-]+)\]\s+classify failed:/i;
-const CLASSIFY_FAIL_GLOBAL_RE = /\[([a-z0-9-]+)\]\s+classify failed:[^\n\r]*/gi;
+const CLASSIFY_FAIL_LINE_RE =
+	/^(?:Warning:\s*)?\[([a-z0-9-]+)\]\s+classify failed:\s*(.*)$/i;
 
 export const DEFAULT_CLASSIFY_SCAN_BYTES = 512_000;
 
@@ -73,9 +73,62 @@ export function bumpClassifyFailureFromText(
 	summary: ClassifyFailureSummary,
 	text: string,
 ): boolean {
-	const m = text.match(CLASSIFY_FAIL_RE);
-	if (!m) return false;
-	return bumpClassifyFailure(summary, m[1] ?? "", text);
+	let changed = false;
+	for (const line of text.split(/\r?\n/)) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+		const m = trimmed.match(CLASSIFY_FAIL_LINE_RE);
+		if (!m) continue;
+		if (bumpClassifyFailure(summary, m[1] ?? "", m[2] ?? trimmed)) {
+			changed = true;
+		}
+	}
+	return changed;
+}
+
+function collectTextParts(value: unknown, out: string[], depth = 0): void {
+	if (depth > 6 || out.length > 4000) return;
+	if (typeof value === "string") {
+		if (value.trim()) out.push(value);
+		return;
+	}
+	if (Array.isArray(value)) {
+		for (const item of value) collectTextParts(item, out, depth + 1);
+		return;
+	}
+	if (!value || typeof value !== "object") return;
+
+	const obj = value as Record<string, unknown>;
+	if (typeof obj.text === "string") collectTextParts(obj.text, out, depth + 1);
+	if (typeof obj.content === "string" || Array.isArray(obj.content)) {
+		collectTextParts(obj.content, out, depth + 1);
+	}
+	if (typeof obj.message === "string" || typeof obj.message === "object") {
+		collectTextParts(obj.message, out, depth + 1);
+	}
+	if (typeof obj.error === "string" || typeof obj.error === "object") {
+		collectTextParts(obj.error, out, depth + 1);
+	}
+	if (obj.result !== undefined) collectTextParts(obj.result, out, depth + 1);
+}
+
+function extractClassifyFailureCorpus(chunk: string): string {
+	const corpus: string[] = [];
+	let parsedAny = false;
+
+	for (const line of chunk.split(/\r?\n/)) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+		try {
+			const parsed = JSON.parse(trimmed) as unknown;
+			parsedAny = true;
+			collectTextParts(parsed, corpus);
+		} catch {
+			// Non-JSON chunks can come from partial tails or direct runtime text.
+		}
+	}
+
+	return parsedAny ? corpus.join("\n") : chunk;
 }
 
 function readTail(pathToFile: string, maxBytes = DEFAULT_CLASSIFY_SCAN_BYTES): string {
@@ -141,12 +194,8 @@ export function scanSessionFileForClassifyFailures(
 
 	if (!chunk) return { changed: false, scan: nextScan };
 
-	let changed = false;
-	for (const match of chunk.matchAll(CLASSIFY_FAIL_GLOBAL_RE)) {
-		if (bumpClassifyFailure(summary, match[1] ?? "", match[0])) {
-			changed = true;
-		}
-	}
+	const corpus = extractClassifyFailureCorpus(chunk);
+	const changed = bumpClassifyFailureFromText(summary, corpus);
 
 	return { changed, scan: nextScan };
 }

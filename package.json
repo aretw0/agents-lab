@@ -9,7 +9,7 @@
     "list": "npm ls --workspaces --depth=0",
     "test": "node --test packages/*/test/*.test.mjs",
     "test:smoke": "npx vitest run",
-    "test:monitor:regression": "node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-chaos-policy.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs",
+    "test:monitor:regression": "node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-gates-regression.test.mjs packages/pi-stack/test/monitor-chaos-policy.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-replay-regression.test.mjs",
     "gate:monitor:regression": "npm run test:monitor:regression --silent",
     "verify": "node scripts/verify-pi-stack.mjs",
     "audit:sovereignty": "node scripts/stack-sovereignty-audit.mjs --strict",

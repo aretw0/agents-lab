@@ -132,6 +132,42 @@ describe("monitor-summary", () => {
 		expect(result.details.classifyFailures.lastMonitor).toBe("fragility");
 	});
 
+	it("ignora strings fixture de classify failed dentro de tool output", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-tool-fixture-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+		pi.handlers.get("tool_result")?.(
+			{
+				content: [
+					{
+						type: "text",
+						text: 'const fixture = "Warning: [fragility] classify failed: No tool call in response";',
+					},
+				],
+			},
+			ctx,
+		);
+
+		const result = await pi.toolDef().execute("tc-fixture", {});
+		expect(result.details.classifyFailures.total).toBe(0);
+		expect(result.details.classifyFailures.byMonitor).toEqual({});
+	});
+
 	it("mstatus refresh hidrata classify failures do session file", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-refresh-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
