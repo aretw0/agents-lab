@@ -53,7 +53,7 @@ describe("monitor interference matrix (fragility/hedge/unauthorized)", () => {
     assert.equal(hedge.event, "turn_end");
     assert.equal(unauthorized.event, "tool_call");
 
-    assert.equal(fragility.when, "has_tool_results");
+    assert.equal(fragility.when, "has_file_writes");
     assert.equal(hedge.when, "has_bash");
     assert.equal(unauthorized.when, "always");
   });
