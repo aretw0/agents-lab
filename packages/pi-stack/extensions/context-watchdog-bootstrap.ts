@@ -39,7 +39,7 @@ export function buildContextWatchBootstrapPlan(
 				},
 			},
 			notes: [
-				"worker preset: minimizes notify noise while preserving status telemetry.",
+				"worker preset: compact-only steering signals; warn/checkpoint stay passive telemetry.",
 				"recommended for short-lived delegated agents and swarm workers.",
 			],
 		};
@@ -69,7 +69,7 @@ export function buildContextWatchBootstrapPlan(
 			},
 		},
 		notes: [
-			"control-plane preset: checkpoint near 70% to preserve long-run continuity.",
+			"control-plane preset: checkpoint near 70% with compact-only active signaling.",
 			"auto-compact runs with idle + cooldown guards.",
 		],
 	};
