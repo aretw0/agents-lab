@@ -251,6 +251,23 @@ export function computeLoopEvidenceStrictFailures(report, milestoneCheck) {
   return [...new Set(failures)];
 }
 
+export function describeLoopEvidenceStrictFailure(code) {
+  switch (code) {
+    case "evidence-missing":
+      return "run /lane-queue status or resume loop until .pi/guardrails-loop-evidence.json is written";
+    case "evidence-invalid-json":
+      return "inspect/restore .pi/guardrails-loop-evidence.json before trusting loop evidence";
+    case "evidence-stale":
+      return "refresh loop evidence with /lane-queue status or rerun after a fresh loop heartbeat";
+    case "readiness-not-ready":
+      return "check boardAuto/loopReady criteria and /lane-queue evidence for runtime/IN_LOOP gaps";
+    case "milestone-mismatch":
+      return "rerun with matching --expect-milestone or align defaultBoardMilestone/loop scope";
+    default:
+      return "inspect loop evidence status and criteria";
+  }
+}
+
 function shouldFailStrict(report, milestoneCheck) {
   return computeLoopEvidenceStrictFailures(report, milestoneCheck).length > 0;
 }
@@ -279,9 +296,10 @@ function main() {
   }
   const milestoneCheck = evaluateMilestoneScopeMatch(report, expectedMilestone);
   const strictFailures = computeLoopEvidenceStrictFailures(report, milestoneCheck);
+  const strictFailureHints = strictFailures.map((code) => ({ code, hint: describeLoopEvidenceStrictFailure(code) }));
   const output = milestoneCheck.expectedMilestone
-    ? { ...report, milestoneCheck, strictFailures }
-    : { ...report, strictFailures };
+    ? { ...report, milestoneCheck, strictFailures, strictFailureHints }
+    : { ...report, strictFailures, strictFailureHints };
 
   if (opts.json) console.log(JSON.stringify(output, null, 2));
   else {
@@ -290,6 +308,7 @@ function main() {
       console.log(`milestoneCheck: expected=${milestoneCheck.expectedMilestone} boardAuto=${milestoneCheck.boardAutoMilestone ?? "n/a"} loopReady=${milestoneCheck.loopReadyMilestone ?? "n/a"} matches=${milestoneCheck.matches ? "yes" : "no"} reason=${milestoneCheck.reason}`);
     }
     console.log(`strictFailures: ${strictFailures.length > 0 ? strictFailures.join(",") : "none"}`);
+    for (const row of strictFailureHints) console.log(`strictHint(${row.code}): ${row.hint}`);
   }
 
   if (opts.strict && shouldFailStrict(report, milestoneCheck)) process.exit(1);

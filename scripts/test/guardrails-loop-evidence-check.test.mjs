@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { assessLoopEvidence, computeEvidenceReadiness, computeLoopEvidenceStrictFailures, evaluateMilestoneScopeMatch } from "../guardrails-loop-evidence-check.mjs";
+import { assessLoopEvidence, computeEvidenceReadiness, computeLoopEvidenceStrictFailures, describeLoopEvidenceStrictFailure, evaluateMilestoneScopeMatch } from "../guardrails-loop-evidence-check.mjs";
 
 test("computeEvidenceReadiness returns ready only when active+emLoop criteria are met", () => {
   const ready = computeEvidenceReadiness({
@@ -166,6 +166,7 @@ test("computeLoopEvidenceStrictFailures explains strict blockers deterministical
     { matches: true },
   );
   assert.deepEqual(ready, []);
+  assert.match(describeLoopEvidenceStrictFailure("milestone-mismatch"), /defaultBoardMilestone|loop scope/);
 });
 
 test("cli json output includes milestoneCheck when expect-milestone is provided", () => {
@@ -210,6 +211,7 @@ test("cli json output includes milestoneCheck when expect-milestone is provided"
     assert.equal(parsed.milestoneCheck.matches, true);
     assert.equal(parsed.milestoneCheck.reason, "match");
     assert.deepEqual(parsed.strictFailures, []);
+    assert.deepEqual(parsed.strictFailureHints, []);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
@@ -353,6 +355,7 @@ test("cli strict mode fails on milestone mismatch", () => {
 
     assert.equal(cli.status, 1);
     assert.match(cli.stdout, /strictFailures: .*milestone-mismatch/);
+    assert.match(cli.stdout, /strictHint\(milestone-mismatch\):/);
   } finally {
     rmSync(cwd, { recursive: true, force: true });
   }
