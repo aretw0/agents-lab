@@ -4521,7 +4521,7 @@
     {
       "id": "TASK-BUD-191",
       "description": "[P2] Revisar skills para discoverability e paridade com guides, usando princípios MDT para reduzir drift documental.",
-      "status": "in-progress",
+      "status": "planned",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-173",
@@ -4538,7 +4538,7 @@
         "Avaliar como princípios MDT podem ajudar a combater drift documental.",
         "Criar plano incremental de atualização de skills com validação por markers/safe_marker_check."
       ],
-      "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega.\n[2026-04-29T20:57:14.467Z] Backlog clarification: MDT reference is concrete repo https://github.com/ifiokjr/mdt, not vague acronym. Keep as influence source for skill/guide parity and documentation drift review; do not research automatically until TASK-BUD-191 is explicitly selected. [rationale:design] Concrete source anchor improves future discoverability/research without opening external research now."
+      "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega.\n[2026-04-29T20:57:14.467Z] Backlog clarification: MDT reference is concrete repo https://github.com/ifiokjr/mdt, not vague acronym. Keep as influence source for skill/guide parity and documentation drift review; do not research automatically until TASK-BUD-191 is explicitly selected. [rationale:design] Concrete source anchor improves future discoverability/research without opening external research now.\n[2026-04-29T21:01:45.041Z] Focus correction: keep as planned/backlog, not hot path. Skill/MDT parity is important for discoverability, but current main lane returns to operational hardening that unlocks unattended/local-first reliability. [rationale:design] Avoid documentation drift/lateral work while preserving the backlog insight."
     },
     {
       "id": "TASK-BUD-192",
@@ -4562,6 +4562,31 @@
       ],
       "notes": "Criado como slice bounded do TASK-BUD-191 após operador pedir voltar ao track importante que desbloqueia potencial acumulado. [rationale:design] Skills aumentam discoverability para modelo/usuário; guides preservam profundidade canônica; paridade explícita reduz drift.\n[2026-04-29T20:58:54.039Z] slice=1 focus=TASK-BUD-192 gate=safe_marker_check-doc=5/5-readme=3/3 commit=pending drift=no next=commit-and-handoff. [rationale:design] Protocolo define quando guides, skills ou ambos devem carregar decisões e como validar parity markers sem broad scan.",
       "verification": "VER-BUD-472"
+    },
+    {
+      "id": "TASK-BUD-193",
+      "description": "[P1] Expor classificador Git maintenance como status read-only sem cleanup automático.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-190"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Tool read-only coleta git count-objects e presença de .git/gc.log, classifica via evaluateGitMaintenanceSignal e retorna summary compacto.",
+        "Tool nunca executa git gc, git prune ou remove .git/gc.log.",
+        "Testes usam runner/fs mockados sem depender do repo real.",
+        "Smokes focal e completo verdes."
+      ],
+      "notes": "Criado após correção de foco: voltar do track de skills para hardening operacional local. [rationale:risk-control] Classificar manutenção Git em runtime reduz interpretação manual e mantém cleanup como opt-in.\n[2026-04-29T21:02:58.288Z] slice=1 focus=TASK-BUD-193 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Git maintenance classifier agora tem surface read-only que coleta somente diagnóstico e nunca executa cleanup.",
+      "verification": "VER-BUD-473"
     }
   ]
 }

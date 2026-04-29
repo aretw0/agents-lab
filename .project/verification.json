@@ -6477,6 +6477,15 @@
       "method": "inspection",
       "evidence": "Created docs/guides/skill-guide-parity.md and linked it from docs/guides/README.md. The protocol defines guide as canonical depth, skill as discovery/execution surface, intentional duplication rules, parity markers, incremental review flow, and concrete MDT anchor https://github.com/ifiokjr/mdt for future bounded influence. Validation used live safe_marker_check: skill-guide-parity markers passed 5/5; README markers passed 3/3. [rationale:design] Establishes a controlled path for skill discoverability without broad scans or document drift.",
       "timestamp": "2026-04-29T20:58:54.039Z"
+    },
+    {
+      "id": "VER-BUD-473",
+      "target": "TASK-BUD-193",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added guardrails-core-git-maintenance-surface.ts registering git_maintenance_status as a read-only tool. It runs only git count-objects -vH, checks .git/gc.log presence, classifies via evaluateGitMaintenanceSignal, returns compact summary/details, and reports cleanupCommandsExecuted=[]. Tests cover parser, injectable read-only diagnostics, and tool registration without depending on the real repository. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 137/137 across 24 files. [rationale:risk-control] Operationalizes Git maintenance monitoring while keeping git gc/prune/removing gc.log opt-in.",
+      "timestamp": "2026-04-29T21:02:58.288Z"
     }
   ]
 }

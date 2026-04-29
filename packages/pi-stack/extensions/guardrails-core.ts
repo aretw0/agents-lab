@@ -107,6 +107,7 @@ import { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, resolveI18nInt
 import { registerGuardrailsShellRouteSurface } from "./guardrails-core-shell-route-surface";
 import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
 import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
+import { registerGuardrailsGitMaintenanceSurface } from "./guardrails-core-git-maintenance-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
@@ -3115,6 +3116,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsShellRouteSurface(pi, appendAuditEntry, () => shellRoutingProfile);
   registerGuardrailsDeliverySurface(pi, appendAuditEntry);
   registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
+  registerGuardrailsGitMaintenanceSurface(pi);
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsMarkerCheckSurface(pi);
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
