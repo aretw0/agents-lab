@@ -434,6 +434,24 @@ Meta-sinal de ruído excessivo (advisory):
 - ação padrão: reduzir superfície para status passivo + 1 recomendação consolidada;
 - manter modo não-bloqueante por default para não travar throughput de fábrica.
 
+### Governança de board em worktrees/sessões paralelas
+
+Política padrão: **single writer canônico** para `.project/tasks.json` e `.project/verification.json`.
+Worktrees/subagentes podem propor mudanças, mas a sessão control-plane principal aplica via `board_query`/`board_update` ou etapa gerada/revisada.
+
+Quando houver mais de um writer potencial:
+- usar `state_reconcile_plan` para classificar risco antes da mutação;
+- exigir `lock-and-atomic-write` para escrita direta no board;
+- preferir `single-writer-branch` + `generated-apply-step` para worktrees;
+- registrar em evidência quais notas/status/verificações foram promovidos e quais ficaram fora de escopo;
+- se houver conflito de notas/status, não sobrescrever silenciosamente: converter em item de reconciliação/manual review.
+
+Fluxo pós-worktree recomendado:
+1. worker entrega diff/patch ou resumo gerado, sem assumir posse do board canônico;
+2. control-plane compara `mtime`/branch e aplica update canônico com lock+atomic;
+3. valida `board_query`/verificação focal;
+4. commit inclui board apenas se a promoção foi intencional.
+
 ### Contrato de promoção seletiva (worktree -> main)
 
 Quando o delivery mode estiver em `apply-to-branch`, a evidência de conclusão deve explicitar seleção de escopo:

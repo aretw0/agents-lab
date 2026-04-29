@@ -6144,6 +6144,15 @@
       "method": "test",
       "evidence": "Progressive hatch/simple-first task closed. Hatch runbook defaults to simple lane and advanced lane is explicit --advanced; recommended stack/project pipeline docs state strict-curated default, opt-in runtime extras and no swarm/delegation CTA on first contact without scale signal. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (86/86 passed). [rationale:risk-control] Keeps onboarding low-noise and prevents accidental escalation to high-cost delegation/swarm paths.",
       "timestamp": "2026-04-29T13:19:23.226Z"
+    },
+    {
+      "id": "VER-BUD-436",
+      "target": "TASK-BUD-123",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+policy-tool",
+      "evidence": "Board/worktree reconciliation policy closed. Runbook mandates single canonical writer for .project/tasks and verification, state_reconcile_plan before parallel writes, lock-and-atomic-write for direct board mutation, single-writer-branch + generated-apply-step for worktrees, explicit promoted/skipped evidence and manual review on conflicts. Validation: state_reconcile_plan(board,native,parallelWriters=2) returned concurrencyRisk=medium with lock-and-atomic-write/single-writer-branch/generated-apply-step/manualReviewRequired; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (124/124 passed). [rationale:risk-control] Prevents silent board drift/corruption in parallel long-run/worktree flows.",
+      "timestamp": "2026-04-29T13:21:30.036Z"
     }
   ]
 }

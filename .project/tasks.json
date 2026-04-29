@@ -2936,7 +2936,7 @@
     {
       "id": "TASK-BUD-123",
       "description": "[P1] Endurecer governança de board em worktrees para reduzir drift entre sessões/branches (single-writer cross-worktree + reconciliação explícita).",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-122"
       ],
@@ -2954,7 +2954,8 @@
         "Fluxo de reconciliação pós-worktree é determinístico e auditável (sem perda silenciosa de notas/status).",
         "Runbook define política operacional recomendada (single writer canônico + fallback seguro para worktrees)."
       ],
-      "notes": "Criada a partir de dúvida operacional do usuário (2026-04-23): medo de confusão/drift quando worktree altera board e sessão principal segue em paralelo. Objetivo: manter throughput de long-runs sem sacrificar consistência do clock canônico."
+      "notes": "Criada a partir de dúvida operacional do usuário (2026-04-23): medo de confusão/drift quando worktree altera board e sessão principal segue em paralelo. Objetivo: manter throughput de long-runs sem sacrificar consistência do clock canônico.\n[2026-04-29T13:21:30.036Z] Closed board/worktree reconciliation policy: runbook now mandates single canonical writer for .project/tasks and verification, state_reconcile_plan before parallel writes, lock-and-atomic-write for direct board mutation, single-writer-branch + generated-apply-step for worktrees, and explicit promoted/skipped evidence to avoid silent note/status loss. Validation: state_reconcile_plan(board,native,parallelWriters=2) returned concurrencyRisk=medium with lock-and-atomic-write/single-writer-branch/generated-apply-step/manualReviewRequired; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (124/124 passed). [rationale:risk-control] Prevents board drift/corruption when long-runs use worktrees, subagents or parallel sessions.",
+      "verification": "VER-BUD-436"
     },
     {
       "id": "TASK-BUD-124",
