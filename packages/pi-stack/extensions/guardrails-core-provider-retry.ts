@@ -123,6 +123,34 @@ export function classifyLongRunDispatchFailure(errorText: string | undefined): D
   return "other";
 }
 
+export function extractToolOutputOrphanCallId(errorText: string | undefined): string | undefined {
+  const text = String(errorText ?? "").trim();
+  if (!text || classifyLongRunDispatchFailure(text) !== "tool-output-orphan") return undefined;
+  const direct = /\b(?:call_id|tool_call_id)\b["'\s:=]+["']?([A-Za-z0-9_.\/-]+)/i.exec(text);
+  if (direct?.[1]) return direct[1].replace(/["',;)}\]]+$/g, "");
+  const compact = /\b(call_[A-Za-z0-9_-]{6,})\b/.exec(text);
+  return compact?.[1];
+}
+
+export function resolveToolOutputOrphanRedispatchDecision(
+  seenCallIds: ReadonlySet<string>,
+  errorText: string | undefined,
+): {
+  callId?: string;
+  repeated: boolean;
+  retryDiscarded: boolean;
+  action: "allow-retry" | "discard-retry-before-redispatch";
+} {
+  const callId = extractToolOutputOrphanCallId(errorText);
+  const repeated = Boolean(callId && seenCallIds.has(callId));
+  return {
+    callId,
+    repeated,
+    retryDiscarded: repeated,
+    action: repeated ? "discard-retry-before-redispatch" : "allow-retry",
+  };
+}
+
 export function resolveProviderTransientRetryDelayMs(
   consecutiveFailures: number,
   cfg: LongRunProviderTransientRetryConfig,

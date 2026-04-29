@@ -87,6 +87,8 @@ import {
   buildProviderRetryExhaustedActionLines,
   buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
+  extractToolOutputOrphanCallId,
+  resolveToolOutputOrphanRedispatchDecision,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveDispatchFailurePauseAfter,
@@ -173,6 +175,8 @@ export {
   buildProviderRetryExhaustedActionLines,
   buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
+  extractToolOutputOrphanCallId,
+  resolveToolOutputOrphanRedispatchDecision,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveDispatchFailurePauseAfter,
@@ -1681,6 +1685,7 @@ export default function (pi: ExtensionAPI) {
   let lastDispatchFailureClass: DispatchFailureClass = "other";
   let lastDispatchFailurePauseAfterUsed = 0;
   let lastDispatchFailureWindowMsUsed = 0;
+  let seenToolOutputOrphanCallIds = new Set<string>();
   let lastLongRunBusyAt = Date.now();
   let autoDrainTimer: NodeJS.Timeout | undefined;
   let loopEvidenceHeartbeatTimer: NodeJS.Timeout | undefined;
@@ -1907,6 +1912,13 @@ export default function (pi: ExtensionAPI) {
     lastDispatchFailureClass = "other";
     lastDispatchFailurePauseAfterUsed = 0;
     lastDispatchFailureWindowMsUsed = 0;
+    seenToolOutputOrphanCallIds.clear();
+  }
+
+  function trackToolOutputOrphanCallId(errorText: string) {
+    const decision = resolveToolOutputOrphanRedispatchDecision(seenToolOutputOrphanCallIds, errorText);
+    if (decision.callId) seenToolOutputOrphanCallIds.add(decision.callId);
+    return decision;
   }
 
   function markLoopHealthy(ctx: ExtensionContext, reason: string): void {
@@ -2314,19 +2326,34 @@ export default function (pi: ExtensionAPI) {
         return true;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        const queued = enqueueDeferredIntent(
-          ctx.cwd,
-          intentText,
-          "board-auto-advance-fallback",
-          longRunIntentQueueConfig.maxItems,
-          {
-            dedupeKey: intentText,
-            dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-          },
-        );
+        const orphanCall = trackToolOutputOrphanCallId(message);
+        const retryDiscarded = orphanCall.repeated;
+        const queued = retryDiscarded
+          ? { queuedCount: getDeferredIntentQueueCount(ctx.cwd), deduped: false }
+          : enqueueDeferredIntent(
+            ctx.cwd,
+            intentText,
+            "board-auto-advance-fallback",
+            longRunIntentQueueConfig.maxItems,
+            {
+              dedupeKey: intentText,
+              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
+            },
+          );
         markLoopDegraded(ctx, "board-auto-advance-dispatch-failed", message);
         const failureTrack = trackClassifiedDispatchFailure(ctx, "board-auto-advance-dispatch-failed", message);
         const errorClass = failureTrack.errorClass;
+        if (retryDiscarded) {
+          appendAuditEntry(ctx, "guardrails-core.tool-output-orphan-redispatch-discarded", {
+            atIso: new Date().toISOString(),
+            reason,
+            source: "board-auto-advance",
+            taskId: nextTaskId,
+            callId: orphanCall.callId,
+            errorClass,
+            action: "discard-retry-before-redispatch",
+          });
+        }
         appendAuditEntry(ctx, "guardrails-core.board-intent-auto-advance-failed", {
           atIso: new Date().toISOString(),
           reason,
@@ -2338,6 +2365,9 @@ export default function (pi: ExtensionAPI) {
           pauseAfterUsed: failureTrack.pauseAfterUsed,
           windowMsUsed: failureTrack.windowMsUsed,
           pauseTriggered: failureTrack.pauseTriggered,
+          toolOutputOrphanCallId: orphanCall.callId,
+          repeatedToolOutputOrphanCallId: orphanCall.repeated,
+          retryDiscarded,
           queuedCount: queued.queuedCount,
           deduped: queued.deduped,
           selectionPolicy: boardReadiness.selectionPolicy,
@@ -2415,19 +2445,34 @@ export default function (pi: ExtensionAPI) {
         dispatched += 1;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        const retryQueued = enqueueDeferredIntent(
-          ctx.cwd,
-          popped.item.text,
-          `auto-drain-retry:${reason}`,
-          longRunIntentQueueConfig.maxItems,
-          {
-            dedupeKey: popped.item.text,
-            dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-          },
-        );
+        const orphanCall = trackToolOutputOrphanCallId(message);
+        const retryDiscarded = orphanCall.repeated;
+        const retryQueued = retryDiscarded
+          ? { queuedCount: getDeferredIntentQueueCount(ctx.cwd), deduped: false }
+          : enqueueDeferredIntent(
+            ctx.cwd,
+            popped.item.text,
+            `auto-drain-retry:${reason}`,
+            longRunIntentQueueConfig.maxItems,
+            {
+              dedupeKey: popped.item.text,
+              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
+            },
+          );
         markLoopDegraded(ctx, `dispatch-failed:${reason}`, message);
         const failureTrack = trackClassifiedDispatchFailure(ctx, `dispatch-failed:${reason}`, message);
         const errorClass = failureTrack.errorClass;
+        if (retryDiscarded) {
+          appendAuditEntry(ctx, "guardrails-core.tool-output-orphan-redispatch-discarded", {
+            atIso: new Date().toISOString(),
+            reason,
+            source: "auto-drain",
+            itemId: popped.item.id,
+            callId: orphanCall.callId,
+            errorClass,
+            action: "discard-retry-before-redispatch",
+          });
+        }
         const retryDelayMs =
           errorClass === "provider-transient" && longRunProviderRetryConfig.enabled
             ? resolveProviderTransientRetryDelayMs(
@@ -2446,6 +2491,9 @@ export default function (pi: ExtensionAPI) {
           errorClass,
           pauseAfterUsed: failureTrack.pauseAfterUsed,
           windowMsUsed: failureTrack.windowMsUsed,
+          toolOutputOrphanCallId: orphanCall.callId,
+          repeatedToolOutputOrphanCallId: orphanCall.repeated,
+          retryDiscarded,
           retryDelayMs,
           retryQueuedCount: retryQueued.queuedCount,
           retryDeduped: retryQueued.deduped,

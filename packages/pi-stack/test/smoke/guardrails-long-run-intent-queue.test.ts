@@ -68,6 +68,8 @@ import {
   buildProviderRetryExhaustedActionLines,
   buildToolOutputOrphanRecoveryActionLines,
   classifyLongRunDispatchFailure,
+  extractToolOutputOrphanCallId,
+  resolveToolOutputOrphanRedispatchDecision,
   isProviderTransientRetryExhausted,
   resolveDispatchFailureBlockAfter,
   resolveDispatchFailurePauseAfter,
@@ -1303,6 +1305,25 @@ describe("guardrails-core long-run intent queue", () => {
     expect(classifyLongRunDispatchFailure("HTTP 429 too many requests")).toBe("provider-transient");
     expect(classifyLongRunDispatchFailure("No tool call found for function call output with call_id call_abc123")).toBe("tool-output-orphan");
     expect(classifyLongRunDispatchFailure("unexpected parser error")).toBe("other");
+    expect(extractToolOutputOrphanCallId("No tool call found for function call output with call_id call_abc123")).toBe("call_abc123");
+    expect(extractToolOutputOrphanCallId("No tool call found for function call output with tool_call_id='call_QJlU6a2DGglAm3NntokWyBwo'")).toBe("call_QJlU6a2DGglAm3NntokWyBwo");
+    expect(extractToolOutputOrphanCallId("No tool call found for function call output with call_QJlU6a2DGglAm3NntokWyBwo after compact")).toBe("call_QJlU6a2DGglAm3NntokWyBwo");
+    expect(extractToolOutputOrphanCallId("server_is_overload call_abc123")).toBeUndefined();
+
+    const firstOrphan = resolveToolOutputOrphanRedispatchDecision(new Set(), "No tool call found for function call output with call_id call_QJlU6a2DGglAm3NntokWyBwo");
+    expect(firstOrphan).toMatchObject({
+      callId: "call_QJlU6a2DGglAm3NntokWyBwo",
+      repeated: false,
+      retryDiscarded: false,
+      action: "allow-retry",
+    });
+    const repeatedOrphan = resolveToolOutputOrphanRedispatchDecision(new Set(["call_QJlU6a2DGglAm3NntokWyBwo"]), "No tool call found for function call output with call_id call_QJlU6a2DGglAm3NntokWyBwo after Session compacted 4 times");
+    expect(repeatedOrphan).toMatchObject({
+      callId: "call_QJlU6a2DGglAm3NntokWyBwo",
+      repeated: true,
+      retryDiscarded: true,
+      action: "discard-retry-before-redispatch",
+    });
     expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3)).toBe(1);
     expect(resolveDispatchFailurePauseAfter("tool-output-orphan", 3, 2)).toBe(2);
     expect(resolveDispatchFailurePauseAfter("provider-transient", 3)).toBe(3);

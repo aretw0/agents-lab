@@ -3447,15 +3447,15 @@
     {
       "id": "TASK-BUD-142",
       "description": "[P2] Investigar orphaned function_call_output sobrevivendo a compactacoes (mesmo call_id repetido)",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "acceptance_criteria": [
         "Identificar se o orphan e preservado pelo algoritmo de compactacao do pi ou gerado novamente.",
         "Se for bug do pi framework: documentar e abrir issue upstream.",
         "Se for mitigavel: consumer detecta call_id ja visto e descarta com audit antes de redispatch."
       ],
-      "verification": "",
-      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: call_id call_QJlU6a2DGglAm3NntokWyBwo repetiu-se mesmo apos Session compacted 4 times. Fix TASK-BUD-119 mitiga o loop mas nao resolve o orphan em si."
+      "verification": "VER-BUD-410",
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: call_id call_QJlU6a2DGglAm3NntokWyBwo repetiu-se mesmo apos Session compacted 4 times. Fix TASK-BUD-119 mitiga o loop mas nao resolve o orphan em si.\n[2026-04-29T12:17:41.550Z] Implemented mitigable consumer-side guard: orphaned function_call_output errors now extract call_id/tool_call_id, track already-seen orphan call IDs during dispatch-failure tracking, discard repeated-call-id retries before redispatch, and audit guardrails-core.tool-output-orphan-redispatch-discarded. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed); cmd.exe /c npm run test:monitor:smoke --silent (91/91 passed). [rationale:risk-control] Deterministic discard prevents repeated compacted orphan call_id loops without changing framework compaction behavior or broad retry policy."
     },
     {
       "id": "TASK-BUD-143",
