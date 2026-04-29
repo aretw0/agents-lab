@@ -87,3 +87,4 @@ export { resolveSkillAccessRoot, resolveSkillReadAccess } from "./guardrails-cor
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";
 export { resolveUnattendedContinuationPlan } from "./guardrails-core-unattended-continuation";
+export { detectCommandSensitiveMarkerReasons, evaluateTextMarkerCheck } from "./guardrails-core-marker-check";

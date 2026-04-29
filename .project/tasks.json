@@ -4425,6 +4425,31 @@
       ],
       "notes": "Criado após reload validar unattended_continuation_plan ao vivo. [rationale:risk-control] A tool existe em runtime; documentar o uso evita voltar a diagnósticos amplos ou hesitação ad hoc.\n[2026-04-29T20:27:30.074Z] slice=1 focus=TASK-BUD-186 gate=unattended-continuation-tool-docs-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta usar unattended_continuation_plan como checagem curta e registrar summary, evitando pacote diagnóstico amplo.",
       "verification": "VER-BUD-467"
+    },
+    {
+      "id": "TASK-BUD-187",
+      "description": "[P0] Criar primitiva desacoplada de safe marker check para endurecer validações textuais sem depender de shell.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-184"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-marker-check.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-marker-check.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro avalia markers em texto sem acoplar a cmd.exe, PowerShell ou bash.",
+        "Normalização opcional de acentos/case e summary compacto.",
+        "Markers command-sensitive são detectados como política, não por falha acidental de shell.",
+        "Smoke cobre marker normal, acento, ausente e marker command-sensitive."
+      ],
+      "notes": "Criado após feedback do operador: detalhes de Windows/git-bash devem ser resolvidos pela stack; agente não deve esbarrar em quoting por falta de hard intent. [rationale:risk-control] Substituir marker checks artesanais por primitiva pura reduz falso negativo e não acopla política a shell específico.\n[2026-04-29T20:39:52.559Z] slice=1 focus=TASK-BUD-187 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Safe marker check agora é helper puro/desacoplado; markers command-sensitive são política explícita, não falha acidental de shell.",
+      "verification": "VER-BUD-468"
     }
   ]
 }

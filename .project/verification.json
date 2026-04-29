@@ -6432,6 +6432,15 @@
       "method": "inspection",
       "evidence": "After reload, live unattended_continuation_plan returned summary=unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved. Updated docs/guides/control-plane-operating-doctrine.md to document using unattended_continuation_plan as a short boundary check and recording compact summary instead of opening a broad diagnostic pack. Marker validation passed after avoiding backtick-sensitive markers: unattended continuation tool docs markers passed: 4. [rationale:risk-control] Operationalizes the tool without increasing diagnostic bloat.",
       "timestamp": "2026-04-29T20:27:30.074Z"
+    },
+    {
+      "id": "VER-BUD-468",
+      "target": "TASK-BUD-187",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added shell-agnostic marker check primitive in packages/pi-stack/extensions/guardrails-core-marker-check.ts: evaluateTextMarkerCheck and detectCommandSensitiveMarkerReasons. It supports accent/case normalization, compact summary, missing markers, and explicit command-sensitive marker policy (backtick, command-substitution, newline) without coupling to cmd.exe, PowerShell, or bash. Added smoke coverage for plain markers, accents, missing marker, and backtick policy. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-marker-check.test.ts passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 129/129 across 21 files. [rationale:risk-control] Hardens repeated marker-check failure mode as a reusable primitive instead of relying on documentation or shell-specific quoting.",
+      "timestamp": "2026-04-29T20:39:52.559Z"
     }
   ]
 }
