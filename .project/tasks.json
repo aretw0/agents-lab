@@ -4116,7 +4116,7 @@
         "Ao final, avaliar unattended_rehearsal_gate com blockers=0 antes de propor canário remote/offload.",
         "Se contexto entrar em checkpoint/compact, preservar progresso antes de continuar e não abrir diagnóstico amplo sem sinal."
       ],
-      "notes": "Criado como próximo foco explícito após steering humano prossiga em checkpoint (2026-04-29). [rationale:risk-control] Antes de agent-as-tools/subagentes/GitHub Actions, provar continuidade local-first com evidência auditável e baixo bloat de tools."
+      "notes": "Criado como próximo foco explícito após steering humano prossiga em checkpoint (2026-04-29). [rationale:risk-control] Antes de agent-as-tools/subagentes/GitHub Actions, provar continuidade local-first com evidência auditável e baixo bloat de tools.\n[2026-04-29T18:20:00Z] slice=1 focus=TASK-BUD-172 gate=cmd.exe /c node -e rehearsal evidence markers passed: 3 commit=pending drift=no next=commit-doc-slice. [rationale:risk-control] Primeiro slice do rehearsal manteve foco local-first e adicionou formato curto de evidência para evitar bloat de tracking."
     }
   ]
 }

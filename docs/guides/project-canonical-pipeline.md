@@ -708,6 +708,8 @@ Critério de maturidade: três ou mais slices locais seguidos com foco preservad
 
 A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes.
 
+Durante o rehearsal, cada slice deve registrar uma evidência curta em formato estável: `slice=<n> focus=<task|milestone> gate=<comando|inspeção> commit=<sha> drift=<yes|no> next=<ação>`. O registro pode ficar em nota do board/handoff, evitando uma nova superfície grande de tracking.
+
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
 ### Pre-compact calm-close (anti-paralisia)
