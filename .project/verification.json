@@ -6531,6 +6531,15 @@
       "method": "test",
       "evidence": "Added resolveValidationMethodPlan in packages/pi-stack/extensions/guardrails-core-validation-method.ts and exported it. It routes marker-check validation to safe_marker_check/evaluateTextMarkerCheck, steers legacy shell-inline marker checks away from shell, allows focal tests only when focalGateKnown, allows structured-read validation, and blocks protected/mutating validation paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-validation-method.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 148/148 across 27 files. [rationale:risk-control] Complements unattended continuation by making the validation method explicit and guarded.",
       "timestamp": "2026-04-29T21:27:10.665Z"
+    },
+    {
+      "id": "VER-BUD-479",
+      "target": "TASK-BUD-199",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added guardrails-core-validation-method-surface.ts registering validation_method_plan as a read-only tool, wired it in guardrails-core.ts, added guardrails-validation-method-surface smoke test, and included it in test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-validation-method.test.ts packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 149/149 across 28 files. [rationale:risk-control] Makes safe validation method selection available at runtime, closing the loop after unattended continuation planning.",
+      "timestamp": "2026-04-29T21:36:37.801Z"
     }
   ]
 }

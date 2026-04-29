@@ -115,6 +115,7 @@ import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structu
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-core-unattended-continuation-surface";
 import { registerGuardrailsUnattendedRehearsalSurface } from "./guardrails-core-unattended-rehearsal-surface";
+import { registerGuardrailsValidationMethodSurface } from "./guardrails-core-validation-method-surface";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
@@ -3125,6 +3126,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsAutonomyLaneSurface(pi);
   registerGuardrailsUnattendedContinuationSurface(pi);
   registerGuardrailsUnattendedRehearsalSurface(pi);
+  registerGuardrailsValidationMethodSurface(pi);
   pi.registerCommand("lane-queue", {
     description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]",
     handler: async (args, ctx) => {

@@ -4703,6 +4703,30 @@
       ],
       "notes": "Criado na lane essencial de hardening operacional. [rationale:risk-control] Já sabemos decidir se continua; faltava codificar como validar sem cair em métodos frágeis como marker check artesanal de shell.\n[2026-04-29T21:27:10.665Z] slice=1 focus=TASK-BUD-198 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] O loop agora decide como validar: marker checks vão para safe_marker_check, testes precisam gate focal conhecido, structured reads seguem read-only, protegido/mutação bloqueia.",
       "verification": "VER-BUD-478"
+    },
+    {
+      "id": "TASK-BUD-199",
+      "description": "[P1] Expor plano de método de validação como tool read-only para o loop unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-198"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-validation-method-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Tool validation_method_plan retorna decisão/sumário sem efeitos colaterais.",
+        "Surface permite decidir safe_marker_check/focal-test/structured-read/ask/block em runtime.",
+        "Smokes focal e completo verdes."
+      ],
+      "notes": "Criado como continuação essencial após o helper de método de validação. [rationale:risk-control] A escolha segura do método de validação precisa estar disponível em runtime para evitar regressão a shell/validação artesanal.\n[2026-04-29T21:36:37.801Z] slice=1 focus=TASK-BUD-199 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] validation_method_plan fica disponível em runtime para escolher método seguro sem efeitos colaterais.",
+      "verification": "VER-BUD-479"
     }
   ]
 }
