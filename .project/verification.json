@@ -6081,6 +6081,15 @@
       "method": "command",
       "evidence": "Storage/memory governance primitive closed. Evidence: ops:disk:strict produced bounded dry-run inventory with volatile candidates and protected session/global-session artifacts; host disk guard tests passed 7/7; live machine_maintenance_status reports severity=ok, longRun=allow, monitors=allow. [rationale:risk-control] Provides bounded resource pressure gates and dry-first cleanup planning for unattended loops while preserving continuity artifacts by default.",
       "timestamp": "2026-04-29T13:06:43.959Z"
+    },
+    {
+      "id": "VER-BUD-429",
+      "target": "TASK-BUD-122",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Bounded surface/proxy primitive closed. Project board query/update surfaces and session analytics indexed summaries are implemented and hardened: canonical tool execute signature, explicit invalid-input errors, bounded limits, cache-aware metadata and bounded notes trimming. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts (63/63 passed). [rationale:risk-control] Avoids raw reads of large project/session/log artifacts during long-runs and reduces stale evidence/context blow-up risk.",
+      "timestamp": "2026-04-29T13:07:47.992Z"
     }
   ]
 }
