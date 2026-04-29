@@ -28,6 +28,18 @@ Esse começo não deve virar lock-in. As primitivas devem permanecer agnósticas
 
 Quando uma tool usar `board`, leia como a superfície local atual para esse contrato, não como a única arquitetura futura.
 
+## Fluxo bounded do board local
+
+Para fatias unattended locais, prefira as primitivas bounded em vez de scripts ad hoc sobre JSON:
+
+1. criar a fatia com `board_task_create` quando ela ainda não existir;
+2. executar a mudança pequena e reversível;
+3. validar pelo método escolhido (`validation_method_plan`, teste focal, `safe_marker_check` ou structured-read);
+4. fechar com `board_task_complete`, que registra verification `passed`, linka a task e marca `completed` em uma chamada;
+5. quando o fechamento único não couber, usar o fallback explícito `board_verification_append` + `board_update`.
+
+Esse fluxo é sobre capacidades, não sobre lock-in: adapters futuros devem oferecer operações equivalentes de criar tarefa, registrar evidência, atualizar status e preservar rationale.
+
 ## Quando continuar sem perguntar
 
 Continue automaticamente quando todos os itens forem verdadeiros:

@@ -6666,6 +6666,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:26:38.632Z",
       "evidence": "Added completeProjectTaskBoardWithVerification and board_task_complete to project-board-surface. The bounded flow appends passed verification, links it to the task, marks the task completed, rejects duplicate verification ids, and pre-blocks sensitive completion without rationale before appending verification. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 53/53; cmd.exe /c npm run test:monitor:smoke --silent passed 207/207 across 32 files. [rationale:risk-control] Reduces multi-step close drift and avoids the legacy complete-task path."
+    },
+    {
+      "id": "VER-BUD-494",
+      "target": "TASK-BUD-215",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-29T23:29:15.691Z",
+      "evidence": "Updated docs/guides/control-plane-operating-doctrine.md with 'Fluxo bounded do board local'. It documents using board_task_create for new slices, validation_method_plan/safe_marker_check/focal/structured-read for validation, board_task_complete for one-call close, and board_verification_append + board_update as explicit fallback. It frames the flow as capabilities rather than lock-in so future adapters can provide equivalent operations. Validation: safe_marker_check passed 11/11 markers with commandSensitive=none. [rationale:risk-control] Makes the safe unattended create/validate/close path explicit and validates board_task_complete live after reload."
     }
   ]
 }

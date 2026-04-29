@@ -5073,6 +5073,28 @@
       ],
       "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Fechar uma fatia hoje ainda exige múltiplas chamadas coordenadas; um primitive bounded de complete-with-verification reduz risco de drift e melhora operação ininterrupta.\n[2026-04-29T23:26:38.632Z] slice=1 focus=TASK-BUD-214 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem primitive bounded de complete-with-verification para reduzir drift de fechamento de slices.",
       "verification": "VER-BUD-493"
+    },
+    {
+      "id": "TASK-BUD-215",
+      "description": "[P1] Documentar fluxo bounded de criação/fechamento do board para unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-211",
+        "TASK-BUD-214"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina orienta usar board_task_create, board_task_complete e fallback board_verification_append+board_update em vez de scripts ad hoc quando disponíveis.",
+        "Texto mantém .project como adapter local atual e fala em capacidade/primitiva, não lock-in.",
+        "Validação usa safe_marker_check e fechamento usa board_task_complete live pós-reload."
+      ],
+      "notes": "Criado via board_task_create após reload de board_task_complete. [rationale:risk-control] O loop unattended precisa de caminho canônico curto para criar e fechar slices com evidência sem scripts ad hoc.\n[2026-04-29T23:34:00Z] slice=1 focus=TASK-BUD-215 gate=safe_marker_check-summary-marker-check-ok-yes-matched-11/11-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora aponta o fluxo bounded do board para criar, validar e fechar fatias sem scripts ad hoc.",
+      "verification": "VER-BUD-494"
     }
   ]
 }
