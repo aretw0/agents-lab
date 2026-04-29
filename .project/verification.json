@@ -6045,6 +6045,15 @@
       "method": "test",
       "evidence": "Deterministic macro-refactor primitive closed: rename/imports/format macro contracts, tool surface and command surface are revalidated with dry-run defaults, invalid-target guards, range validation, maxFiles normalization and engine-unavailable fallback. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts (11/11 passed). [rationale:risk-control] Reduces manual multi-point edit risk by making common refactors previewable, bounded and auditable before apply.",
       "timestamp": "2026-04-29T12:55:52.901Z"
+    },
+    {
+      "id": "VER-BUD-425",
+      "target": "TASK-BUD-147",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command",
+      "evidence": "Monitor curation/rollout primitive closed. Evidence includes curated monitor profile policy, runtime prefilter for unauthorized-action, false-positive fixes for classify-failure telemetry, local monitor gates, and sovereign audit-only posture. Validation: cmd.exe /c npm run monitor:stability:gate:strict --silent returned stable=true, classifyFailures=0, sovereignDeltaMentions=3; live monitor_sovereign_delta reported divergence=0. [rationale:risk-control] Supports long-runs with predictable low-noise monitoring and keeps monitor-sovereign in audit/shadow rather than enforcement until explicit rollout decision.",
+      "timestamp": "2026-04-29T12:57:00.709Z"
     }
   ]
 }
