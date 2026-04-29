@@ -706,7 +706,7 @@ Antes de promover para agent-as-tools, subagentes ou GitHub Actions, o rehearsal
 
 Critério de maturidade: três ou mais slices locais seguidos com foco preservado, smoke verde, commits pequenos, handoff fresco e nenhuma seleção automática de escopo protegido. Só depois disso remote/offload entra como canário controlado e opt-in.
 
-A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes.
+A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes. A tool `unattended_rehearsal_gate` também retorna `summary`; use esse resumo compacto em handoff/auto-resume quando a decisão operacional basta, preservando o payload detalhado para auditoria ou debug.
 
 A decisão operacional após foco completo deve seguir a [doutrina operacional do control-plane unattended](./control-plane-operating-doctrine.md): continuar sozinho em mudanças locais pequenas e reversíveis; parar apenas em risco, ambiguidade real ou escopo protegido.
 

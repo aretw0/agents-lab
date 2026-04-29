@@ -4231,6 +4231,27 @@
       ],
       "verification": "VER-BUD-458",
       "notes": "[2026-04-29T19:20:20.187Z] slice=1 focus=TASK-BUD-177 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Summary reduz parsing manual do payload e favorece handoff/auto-resume enxuto sem perder detalhes."
+    },
+    {
+      "id": "TASK-BUD-178",
+      "description": "[P1] Documentar uso do summary compacto do unattended_rehearsal_gate para reduzir parsing e handoff verboso.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-177"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook orienta preferir summary compacto quando só a decisão operacional é necessária.",
+        "Payload detalhado continua indicado para auditoria/debug.",
+        "Validação curta confirma marcadores e registro de evidência."
+      ],
+      "notes": "Criado após reload validar summary ao vivo. [rationale:risk-control] Documentar o contrato evita que agentes voltem a colar payload completo no handoff quando uma linha compacta basta.\n[2026-04-29T19:26:06.284Z] slice=1 focus=TASK-BUD-178 gate=rehearsal-summary-docs-markers-passed:3 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora orienta usar summary compacto no handoff/auto-resume quando basta decisão operacional, preservando payload detalhado para auditoria/debug.",
+      "verification": "VER-BUD-459"
     }
   ]
 }

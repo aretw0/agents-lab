@@ -6351,6 +6351,15 @@
       "method": "test",
       "evidence": "After reload, live unattended_rehearsal_gate returned ready-for-canary score=6/6 blockers=[]. Then the surface was updated to include summary from summarizeUnattendedRehearsalGate in its returned details/content. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 119/119. [rationale:risk-control] Adds compact operational evidence without removing detailed structured data.",
       "timestamp": "2026-04-29T19:20:20.187Z"
+    },
+    {
+      "id": "VER-BUD-459",
+      "target": "TASK-BUD-178",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "After reload, live unattended_rehearsal_gate returned summary=unattended-rehearsal: decision=ready-for-canary ready=yes score=6/6 blockers=none. Updated docs/guides/project-canonical-pipeline.md to prefer the compact summary in handoff/auto-resume when the operational decision is enough, while preserving detailed payload for audit/debug. Marker validation passed: rehearsal summary docs markers passed: 3. [rationale:risk-control] Reduces handoff verbosity without hiding structured evidence.",
+      "timestamp": "2026-04-29T19:26:06.284Z"
     }
   ]
 }
