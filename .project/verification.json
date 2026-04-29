@@ -6099,6 +6099,15 @@
       "method": "test",
       "evidence": "Safe mutation / structured query primitive closed. Deterministic large-file mutation risk assessment, dry-first builders, command/tool surfaces, typed schemas, invalid numeric guardrails, multi-statement query blocking and empty-query blocking are implemented. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-safe-mutation-contract.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-reexport.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-registration.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts (14/14 passed). [rationale:risk-control] Reduces manual text mutation, corruption and query-chain risks for large/structured artifacts.",
       "timestamp": "2026-04-29T13:08:30.096Z"
+    },
+    {
+      "id": "VER-BUD-431",
+      "target": "TASK-BUD-149",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Structured I/O Loam-bridge primitive closed. JSON selector parser/write/read surfaces, root/JSONPath-like selectors, quoted keys, dry-run defaults, blast-radius caps, rollback token, command/tool surfaces and structured_io expansion are implemented. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts (22/22 passed). [rationale:risk-control] Replaces broad manual string editing with bounded AST/schema-first operations for structured artifacts.",
+      "timestamp": "2026-04-29T13:09:37.140Z"
     }
   ]
 }
