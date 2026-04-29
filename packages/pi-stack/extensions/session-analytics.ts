@@ -54,7 +54,10 @@ export function toSessionWorkspaceKey(absPath: string): string {
 }
 
 export function sessionDir(cwd: string): string {
-  return path.join(homedir(), ".pi", "agent", "sessions", toSessionWorkspaceKey(cwd));
+  const key = toSessionWorkspaceKey(cwd);
+  const local = path.join(cwd, ".sandbox", "pi-agent", "sessions", key);
+  if (existsSync(local)) return local;
+  return path.join(homedir(), ".pi", "agent", "sessions", key);
 }
 
 // ---------------------------------------------------------------------------

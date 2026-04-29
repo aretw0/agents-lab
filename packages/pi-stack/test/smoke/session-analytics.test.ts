@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -168,6 +168,39 @@ describe("session-analytics — readJsonlLines (bounded tail scan)", () => {
       expect(parsed.stats.skippedLongLines).toBe(1);
       expect(parsed.stats.parseErrors).toBe(0);
       expect(parsed.stats.recordsParsed).toBe(2);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("session-analytics — local sandbox session discovery", () => {
+  it("consulta sessões locais .sandbox antes de depender do diretório global", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-local-"));
+    try {
+      const key = toSessionWorkspaceKey(dir);
+      const sessionDir = join(dir, ".sandbox", "pi-agent", "sessions", key);
+      mkdirSync(sessionDir, { recursive: true });
+      writeFileSync(
+        join(sessionDir, "local.jsonl"),
+        `${JSON.stringify({
+          type: "message",
+          timestamp: new Date().toISOString(),
+          message: {
+            role: "toolResult",
+            toolName: "bash",
+            content: [{ type: "text", text: "x".repeat(25_000) }],
+          },
+        })}\n`,
+        "utf8",
+      );
+
+      const result = runQuery(dir, "outliers", 24, undefined, 5, 20_000);
+      const data = result.data as { outliers: Array<{ toolName?: string; textChars: number }> };
+
+      expect(result.filesScanned).toBe(1);
+      expect(data.outliers[0]?.toolName).toBe("bash");
+      expect(data.outliers[0]?.textChars).toBe(25_000);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
