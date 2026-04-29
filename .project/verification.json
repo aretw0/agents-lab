@@ -6702,6 +6702,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:45:14.110Z",
       "evidence": "Added compact failure summaries to createProjectTaskBoard, appendProjectVerificationBoard, and completeProjectTaskBoardWithVerification. Error paths now include summary strings such as board-task-create ok=no reason=task-already-exists, board-verification-append ok=no reason=missing-verification-evidence, and board-task-complete ok=no reason=rationale-consistency-required-to-complete-task. Tests assert success and failure summaries for helpers and tools. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Failure summaries reduce unattended handoff/log bloat and keep blocked operations auditable."
+    },
+    {
+      "id": "VER-BUD-498",
+      "target": "TASK-BUD-219",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-29T23:48:01.769Z",
+      "evidence": "Updated docs/guides/control-plane-operating-doctrine.md to instruct unattended board flows to record compact tool summaries when sufficient for handoff/log, covering success and failure one-line summaries and reserving full JSON expansion for error investigation. Validation: safe_marker_check passed 8/8 markers with commandSensitive=none. [rationale:risk-control] Turns the new board summary fields into operational guidance that reduces unattended handoff/log bloat."
     }
   ]
 }

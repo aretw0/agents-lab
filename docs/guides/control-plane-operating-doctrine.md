@@ -38,6 +38,8 @@ Para fatias unattended locais, prefira as primitivas bounded em vez de scripts a
 4. fechar com `board_task_complete`, que registra verification `passed`, linka a task e marca `completed` em uma chamada;
 5. quando o fechamento único não couber, usar o fallback explícito `board_verification_append` + `board_update`.
 
+Registre o `summary` compacto dessas tools quando ele for suficiente para handoff ou log. Sucesso e falha devem caber em uma linha curta, por exemplo `board-task-complete: ok=yes ...` ou `board-task-complete: ok=no ... reason=...`; só expanda o JSON completo quando estiver investigando erro.
+
 Esse fluxo é sobre capacidades, não sobre lock-in: adapters futuros devem oferecer operações equivalentes de criar tarefa, registrar evidência, atualizar status e preservar rationale.
 
 ## Quando continuar sem perguntar

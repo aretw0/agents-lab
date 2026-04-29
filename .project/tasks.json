@@ -5163,6 +5163,28 @@
       ],
       "notes": "Criado via board_task_create após reload dos summaries de sucesso. [rationale:risk-control] Em unattended, falhas também precisam de resumo curto para handoff/auditoria sem despejar JSON completo.\n[2026-04-29T23:44:59Z] slice=1 focus=TASK-BUD-218 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board bounded primitives agora resumem falhas sem JSON verboso.",
       "verification": "VER-BUD-497"
+    },
+    {
+      "id": "TASK-BUD-219",
+      "description": "[P1] Documentar uso de summaries compactos no fluxo bounded do board.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-217",
+        "TASK-BUD-218"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina orienta registrar summary compacto das tools bounded quando suficiente.",
+        "Texto cobre summaries de sucesso e falha para handoff/log sem JSON verboso.",
+        "Validação usa safe_marker_check e fechamento usa board_task_complete."
+      ],
+      "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Summaries compactos só reduzem bloat se o fluxo operacional orientar seu uso em handoff/log.\n[2026-04-29T23:49:00Z] slice=1 focus=TASK-BUD-219 gate=safe_marker_check-summary-marker-check-ok-yes-matched-8/8-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta registrar summaries compactos das tools bounded em vez de JSON completo quando suficiente.",
+      "verification": "VER-BUD-498"
     }
   ]
 }
