@@ -6180,6 +6180,15 @@
       "method": "test",
       "evidence": "Decision packet primitive implemented and documented. Added buildProjectTaskDecisionPacket and board_decision_packet with noAutoClose=true, close|keep-open|defer options, verification evidence, blockers and risks. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts passed 44/44; cmd.exe /c npm run test:monitor:smoke --silent passed 96/96. [rationale:risk-control] Strategic/no-auto-close tasks now surface compact human decision evidence without mutating status automatically.",
       "timestamp": "2026-04-29T16:51:31.654Z"
+    },
+    {
+      "id": "VER-BUD-440",
+      "target": "TASK-BUD-158",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Dependency-update governance documented in docs/guides/project-canonical-pipeline.md: detect candidate, run controlled canary, promote/hold-deny/revert with evidence and rollback, and assimilate first-party when external dependency risk/cost/complexity no longer pays off. Validation: cmd.exe /c node -e dependency-update markers passed: 4. [rationale:risk-control] Updates stay hold-by-default during unattended loops so long-run continuity is not broken by dependency churn.",
+      "timestamp": "2026-04-29T16:53:18.025Z"
     }
   ]
 }

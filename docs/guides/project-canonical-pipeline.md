@@ -183,6 +183,17 @@ Sinais de oportunidade de economia devem ser **passivos e pouco ruidosos**: stat
 
 A adoção eventual de `mdt` fica separada: é trilha de **doc-drift/single-source docs** (`check` primeiro, `update` depois), não pipeline de ideias/backlog.
 
+### Governança de updates de dependências pi/extensões
+
+Atualizações de `pi`, extensões e skills devem seguir trilha determinística antes de entrar no baseline local-first:
+
+1. **Detectar:** registrar versão atual, versão candidata, changelog/fonte e escopo afetado (`runtime`, `tool`, `monitor`, `docs`, `package`).
+2. **Canário controlado:** aplicar em escopo isolado ou janela curta, rodar gate focal (`test:monitor:smoke` ou smoke específico) e comparar sinais de memória/storage/throughput quando a mudança impactar long-run.
+3. **Decidir:** promover, manter em hold/deny, ou reverter. A decisão precisa citar evidência mínima: comando/teste, impacto operacional e plano de rollback.
+4. **Assimilar first-party quando fizer sentido:** se a dependência externa aumentar risco/custo/complexidade ou bloquear continuidade, abrir proposta de assimilação parcial/total com migração reversível, API mínima e teste de compatibilidade.
+
+Durante overnight/unattended, updates ficam em `hold` por default; o loop pode continuar com a versão corrente, registrando a oportunidade no board em vez de quebrar uma execução ativa.
+
 ### Storage pressure antes de long-run
 
 Long-runs maiores só são confiáveis quando o ambiente ainda tem folga de armazenamento. Antes de lote grande, ou quando o host estiver perto do limite, usar o gate dry-first:

@@ -3809,7 +3809,7 @@
     {
       "id": "TASK-BUD-158",
       "description": "[P1] Governança de atualização de dependências (pi/extensões) com canário, bloqueio e estratégia de assimilação first-party.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-157"
@@ -3825,7 +3825,8 @@
         "Quando dependência externa deixar de ser vantajosa, existe critério objetivo para assimilação first-party (parcial/total) com plano de migração reversível e auditável.",
         "Runbook cobre política de cadência de updates + rollback + evidência mínima para decisão (teste focal, impacto em memória/storage, impacto em throughput)."
       ],
-      "notes": "Backlog assimilado por steering humano (2026-04-28): receber updates de pi/extensões com segurança operacional (sem quebra de long-run), com opção explícita de barrar upgrade ou abandonar dependência em favor de assimilação first-party quando análise indicar melhor custo/benefício."
+      "notes": "Backlog assimilado por steering humano (2026-04-28): receber updates de pi/extensões com segurança operacional (sem quebra de long-run), com opção explícita de barrar upgrade ou abandonar dependência em favor de assimilação first-party quando análise indicar melhor custo/benefício.\n[2026-04-29T16:53:18.025Z] Completed with VER-BUD-440: dependency update governance now defines detect -> canary -> promote/hold-deny/revert -> first-party assimilation criteria. [rationale:risk-control] Keeps unattended loops stable while preserving upgrade/rollback evidence.",
+      "verification": "VER-BUD-440"
     },
     {
       "id": "TASK-BUD-159",
