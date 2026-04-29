@@ -4916,6 +4916,28 @@
       ],
       "notes": "Criado como continuação local-safe após ratchet. [rationale:risk-control] O budget de linhas sozinho não impede reintroduzir lógica duplicada no core; o smoke deve proteger o wiring extraído.\n[2026-04-29T23:00:47.736Z] slice=1 focus=TASK-BUD-207 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Budget smoke agora protege wiring do módulo extraído e falha se padrões bash guard voltarem ao core.",
       "verification": "VER-BUD-487"
+    },
+    {
+      "id": "TASK-BUD-208",
+      "description": "[P2] Backlog: lint ortográfico i18n-aware para strings user-facing.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-201"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/",
+        "packages/pi-stack/test/smoke/",
+        "docs/guides/i18n-intents.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Definir lint que detecta prováveis erros ortográficos em strings user-facing sem tratar identificadores, chaves, paths, comandos ou termos técnicos como erro.",
+        "Respeitar política i18n: preservar idioma do artefato/string, não forçar tradução e permitir dicionários por locale/domínio.",
+        "Evitar conflito com futuro suporte a internacionalização: suportar allowlist, marcadores no-i18n/no-spellcheck, arquivos de tradução e fallback por locale.",
+        "Rodar como gate local opcional ou smoke bounded antes de virar CI/GitHub Actions."
+      ],
+      "notes": "Backlog criado a pedido do operador. [rationale:quality] Queremos capturar typos em strings sem misturar isso com tradução automática; o lint deve ser i18n-aware, local-first e opt-in antes de qualquer promoção para CI."
     }
   ]
 }
