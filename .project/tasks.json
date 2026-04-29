@@ -3235,7 +3235,7 @@
     {
       "id": "TASK-BUD-131",
       "description": "[P0] Enforce structured-first mutations: impedir edição livre de arquivos estruturados quando existir tool tipada canônica.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-119"
       ],
@@ -3254,7 +3254,8 @@
         "Falha de governança gera mensagem auditável com caminho recomendado (tool canônica) em vez de edição textual frágil.",
         "Runbook explicita política 'structured-first' para todos os artefatos estruturados críticos."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): agente não deve 'acertar JSON na mão' quando houver ferramenta precisa; objetivo é reduzir erro estrutural e aumentar confiabilidade para long runs."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): agente não deve 'acertar JSON na mão' quando houver ferramenta precisa; objetivo é reduzir erro estrutural e aumentar confiabilidade para long runs.\n[2026-04-29T13:14:37.840Z] Implemented and closed structured-first guardrail: edit/write tool calls targeting .project/*.json now resolve through guardrails-core-structured-first, block fragile textual mutation, audit guardrails-core.structured-first-block, and recommend board_query/board_update, read-block/write-block or structured_io. guardrails-core web routing constants were also extracted to keep the orchestrator under budget (3571 <= 3600). Runbook updated with structured-first policy. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (5/5 passed); cmd.exe /c npm run test:monitor:smoke --silent (95/95 passed). [rationale:risk-control] Blocking direct textual mutation of critical structured project blocks reduces JSON corruption/stale evidence risk during unattended loops.",
+      "verification": "VER-BUD-432"
     },
     {
       "id": "TASK-BUD-132",

@@ -477,6 +477,18 @@ Invariantes de segurança operacional:
 - scan guard ativo para arquivos monstruosos (sem parse irrestrito);
 - sempre preferir resumo/index para triagem inicial, aprofundando só no arquivo/slice que bloqueia progresso.
 
+### Política structured-first para artefatos críticos
+
+Quando o alvo for `.project/*.json`, a política padrão é **não** usar `edit`/`write` textual direto se houver superfície tipada equivalente.
+O guardrail `structured-first` bloqueia mutações textuais nesses arquivos e registra auditoria `guardrails-core.structured-first-block` com o caminho recomendado.
+
+Caminhos canônicos:
+- `.project/tasks.json`: usar `board_query` para leitura curta e `board_update` para status/notas/milestone/rationale;
+- `.project/verification.json`: usar `board_query` para leitura e `read-block`/`write-block` ou `structured_io` para evidência estruturada;
+- outros `.project/*.json`: preferir `read-block`/`write-block` ou `structured_io` com dry-run e limite de blast-radius.
+
+Fallback textual só é aceitável quando não existir superfície tipada suficiente; nesse caso, registrar no board/handoff o motivo, o escopo exato e a validação pós-mutação.
+
 ### Migração curta: `project_proxy_*` -> `board_*`
 
 A superfície canônica de board usa apenas `board_query` e `board_update`.

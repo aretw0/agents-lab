@@ -6108,6 +6108,15 @@
       "method": "test",
       "evidence": "Structured I/O Loam-bridge primitive closed. JSON selector parser/write/read surfaces, root/JSONPath-like selectors, quoted keys, dry-run defaults, blast-radius caps, rollback token, command/tool surfaces and structured_io expansion are implemented. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-command.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts (22/22 passed). [rationale:risk-control] Replaces broad manual string editing with bounded AST/schema-first operations for structured artifacts.",
       "timestamp": "2026-04-29T13:09:37.140Z"
+    },
+    {
+      "id": "VER-BUD-432",
+      "target": "TASK-BUD-131",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Structured-first guardrail implemented and closed. edit/write tool calls targeting .project/*.json are blocked by guardrails-core-structured-first with audit event guardrails-core.structured-first-block and recommended canonical surfaces: board_query/board_update for tasks, board_query + read-block/write-block or structured_io for verification, read-block/write-block or structured_io for other .project JSON. Runbook documents the policy. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (5/5 passed); cmd.exe /c npm run test:monitor:smoke --silent (95/95 passed). [rationale:risk-control] Reduces fragile JSON text edits and corruption/stale-evidence risk in unattended long-runs.",
+      "timestamp": "2026-04-29T13:14:37.840Z"
     }
   ]
 }

@@ -113,6 +113,8 @@ import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonom
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
+import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
+import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
 
 // =============================================================================
@@ -218,49 +220,6 @@ async function guardBashPathReads(command: string, ctx: ExtensionContext) {
 // =============================================================================
 // Deterministic Web Routing Guard
 // =============================================================================
-
-const INTERACTIVE_TERMS = [
-  "open",
-  "abrir",
-  "abra",
-  "navigate",
-  "navegar",
-  "navegue",
-  "click",
-  "clicar",
-  "clique",
-  "fill",
-  "preencher",
-  "preencha",
-  "login",
-  "log in",
-  "submit",
-  "enviar",
-  "envie",
-  "form",
-  "formulário",
-  "formulario",
-  "tab",
-  "button",
-  "botão",
-  "botao",
-];
-
-const SENSITIVE_DOMAINS = ["npmjs.com"];
-
-const SENSITIVE_HINTS = ["cloudflare", "bot block", "bloqueio", "captcha", "challenge"];
-
-const DISALLOWED_BASH_PATTERNS = [
-  /\bcurl\b/i,
-  /\bwget\b/i,
-  /python(?:3)?\b[\s\S]*?requests/i,
-  /r\.jina\.ai/i,
-  /\bnpm\s+view\b/i,
-  /registry\.npmjs\.org/i,
-];
-
-const CDP_SCRIPT_HINT =
-  /web-browser[\/\\]scripts|scripts[\/\\](start|nav|eval|pick|screenshot|dismiss-cookies|watch|logs-tail|net-summary)\.js/i;
 
 const SESSION_LOG_PATH_PATTERN = /(^|[^\w.-])\.pi\/agent\/sessions(\/|$)/i;
 const SESSION_LOG_CONTENT_SCAN_PATTERN = /\b(?:grep|rg|findstr|awk|sed|cat|tail|head|more|less)\b/i;
@@ -2946,16 +2905,43 @@ export default function (pi: ExtensionAPI) {
       return await guardBashPathReads(command, ctx);
     }
 
+    let structuredMutationToolType: "edit" | "write" | undefined;
+    let structuredMutationPath: string | undefined;
+    if (isToolCallEventType("edit", event)) {
+      structuredMutationToolType = "edit";
+      structuredMutationPath = event.input.path;
+    } else if (isToolCallEventType("write", event)) {
+      structuredMutationToolType = "write";
+      structuredMutationPath = event.input.path;
+    }
+
+    if (structuredMutationToolType) {
+      const structuredFirstDecision = resolveStructuredFirstMutationDecision({
+        toolType: structuredMutationToolType,
+        path: structuredMutationPath,
+      });
+      if (structuredFirstDecision.block) {
+        appendAuditEntry(ctx, structuredFirstDecision.auditKey ?? "guardrails-core.structured-first-block", {
+          atIso: new Date().toISOString(),
+          toolType: structuredMutationToolType,
+          path: structuredFirstDecision.path,
+          recommendedSurface: structuredFirstDecision.recommendedSurface,
+        });
+        return {
+          block: true,
+          reason: structuredFirstDecision.reason ?? "Blocked by guardrails-core (structured-first).",
+        };
+      }
+    }
+
     if (bloatSmellConfig.enabled && bloatSmellConfig.code.enabled) {
       let metrics: { changedLines: number; hunks: number; filesTouched: number } | undefined;
-      let toolType: "edit" | "write" | undefined;
+      let toolType = structuredMutationToolType;
 
-      if (isToolCallEventType("edit", event)) {
+      if (structuredMutationToolType === "edit") {
         metrics = estimateCodeBloatFromEditInput(event.input);
-        toolType = "edit";
-      } else if (isToolCallEventType("write", event)) {
+      } else if (structuredMutationToolType === "write") {
         metrics = estimateCodeBloatFromWriteInput(event.input);
-        toolType = "write";
       }
 
       if (metrics && toolType) {

@@ -82,3 +82,4 @@ export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrail
 export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";
 export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, buildRefactorRenameSymbolResult } from "./guardrails-core-macro-refactor";
 export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
+export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
