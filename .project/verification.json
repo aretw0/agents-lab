@@ -5937,6 +5937,15 @@
       "method": "test",
       "evidence": "Revalidated simple-first hatch implementation. /colony-pilot hatch check defaults to simple mode without direct swarm CTA; runbook offers status/doctor/colony-pilot check/quota visibility and explicit /colony-pilot hatch check --advanced escalation; footer status remains observable via colony-pilot-hatch. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts (115/115 passed). [rationale:risk-control] Closes onboarding slice with evidence that first contact avoids high-autonomy CTA by default while retaining auditable opt-in escalation.",
       "timestamp": "2026-04-29T12:32:17.567Z"
+    },
+    {
+      "id": "VER-BUD-413",
+      "target": "TASK-BUD-118",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Autonomous control-plane loop nucleus closed from accumulated validated slices: durable lane queue state, explicit pause/resume/cancel-adjacent operation, lease/heartbeat expiry gates, stop boundaries, dispatch-failure advisory/blocking thresholds, provider transient retry/backoff, rapid same-task redispatch guard, and repeated orphan call_id discard/audit before redispatch. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed) and cmd.exe /c npm run test:monitor:smoke --silent (91/91 passed during TASK-BUD-142 slice). [rationale:risk-control] Provides deterministic retry/stop/audit behavior for unattended control-plane execution while preserving no-auto-close and explicit verification gates.",
+      "timestamp": "2026-04-29T12:36:19.967Z"
     }
   ]
 }
