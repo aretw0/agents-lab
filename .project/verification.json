@@ -5883,6 +5883,15 @@
       "method": "test",
       "timestamp": "2026-04-29T10:34:30Z",
       "evidence": "Surface slimming/deprecation-by-default consolidated. `docs/guides/lab-user-surface-parity.md` now classifies `STRICT_CURATED`/`curated-default` as keep baseline, `RUNTIME_CAPABILITY_EXTRAS` as keep opt-in, `stack-full` and remaining third-party lab/compatibility surfaces as deprecate-by-default, and ad-hoc diagnostics as docs-only/remove/archive. `docs/guides/project-canonical-pipeline.md` records strict-curated as the simple distribution baseline, runtime extras as opt-in, stack-full as lab/compatibility, and docs-only/archive policy for unclear recurring value. Existing installer code already enforces `DEFAULT_INSTALL_PROFILE = \"strict-curated\"`. Focal validation: `npx vitest run packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/installer-profile.test.ts` passed 12/12. [rationale:risk-control] Slimming is documented as deprecation-by-default rather than destructive package removal so lab compatibility is preserved while the user-facing default stays simple-first and low-overlap."
+    },
+    {
+      "id": "VER-BUD-407",
+      "target": "TASK-BUD-152",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented deterministic i18n intents: guardrails-core now resolves/audits piStack.guardrailsCore.i18nIntents, injects soft communication + hard artifact policy, supports artifact rules by pathPrefix/extensions with opt-in translation targets, and documents runbook including optional mdt drift detection. Validation: cmd.exe /c npm run test:monitor:smoke --silent (73/73 passed, 10 files).\n[rationale:risk-control] Mudança cria política determinística e auditável para evitar drift de idioma entre comunicação e artefatos persistidos; smoke focal e monitor smoke completo validaram defaults, overrides por escopo/extensão e tradução opt-in sem tocar settings locais.",
+      "timestamp": "2026-04-29T10:45:13.713776Z"
     }
   ]
 }

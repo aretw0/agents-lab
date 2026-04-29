@@ -3654,20 +3654,24 @@
     {
       "id": "TASK-BUD-152",
       "description": "[P1] Implementar intents soft/hard de internacionalização para alinhar comunicação e geração de artefatos ao perfil do usuário",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-i18n-intents.ts",
+        "packages/pi-stack/test/smoke/guardrails-i18n-intents.test.ts",
+        "docs/guides/i18n-intents.md",
         "docs/guides/project-canonical-pipeline.md",
-        "docs/research/"
+        "docs/guides/README.md",
+        "package.json"
       ],
       "acceptance_criteria": [
         "Existe configuração canônica para idioma de comunicação e idioma de escrita de arquivos com distinção soft/hard intent.",
         "Usuário pode estender regras por escopo/tipo de arquivo e habilitar geração opcional de traduções para arquivos selecionados.",
         "Runbook documenta estratégia de coesão de i18n e integração opcional com mdt para detectar drift em trechos comuns multi-idioma."
       ],
-      "verification": "",
-      "notes": "Backlog por steering humano (2026-04-26): garantir coesão de internacionalização entre comunicação do agente e artefatos escritos, com política extensível e deterministicamente auditável."
+      "verification": "VER-BUD-407",
+      "notes": "Backlog por steering humano (2026-04-26): garantir coesão de internacionalização entre comunicação do agente e artefatos escritos, com política extensível e deterministicamente auditável.\nCompleted 2026-04-29: added canonical soft/hard i18n intent policy, artifact override rules, opt-in translation support, audit prompt, runbook, and smoke coverage (test:monitor:smoke 73/73).\n[rationale:risk-control] Mudança cria política determinística e auditável para evitar drift de idioma entre comunicação e artefatos persistidos; smoke focal e monitor smoke completo validaram defaults, overrides por escopo/extensão e tradução opt-in sem tocar settings locais."
     },
     {
       "id": "TASK-BUD-153",

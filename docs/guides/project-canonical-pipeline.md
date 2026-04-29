@@ -142,6 +142,13 @@ Antes de promover hardening interno como capability da pi-stack:
 - Use `inspect` para governança/doc/processo e `command/test` quando houver impacto executável.
 - Referência de contrato: `docs/primitives/quality-verification-gate.md`.
 
+### Soft/hard intent de internacionalização
+- **Comunicação:** `piStack.guardrailsCore.i18nIntents.communication` é soft intent; orienta a língua da resposta ao usuário (`auto-user-profile` por default), mas pode ceder a instrução explícita do turno/sistema.
+- **Artefatos:** `piStack.guardrailsCore.i18nIntents.artifacts` é hard intent; arquivos persistidos devem preservar a língua existente ou seguir a política configurada, sem traduzir comandos, paths, APIs, IDs ou evidências citadas por acidente.
+- **Overrides:** `artifacts.rules[]` permite regras por `pathPrefix` e `extensions`, incluindo `generateTranslations=true` e `translationTargets[]` para traduções opt-in de escopos selecionados.
+- **Auditoria:** quando a política estiver ativa, `guardrails-core` registra `guardrails-core.i18n-intent-policy`; verificações de docs devem registrar idioma pretendido, preservação/override e qualquer tradução opt-in.
+- Runbook completo: `docs/guides/i18n-intents.md`.
+
 ## Política no-obvious-questions no loop canônico
 
 Para manter velocidade de cruzeiro em long-run:

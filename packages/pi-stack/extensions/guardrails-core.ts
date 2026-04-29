@@ -101,6 +101,7 @@ import { buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeG
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardrails-core-behavior-routing";
 import { buildShellRoutingStatusLabel, buildShellRoutingSystemPrompt, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
+import { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, resolveI18nIntentConfig, summarizeI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
 import { registerGuardrailsShellRouteSurface } from "./guardrails-core-shell-route-surface";
 import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
 import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
@@ -185,6 +186,7 @@ export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent
 export { buildShellRoutingStatusLabel, buildShellRoutingStatusLines, buildShellRoutingSystemPrompt, detectShellFamily, isCmdWrappedCommand, isNodeFamilyCommand, parseFirstCommandToken, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, wrapCommandForHostShell } from "./guardrails-core-shell-routing";
 export { evaluateAutonomyLaneReadiness } from "./guardrails-core-autonomy-lane";
 export { evaluateAutonomyLaneTaskSelection, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
+export { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, normalizeI18nIntentConfig, resolveI18nArtifactIntent, resolveI18nIntentConfig, summarizeI18nIntentConfig } from "./guardrails-core-i18n-intents";
 export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-core-delivery-mode";
 export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
 export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";
@@ -913,6 +915,38 @@ export const GUARDRAILS_RUNTIME_CONFIG_SPECS: GuardrailsRuntimeConfigSpec[] = [
     description: "Max chars for assumption audit summary.",
   },
   {
+    key: "i18nIntents.enabled",
+    path: ["piStack", "guardrailsCore", "i18nIntents", "enabled"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Enable soft communication and hard artifact i18n intent steering.",
+  },
+  {
+    key: "i18nIntents.communication.language",
+    path: ["piStack", "guardrailsCore", "i18nIntents", "communication", "language"],
+    type: "string",
+    minLength: 2,
+    maxLength: 80,
+    reloadRequired: false,
+    description: "Preferred communication language (soft intent, e.g. auto-user-profile, pt-BR, en).",
+  },
+  {
+    key: "i18nIntents.artifacts.language",
+    path: ["piStack", "guardrailsCore", "i18nIntents", "artifacts", "language"],
+    type: "string",
+    minLength: 2,
+    maxLength: 120,
+    reloadRequired: false,
+    description: "Default generated artifact language policy (hard intent, e.g. preserve-existing-or-user-language).",
+  },
+  {
+    key: "i18nIntents.artifacts.generateTranslations",
+    path: ["piStack", "guardrailsCore", "i18nIntents", "artifacts", "generateTranslations"],
+    type: "boolean",
+    reloadRequired: false,
+    description: "Allow opt-in generation of translation artifacts for selected scopes/rules.",
+  },
+  {
     key: "contextWatchdog.enabled",
     path: ["piStack", "contextWatchdog", "enabled"],
     type: "boolean",
@@ -1616,6 +1650,7 @@ export default function (pi: ExtensionAPI) {
   let longRunProviderRetryConfig: LongRunProviderTransientRetryConfig =
     DEFAULT_LONG_RUN_PROVIDER_TRANSIENT_RETRY_CONFIG;
   let pragmaticAutonomyConfig: PragmaticAutonomyConfig = DEFAULT_PRAGMATIC_AUTONOMY_CONFIG;
+  let i18nIntentConfig: I18nIntentConfig = DEFAULT_I18N_INTENT_CONFIG;
   let bloatSmellConfig: BloatSmellConfig = DEFAULT_BLOAT_SMELL_CONFIG;
   let lastTextBloatSignalAt = 0;
   let lastTextBloatSignalKey: string | undefined;
@@ -2462,6 +2497,7 @@ export default function (pi: ExtensionAPI) {
     longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
     longRunProviderRetryConfig = resolveLongRunProviderTransientRetryConfig(ctx.cwd);
     pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+    i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
     bloatSmellConfig = resolveBloatSmellConfig(ctx.cwd);
     shellRoutingProfile = resolveCommandRoutingProfile();
     if (providerBudgetGovernorMisconfig) {
@@ -2542,6 +2578,15 @@ export default function (pi: ExtensionAPI) {
       }
     }
 
+    const i18nPrompt = buildI18nIntentSystemPrompt(i18nIntentConfig);
+    if (i18nPrompt.length > 0) {
+      systemPromptParts.push("", ...i18nPrompt);
+      appendAuditEntry(ctx, "guardrails-core.i18n-intent-policy", {
+        atIso: new Date().toISOString(),
+        summary: summarizeI18nIntentConfig(i18nIntentConfig),
+      });
+    }
+
     const parsedIntent = parseGuardrailsIntent(event.prompt ?? "");
     if (parsedIntent.ok && parsedIntent.intent) {
       systemPromptParts.push("", ...buildGuardrailsIntentSystemPrompt(parsedIntent.intent));
@@ -2579,7 +2624,7 @@ export default function (pi: ExtensionAPI) {
 
     if (!strictInteractiveMode) {
       ctx.ui?.setStatus?.("guardrails-core", undefined);
-      if (!autonomyPrompt && !parsedIntent.ok && shellRoutingPrompt.length === 0) return undefined;
+      if (!autonomyPrompt && i18nPrompt.length === 0 && !parsedIntent.ok && shellRoutingPrompt.length === 0) return undefined;
       return { systemPrompt: systemPromptParts.join("\n") };
     }
 
@@ -3106,6 +3151,7 @@ export default function (pi: ExtensionAPI) {
         // Re-read mutable configs so frequently tuned knobs apply now.
         longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
         pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+        i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
 
         const after = readGuardrailsRuntimeConfigSnapshot(ctx.cwd);
         appendAuditEntry(ctx, "guardrails-core.runtime-config-set", {
