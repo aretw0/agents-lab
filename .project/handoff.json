@@ -1,47 +1,51 @@
 {
-  "timestamp": "2026-04-28T18:25:38.502Z",
-  "context": "machine-maintenance gate block: checkpoint handoff and stop; do not start tests/builds/long-runs until resources recover",
+  "timestamp": "2026-04-29T00:24:58.151Z",
+  "context": "Context-watch checkpoint/compact lane active; machine-maintenance recovered and allows bounded work. Continue only micro-slices or compact/resume before any large slice.",
   "next_actions": [
-    "Machine maintenance: checkpoint-and-stop until memory/disk pressure recovers."
+    "Context-watch action: level=compact 72% (compact-now) · Compact now and continue from checkpoint.",
+    "Context-watch: compact/checkpoint before the next large slice; continue micro-slices only until compact/resume.",
+    "Machine maintenance: current gate is OK (longRun=allow, monitors=allow); do not carry forward stale disk-pressure-block evidence.",
+    "If continuing this session, prefer committing/closing current slice and then compacting before broader work."
   ],
   "blockers": [
-    "disk-pressure-block"
+    "context-watch-compact-required"
   ],
   "machine_maintenance": {
-    "generatedAtIso": "2026-04-28T18:25:38.502Z",
-    "severity": "block",
-    "action": "checkpoint-and-stop",
-    "canStartLongRun": false,
-    "shouldCheckpoint": true,
-    "shouldStop": true,
-    "memory": {
-      "severity": "ok",
-      "freeMb": 3461.95,
-      "totalMb": 16048.29,
-      "usedPct": 78.43,
-      "reason": "memory free=3461.95MB used=78.43%"
+    "generatedAtIso": "2026-04-29T00:24:35.000Z",
+    "severity": "ok",
+    "action": "continue",
+    "canStartLongRun": true,
+    "canEvaluateMonitors": true,
+    "shouldCheckpoint": false,
+    "shouldStop": false,
+    "summary": "machine-maintenance · severity=ok · action=continue · longRun=allow · monitors=allow · memory free≈3440MB used≈78.6% · disk free≈14963MB used≈96.93%"
+  },
+  "context_watch_events": [
+    {
+      "atIso": "2026-04-29T00:24:35.000Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 71,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
     },
-    "disk": {
-      "severity": "block",
-      "freeMb": 1065,
-      "totalMb": 486859.32,
-      "usedPct": 99.78,
-      "reason": "disk free=1065MB used=99.78%"
-    },
-    "thresholds": {
-      "memoryWarnFreeMb": 2048,
-      "memoryPauseFreeMb": 1024,
-      "memoryBlockFreeMb": 512,
-      "memoryWarnUsedPct": 85,
-      "memoryPauseUsedPct": 92,
-      "memoryBlockUsedPct": 96,
-      "diskWarnFreeMb": 10240,
-      "diskPauseFreeMb": 5120,
-      "diskBlockFreeMb": 2048
-    },
-    "blockers": [
-      "disk-pressure-block"
-    ],
-    "recommendation": "checkpoint handoff and stop; do not start tests/builds/long-runs until resources recover"
-  }
+    {
+      "atIso": "2026-04-29T00:24:58.151Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 72,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
+    }
+  ]
 }

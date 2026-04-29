@@ -761,6 +761,17 @@
       "resolution": "pattern-addressed",
       "resolvedAtIso": "2026-04-24T16:07:57.477Z",
       "resolvedNote": "Pattern absorbed by work-quality/fragility monitors; recurrence prevented by active monitoring"
+    },
+    {
+      "id": "fragility-fragility-mojbbo7i",
+      "description": "The agent explicitly left `handoff.json` in a stale broken state and deferred resolution by saying the runtime needs a reload, instead of fixing or safely handling it.",
+      "status": "resolved",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor",
+      "resolution": "fixed-immediately",
+      "resolvedAtIso": "2026-04-29T00:25:30.000Z",
+      "resolvedNote": "Rewrote .project/handoff.json with fresh context-watch checkpoint/compact state and current machine-maintenance OK evidence; removed stale disk-pressure-block payload."
     }
   ]
 }
