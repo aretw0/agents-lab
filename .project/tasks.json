@@ -4381,6 +4381,29 @@
       ],
       "notes": "Criado após BG_PROCESS_DONE revelar falso negativo por backticks em marker check. [rationale:risk-control] Transformar erro recorrente em regra curta evita ruído e retrabalho em unattended.\n[2026-04-29T20:12:04.644Z] slice=1 focus=TASK-BUD-184 gate=marker-check-quoting-policy-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] O falso negativo por backticks virou regra operacional: marker checks devem evitar crase ou normalizar antes de comparar.",
       "verification": "VER-BUD-465"
+    },
+    {
+      "id": "TASK-BUD-185",
+      "description": "[P1] Expor plano de continuação unattended como tool read-only para uso operacional pós-reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-181",
+        "TASK-BUD-182"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar tool unattended_continuation_plan read-only e side-effect-free.",
+        "Tool retorna summary compacto e detalhes estruturados.",
+        "Smokes focal e completo permanecem verdes."
+      ],
+      "verification": "VER-BUD-466",
+      "notes": "[2026-04-29T20:23:39.224Z] slice=1 focus=TASK-BUD-185 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A decisão de continuar/parar fica disponível em runtime sem diagnóstico amplo, reforçando malemolência unattended com trilho."
     }
   ]
 }
