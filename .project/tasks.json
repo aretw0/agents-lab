@@ -1544,7 +1544,7 @@
     {
       "id": "TASK-BUD-066",
       "description": "[P1] Formalizar contrato de primitives+adapters para coordenação de trabalho (tracker-agnostic), incluindo adapter de referência para Markdown/Obsidian (caixa de notas) com suporte a fluxos de hard intent.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-012"
       ],
@@ -1558,7 +1558,7 @@
         "Matriz de adapters explicita equivalência operacional entre `.project` (local), backends first-party futuros, trackers Git e Markdown/Obsidian.",
         "Fluxo de hard intent (skill/processo/extensão) é documentado como camada sobre o contrato, sem depender de formato único de storage."
       ],
-      "notes": "Derivada de DEC-BUD-026. Objetivo: tratar sistema de tickets como implementação e preservar interoperabilidade de operação.\n[2026-04-24T12:34:00Z] Slice 1 entregue: `continuity-abstraction.md` formalizado com contrato canônico v1 (task/event/intent/evidence + decisionGate/deliveryState), transições e invariantes; matriz mínima de adapters expandida com `.project`, first-party futuro, GitHub/Gitea e Markdown/Obsidian; camada de hard intent documentada como storage-agnostic. `project-canonical-pipeline.md` recebeu seção operacional de equivalência + hard intent e `requirements.json` ganhou `REQ-BUD-062` traçando o contrato para `TASK-BUD-066`."
+      "notes": "Derivada de DEC-BUD-026. Objetivo: tratar sistema de tickets como implementação e preservar interoperabilidade de operação.\n[2026-04-24T12:34:00Z] Slice 1 entregue: `continuity-abstraction.md` formalizado com contrato canônico v1 (task/event/intent/evidence + decisionGate/deliveryState), transições e invariantes; matriz mínima de adapters expandida com `.project`, first-party futuro, GitHub/Gitea e Markdown/Obsidian; camada de hard intent documentada como storage-agnostic. `project-canonical-pipeline.md` recebeu seção operacional de equivalência + hard intent e `requirements.json` ganhou `REQ-BUD-062` traçando o contrato para `TASK-BUD-066`.\n[completion] Closed after bounded inspection and new passed verification `VER-BUD-399`: continuity abstraction and canonical pipeline now cover the canonical primitives contract, adapter matrix including Markdown/Obsidian, and storage-independent hard intent layer."
     },
     {
       "id": "TASK-BUD-067",

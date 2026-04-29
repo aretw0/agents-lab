@@ -5811,6 +5811,15 @@
       "method": "test",
       "timestamp": "2026-04-28T00:24:55Z",
       "evidence": "Added anti-silent suppression gate for auto-resume: `shouldNotifyAutoResumeSuppression` in `context-watchdog-resume.ts` marks critical suppression reasons (`reload-required`, `checkpoint-evidence-missing`). `context-watchdog.ts` now emits warning notify with actionable hint when those suppressions occur after compact, while preserving structured audit entry (`context-watchdog.auto-resume-suppressed`). Smoke assertions added in `context-watchdog.test.ts`; runbook updated to call out critical-suppression notify behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/installability.test.ts` => 58/58 passed."
+    },
+    {
+      "id": "VER-BUD-399",
+      "target": "TASK-BUD-066",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-29T02:28:00Z",
+      "evidence": "Inspection confirms TASK-BUD-066 acceptance criteria are covered: `docs/primitives/continuity-abstraction.md` defines canonical task/event/intent/evidence plus decisionGate/deliveryState, invariants and transitions; the adapter matrix covers `.project`, first-party future backend, GitHub/Gitea, Markdown/Obsidian and SQLite; the Markdown/Obsidian reference adapter defines frontmatter, append-only events, evidence blocks and decisionGate; `docs/guides/project-canonical-pipeline.md` links the formal contract and documents hard intent as storage-independent."
     }
   ]
 }
