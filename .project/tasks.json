@@ -4982,6 +4982,29 @@
       ],
       "notes": "Criado na lane essencial de trabalho ininterrupto seguro. [rationale:risk-control] O loop ainda usa script ad hoc para registrar verification; uma superfície bounded reduz drift e aproxima fechamento auditável sem complete-task legado.\n[2026-04-29T23:12:02.463Z] slice=1 focus=TASK-BUD-210 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem helper/tool bounded para anexar verification e vincular à task, reduzindo scripts ad hoc.",
       "verification": "VER-BUD-489"
+    },
+    {
+      "id": "TASK-BUD-211",
+      "description": "[P1] Adicionar helper/tool bounded para criar tarefas no board.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-210"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Superfície do board consegue criar task planejada/in-progress sem script ad hoc em .project/tasks.json.",
+        "Criação valida id/description/status e bloqueia duplicata.",
+        "Permite campos bounded: priority, depends_on, files, acceptance_criteria, milestone e note inicial.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado na lane essencial de trabalho ininterrupto seguro. [rationale:risk-control] Após bounded verification append, ainda faltava criação bounded de task; reduzir scripts ad hoc melhora controle do loop unattended.\n[2026-04-29T23:16:31.805Z] slice=1 focus=TASK-BUD-211 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem helper/tool bounded para criar task, complementando verification append e reduzindo scripts ad hoc.",
+      "verification": "VER-BUD-491"
     }
   ]
 }

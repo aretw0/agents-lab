@@ -18,6 +18,7 @@ import {
   appendNote as appendTaskNote,
   readProjectTasksBlock,
   writeProjectTasksBlock,
+  type ProjectTaskItem,
 } from "./colony-pilot-task-sync";
 
 export type ProjectTaskStatus =
@@ -263,6 +264,23 @@ function writeVerificationBlock(cwd: string, block: VerificationBlock): string {
   return p;
 }
 
+function readVerificationBlockForAppend(cwd: string): VerificationBlock {
+  const p = verificationPath(cwd);
+  if (!existsSync(p)) return { verifications: [] };
+  try {
+    const raw = JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown>;
+    const arr = Array.isArray(raw.verifications) ? raw.verifications : [];
+    return {
+      verifications: arr.filter((row): row is VerificationRecord => {
+        const obj = asObject(row);
+        return typeof obj?.id === "string" && obj.id.trim().length > 0;
+      }),
+    };
+  } catch {
+    return { verifications: [] };
+  }
+}
+
 function normalizeLimit(input: unknown, fallback = 20): number {
   const raw = Number(input);
   if (!Number.isFinite(raw) || raw <= 0) return fallback;
@@ -303,6 +321,22 @@ function normalizeMilestoneLabel(value: unknown): string | undefined {
     .trim();
   if (!normalized) return "";
   return normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
+}
+
+function normalizeBoundedText(value: unknown, max: number): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (!normalized) return undefined;
+  return normalized.length <= max ? normalized : `${normalized.slice(0, max - 1)}…`;
+}
+
+function normalizeStringArray(value: unknown, maxItems: number, maxItemLength: number): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const out = value
+    .map((item) => normalizeBoundedText(item, maxItemLength))
+    .filter((item): item is string => Boolean(item))
+    .slice(0, maxItems);
+  return out.length > 0 ? out : undefined;
 }
 
 function extractRationaleKindFromText(text: string | undefined): BoardRationaleKind | undefined {
@@ -1005,6 +1039,67 @@ export function updateProjectTaskBoard(
   };
 }
 
+export interface ProjectTaskCreateResult {
+  ok: boolean;
+  reason?: string;
+  task?: ProjectTaskBoardRow;
+}
+
+export function createProjectTaskBoard(
+  cwd: string,
+  input: {
+    id?: string;
+    description?: string;
+    status?: ProjectTaskStatus;
+    priority?: string;
+    dependsOn?: string[];
+    files?: string[];
+    acceptanceCriteria?: string[];
+    milestone?: string;
+    note?: string;
+  },
+): ProjectTaskCreateResult {
+  const id = typeof input.id === "string" ? input.id.trim() : "";
+  const description = normalizeBoundedText(input.description, 500);
+  const status = PROJECT_TASK_STATUSES.includes(input.status as ProjectTaskStatus)
+    ? input.status as ProjectTaskStatus
+    : "planned";
+  const priority = normalizeBoundedText(input.priority, 40);
+  const dependsOn = normalizeStringArray(input.dependsOn, 20, 120);
+  const files = normalizeStringArray(input.files, 50, 240);
+  const acceptanceCriteria = normalizeStringArray(input.acceptanceCriteria, 20, 300);
+  const milestone = normalizeMilestoneLabel(input.milestone);
+  const note = normalizeBoundedText(input.note, 1000);
+
+  if (!id) return { ok: false, reason: "missing-task-id" };
+  if (!description) return { ok: false, reason: "missing-task-description" };
+  if (typeof input.status === "string" && !PROJECT_TASK_STATUSES.includes(input.status as ProjectTaskStatus)) {
+    return { ok: false, reason: "invalid-task-status" };
+  }
+
+  const block = readProjectTasksBlock(cwd);
+  if (block.tasks.some((row) => row?.id === id)) return { ok: false, reason: "task-already-exists" };
+
+  const task: ProjectTaskItem & { priority?: string } = {
+    id,
+    description,
+    status,
+  };
+  if (priority) task.priority = priority;
+  if (dependsOn) task.depends_on = dependsOn;
+  if (files) task.files = files;
+  if (acceptanceCriteria) task.acceptance_criteria = acceptanceCriteria;
+  if (milestone && milestone.length > 0) task.milestone = milestone;
+  if (note) task.notes = appendTaskNote(undefined, note, 50);
+
+  block.tasks.push(task);
+  writeProjectTasksBlock(cwd, block);
+  invalidateProjectBlockCaches(cwd);
+
+  const row = queryProjectTasks(cwd, { search: id, limit: 200 }).rows.find((item) => item.id === id);
+  return { ok: true, task: row };
+}
+
 export interface ProjectVerificationAppendResult {
   ok: boolean;
   reason?: string;
@@ -1052,7 +1147,7 @@ export function appendProjectVerificationBoard(
   if (!method) return { ok: false, reason: "missing-verification-method" };
   if (!evidence) return { ok: false, reason: "missing-verification-evidence" };
 
-  const verificationRead = readVerificationBlockCached(cwd).block;
+  const verificationRead = readVerificationBlockForAppend(cwd);
   if (verificationRead.verifications.some((row) => row.id === id)) {
     return { ok: false, reason: "verification-already-exists" };
   }
@@ -1185,6 +1280,61 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Query .project/tasks and .project/verification through a bounded board surface with cache-aware metadata.",
     parameters: queryParameters,
     execute: executeQuery,
+  });
+
+  const taskCreateParameters = Type.Object({
+    id: Type.String({ minLength: 1, description: "Task id to create." }),
+    description: Type.String({ minLength: 1, description: "Task description." }),
+    status: Type.Optional(Type.Union(PROJECT_TASK_STATUSES.map((s) => Type.Literal(s)))),
+    priority: Type.Optional(Type.String({ description: "Optional priority label, e.g. p1/p2." })),
+    depends_on: Type.Optional(Type.Array(Type.String(), { description: "Optional dependencies." })),
+    files: Type.Optional(Type.Array(Type.String(), { description: "Optional related files." })),
+    acceptance_criteria: Type.Optional(Type.Array(Type.String(), { description: "Optional bounded acceptance criteria." })),
+    milestone: Type.Optional(Type.String({ description: "Optional milestone label." })),
+    note: Type.Optional(Type.String({ description: "Optional initial note." })),
+  });
+
+  const executeTaskCreate = (
+    _toolCallId: string,
+    params: {
+      id?: string;
+      description?: string;
+      status?: ProjectTaskStatus;
+      priority?: string;
+      depends_on?: string[];
+      files?: string[];
+      acceptance_criteria?: string[];
+      milestone?: string;
+      note?: string;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = createProjectTaskBoard(ctx.cwd, {
+      id: params?.id,
+      description: params?.description,
+      status: params?.status,
+      priority: params?.priority,
+      dependsOn: params?.depends_on,
+      files: params?.files,
+      acceptanceCriteria: params?.acceptance_criteria,
+      milestone: params?.milestone,
+      note: params?.note,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_task_create",
+    label: "Board Task Create",
+    description:
+      "Create one .project/tasks entry through a constrained board surface with duplicate protection and bounded fields.",
+    parameters: taskCreateParameters,
+    execute: executeTaskCreate,
   });
 
   const decisionPacketParameters = Type.Object({

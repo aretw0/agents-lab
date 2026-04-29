@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import projectBoardSurfaceExtension, {
   appendProjectVerificationBoard,
   buildProjectTaskDecisionPacket,
+  createProjectTaskBoard,
   queryProjectTasks,
   queryProjectVerification,
   updateProjectTaskBoard,
@@ -79,6 +80,7 @@ describe("project-board-surface", () => {
               method: "test",
               timestamp: "2026-04-23T05:00:00Z",
               evidence: "smoke ok",
+              extra: { keep: true },
             },
             {
               id: "VER-2",
@@ -114,6 +116,51 @@ describe("project-board-surface", () => {
 
       const second = queryProjectTasks(cwd, { status: "in-progress", limit: 5 });
       expect(second.meta.cacheHit).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("createProjectTaskBoard creates bounded tasks and rejects duplicates", () => {
+    const cwd = seedWorkspace();
+    try {
+      const created = createProjectTaskBoard(cwd, {
+        id: "TASK-D",
+        description: "Quarto slice",
+        status: "planned",
+        priority: "p1",
+        dependsOn: ["TASK-A"],
+        files: ["docs/example.md"],
+        acceptanceCriteria: ["Gate focal verde"],
+        milestone: "MS-LOCAL",
+        note: "[rationale:risk-control] criar task via superfície bounded",
+      });
+      expect(created.ok).toBe(true);
+      expect(created.task).toMatchObject({ id: "TASK-D", status: "planned", milestone: "MS-LOCAL" });
+      expect(created.task?.hasRationale).toBe(true);
+
+      const duplicate = createProjectTaskBoard(cwd, {
+        id: "TASK-D",
+        description: "duplicada",
+      });
+      expect(duplicate).toMatchObject({ ok: false, reason: "task-already-exists" });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("createProjectTaskBoard validates required fields and status", () => {
+    const cwd = seedWorkspace();
+    try {
+      expect(createProjectTaskBoard(cwd, {
+        id: "TASK-X",
+        description: "",
+      })).toMatchObject({ ok: false, reason: "missing-task-description" });
+      expect(createProjectTaskBoard(cwd, {
+        id: "TASK-X",
+        description: "bad status",
+        status: "cancelled" as never,
+      })).toMatchObject({ ok: false, reason: "invalid-task-status" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -184,6 +231,10 @@ describe("project-board-surface", () => {
 
       const verification = queryProjectVerification(cwd, { target: "TASK-C", status: "passed", limit: 10 });
       expect(verification.rows[0]?.id).toBe("VER-3");
+      const raw = JSON.parse(readFileSync(join(cwd, ".project", "verification.json"), "utf8")) as {
+        verifications?: Array<{ id?: string; extra?: { keep?: boolean } }>;
+      };
+      expect(raw.verifications?.find((row) => row.id === "VER-1")?.extra?.keep).toBe(true);
 
       const duplicate = appendProjectVerificationBoard(cwd, {
         id: "VER-3",
@@ -921,6 +972,37 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.readyForHumanDecision).toBe(true);
       expect((result.details as any)?.options).toEqual(["close", "keep-open", "defer"]);
       expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-1");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_task_create tool creates bounded tasks", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const createTool = getTool(pi, "board_task_create");
+
+      const result = await createTool.execute(
+        "tc-board-task-create",
+        {
+          id: "TASK-TOOL",
+          description: "Tool-created task",
+          status: "in-progress",
+          priority: "p1",
+          depends_on: ["TASK-A"],
+          files: ["docs/tool.md"],
+          acceptance_criteria: ["created through tool"],
+          note: "[rationale:risk-control] avoid ad hoc task JSON mutation",
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.task).toMatchObject({ id: "TASK-TOOL", status: "in-progress" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

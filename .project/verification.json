@@ -6630,6 +6630,24 @@
       "method": "test",
       "evidence": "Added appendProjectVerificationBoard and board_verification_append to project-board-surface. The bounded surface validates id/target/status/method/evidence, rejects duplicates, can link target task verification when link_task=true, and keeps query/update caches coherent. Tests added for helper, validation, duplicate blocking, and tool execution. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 47/47; cmd.exe /c npm run test:monitor:smoke --silent passed 201/201 across 32 files. [rationale:risk-control] Reduces ad hoc verification JSON mutation in unattended board loops.",
       "timestamp": "2026-04-29T23:12:02.463Z"
+    },
+    {
+      "id": "VER-BUD-490",
+      "target": "TASK-BUD-210",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-smoke",
+      "timestamp": "2026-04-29T23:14:39.532Z",
+      "evidence": "After reload, live board_verification_append accepted a bounded verification append request. This entry intentionally validates the new runtime tool; it is not linked to TASK-BUD-210 to avoid replacing its original completion verification. [rationale:risk-control] Confirms the bounded verification path works before relying on it in unattended board loops."
+    },
+    {
+      "id": "VER-BUD-491",
+      "target": "TASK-BUD-211",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:16:31.805Z",
+      "evidence": "Added createProjectTaskBoard and board_task_create to project-board-surface. The bounded surface validates id/description/status, rejects duplicates, supports bounded priority/depends_on/files/acceptance_criteria/milestone/note, and returns the created board row. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 50/50; cmd.exe /c npm run test:monitor:smoke --silent passed 204/204 across 32 files. [rationale:risk-control] Reduces ad hoc task JSON mutation in unattended board loops."
     }
   ]
 }
