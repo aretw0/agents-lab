@@ -6054,6 +6054,15 @@
       "method": "command",
       "evidence": "Monitor curation/rollout primitive closed. Evidence includes curated monitor profile policy, runtime prefilter for unauthorized-action, false-positive fixes for classify-failure telemetry, local monitor gates, and sovereign audit-only posture. Validation: cmd.exe /c npm run monitor:stability:gate:strict --silent returned stable=true, classifyFailures=0, sovereignDeltaMentions=3; live monitor_sovereign_delta reported divergence=0. [rationale:risk-control] Supports long-runs with predictable low-noise monitoring and keeps monitor-sovereign in audit/shadow rather than enforcement until explicit rollout decision.",
       "timestamp": "2026-04-29T12:57:00.709Z"
+    },
+    {
+      "id": "VER-BUD-426",
+      "target": "TASK-BUD-155",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Anti-reinflation primitive closed. guardrails-core.ts now delegates public reexports to guardrails-core-exports.ts and path guard config to guardrails-core-path-guard-config.ts; line count is 3585, below the 3600 budget. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (2/2 passed); cmd.exe /c npm run test:monitor:smoke --silent (92/92 passed). [rationale:risk-control] Maintains guardrails-core.ts as an orchestrator and reduces future edit/merge risk for long-run autonomous slices.",
+      "timestamp": "2026-04-29T13:03:58.573Z"
     }
   ]
 }

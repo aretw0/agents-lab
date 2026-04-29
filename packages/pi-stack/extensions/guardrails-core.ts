@@ -112,122 +112,12 @@ import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structu
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
-export {
-  resolveBloatSmellConfig,
-  shouldEmitBloatSmellSignal,
-  extractAssistantTextFromTurnMessage,
-  estimateCodeBloatFromEditInput,
-  estimateCodeBloatFromWriteInput,
-  buildTextBloatStatusLabel,
-  buildCodeBloatStatusLabel,
-} from "./guardrails-core-bloat";
-export {
-  resolveLongRunIntentQueueConfig,
-  extractForceNowText,
-  shouldQueueInputForLongRun,
-  parseLaneQueueAddText,
-  parseLaneQueueMilestoneScope,
-  parseLaneQueueBoardNextMilestone,
-  resolveLaneQueueBoardNextMilestoneSelection,
-  evaluateLaneEvidenceMilestoneParity,
-  shouldWarnLaneEvidence,
-  buildLaneQueueHelpLines,
-  buildLaneQueueStatusUsage,
-  buildLaneQueueBoardNextUsage,
-  buildLaneQueueEvidenceUsage,
-  buildLaneQueueStatusTips,
-  resolveAutoDrainGateReason,
-  resolveAutoDrainRuntimeGateReason,
-  resolveLongRunLoopStopBoundary,
-  resolveDispatchFailureRuntimeGate,
-  estimateAutoDrainWaitMs,
-  shouldAutoDrainDeferredIntent,
-  resolveAutoDrainRetryDelayMs,
-  shouldSchedulePostDispatchAutoDrain,
-  resolveBoardAutoAdvanceGateReason,
-  shouldAutoAdvanceBoardTask,
-  shouldEmitAutoDrainDeferredAudit,
-  shouldEmitBoardAutoAdvanceGateAudit,
-  resolveLoopActivationMarkers,
-  buildLoopActivationMarkersLabel,
-  shouldAnnounceLoopActivationReady,
-  buildLoopActivationBlockerHint,
-  shouldEmitLoopActivationAudit,
-  resolveRuntimeCodeActivationState,
-  enqueueDeferredIntent,
-  dequeueDeferredIntent,
-  clearDeferredIntentQueue,
-  listDeferredIntents,
-  oldestDeferredIntentAgeMs,
-  readLongRunLoopRuntimeState,
-  setLongRunLoopRuntimeMode,
-  markLongRunLoopRuntimeDispatch,
-  markLongRunLoopRuntimeDegraded,
-  markLongRunLoopRuntimeHealthy,
-  isLongRunLoopLeaseExpired,
-  shouldBlockRapidSameTaskRedispatch,
-  BOARD_RAPID_REDISPATCH_WINDOW_MS,
-  normalizeDispatchFailureFingerprint,
-  computeIdenticalFailureStreak,
-  shouldPauseOnIdenticalFailure,
-} from "./guardrails-core-lane-queue";
-export {
-  buildProviderRetryExhaustedActionLines,
-  buildToolOutputOrphanRecoveryActionLines,
-  classifyLongRunDispatchFailure,
-  extractToolOutputOrphanCallId,
-  resolveToolOutputOrphanRedispatchDecision,
-  isProviderTransientRetryExhausted,
-  resolveDispatchFailureBlockAfter,
-  resolveDispatchFailurePauseAfter,
-  resolveDispatchFailureWindowMs,
-  resolveLongRunProviderTransientRetryConfig,
-  resolveProviderTransientRetryDelayMs,
-} from "./guardrails-core-provider-retry";
-export { buildBoardExecuteTaskIntentText, buildBoardExecuteNextIntentText, buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
-export { buildBoardExecuteTaskIntent, buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
-export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
-export { buildShellRoutingStatusLabel, buildShellRoutingStatusLines, buildShellRoutingSystemPrompt, detectShellFamily, isCmdWrappedCommand, isNodeFamilyCommand, parseFirstCommandToken, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, wrapCommandForHostShell } from "./guardrails-core-shell-routing";
-export { evaluateAutonomyLaneReadiness } from "./guardrails-core-autonomy-lane";
-export { evaluateAutonomyLaneTaskSelection, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
-export { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, normalizeI18nIntentConfig, resolveI18nArtifactIntent, resolveI18nIntentConfig, summarizeI18nIntentConfig } from "./guardrails-core-i18n-intents";
-export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-core-delivery-mode";
-export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
-export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";
-export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, buildRefactorRenameSymbolResult } from "./guardrails-core-macro-refactor";
-export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
+import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
+export * from "./guardrails-core-exports";
 
 // =============================================================================
 // Read / Path Guard
 // =============================================================================
-
-const SENSITIVE_PATHS = [
-  ".ssh",
-  ".aws",
-  ".gnupg",
-  ".npmrc",
-  ".docker",
-  ".kube",
-  ".azure",
-  "id_rsa",
-  "id_ed25519",
-  "credentials",
-  ".env",
-  ".netrc",
-  "token",
-  "secret",
-];
-
-const ALLOWED_OUTSIDE = [
-  ".pi",
-  ".cache/checkouts",
-  "node_modules/@mariozechner",
-  "node_modules/@davidorex",
-  "node_modules/@ifi",
-  "node_modules/pi-lens",
-  "node_modules/pi-web-access",
-  "node_modules/mitsupi",
-];
 
 export function isInsideCwd(filePath: string, cwd: string): boolean {
   const resolved = resolve(cwd, filePath);
