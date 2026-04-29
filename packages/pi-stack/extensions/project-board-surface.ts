@@ -603,6 +603,27 @@ export interface ProjectVerificationQueryResult {
   meta: BoardReadMeta;
 }
 
+export interface ProjectTaskDecisionPacket {
+  ok: boolean;
+  reason?: string;
+  taskId: string;
+  task?: ProjectTaskBoardRow;
+  noAutoClose: true;
+  readyForHumanDecision: boolean;
+  recommendedDecision: "close" | "keep-open" | "defer";
+  options: Array<"close" | "keep-open" | "defer">;
+  evidence: Array<{
+    verificationId: string;
+    status?: string;
+    method?: string;
+    timestamp?: string;
+    evidence?: string;
+  }>;
+  blockers: string[];
+  risks: string[];
+  summary: string;
+}
+
 /** @deprecated use ProjectVerificationBoardRow */
 export type ProjectVerificationProxyRow = ProjectVerificationBoardRow;
 
@@ -708,6 +729,94 @@ export function queryProjectVerification(
     rationaleSummary: summarizeVerificationRationale(rows),
     rationaleConsistencySummary: summarizeRationaleConsistency(rows.map((row) => resolveVerificationRationaleConsistency(row, tasksById))),
     meta,
+  };
+}
+
+export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string): ProjectTaskDecisionPacket {
+  const taskId = String(taskIdInput ?? "").trim();
+  if (!taskId) {
+    return {
+      ok: false,
+      reason: "missing-task-id",
+      taskId,
+      noAutoClose: true,
+      readyForHumanDecision: false,
+      recommendedDecision: "defer",
+      options: ["close", "keep-open", "defer"],
+      evidence: [],
+      blockers: ["missing-task-id"],
+      risks: ["cannot-build-decision-packet-without-task-id"],
+      summary: "decision-packet: missing task id; defer and provide a concrete task id.",
+    };
+  }
+
+  const tasks = readTasksBlockCached(cwd).block.tasks;
+  const verifications = readVerificationBlockCached(cwd).block.verifications;
+  const verificationsById = new Map(verifications.map((row) => [row.id, row] as const));
+  const task = tasks.find((row) => row.id === taskId);
+  if (!task) {
+    return {
+      ok: false,
+      reason: "task-not-found",
+      taskId,
+      noAutoClose: true,
+      readyForHumanDecision: false,
+      recommendedDecision: "defer",
+      options: ["close", "keep-open", "defer"],
+      evidence: [],
+      blockers: ["task-not-found"],
+      risks: ["cannot-decide-missing-task"],
+      summary: `decision-packet: ${taskId} not found; defer until the canonical board contains the task.`,
+    };
+  }
+
+  const linkedVerificationId = typeof task.verification === "string" ? task.verification.trim() : "";
+  const linkedVerification = linkedVerificationId ? verificationsById.get(linkedVerificationId) : undefined;
+  const targetVerifications = verifications
+    .filter((row) => row.target === taskId)
+    .sort((a, b) => String(b.timestamp ?? "").localeCompare(String(a.timestamp ?? "")));
+  const evidenceRows = [linkedVerification, ...targetVerifications]
+    .filter((row): row is VerificationRecord => Boolean(row))
+    .filter((row, index, arr) => arr.findIndex((candidate) => candidate.id === row.id) === index)
+    .slice(0, 3);
+  const hasPassedVerification = evidenceRows.some((row) => row.status === "passed");
+  const blockers: string[] = [];
+  if (!linkedVerificationId && evidenceRows.length === 0) blockers.push("missing-verification-evidence");
+  if (linkedVerificationId && !linkedVerification) blockers.push("linked-verification-not-found");
+  if (evidenceRows.length > 0 && !hasPassedVerification) blockers.push("no-passed-verification");
+  if (task.status === "completed") blockers.push("task-already-completed");
+
+  const risks: string[] = [];
+  if (isRationaleSensitiveTask(task) && !hasTaskRationale(task, verificationsById)) risks.push("missing-rationale-for-sensitive-task");
+  if (resolveTaskRationaleConsistency(task, verificationsById) === "mismatch") risks.push("rationale-consistency-mismatch");
+  if (blockers.length === 0 && risks.length > 0) risks.push("human-review-before-close");
+
+  const readyForHumanDecision = blockers.length === 0 && hasPassedVerification;
+  const recommendedDecision = readyForHumanDecision ? "close" : "defer";
+  const taskRow = queryProjectTasks(cwd, { search: taskId, limit: 1 }).rows.find((row) => row.id === taskId);
+  const evidence = evidenceRows.map((row) => ({
+    verificationId: row.id,
+    status: row.status,
+    method: row.method,
+    timestamp: row.timestamp,
+    evidence: shortText(row.evidence, 220),
+  }));
+  const summary = readyForHumanDecision
+    ? `decision-packet: ${taskId} has passed verification evidence; ask human to close, keep-open, or defer.`
+    : `decision-packet: ${taskId} is not ready for close; defer until blockers are resolved.`;
+
+  return {
+    ok: true,
+    taskId,
+    task: taskRow,
+    noAutoClose: true,
+    readyForHumanDecision,
+    recommendedDecision,
+    options: ["close", "keep-open", "defer"],
+    evidence,
+    blockers,
+    risks,
+    summary,
   };
 }
 
@@ -987,6 +1096,32 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     execute: executeQuery,
   });
 
+  const decisionPacketParameters = Type.Object({
+    task_id: Type.String({ minLength: 1, description: "Task id to summarize for a no-auto-close human decision packet." }),
+  });
+
+  const executeDecisionPacket = (
+    _toolCallId: string,
+    params: { task_id?: string },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = buildProjectTaskDecisionPacket(ctx.cwd, String(params?.task_id ?? ""));
+    return {
+      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_decision_packet",
+    label: "Board Decision Packet",
+    description:
+      "Build a compact no-auto-close decision packet (close/keep-open/defer) with recent verification evidence and blockers for one task.",
+    parameters: decisionPacketParameters,
+    execute: executeDecisionPacket,
+  });
 
   const updateParameters = Type.Object({
     task_id: Type.String({ minLength: 1, description: "Task id to update." }),

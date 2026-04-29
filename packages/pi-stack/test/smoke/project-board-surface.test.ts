@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import projectBoardSurfaceExtension, {
+  buildProjectTaskDecisionPacket,
   queryProjectTasks,
   queryProjectVerification,
   updateProjectTaskBoard,
@@ -112,6 +113,33 @@ describe("project-board-surface", () => {
 
       const second = queryProjectTasks(cwd, { status: "in-progress", limit: 5 });
       expect(second.meta.cacheHit).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("buildProjectTaskDecisionPacket summarizes no-auto-close evidence without closing", () => {
+    const cwd = seedWorkspace();
+    try {
+      const ready = buildProjectTaskDecisionPacket(cwd, "TASK-A");
+      expect(ready.ok).toBe(true);
+      expect(ready.noAutoClose).toBe(true);
+      expect(ready.readyForHumanDecision).toBe(true);
+      expect(ready.recommendedDecision).toBe("close");
+      expect(ready.options).toEqual(["close", "keep-open", "defer"]);
+      expect(ready.evidence[0]).toMatchObject({ verificationId: "VER-1", status: "passed" });
+      expect(ready.summary).toContain("ask human");
+
+      const blocked = buildProjectTaskDecisionPacket(cwd, "TASK-B");
+      expect(blocked.readyForHumanDecision).toBe(false);
+      expect(blocked.recommendedDecision).toBe("defer");
+      expect(blocked.blockers).toContain("no-passed-verification");
+
+      expect(buildProjectTaskDecisionPacket(cwd, "TASK-MISSING")).toMatchObject({
+        ok: false,
+        reason: "task-not-found",
+        noAutoClose: true,
+      });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -804,6 +832,30 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-A");
       expect((result.details as any)?.meta?.path).toContain("tasks.json");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_decision_packet tool emits compact human decision options", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const packetTool = getTool(pi, "board_decision_packet");
+
+      const result = await packetTool.execute(
+        "tc-board-decision-packet",
+        { task_id: "TASK-A" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.noAutoClose).toBe(true);
+      expect((result.details as any)?.readyForHumanDecision).toBe(true);
+      expect((result.details as any)?.options).toEqual(["close", "keep-open", "defer"]);
+      expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-1");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
