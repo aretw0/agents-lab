@@ -5982,6 +5982,15 @@
       "method": "test",
       "evidence": "Behavior intent routing revalidated: deterministic classifyBehaviorRoute maps free-form prompts to candidate behavior/skill routes, confidence fallback preserves default behavior when no route is strong enough, and guardrails-core before_agent_start advisory/status/audit path remains covered. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-behavior-routing.test.ts (5/5 passed). [rationale:risk-control] Automatic behavior routing must remain transparent and reversible; focal test evidence confirms deterministic fallback and auditability.",
       "timestamp": "2026-04-29T12:40:50.217Z"
+    },
+    {
+      "id": "VER-BUD-418",
+      "target": "TASK-BUD-114",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Selective worktree promotion allowlist policy revalidated: colony-pilot parser smoke covers promoted vs skipped inventory evidence, docs-only/code-scope derivation, scope compliance checks, diff/apply evidence enforcement/advisory boundaries, and derived-scope policy flag. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (82/82 passed). [rationale:risk-control] Branch materialization must remain scoped and auditable; closure records allowlist/fallback behavior without applying worktree promotion.",
+      "timestamp": "2026-04-29T12:41:53.818Z"
     }
   ]
 }
