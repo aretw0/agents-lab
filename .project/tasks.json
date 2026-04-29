@@ -4093,6 +4093,30 @@
       ],
       "verification": "VER-BUD-452",
       "notes": "Criado e fechado por steering humano (2026-04-29): depois do scorecard, a operação precisa de uma superfície curta para checar maturidade sem abrir diagnóstico amplo. [rationale:risk-control] Um gate read-only evita promoção subjetiva para canário remoto e respeita cadência econômica de tools."
+    },
+    {
+      "id": "TASK-BUD-172",
+      "description": "[P0] Executar rehearsal local-first de unattended com 3 slices limpos e scorecard antes de qualquer canário remote/offload.",
+      "status": "in-progress",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-170",
+        "TASK-BUD-171",
+        "TASK-BUD-168"
+      ],
+      "files": [
+        ".project/handoff.json",
+        ".project/tasks.json",
+        ".project/verification.json",
+        "docs/guides/project-canonical-pipeline.md"
+      ],
+      "acceptance_criteria": [
+        "Rodar pelo menos 3 slices locais bounded com foco preservado, sem seleção automática de escopo protegido.",
+        "Cada slice termina com validação focal, commit pequeno/intencional e evidência curta em board/verification/handoff.",
+        "Ao final, avaliar unattended_rehearsal_gate com blockers=0 antes de propor canário remote/offload.",
+        "Se contexto entrar em checkpoint/compact, preservar progresso antes de continuar e não abrir diagnóstico amplo sem sinal."
+      ],
+      "notes": "Criado como próximo foco explícito após steering humano prossiga em checkpoint (2026-04-29). [rationale:risk-control] Antes de agent-as-tools/subagentes/GitHub Actions, provar continuidade local-first com evidência auditável e baixo bloat de tools."
     }
   ]
 }
