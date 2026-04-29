@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { evaluateUnattendedRehearsalGate } from "../../extensions/guardrails-core-unattended-rehearsal";
+import {
+  evaluateUnattendedRehearsalGate,
+  formatUnattendedRehearsalSliceEvidence,
+} from "../../extensions/guardrails-core-unattended-rehearsal";
 
 describe("guardrails unattended rehearsal gate", () => {
+  it("formats compact stable slice evidence", () => {
+    expect(formatUnattendedRehearsalSliceEvidence({
+      slice: 2,
+      focus: "TASK-BUD-172",
+      gate: "cmd.exe /c npm run focal smoke",
+      commit: "abc1234",
+      drift: false,
+      next: "slice 3",
+    })).toBe("slice=2 focus=TASK-BUD-172 gate=cmd.exe-/c-npm-run-focal-smoke commit=abc1234 drift=no next=slice-3");
+  });
+
   it("requires multiple clean local slices before remote/offload canary", () => {
     const result = evaluateUnattendedRehearsalGate({
       completedLocalSlices: 2,

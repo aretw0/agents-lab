@@ -29,8 +29,36 @@ export interface UnattendedRehearsalGate {
   };
 }
 
+export interface UnattendedRehearsalSliceEvidenceInput {
+  slice: number;
+  focus: string;
+  gate: string;
+  commit: string;
+  drift: boolean;
+  next: string;
+}
+
 const REQUIRED_LOCAL_SLICES = 3;
 const REQUIRED_SCORE = 6;
+
+function compactToken(value: unknown, fallback: string): string {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.replace(/\s+/g, "-").trim();
+  if (!normalized) return fallback;
+  return normalized.length <= 96 ? normalized : `${normalized.slice(0, 95)}…`;
+}
+
+export function formatUnattendedRehearsalSliceEvidence(input: UnattendedRehearsalSliceEvidenceInput): string {
+  const slice = Math.max(0, Math.floor(Number(input.slice ?? 0)));
+  return [
+    `slice=${slice}`,
+    `focus=${compactToken(input.focus, "unknown")}`,
+    `gate=${compactToken(input.gate, "unknown")}`,
+    `commit=${compactToken(input.commit, "pending")}`,
+    `drift=${input.drift ? "yes" : "no"}`,
+    `next=${compactToken(input.next, "none")}`,
+  ].join(" ");
+}
 
 export function evaluateUnattendedRehearsalGate(input: UnattendedRehearsalInput): UnattendedRehearsalGate {
   const completedLocalSlices = Math.max(0, Math.floor(Number(input.completedLocalSlices ?? 0)));
