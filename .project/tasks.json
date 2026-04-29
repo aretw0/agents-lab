@@ -3285,7 +3285,7 @@
     {
       "id": "TASK-BUD-133",
       "description": "[P1] Suportar ticket systems externos (GitHub/Gitea) com espelhamento canônico para board local.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-119"
       ],
@@ -3303,7 +3303,8 @@
         "Fluxo de sincronização explicita direção, conflito e idempotência (board-first com mirrors externos ou inverso por política).",
         "Execução preserva governança atual (no-auto-close estratégico, trilha auditável, fallback manual)."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): habilitar mirror para GitHub/Gitea sem perder board canônico e sem travar evolução local."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): habilitar mirror para GitHub/Gitea sem perder board canônico e sem travar evolução local.\n[2026-04-29T13:23:51.785Z] Closed external issue mirror policy: GitHub skill, control-plane playbook and canonical pipeline now define board-first mapping from external issue number/URL/title/labels/state to local task notes/description/milestone/status, default .project->external direction, idempotency rules, conflict notes, no-auto-close without local verification, and no remote mutation without explicit operator intent. Validation: marker check passed 4 markers. [rationale:risk-control] External trackers can mirror local work without becoming stale/unaudited authority over the canonical board.",
+      "verification": "VER-BUD-437"
     },
     {
       "id": "TASK-BUD-134",

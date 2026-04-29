@@ -6153,6 +6153,15 @@
       "method": "test+policy-tool",
       "evidence": "Board/worktree reconciliation policy closed. Runbook mandates single canonical writer for .project/tasks and verification, state_reconcile_plan before parallel writes, lock-and-atomic-write for direct board mutation, single-writer-branch + generated-apply-step for worktrees, explicit promoted/skipped evidence and manual review on conflicts. Validation: state_reconcile_plan(board,native,parallelWriters=2) returned concurrencyRisk=medium with lock-and-atomic-write/single-writer-branch/generated-apply-step/manualReviewRequired; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (124/124 passed). [rationale:risk-control] Prevents silent board drift/corruption in parallel long-run/worktree flows.",
       "timestamp": "2026-04-29T13:21:30.036Z"
+    },
+    {
+      "id": "VER-BUD-437",
+      "target": "TASK-BUD-133",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs-marker-check",
+      "evidence": "External issue mirror policy closed. GitHub skill, control-plane playbook and canonical pipeline define board-first mapping from external issue number/URL/title/labels/state to local task notes/description/milestone/status, default .project->external sync direction, idempotency rules, conflict notes, no-auto-close without local verification, and no remote mutation without explicit operator intent. Validation: marker check passed 4 markers. [rationale:risk-control] Keeps GitHub/Gitea mirrors useful without replacing the canonical board or silently mutating task status.",
+      "timestamp": "2026-04-29T13:23:51.785Z"
     }
   ]
 }

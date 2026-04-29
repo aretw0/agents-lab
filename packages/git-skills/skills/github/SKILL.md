@@ -12,6 +12,22 @@ Disable interactive prompts in agent-run commands:
 GH_PROMPT_DISABLED=1 gh <command>
 ```
 
+## Board-first issue mirroring
+
+When this workspace uses `.project/tasks.json` as the canonical board, treat GitHub Issues as an external mirror unless the operator explicitly says otherwise.
+
+Mapping:
+- GitHub issue `number`/URL -> task note/evidence external reference.
+- GitHub issue title -> task description summary, preserving local task id as canonical id.
+- GitHub labels -> task priority/milestone only through an explicit mapping recorded in the task notes.
+- GitHub state closed/open -> mirror of local status, not an auto-close authority.
+
+Sync policy:
+- Prefer `.project` -> GitHub for publication/mirror updates.
+- Never close local tasks solely because a GitHub issue is closed; require local verification evidence.
+- On conflict, append an audit note and ask for/rely on the board policy rather than overwriting silently.
+- Do not mutate public GitHub metadata or issue state without explicit operator intent.
+
 ## Issues
 
 ```bash

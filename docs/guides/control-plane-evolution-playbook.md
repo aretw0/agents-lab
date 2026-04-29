@@ -47,6 +47,25 @@ Adaptação local obrigatória:
 - preservar `no-auto-close` para itens estratégicos;
 - promoção por verificação (`verification`) antes de `completed`.
 
+## Espelho externo de issues/status
+
+Mapeamento canônico:
+- `.project/tasks[].id` é o identificador operacional; issue externa entra como referência em nota/evidência.
+- `description`/título externo são resumo espelhado, não fonte final de verdade.
+- labels externas só alteram `priority`/`milestone` quando houver mapping explícito registrado.
+- `status` local só muda para `completed` com `verification` local passada; fechamento externo não auto-fecha task estratégica.
+
+Direção e conflito:
+- default: board-first (`.project` -> GitHub/Gitea) para mirrors públicos;
+- import externo só cria proposta/nota quando houver divergência;
+- conflito de status/label/evidência vira nota auditável e exige política/operador, sem overwrite silencioso;
+- operações remotas mutantes (`gh issue close/edit`, labels, milestones) exigem intenção explícita.
+
+Idempotência mínima:
+- registrar URL/número externo uma vez por task;
+- reaplicar sync não deve duplicar notas ou mudar status sem nova evidência;
+- cada sync deve declarar direção, entidade externa, task alvo e campos promovidos/ignorados.
+
 ## Anti-patterns (evitar)
 
 - transformar subagente em "memória longa" do sistema;

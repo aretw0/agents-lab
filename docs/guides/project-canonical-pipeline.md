@@ -452,6 +452,22 @@ Fluxo pós-worktree recomendado:
 3. valida `board_query`/verificação focal;
 4. commit inclui board apenas se a promoção foi intencional.
 
+### Mirror externo (GitHub/Gitea) sem perder board canônico
+
+Entidades externas são **mirrors**, não autoridade principal, salvo política explícita por projeto.
+
+Contrato de sync:
+- task id local permanece canônico; issue URL/número entra em nota/evidência;
+- labels/status externos são importados apenas por mapping explícito;
+- fechamento externo não completa task local sem `verification` passada;
+- sync deve ser idempotente: não duplicar nota de mesma URL/número e não rebaixar status local sem conflito auditado;
+- direção default é `.project` -> externo; import externo vira proposta/nota quando divergir.
+
+Contrato de conflito:
+- se remoto e local discordam em status/labels/evidência, registrar nota curta com campos conflitantes;
+- não usar `gh issue edit/close` ou mutações públicas sem intenção explícita do operador;
+- preservar `no-auto-close` estratégico: fechamento é sempre local + verificação + commit auditável.
+
 ### Contrato de promoção seletiva (worktree -> main)
 
 Quando o delivery mode estiver em `apply-to-branch`, a evidência de conclusão deve explicitar seleção de escopo:
