@@ -5874,6 +5874,15 @@
       "method": "test",
       "timestamp": "2026-04-29T10:31:30Z",
       "evidence": "Idea Inbox Primitive implemented in `scripts/session-triage.mjs` and documented. The pipeline accepts Markdown/Obsidian-style idea sources via `--ideas/--idea-inbox` and session/canonical events, normalizes matches into `ideaInbox.proposals[]`, and emits `taskDraft.status=planned` with objective description, minimal acceptance criteria, origin references, and `decisionGate` requiring human review, verification, and no-auto-close. The script does not write `.project/tasks` or auto-prioritize proposals. Docs updated in `docs/guides/session-triage.md` and `docs/primitives/continuity-abstraction.md`. Focal validation: `node --test scripts/test/session-triage-delegation.test.mjs` passed 4/4."
+    },
+    {
+      "id": "VER-BUD-406",
+      "target": "TASK-BUD-130",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T10:34:30Z",
+      "evidence": "Surface slimming/deprecation-by-default consolidated. `docs/guides/lab-user-surface-parity.md` now classifies `STRICT_CURATED`/`curated-default` as keep baseline, `RUNTIME_CAPABILITY_EXTRAS` as keep opt-in, `stack-full` and remaining third-party lab/compatibility surfaces as deprecate-by-default, and ad-hoc diagnostics as docs-only/remove/archive. `docs/guides/project-canonical-pipeline.md` records strict-curated as the simple distribution baseline, runtime extras as opt-in, stack-full as lab/compatibility, and docs-only/archive policy for unclear recurring value. Existing installer code already enforces `DEFAULT_INSTALL_PROFILE = \"strict-curated\"`. Focal validation: `npx vitest run packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/installer-profile.test.ts` passed 12/12. [rationale:risk-control] Slimming is documented as deprecation-by-default rather than destructive package removal so lab compatibility is preserved while the user-facing default stays simple-first and low-overlap."
     }
   ]
 }

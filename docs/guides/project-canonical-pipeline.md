@@ -533,6 +533,12 @@ Regras:
 - **outcome-agnostic + simple-first**: distribuição deve atender usuário iniciante (fluxo direto/manual) e usuário avançado (fábrica/board/control-plane) sem exigir adoção imediata da camada avançada;
 - **progressive disclosure**: features de governança avançada entram por opt-in e com trilha curta de onboarding.
 
+Slimming/deprecation-by-default:
+- `strict-curated` é o baseline oficial de distribuição simples;
+- `curated-runtime` adiciona capacidades long-run/control-plane somente por opt-in;
+- `stack-full` preserva laboratório/compatibilidade, mas não deve ser tratado como experiência inicial do usuário;
+- superfície recorrente sem uso claro deve virar docs-only/runbook ou ser arquivada até haver evidência de valor operacional.
+
 ## Política de retomada pós-compactação
 Retomar apenas com:
 1. `.project/handoff.json`

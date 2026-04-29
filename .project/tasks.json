@@ -3201,7 +3201,7 @@
     {
       "id": "TASK-BUD-130",
       "description": "[P1] Reduzir gordura da superfície de tools após calibração (surface slimming + deprecation-by-default para lab-only recorrente).",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-OPS-HYGIENE-003"
       ],
@@ -3218,7 +3218,7 @@
         "Tools calibradas sem uso recorrente são removidas/desligadas da distribuição e substituídas por runbook/documentação quando apropriado.",
         "Paridade lab↔usuário continua preservada sem impor superfície inchada para usuários iniciantes."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): após fase de calibração, reduzir ferramentas disponíveis que não agregam no contexto atual e manter distribuição simple-first/outcome-agnostic."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): após fase de calibração, reduzir ferramentas disponíveis que não agregam no contexto atual e manter distribuição simple-first/outcome-agnostic.\n[completion] Closed with `VER-BUD-406`: surface inventory now classifies keep / keep opt-in / deprecate-by-default / docs-only-remove/archive, tied to existing strict-curated default installer behavior. Focal package-list + installer-profile tests passed 12/12.\n[rationale:risk-control] Surface slimming uses deprecation-by-default instead of destructive removal so calibrated lab/compatibility packages remain available by explicit profile while the distributed default remains simple-first and low-overlap."
     },
     {
       "id": "TASK-BUD-131",
