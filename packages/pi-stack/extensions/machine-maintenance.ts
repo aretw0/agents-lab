@@ -67,9 +67,13 @@ const DEFAULT_THRESHOLDS: MachineMaintenanceThresholds = {
 	memoryWarnUsedPct: 85,
 	memoryPauseUsedPct: 92,
 	memoryBlockUsedPct: 96,
-	diskWarnFreeMb: 10 * 1024,
-	diskPauseFreeMb: 5 * 1024,
-	diskBlockFreeMb: 2 * 1024,
+	// Disk pressure is absolute-free-space based. High used% on large disks is
+	// expected during local-first dogfood; keep normal bounded work available
+	// while >=5GB remains free, and reserve pause/block for genuinely tight
+	// space where tests, logs, package installs, or checkpoints can fail.
+	diskWarnFreeMb: 5 * 1024,
+	diskPauseFreeMb: 2 * 1024,
+	diskBlockFreeMb: 1024,
 };
 
 function toMb(bytes: number): number {

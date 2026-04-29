@@ -43,6 +43,14 @@ describe("machine-maintenance gate", () => {
     expect(gate.shouldStop).toBe(false);
   });
 
+  it("keeps disk ok above the 5GB free-space floor even with high used percentage", () => {
+    const disk = classifyDiskPressure({ freeMb: 6 * 1024, totalMb: 500 * 1024, thresholds });
+
+    expect(disk.severity).toBe("ok");
+    expect(disk.usedPct).toBeGreaterThan(98);
+    expect(thresholds.diskWarnFreeMb).toBe(5 * 1024);
+  });
+
   it("pauses long-runs before hard block", () => {
     const memory = classifyMemoryPressure({ freeMb: thresholds.memoryPauseFreeMb, totalMb: 16384, thresholds });
     const disk = classifyDiskPressure({ freeMb: 50 * 1024, totalMb: 100 * 1024, thresholds });
