@@ -184,6 +184,7 @@ export { buildBoardExecuteTaskIntent, buildBoardExecuteNextIntent, buildGuardrai
 export { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 export { buildShellRoutingStatusLabel, buildShellRoutingStatusLines, buildShellRoutingSystemPrompt, detectShellFamily, isCmdWrappedCommand, isNodeFamilyCommand, parseFirstCommandToken, resolveBashCommandRoutingDecision, resolveCommandRoutingProfile, wrapCommandForHostShell } from "./guardrails-core-shell-routing";
 export { evaluateAutonomyLaneReadiness } from "./guardrails-core-autonomy-lane";
+export { evaluateAutonomyLaneTaskSelection, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
 export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-core-delivery-mode";
 export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
 export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";

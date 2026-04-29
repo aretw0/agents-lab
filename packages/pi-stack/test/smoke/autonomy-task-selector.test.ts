@@ -1,0 +1,70 @@
+import { describe, expect, it } from "vitest";
+import { selectAutonomyLaneTask } from "../../extensions/guardrails-core-autonomy-task-selector";
+import type { ProjectTaskItem } from "../../extensions/colony-pilot-task-sync";
+
+function task(partial: Partial<ProjectTaskItem> & { id: string }): ProjectTaskItem {
+  return {
+    id: partial.id,
+    description: partial.description ?? "[P2] task",
+    status: partial.status ?? "planned",
+    depends_on: partial.depends_on,
+    files: partial.files,
+    milestone: partial.milestone,
+  };
+}
+
+describe("autonomy task selector", () => {
+  it("prefers in-progress work over planned work, then priority and id", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-P0-PLANNED", description: "[P0] planned", status: "planned" }),
+      task({ id: "TASK-P1-A", description: "[P1] in progress a", status: "in-progress" }),
+      task({ id: "TASK-P0-INPROG", description: "[P0] in progress", status: "in-progress" }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-P0-INPROG");
+    expect(result.selectionPolicy).toContain("status(in-progress>planned)");
+  });
+
+  it("requires dependencies to be completed", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-A", status: "planned", depends_on: ["TASK-MISSING"] }),
+      task({ id: "TASK-B", status: "planned", description: "[P2] fallback" }),
+    ]);
+
+    expect(result.nextTaskId).toBe("TASK-B");
+    expect(result.totals.blockedByDependencies).toBe(1);
+  });
+
+  it("skips protected scopes by default for unattended lanes", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-CI", status: "in-progress", description: "[P0] update ci", files: [".github/workflows/test.yml"] }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local gate" }),
+      task({ id: "TASK-SETTINGS", status: "planned", description: "[P0] settings", files: [".pi/settings.json"] }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-LOCAL");
+    expect(result.totals.skippedProtectedScope).toBe(2);
+  });
+
+  it("can include protected scopes only when explicitly authorized", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-CI", status: "planned", description: "[P0] update ci", files: [".github/workflows/test.yml"] }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local gate" }),
+    ], { includeProtectedScopes: true });
+
+    expect(result.nextTaskId).toBe("TASK-CI");
+    expect(result.selectionPolicy).toContain("protected-scopes-included");
+  });
+
+  it("filters by milestone", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-A", milestone: "later", status: "planned" }),
+      task({ id: "TASK-B", milestone: "now", status: "planned" }),
+    ], { milestone: "now" });
+
+    expect(result.nextTaskId).toBe("TASK-B");
+    expect(result.milestone).toBe("now");
+  });
+});
