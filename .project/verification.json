@@ -6504,6 +6504,15 @@
       "method": "test",
       "evidence": "Added resolveRecurringFailureHardening in packages/pi-stack/extensions/guardrails-core-recurring-failure.ts and exported it. It returns observe/document-rule/create-primitive/add-runtime-guard/block-old-path with hardIntentRequired, reasons, nextActions, and summary. Tests cover first occurrence documentation, repeated failure needing primitive/test, runtime guard escalation, third occurrence old-path blocking, and fully mitigated observation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 142/142 across 25 files. [rationale:risk-control] Converts repeated soft-intent failures into deterministic hardening steps for unattended operation.",
       "timestamp": "2026-04-29T21:14:37.325Z"
+    },
+    {
+      "id": "VER-BUD-476",
+      "target": "TASK-BUD-196",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added guardrails-core-recurring-failure-surface.ts registering recurring_failure_hardening_plan as read-only tool, wired it in guardrails-core.ts, added smoke test, and included it in test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 143/143 across 26 files. [rationale:risk-control] Makes repeated-failure hardening operational without mutating state automatically.",
+      "timestamp": "2026-04-29T21:19:20.387Z"
     }
   ]
 }

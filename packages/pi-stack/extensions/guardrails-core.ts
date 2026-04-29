@@ -110,6 +110,7 @@ import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mu
 import { registerGuardrailsGitMaintenanceSurface } from "./guardrails-core-git-maintenance-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
 import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
+import { registerGuardrailsRecurringFailureSurface } from "./guardrails-core-recurring-failure-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-core-unattended-continuation-surface";
@@ -3119,6 +3120,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsGitMaintenanceSurface(pi);
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsMarkerCheckSurface(pi);
+  registerGuardrailsRecurringFailureSurface(pi);
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsAutonomyLaneSurface(pi);
   registerGuardrailsUnattendedContinuationSurface(pi);

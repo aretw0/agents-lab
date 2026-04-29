@@ -4633,6 +4633,28 @@
       ],
       "notes": "Criado na lane essencial de hardening operacional. [rationale:risk-control] O loop unattended precisa converter falhas repetidas em guardrails testados, não apenas em documentação ou lembretes.\n[2026-04-29T21:14:37.325Z] slice=1 focus=TASK-BUD-195 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Falhas recorrentes agora têm política codificada: doc na primeira, primitiva/teste na segunda, guard runtime, e bloqueio do caminho antigo na terceira.",
       "verification": "VER-BUD-475"
+    },
+    {
+      "id": "TASK-BUD-196",
+      "description": "[P1] Expor plano de hardening de falhas recorrentes como tool read-only.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-195"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-recurring-failure-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Tool recurring_failure_hardening_plan retorna plano/sumário sem efeitos colaterais.",
+        "Surface é read-only e side-effect-free.",
+        "Smokes focal e completo verdes."
+      ],
+      "verification": "VER-BUD-476",
+      "notes": "[2026-04-29T21:19:20.387Z] slice=1 focus=TASK-BUD-196 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Hardening de falhas recorrentes ficou disponível em runtime para orientar quando soft intent deve virar primitiva/teste/guard/bloqueio."
     }
   ]
 }
