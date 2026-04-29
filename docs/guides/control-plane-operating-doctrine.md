@@ -34,6 +34,8 @@ Continue automaticamente quando todos os itens forem verdadeiros:
 
 Exemplo: após fechar uma tarefa de rehearsal, criar uma pequena tarefa de doutrina ou reduzir bloat documental é aceitável se isso responde diretamente ao feedback do operador.
 
+A primitiva `resolveUnattendedContinuationPlan` codifica essa decisão: `continue-local` quando a próxima fatia é local-safe, `ask-decision` quando o próximo passo é ambíguo, `blocked` para risco ou escopo protegido, `checkpoint` quando falta progresso salvo, e `pause-for-compact` quando o contexto já está em compact com progresso preservado.
+
 ## Quando parar ou pedir decisão
 
 Pare, faça checkpoint ou peça decisão quando houver:

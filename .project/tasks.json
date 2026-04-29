@@ -4318,6 +4318,27 @@
       ],
       "verification": "VER-BUD-462",
       "notes": "[2026-04-29T19:55:31.448Z] slice=1 focus=TASK-BUD-181 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A doutrina de malemolência unattended agora tem helper testado para reduzir paradas por hesitação sem liberar escopos protegidos."
+    },
+    {
+      "id": "TASK-BUD-182",
+      "description": "[P1] Documentar plano de continuação unattended na doutrina operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-181"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina menciona resolveUnattendedContinuationPlan e suas decisões.",
+        "Documento deixa claro continue-local vs ask-decision/blocked/checkpoint/pause-for-compact.",
+        "Validação por marcadores e evidência curta no board."
+      ],
+      "notes": "Criado como continuação local-safe após codificar helper. [rationale:risk-control] Sem doc, a primitiva pode existir mas a operação continuar hesitante; alinhar doutrina fecha o loop.\n[2026-04-29T19:56:47.500Z] slice=1 focus=TASK-BUD-182 gate=unattended-continuation-doctrine-markers-passed:6 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora referencia o helper que decide continuar/parar, reduzindo hesitação operacional sem relaxar escopos protegidos.",
+      "verification": "VER-BUD-463"
     }
   ]
 }

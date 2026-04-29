@@ -6387,6 +6387,15 @@
       "method": "test",
       "evidence": "Added resolveUnattendedContinuationPlan in guardrails-core-unattended-continuation.ts with decisions continue-local/checkpoint/pause-for-compact/ask-decision/blocked, exported it, and added smoke tests for safe continuation, ambiguity, risk/protected scopes, and compact behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 124/124 across 19 files. [rationale:risk-control] Encodes the operating doctrine so focus completion does not cause unnecessary stops while risk/protected scopes still stop.",
       "timestamp": "2026-04-29T19:55:31.448Z"
+    },
+    {
+      "id": "VER-BUD-463",
+      "target": "TASK-BUD-182",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Updated docs/guides/control-plane-operating-doctrine.md to mention resolveUnattendedContinuationPlan and map decisions: continue-local, ask-decision, blocked, checkpoint, pause-for-compact. Marker validation passed 6/6. [rationale:risk-control] Aligns the human-readable doctrine with the tested helper so future unattended operation can continue safely without ad hoc hesitation.",
+      "timestamp": "2026-04-29T19:56:47.500Z"
     }
   ]
 }
