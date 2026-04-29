@@ -5829,6 +5829,15 @@
       "method": "test",
       "timestamp": "2026-04-29T02:29:30Z",
       "evidence": "Final consolidation for TASK-BUD-141 passed. `resolveAutoResumeDispatchDecision` suppresses auto-resume before dispatch when `hasPendingMessages`, `hasRecentSteerInput`, or `queuedLaneIntents>0`; runtime records suppression through `context-watchdog.auto-resume-suppressed` with reason and gate fields before sending follow-up; prompt tests assert execution-first output and absence of context/cadence pressure (`Context-watch action:`, `freshness=`, `Cadence:`). Focal validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` passed 29/29. [rationale:risk-control] Auto-resume must prioritize fresh human steering and pending lane intents before autonomous continuation to avoid overriding operator intent after compaction."
+    },
+    {
+      "id": "VER-BUD-401",
+      "target": "TASK-BUD-146",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T02:30:00Z",
+      "evidence": "Final consolidation for TASK-BUD-146 passed. `context-watchdog` exposes passive `steeringStatus` on `context_watch_status` and updates `context-watch-steering` status during assessment; `resolveContextWatchSteeringDispatch` is tested for default compact-only signaling with fallback status when notify is muted; warn remains non-blocking steering (`continue-bounded`), checkpoint/compact remain lifecycle lanes, and operator/reload deterministic action is exposed through `operatorSignal`, `deterministicStop`, and `operatorAction`. Focal validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` passed 29/29. [rationale:risk-control] Context steering must reach the control plane through passive/status/operator surfaces so long-runs do not depend on manual debug tool calls when context/reload risk is high."
     }
   ]
 }
