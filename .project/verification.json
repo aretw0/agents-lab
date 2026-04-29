@@ -6594,6 +6594,15 @@
       "method": "test",
       "evidence": "Extracted bash guard policies from guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts. Re-exported the policy helpers through guardrails-core-exports.ts and added guardrails-bash-guard-policies smoke covering command-sensitive shell marker checks, session log scans, pi root recursive scans, and allow case. Orchestrator line count is 3493 (budget 3600). Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 152/152 across 30 files. [rationale:risk-control] Reduces orchestrator bloat while preserving runtime bash guard behavior.",
       "timestamp": "2026-04-29T22:48:14.886Z"
+    },
+    {
+      "id": "VER-BUD-486",
+      "target": "TASK-BUD-206",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Lowered guardrails-core orchestrator budget from 3600 to 3550 lines after TASK-BUD-205 extraction left the core at 3493 lines, and added guardrails-core-orchestrator-budget.test.ts to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts passed 2/2; cmd.exe /c npm run test:monitor:smoke --silent passed 154/154 across 31 files. [rationale:risk-control] Prevents silent reinflation of the main guardrails orchestrator.",
+      "timestamp": "2026-04-29T22:58:30.884Z"
     }
   ]
 }
