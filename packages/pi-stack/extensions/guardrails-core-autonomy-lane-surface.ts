@@ -88,6 +88,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     parameters: Type.Object({
       milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
       include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
       sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
@@ -95,6 +96,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       const result = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
         milestone: typeof p.milestone === "string" ? p.milestone : undefined,
         includeProtectedScopes: p.include_protected_scopes === true,
+        includeMissingRationale: p.include_missing_rationale === true,
         sampleLimit: asNumber(p.sample_limit, 5),
       });
       return {

@@ -8,6 +8,7 @@ export type AutonomyTaskSelectionReason =
 export interface AutonomyTaskSelectorOptions {
   milestone?: string;
   includeProtectedScopes?: boolean;
+  includeMissingRationale?: boolean;
   sampleLimit?: number;
 }
 
@@ -25,6 +26,7 @@ export interface AutonomyTaskSelection {
     planned: number;
     blockedByDependencies: number;
     skippedProtectedScope: number;
+    skippedMissingRationale: number;
   };
 }
 
@@ -92,6 +94,24 @@ function taskTouchesProtectedScope(task: ProjectTaskItem): boolean {
   return isProtectedScopeText(description);
 }
 
+function hasRationaleText(text: unknown): boolean {
+  if (typeof text !== "string" || text.trim().length <= 0) return false;
+  return /(?:\[rationale:[^\]]+\]|(?:^|\s)(?:rationale|motivo|reason)\s*[:=-]\s*\S)/i.test(text);
+}
+
+function isRationaleSensitiveAutonomyTask(task: ProjectTaskItem): boolean {
+  const textHaystack = [task.id, task.description, task.notes ?? ""].join("\n").toLowerCase();
+  const fileHaystack = Array.isArray(task.files) ? task.files.join("\n").toLowerCase() : "";
+  const hasRefactorSignal = /(refactor|rename|organize\s+imports|formatar|desinflar|hardening)/i.test(textHaystack);
+  const hasTestSignal = /(^|\W)(test|tests|smoke|vitest|e2e|spec)(\W|$)/i.test(textHaystack)
+    || /(\/test\/|\.test\.|\.spec\.|smoke)/i.test(fileHaystack);
+  return hasRefactorSignal || hasTestSignal;
+}
+
+function taskMissingRequiredRationale(task: ProjectTaskItem): boolean {
+  return isRationaleSensitiveAutonomyTask(task) && !hasRationaleText(task.notes);
+}
+
 function compareTasks(a: ProjectTaskItem, b: ProjectTaskItem): number {
   const byStatus = statusRank(a) - statusRank(b);
   if (byStatus !== 0) return byStatus;
@@ -107,6 +127,7 @@ export function selectAutonomyLaneTask(
   const milestone = normalizeMilestone(options?.milestone);
   const sampleLimit = clampSampleLimit(options?.sampleLimit);
   const includeProtectedScopes = options?.includeProtectedScopes === true;
+  const includeMissingRationale = options?.includeMissingRationale === true;
   const completed = new Set(
     tasks
       .filter((task) => task.status === "completed")
@@ -123,11 +144,15 @@ export function selectAutonomyLaneTask(
   const scoped = includeProtectedScopes
     ? candidate
     : candidate.filter((task) => !taskTouchesProtectedScope(task));
-  const blockedByDependencies = scoped.filter((task) => {
+  const skippedMissingRationale = scoped.filter((task) => !includeMissingRationale && taskMissingRequiredRationale(task)).length;
+  const rationaleReady = includeMissingRationale
+    ? scoped
+    : scoped.filter((task) => !taskMissingRequiredRationale(task));
+  const blockedByDependencies = rationaleReady.filter((task) => {
     const deps = normalizeDependsOn(task.depends_on);
     return deps.length > 0 && !deps.every((dep) => completed.has(dep));
   }).length;
-  const eligible = scoped
+  const eligible = rationaleReady
     .filter((task) => {
       const deps = normalizeDependsOn(task.depends_on);
       return deps.every((dep) => completed.has(dep));
@@ -142,6 +167,7 @@ export function selectAutonomyLaneTask(
     "priority(P0..P9)",
     "id",
     includeProtectedScopes ? "protected-scopes-included" : "protected-scopes-skipped",
+    includeMissingRationale ? "missing-rationale-included" : "missing-rationale-skipped",
     milestone ? `milestone(${milestone})` : undefined,
   ].filter(Boolean).join("+");
 
@@ -160,6 +186,7 @@ export function selectAutonomyLaneTask(
         planned: candidate.filter((task) => task.status === "planned").length,
         blockedByDependencies,
         skippedProtectedScope,
+        skippedMissingRationale,
       },
     };
   }
@@ -169,7 +196,7 @@ export function selectAutonomyLaneTask(
     reason: candidate.length === 0 ? "no-candidate-tasks" : "no-eligible-tasks",
     recommendation: candidate.length === 0
       ? "add or select a planned/in-progress task before autonomous continuation."
-      : "decompose or unblock the next bounded task; protected scopes remain skipped unless explicitly authorized.",
+      : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
     selectionPolicy,
     milestone,
     nextTaskId: undefined,
@@ -180,6 +207,7 @@ export function selectAutonomyLaneTask(
       planned: candidate.filter((task) => task.status === "planned").length,
       blockedByDependencies,
       skippedProtectedScope,
+      skippedMissingRationale,
     },
   };
 }

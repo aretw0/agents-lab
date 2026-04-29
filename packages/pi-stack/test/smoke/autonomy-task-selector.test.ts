@@ -58,6 +58,27 @@ describe("autonomy task selector", () => {
     expect(result.selectionPolicy).toContain("protected-scopes-included");
   });
 
+  it("skips rationale-sensitive tasks that lack rationale evidence by default", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-HARDEN", status: "in-progress", description: "[P0] hardening slice", notes: "validated with smoke" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local gate" }),
+    ]);
+
+    expect(result.nextTaskId).toBe("TASK-LOCAL");
+    expect(result.totals.skippedMissingRationale).toBe(1);
+    expect(result.selectionPolicy).toContain("missing-rationale-skipped");
+  });
+
+  it("can include missing-rationale tasks only when explicitly authorized", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-HARDEN", status: "in-progress", description: "[P0] hardening slice", notes: "validated with smoke" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local gate" }),
+    ], { includeMissingRationale: true });
+
+    expect(result.nextTaskId).toBe("TASK-HARDEN");
+    expect(result.selectionPolicy).toContain("missing-rationale-included");
+  });
+
   it("filters by milestone", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-A", milestone: "later", status: "planned" }),
