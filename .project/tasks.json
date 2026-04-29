@@ -4517,6 +4517,28 @@
       ],
       "notes": "Criado como continuação local-safe após política Git GC. [rationale:risk-control] O aviso de manutenção deve virar sinal classificado e auditável, não interpretação manual nem prune automático.\n[2026-04-29T20:53:32.268Z] slice=1 focus=TASK-BUD-190 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Git maintenance agora tem helper puro para classificar informational/warning/intervention sem permitir cleanup automático.",
       "verification": "VER-BUD-471"
+    },
+    {
+      "id": "TASK-BUD-191",
+      "description": "[P2] Revisar skills para discoverability e paridade com guides, usando princípios MDT para reduzir drift documental.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-173",
+        "TASK-BUD-175"
+      ],
+      "files": [
+        "packages/lab-skills/skills/**/SKILL.md",
+        "packages/pi-skills/skills/**/SKILL.md",
+        "docs/guides/**"
+      ],
+      "acceptance_criteria": [
+        "Mapear quais decisões/primitivas estão só em guides e deveriam ter skill para discoverability do modelo/usuário.",
+        "Definir critério de paridade guide -> skill sem duplicação excessiva.",
+        "Avaliar como princípios MDT podem ajudar a combater drift documental.",
+        "Criar plano incremental de atualização de skills com validação por markers/safe_marker_check."
+      ],
+      "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega."
     }
   ]
 }
