@@ -6684,6 +6684,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:33:11.382Z",
       "evidence": "Added a project-board-surface smoke test proving completeProjectTaskBoardWithVerification blocks rationale consistency mismatch before appending verification. The test creates TASK-MISMATCH with task rationale refactor, attempts completion with verification rationale test-change, expects rationale-consistency-required-to-complete-task, and verifies no verification rows were created for that target. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Ensures failed bounded close attempts do not leave partial evidence in the board."
+    },
+    {
+      "id": "VER-BUD-496",
+      "target": "TASK-BUD-217",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:41:12.238Z",
+      "evidence": "Added compact summary fields to createProjectTaskBoard, appendProjectVerificationBoard, and completeProjectTaskBoardWithVerification results, including tool-visible summaries for board_task_create, board_verification_append, and board_task_complete. Tests assert helper and tool summaries. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Compact summaries reduce handoff/log bloat and make unattended board operations easier to audit."
     }
   ]
 }

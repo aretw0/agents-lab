@@ -5116,6 +5116,30 @@
       ],
       "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] A primitive de fechamento em uma chamada precisa provar que falhas de consistência não deixam evidence parcial no board.\n[2026-04-29T23:32:46Z] slice=1 focus=TASK-BUD-216 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] complete-with-verification agora tem teste de no-partial-append em mismatch de rationale.",
       "verification": "VER-BUD-495"
+    },
+    {
+      "id": "TASK-BUD-217",
+      "description": "[P1] Adicionar summaries compactos às primitives bounded do board.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-211",
+        "TASK-BUD-214"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "board_task_create retorna summary compacto com decisão/ids principais.",
+        "board_verification_append retorna summary compacto com ok/id/target/link.",
+        "board_task_complete retorna summary compacto com ok/task/verification/status.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Summaries compactos reduzem bloat de handoff/log e tornam fechamento unattended mais auditável sem despejar JSON completo.\n[2026-04-29T23:40:58Z] slice=1 focus=TASK-BUD-217 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board bounded primitives agora retornam summaries compactos para reduzir bloat operacional.",
+      "verification": "VER-BUD-496"
     }
   ]
 }

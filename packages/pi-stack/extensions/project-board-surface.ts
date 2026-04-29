@@ -1042,6 +1042,7 @@ export function updateProjectTaskBoard(
 export interface ProjectTaskCreateResult {
   ok: boolean;
   reason?: string;
+  summary?: string;
   task?: ProjectTaskBoardRow;
 }
 
@@ -1097,12 +1098,17 @@ export function createProjectTaskBoard(
   invalidateProjectBlockCaches(cwd);
 
   const row = queryProjectTasks(cwd, { search: id, limit: 200 }).rows.find((item) => item.id === id);
-  return { ok: true, task: row };
+  return {
+    ok: true,
+    summary: `board-task-create: ok=yes task=${id} status=${status}`,
+    task: row,
+  };
 }
 
 export interface ProjectVerificationAppendResult {
   ok: boolean;
   reason?: string;
+  summary?: string;
   verification?: VerificationRecord;
   task?: ProjectTaskBoardRow;
 }
@@ -1110,6 +1116,7 @@ export interface ProjectVerificationAppendResult {
 export interface ProjectTaskCompleteWithVerificationResult {
   ok: boolean;
   reason?: string;
+  summary?: string;
   verificationAppend?: ProjectVerificationAppendResult;
   update?: ProjectTaskUpdateResult;
   verification?: VerificationRecord;
@@ -1189,7 +1196,12 @@ export function appendProjectVerificationBoard(
   writeVerificationBlock(cwd, verificationRead);
   invalidateProjectBlockCaches(cwd);
 
-  return { ok: true, verification, task: linkedTask };
+  return {
+    ok: true,
+    summary: `board-verification-append: ok=yes verification=${id} target=${target} linked=${linkedTask ? "yes" : "no"}`,
+    verification,
+    task: linkedTask,
+  };
 }
 
 export function completeProjectTaskBoardWithVerification(
@@ -1269,6 +1281,7 @@ export function completeProjectTaskBoardWithVerification(
 
   return {
     ok: true,
+    summary: `board-task-complete: ok=yes task=${taskId} verification=${verificationId} status=completed`,
     verificationAppend,
     update,
     verification: verificationAppend.verification,
