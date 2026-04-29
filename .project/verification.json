@@ -5973,6 +5973,15 @@
       "method": "test",
       "evidence": "GitHub Copilot billing adapter revalidated: quota-visibility parser smoke covers external billing payload normalization/injection into usage events for provider/account-aware budget matching while preserving native session ingestion. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts (34/34 passed). [rationale:risk-control] Budget decisions depend on trustworthy external cost ingestion; closure records parser/account matching evidence without touching live provider billing state.",
       "timestamp": "2026-04-29T12:39:41.300Z"
+    },
+    {
+      "id": "VER-BUD-417",
+      "target": "TASK-BUD-043",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Behavior intent routing revalidated: deterministic classifyBehaviorRoute maps free-form prompts to candidate behavior/skill routes, confidence fallback preserves default behavior when no route is strong enough, and guardrails-core before_agent_start advisory/status/audit path remains covered. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-behavior-routing.test.ts (5/5 passed). [rationale:risk-control] Automatic behavior routing must remain transparent and reversible; focal test evidence confirms deterministic fallback and auditability.",
+      "timestamp": "2026-04-29T12:40:50.217Z"
     }
   ]
 }
