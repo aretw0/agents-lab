@@ -50,13 +50,18 @@ export function cloneClassifyFailureSummary(
 	};
 }
 
+function isConcreteMonitorName(monitorNameRaw: string): boolean {
+	const monitorName = monitorNameRaw.trim().toLowerCase();
+	return monitorName.length > 0 && monitorName !== "monitor" && monitorName !== "monitors";
+}
+
 export function bumpClassifyFailure(
 	summary: ClassifyFailureSummary,
 	monitorNameRaw: string,
 	errorText?: string,
 ): boolean {
 	const monitorName = monitorNameRaw.trim();
-	if (!monitorName) return false;
+	if (!isConcreteMonitorName(monitorName)) return false;
 
 	summary.total += 1;
 	summary.byMonitor[monitorName] = (summary.byMonitor[monitorName] ?? 0) + 1;

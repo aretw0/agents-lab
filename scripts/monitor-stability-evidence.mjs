@@ -28,6 +28,7 @@ import process from "node:process";
 const CLASSIFY_FAIL_RE =
 	/^(?:Warning:\s*)?\[([a-z0-9-]+)\]\s+classify failed:\s*(.*)$/i;
 const MONITOR_SOV_DELTA_RE = /^monitor-sovereign-delta\b.*$/i;
+const RESERVED_CLASSIFY_MONITOR_NAMES = new Set(["monitor", "monitors"]);
 const DEFAULT_TAIL_BYTES = 1_000_000;
 
 function parseArgs(argv) {
@@ -203,6 +204,11 @@ function extractTextCorpusFromJsonlTail(text) {
 	};
 }
 
+function isConcreteMonitorName(monitorNameRaw) {
+	const monitorName = String(monitorNameRaw ?? "").trim().toLowerCase();
+	return monitorName.length > 0 && !RESERVED_CLASSIFY_MONITOR_NAMES.has(monitorName);
+}
+
 function analyzeTail(text) {
 	const { corpus, sessionStats } = extractTextCorpusFromJsonlTail(text);
 	const byMonitor = {};
@@ -216,9 +222,10 @@ function analyzeTail(text) {
 
 		const classify = trimmed.match(CLASSIFY_FAIL_RE);
 		if (classify) {
-			total += 1;
 			const monitor = (classify[1] ?? "").trim();
-			if (monitor) byMonitor[monitor] = (byMonitor[monitor] ?? 0) + 1;
+			if (!isConcreteMonitorName(monitor)) continue;
+			total += 1;
+			byMonitor[monitor] = (byMonitor[monitor] ?? 0) + 1;
 			last = {
 				monitor,
 				error: (classify[2] ?? "").trim().slice(0, 300),

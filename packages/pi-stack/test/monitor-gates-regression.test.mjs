@@ -84,6 +84,29 @@ describe("monitor stability gates (deterministic fixtures)", () => {
     assert.equal(run.json.sovereignDelta.mentions, 1);
   });
 
+  it("evidence ignores generic monitor classify-failed placeholder", () => {
+    writeSessionFixture(tmpAgentDir, "session-generic-monitor.jsonl", [
+      msg("user", "check monitors"),
+      msg("assistant", "Warning: [monitor] classify failed:\n[monitor] classify failed:"),
+      msg(
+        "assistant",
+        "monitor-sovereign-delta · sovereignFlag=0 · thirdPartyDelta=0 · divergence=0",
+      ),
+    ]);
+
+    const run = runScript(
+      "scripts/monitor-stability-evidence.mjs",
+      ["--source", "auto", "--tail-bytes", "500000"],
+      { env: { PI_CODING_AGENT_DIR: tmpAgentDir } },
+    );
+
+    assert.equal(run.status, 0, run.stderr || run.stdout);
+    assert.ok(run.json, "expected JSON output");
+    assert.equal(run.json.classifyFailures.total, 0);
+    assert.deepEqual(run.json.classifyFailures.byMonitor, {});
+    assert.equal(run.json.sovereignDelta.mentions, 1);
+  });
+
   it("gate fails when classify failures exceed threshold", () => {
     writeSessionFixture(tmpAgentDir, "session-b.jsonl", [
       msg("user", "turn1"),

@@ -132,6 +132,44 @@ describe("monitor-summary", () => {
 		expect(result.details.classifyFailures.lastMonitor).toBe("fragility");
 	});
 
+	it("ignora placeholder genérico de monitor classify failed", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-generic-fail-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+		pi.handlers.get("message_end")?.(
+			{
+				message: {
+					content: [
+						{
+							type: "text",
+							text: "Warning: [monitor] classify failed:\n[monitor] classify failed:",
+						},
+					],
+				},
+			},
+			ctx,
+		);
+
+		const result = await pi.toolDef().execute("tc-generic", {});
+		expect(result.details.classifyFailures.total).toBe(0);
+		expect(result.details.classifyFailures.byMonitor).toEqual({});
+	});
+
 	it("ignora strings fixture de classify failed dentro de tool output", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-tool-fixture-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
