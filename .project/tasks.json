@@ -5140,6 +5140,29 @@
       ],
       "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Summaries compactos reduzem bloat de handoff/log e tornam fechamento unattended mais auditável sem despejar JSON completo.\n[2026-04-29T23:40:58Z] slice=1 focus=TASK-BUD-217 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board bounded primitives agora retornam summaries compactos para reduzir bloat operacional.",
       "verification": "VER-BUD-496"
+    },
+    {
+      "id": "TASK-BUD-218",
+      "description": "[P1] Adicionar summaries compactos também para falhas das primitives bounded do board.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-217"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "board_task_create retorna summary compacto também em erro.",
+        "board_verification_append retorna summary compacto também em erro.",
+        "board_task_complete retorna summary compacto também em erro antes de mutar.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create após reload dos summaries de sucesso. [rationale:risk-control] Em unattended, falhas também precisam de resumo curto para handoff/auditoria sem despejar JSON completo.\n[2026-04-29T23:44:59Z] slice=1 focus=TASK-BUD-218 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board bounded primitives agora resumem falhas sem JSON verboso.",
+      "verification": "VER-BUD-497"
     }
   ]
 }

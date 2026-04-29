@@ -6693,6 +6693,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:41:12.238Z",
       "evidence": "Added compact summary fields to createProjectTaskBoard, appendProjectVerificationBoard, and completeProjectTaskBoardWithVerification results, including tool-visible summaries for board_task_create, board_verification_append, and board_task_complete. Tests assert helper and tool summaries. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Compact summaries reduce handoff/log bloat and make unattended board operations easier to audit."
+    },
+    {
+      "id": "VER-BUD-497",
+      "target": "TASK-BUD-218",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:45:14.110Z",
+      "evidence": "Added compact failure summaries to createProjectTaskBoard, appendProjectVerificationBoard, and completeProjectTaskBoardWithVerification. Error paths now include summary strings such as board-task-create ok=no reason=task-already-exists, board-verification-append ok=no reason=missing-verification-evidence, and board-task-complete ok=no reason=rationale-consistency-required-to-complete-task. Tests assert success and failure summaries for helpers and tools. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Failure summaries reduce unattended handoff/log bloat and keep blocked operations auditable."
     }
   ]
 }

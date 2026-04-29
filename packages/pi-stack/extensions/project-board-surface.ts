@@ -1072,14 +1072,14 @@ export function createProjectTaskBoard(
   const milestone = normalizeMilestoneLabel(input.milestone);
   const note = normalizeBoundedText(input.note, 1000);
 
-  if (!id) return { ok: false, reason: "missing-task-id" };
-  if (!description) return { ok: false, reason: "missing-task-description" };
+  if (!id) return { ok: false, reason: "missing-task-id", summary: buildBoardTaskCreateSummary(false, id, status, "missing-task-id") };
+  if (!description) return { ok: false, reason: "missing-task-description", summary: buildBoardTaskCreateSummary(false, id, status, "missing-task-description") };
   if (typeof input.status === "string" && !PROJECT_TASK_STATUSES.includes(input.status as ProjectTaskStatus)) {
-    return { ok: false, reason: "invalid-task-status" };
+    return { ok: false, reason: "invalid-task-status", summary: buildBoardTaskCreateSummary(false, id, status, "invalid-task-status") };
   }
 
   const block = readProjectTasksBlock(cwd);
-  if (block.tasks.some((row) => row?.id === id)) return { ok: false, reason: "task-already-exists" };
+  if (block.tasks.some((row) => row?.id === id)) return { ok: false, reason: "task-already-exists", summary: buildBoardTaskCreateSummary(false, id, status, "task-already-exists") };
 
   const task: ProjectTaskItem & { priority?: string } = {
     id,
@@ -1100,7 +1100,7 @@ export function createProjectTaskBoard(
   const row = queryProjectTasks(cwd, { search: id, limit: 200 }).rows.find((item) => item.id === id);
   return {
     ok: true,
-    summary: `board-task-create: ok=yes task=${id} status=${status}`,
+    summary: buildBoardTaskCreateSummary(true, id, status),
     task: row,
   };
 }
@@ -1121,6 +1121,38 @@ export interface ProjectTaskCompleteWithVerificationResult {
   update?: ProjectTaskUpdateResult;
   verification?: VerificationRecord;
   task?: ProjectTaskBoardRow;
+}
+
+function buildBoardTaskCreateSummary(ok: boolean, taskId: string, status: string, reason?: string): string {
+  return [
+    "board-task-create:",
+    `ok=${ok ? "yes" : "no"}`,
+    taskId ? `task=${taskId}` : undefined,
+    status ? `status=${status}` : undefined,
+    reason ? `reason=${reason}` : undefined,
+  ].filter(Boolean).join(" ");
+}
+
+function buildBoardVerificationAppendSummary(ok: boolean, verificationId: string, target: string, linked: boolean, reason?: string): string {
+  return [
+    "board-verification-append:",
+    `ok=${ok ? "yes" : "no"}`,
+    verificationId ? `verification=${verificationId}` : undefined,
+    target ? `target=${target}` : undefined,
+    `linked=${linked ? "yes" : "no"}`,
+    reason ? `reason=${reason}` : undefined,
+  ].filter(Boolean).join(" ");
+}
+
+function buildBoardTaskCompleteSummary(ok: boolean, taskId: string, verificationId: string, status: string, reason?: string): string {
+  return [
+    "board-task-complete:",
+    `ok=${ok ? "yes" : "no"}`,
+    taskId ? `task=${taskId}` : undefined,
+    verificationId ? `verification=${verificationId}` : undefined,
+    status ? `status=${status}` : undefined,
+    reason ? `reason=${reason}` : undefined,
+  ].filter(Boolean).join(" ");
 }
 
 function normalizeVerificationEvidence(value: unknown): string | undefined {
@@ -1157,23 +1189,23 @@ export function appendProjectVerificationBoard(
     ? input.timestamp.trim()
     : new Date().toISOString();
 
-  if (!id) return { ok: false, reason: "missing-verification-id" };
-  if (!target) return { ok: false, reason: "missing-verification-target" };
-  if (!status) return { ok: false, reason: "invalid-verification-status" };
-  if (!method) return { ok: false, reason: "missing-verification-method" };
-  if (!evidence) return { ok: false, reason: "missing-verification-evidence" };
+  if (!id) return { ok: false, reason: "missing-verification-id", summary: buildBoardVerificationAppendSummary(false, id, target, false, "missing-verification-id") };
+  if (!target) return { ok: false, reason: "missing-verification-target", summary: buildBoardVerificationAppendSummary(false, id, target, false, "missing-verification-target") };
+  if (!status) return { ok: false, reason: "invalid-verification-status", summary: buildBoardVerificationAppendSummary(false, id, target, false, "invalid-verification-status") };
+  if (!method) return { ok: false, reason: "missing-verification-method", summary: buildBoardVerificationAppendSummary(false, id, target, false, "missing-verification-method") };
+  if (!evidence) return { ok: false, reason: "missing-verification-evidence", summary: buildBoardVerificationAppendSummary(false, id, target, false, "missing-verification-evidence") };
 
   const verificationRead = readVerificationBlockForAppend(cwd);
   if (verificationRead.verifications.some((row) => row.id === id)) {
-    return { ok: false, reason: "verification-already-exists" };
+    return { ok: false, reason: "verification-already-exists", summary: buildBoardVerificationAppendSummary(false, id, target, false, "verification-already-exists") };
   }
 
   let linkedTask: ProjectTaskBoardRow | undefined;
   if (input.linkTask === true) {
-    if (targetType !== "task") return { ok: false, reason: "link-task-requires-task-target-type" };
+    if (targetType !== "task") return { ok: false, reason: "link-task-requires-task-target-type", summary: buildBoardVerificationAppendSummary(false, id, target, false, "link-task-requires-task-target-type") };
     const taskBlock = readProjectTasksBlock(cwd);
     const taskIndex = taskBlock.tasks.findIndex((row) => row?.id === target);
-    if (taskIndex < 0) return { ok: false, reason: "task-target-not-found" };
+    if (taskIndex < 0) return { ok: false, reason: "task-target-not-found", summary: buildBoardVerificationAppendSummary(false, id, target, false, "task-target-not-found") };
     taskBlock.tasks[taskIndex] = {
       ...taskBlock.tasks[taskIndex],
       verification: id,
@@ -1198,7 +1230,7 @@ export function appendProjectVerificationBoard(
 
   return {
     ok: true,
-    summary: `board-verification-append: ok=yes verification=${id} target=${target} linked=${linkedTask ? "yes" : "no"}`,
+    summary: buildBoardVerificationAppendSummary(true, id, target, Boolean(linkedTask)),
     verification,
     task: linkedTask,
   };
@@ -1225,25 +1257,25 @@ export function completeProjectTaskBoardWithVerification(
   const requireRationaleOnComplete = input.requireRationaleOnComplete !== false;
   const requireRationaleConsistencyOnComplete = input.requireRationaleConsistencyOnComplete !== false;
 
-  if (!taskId) return { ok: false, reason: "missing-task-id" };
-  if (!verificationId) return { ok: false, reason: "missing-verification-id" };
-  if (!method) return { ok: false, reason: "missing-verification-method" };
-  if (!evidence) return { ok: false, reason: "missing-verification-evidence" };
+  if (!taskId) return { ok: false, reason: "missing-task-id", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "missing-task-id") };
+  if (!verificationId) return { ok: false, reason: "missing-verification-id", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "missing-verification-id") };
+  if (!method) return { ok: false, reason: "missing-verification-method", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "missing-verification-method") };
+  if (!evidence) return { ok: false, reason: "missing-verification-evidence", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "missing-verification-evidence") };
 
   const taskBlock = readProjectTasksBlock(cwd);
   const currentTask = taskBlock.tasks.find((row) => row?.id === taskId) as TaskRecord | undefined;
-  if (!currentTask) return { ok: false, reason: "task-not-found" };
+  if (!currentTask) return { ok: false, reason: "task-not-found", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "task-not-found") };
 
   const verificationRead = readVerificationBlockForAppend(cwd);
   if (verificationRead.verifications.some((row) => row.id === verificationId)) {
-    return { ok: false, reason: "verification-already-exists" };
+    return { ok: false, reason: "verification-already-exists", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "verification-already-exists") };
   }
 
   const evidenceRationaleKind = extractRationaleKindFromText(evidence);
   const taskRationaleKind = resolveTaskNoteRationaleKind(currentTask);
   const rationaleRequired = isRationaleSensitiveTask(currentTask);
   if (requireRationaleOnComplete && rationaleRequired && !hasRationaleText(currentTask.notes) && !hasRationaleText(evidence)) {
-    return { ok: false, reason: "rationale-required-to-complete-sensitive-task" };
+    return { ok: false, reason: "rationale-required-to-complete-sensitive-task", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "rationale-required-to-complete-sensitive-task") };
   }
   if (
     requireRationaleConsistencyOnComplete
@@ -1251,7 +1283,7 @@ export function completeProjectTaskBoardWithVerification(
     && evidenceRationaleKind
     && taskRationaleKind !== evidenceRationaleKind
   ) {
-    return { ok: false, reason: "rationale-consistency-required-to-complete-task" };
+    return { ok: false, reason: "rationale-consistency-required-to-complete-task", summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", "rationale-consistency-required-to-complete-task") };
   }
 
   const verificationAppend = appendProjectVerificationBoard(cwd, {
@@ -1265,7 +1297,8 @@ export function completeProjectTaskBoardWithVerification(
     linkTask: true,
   });
   if (!verificationAppend.ok) {
-    return { ok: false, reason: verificationAppend.reason, verificationAppend };
+    const reason = verificationAppend.reason ?? "verification-append-failed";
+    return { ok: false, reason, summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", reason), verificationAppend };
   }
 
   const update = updateProjectTaskBoard(cwd, taskId, {
@@ -1276,12 +1309,13 @@ export function completeProjectTaskBoardWithVerification(
     requireRationaleConsistencyOnComplete,
   });
   if (!update.ok) {
-    return { ok: false, reason: update.reason, verificationAppend, update };
+    const reason = update.reason ?? "task-update-failed";
+    return { ok: false, reason, summary: buildBoardTaskCompleteSummary(false, taskId, verificationId, "blocked", reason), verificationAppend, update };
   }
 
   return {
     ok: true,
-    summary: `board-task-complete: ok=yes task=${taskId} verification=${verificationId} status=completed`,
+    summary: buildBoardTaskCompleteSummary(true, taskId, verificationId, "completed"),
     verificationAppend,
     update,
     verification: verificationAppend.verification,

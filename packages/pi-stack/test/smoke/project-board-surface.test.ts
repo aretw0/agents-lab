@@ -145,7 +145,11 @@ describe("project-board-surface", () => {
         id: "TASK-D",
         description: "duplicada",
       });
-      expect(duplicate).toMatchObject({ ok: false, reason: "task-already-exists" });
+      expect(duplicate).toMatchObject({
+        ok: false,
+        reason: "task-already-exists",
+        summary: "board-task-create: ok=no task=TASK-D status=planned reason=task-already-exists",
+      });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -261,7 +265,11 @@ describe("project-board-surface", () => {
         status: "passed",
         method: "test",
         evidence: "",
-      })).toMatchObject({ ok: false, reason: "missing-verification-evidence" });
+      })).toMatchObject({
+        ok: false,
+        reason: "missing-verification-evidence",
+        summary: "board-verification-append: ok=no verification=VER-X target=TASK-C linked=no reason=missing-verification-evidence",
+      });
       expect(appendProjectVerificationBoard(cwd, {
         id: "VER-X",
         target: "TASK-C",
@@ -350,7 +358,11 @@ describe("project-board-surface", () => {
         method: "test",
         evidence: "tests passed [rationale:test-change] divergent reason",
       });
-      expect(blocked).toMatchObject({ ok: false, reason: "rationale-consistency-required-to-complete-task" });
+      expect(blocked).toMatchObject({
+        ok: false,
+        reason: "rationale-consistency-required-to-complete-task",
+        summary: "board-task-complete: ok=no task=TASK-MISMATCH verification=VER-MISMATCH status=blocked reason=rationale-consistency-required-to-complete-task",
+      });
       expect(queryProjectVerification(cwd, { target: "TASK-MISMATCH", limit: 10 }).filtered).toBe(0);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
