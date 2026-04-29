@@ -4294,6 +4294,30 @@
       ],
       "notes": "Criado como continuação local-safe após adicionar o validador. [rationale:risk-control] Sem documentação, agentes podem voltar a registrar evidência solta ou payload verboso; a regra curta mantém auditoria sem bloat.\n[2026-04-29T19:52:12.740Z] slice=1 focus=TASK-BUD-180 gate=rehearsal-evidence-validation-docs-markers-passed:3 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora orienta validar a linha compacta e corrigir formato curto, em vez de expandir payload no handoff.",
       "verification": "VER-BUD-461"
+    },
+    {
+      "id": "TASK-BUD-181",
+      "description": "[P1] Codificar plano determinístico de continuação unattended para reduzir hesitação após foco completo.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-173",
+        "TASK-BUD-174"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Helper decide continue-local quando próxima fatia é local-safe e progresso está salvo.",
+        "Helper bloqueia risco/escopo protegido e pede decisão em ambiguidade real.",
+        "Helper não inicia novo trabalho em compact e exige checkpoint quando progresso não está salvo.",
+        "Smoke focal e test:monitor:smoke verdes."
+      ],
+      "verification": "VER-BUD-462",
+      "notes": "[2026-04-29T19:55:31.448Z] slice=1 focus=TASK-BUD-181 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A doutrina de malemolência unattended agora tem helper testado para reduzir paradas por hesitação sem liberar escopos protegidos."
     }
   ]
 }

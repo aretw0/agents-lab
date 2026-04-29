@@ -6378,6 +6378,15 @@
       "method": "inspection",
       "evidence": "Updated docs/guides/project-canonical-pipeline.md to mention validateUnattendedRehearsalSliceEvidence as a lightweight check for compact rehearsal evidence lines. Marker validation passed: validateUnattendedRehearsalSliceEvidence; valid=yes missing=none invalid=none; corrigir a linha curta, nao expandir para payload verboso. [rationale:risk-control] Keeps handoff evidence auditable and concise without introducing a heavier tracking surface.",
       "timestamp": "2026-04-29T19:52:12.740Z"
+    },
+    {
+      "id": "VER-BUD-462",
+      "target": "TASK-BUD-181",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added resolveUnattendedContinuationPlan in guardrails-core-unattended-continuation.ts with decisions continue-local/checkpoint/pause-for-compact/ask-decision/blocked, exported it, and added smoke tests for safe continuation, ambiguity, risk/protected scopes, and compact behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 124/124 across 19 files. [rationale:risk-control] Encodes the operating doctrine so focus completion does not cause unnecessary stops while risk/protected scopes still stop.",
+      "timestamp": "2026-04-29T19:55:31.448Z"
     }
   ]
 }
