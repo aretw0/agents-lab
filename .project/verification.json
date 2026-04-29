@@ -5928,6 +5928,15 @@
       "method": "inspect",
       "evidence": "Docs consolidated optional Squeez-inspired context-economy profile and mdt doc-drift trail. Updated docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md with baseline vs opt-in matrix, mdt check/update adoption path, and success metrics; updated docs/guides/project-canonical-pipeline.md with operational opt-in limits and metrics; updated docs/guides/monitor-overrides.md with monitor noise/cost guardrails and mdt separation. Validation: cmd.exe /c node -e docs marker check (4 markers passed). [rationale:risk-control] Documents measurable opt-in adoption without changing runtime defaults, CI, publish, settings, or remote metadata.",
       "timestamp": "2026-04-29T12:21:20.569Z"
+    },
+    {
+      "id": "VER-BUD-412",
+      "target": "TASK-BUD-088",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Revalidated simple-first hatch implementation. /colony-pilot hatch check defaults to simple mode without direct swarm CTA; runbook offers status/doctor/colony-pilot check/quota visibility and explicit /colony-pilot hatch check --advanced escalation; footer status remains observable via colony-pilot-hatch. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts (115/115 passed). [rationale:risk-control] Closes onboarding slice with evidence that first contact avoids high-autonomy CTA by default while retaining auditable opt-in escalation.",
+      "timestamp": "2026-04-29T12:32:17.567Z"
     }
   ]
 }

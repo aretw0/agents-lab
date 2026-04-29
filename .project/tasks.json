@@ -2044,7 +2044,7 @@
     {
       "id": "TASK-BUD-088",
       "description": "[P0] Implementar hatch progressivo (simple-first): primeiro contato de sessão/projeto sem oferta direta de swarm, com escala explícita sob demanda.",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-083"
       ],
@@ -2061,7 +2061,8 @@
         "UX inicial oferece apenas trilha simples (status/context/readiness básico + como escalar).",
         "Comando/flag explícita permite promover para modo avançado na mesma sessão sem fricção."
       ],
-      "notes": "Foco: não assustar no primeiro contato e preservar clareza de controle.\n[2026-04-23T21:30:00Z] Slice simple-first aplicada: `/colony-pilot hatch check` default em `mode: simple` sem CTA direta de swarm; trilha básica + comando explícito de escala (`--advanced`). Opt-in avançado mantém runbook com `/colony <goal>`. Status `colony-pilot-hatch` exposto para observabilidade no footer. Smokes focais: colony-pilot-hatch-e2e-harness + colony-pilot-parsers + custom-footer-registration (114/114)."
+      "notes": "Foco: não assustar no primeiro contato e preservar clareza de controle.\n[2026-04-23T21:30:00Z] Slice simple-first aplicada: `/colony-pilot hatch check` default em `mode: simple` sem CTA direta de swarm; trilha básica + comando explícito de escala (`--advanced`). Opt-in avançado mantém runbook com `/colony <goal>`. Status `colony-pilot-hatch` exposto para observabilidade no footer. Smokes focais: colony-pilot-hatch-e2e-harness + colony-pilot-parsers + custom-footer-registration (114/114).\n[2026-04-29T12:32:17.567Z] Revalidated simple-first hatch implementation: default /colony-pilot hatch check stays mode=simple with no direct swarm CTA, simple lane points to status/doctor/check/budget and explicit --advanced escalation, footer exposes colony-pilot-hatch status. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts (115/115 passed). [rationale:risk-control] Simple-first onboarding reduces accidental swarm/delegation escalation while preserving explicit opt-in path and observable runtime status.",
+      "verification": "VER-BUD-412"
     },
     {
       "id": "TASK-BUD-089",
