@@ -1,24 +1,22 @@
 {
-  "timestamp": "2026-04-29T02:31:53.350Z",
-  "context": "Post-reload local calibration state is healthy. Context-watch warn lane is non-blocking steering: continue bounded work, avoid broad scans, checkpoint at checkpoint threshold, and wrap up only at compact lane.",
+  "timestamp": "2026-04-29T10:24:39.043Z",
+  "context": "Post-auto-resume local calibration state is healthy. Context-watch reset to ok after compact, auto-resume dispatched successfully, and latest steering allows standard bounded slices. Do not treat historical compact/checkpoint events as current blockers without fresh tool evidence.",
   "next_actions": [
-    "Context-watch action: level=checkpoint 68% (write-checkpoint) · Write handoff checkpoint before the next large slice.",
     "Continue local-first monitor/control-plane calibration with bounded slices.",
-    "At checkpoint threshold, refresh handoff before broader continuation.",
-    "At compact threshold, wrap up and let auto-compact/auto-resume proceed.",
+    "Use autonomy_lane_status for conservative task selection and skip protected/missing-rationale scopes by default.",
+    "At checkpoint threshold, refresh handoff and continue if safe; do not stop only because checkpoint was reached.",
+    "At compact threshold, wrap up briefly and let auto-compact/auto-resume proceed.",
     "Keep monitor-sovereign disabled/audit-only until additional shadow evidence is collected.",
     "Do not carry forward stale context-watch-warn-active, context-watch-compact-required, or disk-pressure blockers without fresh tool evidence."
   ],
-  "blockers": [
-    "context-watch-checkpoint-required"
-  ],
+  "blockers": [],
   "context_watch": {
-    "generatedAtIso": "2026-04-29T01:53:29.006Z",
-    "level": "warn",
-    "percent": 57,
-    "action": "continue-bounded",
-    "operatingCadence": "bounded-slices",
-    "recommendation": "Continue normal bounded work; avoid broad scans and prepare to checkpoint at the checkpoint threshold."
+    "generatedAtIso": "2026-04-29T10:24:39.043Z",
+    "level": "ok",
+    "percent": 9,
+    "action": "continue",
+    "operatingCadence": "standard-slices",
+    "recommendation": "Context healthy after auto-resume; continue bounded work."
   },
   "recent_validation": [
     "context_watch_status after reload returned action=continue-bounded, operatingCadence=bounded-slices, deterministicStop.required=false, operatorAction.blocking=false.",
@@ -79,6 +77,32 @@
       },
       "action": "write-checkpoint",
       "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-04-29T10:22:24.185Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 71,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-04-29T10:22:53.041Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 72,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

@@ -5847,6 +5847,15 @@
       "method": "test",
       "timestamp": "2026-04-29T02:32:30Z",
       "evidence": "Final consolidation for TASK-BUD-156 passed. `project-board-surface` supports canonical rationale kinds, detects sensitive refactor/test-change work, exposes `needs_rationale`, `rationale_required`, `rationaleSource`, `rationaleConsistency` and summaries, enforces rationale on sensitive updates/completion, syncs rationale to linked verification evidence, and keeps the flow backend-agnostic through the board surface rather than repository-specific assumptions. Focal validation: `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` passed 42/42. [rationale:risk-control] Requiring communicable rationale for refactors/test changes reduces future audit risk and prevents opaque changes from being closed without a durable reason in task/verification surfaces."
+    },
+    {
+      "id": "VER-BUD-403",
+      "target": "TASK-OPS-HYGIENE-003",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-29T10:25:30Z",
+      "evidence": "Final consolidation for TASK-OPS-HYGIENE-003 passed. `docs/guides/lab-user-surface-parity.md` defines parity-by-default, temporary lab-only exceptions, promotion/removal criteria, governance through board/verification, and outcome-agnostic simple-first distribution. `docs/guides/project-canonical-pipeline.md` includes the canonical distributed-surface hygiene section with parity, documented exceptions, promotion to tool/command/monitor/signal, periodic drift review, and progressive disclosure. `docs/guides/README.md` indexes the parity guide. The next inventory/reduction step is represented by dependent `TASK-BUD-130`, satisfying the requested board follow-up for lab↔distributed surface differences."
     }
   ]
 }

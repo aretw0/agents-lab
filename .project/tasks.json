@@ -3180,7 +3180,7 @@
     {
       "id": "TASK-OPS-HYGIENE-003",
       "description": "[P1] Expandir higiene pós-marco para superfície distribuída (paridade lab<->usuário + governança de tools lab-only temporárias).",
-      "status": "in-progress",
+      "status": "completed",
       "depends_on": [
         "TASK-OPS-HYGIENE-002"
       ],
@@ -3196,7 +3196,7 @@
         "Existe política para tools/superfícies lab-only temporárias com critério de graduação para surface canônica (tool/comando/sinal operacional) ou remoção.",
         "Board registra evidência de revisão de escopo e próximo passo para inventário de diferenças lab x distribuído."
       ],
-      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência.\n[2026-04-24T01:02:00Z] Escopo ampliado por diretriz de distribuição: guias agora explicitam postura outcome-agnostic + simple-first (progressive disclosure), preservando caminho simples para usuários iniciantes e opt-in para camada fábrica/control-plane.\n[2026-04-27T00:00:00Z] Backlog add (feedback humano): investigar e corrigir saída de background process que aparece com bloco/meta `[undefined]` em notificações `BG_PROCESS_DONE`, garantindo envelope determinístico/legível para operadores em long-run."
+      "notes": "Criada após ajuste de escopo solicitado pelo usuário (2026-04-24): higiene deve cobrir o que usamos internamente e o que distribuímos, evitando drift entre laboratório e usuários.\n[2026-04-24T00:30:00Z] Snapshot inicial documentado em `docs/guides/lab-user-surface-parity.md` com regra de paridade por padrão, exceções lab-only temporárias, critério de promoção/remoção e governança via board/evidência.\n[2026-04-24T01:02:00Z] Escopo ampliado por diretriz de distribuição: guias agora explicitam postura outcome-agnostic + simple-first (progressive disclosure), preservando caminho simples para usuários iniciantes e opt-in para camada fábrica/control-plane.\n[2026-04-27T00:00:00Z] Backlog add (feedback humano): investigar e corrigir saída de background process que aparece com bloco/meta `[undefined]` em notificações `BG_PROCESS_DONE`, garantindo envelope determinístico/legível para operadores em long-run.\n[completion] Closed with final passed verification `VER-BUD-403`: distributed-surface hygiene is documented in the canonical pipeline and parity guide, indexed in guides README, and the next inventory/slimming step is tracked by dependent `TASK-BUD-130`."
     },
     {
       "id": "TASK-BUD-130",
