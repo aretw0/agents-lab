@@ -6513,6 +6513,15 @@
       "method": "test",
       "evidence": "Added guardrails-core-recurring-failure-surface.ts registering recurring_failure_hardening_plan as read-only tool, wired it in guardrails-core.ts, added smoke test, and included it in test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 143/143 across 26 files. [rationale:risk-control] Makes repeated-failure hardening operational without mutating state automatically.",
       "timestamp": "2026-04-29T21:19:20.387Z"
+    },
+    {
+      "id": "VER-BUD-477",
+      "target": "TASK-BUD-197",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "After reload, live recurring_failure_hardening_plan returned summary=recurring-failure: decision=observe hardIntent=no occurrences=2 reasons=mitigated for the already-hardened marker-check failure path. Updated docs/guides/control-plane-operating-doctrine.md with Falhas recorrentes section: use recurring_failure_hardening_plan before another reminder; second occurrence should become hard intent with primitive/test; add runtime guard or block old path when needed. Validation used safe_marker_check: marker-check ok=yes matched=5/5 missing=none commandSensitive=none. [rationale:risk-control] Closes runtime/docs loop for recurring-failure hardening.",
+      "timestamp": "2026-04-29T21:23:22.907Z"
     }
   ]
 }

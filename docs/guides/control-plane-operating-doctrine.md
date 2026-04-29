@@ -72,6 +72,12 @@ slice=<n> focus=<task> gate=<comando-ou-inspeção> commit=<sha> drift=<yes|no> 
 
 Essa linha deve ser suficiente para explicar continuidade sem inflar handoff, board ou docs.
 
+## Falhas recorrentes
+
+Quando o mesmo problema operacional se repetir, use `recurring_failure_hardening_plan` antes de escrever mais um lembrete. A regra é: primeira ocorrência pode virar regra curta; segunda ocorrência deve virar hard intent com primitiva e teste; depois disso, adicionar guard runtime ou bloquear o caminho antigo se ele continuar disponível.
+
+O objetivo é evitar soft guidance repetida: se o agente continua esbarrando no mesmo problema, a stack deve tornar o caminho seguro mais fácil ou o caminho antigo menos disponível.
+
 ## Critério de qualidade crescente
 
 A qualidade está aumentando quando:

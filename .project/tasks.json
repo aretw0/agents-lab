@@ -4655,6 +4655,27 @@
       ],
       "verification": "VER-BUD-476",
       "notes": "[2026-04-29T21:19:20.387Z] slice=1 focus=TASK-BUD-196 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Hardening de falhas recorrentes ficou disponível em runtime para orientar quando soft intent deve virar primitiva/teste/guard/bloqueio."
+    },
+    {
+      "id": "TASK-BUD-197",
+      "description": "[P1] Documentar uso operacional de recurring_failure_hardening_plan no loop unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-196"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina aponta recurring_failure_hardening_plan como checagem quando falha se repete.",
+        "Documento explicita que repetição deve virar hard intent: primitiva/teste/guard/bloqueio, não só lembrete.",
+        "Validação usa safe_marker_check e evidência inclui leitura ao vivo pós-reload."
+      ],
+      "notes": "Criado após reload validar recurring_failure_hardening_plan ao vivo. [rationale:risk-control] Fecha o loop runtime-docs da política de falhas recorrentes e reforça que soft guidance repetida deve virar hard intent.\n[2026-04-29T21:23:22.907Z] slice=1 focus=TASK-BUD-197 gate=safe_marker_check-summary-marker-check-ok-yes-matched-5/5-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora manda usar recurring_failure_hardening_plan quando falha se repete, convertendo soft guidance em hard intent.",
+      "verification": "VER-BUD-477"
     }
   ]
 }
