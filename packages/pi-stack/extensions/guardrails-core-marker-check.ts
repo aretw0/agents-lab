@@ -34,6 +34,27 @@ export function detectCommandSensitiveMarkerReasons(marker: string): string[] {
   return reasons;
 }
 
+export function detectShellInlineCommandSensitiveMarkerCheck(command: string): boolean {
+  const normalized = String(command ?? "").toLowerCase();
+  const invokesInlineEvaluator = /\b(?:node|python|python3)\b[\s\S]*(?:\s-e\b|\s-c\b)/i.test(command)
+    || /\b(?:node|python|python3)\b[\s\S]*(?:eval|exec)/i.test(command);
+  if (!invokesInlineEvaluator) return false;
+
+  const markerLike = /\bmarkers?\b|\.includes\s*\(|\.indexof\s*\(|readfilesync\s*\(/i.test(command)
+    || normalized.includes("missing ")
+    || normalized.includes("marker-check");
+  if (!markerLike) return false;
+
+  return detectCommandSensitiveMarkerReasons(command).length > 0;
+}
+
+export function commandSensitiveShellMarkerCheckReason(): string {
+  return [
+    "Blocked by guardrails-core (safe_marker_check): shell-inline marker checks with command-sensitive syntax are a recurring failure path.",
+    "Use safe_marker_check for runtime file markers, or evaluateTextMarkerCheck inside tests/code.",
+  ].join(" ");
+}
+
 export function evaluateTextMarkerCheck(input: TextMarkerCheckInput): TextMarkerCheckResult {
   const options = {
     normalizeAccents: input.normalizeAccents === true,

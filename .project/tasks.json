@@ -4773,6 +4773,34 @@
       ],
       "notes": "Criado na lane essencial de hardening. [rationale:risk-control] As primitivas novas precisam estar protegidas contra quebra de export público; sem isso runtime/docs podem divergir do pacote carregado.\n[2026-04-29T22:17:34.060Z] slice=1 focus=TASK-BUD-201 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Reexports públicos das primitivas de hardening agora têm smoke dedicado, reduzindo drift entre módulos internos e pacote carregado.",
       "verification": "VER-BUD-481"
+    },
+    {
+      "id": "TASK-BUD-202",
+      "description": "[P1] Bloquear caminho legado de marker check shell-inline command-sensitive no bash guard.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-187",
+        "TASK-BUD-188",
+        "TASK-BUD-196",
+        "TASK-BUD-199"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-marker-check.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-marker-check.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Detectar comandos shell-inline de marker check com sintaxe command-sensitive como old path legado.",
+        "Bash guard bloqueia esse caminho e orienta safe_marker_check/evaluateTextMarkerCheck.",
+        "Detecção não bloqueia node -e genérico sem padrão de marker check.",
+        "Smokes focal e completo verdes."
+      ],
+      "notes": "Criado pela política recurring_failure_hardening_plan: old path de marker checks shell-inline ainda estava disponível após regra/primitiva/tool. [rationale:risk-control] Terceira ocorrência exige route-to-guarded-path/warn-or-block-legacy-path, sem acoplar a shell específico além do guard de bash existente.\n[2026-04-29T22:33:58.185Z] slice=1 focus=TASK-BUD-202 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Bash guard agora bloqueia marker checks shell-inline command-sensitive e roteia para safe_marker_check/evaluateTextMarkerCheck.",
+      "verification": "VER-BUD-482"
     }
   ]
 }

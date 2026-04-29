@@ -120,6 +120,7 @@ import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
+import { commandSensitiveShellMarkerCheckReason, detectShellInlineCommandSensitiveMarkerCheck } from "./guardrails-core-marker-check";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
 
@@ -279,6 +280,13 @@ type BashGuardPolicy = {
 };
 
 const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
+  {
+    id: "command-sensitive-shell-marker-check",
+    when: "tool(bash)",
+    detect: detectShellInlineCommandSensitiveMarkerCheck,
+    reason: commandSensitiveShellMarkerCheckReason,
+    auditKey: "guardrails-core.command-sensitive-shell-marker-check-block",
+  },
   {
     id: "pi-root-recursive-scan",
     when: "tool(bash)",

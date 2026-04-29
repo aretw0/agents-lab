@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  commandSensitiveShellMarkerCheckReason,
   detectCommandSensitiveMarkerReasons,
+  detectShellInlineCommandSensitiveMarkerCheck,
   evaluateTextMarkerCheck,
 } from "../../extensions/guardrails-core-marker-check";
 
@@ -41,6 +43,12 @@ describe("guardrails marker check", () => {
     expect(result.ok).toBe(false);
     expect(result.missing).toEqual(["delta"]);
     expect(result.summary).toBe("marker-check: ok=no matched=1/2 missing=1 commandSensitive=none");
+  });
+
+  it("detects shell-inline command-sensitive marker checks as legacy path", () => {
+    expect(detectShellInlineCommandSensitiveMarkerCheck("cmd.exe /c node -e \"const markers=['Não executar `git prune` automaticamente'];\"")).toBe(true);
+    expect(detectShellInlineCommandSensitiveMarkerCheck("cmd.exe /c node -e \"console.log(`template-ok`)\"")).toBe(false);
+    expect(commandSensitiveShellMarkerCheckReason()).toContain("Use safe_marker_check");
   });
 
   it("detects command-sensitive markers as policy, not shell failure", () => {

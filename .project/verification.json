@@ -6558,6 +6558,15 @@
       "method": "test",
       "evidence": "Added packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts covering guardrails-core public reexports for evaluateTextMarkerCheck, evaluateGitMaintenanceSignal, resolveRecurringFailureHardening, and resolveValidationMethodPlan. Added it to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts passed 1/1; cmd.exe /c npm run test:monitor:smoke --silent passed 150/150 across 29 files. [rationale:risk-control] Protects accumulated hardening primitives from public export drift.",
       "timestamp": "2026-04-29T22:17:34.060Z"
+    },
+    {
+      "id": "VER-BUD-482",
+      "target": "TASK-BUD-202",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added detectShellInlineCommandSensitiveMarkerCheck and commandSensitiveShellMarkerCheckReason in guardrails-core-marker-check.ts, and added a bash guard policy in guardrails-core.ts blocking shell-inline marker checks with command-sensitive syntax. The detector targets inline evaluators (node/python -e/-c/eval/exec) with marker-like patterns and command-sensitive syntax; it does not block generic node -e template literals. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-marker-check.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 151/151 across 29 files. [rationale:risk-control] Implements recurring_failure_hardening_plan old-path blocking for the repeated marker-check quoting failure.",
+      "timestamp": "2026-04-29T22:33:58.185Z"
     }
   ]
 }
