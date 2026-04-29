@@ -1,23 +1,16 @@
 {
-  "timestamp": "2026-04-29T01:29:31.363Z",
+  "timestamp": "2026-04-29T01:36:29.864Z",
   "context": "Post-reload local calibration state is healthy. Previous compact-lane handoff from 00:24 is stale and should not be used as current blocker evidence. Continue only bounded micro-slices because context is near warn threshold and disk usage remains high.",
   "next_actions": [
+    "Context-watch action: level=warn 50% (write-checkpoint) · Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume.",
     "Continue local-first monitor/control-plane calibration in micro-slices only.",
     "If broader work is needed, checkpoint/compact before starting.",
     "Keep monitor-sovereign disabled/audit-only until additional shadow evidence is collected.",
     "Do not carry forward stale context-watch-compact-required or disk-pressure blockers without fresh tool evidence."
   ],
-  "blockers": [],
-  "machine_maintenance": {
-    "generatedAtIso": "2026-04-29T01:29:31.363Z",
-    "severity": "ok",
-    "action": "continue",
-    "canStartLongRun": true,
-    "canEvaluateMonitors": true,
-    "shouldCheckpoint": false,
-    "shouldStop": false,
-    "summary": "machine-maintenance · severity=ok · action=continue · longRun=allow · monitors=allow · memory free≈5108MB used≈68.17% · disk free≈14395MB used≈97.04%"
-  },
+  "blockers": [
+    "context-watch-warn-active"
+  ],
   "context_watch": {
     "generatedAtIso": "2026-04-29T01:29:31.363Z",
     "level": "ok",
@@ -30,5 +23,20 @@
     "claude_code_execute dry-run preserved params after tool execute signature fix.",
     "test:monitor:regression passed 67 tests / 18 suites including tool execute signature regression.",
     "monitor-sovereign remains audit-only with divergence=0."
+  ],
+  "context_watch_events": [
+    {
+      "atIso": "2026-04-29T01:36:29.864Z",
+      "reason": "message_end",
+      "level": "warn",
+      "percent": 50,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
+    }
   ]
 }
