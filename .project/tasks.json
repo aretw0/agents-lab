@@ -4211,6 +4211,26 @@
       ],
       "verification": "VER-BUD-457",
       "notes": "[2026-04-29T19:13:14.462Z] slice=1 focus=TASK-BUD-176 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Refactor leve reduz mistura de domínios: autonomy lane continua cuidando seleção/plano, enquanto rehearsal gate tem surface própria."
+    },
+    {
+      "id": "TASK-BUD-177",
+      "description": "[P1] Expor resumo compacto na surface do unattended rehearsal gate para reduzir ruído operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-176"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-rehearsal-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "unattended_rehearsal_gate retorna summary compacto além do payload detalhado.",
+        "Smoke focal cobre o summary.",
+        "test:monitor:smoke permanece verde."
+      ],
+      "verification": "VER-BUD-458",
+      "notes": "[2026-04-29T19:20:20.187Z] slice=1 focus=TASK-BUD-177 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Summary reduz parsing manual do payload e favorece handoff/auto-resume enxuto sem perder detalhes."
     }
   ]
 }

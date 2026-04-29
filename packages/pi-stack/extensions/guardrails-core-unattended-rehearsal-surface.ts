@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { evaluateUnattendedRehearsalGate } from "./guardrails-core-unattended-rehearsal";
+import { evaluateUnattendedRehearsalGate, summarizeUnattendedRehearsalGate } from "./guardrails-core-unattended-rehearsal";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -27,7 +27,7 @@ export function registerGuardrailsUnattendedRehearsalSurface(pi: ExtensionAPI): 
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = evaluateUnattendedRehearsalGate({
+      const gate = evaluateUnattendedRehearsalGate({
         completedLocalSlices: asNumber(p.completed_local_slices, 0),
         focusPreserved: asBool(p.focus_preserved, false),
         focalSmokeGreen: asBool(p.focal_smoke_green, false),
@@ -36,6 +36,7 @@ export function registerGuardrailsUnattendedRehearsalSurface(pi: ExtensionAPI): 
         protectedScopeAutoSelections: asNumber(p.protected_scope_auto_selections, 0),
         unresolvedBlockers: asNumber(p.unresolved_blockers, 0),
       });
+      const result = { ...gate, summary: summarizeUnattendedRehearsalGate(gate) };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

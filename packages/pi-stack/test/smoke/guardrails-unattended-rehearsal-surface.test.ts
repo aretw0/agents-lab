@@ -26,5 +26,6 @@ describe("guardrails unattended rehearsal surface", () => {
 
     expect(result?.details.ready).toBe(true);
     expect(result?.details.decision).toBe("ready-for-canary");
+    expect(result?.details.summary).toBe("unattended-rehearsal: decision=ready-for-canary ready=yes score=6/6 blockers=none");
   });
 });

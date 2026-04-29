@@ -6342,6 +6342,15 @@
       "method": "test",
       "evidence": "Moved unattended_rehearsal_gate registration from guardrails-core-autonomy-lane-surface.ts to new guardrails-core-unattended-rehearsal-surface.ts, registered it in guardrails-core.ts, moved surface smoke coverage to guardrails-unattended-rehearsal-surface.test.ts, and added the new test to test:monitor:smoke. Validation: focal vitest for autonomy lane + unattended rehearsal surface/helper passed 10/10; cmd.exe /c npm run test:monitor:smoke --silent passed 119/119 across 18 files. [rationale:risk-control] Reduces surface coupling without behavior change or protected-scope drift.",
       "timestamp": "2026-04-29T19:13:14.462Z"
+    },
+    {
+      "id": "VER-BUD-458",
+      "target": "TASK-BUD-177",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "After reload, live unattended_rehearsal_gate returned ready-for-canary score=6/6 blockers=[]. Then the surface was updated to include summary from summarizeUnattendedRehearsalGate in its returned details/content. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 119/119. [rationale:risk-control] Adds compact operational evidence without removing detailed structured data.",
+      "timestamp": "2026-04-29T19:20:20.187Z"
     }
   ]
 }
