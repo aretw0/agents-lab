@@ -4493,6 +4493,30 @@
       ],
       "notes": "Criado após reload validar safe_marker_check ao vivo. [rationale:risk-control] Agora que há tool runtime, a política deve apontar para ela como default para evitar regressão para shell quoting.\n[2026-04-29T20:50:50.120Z] slice=1 focus=TASK-BUD-189 gate=safe_marker_check-summary-marker-check-ok-yes-matched-4/4-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora aponta safe_marker_check como default runtime para validações textuais, evitando regressão para shell quoting.",
       "verification": "VER-BUD-470"
+    },
+    {
+      "id": "TASK-BUD-190",
+      "description": "[P1] Criar classificador determinístico para sinais de manutenção Git GC/prune.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-183"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro classifica sinais Git como informational, warning ou intervention sem executar cleanup.",
+        "Critérios consideram loose objects, tamanho, garbage, gcLog, disco/performance e retornam summary compacto.",
+        "Smoke cobre estado atual leve, warning por gcLog e intervenção por disco/performance/garbage alto."
+      ],
+      "notes": "Criado como continuação local-safe após política Git GC. [rationale:risk-control] O aviso de manutenção deve virar sinal classificado e auditável, não interpretação manual nem prune automático.\n[2026-04-29T20:53:32.268Z] slice=1 focus=TASK-BUD-190 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Git maintenance agora tem helper puro para classificar informational/warning/intervention sem permitir cleanup automático.",
+      "verification": "VER-BUD-471"
     }
   ]
 }

@@ -6459,6 +6459,15 @@
       "method": "inspection",
       "evidence": "After reload, live safe_marker_check validated existing marker policy in docs/guides/project-canonical-pipeline.md: marker-check ok=yes matched=3/3. Updated the runbook to prefer safe_marker_check for operational marker checks, while leaving evaluateTextMarkerCheck as the pure helper for tests/code. A first doc marker check returned missing=1 because backtick formatting interrupted the phrase; adjusted the sentence to plain safe_marker_check and live safe_marker_check then returned summary=marker-check: ok=yes matched=4/4 missing=none commandSensitive=none. [rationale:risk-control] Establishes the runtime primitive as default and lets policy failures surface as structured marker results, not shell errors.",
       "timestamp": "2026-04-29T20:50:50.120Z"
+    },
+    {
+      "id": "VER-BUD-471",
+      "target": "TASK-BUD-190",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added evaluateGitMaintenanceSignal in packages/pi-stack/extensions/guardrails-core-git-maintenance.ts and exported it. The helper classifies git maintenance signals as informational/warning/intervention, returns action continue/monitor/ask-before-maintenance, compact summary, reasons, metrics, and cleanupAllowedAutomatically=false. Tests cover small clean repo, current observed shape (6089 loose objects, 10.14 MiB, gcLogPresent=true, garbage=0) as warning/monitor, and intervention for disk/performance/large size. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 134/134 across 23 files. [rationale:risk-control] Turns git gc warning interpretation into deterministic policy without running git prune/gc automatically.",
+      "timestamp": "2026-04-29T20:53:32.268Z"
     }
   ]
 }
