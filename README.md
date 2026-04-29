@@ -12,6 +12,15 @@
 - 📊 **Avaliar** — comparar abordagens, frameworks e filosofias de design
 - 🚀 **Evoluir** — superar qualquer engine específica caso o ecossistema avance
 
+## Posicionamento público
+
+Este repositório é local-first e outcome-agnostic: ele serve tanto para uso simples e manual quanto para evolução gradual rumo a control-plane, long-run e automação com evidência. A distribuição da `@aretw0/pi-stack` segue **simple-first** por padrão; superfícies avançadas ficam documentadas como opt-in.
+
+Metadata sugerida para o GitHub:
+
+- **Descrição:** Laboratório local-first para construir, calibrar e distribuir primitivas reutilizáveis de agentes de IA, incluindo a stack curada `@aretw0/pi-stack` para pi.
+- **Topics:** `ai-agents`, `pi`, `coding-agent`, `agent-tools`, `local-first`, `developer-tools`, `typescript`, `llm`, `automation`
+
 ## Engine Principal: Pi
 
 A engine primária deste laboratório é o **[pi](https://github.com/badlogic/pi-mono)** — um toolkit altamente extensível para construção de agentes de IA e gerenciamento de LLMs. Pi se prova excelente para "mess around and find out" e serve como engine de sistemas maiores.
@@ -190,6 +199,7 @@ Limites de segurança (bounded-by-default):
 
 - [pi-mono — repositório oficial](https://github.com/badlogic/pi-mono)
 - [Guias deste laboratório](./docs/guides/)
+  - [GitHub Repo Presence](./docs/guides/github-repo-presence.md)
   - [Web Session Gateway](./docs/guides/web-session-gateway.md)
   - [Colony Runtime Recovery](./docs/guides/colony-runtime-recovery.md)
 - [Pesquisas e análises](./docs/research/)

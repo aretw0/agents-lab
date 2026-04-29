@@ -3313,21 +3313,22 @@
     {
       "id": "TASK-BUD-135",
       "description": "[P2] Organizar presença do repositório no GitHub (MDT/docs drift + metadata pública) com postura de distribuição clara e profissional.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-OPS-HYGIENE-003"
       ],
       "files": [
-        "docs/guides/project-canonical-pipeline.md",
+        "README.md",
         "docs/guides/README.md",
-        "README.md"
+        "docs/guides/github-repo-presence.md"
       ],
       "acceptance_criteria": [
         "Existe checklist operacional para hygiene de repo no GitHub (incluindo drift de documentação/MDT) com rotina de revisão periódica.",
         "Descrição, topics/tags e metadados laterais do repositório ficam alinhados ao posicionamento da stack (simple-first + outcome-agnostic).",
         "Resultado fica registrado no board com evidência objetiva do antes/depois (sem bloquear o roadmap de desbloqueio atual)."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): organizar o repositório completo no GitHub para reduzir fricção de descoberta e manter coerência entre documentação interna e apresentação pública."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): organizar o repositório completo no GitHub para reduzir fricção de descoberta e manter coerência entre documentação interna e apresentação pública.\nCompleted 2026-04-29: added GitHub repository presence checklist with target public description/topics, README positioning, docs index, periodic docs/MDT drift routine, and explicit no-remote-mutation policy. Validation: targeted Python link/existence check passed.\n[rationale:risk-control] Slice documents desired public metadata and periodic drift/MDT review without remote mutation, CI changes or publish, preserving local-first bounded operation under machine warning.",
+      "verification": "VER-BUD-409"
     },
     {
       "id": "TASK-BUD-136",

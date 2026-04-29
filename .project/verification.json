@@ -5901,6 +5901,15 @@
       "method": "test",
       "evidence": "Implemented unified AST-first structured I/O slice: structuredRead/structuredWrite now resolve kind=auto|json|markdown|latex; JSON keeps parser path; Markdown supports heading:<title>; LaTeX supports section:<title>; outputs include via/sourceSpan, dry-run default, rollback token and blast-radius cap; unified structured_io tool added while structured_io_json remains compatible. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts (17/17 passed); cmd.exe /c npm run test:monitor:smoke --silent (90/90 passed, 13 files).\n[rationale:risk-control] Expansão preserva compatibilidade da tool JSON legada e limita Markdown/LaTeX a seções com parser leve, dry-run, sourceSpan e maxTouchedLines para reduzir edição textual frágil sem ampliar blast-radius.",
       "timestamp": "2026-04-29T11:53:42.206152Z"
+    },
+    {
+          "id": "VER-BUD-409",
+          "target": "TASK-BUD-135",
+          "target_type": "task",
+          "status": "passed",
+          "method": "inspect",
+          "evidence": "GitHub repository presence checklist added in docs/guides/github-repo-presence.md and indexed from README.md/docs/guides/README.md. README now records public positioning (local-first, outcome-agnostic, simple-first) plus suggested description/topics. No remote GitHub metadata was mutated; checklist requires explicit operator intent before gh repo edit. Validation: targeted Python link/existence check over README.md, docs/guides/README.md, docs/guides/github-repo-presence.md passed. [rationale:risk-control] Slice documents desired public metadata and periodic drift/MDT review without remote mutation, CI changes or publish, preserving local-first bounded operation under machine warning.",
+          "timestamp": "2026-04-29T11:57:25.279372Z"
     }
   ]
 }

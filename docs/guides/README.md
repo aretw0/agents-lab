@@ -44,6 +44,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [first-party-assimilation-notes.md](./first-party-assimilation-notes.md) | Memória técnica de capacidades suprimidas por conflito para futura centralização first-party |
 | [ci-governance.md](./ci-governance.md) | Troubleshooting dos gates de soberania no CI (annotations, registry, criticality, owner) |
 | [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
+| [github-repo-presence.md](./github-repo-presence.md) | Checklist de presença pública do repositório no GitHub: metadata, README e drift de docs/MDT |
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 
 ### Embedding e Integração
