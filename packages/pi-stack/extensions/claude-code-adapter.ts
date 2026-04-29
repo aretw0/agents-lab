@@ -279,7 +279,12 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       dry_run: Type.Optional(Type.Boolean({ description: "Preview budget state without executing. Default: false." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Subprocess timeout in milliseconds. Default: 120000." })),
     }),
-    async execute({ goal, cwd, dry_run, timeout_ms }) {
+    async execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const goal = typeof p.goal === "string" ? p.goal : "";
+      const cwd = typeof p.cwd === "string" ? p.cwd : undefined;
+      const dry_run = typeof p.dry_run === "boolean" ? p.dry_run : false;
+      const timeout_ms = typeof p.timeout_ms === "number" ? p.timeout_ms : undefined;
       const isDryRun = dry_run ?? false;
       const timeoutMs = typeof timeout_ms === "number" && timeout_ms > 0 ? timeout_ms : 120_000;
       const budgetState = checkBudgetGate(sessionRequests, budgetCfg);

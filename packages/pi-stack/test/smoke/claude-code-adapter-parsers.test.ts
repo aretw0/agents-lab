@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
+import claudeCodeAdapterExtension, {
   parseWhichLikeOutput,
   parseAuthStatusOutput,
   parseClaudeCodeRequestBudget,
@@ -120,6 +120,34 @@ describe("claude-code adapter — checkBudgetGate", () => {
     const cfg7 = parseClaudeCodeRequestBudget({ sessionRequestCap: 7, warnFraction: 0.5 });
     const state = checkBudgetGate(0, cfg7);
     expect(state.warnAt).toBe(4); // ceil(7 * 0.5) = 4
+  });
+});
+
+describe("claude-code adapter — execute signature", () => {
+  it("usa params como segundo argumento na assinatura real do pi", async () => {
+    let registeredTool: {
+      name: string;
+      execute: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details: Record<string, unknown> }>;
+    } | undefined;
+
+    claudeCodeAdapterExtension({
+      registerTool(tool: unknown) {
+        const candidate = tool as typeof registeredTool;
+        if (candidate?.name === "claude_code_execute") registeredTool = candidate;
+      },
+      registerCommand() {},
+    } as never);
+
+    const output = await registeredTool?.execute("call-test", {
+      goal: "hello",
+      dry_run: true,
+      cwd: "C:/tmp/work",
+      timeout_ms: 1234,
+    });
+
+    expect(output?.details.dryRun).toBe(true);
+    expect(output?.details.goal).toBe("hello");
+    expect(output?.details.cwd).toBe("C:/tmp/work");
   });
 });
 
