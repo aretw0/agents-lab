@@ -4521,7 +4521,7 @@
     {
       "id": "TASK-BUD-191",
       "description": "[P2] Revisar skills para discoverability e paridade com guides, usando princípios MDT para reduzir drift documental.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-173",
@@ -4539,6 +4539,29 @@
         "Criar plano incremental de atualização de skills com validação por markers/safe_marker_check."
       ],
       "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega.\n[2026-04-29T20:57:14.467Z] Backlog clarification: MDT reference is concrete repo https://github.com/ifiokjr/mdt, not vague acronym. Keep as influence source for skill/guide parity and documentation drift review; do not research automatically until TASK-BUD-191 is explicitly selected. [rationale:design] Concrete source anchor improves future discoverability/research without opening external research now."
+    },
+    {
+      "id": "TASK-BUD-192",
+      "description": "[P1] Definir protocolo de paridade guide-skill para aumentar discoverability sem drift documental.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-191"
+      ],
+      "files": [
+        "docs/guides/skill-guide-parity.md",
+        "docs/guides/README.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar quando uma decisão deve estar em guide, skill ou ambos.",
+        "Definir mecanismo de anchors/parity markers validável por safe_marker_check.",
+        "Incluir referência concreta a https://github.com/ifiokjr/mdt como inspiração futura, sem abrir pesquisa ampla.",
+        "Registrar plano incremental para revisar skills sem broad scan descontrolado."
+      ],
+      "notes": "Criado como slice bounded do TASK-BUD-191 após operador pedir voltar ao track importante que desbloqueia potencial acumulado. [rationale:design] Skills aumentam discoverability para modelo/usuário; guides preservam profundidade canônica; paridade explícita reduz drift.\n[2026-04-29T20:58:54.039Z] slice=1 focus=TASK-BUD-192 gate=safe_marker_check-doc=5/5-readme=3/3 commit=pending drift=no next=commit-and-handoff. [rationale:design] Protocolo define quando guides, skills ou ambos devem carregar decisões e como validar parity markers sem broad scan.",
+      "verification": "VER-BUD-472"
     }
   ]
 }

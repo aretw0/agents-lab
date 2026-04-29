@@ -6468,6 +6468,15 @@
       "method": "test",
       "evidence": "Added evaluateGitMaintenanceSignal in packages/pi-stack/extensions/guardrails-core-git-maintenance.ts and exported it. The helper classifies git maintenance signals as informational/warning/intervention, returns action continue/monitor/ask-before-maintenance, compact summary, reasons, metrics, and cleanupAllowedAutomatically=false. Tests cover small clean repo, current observed shape (6089 loose objects, 10.14 MiB, gcLogPresent=true, garbage=0) as warning/monitor, and intervention for disk/performance/large size. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 134/134 across 23 files. [rationale:risk-control] Turns git gc warning interpretation into deterministic policy without running git prune/gc automatically.",
       "timestamp": "2026-04-29T20:53:32.268Z"
+    },
+    {
+      "id": "VER-BUD-472",
+      "target": "TASK-BUD-192",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Created docs/guides/skill-guide-parity.md and linked it from docs/guides/README.md. The protocol defines guide as canonical depth, skill as discovery/execution surface, intentional duplication rules, parity markers, incremental review flow, and concrete MDT anchor https://github.com/ifiokjr/mdt for future bounded influence. Validation used live safe_marker_check: skill-guide-parity markers passed 5/5; README markers passed 3/3. [rationale:design] Establishes a controlled path for skill discoverability without broad scans or document drift.",
+      "timestamp": "2026-04-29T20:58:54.039Z"
     }
   ]
 }
