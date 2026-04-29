@@ -35,6 +35,8 @@ import {
 	resolveContextWatchSteeringDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
 	resolvePreCompactCalmCloseSignal,
+	resolveProgressPreservationSignal,
+	summarizeProgressPreservationSignal,
 	resolveAntiParalysisDispatch,
 	isAutoCompactDeferralReason,
 	resolveHandoffFreshness,
@@ -383,6 +385,56 @@ describe("context-watchdog", () => {
 			deferCount: 0,
 		});
 		expect(nonCompact.calmCloseReady).toBe(false);
+	});
+
+	it("surfaces progress-preservation assurance without noisy notification", () => {
+		const freshCheckpoint = resolveProgressPreservationSignal({
+			assessmentLevel: "compact",
+			handoffFreshnessLabel: "fresh",
+			checkpointEvidenceReady: true,
+			compactCheckpointPersistRecommended: false,
+			autoResumeEnabled: true,
+		});
+		expect(freshCheckpoint).toMatchObject({
+			status: "ready",
+			progressSaved: true,
+			compactCheckpointReady: true,
+		});
+
+		const compactAutoPersist = resolveProgressPreservationSignal({
+			assessmentLevel: "compact",
+			handoffFreshnessLabel: "fresh",
+			checkpointEvidenceReady: false,
+			compactCheckpointPersistRecommended: true,
+			autoResumeEnabled: true,
+		});
+		expect(compactAutoPersist).toMatchObject({
+			status: "will-auto-persist",
+			progressSaved: true,
+			compactCheckpointReady: true,
+		});
+
+		const freshHandoff = resolveProgressPreservationSignal({
+			assessmentLevel: "warn",
+			handoffFreshnessLabel: "fresh",
+			checkpointEvidenceReady: false,
+			compactCheckpointPersistRecommended: false,
+			autoResumeEnabled: true,
+		});
+		expect(freshHandoff).toMatchObject({
+			status: "fresh-handoff",
+			progressSaved: true,
+			compactCheckpointReady: false,
+		});
+		expect(summarizeProgressPreservationSignal(freshHandoff)).toContain("saved=yes");
+
+		expect(resolveProgressPreservationSignal({
+			assessmentLevel: "checkpoint",
+			handoffFreshnessLabel: "stale",
+			checkpointEvidenceReady: false,
+			compactCheckpointPersistRecommended: false,
+			autoResumeEnabled: true,
+		}).status).toBe("needs-checkpoint");
 	});
 
 	it("gates anti-paralysis warning with grace/cooldown and window cap", () => {

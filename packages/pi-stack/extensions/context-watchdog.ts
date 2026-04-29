@@ -468,6 +468,21 @@ export type PreCompactCalmCloseSignal = {
 	recommendation: string;
 };
 
+export type ProgressPreservationStatus =
+	| "ready"
+	| "fresh-handoff"
+	| "will-auto-persist"
+	| "needs-checkpoint"
+	| "unknown";
+
+export type ProgressPreservationSignal = {
+	status: ProgressPreservationStatus;
+	progressSaved: boolean;
+	compactCheckpointReady: boolean;
+	reason: string;
+	recommendation: string;
+};
+
 export type AntiParalysisDispatchDecision = {
 	shouldNotify: boolean;
 	reason:
@@ -492,6 +507,66 @@ export function resolveCheckpointEvidenceReadyForCalmClose(input: {
 	if (ageMs === undefined || !Number.isFinite(ageMs)) return true;
 	const maxAgeMs = Math.max(60_000, Math.floor(Number(input.maxCheckpointAgeMs ?? 0)));
 	return ageMs <= maxAgeMs;
+}
+
+export function resolveProgressPreservationSignal(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	handoffFreshnessLabel: "fresh" | "stale" | "unknown";
+	checkpointEvidenceReady: boolean;
+	compactCheckpointPersistRecommended: boolean;
+	autoResumeEnabled: boolean;
+}): ProgressPreservationSignal {
+	if (input.checkpointEvidenceReady) {
+		return {
+			status: "ready",
+			progressSaved: true,
+			compactCheckpointReady: true,
+			reason: "fresh-context-watch-checkpoint-evidence",
+			recommendation: "progress-preservation: checkpoint evidence is fresh; compact/resume can proceed without another manual checkpoint.",
+		};
+	}
+
+	if (input.assessmentLevel === "compact" && input.compactCheckpointPersistRecommended && input.autoResumeEnabled) {
+		return {
+			status: "will-auto-persist",
+			progressSaved: input.handoffFreshnessLabel === "fresh",
+			compactCheckpointReady: true,
+			reason: "compact-lane-auto-persist-before-compact",
+			recommendation: "progress-preservation: compact lane will persist a compact checkpoint before auto-compact; keep output short and let idle compact proceed.",
+		};
+	}
+
+	if (input.handoffFreshnessLabel === "fresh") {
+		return {
+			status: "fresh-handoff",
+			progressSaved: true,
+			compactCheckpointReady: false,
+			reason: "fresh-handoff-without-context-watch-checkpoint-event",
+			recommendation: "progress-preservation: handoff is fresh, but no context-watch checkpoint event is recorded yet; refresh at checkpoint/near compact before large output.",
+		};
+	}
+
+	if (input.handoffFreshnessLabel === "stale") {
+		return {
+			status: "needs-checkpoint",
+			progressSaved: false,
+			compactCheckpointReady: false,
+			reason: "handoff-stale",
+			recommendation: "progress-preservation: handoff is stale; write a short checkpoint before compact-risk work.",
+		};
+	}
+
+	return {
+		status: "unknown",
+		progressSaved: false,
+		compactCheckpointReady: false,
+		reason: "handoff-missing-or-unreadable",
+		recommendation: "progress-preservation: checkpoint evidence is unavailable; write a short handoff before compact-risk work.",
+	};
+}
+
+export function summarizeProgressPreservationSignal(signal: ProgressPreservationSignal): string {
+	return `progress-preservation: ${signal.status} saved=${signal.progressSaved ? "yes" : "no"} compactReady=${signal.compactCheckpointReady ? "yes" : "no"} reason=${signal.reason}`;
 }
 
 export function resolvePreCompactCalmCloseSignal(input: {
@@ -1154,6 +1229,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			deferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
 		});
+		const progressPreservation = resolveProgressPreservationSignal({
+			assessmentLevel: assessment.level,
+			handoffFreshnessLabel: handoffFreshness.label,
+			checkpointEvidenceReady,
+			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
+			autoResumeEnabled: config.autoResumeAfterCompact,
+		});
 		const antiParalysisDispatch = resolveAntiParalysisDispatch({
 			triggered: calmClose.antiParalysisTriggered,
 			nowMs,
@@ -1202,6 +1284,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
 			handoffLastEventAgeMs,
 			handoffLastEventAgeSec,
+			progressPreservation,
+			progressPreservationSummary: summarizeProgressPreservationSignal(progressPreservation),
 			calmCloseReady: calmClose.calmCloseReady,
 			checkpointEvidenceReady: calmClose.checkpointEvidenceReady,
 			deferCount: calmClose.deferCount,

@@ -3418,7 +3418,7 @@
     {
       "id": "TASK-BUD-139",
       "description": "[P1] Instituir \"decision packet\" automático para tarefas em no-auto-close (resumo de evidência + opções de decisão humana).",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-119"
       ],
@@ -3435,7 +3435,7 @@
         "Pacote inclui evidências canônicas recentes (verification IDs, comandos/testes, blockers remanescentes) sem exigir pergunta explícita do usuário.",
         "Processo preserva no-auto-close e reduz fricção: usuário só decide, não precisa pedir descoberta manual."
       ],
-      "notes": "Backlog aberto por feedback humano (2026-04-24): hoje o usuário ainda precisa lembrar de perguntar pendências de decisão; objetivo é tornar esse checkpoint proativo e determinístico."
+      "notes": "Backlog aberto por feedback humano (2026-04-24): hoje o usuário ainda precisa lembrar de perguntar pendências de decisão; objetivo é tornar esse checkpoint proativo e determinístico.\n[2026-04-29T13:33:42.756Z] Steering assimilado: auto-compact foi percebido como agressivo quando não houve chance visível de conferir checkpoint final antes da perda de memória. Slice implementado adiciona sinal passivo progressPreservation/progressPreservationSummary no context-watch para diferenciar checkpoint pronto, handoff fresco, auto-persist antes do compact e necessidade real de checkpoint. Validação: cmd.exe /c npm run test:monitor:smoke --silent (96/96). [rationale:risk-control] O operador/usuário precisa de evidência curta de que o progresso foi salvo antes de compactar, sem transformar warn/checkpoint em parada ruidosa."
     },
     {
       "id": "TASK-BUD-140",
@@ -3871,6 +3871,29 @@
         "Documentar a política operacional e sua relação com guardrails, skill routing e parity/curation."
       ],
       "notes": "Backlog criado a partir de decisão conversacional em 2026-04-28: não puxar execução agora; retomar como lane de médio prazo após estabilizar monitores/control-plane. Rationale: acesso read-only a skills relevantes instaladas/configuradas deve ser considerado baixo risco e necessário para autonomia, desde que local-first, bounded e sem execução automática."
+    },
+    {
+      "id": "TASK-BUD-161",
+      "description": "[P1/médio prazo] Criar sinais passivos de oportunidade de economia de contexto inspirados em Squeez, sem compactação agressiva nem ruído excessivo.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-148",
+        "TASK-BUD-139"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md"
+      ],
+      "acceptance_criteria": [
+        "Detectar oportunidades de economia (tool-output repetitivo, handoff grande, evidência re-lida pós-compact, next-actions truncadas) como status/telemetria passiva, não como interrupção padrão.",
+        "Diferenciar sugestão de economia de gatilho de compactação: o sinal deve orientar o próximo slice sem forçar compact nem esconder evidência canônica.",
+        "Medir impacto com métricas simples (tamanho de handoff/tool-output por slice, re-leitura pós-resume, smoke focal sem regressão/classify-fail).",
+        "Documentar como práticas Squeez-like entram no dia a dia: output shaping, dedupe e checkpoints sintéticos opt-in, preservando aprendizado operacional."
+      ],
+      "notes": "Backlog criado por steering humano em 2026-04-29T13:33:42.756Z: compactação foi percebida como agressiva quando não houve verificação visível de checkpoint final. O caminho imediato é progressPreservation; o médio prazo é sinal passivo de economia/contexto para aprender com operações sem ruído. [rationale:risk-control] Economia de contexto só é útil se não sacrificar continuidade, aprendizado operacional e confiança do usuário."
     }
   ]
 }
