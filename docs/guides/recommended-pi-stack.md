@@ -190,6 +190,17 @@ A stack evolui em dois sentidos:
 
 O critério de entrada de um pacote de terceiro na stack é: **uso real + valor comprovado + sem overlap não resolvido**.
 
+### Política read-only de skills instaladas
+
+Quando uma skill é relevante e já está instalada/configurada, leitura bounded é baixo risco e deve ser local-first:
+
+1. resolver raiz por precedência `project-local > workspace node_modules > global allowlisted`;
+2. permitir leitura exata de `SKILL.md` e docs relativos dentro da raiz da skill/pacote;
+3. bloquear discovery/scan recursivo amplo, path escape e skills globais não allowlisted;
+4. manter aprovação explícita para instalar/habilitar pacote ou executar comandos sugeridos pela skill.
+
+Essa política reduz prompts desnecessários em loops unattended sem transformar skill routing em execução automática.
+
 ### Centralização first-party por ondas (sem big-bang)
 
 Para preservar estabilidade de long-run, a migração segue ondas pequenas/reversíveis:

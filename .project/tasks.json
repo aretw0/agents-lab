@@ -3857,7 +3857,7 @@
     {
       "id": "TASK-BUD-160",
       "description": "[P1/médio prazo] Formalizar política local-first de resolução e acesso read-only a skills (project/local → workspace node_modules → global allowlisted), evitando pedidos de permissão desnecessários quando a skill é relevante e já está instalada/configurada.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-043"
       ],
@@ -3874,7 +3874,8 @@
         "Adicionar gate/testes cobrindo local-over-global, fallback para node_modules configurado, global allowlisted, links relativos dentro da skill e bloqueio de scans explosivos.",
         "Documentar a política operacional e sua relação com guardrails, skill routing e parity/curation."
       ],
-      "notes": "Backlog criado a partir de decisão conversacional em 2026-04-28: não puxar execução agora; retomar como lane de médio prazo após estabilizar monitores/control-plane. Rationale: acesso read-only a skills relevantes instaladas/configuradas deve ser considerado baixo risco e necessário para autonomia, desde que local-first, bounded e sem execução automática."
+      "notes": "Backlog criado a partir de decisão conversacional em 2026-04-28: não puxar execução agora; retomar como lane de médio prazo após estabilizar monitores/control-plane. Rationale: acesso read-only a skills relevantes instaladas/configuradas deve ser considerado baixo risco e necessário para autonomia, desde que local-first, bounded e sem execução automática.\n[2026-04-29T17:26:56.613Z] Completed with VER-BUD-446: local-first read-only skill access policy implemented as deterministic helper/contract and documented. [rationale:risk-control] Bounded skill reads are low-risk for unattended autonomy, while global/unbounded/execute paths remain gated.",
+      "verification": "VER-BUD-446"
     },
     {
       "id": "TASK-BUD-161",

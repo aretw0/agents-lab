@@ -83,3 +83,4 @@ export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessSt
 export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, buildRefactorRenameSymbolResult } from "./guardrails-core-macro-refactor";
 export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
+export { resolveSkillAccessRoot, resolveSkillReadAccess } from "./guardrails-core-skill-access-policy";

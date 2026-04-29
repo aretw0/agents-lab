@@ -6234,6 +6234,15 @@
       "method": "test",
       "evidence": "Autonomy task selector now treats GitHub Actions, gh actions, remote compute, remote execution and remote runner/runners text as protected scope unless includeProtectedScopes=true. Added smoke coverage for GitHub Actions remote compute being skipped by default. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 101/101. [rationale:risk-control] Protects local-first unattended loops from drifting into CI/remote execution before explicit authorization.",
       "timestamp": "2026-04-29T17:20:49.105Z"
+    },
+    {
+      "id": "VER-BUD-446",
+      "target": "TASK-BUD-160",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented local-first read-only skill access policy helper. Added guardrails-core-skill-access-policy.ts with deterministic root resolution project-local > workspace-node-modules > global-allowlisted; bounded read decisions for SKILL.md/linked in-root docs; blocks path escape, recursive scans, global non-allowlisted skills and execute/install without approval. Re-exported helper and added smoke coverage. Documented policy in docs/guides/recommended-pi-stack.md. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 106/106. [rationale:risk-control] Reduces unnecessary permission prompts for relevant installed skills without granting execution or broad discovery.",
+      "timestamp": "2026-04-29T17:26:56.613Z"
     }
   ]
 }
