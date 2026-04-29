@@ -2918,8 +2918,8 @@
     {
       "id": "colony-colony-signal-launched",
       "description": "[COLONY:ant_colony] colony COLONY_SIGNAL:LAUNCHED",
-      "status": "in-progress",
-      "notes": "[2026-04-23T04:57:01.505Z] colony COLONY_SIGNAL:LAUNCHED phase=unknown"
+      "status": "completed",
+      "notes": "[2026-04-23T04:57:01.505Z] colony COLONY_SIGNAL:LAUNCHED phase=unknown\n[completion] Closed as stale colony telemetry after reconciliation. Evidence `VER-BUD-404`: `bg_colony_status` reports no current colony running; historical session signals show launched/complete telemetry but no active work item to execute."
     },
     {
       "id": "TASK-BUD-123",

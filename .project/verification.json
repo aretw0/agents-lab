@@ -5856,6 +5856,15 @@
       "method": "inspect",
       "timestamp": "2026-04-29T10:25:30Z",
       "evidence": "Final consolidation for TASK-OPS-HYGIENE-003 passed. `docs/guides/lab-user-surface-parity.md` defines parity-by-default, temporary lab-only exceptions, promotion/removal criteria, governance through board/verification, and outcome-agnostic simple-first distribution. `docs/guides/project-canonical-pipeline.md` includes the canonical distributed-surface hygiene section with parity, documented exceptions, promotion to tool/command/monitor/signal, periodic drift review, and progressive disclosure. `docs/guides/README.md` indexes the parity guide. The next inventory/reduction step is represented by dependent `TASK-BUD-130`, satisfying the requested board follow-up for lab↔distributed surface differences."
+    },
+    {
+      "id": "VER-BUD-404",
+      "target": "colony-colony-signal-launched",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-04-29T10:27:30Z",
+      "evidence": "Board hygiene reconciliation for stale colony telemetry task. `bg_colony_status` returned: no colony is currently running. `session_analytics_query(query_type=signals, lookback_hours=168, signal_filter=COMPLETE,FAILED,BUDGET_EXCEEDED,LAUNCHED)` found historical LAUNCHED/COMPLETE/BUDGET_EXCEEDED signals, confirming this task is telemetry/history rather than an active executable blocker. Closing prevents stale `COLONY_SIGNAL:LAUNCHED` from dominating conservative autonomy selection."
     }
   ]
 }
