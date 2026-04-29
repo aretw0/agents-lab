@@ -5955,6 +5955,15 @@
       "method": "test",
       "evidence": "Canonical command/intent bus closed from accumulated validated slices: typed guardrails envelopes for board.execute-task/board.execute-next, deterministic encode/parse/summary, before_agent_start consumer guidance, board-next dispatch fallback/requeue audit, lane-now immediate follow-up path, dedupe/canonicalization, and orphan/rapid-redispatch hardening. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed). [rationale:risk-control] Reduces dependence on fragile manual slash-command chaining while preserving audited fallback/manual recovery paths for degraded capability.",
       "timestamp": "2026-04-29T12:37:27.320Z"
+    },
+    {
+      "id": "VER-BUD-415",
+      "target": "TASK-BUD-124",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Provider transient retry strategy closed after focal revalidation: transient errors (server overload/429/5xx) are classified, providerTransientRetry is configurable with default maxAttempts >= 10, retry delay uses deterministic exponential backoff with cap, dispatch-failure block threshold expands for transient retry budget, and retry-exhausted status/audit expose actionable recovery lines. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed). [rationale:risk-control] Keeps unattended loops resilient to transient provider failures without silent infinite retries; exhaustion remains explicit and auditable.",
+      "timestamp": "2026-04-29T12:38:19.022Z"
     }
   ]
 }
