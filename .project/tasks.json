@@ -4938,6 +4938,27 @@
         "Rodar como gate local opcional ou smoke bounded antes de virar CI/GitHub Actions."
       ],
       "notes": "Backlog criado a pedido do operador. [rationale:quality] Queremos capturar typos em strings sem misturar isso com tradução automática; o lint deve ser i18n-aware, local-first e opt-in antes de qualquer promoção para CI."
+    },
+    {
+      "id": "TASK-BUD-209",
+      "description": "[P1] Incluir project-board-surface no smoke principal do loop unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-207"
+      ],
+      "files": [
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "project-board-surface.test.ts roda no test:monitor:smoke.",
+        "Gate protege query/update/decision packet/rationale do board usado pelo loop unattended.",
+        "Focal project-board-surface e smoke completo permanecem verdes."
+      ],
+      "notes": "Criado na lane essencial de segurança/controle do loop. [rationale:risk-control] O board é a autoridade operacional do loop unattended; seus helpers precisam estar no smoke principal para evitar drift silencioso.\n[2026-04-29T23:06:46.750Z] slice=1 focus=TASK-BUD-209 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] project-board-surface agora roda no smoke principal, protegendo query/update/decision/rationale usados pelo loop unattended.",
+      "verification": "VER-BUD-488"
     }
   ]
 }

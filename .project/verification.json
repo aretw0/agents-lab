@@ -6612,6 +6612,15 @@
       "method": "test",
       "evidence": "Extended guardrails-core-orchestrator-budget smoke to assert guardrails-core wires evaluateBashGuardPolicies(command) from ./guardrails-core-bash-guard-policies and does not contain SESSION_LOG_PATH_PATTERN or PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts passed 2/2; cmd.exe /c npm run test:monitor:smoke --silent passed 154/154 across 31 files. [rationale:risk-control] Protects the extracted bash guard policy boundary, not only the line budget.",
       "timestamp": "2026-04-29T23:00:47.736Z"
+    },
+    {
+      "id": "VER-BUD-488",
+      "target": "TASK-BUD-209",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added packages/pi-stack/test/smoke/project-board-surface.test.ts to test:monitor:smoke so the canonical board surface used by unattended loops is covered by the main local smoke gate. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 44/44; cmd.exe /c npm run test:monitor:smoke --silent passed 198/198 across 32 files. [rationale:risk-control] Prevents silent drift in board query/update/decision/rationale behavior that controls audited long-run work.",
+      "timestamp": "2026-04-29T23:06:46.750Z"
     }
   ]
 }
