@@ -4727,6 +4727,27 @@
       ],
       "notes": "Criado como continuação essencial após o helper de método de validação. [rationale:risk-control] A escolha segura do método de validação precisa estar disponível em runtime para evitar regressão a shell/validação artesanal.\n[2026-04-29T21:36:37.801Z] slice=1 focus=TASK-BUD-199 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] validation_method_plan fica disponível em runtime para escolher método seguro sem efeitos colaterais.",
       "verification": "VER-BUD-479"
+    },
+    {
+      "id": "TASK-BUD-200",
+      "description": "[P1] Documentar uso operacional de validation_method_plan na doutrina unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-199"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina orienta usar validation_method_plan quando o método de validação for ambíguo.",
+        "Documento explicita safe_marker_check para markers, focal test com gate conhecido e structured-read para inspeções read-only.",
+        "Validação usa safe_marker_check e evidência inclui leitura ao vivo pós-reload."
+      ],
+      "notes": "Criado após reload validar validation_method_plan ao vivo. [rationale:risk-control] A decisão de continuar precisa vir acompanhada de método seguro de validação; documentar o uso runtime evita regressão para checks frágeis.\n[2026-04-29T21:53:19.205Z] slice=1 focus=TASK-BUD-200 gate=safe_marker_check-summary-marker-check-ok-yes-matched-6/6-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta validation_method_plan para escolher método seguro quando a validação é ambígua.",
+      "verification": "VER-BUD-480"
     }
   ]
 }

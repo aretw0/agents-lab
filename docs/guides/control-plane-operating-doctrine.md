@@ -62,6 +62,17 @@ Quando o foco termina e não há canário remoto autorizado, priorize:
 
 Remote/offload só vem depois de scorecard local verde e intenção explícita do operador.
 
+## Método de validação
+
+Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:
+
+- markers de texto devem ir para `safe_marker_check` ou `evaluateTextMarkerCheck`, não para shell inline;
+- teste focal só deve rodar quando o gate é conhecido e bounded;
+- inspeção read-only deve usar structured-read quando aplicável;
+- validação que toca escopo protegido ou exige mutação deve bloquear e pedir intenção explícita.
+
+Registre o `summary` compacto da decisão quando ele explicar por que o método escolhido é seguro.
+
 ## Evidência mínima por fatia
 
 Use uma linha curta:
