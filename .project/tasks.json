@@ -3894,6 +3894,28 @@
         "Documentar como práticas Squeez-like entram no dia a dia: output shaping, dedupe e checkpoints sintéticos opt-in, preservando aprendizado operacional."
       ],
       "notes": "Backlog criado por steering humano em 2026-04-29T13:33:42.756Z: compactação foi percebida como agressiva quando não houve verificação visível de checkpoint final. O caminho imediato é progressPreservation; o médio prazo é sinal passivo de economia/contexto para aprender com operações sem ruído. [rationale:risk-control] Economia de contexto só é útil se não sacrificar continuidade, aprendizado operacional e confiança do usuário."
+    },
+    {
+      "id": "TASK-BUD-162",
+      "description": "[P2/médio prazo] Avaliar e assimilar influências boas de impeccable.style como primitivas de estilo/clareza/qualidade operacional, sem desviar do foco local-first atual.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-161"
+      ],
+      "files": [
+        "docs/research/impeccable-style-influence-2026-04.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "packages/lab-skills/skills/control-plane-ops/SKILL.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar leitura/triagem bounded de https://impeccable.style/ com foco em práticas transferíveis para agentes, prompts, docs, UI textual e revisão de qualidade.",
+        "Separar influências em: adotar agora, cultivar como primitiva, manter como inspiração, ou rejeitar por desalinhamento com local-first/simple-first.",
+        "Traduzir boas práticas em pelo menos uma proposta concreta de primitive/runbook/checklist com métrica de benefício e baixo ruído.",
+        "Posicionar impeccable.style ao lado de Squeez/mdt no mapa de influências, preservando foco no trabalho principal e evitando pesquisa ampla oportunista durante checkpoint/compact."
+      ],
+      "verification": "",
+      "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual."
     }
   ]
 }
