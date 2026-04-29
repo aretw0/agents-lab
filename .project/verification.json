@@ -6000,6 +6000,15 @@
       "method": "test",
       "evidence": "Colony-pilot deflation primitive closed after accumulated extraction slices. Entry point remains an orchestrator (packages/pi-stack/extensions/colony-pilot.ts: 2115 lines) with delivery-policy, budget-policy, baseline, model-policy, artifacts, command-surface, settings, output-policy, session-utils and provider-budget-gate domains extracted into cohesive modules while public names remain covered by parser smoke. Validation: wc -l packages/pi-stack/extensions/colony-pilot.ts (2115); cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (82/82 passed). [rationale:risk-control] Smaller cohesive modules make long-run maintenance safer and more reusable without changing runtime defaults or protected settings.",
       "timestamp": "2026-04-29T12:46:30.945Z"
+    },
+    {
+      "id": "VER-BUD-420",
+      "target": "TASK-BUD-120",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Auto-resume trust surface improved for compacted handoffs: buildAutoResumePromptFromHandoff now preserves operational focus when current_tasks is empty and no TASK id is present by deriving hints such as autonomy-lane-status, board-task-selection, and lane-queue from next_actions/blockers/context. This prevents focusTasks: none-listed in autonomy-lane resumes like the observed compact incident. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts (30/30 passed); cmd.exe /c npm run test:monitor:smoke --silent (92/92 passed). [rationale:risk-control] Long-run auto-resume needs actionable, low-noise focus without stale evidence; operational hints keep the loop resumable while preserving bounded prompt size.",
+      "timestamp": "2026-04-29T12:49:29.575Z"
     }
   ]
 }

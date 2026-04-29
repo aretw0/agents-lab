@@ -578,6 +578,17 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("focusTasks: TASK-BUD-119, TASK-BUD-115, TASK-BUD-112");
 	});
 
+	it("keeps autonomy lane focus visible when no concrete task id survived compact", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			next_actions: [
+				"Continue local-first monitor/control-plane calibration with bounded slices.",
+				"Use autonomy_lane_status for conservative task selection and skip protected/missing-rationale scopes by default.",
+			],
+		} as any);
+		expect(prompt).toContain("focusTasks: autonomy-lane-status");
+		expect(prompt).not.toContain("focusTasks: none-listed");
+	});
+
 	it("annotates omitted list items with explicit +N more marker", () => {
 		const prompt = buildAutoResumePromptFromHandoff({
 			current_tasks: ["TASK-BUD-101", "TASK-BUD-102", "TASK-BUD-103", "TASK-BUD-104"],

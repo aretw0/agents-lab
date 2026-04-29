@@ -201,6 +201,29 @@ function extractTaskIdsFromTextLines(values: string[], limit = 3): string[] {
 	return ids;
 }
 
+function extractOperationalFocusHints(values: string[], limit = 3): string[] {
+	const hints: string[] = [];
+	const add = (hint: string) => {
+		if (hints.includes(hint) || hints.length >= limit) return;
+		hints.push(hint);
+	};
+	for (const value of values) {
+		const normalized = String(value ?? "").toLowerCase();
+		if (!normalized) continue;
+		if (/\bautonomy[_ -]?lane[_ -]?status\b/.test(normalized) || /\bautonomy lane\b/.test(normalized)) {
+			add("autonomy-lane-status");
+		}
+		if (/\bboard[-_ ]?(next|task|selection)\b/.test(normalized) || /\btask selection\b/.test(normalized)) {
+			add("board-task-selection");
+		}
+		if (/\blane[-_ ]?queue\b/.test(normalized)) {
+			add("lane-queue");
+		}
+		if (hints.length >= limit) break;
+	}
+	return hints;
+}
+
 function formatPromptList(values: string[], droppedByLimitCount: number, fallback: string, separator: string): string {
 	if (values.length <= 0) return fallback;
 	const base = values.join(separator);
@@ -217,15 +240,19 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		? handoff.timestamp
 		: undefined;
 	const rawCurrentTasks = normalizeStringArray(handoff.current_tasks);
+	const focusSourceLines = [
+		...normalizeStringArray(handoff.next_actions),
+		...normalizeStringArray(handoff.blockers),
+		typeof handoff.context === "string" ? handoff.context : "",
+	];
 	const derivedTaskHints = rawCurrentTasks.length > 0
 		? []
-		: extractTaskIdsFromTextLines([
-			...normalizeStringArray(handoff.next_actions),
-			...normalizeStringArray(handoff.blockers),
-			typeof handoff.context === "string" ? handoff.context : "",
-		]);
+		: extractTaskIdsFromTextLines(focusSourceLines);
+	const operationalFocusHints = rawCurrentTasks.length > 0 || derivedTaskHints.length > 0
+		? []
+		: extractOperationalFocusHints(focusSourceLines);
 	const tasksPrepared = preparePromptCollection({
-		values: rawCurrentTasks.length > 0 ? rawCurrentTasks : derivedTaskHints,
+		values: rawCurrentTasks.length > 0 ? rawCurrentTasks : (derivedTaskHints.length > 0 ? derivedTaskHints : operationalFocusHints),
 		maxChars: 48,
 		limit: 3,
 	});
