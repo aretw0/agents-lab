@@ -38,6 +38,14 @@ export interface UnattendedRehearsalSliceEvidenceInput {
   next: string;
 }
 
+export interface UnattendedRehearsalSliceEvidenceValidation {
+  valid: boolean;
+  fields: Record<string, string>;
+  missing: string[];
+  invalid: string[];
+  summary: string;
+}
+
 const REQUIRED_LOCAL_SLICES = 3;
 const REQUIRED_SCORE = 6;
 
@@ -58,6 +66,32 @@ export function formatUnattendedRehearsalSliceEvidence(input: UnattendedRehearsa
     `drift=${input.drift ? "yes" : "no"}`,
     `next=${compactToken(input.next, "none")}`,
   ].join(" ");
+}
+
+export function validateUnattendedRehearsalSliceEvidence(line: string): UnattendedRehearsalSliceEvidenceValidation {
+  const fields: Record<string, string> = {};
+  for (const part of String(line ?? "").trim().split(/\s+/).filter(Boolean)) {
+    const separator = part.indexOf("=");
+    if (separator <= 0) continue;
+    const key = part.slice(0, separator);
+    const value = part.slice(separator + 1);
+    if (key) fields[key] = value;
+  }
+
+  const required = ["slice", "focus", "gate", "commit", "drift", "next"];
+  const missing = required.filter((key) => !fields[key]);
+  const invalid: string[] = [];
+  if (fields.slice && !/^\d+$/.test(fields.slice)) invalid.push("slice");
+  if (fields.drift && fields.drift !== "yes" && fields.drift !== "no") invalid.push("drift");
+
+  const valid = missing.length === 0 && invalid.length === 0;
+  return {
+    valid,
+    fields,
+    missing,
+    invalid,
+    summary: `rehearsal-slice-evidence: valid=${valid ? "yes" : "no"} missing=${missing.length > 0 ? missing.join(",") : "none"} invalid=${invalid.length > 0 ? invalid.join(",") : "none"}`,
+  };
 }
 
 export function summarizeUnattendedRehearsalGate(gate: UnattendedRehearsalGate): string {

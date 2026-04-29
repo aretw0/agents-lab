@@ -4252,6 +4252,27 @@
       ],
       "notes": "Criado após reload validar summary ao vivo. [rationale:risk-control] Documentar o contrato evita que agentes voltem a colar payload completo no handoff quando uma linha compacta basta.\n[2026-04-29T19:26:06.284Z] slice=1 focus=TASK-BUD-178 gate=rehearsal-summary-docs-markers-passed:3 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora orienta usar summary compacto no handoff/auto-resume quando basta decisão operacional, preservando payload detalhado para auditoria/debug.",
       "verification": "VER-BUD-459"
+    },
+    {
+      "id": "TASK-BUD-179",
+      "description": "[P1] Validar linhas compactas de evidência do rehearsal unattended para evitar handoff malformado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-178"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-rehearsal.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Adicionar validador determinístico para a linha slice/focus/gate/commit/drift/next.",
+        "Retornar summary compacto de validade/missing/invalid.",
+        "Cobrir casos válido e inválido em smoke e manter monitor smoke verde."
+      ],
+      "verification": "VER-BUD-460",
+      "notes": "[2026-04-29T19:33:53.660Z] slice=1 focus=TASK-BUD-179 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Validador reduz gordura de auditoria e evita evidência de rehearsal malformada sem criar nova surface grande."
     }
   ]
 }

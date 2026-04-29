@@ -6360,6 +6360,15 @@
       "method": "inspection",
       "evidence": "After reload, live unattended_rehearsal_gate returned summary=unattended-rehearsal: decision=ready-for-canary ready=yes score=6/6 blockers=none. Updated docs/guides/project-canonical-pipeline.md to prefer the compact summary in handoff/auto-resume when the operational decision is enough, while preserving detailed payload for audit/debug. Marker validation passed: rehearsal summary docs markers passed: 3. [rationale:risk-control] Reduces handoff verbosity without hiding structured evidence.",
       "timestamp": "2026-04-29T19:26:06.284Z"
+    },
+    {
+      "id": "VER-BUD-460",
+      "target": "TASK-BUD-179",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added validateUnattendedRehearsalSliceEvidence with fields/missing/invalid/summary for compact rehearsal evidence lines, exported it, and covered valid+invalid cases in guardrails-unattended-rehearsal smoke tests. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 120/120. [rationale:risk-control] Makes compact handoff evidence auditable without expanding tracking surfaces.",
+      "timestamp": "2026-04-29T19:33:53.660Z"
     }
   ]
 }

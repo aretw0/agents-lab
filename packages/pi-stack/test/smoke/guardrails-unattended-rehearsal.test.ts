@@ -3,6 +3,7 @@ import {
   evaluateUnattendedRehearsalGate,
   formatUnattendedRehearsalSliceEvidence,
   summarizeUnattendedRehearsalGate,
+  validateUnattendedRehearsalSliceEvidence,
 } from "../../extensions/guardrails-core-unattended-rehearsal";
 
 describe("guardrails unattended rehearsal gate", () => {
@@ -15,6 +16,29 @@ describe("guardrails unattended rehearsal gate", () => {
       drift: false,
       next: "slice 3",
     })).toBe("slice=2 focus=TASK-BUD-172 gate=cmd.exe-/c-npm-run-focal-smoke commit=abc1234 drift=no next=slice-3");
+  });
+
+  it("validates compact slice evidence lines", () => {
+    const line = formatUnattendedRehearsalSliceEvidence({
+      slice: 3,
+      focus: "TASK-BUD-179",
+      gate: "focal",
+      commit: "abc1234",
+      drift: false,
+      next: "done",
+    });
+
+    expect(validateUnattendedRehearsalSliceEvidence(line)).toMatchObject({
+      valid: true,
+      missing: [],
+      invalid: [],
+      summary: "rehearsal-slice-evidence: valid=yes missing=none invalid=none",
+    });
+    expect(validateUnattendedRehearsalSliceEvidence("slice=x drift=maybe")).toMatchObject({
+      valid: false,
+      missing: ["focus", "gate", "commit", "next"],
+      invalid: ["slice", "drift"],
+    });
   });
 
   it("summarizes gate decisions for compact handoff evidence", () => {

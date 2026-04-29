@@ -85,4 +85,4 @@ export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRea
 export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 export { resolveSkillAccessRoot, resolveSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
-export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate } from "./guardrails-core-unattended-rehearsal";
+export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";
