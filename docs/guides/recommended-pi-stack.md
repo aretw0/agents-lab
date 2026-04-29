@@ -24,6 +24,13 @@ Trade-off canônico:
 - quanto menor o perfil, menor risco de overlap/ruído e mais previsível a governança;
 - extras ficam fora do default e entram só por comando explícito (`--runtime-extras` ou `--profile ...`).
 
+Política de sugestão padrão:
+- no hatch e no loop operacional, sugerir apenas o próximo passo essencial para o contexto atual;
+- não sugerir swarm/colônia por padrão quando a trilha simples resolve o objetivo;
+- sugerir delegação/subagente somente com readiness e motivo objetivo;
+- sugerir swarm somente com preflight, budget envelope e escopo paralelo claros;
+- sempre oferecer fallback curto para voltar ao modo simples.
+
 Ou diretamente via pi:
 
 ```bash

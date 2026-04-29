@@ -2093,7 +2093,7 @@
     {
       "id": "TASK-BUD-090",
       "description": "[P1] Implementar política de discoverability enxuta no control-plane (sugestões mínimas e contextuais) e plano de de-ruído da curadoria.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-087",
         "TASK-BUD-088"
@@ -2111,7 +2111,8 @@
         "Inventário de superfícies identifica e remove recomendações redundantes/ruidosas.",
         "Runbook explicita quando sugerir swarm, quando sugerir delegação e quando ficar no modo simples."
       ],
-      "notes": "Pragmatismo: otimizar legibilidade e confiança antes de ampliar superfície."
+      "notes": "Pragmatismo: otimizar legibilidade e confiança antes de ampliar superfície.\n[2026-04-29T13:18:10.487Z] Closed user-surface slimming for scale recommendations: recommended stack docs now state hatch/loop should suggest only the essential next step, keep swarm out of default CTA, require readiness/objective reason for delegation, require preflight/budget/parallel scope for swarm, and provide fallback to simple mode. User surface audit records the same recommendation policy. Validation: cmd.exe /c node -e marker check (4 markers passed). [rationale:risk-control] A slimmer default surface reduces noise and avoids accidental escalation while preserving opt-in advanced lanes.",
+      "verification": "VER-BUD-434"
     },
     {
       "id": "TASK-BUD-091",

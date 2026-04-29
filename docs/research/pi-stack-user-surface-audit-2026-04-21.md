@@ -55,6 +55,16 @@ npm run -s test:smoke -- packages/pi-stack/test/smoke/installer-filters.test.ts 
 npm run -s test:ops:loop-evidence
 ```
 
+## Política de recomendações para usuário final
+
+Para reduzir ruído percebido e preservar confiança:
+
+- default do hatch: caminho simples, local e essencial primeiro;
+- subagente/delegação: recomendar apenas quando houver readiness explícito e ganho de throughput plausível;
+- swarm/colônia: recomendar apenas quando houver preflight verde, budget envelope e trabalho paralelizável;
+- superfícies redundantes: manter fora do CTA inicial; documentar como opt-in, compatibilidade ou laboratório;
+- fallback obrigatório: toda recomendação avançada deve dizer como voltar ao modo simples sem perder progresso.
+
 ## Conclusão prática
 
 - Parte relevante das evoluções **já está no caminho de usuários** quando implementada como extensão/tool em `packages/pi-stack`.

@@ -6126,6 +6126,15 @@
       "method": "doc+runtime-gate",
       "evidence": "Scale-suggestion contract closed. docs/guides/agent-driver-charter.md documents L1/control-plane as default, objective reasons required for L2/L3 suggestion (context, backlog independence, readiness, cost), scope/cost bound, L1 fallback, and short operator path to pause/reduce scale without losing progress. Validation: subagent_readiness_status(strict=true) returned ready=true with classifyFailures=0 and COMPLETE=1. [rationale:risk-control] Keeps scale escalation auditable, reversible and user-controllable.",
       "timestamp": "2026-04-29T13:16:19.649Z"
+    },
+    {
+      "id": "VER-BUD-434",
+      "target": "TASK-BUD-090",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs-marker-check",
+      "evidence": "User-surface slimming for scale recommendations closed. docs/guides/recommended-pi-stack.md and docs/research/pi-stack-user-surface-audit-2026-04-21.md state that hatch/loop defaults should suggest only the essential next step, keep swarm out of default CTA, require readiness/objective reason for delegation, require preflight/budget/parallel scope for swarm, and provide fallback to simple mode. Validation: marker check passed 4 markers. [rationale:risk-control] Reduces noisy/redundant recommendations and prevents accidental escalation while keeping advanced lanes opt-in.",
+      "timestamp": "2026-04-29T13:18:10.487Z"
     }
   ]
 }
