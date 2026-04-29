@@ -3419,7 +3419,7 @@
     {
       "id": "TASK-BUD-140",
       "description": "[P1] Impedir que monitores sejam pausados sob pressao de memoria/safe-mode",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "acceptance_criteria": [
         "Monitores nao sao desativados automaticamente quando safe-mode ou heap warning e acionado.",
@@ -3427,7 +3427,7 @@
         "Sob pressao, sistema fica mais conservador (nao menos)."
       ],
       "verification": "",
-      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, log mostra monitors paused durante heap 926MB + safe-mode. Referencia: sessao compactada TASK-BUD-067."
+      "notes": "[2026-04-24T16:06:31.885Z] Evidencia: incidente 2026-04-24, log mostra monitors paused durante heap 926MB + safe-mode. Referencia: sessao compactada TASK-BUD-067.\n[2026-04-29T00:09Z] Micro-slice implementado: machine-maintenance agora explicita `canEvaluateMonitors: true` no gate, separando pressão de máquina de política de avaliação de monitores. Mesmo em `pause-long-runs`/`checkpoint-and-stop`, o contrato testado mantém monitores permitidos; apenas long-runs são segurados. `formatMachineMaintenanceGate` passa a incluir `monitors=allow` após reload. Evidência: `npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts` passou 5/5; `npm run gate:monitor:local` passou 66 Node + 18 Vitest.\n[rationale-sync] TASK-BUD-140 recebeu rationale risk-control: pressão de máquina restringe long-runs, não observabilidade/monitores.\n[rationale:risk-control] Monitores são uma superfície de segurança/observabilidade e não devem ser desligados implicitamente por pressão de memória/disco; o gate de máquina deve limitar long-runs pesados, mas preservar avaliação de monitores para manter visibilidade e controle durante degradação."
     },
     {
       "id": "TASK-BUD-141",

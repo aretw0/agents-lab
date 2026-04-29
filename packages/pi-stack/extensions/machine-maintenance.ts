@@ -50,6 +50,7 @@ export interface MachineMaintenanceGate {
 	severity: MachineMaintenanceSeverity;
 	action: MachineMaintenanceAction;
 	canStartLongRun: boolean;
+	canEvaluateMonitors: boolean;
 	shouldCheckpoint: boolean;
 	shouldStop: boolean;
 	memory: ResourcePressureReading;
@@ -216,6 +217,7 @@ export function evaluateMachineMaintenanceGate(input: {
 		severity,
 		action,
 		canStartLongRun: action === "continue",
+		canEvaluateMonitors: true,
 		shouldCheckpoint: action === "pause-long-runs" || action === "checkpoint-and-stop",
 		shouldStop: action === "checkpoint-and-stop",
 		memory: input.memory,
@@ -241,6 +243,7 @@ export function formatMachineMaintenanceGate(gate: MachineMaintenanceGate): stri
 		`severity=${gate.severity}`,
 		`action=${gate.action}`,
 		`longRun=${gate.canStartLongRun ? "allow" : "hold"}`,
+		`monitors=${gate.canEvaluateMonitors ? "allow" : "hold"}`,
 		gate.memory.reason,
 		gate.disk.reason,
 		`recommendation=${gate.recommendation}`,

@@ -39,6 +39,7 @@ describe("machine-maintenance gate", () => {
     expect(gate.severity).toBe("ok");
     expect(gate.action).toBe("continue");
     expect(gate.canStartLongRun).toBe(true);
+    expect(gate.canEvaluateMonitors).toBe(true);
     expect(gate.shouldStop).toBe(false);
   });
 
@@ -50,6 +51,7 @@ describe("machine-maintenance gate", () => {
     expect(gate.severity).toBe("pause");
     expect(gate.action).toBe("pause-long-runs");
     expect(gate.canStartLongRun).toBe(false);
+    expect(gate.canEvaluateMonitors).toBe(true);
     expect(gate.shouldCheckpoint).toBe(true);
     expect(gate.blockers).toContain("memory-pressure-pause");
   });
@@ -62,6 +64,7 @@ describe("machine-maintenance gate", () => {
     expect(gate.severity).toBe("block");
     expect(gate.action).toBe("checkpoint-and-stop");
     expect(gate.shouldStop).toBe(true);
+    expect(gate.canEvaluateMonitors).toBe(true);
     expect(gate.blockers).toContain("disk-pressure-block");
   });
 
@@ -72,6 +75,7 @@ describe("machine-maintenance gate", () => {
 
     expect(formatMachineMaintenanceGate(gate)).toContain("machine-maintenance");
     expect(formatMachineMaintenanceGate(gate)).toContain("longRun=allow");
+    expect(formatMachineMaintenanceGate(gate)).toContain("monitors=allow");
   });
 
   it("registers a pi tool with the canonical execute signature", async () => {
