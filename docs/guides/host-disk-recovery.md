@@ -51,9 +51,43 @@ npm run ops:disk:cleanup:with-sessions
 4. Rodar validação focal pendente (smokes curtos).
 5. Atualizar `.project/handoff.json` com evidência da retomada.
 
+## Manutenção do repositório Git
+
+Avisos como `There are too many unreachable loose objects; run 'git prune' to remove them` indicam que o Git deixou de fazer cleanup automático até o `.git/gc.log` ser tratado. Isso é um sinal de manutenção, não um blocker imediato.
+
+### Como classificar
+
+- **Informativo**: poucos MiB de loose objects, `garbage=0`, testes/commits normais e sem impacto de performance.
+- **Warning**: aviso aparece repetidamente, `git count-objects -vH` mostra milhares de loose objects, ou `.git/gc.log` impede novo auto-gc.
+- **Intervenção**: disco baixo, clone/commit/status ficam lentos, muitos objetos ocupam centenas de MiB/GiB, ou há suspeita de worktrees/runs gerando objetos órfãos em excesso.
+
+### Diagnóstico dry-first
+
+```bash
+# Sem apagar nada
+git count-objects -vH
+
+# Ler a causa do último gc que bloqueou auto-cleanup
+# Windows/cmd:
+if exist .git\\gc.log type .git\\gc.log
+```
+
+### Política de ação
+
+- Não executar `git prune` automaticamente em unattended.
+- Não remover `.git/gc.log` automaticamente só para reativar auto-gc.
+- Se estiver em **Warning**, registrar no handoff e seguir trabalhando se o tamanho for pequeno.
+- Se entrar em **Intervenção**, pedir intenção explícita do operador e preferir sequência dry-first:
+  1. checkpoint/handoff;
+  2. `git count-objects -vH`;
+  3. revisar `.git/gc.log`;
+  4. confirmar que não há worktree/rebase/merge crítico em andamento;
+  5. só então considerar `git gc`/`git prune` conforme decisão humana.
+
 ## Prevenção de recorrência
 
 - Evitar comandos pesados em background sob baixa margem de disco.
 - Preferir slices com 2–4 arquivos e testes focais.
 - Registrar checkpoint antes de validações potencialmente longas.
 - Rodar `ops:disk:check` periodicamente em fases de long-run.
+- Tratar avisos de Git GC como manutenção controlada: observar, classificar e agir dry-first.

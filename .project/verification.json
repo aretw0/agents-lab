@@ -6396,6 +6396,15 @@
       "method": "inspection",
       "evidence": "Updated docs/guides/control-plane-operating-doctrine.md to mention resolveUnattendedContinuationPlan and map decisions: continue-local, ask-decision, blocked, checkpoint, pause-for-compact. Marker validation passed 6/6. [rationale:risk-control] Aligns the human-readable doctrine with the tested helper so future unattended operation can continue safely without ad hoc hesitation.",
       "timestamp": "2026-04-29T19:56:47.500Z"
+    },
+    {
+      "id": "VER-BUD-464",
+      "target": "TASK-BUD-183",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Observed current git maintenance signal with git count-objects -vH: count=6089, size=10.14 MiB, in-pack=8918, packs=4, size-pack=3.72 MiB, prune-packable=0, garbage=0, size-garbage=0 bytes; gc warning persists. Documented Git repository maintenance policy in docs/guides/host-disk-recovery.md with Informativo/Warning/Intervencao classification, dry-first diagnostics, and explicit prohibition on unattended git prune/removing .git/gc.log. Marker validation passed: git maintenance policy markers passed: 7. [rationale:risk-control] Current state is warning/informational due small size and garbage=0; no cleanup performed.",
+      "timestamp": "2026-04-29T20:00:08.023Z"
     }
   ]
 }

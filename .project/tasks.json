@@ -4339,6 +4339,27 @@
       ],
       "notes": "Criado como continuação local-safe após codificar helper. [rationale:risk-control] Sem doc, a primitiva pode existir mas a operação continuar hesitante; alinhar doutrina fecha o loop.\n[2026-04-29T19:56:47.500Z] slice=1 focus=TASK-BUD-182 gate=unattended-continuation-doctrine-markers-passed:6 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora referencia o helper que decide continuar/parar, reduzindo hesitação operacional sem relaxar escopos protegidos.",
       "verification": "VER-BUD-463"
+    },
+    {
+      "id": "TASK-BUD-183",
+      "description": "[P1] Controlar sinal de manutenção git gc/prune sem executar limpeza destrutiva automaticamente.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-182"
+      ],
+      "files": [
+        "docs/guides/host-disk-recovery.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar quando o aviso de loose objects/gc.log é informativo, warning ou intervenção.",
+        "Explicitar comandos dry-run/diagnóstico e proibir git prune automático sem intenção explícita.",
+        "Registrar estado atual observado e validação por marcadores."
+      ],
+      "notes": "Criado após operador perguntar quando se preocupar com aviso git gc. [rationale:risk-control] O sinal é manutenção controlada: deve ter thresholds e ação dry-first, não virar prune automático.\n[2026-04-29T20:00:08.023Z] slice=1 focus=TASK-BUD-183 gate=git-maintenance-policy-markers-passed:7 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Git GC warning classificado como manutenção controlada: observar/classificar/dry-first; não executar prune automático.",
+      "verification": "VER-BUD-464"
     }
   ]
 }
