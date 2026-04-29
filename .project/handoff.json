@@ -1,24 +1,34 @@
 {
-  "timestamp": "2026-04-29T01:36:29.864Z",
-  "context": "Post-reload local calibration state is healthy. Previous compact-lane handoff from 00:24 is stale and should not be used as current blocker evidence. Continue only bounded micro-slices because context is near warn threshold and disk usage remains high.",
+  "timestamp": "2026-04-29T01:53:29.006Z",
+  "context": "Post-reload local calibration state is healthy. Context-watch warn lane is non-blocking steering: continue bounded work, avoid broad scans, checkpoint at checkpoint threshold, and wrap up only at compact lane.",
   "next_actions": [
-    "Context-watch action: level=warn 50% (write-checkpoint) · Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume.",
-    "Continue local-first monitor/control-plane calibration in micro-slices only.",
-    "If broader work is needed, checkpoint/compact before starting.",
+    "Continue local-first monitor/control-plane calibration with bounded slices.",
+    "At checkpoint threshold, refresh handoff before broader continuation.",
+    "At compact threshold, wrap up and let auto-compact/auto-resume proceed.",
     "Keep monitor-sovereign disabled/audit-only until additional shadow evidence is collected.",
-    "Do not carry forward stale context-watch-compact-required or disk-pressure blockers without fresh tool evidence."
+    "Do not carry forward stale context-watch-warn-active, context-watch-compact-required, or disk-pressure blockers without fresh tool evidence."
   ],
-  "blockers": [
-    "context-watch-warn-active"
-  ],
+  "blockers": [],
   "context_watch": {
-    "generatedAtIso": "2026-04-29T01:29:31.363Z",
-    "level": "ok",
-    "percent": 47,
+    "generatedAtIso": "2026-04-29T01:53:29.006Z",
+    "level": "warn",
+    "percent": 57,
+    "action": "continue-bounded",
+    "operatingCadence": "bounded-slices",
+    "recommendation": "Continue normal bounded work; avoid broad scans and prepare to checkpoint at the checkpoint threshold."
+  },
+  "machine_maintenance": {
+    "generatedAtIso": "2026-04-29T01:53:29.006Z",
+    "severity": "ok",
     "action": "continue",
-    "recommendation": "Context healthy; bounded micro-slices recommended because warn threshold is 50%."
+    "canStartLongRun": true,
+    "canEvaluateMonitors": true,
+    "shouldCheckpoint": false,
+    "shouldStop": false,
+    "summary": "machine-maintenance · severity=ok · action=continue · longRun=allow · monitors=allow · memory free≈4507MB used≈71.91% · disk free≈13690MB used≈97.19%"
   },
   "recent_validation": [
+    "context_watch_status after reload returned action=continue-bounded, operatingCadence=bounded-slices, deterministicStop.required=false, operatorAction.blocking=false.",
     "session_analytics_query returned queryType=outliers/lookbackHours=2 after tool execute signature fix.",
     "claude_code_execute dry-run preserved params after tool execute signature fix.",
     "test:monitor:regression passed 67 tests / 18 suites including tool execute signature regression.",
@@ -26,17 +36,17 @@
   ],
   "context_watch_events": [
     {
-      "atIso": "2026-04-29T01:36:29.864Z",
+      "atIso": "2026-04-29T01:53:29.006Z",
       "reason": "message_end",
       "level": "warn",
-      "percent": 50,
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
-      "action": "write-checkpoint",
-      "recommendation": "Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume."
+      "action": "continue-bounded",
+      "recommendation": "Warn is steering only; continue bounded work until checkpoint threshold."
     }
   ]
 }
