@@ -6405,6 +6405,15 @@
       "method": "inspection",
       "evidence": "Observed current git maintenance signal with git count-objects -vH: count=6089, size=10.14 MiB, in-pack=8918, packs=4, size-pack=3.72 MiB, prune-packable=0, garbage=0, size-garbage=0 bytes; gc warning persists. Documented Git repository maintenance policy in docs/guides/host-disk-recovery.md with Informativo/Warning/Intervencao classification, dry-first diagnostics, and explicit prohibition on unattended git prune/removing .git/gc.log. Marker validation passed: git maintenance policy markers passed: 7. [rationale:risk-control] Current state is warning/informational due small size and garbage=0; no cleanup performed.",
       "timestamp": "2026-04-29T20:00:08.023Z"
+    },
+    {
+      "id": "VER-BUD-465",
+      "target": "TASK-BUD-184",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Updated docs/guides/project-canonical-pipeline.md to document safe marker checks via cmd.exe /c node -e: avoid backticks/crases inside searched strings, prefer markers without crase, or normalize accents/punctuation before comparison. Marker validation passed: marker check quoting policy markers passed: 4. [rationale:risk-control] Prevents false-negative validation noise like the earlier BG_PROCESS_DONE quoting failure.",
+      "timestamp": "2026-04-29T20:12:04.644Z"
     }
   ]
 }

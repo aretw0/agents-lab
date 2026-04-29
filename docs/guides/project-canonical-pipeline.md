@@ -714,6 +714,8 @@ Durante o rehearsal, cada slice deve registrar uma evidência curta em formato e
 
 Quando houver dúvida sobre a linha antes de gravar evidência, use `validateUnattendedRehearsalSliceEvidence` como checagem leve: ela deve retornar `valid=yes missing=none invalid=none`. Falhas indicam corrigir a linha curta, não expandir para payload verboso.
 
+Para marker checks via `cmd.exe /c node -e`, evite crases/backticks dentro das strings procuradas: shells podem interpretar o conteúdo antes do Node e produzir falso negativo. Prefira marcadores sem crase, ou normalize acentos e pontuação antes de comparar.
+
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
 ### Pre-compact calm-close (anti-paralisia)
