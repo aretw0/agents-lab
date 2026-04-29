@@ -195,6 +195,8 @@ O baseline permanece agnóstico e simples: board canônico, handoff curto, gates
 
 Sinais de oportunidade de economia devem ser **passivos e pouco ruidosos**: status/telemetria curta que indique repetição de tool-output, handoff grande demais, evidência re-lida após compactação ou lista de next-actions truncada. O sinal deve sugerir "economizar no próximo slice" sem forçar compactação nem esconder evidência canônica. Influências como `squeez` entram assim no dia a dia: output shaping, dedupe e checkpoints sintéticos como prática incremental, sempre medidos contra retomada correta.
 
+O `context_watch_status` expõe `autoCompact.contextEconomy` / `contextEconomySummary` como sinal passivo. Exemplos de oportunidades: `next-actions-truncated`, `large-handoff`, `many-next-actions` e `resume-prompt-truncated`. Esses estados são `info`/telemetria: não mudam o gatilho de compactação, não bloqueiam o loop e servem para melhorar o próximo checkpoint/status.
+
 A adoção eventual de `mdt` fica separada: é trilha de **doc-drift/single-source docs** (`check` primeiro, `update` depois), não pipeline de ideias/backlog.
 
 ### Governança de updates de dependências pi/extensões

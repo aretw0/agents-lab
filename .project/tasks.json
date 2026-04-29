@@ -3879,7 +3879,7 @@
     {
       "id": "TASK-BUD-161",
       "description": "[P1/médio prazo] Criar sinais passivos de oportunidade de economia de contexto inspirados em Squeez, sem compactação agressiva nem ruído excessivo.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-148",
@@ -3897,7 +3897,8 @@
         "Medir impacto com métricas simples (tamanho de handoff/tool-output por slice, re-leitura pós-resume, smoke focal sem regressão/classify-fail).",
         "Documentar como práticas Squeez-like entram no dia a dia: output shaping, dedupe e checkpoints sintéticos opt-in, preservando aprendizado operacional."
       ],
-      "notes": "Backlog criado por steering humano em 2026-04-29T13:33:42.756Z: compactação foi percebida como agressiva quando não houve verificação visível de checkpoint final. O caminho imediato é progressPreservation; o médio prazo é sinal passivo de economia/contexto para aprender com operações sem ruído. [rationale:risk-control] Economia de contexto só é útil se não sacrificar continuidade, aprendizado operacional e confiança do usuário."
+      "notes": "Backlog criado por steering humano em 2026-04-29T13:33:42.756Z: compactação foi percebida como agressiva quando não houve verificação visível de checkpoint final. O caminho imediato é progressPreservation; o médio prazo é sinal passivo de economia/contexto para aprender com operações sem ruído. [rationale:risk-control] Economia de contexto só é útil se não sacrificar continuidade, aprendizado operacional e confiança do usuário.\n[2026-04-29T17:16:12.715Z] Completed with VER-BUD-444: passive context-economy signal exposed in context_watch_status and documented. [rationale:risk-control] Economy signals remain non-blocking telemetry, not aggressive compaction.",
+      "verification": "VER-BUD-444"
     },
     {
       "id": "TASK-BUD-162",

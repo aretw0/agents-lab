@@ -6216,6 +6216,15 @@
       "method": "test",
       "evidence": "Implemented focus-aware autonomy task selection. Added focusTaskIds/focusSource to selectAutonomyLaneTask, readAutonomyHandoffFocusTaskIds, default handoff focus in autonomy_lane_status/autonomy_lane_next_task, and focus-mismatch reason to prevent drifting into unrelated eligible tasks. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 13/13; cmd.exe /c npm run test:monitor:smoke --silent passed 99/99. [rationale:risk-control] This directly hardens unattended continuity by requiring task selection to align with explicit/handoff focus unless focus is cleared.",
       "timestamp": "2026-04-29T17:09:50.497Z"
+    },
+    {
+      "id": "VER-BUD-444",
+      "target": "TASK-BUD-161",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented passive context-economy signal in context_watch_status. Added ContextEconomySignal with non-blocking opportunity kinds next-actions-truncated, large-handoff, many-next-actions and resume-prompt-truncated; metrics include handoffBytes, nextActionCount and auto-resume truncation data. Documented that the signal is info/telemetry and does not trigger compact or block the loop. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 100/100. [rationale:risk-control] Squeez-like economy is useful only as passive guidance that preserves canonical evidence, continuity, and low-noise unattended operation.",
+      "timestamp": "2026-04-29T17:16:12.715Z"
     }
   ]
 }

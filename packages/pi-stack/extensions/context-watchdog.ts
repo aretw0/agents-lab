@@ -483,6 +483,27 @@ export type ProgressPreservationSignal = {
 	recommendation: string;
 };
 
+export type ContextEconomyOpportunityKind =
+	| "none"
+	| "next-actions-truncated"
+	| "large-handoff"
+	| "many-next-actions"
+	| "resume-prompt-truncated";
+
+export type ContextEconomySignal = {
+	passive: true;
+	kind: ContextEconomyOpportunityKind;
+	opportunity: boolean;
+	severity: "none" | "info";
+	recommendation: string;
+	metrics: {
+		handoffBytes?: number;
+		nextActionCount?: number;
+		autoResumeDroppedNextActions?: number;
+		autoResumeGlobalTruncated?: boolean;
+	};
+};
+
 export type AntiParalysisDispatchDecision = {
 	shouldNotify: boolean;
 	reason:
@@ -567,6 +588,77 @@ export function resolveProgressPreservationSignal(input: {
 
 export function summarizeProgressPreservationSignal(signal: ProgressPreservationSignal): string {
 	return `progress-preservation: ${signal.status} saved=${signal.progressSaved ? "yes" : "no"} compactReady=${signal.compactCheckpointReady ? "yes" : "no"} reason=${signal.reason}`;
+}
+
+export function resolveContextEconomySignal(input: {
+	handoffBytes?: number;
+	nextActionCount?: number;
+	autoResumeDroppedNextActions?: number;
+	autoResumeGlobalTruncated?: boolean;
+}): ContextEconomySignal {
+	const handoffBytes = Number.isFinite(input.handoffBytes) ? Math.max(0, Math.floor(Number(input.handoffBytes))) : undefined;
+	const nextActionCount = Number.isFinite(input.nextActionCount) ? Math.max(0, Math.floor(Number(input.nextActionCount))) : undefined;
+	const autoResumeDroppedNextActions = Number.isFinite(input.autoResumeDroppedNextActions)
+		? Math.max(0, Math.floor(Number(input.autoResumeDroppedNextActions)))
+		: undefined;
+	const metrics = {
+		handoffBytes,
+		nextActionCount,
+		autoResumeDroppedNextActions,
+		autoResumeGlobalTruncated: input.autoResumeGlobalTruncated === true,
+	};
+	if (input.autoResumeGlobalTruncated === true) {
+		return {
+			passive: true,
+			kind: "resume-prompt-truncated",
+			opportunity: true,
+			severity: "info",
+			recommendation: "context-economy: resume prompt was globally truncated; shape the next handoff/status into fewer canonical bullets.",
+			metrics,
+		};
+	}
+	if ((autoResumeDroppedNextActions ?? 0) > 0) {
+		return {
+			passive: true,
+			kind: "next-actions-truncated",
+			opportunity: true,
+			severity: "info",
+			recommendation: "context-economy: next-actions were truncated in auto-resume; consolidate repeated or low-priority actions in the next checkpoint.",
+			metrics,
+		};
+	}
+	if ((handoffBytes ?? 0) >= 8_000) {
+		return {
+			passive: true,
+			kind: "large-handoff",
+			opportunity: true,
+			severity: "info",
+			recommendation: "context-economy: handoff is large; prefer concise focus, validation, commits and blockers before the next compact lane.",
+			metrics,
+		};
+	}
+	if ((nextActionCount ?? 0) > 4) {
+		return {
+			passive: true,
+			kind: "many-next-actions",
+			opportunity: true,
+			severity: "info",
+			recommendation: "context-economy: many next-actions are present; keep only actionable priorities and move background ideas to backlog.",
+			metrics,
+		};
+	}
+	return {
+		passive: true,
+		kind: "none",
+		opportunity: false,
+		severity: "none",
+		recommendation: "context-economy: no passive economy opportunity detected.",
+		metrics,
+	};
+}
+
+export function summarizeContextEconomySignal(signal: ContextEconomySignal): string {
+	return `context-economy: ${signal.kind} opportunity=${signal.opportunity ? "yes" : "no"}`;
 }
 
 export function resolvePreCompactCalmCloseSignal(input: {
@@ -1236,6 +1328,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
 			autoResumeEnabled: config.autoResumeAfterCompact,
 		});
+		const autoResumePromptDiagnostics = lastAutoResumeDecision?.promptDiagnostics;
+		const contextEconomy = resolveContextEconomySignal({
+			handoffBytes: JSON.stringify(handoff).length,
+			nextActionCount: Array.isArray(handoff.next_actions) ? handoff.next_actions.length : undefined,
+			autoResumeDroppedNextActions: autoResumePromptDiagnostics?.nextActions.droppedByLimitCount,
+			autoResumeGlobalTruncated: autoResumePromptDiagnostics?.globalTruncated,
+		});
 		const antiParalysisDispatch = resolveAntiParalysisDispatch({
 			triggered: calmClose.antiParalysisTriggered,
 			nowMs,
@@ -1286,6 +1385,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffLastEventAgeSec,
 			progressPreservation,
 			progressPreservationSummary: summarizeProgressPreservationSignal(progressPreservation),
+			contextEconomy,
+			contextEconomySummary: summarizeContextEconomySignal(contextEconomy),
 			calmCloseReady: calmClose.calmCloseReady,
 			checkpointEvidenceReady: calmClose.checkpointEvidenceReady,
 			deferCount: calmClose.deferCount,

@@ -37,6 +37,8 @@ import {
 	resolvePreCompactCalmCloseSignal,
 	resolveProgressPreservationSignal,
 	summarizeProgressPreservationSignal,
+	resolveContextEconomySignal,
+	summarizeContextEconomySignal,
 	resolveAntiParalysisDispatch,
 	isAutoCompactDeferralReason,
 	resolveHandoffFreshness,
@@ -435,6 +437,32 @@ describe("context-watchdog", () => {
 			compactCheckpointPersistRecommended: false,
 			autoResumeEnabled: true,
 		}).status).toBe("needs-checkpoint");
+	});
+
+	it("surfaces passive context-economy opportunities without compact triggers", () => {
+		const nextActions = resolveContextEconomySignal({
+			handoffBytes: 1_200,
+			nextActionCount: 3,
+			autoResumeDroppedNextActions: 2,
+		});
+		expect(nextActions).toMatchObject({
+			passive: true,
+			kind: "next-actions-truncated",
+			opportunity: true,
+			severity: "info",
+		});
+		expect(nextActions.recommendation).toContain("consolidate");
+
+		const largeHandoff = resolveContextEconomySignal({ handoffBytes: 8_500, nextActionCount: 2 });
+		expect(largeHandoff.kind).toBe("large-handoff");
+		expect(summarizeContextEconomySignal(largeHandoff)).toContain("opportunity=yes");
+
+		const none = resolveContextEconomySignal({ handoffBytes: 1_000, nextActionCount: 2 });
+		expect(none).toMatchObject({
+			kind: "none",
+			opportunity: false,
+			severity: "none",
+		});
 	});
 
 	it("gates anti-paralysis warning with grace/cooldown and window cap", () => {
