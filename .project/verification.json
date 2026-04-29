@@ -6648,6 +6648,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:16:31.805Z",
       "evidence": "Added createProjectTaskBoard and board_task_create to project-board-surface. The bounded surface validates id/description/status, rejects duplicates, supports bounded priority/depends_on/files/acceptance_criteria/milestone/note, and returns the created board row. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 50/50; cmd.exe /c npm run test:monitor:smoke --silent passed 204/204 across 32 files. [rationale:risk-control] Reduces ad hoc task JSON mutation in unattended board loops."
+    },
+    {
+      "id": "VER-BUD-492",
+      "target": "TASK-BUD-213",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-29T23:22:46.811Z",
+      "evidence": "Updated docs/guides/control-plane-operating-doctrine.md with 'Memoria de projeto e adapters'. It states that .project is the current local-first adapter, not lock-in; primitives should stay agnostic for user-chosen project memory including GitHub Issues, GitLab, Linear/Jira, or other ticket systems; the important contract is create/select task, record evidence, update status, preserve rationale, and resume via handoff. Validation: safe_marker_check passed 10/10 markers. [rationale:risk-control] Aligns current board tools with future adapter strategy while preserving the local-first starting point."
     }
   ]
 }

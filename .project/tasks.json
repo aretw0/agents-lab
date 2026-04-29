@@ -5005,6 +5005,50 @@
       ],
       "notes": "Criado na lane essencial de trabalho ininterrupto seguro. [rationale:risk-control] Após bounded verification append, ainda faltava criação bounded de task; reduzir scripts ad hoc melhora controle do loop unattended.\n[2026-04-29T23:16:31.805Z] slice=1 focus=TASK-BUD-211 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem helper/tool bounded para criar task, complementando verification append e reduzindo scripts ad hoc.",
       "verification": "VER-BUD-491"
+    },
+    {
+      "id": "TASK-BUD-212",
+      "description": "[P2] Backlog: desenhar protocolo agnóstico para memória de projeto e ticket systems.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-210",
+        "TASK-BUD-211"
+      ],
+      "files": [
+        "docs/guides/",
+        "packages/pi-stack/extensions/project-board-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Definir uma interface/protocolo de primitivas para memória de projeto que não dependa de .project/tasks.json.",
+        "Mapear adaptadores possíveis: .project local, GitHub Issues, GitLab Issues, Linear/Jira ou outro ticket system.",
+        "Preservar a recomendação ampla: o usuário deve construir uma memória de projeto de algum jeito, mas escolher a montagem.",
+        "Manter tools atuais como começo local-first, sem vender .project como único caminho."
+      ],
+      "notes": "Criado a partir de steering do operador após reload. [rationale:risk-control] As superfícies atuais começam em .project/davidorex, mas devem evoluir para primitivas/adaptadores agnósticos para não travar a arquitetura em um ticket system."
+    },
+    {
+      "id": "TASK-BUD-213",
+      "description": "[P1] Registrar posicionamento agnóstico das primitivas de memória de projeto na doutrina.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-211",
+        "TASK-BUD-212"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina deixa claro que .project/board atual é adapter local-first inicial, não o único modelo recomendado.",
+        "Texto preserva a recomendação de construir alguma memória de projeto, com liberdade para outros ticket systems.",
+        "Mantém foco em primitivas agnósticas e adaptadores futuros.",
+        "Validação por safe_marker_check e fechamento via board_verification_append/board_update."
+      ],
+      "notes": "Criado via board_task_create live após reload. [rationale:risk-control] Documentar a fronteira evita lock-in conceitual enquanto continuamos usando .project como começo local-first auditável.\n[2026-04-29T23:22:46.811Z] slice=1 focus=TASK-BUD-213 gate=safe_marker_check-summary-marker-check-ok-yes-matched-10/10-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora posiciona .project como adapter local-first inicial e preserva primitivas agnósticas para outros ticket systems.",
+      "verification": "VER-BUD-492"
     }
   ]
 }

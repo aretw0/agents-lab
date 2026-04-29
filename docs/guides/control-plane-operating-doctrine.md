@@ -20,6 +20,14 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 10. **Qualidade vem de síntese, remoção e consistência** — preferir reduzir superfícies redundantes e consolidar opiniões antes de adicionar novas ferramentas.
 11. **Unattended é malemolência com trilho** — continuar sozinho em fatias seguras, mas deixar rastro curto para auditoria e retomada.
 
+## Memória de projeto e adapters
+
+A stack recomenda que cada projeto tenha alguma memória operacional: tarefas, decisões, verificações e handoff precisam existir em uma forma recuperável. O formato atual em `.project/` é o adapter local-first inicial porque é simples, versionável e auditável no PC.
+
+Esse começo não deve virar lock-in. As primitivas devem permanecer agnósticas o suficiente para que o usuário monte a própria memória com pi, seja via `.project/`, GitHub Issues, GitLab, Linear/Jira ou outro ticket system. O contrato importante é a capacidade: criar/selecionar tarefa, registrar evidência, atualizar status, preservar rationale e retomar por handoff.
+
+Quando uma tool usar `board`, leia como a superfície local atual para esse contrato, não como a única arquitetura futura.
+
 ## Quando continuar sem perguntar
 
 Continue automaticamente quando todos os itens forem verdadeiros:
