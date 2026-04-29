@@ -2069,7 +2069,7 @@
     {
       "id": "TASK-BUD-089",
       "description": "[P1] Consolidar escada de escala operacional (manual -> delegação -> swarm) com critérios auditáveis e messaging de confiança/interruptibilidade.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-085",
         "TASK-BUD-088"
@@ -2087,7 +2087,8 @@
         "Sem sinal forte/solicitação explícita, manter lane simples por default.",
         "Usuário recebe caminho curto para interromper ou reduzir escala sem perder progresso."
       ],
-      "notes": "Foco: autonomia confiável sem sensação de perda de controle."
+      "notes": "Foco: autonomia confiável sem sensação de perda de controle.\n[2026-04-29T13:16:19.649Z] Closed scale-suggestion contract: agent driver charter now keeps L1/control-plane as default and requires objective reason (context, backlog independence, readiness, cost), proposed lane, scope/cost bound and L1 fallback before suggesting L2/L3. It also documents short operator commands to pause/reduce scale without losing validated progress. Validation: subagent_readiness_status(strict=true) ready=true with classifyFailures=0 and COMPLETE=1. [rationale:risk-control] Scale suggestions stay auditable and reversible, avoiding unwanted delegation/colony escalation during local-first long-runs.",
+      "verification": "VER-BUD-433"
     },
     {
       "id": "TASK-BUD-090",

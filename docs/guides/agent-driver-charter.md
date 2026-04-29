@@ -208,6 +208,23 @@ Para reduzir subjetividade, toda long run deve declarar lane ativa e respeitar o
 3. **Gate de governança quebrado** (`project-validate` não clean, preflight falhando, readiness estrito reprovado).
 4. **Sinal de confiança quebrada**: usuário pede pausa/interrupção ou objetivo fica ambíguo.
 
+### Contrato de sugestão de escala
+
+A lane simples (L1/control-plane) permanece default. Sugerir L2/L3 só quando houver sinal objetivo e comunicável:
+
+- **contexto**: janela próxima de checkpoint/compact ou tarefa extensa que preserva melhor progresso via handoff/subagente;
+- **backlog**: múltiplos itens independentes com validações focais claras;
+- **readiness**: `subagent_readiness_status(strict=true)` passa e preflight/swarm governance está verde para L3;
+- **custo**: quota/provider sem WARN/BLOCK e orçamento explícito para execução paralela.
+
+Toda sugestão de escala deve dizer em uma frase: motivo, lane proposta, limite de custo/escopo e fallback para L1.
+Sem esse conjunto mínimo — ou sem pedido explícito do usuário — continuar em L1 com slices bounded.
+
+Caminho curto de redução/interrupção:
+- usuário pode pedir “pausar”, “voltar para L1”, “sem subagentes/colônia” ou “só board/local”;
+- o control-plane registra checkpoint/handoff curto, cancela novos lançamentos e preserva progresso já validado;
+- falha de readiness/governança/custo rebaixa automaticamente para L1 sem tentar compensar com mais paralelismo.
+
 ### Próximo marco de calibração/autonomia (objetivo)
 
 Long run atual vai até cumprir este pacote mínimo:

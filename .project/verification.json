@@ -6117,6 +6117,15 @@
       "method": "test",
       "evidence": "Structured-first guardrail implemented and closed. edit/write tool calls targeting .project/*.json are blocked by guardrails-core-structured-first with audit event guardrails-core.structured-first-block and recommended canonical surfaces: board_query/board_update for tasks, board_query + read-block/write-block or structured_io for verification, read-block/write-block or structured_io for other .project JSON. Runbook documents the policy. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-first.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (5/5 passed); cmd.exe /c npm run test:monitor:smoke --silent (95/95 passed). [rationale:risk-control] Reduces fragile JSON text edits and corruption/stale-evidence risk in unattended long-runs.",
       "timestamp": "2026-04-29T13:14:37.840Z"
+    },
+    {
+      "id": "VER-BUD-433",
+      "target": "TASK-BUD-089",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+runtime-gate",
+      "evidence": "Scale-suggestion contract closed. docs/guides/agent-driver-charter.md documents L1/control-plane as default, objective reasons required for L2/L3 suggestion (context, backlog independence, readiness, cost), scope/cost bound, L1 fallback, and short operator path to pause/reduce scale without losing progress. Validation: subagent_readiness_status(strict=true) returned ready=true with classifyFailures=0 and COMPLETE=1. [rationale:risk-control] Keeps scale escalation auditable, reversible and user-controllable.",
+      "timestamp": "2026-04-29T13:16:19.649Z"
     }
   ]
 }
