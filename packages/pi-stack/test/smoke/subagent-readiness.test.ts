@@ -88,6 +88,55 @@ describe("subagent-readiness extension", () => {
 		}
 	});
 
+	it("strict readiness ignores generic monitor classify-failed placeholders", () => {
+		const dir = makeWorkspace();
+		try {
+			writeFileSync(
+				join(dir, ".sandbox", "pi-agent", "settings.json"),
+				JSON.stringify(
+					{
+						packages: [
+							{ source: "npm:@ifi/oh-pi-ant-colony" },
+							{ source: "npm:@ifi/pi-web-remote" },
+						],
+					},
+					null,
+					2,
+				) + "\n",
+			);
+			writeFileSync(
+				join(
+					dir,
+					".sandbox",
+					"pi-agent",
+					"sessions",
+					"--fixture--",
+					"session-generic-monitor.jsonl",
+				),
+				[
+					msg("user", "turn1"),
+					msg("user", "turn2"),
+					msg("user", "turn3"),
+					msg("assistant", "Warning: [monitor] classify failed:\n[monitor] classify failed:"),
+					msg("assistant", "[COLONY_SIGNAL:COMPLETE] done"),
+				].join("\n") + "\n",
+			);
+
+			const result = runSubagentReadiness(dir, {
+				source: "isolated",
+				strict: true,
+				tailBytes: 200_000,
+				days: 1,
+				limit: 1,
+			});
+
+			expect(result.ready).toBe(true);
+			expect(result.summary.monitor.classifyFailures).toBe(0);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
 	it("strict readiness accepts COMPLETE fallback from colony retention snapshot", () => {
 		const dir = makeWorkspace();
 		try {

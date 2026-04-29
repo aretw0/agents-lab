@@ -19,6 +19,7 @@ const STRICT_REQUIRED_PILOT_PACKAGES = [
 ];
 
 const CLASSIFY_FAIL_RE = /^(?:Warning:\s*)?\[([a-z0-9-]+)\]\s+classify failed:/i;
+const RESERVED_CLASSIFY_MONITOR_NAMES = new Set(["monitor", "monitors"]);
 
 type SourceMode = "auto" | "isolated" | "global";
 
@@ -206,6 +207,11 @@ function collectTextParts(value: unknown, out: string[], depth = 0): void {
 	collectTextParts(obj.result, out, depth + 1);
 }
 
+function isConcreteMonitorName(monitorNameRaw: string | undefined): boolean {
+	const monitorName = String(monitorNameRaw ?? "").trim().toLowerCase();
+	return monitorName.length > 0 && !RESERVED_CLASSIFY_MONITOR_NAMES.has(monitorName);
+}
+
 function scanSessionTail(filePath: string, tailBytes: number): {
 	userTurns: number;
 	classifyFailures: number;
@@ -236,7 +242,8 @@ function scanSessionTail(filePath: string, tailBytes: number): {
 		for (const row of corpus.join("\n").split(/\r?\n/)) {
 			const t = row.trim();
 			if (!t) continue;
-			if (CLASSIFY_FAIL_RE.test(t)) classifyFailures += 1;
+			const classifyFail = t.match(CLASSIFY_FAIL_RE);
+			if (classifyFail && isConcreteMonitorName(classifyFail[1])) classifyFailures += 1;
 			for (const match of t.matchAll(/\[COLONY_SIGNAL:([A-Z_]+)\]/g)) {
 				const key = match[1];
 				signals.set(key, (signals.get(key) ?? 0) + 1);
