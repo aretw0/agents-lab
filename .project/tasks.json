@@ -4748,6 +4748,31 @@
       ],
       "notes": "Criado após reload validar validation_method_plan ao vivo. [rationale:risk-control] A decisão de continuar precisa vir acompanhada de método seguro de validação; documentar o uso runtime evita regressão para checks frágeis.\n[2026-04-29T21:53:19.205Z] slice=1 focus=TASK-BUD-200 gate=safe_marker_check-summary-marker-check-ok-yes-matched-6/6-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta validation_method_plan para escolher método seguro quando a validação é ambígua.",
       "verification": "VER-BUD-480"
+    },
+    {
+      "id": "TASK-BUD-201",
+      "description": "[P1] Cobrir reexports das novas primitivas de hardening operacional em guardrails-core.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-187",
+        "TASK-BUD-190",
+        "TASK-BUD-195",
+        "TASK-BUD-198"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke importa via guardrails-core as primitivas safe marker, git maintenance, recurring failure e validation method.",
+        "Teste valida comportamento mínimo de cada helper via reexport público.",
+        "test:monitor:smoke permanece verde."
+      ],
+      "notes": "Criado na lane essencial de hardening. [rationale:risk-control] As primitivas novas precisam estar protegidas contra quebra de export público; sem isso runtime/docs podem divergir do pacote carregado.\n[2026-04-29T22:17:34.060Z] slice=1 focus=TASK-BUD-201 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Reexports públicos das primitivas de hardening agora têm smoke dedicado, reduzindo drift entre módulos internos e pacote carregado.",
+      "verification": "VER-BUD-481"
     }
   ]
 }

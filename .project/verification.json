@@ -6549,6 +6549,15 @@
       "method": "inspection",
       "evidence": "After reload, live validation_method_plan returned summary=validation-method: decision=use-safe-marker-check canValidate=yes kind=marker-check reasons=legacy-shell-inline-requested,command-sensitive-markers. Updated docs/guides/control-plane-operating-doctrine.md with Metodo de validacao section: use validation_method_plan when validation method is ambiguous; route text markers to safe_marker_check/evaluateTextMarkerCheck; run focal tests only when gate is known; use structured-read for read-only inspection; block protected/mutating validation. Validation used safe_marker_check: marker-check ok=yes matched=6/6 missing=none commandSensitive=none. [rationale:risk-control] Closes runtime/docs loop for safe validation method selection.",
       "timestamp": "2026-04-29T21:53:19.205Z"
+    },
+    {
+      "id": "VER-BUD-481",
+      "target": "TASK-BUD-201",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts covering guardrails-core public reexports for evaluateTextMarkerCheck, evaluateGitMaintenanceSignal, resolveRecurringFailureHardening, and resolveValidationMethodPlan. Added it to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts passed 1/1; cmd.exe /c npm run test:monitor:smoke --silent passed 150/150 across 29 files. [rationale:risk-control] Protects accumulated hardening primitives from public export drift.",
+      "timestamp": "2026-04-29T22:17:34.060Z"
     }
   ]
 }
