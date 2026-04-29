@@ -156,6 +156,20 @@ Long-runs precisam de monitores como trilho de confiança, não como fricção d
 
 Lease válido de long-run = loop running + task/intenção elegível + budget/provider/machine seguros + escopo autorizado. Enquanto o lease valer, monitores não devem pedir confirmação redundante; devem auditar ou agregar sinal. Runbook completo: `docs/guides/monitor-overrides.md#política-por-modo-de-execução`.
 
+### Adapters de mensageria fora da TUI/Web
+
+Canais como Telegram podem operar o control plane como UI degradada, não como nova fonte de verdade. Capability map mínimo:
+
+| Capacidade | TUI/Web | Telegram/message adapter |
+| --- | --- | --- |
+| Status curto, gates, quota e máquina | suportado | suportado com resumo bounded |
+| Acionar loop/checkpoint/task selecionada | suportado | suportado via intent canônico auditado |
+| Revisão rica de diffs/logs longos | suportado | degradado; enviar link/resumo e cair para TUI/Web quando necessário |
+| Editar board diretamente | não recomendado | não suportado; usar `board_query`/`board_update`/intents |
+| Fechar task estratégica/no-auto-close | suportado com verification | degradado; exigir decision packet + confirmação explícita |
+
+Todo adapter remoto deve preservar budget/delivery gates, registrar evidência em `tasks`/`verification`/`handoff`, e tratar truncamento/atraso de mensagem como motivo para fallback local em vez de decisão silenciosa.
+
 ### Soft/hard intent de internacionalização
 - **Comunicação:** `piStack.guardrailsCore.i18nIntents.communication` é soft intent; orienta a língua da resposta ao usuário (`auto-user-profile` por default), mas pode ceder a instrução explícita do turno/sistema.
 - **Artefatos:** `piStack.guardrailsCore.i18nIntents.artifacts` é hard intent; arquivos persistidos devem preservar a língua existente ou seguir a política configurada, sem traduzir comandos, paths, APIs, IDs ou evidências citadas por acidente.

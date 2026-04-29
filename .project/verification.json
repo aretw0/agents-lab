@@ -6189,6 +6189,15 @@
       "method": "inspect",
       "evidence": "Dependency-update governance documented in docs/guides/project-canonical-pipeline.md: detect candidate, run controlled canary, promote/hold-deny/revert with evidence and rollback, and assimilate first-party when external dependency risk/cost/complexity no longer pays off. Validation: cmd.exe /c node -e dependency-update markers passed: 4. [rationale:risk-control] Updates stay hold-by-default during unattended loops so long-run continuity is not broken by dependency churn.",
       "timestamp": "2026-04-29T16:53:18.025Z"
+    },
+    {
+      "id": "VER-BUD-441",
+      "target": "TASK-BUD-121",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Telegram/message-adapter governance documented. docs/guides/project-canonical-pipeline.md now includes TUI/Web -> Telegram capability map with supported/degraded/unsupported fallbacks, canonical intent/audit requirement, no direct board edits, and decision-packet confirmation for strategic/no-auto-close closure. embed-pi-cli skill now includes model D Message adapter with governance checklist. Validation: cmd.exe /c node -e telegram adapter markers passed: 4. [rationale:risk-control] Remote messaging can steer loops/checkpoints without bypassing budget, delivery, verification, board, or handoff authority.",
+      "timestamp": "2026-04-29T16:55:29.685Z"
     }
   ]
 }

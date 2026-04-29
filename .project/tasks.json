@@ -2875,7 +2875,7 @@
     {
       "id": "TASK-BUD-121",
       "description": "[P2] Curar extensão/adapter Telegram para operar o control plane fora da TUI/Web, com mapeamento explícito de limitações de mensageria e preservação de governança canônica.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-118",
         "TASK-BUD-119",
@@ -2896,7 +2896,8 @@
         "Canal Telegram consegue acionar/acompanhar loops e checkpoints sem bypass de budget/delivery gates.",
         "Evidência canônica continua no board (`tasks`/`verification`/`handoff`) mesmo quando origem da interação for Telegram."
       ],
-      "notes": "Backlogado explicitamente para a fase final da lapidação do control plane, conforme prioridade do usuário."
+      "notes": "Backlogado explicitamente para a fase final da lapidação do control plane, conforme prioridade do usuário.\n[2026-04-29T16:55:29.685Z] Completed with VER-BUD-441: Telegram/message adapter policy now maps supported/degraded/unsupported capabilities and preserves canonical gates/evidence. [rationale:risk-control] External messaging remains a degraded UI over the board/control-plane, not a bypass.",
+      "verification": "VER-BUD-441"
     },
     {
       "id": "TASK-BUD-122",

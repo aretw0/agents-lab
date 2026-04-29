@@ -20,6 +20,8 @@ Antes de qualquer implementação, identifique qual modelo se aplica:
 
 **C — Subprocess bridge** (integração programática): o projeto orquestra pi de fora (CI, pipeline). Invoque pi como subprocesso e consuma sessões JSONL.
 
+**D — Message adapter** (ex.: Telegram/Matrix/WhatsApp): canal externo envia comandos/steering para o control plane. Trate o canal como UI degradada: ele pode acionar loops, acompanhar checkpoints e receber resumos, mas não é autoridade canônica e não bypassa budget/delivery/verification gates.
+
 Se não tiver certeza, comece com A e evolua para B se precisar de tools/commands próprios.
 
 ## Referência canônica
@@ -62,6 +64,12 @@ Independente do modelo:
 - [ ] `deliveryPolicy.mode` explícito
 - [ ] Sessões CI isoladas das sessões do usuário
 - [ ] Testado com budget baixo antes de runs longas
+
+Para modelo D/message adapter:
+- [ ] Capability map explícito (`supported|degraded|unsupported`) entre TUI/Web e o canal.
+- [ ] Comandos remotos viram intents canônicos (`board.execute-task`, checkpoint, status) com auditoria; nunca editam `.project` diretamente.
+- [ ] Fechamento de task continua exigindo `verification` e, para no-auto-close/estratégicas, decisão humana explícita.
+- [ ] Limitações do canal (mensagem truncada, atraso, falta de rich UI, anexos) têm fallback para TUI/Web/local handoff.
 
 ### 4) Validar
 
