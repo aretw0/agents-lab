@@ -4163,6 +4163,29 @@
       ],
       "notes": "Criado como próxima melhoria local-safe após a doutrina. [rationale:risk-control] Remove ambiguidade que fazia o agente parar após foco completo, sem liberar drift para pesquisa/CI/remote.\n[2026-04-29T18:54:14.031Z] slice=1 focus=TASK-BUD-174 gate=rehearsal-doctrine-alignment-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora orienta continuar com fatia local-safe óbvia após foco completo, mas mantém parada para ambiguidade real e escopos protegidos.",
       "verification": "VER-BUD-455"
+    },
+    {
+      "id": "TASK-BUD-175",
+      "description": "[P1] Alinhar skill control-plane-ops com doutrina unattended e cadência econômica de diagnóstico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-173",
+        "TASK-BUD-174",
+        "TASK-BUD-168"
+      ],
+      "files": [
+        "packages/lab-skills/skills/control-plane-ops/SKILL.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Skill deve apontar para a doutrina operacional como referência de continuidade unattended.",
+        "Checklist bounded não deve sugerir pacote diagnóstico completo por default em hot path.",
+        "Critérios de continuar/parar devem preservar escopos protegidos e reduzir hesitação."
+      ],
+      "notes": "Criado como continuação local-safe: a skill ainda sugeria diagnóstico amplo por default e não refletia a doutrina nova. [rationale:risk-control] Alinhar instruções de runtime reduz bloat de tools e aumenta malemolência unattended sem relaxar gates.\n[2026-04-29T19:00:11.148Z] slice=1 focus=TASK-BUD-175 gate=control-plane-skill-doctrine-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Skill agora referencia a doutrina unattended e substitui pacote diagnóstico default por cadência boundary-driven.",
+      "verification": "VER-BUD-456"
     }
   ]
 }

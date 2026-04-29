@@ -13,8 +13,9 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 
 1. **Board canônico primeiro**: `.project/tasks.json` + `.project/verification.json` são fonte local de verdade.
 2. **Slice bounded**: selecione uma task, faça mudança pequena, valide gate focal, commite, atualize board.
-3. **Handoff antes de risco de contexto**: em checkpoint, refresque `.project/handoff.json`; em compact, pare novo trabalho e deixe auto-resume continuar.
-4. **Escala progressiva**: L1 control-plane direto por default; L2 subagente só com readiness; L3 swarm só com preflight/budget/escopo paralelo.
+3. **Continuidade unattended com trilho**: se o foco terminar e houver próxima fatia local-safe óbvia, continue; pare apenas em risco, ambiguidade real ou escopo protegido.
+4. **Handoff antes de risco de contexto**: em checkpoint, refresque `.project/handoff.json`; em compact, pare novo trabalho e deixe auto-resume continuar.
+5. **Escala progressiva**: L1 control-plane direto por default; L2 subagente só com readiness; L3 swarm só com preflight/budget/escopo paralelo.
 5. **Sem auto-close externo**: GitHub/Gitea/trackers espelham o board; completion local requer verificação local.
 
 ## Mapa guide -> skill/playbook
@@ -22,6 +23,7 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 | Conteúdo crítico | Guia canônico | Aplicação nesta skill |
 |---|---|---|
 | Loop local-first/board-first | `docs/guides/project-canonical-pipeline.md` | escolher task, validar, commit, atualizar board |
+| Doutrina unattended | `docs/guides/control-plane-operating-doctrine.md` | decidir quando continuar sem perguntar, quando parar e como escolher a próxima fatia local-safe |
 | Evolução L1/L2/L3 | `docs/guides/control-plane-evolution-playbook.md` | decidir quando manter simples, delegar ou usar swarm |
 | Checkpoint/compact/handoff | `docs/guides/project-canonical-pipeline.md` | refrescar handoff no checkpoint e parar novo trabalho no compact |
 | Rollout/rollback de delegação | `docs/guides/control-plane-evolution-playbook.md` | canário curto, evidência no parent, rollback para L1 |
@@ -31,15 +33,15 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 ## Checklist de execução bounded
 
 ```text
-1. context_watch_status + machine_maintenance_status + quota_alerts
-2. autonomy_lane_status (ou board_query) para selecionar task
+1. confirmar foco por handoff/board ou criar próxima fatia local-safe óbvia
+2. usar diagnósticos só em boundary: reload, checkpoint, seleção, pre-long-run, troubleshooting ou sinal real
 3. ler só arquivos-alvo
 4. editar/implementar micro-slice
 5. rodar teste focal
 6. git diff --check
 7. commit apenas arquivos intencionais
 8. atualizar task + verification com rationale quando sensível
-9. repetir ou checkpoint conforme contexto
+9. repetir automaticamente se o próximo passo for local, pequeno e seguro; caso contrário checkpoint/decisão
 ```
 
 ## Política structured/board-first

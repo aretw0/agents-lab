@@ -6324,6 +6324,15 @@
       "method": "inspection",
       "evidence": "Aligned docs/guides/project-canonical-pipeline.md rehearsal contract with docs/guides/control-plane-operating-doctrine.md. Marker validation passed: continuar com a próxima fatia local-safe óbvia; remote/offload entra como canário controlado e opt-in; doutrina operacional do control-plane unattended; parar apenas em risco, ambiguidade real ou escopo protegido. [rationale:risk-control] Removes the outdated stop-after-focus implication while preserving protected-scope boundaries.",
       "timestamp": "2026-04-29T18:54:14.031Z"
+    },
+    {
+      "id": "VER-BUD-456",
+      "target": "TASK-BUD-175",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Updated packages/lab-skills/skills/control-plane-ops/SKILL.md to reference docs/guides/control-plane-operating-doctrine.md, add unattended continuity with guardrails, and replace default diagnostic-pack checklist with boundary-driven diagnostics. Marker validation passed: Continuidade unattended com trilho; docs/guides/control-plane-operating-doctrine.md; usar diagnósticos só em boundary; repetir automaticamente se o próximo passo for local. Also asserted the old context_watch_status + machine_maintenance_status + quota_alerts hot-path pack is absent. [rationale:risk-control] Improves runtime instructions to reduce tool bloat and hesitation while preserving protected-scope stops.",
+      "timestamp": "2026-04-29T19:00:11.148Z"
     }
   ]
 }
