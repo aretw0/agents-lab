@@ -4404,6 +4404,27 @@
       ],
       "verification": "VER-BUD-466",
       "notes": "[2026-04-29T20:23:39.224Z] slice=1 focus=TASK-BUD-185 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A decisão de continuar/parar fica disponível em runtime sem diagnóstico amplo, reforçando malemolência unattended com trilho."
+    },
+    {
+      "id": "TASK-BUD-186",
+      "description": "[P1] Documentar uso operacional da tool unattended_continuation_plan após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-185"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina menciona a tool unattended_continuation_plan e o summary compacto.",
+        "Documento orienta usar a tool como checagem curta em boundary, sem pacote diagnóstico amplo.",
+        "Validação por marcadores e evidência curta no board."
+      ],
+      "notes": "Criado após reload validar unattended_continuation_plan ao vivo. [rationale:risk-control] A tool existe em runtime; documentar o uso evita voltar a diagnósticos amplos ou hesitação ad hoc.\n[2026-04-29T20:27:30.074Z] slice=1 focus=TASK-BUD-186 gate=unattended-continuation-tool-docs-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta usar unattended_continuation_plan como checagem curta e registrar summary, evitando pacote diagnóstico amplo.",
+      "verification": "VER-BUD-467"
     }
   ]
 }

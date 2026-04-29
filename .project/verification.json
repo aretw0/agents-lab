@@ -6423,6 +6423,15 @@
       "method": "test",
       "evidence": "Added guardrails-core-unattended-continuation-surface.ts registering unattended_continuation_plan as a read-only tool, wired it in guardrails-core.ts, added guardrails-unattended-continuation-surface smoke test, and included it in test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 125/125 across 20 files. [rationale:risk-control] Makes the continuation doctrine operational without invoking broad diagnostic packs.",
       "timestamp": "2026-04-29T20:23:39.224Z"
+    },
+    {
+      "id": "VER-BUD-467",
+      "target": "TASK-BUD-186",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "After reload, live unattended_continuation_plan returned summary=unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved. Updated docs/guides/control-plane-operating-doctrine.md to document using unattended_continuation_plan as a short boundary check and recording compact summary instead of opening a broad diagnostic pack. Marker validation passed after avoiding backtick-sensitive markers: unattended continuation tool docs markers passed: 4. [rationale:risk-control] Operationalizes the tool without increasing diagnostic bloat.",
+      "timestamp": "2026-04-29T20:27:30.074Z"
     }
   ]
 }

@@ -36,6 +36,8 @@ Exemplo: após fechar uma tarefa de rehearsal, criar uma pequena tarefa de doutr
 
 A primitiva `resolveUnattendedContinuationPlan` codifica essa decisão: `continue-local` quando a próxima fatia é local-safe, `ask-decision` quando o próximo passo é ambíguo, `blocked` para risco ou escopo protegido, `checkpoint` quando falta progresso salvo, e `pause-for-compact` quando o contexto já está em compact com progresso preservado.
 
+Em runtime, use a tool `unattended_continuation_plan` como checagem curta em boundaries de reload/checkpoint/ambiguidade. Prefira registrar o `summary` compacto no handoff; não abra pacote diagnóstico amplo quando essa decisão local basta.
+
 ## Quando parar ou pedir decisão
 
 Pare, faça checkpoint ou peça decisão quando houver:
