@@ -6315,6 +6315,15 @@
       "method": "inspection",
       "evidence": "Created docs/guides/control-plane-operating-doctrine.md and linked it from docs/guides/README.md. Marker validation passed: Foco completo não é parada automática; Quando continuar sem perguntar; Escolha da próxima fatia local-safe; Remote/offload só vem depois; Evidência mínima por fatia. [rationale:risk-control] The doctrine answers when to continue unattended, when to stop, and how to prioritize quality/refactor/fat removal/inspirations without auto-entering protected scopes.",
       "timestamp": "2026-04-29T18:47:43.773Z"
+    },
+    {
+      "id": "VER-BUD-455",
+      "target": "TASK-BUD-174",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "Aligned docs/guides/project-canonical-pipeline.md rehearsal contract with docs/guides/control-plane-operating-doctrine.md. Marker validation passed: continuar com a próxima fatia local-safe óbvia; remote/offload entra como canário controlado e opt-in; doutrina operacional do control-plane unattended; parar apenas em risco, ambiguidade real ou escopo protegido. [rationale:risk-control] Removes the outdated stop-after-focus implication while preserving protected-scope boundaries.",
+      "timestamp": "2026-04-29T18:54:14.031Z"
     }
   ]
 }

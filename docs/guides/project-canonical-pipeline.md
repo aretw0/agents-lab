@@ -702,11 +702,13 @@ Antes de promover para agent-as-tools, subagentes ou GitHub Actions, o rehearsal
 3. validar gate focal;
 4. commitar apenas arquivos intencionais;
 5. atualizar `tasks`/`verification`/handoff;
-6. se o foco terminar, retornar `focus-complete` e pedir próximo foco explícito em vez de driftar para pesquisa, CI/remote ou backlog lateral.
+6. se o foco terminar, continuar com a próxima fatia local-safe óbvia; se a próxima opção for ambígua ou protegida, registrar `focus-complete` e pedir decisão em vez de driftar para pesquisa, CI/remote ou backlog lateral.
 
-Critério de maturidade: três ou mais slices locais seguidos com foco preservado, smoke verde, commits pequenos, handoff fresco e nenhuma seleção automática de escopo protegido. Só depois disso remote/offload entra como canário controlado.
+Critério de maturidade: três ou mais slices locais seguidos com foco preservado, smoke verde, commits pequenos, handoff fresco e nenhuma seleção automática de escopo protegido. Só depois disso remote/offload entra como canário controlado e opt-in.
 
 A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes.
+
+A decisão operacional após foco completo deve seguir a [doutrina operacional do control-plane unattended](./control-plane-operating-doctrine.md): continuar sozinho em mudanças locais pequenas e reversíveis; parar apenas em risco, ambiguidade real ou escopo protegido.
 
 Durante o rehearsal, cada slice deve registrar uma evidência curta em formato estável: `slice=<n> focus=<task|milestone> gate=<comando|inspeção> commit=<sha> drift=<yes|no> next=<ação>`. O registro pode ficar em nota do board/handoff, evitando uma nova superfície grande de tracking.
 
