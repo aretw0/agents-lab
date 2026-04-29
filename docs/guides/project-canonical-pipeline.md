@@ -693,6 +693,19 @@ Para rodar um milestone quase unattended no control plane, operar com um contrat
 - **cadência recomendada**: lotes de 10–50 micro-slices, com checkpoint em board (`notes`) + `VER-*` parcial por lote;
 - **higiene de runtime**: preservar política `board-first`, steering do usuário com precedência, e usar `/lane-queue status` + `/context-watch` como telemetria passiva antes de escalar intervenção humana.
 
+#### Rehearsal local-first de unattended
+
+Antes de promover para agent-as-tools, subagentes ou GitHub Actions, o rehearsal local precisa provar o ciclo mínimo:
+
+1. escolher **foco explícito** (task ou milestone local-first) e gravar no handoff;
+2. executar slice bounded sem chamar pacote diagnóstico por hábito;
+3. validar gate focal;
+4. commitar apenas arquivos intencionais;
+5. atualizar `tasks`/`verification`/handoff;
+6. se o foco terminar, retornar `focus-complete` e pedir próximo foco explícito em vez de driftar para pesquisa, CI/remote ou backlog lateral.
+
+Critério de maturidade: três ou mais slices locais seguidos com foco preservado, smoke verde, commits pequenos, handoff fresco e nenhuma seleção automática de escopo protegido. Só depois disso remote/offload entra como canário controlado.
+
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
 ### Pre-compact calm-close (anti-paralisia)
