@@ -55,11 +55,36 @@ export function resolveAutoCompactRetryDelayMs(
 	return undefined;
 }
 
+export type ContextWatchAutoCompactIdleState = {
+	observedIdle: boolean;
+	effectiveIdle: boolean;
+	hasPendingMessages: boolean;
+	eligibleByMessageEnd: boolean;
+};
+
 export type ContextWatchAutoCompactDiagnostics = {
 	decision: ContextWatchAutoCompactDecision;
 	retryRecommended: boolean;
 	retryDelayMs?: number;
+	idle: ContextWatchAutoCompactIdleState;
 };
+
+export function resolveAutoCompactEffectiveIdle(input: {
+	autoCompactRequireIdle: boolean;
+	reason?: string;
+	isIdle: boolean;
+	hasPendingMessages: boolean;
+}): ContextWatchAutoCompactIdleState {
+	const eligibleByMessageEnd = input.autoCompactRequireIdle
+		&& input.reason === "message_end"
+		&& !input.hasPendingMessages;
+	return {
+		observedIdle: input.isIdle,
+		effectiveIdle: input.isIdle || eligibleByMessageEnd,
+		hasPendingMessages: input.hasPendingMessages,
+		eligibleByMessageEnd,
+	};
+}
 
 export function buildAutoCompactDiagnostics(
 	assessment: AutoCompactAssessmentLike,
@@ -70,10 +95,20 @@ export function buildAutoCompactDiagnostics(
 		inFlight: boolean;
 		isIdle: boolean;
 		hasPendingMessages: boolean;
+		reason?: string;
 	},
 	defaultRetryMs = 2_000,
 ): ContextWatchAutoCompactDiagnostics {
-	const decision = shouldTriggerAutoCompact(assessment, config, state);
+	const idle = resolveAutoCompactEffectiveIdle({
+		autoCompactRequireIdle: config.autoCompactRequireIdle,
+		reason: state.reason,
+		isIdle: state.isIdle,
+		hasPendingMessages: state.hasPendingMessages,
+	});
+	const decision = shouldTriggerAutoCompact(assessment, config, {
+		...state,
+		isIdle: idle.effectiveIdle,
+	});
 	const retryDelayMs = resolveAutoCompactRetryDelayMs(
 		decision,
 		{ nowMs: state.nowMs, lastAutoCompactAt: state.lastAutoCompactAt },
@@ -84,6 +119,7 @@ export function buildAutoCompactDiagnostics(
 		decision,
 		retryRecommended: retryDelayMs !== undefined,
 		retryDelayMs,
+		idle,
 	};
 }
 

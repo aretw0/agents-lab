@@ -18,6 +18,7 @@ import {
 	toAgeSec,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
+	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
@@ -213,6 +214,35 @@ describe("context-watchdog", () => {
 		expect(diag.decision.reason).toBe("not-idle");
 		expect(diag.retryRecommended).toBe(true);
 		expect(diag.retryDelayMs).toBe(2_000);
+		expect(diag.idle).toEqual({
+			observedIdle: false,
+			effectiveIdle: false,
+			hasPendingMessages: true,
+			eligibleByMessageEnd: false,
+		});
+
+		expect(resolveAutoCompactEffectiveIdle({
+			autoCompactRequireIdle: true,
+			reason: "message_end",
+			isIdle: false,
+			hasPendingMessages: false,
+		})).toEqual({
+			observedIdle: false,
+			effectiveIdle: true,
+			hasPendingMessages: false,
+			eligibleByMessageEnd: true,
+		});
+
+		const messageEndDiag = buildAutoCompactDiagnostics(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: false,
+			hasPendingMessages: false,
+			reason: "message_end",
+		});
+		expect(messageEndDiag.decision).toEqual({ trigger: true, reason: "trigger" });
+		expect(messageEndDiag.idle.eligibleByMessageEnd).toBe(true);
 		expect(resolveCompactCheckpointPersistence({
 			assessmentLevel: "compact",
 			handoffLastEventLevel: "warn",

@@ -22,12 +22,14 @@ import {
 } from "./custom-footer";
 import {
 	buildAutoCompactDiagnostics,
+	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	isAutoCompactDeferralReason,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
 	type ContextWatchAutoCompactDecision,
 	type ContextWatchAutoCompactDiagnostics,
+	type ContextWatchAutoCompactIdleState,
 } from "./context-watchdog-auto-compact";
 import {
 	DEFAULT_CONTEXT_WATCHDOG_CONFIG,
@@ -111,6 +113,7 @@ export {
 	resolveCompactCheckpointPersistence,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
+	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
@@ -132,6 +135,7 @@ export {
 export type {
 	ContextWatchAutoCompactDecision,
 	ContextWatchAutoCompactDiagnostics,
+	ContextWatchAutoCompactIdleState,
 	ContextWatchBootstrapPlan,
 	ContextWatchBootstrapPreset,
 	ContextWatchHandoffEvent,
@@ -793,6 +797,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			inFlight: autoCompactInFlight,
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
+			reason,
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (
 			assessment.level === "compact"
