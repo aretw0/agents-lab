@@ -4959,6 +4959,29 @@
       ],
       "notes": "Criado na lane essencial de segurança/controle do loop. [rationale:risk-control] O board é a autoridade operacional do loop unattended; seus helpers precisam estar no smoke principal para evitar drift silencioso.\n[2026-04-29T23:06:46.750Z] slice=1 focus=TASK-BUD-209 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] project-board-surface agora roda no smoke principal, protegendo query/update/decision/rationale usados pelo loop unattended.",
       "verification": "VER-BUD-488"
+    },
+    {
+      "id": "TASK-BUD-210",
+      "description": "[P1] Adicionar helper/tool bounded para registrar verification no board.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-209"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Superfície do board consegue anexar verification sem script ad hoc em .project/verification.json.",
+        "Opcionalmente vincula a verification à task alvo quando target_type=task/link_task=true.",
+        "Bloqueia duplicata por padrão e valida campos mínimos.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado na lane essencial de trabalho ininterrupto seguro. [rationale:risk-control] O loop ainda usa script ad hoc para registrar verification; uma superfície bounded reduz drift e aproxima fechamento auditável sem complete-task legado.\n[2026-04-29T23:12:02.463Z] slice=1 focus=TASK-BUD-210 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem helper/tool bounded para anexar verification e vincular à task, reduzindo scripts ad hoc.",
+      "verification": "VER-BUD-489"
     }
   ]
 }

@@ -44,7 +44,7 @@ interface TaskRecord {
   milestone?: string;
 }
 
-interface VerificationRecord {
+export interface VerificationRecord {
   id: string;
   target?: string;
   target_type?: string;
@@ -53,6 +53,14 @@ interface VerificationRecord {
   timestamp?: string;
   evidence?: string;
 }
+
+export type ProjectVerificationStatus = "passed" | "partial" | "failed";
+
+const PROJECT_VERIFICATION_STATUSES: ProjectVerificationStatus[] = [
+  "passed",
+  "partial",
+  "failed",
+];
 
 export type BoardRationaleKind = "refactor" | "test-change" | "risk-control" | "other";
 
@@ -997,6 +1005,89 @@ export function updateProjectTaskBoard(
   };
 }
 
+export interface ProjectVerificationAppendResult {
+  ok: boolean;
+  reason?: string;
+  verification?: VerificationRecord;
+  task?: ProjectTaskBoardRow;
+}
+
+function normalizeVerificationEvidence(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (!normalized) return undefined;
+  return normalized.length <= 4000 ? normalized : `${normalized.slice(0, 3999)}…`;
+}
+
+export function appendProjectVerificationBoard(
+  cwd: string,
+  input: {
+    id?: string;
+    target?: string;
+    targetType?: string;
+    status?: ProjectVerificationStatus;
+    method?: string;
+    evidence?: string;
+    timestamp?: string;
+    linkTask?: boolean;
+  },
+): ProjectVerificationAppendResult {
+  const id = typeof input.id === "string" ? input.id.trim() : "";
+  const target = typeof input.target === "string" ? input.target.trim() : "";
+  const targetType = typeof input.targetType === "string" && input.targetType.trim().length > 0
+    ? input.targetType.trim()
+    : "task";
+  const status = PROJECT_VERIFICATION_STATUSES.includes(input.status as ProjectVerificationStatus)
+    ? input.status as ProjectVerificationStatus
+    : undefined;
+  const method = typeof input.method === "string" ? input.method.trim() : "";
+  const evidence = normalizeVerificationEvidence(input.evidence);
+  const timestamp = typeof input.timestamp === "string" && input.timestamp.trim().length > 0
+    ? input.timestamp.trim()
+    : new Date().toISOString();
+
+  if (!id) return { ok: false, reason: "missing-verification-id" };
+  if (!target) return { ok: false, reason: "missing-verification-target" };
+  if (!status) return { ok: false, reason: "invalid-verification-status" };
+  if (!method) return { ok: false, reason: "missing-verification-method" };
+  if (!evidence) return { ok: false, reason: "missing-verification-evidence" };
+
+  const verificationRead = readVerificationBlockCached(cwd).block;
+  if (verificationRead.verifications.some((row) => row.id === id)) {
+    return { ok: false, reason: "verification-already-exists" };
+  }
+
+  let linkedTask: ProjectTaskBoardRow | undefined;
+  if (input.linkTask === true) {
+    if (targetType !== "task") return { ok: false, reason: "link-task-requires-task-target-type" };
+    const taskBlock = readProjectTasksBlock(cwd);
+    const taskIndex = taskBlock.tasks.findIndex((row) => row?.id === target);
+    if (taskIndex < 0) return { ok: false, reason: "task-target-not-found" };
+    taskBlock.tasks[taskIndex] = {
+      ...taskBlock.tasks[taskIndex],
+      verification: id,
+    };
+    writeProjectTasksBlock(cwd, taskBlock);
+    invalidateProjectBlockCaches(cwd);
+    linkedTask = queryProjectTasks(cwd, { search: target, limit: 200 }).rows.find((row) => row.id === target);
+  }
+
+  const verification: VerificationRecord = {
+    id,
+    target,
+    target_type: targetType,
+    status,
+    method,
+    timestamp,
+    evidence,
+  };
+  verificationRead.verifications.push(verification);
+  writeVerificationBlock(cwd, verificationRead);
+  invalidateProjectBlockCaches(cwd);
+
+  return { ok: true, verification, task: linkedTask };
+}
+
 export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
   const queryParameters = Type.Object({
     entity: Type.Union([Type.Literal("tasks"), Type.Literal("verification")]),
@@ -1121,6 +1212,58 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Build a compact no-auto-close decision packet (close/keep-open/defer) with recent verification evidence and blockers for one task.",
     parameters: decisionPacketParameters,
     execute: executeDecisionPacket,
+  });
+
+  const verificationAppendParameters = Type.Object({
+    id: Type.String({ minLength: 1, description: "Verification id to append." }),
+    target: Type.String({ minLength: 1, description: "Target task/id this verification belongs to." }),
+    target_type: Type.Optional(Type.String({ description: "Target type (default: task)." })),
+    status: Type.Union(PROJECT_VERIFICATION_STATUSES.map((s) => Type.Literal(s))),
+    method: Type.String({ minLength: 1, description: "Verification method, e.g. test or inspection." }),
+    evidence: Type.String({ minLength: 1, description: "Bounded evidence text." }),
+    timestamp: Type.Optional(Type.String({ description: "ISO timestamp. Defaults to now." })),
+    link_task: Type.Optional(Type.Boolean({ description: "When true and target_type=task, set target task verification to this id." })),
+  });
+
+  const executeVerificationAppend = (
+    _toolCallId: string,
+    params: {
+      id?: string;
+      target?: string;
+      target_type?: string;
+      status?: ProjectVerificationStatus;
+      method?: string;
+      evidence?: string;
+      timestamp?: string;
+      link_task?: boolean;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = appendProjectVerificationBoard(ctx.cwd, {
+      id: params?.id,
+      target: params?.target,
+      targetType: params?.target_type,
+      status: params?.status,
+      method: params?.method,
+      evidence: params?.evidence,
+      timestamp: params?.timestamp,
+      linkTask: params?.link_task === true,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_verification_append",
+    label: "Board Verification Append",
+    description:
+      "Append one .project/verification entry through a constrained board surface, optionally linking it to a task.",
+    parameters: verificationAppendParameters,
+    execute: executeVerificationAppend,
   });
 
   const updateParameters = Type.Object({

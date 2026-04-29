@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import projectBoardSurfaceExtension, {
+  appendProjectVerificationBoard,
   buildProjectTaskDecisionPacket,
   queryProjectTasks,
   queryProjectVerification,
@@ -159,6 +160,70 @@ describe("project-board-surface", () => {
       expect(result.rows[0]?.evidence).toContain("smoke");
       expect(result.rows[0]?.rationaleSource).toBe("none");
       expect(result.rows[0]?.rationaleConsistency).toBe("none");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("appendProjectVerificationBoard appends verification and can link target task", () => {
+    const cwd = seedWorkspace();
+    try {
+      const appended = appendProjectVerificationBoard(cwd, {
+        id: "VER-3",
+        target: "TASK-C",
+        targetType: "task",
+        status: "passed",
+        method: "test",
+        evidence: "focal gate ok",
+        timestamp: "2026-04-23T05:03:00Z",
+        linkTask: true,
+      });
+      expect(appended.ok).toBe(true);
+      expect(appended.verification).toMatchObject({ id: "VER-3", target: "TASK-C", status: "passed" });
+      expect(appended.task?.verification).toBe("VER-3");
+
+      const verification = queryProjectVerification(cwd, { target: "TASK-C", status: "passed", limit: 10 });
+      expect(verification.rows[0]?.id).toBe("VER-3");
+
+      const duplicate = appendProjectVerificationBoard(cwd, {
+        id: "VER-3",
+        target: "TASK-C",
+        status: "passed",
+        method: "test",
+        evidence: "duplicate",
+      });
+      expect(duplicate).toMatchObject({ ok: false, reason: "verification-already-exists" });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("appendProjectVerificationBoard validates minimal bounded fields", () => {
+    const cwd = seedWorkspace();
+    try {
+      expect(appendProjectVerificationBoard(cwd, {
+        id: "VER-X",
+        target: "TASK-C",
+        status: "passed",
+        method: "test",
+        evidence: "",
+      })).toMatchObject({ ok: false, reason: "missing-verification-evidence" });
+      expect(appendProjectVerificationBoard(cwd, {
+        id: "VER-X",
+        target: "TASK-C",
+        status: "failed" as never,
+        method: "test",
+        evidence: "failure recorded",
+        linkTask: true,
+      }).ok).toBe(true);
+      expect(appendProjectVerificationBoard(cwd, {
+        id: "VER-Y",
+        target: "TASK-MISSING",
+        status: "passed",
+        method: "test",
+        evidence: "cannot link missing task",
+        linkTask: true,
+      })).toMatchObject({ ok: false, reason: "task-target-not-found" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -856,6 +921,38 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.readyForHumanDecision).toBe(true);
       expect((result.details as any)?.options).toEqual(["close", "keep-open", "defer"]);
       expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-1");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_verification_append tool appends and links verification", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const appendTool = getTool(pi, "board_verification_append");
+
+      const result = await appendTool.execute(
+        "tc-board-verification-append",
+        {
+          id: "VER-TOOL",
+          target: "TASK-C",
+          target_type: "task",
+          status: "passed",
+          method: "test",
+          evidence: "tool gate ok",
+          timestamp: "2026-04-23T05:04:00Z",
+          link_task: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.verification?.id).toBe("VER-TOOL");
+      expect((result.details as any)?.task?.verification).toBe("VER-TOOL");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

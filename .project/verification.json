@@ -6621,6 +6621,15 @@
       "method": "test",
       "evidence": "Added packages/pi-stack/test/smoke/project-board-surface.test.ts to test:monitor:smoke so the canonical board surface used by unattended loops is covered by the main local smoke gate. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 44/44; cmd.exe /c npm run test:monitor:smoke --silent passed 198/198 across 32 files. [rationale:risk-control] Prevents silent drift in board query/update/decision/rationale behavior that controls audited long-run work.",
       "timestamp": "2026-04-29T23:06:46.750Z"
+    },
+    {
+      "id": "VER-BUD-489",
+      "target": "TASK-BUD-210",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added appendProjectVerificationBoard and board_verification_append to project-board-surface. The bounded surface validates id/target/status/method/evidence, rejects duplicates, can link target task verification when link_task=true, and keeps query/update caches coherent. Tests added for helper, validation, duplicate blocking, and tool execution. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 47/47; cmd.exe /c npm run test:monitor:smoke --silent passed 201/201 across 32 files. [rationale:risk-control] Reduces ad hoc verification JSON mutation in unattended board loops.",
+      "timestamp": "2026-04-29T23:12:02.463Z"
     }
   ]
 }
