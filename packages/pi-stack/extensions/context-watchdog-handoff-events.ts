@@ -34,7 +34,10 @@ export type CompactCheckpointPersistenceReason =
 	| "compact-event-fresh";
 
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
+const MACHINE_MAINTENANCE_ACTION_PREFIX = "Machine maintenance:";
+const MACHINE_MAINTENANCE_CONTEXT_PREFIX = "machine-maintenance gate";
 const CONTEXT_WATCH_BLOCKER_PREFIX = "context-watch-";
+const MACHINE_MAINTENANCE_BLOCKER_PREFIXES = ["memory-pressure-", "disk-pressure-"];
 const CONTEXT_WATCH_EVENTS_KEY = "context_watch_events";
 const CONTEXT_WATCH_EVENTS_MAX = 12;
 
@@ -143,8 +146,17 @@ export function applyContextWatchToHandoff(
 		: {};
 	const actionLine = contextWatchActionLine(assessment);
 
+	delete base.machine_maintenance;
+	if (
+		typeof base.context === "string" &&
+		base.context.trim().toLowerCase().startsWith(MACHINE_MAINTENANCE_CONTEXT_PREFIX)
+	) {
+		delete base.context;
+	}
+
 	const nextActions = normalizeStringArray(base.next_actions)
-		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_ACTION_PREFIX));
+		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_ACTION_PREFIX))
+		.filter((entry) => !entry.startsWith(MACHINE_MAINTENANCE_ACTION_PREFIX));
 	if (assessment.level !== "ok") nextActions.unshift(actionLine);
 	if (nextActions.length > 0) {
 		base.next_actions = nextActions.slice(0, 20);
@@ -153,7 +165,8 @@ export function applyContextWatchToHandoff(
 	}
 
 	const blockers = normalizeStringArray(base.blockers)
-		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_BLOCKER_PREFIX));
+		.filter((entry) => !entry.startsWith(CONTEXT_WATCH_BLOCKER_PREFIX))
+		.filter((entry) => !MACHINE_MAINTENANCE_BLOCKER_PREFIXES.some((prefix) => entry.startsWith(prefix)));
 	const contextBlockers = contextWatchBlockersForLevel(assessment.level);
 	if (contextBlockers.length > 0) blockers.unshift(...contextBlockers);
 	if (blockers.length > 0) {

@@ -2838,7 +2838,7 @@
     {
       "id": "TASK-BUD-120",
       "description": "[P1] Consolidar superfícies de confiança do loop (status/health/audit/handoff) para operação 'deixa rodando' com governança explícita e baixo ruído.",
-      "status": "planned",
+      "status": "in-progress",
       "depends_on": [
         "TASK-BUD-118",
         "TASK-BUD-119"
@@ -2859,7 +2859,7 @@
         "Handoff inclui resumo operacional mínimo para auto-resume sem exigir confirmação humana redundante.",
         "Noise-budget preservado: sinais críticos priorizados e consolidáveis sem spam de notificações."
       ],
-      "notes": "Complementa o núcleo de loop com curadoria operacional para confiança contínua.\n[2026-04-23T12:14:00Z] Feedback humano assimilado: papel dos monitores em long run precisa política explícita para não interromper autorizações já válidas e evitar fricção no modo unattended; desdobrado em TASK-BUD-126 (governança por modo + lease de autorização + low-friction profile)."
+      "notes": "Complementa o núcleo de loop com curadoria operacional para confiança contínua.\n[2026-04-23T12:14:00Z] Feedback humano assimilado: papel dos monitores em long run precisa política explícita para não interromper autorizações já válidas e evitar fricção no modo unattended; desdobrado em TASK-BUD-126 (governança por modo + lease de autorização + low-friction profile).\n[2026-04-29T00:12Z] Micro-slice de confiança/handoff: detectado que context-watch regravava `.project/handoff.json` com timestamp novo mas preservando payload stale de `machine_maintenance` antigo (`disk-pressure-block`) após recuperação do host. Corrigido `applyContextWatchToHandoff` para remover `machine_maintenance`, contexto `machine-maintenance gate...`, ações `Machine maintenance:` e blockers `memory-pressure-*`/`disk-pressure-*` quando o escritor é context-watch; se a máquina ainda estiver em pressão, machine-maintenance deve regravar evidência fresca. Evidência: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` passou 29/29; `npm run gate:monitor:local` passou 66 Node + 18 Vitest; `npm run ops:disk:strict` passou severity=ok/free≈17.27GB.\n[rationale-sync] TASK-BUD-120 recebeu rationale risk-control para explicitar que handoff/status precisam separar evidência fresca de snapshots legados.\n[rationale:risk-control] Superfícies de confiança como status/health/handoff orientam continuidade operacional; elas não podem renovar evidência stale como se fosse estado atual, porque isso induz decisões erradas em long-runs e handoffs entre sessões."
     },
     {
       "id": "TASK-BUD-121",

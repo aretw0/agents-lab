@@ -853,6 +853,38 @@ describe("context-watchdog", () => {
 		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});
 
+	it("does not refresh stale machine-maintenance payload when writing context-watch events", () => {
+		const assessment = evaluateContextWatch(57, {
+			warnPct: 50,
+			checkpointPct: 68,
+			compactPct: 72,
+		});
+		const next = applyContextWatchToHandoff(
+			{
+				context: "machine-maintenance gate block: stale disk pressure",
+				next_actions: [
+					"Machine maintenance: checkpoint-and-stop until memory/disk pressure recovers.",
+					"Keep unrelated operator note",
+				],
+				blockers: ["disk-pressure-block", "memory-pressure-warn", "infra-wait"],
+				machine_maintenance: { severity: "block" },
+			},
+			assessment,
+			"message_end",
+			"2026-04-21T21:32:00.000Z",
+		) as any;
+
+		expect(next.machine_maintenance).toBeUndefined();
+		expect(next.context).toBe("Context-watch tracking active: maintain continuity under context pressure.");
+		expect(next.next_actions.some((line: string) => line.startsWith("Machine maintenance:")))
+			.toBe(false);
+		expect(next.next_actions).toContain("Keep unrelated operator note");
+		expect(next.blockers).not.toContain("disk-pressure-block");
+		expect(next.blockers).not.toContain("memory-pressure-warn");
+		expect(next.blockers).toContain("infra-wait");
+		expect(next.blockers).toContain("context-watch-warn-active");
+	});
+
 	it("cleans old context-watch blockers when level returns to ok", () => {
 		const assessment = evaluateContextWatch(20, {
 			warnPct: 50,
