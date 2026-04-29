@@ -58,6 +58,27 @@ Também aceita JSONL (um evento por linha):
 node scripts/session-triage.mjs --events ./data/canonical-events.jsonl
 ```
 
+Idea Inbox Primitive (captura sem aplicar automaticamente):
+
+```bash
+node scripts/session-triage.mjs --ideas ./notes/inbox.md --json
+node scripts/session-triage.mjs --events ./data/canonical-events.jsonl --ideas ./notes/inbox.md --json
+```
+
+O inbox aceita padrões Markdown/Obsidian simples:
+
+```markdown
+- idea: Criar runbook curto para operadores iniciantes
+> [!idea] Capturar nota Obsidian como proposal
+idea: Converter brainstorming de sessão em task draft revisável
+```
+
+Contrato do inbox:
+- normaliza cada ideia para `ideaInbox.proposals[]`;
+- cada proposal contém `taskDraft.status=planned`, `acceptance_criteria` mínima e `references` para a origem;
+- `decisionGate` sempre exige revisão humana, verificação e `noAutoClose`;
+- o script **não escreve** em `.project/tasks` nem promove prioridade automaticamente.
+
 Exemplo no repositório:
 
 ```bash

@@ -85,6 +85,16 @@ Regras mínimas do adapter:
 
 O adapter pode ser **inbox-first** (captura) ou **mirror-first** (projeção), sem substituir o contrato canônico.
 
+### Idea Inbox Primitive
+
+A captura de ideias livres deve produzir proposal antes de task final:
+
+1. aceitar fontes Markdown/Obsidian e eventos de sessão;
+2. normalizar para `proposal` com origem auditável;
+3. gerar `taskDraft.status=planned` com descrição objetiva e AC mínimo;
+4. exigir `decisionGate.requiresHumanApproval=true` antes de promover prioridade/scope;
+5. nunca aplicar auto-close nem auto-priorização agressiva a partir do inbox.
+
 ---
 
 ## Estado no agents-lab

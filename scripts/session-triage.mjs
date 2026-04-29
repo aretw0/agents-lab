@@ -12,6 +12,7 @@
  *   node scripts/session-triage.mjs
  *   node scripts/session-triage.mjs --days 2 --limit 12
  *   node scripts/session-triage.mjs --events ./data/canonical-events.json
+ *   node scripts/session-triage.mjs --ideas ./notes/inbox.md
  *   node scripts/session-triage.mjs --summary-store ./.sandbox/pi-agent/triage/branch-summary-store.json
  *   node scripts/session-triage.mjs --no-summary-store
  *   node scripts/session-triage.mjs --json
@@ -34,6 +35,7 @@ function parseArgs(argv) {
     window: 1,
     expand: false,
     allowGlobalFallback: false,
+    ideaSources: [],
   };
 
   for (let i = 0; i < argv.length; i++) {
@@ -88,6 +90,12 @@ function parseArgs(argv) {
     }
     if (a === "--allow-global-fallback") {
       out.allowGlobalFallback = true;
+      continue;
+    }
+    if (a === "--ideas" || a === "--idea-inbox") {
+      const src = argv[i + 1];
+      if (src) out.ideaSources.push(src);
+      i++;
       continue;
     }
   }
@@ -247,6 +255,101 @@ function buildToolingClaimCandidates(gapTotals) {
     .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
 }
 
+function stableIdeaId(text) {
+  const normalized = String(text ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+  let hash = 5381;
+  for (const ch of normalized) hash = ((hash << 5) + hash) ^ ch.charCodeAt(0);
+  return `IDEA-${(hash >>> 0).toString(36).toUpperCase()}`;
+}
+
+function normalizeIdeaTitle(text) {
+  return String(text ?? "")
+    .replace(/\s+/g, " ")
+    .replace(/[`*_#>\[\]]/g, "")
+    .trim()
+    .slice(0, 180);
+}
+
+function extractIdeaCandidatesFromText(text, source) {
+  const out = [];
+  const lines = String(text ?? "").split(/\r?\n/);
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index].trim();
+    if (!line) continue;
+
+    const matches = [
+      line.match(/^[-*]\s+(?:\[[ xX]\]\s*)?(?:💡\s*)?(?:idea|ideia|inbox)\s*[:\-–]\s+(.+)$/i),
+      line.match(/^#{1,6}\s+(?:💡\s*)?(?:idea|ideia|inbox)\s*[:\-–]\s+(.+)$/i),
+      line.match(/^(?:💡\s*)?(?:idea|ideia|inbox)\s*[:\-–]\s+(.+)$/i),
+      line.match(/^>\s*\[!(?:idea|ideia|inbox)\]\s*(.*)$/i),
+    ].find(Boolean);
+
+    if (!matches) continue;
+    const title = normalizeIdeaTitle(matches[1] || lines[index + 1] || "");
+    if (!title) continue;
+    out.push({
+      id: stableIdeaId(`${source.kind}:${source.ref}:${title}`),
+      title,
+      source: { ...source, line: index + 1 },
+      taskDraft: {
+        status: "planned",
+        description: title,
+        acceptance_criteria: [
+          "Human review confirms priority/scope before autonomous execution.",
+          "Origin reference remains attached to the promoted task.",
+          "No auto-close or aggressive priority promotion is applied by the inbox pipeline.",
+        ],
+        references: [source.ref],
+      },
+      decisionGate: {
+        requiresHumanApproval: true,
+        requiresVerification: true,
+        noAutoClose: true,
+      },
+    });
+  }
+  return out;
+}
+
+function collectIdeaInbox({ ideaSources, sessions }) {
+  const proposals = [];
+
+  for (const rawPath of ideaSources ?? []) {
+    const sourcePath = path.resolve(rawPath);
+    if (!existsSync(sourcePath)) continue;
+    const stat = statSync(sourcePath);
+    const files = stat.isDirectory()
+      ? readdirSync(sourcePath)
+          .filter((name) => /\.(?:md|markdown)$/i.test(name))
+          .map((name) => path.join(sourcePath, name))
+      : [sourcePath];
+
+    for (const file of files) {
+      if (!/\.(?:md|markdown)$/i.test(file)) continue;
+      const text = readFileSync(file, "utf8");
+      proposals.push(...extractIdeaCandidatesFromText(text, { kind: "markdown", ref: path.resolve(file) }));
+    }
+  }
+
+  for (const session of sessions ?? []) {
+    for (const candidate of session.ideaCandidates ?? []) proposals.push(candidate);
+  }
+
+  const byKey = new Map();
+  for (const proposal of proposals) {
+    const key = proposal.title.toLowerCase();
+    if (!byKey.has(key)) byKey.set(key, proposal);
+  }
+
+  const deduped = [...byKey.values()].sort((a, b) => a.id.localeCompare(b.id));
+  return {
+    proposalCount: deduped.length,
+    reviewRequired: deduped.length > 0,
+    promotionPolicy: "draft-planned-task-only; human-review-required; no-auto-close; no-aggressive-priority",
+    proposals: deduped,
+  };
+}
+
 function recommendDelegationLane(report) {
   const claims = Array.isArray(report?.aggregate?.toolingClaims) ? report.aggregate.toolingClaims : [];
   const claimCount = claims.reduce((sum, item) => sum + (Number(item?.count) || 0), 0);
@@ -396,6 +499,7 @@ function parseSessionFile(filePath, lineBudget) {
     assistantMessages: 0,
     colonySignals: {},
     toolingGaps: {},
+    ideaCandidates: [],
     branchSummaries: [],
     totalLineCount: allLines.length,
     scannedLineCount: lines.length,
@@ -424,6 +528,14 @@ function parseSessionFile(filePath, lineBudget) {
     for (const m of matches) addCount(signalCount, m[1]);
 
     for (const code of detectToolingGapCodes(text)) addCount(toolingGapCount, code);
+
+    out.ideaCandidates.push(
+      ...extractIdeaCandidatesFromText(text, {
+        kind: "session",
+        ref: path.basename(filePath),
+        role: String(role ?? "unknown"),
+      }),
+    );
 
     if (role !== "toolResult") {
       const summary = extractSummaryBlock(text);
@@ -464,7 +576,13 @@ function parseCanonicalEventsInput(eventsPath) {
 
   try {
     const parsed = JSON.parse(rawText);
-    const events = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.events) ? parsed.events : [];
+    const events = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.events)
+        ? parsed.events
+        : parsed && typeof parsed === "object" && (parsed.event || parsed.source || parsed.text || parsed.message || parsed.content)
+          ? [parsed]
+          : [];
     return {
       events: Array.isArray(events) ? events : [],
       format: "json",
@@ -513,6 +631,7 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
     colonySignals: {},
     toolingGaps: {},
     providers: {},
+    ideaCandidates: [],
     branchSummaries: [],
   };
 
@@ -540,6 +659,14 @@ function parseCanonicalEventsFile(eventsPath, cutoffMs) {
     for (const m of matches) addCount(signalCount, m[1]);
 
     for (const code of detectToolingGapCodes(text)) addCount(toolingGapCount, code);
+
+    out.ideaCandidates.push(
+      ...extractIdeaCandidatesFromText(text, {
+        kind: "event",
+        ref: `canonical:${path.basename(eventsPath)}:${provider}`,
+        role,
+      }),
+    );
 
     const summary = extractSummaryBlock(text);
     if (summary) {
@@ -630,6 +757,9 @@ function renderHuman(report) {
   if (report.sources?.canonicalEvents) {
     lines.push(`Canonical events: ${report.sources.canonicalEvents}`);
   }
+  if ((report.sources?.ideaInbox ?? []).length > 0) {
+    lines.push(`Idea inbox sources: ${report.sources.ideaInbox.join(", ")}`);
+  }
   if (report.sources?.branchSummaryStore) {
     lines.push(`Branch-summary store: ${report.sources.branchSummaryStore}`);
   }
@@ -691,6 +821,19 @@ function renderHuman(report) {
   lines.push(`lane: ${rec.lane} (confidence=${rec.confidence})`);
   for (const reason of rec.reasons ?? []) lines.push(`- ${reason}`);
   lines.push(`next: ${rec.nextAction}`);
+  lines.push("");
+
+  lines.push(`## Idea inbox proposals (${report.ideaInbox?.proposalCount ?? 0})`);
+  if ((report.ideaInbox?.proposals ?? []).length === 0) {
+    lines.push("- (none)");
+  } else {
+    lines.push(`policy: ${report.ideaInbox.promotionPolicy}`);
+    for (const item of report.ideaInbox.proposals) {
+      lines.push(`- ${item.id}: ${item.title}`);
+      lines.push(`  - source: ${item.source.kind}:${item.source.ref}:${item.source.line}`);
+      lines.push("  - gate: human-review + verification + no-auto-close");
+    }
+  }
   lines.push("");
 
   lines.push(`## Branch-summary aggregation (merged=${report.aggregate.branchSummariesCount ?? 0})`);
@@ -801,6 +944,7 @@ const report = {
     piSessionJsonl: existsSync(sessionDir),
     sessionDirSource: scanConfig.sessionDirSource,
     canonicalEvents: opts.eventsPath ? path.resolve(opts.eventsPath) : null,
+    ideaInbox: (opts.ideaSources ?? []).map((src) => path.resolve(src)),
     branchSummaryStore: summaryStorePath,
   },
   scanWindow: {
@@ -832,6 +976,7 @@ const report = {
     sessionExtracted: sessionSummaries.length,
   },
   board,
+  ideaInbox: collectIdeaInbox({ ideaSources: opts.ideaSources, sessions }),
 };
 
 report.recommendation = recommendDelegationLane(report);

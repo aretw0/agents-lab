@@ -1578,7 +1578,7 @@
     {
       "id": "TASK-BUD-068",
       "description": "[P1] Implementar Idea Inbox Primitive para capturar ideias livres (sessão + Markdown/Obsidian) e promover candidatos determinísticos para `.project/tasks` com revisão humana.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-066"
       ],
@@ -1592,7 +1592,7 @@
         "Proposals viram tasks `planned` com descrição objetiva, AC mínimo e referência de origem, sem auto-close nem auto-priorização agressiva.",
         "Fluxo inclui etapa explícita de revisão humana para promover prioridade/scope antes de execução autônoma."
       ],
-      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável. Alinhada ao modelo de intenção híbrida (DEC-BUD-027): soft intent distribuída em skills/prompts + hard intent de governança. Correção de escopo (2026-04-25): Idea Inbox não depende de `mdt`; `mdt` entra na trilha de doc-drift/single-source docs."
+      "notes": "Derivada do snapshot de pesquisa `agent-factory-vs-squeez-mdt-2026-04-21.md`; foco em reduzir atrito de captura e transformar brainstorming em backlog executável. Alinhada ao modelo de intenção híbrida (DEC-BUD-027): soft intent distribuída em skills/prompts + hard intent de governança. Correção de escopo (2026-04-25): Idea Inbox não depende de `mdt`; `mdt` entra na trilha de doc-drift/single-source docs.\n[completion] Closed with `VER-BUD-405`: `session-triage` now exposes an Idea Inbox Primitive for Markdown/Obsidian-style notes plus session/canonical events, producing human-review-gated planned task drafts without writing `.project/tasks` or auto-prioritizing. Focal node test passed 4/4.\n[rationale:risk-control] Idea capture can affect backlog quality, so promotion is intentionally proposal-only with human review, verification, origin references, and no auto-close/no aggressive priority to prevent brainstorming from becoming autonomous execution without consent."
     },
     {
       "id": "TASK-BUD-069",

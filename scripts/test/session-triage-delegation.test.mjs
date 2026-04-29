@@ -126,6 +126,50 @@ test("session-triage recommends swarm-candidate when complete signal exists and 
   }
 });
 
+test("session-triage extracts idea inbox proposals from markdown and canonical events without auto-applying tasks", () => {
+  const workspace = makeWorkspace();
+  try {
+    writeFileSync(
+      path.join(workspace, ".project", "tasks.json"),
+      JSON.stringify({ tasks: [] }, null, 2),
+    );
+
+    const ideasPath = path.join(workspace, "ideas.md");
+    writeFileSync(
+      ideasPath,
+      [
+        "# Inbox",
+        "- idea: Criar runbook curto para operadores iniciantes",
+        "> [!idea] Capturar nota Obsidian como proposal",
+      ].join("\n"),
+    );
+
+    const eventsPath = path.join(workspace, "events.jsonl");
+    const event = {
+      source: { provider: "pi" },
+      event: {
+        timestampIso: new Date().toISOString(),
+        role: "user",
+        text: "idea: Converter brainstorming de sessão em task draft revisável",
+      },
+    };
+    writeFileSync(eventsPath, `${JSON.stringify(event)}\n`);
+
+    const report = runTriage({ workspace, eventsPath, extraArgs: ["--ideas", ideasPath] });
+    assert.equal(report.ideaInbox.proposalCount, 3);
+    assert.equal(report.ideaInbox.reviewRequired, true);
+    assert.match(report.ideaInbox.promotionPolicy, /human-review-required/);
+    for (const proposal of report.ideaInbox.proposals) {
+      assert.equal(proposal.taskDraft.status, "planned");
+      assert.equal(proposal.decisionGate.requiresHumanApproval, true);
+      assert.equal(proposal.decisionGate.noAutoClose, true);
+      assert.ok(proposal.taskDraft.acceptance_criteria.length >= 1);
+    }
+  } finally {
+    rmSync(workspace, { recursive: true, force: true });
+  }
+});
+
 test("session-triage defaults to local sandbox sessions with tail-batch window", () => {
   const workspace = makeWorkspace();
   try {
