@@ -4186,6 +4186,31 @@
       ],
       "notes": "Criado como continuação local-safe: a skill ainda sugeria diagnóstico amplo por default e não refletia a doutrina nova. [rationale:risk-control] Alinhar instruções de runtime reduz bloat de tools e aumenta malemolência unattended sem relaxar gates.\n[2026-04-29T19:00:11.148Z] slice=1 focus=TASK-BUD-175 gate=control-plane-skill-doctrine-markers-passed:4 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Skill agora referencia a doutrina unattended e substitui pacote diagnóstico default por cadência boundary-driven.",
       "verification": "VER-BUD-456"
+    },
+    {
+      "id": "TASK-BUD-176",
+      "description": "[P1] Separar surface do unattended rehearsal para reduzir acoplamento da autonomy lane.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-171",
+        "TASK-BUD-173"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-rehearsal-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "unattended_rehearsal_gate registrado por surface própria.",
+        "autonomy lane surface não importa nem registra o gate de rehearsal.",
+        "Smokes focal e monitor smoke continuam verdes."
+      ],
+      "verification": "VER-BUD-457",
+      "notes": "[2026-04-29T19:13:14.462Z] slice=1 focus=TASK-BUD-176 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Refactor leve reduz mistura de domínios: autonomy lane continua cuidando seleção/plano, enquanto rehearsal gate tem surface própria."
     }
   ]
 }
