@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
-import { evaluateAutonomyLaneTaskSelection } from "./guardrails-core-autonomy-task-selector";
+import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -14,6 +14,19 @@ function asBool(value: unknown, fallback: boolean): boolean {
 function asNumber(value: unknown, fallback: number): number {
   const raw = Number(value);
   return Number.isFinite(raw) ? raw : fallback;
+}
+
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+}
+
+function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { ids: string[]; source?: "explicit" | "handoff" } {
+  const explicit = asStringArray(p.focus_task_ids);
+  if (explicit.length > 0) return { ids: explicit, source: "explicit" };
+  if (p.use_handoff_focus === false) return { ids: [] };
+  const handoff = readAutonomyHandoffFocusTaskIds(cwd);
+  return handoff.length > 0 ? { ids: handoff, source: "handoff" } : { ids: [] };
 }
 
 export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
@@ -102,15 +115,20 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
       include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
       include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
       sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
+      const focus = resolveFocusTaskIds(p, ctx.cwd);
       const selection = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
         milestone: typeof p.milestone === "string" ? p.milestone : undefined,
         includeProtectedScopes: p.include_protected_scopes === true,
         includeMissingRationale: p.include_missing_rationale === true,
         sampleLimit: asNumber(p.sample_limit, 5),
+        focusTaskIds: focus.ids,
+        focusSource: focus.source,
       });
       const plan = evaluateAutonomyLaneReadiness({
         context: {
@@ -162,15 +180,20 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
       include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
       include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
       sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
+      const focus = resolveFocusTaskIds(p, ctx.cwd);
       const result = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
         milestone: typeof p.milestone === "string" ? p.milestone : undefined,
         includeProtectedScopes: p.include_protected_scopes === true,
         includeMissingRationale: p.include_missing_rationale === true,
         sampleLimit: asNumber(p.sample_limit, 5),
+        focusTaskIds: focus.ids,
+        focusSource: focus.source,
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

@@ -1,15 +1,20 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 
 export type AutonomyTaskSelectionReason =
   | "ready"
   | "no-candidate-tasks"
-  | "no-eligible-tasks";
+  | "no-eligible-tasks"
+  | "focus-mismatch";
 
 export interface AutonomyTaskSelectorOptions {
   milestone?: string;
   includeProtectedScopes?: boolean;
   includeMissingRationale?: boolean;
   sampleLimit?: number;
+  focusTaskIds?: string[];
+  focusSource?: "explicit" | "handoff";
 }
 
 export interface AutonomyTaskSelection {
@@ -18,6 +23,8 @@ export interface AutonomyTaskSelection {
   recommendation: string;
   selectionPolicy: string;
   milestone?: string;
+  focusTaskIds?: string[];
+  focusSource?: "explicit" | "handoff";
   nextTaskId?: string;
   eligibleTaskIds: string[];
   totals: {
@@ -27,6 +34,7 @@ export interface AutonomyTaskSelection {
     blockedByDependencies: number;
     skippedProtectedScope: number;
     skippedMissingRationale: number;
+    skippedFocusMismatch: number;
   };
 }
 
@@ -53,6 +61,32 @@ function normalizeMilestone(value: unknown): string | undefined {
   const text = normalizeText(value);
   if (!text) return undefined;
   return text.length <= 120 ? text : `${text.slice(0, 119)}…`;
+}
+
+function normalizeTaskIdList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of value) {
+    const id = normalizeTaskId(item);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+  }
+  return out.slice(0, 20);
+}
+
+export function readAutonomyHandoffFocusTaskIds(cwd: string): string[] {
+  const handoffPath = path.join(cwd, ".project", "handoff.json");
+  if (!existsSync(handoffPath)) return [];
+  try {
+    const parsed = JSON.parse(readFileSync(handoffPath, "utf8")) as { current_tasks?: unknown; focusTasks?: unknown };
+    const currentTasks = normalizeTaskIdList(parsed.current_tasks);
+    if (currentTasks.length > 0) return currentTasks;
+    return normalizeTaskIdList(parsed.focusTasks);
+  } catch {
+    return [];
+  }
 }
 
 function clampSampleLimit(value: unknown): number {
@@ -128,6 +162,9 @@ export function selectAutonomyLaneTask(
   const sampleLimit = clampSampleLimit(options?.sampleLimit);
   const includeProtectedScopes = options?.includeProtectedScopes === true;
   const includeMissingRationale = options?.includeMissingRationale === true;
+  const focusTaskIds = normalizeTaskIdList(options?.focusTaskIds);
+  const focusSource = focusTaskIds.length > 0 ? options?.focusSource : undefined;
+  const focusSet = new Set(focusTaskIds);
   const completed = new Set(
     tasks
       .filter((task) => task.status === "completed")
@@ -148,11 +185,17 @@ export function selectAutonomyLaneTask(
   const rationaleReady = includeMissingRationale
     ? scoped
     : scoped.filter((task) => !taskMissingRequiredRationale(task));
-  const blockedByDependencies = rationaleReady.filter((task) => {
+  const skippedFocusMismatch = focusTaskIds.length > 0
+    ? rationaleReady.filter((task) => !focusSet.has(normalizeTaskId(task.id) ?? "")).length
+    : 0;
+  const focusReady = focusTaskIds.length > 0
+    ? rationaleReady.filter((task) => focusSet.has(normalizeTaskId(task.id) ?? ""))
+    : rationaleReady;
+  const blockedByDependencies = focusReady.filter((task) => {
     const deps = normalizeDependsOn(task.depends_on);
     return deps.length > 0 && !deps.every((dep) => completed.has(dep));
   }).length;
-  const eligible = rationaleReady
+  const eligible = focusReady
     .filter((task) => {
       const deps = normalizeDependsOn(task.depends_on);
       return deps.every((dep) => completed.has(dep));
@@ -168,6 +211,7 @@ export function selectAutonomyLaneTask(
     "id",
     includeProtectedScopes ? "protected-scopes-included" : "protected-scopes-skipped",
     includeMissingRationale ? "missing-rationale-included" : "missing-rationale-skipped",
+    focusTaskIds.length > 0 ? `focus(${focusSource ?? "explicit"}:${focusTaskIds.join(",")})` : undefined,
     milestone ? `milestone(${milestone})` : undefined,
   ].filter(Boolean).join("+");
 
@@ -178,6 +222,8 @@ export function selectAutonomyLaneTask(
       recommendation: `execute bounded slice for ${eligibleTaskIds[0]}; validate focal gate; commit; update board.`,
       selectionPolicy,
       milestone,
+      focusTaskIds: focusTaskIds.length > 0 ? focusTaskIds : undefined,
+      focusSource,
       nextTaskId: eligibleTaskIds[0],
       eligibleTaskIds: eligibleTaskIds.slice(0, sampleLimit),
       totals: {
@@ -187,18 +233,35 @@ export function selectAutonomyLaneTask(
         blockedByDependencies,
         skippedProtectedScope,
         skippedMissingRationale,
+        skippedFocusMismatch,
       },
     };
   }
 
+  const hasEligibleOutsideFocus = focusTaskIds.length > 0 && rationaleReady
+    .filter((task) => {
+      const deps = normalizeDependsOn(task.depends_on);
+      return deps.every((dep) => completed.has(dep));
+    })
+    .some((task) => !focusSet.has(normalizeTaskId(task.id) ?? ""));
+  const reason = candidate.length === 0
+    ? "no-candidate-tasks"
+    : hasEligibleOutsideFocus
+      ? "focus-mismatch"
+      : "no-eligible-tasks";
+
   return {
     ready: false,
-    reason: candidate.length === 0 ? "no-candidate-tasks" : "no-eligible-tasks",
-    recommendation: candidate.length === 0
+    reason,
+    recommendation: reason === "no-candidate-tasks"
       ? "add or select a planned/in-progress task before autonomous continuation."
-      : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
+      : reason === "focus-mismatch"
+        ? "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation."
+        : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
     selectionPolicy,
     milestone,
+    focusTaskIds: focusTaskIds.length > 0 ? focusTaskIds : undefined,
+    focusSource,
     nextTaskId: undefined,
     eligibleTaskIds: [],
     totals: {
@@ -208,6 +271,7 @@ export function selectAutonomyLaneTask(
       blockedByDependencies,
       skippedProtectedScope,
       skippedMissingRationale,
+      skippedFocusMismatch,
     },
   };
 }

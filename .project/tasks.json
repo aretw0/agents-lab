@@ -3920,6 +3920,29 @@
       ],
       "verification": "",
       "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual."
+    },
+    {
+      "id": "TASK-BUD-163",
+      "description": "[P0] Endurecer a autonomy lane contra drift de foco usando current_tasks do handoff/focus explícito antes de selecionar próxima task.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-120",
+        "TASK-BUD-157"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Selector respeita focus_task_ids explícitos e current_tasks do handoff por default nas superfícies read-only.",
+        "Quando só há trabalho elegível fora do foco, a seleção retorna focus-mismatch em vez de avançar para task lateral.",
+        "Focal smoke e test:monitor:smoke validam a política sem mutações colaterais no board."
+      ],
+      "verification": "VER-BUD-443",
+      "notes": "Criado e fechado por steering humano (2026-04-29): foco maior é esticar unattended com loops contínuos, organizados e auditados sem drift. [rationale:risk-control] A lane deve preservar foco do handoff/usuário antes de escalar para agent-as-tools, subagentes ou GitHub Actions."
     }
   ]
 }

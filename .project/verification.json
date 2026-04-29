@@ -6207,6 +6207,15 @@
       "method": "inspect",
       "evidence": "Semantic code-ops roadmap updated in docs/guides/project-canonical-pipeline.md. Priority operations include rename symbol, move file/import updates, organize imports and format target. Contract now states dry-first preview, explicit engine-unavailable fallback, textual fallback only with evidence/blast-radius limits, and simple flow remains opt-in/outcome-agnostic. Validation: cmd.exe /c node -e semantic code ops markers passed: 4. [rationale:risk-control] Structural code operations reduce scattered manual edits without increasing friction for focal simple work.",
       "timestamp": "2026-04-29T16:57:16.034Z"
+    },
+    {
+      "id": "VER-BUD-443",
+      "target": "TASK-BUD-163",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented focus-aware autonomy task selection. Added focusTaskIds/focusSource to selectAutonomyLaneTask, readAutonomyHandoffFocusTaskIds, default handoff focus in autonomy_lane_status/autonomy_lane_next_task, and focus-mismatch reason to prevent drifting into unrelated eligible tasks. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 13/13; cmd.exe /c npm run test:monitor:smoke --silent passed 99/99. [rationale:risk-control] This directly hardens unattended continuity by requiring task selection to align with explicit/handoff focus unless focus is cleared.",
+      "timestamp": "2026-04-29T17:09:50.497Z"
     }
   ]
 }

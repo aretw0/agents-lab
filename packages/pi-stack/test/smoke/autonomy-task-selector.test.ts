@@ -79,6 +79,30 @@ describe("autonomy task selector", () => {
     expect(result.selectionPolicy).toContain("missing-rationale-included");
   });
 
+  it("respects focus task ids before drifting to unrelated eligible work", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-REMOTE", status: "planned", description: "[P0] remote runner" }),
+      task({ id: "TASK-FOCUS", status: "planned", description: "[P2] focused local" }),
+    ], { focusTaskIds: ["TASK-FOCUS"], focusSource: "explicit" });
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-FOCUS");
+    expect(result.totals.skippedFocusMismatch).toBe(1);
+    expect(result.selectionPolicy).toContain("focus(explicit:TASK-FOCUS)");
+  });
+
+  it("blocks unrelated eligible work when focus has no eligible task", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-REMOTE", status: "planned", description: "[P0] remote runner" }),
+      task({ id: "TASK-FOCUS", status: "completed", description: "[P1] done" }),
+    ], { focusTaskIds: ["TASK-FOCUS"], focusSource: "handoff" });
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("focus-mismatch");
+    expect(result.nextTaskId).toBeUndefined();
+    expect(result.recommendation).toContain("do not drift");
+  });
+
   it("filters by milestone", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-A", milestone: "later", status: "planned" }),

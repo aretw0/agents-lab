@@ -53,6 +53,31 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
   });
 
+  it("uses handoff focus by default to avoid drifting to unrelated tasks", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-focus-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-REMOTE", description: "[P0] remote ci", status: "planned" },
+        { id: "TASK-FOCUS", description: "[P2] focused local", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      current_tasks: ["TASK-FOCUS"],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-FOCUS");
+    expect((result?.details.selection as { focusSource?: string } | undefined)?.focusSource).toBe("handoff");
+  });
+
   it("registers composed status tool with board selection and lane plan", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
