@@ -6297,6 +6297,15 @@
       "method": "test",
       "evidence": "Exposed unattended_rehearsal_gate as a read-only tool in guardrails-core-autonomy-lane-surface. The tool maps completed_local_slices, focus_preserved, focal_smoke_green, small_commits, handoff_fresh, protected_scope_auto_selections and unresolved_blockers into evaluateUnattendedRehearsalGate decisions. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 8/8; cmd.exe /c npm run test:monitor:smoke --silent passed 117/117. [rationale:risk-control] Makes remote/offload readiness checkable without broad diagnostics or mutable side effects.",
       "timestamp": "2026-04-29T18:09:23.744Z"
+    },
+    {
+      "id": "VER-BUD-453",
+      "target": "TASK-BUD-172",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "TASK-BUD-172 completed with 3 local-first slices. Slice 1 commit=00fcaca docs(control-plane): record rehearsal slice evidence. Slice 2 commit=ada62b7 feat(guardrails): format rehearsal slice evidence; board evidence commit=8715087. Slice 3 commit=5c81671 feat(guardrails): summarize rehearsal gate. Focal validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 119/119. Live unattended_rehearsal_gate returned decision=ready-for-canary, score=6/6, blockers=[] with protected_scope_auto_selections=0 and unresolved_blockers=0. [rationale:risk-control] Evidence supports considering a controlled canary only with operator intent; no remote/offload action was started automatically.",
+      "timestamp": "2026-04-29T18:26:48.549Z"
     }
   ]
 }
