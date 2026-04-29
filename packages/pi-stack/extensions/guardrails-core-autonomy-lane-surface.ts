@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
+import { evaluateAutonomyLaneTaskSelection } from "./guardrails-core-autonomy-task-selector";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -72,6 +73,29 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         workspace: {
           unexpectedDirty: asBool(p.unexpected_dirty, false),
         },
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_next_task",
+    label: "Autonomy Lane Next Task",
+    description: "Select the next conservative autonomy-lane board task. Read-only and side-effect-free.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
+        milestone: typeof p.milestone === "string" ? p.milestone : undefined,
+        includeProtectedScopes: p.include_protected_scopes === true,
+        sampleLimit: asNumber(p.sample_limit, 5),
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
