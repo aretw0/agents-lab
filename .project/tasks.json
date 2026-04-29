@@ -886,7 +886,7 @@
       "type": "feature",
       "id": "TASK-BUD-040",
       "description": "[P1] Desenvolver um adapter de billing para o GitHub Copilot que consulte a API de custos (ou fonte externa equivalente) e injete o custo real faturado no sistema de budget.",
-      "status": "in-progress",
+      "status": "completed",
       "references": [
         "REQ-BUD-023",
         "DEC-BUD-017"
@@ -900,7 +900,8 @@
         "Eventos de billing respeitam chave canônica provider/account (`github-copilot[/account]`) para matcher account-aware com fallback provider-only.",
         "Smoke cobre parse/normalização do payload externo e validação de injeção no modelo de eventos de quota."
       ],
-      "notes": "[2026-04-24T12:16:00Z] Slice implementada: `quota-visibility` agora lê fonte externa de billing do Copilot (`~/.pi/agent/billing/github-copilot-costs.json`, override opcional por `PI_COPILOT_BILLING_PATH`), normaliza payload (records/items/events/data) e injeta eventos `github-copilot` com custo real faturado no cálculo de provider budgets. Exportado helper `extractCopilotBillingUsageEvents` com teste dedicado em smoke (`quota-visibility-parsers` 33/33 pass)."
+      "notes": "[2026-04-24T12:16:00Z] Slice implementada: `quota-visibility` agora lê fonte externa de billing do Copilot (`~/.pi/agent/billing/github-copilot-costs.json`, override opcional por `PI_COPILOT_BILLING_PATH`), normaliza payload (records/items/events/data) e injeta eventos `github-copilot` com custo real faturado no cálculo de provider budgets. Exportado helper `extractCopilotBillingUsageEvents` com teste dedicado em smoke (`quota-visibility-parsers` 33/33 pass).\n[2026-04-29T12:39:41.300Z] Revalidated Copilot billing adapter: quota-visibility parser smoke confirms external GitHub Copilot billing payload normalization/injection path remains green. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts (34/34 passed). [rationale:risk-control] External billing ingestion affects quota/budget decisions, so closure records account/provider matching and parser coverage without mutating live billing sources.",
+      "verification": "VER-BUD-416"
     },
     {
       "type": "bug",
