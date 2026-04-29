@@ -30,12 +30,14 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
 }
 
 describe("guardrails-core structured_io_json tool", () => {
-  it("registers structured_io_json tool", () => {
+  it("registers unified structured_io and legacy structured_io_json tools", () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
-    const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io_json");
-    expect(call).toBeTruthy();
-    const tool = call?.[0] as any;
+    const unifiedCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io");
+    const jsonCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([t]) => t?.name === "structured_io_json");
+    expect(unifiedCall).toBeTruthy();
+    expect(jsonCall).toBeTruthy();
+    const tool = unifiedCall?.[0] as any;
     const operationAnyOf = tool?.parameters?.properties?.operation?.anyOf ?? [];
     const operationLiterals = operationAnyOf
       .map((item: any) => item?.const)
@@ -135,6 +137,48 @@ describe("guardrails-core structured_io_json tool", () => {
     expect((apply.details as any)?.applied).toBe(true);
     const changed = JSON.parse(readFileSync(path, "utf8"));
     expect(changed.a["b.c"]).toBe(9);
+
+    rmSync(cwd, { recursive: true, force: true });
+  });
+
+  it("uses unified structured_io tool for Markdown and LaTeX sections", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-structured-tool-"));
+    writeFileSync(join(cwd, "doc.md"), ["# Doc", "", "## Target", "old", "## Next", "tail"].join("\n"), "utf8");
+    writeFileSync(join(cwd, "paper.tex"), ["\\section{Target}", "old", "\\section{Next}", "tail"].join("\n"), "utf8");
+
+    const pi = makeMockPi();
+    guardrailsCore(pi);
+    const tool = getTool(pi, "structured_io");
+
+    const read = await tool.execute(
+      "tc-md-read",
+      { path: "doc.md", selector: "heading:Target", operation: "read" },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((read.details as any)?.kind).toBe("markdown");
+    expect((read.details as any)?.value).toBe("old");
+
+    const apply = await tool.execute(
+      "tc-md-write",
+      { path: "doc.md", selector: "heading:Target", operation: "set", payload: "new", dryRun: false },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((apply.details as any)?.applied).toBe(true);
+    expect(readFileSync(join(cwd, "doc.md"), "utf8")).toContain("## Target\nnew\n## Next");
+
+    const latex = await tool.execute(
+      "tc-tex-read",
+      { path: "paper.tex", selector: "section:Target", operation: "read" },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+    expect((latex.details as any)?.kind).toBe("latex");
+    expect((latex.details as any)?.via).toBe("latex-ast-lite");
 
     rmSync(cwd, { recursive: true, force: true });
   });

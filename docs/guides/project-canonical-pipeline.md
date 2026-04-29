@@ -331,11 +331,12 @@ Implementação incremental atual:
 - comando dry-first para operador: `/safe-mutation` (`help`, `large-file`, `query`) com audit trail (`guardrails-core.safe-mutation.*`) e validação explícita de contagem de linhas (`touchedLines/maxTouchedLines` inteiros em faixa);
 - tools tipadas `safe_mutate_large_file` e `structured_query_plan` para consumo determinístico em workflows/subagentes, mantendo os mesmos guardrails de risco/forbidMutation e bloqueio explícito de query multi-statement/vazia;
 - seed de I/O estruturado (loam-inspired): `guardrails-core-structured-io.ts` com `structuredJsonRead`/`structuredJsonWrite` e selector canônico (inclui bracket-quoted key, ex.: `a["b.c"]`);
-- reexport de structured I/O em `guardrails-core.ts` para consumo unificado (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`);
+- pathway unificado AST-first leve: `structuredRead`/`structuredWrite` resolvem `kind=auto|json|markdown|latex`; JSON usa parser nativo, Markdown usa seções por heading (`heading:<título>`) e LaTeX usa seções (`section:<título>`), sempre com `sourceSpan`, `via`, dry-run e cap de blast-radius;
+- reexport de structured I/O em `guardrails-core.ts` para consumo unificado (`parseStructuredJsonSelector`, `structuredJsonRead`, `structuredJsonWrite`, `structuredRead`, `structuredWrite`, `resolveStructuredIoKind`);
 - comando operador `/structured-io` (`json-read`, `json-write`) com dry-run default, cap de blast-radius, validação de `--max-lines` (inteiro positivo) e audit trail (`guardrails-core.structured-io.*`);
 - seletores JSON aceitam índice em bracket (`a.b[0].c`) e seletor raiz (`$`) para replace de documento inteiro com `set`; `remove` na raiz é bloqueado explicitamente (`root-remove-unsupported`);
-- tool tipada `structured_io_json` (`read|set|remove`) para consumo determinístico por agentes/workflows, também dry-first por default;
-- smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts`, `guardrails-safe-mutation-registration.test.ts`, `guardrails-structured-io-contract.test.ts`, `guardrails-structured-io-command.test.ts`, `guardrails-structured-io-tool.test.ts`.
+- tool tipada unificada `structured_io` (`read|set|remove`) cobre JSON/Markdown/LaTeX; tool legada `structured_io_json` permanece para compatibilidade, ambas dry-first por default;
+- smokes de contrato/superfície: `guardrails-safe-mutation-contract.test.ts`, `guardrails-safe-mutation-reexport.test.ts`, `guardrails-safe-mutation-registration.test.ts`, `guardrails-structured-io-contract.test.ts`, `guardrails-structured-io-command.test.ts`, `guardrails-structured-io-reexport.test.ts`, `guardrails-structured-io-tool.test.ts`.
 
 Referência de contrato inicial: `docs/research/task-bud-145-safe-mutation-structured-query-contract-2026-04-24.md`.
 Evolução planejada para I/O estruturado centralizado (loam-inspired): `docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md`.

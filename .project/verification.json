@@ -5892,6 +5892,15 @@
       "method": "test",
       "evidence": "Implemented deterministic i18n intents: guardrails-core now resolves/audits piStack.guardrailsCore.i18nIntents, injects soft communication + hard artifact policy, supports artifact rules by pathPrefix/extensions with opt-in translation targets, and documents runbook including optional mdt drift detection. Validation: cmd.exe /c npm run test:monitor:smoke --silent (73/73 passed, 10 files).\n[rationale:risk-control] Mudança cria política determinística e auditável para evitar drift de idioma entre comunicação e artefatos persistidos; smoke focal e monitor smoke completo validaram defaults, overrides por escopo/extensão e tradução opt-in sem tocar settings locais.",
       "timestamp": "2026-04-29T10:45:13.713776Z"
+    },
+    {
+      "id": "VER-BUD-408",
+      "target": "TASK-BUD-154",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented unified AST-first structured I/O slice: structuredRead/structuredWrite now resolve kind=auto|json|markdown|latex; JSON keeps parser path; Markdown supports heading:<title>; LaTeX supports section:<title>; outputs include via/sourceSpan, dry-run default, rollback token and blast-radius cap; unified structured_io tool added while structured_io_json remains compatible. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts (17/17 passed); cmd.exe /c npm run test:monitor:smoke --silent (90/90 passed, 13 files).\n[rationale:risk-control] Expansão preserva compatibilidade da tool JSON legada e limita Markdown/LaTeX a seções com parser leve, dry-run, sourceSpan e maxTouchedLines para reduzir edição textual frágil sem ampliar blast-radius.",
+      "timestamp": "2026-04-29T11:53:42.206152Z"
     }
   ]
 }

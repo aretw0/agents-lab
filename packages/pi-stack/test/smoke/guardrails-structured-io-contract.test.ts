@@ -3,6 +3,8 @@ import {
 	parseStructuredJsonSelector,
 	structuredJsonRead,
 	structuredJsonWrite,
+	structuredRead,
+	structuredWrite,
 } from "../../extensions/guardrails-core-structured-io";
 
 describe("guardrails-core structured io contract", () => {
@@ -194,5 +196,55 @@ describe("guardrails-core structured io contract", () => {
 		expect(removeRoot.applied).toBe(false);
 		expect(removeRoot.blocked).toBe(true);
 		expect(removeRoot.reason).toBe("root-remove-unsupported");
+	});
+
+	it("reads and writes Markdown sections through unified structured io", () => {
+		const content = ["# Title", "intro", "", "## Target", "old body", "", "## Next", "tail"].join("\n");
+		const read = structuredRead({ content, path: "doc.md", selector: "heading:Target" });
+		expect(read).toMatchObject({
+			ok: true,
+			kind: "markdown",
+			found: true,
+			shape: "section",
+			value: "old body",
+			sourceSpan: { startLine: 4, endLine: 6 },
+			via: "markdown-ast-lite",
+		});
+
+		const write = structuredWrite({
+			content,
+			path: "doc.md",
+			selector: "heading:Target",
+			operation: "set",
+			payload: "new body",
+			dryRun: false,
+			maxTouchedLines: 10,
+		});
+		expect(write).toMatchObject({ applied: true, kind: "markdown", reason: "ok-applied" });
+		expect(write.output).toContain("## Target\nnew body\n## Next");
+	});
+
+	it("reads and writes LaTeX sections through unified structured io", () => {
+		const content = ["\\section{Intro}", "hello", "\\section{Target}", "old", "\\subsection{Child}", "child", "\\section{Next}", "tail"].join("\n");
+		const read = structuredRead({ content, path: "paper.tex", selector: "section:Target" });
+		expect(read).toMatchObject({
+			ok: true,
+			kind: "latex",
+			found: true,
+			value: "old\n\\subsection{Child}\nchild",
+			sourceSpan: { startLine: 3, endLine: 6 },
+			via: "latex-ast-lite",
+		});
+
+		const blocked = structuredWrite({
+			content,
+			path: "paper.tex",
+			selector: "section:Target",
+			operation: "set",
+			payload: Array.from({ length: 8 }, (_, i) => `line-${i}`).join("\n"),
+			dryRun: false,
+			maxTouchedLines: 2,
+		});
+		expect(blocked).toMatchObject({ applied: false, blocked: true, reason: "blocked:blast-radius-exceeded" });
 	});
 });

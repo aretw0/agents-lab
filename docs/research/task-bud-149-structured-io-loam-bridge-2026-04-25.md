@@ -63,3 +63,4 @@ Saída:
 - **TASK-BUD-144**: macro-APIs de refactor (inclui visão IDE-like para rename project-wide).
 - **TASK-BUD-145**: mutação segura e query estruturada com guardrails.
 - **TASK-BUD-149**: camada unificadora de leitura/escrita estruturada para reduzir edição textual manual.
+- **TASK-BUD-154**: expansão AST-first leve entregue para `kind=auto|json|markdown|latex`, com JSON parser nativo, Markdown por `heading:<título>`, LaTeX por `section:<título>`, `sourceSpan`, `via`, dry-run e cap de blast-radius sob a tool unificada `structured_io`.

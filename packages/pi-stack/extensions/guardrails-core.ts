@@ -191,7 +191,7 @@ export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-co
 export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
 export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";
 export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, buildRefactorRenameSymbolResult } from "./guardrails-core-macro-refactor";
-export { parseStructuredJsonSelector, structuredJsonRead, structuredJsonWrite } from "./guardrails-core-structured-io";
+export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 
 // =============================================================================
 // Read / Path Guard

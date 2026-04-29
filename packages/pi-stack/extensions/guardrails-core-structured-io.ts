@@ -219,6 +219,17 @@ export type StructuredJsonWriteResult = {
   rollbackToken: string | null;
 };
 
+export function countStructuredTouchedLines(beforeText: string, afterText: string): number {
+  const before = beforeText.split(/\r?\n/);
+  const after = afterText.split(/\r?\n/);
+  const max = Math.max(before.length, after.length);
+  let changed = 0;
+  for (let i = 0; i < max; i += 1) {
+    if ((before[i] ?? "") !== (after[i] ?? "")) changed += 1;
+  }
+  return changed;
+}
+
 function countTouchedLines(beforeText: string, afterText: string): number {
   const before = beforeText.split(/\r?\n/);
   const after = afterText.split(/\r?\n/);
@@ -230,10 +241,22 @@ function countTouchedLines(beforeText: string, afterText: string): number {
   return changed;
 }
 
+export function structuredRiskFromTouchedLines(lines: number): StructuredIoRiskLevel {
+  if (lines <= 40) return "low";
+  if (lines <= 120) return "medium";
+  return "high";
+}
+
 function riskFromTouchedLines(lines: number): StructuredIoRiskLevel {
   if (lines <= 40) return "low";
   if (lines <= 120) return "medium";
   return "high";
+}
+
+export function normalizeStructuredMaxTouchedLines(input: unknown): number {
+  const raw = Number(input);
+  if (!Number.isFinite(raw)) return 120;
+  return Math.max(1, Math.floor(raw));
 }
 
 function normalizeMaxTouchedLines(input: unknown): number {
@@ -527,4 +550,211 @@ export function structuredJsonWrite(input: {
     preview: afterText,
     rollbackToken: `rb-json-${Date.now()}`,
   };
+}
+
+export type StructuredIoKind = "auto" | "json" | "markdown" | "latex";
+export type StructuredIoOperation = "read" | "set" | "remove";
+export type StructuredIoReadResult = {
+  ok: boolean;
+  kind: Exclude<StructuredIoKind, "auto">;
+  selector: string;
+  found: boolean;
+  reason?: "unsupported-kind" | "invalid-json" | "invalid-selector" | "selector-not-found";
+  value?: unknown;
+  shape?: "null" | "array" | "object" | "string" | "number" | "boolean" | "section";
+  sourceSpan?: { startLine: number; endLine: number };
+  via: "json-parser" | "markdown-ast-lite" | "latex-ast-lite";
+};
+export type StructuredIoWriteResult = StructuredJsonWriteResult & {
+  kind: Exclude<StructuredIoKind, "auto">;
+  selector: string;
+  via: "json-parser" | "markdown-ast-lite" | "latex-ast-lite";
+  sourceSpan?: { startLine: number; endLine: number };
+};
+
+type SectionMatch = {
+  headingLineIndex: number;
+  bodyStartIndex: number;
+  endExclusiveIndex: number;
+  level: number;
+  title: string;
+};
+
+export function resolveStructuredIoKind(input: { kind?: StructuredIoKind | string; path?: string; content?: string }): Exclude<StructuredIoKind, "auto"> {
+  const explicit = String(input.kind ?? "auto").trim().toLowerCase();
+  if (explicit === "json" || explicit === "markdown" || explicit === "latex") return explicit;
+  const path = String(input.path ?? "").toLowerCase();
+  if (path.endsWith(".json")) return "json";
+  if (path.endsWith(".md") || path.endsWith(".markdown") || path.endsWith(".mdx")) return "markdown";
+  if (path.endsWith(".tex") || path.endsWith(".latex")) return "latex";
+  const content = String(input.content ?? "").trimStart();
+  if (content.startsWith("{") || content.startsWith("[")) return "json";
+  if (/^\\(?:section|subsection|subsubsection)\s*\{/m.test(content)) return "latex";
+  return "markdown";
+}
+
+function selectorTitle(selector: string, prefix: "heading" | "section"): string | undefined {
+  const trimmed = String(selector ?? "").trim();
+  const colonPrefix = `${prefix}:`;
+  if (trimmed.toLowerCase().startsWith(colonPrefix)) {
+    const title = trimmed.slice(colonPrefix.length).trim();
+    return title || undefined;
+  }
+  return trimmed || undefined;
+}
+
+function findMarkdownSection(content: string, selector: string): SectionMatch | undefined {
+  const title = selectorTitle(selector, "heading");
+  if (!title) return undefined;
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(lines[i] ?? "");
+    if (!match) continue;
+    const level = match[1].length;
+    const currentTitle = match[2].trim();
+    if (currentTitle !== title) continue;
+    let end = lines.length;
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const next = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(lines[j] ?? "");
+      if (next && next[1].length <= level) {
+        end = j;
+        break;
+      }
+    }
+    return { headingLineIndex: i, bodyStartIndex: i + 1, endExclusiveIndex: end, level, title: currentTitle };
+  }
+  return undefined;
+}
+
+function latexLevel(command: string): number {
+  if (command === "section") return 1;
+  if (command === "subsection") return 2;
+  return 3;
+}
+
+function findLatexSection(content: string, selector: string): SectionMatch | undefined {
+  const title = selectorTitle(selector, "section");
+  if (!title) return undefined;
+  const lines = content.split(/\r?\n/);
+  const sectionPattern = /^\\(section|subsection|subsubsection)\*?\{([^{}]+)\}\s*$/;
+  for (let i = 0; i < lines.length; i += 1) {
+    const match = sectionPattern.exec(lines[i] ?? "");
+    if (!match) continue;
+    const level = latexLevel(match[1]);
+    const currentTitle = match[2].trim();
+    if (currentTitle !== title) continue;
+    let end = lines.length;
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const next = sectionPattern.exec(lines[j] ?? "");
+      if (next && latexLevel(next[1]) <= level) {
+        end = j;
+        break;
+      }
+    }
+    return { headingLineIndex: i, bodyStartIndex: i + 1, endExclusiveIndex: end, level, title: currentTitle };
+  }
+  return undefined;
+}
+
+function readSection(content: string, selector: string, kind: "markdown" | "latex"): StructuredIoReadResult {
+  const match = kind === "markdown" ? findMarkdownSection(content, selector) : findLatexSection(content, selector);
+  const via = kind === "markdown" ? "markdown-ast-lite" : "latex-ast-lite";
+  if (!selectorTitle(selector, kind === "markdown" ? "heading" : "section")) {
+    return { ok: false, kind, selector, found: false, reason: "invalid-selector", via };
+  }
+  if (!match) return { ok: true, kind, selector, found: false, reason: "selector-not-found", via };
+  const lines = content.split(/\r?\n/);
+  const body = lines.slice(match.bodyStartIndex, match.endExclusiveIndex).join("\n").replace(/^\n|\n$/g, "");
+  return {
+    ok: true,
+    kind,
+    selector,
+    found: true,
+    value: body,
+    shape: "section",
+    sourceSpan: { startLine: match.headingLineIndex + 1, endLine: match.endExclusiveIndex },
+    via,
+  };
+}
+
+function writeSection(input: {
+  content: string;
+  selector: string;
+  kind: "markdown" | "latex";
+  operation: "set" | "remove";
+  payload?: unknown;
+  dryRun?: boolean;
+  maxTouchedLines?: number;
+}): StructuredIoWriteResult {
+  const dryRun = input.dryRun !== false;
+  const maxTouchedLines = normalizeStructuredMaxTouchedLines(input.maxTouchedLines);
+  const via = input.kind === "markdown" ? "markdown-ast-lite" : "latex-ast-lite";
+  const match = input.kind === "markdown" ? findMarkdownSection(input.content, input.selector) : findLatexSection(input.content, input.selector);
+  if (!selectorTitle(input.selector, input.kind === "markdown" ? "heading" : "section")) {
+    return { kind: input.kind, selector: input.selector, via, applied: false, changed: false, blocked: true, reason: "invalid-selector", riskLevel: "high", touchedLines: 0, maxTouchedLines, preview: "", rollbackToken: null };
+  }
+  if (!match) {
+    return { kind: input.kind, selector: input.selector, via, applied: false, changed: false, blocked: true, reason: "selector-not-found", riskLevel: "high", touchedLines: 0, maxTouchedLines, preview: "", rollbackToken: null };
+  }
+  const lines = input.content.split(/\r?\n/);
+  const nextLines = [...lines];
+  if (input.operation === "remove") {
+    nextLines.splice(match.headingLineIndex, match.endExclusiveIndex - match.headingLineIndex);
+  } else {
+    const payloadLines = String(input.payload ?? "").replace(/\r\n/g, "\n").split("\n");
+    nextLines.splice(match.bodyStartIndex, match.endExclusiveIndex - match.bodyStartIndex, ...payloadLines);
+  }
+  const afterText = nextLines.join("\n");
+  const changed = afterText !== input.content;
+  if (!changed) {
+    return { kind: input.kind, selector: input.selector, via, applied: false, changed: false, blocked: false, reason: "no-change", riskLevel: "low", touchedLines: 0, maxTouchedLines, preview: "", rollbackToken: null, sourceSpan: { startLine: match.headingLineIndex + 1, endLine: match.endExclusiveIndex } };
+  }
+  const touchedLines = countStructuredTouchedLines(input.content, afterText);
+  const riskLevel = structuredRiskFromTouchedLines(touchedLines);
+  if (touchedLines > maxTouchedLines) {
+    return { kind: input.kind, selector: input.selector, via, applied: false, changed: false, blocked: true, reason: "blocked:blast-radius-exceeded", riskLevel: "high", touchedLines, maxTouchedLines, output: afterText, preview: afterText, rollbackToken: null, sourceSpan: { startLine: match.headingLineIndex + 1, endLine: match.endExclusiveIndex } };
+  }
+  return {
+    kind: input.kind,
+    selector: input.selector,
+    via,
+    applied: !dryRun,
+    changed: true,
+    blocked: false,
+    reason: dryRun ? "ok-preview" : "ok-applied",
+    riskLevel,
+    touchedLines,
+    maxTouchedLines,
+    output: afterText,
+    preview: afterText,
+    rollbackToken: dryRun ? null : `rb-${input.kind}-${Date.now()}`,
+    sourceSpan: { startLine: match.headingLineIndex + 1, endLine: match.endExclusiveIndex },
+  };
+}
+
+export function structuredRead(input: { content: string; selector: string; kind?: StructuredIoKind | string; path?: string }): StructuredIoReadResult {
+  const kind = resolveStructuredIoKind(input);
+  if (kind === "json") {
+    const result = structuredJsonRead({ content: input.content, selector: input.selector });
+    return { ok: result.found, kind, selector: input.selector, ...result, via: "json-parser" };
+  }
+  return readSection(input.content, input.selector, kind);
+}
+
+export function structuredWrite(input: {
+  content: string;
+  selector: string;
+  kind?: StructuredIoKind | string;
+  path?: string;
+  operation: "set" | "remove";
+  payload?: unknown;
+  dryRun?: boolean;
+  maxTouchedLines?: number;
+}): StructuredIoWriteResult {
+  const kind = resolveStructuredIoKind(input);
+  if (kind === "json") {
+    const result = structuredJsonWrite(input);
+    return { kind, selector: input.selector, via: "json-parser", ...result };
+  }
+  return writeSection({ ...input, kind });
 }

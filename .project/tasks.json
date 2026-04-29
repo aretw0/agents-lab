@@ -3704,21 +3704,26 @@
     {
       "id": "TASK-BUD-154",
       "description": "[P1] Expandir structured-io para superfícies AST-first (Markdown/LaTeX e formatos estruturados adicionais) sob API unificada",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-structured-io.ts",
+        "packages/pi-stack/extensions/guardrails-core-structured-io-surface.ts",
         "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-reexport.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts",
         "docs/research/task-bud-149-structured-io-loam-bridge-2026-04-25.md",
-        "docs/guides/project-canonical-pipeline.md"
+        "docs/guides/project-canonical-pipeline.md",
+        "package.json"
       ],
       "acceptance_criteria": [
         "API structured-io oferece pathway AST/schema para Markdown e LaTeX além de JSON, mantendo dry-first, blast-radius e rollback token.",
         "Operações estruturadas evitam patch textual amplo quando parser/AST estiver disponível, com razões explícitas quando houver fallback.",
         "Contratos/smokes cobrem leitura/mutação estruturada multi-formato com evidência auditável consistente."
       ],
-      "verification": "",
-      "notes": "Backlog por steering humano (2026-04-26): levar structured-io ao extremo AST-first, incluindo Markdown e LaTeX, para reduzir manipulação textual frágil e manter coesão operacional em longa execução."
+      "verification": "VER-BUD-408",
+      "notes": "Backlog por steering humano (2026-04-26): levar structured-io ao extremo AST-first, incluindo Markdown e LaTeX, para reduzir manipulação textual frágil e manter coesão operacional em longa execução.\nCompleted 2026-04-29: added unified structured_io API/tool for JSON, Markdown headings and LaTeX sections with sourceSpan/via, dry-run default, blast-radius cap, rollback token and smoke coverage (test:monitor:smoke 90/90).\n[rationale:risk-control] Expansão preserva compatibilidade da tool JSON legada e limita Markdown/LaTeX a seções com parser leve, dry-run, sourceSpan e maxTouchedLines para reduzir edição textual frágil sem ampliar blast-radius."
     },
     {
       "id": "TASK-BUD-155",

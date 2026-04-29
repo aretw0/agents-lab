@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { structuredJsonRead, structuredJsonWrite } from "./guardrails-core-structured-io";
+import { structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 
 export type GuardrailsAuditAppender = (
 	ctx: ExtensionContext,
@@ -17,6 +17,126 @@ export function registerGuardrailsStructuredIoSurface(
 	appendAuditEntry: GuardrailsAuditAppender,
 	isInsideCwd: GuardrailsPathInsideCwdChecker,
 ): void {
+	pi.registerTool({
+		name: "structured_io",
+		label: "Structured IO",
+		description: "Dry-first unified structured read/write for JSON, Markdown sections, and LaTeX sections.",
+		parameters: Type.Object({
+			path: Type.String({ description: "Path relativo ao projeto (dentro do cwd)." }),
+			kind: Type.Optional(Type.Union([
+				Type.Literal("auto"),
+				Type.Literal("json"),
+				Type.Literal("markdown"),
+				Type.Literal("latex"),
+			], { description: "auto | json | markdown | latex" })),
+			selector: Type.String({ description: "JSON selector, heading:<title> for Markdown, or section:<title> for LaTeX." }),
+			operation: Type.Union([
+				Type.Literal("read"),
+				Type.Literal("set"),
+				Type.Literal("remove"),
+			], { description: "read | set | remove" }),
+			payload: Type.Optional(Type.Any()),
+			dryRun: Type.Optional(Type.Boolean()),
+			maxTouchedLines: Type.Optional(Type.Integer({ minimum: 1 })),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = params as {
+				path?: string;
+				kind?: string;
+				selector?: string;
+				operation?: string;
+				payload?: unknown;
+				dryRun?: boolean;
+				maxTouchedLines?: number;
+			};
+			const targetPath = String(p.path ?? "").trim();
+			const selector = String(p.selector ?? "").trim();
+			const operation = String(p.operation ?? "read").trim().toLowerCase();
+			const kind = String(p.kind ?? "auto").trim().toLowerCase();
+
+			if (!targetPath || !selector) {
+				const details = { ok: false, reason: "missing-path-or-selector" };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			if (!isInsideCwd(targetPath, ctx.cwd)) {
+				const details = { ok: false, reason: "path-outside-cwd", path: targetPath };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			const absolutePath = resolve(ctx.cwd, targetPath);
+			if (!existsSync(absolutePath)) {
+				const details = { ok: false, reason: "file-not-found", path: targetPath };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			const content = readFileSync(absolutePath, "utf8");
+			if (operation === "read") {
+				const result = structuredRead({ content, selector, kind, path: targetPath });
+				appendAuditEntry(ctx, "guardrails-core.structured-io.read", {
+					atIso: new Date().toISOString(),
+					path: targetPath,
+					kind: result.kind,
+					selector,
+					via: result.via,
+					found: result.found,
+					reason: result.reason,
+					shape: result.shape,
+					sourceSpan: result.sourceSpan,
+				});
+				const details = { ok: true, path: targetPath, selector, operation, ...result };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			if (operation !== "set" && operation !== "remove") {
+				const details = { ok: false, reason: "invalid-operation", operation, allowed: ["read", "set", "remove"] };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			if (operation === "set" && p.payload === undefined) {
+				const details = { ok: false, reason: "missing-payload-for-set" };
+				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			}
+
+			const result = structuredWrite({
+				content,
+				selector,
+				kind,
+				path: targetPath,
+				operation: operation as "set" | "remove",
+				payload: p.payload,
+				dryRun: p.dryRun !== false,
+				maxTouchedLines: p.maxTouchedLines,
+			});
+
+			if (result.applied && result.output) {
+				writeFileSync(absolutePath, `${result.output}\n`, "utf8");
+			}
+
+			appendAuditEntry(ctx, "guardrails-core.structured-io.write", {
+				atIso: new Date().toISOString(),
+				path: targetPath,
+				kind: result.kind,
+				selector,
+				operation,
+				via: result.via,
+				dryRun: p.dryRun !== false,
+				maxTouchedLines: p.maxTouchedLines,
+				applied: result.applied,
+				changed: result.changed,
+				blocked: result.blocked,
+				reason: result.reason,
+				riskLevel: result.riskLevel,
+				touchedLines: result.touchedLines,
+				rollbackToken: result.rollbackToken,
+				sourceSpan: result.sourceSpan,
+			});
+
+			const details = { ok: true, path: targetPath, selector, operation, ...result };
+			return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+		},
+	});
+
 	pi.registerTool({
 		name: "structured_io_json",
 		label: "Structured IO JSON",

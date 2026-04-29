@@ -3,6 +3,8 @@ import {
 	parseStructuredJsonSelector,
 	structuredJsonRead,
 	structuredJsonWrite,
+	structuredRead,
+	structuredWrite,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core structured-io re-export", () => {
@@ -50,5 +52,16 @@ describe("guardrails-core structured-io re-export", () => {
 			dryRun: true,
 		});
 		expect(write.reason).toBe("ok-preview");
+
+		const markdown = "# Doc\n\n## Target\nold";
+		expect(structuredRead({ content: markdown, path: "doc.md", selector: "heading:Target" })).toMatchObject({
+			kind: "markdown",
+			found: true,
+			value: "old",
+		});
+		expect(structuredWrite({ content: markdown, path: "doc.md", selector: "heading:Target", operation: "set", payload: "new" })).toMatchObject({
+			kind: "markdown",
+			reason: "ok-preview",
+		});
 	});
 });
