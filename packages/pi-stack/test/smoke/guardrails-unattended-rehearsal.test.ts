@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   evaluateUnattendedRehearsalGate,
   formatUnattendedRehearsalSliceEvidence,
+  summarizeUnattendedRehearsalGate,
 } from "../../extensions/guardrails-core-unattended-rehearsal";
 
 describe("guardrails unattended rehearsal gate", () => {
@@ -14,6 +15,19 @@ describe("guardrails unattended rehearsal gate", () => {
       drift: false,
       next: "slice 3",
     })).toBe("slice=2 focus=TASK-BUD-172 gate=cmd.exe-/c-npm-run-focal-smoke commit=abc1234 drift=no next=slice-3");
+  });
+
+  it("summarizes gate decisions for compact handoff evidence", () => {
+    const result = evaluateUnattendedRehearsalGate({
+      completedLocalSlices: 3,
+      focusPreserved: true,
+      focalSmokeGreen: true,
+      smallCommits: true,
+      handoffFresh: true,
+      protectedScopeAutoSelections: 0,
+    });
+
+    expect(summarizeUnattendedRehearsalGate(result)).toBe("unattended-rehearsal: decision=ready-for-canary ready=yes score=6/6 blockers=none");
   });
 
   it("requires multiple clean local slices before remote/offload canary", () => {

@@ -60,6 +60,11 @@ export function formatUnattendedRehearsalSliceEvidence(input: UnattendedRehearsa
   ].join(" ");
 }
 
+export function summarizeUnattendedRehearsalGate(gate: UnattendedRehearsalGate): string {
+  const blockers = gate.blockers.length > 0 ? gate.blockers.join(",") : "none";
+  return `unattended-rehearsal: decision=${gate.decision} ready=${gate.ready ? "yes" : "no"} score=${gate.score}/${gate.requiredScore} blockers=${blockers}`;
+}
+
 export function evaluateUnattendedRehearsalGate(input: UnattendedRehearsalInput): UnattendedRehearsalGate {
   const completedLocalSlices = Math.max(0, Math.floor(Number(input.completedLocalSlices ?? 0)));
   const protectedScopeAutoSelections = Math.max(0, Math.floor(Number(input.protectedScopeAutoSelections ?? 0)));
