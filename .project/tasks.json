@@ -4538,7 +4538,7 @@
         "Avaliar como princípios MDT podem ajudar a combater drift documental.",
         "Criar plano incremental de atualização de skills com validação por markers/safe_marker_check."
       ],
-      "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega."
+      "notes": "Backlog criado por steering do operador em 2026-04-29. [rationale:design] Guides são bons como referência canônica, mas skills aumentam discoverability para modelo e usuário; MDT pode ajudar a manter paridade e combater drift documental sem virar duplicação cega.\n[2026-04-29T20:57:14.467Z] Backlog clarification: MDT reference is concrete repo https://github.com/ifiokjr/mdt, not vague acronym. Keep as influence source for skill/guide parity and documentation drift review; do not research automatically until TASK-BUD-191 is explicitly selected. [rationale:design] Concrete source anchor improves future discoverability/research without opening external research now."
     }
   ]
 }
