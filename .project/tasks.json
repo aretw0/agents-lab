@@ -4894,6 +4894,28 @@
       ],
       "notes": "Criado como continuação local-safe após TASK-BUD-205. [rationale:risk-control] A extração reduziu o core para 3493 linhas; ratchetar e incluir no smoke principal evita reinflar silenciosamente.\n[2026-04-29T22:58:30.884Z] slice=1 focus=TASK-BUD-206 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Orquestrador ratchetado para 3550 linhas e budget entrou no smoke principal.",
       "verification": "VER-BUD-486"
+    },
+    {
+      "id": "TASK-BUD-207",
+      "description": "[P1] Proteger wiring extraído das bash guard policies contra reinflação do orquestrador.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-205",
+        "TASK-BUD-206"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Budget smoke confirma que guardrails-core usa evaluateBashGuardPolicies do módulo extraído.",
+        "Budget smoke falha se padrões de session log/pi root scan voltarem ao orquestrador.",
+        "Focal budget e test:monitor:smoke permanecem verdes."
+      ],
+      "notes": "Criado como continuação local-safe após ratchet. [rationale:risk-control] O budget de linhas sozinho não impede reintroduzir lógica duplicada no core; o smoke deve proteger o wiring extraído.\n[2026-04-29T23:00:47.736Z] slice=1 focus=TASK-BUD-207 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Budget smoke agora protege wiring do módulo extraído e falha se padrões bash guard voltarem ao core.",
+      "verification": "VER-BUD-487"
     }
   ]
 }

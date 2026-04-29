@@ -20,5 +20,9 @@ describe("guardrails-core orchestrator budget", () => {
 		const source = readFileSync(CORE_PATH, "utf8");
 		expect(source).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(source).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");
+		expect(source).toContain("evaluateBashGuardPolicies(command)");
+		expect(source).toContain("./guardrails-core-bash-guard-policies");
+		expect(source).not.toContain("SESSION_LOG_PATH_PATTERN");
+		expect(source).not.toContain("PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN");
 	});
 });
