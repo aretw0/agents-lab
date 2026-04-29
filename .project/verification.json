@@ -6495,6 +6495,15 @@
       "method": "inspection",
       "evidence": "After reload, live git_maintenance_status returned summary=git-maintenance: severity=warning action=monitor loose=460 sizeMiB=4.8 garbage=0 gcLog=yes, cleanupAllowedAutomatically=false, cleanupCommandsExecuted=[]. Updated docs/guides/host-disk-recovery.md to prefer git_maintenance_status at runtime and clarify that severity=warning action=monitor records/continues only and does not authorize git gc, git prune, or removing .git/gc.log. Validation used safe_marker_check: marker-check ok=yes matched=5/5 missing=none commandSensitive=none. [rationale:risk-control] Closes the runtime/documentation loop for controlled Git maintenance.",
       "timestamp": "2026-04-29T21:11:00.959Z"
+    },
+    {
+      "id": "VER-BUD-475",
+      "target": "TASK-BUD-195",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added resolveRecurringFailureHardening in packages/pi-stack/extensions/guardrails-core-recurring-failure.ts and exported it. It returns observe/document-rule/create-primitive/add-runtime-guard/block-old-path with hardIntentRequired, reasons, nextActions, and summary. Tests cover first occurrence documentation, repeated failure needing primitive/test, runtime guard escalation, third occurrence old-path blocking, and fully mitigated observation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 142/142 across 25 files. [rationale:risk-control] Converts repeated soft-intent failures into deterministic hardening steps for unattended operation.",
+      "timestamp": "2026-04-29T21:14:37.325Z"
     }
   ]
 }

@@ -88,4 +88,5 @@ export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";
 export { resolveUnattendedContinuationPlan } from "./guardrails-core-unattended-continuation";
 export { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
+export { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
 export { detectCommandSensitiveMarkerReasons, evaluateTextMarkerCheck } from "./guardrails-core-marker-check";

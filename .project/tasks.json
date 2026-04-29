@@ -4608,6 +4608,31 @@
       ],
       "notes": "Criado após reload validar git_maintenance_status ao vivo. [rationale:risk-control] A tool existe em runtime; documentar uso fecha o loop e evita voltar a interpretação manual ou prune automático.\n[2026-04-29T21:11:00.959Z] slice=1 focus=TASK-BUD-194 gate=safe_marker_check-summary-marker-check-ok-yes-matched-5/5-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora aponta git_maintenance_status como default runtime e reforça que warning/monitor não autoriza cleanup.",
       "verification": "VER-BUD-474"
+    },
+    {
+      "id": "TASK-BUD-195",
+      "description": "[P1] Codificar política de endurecimento para falhas recorrentes do loop unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-187",
+        "TASK-BUD-181"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-recurring-failure.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro decide quando observar, documentar, criar primitiva/teste, adicionar guard runtime ou bloquear caminho antigo.",
+        "Política codifica que repetição deixa de ser soft intent e vira hard intent.",
+        "Smoke cobre primeira ocorrência, segunda ocorrência, terceira ocorrência e caso já mitigado."
+      ],
+      "notes": "Criado na lane essencial de hardening operacional. [rationale:risk-control] O loop unattended precisa converter falhas repetidas em guardrails testados, não apenas em documentação ou lembretes.\n[2026-04-29T21:14:37.325Z] slice=1 focus=TASK-BUD-195 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Falhas recorrentes agora têm política codificada: doc na primeira, primitiva/teste na segunda, guard runtime, e bloqueio do caminho antigo na terceira.",
+      "verification": "VER-BUD-475"
     }
   ]
 }
