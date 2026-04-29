@@ -82,6 +82,79 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
   });
 
   pi.registerTool({
+    name: "autonomy_lane_status",
+    label: "Autonomy Lane Status",
+    description: "Compose supplied runtime gates with conservative board task selection. Read-only and side-effect-free.",
+    parameters: Type.Object({
+      context_level: Type.Optional(Type.String({ description: "ok | warn | checkpoint | compact" })),
+      context_percent: Type.Optional(Type.Number()),
+      machine_severity: Type.Optional(Type.String({ description: "ok | warn | pause | block" })),
+      can_start_long_run: Type.Optional(Type.Boolean()),
+      provider_ready: Type.Optional(Type.Number()),
+      provider_blocked: Type.Optional(Type.Number()),
+      provider_degraded: Type.Optional(Type.Number()),
+      quota_block_alerts: Type.Optional(Type.Number()),
+      quota_warn_alerts: Type.Optional(Type.Number()),
+      monitor_classify_failures: Type.Optional(Type.Number()),
+      monitor_sovereign_divergence: Type.Optional(Type.Number()),
+      subagents_ready: Type.Optional(Type.Boolean()),
+      unexpected_dirty: Type.Optional(Type.Boolean()),
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const selection = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
+        milestone: typeof p.milestone === "string" ? p.milestone : undefined,
+        includeProtectedScopes: p.include_protected_scopes === true,
+        includeMissingRationale: p.include_missing_rationale === true,
+        sampleLimit: asNumber(p.sample_limit, 5),
+      });
+      const plan = evaluateAutonomyLaneReadiness({
+        context: {
+          level: normalizeContextLevel(p.context_level),
+          percent: asNumber(p.context_percent, 0),
+        },
+        machine: {
+          severity: typeof p.machine_severity === "string" ? p.machine_severity : "ok",
+          canStartLongRun: asBool(p.can_start_long_run, true),
+          canEvaluateMonitors: true,
+        },
+        provider: {
+          ready: asNumber(p.provider_ready, 1),
+          blocked: asNumber(p.provider_blocked, 0),
+          degraded: asNumber(p.provider_degraded, 0),
+        },
+        quota: {
+          blockAlerts: asNumber(p.quota_block_alerts, 0),
+          warnAlerts: asNumber(p.quota_warn_alerts, 0),
+        },
+        board: {
+          ready: selection.ready,
+          nextTaskId: selection.nextTaskId,
+        },
+        monitors: {
+          classifyFailures: asNumber(p.monitor_classify_failures, 0),
+          sovereignDivergence: asNumber(p.monitor_sovereign_divergence, 0),
+        },
+        subagents: {
+          ready: asBool(p.subagents_ready, true),
+        },
+        workspace: {
+          unexpectedDirty: asBool(p.unexpected_dirty, false),
+        },
+      });
+      const result = { ready: plan.ready && selection.ready, plan, selection };
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
     name: "autonomy_lane_next_task",
     label: "Autonomy Lane Next Task",
     description: "Select the next conservative autonomy-lane board task. Read-only and side-effect-free.",

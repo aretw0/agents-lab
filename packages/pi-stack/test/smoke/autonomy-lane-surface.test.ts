@@ -52,4 +52,26 @@ describe("autonomy lane surface", () => {
     expect(result?.details.ready).toBe(true);
     expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
   });
+
+  it("registers composed status tool with board selection and lane plan", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+
+    expect(result?.details.ready).toBe(true);
+    expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-NEXT");
+    expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
+  });
 });
