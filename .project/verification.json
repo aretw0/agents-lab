@@ -5919,6 +5919,15 @@
       "method": "test",
       "evidence": "Implemented mitigable consumer-side handling for orphaned function_call_output surviving compaction: extractToolOutputOrphanCallId parses call_id/tool_call_id, resolveToolOutputOrphanRedispatchDecision returns allow-retry vs discard-retry-before-redispatch, and guardrails-core skips retry enqueue + writes guardrails-core.tool-output-orphan-redispatch-discarded when a repeated orphan call_id is seen before redispatch. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed); cmd.exe /c npm run test:monitor:smoke --silent (91/91 passed). [rationale:risk-control] Satisfies mitigable acceptance path with deterministic audit/discard while preserving existing orphanFailurePauseAfter behavior and avoiding upstream/remote mutation.",
       "timestamp": "2026-04-29T12:17:41.550Z"
+    },
+    {
+      "id": "VER-BUD-411",
+      "target": "TASK-BUD-148",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Docs consolidated optional Squeez-inspired context-economy profile and mdt doc-drift trail. Updated docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md with baseline vs opt-in matrix, mdt check/update adoption path, and success metrics; updated docs/guides/project-canonical-pipeline.md with operational opt-in limits and metrics; updated docs/guides/monitor-overrides.md with monitor noise/cost guardrails and mdt separation. Validation: cmd.exe /c node -e docs marker check (4 markers passed). [rationale:risk-control] Documents measurable opt-in adoption without changing runtime defaults, CI, publish, settings, or remote metadata.",
+      "timestamp": "2026-04-29T12:21:20.569Z"
     }
   ]
 }

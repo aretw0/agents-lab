@@ -60,11 +60,39 @@ Ainda falta uma **primitiva de captura de ideias** (inbox) para transformar nota
    - aplicar em superfícies first-party de alto ruído.
    - política por threshold/cooldown para evitar spam de notify.
 
+## Perfil opt-in de economia de contexto
+
+A inspiração em `squeez` entra como **perfil opcional**, não como baseline obrigatório. O objetivo é reduzir custo/ruído em long-runs sem transformar a stack em um clone host-bound.
+
+| Prática | Baseline da stack | Perfil opt-in "context economy" |
+|---|---|---|
+| Output shaping | respostas concisas por política de agente e gates de bloat advisory | sumarização mais agressiva de tool-output, diffs e evidência repetida |
+| Dedup de eventos | dedupe em lane-queue/intents e auditoria throttled | dedupe adicional de status/health/audit/handoff quando o conteúdo for semanticamente idêntico |
+| Intensidade adaptativa | `context-watch` orienta `ok|warn|checkpoint|compact` sem soft-stop em `warn` | reduzir verbosidade automaticamente em `warn`, usar checkpoints sintéticos perto de `checkpoint`, e preservar foco ativo antes de compactar |
+| Memória de sessão | handoff curto + board canônico | memória resumida por slice com limite explícito de tokens/caracteres e links para evidência canônica |
+
+Critério de promoção: só mover algo do perfil opt-in para baseline se houver evidência local de menor custo/contexto **sem** perda de retomada, auditabilidade ou qualidade de verificação.
+
+## Trilha `mdt` para doc-drift
+
+`mdt` deve ser tratado como adapter de documentação single-source:
+
+1. começar com `mdt check` advisory em docs repetitivos (README, guias, snippets de policy);
+2. promover para `mdt update` apenas em blocos pequenos e revisáveis;
+3. manter separado do fluxo de ideias/backlog: `mdt` sincroniza documentação, não prioriza tasks;
+4. só considerar CI depois de provar localmente que o check reduz drift sem gerar churn excessivo.
+
+## Métrica mínima de sucesso
+
+- **Economia de contexto/custo:** redução observável de tool-output/status repetitivo ou tamanho de handoff por slice, sem perder links/evidência canônica.
+- **Redução de drift documental:** menos diferenças manuais entre README/guias/snippets após `mdt check` local.
+- **Performance/ruído:** sem aumento relevante de tempo de smoke focal e sem novos alerts/classify failures de monitor.
+
 ## Decisão operacional deste snapshot
 
 - Avançar primeiro no **Idea Inbox Primitive** (ganho de fluxo imediato para sessões com alta carga de ideias).
 - Tratar `mdt` como habilitador de consistência documental em segundo passo.
-- Manter qualquer inspiração de `squeez` no plano de primitivas first-party, sem lock-in de host.
+- Manter qualquer inspiração de `squeez` no plano de primitivas first-party, sem lock-in de host, por meio de perfil opt-in de economia de contexto.
 
 ## Correção de entendimento (2026-04-25)
 

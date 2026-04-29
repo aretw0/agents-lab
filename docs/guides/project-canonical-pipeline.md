@@ -156,6 +156,17 @@ Para manter velocidade de cruzeiro em long-run:
 - interrupção do usuário apenas em risco irreversível/perda de dados/conflito de objetivo;
 - assunções automáticas devem ficar auditáveis no runtime (`guardrails-core.pragmatic-assumption-applied`) e refletidas no board quando impactarem decisão de tarefa.
 
+### Perfil opt-in de economia de contexto
+
+O baseline permanece agnóstico e simples: board canônico, handoff curto, gates locais e monitores calibrados. Otimizações inspiradas em `squeez` devem entrar como perfil **opt-in** de economia de contexto, com os seguintes limites:
+
+- **Baseline:** dedupe de intents, auditoria throttled, `context-watch` como steering e handoff resumido.
+- **Opt-in:** output shaping mais agressivo, dedupe semântico de status repetitivo, sumarização compacta de tool-output e checkpoints sintéticos quando o contexto estiver perto do threshold.
+- **Não-goal:** acoplar a stack a hooks de um CLI específico ou esconder evidência canônica necessária para retomada.
+- **Métrica mínima:** menor tamanho de handoff/tool-output por slice e menor custo/contexto, sem novos classify failures, sem perda de verificação e sem impacto perceptível no smoke focal.
+
+A adoção eventual de `mdt` fica separada: é trilha de **doc-drift/single-source docs** (`check` primeiro, `update` depois), não pipeline de ideias/backlog.
+
 ### Storage pressure antes de long-run
 
 Long-runs maiores só são confiáveis quando o ambiente ainda tem folga de armazenamento. Antes de lote grande, ou quando o host estiver perto do limite, usar o gate dry-first:

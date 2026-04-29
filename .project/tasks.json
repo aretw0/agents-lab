@@ -3568,7 +3568,7 @@
     {
       "id": "TASK-BUD-148",
       "description": "[P2] Consolidar perfil opcional inspirado em Squeez (economia de tokens/contexto) e adoção eventual de MDT para doc-drift (single-source docs), mantendo baseline agnóstico da stack.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-CAL-2026-04-21-B"
@@ -3583,8 +3583,8 @@
         "Trilha de adoção de `mdt` fica explícita como doc-drift guard (single-source docs, update/check em CI), sem confundir com pipeline de ideias/backlog.",
         "Runbook define métrica mínima de sucesso: economia de contexto/custo na fábrica e redução de drift documental sem impacto relevante de performance."
       ],
-      "verification": "",
-      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default. Correção de entendimento: `squeez` é otimizador de tokens/contexto via shaping de saída e memória de sessão; `mdt` é ferramenta de sincronização documental (template update/check), não motor de triagem de ideias."
+      "verification": "VER-BUD-411",
+      "notes": "Backlog por steering humano (2026-04-25): manter Squeez/MDT no radar estratégico e traduzir em estratégia operacional melhorada, sem impor modo opinativo como default. Correção de entendimento: `squeez` é otimizador de tokens/contexto via shaping de saída e memória de sessão; `mdt` é ferramenta de sincronização documental (template update/check), não motor de triagem de ideias.\n[2026-04-29T12:21:20.569Z] Consolidated optional context-economy profile: research note now maps baseline vs opt-in Squeez-inspired output shaping/dedup/adaptive intensity/session memory; canonical pipeline records metrics and keeps mdt as separate doc-drift/single-source trail; monitor overrides document monitor-specific noise/cost limits. Validation: cmd.exe /c node -e docs marker check (4 markers passed). [rationale:risk-control] Keeps baseline agnostic/simple while making token/context optimization and mdt adoption measurable and opt-in."
     },
     {
       "id": "TASK-BUD-149",

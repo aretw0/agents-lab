@@ -58,6 +58,17 @@ Checklist rápido:
 3. se houver arquivo indevido rastreado, usar `git rm --cached -- <path>` (sem apagar cópia local);
 4. só versionar extras de monitor/runtime por decisão explícita de opt-in do projeto.
 
+### Perfil opt-in de economia de contexto
+
+Monitores continuam baseline **leves e provider-aware**. Qualquer prática inspirada em `squeez` deve ser opt-in e mensurável:
+
+- reduzir ruído de notify/status por dedupe e cooldown, não por esconder falhas reais;
+- adaptar intensidade de classificação quando `context-watch` estiver em `warn|checkpoint`, preservando `warn` como steering não bloqueante;
+- manter evidência mínima para auditoria (`monitor_sovereign_delta`, classify failures, provider/modelo efetivo);
+- promover para default apenas quando a economia de contexto/custo vier sem aumento de falsos negativos ou classify failures.
+
+`mdt` não participa da decisão de monitor: quando adotado, deve apenas checar drift de documentação/snippets de policy que descrevem os monitores.
+
 ### Comando principal
 
 > Convenção do laboratório: não criar “doctor” paralelo por domínio.  
