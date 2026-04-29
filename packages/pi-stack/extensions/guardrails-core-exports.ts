@@ -90,4 +90,9 @@ export { resolveUnattendedContinuationPlan } from "./guardrails-core-unattended-
 export { resolveValidationMethodPlan } from "./guardrails-core-validation-method";
 export { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
 export { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
-export { detectCommandSensitiveMarkerReasons, evaluateTextMarkerCheck } from "./guardrails-core-marker-check";
+export {
+  commandSensitiveShellMarkerCheckReason,
+  detectCommandSensitiveMarkerReasons,
+  detectShellInlineCommandSensitiveMarkerCheck,
+  evaluateTextMarkerCheck,
+} from "./guardrails-core-marker-check";

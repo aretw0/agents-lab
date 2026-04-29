@@ -6576,6 +6576,15 @@
       "method": "inspection",
       "evidence": "After reload, live bash command for an inline marker check with a newline marker was blocked with: Blocked by guardrails-core (safe_marker_check): shell-inline marker checks with command-sensitive syntax are a recurring failure path. Updated docs/guides/control-plane-operating-doctrine.md to record that shell-inline marker checks with command-sensitive syntax are a legacy path blocked by bash guard, and to route to safe_marker_check/evaluateTextMarkerCheck. Validation: safe_marker_check returned marker-check ok=yes matched=6/6 missing=none commandSensitive=none. [rationale:risk-control] Keeps runtime guard behavior discoverable and auditable.",
       "timestamp": "2026-04-29T22:38:01.448Z"
+    },
+    {
+      "id": "VER-BUD-484",
+      "target": "TASK-BUD-204",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Re-exported detectShellInlineCommandSensitiveMarkerCheck and commandSensitiveShellMarkerCheckReason via guardrails-core-exports.ts, and extended guardrails-core-hardening-reexport smoke to validate positive shell marker check blocking, generic inline command non-blocking, and reason text. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts passed 1/1; cmd.exe /c npm run test:monitor:smoke --silent passed 151/151 across 29 files. [rationale:risk-control] Keeps the new runtime guard testable through the public hardening surface.",
+      "timestamp": "2026-04-29T22:40:43.138Z"
     }
   ]
 }

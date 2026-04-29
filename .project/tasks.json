@@ -4822,6 +4822,29 @@
       ],
       "notes": "Criado após reload validar o bloqueio live do bash guard. [rationale:risk-control] Runtime guard sem doutrina curta vira surpresa operacional; registrar a rota segura reduz repetição e atrito.\n[2026-04-29T22:38:01.448Z] slice=1 focus=TASK-BUD-203 gate=safe_marker_check-summary-marker-check-ok-yes-matched-6/6-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora reflete o bloqueio live do bash guard para marker checks shell-inline command-sensitive.",
       "verification": "VER-BUD-483"
+    },
+    {
+      "id": "TASK-BUD-204",
+      "description": "[P1] Exportar e cobrir helper público do bloqueio de marker check shell-inline.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-202",
+        "TASK-BUD-201"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "guardrails-core reexporta helpers do bloqueio command-sensitive shell marker check.",
+        "Smoke de reexport valida decisão positiva e caso genérico não bloqueado.",
+        "Smoke focal e test:monitor:smoke permanecem verdes."
+      ],
+      "notes": "Criado como continuação local-safe após TASK-BUD-203. [rationale:risk-control] O novo runtime guard precisa ficar testável pela superfície pública como as demais primitivas de hardening.\n[2026-04-29T22:40:43.138Z] slice=1 focus=TASK-BUD-204 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Helpers do bloqueio shell marker check agora são reexportados e cobertos por smoke público.",
+      "verification": "VER-BUD-484"
     }
   ]
 }
