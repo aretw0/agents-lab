@@ -5838,6 +5838,15 @@
       "method": "test",
       "timestamp": "2026-04-29T02:30:00Z",
       "evidence": "Final consolidation for TASK-BUD-146 passed. `context-watchdog` exposes passive `steeringStatus` on `context_watch_status` and updates `context-watch-steering` status during assessment; `resolveContextWatchSteeringDispatch` is tested for default compact-only signaling with fallback status when notify is muted; warn remains non-blocking steering (`continue-bounded`), checkpoint/compact remain lifecycle lanes, and operator/reload deterministic action is exposed through `operatorSignal`, `deterministicStop`, and `operatorAction`. Focal validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` passed 29/29. [rationale:risk-control] Context steering must reach the control plane through passive/status/operator surfaces so long-runs do not depend on manual debug tool calls when context/reload risk is high."
+    },
+    {
+      "id": "VER-BUD-402",
+      "target": "TASK-BUD-156",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T02:32:30Z",
+      "evidence": "Final consolidation for TASK-BUD-156 passed. `project-board-surface` supports canonical rationale kinds, detects sensitive refactor/test-change work, exposes `needs_rationale`, `rationale_required`, `rationaleSource`, `rationaleConsistency` and summaries, enforces rationale on sensitive updates/completion, syncs rationale to linked verification evidence, and keeps the flow backend-agnostic through the board surface rather than repository-specific assumptions. Focal validation: `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` passed 42/42. [rationale:risk-control] Requiring communicable rationale for refactors/test changes reduces future audit risk and prevents opaque changes from being closed without a durable reason in task/verification surfaces."
     }
   ]
 }
