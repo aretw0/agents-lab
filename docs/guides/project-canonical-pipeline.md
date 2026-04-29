@@ -142,6 +142,18 @@ Antes de promover hardening interno como capability da pi-stack:
 - Use `inspect` para governança/doc/processo e `command/test` quando houver impacto executável.
 - Referência de contrato: `docs/primitives/quality-verification-gate.md`.
 
+### Monitores por modo de execução
+
+Long-runs precisam de monitores como trilho de confiança, não como fricção de permissão repetida. Política resumida:
+
+- `interactive-dev`: feedback rico; L1/L2/L3 podem aparecer imediatamente.
+- `control-plane`: L1/L2 com cooldown e sem bloquear `warn`; L3 só para risco real/autorização/custo/dados.
+- `overnight/unattended`: no-interrupt por default; advisory agregado em checkpoint/erro repetido; hard gates preservados.
+- `subagent`: mínimo local; retorno agregado para o control-plane decidir.
+- `swarm/colony`: governança em budget/delivery/selective-promotion; reviewer/soldier substitui nudges por-turno.
+
+Lease válido de long-run = loop running + task/intenção elegível + budget/provider/machine seguros + escopo autorizado. Enquanto o lease valer, monitores não devem pedir confirmação redundante; devem auditar ou agregar sinal. Runbook completo: `docs/guides/monitor-overrides.md#política-por-modo-de-execução`.
+
 ### Soft/hard intent de internacionalização
 - **Comunicação:** `piStack.guardrailsCore.i18nIntents.communication` é soft intent; orienta a língua da resposta ao usuário (`auto-user-profile` por default), mas pode ceder a instrução explícita do turno/sistema.
 - **Artefatos:** `piStack.guardrailsCore.i18nIntents.artifacts` é hard intent; arquivos persistidos devem preservar a língua existente ou seguir a política configurada, sem traduzir comandos, paths, APIs, IDs ou evidências citadas por acidente.

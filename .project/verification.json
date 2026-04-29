@@ -6009,6 +6009,15 @@
       "method": "test",
       "evidence": "Auto-resume trust surface improved for compacted handoffs: buildAutoResumePromptFromHandoff now preserves operational focus when current_tasks is empty and no TASK id is present by deriving hints such as autonomy-lane-status, board-task-selection, and lane-queue from next_actions/blockers/context. This prevents focusTasks: none-listed in autonomy-lane resumes like the observed compact incident. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts (30/30 passed); cmd.exe /c npm run test:monitor:smoke --silent (92/92 passed). [rationale:risk-control] Long-run auto-resume needs actionable, low-noise focus without stale evidence; operational hints keep the loop resumable while preserving bounded prompt size.",
       "timestamp": "2026-04-29T12:49:29.575Z"
+    },
+    {
+      "id": "VER-BUD-421",
+      "target": "TASK-BUD-126",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "evidence": "Monitor execution-mode policy formalized in docs/guides/monitor-overrides.md and summarized in docs/guides/project-canonical-pipeline.md. The policy covers interactive-dev, control-plane, overnight/unattended, subagent and swarm/colony modes; maps L1 observe/L2 advisory/L3 enforce/off behavior; defines long-run authorization lease; documents no-interrupt profile and monitor off/on runbook. Validation: cmd.exe /c node -e monitor mode policy marker check (4 markers passed). [rationale:risk-control] Prevents monitors from interrupting authorized long-runs redundantly while preserving hard gates for budget, machine pressure, protected scopes, destructive/security actions and delivery evidence.",
+      "timestamp": "2026-04-29T12:51:51.065Z"
     }
   ]
 }

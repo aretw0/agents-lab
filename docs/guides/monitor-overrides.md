@@ -138,6 +138,46 @@ Para manter classifiers no mesmo “tier” operacional:
 
 No laboratório, ambos devem compartilhar a mesma primitiva de trigger (`when`, `tool(...)`, `every(n)`) e o mesmo modelo de fatos; muda apenas o modo de execução (`enforce` vs `observe`).
 
+## Política por modo de execução
+
+Monitores devem proteger long-runs autorizadas sem virar uma segunda fonte de permissão redundante. A matriz abaixo é o default pragmático; perfis mais estritos são opt-in.
+
+| Modo | L1 observe | L2 advisory | L3 enforce | Monitores que podem ficar off | Intenção |
+|---|---:|---:|---:|---|---|
+| `interactive-dev` | sim | sim | sim | nenhum por default | feedback rico durante desenvolvimento assistido |
+| `control-plane` | sim, com cooldown | sim, sem interromper `warn` | só risco real/autorização/custo/dados | sensores ruidosos sem evidência nova | manter o loop andando com status/audit claros |
+| `overnight/unattended` | sumarizado | apenas em checkpoint/erro repetido | budget, destructive/security, machine pressure, protected scopes | nudges de estilo/qualidade não críticos | rodar por muito tempo e parar só em risco/blocker real |
+| `subagent` | mínimo | raro, agregado no retorno | hard gates herdados do control-plane | monitores conversacionais redundantes | evitar que worker perca throughput por perguntas locais |
+| `swarm/colony` | agregado por run | pós-run ou promotion gate | budget/delivery/selective-promotion | monitores por-turno que duplicam reviewer/soldier | preservar governança sem multiplicar ruído por agente |
+
+### Lease de autorização long-run
+
+Uma long-run autorizada é válida enquanto os quatro sinais permanecem verdadeiros:
+
+1. `loop`/lane runtime está `running` e sem stop-condition bloqueante;
+2. board task/intenção canônica continua elegível e dentro do escopo permitido;
+3. budget/provider/machine gates seguem `ok` ou `warn` não bloqueante;
+4. não houve nova ação destrutiva, protected-scope, publish/CI/settings, ou dado sensível fora do contrato autorizado.
+
+Enquanto esse lease estiver válido, monitores L1/L2 não devem reverter para confirmação humana só por falta de contexto local. Eles podem registrar `observe/advisory`, mas interrupção fica reservada a L3/hard gates ou a checkpoint/compact lanes.
+
+### Perfil no-interrupt para loops longos
+
+Em `control-plane`, `overnight/unattended`, `subagent` e `swarm/colony`:
+
+- `warn` de contexto é steering leve: continuar bounded, sem soft-stop;
+- perguntas óbvias viram assunções auditáveis quando o risco é baixo;
+- nudges de estilo/qualidade devem ser agrupados no board/verification ou no retorno da run;
+- classify LLM deve ser evitado quando prefilter determinístico já prova read-only/baixo risco;
+- machine/budget/security/destructive gates continuam com precedência sobre throughput.
+
+### Runbook de desligar/religar monitores
+
+- Pode desligar temporariamente monitores ruidosos antes de swarm/colony quando houver lease válido e hard gates ativos.
+- Deve manter ou substituir por primitiva first-party: budget cap, machine pressure, protected-scope, delivery evidence e no-auto-close.
+- Religar após promotion/review ou quando o loop voltar para modo `interactive-dev`.
+- Registrar no board/handoff quando um modo no-interrupt foi usado para justificar decisões posteriores.
+
 Config da primitiva first-party (`.pi/settings.json`):
 
 ```json
