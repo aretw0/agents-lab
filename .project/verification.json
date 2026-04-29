@@ -6675,6 +6675,15 @@
       "method": "inspection",
       "timestamp": "2026-04-29T23:29:15.691Z",
       "evidence": "Updated docs/guides/control-plane-operating-doctrine.md with 'Fluxo bounded do board local'. It documents using board_task_create for new slices, validation_method_plan/safe_marker_check/focal/structured-read for validation, board_task_complete for one-call close, and board_verification_append + board_update as explicit fallback. It frames the flow as capabilities rather than lock-in so future adapters can provide equivalent operations. Validation: safe_marker_check passed 11/11 markers with commandSensitive=none. [rationale:risk-control] Makes the safe unattended create/validate/close path explicit and validates board_task_complete live after reload."
+    },
+    {
+      "id": "VER-BUD-495",
+      "target": "TASK-BUD-216",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:33:11.382Z",
+      "evidence": "Added a project-board-surface smoke test proving completeProjectTaskBoardWithVerification blocks rationale consistency mismatch before appending verification. The test creates TASK-MISMATCH with task rationale refactor, attempts completion with verification rationale test-change, expects rationale-consistency-required-to-complete-task, and verifies no verification rows were created for that target. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Ensures failed bounded close attempts do not leave partial evidence in the board."
     }
   ]
 }

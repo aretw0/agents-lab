@@ -330,6 +330,30 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("completeProjectTaskBoardWithVerification blocks rationale mismatch before append", () => {
+    const cwd = seedWorkspace();
+    try {
+      const created = createProjectTaskBoard(cwd, {
+        id: "TASK-MISMATCH",
+        description: "Refactor with rationale mismatch",
+        status: "in-progress",
+        note: "[rationale:refactor] planned cleanup",
+      });
+      expect(created.ok).toBe(true);
+
+      const blocked = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-MISMATCH",
+        verificationId: "VER-MISMATCH",
+        method: "test",
+        evidence: "tests passed [rationale:test-change] divergent reason",
+      });
+      expect(blocked).toMatchObject({ ok: false, reason: "rationale-consistency-required-to-complete-task" });
+      expect(queryProjectVerification(cwd, { target: "TASK-MISMATCH", limit: 10 }).filtered).toBe(0);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("updateProjectTaskBoard atualiza status e append de nota", () => {
     const cwd = seedWorkspace();
     try {

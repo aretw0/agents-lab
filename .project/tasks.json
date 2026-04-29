@@ -5095,6 +5095,27 @@
       ],
       "notes": "Criado via board_task_create após reload de board_task_complete. [rationale:risk-control] O loop unattended precisa de caminho canônico curto para criar e fechar slices com evidência sem scripts ad hoc.\n[2026-04-29T23:34:00Z] slice=1 focus=TASK-BUD-215 gate=safe_marker_check-summary-marker-check-ok-yes-matched-11/11-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora aponta o fluxo bounded do board para criar, validar e fechar fatias sem scripts ad hoc.",
       "verification": "VER-BUD-494"
+    },
+    {
+      "id": "TASK-BUD-216",
+      "description": "[P1] Cobrir bloqueio sem mutação no complete-with-verification quando rationale diverge.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-214"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Teste garante que completeProjectTaskBoardWithVerification bloqueia mismatch de rationale antes de anexar verification.",
+        "Teste confirma que nenhuma verification é criada no alvo bloqueado.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] A primitive de fechamento em uma chamada precisa provar que falhas de consistência não deixam evidence parcial no board.\n[2026-04-29T23:32:46Z] slice=1 focus=TASK-BUD-216 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] complete-with-verification agora tem teste de no-partial-append em mismatch de rationale.",
+      "verification": "VER-BUD-495"
     }
   ]
 }
