@@ -6522,6 +6522,15 @@
       "method": "inspection",
       "evidence": "After reload, live recurring_failure_hardening_plan returned summary=recurring-failure: decision=observe hardIntent=no occurrences=2 reasons=mitigated for the already-hardened marker-check failure path. Updated docs/guides/control-plane-operating-doctrine.md with Falhas recorrentes section: use recurring_failure_hardening_plan before another reminder; second occurrence should become hard intent with primitive/test; add runtime guard or block old path when needed. Validation used safe_marker_check: marker-check ok=yes matched=5/5 missing=none commandSensitive=none. [rationale:risk-control] Closes runtime/docs loop for recurring-failure hardening.",
       "timestamp": "2026-04-29T21:23:22.907Z"
+    },
+    {
+      "id": "VER-BUD-478",
+      "target": "TASK-BUD-198",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added resolveValidationMethodPlan in packages/pi-stack/extensions/guardrails-core-validation-method.ts and exported it. It routes marker-check validation to safe_marker_check/evaluateTextMarkerCheck, steers legacy shell-inline marker checks away from shell, allows focal tests only when focalGateKnown, allows structured-read validation, and blocks protected/mutating validation paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-validation-method.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 148/148 across 27 files. [rationale:risk-control] Complements unattended continuation by making the validation method explicit and guarded.",
+      "timestamp": "2026-04-29T21:27:10.665Z"
     }
   ]
 }

@@ -4676,6 +4676,33 @@
       ],
       "notes": "Criado após reload validar recurring_failure_hardening_plan ao vivo. [rationale:risk-control] Fecha o loop runtime-docs da política de falhas recorrentes e reforça que soft guidance repetida deve virar hard intent.\n[2026-04-29T21:23:22.907Z] slice=1 focus=TASK-BUD-197 gate=safe_marker_check-summary-marker-check-ok-yes-matched-5/5-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora manda usar recurring_failure_hardening_plan quando falha se repete, convertendo soft guidance em hard intent.",
       "verification": "VER-BUD-477"
+    },
+    {
+      "id": "TASK-BUD-198",
+      "description": "[P1] Codificar plano de método de validação para evitar regressão a checks frágeis no loop unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-187",
+        "TASK-BUD-188",
+        "TASK-BUD-181"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-validation-method.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-validation-method.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro escolhe safe_marker_check para validações de markers e evita shell inline como caminho padrão.",
+        "Helper roteia testes focais e leituras estruturadas sem bloquear trabalho local-safe.",
+        "Helper bloqueia/ask em mutation/protected/unknown quando não há método seguro.",
+        "Smoke cobre marker check, shell inline legado, teste focal, structured read e protegido."
+      ],
+      "notes": "Criado na lane essencial de hardening operacional. [rationale:risk-control] Já sabemos decidir se continua; faltava codificar como validar sem cair em métodos frágeis como marker check artesanal de shell.\n[2026-04-29T21:27:10.665Z] slice=1 focus=TASK-BUD-198 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] O loop agora decide como validar: marker checks vão para safe_marker_check, testes precisam gate focal conhecido, structured reads seguem read-only, protegido/mutação bloqueia.",
+      "verification": "VER-BUD-478"
     }
   ]
 }
