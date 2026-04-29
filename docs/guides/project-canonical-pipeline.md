@@ -349,12 +349,15 @@ Objetivo: transformar um soft-intent operacional em comportamento previsível e 
 Para reduzir edição "na unha" em fluxos repetitivos, priorizar superfície macro com contrato estável:
 
 - `refactor_rename_symbol`
+- `refactor_move_file` / move com atualização de imports (prioridade seguinte)
 - `refactor_organize_imports`
 - `refactor_format_target`
 
 Contrato mínimo:
 - `dryRun=true` por default;
 - resposta com preview + escopo de arquivos afetados;
+- fallback textual apenas quando operação semântica estiver indisponível, com `engine-unavailable`/evidência explícita e blast-radius limitado;
+- caminho simples continua simples: macros são opt-in/dry-first e não aumentam fricção para edição focal comum;
 - `apply` com trilha auditável e rollback mínimo.
 
 Implementação incremental atual:

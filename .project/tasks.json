@@ -3265,7 +3265,7 @@
     {
       "id": "TASK-BUD-132",
       "description": "[P2] Evoluir de structured-first para code-ops semânticas (ex.: rename seguro multi-ocorrência) com ferramentas dedicadas.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-131"
       ],
@@ -3281,7 +3281,8 @@
         "Existe estratégia de adoção incremental (fallback textual apenas quando operação semântica indisponível, com evidência).",
         "Plano mantém stack outcome-agnostic: ganhos para avançados sem aumentar fricção para fluxo simples."
       ],
-      "notes": "Backlog aberto por brainstorming humano (2026-04-24): no futuro, operações de código devem usar ferramentas estruturais para evitar mudanças manuais dispersas e inconsistentes."
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): no futuro, operações de código devem usar ferramentas estruturais para evitar mudanças manuais dispersas e inconsistentes.\n[2026-04-29T16:57:16.034Z] Completed with VER-BUD-442: semantic code-op priorities and incremental fallback strategy are documented. [rationale:risk-control] Dry-first semantic ops are opt-in and preserve simple-flow ergonomics.",
+      "verification": "VER-BUD-442"
     },
     {
       "id": "TASK-BUD-133",
