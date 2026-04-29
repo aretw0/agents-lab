@@ -4050,6 +4050,29 @@
       ],
       "verification": "VER-BUD-450",
       "notes": "Criado e fechado por steering humano (2026-04-29): foco maior é esticar unattended local-first com trabalho contínuo, organizado e auditado antes de escalar agentes/remoto. [rationale:risk-control] Um rehearsal local explícito evita confundir maturidade do loop com expansão prematura de superfície."
+    },
+    {
+      "id": "TASK-BUD-170",
+      "description": "[P0] Galvanizar scorecard de rehearsal unattended local-first antes de canário remote/offload.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-169",
+        "TASK-BUD-168"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-rehearsal.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Scorecard determina continue-local, blocked ou ready-for-canary com critérios explícitos.",
+        "Gate exige 3+ slices locais, foco preservado, smoke verde, commits pequenos, handoff fresco e zero protected-scope auto-selection.",
+        "Smoke local cobre falta de slices, readiness completa e bloqueio por drift/blockers."
+      ],
+      "verification": "VER-BUD-451",
+      "notes": "Criado e fechado por steering humano (2026-04-29): precisamos medir maturidade local-first antes de escalar para agent-as-tools/subagentes/GitHub Actions. [rationale:risk-control] Scorecard evita promover autonomia por sensação; exige evidência local auditável."
     }
   ]
 }

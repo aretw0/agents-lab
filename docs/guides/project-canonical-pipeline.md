@@ -706,6 +706,8 @@ Antes de promover para agent-as-tools, subagentes ou GitHub Actions, o rehearsal
 
 Critério de maturidade: três ou mais slices locais seguidos com foco preservado, smoke verde, commits pequenos, handoff fresco e nenhuma seleção automática de escopo protegido. Só depois disso remote/offload entra como canário controlado.
 
+A primitiva `evaluateUnattendedRehearsalGate` formaliza esse scorecard: `continue-local` enquanto faltarem critérios, `blocked` quando houver drift/protected-scope ou blockers, e `ready-for-canary` apenas quando todos os critérios locais estiverem verdes.
+
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
 ### Pre-compact calm-close (anti-paralisia)

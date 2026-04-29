@@ -6279,6 +6279,15 @@
       "method": "inspect",
       "evidence": "Documented unattended local-first rehearsal in docs/guides/project-canonical-pipeline.md. The runbook requires explicit focus, bounded slice, focal gate, intentional commit, board/verification/handoff update, and focus-complete instead of drift when done. Maturity criterion: at least three local slices with focus preserved, green smoke, small commits, fresh handoff and no protected-scope auto-selection; remote/offload only later as controlled canary. Validation: cmd.exe /c node -e unattended rehearsal markers passed: 4. [rationale:risk-control] Establishes the local proof point before agent-as-tools, subagents, or GitHub Actions expansion.",
       "timestamp": "2026-04-29T17:47:46.791Z"
+    },
+    {
+      "id": "VER-BUD-451",
+      "target": "TASK-BUD-170",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented unattended rehearsal scorecard helper. Added guardrails-core-unattended-rehearsal.ts with evaluateUnattendedRehearsalGate returning continue-local, blocked or ready-for-canary based on 3+ local slices, focus preservation, focal smoke, small commits, fresh handoff, protected-scope auto-selection count and blockers. Re-exported helper, documented it in project-canonical-pipeline and added smoke test to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 116/116. [rationale:risk-control] Converts unattended maturity into an auditable gate before remote/offload canaries.",
+      "timestamp": "2026-04-29T18:04:58.405Z"
     }
   ]
 }
