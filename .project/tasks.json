@@ -4273,6 +4273,27 @@
       ],
       "verification": "VER-BUD-460",
       "notes": "[2026-04-29T19:33:53.660Z] slice=1 focus=TASK-BUD-179 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Validador reduz gordura de auditoria e evita evidência de rehearsal malformada sem criar nova surface grande."
+    },
+    {
+      "id": "TASK-BUD-180",
+      "description": "[P1] Documentar validação compacta de evidência do rehearsal para manter handoff auditável e enxuto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-179"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook menciona validateUnattendedRehearsalSliceEvidence como checagem opcional antes de registrar evidência.",
+        "Documento preserva uso de linha curta e evita nova superfície pesada de tracking.",
+        "Validação por marcadores e board/verification atualizados."
+      ],
+      "notes": "Criado como continuação local-safe após adicionar o validador. [rationale:risk-control] Sem documentação, agentes podem voltar a registrar evidência solta ou payload verboso; a regra curta mantém auditoria sem bloat.\n[2026-04-29T19:52:12.740Z] slice=1 focus=TASK-BUD-180 gate=rehearsal-evidence-validation-docs-markers-passed:3 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora orienta validar a linha compacta e corrigir formato curto, em vez de expandir payload no handoff.",
+      "verification": "VER-BUD-461"
     }
   ]
 }

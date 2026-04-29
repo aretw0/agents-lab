@@ -712,6 +712,8 @@ A decisão operacional após foco completo deve seguir a [doutrina operacional d
 
 Durante o rehearsal, cada slice deve registrar uma evidência curta em formato estável: `slice=<n> focus=<task|milestone> gate=<comando|inspeção> commit=<sha> drift=<yes|no> next=<ação>`. O registro pode ficar em nota do board/handoff, evitando uma nova superfície grande de tracking.
 
+Quando houver dúvida sobre a linha antes de gravar evidência, use `validateUnattendedRehearsalSliceEvidence` como checagem leve: ela deve retornar `valid=yes missing=none invalid=none`. Falhas indicam corrigir a linha curta, não expandir para payload verboso.
+
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
 ### Pre-compact calm-close (anti-paralisia)
