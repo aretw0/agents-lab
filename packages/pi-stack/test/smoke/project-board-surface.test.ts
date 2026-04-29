@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import projectBoardSurfaceExtension, {
   appendProjectVerificationBoard,
   buildProjectTaskDecisionPacket,
+  completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
   queryProjectTasks,
   queryProjectVerification,
@@ -275,6 +276,55 @@ describe("project-board-surface", () => {
         evidence: "cannot link missing task",
         linkTask: true,
       })).toMatchObject({ ok: false, reason: "task-target-not-found" });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("completeProjectTaskBoardWithVerification appends, links, and completes", () => {
+    const cwd = seedWorkspace();
+    try {
+      const completed = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-C",
+        verificationId: "VER-COMPLETE",
+        method: "test",
+        evidence: "completion gate passed [rationale:risk-control] bounded close",
+        appendNote: "completed through bounded helper",
+      });
+      expect(completed.ok).toBe(true);
+      expect(completed.verification).toMatchObject({ id: "VER-COMPLETE", status: "passed" });
+      expect(completed.task).toMatchObject({ id: "TASK-C", status: "completed", verification: "VER-COMPLETE" });
+
+      const duplicate = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-C",
+        verificationId: "VER-COMPLETE",
+        method: "test",
+        evidence: "duplicate [rationale:risk-control]",
+      });
+      expect(duplicate).toMatchObject({ ok: false, reason: "verification-already-exists" });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("completeProjectTaskBoardWithVerification blocks sensitive completion without rationale before append", () => {
+    const cwd = seedWorkspace();
+    try {
+      const created = createProjectTaskBoard(cwd, {
+        id: "TASK-REF",
+        description: "Refactor sensitive path",
+        status: "in-progress",
+      });
+      expect(created.ok).toBe(true);
+
+      const blocked = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-REF",
+        verificationId: "VER-REF",
+        method: "test",
+        evidence: "tests passed",
+      });
+      expect(blocked).toMatchObject({ ok: false, reason: "rationale-required-to-complete-sensitive-task" });
+      expect(queryProjectVerification(cwd, { target: "TASK-REF", limit: 10 }).filtered).toBe(0);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -1035,6 +1085,35 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.ok).toBe(true);
       expect((result.details as any)?.verification?.id).toBe("VER-TOOL");
       expect((result.details as any)?.task?.verification).toBe("VER-TOOL");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("board_task_complete tool appends verification and completes task", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const completeTool = getTool(pi, "board_task_complete");
+
+      const result = await completeTool.execute(
+        "tc-board-task-complete",
+        {
+          task_id: "TASK-C",
+          verification_id: "VER-TOOL-COMPLETE",
+          method: "test",
+          evidence: "tool completion ok [rationale:risk-control] bounded close",
+          append_note: "completed through tool",
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.verification?.id).toBe("VER-TOOL-COMPLETE");
+      expect((result.details as any)?.task).toMatchObject({ id: "TASK-C", status: "completed" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

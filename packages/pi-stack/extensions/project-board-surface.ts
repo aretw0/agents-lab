@@ -1107,6 +1107,15 @@ export interface ProjectVerificationAppendResult {
   task?: ProjectTaskBoardRow;
 }
 
+export interface ProjectTaskCompleteWithVerificationResult {
+  ok: boolean;
+  reason?: string;
+  verificationAppend?: ProjectVerificationAppendResult;
+  update?: ProjectTaskUpdateResult;
+  verification?: VerificationRecord;
+  task?: ProjectTaskBoardRow;
+}
+
 function normalizeVerificationEvidence(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.replace(/\s+/g, " ").trim();
@@ -1181,6 +1190,90 @@ export function appendProjectVerificationBoard(
   invalidateProjectBlockCaches(cwd);
 
   return { ok: true, verification, task: linkedTask };
+}
+
+export function completeProjectTaskBoardWithVerification(
+  cwd: string,
+  input: {
+    taskId?: string;
+    verificationId?: string;
+    method?: string;
+    evidence?: string;
+    timestamp?: string;
+    appendNote?: string;
+    maxNoteLines?: number;
+    requireRationaleOnComplete?: boolean;
+    requireRationaleConsistencyOnComplete?: boolean;
+  },
+): ProjectTaskCompleteWithVerificationResult {
+  const taskId = typeof input.taskId === "string" ? input.taskId.trim() : "";
+  const verificationId = typeof input.verificationId === "string" ? input.verificationId.trim() : "";
+  const method = typeof input.method === "string" ? input.method.trim() : "";
+  const evidence = normalizeVerificationEvidence(input.evidence);
+  const requireRationaleOnComplete = input.requireRationaleOnComplete !== false;
+  const requireRationaleConsistencyOnComplete = input.requireRationaleConsistencyOnComplete !== false;
+
+  if (!taskId) return { ok: false, reason: "missing-task-id" };
+  if (!verificationId) return { ok: false, reason: "missing-verification-id" };
+  if (!method) return { ok: false, reason: "missing-verification-method" };
+  if (!evidence) return { ok: false, reason: "missing-verification-evidence" };
+
+  const taskBlock = readProjectTasksBlock(cwd);
+  const currentTask = taskBlock.tasks.find((row) => row?.id === taskId) as TaskRecord | undefined;
+  if (!currentTask) return { ok: false, reason: "task-not-found" };
+
+  const verificationRead = readVerificationBlockForAppend(cwd);
+  if (verificationRead.verifications.some((row) => row.id === verificationId)) {
+    return { ok: false, reason: "verification-already-exists" };
+  }
+
+  const evidenceRationaleKind = extractRationaleKindFromText(evidence);
+  const taskRationaleKind = resolveTaskNoteRationaleKind(currentTask);
+  const rationaleRequired = isRationaleSensitiveTask(currentTask);
+  if (requireRationaleOnComplete && rationaleRequired && !hasRationaleText(currentTask.notes) && !hasRationaleText(evidence)) {
+    return { ok: false, reason: "rationale-required-to-complete-sensitive-task" };
+  }
+  if (
+    requireRationaleConsistencyOnComplete
+    && taskRationaleKind
+    && evidenceRationaleKind
+    && taskRationaleKind !== evidenceRationaleKind
+  ) {
+    return { ok: false, reason: "rationale-consistency-required-to-complete-task" };
+  }
+
+  const verificationAppend = appendProjectVerificationBoard(cwd, {
+    id: verificationId,
+    target: taskId,
+    targetType: "task",
+    status: "passed",
+    method,
+    evidence,
+    timestamp: input.timestamp,
+    linkTask: true,
+  });
+  if (!verificationAppend.ok) {
+    return { ok: false, reason: verificationAppend.reason, verificationAppend };
+  }
+
+  const update = updateProjectTaskBoard(cwd, taskId, {
+    status: "completed",
+    appendNote: input.appendNote,
+    maxNoteLines: input.maxNoteLines,
+    requireRationaleOnComplete,
+    requireRationaleConsistencyOnComplete,
+  });
+  if (!update.ok) {
+    return { ok: false, reason: update.reason, verificationAppend, update };
+  }
+
+  return {
+    ok: true,
+    verificationAppend,
+    update,
+    verification: verificationAppend.verification,
+    task: update.task,
+  };
 }
 
 export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
@@ -1414,6 +1507,61 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Append one .project/verification entry through a constrained board surface, optionally linking it to a task.",
     parameters: verificationAppendParameters,
     execute: executeVerificationAppend,
+  });
+
+  const taskCompleteParameters = Type.Object({
+    task_id: Type.String({ minLength: 1, description: "Task id to complete." }),
+    verification_id: Type.String({ minLength: 1, description: "Verification id to append and link." }),
+    method: Type.String({ minLength: 1, description: "Verification method, e.g. test or inspection." }),
+    evidence: Type.String({ minLength: 1, description: "Bounded verification evidence." }),
+    timestamp: Type.Optional(Type.String({ description: "ISO timestamp. Defaults to now." })),
+    append_note: Type.Optional(Type.String({ description: "Optional completion note appended to the task." })),
+    max_note_lines: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
+    require_rationale_on_complete: Type.Optional(Type.Boolean({ description: "Default true." })),
+    require_rationale_consistency_on_complete: Type.Optional(Type.Boolean({ description: "Default true for mismatches." })),
+  });
+
+  const executeTaskComplete = (
+    _toolCallId: string,
+    params: {
+      task_id?: string;
+      verification_id?: string;
+      method?: string;
+      evidence?: string;
+      timestamp?: string;
+      append_note?: string;
+      max_note_lines?: number;
+      require_rationale_on_complete?: boolean;
+      require_rationale_consistency_on_complete?: boolean;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = completeProjectTaskBoardWithVerification(ctx.cwd, {
+      taskId: params?.task_id,
+      verificationId: params?.verification_id,
+      method: params?.method,
+      evidence: params?.evidence,
+      timestamp: params?.timestamp,
+      appendNote: params?.append_note,
+      maxNoteLines: params?.max_note_lines,
+      requireRationaleOnComplete: params?.require_rationale_on_complete,
+      requireRationaleConsistencyOnComplete: params?.require_rationale_consistency_on_complete,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_task_complete",
+    label: "Board Task Complete",
+    description:
+      "Append passed verification, link it to a task, and mark the task completed through a constrained board surface.",
+    parameters: taskCompleteParameters,
+    execute: executeTaskComplete,
   });
 
   const updateParameters = Type.Object({

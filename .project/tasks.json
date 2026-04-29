@@ -5049,6 +5049,30 @@
       ],
       "notes": "Criado via board_task_create live após reload. [rationale:risk-control] Documentar a fronteira evita lock-in conceitual enquanto continuamos usando .project como começo local-first auditável.\n[2026-04-29T23:22:46.811Z] slice=1 focus=TASK-BUD-213 gate=safe_marker_check-summary-marker-check-ok-yes-matched-10/10-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora posiciona .project como adapter local-first inicial e preserva primitivas agnósticas para outros ticket systems.",
       "verification": "VER-BUD-492"
+    },
+    {
+      "id": "TASK-BUD-214",
+      "description": "[P1] Adicionar helper/tool bounded para completar task com verification em uma chamada.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-210",
+        "TASK-BUD-211"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Superfície do board consegue anexar verification passed, linkar à task e marcar completed em fluxo único bounded.",
+        "Fluxo bloqueia duplicata, target ausente e completion sensível sem rationale antes de mutar verification.",
+        "Tool evita depender do complete-task legado e reduz scripts ad hoc no loop unattended.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Fechar uma fatia hoje ainda exige múltiplas chamadas coordenadas; um primitive bounded de complete-with-verification reduz risco de drift e melhora operação ininterrupta.\n[2026-04-29T23:26:38.632Z] slice=1 focus=TASK-BUD-214 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Board agora tem primitive bounded de complete-with-verification para reduzir drift de fechamento de slices.",
+      "verification": "VER-BUD-493"
     }
   ]
 }
