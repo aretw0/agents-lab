@@ -108,6 +108,7 @@ import { registerGuardrailsShellRouteSurface } from "./guardrails-core-shell-rou
 import { registerGuardrailsDeliverySurface } from "./guardrails-core-delivery-surface";
 import { registerGuardrailsSafeMutationSurface } from "./guardrails-core-safe-mutation-surface";
 import { registerGuardrailsMacroRefactorSurface } from "./guardrails-core-macro-refactor-surface";
+import { registerGuardrailsMarkerCheckSurface } from "./guardrails-core-marker-check-surface";
 import { registerGuardrailsStructuredIoSurface } from "./guardrails-core-structured-io-surface";
 import { registerGuardrailsAutonomyLaneSurface } from "./guardrails-core-autonomy-lane-surface";
 import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-core-unattended-continuation-surface";
@@ -3115,6 +3116,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsDeliverySurface(pi, appendAuditEntry);
   registerGuardrailsSafeMutationSurface(pi, appendAuditEntry);
   registerGuardrailsMacroRefactorSurface(pi, appendAuditEntry, isInsideCwd);
+  registerGuardrailsMarkerCheckSurface(pi);
   registerGuardrailsStructuredIoSurface(pi, appendAuditEntry, isInsideCwd);
   registerGuardrailsAutonomyLaneSurface(pi);
   registerGuardrailsUnattendedContinuationSurface(pi);

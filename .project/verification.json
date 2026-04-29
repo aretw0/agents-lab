@@ -6441,6 +6441,15 @@
       "method": "test",
       "evidence": "Added shell-agnostic marker check primitive in packages/pi-stack/extensions/guardrails-core-marker-check.ts: evaluateTextMarkerCheck and detectCommandSensitiveMarkerReasons. It supports accent/case normalization, compact summary, missing markers, and explicit command-sensitive marker policy (backtick, command-substitution, newline) without coupling to cmd.exe, PowerShell, or bash. Added smoke coverage for plain markers, accents, missing marker, and backtick policy. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-marker-check.test.ts passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 129/129 across 21 files. [rationale:risk-control] Hardens repeated marker-check failure mode as a reusable primitive instead of relying on documentation or shell-specific quoting.",
       "timestamp": "2026-04-29T20:39:52.559Z"
+    },
+    {
+      "id": "VER-BUD-469",
+      "target": "TASK-BUD-188",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Added guardrails-core-marker-check-surface.ts registering safe_marker_check as a read-only shell-agnostic tool, wired it in guardrails-core.ts, added smoke tests for workspace file marker checks and outside-workspace path blocking, and included it in test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-marker-check.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 131/131 across 22 files. [rationale:risk-control] Gives agents a runtime primitive for marker validation instead of relying on platform-specific shell quoting.",
+      "timestamp": "2026-04-29T20:47:29.936Z"
     }
   ]
 }

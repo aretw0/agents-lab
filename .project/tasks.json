@@ -4450,6 +4450,28 @@
       ],
       "notes": "Criado após feedback do operador: detalhes de Windows/git-bash devem ser resolvidos pela stack; agente não deve esbarrar em quoting por falta de hard intent. [rationale:risk-control] Substituir marker checks artesanais por primitiva pura reduz falso negativo e não acopla política a shell específico.\n[2026-04-29T20:39:52.559Z] slice=1 focus=TASK-BUD-187 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Safe marker check agora é helper puro/desacoplado; markers command-sensitive são política explícita, não falha acidental de shell.",
       "verification": "VER-BUD-468"
+    },
+    {
+      "id": "TASK-BUD-188",
+      "description": "[P1] Expor safe marker check como tool read-only shell-agnostic.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-187"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-marker-check-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Tool safe_marker_check lê apenas path dentro do workspace e usa evaluateTextMarkerCheck.",
+        "Tool retorna summary compacto, missing e commandSensitiveMarkers sem depender de shell.",
+        "Smokes focal e completo verdes."
+      ],
+      "verification": "VER-BUD-469",
+      "notes": "[2026-04-29T20:47:29.936Z] slice=1 focus=TASK-BUD-188 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A primitiva safe marker check ficou disponível em runtime como tool read-only, evitando marker checks artesanais em shell."
     }
   ]
 }
