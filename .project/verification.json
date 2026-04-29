@@ -6585,6 +6585,15 @@
       "method": "test",
       "evidence": "Re-exported detectShellInlineCommandSensitiveMarkerCheck and commandSensitiveShellMarkerCheckReason via guardrails-core-exports.ts, and extended guardrails-core-hardening-reexport smoke to validate positive shell marker check blocking, generic inline command non-blocking, and reason text. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts passed 1/1; cmd.exe /c npm run test:monitor:smoke --silent passed 151/151 across 29 files. [rationale:risk-control] Keeps the new runtime guard testable through the public hardening surface.",
       "timestamp": "2026-04-29T22:40:43.138Z"
+    },
+    {
+      "id": "VER-BUD-485",
+      "target": "TASK-BUD-205",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Extracted bash guard policies from guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts. Re-exported the policy helpers through guardrails-core-exports.ts and added guardrails-bash-guard-policies smoke covering command-sensitive shell marker checks, session log scans, pi root recursive scans, and allow case. Orchestrator line count is 3493 (budget 3600). Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 152/152 across 30 files. [rationale:risk-control] Reduces orchestrator bloat while preserving runtime bash guard behavior.",
+      "timestamp": "2026-04-29T22:48:14.886Z"
     }
   ]
 }

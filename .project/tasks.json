@@ -4845,6 +4845,33 @@
       ],
       "notes": "Criado como continuação local-safe após TASK-BUD-203. [rationale:risk-control] O novo runtime guard precisa ficar testável pela superfície pública como as demais primitivas de hardening.\n[2026-04-29T22:40:43.138Z] slice=1 focus=TASK-BUD-204 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Helpers do bloqueio shell marker check agora são reexportados e cobertos por smoke público.",
       "verification": "VER-BUD-484"
+    },
+    {
+      "id": "TASK-BUD-205",
+      "description": "[P1] Extrair bash guard policies do orquestrador guardrails-core.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-202",
+        "TASK-BUD-204"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts",
+        "package.json",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Políticas bash guard ficam em módulo dedicado e continuam usadas pelo guardrails-core.",
+        "Smoke cobre session log scan, pi root recursive scan e shell marker command-sensitive.",
+        "Orquestrador fica com margem sob o orçamento de 3600 linhas.",
+        "test:monitor:smoke permanece verde."
+      ],
+      "notes": "Criado como hardening local-safe após TASK-BUD-204. [rationale:risk-control] guardrails-core.ts está perto do orçamento de linhas; extrair políticas reduz risco de reinflar o orquestrador e deixa os bloqueios testáveis em módulo próprio.\n[2026-04-29T22:48:14.886Z] slice=1 focus=TASK-BUD-205 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Bash guard policies foram extraídas do orquestrador; core caiu para 3493 linhas e smoke completo passou.",
+      "verification": "VER-BUD-485"
     }
   ]
 }

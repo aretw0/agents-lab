@@ -15,7 +15,6 @@ import { join, resolve, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { analyzeQuota, parseProviderBudgets, safeNum, type ProviderBudgetMap, type ProviderBudgetStatus } from "./quota-visibility";
 import { parseBudgetOverrideReason } from "./colony-pilot";
-import { matchesWhen, toPolicyFacts } from "./policy-primitive";
 import {
   DEFAULT_BLOAT_SMELL_CONFIG,
   resolveBloatSmellConfig,
@@ -120,7 +119,7 @@ import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
-import { commandSensitiveShellMarkerCheckReason, detectShellInlineCommandSensitiveMarkerCheck } from "./guardrails-core-marker-check";
+import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
 
@@ -227,102 +226,6 @@ async function guardBashPathReads(command: string, ctx: ExtensionContext) {
 // =============================================================================
 // Deterministic Web Routing Guard
 // =============================================================================
-
-const SESSION_LOG_PATH_PATTERN = /(^|[^\w.-])\.pi\/agent\/sessions(\/|$)/i;
-const SESSION_LOG_CONTENT_SCAN_PATTERN = /\b(?:grep|rg|findstr|awk|sed|cat|tail|head|more|less)\b/i;
-const SESSION_LOG_FILENAME_ONLY_PATTERN =
-  /\b(?:grep|rg)\b[\s\S]*\b(?:--files-with-matches|--files-without-match)\b|\b(?:grep|rg)\b[\s\S]*\s-[a-z]*l[a-z]*\b/i;
-const SESSION_LOG_COUNT_ONLY_PATTERN =
-  /\|\s*wc\s+-l\b|\b(?:grep|rg)\b[\s\S]*\b--count\b|\b(?:grep|rg)\b[\s\S]*\s-[a-z]*c[a-z]*\b/i;
-const PI_ROOT_PATH_PATTERN =
-  /(^|\s)(?:\.\/)?\.pi(?=\s|$|[|;&])|(^|\s)~\/\.pi(?=\s|$|[|;&])|(^|\s)[a-z]:\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])|(^|\s)\/mnt\/[a-z]\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])/i;
-const PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN =
-  /\brg\b|\bgrep\b[\s\S]*\b--recursive\b|\bgrep\b[\s\S]*\s-[a-z]*r[a-z]*\b|\bfindstr\b[\s\S]*\s\/s\b/i;
-
-export function detectHighRiskSessionLogScan(command: string): boolean {
-  const normalized = command.toLowerCase().replace(/\\/g, "/");
-  if (!SESSION_LOG_PATH_PATTERN.test(normalized)) return false;
-  if (!SESSION_LOG_CONTENT_SCAN_PATTERN.test(normalized)) return false;
-  if (SESSION_LOG_FILENAME_ONLY_PATTERN.test(normalized)) return false;
-  if (SESSION_LOG_COUNT_ONLY_PATTERN.test(normalized)) return false;
-  return true;
-}
-
-export function highRiskSessionLogScanReason(): string {
-  return [
-    "Blocked by guardrails-core (session_log_scan): command scans ~/.pi/agent/sessions with content-reading tools and can emit giant JSONL lines.",
-    "Use session_analytics_query / quota_visibility_* tools or read with offset/limit instead.",
-  ].join(" ");
-}
-
-export function detectHighRiskPiRootRecursiveScan(command: string): boolean {
-  const normalized = command.toLowerCase().replace(/\\/g, "/");
-  if (!PI_ROOT_PATH_PATTERN.test(normalized)) return false;
-  if (!PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN.test(normalized)) return false;
-  if (SESSION_LOG_FILENAME_ONLY_PATTERN.test(normalized)) return false;
-  if (SESSION_LOG_COUNT_ONLY_PATTERN.test(normalized)) return false;
-  return true;
-}
-
-export function highRiskPiRootRecursiveScanReason(): string {
-  return [
-    "Blocked by guardrails-core (pi_root_recursive_scan): recursive content scan over .pi can explode output/context.",
-    "Use filename/count-only search first, then read specific files with offset/limit.",
-  ].join(" ");
-}
-
-type BashGuardPolicy = {
-  id: string;
-  when: string;
-  detect: (command: string) => boolean;
-  reason: () => string;
-  auditKey: string;
-};
-
-const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
-  {
-    id: "command-sensitive-shell-marker-check",
-    when: "tool(bash)",
-    detect: detectShellInlineCommandSensitiveMarkerCheck,
-    reason: commandSensitiveShellMarkerCheckReason,
-    auditKey: "guardrails-core.command-sensitive-shell-marker-check-block",
-  },
-  {
-    id: "pi-root-recursive-scan",
-    when: "tool(bash)",
-    detect: detectHighRiskPiRootRecursiveScan,
-    reason: highRiskPiRootRecursiveScanReason,
-    auditKey: "guardrails-core.pi-root-recursive-scan-block",
-  },
-  {
-    id: "session-log-scan",
-    when: "tool(bash)",
-    detect: detectHighRiskSessionLogScan,
-    reason: highRiskSessionLogScanReason,
-    auditKey: "guardrails-core.session-log-scan-block",
-  },
-];
-
-function shouldApplyBashGuardPolicy(policy: BashGuardPolicy): boolean {
-  return matchesWhen(
-    policy.when,
-    toPolicyFacts({
-      hasBash: true,
-      toolCalls: 1,
-      hasFileWrites: false,
-      calledTools: new Set(["bash"]),
-    }),
-    0,
-  );
-}
-
-function evaluateBashGuardPolicies(command: string): BashGuardPolicy | undefined {
-  for (const policy of BASH_GUARD_POLICIES) {
-    if (!shouldApplyBashGuardPolicy(policy)) continue;
-    if (policy.detect(command)) return policy;
-  }
-  return undefined;
-}
 
 export interface RoutingDecision {
   interactive: boolean;

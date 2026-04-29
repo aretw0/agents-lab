@@ -91,6 +91,14 @@ export { resolveValidationMethodPlan } from "./guardrails-core-validation-method
 export { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
 export { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
 export {
+  BASH_GUARD_POLICIES,
+  detectHighRiskPiRootRecursiveScan,
+  detectHighRiskSessionLogScan,
+  evaluateBashGuardPolicies,
+  highRiskPiRootRecursiveScanReason,
+  highRiskSessionLogScanReason,
+} from "./guardrails-core-bash-guard-policies";
+export {
   commandSensitiveShellMarkerCheckReason,
   detectCommandSensitiveMarkerReasons,
   detectShellInlineCommandSensitiveMarkerCheck,
