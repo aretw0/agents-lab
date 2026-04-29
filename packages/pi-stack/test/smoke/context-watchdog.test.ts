@@ -554,13 +554,15 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("TASK-BUD-084, TASK-BUD-018");
 		expect(prompt).toContain("blockers: infra-wait");
 		expect(prompt).toContain("Consolidar TASK-BUD-084");
-		expect(prompt).toContain("execution: prioritize latest user steering/follow-up");
+		expect(prompt).toContain("policy: latest user steering wins");
 		expect(prompt).not.toContain("Context-watch action:");
 		expect(prompt).not.toContain("freshness=");
 		expect(prompt).not.toContain("Cadence:");
 
 		const unknownPrompt = buildAutoResumePromptFromHandoff({ current_tasks: [] } as any, 5 * 60 * 1000, nowMs);
 		expect(unknownPrompt).toContain("focusTasks: none-listed");
+		expect(unknownPrompt).not.toContain("blockers: none");
+		expect(unknownPrompt).not.toContain("next: keep current lane intent");
 	});
 
 	it("resume prompt stays execution-focused even when context events are present", () => {
@@ -593,6 +595,7 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("[snip]");
 		expect(prompt).toContain("run focused slice");
 		expect(prompt).not.toContain("next: next:");
+		expect(prompt).not.toContain("execution:");
 		expect(prompt).not.toContain("...");
 		expect(prompt).not.toContain("…");
 	});

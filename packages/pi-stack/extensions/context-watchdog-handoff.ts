@@ -276,12 +276,14 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
 		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
-		`blockers: ${formatPromptList(blockersPrepared.values, blockersPrepared.diagnostics.droppedByLimitCount, "none", " | ")}`,
-		nextPrepared.values.length > 0
-			? `next: ${formatPromptList(nextPrepared.values, nextPrepared.diagnostics.droppedByLimitCount, "keep current lane intent", " | ")}`
-			: "next: keep current lane intent",
-		"execution: prioritize latest user steering/follow-up; if none, proceed with listed tasks.",
 	];
+	if (blockersPrepared.values.length > 0) {
+		lines.push(`blockers: ${formatPromptList(blockersPrepared.values, blockersPrepared.diagnostics.droppedByLimitCount, "none", " | ")}`);
+	}
+	if (nextPrepared.values.length > 0) {
+		lines.push(`next: ${formatPromptList(nextPrepared.values, nextPrepared.diagnostics.droppedByLimitCount, "keep current lane intent", " | ")}`);
+	}
+	lines.push("policy: latest user steering wins; otherwise continue listed tasks.");
 	const promptRaw = lines.join("\n");
 	const globalTruncated = promptRaw.length > AUTO_RESUME_PROMPT_MAX_CHARS;
 	const globalTruncatedChars = globalTruncated
