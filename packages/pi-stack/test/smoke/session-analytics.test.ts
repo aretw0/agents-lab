@@ -10,6 +10,7 @@ import sessionAnalyticsExtension, {
   readJsonlLines,
   runQuery,
   parseGalvanizationCandidates,
+  normalizeSessionAnalyticsToolParams,
 } from "../../extensions/session-analytics";
 
 describe("session-analytics — toSessionWorkspaceKey", () => {
@@ -243,6 +244,22 @@ describe("session-analytics — local sandbox session discovery", () => {
       process.chdir(oldCwd);
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it("normaliza payloads aninhados do harness", () => {
+    const normalized = normalizeSessionAnalyticsToolParams({
+      input: {
+        query_type: "outliers",
+        lookback_hours: 2,
+        limit: 3,
+        min_chars: 20_000,
+      },
+    });
+
+    expect(normalized.queryType).toBe("outliers");
+    expect(normalized.hours).toBe(2);
+    expect(normalized.limit).toBe(3);
+    expect(normalized.minChars).toBe(20_000);
   });
 });
 

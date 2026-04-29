@@ -647,6 +647,70 @@ function listSessionFiles(dir: string, lookbackHours: number): string[] {
 
 export type QueryType = "signals" | "timeline" | "model-usage" | "summary" | "outliers" | "galvanization";
 
+const VALID_QUERY_TYPES: QueryType[] = ["signals", "timeline", "model-usage", "summary", "outliers", "galvanization"];
+
+function collectParamCandidates(input: unknown, out: unknown[] = [], depth = 0): unknown[] {
+  if (depth > 3 || input == null) return out;
+  out.push(input);
+  if (typeof input !== "object") return out;
+  for (const value of Object.values(input as Record<string, unknown>)) {
+    if (value && typeof value === "object") collectParamCandidates(value, out, depth + 1);
+    else out.push(value);
+  }
+  return out;
+}
+
+function readNumberParam(candidates: unknown[], keys: string[]): number | undefined {
+  for (const item of candidates) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+    }
+  }
+  return undefined;
+}
+
+function readStringParam(candidates: unknown[], keys: string[]): string | undefined {
+  for (const item of candidates) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "string") return value;
+    }
+  }
+  return undefined;
+}
+
+export function normalizeSessionAnalyticsToolParams(params: unknown): {
+  queryType: QueryType;
+  hours: number;
+  signalFilter?: string;
+  limit: number;
+  minChars: number;
+} {
+  const candidates = collectParamCandidates(params);
+  const explicitQueryType = readStringParam(candidates, ["query_type", "queryType", "type"]);
+  const valueQueryType = candidates.find((value): value is QueryType => (
+    typeof value === "string" && VALID_QUERY_TYPES.includes(value as QueryType)
+  ));
+  const rawQueryType = explicitQueryType ?? valueQueryType;
+  const queryType = VALID_QUERY_TYPES.includes(rawQueryType as QueryType) ? rawQueryType as QueryType : "summary";
+  const rawHours = readNumberParam(candidates, ["lookback_hours", "lookbackHours", "hours"]);
+  const rawLimit = readNumberParam(candidates, ["limit"]);
+  const rawMinChars = readNumberParam(candidates, ["min_chars", "minChars"]);
+  const signalFilter = readStringParam(candidates, ["signal_filter", "signalFilter"]);
+  return {
+    queryType,
+    hours: typeof rawHours === "number" && rawHours > 0 ? rawHours : 24,
+    signalFilter,
+    limit: typeof rawLimit === "number" && rawLimit > 0 ? rawLimit : 50,
+    minChars: typeof rawMinChars === "number" && rawMinChars > 0 ? rawMinChars : 20_000,
+  };
+}
+
 export interface SessionAnalyticsScanSummary {
   maxTailBytes: number;
   maxLineChars: number;
@@ -822,18 +886,15 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
       ),
     }),
     execute(params) {
-      const p = (params ?? {}) as Record<string, unknown>;
-      const rawQueryType = typeof p.query_type === "string" ? p.query_type : p.queryType;
-      const queryType = typeof rawQueryType === "string" ? rawQueryType as QueryType : "summary";
-      const rawHours = typeof p.lookback_hours === "number" ? p.lookback_hours : p.lookbackHours;
-      const rawSignalFilter = typeof p.signal_filter === "string" ? p.signal_filter : p.signalFilter;
-      const rawLimit = p.limit;
-      const rawMinChars = typeof p.min_chars === "number" ? p.min_chars : p.minChars;
-      const hours = typeof rawHours === "number" && rawHours > 0 ? rawHours : 24;
-      const cap = typeof rawLimit === "number" && rawLimit > 0 ? rawLimit : 50;
-      const minChars = typeof rawMinChars === "number" && rawMinChars > 0 ? rawMinChars : 20_000;
-      const signalFilter = typeof rawSignalFilter === "string" ? rawSignalFilter : undefined;
-      const result = runQuery(process.cwd(), queryType, hours, signalFilter, cap, minChars);
+      const normalized = normalizeSessionAnalyticsToolParams(params);
+      const result = runQuery(
+        process.cwd(),
+        normalized.queryType,
+        normalized.hours,
+        normalized.signalFilter,
+        normalized.limit,
+        normalized.minChars,
+      );
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
@@ -849,9 +910,8 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
       const tokens = (args ?? "summary").trim().split(/\s+/);
       const subCmd = tokens[0].toLowerCase() as QueryType | string;
 
-      const VALID: QueryType[] = ["signals", "timeline", "model-usage", "summary", "outliers", "galvanization"];
-      if (!VALID.includes(subCmd as QueryType)) {
-        ctx.ui.notify(`Unknown subcommand '${subCmd}'. Use: ${VALID.join(" | ")}`, "warning");
+      if (!VALID_QUERY_TYPES.includes(subCmd as QueryType)) {
+        ctx.ui.notify(`Unknown subcommand '${subCmd}'. Use: ${VALID_QUERY_TYPES.join(" | ")}`, "warning");
         return;
       }
 
