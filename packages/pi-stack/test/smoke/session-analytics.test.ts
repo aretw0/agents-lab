@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
+import sessionAnalyticsExtension, {
   toSessionWorkspaceKey,
   parseSignals,
   parseModelChanges,
@@ -202,6 +202,45 @@ describe("session-analytics — local sandbox session discovery", () => {
       expect(data.outliers[0]?.toolName).toBe("bash");
       expect(data.outliers[0]?.textChars).toBe(25_000);
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("normaliza parâmetros camelCase do harness no execute do tool", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-tool-"));
+    const oldCwd = process.cwd();
+    let registeredTool: { execute: (params: Record<string, unknown>) => { details: ReturnType<typeof runQuery> } } | undefined;
+    try {
+      const key = toSessionWorkspaceKey(dir);
+      const sessionDir = join(dir, ".sandbox", "pi-agent", "sessions", key);
+      mkdirSync(sessionDir, { recursive: true });
+      writeFileSync(
+        join(sessionDir, "local.jsonl"),
+        `${JSON.stringify({
+          type: "message",
+          timestamp: new Date().toISOString(),
+          message: {
+            role: "toolResult",
+            toolName: "bash",
+            content: [{ type: "text", text: "y".repeat(25_000) }],
+          },
+        })}\n`,
+        "utf8",
+      );
+      sessionAnalyticsExtension({
+        registerTool(tool: unknown) { registeredTool = tool as typeof registeredTool; },
+        registerCommand() {},
+      } as never);
+      process.chdir(dir);
+
+      const output = registeredTool?.execute({ queryType: "outliers", lookbackHours: 2, limit: 3, minChars: 20_000 });
+      const data = output?.details.data as { outliers: Array<{ textChars: number }> };
+
+      expect(output?.details.queryType).toBe("outliers");
+      expect(output?.details.lookbackHours).toBe(2);
+      expect(data.outliers[0]?.textChars).toBe(25_000);
+    } finally {
+      process.chdir(oldCwd);
       rmSync(dir, { recursive: true, force: true });
     }
   });

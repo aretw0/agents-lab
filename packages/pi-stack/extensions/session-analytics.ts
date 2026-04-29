@@ -821,11 +821,19 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         Type.Number({ description: "Minimum text size (chars) to consider an outlier. Only for query_type=outliers. Default: 20000." })
       ),
     }),
-    execute({ query_type, lookback_hours, signal_filter, limit, min_chars }) {
-      const hours = typeof lookback_hours === "number" && lookback_hours > 0 ? lookback_hours : 24;
-      const cap = typeof limit === "number" && limit > 0 ? limit : 50;
-      const minChars = typeof min_chars === "number" && min_chars > 0 ? min_chars : 20_000;
-      const result = runQuery(process.cwd(), query_type, hours, signal_filter, cap, minChars);
+    execute(params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const rawQueryType = typeof p.query_type === "string" ? p.query_type : p.queryType;
+      const queryType = typeof rawQueryType === "string" ? rawQueryType as QueryType : "summary";
+      const rawHours = typeof p.lookback_hours === "number" ? p.lookback_hours : p.lookbackHours;
+      const rawSignalFilter = typeof p.signal_filter === "string" ? p.signal_filter : p.signalFilter;
+      const rawLimit = p.limit;
+      const rawMinChars = typeof p.min_chars === "number" ? p.min_chars : p.minChars;
+      const hours = typeof rawHours === "number" && rawHours > 0 ? rawHours : 24;
+      const cap = typeof rawLimit === "number" && rawLimit > 0 ? rawLimit : 50;
+      const minChars = typeof rawMinChars === "number" && rawMinChars > 0 ? rawMinChars : 20_000;
+      const signalFilter = typeof rawSignalFilter === "string" ? rawSignalFilter : undefined;
+      const result = runQuery(process.cwd(), queryType, hours, signalFilter, cap, minChars);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
