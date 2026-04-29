@@ -6135,6 +6135,15 @@
       "method": "docs-marker-check",
       "evidence": "User-surface slimming for scale recommendations closed. docs/guides/recommended-pi-stack.md and docs/research/pi-stack-user-surface-audit-2026-04-21.md state that hatch/loop defaults should suggest only the essential next step, keep swarm out of default CTA, require readiness/objective reason for delegation, require preflight/budget/parallel scope for swarm, and provide fallback to simple mode. Validation: marker check passed 4 markers. [rationale:risk-control] Reduces noisy/redundant recommendations and prevents accidental escalation while keeping advanced lanes opt-in.",
       "timestamp": "2026-04-29T13:18:10.487Z"
+    },
+    {
+      "id": "VER-BUD-435",
+      "target": "TASK-BUD-093",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Progressive hatch/simple-first task closed. Hatch runbook defaults to simple lane and advanced lane is explicit --advanced; recommended stack/project pipeline docs state strict-curated default, opt-in runtime extras and no swarm/delegation CTA on first contact without scale signal. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (86/86 passed). [rationale:risk-control] Keeps onboarding low-noise and prevents accidental escalation to high-cost delegation/swarm paths.",
+      "timestamp": "2026-04-29T13:19:23.226Z"
     }
   ]
 }

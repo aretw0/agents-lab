@@ -2165,7 +2165,7 @@
     {
       "id": "TASK-BUD-093",
       "description": "[P1] Ajustar discoverability/hatch para comunicar baseline oficial vs extras opt-in sem ruído e sem recomendação prematura de capacidades avançadas.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-088",
         "TASK-BUD-092"
@@ -2183,7 +2183,8 @@
         "Extras opt-in aparecem em seção separada com linguagem explícita de experimental/opcional.",
         "Sem CTA de swarm/delegação complexa no primeiro contato sem sinal de escala."
       ],
-      "notes": "Complementa UX progressiva com política de curadoria enxuta."
+      "notes": "Complementa UX progressiva com política de curadoria enxuta.\n[2026-04-29T13:19:23.226Z] Closed progressive hatch/simple-first task: hatch runbook already defaults to simple lane and exposes advanced lane only via explicit --advanced; recommended stack/project pipeline docs state strict-curated default, runtime extras opt-in, no swarm/delegation CTA on first contact without scale signal. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (86/86 passed). [rationale:risk-control] Simple-first hatch minimizes onboarding noise and avoids accidental high-cost swarm/delegation paths.",
+      "verification": "VER-BUD-435"
     },
     {
       "id": "TASK-BUD-094",
