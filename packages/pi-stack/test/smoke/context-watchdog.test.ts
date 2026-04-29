@@ -110,27 +110,27 @@ describe("context-watchdog", () => {
 		expect(evaluateContextWatch(72, thresholds).level).toBe("compact");
 	});
 
-	it("formats passive steering status with short actionable text", () => {
+	it("formats passive warn steering without soft-stopping work", () => {
 		expect(formatContextWatchSteeringStatus({
 			level: "warn",
-			action: "micro-slice-only",
-			recommendation: "Keep micro-slices and avoid broad scans until checkpoint.",
-		})).toContain("[ctx-steer] warn · action=micro-slice-only");
+			action: "continue-bounded",
+			recommendation: "Continue normal bounded work; avoid broad scans and prepare to checkpoint at the checkpoint threshold.",
+		})).toContain("[ctx-steer] warn · action=continue-bounded");
 	});
 
-	it("escalates second warn to checkpoint action for controlled handoff", () => {
+	it("keeps warn as steering and reserves checkpoint actions for checkpoint/compact lanes", () => {
 		const warn = evaluateContextWatch(60, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
 		expect(warn.level).toBe("warn");
-		expect(warn.action).toBe("micro-slice-only");
+		expect(warn.action).toBe("continue-bounded");
 
 		const firstWarn = applyWarnCadenceEscalation(warn, 1);
-		expect(firstWarn.action).toBe("micro-slice-only");
-		expect(firstWarn.recommendation).toContain("micro-slices");
+		expect(firstWarn.action).toBe("continue-bounded");
+		expect(firstWarn.recommendation).toContain("bounded work");
 
 		const secondWarn = applyWarnCadenceEscalation(warn, 2);
-		expect(secondWarn.action).toBe("write-checkpoint");
-		expect(secondWarn.recommendation).toContain("Second warn detected");
-		expect(secondWarn.severity).toBe("warning");
+		expect(secondWarn.action).toBe("continue-bounded");
+		expect(secondWarn.recommendation).toContain("checkpoint threshold");
+		expect(secondWarn.severity).toBe("info");
 
 		const checkpoint = evaluateContextWatch(68, { warnPct: 50, checkpointPct: 68, compactPct: 72 });
 		expect(applyWarnCadenceEscalation(checkpoint, 2).action).toBe("write-checkpoint");
@@ -768,7 +768,7 @@ describe("context-watchdog", () => {
 			assessmentLevel: "warn",
 			handoffLastEventLevel: "compact",
 		})).toEqual({
-			operatingCadence: "micro-slice-only",
+			operatingCadence: "bounded-slices",
 			postResumeRecalibrated: false,
 			reason: "level-warn",
 		});
@@ -882,7 +882,8 @@ describe("context-watchdog", () => {
 		expect(next.blockers).not.toContain("disk-pressure-block");
 		expect(next.blockers).not.toContain("memory-pressure-warn");
 		expect(next.blockers).toContain("infra-wait");
-		expect(next.blockers).toContain("context-watch-warn-active");
+		expect(next.blockers.some((line: string) => String(line).startsWith("context-watch-")))
+			.toBe(false);
 	});
 
 	it("cleans old context-watch blockers when level returns to ok", () => {
@@ -894,7 +895,7 @@ describe("context-watchdog", () => {
 		const next = applyContextWatchToHandoff(
 			{
 				context: "ongoing",
-				next_actions: ["Context-watch action: level=warn 55% (micro-slice-only)"],
+				next_actions: ["Context-watch action: level=warn 55% (continue-bounded)"],
 				blockers: ["context-watch-warn-active", "other-blocker"],
 				context_watch_events: [],
 			},

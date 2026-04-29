@@ -184,7 +184,7 @@ export type ContextWatchOperatorActionPlan = {
 	commandHint?: string;
 };
 
-export type ContextWatchOperatingCadence = "standard-slices" | "micro-slice-only";
+export type ContextWatchOperatingCadence = "standard-slices" | "bounded-slices" | "micro-slice-only";
 
 export type ContextWatchOperatingCadenceSignal = {
 	operatingCadence: ContextWatchOperatingCadence;
@@ -281,10 +281,10 @@ export function applyWarnCadenceEscalation(
 	if (assessment.level !== "warn" || warnStreak < 2) return assessment;
 	return {
 		...assessment,
-		action: "write-checkpoint",
+		action: "continue-bounded",
 		recommendation:
-			"Second warn detected: write handoff checkpoint now, then continue micro-slices until compact/resume.",
-		severity: "warning",
+			"Warn cadence active: continue bounded work; checkpoint only at the checkpoint threshold and wrap up at compact.",
+		severity: "info",
 	};
 }
 
@@ -406,7 +406,7 @@ export function resolveContextWatchOperatingCadence(input: {
 	const level = input.assessmentLevel;
 	if (level === "warn") {
 		return {
-			operatingCadence: "micro-slice-only",
+			operatingCadence: "bounded-slices",
 			postResumeRecalibrated: false,
 			reason: "level-warn",
 		};

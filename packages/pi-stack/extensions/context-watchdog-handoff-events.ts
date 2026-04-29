@@ -48,7 +48,7 @@ function contextWatchActionForLevel(level: ContextWatchdogLevel): string {
 		case "checkpoint":
 			return "write-checkpoint";
 		case "warn":
-			return "micro-slice-only";
+			return "continue-bounded";
 		default:
 			return "continue";
 	}
@@ -107,7 +107,6 @@ function contextWatchActionLine(assessment: ContextWatchAssessmentLike): string 
 function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
 	if (level === "compact") return ["context-watch-compact-required"];
 	if (level === "checkpoint") return ["context-watch-checkpoint-required"];
-	if (level === "warn") return ["context-watch-warn-active"];
 	return [];
 }
 

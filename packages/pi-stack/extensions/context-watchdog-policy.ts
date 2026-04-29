@@ -22,7 +22,7 @@ export function contextWatchActionForLevel(level: ContextWatchdogLevel): string 
 		case "checkpoint":
 			return "write-checkpoint";
 		case "warn":
-			return "micro-slice-only";
+			return "continue-bounded";
 		default:
 			return "continue";
 	}
@@ -60,7 +60,7 @@ export function evaluateContextWatch(
 			percent,
 			level: "warn",
 			thresholds,
-			recommendation: "Keep micro-slices and avoid broad scans until checkpoint.",
+			recommendation: "Continue normal bounded work; avoid broad scans and prepare to checkpoint at the checkpoint threshold.",
 			action: contextWatchActionForLevel("warn"),
 			severity: "info",
 		};
