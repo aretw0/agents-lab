@@ -6288,6 +6288,15 @@
       "method": "test",
       "evidence": "Implemented unattended rehearsal scorecard helper. Added guardrails-core-unattended-rehearsal.ts with evaluateUnattendedRehearsalGate returning continue-local, blocked or ready-for-canary based on 3+ local slices, focus preservation, focal smoke, small commits, fresh handoff, protected-scope auto-selection count and blockers. Re-exported helper, documented it in project-canonical-pipeline and added smoke test to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 116/116. [rationale:risk-control] Converts unattended maturity into an auditable gate before remote/offload canaries.",
       "timestamp": "2026-04-29T18:04:58.405Z"
+    },
+    {
+      "id": "VER-BUD-452",
+      "target": "TASK-BUD-171",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Exposed unattended_rehearsal_gate as a read-only tool in guardrails-core-autonomy-lane-surface. The tool maps completed_local_slices, focus_preserved, focal_smoke_green, small_commits, handoff_fresh, protected_scope_auto_selections and unresolved_blockers into evaluateUnattendedRehearsalGate decisions. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-rehearsal.test.ts passed 8/8; cmd.exe /c npm run test:monitor:smoke --silent passed 117/117. [rationale:risk-control] Makes remote/offload readiness checkable without broad diagnostics or mutable side effects.",
+      "timestamp": "2026-04-29T18:09:23.744Z"
     }
   ]
 }

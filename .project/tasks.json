@@ -4073,6 +4073,26 @@
       ],
       "verification": "VER-BUD-451",
       "notes": "Criado e fechado por steering humano (2026-04-29): precisamos medir maturidade local-first antes de escalar para agent-as-tools/subagentes/GitHub Actions. [rationale:risk-control] Scorecard evita promover autonomia por sensação; exige evidência local auditável."
+    },
+    {
+      "id": "TASK-BUD-171",
+      "description": "[P0] Expor gate de rehearsal unattended como tool read-only para validação operacional antes de canários remote/offload.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-170"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool read-only avalia evaluateUnattendedRehearsalGate sem efeitos colaterais.",
+        "Superfície retorna continue-local/blocked/ready-for-canary com critérios auditáveis.",
+        "Smoke focal e test:monitor:smoke validam o contrato."
+      ],
+      "verification": "VER-BUD-452",
+      "notes": "Criado e fechado por steering humano (2026-04-29): depois do scorecard, a operação precisa de uma superfície curta para checar maturidade sem abrir diagnóstico amplo. [rationale:risk-control] Um gate read-only evita promoção subjetiva para canário remoto e respeita cadência econômica de tools."
     }
   ]
 }
