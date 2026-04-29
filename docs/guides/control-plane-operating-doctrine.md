@@ -67,6 +67,7 @@ Remote/offload só vem depois de scorecard local verde e intenção explícita d
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:
 
 - markers de texto devem ir para `safe_marker_check` ou `evaluateTextMarkerCheck`, não para shell inline;
+- marker check shell-inline com sintaxe command-sensitive é caminho legado bloqueado pelo bash guard;
 - teste focal só deve rodar quando o gate é conhecido e bounded;
 - inspeção read-only deve usar structured-read quando aplicável;
 - validação que toca escopo protegido ou exige mutação deve bloquear e pedir intenção explícita.

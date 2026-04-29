@@ -4801,6 +4801,27 @@
       ],
       "notes": "Criado pela política recurring_failure_hardening_plan: old path de marker checks shell-inline ainda estava disponível após regra/primitiva/tool. [rationale:risk-control] Terceira ocorrência exige route-to-guarded-path/warn-or-block-legacy-path, sem acoplar a shell específico além do guard de bash existente.\n[2026-04-29T22:33:58.185Z] slice=1 focus=TASK-BUD-202 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Bash guard agora bloqueia marker checks shell-inline command-sensitive e roteia para safe_marker_check/evaluateTextMarkerCheck.",
       "verification": "VER-BUD-482"
+    },
+    {
+      "id": "TASK-BUD-203",
+      "description": "[P1] Documentar bloqueio runtime do caminho legado de marker check shell-inline.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-202"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina registra que shell-inline marker checks command-sensitive são bloqueados pelo bash guard.",
+        "Documento orienta safe_marker_check/evaluateTextMarkerCheck como caminho suportado.",
+        "Evidência inclui validação live pós-reload do bloqueio e safe_marker_check dos markers do doc."
+      ],
+      "notes": "Criado após reload validar o bloqueio live do bash guard. [rationale:risk-control] Runtime guard sem doutrina curta vira surpresa operacional; registrar a rota segura reduz repetição e atrito.\n[2026-04-29T22:38:01.448Z] slice=1 focus=TASK-BUD-203 gate=safe_marker_check-summary-marker-check-ok-yes-matched-6/6-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora reflete o bloqueio live do bash guard para marker checks shell-inline command-sensitive.",
+      "verification": "VER-BUD-483"
     }
   ]
 }

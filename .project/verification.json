@@ -6567,6 +6567,15 @@
       "method": "test",
       "evidence": "Added detectShellInlineCommandSensitiveMarkerCheck and commandSensitiveShellMarkerCheckReason in guardrails-core-marker-check.ts, and added a bash guard policy in guardrails-core.ts blocking shell-inline marker checks with command-sensitive syntax. The detector targets inline evaluators (node/python -e/-c/eval/exec) with marker-like patterns and command-sensitive syntax; it does not block generic node -e template literals. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-marker-check.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 151/151 across 29 files. [rationale:risk-control] Implements recurring_failure_hardening_plan old-path blocking for the repeated marker-check quoting failure.",
       "timestamp": "2026-04-29T22:33:58.185Z"
+    },
+    {
+      "id": "VER-BUD-483",
+      "target": "TASK-BUD-203",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "After reload, live bash command for an inline marker check with a newline marker was blocked with: Blocked by guardrails-core (safe_marker_check): shell-inline marker checks with command-sensitive syntax are a recurring failure path. Updated docs/guides/control-plane-operating-doctrine.md to record that shell-inline marker checks with command-sensitive syntax are a legacy path blocked by bash guard, and to route to safe_marker_check/evaluateTextMarkerCheck. Validation: safe_marker_check returned marker-check ok=yes matched=6/6 missing=none commandSensitive=none. [rationale:risk-control] Keeps runtime guard behavior discoverable and auditable.",
+      "timestamp": "2026-04-29T22:38:01.448Z"
     }
   ]
 }
