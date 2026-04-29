@@ -4472,6 +4472,27 @@
       ],
       "verification": "VER-BUD-469",
       "notes": "[2026-04-29T20:47:29.936Z] slice=1 focus=TASK-BUD-188 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] A primitiva safe marker check ficou disponível em runtime como tool read-only, evitando marker checks artesanais em shell."
+    },
+    {
+      "id": "TASK-BUD-189",
+      "description": "[P1] Documentar safe_marker_check como caminho padrão para validações textuais runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-188"
+      ],
+      "files": [
+        "docs/guides/project-canonical-pipeline.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook orienta usar safe_marker_check em vez de marker checks artesanais no shell.",
+        "Documento preserva exceção para testes/código quando helper puro for mais adequado.",
+        "Validação usa safe_marker_check ao vivo e registra summary compacto."
+      ],
+      "notes": "Criado após reload validar safe_marker_check ao vivo. [rationale:risk-control] Agora que há tool runtime, a política deve apontar para ela como default para evitar regressão para shell quoting.\n[2026-04-29T20:50:50.120Z] slice=1 focus=TASK-BUD-189 gate=safe_marker_check-summary-marker-check-ok-yes-matched-4/4-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora aponta safe_marker_check como default runtime para validações textuais, evitando regressão para shell quoting.",
+      "verification": "VER-BUD-470"
     }
   ]
 }

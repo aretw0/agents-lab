@@ -714,7 +714,9 @@ Durante o rehearsal, cada slice deve registrar uma evidência curta em formato e
 
 Quando houver dúvida sobre a linha antes de gravar evidência, use `validateUnattendedRehearsalSliceEvidence` como checagem leve: ela deve retornar `valid=yes missing=none invalid=none`. Falhas indicam corrigir a linha curta, não expandir para payload verboso.
 
-Para marker checks via `cmd.exe /c node -e`, evite crases/backticks dentro das strings procuradas: shells podem interpretar o conteúdo antes do Node e produzir falso negativo. Prefira marcadores sem crase, ou normalize acentos e pontuação antes de comparar.
+Para marker checks operacionais, prefira safe_marker_check: a tool é shell-agnostic, normaliza acentos/case quando solicitado e trata marcadores command-sensitive como política explícita. Use checks artesanais via shell apenas em testes/código quando o helper puro `evaluateTextMarkerCheck` for mais adequado.
+
+Se ainda usar comandos inline como `cmd.exe /c node -e`, evite crases/backticks dentro das strings procuradas: shells podem interpretar o conteúdo antes do Node e produzir falso negativo. Prefira marcadores sem crase, ou normalize acentos e pontuação antes de comparar.
 
 Resultado esperado: maior autonomia operacional sem perder previsibilidade, auditabilidade e controle de risco.
 
