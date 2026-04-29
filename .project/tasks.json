@@ -5185,6 +5185,31 @@
       ],
       "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] Summaries compactos só reduzem bloat se o fluxo operacional orientar seu uso em handoff/log.\n[2026-04-29T23:49:00Z] slice=1 focus=TASK-BUD-219 gate=safe_marker_check-summary-marker-check-ok-yes-matched-8/8-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Doutrina agora orienta registrar summaries compactos das tools bounded em vez de JSON completo quando suficiente.",
       "verification": "VER-BUD-498"
+    },
+    {
+      "id": "TASK-BUD-220",
+      "description": "[P1] Compactar payload das tools bounded do board para reduzir bloat de contexto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-217",
+        "TASK-BUD-218",
+        "TASK-BUD-219"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "board_verification_append não retorna evidence completo no payload da tool quando summary basta.",
+        "board_task_complete não retorna objetos nested completos no payload da tool.",
+        "Helpers internos continuam disponíveis para testes/código com detalhes completos.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] As summaries existem, mas as tools ainda despejam JSON grande; compactar o payload live reduz bloat em loops unattended.\n[2026-04-29T23:52:25Z] slice=1 focus=TASK-BUD-220 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Live board tools agora retornam payload compacto quando summary basta.",
+      "verification": "VER-BUD-499"
     }
   ]
 }

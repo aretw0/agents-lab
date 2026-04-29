@@ -1162,6 +1162,38 @@ function normalizeVerificationEvidence(value: unknown): string | undefined {
   return normalized.length <= 4000 ? normalized : `${normalized.slice(0, 3999)}…`;
 }
 
+function compactVerificationRecord(verification: VerificationRecord | undefined): Omit<VerificationRecord, "evidence"> | undefined {
+  if (!verification) return undefined;
+  return {
+    id: verification.id,
+    target: verification.target,
+    target_type: verification.target_type,
+    status: verification.status,
+    method: verification.method,
+    timestamp: verification.timestamp,
+  };
+}
+
+function compactVerificationAppendToolResult(result: ProjectVerificationAppendResult) {
+  return {
+    ok: result.ok,
+    reason: result.reason,
+    summary: result.summary,
+    verification: compactVerificationRecord(result.verification),
+    task: result.task,
+  };
+}
+
+function compactTaskCompleteToolResult(result: ProjectTaskCompleteWithVerificationResult) {
+  return {
+    ok: result.ok,
+    reason: result.reason,
+    summary: result.summary,
+    verification: compactVerificationRecord(result.verification),
+    task: result.task,
+  };
+}
+
 export function appendProjectVerificationBoard(
   cwd: string,
   input: {
@@ -1531,7 +1563,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     _onUpdate: (update: unknown) => void,
     ctx: { cwd: string },
   ) => {
-    const details = appendProjectVerificationBoard(ctx.cwd, {
+    const result = appendProjectVerificationBoard(ctx.cwd, {
       id: params?.id,
       target: params?.target,
       targetType: params?.target_type,
@@ -1541,8 +1573,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       timestamp: params?.timestamp,
       linkTask: params?.link_task === true,
     });
+    const details = compactVerificationAppendToolResult(result);
     return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      content: [{ type: "text", text: details.summary ?? JSON.stringify(details, null, 2) }],
       details,
     };
   };
@@ -1585,7 +1618,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     _onUpdate: (update: unknown) => void,
     ctx: { cwd: string },
   ) => {
-    const details = completeProjectTaskBoardWithVerification(ctx.cwd, {
+    const result = completeProjectTaskBoardWithVerification(ctx.cwd, {
       taskId: params?.task_id,
       verificationId: params?.verification_id,
       method: params?.method,
@@ -1596,8 +1629,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       requireRationaleOnComplete: params?.require_rationale_on_complete,
       requireRationaleConsistencyOnComplete: params?.require_rationale_consistency_on_complete,
     });
+    const details = compactTaskCompleteToolResult(result);
     return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      content: [{ type: "text", text: details.summary ?? JSON.stringify(details, null, 2) }],
       details,
     };
   };

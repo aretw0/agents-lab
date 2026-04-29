@@ -1125,6 +1125,8 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.ok).toBe(true);
       expect((result.details as any)?.summary).toBe("board-verification-append: ok=yes verification=VER-TOOL target=TASK-C linked=yes");
       expect((result.details as any)?.verification?.id).toBe("VER-TOOL");
+      expect((result.details as any)?.verification?.evidence).toBeUndefined();
+      expect((result as any)?.content?.[0]?.text).toBe("board-verification-append: ok=yes verification=VER-TOOL target=TASK-C linked=yes");
       expect((result.details as any)?.task?.verification).toBe("VER-TOOL");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
@@ -1155,6 +1157,10 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.ok).toBe(true);
       expect((result.details as any)?.summary).toBe("board-task-complete: ok=yes task=TASK-C verification=VER-TOOL-COMPLETE status=completed");
       expect((result.details as any)?.verification?.id).toBe("VER-TOOL-COMPLETE");
+      expect((result.details as any)?.verification?.evidence).toBeUndefined();
+      expect((result.details as any)?.verificationAppend).toBeUndefined();
+      expect((result.details as any)?.update).toBeUndefined();
+      expect((result as any)?.content?.[0]?.text).toBe("board-task-complete: ok=yes task=TASK-C verification=VER-TOOL-COMPLETE status=completed");
       expect((result.details as any)?.task).toMatchObject({ id: "TASK-C", status: "completed" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });

@@ -6711,6 +6711,15 @@
       "method": "inspection",
       "timestamp": "2026-04-29T23:48:01.769Z",
       "evidence": "Updated docs/guides/control-plane-operating-doctrine.md to instruct unattended board flows to record compact tool summaries when sufficient for handoff/log, covering success and failure one-line summaries and reserving full JSON expansion for error investigation. Validation: safe_marker_check passed 8/8 markers with commandSensitive=none. [rationale:risk-control] Turns the new board summary fields into operational guidance that reduces unattended handoff/log bloat."
+    },
+    {
+      "id": "VER-BUD-499",
+      "target": "TASK-BUD-220",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:52:42.727Z",
+      "evidence": "Compacted live tool payloads for board_verification_append and board_task_complete: tool details now include ok/reason/summary, compact verification metadata without evidence, and task row, while helper functions still return full internal details. Tool content now emits the summary line when available. Tests assert evidence is omitted from tool payloads and nested complete internals are not returned by the tool. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Reduces context bloat from live board tool calls during unattended loops."
     }
   ]
 }
