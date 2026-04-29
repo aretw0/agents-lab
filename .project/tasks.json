@@ -4118,6 +4118,30 @@
       ],
       "notes": "Criado como próximo foco explícito após steering humano prossiga em checkpoint (2026-04-29). [rationale:risk-control] Antes de agent-as-tools/subagentes/GitHub Actions, provar continuidade local-first com evidência auditável e baixo bloat de tools.\n[2026-04-29T18:20:00Z] slice=1 focus=TASK-BUD-172 gate=cmd.exe /c node -e rehearsal evidence markers passed: 3 commit=pending drift=no next=commit-doc-slice. [rationale:risk-control] Primeiro slice do rehearsal manteve foco local-first e adicionou formato curto de evidência para evitar bloat de tracking.\n[2026-04-29T18:27:00Z] slice=2 focus=TASK-BUD-172 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=ada62b7 drift=no next=slice-3. [rationale:risk-control] Segundo slice converteu o formato de evidência em helper testado, preservando foco local-first e sem tocar escopos protegidos.\n[2026-04-29T18:29:00Z] slice=3 focus=TASK-BUD-172 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=5c81671 drift=no next=final-scorecard. [rationale:risk-control] Terceiro slice adicionou resumo compacto do gate para handoff/auto-resume, mantendo evidência curta e validada localmente.\n[2026-04-29T18:26:48.549Z] final-scorecard focus=TASK-BUD-172 gate=unattended_rehearsal_gate decision=ready-for-canary score=6/6 blockers=none drift=no next=operator-controlled-canary-only. [rationale:risk-control] Rehearsal local-first cumpriu 3 slices limpos; pronto para considerar canário controlado, não para executar remoto automaticamente.",
       "verification": "VER-BUD-453"
+    },
+    {
+      "id": "TASK-BUD-173",
+      "description": "[P0] Consolidar doutrina operacional do control-plane unattended para reduzir hesitação e melhorar qualidade local-first.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-172",
+        "TASK-BUD-168"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/README.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar princípios curtos de quando continuar sozinho, quando parar e como escolher próxima fatia local-safe.",
+        "Explicitar que foco completo não implica parar se houver próxima melhoria local segura e óbvia.",
+        "Diferenciar qualidade/refactor/remoção de gordura/inspirações/remote canary sem abrir escopos protegidos automaticamente.",
+        "Validar marcadores principais e registrar evidência no board/handoff."
+      ],
+      "notes": "Criado após feedback do operador: o agente parou por foco completo, mas deveria continuar em melhoria local segura. [rationale:risk-control] A doutrina reduz decisões ad hoc e melhora malemolência unattended sem relaxar escopos protegidos.\n[2026-04-29T18:47:43.773Z] slice=1 focus=TASK-BUD-173 gate=operating-doctrine-markers-passed:5 commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Consolidada doutrina para reduzir hesitação unattended: foco completo não para automaticamente quando há melhoria local-safe; remote/offload permanece opt-in.",
+      "verification": "VER-BUD-454"
     }
   ]
 }
