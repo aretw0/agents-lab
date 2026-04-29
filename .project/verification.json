@@ -6063,6 +6063,15 @@
       "method": "test",
       "evidence": "Anti-reinflation primitive closed. guardrails-core.ts now delegates public reexports to guardrails-core-exports.ts and path guard config to guardrails-core-path-guard-config.ts; line count is 3585, below the 3600 budget. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts (2/2 passed); cmd.exe /c npm run test:monitor:smoke --silent (92/92 passed). [rationale:risk-control] Maintains guardrails-core.ts as an orchestrator and reduces future edit/merge risk for long-run autonomous slices.",
       "timestamp": "2026-04-29T13:03:58.573Z"
+    },
+    {
+      "id": "VER-BUD-427",
+      "target": "TASK-BUD-157",
+      "target_type": "task",
+      "status": "passed",
+      "method": "integrated-local-run",
+      "evidence": "Local-first long-run preparation milestone closed. Evidence: autonomy lane repeatedly selected bounded tasks, ran focal validation, committed intended files, updated board/verification, refreshed handoff near checkpoint, and auto-resumed from compact with focusTasks preserved. Dependencies complete: TASK-BUD-119, TASK-BUD-141, TASK-BUD-155, TASK-BUD-156. Latest validation: autonomy_lane_status ready=true, context_watch_status post-auto-resume level=ok/action=continue, machine_maintenance_status severity=ok/longRun=allow/monitors=allow, cmd.exe /c npm run test:monitor:smoke --silent passed 92/92. [rationale:risk-control] Establishes safe local-PC baseline for unattended bounded loops before any CI/remote promotion.",
+      "timestamp": "2026-04-29T13:05:31.202Z"
     }
   ]
 }
