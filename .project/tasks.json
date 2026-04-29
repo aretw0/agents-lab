@@ -4587,6 +4587,27 @@
       ],
       "notes": "Criado após correção de foco: voltar do track de skills para hardening operacional local. [rationale:risk-control] Classificar manutenção Git em runtime reduz interpretação manual e mantém cleanup como opt-in.\n[2026-04-29T21:02:58.288Z] slice=1 focus=TASK-BUD-193 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Git maintenance classifier agora tem surface read-only que coleta somente diagnóstico e nunca executa cleanup.",
       "verification": "VER-BUD-473"
+    },
+    {
+      "id": "TASK-BUD-194",
+      "description": "[P1] Documentar uso operacional de git_maintenance_status após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-193"
+      ],
+      "files": [
+        "docs/guides/host-disk-recovery.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook aponta git_maintenance_status como caminho runtime para classificar aviso Git GC.",
+        "Documento registra que summary warning/monitor não autoriza cleanup automático.",
+        "Validação usa safe_marker_check e evidência inclui leitura ao vivo pós-reload."
+      ],
+      "notes": "Criado após reload validar git_maintenance_status ao vivo. [rationale:risk-control] A tool existe em runtime; documentar uso fecha o loop e evita voltar a interpretação manual ou prune automático.\n[2026-04-29T21:11:00.959Z] slice=1 focus=TASK-BUD-194 gate=safe_marker_check-summary-marker-check-ok-yes-matched-5/5-missing-none-commandSensitive-none commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Runbook agora aponta git_maintenance_status como default runtime e reforça que warning/monitor não autoriza cleanup.",
+      "verification": "VER-BUD-474"
     }
   ]
 }

@@ -63,6 +63,8 @@ Avisos como `There are too many unreachable loose objects; run 'git prune' to re
 
 ### Diagnóstico dry-first
 
+Em runtime do pi, prefira git_maintenance_status: a tool executa apenas diagnóstico (`git count-objects -vH` + presença de `.git/gc.log`), classifica o sinal e retorna `cleanupCommandsExecuted=[]`.
+
 ```bash
 # Sem apagar nada
 git count-objects -vH
@@ -71,6 +73,8 @@ git count-objects -vH
 # Windows/cmd:
 if exist .git\\gc.log type .git\\gc.log
 ```
+
+Um resultado `severity=warning action=monitor` significa registrar e continuar se o repositório estiver responsivo; não autoriza `git gc`, `git prune` nem remoção de `.git/gc.log`.
 
 ### Política de ação
 

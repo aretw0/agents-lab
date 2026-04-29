@@ -6486,6 +6486,15 @@
       "method": "test",
       "evidence": "Added guardrails-core-git-maintenance-surface.ts registering git_maintenance_status as a read-only tool. It runs only git count-objects -vH, checks .git/gc.log presence, classifies via evaluateGitMaintenanceSignal, returns compact summary/details, and reports cleanupCommandsExecuted=[]. Tests cover parser, injectable read-only diagnostics, and tool registration without depending on the real repository. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts passed 6/6; cmd.exe /c npm run test:monitor:smoke --silent passed 137/137 across 24 files. [rationale:risk-control] Operationalizes Git maintenance monitoring while keeping git gc/prune/removing gc.log opt-in.",
       "timestamp": "2026-04-29T21:02:58.288Z"
+    },
+    {
+      "id": "VER-BUD-474",
+      "target": "TASK-BUD-194",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "evidence": "After reload, live git_maintenance_status returned summary=git-maintenance: severity=warning action=monitor loose=460 sizeMiB=4.8 garbage=0 gcLog=yes, cleanupAllowedAutomatically=false, cleanupCommandsExecuted=[]. Updated docs/guides/host-disk-recovery.md to prefer git_maintenance_status at runtime and clarify that severity=warning action=monitor records/continues only and does not authorize git gc, git prune, or removing .git/gc.log. Validation used safe_marker_check: marker-check ok=yes matched=5/5 missing=none commandSensitive=none. [rationale:risk-control] Closes the runtime/documentation loop for controlled Git maintenance.",
+      "timestamp": "2026-04-29T21:11:00.959Z"
     }
   ]
 }
