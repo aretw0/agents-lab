@@ -6036,6 +6036,15 @@
       "method": "test",
       "evidence": "Canonical loop-evidence readiness naming revalidated and closed: readyForLoopEvidence is the preferred operational field while readyForTaskBud125 remains a deprecated compatibility alias during transition. Loop-evidence tests preserve task-agnostic readiness semantics and strict failure diagnostics. Validation: cmd.exe /c npm run test:ops:loop-evidence --silent (14/14 passed). [rationale:risk-control] Removes historical milestone/task-id coupling from user-facing trust surfaces without breaking existing scripts during migration.",
       "timestamp": "2026-04-29T12:54:38.566Z"
+    },
+    {
+      "id": "VER-BUD-424",
+      "target": "TASK-BUD-144",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Deterministic macro-refactor primitive closed: rename/imports/format macro contracts, tool surface and command surface are revalidated with dry-run defaults, invalid-target guards, range validation, maxFiles normalization and engine-unavailable fallback. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-macro-refactor-contract.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-command.test.ts (11/11 passed). [rationale:risk-control] Reduces manual multi-point edit risk by making common refactors previewable, bounded and auditable before apply.",
+      "timestamp": "2026-04-29T12:55:52.901Z"
     }
   ]
 }
