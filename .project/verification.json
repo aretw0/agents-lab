@@ -5991,6 +5991,15 @@
       "method": "test",
       "evidence": "Selective worktree promotion allowlist policy revalidated: colony-pilot parser smoke covers promoted vs skipped inventory evidence, docs-only/code-scope derivation, scope compliance checks, diff/apply evidence enforcement/advisory boundaries, and derived-scope policy flag. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (82/82 passed). [rationale:risk-control] Branch materialization must remain scoped and auditable; closure records allowlist/fallback behavior without applying worktree promotion.",
       "timestamp": "2026-04-29T12:41:53.818Z"
+    },
+    {
+      "id": "VER-BUD-419",
+      "target": "TASK-BUD-116",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Colony-pilot deflation primitive closed after accumulated extraction slices. Entry point remains an orchestrator (packages/pi-stack/extensions/colony-pilot.ts: 2115 lines) with delivery-policy, budget-policy, baseline, model-policy, artifacts, command-surface, settings, output-policy, session-utils and provider-budget-gate domains extracted into cohesive modules while public names remain covered by parser smoke. Validation: wc -l packages/pi-stack/extensions/colony-pilot.ts (2115); cmd.exe /c npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts (82/82 passed). [rationale:risk-control] Smaller cohesive modules make long-run maintenance safer and more reusable without changing runtime defaults or protected settings.",
+      "timestamp": "2026-04-29T12:46:30.945Z"
     }
   ]
 }
