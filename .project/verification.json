@@ -6027,6 +6027,15 @@
       "method": "test",
       "evidence": "Loop-evidence heartbeat primitive closed after sustained runtime notes and focal revalidation. Controlled heartbeat/lease-renew refreshes evidence when readiness criteria remain true, while strict checks prevent masking invalid state. Validation: cmd.exe /c npm run test:ops:loop-evidence --silent (14/14 passed); cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52/52 passed). [rationale:risk-control] Unattended loops need fresh evidence for trust surfaces, but heartbeat must remain bounded by readiness/lease criteria to avoid stale or false-current state.",
       "timestamp": "2026-04-29T12:53:23.819Z"
+    },
+    {
+      "id": "VER-BUD-423",
+      "target": "TASK-BUD-137",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Canonical loop-evidence readiness naming revalidated and closed: readyForLoopEvidence is the preferred operational field while readyForTaskBud125 remains a deprecated compatibility alias during transition. Loop-evidence tests preserve task-agnostic readiness semantics and strict failure diagnostics. Validation: cmd.exe /c npm run test:ops:loop-evidence --silent (14/14 passed). [rationale:risk-control] Removes historical milestone/task-id coupling from user-facing trust surfaces without breaking existing scripts during migration.",
+      "timestamp": "2026-04-29T12:54:38.566Z"
     }
   ]
 }
