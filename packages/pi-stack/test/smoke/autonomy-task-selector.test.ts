@@ -48,6 +48,16 @@ describe("autonomy task selector", () => {
     expect(result.totals.skippedProtectedScope).toBe(2);
   });
 
+  it("treats GitHub Actions and remote execution as protected autonomy scope", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-ACTIONS", status: "planned", description: "[P0] introduce GitHub Actions remote compute" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local unattended loop" }),
+    ]);
+
+    expect(result.nextTaskId).toBe("TASK-LOCAL");
+    expect(result.totals.skippedProtectedScope).toBe(1);
+  });
+
   it("can include protected scopes only when explicitly authorized", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-CI", status: "planned", description: "[P0] update ci", files: [".github/workflows/test.yml"] }),
@@ -81,7 +91,7 @@ describe("autonomy task selector", () => {
 
   it("respects focus task ids before drifting to unrelated eligible work", () => {
     const result = selectAutonomyLaneTask([
-      task({ id: "TASK-REMOTE", status: "planned", description: "[P0] remote runner" }),
+      task({ id: "TASK-OTHER", status: "planned", description: "[P0] outside focus" }),
       task({ id: "TASK-FOCUS", status: "planned", description: "[P2] focused local" }),
     ], { focusTaskIds: ["TASK-FOCUS"], focusSource: "explicit" });
 
@@ -93,7 +103,7 @@ describe("autonomy task selector", () => {
 
   it("blocks unrelated eligible work when focus has no eligible task", () => {
     const result = selectAutonomyLaneTask([
-      task({ id: "TASK-REMOTE", status: "planned", description: "[P0] remote runner" }),
+      task({ id: "TASK-OTHER", status: "planned", description: "[P0] outside focus" }),
       task({ id: "TASK-FOCUS", status: "completed", description: "[P1] done" }),
     ], { focusTaskIds: ["TASK-FOCUS"], focusSource: "handoff" });
 

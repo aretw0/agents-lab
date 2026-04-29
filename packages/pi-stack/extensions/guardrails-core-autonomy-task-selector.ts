@@ -43,6 +43,9 @@ const PROTECTED_SCOPE_PATTERNS = [
   /^\.obsidian(?:\/|$)/i,
   /^\.github(?:\/|$)/i,
   /(?:^|\/)workflows(?:\/|$)/i,
+  /\bgithub\s+actions\b/i,
+  /\bgh\s+actions\b/i,
+  /\bremote\s+(?:compute|execution|runner|runners)\b/i,
   /\bpublish\b/i,
   /\bci\b/i,
 ];

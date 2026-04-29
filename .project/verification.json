@@ -6225,6 +6225,15 @@
       "method": "test",
       "evidence": "Implemented passive context-economy signal in context_watch_status. Added ContextEconomySignal with non-blocking opportunity kinds next-actions-truncated, large-handoff, many-next-actions and resume-prompt-truncated; metrics include handoffBytes, nextActionCount and auto-resume truncation data. Documented that the signal is info/telemetry and does not trigger compact or block the loop. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 100/100. [rationale:risk-control] Squeez-like economy is useful only as passive guidance that preserves canonical evidence, continuity, and low-noise unattended operation.",
       "timestamp": "2026-04-29T17:16:12.715Z"
+    },
+    {
+      "id": "VER-BUD-445",
+      "target": "TASK-BUD-164",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Autonomy task selector now treats GitHub Actions, gh actions, remote compute, remote execution and remote runner/runners text as protected scope unless includeProtectedScopes=true. Added smoke coverage for GitHub Actions remote compute being skipped by default. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 101/101. [rationale:risk-control] Protects local-first unattended loops from drifting into CI/remote execution before explicit authorization.",
+      "timestamp": "2026-04-29T17:20:49.105Z"
     }
   ]
 }
