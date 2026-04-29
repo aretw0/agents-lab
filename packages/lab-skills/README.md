@@ -10,6 +10,7 @@
 | `cultivate-primitive` | Guia o cultivo de primitivas reutilizáveis — da identificação ao pacote publicado |
 | `stack-feedback` | Coleta feedback estruturado sobre a stack para orientar curadoria e priorização |
 | `session-triage` | Consolida histórico recente (incluindo branch summaries) em pendências executáveis no board canônico |
+| `control-plane-ops` | Guia operação local-first com board canônico, long-runs bounded, handoff, rollout/rollback e mirrors externos |
 
 ## Uso
 

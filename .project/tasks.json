@@ -3392,7 +3392,7 @@
     {
       "id": "TASK-BUD-138",
       "description": "[P1] Converter boas práticas/playbooks de guides internos em superfícies distribuídas (skills + exemplos) para pi-stack.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-119",
         "TASK-BUD-135"
@@ -3412,7 +3412,8 @@
         "Pelo menos o núcleo de práticas recorrentes é distribuído como skill versionada (não apenas documentação local), mantendo linguagem simple-first + progressive disclosure.",
         "Runbook de distribuição define como manter skills sincronizadas com a evolução dos playbooks (evitando drift docs-only)."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): guides internos não são distribuídos; práticas canônicas precisam viajar com a stack via skills/exemplos para disseminação operacional consistente."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): guides internos não são distribuídos; práticas canônicas precisam viajar com a stack via skills/exemplos para disseminação operacional consistente.\n[2026-04-29T13:26:50.471Z] Implemented and closed distributed control-plane practice skill: added packages/lab-skills/skills/control-plane-ops/SKILL.md mapping guide->skill/playbook for board-first loops, L1/L2/L3 evolution, checkpoint/compact/handoff, rollout/rollback, external mirrors and board drift. README and canonical playbooks now link the skill to avoid docs-only drift. Validation: marker check passed 5 markers; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/package-list.test.ts (7/7 passed). [rationale:risk-control] Critical long-run practices now travel as a versioned skill with the stack, reducing operator drift across users/sessions.",
+      "verification": "VER-BUD-438"
     },
     {
       "id": "TASK-BUD-139",

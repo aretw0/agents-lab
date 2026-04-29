@@ -2,6 +2,8 @@
 
 Objetivo: evoluir de forma segura do control-plane local para delegação e, só depois, para federação multi-control-plane — sem misturar conceitos no mesmo ciclo.
 
+Distribuição operacional: o núcleo deste playbook também viaja como skill versionada em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para reduzir drift entre documentação local e comportamento dos agentes.
+
 ## Princípios
 
 1. **Playbook-first**: consolidar contrato operacional antes de ampliar arquitetura.

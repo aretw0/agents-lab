@@ -2,6 +2,8 @@
 
 Objetivo: preservar contexto de forma durável e retomável com baixo custo.
 
+Skill distribuída: práticas recorrentes deste guia são resumidas em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para que o contrato board-first/long-run viaje com a stack, não apenas com a documentação local.
+
 ## Regra principal
 1. **Canônico primeiro:** atualizar `.project/*`.
 2. **Derivados depois:** `HANDOFF.md` (delta curto) e `ROADMAP.md` (macro).
