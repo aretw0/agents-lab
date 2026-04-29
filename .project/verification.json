@@ -6261,6 +6261,15 @@
       "method": "test",
       "evidence": "Autonomy selector now treats external URLs and research/influence/inspiration wording as protected scope unless includeProtectedScopes=true. Added smoke coverage showing an external influence task is skipped in favor of local unattended-loop work. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 16/16; cmd.exe /c npm run test:monitor:smoke --silent passed 108/108. [rationale:risk-control] Keeps medium-term research/influence backlog from becoming unattended next work without explicit focus.",
       "timestamp": "2026-04-29T17:36:39.084Z"
+    },
+    {
+      "id": "VER-BUD-449",
+      "target": "TASK-BUD-168",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Implemented deterministic tool cadence primitive. Added guardrails-core-tool-cadence.ts and smoke tests for hot-path avoidance, bounded board evidence, post-reload validation, task selection, troubleshooting and explicit request paths. Documented diagnostic tool cadence in project-canonical-pipeline and added test to test:monitor:smoke. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-cadence.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 113/113. [rationale:risk-control] Controls governance/tooling context bloat while preserving rich diagnostics for troubleshooting boundaries.",
+      "timestamp": "2026-04-29T17:40:26.888Z"
     }
   ]
 }

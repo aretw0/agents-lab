@@ -84,3 +84,4 @@ export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, bu
 export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 export { resolveSkillAccessRoot, resolveSkillReadAccess } from "./guardrails-core-skill-access-policy";
+export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";

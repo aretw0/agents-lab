@@ -4006,6 +4006,30 @@
       ],
       "verification": "VER-BUD-448",
       "notes": "Criado e fechado por steering humano (2026-04-29): após validar focus-complete, o único next automático era pesquisa de influência; isso não deve disputar foco com maturidade unattended local-first. [rationale:risk-control] Research/influence backlog é valioso, mas deve ser selecionado explicitamente para não quebrar foco contínuo."
+    },
+    {
+      "id": "TASK-BUD-168",
+      "description": "[P0] Formalizar cadência econômica de tools diagnósticas para evitar bloat de contexto no hot path do executor.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-161",
+        "TASK-BUD-163"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-cadence.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-cadence.test.ts",
+        "docs/guides/project-canonical-pipeline.md",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Definir decisão determinística para quando usar context/machine/autonomy/quota/monitor/session tools.",
+        "Hot path evita pacotes diagnósticos por hábito e usa board surfaces bounded como evidência canônica.",
+        "Troubleshooting, reload, checkpoint, seleção, pré-long-run e pedido explícito continuam autorizando a tool certa.",
+        "Smoke local valida a política e docs registram a prática operacional."
+      ],
+      "verification": "VER-BUD-449",
+      "notes": "Criado e fechado por steering humano (2026-04-29): feedback explícito sobre controlar bloat de informações e reservar tools certas para momentos certos. [rationale:risk-control] Menos tool-output no hot path melhora autonomia contínua e preserva contexto sem perder troubleshooting quando necessário."
     }
   ]
 }

@@ -197,6 +197,10 @@ Sinais de oportunidade de economia devem ser **passivos e pouco ruidosos**: stat
 
 O `context_watch_status` expõe `autoCompact.contextEconomy` / `contextEconomySummary` como sinal passivo. Exemplos de oportunidades: `next-actions-truncated`, `large-handoff`, `many-next-actions` e `resume-prompt-truncated`. Esses estados são `info`/telemetria: não mudam o gatilho de compactação, não bloqueiam o loop e servem para melhorar o próximo checkpoint/status.
 
+### Cadência de tools diagnósticas
+
+No hot path do executor, evitar chamar pacotes de status por hábito. `context_watch_status`, `machine_maintenance_status`, quota/provider/monitor/session analytics e similares devem ser usados quando há fronteira ou sinal: pós-`/reload`, seleção de task, pré-long-run, checkpoint/near-compact, erro/pressão, ou pedido explícito. A primitiva `resolveToolCadenceDecision` formaliza a regra: board surfaces bounded continuam no caminho canônico; diagnostic packs ficam reservados para troubleshooting. Depois que um sinal estiver calibrado, confiar no steering passivo e reabrir diagnóstico só quando o sinal pedir.
+
 A adoção eventual de `mdt` fica separada: é trilha de **doc-drift/single-source docs** (`check` primeiro, `update` depois), não pipeline de ideias/backlog.
 
 ### Governança de updates de dependências pi/extensões
