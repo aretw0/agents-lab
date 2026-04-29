@@ -210,7 +210,15 @@ describe("session-analytics — local sandbox session discovery", () => {
   it("normaliza parâmetros camelCase do harness no execute do tool", () => {
     const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-tool-"));
     const oldCwd = process.cwd();
-    let registeredTool: { execute: (params: Record<string, unknown>) => { details: ReturnType<typeof runQuery> } } | undefined;
+    let registeredTool: {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal | undefined,
+        onUpdate: unknown,
+        ctx: { cwd: string },
+      ) => { details: ReturnType<typeof runQuery> };
+    } | undefined;
     try {
       const key = toSessionWorkspaceKey(dir);
       const sessionDir = join(dir, ".sandbox", "pi-agent", "sessions", key);
@@ -234,7 +242,13 @@ describe("session-analytics — local sandbox session discovery", () => {
       } as never);
       process.chdir(dir);
 
-      const output = registeredTool?.execute({ queryType: "outliers", lookbackHours: 2, limit: 3, minChars: 20_000 });
+      const output = registeredTool?.execute(
+        "call-test",
+        { queryType: "outliers", lookbackHours: 2, limit: 3, minChars: 20_000 },
+        undefined,
+        undefined,
+        { cwd: dir },
+      );
       const data = output?.details.data as { outliers: Array<{ textChars: number }> };
 
       expect(output?.details.queryType).toBe("outliers");

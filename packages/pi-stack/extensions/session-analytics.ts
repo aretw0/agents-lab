@@ -885,10 +885,11 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         Type.Number({ description: "Minimum text size (chars) to consider an outlier. Only for query_type=outliers. Default: 20000." })
       ),
     }),
-    execute(params) {
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const normalized = normalizeSessionAnalyticsToolParams(params);
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
       const result = runQuery(
-        process.cwd(),
+        cwd,
         normalized.queryType,
         normalized.hours,
         normalized.signalFilter,
