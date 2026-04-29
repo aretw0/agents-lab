@@ -3965,6 +3965,26 @@
       ],
       "verification": "VER-BUD-445",
       "notes": "Criado e fechado por steering humano (2026-04-29): foco é unattended local-first; GitHub Actions/remote execution são futuros aceleradores, não next automático. [rationale:risk-control] Evita drift para CI/remote scope antes da maturação local e autorização explícita."
+    },
+    {
+      "id": "TASK-BUD-166",
+      "description": "[P0] Diferenciar foco completo de drift lateral na autonomy lane antes de escolher próximo foco.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-163"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando current_tasks/focus aponta apenas para tasks completed, selector retorna focus-complete e não seleciona task lateral.",
+        "Quando foco existe mas está bloqueado, selector mantém focus-mismatch para impedir drift.",
+        "Smoke focal e monitor smoke validam o contrato."
+      ],
+      "verification": "VER-BUD-447",
+      "notes": "Criado e fechado por steering humano (2026-04-29): loops unattended precisam saber parar/solicitar próximo foco quando o foco atual terminou, em vez de saltar para outra fila. [rationale:risk-control] Separar focus-complete de focus-mismatch melhora auditoria e reduz drift."
     }
   ]
 }

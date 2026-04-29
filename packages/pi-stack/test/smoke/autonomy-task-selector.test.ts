@@ -101,11 +101,23 @@ describe("autonomy task selector", () => {
     expect(result.selectionPolicy).toContain("focus(explicit:TASK-FOCUS)");
   });
 
-  it("blocks unrelated eligible work when focus has no eligible task", () => {
+  it("reports completed focus before selecting a new unrelated task", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-OTHER", status: "planned", description: "[P0] outside focus" }),
       task({ id: "TASK-FOCUS", status: "completed", description: "[P1] done" }),
     ], { focusTaskIds: ["TASK-FOCUS"], focusSource: "handoff" });
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("focus-complete");
+    expect(result.nextTaskId).toBeUndefined();
+    expect(result.recommendation).toContain("choose the next focus explicitly");
+  });
+
+  it("blocks unrelated eligible work when focus has no eligible task", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-OTHER", status: "planned", description: "[P0] outside focus" }),
+      task({ id: "TASK-BLOCKED", status: "planned", description: "[P1] blocked focus", depends_on: ["TASK-MISSING"] }),
+    ], { focusTaskIds: ["TASK-BLOCKED"], focusSource: "handoff" });
 
     expect(result.ready).toBe(false);
     expect(result.reason).toBe("focus-mismatch");

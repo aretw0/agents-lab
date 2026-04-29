@@ -6,6 +6,7 @@ export type AutonomyTaskSelectionReason =
   | "ready"
   | "no-candidate-tasks"
   | "no-eligible-tasks"
+  | "focus-complete"
   | "focus-mismatch";
 
 export interface AutonomyTaskSelectorOptions {
@@ -247,20 +248,30 @@ export function selectAutonomyLaneTask(
       return deps.every((dep) => completed.has(dep));
     })
     .some((task) => !focusSet.has(normalizeTaskId(task.id) ?? ""));
+  const focusKnownTasks = focusTaskIds.length > 0
+    ? tasks.filter((task) => focusSet.has(normalizeTaskId(task.id) ?? ""))
+    : [];
+  const focusAllComplete = focusTaskIds.length > 0
+    && focusKnownTasks.length > 0
+    && focusKnownTasks.every((task) => task.status === "completed");
   const reason = candidate.length === 0
     ? "no-candidate-tasks"
-    : hasEligibleOutsideFocus
-      ? "focus-mismatch"
-      : "no-eligible-tasks";
+    : focusAllComplete
+      ? "focus-complete"
+      : hasEligibleOutsideFocus
+        ? "focus-mismatch"
+        : "no-eligible-tasks";
 
   return {
     ready: false,
     reason,
     recommendation: reason === "no-candidate-tasks"
       ? "add or select a planned/in-progress task before autonomous continuation."
-      : reason === "focus-mismatch"
-        ? "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation."
-        : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
+      : reason === "focus-complete"
+        ? "current focus is complete; choose the next focus explicitly before autonomous continuation."
+        : reason === "focus-mismatch"
+          ? "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation."
+          : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
     selectionPolicy,
     milestone,
     focusTaskIds: focusTaskIds.length > 0 ? focusTaskIds : undefined,

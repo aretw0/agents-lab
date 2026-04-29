@@ -6243,6 +6243,15 @@
       "method": "test",
       "evidence": "Implemented local-first read-only skill access policy helper. Added guardrails-core-skill-access-policy.ts with deterministic root resolution project-local > workspace-node-modules > global-allowlisted; bounded read decisions for SKILL.md/linked in-root docs; blocks path escape, recursive scans, global non-allowlisted skills and execute/install without approval. Re-exported helper and added smoke coverage. Documented policy in docs/guides/recommended-pi-stack.md. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 106/106. [rationale:risk-control] Reduces unnecessary permission prompts for relevant installed skills without granting execution or broad discovery.",
       "timestamp": "2026-04-29T17:26:56.613Z"
+    },
+    {
+      "id": "VER-BUD-447",
+      "target": "TASK-BUD-166",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Autonomy selector now distinguishes completed focus from lateral drift. Added focus-complete reason when handoff/explicit focus tasks are all completed; recommendation asks to choose the next focus explicitly before continuation. Focus mismatch remains for blocked/unavailable focused work with unrelated eligible tasks outside focus. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 15/15; cmd.exe /c npm run test:monitor:smoke --silent passed 107/107. [rationale:risk-control] This makes unattended loops stop at natural focus boundaries instead of silently drifting.",
+      "timestamp": "2026-04-29T17:29:53.251Z"
     }
   ]
 }
