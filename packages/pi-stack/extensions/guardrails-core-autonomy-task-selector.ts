@@ -47,6 +47,8 @@ const PROTECTED_SCOPE_PATTERNS = [
   /\bgithub\s+actions\b/i,
   /\bgh\s+actions\b/i,
   /\bremote\s+(?:compute|execution|runner|runners)\b/i,
+  /https?:\/\//i,
+  /\b(?:research|pesquisa|influ[eê]ncia|inspiration|inspira[cç][aã]o)\b/i,
   /\bpublish\b/i,
   /\bci\b/i,
 ];

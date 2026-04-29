@@ -6252,6 +6252,15 @@
       "method": "test",
       "evidence": "Autonomy selector now distinguishes completed focus from lateral drift. Added focus-complete reason when handoff/explicit focus tasks are all completed; recommendation asks to choose the next focus explicitly before continuation. Focus mismatch remains for blocked/unavailable focused work with unrelated eligible tasks outside focus. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 15/15; cmd.exe /c npm run test:monitor:smoke --silent passed 107/107. [rationale:risk-control] This makes unattended loops stop at natural focus boundaries instead of silently drifting.",
       "timestamp": "2026-04-29T17:29:53.251Z"
+    },
+    {
+      "id": "VER-BUD-448",
+      "target": "TASK-BUD-167",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "evidence": "Autonomy selector now treats external URLs and research/influence/inspiration wording as protected scope unless includeProtectedScopes=true. Added smoke coverage showing an external influence task is skipped in favor of local unattended-loop work. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passed 16/16; cmd.exe /c npm run test:monitor:smoke --silent passed 108/108. [rationale:risk-control] Keeps medium-term research/influence backlog from becoming unattended next work without explicit focus.",
+      "timestamp": "2026-04-29T17:36:39.084Z"
     }
   ]
 }

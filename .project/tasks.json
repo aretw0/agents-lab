@@ -3985,6 +3985,27 @@
       ],
       "verification": "VER-BUD-447",
       "notes": "Criado e fechado por steering humano (2026-04-29): loops unattended precisam saber parar/solicitar próximo foco quando o foco atual terminou, em vez de saltar para outra fila. [rationale:risk-control] Separar focus-complete de focus-mismatch melhora auditoria e reduz drift."
+    },
+    {
+      "id": "TASK-BUD-167",
+      "description": "[P0] Proteger tarefas de pesquisa/influência externa contra seleção automática na autonomy lane sem foco explícito.",
+      "status": "completed",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-163",
+        "TASK-BUD-164"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Selector pula tarefas com URL externa ou linguagem de pesquisa/influência por default.",
+        "Opt-in includeProtectedScopes continua permitindo seleção quando o operador explicitamente escolhe esse foco.",
+        "TASK-BUD-162 permanece backlog de influência, não próximo automático do loop unattended local-first."
+      ],
+      "verification": "VER-BUD-448",
+      "notes": "Criado e fechado por steering humano (2026-04-29): após validar focus-complete, o único next automático era pesquisa de influência; isso não deve disputar foco com maturidade unattended local-first. [rationale:risk-control] Research/influence backlog é valioso, mas deve ser selecionado explicitamente para não quebrar foco contínuo."
     }
   ]
 }
