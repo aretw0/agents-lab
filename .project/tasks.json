@@ -5210,6 +5210,29 @@
       ],
       "notes": "Criado via board_task_create na lane essencial. [rationale:risk-control] As summaries existem, mas as tools ainda despejam JSON grande; compactar o payload live reduz bloat em loops unattended.\n[2026-04-29T23:52:25Z] slice=1 focus=TASK-BUD-220 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Live board tools agora retornam payload compacto quando summary basta.",
       "verification": "VER-BUD-499"
+    },
+    {
+      "id": "TASK-BUD-221",
+      "description": "[P1] Compactar content de board_task_create usando summary quando disponível.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-217",
+        "TASK-BUD-220"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "board_task_create emite summary no content quando disponível.",
+        "details continuam carregando task row bounded para automação.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create após reload dos payloads compactos. [rationale:risk-control] Fechar a consistência de summaries nas bounded board tools reduz bloat desde a criação da fatia.\n[2026-04-29T23:56:42Z] slice=1 focus=TASK-BUD-221 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] board_task_create agora também emite summary compacto no content.",
+      "verification": "VER-BUD-500"
     }
   ]
 }

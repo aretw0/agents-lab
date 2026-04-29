@@ -1495,7 +1495,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       note: params?.note,
     });
     return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      content: [{ type: "text", text: details.summary ?? JSON.stringify(details, null, 2) }],
       details,
     };
   };

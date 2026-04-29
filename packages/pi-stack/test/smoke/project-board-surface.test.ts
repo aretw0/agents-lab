@@ -1092,6 +1092,7 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.ok).toBe(true);
       expect((result.details as any)?.summary).toBe("board-task-create: ok=yes task=TASK-TOOL status=in-progress");
+      expect((result as any)?.content?.[0]?.text).toBe("board-task-create: ok=yes task=TASK-TOOL status=in-progress");
       expect((result.details as any)?.task).toMatchObject({ id: "TASK-TOOL", status: "in-progress" });
     } finally {
       rmSync(cwd, { recursive: true, force: true });

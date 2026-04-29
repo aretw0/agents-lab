@@ -6720,6 +6720,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:52:42.727Z",
       "evidence": "Compacted live tool payloads for board_verification_append and board_task_complete: tool details now include ok/reason/summary, compact verification metadata without evidence, and task row, while helper functions still return full internal details. Tool content now emits the summary line when available. Tests assert evidence is omitted from tool payloads and nested complete internals are not returned by the tool. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Reduces context bloat from live board tool calls during unattended loops."
+    },
+    {
+      "id": "VER-BUD-500",
+      "target": "TASK-BUD-221",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-29T23:56:54.950Z",
+      "evidence": "Changed board_task_create tool content to emit the compact summary line when available, while keeping details.task available for automation. Added smoke assertion that board_task_create content equals its summary. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Makes all bounded board tool content prefer compact summaries, reducing live context bloat from slice creation onward."
     }
   ]
 }
