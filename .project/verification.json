@@ -7638,6 +7638,15 @@
       "method": "test+inspection",
       "timestamp": "2026-04-30T09:40:46.307Z",
       "evidence": "Established canonical settings/derived overlay contract without modifying .pi/settings.json. Added storage topology constants/helpers: canonical .pi/settings.json remains the protected baseline; derived agent overlays live under .pi/derived-settings/<agent-id>.settings.json with sanitized ids. Added readDerivedAgentSettings/writeDerivedAgentSettings and a smoke test proving derived overlays stay separate from canonical settings and are not returned by readSettingsJson by default. Documented doctrine: agents must not silently rewrite canonical settings; temporary agent/worker/rehearsal/overnight variation uses explicit overlays; promotion to canonical requires operator intent/snapshot; readiness/local audit must continue treating modified .pi/settings.json as real protected drift. Validation: focal context-watchdog-storage passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 263/263 across 32 files. No .pi/settings.json edit was made by this slice; existing protected drift remains visible. [rationale:risk-control] Separating canonical baseline from derived overlays removes future spurious agent settings churn while preserving fail-closed protection on real canonical drift."
+    },
+    {
+      "id": "VER-BUD-602",
+      "target": "TASK-BUD-328",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T09:43:16.227Z",
+      "evidence": "Consolidated colony-pilot settings helpers on the canonical settings topology. colony-pilot-settings now delegates canonical read/write to context-watchdog-storage readProjectSettings/writeProjectSettings and re-exports resolveProjectSettingsTopology; parseColonyPilotSettings/parseQuotaVisibilityBudgetSettings read from the canonical baseline helper instead of duplicating .pi/settings.json path parsing. Added wrapper access for readDerivedAgentSettings/writeDerivedAgentSettings so colony/agent-specific code can use explicit derived overlays without overwriting canonical settings. Verified wrapper behavior with a bounded tsx smoke: canonical path `.pi/settings.json`, derived path `.pi/derived-settings/worker-one.settings.json`, colony settings and quota budgets parsed, derived overlay read separately. Full monitor smoke passed 263/263. No .pi/settings.json mutation was made; existing protected drift remains visible. [rationale:risk-control] Shared topology reduces duplicated settings paths and gives specialized agents a derived overlay route while preserving explicit canonical writes only."
     }
   ]
 }

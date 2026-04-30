@@ -7894,6 +7894,33 @@
       ],
       "notes": "[rationale:risk-control] .pi/settings.json como drift protegido bloqueia corretamente, mas precisamos de um contrato canônico para evitar que agentes usem/mutem settings de forma acidental; overlays derivados devem ser separados e auditáveis.\n[2026-04-30T09:40:23Z] slice=1 focus=TASK-BUD-327 gate=context-watchdog-storage-5/5+test:monitor:smoke-263/263 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Contrato canonical/overlay criado sem alterar o settings canônico.",
       "verification": "VER-BUD-601"
+    },
+    {
+      "id": "TASK-BUD-328",
+      "description": "[P1] Consolidar helpers de settings do colony pilot no topology canônico/derivado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-327"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot-settings.ts",
+        "packages/pi-stack/extensions/context-watchdog-storage.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-storage.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Remover duplicação local de path/leitura/escrita de .pi/settings.json em colony-pilot-settings quando houver helper canônico equivalente.",
+        "Garantir que writes explícitos de baseline continuam escrevendo somente o canonical .pi/settings.json.",
+        "Expor/reusar helpers derivados para agentes sem sobrescrever canonical quando aplicável.",
+        "Não modificar .pi/settings.json nesta fatia.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Depois de definir o contrato canonical/derived, precisamos reduzir duplicação de settings helpers para que ferramentas específicas não inventem outro caminho ou sobrescrevam o baseline sem passar pelo contrato comum.\n[2026-04-30T09:43:01Z] slice=1 focus=TASK-BUD-328 gate=tsx-wrapper-smoke+test:monitor:smoke-263/263 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Colony pilot agora reutiliza topology canônico/derivado em vez de inventar path próprio.",
+      "verification": "VER-BUD-602"
     }
   ]
 }
