@@ -113,7 +113,112 @@ export type TrustedHumanConfirmationEnvelopeConsumption = {
   summary: string;
 };
 
+export type HumanConfirmationRuntimeConsumptionDecision = "ready-for-guard-consumption" | "needs-runtime-bridge" | "needs-upstream-signal" | "blocked";
+
+export type HumanConfirmationRuntimeConsumptionPlanInput = {
+  guardOwnsConfirmationDialog?: boolean;
+  structuredEnvelopeDetailsAvailable?: boolean;
+  auditEntryReadableByConsumer?: boolean;
+  customMessagesTextOnly?: boolean;
+  upstreamToolCallHasConfirmationSignal?: boolean;
+  destructiveOrProtectedAction?: boolean;
+};
+
+export type HumanConfirmationRuntimeConsumptionPlan = {
+  decision: HumanConfirmationRuntimeConsumptionDecision;
+  authorization: "none";
+  dispatchAllowed: false;
+  canOverrideMonitorBlock: false;
+  textOnlyEvidenceAccepted: false;
+  reasons: string[];
+  nextActions: string[];
+  summary: string;
+};
+
 const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
+
+export function resolveHumanConfirmationRuntimeConsumptionPlan(
+  input: HumanConfirmationRuntimeConsumptionPlanInput,
+): HumanConfirmationRuntimeConsumptionPlan {
+  const reasons: string[] = [];
+  const nextActions: string[] = [];
+  const protectedAction = input.destructiveOrProtectedAction !== false;
+
+  if (!protectedAction) {
+    reasons.push("confirmation-not-required-for-local-safe-action");
+    return {
+      decision: "blocked",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      textOnlyEvidenceAccepted: false,
+      reasons,
+      nextActions: ["do-not-use-confirmation-evidence-for-local-safe-action"],
+      summary: "human-confirmation-runtime-consumption: decision=blocked dispatch=no override=no textOnly=no reasons=confirmation-not-required-for-local-safe-action authorization=none",
+    };
+  }
+
+  if (input.customMessagesTextOnly && !input.structuredEnvelopeDetailsAvailable) {
+    reasons.push("custom-messages-text-only-spoofable");
+    nextActions.push("provide-structured-envelope-details-to-consumer");
+  }
+
+  if (input.guardOwnsConfirmationDialog && input.structuredEnvelopeDetailsAvailable) {
+    reasons.push("guard-owned-confirmation-structured-evidence");
+    return {
+      decision: "ready-for-guard-consumption",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      textOnlyEvidenceAccepted: false,
+      reasons,
+      nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
+      summary: `human-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.auditEntryReadableByConsumer && input.structuredEnvelopeDetailsAvailable) {
+    reasons.push("structured-audit-entry-readable-by-consumer");
+    return {
+      decision: "ready-for-guard-consumption",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      textOnlyEvidenceAccepted: false,
+      reasons,
+      nextActions: ["consume-envelope-with-exact-match-ttl-single-use"],
+      summary: `human-confirmation-runtime-consumption: decision=ready-for-guard-consumption dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (!input.upstreamToolCallHasConfirmationSignal && !input.guardOwnsConfirmationDialog) {
+    reasons.push("upstream-confirmation-signal-not-exposed");
+    nextActions.push("add-upstream-or-wrapper-confirmation-signal");
+    return {
+      decision: "needs-upstream-signal",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      textOnlyEvidenceAccepted: false,
+      reasons,
+      nextActions,
+      summary: `human-confirmation-runtime-consumption: decision=needs-upstream-signal dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  reasons.push("structured-envelope-details-not-available-to-consumer");
+  nextActions.push("wire-runtime-bridge-for-structured-envelope-details");
+  return {
+    decision: "needs-runtime-bridge",
+    authorization: "none",
+    dispatchAllowed: false,
+    canOverrideMonitorBlock: false,
+    textOnlyEvidenceAccepted: false,
+    reasons,
+    nextActions,
+    summary: `human-confirmation-runtime-consumption: decision=needs-runtime-bridge dispatch=no override=no textOnly=no reasons=${reasons.join("|")} authorization=none`,
+  };
+}
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;

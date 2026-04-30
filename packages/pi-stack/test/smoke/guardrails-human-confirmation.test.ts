@@ -7,6 +7,7 @@ import {
   recordTrustedHumanConfirmationUiDecision,
   resolveHumanConfirmationAuditPlan,
   resolveHumanConfirmationEvidenceMatch,
+  resolveHumanConfirmationRuntimeConsumptionPlan,
   type PendingHumanConfirmedAction,
   type TrustedHumanConfirmationEvidence,
 } from "../../extensions/guardrails-core-human-confirmation";
@@ -226,5 +227,27 @@ describe("human confirmation audit plan", () => {
     unsafe.details.canOverrideMonitorBlock = true;
     expect(extractTrustedHumanConfirmationEvidenceFromEnvelope(unsafe)).toBeUndefined();
     expect(consumeTrustedHumanConfirmationAuditEnvelope(unsafe, pendingDelete).decision).toBe("rejected");
+  });
+
+  it("plans runtime consumption without accepting text-only monitor context", () => {
+    const textOnly = resolveHumanConfirmationRuntimeConsumptionPlan({
+      customMessagesTextOnly: true,
+      structuredEnvelopeDetailsAvailable: false,
+      upstreamToolCallHasConfirmationSignal: false,
+      destructiveOrProtectedAction: true,
+    });
+    expect(textOnly.decision).toBe("needs-upstream-signal");
+    expect(textOnly.textOnlyEvidenceAccepted).toBe(false);
+    expect(textOnly.reasons).toContain("custom-messages-text-only-spoofable");
+
+    const guardOwned = resolveHumanConfirmationRuntimeConsumptionPlan({
+      guardOwnsConfirmationDialog: true,
+      structuredEnvelopeDetailsAvailable: true,
+      destructiveOrProtectedAction: true,
+    });
+    expect(guardOwned.decision).toBe("ready-for-guard-consumption");
+    expect(guardOwned.nextActions).toEqual(["consume-envelope-with-exact-match-ttl-single-use"]);
+    expect(guardOwned.dispatchAllowed).toBe(false);
+    expect(guardOwned.canOverrideMonitorBlock).toBe(false);
   });
 });

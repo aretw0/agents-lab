@@ -8664,6 +8664,15 @@
       "method": "core-envelope-consumption-smoke",
       "timestamp": "2026-04-30T22:19:30.247Z",
       "evidence": "First bounded slice for TASK-BUD-392 added structured envelope consumption without trusting spoofable text. Implemented extractTrustedHumanConfirmationEvidenceFromEnvelope and consumeTrustedHumanConfirmationAuditEnvelope: require customType=human-confirmation-evidence, display=false, structured details, trusted origin, protected/destructive actionKind, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none, then reuse exact-match/TTL/single-use evidence consumption. Text-only spoofed content and envelopes with unsafe override fields are rejected. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 14 passed. Docs sync/check ok. Remaining: wire actual monitor/guard runtime context to supply structured envelope details instead of only text content."
+    },
+    {
+      "id": "VER-BUD-716",
+      "target": "TASK-BUD-392",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime-consumption-plan-smoke",
+      "timestamp": "2026-04-30T22:22:13.394Z",
+      "evidence": "Second bounded slice for TASK-BUD-392 added resolveHumanConfirmationRuntimeConsumptionPlan. It encodes the runtime boundary: guard-owned confirmations or readable structured audit entries can be ready for guard consumption, but text-only custom_messages are spoofable and never accepted; if upstream destructive confirmation is not exposed and the guard does not own the dialog, the decision is needs-upstream-signal. All outcomes preserve dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 15 passed. Docs sync/check ok."
     }
   ]
 }
