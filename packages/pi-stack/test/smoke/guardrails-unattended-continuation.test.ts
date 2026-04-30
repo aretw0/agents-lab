@@ -21,6 +21,7 @@ import {
   resolveNextLocalSafeCollectorResult,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
+  resolveSelfReloadAutoresumeCanaryPlan,
   resolveOneSliceExecutorBacklogGate,
   resolveOneSliceLocalCanaryPlan,
   resolveProtectedScopesCollectorResult,
@@ -65,6 +66,69 @@ function greenInput() {
 }
 
 describe("guardrails unattended continuation", () => {
+  it("plans self-reload/autoresume as read-only human decision evidence", () => {
+    const ready = resolveSelfReloadAutoresumeCanaryPlan({
+      optIn: true,
+      reloadRequired: true,
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      autoResumePreviewReady: true,
+      pendingMessagesClear: true,
+      recentSteerClear: true,
+      laneQueueClear: true,
+      stopConditionsClear: true,
+      contextLevel: "ok",
+    });
+    expect(ready.decision).toBe("ready-for-human-decision");
+    expect(ready.reloadAllowed).toBe(false);
+    expect(ready.autoResumeDispatchAllowed).toBe(false);
+    expect(ready.dispatchAllowed).toBe(false);
+    expect(ready.authorization).toBe("none");
+    expect(ready.summary).toContain("reload=no autoResume=no dispatch=no");
+
+    const blocked = resolveSelfReloadAutoresumeCanaryPlan({
+      optIn: true,
+      reloadRequired: true,
+      checkpointFresh: false,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      autoResumePreviewReady: true,
+      pendingMessagesClear: false,
+      recentSteerClear: true,
+      laneQueueClear: true,
+      stopConditionsClear: true,
+      contextLevel: "compact",
+    });
+    expect(blocked.decision).toBe("blocked");
+    expect(blocked.reasons).toContain("checkpoint-not-fresh");
+    expect(blocked.reasons).toContain("pending-messages");
+    expect(blocked.reasons).toContain("compact-without-fresh-checkpoint");
+    expect(blocked.reloadAllowed).toBe(false);
+
+    const notNeeded = resolveSelfReloadAutoresumeCanaryPlan({
+      optIn: true,
+      reloadRequired: false,
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      autoResumePreviewReady: true,
+      pendingMessagesClear: true,
+      recentSteerClear: true,
+      laneQueueClear: true,
+      stopConditionsClear: true,
+      contextLevel: "ok",
+    });
+    expect(notNeeded.decision).toBe("not-needed");
+    expect(notNeeded.requiresHumanDecision).toBe(false);
+  });
+
   it("builds a no-execution decision packet for one-slice dispatch", () => {
     const readyPlan = resolveOneSliceLocalCanaryPlan(greenInput());
     const baseInput = {

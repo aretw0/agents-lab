@@ -223,6 +223,8 @@ Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportam
 
 Enquanto esse contrato não existir, reload continua sendo intervenção do operador. O objetivo futuro é permitir que o agente solicite/execute reload somente quando esses gates estiverem verdes e falhe fechado quando faltar evidência de progresso preservado.
 
+A superfície `self_reload_autoresume_canary` é apenas plano read-only: mesmo com todos os gates verdes retorna `reloadAllowed=false`, `autoResumeDispatchAllowed=false`, `dispatchAllowed=false`, `authorization=none` e `decision=ready-for-human-decision`. Ela existe para auditar maturidade do contrato antes de qualquer implementação protegida de reload real; não executa `/reload`, não agenda resume e bloqueia em pending messages, recent steer, lane queue, escopos protegidos, remote/offload, GitHub Actions ou manutenção destrutiva.
+
 ## Loop local sem empurrões manuais
 
 Os empurrões manuais do operador ainda substituem um idle continuation loop seguro. O canário futuro desse loop só deve continuar sozinho quando conseguir selecionar a próxima fatia local-safe, gravar checkpoint bounded fresco, respeitar orçamento do handoff, confirmar git state esperado, evitar escopos protegidos, aplicar cooldown, executar validação/smoke conhecido e parar em stop conditions reais.

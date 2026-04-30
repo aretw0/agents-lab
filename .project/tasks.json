@@ -5596,7 +5596,7 @@
     {
       "id": "TASK-BUD-237",
       "description": "[P1/backlog] Projetar reload/autoresume seguro executável pelo agente sem intervenção humana.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-226",
@@ -5616,7 +5616,7 @@
         "Garantir auto-resume minimal usando handoff compacto, com cooldown e auditoria.",
         "Cobrir com smoke/e2e local antes de qualquer uso unattended real."
       ],
-      "notes": "Backlog criado a pedido do operador. [rationale:risk-control] Self-reload só deve sair do backlog quando checkpoint, stale guard, orçamento, estado git e auto-resume estiverem suficientemente provados para não depender de intervenção humana."
+      "notes": "Backlog criado a pedido do operador. [rationale:risk-control] Self-reload só deve sair do backlog quando checkpoint, stale guard, orçamento, estado git e auto-resume estiverem suficientemente provados para não depender de intervenção humana.\n2026-04-30: implementado canary read-only self_reload_autoresume_canary. Mesmo green path retorna reloadAllowed=false, autoResumeDispatchAllowed=false, dispatchAllowed=false, authorization=none e decision=ready-for-human-decision; bloqueia pending messages, recent steer, lane queue, escopos protegidos, remote/offload, GitHub Actions e manutenção destrutiva. Requer reload para validação live da tool."
     },
     {
       "id": "TASK-BUD-238",

@@ -381,6 +381,43 @@ export interface NudgeFreeLoopMeasuredPacketTrust {
 }
 
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
+export type SelfReloadAutoresumeCanaryDecision = "ready-for-human-decision" | "not-needed" | "blocked";
+
+export interface SelfReloadAutoresumeCanaryInput {
+  optIn: boolean;
+  reloadRequired: boolean;
+  checkpointFresh: boolean;
+  handoffBudgetOk: boolean;
+  gitStateExpected: boolean;
+  protectedScopesClear: boolean;
+  cooldownReady: boolean;
+  autoResumePreviewReady: boolean;
+  pendingMessagesClear: boolean;
+  recentSteerClear: boolean;
+  laneQueueClear: boolean;
+  stopConditionsClear: boolean;
+  contextLevel: UnattendedContinuationContextLevel;
+  schedulerRequested?: boolean;
+  remoteOrOffloadRequested?: boolean;
+  githubActionsRequested?: boolean;
+  protectedScopeRequested?: boolean;
+  destructiveMaintenanceRequested?: boolean;
+}
+
+export interface SelfReloadAutoresumeCanaryPlan {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  reloadAllowed: false;
+  autoResumeDispatchAllowed: false;
+  requiresHumanDecision: boolean;
+  decision: SelfReloadAutoresumeCanaryDecision;
+  reasons: string[];
+  summary: string;
+  recommendation: string;
+}
 
 export interface NudgeFreeLoopCanaryGate {
   effect: "none";
@@ -1151,6 +1188,110 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
     reasons: ["all-gates-green"],
     summary: "nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green",
     recommendation: "A canary idle loop may continue the next small local-safe slice.",
+  };
+}
+
+export function resolveSelfReloadAutoresumeCanaryPlan(input: SelfReloadAutoresumeCanaryInput): SelfReloadAutoresumeCanaryPlan {
+  const reasons: string[] = [];
+  const blockedRequests: string[] = [];
+
+  if (!input.optIn) reasons.push("missing-opt-in");
+  if (!input.reloadRequired) reasons.push("reload-not-required");
+  if (!input.checkpointFresh) reasons.push("checkpoint-not-fresh");
+  if (!input.handoffBudgetOk) reasons.push("handoff-budget-not-ok");
+  if (!input.gitStateExpected) reasons.push("unexpected-git-state");
+  if (!input.protectedScopesClear) reasons.push("protected-scope-pending");
+  if (!input.cooldownReady) reasons.push("cooldown-not-ready");
+  if (!input.autoResumePreviewReady) reasons.push("auto-resume-preview-not-ready");
+  if (!input.pendingMessagesClear) reasons.push("pending-messages");
+  if (!input.recentSteerClear) reasons.push("recent-steer");
+  if (!input.laneQueueClear) reasons.push("lane-queue-pending");
+  if (!input.stopConditionsClear) reasons.push("stop-condition-present");
+  if (input.contextLevel === "compact" && !input.checkpointFresh) reasons.push("compact-without-fresh-checkpoint");
+  if (input.schedulerRequested) {
+    reasons.push("scheduler-requested");
+    blockedRequests.push("scheduler");
+  }
+  if (input.remoteOrOffloadRequested) {
+    reasons.push("remote-or-offload-requested");
+    blockedRequests.push("remote-or-offload");
+  }
+  if (input.githubActionsRequested) {
+    reasons.push("github-actions-requested");
+    blockedRequests.push("github-actions");
+  }
+  if (input.protectedScopeRequested) {
+    reasons.push("protected-scope-requested");
+    blockedRequests.push("protected-scope");
+  }
+  if (input.destructiveMaintenanceRequested) {
+    reasons.push("destructive-maintenance-requested");
+    blockedRequests.push("destructive-maintenance");
+  }
+
+  const hardBlock = reasons.some((reason) => [
+    "unexpected-git-state",
+    "protected-scope-pending",
+    "pending-messages",
+    "recent-steer",
+    "lane-queue-pending",
+    "stop-condition-present",
+    "compact-without-fresh-checkpoint",
+    "scheduler-requested",
+    "remote-or-offload-requested",
+    "github-actions-requested",
+    "protected-scope-requested",
+    "destructive-maintenance-requested",
+  ].includes(reason));
+
+  if (!input.reloadRequired && reasons.length === 1 && reasons[0] === "reload-not-required") {
+    return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      reloadAllowed: false,
+      autoResumeDispatchAllowed: false,
+      requiresHumanDecision: false,
+      decision: "not-needed",
+      reasons,
+      summary: "self-reload-autoresume-canary: decision=not-needed reload=no autoResume=no dispatch=no reasons=reload-not-required authorization=none",
+      recommendation: "Do not reload; continue from the current live runtime.",
+    };
+  }
+
+  if (hardBlock || reasons.length > 0) {
+    const blockedRequestsSummary = blockedRequests.length > 0 ? ` blockedRequests=${blockedRequests.join("|")}` : "";
+    return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      reloadAllowed: false,
+      autoResumeDispatchAllowed: false,
+      requiresHumanDecision: true,
+      decision: "blocked",
+      reasons,
+      summary: `self-reload-autoresume-canary: decision=blocked reload=no autoResume=no dispatch=no reasons=${reasons.slice(0, 5).join(",")}${blockedRequestsSummary} authorization=none`,
+      recommendation: "Do not self-reload; preserve progress and ask the operator after the missing gates are resolved.",
+    };
+  }
+
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    reloadAllowed: false,
+    autoResumeDispatchAllowed: false,
+    requiresHumanDecision: true,
+    decision: "ready-for-human-decision",
+    reasons: ["all-gates-green", "human-decision-required", "execution-not-implemented"],
+    summary: "self-reload-autoresume-canary: decision=ready-for-human-decision reload=no autoResume=no dispatch=no reasons=all-gates-green,human-decision-required,execution-not-implemented authorization=none",
+    recommendation: "Present this evidence to the operator; runtime self-reload execution remains a separate protected implementation task.",
   };
 }
 

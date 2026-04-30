@@ -8529,6 +8529,15 @@
       "method": "curation-correction+docs-check",
       "timestamp": "2026-04-30T21:15:04.762Z",
       "evidence": "Completed /btw recalibration: first-party /btw is no longer exposed as a package prompt, prior art is documented, and doctrine requires explicit design decision before publishing/reusing/wrapping. The draft prompt remains in repo for comparison but is not listed in package files or pi.prompts. Focal validations passed: docs:package:sync, docs:package:check, marker checks, and manifest guard."
+    },
+    {
+      "id": "VER-BUD-701",
+      "target": "TASK-BUD-237",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-canary+smoke-tests",
+      "timestamp": "2026-04-30T21:21:28.991Z",
+      "evidence": "Implemented read-only self_reload_autoresume_canary. Pure helper resolveSelfReloadAutoresumeCanaryPlan returns ready-for-human-decision on green gates but always reloadAllowed=false, autoResumeDispatchAllowed=false, dispatchAllowed=false, authorization=none, with execution-not-implemented. It returns blocked when checkpoint is stale/missing, handoff budget fails, git state is unexpected, protected scopes are pending, cooldown not ready, auto-resume preview missing, pending messages/recent steer/lane queue exist, stop conditions are present, or scheduler/remote/GitHub Actions/protected scope/destructive maintenance is requested. Surface tool added and documented. Validation: vitest guardrails-unattended-continuation.test.ts + guardrails-unattended-continuation-surface.test.ts + guardrails-core-hardening-reexport.test.ts => 55 passed; docs package sync/check ok; safe_marker_check docs 5/5, core 5/5, surface 4/4. Reload required before live tool validation."
     }
   ]
 }

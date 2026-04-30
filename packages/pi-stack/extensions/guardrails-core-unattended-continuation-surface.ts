@@ -6,6 +6,7 @@ import { Type } from "@sinclair/typebox";
 import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   resolveNudgeFreeLoopCanaryGate,
+  resolveSelfReloadAutoresumeCanaryPlan,
   resolveOneSliceExecutorBacklogGate,
   resolveUnattendedContinuationPlan,
   reviewOneSliceLocalHumanConfirmedContract,
@@ -403,6 +404,59 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
         githubActionsRequested: asBool(p.github_actions_requested, false),
         protectedScopeRequested: asBool(p.protected_scope_requested, false),
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "self_reload_autoresume_canary",
+    label: "Self-Reload Auto-Resume Canary",
+    description: "Read-only canary plan for future self-reload/autoresume. Never reloads, never dispatches resume, and requires explicit human decision even when gates are green.",
+    parameters: Type.Object({
+      opt_in: Type.Boolean({ description: "Explicit opt-in for evaluating the self-reload/autoresume canary." }),
+      reload_required: Type.Boolean({ description: "Whether the live runtime has pending source/tool changes requiring reload." }),
+      checkpoint_fresh: Type.Boolean({ description: "Whether bounded handoff/checkpoint evidence is fresh." }),
+      handoff_budget_ok: Type.Boolean({ description: "Whether handoff evidence fits the bounded checkpoint budget." }),
+      git_state_expected: Type.Boolean({ description: "Whether git state matches the expected local-safe scope." }),
+      protected_scopes_clear: Type.Boolean({ description: "Whether protected scopes are absent." }),
+      cooldown_ready: Type.Boolean({ description: "Whether reload/autoresume cooldown would allow a canary." }),
+      auto_resume_preview_ready: Type.Boolean({ description: "Whether auto-resume preview is readable and bounded." }),
+      pending_messages_clear: Type.Boolean({ description: "Whether no pending messages would be interrupted." }),
+      recent_steer_clear: Type.Boolean({ description: "Whether no recent human steer should suppress resume." }),
+      lane_queue_clear: Type.Boolean({ description: "Whether deferred lane queue is empty." }),
+      stop_conditions_clear: Type.Boolean({ description: "Whether no real stop condition is present." }),
+      context_level: Type.Optional(Type.Union([Type.Literal("ok"), Type.Literal("warn"), Type.Literal("checkpoint"), Type.Literal("compact")])),
+      scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks when scheduler/repetition is requested." })),
+      remote_or_offload_requested: Type.Optional(Type.Boolean({ description: "Blocks when remote/offload is requested." })),
+      github_actions_requested: Type.Optional(Type.Boolean({ description: "Blocks when GitHub Actions/CI is requested." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when protected scopes are requested." })),
+      destructive_maintenance_requested: Type.Optional(Type.Boolean({ description: "Blocks when destructive maintenance is requested." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = resolveSelfReloadAutoresumeCanaryPlan({
+        optIn: asBool(p.opt_in, false),
+        reloadRequired: asBool(p.reload_required, false),
+        checkpointFresh: asBool(p.checkpoint_fresh, false),
+        handoffBudgetOk: asBool(p.handoff_budget_ok, false),
+        gitStateExpected: asBool(p.git_state_expected, false),
+        protectedScopesClear: asBool(p.protected_scopes_clear, false),
+        cooldownReady: asBool(p.cooldown_ready, false),
+        autoResumePreviewReady: asBool(p.auto_resume_preview_ready, false),
+        pendingMessagesClear: asBool(p.pending_messages_clear, false),
+        recentSteerClear: asBool(p.recent_steer_clear, false),
+        laneQueueClear: asBool(p.lane_queue_clear, false),
+        stopConditionsClear: asBool(p.stop_conditions_clear, false),
+        contextLevel: normalizeContextLevel(p.context_level),
+        schedulerRequested: asBool(p.scheduler_requested, false),
+        remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBool(p.github_actions_requested, false),
+        protectedScopeRequested: asBool(p.protected_scope_requested, false),
+        destructiveMaintenanceRequested: asBool(p.destructive_maintenance_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],

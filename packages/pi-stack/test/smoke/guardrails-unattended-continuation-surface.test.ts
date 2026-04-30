@@ -433,6 +433,66 @@ describe("guardrails unattended continuation surface", () => {
     ]));
   });
 
+  it("registers read-only self-reload/autoresume canary tool", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsUnattendedContinuationSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const canaryTool = tools.find((tool) => tool.name === "self_reload_autoresume_canary");
+    const ready = canaryTool?.execute("call-self-reload-ready", {
+      opt_in: true,
+      reload_required: true,
+      checkpoint_fresh: true,
+      handoff_budget_ok: true,
+      git_state_expected: true,
+      protected_scopes_clear: true,
+      cooldown_ready: true,
+      auto_resume_preview_ready: true,
+      pending_messages_clear: true,
+      recent_steer_clear: true,
+      lane_queue_clear: true,
+      stop_conditions_clear: true,
+      context_level: "ok",
+    });
+    const blocked = canaryTool?.execute("call-self-reload-blocked", {
+      opt_in: true,
+      reload_required: true,
+      checkpoint_fresh: false,
+      handoff_budget_ok: true,
+      git_state_expected: true,
+      protected_scopes_clear: true,
+      cooldown_ready: true,
+      auto_resume_preview_ready: true,
+      pending_messages_clear: false,
+      recent_steer_clear: true,
+      lane_queue_clear: true,
+      stop_conditions_clear: true,
+      context_level: "compact",
+      remote_or_offload_requested: true,
+    });
+
+    expect(ready?.content?.[0]?.text).toContain("self-reload-autoresume-canary: decision=ready-for-human-decision reload=no autoResume=no dispatch=no");
+    expect(ready?.details).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      reloadAllowed: false,
+      autoResumeDispatchAllowed: false,
+      requiresHumanDecision: true,
+    });
+    expect(blocked?.content?.[0]?.text).toContain("decision=blocked reload=no autoResume=no dispatch=no");
+    expect(blocked?.content?.[0]?.text).toContain("blockedRequests=remote-or-offload");
+    expect(blocked?.details.reasons).toEqual(expect.arrayContaining([
+      "checkpoint-not-fresh",
+      "pending-messages",
+      "compact-without-fresh-checkpoint",
+      "remote-or-offload-requested",
+    ]));
+  });
+
   it("registers compact read-only nudge-free loop canary tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

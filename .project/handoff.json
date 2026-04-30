@@ -1,31 +1,33 @@
 {
-  "timestamp": "2026-04-30T21:15:18.877Z",
-  "context": "Recalibrated /btw after operator correction. Prior art inspected locally: oh-pi has real runtime /btw and /qq extension with widget, side thr [snip] doctrine guard. Completed TASK-BUD-386. [truncated:+362 chars]",
+  "timestamp": "2026-04-30T21:21:40.116Z",
+  "context": "Implemented safe self-reload/autoresume canary slice. Added read-only pure helper resolveSelfReloadAutoresumeCanaryPlan and runtime tool self [snip] validation before closing TASK-BUD-237. [truncated:+490 chars]",
+  "current_tasks": [
+    "TASK-BUD-237"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-386 curation correction.",
-    "Select next local-first safe task after gates.",
-    "If /btw returns later, decide explicitly: use oh-pi, wrap/filter oh-pi, create runtime first-party, or keep docs-only."
+    "Commit TASK-BUD-237 read-only canary implementation.",
+    "Reload before live validation of self_reload_autoresume_canary.",
+    "After reload, validate green path and blocked path; then close TASK-BUD-237 if acceptable."
   ],
   "blockers": [
-    "/btw first-party remains research/curation, not exposed to users.",
-    "TASK-BUD-383 confirmation propagation mismatch remains planned.",
-    "Git maintenance cleanup remains opt-in."
+    "Reload required before runtime tool validation.",
+    "Tool is evidence only; no self-reload/autoresume execution is implemented or authorized.",
+    "TASK-BUD-383 confirmation propagation mismatch remains planned."
   ],
   "recent_validation": [
-    "safe_marker_check docs/research/btw-prior-art-2026-04-30.md matched=6/6",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
-    "structured_io_json packages/lab-skills/package.json pi.prompts => selector-not-found"
+    "vitest guardrails-unattended-continuation.test.ts + guardrails-unattended-continuation-surface [snip] > 3 files, 55 tests passed [truncated:+55 chars]",
+    "npm run docs:package:sync => ok",
+    "npm run docs:package:check => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:15:18.877Z",
+    "generatedAtIso": "2026-04-30T21:21:40.116Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-btw-curation-correction-then-select-next",
-    "focus_task_status": "completed"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:15:18.877Z",
+      "atIso": "2026-04-30T21:21:40.116Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -35,10 +37,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-btw-curation-correction-then-select-next"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-386"
   ]
 }
