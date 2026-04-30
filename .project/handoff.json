@@ -1,41 +1,36 @@
 {
-  "timestamp": "2026-04-30T13:32:16.805Z",
-  "context": "TASK-BUD-376 completed. Live-validated one_slice_executor_backlog_gate after reload. Ready path returned decision=ready-for-separate-task imp [snip] lity before stronger long-run autonomy. [truncated:+641 chars]",
+  "timestamp": "2026-04-30T13:54:04.585Z",
+  "context": "TASK-BUD-375 progressed with docs and verification. Control-plane doctrine now separates Esc/cancel responsibility across terminal/sandbox/ho [snip] nger long-run/unattended stays blocked. [truncated:+251 chars]",
+  "current_tasks": [
+    "TASK-BUD-375"
+  ],
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "start TASK-BUD-375 Esc/cancel investigation with bounded read-only diagnostics",
-    "do not start long-running/unattended execution until cancel reliability is understood"
+    "Commit docs/board/handoff/verification evidence as one bounded slice.",
+    "Continue TASK-BUD-375 with minimal source-aware diagnostics only if needed.",
+    "Do not start stronger long-run/unattended until cancel reliability or fallback contract is proven."
   ],
   "blockers": [
-    "Esc/cancel reliability is uncertain and blocks stronger long-run/unattended execution."
+    "Esc/cancel live reliability unproven.",
+    "Avoid broad scans/source maps after context blast-radius incident."
   ],
   "recent_validation": [
-    "live ready one_slice_executor_backlog_gate: ready-for-separate-task implementation=no dispatch [snip] utor=no authorization=none [truncated:+8 chars]",
-    "live blocked one_slice_executor_backlog_gate: blockedRequests=repeat / scheduler / self-reload [snip] utor=no authorization=none [truncated:+116 chars]",
-    "git status after tool calls: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
-  ],
-  "recent_commits": [
-    "pending"
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
+    "board_verification_append VER-BUD-649 ok",
+    "board_update TASK-BUD-375 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T13:32:16.805Z",
-    "level": "compact",
-    "percent": 72,
+    "generatedAtIso": "2026-04-30T13:54:04.585Z",
+    "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; proceed to TASK-BUD-375 next.",
-    "focus_task_status": "completed"
+    "recommendation": "commit-evidence-then-continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T13:32:16.805Z",
+      "atIso": "2026-04-30T13:54:04.585Z",
       "reason": "manual_checkpoint",
-      "level": "compact",
-      "percent": 72,
+      "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; proceed to TASK-BUD-375 next."
+      "recommendation": "commit-evidence-then-continue-bounded"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-376"
   ]
 }

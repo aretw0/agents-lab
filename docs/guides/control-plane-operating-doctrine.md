@@ -20,6 +20,29 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 10. **Qualidade vem de síntese, remoção e consistência** — preferir reduzir superfícies redundantes e consolidar opiniões antes de adicionar novas ferramentas.
 11. **Unattended é malemolência com trilho** — continuar sozinho em fatias seguras, mas deixar rastro curto para auditoria e retomada.
 
+## Controle humano, cancelamento e blast radius
+
+Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle humano, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.
+
+A investigação deve separar três camadas antes de atribuir culpa:
+
+1. **Terminal/sandbox/host** — Windows Terminal, tmux, SSH, PTY, navegador remoto ou sandbox podem impedir que uma tecla chegue ao TUI. Se a limitação estiver nessa camada, registre workaround/fallback e não tente “consertar” configuração pessoal sem intenção explícita.
+2. **Upstream pi/TUI** — o binding esperado é `app.interrupt=escape`; o TUI precisa receber o input, manter foco correto e encaminhar para `onEscape`. Durante streaming, compaction, retry, bash ou selectors, o handler pode trocar de significado e deve restaurar o estado anterior ao finalizar.
+3. **Extensões e alquimias locais** — extensões podem registrar atalhos, widgets, editor customizado, terminal listeners ou ferramentas longas. Elas não devem capturar `Esc`, substituir o editor ou ignorar `AbortSignal` sem fallback visível.
+
+A evidência mínima para classificar o incidente é curta: keybinding efetivo, presença/ausência de override pessoal, foco/estado do TUI no momento, caminho de abort chamado, e se a operação em curso respeita `AbortSignal` ou mata subprocesso/árvore de processo. Um resultado `ready` de qualquer gate continua sendo evidência, não permissão para executar mais tempo.
+
+Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local em `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
+
+Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
+
+Fallback operacional enquanto `Esc` estiver incerto:
+
+- não iniciar long-run, loop, scheduler, self-reload, remote/offload ou executor;
+- preferir comandos com timeout curto e saída limitada;
+- manter checkpoint fresco antes de qualquer compact/reload;
+- se `Esc` falhar, usar fallback explícito do ambiente (`Ctrl+C`, comando de stop do processo, fechar a sessão, ou kill manual pelo operador) e registrar a camada provável.
+
 ## Settings canônico e overlays derivados
 
 `.pi/settings.json` é baseline canônico protegido do projeto. Ele pode ser lido para descobrir políticas, budgets, providers e gates, mas não deve ser reescrito por agentes comuns nem por fatias unattended locais. Mudanças nele exigem intenção explícita do operador, snapshot/rollback quando aplicável e evidência no board.

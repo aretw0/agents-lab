@@ -8061,6 +8061,15 @@
       "method": "live-tool+inspection",
       "timestamp": "2026-04-30T13:31:56.587Z",
       "evidence": "After reload, live runtime validation of one_slice_executor_backlog_gate succeeded. Ready path returned `one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none`. Blocked path returned `one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=project-strategy-missing,operator-packet-missing-files-missing,explicit-human-contract-missing,time-budget-missing blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance authorization=none`. git status after tool calls showed only explicit .project/handoff.json and .project/tasks.json workflow changes; the tool did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, start a loop, approve executor, or allow implementation. TASK-BUD-375 remains the next P1 focus before stronger long-run autonomy because Esc/cancel reliability is uncertain. [rationale:risk-control] The backlog gate is live and preserves no-implementation/no-dispatch boundaries."
+    },
+    {
+      "id": "VER-BUD-649",
+      "target": "TASK-BUD-375",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection+safe_marker_check",
+      "timestamp": "2026-04-30T13:53:47.472Z",
+      "evidence": "TASK-BUD-375 bounded investigation documented human-control classification in docs/guides/control-plane-operating-doctrine.md. Evidence markers present: Controle humano, cancelamento e blast radius; npm run pi:dev; PI_CODING_AGENT_DIR=.sandbox/pi-agent; node_modules/@mariozechner/pi-coding-agent/dist/cli.js. Runtime not changed; live Esc remains future/operator validation before stronger long-run."
     }
   ]
 }
