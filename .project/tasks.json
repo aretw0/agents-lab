@@ -8125,6 +8125,33 @@
       ],
       "notes": "[rationale:risk-control] A primeira evidência verde de readiness precisa virar doutrina explícita para evitar spoof operacional ou interpretação de ready como autorização.\n[2026-04-30T10:26:05Z] slice=1 focus=TASK-BUD-336 gate=safe_marker_check-4/4+focal-54/54 commit=pending docs=ready-evidence-not-permission. [rationale:risk-control] Prova verde documentada sem autorizar automação.",
       "verification": "VER-BUD-610"
+    },
+    {
+      "id": "TASK-BUD-337",
+      "description": "[P1] Documentar contrato do próximo canário local unattended após readiness verde.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-335",
+        "TASK-BUD-336"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato mínimo para um futuro canário local unattended pós-readiness verde, sem ativá-lo.",
+        "Explicitar preflight, execução de uma única fatia, validação, commit/staging limitado, board close e checkpoint como sequência bounded.",
+        "Explicitar stop conditions e rollback/cancelamento antes de qualquer repetição automática.",
+        "Reforçar que scheduler/remote/self-reload/offload continuam fora de escopo sem tarefa/autorização separada.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Validar por marker check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Depois da primeira prova verde, o próximo risco é pular de evidência para automação; precisamos de um contrato de canário explícito, local-only e de uma fatia antes de qualquer loop repetitivo.\n[2026-04-30T10:38:38Z] slice=1 focus=TASK-BUD-337 gate=safe_marker_check-4/4+focal-54/54 commit=pending docs=one-slice-canary-contract. [rationale:risk-control] Contrato do próximo canário documentado sem ativar automação.",
+      "verification": "VER-BUD-611"
     }
   ]
 }

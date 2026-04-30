@@ -148,6 +148,23 @@ A primeira prova verde local só vale quando as condições observáveis estão 
 
 Use essa prova como critério de maturidade para desenhar o próximo canário, não como atalho para ativar automação. A promoção de `ready=yes` para execução unattended exige tarefa separada, autorização explícita, rollback e contrato de parada.
 
+### Contrato do próximo canário local
+
+O próximo canário local, quando explicitamente escolhido, deve executar no máximo uma fatia por disparo. O roteiro mínimo é:
+
+1. preflight read-only: `context_watch_continuation_readiness` verde, git state esperado, protected scopes clear, checkpoint fresco e orçamento de handoff dentro do limite;
+2. seleção: uma tarefa `in-progress` pequena/local-safe ou uma tarefa recém-criada com validação conhecida;
+3. execução: alterar somente arquivos declarados e reversíveis por git;
+4. validação: rodar o gate focal planejado ou `safe_marker_check`/structured-read quando for documentação;
+5. staging: adicionar somente arquivos intencionais, nunca `.pi/settings.json`, `.github`, `.obsidian` ou remoto sem autorização explícita;
+6. fechamento: usar `board_task_complete` ou fallback bounded equivalente;
+7. checkpoint: escrever `context_watch_checkpoint` com contexto curto, validação, commits e próximos passos;
+8. parada: encerrar o disparo após uma fatia, mesmo se outra oportunidade local-safe existir.
+
+A repetição automática ainda não faz parte desse canário. Para repetir, é necessário um contrato separado de cooldown, limite de fatias, limite de custo/tempo, cancelamento, handoff fresco a cada iteração e stop conditions verificadas antes de cada volta.
+
+Stop imediato: escopo protegido, diff inesperado, teste falhando sem correção óbvia, ambiguidade de produto, contexto em compact sem progresso salvo, reload necessário, checkpoint rejeitado, budget/custo indefinido ou qualquer sinal de perda de dados. Scheduler, remote/offload, self-reload e GitHub Actions continuam fora de escopo até haver tarefa e autorização separadas.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:

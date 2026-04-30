@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-04-30T10:26:25.515Z",
-  "context": "TASK-BUD-336 completed. Documented the first green local continuity readiness proof in the control-plane operating doctrine. The doc now make [snip] protected settings or .github changes. [truncated:+397 chars]",
+  "timestamp": "2026-04-30T10:39:11.806Z",
+  "context": "TASK-BUD-337 completed. Documented the next local unattended canary contract. The future canary is explicitly one-slice-per-dispatch: read-on [snip] d no protected settings/github changes. [truncated:+431 chars]",
   "next_actions": [
     "commit doctrine/board/handoff evidence",
-    "continue next local-safe slice toward designing but not activating a bounded unattended-loop canary",
-    "preserve rule: ready evidence is not authorization"
+    "continue local-safe implementation planning for a read-only one-slice canary preflight, if selected",
+    "do not activate repetition, scheduler, remote/offload, self-reload, or GitHub Actions"
   ],
   "blockers": [],
   "recent_validation": [
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4 markers: Prova v [snip] cional, contrato de parada [truncated:+64 chars]",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4 markers for one-slice canary contract",
     "cmd.exe /c npx vitest run context-watchdog + guardrails-unattended-continuation-surface passed 54/54",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-336 verification=VER-BUD-610 status=completed"
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-337 verification=VER-BUD-611 status=completed"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T10:26:25.515Z",
+    "generatedAtIso": "2026-04-30T10:39:11.806Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; safe to continue local-first design work without activating automation.",
+    "recommendation": "Commit evidence; the next canary boundary is now explicit and safe to implement only as read-only/planned pieces.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T10:26:25.515Z",
+      "atIso": "2026-04-30T10:39:11.806Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; safe to continue local-first design work without activating automation."
+      "recommendation": "Commit evidence; the next canary boundary is now explicit and safe to implement only as read-only/planned pieces."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-336"
+    "TASK-BUD-337"
   ]
 }
