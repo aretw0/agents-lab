@@ -26,6 +26,31 @@ export interface ClassifyFailureScanState {
 	offset: number;
 }
 
+export type MonitorClassifyFailureDecision = "ok" | "warn" | "degrade" | "block";
+
+export interface MonitorClassifyFailureReadinessOptions {
+	warnAfter?: number;
+	degradeAfter?: number;
+	blockAfter?: number;
+}
+
+export interface MonitorClassifyFailureReadiness {
+	mode: "monitor-classify-failure-readiness";
+	decision: MonitorClassifyFailureDecision;
+	activation: "none";
+	authorization: "none";
+	dispatchAllowed: false;
+	readyForStrongUnattended: boolean;
+	readinessImpact: "none" | "advisory" | "degrade-unattended" | "block-unattended";
+	total: number;
+	lastMonitor?: string;
+	lastErrorClass?: "classifier-format" | "instructions" | "provider-or-runtime" | "unknown";
+	repeatedMonitors: string[];
+	reasons: string[];
+	nextActions: string[];
+	evidence: string;
+}
+
 const CLASSIFY_FAIL_LINE_RE =
 	/^(?:Warning:\s*)?\[([a-z0-9-]+)\]\s+classify failed:\s*(.*)$/i;
 
@@ -72,6 +97,84 @@ export function bumpClassifyFailure(
 			? errorText.trim().slice(0, 300)
 			: undefined;
 	return true;
+}
+
+function classifyFailureErrorText(errorText?: string): MonitorClassifyFailureReadiness["lastErrorClass"] {
+	const text = (errorText ?? "").toLowerCase();
+	if (!text.trim()) return "unknown";
+	if (text.includes("no tool call in response")) return "classifier-format";
+	if (text.includes("instructions are required")) return "instructions";
+	if (text.includes("stopreason") || text.includes("provider") || text.includes("model")) return "provider-or-runtime";
+	return "unknown";
+}
+
+export function resolveMonitorClassifyFailureReadiness(
+	summary: ClassifyFailureSummary,
+	options: MonitorClassifyFailureReadinessOptions = {},
+): MonitorClassifyFailureReadiness {
+	const warnAfter = Math.max(1, Math.floor(options.warnAfter ?? 1));
+	const degradeAfter = Math.max(warnAfter + 1, Math.floor(options.degradeAfter ?? 2));
+	const blockAfter = Math.max(degradeAfter + 1, Math.floor(options.blockAfter ?? 4));
+	const total = Math.max(0, Math.floor(summary.total ?? 0));
+	const repeatedMonitors = Object.entries(summary.byMonitor ?? {})
+		.filter(([, count]) => count >= degradeAfter)
+		.map(([monitor]) => monitor)
+		.sort();
+	const reasons: string[] = [];
+
+	let decision: MonitorClassifyFailureDecision = "ok";
+	let readinessImpact: MonitorClassifyFailureReadiness["readinessImpact"] = "none";
+	if (total <= 0) {
+		reasons.push("no-classify-failures");
+	} else if (total < degradeAfter && repeatedMonitors.length === 0) {
+		decision = "warn";
+		readinessImpact = "advisory";
+		reasons.push("isolated-classify-failure");
+	} else if (total < blockAfter) {
+		decision = "degrade";
+		readinessImpact = "degrade-unattended";
+		reasons.push(repeatedMonitors.length > 0 ? "repeated-monitor-failure" : "multiple-classify-failures");
+	} else {
+		decision = "block";
+		readinessImpact = "block-unattended";
+		reasons.push("classify-failure-threshold-exceeded");
+	}
+
+	const lastErrorClass = classifyFailureErrorText(summary.lastError);
+	if (lastErrorClass && lastErrorClass !== "unknown") reasons.push(`last-error:${lastErrorClass}`);
+
+	const nextActions = decision === "ok"
+		? ["continue-local-first"]
+		: decision === "warn"
+			? ["record-warning", "continue-bounded-local-work", "watch-for-repeat-before-unattended"]
+			: decision === "degrade"
+				? ["degrade-unattended-readiness", "inspect-monitor-prompt-schema-provider", "run-short-monitor-smoke"]
+				: ["block-strong-unattended", "disable-or-fix-failing-monitor-before-long-run", "collect-provider-runtime-evidence"];
+
+	return {
+		mode: "monitor-classify-failure-readiness",
+		decision,
+		activation: "none",
+		authorization: "none",
+		dispatchAllowed: false,
+		readyForStrongUnattended: decision === "ok",
+		readinessImpact,
+		total,
+		lastMonitor: summary.lastMonitor,
+		lastErrorClass,
+		repeatedMonitors,
+		reasons,
+		nextActions,
+		evidence: [
+			"monitor-classify-failure-readiness",
+			`decision=${decision}`,
+			`total=${total}`,
+			`last=${summary.lastMonitor ?? "none"}`,
+			`impact=${readinessImpact}`,
+			"dispatch=no",
+			"authorization=none",
+		].join(" "),
+	};
 }
 
 export function bumpClassifyFailureFromText(

@@ -8412,6 +8412,15 @@
       "method": "test+live-tool+docs",
       "timestamp": "2026-04-30T20:19:58.230Z",
       "evidence": "Completed first-party curation coverage signal. Implementation consolidates curationCoverage into capability-owners.json, evaluates filter/remove/needs-decision state via curation-coverage.ts, integrates the summary into stack_sovereignty_status, and documents the policy in lab-user-surface-parity. Tests passed: curation-coverage.test.ts + stack-sovereignty.test.ts => 10 passed. Live after reload showed total=8 filtered=7 missingFilter=0 needsDecision=1 activeThirdPartyOverlaps=1. [rationale:risk-control] This brings first-party coverage and third-party suppression/removal decisions to the operator surface so growing internal coverage reduces dependency/conflict risk instead of silently accumulating overlap."
+    },
+    {
+      "id": "VER-BUD-688",
+      "target": "TASK-BUD-384",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+docs+readiness-signal",
+      "timestamp": "2026-04-30T20:26:43.185Z",
+      "evidence": "Implemented first deterministic readiness signal for monitor classify failures. Added resolveMonitorClassifyFailureReadiness and runtime tool monitor_classify_failure_readiness via monitor-summary. It classifies no failures as ok, one classifier-format failure as warn/advisory, repeated failures as degrade-unattended, and threshold volume as block-unattended, always with activation=none authorization=none dispatchAllowed=false. Tests passed: monitor-classify-failure-readiness.test.ts + monitor-summary.test.ts => 10 passed. Docs updated in monitor-overrides to record research direction: minimize LLM use for steering via sovereign/deterministic classifiers, local heuristics, and structured evidence; classifier LLM should be calibrated fallback. docs:package:sync/check passed. Runtime live validation requires reload."
     }
   ]
 }

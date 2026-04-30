@@ -9319,7 +9319,7 @@
     {
       "id": "TASK-BUD-384",
       "description": "Investigar classify failed intermitente em behavior monitors quando classifier responde texto sem tool call.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-147"
@@ -9337,7 +9337,7 @@
         "Garantir que falha de classifier não seja confundida com ação operacional autorizada ou bloqueio definitivo."
       ],
       "milestone": "monitor-stability",
-      "notes": "2026-04-30: criado após warning observado pelo operador: [commit-hygiene] classify failed: No tool call in response (stopReason: stop, content: [text]). Diagnóstico inicial: monitors_compact_status mostra classifyFail=1 lastFail=commit-hygiene; monitor-sovereign em audit reporta tpFail=1/tpDelta=1; não há evidência de avalanche no scan bounded.\n[rationale:risk-control] Behavior monitors são parte do controle para trabalho longo; classify failures isoladas podem ser toleradas, mas repetição precisa degradar readiness e virar correção de prompt/schema/provider."
+      "notes": "2026-04-30: criado após warning observado pelo operador: [commit-hygiene] classify failed: No tool call in response (stopReason: stop, content: [text]). Diagnóstico inicial: monitors_compact_status mostra classifyFail=1 lastFail=commit-hygiene; monitor-sovereign em audit reporta tpFail=1/tpDelta=1; não há evidência de avalanche no scan bounded.\n[rationale:risk-control] Behavior monitors são parte do controle para trabalho longo; classify failures isoladas podem ser toleradas, mas repetição precisa degradar readiness e virar correção de prompt/schema/provider.\n2026-04-30: iniciando fatia bounded essencial. Escopo: tornar classify failures de monitores em sinal determinístico de readiness/triage, sem mexer em provider/model ou desabilitar monitores automaticamente.\n2026-04-30: operador reforçou direção de pesquisa: monitor stability deve buscar abordagem que use o mínimo possível de LLMs mantendo qualidade de steering. Preferir sovereign/deterministic classifiers, heurísticas e evidência local antes de classifier LLM; LLM deve virar fallback calibrado, não dependência cega.\n2026-04-30: primeira fatia implementada: monitor_classify_failure_readiness torna classify failures em sinal determinístico de readiness. Falha isolada warn/advisory; repetida degrada unattended; volume bloqueia strong unattended. Docs registram direção de reduzir uso de LLM em monitores via sovereign/deterministic/local evidence. Reload necessário para validação live."
     }
   ]
 }

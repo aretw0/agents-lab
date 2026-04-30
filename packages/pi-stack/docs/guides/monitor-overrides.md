@@ -227,6 +227,14 @@ npm run subagent:readiness:strict
 > Em sessão isolada sem `@davidorex/pi-project-workflows`, o comando `/monitors` não existe.
 > Nesse caso, use `/monitor-sovereign on|off` para controle básico dos specs locais.
 
+## Classify failures e prontidão unattended
+
+Classify failures de monitor devem ser tratados como sinal de prontidão, não como falha fatal imediata. Uma ocorrência isolada como `No tool call in response` é warning/advisory; repetição no mesmo monitor degrada prontidão de unattended; volume acima do limiar bloqueia strong unattended até correção.
+
+A direção de pesquisa é reduzir dependência de LLM para steering: preferir classificadores sovereign/determinísticos, heurísticas locais e evidência estruturada; usar classifier LLM como fallback calibrado quando realmente agrega qualidade.
+
+Superfície de apoio: `monitor_classify_failure_readiness` resume impacto sem mutação, sem dispatch e sem autorizar operação.
+
 ## Gate operacional de release (monitors)
 
 Antes de qualquer publish RC/final:

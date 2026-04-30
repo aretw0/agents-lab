@@ -1,38 +1,37 @@
 {
-  "timestamp": "2026-04-30T20:20:09.295Z",
-  "context": "After reload, live-validated stack_sovereignty_status curationCoverage output and completed TASK-BUD-382. Also diagnosed operator warning: mo [snip] TUI confirmation propagation mismatch. [truncated:+385 chars]",
+  "timestamp": "2026-04-30T20:27:01.387Z",
+  "context": "Implemented bounded monitor classify-failure readiness signal. Added resolveMonitorClassifyFailureReadiness and monitor_classify_failure_read [snip] o reload needed before live validation. [truncated:+466 chars]",
+  "current_tasks": [
+    "TASK-BUD-384"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-382 closure plus TASK-BUD-384 monitor warning backlog.",
-    "Continue essential local-first lane; monitor classify failures should degrade readiness only if repeated.",
-    "Do not enable strong unattended until monitor/cancel/background operational gaps are closed."
+    "Commit TASK-BUD-384 readiness signal slice.",
+    "Reload before live validation of monitor_classify_failure_readiness.",
+    "After reload, live validate current isolated failure returns warn/advisory rather than broad monitor failure."
   ],
   "blockers": [
-    "TASK-BUD-384 monitor classify failure follow-up planned.",
-    "TASK-BUD-383 confirmation propagation bug planned.",
+    "Reload required before monitor_classify_failure_readiness live validation.",
+    "TASK-BUD-383 confirmation propagation bug remains planned.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]"
   ],
   "recent_validation": [
-    "stack_sovereignty_status live curationCoverage total=8 filtered=7 missingFilter=0 needsDecisio [snip] activeThirdPartyOverlaps=1 [truncated:+4 chars]",
-    "monitors_compact_status classifyFail=1 lastFail=commit-hygiene",
-    "monitor_sovereign_status enabled=no mode=audit tpFail=1 tpDelta=1"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test [snip] > 2 files, 10 tests passed [truncated:+58 chars]",
+    "safe_marker_check docs/guides/monitor-overrides.md matched=6/6",
+    "cmd.exe /c npm run docs:package:sync => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T20:20:09.295Z",
+    "generatedAtIso": "2026-04-30T20:27:01.387Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-continue-essential-lane",
-    "focus_task_status": "completed"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T20:20:09.295Z",
+      "atIso": "2026-04-30T20:27:01.387Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-continue-essential-lane"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-382"
   ]
 }

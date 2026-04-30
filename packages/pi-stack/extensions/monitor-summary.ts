@@ -19,6 +19,7 @@ import {
 	bumpClassifyFailureFromText,
 	cloneClassifyFailureSummary,
 	newClassifyFailureSummary,
+	resolveMonitorClassifyFailureReadiness,
 	scanSessionFileForClassifyFailures,
 	type ClassifyFailureScanState,
 	type ClassifyFailureSummary,
@@ -194,6 +195,33 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 		if (bumpClassifyFailureFromText(state.summary.classifyFailures, text)) {
 			updateStatus(ctx, state);
 		}
+	});
+
+	pi.registerTool({
+		name: "monitor_classify_failure_readiness",
+		label: "Monitor Classify Failure Readiness",
+		description:
+			"Classify monitor classify-failure pressure for local-first/unattended readiness. Read-only; isolated failures warn, repeated failures degrade/block strong unattended.",
+		parameters: Type.Object({
+			warn_after: Type.Optional(Type.Number({ description: "Failure count that starts advisory warning. Default 1." })),
+			degrade_after: Type.Optional(Type.Number({ description: "Failure count that degrades strong unattended readiness. Default 2." })),
+			block_after: Type.Optional(Type.Number({ description: "Failure count that blocks strong unattended readiness. Default 4." })),
+		}),
+		async execute(_id, params) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const result = resolveMonitorClassifyFailureReadiness(
+				state.summary.classifyFailures,
+				{
+					warnAfter: typeof p.warn_after === "number" ? p.warn_after : undefined,
+					degradeAfter: typeof p.degrade_after === "number" ? p.degrade_after : undefined,
+					blockAfter: typeof p.block_after === "number" ? p.block_after : undefined,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+				details: result,
+			};
+		},
 	});
 
 	pi.registerTool({
