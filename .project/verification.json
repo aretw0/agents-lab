@@ -7431,6 +7431,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:04:23.482Z",
       "evidence": "Prioritized actionable local reasons in local_continuity_audit. localContinuityReasons now lists non-observed collector reasons first and suppresses generic measured-evidence-incomplete/measured-evidence-invalid/collectors-not-eligible/packet-not-ready/trust-not-eligible from the visible top reasons when collector invalid/missing already explains the failure. The reason list remains capped to five entries and derived from envelope/collectors without broad diagnostics. Validation: focal surface smoke passed 3/3 and asserts measured-evidence-incomplete is suppressed when git-state:invalid is present; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. authorization=none and read-only/advisory behavior unchanged; nudge_free_loop_canary remains manual-only. [rationale:risk-control] Visible reasons now guide local correction instead of showing generic packet symptoms first."
+    },
+    {
+      "id": "VER-BUD-579",
+      "target": "TASK-BUD-305",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:06:49.221Z",
+      "evidence": "Hardened local_continuity_audit current-task/candidate derivation. The audit surface now treats handoff current_tasks as candidate only when the referenced task status is in-progress or planned; completed/stale handoff tasks are ignored and fallback selection uses in-progress then planned tasks. Added smoke proving a completed handoff task is skipped and a planned local task becomes the candidate with evidence `next-local-safe=yes task=TASK-PLANNED files=1`. Validation: focal surface smoke passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 256/256 across 32 files. authorization=none and read-only/advisory behavior unchanged; nudge_free_loop_canary remains manual-only. No scheduler, self-reload, loop, remote, or auto-continuation was activated. [rationale:risk-control] The audit surface no longer treats stale completed handoff tasks as active continuation candidates."
     }
   ]
 }

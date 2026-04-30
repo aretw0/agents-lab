@@ -54,10 +54,17 @@ function listGitChangedPaths(cwd: string): { status: NudgeFreeLoopLocalReadStatu
   }
 }
 
+function isCandidateTask(task: any): boolean {
+  return task?.status === "in-progress" || task?.status === "planned";
+}
+
 function findTask(tasksJson: unknown, taskId?: string): any | undefined {
   const tasks = Array.isArray(tasksJson) ? tasksJson : (tasksJson as { tasks?: unknown[] } | undefined)?.tasks;
   if (!Array.isArray(tasks)) return undefined;
-  if (taskId) return tasks.find((task: any) => task?.id === taskId);
+  if (taskId) {
+    const handoffTask = tasks.find((task: any) => task?.id === taskId);
+    if (isCandidateTask(handoffTask)) return handoffTask;
+  }
   return tasks.find((task: any) => task?.status === "in-progress") ?? tasks.find((task: any) => task?.status === "planned");
 }
 

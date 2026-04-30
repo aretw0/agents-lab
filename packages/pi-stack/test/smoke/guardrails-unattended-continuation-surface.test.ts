@@ -71,6 +71,53 @@ describe("guardrails unattended continuation surface", () => {
     }
   });
 
+  it("ignores completed handoff task when deriving local continuity candidate", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-stale-task-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: "2026-04-30T04:40:00.000Z",
+        current_tasks: ["TASK-DONE"],
+        blockers: [],
+      }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+        {
+          id: "TASK-DONE",
+          status: "completed",
+          description: "Completed stale handoff task",
+          files: [".github/workflows/ci.yml"],
+          acceptance_criteria: ["Done."],
+        },
+        {
+          id: "TASK-PLANNED",
+          status: "planned",
+          description: "Marker based local follow-up",
+          files: ["packages/pi-stack/extensions/foo.ts"],
+          acceptance_criteria: ["Use marker validation."],
+        },
+      ] }));
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+      const collectorResults = result?.details.collectorResults as Array<{ fact: string; status: string; evidence: string }>;
+      const candidate = collectorResults.find((entry) => entry.fact === "candidate");
+
+      expect(candidate).toEqual({
+        fact: "candidate",
+        status: "observed",
+        evidence: "next-local-safe=yes task=TASK-PLANNED files=1",
+      });
+      expect(result?.content?.[0]?.text).toContain("local-continuity-audit:");
+      expect(result?.content?.[0]?.text).toContain("authorization=none");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("registers read-only continuation plan tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

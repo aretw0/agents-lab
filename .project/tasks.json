@@ -7294,6 +7294,33 @@
       ],
       "notes": "Criado após live validation TASK-BUD-303 mostrar measured-evidence-incomplete no top reasons. [rationale:risk-control] Reasons visíveis devem guiar correção local e não obscurecer causas acionáveis com sintomas genéricos.\n[2026-04-30T05:04:05Z] slice=1 focus=TASK-BUD-304 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons acionáveis priorizados no local_continuity_audit sem mudar política.",
       "verification": "VER-BUD-578"
+    },
+    {
+      "id": "TASK-BUD-305",
+      "description": "[P1] Ignorar handoff task concluída ao derivar candidate do local_continuity_audit.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-304"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "local_continuity_audit não deve usar current_tasks do handoff como candidate quando a task já estiver completed.",
+        "Quando handoff aponta para task concluída, derivar candidate de task in-progress/planned disponível.",
+        "Adicionar smoke cobrindo handoff stale completed e fallback para planned candidate.",
+        "Manter reasons compactos, authorization=none e comportamento read-only/advisory.",
+        "nudge_free_loop_canary continua manual-only e sem measured overrides.",
+        "Nenhuma scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após TASK-BUD-304. [rationale:risk-control] Audit local não deve tratar handoff stale/completed como próximo slice ativo, pois isso gera candidate inválido e obscurece o próximo trabalho real.\n[2026-04-30T05:06:37Z] slice=1 focus=TASK-BUD-305 gate=test:monitor:smoke-256/256 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Candidate derivation ignora handoff completed/stale e faz fallback para in-progress/planned.",
+      "verification": "VER-BUD-579"
     }
   ]
 }
