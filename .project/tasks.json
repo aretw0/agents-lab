@@ -5589,6 +5589,52 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] Ferramentas de status são úteis em boundaries, mas não podem inflar contexto quando usadas em loops longos.\n[2026-04-30T01:09:14Z] slice=1 focus=TASK-BUD-236 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] context_watch_status agora emite content compacto para reduzir bloat diagnóstico.",
       "verification": "VER-BUD-515"
+    },
+    {
+      "id": "TASK-BUD-237",
+      "description": "[P1/backlog] Projetar reload/autoresume seguro executável pelo agente sem intervenção humana.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-226",
+        "TASK-BUD-231",
+        "TASK-BUD-232",
+        "TASK-BUD-236"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato seguro para agente solicitar reload somente após checkpoint bounded fresco, orçamento ok, git state esperado e sem escopos protegidos pendentes.",
+        "Implementar canary opt-in que não executa reload se faltar handoff fresco ou houver risco de perda de progresso.",
+        "Garantir auto-resume minimal usando handoff compacto, com cooldown e auditoria.",
+        "Cobrir com smoke/e2e local antes de qualquer uso unattended real."
+      ],
+      "notes": "Backlog criado a pedido do operador. [rationale:risk-control] Self-reload só deve sair do backlog quando checkpoint, stale guard, orçamento, estado git e auto-resume estiverem suficientemente provados para não depender de intervenção humana."
+    },
+    {
+      "id": "TASK-BUD-238",
+      "description": "[P1] Validar ao vivo content compacto de context_watch_status após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-236"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_status retorna content compacto ao vivo após reload.",
+        "Validação registra summary sem despejar JSON verbose no handoff.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar a mudança live. [rationale:risk-control] Diagnósticos boundary precisam ser compactos em runtime para não acelerar compactação durante trabalho longo.\n[2026-04-30T01:12:00Z] slice=1 focus=TASK-BUD-238 gate=live-context_watch_status-compact-content commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] context_watch_status compacto confirmado ao vivo em checkpoint lane.",
+      "verification": "VER-BUD-516"
     }
   ]
 }

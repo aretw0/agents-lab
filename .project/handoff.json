@@ -1,35 +1,47 @@
 {
-  "timestamp": "2026-04-30T01:00:17.179Z",
-  "context": "TASK-BUD-233 completed. Live stale-checkpoint guard was validated after reload by temporarily setting handoff timestamp to the future with st [snip] oint and did not overwrite the handoff. [truncated:+77 chars]",
+  "timestamp": "2026-04-30T01:11:32.390Z",
+  "context": "TASK-BUD-236 completed. context_watch_status now emits compact summary content while preserving full structured details for automation, reduc [snip] iagnostic bloat at long-run boundaries. [truncated:+5 chars]",
   "current_tasks": [
-    "TASK-BUD-233"
+    "TASK-BUD-236"
   ],
   "next_actions": [
-    "commit TASK-BUD-233 board and handoff validation files",
+    "Context-watch action: level=checkpoint 68% (write-checkpoint) · Write handoff checkpoint before the next large slice.",
+    "reload before relying on compact context_watch_status content live",
     "continue essential local hardening for unattended safe/control loop",
-    "avoid ad hoc handoff writes; use context_watch_checkpoint"
+    "prefer compact content plus structured details for diagnostic tools"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required",
+    "reload-recommended-for-compact-context-watch-status"
+  ],
   "recent_validation": [
-    "live stale attempt summary: context-watch-checkpoint ok=no task=TASK-BUD-233 reason=stale-checkpoint",
-    "handoff remained at future timestamp/current TASK-BUD-232 after stale attempt, proving no overwrite",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-233 verification=VER-BUD-512 status=completed"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 42/42",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 218/218 across 32 files",
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-236 verification=VER-BUD-515 status=completed"
+  ],
+  "recent_commits": [
+    "b2d1e06 feat(context): summarize status tool"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T01:00:17.179Z",
+    "generatedAtIso": "2026-04-30T01:09:56.051Z",
     "level": "ok",
     "percent": 14,
     "action": "continue",
-    "recommendation": "Progress saved through bounded checkpoint primitive; continue."
+    "recommendation": "Progress saved through bounded checkpoint primitive; reload recommended for compact status output."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T01:00:17.179Z",
-      "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 14,
-      "action": "checkpoint-refresh",
-      "recommendation": "Progress saved through bounded checkpoint primitive; continue."
+      "atIso": "2026-04-30T01:11:32.390Z",
+      "reason": "session_start",
+      "level": "checkpoint",
+      "percent": 68,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
     }
   ]
 }
