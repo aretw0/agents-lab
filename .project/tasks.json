@@ -6073,6 +6073,31 @@
       ],
       "notes": "Criado após reload para validar runtime depois do bound de evidência medida. [rationale:risk-control] O endurecimento de evidência bounded não deve abrir caminho runtime para ready por parâmetros manuais.\n[2026-04-30T02:05:00Z] slice=1 focus=TASK-BUD-257 gate=live-nudge_free_loop_canary-manual-signal-source-after-bounded-evidence commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Runtime pós-reload confirmou que bounded evidence não abriu ready manual.",
       "verification": "VER-BUD-533"
+    },
+    {
+      "id": "TASK-BUD-258",
+      "description": "[P1] Criar helper measured que deriva booleans do canário a partir de sinais estruturados.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-257"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro measured aceita sinais estruturados por gate e deriva os booleans do canário internamente.",
+        "Helper chama o gate com signalSource=measured e measuredEvidence estruturada, sem aceitar booleans separados manipuláveis.",
+        "Testes cobrem ready com todos os sinais ok e blocked/defer quando sinais críticos não estão ok.",
+        "Nenhuma automação, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado como próximo passo do caminho measured sem abrir runtime/loop. [rationale:risk-control] A origem measured deve derivar booleans e evidência do mesmo pacote de sinais, evitando mismatch/spoof por parâmetros separados.\n[2026-04-30T02:09:47Z] slice=1 focus=TASK-BUD-258 gate=test:monitor:smoke-228/228 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Helper measured puro criado sem ativar loop/scheduler.",
+      "verification": "VER-BUD-534"
     }
   ]
 }

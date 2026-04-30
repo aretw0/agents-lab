@@ -49,6 +49,18 @@ export interface NudgeFreeLoopCanaryInput {
   measuredEvidence?: NudgeFreeLoopMeasuredEvidenceEntry[];
 }
 
+export interface NudgeFreeLoopMeasuredSignal {
+  ok: boolean;
+  evidence: string;
+}
+
+export type NudgeFreeLoopMeasuredSignals = Record<NudgeFreeLoopMeasuredGate, NudgeFreeLoopMeasuredSignal>;
+
+export interface NudgeFreeLoopMeasuredCanaryInput {
+  optIn: boolean;
+  signals: NudgeFreeLoopMeasuredSignals;
+}
+
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
 
 export interface NudgeFreeLoopCanaryGate {
@@ -105,6 +117,27 @@ function evaluateMeasuredEvidenceCoverage(entries: NudgeFreeLoopMeasuredEvidence
     missingMeasuredEvidenceGates: REQUIRED_NUDGE_FREE_MEASURED_GATES.filter((gate) => !covered.has(gate)),
     invalidMeasuredEvidenceGates: [...invalid],
   };
+}
+
+export function resolveMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
+  const signal = (gate: NudgeFreeLoopMeasuredGate): NudgeFreeLoopMeasuredSignal => input.signals[gate] ?? { ok: false, evidence: "" };
+  return resolveNudgeFreeLoopCanaryGate({
+    optIn: input.optIn,
+    nextLocalSafe: signal("next-local-safe").ok,
+    checkpointFresh: signal("checkpoint-fresh").ok,
+    handoffBudgetOk: signal("handoff-budget-ok").ok,
+    gitStateExpected: signal("git-state-expected").ok,
+    protectedScopesClear: signal("protected-scopes-clear").ok,
+    cooldownReady: signal("cooldown-ready").ok,
+    validationKnown: signal("validation-known").ok,
+    stopConditionsClear: signal("stop-conditions-clear").ok,
+    signalSource: "measured",
+    measuredEvidence: REQUIRED_NUDGE_FREE_MEASURED_GATES.map((gate) => ({
+      gate,
+      ok: signal(gate).ok,
+      evidence: signal(gate).evidence,
+    })),
+  });
 }
 
 export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {

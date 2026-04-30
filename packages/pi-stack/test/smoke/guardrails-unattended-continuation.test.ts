@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
+  resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
   resolveUnattendedContinuationPlan,
 } from "../../extensions/guardrails-core-unattended-continuation";
@@ -17,8 +18,59 @@ const completeMeasuredEvidence = [
 ] as const;
 
 const allMeasuredEvidenceGates = completeMeasuredEvidence.map((entry) => entry.gate);
+const completeMeasuredSignals = Object.fromEntries(
+  completeMeasuredEvidence.map((entry) => [entry.gate, { ok: entry.ok, evidence: entry.evidence }]),
+) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives nudge-free measured readiness from one structured signal bundle", () => {
+    const gate = resolveMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      signals: completeMeasuredSignals,
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
+      measuredEvidenceCount: 8,
+      missingMeasuredEvidenceGates: [],
+      invalidMeasuredEvidenceGates: [],
+      decision: "ready",
+      canContinueWithoutNudge: true,
+      reasons: ["all-gates-green"],
+    });
+  });
+
+  it("blocks derived nudge-free measured readiness on critical measured stop signals", () => {
+    const gate = resolveMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      signals: {
+        ...completeMeasuredSignals,
+        "git-state-expected": { ok: false, evidence: "git=unexpected" },
+        "protected-scopes-clear": { ok: false, evidence: "protected=pending" },
+        "stop-conditions-clear": { ok: false, evidence: "stop=present" },
+      },
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
+      decision: "blocked",
+      canContinueWithoutNudge: false,
+      reasons: [
+        "measured-evidence-incomplete",
+        "unexpected-git-state",
+        "protected-scope-pending",
+        "stop-condition-present",
+      ],
+      missingMeasuredEvidenceGates: ["git-state-expected", "protected-scopes-clear", "stop-conditions-clear"],
+    });
+  });
+
   it("marks the nudge-free loop canary ready only when measured gates are covered", () => {
     const gate = resolveNudgeFreeLoopCanaryGate({
       optIn: true,
