@@ -7566,6 +7566,15 @@
       "method": "test",
       "timestamp": "2026-04-30T06:02:34.230Z",
       "evidence": "Limited runtime auto-resume/preview preferred board focus to one primary task. Runtime calls now pass readProjectPreferredActiveTaskIds(ctx.cwd, 1), so preferredTaskIds contributes only the best local-safe task when current_tasks is absent/stale and no non-stale task is directly derived. This preserves explicit current_tasks and direct next_actions/context task IDs, but prevents backlog planned tasks from being bundled with a fresh active focus. Existing stale/completed filtering and TASK-SELECTION hardening remain intact. Smoke now includes an extra planned task and proves preview focuses TASK-BUD-317 only, not TASK-BUD-296 or board-task-selection. Validation: context-watchdog focal smoke passed 46/46; cmd.exe /c npm run test:monitor:smoke --silent passed 261/261 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] A single primary focus reduces drift/noise for uninterrupted safe local operation."
+    },
+    {
+      "id": "VER-BUD-594",
+      "target": "TASK-BUD-320",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T06:04:20.591Z",
+      "evidence": "Live runtime after operator reload validated single-primary auto-resume focus. After creating active TASK-BUD-320, context_watch_auto_resume_preview returned `context-watch-auto-resume-preview: focusTasks=TASK-BUD-320 staleFocus=1 diagnostics=tasks(in=1,listed=1,dedup=0,trunc=0,drop=0);staleFocus=1;blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=3,listed=2,dedup=0,trunc=2,drop=1);global=ok`. This confirms the loaded runtime now uses one concrete primary focus and does not bundle planned backlog tasks such as TASK-BUD-296/TASK-BUD-268 with the active focus. staleFocus=1 confirms completed_tasks still blocks reentry. Focal context-watchdog smoke passed 46/46. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] A single concrete primary focus reduces ambiguity and drift for uninterrupted local-safe operation."
     }
   ]
 }
