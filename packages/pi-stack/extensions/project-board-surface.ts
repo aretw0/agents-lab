@@ -870,6 +870,7 @@ function invalidateProjectBlockCaches(cwd: string): void {
 export interface ProjectTaskUpdateResult {
   ok: boolean;
   reason?: string;
+  summary?: string;
   task?: ProjectTaskBoardRow;
   verificationSync?: BoardVerificationSyncResult;
 }
@@ -892,14 +893,20 @@ export function updateProjectTaskBoard(
   },
 ): ProjectTaskUpdateResult {
   const id = String(taskId ?? "").trim();
-  if (!id) return { ok: false, reason: "missing-task-id" };
+  const requestedStatus = typeof updates.status === "string" && updates.status.length > 0 ? updates.status : "unchanged";
+  const fail = (reason: string): ProjectTaskUpdateResult => ({
+    ok: false,
+    reason,
+    summary: buildBoardTaskUpdateSummary(false, id, requestedStatus, reason),
+  });
+  if (!id) return fail("missing-task-id");
 
   const p = tasksPath(cwd);
-  if (!existsSync(p)) return { ok: false, reason: "tasks-block-missing" };
+  if (!existsSync(p)) return fail("tasks-block-missing");
 
   const block = readProjectTasksBlock(cwd);
   const idx = block.tasks.findIndex((row) => row?.id === id);
-  if (idx < 0) return { ok: false, reason: "task-not-found" };
+  if (idx < 0) return fail("task-not-found");
 
   const current = block.tasks[idx]!;
   const next = { ...current };
@@ -910,7 +917,7 @@ export function updateProjectTaskBoard(
 
   if (typeof updates.milestone === "string") {
     const nextMilestone = normalizeMilestoneLabel(updates.milestone);
-    if (nextMilestone === undefined) return { ok: false, reason: "invalid-milestone" };
+    if (nextMilestone === undefined) return fail("invalid-milestone");
     if (nextMilestone.length <= 0) delete (next as { milestone?: string }).milestone;
     else (next as { milestone?: string }).milestone = nextMilestone;
   }
@@ -929,24 +936,18 @@ export function updateProjectTaskBoard(
   const hasRationaleKind = typeof updates.rationaleKind === "string" && updates.rationaleKind.trim().length > 0;
   const hasRationaleTextInput = typeof updates.rationaleText === "string" && updates.rationaleText.trim().length > 0;
   if (updates.syncRationaleToVerification === true && (!hasRationaleKind || !hasRationaleTextInput)) {
-    return {
-      ok: false,
-      reason: "sync-requires-rationale-payload",
-    };
+    return fail("sync-requires-rationale-payload");
   }
   if (hasRationaleKind !== hasRationaleTextInput) {
-    return {
-      ok: false,
-      reason: hasRationaleKind ? "missing-rationale-text" : "missing-rationale-kind",
-    };
+    return fail(hasRationaleKind ? "missing-rationale-text" : "missing-rationale-kind");
   }
 
   let rationaleNoteForSync: string | undefined;
   if (hasRationaleKind && hasRationaleTextInput) {
     const kind = normalizeRationaleKind(updates.rationaleKind);
     const rationaleText = normalizeRationaleText(updates.rationaleText);
-    if (!kind) return { ok: false, reason: "invalid-rationale-kind" };
-    if (!rationaleText) return { ok: false, reason: "invalid-rationale-text" };
+    if (!kind) return fail("invalid-rationale-kind");
+    if (!rationaleText) return fail("invalid-rationale-text");
     rationaleNoteForSync = buildTaskRationaleNote(kind, rationaleText);
     const mergedNote = appendRationaleToTaskNotes(next.notes, rationaleNoteForSync, maxLines);
     next.notes = mergedNote.next;
@@ -989,28 +990,16 @@ export function updateProjectTaskBoard(
   const rationaleConsistency = resolveTaskRationaleConsistency(next as TaskRecord, verificationMap);
   const completingTask = next.status === "completed";
   if (updates.requireRationaleOnComplete === true && completingTask && rationaleRequired && !hasRationale) {
-    return {
-      ok: false,
-      reason: "rationale-required-to-complete-sensitive-task",
-    };
+    return fail("rationale-required-to-complete-sensitive-task");
   }
   if (updates.requireRationaleConsistencyOnComplete === true && completingTask && rationaleConsistency === "mismatch") {
-    return {
-      ok: false,
-      reason: "rationale-consistency-required-to-complete-task",
-    };
+    return fail("rationale-consistency-required-to-complete-task");
   }
   if (updates.requireRationaleForSensitive === true && rationaleRequired && !hasRationale) {
-    return {
-      ok: false,
-      reason: "rationale-required-for-sensitive-task",
-    };
+    return fail("rationale-required-for-sensitive-task");
   }
   if (updates.requireRationaleConsistency === true && rationaleConsistency === "mismatch") {
-    return {
-      ok: false,
-      reason: "rationale-consistency-mismatch",
-    };
+    return fail("rationale-consistency-mismatch");
   }
 
   block.tasks[idx] = next;
@@ -1020,21 +1009,23 @@ export function updateProjectTaskBoard(
   }
   invalidateProjectBlockCaches(cwd);
 
+  const task: ProjectTaskBoardRow = {
+    id: next.id,
+    status: next.status,
+    description: shortText(next.description, 180) ?? next.description,
+    milestone: next.milestone,
+    verification: next.verification,
+    dependsOnCount: Array.isArray(next.depends_on) ? next.depends_on.length : 0,
+    rationaleRequired,
+    hasRationale,
+    rationaleKind: resolveTaskRationaleKind(next as TaskRecord, verificationMap),
+    rationaleSource: resolveTaskRationaleSource(next as TaskRecord, verificationMap),
+    rationaleConsistency,
+  };
   return {
     ok: true,
-    task: {
-      id: next.id,
-      status: next.status,
-      description: shortText(next.description, 180) ?? next.description,
-      milestone: next.milestone,
-      verification: next.verification,
-      dependsOnCount: Array.isArray(next.depends_on) ? next.depends_on.length : 0,
-      rationaleRequired,
-      hasRationale,
-      rationaleKind: resolveTaskRationaleKind(next as TaskRecord, verificationMap),
-      rationaleSource: resolveTaskRationaleSource(next as TaskRecord, verificationMap),
-      rationaleConsistency,
-    },
+    summary: buildBoardTaskUpdateSummary(true, id, task.status),
+    task,
     verificationSync,
   };
 }
@@ -1126,6 +1117,16 @@ export interface ProjectTaskCompleteWithVerificationResult {
 function buildBoardTaskCreateSummary(ok: boolean, taskId: string, status: string, reason?: string): string {
   return [
     "board-task-create:",
+    `ok=${ok ? "yes" : "no"}`,
+    taskId ? `task=${taskId}` : undefined,
+    status ? `status=${status}` : undefined,
+    reason ? `reason=${reason}` : undefined,
+  ].filter(Boolean).join(" ");
+}
+
+function buildBoardTaskUpdateSummary(ok: boolean, taskId: string, status: string, reason?: string): string {
+  return [
+    "board-update:",
     `ok=${ok ? "yes" : "no"}`,
     taskId ? `task=${taskId}` : undefined,
     status ? `status=${status}` : undefined,
@@ -1734,9 +1735,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     const syncRationaleToVerification = params?.sync_rationale_to_verification === true;
 
     if (!taskId) {
-      const out = { ok: false, reason: "missing-task-id" };
+      const out = { ok: false, reason: "missing-task-id", summary: buildBoardTaskUpdateSummary(false, taskId, status ?? "unchanged", "missing-task-id") };
       return {
-        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+        content: [{ type: "text", text: out.summary }],
         details: out,
       };
     }
@@ -1753,9 +1754,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       Boolean(params?.require_rationale_consistency_on_complete) ||
       Boolean(params?.sync_rationale_to_verification);
     if (!hasUpdate) {
-      const out = { ok: false, reason: "no-updates-requested" };
+      const out = { ok: false, reason: "no-updates-requested", summary: buildBoardTaskUpdateSummary(false, taskId, status ?? "unchanged", "no-updates-requested") };
       return {
-        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+        content: [{ type: "text", text: out.summary }],
         details: out,
       };
     }
@@ -1774,7 +1775,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       syncRationaleToVerification,
     });
     return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+      content: [{ type: "text", text: details.summary ?? JSON.stringify(details, null, 2) }],
       details,
     };
   };

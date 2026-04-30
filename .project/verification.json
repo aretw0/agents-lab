@@ -6747,6 +6747,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:06:17.362Z",
       "evidence": "Extracted resolveAutoCompactCheckpointGate as a pure deterministic checkpoint gate for auto-compact. Runtime now uses the helper before ctx.compact, proceeding only when a checkpoint was just written or fresh checkpoint evidence is already ready, otherwise suppressing with checkpoint-evidence-missing. Tests cover proceed by handoffPath, proceed by checkpointEvidenceReady, and suppress by missing checkpoint evidence. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Makes the critical compact guard testable and auditable for safer unattended operation."
+    },
+    {
+      "id": "VER-BUD-503",
+      "target": "TASK-BUD-224",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:16:07.316Z",
+      "evidence": "Added compact summaries to updateProjectTaskBoard success and failure paths, including board-update ok=yes/no task/status/reason lines. Updated board_update tool content to emit the summary when available while keeping details.task and verificationSync for automation. Tests assert helper success summary, helper failure summary, and board_update tool content summary. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Keeps the explicit fallback board_verification_append + board_update bounded and low-bloat for unattended loops."
     }
   ]
 }

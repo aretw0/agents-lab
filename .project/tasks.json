@@ -5280,6 +5280,30 @@
       ],
       "notes": "Criado após reload do guard de auto-compact. [rationale:risk-control] O freio crítico contra compact agressivo precisa ficar determinístico e testável, não apenas embutido no runtime.\n[2026-04-30T00:06:05Z] slice=1 focus=TASK-BUD-223 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Gate crítico de checkpoint antes de compact agora é helper puro coberto por teste.",
       "verification": "VER-BUD-502"
+    },
+    {
+      "id": "TASK-BUD-224",
+      "description": "[P1] Compactar board_update com summary para fallback bounded sem bloat.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-219",
+        "TASK-BUD-220"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "updateProjectTaskBoard retorna summary compacto em sucesso e falhas principais.",
+        "board_update tool emite summary no content quando disponível.",
+        "details continuam trazendo task row bounded e verificationSync quando necessário.",
+        "project-board-surface focal e smoke principal permanecem verdes."
+      ],
+      "notes": "Criado via board_task_create. [rationale:risk-control] O fallback explícito board_verification_append + board_update também precisa evitar JSON verboso em loops unattended.\n[2026-04-30T00:15:54Z] slice=1 focus=TASK-BUD-224 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] board_update agora segue o padrão de summaries compactos para fallback bounded.",
+      "verification": "VER-BUD-503"
     }
   ]
 }

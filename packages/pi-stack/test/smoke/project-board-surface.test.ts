@@ -377,6 +377,7 @@ describe("project-board-surface", () => {
         appendNote: "[2026-04-23T05:02:00Z] retomado via proxy",
       });
       expect(updated.ok).toBe(true);
+      expect(updated.summary).toBe("board-update: ok=yes task=TASK-B status=in-progress");
 
       const query = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
       expect(query.filtered).toBe(2);
@@ -545,6 +546,7 @@ describe("project-board-surface", () => {
       });
       expect(blocked.ok).toBe(false);
       expect(blocked.reason).toBe("sync-requires-rationale-payload");
+      expect(blocked.summary).toBe("board-update: ok=no task=TASK-A status=unchanged reason=sync-requires-rationale-payload");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -1189,6 +1191,8 @@ describe("project-board-surface", () => {
       );
 
       expect((result.details as any)?.ok).toBe(true);
+      expect((result.details as any)?.summary).toBe("board-update: ok=yes task=TASK-B status=in-progress");
+      expect((result as any)?.content?.[0]?.text).toBe("board-update: ok=yes task=TASK-B status=in-progress");
       expect((result.details as any)?.verificationSync?.status).toBe("skipped");
       const check = queryProjectTasks(cwd, { status: "in-progress", limit: 10 });
       expect(check.rows.some((row) => row.id === "TASK-B")).toBe(true);
