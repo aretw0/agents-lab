@@ -8205,6 +8205,24 @@
       "method": "live-guard-validation",
       "timestamp": "2026-04-30T17:56:22.523Z",
       "evidence": "Live validation after user message 'reload' did not block source-map blast-radius test commands: `grep -n \"__PI_STACK_IMPOSSIBLE_MARKER__\" node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map` returned exit 1 without guard block; `grep -RIn \"__PI_STACK_IMPOSSIBLE_MARKER__\" node_modules/@mariozechner/pi-coding-agent/dist/core --include=\"*.map\" | head -1` also did not block. Existing upstream_pi_package_mutation guard still blocked `rm --version node_modules/@mariozechner/pi-coding-agent`, so guardrails-core is active but this new policy is not live or not matching runtime input. No large output or mutation occurred."
+    },
+    {
+      "id": "VER-BUD-665",
+      "target": "TASK-BUD-377",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-guard-after-reload",
+      "timestamp": "2026-04-30T18:28:59.038Z",
+      "evidence": "After confirmed /reload, live source-map blast-radius guard blocked direct content read of node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map with reason source_map_blast_radius. Control allow path also succeeded: grep -RIn --exclude=\"*.map\" impossible marker over the same dist/core root executed without guard block and produced no output. This validates runtime enforcement while preserving explicit *.map exclusion path."
+    },
+    {
+      "id": "VER-BUD-666",
+      "target": "TASK-BUD-377",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-guard-after-reload",
+      "timestamp": "2026-04-30T18:29:10.506Z",
+      "evidence": "Completed live validation after confirmed /reload. The source-map blast-radius guard blocked direct grep of node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map with source_map_blast_radius. The allowed alternative grep -RIn --exclude=\"*.map\" over the same root executed without guard block and produced no output. Prior mismatch was due stale runtime before real reload. [rationale:risk-control] Runtime now prevents source-map/context blast while preserving bounded/excluded diagnostics."
     }
   ]
 }
