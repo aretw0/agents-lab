@@ -6828,6 +6828,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:53:57.902Z",
       "evidence": "Hardened writeLocalSliceHandoffCheckpoint to reject stale checkpoint writes when input.timestampIso is older than the existing .project/handoff.json timestamp. The failure returns compact summary context-watch-checkpoint ok=no reason=stale-checkpoint and preserves the newer handoff. Tests cover writing a fresh checkpoint, attempting an older checkpoint, and verifying the original timestamp/current_tasks remain. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 38/38; cmd.exe /c npm run test:monitor:smoke --silent passed 214/214 across 32 files. [rationale:risk-control] Prevents old/parallel unattended workers from overwriting newer handoff progress."
+    },
+    {
+      "id": "VER-BUD-512",
+      "target": "TASK-BUD-233",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T01:00:03.224Z",
+      "evidence": "Live-validated stale-checkpoint guard after reload. Temporarily set .project/handoff.json timestamp to future 2099-01-01T00:00:00.000Z via structured_io_json, then context_watch_checkpoint returned compact failure summary: context-watch-checkpoint: ok=no task=TASK-BUD-233 reason=stale-checkpoint. Re-reading handoff showed the future timestamp/current TASK-BUD-232 handoff remained, proving the stale attempt did not overwrite it. Timestamp was then restored to 2026-04-30T00:54:34.371Z for valid final checkpoint. [rationale:risk-control] Confirms live protection against old/parallel worker overwrites."
     }
   ]
 }

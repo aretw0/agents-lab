@@ -5496,6 +5496,27 @@
       ],
       "notes": "Criado após reload do enforcement de orçamento. [rationale:risk-control] Em operação unattended/parallel, um agente antigo não deve sobrescrever um handoff mais novo e perder progresso.\n[2026-04-30T00:53:45Z] slice=1 focus=TASK-BUD-232 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Checkpoint bounded agora bloqueia sobrescrita stale por timestamp antigo.",
       "verification": "VER-BUD-511"
+    },
+    {
+      "id": "TASK-BUD-233",
+      "description": "[P1] Validar ao vivo bloqueio stale-checkpoint após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-232"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Uma tentativa live de checkpoint stale retorna ok=no reason=stale-checkpoint.",
+        "O handoff atual não é sobrescrito pela tentativa stale.",
+        "Task é fechada e handoff final é salvo com context_watch_checkpoint válido."
+      ],
+      "notes": "Criado após reload para provar o guard stale-checkpoint em runtime. [rationale:risk-control] Guard contra sobrescrita por worker antigo precisa ser comprovado no hot path live antes de seguir.\n[2026-04-30T00:59:00Z] slice=1 focus=TASK-BUD-233 gate=live-context_watch_checkpoint-stale-checkpoint commit=pending drift=no next=valid-checkpoint-and-commit. [rationale:risk-control] Guard stale-checkpoint confirmado ao vivo sem sobrescrever handoff útil.",
+      "verification": "VER-BUD-512"
     }
   ]
 }

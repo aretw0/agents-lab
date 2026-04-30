@@ -1,22 +1,22 @@
 {
-  "timestamp": "2026-04-30T00:38:54.314Z",
-  "context": "TASK-BUD-229 completed. Live context_watch_checkpoint missing-context guard was validated after reload: whitespace context returned ok=no reason=missing-context and did not overwrite the previous useful handoff checkpoint.",
+  "timestamp": "2026-04-30T01:00:17.179Z",
+  "context": "TASK-BUD-233 completed. Live stale-checkpoint guard was validated after reload by temporarily setting handoff timestamp to the future with st [snip] oint and did not overwrite the handoff. [truncated:+77 chars]",
   "current_tasks": [
-    "TASK-BUD-229"
+    "TASK-BUD-233"
   ],
   "next_actions": [
-    "commit TASK-BUD-229 board and handoff validation files",
+    "commit TASK-BUD-233 board and handoff validation files",
     "continue essential local hardening for unattended safe/control loop",
-    "keep using context_watch_checkpoint for valid checkpoints only"
+    "avoid ad hoc handoff writes; use context_watch_checkpoint"
   ],
   "blockers": [],
   "recent_validation": [
-    "live invalid context_watch_checkpoint summary: context-watch-checkpoint ok=no task=TASK-BUD-229 reason=missing-context",
-    "handoff remained at previous useful timestamp 2026-04-30T00:32:12.530Z after invalid call",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-229 verification=VER-BUD-508 status=completed"
+    "live stale attempt summary: context-watch-checkpoint ok=no task=TASK-BUD-233 reason=stale-checkpoint",
+    "handoff remained at future timestamp/current TASK-BUD-232 after stale attempt, proving no overwrite",
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-233 verification=VER-BUD-512 status=completed"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T00:38:54.314Z",
+    "generatedAtIso": "2026-04-30T01:00:17.179Z",
     "level": "ok",
     "percent": 14,
     "action": "continue",
@@ -24,7 +24,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T00:38:54.314Z",
+      "atIso": "2026-04-30T01:00:17.179Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 14,
