@@ -1222,6 +1222,7 @@ export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLo
 
 export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHumanConfirmedContractInput): OneSliceLocalHumanConfirmedContractReview {
   const reasons: string[] = [];
+  const blockedRequests: string[] = [];
 
   if (input.decisionPacket.decision !== "ready-for-human-decision") reasons.push("packet-not-ready");
   if (input.decisionPacket.dispatchAllowed !== false) reasons.push("packet-dispatch-not-false");
@@ -1241,14 +1242,33 @@ export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHu
   if (!input.commitScopeKnown) reasons.push("commit-scope-missing");
   if (!input.checkpointPlanned) reasons.push("checkpoint-plan-missing");
   if (!input.stopContractKnown) reasons.push("stop-contract-missing");
-  if (input.repeatRequested) reasons.push("repeat-requested");
-  if (input.schedulerRequested) reasons.push("scheduler-requested");
-  if (input.selfReloadRequested) reasons.push("self-reload-requested");
-  if (input.remoteOrOffloadRequested) reasons.push("remote-or-offload-requested");
-  if (input.githubActionsRequested) reasons.push("github-actions-requested");
-  if (input.protectedScopeRequested) reasons.push("protected-scope-requested");
+  if (input.repeatRequested) {
+    reasons.push("repeat-requested");
+    blockedRequests.push("repeat");
+  }
+  if (input.schedulerRequested) {
+    reasons.push("scheduler-requested");
+    blockedRequests.push("scheduler");
+  }
+  if (input.selfReloadRequested) {
+    reasons.push("self-reload-requested");
+    blockedRequests.push("self-reload");
+  }
+  if (input.remoteOrOffloadRequested) {
+    reasons.push("remote-or-offload-requested");
+    blockedRequests.push("remote-or-offload");
+  }
+  if (input.githubActionsRequested) {
+    reasons.push("github-actions-requested");
+    blockedRequests.push("github-actions");
+  }
+  if (input.protectedScopeRequested) {
+    reasons.push("protected-scope-requested");
+    blockedRequests.push("protected-scope");
+  }
 
   if (reasons.length > 0) {
+    const blockedRequestsSummary = blockedRequests.length > 0 ? ` blockedRequests=${blockedRequests.slice(0, 6).join("|")}` : "";
     return {
       effect: "none",
       mode: "contract-review",
@@ -1259,7 +1279,7 @@ export function reviewOneSliceLocalHumanConfirmedContract(input: OneSliceLocalHu
       oneSliceOnly: true,
       decision: "blocked",
       reasons,
-      summary: `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      summary: `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
       recommendation: "Do not execute; resolve the contract blockers and keep using preview/readiness evidence until an approved executor exists.",
     };
   }

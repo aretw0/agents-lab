@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-04-30T11:55:15.371Z",
-  "context": "TASK-BUD-358 completed. Live-validated one_slice_human_contract_review after reload. Green path returned decision=contract-ready-no-executor [snip] t/commit are explicit workflow actions. [truncated:+462 chars]",
+  "timestamp": "2026-04-30T11:57:03.881Z",
+  "context": "TASK-BUD-359 completed. reviewOneSliceLocalHumanConfirmedContract blocked summaries now include blockedRequests=<[ellipsis]> for prohibited r [snip] oad is required before live validation. [truncated:+288 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "next essential candidate: expose full blocked reason visibility in compact contract-review sum [snip] review and contract review [truncated:+99 chars]",
-    "do not implement executor/scheduler/repetition without separate explicit authorization"
+    "commit code/tests/board/handoff evidence",
+    "reload before live-validating blockedRequests in one_slice_human_contract_review output",
+    "after reload, run blocked contract review and confirm blockedRequests appears with dispatch=no [snip] utor=no authorization=none [truncated:+5 chars]"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before blockedRequests appears live."
+  ],
   "recent_validation": [
-    "live green one_slice_human_contract_review: contract-ready-no-executor dispatch=no executor=no authorization=none",
-    "live blocked one_slice_human_contract_review: blocked dispatch=no executor=no authorization=none with compact reasons",
-    "git status after tool calls: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
+    "cmd.exe /c npx vitest run guardrails-unattended-continuation + guardrails-unattended-continuation-surface passed 50/50",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 269/269 across 32 files",
+    "pure helper smoke: blocked summary contains blockedRequests=repeat / scheduler / self-reload / [snip] -actions / protected-scope [truncated:+27 chars]"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:55:15.371Z",
+    "generatedAtIso": "2026-04-30T11:57:03.881Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; contract review runtime surface is live-validated.",
+    "recommendation": "Commit evidence; request reload before live validation of blockedRequests.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:55:15.371Z",
+      "atIso": "2026-04-30T11:57:03.881Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; contract review runtime surface is live-validated."
+      "recommendation": "Commit evidence; request reload before live validation of blockedRequests."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-358"
+    "TASK-BUD-359"
   ]
 }

@@ -183,6 +183,7 @@ describe("guardrails unattended continuation", () => {
       reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
       summary: "one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
     });
+    expect(readyReview.summary).not.toContain("blockedRequests=");
     expect(genericConfirmation).toMatchObject({
       decision: "blocked",
       dispatchAllowed: false,
@@ -191,6 +192,7 @@ describe("guardrails unattended continuation", () => {
     });
     expect(protectedRepeat.dispatchAllowed).toBe(false);
     expect(protectedRepeat.executorApproved).toBe(false);
+    expect(protectedRepeat.summary).toContain("blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope");
     expect(protectedRepeat.reasons).toEqual(expect.arrayContaining([
       "protected-scope",
       "repeat-requested",

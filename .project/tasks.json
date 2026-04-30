@@ -8688,6 +8688,35 @@
       ],
       "notes": "[rationale:risk-control] A nova runtime tool deve ser validada ao vivo como revisão read-only de contrato, não como executor.\n[2026-04-30T11:58:00Z] slice=1 focus=TASK-BUD-358 gate=live-one_slice_human_contract_review green=contract-ready-no-executor blocked=blocked dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] Tool runtime validada como revisão sem executor.",
       "verification": "VER-BUD-632"
+    },
+    {
+      "id": "TASK-BUD-359",
+      "description": "[P1] Expor blockedRequests compactos no summary de contrato humano bloqueado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-358"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar blockedRequests=<...> ao summary de reviewOneSliceLocalHumanConfirmedContract quando houver pedidos proibidos como repeat/scheduler/self-reload/remote-or-offload/github-actions/protected-scope.",
+        "Manter summary verde inalterado e enxuto.",
+        "Manter dispatch=no executor=no authorization=none.",
+        "Atualizar testes puros e de surface para validar blockedRequests.",
+        "Não criar executor, dispatcher, scheduler, loop ou automação.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Como details nem sempre aparecem no transcript, pedidos proibidos precisam ficar visíveis no summary bloqueado sem liberar execução.\n[2026-04-30T11:56:30Z] slice=1 focus=TASK-BUD-359 gate=focal-50/50+test:monitor:smoke-269/269 commit=pending summary=blockedRequests-on-contract-block reload-needed=yes. [rationale:risk-control] Pedidos proibidos agora aparecem compactos em bloqueios sem autorizar execução.",
+      "verification": "VER-BUD-633"
     }
   ]
 }

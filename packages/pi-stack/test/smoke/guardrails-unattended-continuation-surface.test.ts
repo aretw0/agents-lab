@@ -346,6 +346,7 @@ describe("guardrails unattended continuation surface", () => {
       decision: "contract-ready-no-executor",
     });
     expect(blocked?.content?.[0]?.text).toContain("one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no");
+    expect(blocked?.content?.[0]?.text).toContain("blockedRequests=scheduler|remote-or-offload|github-actions");
     expect(blocked?.details.dispatchAllowed).toBe(false);
     expect(blocked?.details.executorApproved).toBe(false);
     expect(blocked?.details.reasons).toEqual(expect.arrayContaining([
