@@ -772,10 +772,17 @@ export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
 ): { ok: boolean; summary: string; path?: string; checkpoint?: Record<string, unknown>; reason?: string } {
+	const taskId = input.taskId || "n/a";
+	if (typeof input.context !== "string" || input.context.trim().length <= 0) {
+		return {
+			ok: false,
+			reason: "missing-context",
+			summary: `context-watch-checkpoint: ok=no task=${taskId} reason=missing-context`,
+		};
+	}
 	try {
 		const checkpoint = buildLocalSliceHandoffCheckpoint(input);
 		const handoffPath = writeHandoffJson(cwd, checkpoint);
-		const taskId = input.taskId || "n/a";
 		return {
 			ok: true,
 			summary: `context-watch-checkpoint: ok=yes task=${taskId} path=.project/handoff.json`,
@@ -787,7 +794,7 @@ export function writeLocalSliceHandoffCheckpoint(
 		return {
 			ok: false,
 			reason,
-			summary: `context-watch-checkpoint: ok=no task=${input.taskId || "n/a"} reason=write-failed`,
+			summary: `context-watch-checkpoint: ok=no task=${taskId} reason=write-failed`,
 		};
 	}
 }
@@ -1594,7 +1601,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const result = writeLocalSliceHandoffCheckpoint(ctx.cwd, {
 				timestampIso: new Date().toISOString(),
 				taskId: p.task_id,
-				context: String(p.context ?? "Local slice checkpoint saved."),
+				context: String(p.context ?? ""),
 				validation: p.validation,
 				commits: p.commits,
 				nextActions: p.next_actions,

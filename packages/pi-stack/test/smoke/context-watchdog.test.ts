@@ -1013,6 +1013,25 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("does not write empty local slice handoff checkpoints", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-handoff-empty-"));
+		try {
+			const result = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2026-04-30T00:30:00.000Z",
+				taskId: "TASK-BUD-228",
+				context: "   ",
+			});
+			expect(result).toMatchObject({
+				ok: false,
+				reason: "missing-context",
+				summary: "context-watch-checkpoint: ok=no task=TASK-BUD-228 reason=missing-context",
+			});
+			expect(existsSync(join(cwd, ".project", "handoff.json"))).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("computes handoff freshness deterministically", () => {
 		const nowMs = Date.parse("2026-04-21T20:30:00.000Z");
 		expect(resolveHandoffFreshness(undefined, nowMs).label).toBe("unknown");

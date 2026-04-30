@@ -5373,6 +5373,31 @@
       ],
       "notes": "Criado após reload para validar a nova primitive live. [rationale:risk-control] Antes de seguir criando mais hardening, precisamos provar que o checkpoint bounded substitui o script ad hoc no fluxo real.\n[2026-04-30T00:27:00Z] slice=1 focus=TASK-BUD-227 gate=live-context_watch_checkpoint-summary-ok-yes commit=pending drift=no next=commit-board-validation-only. [rationale:risk-control] Checkpoint desta fatia foi gravado pela primitive bounded.",
       "verification": "VER-BUD-506"
+    },
+    {
+      "id": "TASK-BUD-228",
+      "description": "[P1] Bloquear checkpoint handoff vazio antes de escrever .project/handoff.json.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-226",
+        "TASK-BUD-227"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "writeLocalSliceHandoffCheckpoint rejeita context vazio/whitespace sem escrever handoff.",
+        "context_watch_checkpoint retorna summary compacto ok=no reason=missing-context nesse caso.",
+        "Teste focal cobre que arquivo não é criado em input inválido.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado via board_task_create. [rationale:risk-control] Um checkpoint bounded só é seguro se não puder substituir handoff útil por payload vazio ou sem contexto retomável.\n[2026-04-30T00:31:35Z] slice=1 focus=TASK-BUD-228 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-checkpoint-with-context_watch_checkpoint. [rationale:risk-control] Checkpoint bounded agora bloqueia contexto vazio antes de escrever.",
+      "verification": "VER-BUD-507"
     }
   ]
 }

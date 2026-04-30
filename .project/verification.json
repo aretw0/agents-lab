@@ -6783,6 +6783,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T00:26:17.559Z",
       "evidence": "Live-validated context_watch_checkpoint after reload. It returned compact summary: context-watch-checkpoint: ok=yes task=TASK-BUD-227 path=.project/handoff.json, and wrote the current slice handoff through the bounded primitive rather than a node -e ad hoc script. [rationale:risk-control] Confirms the checkpoint primitive is usable in the real hot path for safer unattended progress preservation."
+    },
+    {
+      "id": "VER-BUD-507",
+      "target": "TASK-BUD-228",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:31:52.702Z",
+      "evidence": "Hardened writeLocalSliceHandoffCheckpoint to reject empty/whitespace context before writing .project/handoff.json and return compact failure summary context-watch-checkpoint ok=no reason=missing-context. context_watch_checkpoint now passes raw/missing context through instead of replacing it with a default, so invalid input is blocked rather than producing an unresumeable checkpoint. Tests verify no handoff file is created for whitespace context. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 35/35; cmd.exe /c npm run test:monitor:smoke --silent passed 211/211 across 32 files. [rationale:risk-control] Prevents corrupting useful handoff state with empty checkpoints during unattended operation."
     }
   ]
 }
