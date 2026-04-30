@@ -7709,6 +7709,35 @@
       ],
       "notes": "[rationale:risk-control] O foco primário único precisa ser validado no runtime carregado para reduzir drift/noise em operação ininterrupta local-safe.\n[2026-04-30T06:04:09Z] slice=1 focus=TASK-BUD-320 gate=live-context_watch_auto_resume_preview+context-watchdog-smoke-46/46 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Foco primário único do auto-resume validado ao vivo após reload.",
       "verification": "VER-BUD-594"
+    },
+    {
+      "id": "TASK-BUD-321",
+      "description": "[P1] Expor pacote read-only de continuation readiness sem auto-run.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-320"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar superfície read-only que combine primary focus do auto-resume preview com local_continuity_audit.",
+        "O pacote deve indicar continue readiness/blocked de forma compacta, preservando authorization=none.",
+        "Não deve iniciar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Deve derivar fatos localmente de .project/handoff.json, .project/tasks.json e git status, sem aceitar facts/statuses do caller.",
+        "Deve reutilizar helpers existentes para evitar lógica divergente.",
+        "Adicionar smoke cobrindo registro/execução read-only e ausência de parâmetros spoofáveis.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Para desbloquear operação ininterrupta segura, precisamos de um pacote único de decisão read-only que una foco primário e audit local sem ainda conceder autorização operacional.\n[2026-04-30T06:08:05Z] slice=1 focus=TASK-BUD-321 gate=test:monitor:smoke-262/262 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Pacote read-only de continuation readiness combina foco primário e audit local sem auto-run.",
+      "verification": "VER-BUD-595"
     }
   ]
 }

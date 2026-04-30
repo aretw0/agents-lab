@@ -97,6 +97,11 @@ import {
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
+import {
+	buildLocalContinuityAudit,
+	formatLocalContinuityAuditSummary,
+	localContinuityAuditReasons,
+} from "./guardrails-core-unattended-continuation-surface";
 
 export {
 	applyContextWatchBootstrapToSettings,
@@ -841,6 +846,22 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 		`focusTasks=${input.focusTasks.replace(/\s+/g, "_")}`,
 		`staleFocus=${input.staleFocusCount}`,
 		`diagnostics=${input.diagnosticsSummary.replace(/\s+/g, ";")}`,
+	].join(" ");
+}
+
+export function formatContextWatchContinuationReadinessSummary(input: {
+	ready: boolean;
+	focusTasks: string;
+	localAuditDecision: string;
+	staleFocusCount: number;
+}): string {
+	return [
+		"context-watch-continuation-readiness:",
+		`ready=${input.ready ? "yes" : "no"}`,
+		`focus=${input.focusTasks.replace(/\s+/g, "_")}`,
+		`audit=${input.localAuditDecision}`,
+		`staleFocus=${input.staleFocusCount}`,
+		"authorization=none",
 	].join(" ");
 }
 
@@ -1812,6 +1833,55 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					diagnosticsSummary,
 					effect: "none",
 					mode: "read-only-preview",
+					authorization: "none",
+				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_continuation_readiness",
+		label: "Context Watch Continuation Readiness",
+		description:
+			"Read-only continuation readiness packet combining auto-resume primary focus with local continuity audit. Never dispatches resume, compact, scheduler, remote, or automation.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
+				readHandoffJson(ctx.cwd),
+				config.handoffFreshMaxAgeMs,
+				Date.now(),
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+			);
+			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
+			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const staleFocus = extractAutoResumePromptValue(resumeEnvelope.prompt, "staleFocus", "none");
+			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
+			const localAudit = buildLocalContinuityAudit(ctx.cwd);
+			const localAuditReasons = localContinuityAuditReasons(localAudit);
+			const localContinuitySummary = formatLocalContinuityAuditSummary(localAudit, localAuditReasons);
+			const localAuditDecision = localAudit.envelope.packet.gate.decision;
+			const ready = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const summary = formatContextWatchContinuationReadinessSummary({
+				ready,
+				focusTasks,
+				localAuditDecision,
+				staleFocusCount,
+			});
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					ready,
+					focusTasks,
+					staleFocus,
+					staleFocusCount,
+					diagnosticsSummary,
+					localContinuitySummary,
+					localContinuityReasons: localAuditReasons,
+					localContinuity: localAudit,
+					autoResumePrompt: resumeEnvelope.prompt,
+					effect: "none",
+					mode: "read-only-readiness",
 					authorization: "none",
 				},
 			};

@@ -17,6 +17,7 @@ import contextWatchdogExtension, {
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
 	formatContextWatchAutoResumePreviewSummary,
+	formatContextWatchContinuationReadinessSummary,
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
@@ -1314,6 +1315,54 @@ describe("context-watchdog", () => {
 			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-316");
 			expect(result.details?.prompt).not.toContain("TASK-BUD-296");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_continuation_readiness combines primary focus with local audit read-only", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-continuation-readiness-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-04-30T06:04:09.000Z",
+				completed_tasks: ["TASK-BUD-320"],
+				next_actions: ["continue essential lane with board-task-selection after TASK-BUD-320"],
+				context: "TASK-BUD-320 completed; choose one primary task.",
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-320", status: "completed" },
+				{ id: "TASK-BUD-321", status: "in-progress", description: "Continuation readiness smoke", files: ["packages/pi-stack/extensions/context-watchdog.ts"], acceptance_criteria: ["Smoke principal permanece verde."] },
+			] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_continuation_readiness");
+			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_continuation_readiness")?.[0]?.parameters ?? {});
+			expect(schemaText).not.toContain("taskStatusById");
+			expect(schemaText).not.toContain("preferredTaskIds");
+			const result = await tool.execute("tc-continuation-readiness", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
+			expect(result.content?.[0]?.text).toContain("context-watch-continuation-readiness:");
+			expect(result.content?.[0]?.text).toContain("ready=no");
+			expect(result.content?.[0]?.text).toContain("focus=TASK-BUD-321");
+			expect(result.content?.[0]?.text).toContain("authorization=none");
+			expect(result.details).toMatchObject({
+				effect: "none",
+				mode: "read-only-readiness",
+				authorization: "none",
+				ready: false,
+				focusTasks: "TASK-BUD-321",
+				staleFocus: "TASK-BUD-320=completed",
+				localContinuitySummary: expect.stringContaining("local-continuity-audit:"),
+			});
+			expect(result.details?.autoResumePrompt).not.toContain("focusTasks: board-task-selection");
+			expect(formatContextWatchContinuationReadinessSummary({
+				ready: false,
+				focusTasks: "TASK-BUD-321",
+				localAuditDecision: "blocked",
+				staleFocusCount: 1,
+			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked staleFocus=1 authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

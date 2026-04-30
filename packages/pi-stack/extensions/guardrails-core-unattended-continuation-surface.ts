@@ -101,7 +101,7 @@ function deriveCandidate(task: any): NudgeFreeLoopLocalCandidate | undefined {
   };
 }
 
-function localContinuityAuditReasons(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string[] {
+export function localContinuityAuditReasons(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string[] {
   const collectorReasons = result.collectorResults
     .filter((collector) => collector.status !== "observed")
     .map((collector) => `${collector.fact}:${collector.status}`);
@@ -125,7 +125,7 @@ function localContinuityAuditReasons(result: ReturnType<typeof buildLocalMeasure
   return [...reasons].slice(0, 5);
 }
 
-function formatLocalContinuityAuditSummary(
+export function formatLocalContinuityAuditSummary(
   result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>,
   reasons = localContinuityAuditReasons(result),
 ): string {
@@ -138,7 +138,7 @@ function formatLocalContinuityAuditSummary(
   ].filter(Boolean).join(" ");
 }
 
-function buildLocalContinuityAudit(cwd: string) {
+export function buildLocalContinuityAudit(cwd: string) {
   const handoff = readJsonFile(join(cwd, ".project", "handoff.json"));
   const tasks = readJsonFile(join(cwd, ".project", "tasks.json"));
   const handoffTaskId = Array.isArray(handoff.json?.current_tasks) ? String(handoff.json.current_tasks[0] ?? "") : undefined;

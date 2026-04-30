@@ -7575,6 +7575,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T06:04:20.591Z",
       "evidence": "Live runtime after operator reload validated single-primary auto-resume focus. After creating active TASK-BUD-320, context_watch_auto_resume_preview returned `context-watch-auto-resume-preview: focusTasks=TASK-BUD-320 staleFocus=1 diagnostics=tasks(in=1,listed=1,dedup=0,trunc=0,drop=0);staleFocus=1;blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=3,listed=2,dedup=0,trunc=2,drop=1);global=ok`. This confirms the loaded runtime now uses one concrete primary focus and does not bundle planned backlog tasks such as TASK-BUD-296/TASK-BUD-268 with the active focus. staleFocus=1 confirms completed_tasks still blocks reentry. Focal context-watchdog smoke passed 46/46. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] A single concrete primary focus reduces ambiguity and drift for uninterrupted local-safe operation."
+    },
+    {
+      "id": "VER-BUD-595",
+      "target": "TASK-BUD-321",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T06:08:19.064Z",
+      "evidence": "Added read-only `context_watch_continuation_readiness` packet combining auto-resume primary focus with local_continuity_audit. The tool accepts zero parameters, derives handoff/task statuses locally from .project/handoff.json and .project/tasks.json, reuses buildAutoResumePromptEnvelopeFromHandoff for primary focus and buildLocalContinuityAudit/formatLocalContinuityAuditSummary/localContinuityAuditReasons for local audit, and returns compact summary `context-watch-continuation-readiness: ready=... focus=... audit=... staleFocus=... authorization=none`. Details include effect=none, mode=read-only-readiness, authorization=none, autoResumePrompt, diagnosticsSummary, localContinuitySummary, and localContinuityReasons. It never dispatches compact/resume/scheduler/self-reload/remote/automation. Added smoke proving no spoofable taskStatusById/preferredTaskIds params, concrete focus TASK-BUD-321, staleFocus TASK-BUD-320=completed, local-continuity-audit summary, ready=no, and authorization=none. Validation: focal context-watchdog + guardrails surface smokes passed 52/52; cmd.exe /c npm run test:monitor:smoke --silent passed 262/262 across 32 files. [rationale:risk-control] This creates a single read-only decision packet for uninterrupted-safe continuation without granting operational authorization."
     }
   ]
 }
