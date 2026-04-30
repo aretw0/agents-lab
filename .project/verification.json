@@ -8475,6 +8475,24 @@
       "method": "docs-sync+focal-test",
       "timestamp": "2026-04-30T20:56:23.181Z",
       "evidence": "Documented the operational diagnosis in project-canonical-pipeline: checkpoint-evidence-missing with a fresh handoff is a compatibility bug, and manual/bounded checkpoints must emit or normalize valid context_watch_events including manual_checkpoint, level, percent and thresholds before long-runs rely on auto-resume. Validation: npm run docs:package:sync ok; npm run docs:package:check ok; npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 49 passed."
+    },
+    {
+      "id": "VER-BUD-695",
+      "target": "TASK-BUD-385",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-after-reload",
+      "timestamp": "2026-04-30T21:00:40.055Z",
+      "evidence": "After reload, context_watch_status reported level=ok percent=29 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=fresh. This validates the manual checkpoint evidence compatibility fix is live and the previous checkpoint-evidence-missing suppression is no longer present in current status. Auto-resume remains evidence-only and does not authorize long-run execution."
+    },
+    {
+      "id": "VER-BUD-696",
+      "target": "TASK-BUD-384",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-after-reload",
+      "timestamp": "2026-04-30T21:01:14.480Z",
+      "evidence": "After reload, monitor_classify_failure_readiness returned decision=ok total=0 readinessImpact=none readyForStrongUnattended=true with activation=none authorization=none dispatchAllowed=false. monitors_compact_status reported classifyFail=0 across 5 enabled monitors. This validates the classifier-format failure readiness signal and the prompt/tool-call alignment slice; strong unattended is still governed by other gates and not authorized by this task alone."
     }
   ]
 }
