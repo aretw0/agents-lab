@@ -9357,7 +9357,7 @@
         "Strong unattended remains blocked unless other long-run gates are satisfied."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "Criado após warning: context-watch auto compact completed; auto resume suppressed (checkpoint-evidence-missing). Suspeita confirmada: handoff manual existia, mas context_watch_events de context_watch_checkpoint era lightweight e o normalizador exigia percent/thresholds, causando falso negativo de evidência."
+      "notes": "Criado após warning: context-watch auto compact completed; auto resume suppressed (checkpoint-evidence-missing). Suspeita confirmada: handoff manual existia, mas context_watch_events de context_watch_checkpoint era lightweight e o normalizador exigia percent/thresholds, causando falso negativo de evidência.\n2026-04-30: root cause corrigida e commitada em 05b5a19. Manual checkpoints agora são aceitos como evidência de compact/resume; buildLocalSliceHandoffCheckpoint passa a emitir percent/thresholds default. Reload necessário antes de confiar na versão runtime. Git maintenance warning classificado como monitor/opt-in."
     }
   ]
 }
