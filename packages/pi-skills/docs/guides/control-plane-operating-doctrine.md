@@ -127,11 +127,11 @@ Quando uma tool usar `board`, leia como a superfície local atual para esse cont
 
 ## Discussões laterais rápidas (`/btw`)
 
-`/btw` permanece em fase de pesquisa/curadoria, não como prompt first-party canônico. Antes de expor uma versão própria, compare a prior art instalada: `@ifi/oh-pi-extensions/extensions/btw.ts` implementa `/btw` e `/qq` como conversa lateral em widget, mantém thread separada fora do contexto principal, e só injeta de volta por comandos explícitos (`/btw:inject`, `/btw:summarize`). A skill `@ifi/oh-pi-skills/skills/btw/SKILL.md` documenta também `/btw:new`, `/btw:clear` e `--save`.
+`/btw` permanece em fase de pesquisa/curadoria, não como prompt first-party canônico. Antes de expor uma versão própria, compare a prior art instalada e remota. `@ifi/oh-pi-extensions/extensions/btw.ts` implementa `/btw` e `/qq` como conversa lateral em widget, mantém thread separada fora do contexto principal, e só injeta de volta por comandos explícitos (`/btw:inject`, `/btw:summarize`). A skill `@ifi/oh-pi-skills/skills/btw/SKILL.md` documenta também `/btw:new`, `/btw:clear` e `--save`. A referência remota `mitsuhiko/agent-stuff/extensions/btw.ts` também implementa `/btw` como extensão runtime: overlay de side-chat, `AgentSession` separada em memória, thread persistida por custom entries e injeção de summary no chat principal.
 
 Contrato desejado para qualquer versão futura: canal conversacional/advisory, sem trocar foco atual por padrão, sem executar mudanças automaticamente e sem disparar comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
 
-Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design: reutilizar `oh-pi`, envolver/filtrar a extensão existente, ou criar uma alternativa first-party opt-in.
+Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design: reutilizar `oh-pi`, adaptar/wrappar `mitsuhiko/agent-stuff`, envolver/filtrar uma extensão existente, ou criar uma alternativa first-party opt-in.
 
 ## Fluxo bounded do board local
 

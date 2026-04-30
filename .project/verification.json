@@ -8547,6 +8547,24 @@
       "method": "live-after-reload",
       "timestamp": "2026-04-30T21:24:40.394Z",
       "evidence": "After reload, self_reload_autoresume_canary live green-path validation returned decision=ready-for-human-decision reload=no autoResume=no dispatch=no reasons=all-gates-green,human-decision-required,execution-not-implemented authorization=none. Live blocked-path validation returned decision=blocked reload=no autoResume=no dispatch=no reasons=checkpoint-not-fresh,pending-messages,compact-without-fresh-checkpoint,remote-or-offload-requested blockedRequests=remote-or-offload authorization=none. context_watch_status remained bounded with handoff=fresh. This validates the canary as evidence-only and non-executing."
+    },
+    {
+      "id": "VER-BUD-703",
+      "target": "TASK-BUD-388",
+      "target_type": "task",
+      "status": "passed",
+      "method": "remote-prior-art+docs-check",
+      "timestamp": "2026-04-30T21:32:07.476Z",
+      "evidence": "Completed the missing /btw prior-art pass for https://github.com/mitsuhiko/agent-stuff/blob/main/extensions/btw.ts. The remote implementation is a runtime extension, not a prompt: overlay side-chat, separate in-memory AgentSession, seeded main context via buildSessionContext, thread persisted through custom entries, codingTools available in the side session, session_start restore, and summary injection into main chat via pi.sendUserMessage/followUp. Updated docs/research/btw-prior-art-2026-04-30.md to correct the earlier local-only mitsupi conclusion and explicitly state node_modules/mitsupi lacking /btw does not mean Mitsuhiko lacks a remote implementation. Updated doctrine to include both oh-pi and mitsuhiko/agent-stuff as prior art. Kept first-party /btw unexposed: packages/lab-skills/package.json pi.prompts absent. Validation: safe_marker_check research 5/5; doctrine 4/4; docs sync/check ok; node guard btw-mitsuhiko-prior-art ok."
+    },
+    {
+      "id": "VER-BUD-704",
+      "target": "TASK-BUD-388",
+      "target_type": "task",
+      "status": "passed",
+      "method": "prior-art-comparison-closure",
+      "timestamp": "2026-04-30T21:32:52.730Z",
+      "evidence": "TASK-BUD-388 closed after correcting /btw prior art. Research now compares @ifi/oh-pi /btw with mitsuhiko/agent-stuff extensions/btw.ts and preserves the decision not to expose first-party /btw through pi.prompts or package files until explicit design choice. The earlier cache command failure was recorded separately as TASK-BUD-387 Ops backlog, and TASK-BUD-255 was returned to planned to preserve /btw focus."
     }
   ]
 }

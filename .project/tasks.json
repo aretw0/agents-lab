@@ -6030,7 +6030,7 @@
         "Verificar terminal/keybindings/sinal de abort sem modificar configuração protegida sem intenção explícita.",
         "Documentar comportamento esperado e, se necessário, criar guard/teste para operações longas canceláveis."
       ],
-      "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual."
+      "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual.\n2026-04-30: triagem bounded encontrou que esta investigação foi subsumida e concluída com mais profundidade em TASK-BUD-375: política por camadas, fallback, go/no-go matrix e fix concreto de AbortSignal em claude_code_execute. Fechamento por evidência acumulada, sem nova investigação interativa de ESC.\n2026-04-30: desvio interrompido por steering do operador para preservar o fio do /btw. Voltando esta task para planned; continuar TASK-BUD-388 antes de retomar cancelamento/ESC."
     },
     {
       "id": "TASK-BUD-256",
@@ -9387,6 +9387,47 @@
       "milestone": "local-first-control-plane",
       "notes": "Criado por steering do operador: não atacar /btw antes de ver como outros fizeram; há referência em @ifi/oh-pi e possivelmente mitsupi. [rationale:risk-control] Evita transformar uma ergonomia lateral em superfície canônica antes de entender prior art e riscos de contexto/injeção.\n2026-04-30: concluído após steering do operador. /btw first-party foi demovido de superfície canônica: sem pi.prompts e sem files prompts; rascunho preservado só para comparação. Prior art oh-pi/mitsupi documentado em docs/research/btw-prior-art-2026-04-30.md.",
       "verification": "VER-BUD-700"
+    },
+    {
+      "id": "TASK-BUD-387",
+      "description": "Backlog Ops: harden remote checkout/cache workflow against shell-variable interpolation and missing helper scripts.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/git-skills/skills/git-checkout-cache/SKILL.md",
+        "packages/git-skills/skills/git-checkout-cache/",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documentar o incidente em que variável shell não escapada foi esvaziada antes de chegar ao bash, quebrando git clone/cache.",
+        "Fornecer helper versionado ou receita sem variáveis shell frágeis para cache de repositórios remotos.",
+        "Adicionar validação/smoke local que cubra path-only para um repo remoto pequeno ou simulado.",
+        "Registrar fallback seguro quando o helper não estiver instalado, sem bloquear a lane principal."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "Criado a partir de steering do operador: tratar como incidente significa anotar para resolver depois e voltar ao trabalho essencial. [rationale:risk-control] Falha de construção de comando para checkout cache afeta pesquisa remota bounded e pode levar a conclusões incompletas; precisa hardening Ops separado sem interromper a lane atual."
+    },
+    {
+      "id": "TASK-BUD-388",
+      "description": "Backlog: completar prior art de /btw com mitsuhiko/agent-stuff remoto antes de qualquer decisão first-party.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-386"
+      ],
+      "files": [
+        "docs/research/btw-prior-art-2026-04-30.md",
+        "packages/lab-skills/package.json"
+      ],
+      "acceptance_criteria": [
+        "Comparar explicitamente @ifi/oh-pi btw.ts com mitsuhiko/agent-stuff extensions/btw.ts.",
+        "Corrigir a nota de pesquisa para não dar a entender que Mitsuhiko não tem implementação remota de /btw.",
+        "Manter /btw first-party não exposto até decisão explícita.",
+        "Registrar decisão de usar/reusar/wrappar/ignorar prior art em task futura, se necessário."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "Criado após operador apontar https://github.com/mitsuhiko/agent-stuff/blob/main/extensions/btw.ts. [rationale:risk-control] A pesquisa anterior só cobriu node_modules/mitsupi local; decisão canônica de /btw precisa incluir prior art remoto relevante.\n2026-04-30: retomado como foco atual para completar prior art de /btw com mitsuhiko/agent-stuff remoto apontado pelo operador, antes de qualquer decisão first-party.\n2026-04-30: concluído. Prior art remoto mitsuhiko/agent-stuff incluído e conclusão corrigida: Mitsuhiko tem implementação remota de /btw; a ausência em node_modules/mitsupi era só limite da pesquisa local. /btw first-party segue não exposto.",
+      "verification": "VER-BUD-704"
     }
   ]
 }

@@ -1,45 +1,45 @@
 {
-  "timestamp": "2026-04-30T21:24:49.601Z",
-  "context": "Post-reload live validation completed for self_reload_autoresume_canary. Green path returns only ready-for-human-decision with reload=no, aut [snip] continue bounded local-safe work only. [truncated:+234 chars]",
+  "timestamp": "2026-04-30T21:33:13.601Z",
+  "context": "Preserved and completed /btw thread after operator steer. Corrected earlier local-only conclusion: mitsuhiko/agent-stuff remote has extension [snip] dent; returned TASK-BUD-255 to planned. [truncated:+431 chars]",
   "next_actions": [
-    "Commit TASK-BUD-237 completion evidence.",
-    "Select next local-first safe task under bounded-slices cadence.",
-    "Keep self-reload execution as separate protected future work only after explicit operator decision."
+    "Commit TASK-BUD-388 completion and Ops backlog evidence.",
+    "Continue bounded local-safe lane; likely next task from selector after commit.",
+    "Do not expose /btw first-party until explicit design decision: use oh-pi, adapt/wrap mitsuhiko [snip] n, or first-party runtime. [truncated:+38 chars]"
   ],
   "blockers": [
-    "Context is warn; keep slices bounded and checkpoint fresh.",
-    "TASK-BUD-383 confirmation propagation mismatch remains planned.",
-    "Git maintenance cleanup remains opt-in."
+    "Context is warn/bounded-slices; keep slices short and checkpoint fresh.",
+    "TASK-BUD-387 Ops checkout-cache hardening remains planned.",
+    "TASK-BUD-383 confirmation propagation mismatch remains planned."
   ],
   "recent_validation": [
-    "self_reload_autoresume_canary green => decision=ready-for-human-decision reload=no autoResume= [snip] atch=no authorization=none [truncated:+7 chars]",
-    "self_reload_autoresume_canary blocked => checkpoint-not-fresh,pending-messages,compact-without [snip] Requests=remote-or-offload [truncated:+54 chars]",
-    "context_watch_status => level=warn percent=53 action=continue-bounded handoff=fresh"
+    "safe_marker_check docs/research/btw-prior-art-2026-04-30.md matched=5/5",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
+    "structured_io_json packages/lab-skills/package.json pi.prompts => selector-not-found"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:24:49.601Z",
+    "generatedAtIso": "2026-04-30T21:33:13.601Z",
     "level": "warn",
-    "percent": 53,
+    "percent": 62,
     "action": "continue",
-    "recommendation": "commit-completion-then-select-next-bounded-local-safe-task",
+    "recommendation": "commit-btw-prior-art-correction-then-select-next",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:24:49.601Z",
+      "atIso": "2026-04-30T21:33:13.601Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 53,
+      "percent": 62,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-completion-then-select-next-bounded-local-safe-task"
+      "recommendation": "commit-btw-prior-art-correction-then-select-next"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-237"
+    "TASK-BUD-388"
   ]
 }
