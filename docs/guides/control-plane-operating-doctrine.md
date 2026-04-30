@@ -34,6 +34,13 @@ A evidência mínima para classificar o incidente é curta: keybinding efetivo, 
 
 Em sessões deste repositório, considere ainda o launcher. O fluxo comum de desenvolvimento é `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, usa o CLI local em `node_modules/@mariozechner/pi-coding-agent/dist/cli.js` e pausa o loop autônomo antes de iniciar. Portanto, uma investigação não deve assumir que `~/.pi/agent` ou um pacote publicado representam a sessão live; confira launcher, `PI_CODING_AGENT_DIR`, sourceInfo de recursos e caminhos carregados antes de atribuir comportamento a upstream ou às extensões locais.
 
+Checklist source-aware para `pi:dev`:
+
+- confirmar `npm run pi:isolated:status` e registrar se o modo ativo é `isolated`;
+- checar overrides de keybinding no sandbox (`.sandbox/pi-agent/keybindings.json`) além de `~/.pi/agent/keybindings.json`;
+- listar somente os pacotes carregados que podem tocar input (`registerShortcut`, `setEditorComponent`, `onTerminalInput`, overlays) com busca curta e sem source maps;
+- separar “tecla não chegou ao TUI” de “abort foi chamado, mas a operação não respeitou o sinal”.
+
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
 
 Fallback operacional enquanto `Esc` estiver incerto:

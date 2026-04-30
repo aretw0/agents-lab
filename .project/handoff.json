@@ -1,36 +1,37 @@
 {
-  "timestamp": "2026-04-30T13:54:04.585Z",
-  "context": "TASK-BUD-375 progressed with docs and verification. Control-plane doctrine now separates Esc/cancel responsibility across terminal/sandbox/ho [snip] nger long-run/unattended stays blocked. [truncated:+251 chars]",
+  "timestamp": "2026-04-30T14:01:23.520Z",
+  "context": "Continuing essential human-control lane. Source-aware pi:dev diagnostics found active isolated mode and no sandbox keybindings override. Oper [snip] list for future Esc/cancel diagnostics. [truncated:+298 chars]",
   "current_tasks": [
     "TASK-BUD-375"
   ],
   "next_actions": [
-    "Commit docs/board/handoff/verification evidence as one bounded slice.",
-    "Continue TASK-BUD-375 with minimal source-aware diagnostics only if needed.",
-    "Do not start stronger long-run/unattended until cancel reliability or fallback contract is proven."
+    "Do not edit settings now; handle host-specific settings paths under TASK-BUD-378 as separate slice.",
+    "Continue TASK-BUD-375 with minimal source-aware diagnostics or document remaining matrix.",
+    "Commit bounded docs/board/handoff evidence when ready."
   ],
   "blockers": [
     "Esc/cancel live reliability unproven.",
-    "Avoid broad scans/source maps after context blast-radius incident."
+    "Host-specific path canonicalization is now backlog TASK-BUD-378.",
+    "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
-    "board_verification_append VER-BUD-649 ok",
-    "board_update TASK-BUD-375 ok"
+    "npm run pi:isolated:status: active mode isolated",
+    "sandbox keybindings check: NO_SANDBOX_KEYBINDINGS",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T13:54:04.585Z",
+    "generatedAtIso": "2026-04-30T14:01:23.520Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-evidence-then-continue-bounded"
+    "recommendation": "continue-bounded-read-only"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T13:54:04.585Z",
+      "atIso": "2026-04-30T14:01:23.520Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-evidence-then-continue-bounded"
+      "recommendation": "continue-bounded-read-only"
     }
   ]
 }

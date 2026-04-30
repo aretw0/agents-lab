@@ -9116,7 +9116,7 @@
         "Documentar diagnóstico mínimo e próximos passos sem editar configurações pessoais automaticamente.",
         "Preservar que runtime/tool long-run precisa respeitar AbortSignal/cancelamento quando aplicável."
       ],
-      "notes": "[rationale:risk-control] O operador tentou cancelar com Esc e não conseguiu; isso reduz controle humano sobre operações longas e precisa virar incidente/backlog antes de avançar autonomia.\n[2026-04-30T13:42:00Z] Iniciando investigação bounded/read-only da falha de Esc/cancelamento. Esc é controle humano crítico; sem confiabilidade de cancelamento, não avançar long-run/unattended forte. [rationale:risk-control] Cancelamento precisa ser tratável antes de automação longa.\n2026-04-30: operador pediu separar Esc/cancel por camada: (1) limitação de terminal/sandbox/Windows Terminal; (2) comportamento upstream do pi/TUI; (3) efeitos das customizações/alquimias locais do projeto. Também registrou que estouro de contexto/auto-compact 172% é incidente operacional; próximos diagnósticos devem ser mínimos, bounded e sem broad scan.\n2026-04-30: operador acrescentou que o desenvolvimento local usa `npm run pi:dev`; investigação de Esc/cancel deve considerar resolução de fontes em modo dev, onde runtime/docs/extensões podem vir de caminho diferente de node_modules publicado. Não assumir que evidência em node_modules é o runtime efetivamente carregado sem checar script/launcher/sourceInfo.\n2026-04-30: doc atualizado com regra de investigação para `npm run pi:dev`: launcher usa `scripts/pi-isolated.mjs --dev`, `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, CLI local em node_modules e pausa loop; não atribuir Esc/cancel a upstream/global/publicado sem checar origem efetivamente carregada. Validação: safe_marker_check matched=4/4.\n2026-04-30: VER-BUD-649 appended as bounded inspection evidence for documented classification/fallback. Task remains in-progress because live Esc/cancel reliability is not yet proven; stronger long-run/unattended remains blocked until operator/live validation or fallback contract is decided."
+      "notes": "[rationale:risk-control] O operador tentou cancelar com Esc e não conseguiu; isso reduz controle humano sobre operações longas e precisa virar incidente/backlog antes de avançar autonomia.\n[2026-04-30T13:42:00Z] Iniciando investigação bounded/read-only da falha de Esc/cancelamento. Esc é controle humano crítico; sem confiabilidade de cancelamento, não avançar long-run/unattended forte. [rationale:risk-control] Cancelamento precisa ser tratável antes de automação longa.\n2026-04-30: operador pediu separar Esc/cancel por camada: (1) limitação de terminal/sandbox/Windows Terminal; (2) comportamento upstream do pi/TUI; (3) efeitos das customizações/alquimias locais do projeto. Também registrou que estouro de contexto/auto-compact 172% é incidente operacional; próximos diagnósticos devem ser mínimos, bounded e sem broad scan.\n2026-04-30: operador acrescentou que o desenvolvimento local usa `npm run pi:dev`; investigação de Esc/cancel deve considerar resolução de fontes em modo dev, onde runtime/docs/extensões podem vir de caminho diferente de node_modules publicado. Não assumir que evidência em node_modules é o runtime efetivamente carregado sem checar script/launcher/sourceInfo.\n2026-04-30: doc atualizado com regra de investigação para `npm run pi:dev`: launcher usa `scripts/pi-isolated.mjs --dev`, `PI_CODING_AGENT_DIR=.sandbox/pi-agent`, CLI local em node_modules e pausa loop; não atribuir Esc/cancel a upstream/global/publicado sem checar origem efetivamente carregada. Validação: safe_marker_check matched=4/4.\n2026-04-30: VER-BUD-649 appended as bounded inspection evidence for documented classification/fallback. Task remains in-progress because live Esc/cancel reliability is not yet proven; stronger long-run/unattended remains blocked until operator/live validation or fallback contract is decided.\n2026-04-30: ao checar pi:dev/isolated, operador pediu evitar paths específicos do computador em settings. Criado TASK-BUD-378 para canonizar settings do pi isolated/dev e evitar paths absolutos host-specific. Não editar settings agora dentro de TASK-BUD-375."
     },
     {
       "id": "TASK-BUD-376",
@@ -9160,6 +9160,28 @@
       ],
       "milestone": "human-control",
       "notes": "2026-04-30: criado após operador observar auto-compact em 172%; objetivo é evitar repetir diagnóstico que explode contexto. Não autoriza alterar settings nem compactação automática sem decisão explícita."
+    },
+    {
+      "id": "TASK-BUD-378",
+      "description": "Canonicalizar settings do pi isolated/dev para evitar paths absolutos específicos da máquina.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-375"
+      ],
+      "files": [
+        "scripts/pi-isolated.mjs",
+        ".sandbox/pi-agent/settings.json",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Substituir ou evitar geração de paths absolutos host-specific em settings do sandbox/dev quando houver alternativa canônica workspace-relative/package-source.",
+        "Definir migração/normalização não destrutiva para settings existentes com paths absolutos locais.",
+        "Preservar que .pi/settings.json continua canonical do projeto e .sandbox/pi-agent/settings.json é estado local derivado, não artifact para commitar.",
+        "Validar que npm run pi:dev/pi:isolated ainda resolve pacotes locais corretamente sem amarrar ao caminho do computador do operador."
+      ],
+      "milestone": "human-control",
+      "notes": "2026-04-30: criado a pedido do operador após notar path absoluto em .sandbox/pi-agent/settings.json. Não alterar settings agora sem fatia própria; backlog para canonizar resolução do launcher/dev."
     }
   ]
 }
