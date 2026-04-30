@@ -5565,6 +5565,30 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] O guard stale-checkpoint foi validado ao vivo, mas precisa ficar protegido na superfície runtime usada por loops unattended.\n[2026-04-30T01:05:21Z] slice=1 focus=TASK-BUD-235 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Smoke cobre stale-checkpoint na superfície runtime context_watch_checkpoint.",
       "verification": "VER-BUD-514"
+    },
+    {
+      "id": "TASK-BUD-236",
+      "description": "[P1] Compactar content da tool context_watch_status para reduzir bloat diagnóstico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-234"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_status emite uma linha summary curta no content em vez de JSON completo.",
+        "details continuam carregando payload estruturado completo para automação.",
+        "Smoke cobre content compacto e mantém campos críticos em details.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado via board_task_create. [rationale:risk-control] Ferramentas de status são úteis em boundaries, mas não podem inflar contexto quando usadas em loops longos.\n[2026-04-30T01:09:14Z] slice=1 focus=TASK-BUD-236 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] context_watch_status agora emite content compacto para reduzir bloat diagnóstico.",
+      "verification": "VER-BUD-515"
     }
   ]
 }

@@ -6855,6 +6855,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:05:34.225Z",
       "evidence": "Added runtime smoke coverage for context_watch_checkpoint stale-checkpoint behavior. The test seeds a future handoff, executes context_watch_checkpoint with current timestamp, asserts compact failure summary context-watch-checkpoint ok=no reason=stale-checkpoint, and verifies the future handoff timestamp/current_tasks remain unchanged. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 41/41; cmd.exe /c npm run test:monitor:smoke --silent passed 217/217 across 32 files. [rationale:risk-control] Keeps the live checkpoint tool protected against old/parallel worker overwrites in unattended loops."
+    },
+    {
+      "id": "VER-BUD-515",
+      "target": "TASK-BUD-236",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:09:27.981Z",
+      "evidence": "Compacted context_watch_status tool content to a single summary line while preserving the full structured payload in details. Added formatContextWatchStatusToolSummary and smoke coverage that executes context_watch_status with a mock context, asserting compact content summary and critical structured details. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 218/218 across 32 files. [rationale:risk-control] Keeps boundary diagnostics useful without dumping verbose JSON into long-running unattended context."
     }
   ]
 }

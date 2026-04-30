@@ -15,6 +15,7 @@ import contextWatchdogExtension, {
 	LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
+	formatContextWatchStatusToolSummary,
 	formatContextWatchSteeringStatus,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
@@ -1118,6 +1119,40 @@ describe("context-watchdog", () => {
 			expect(written.current_tasks).toEqual(["TASK-BUD-226"]);
 			expect(written.recent_validation).toEqual(["context-watchdog.test.ts passed 34/34"]);
 			expect(written.context_watch).toMatchObject({ level: "ok", percent: 14 });
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_status tool emits compact content and structured details", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-status-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_status");
+			const result = await tool.execute(
+				"tc-context-watch-status",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 14 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect(result.content?.[0]?.text).toBe("context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown");
+			expect(result.details).toMatchObject({
+				level: "ok",
+				percent: 14,
+				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown",
+			});
+			expect(result.details?.autoCompact).toBeTruthy();
+			expect(result.details?.operatorAction).toBeTruthy();
+			expect(formatContextWatchStatusToolSummary({ level: "ok", percent: 14, action: "continue" }))
+				.toBe("context-watch-status: level=ok percent=14 action=continue");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

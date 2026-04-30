@@ -772,6 +772,27 @@ function readContextWatchdogSourceMtimeMs(): number | undefined {
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
+export function formatContextWatchStatusToolSummary(input: {
+	level: ContextWatchdogLevel;
+	percent?: number;
+	action?: string;
+	autoCompactDecision?: string;
+	operatorActionKind?: string;
+	operatingCadence?: string;
+	handoffFreshness?: HandoffFreshnessLabel;
+}): string {
+	return [
+		"context-watch-status:",
+		`level=${input.level}`,
+		input.percent !== undefined ? `percent=${Math.floor(Number(input.percent))}` : undefined,
+		input.action ? `action=${input.action}` : undefined,
+		input.autoCompactDecision ? `autoCompact=${input.autoCompactDecision}` : undefined,
+		input.operatorActionKind ? `operator=${input.operatorActionKind}` : undefined,
+		input.operatingCadence ? `cadence=${input.operatingCadence}` : undefined,
+		input.handoffFreshness ? `handoff=${input.handoffFreshness}` : undefined,
+	].filter(Boolean).join(" ");
+}
+
 export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
@@ -1575,8 +1596,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
+			const summary = formatContextWatchStatusToolSummary({
+				level: assessment.level,
+				percent: assessment.percent,
+				action: assessment.action,
+				autoCompactDecision: autoCompact.decision.reason,
+				operatorActionKind: operatorAction.kind,
+				operatingCadence: operatingCadence.operatingCadence,
+				handoffFreshness: autoCompact.handoffFreshness.label,
+			});
 			const payload = {
 				...assessment,
+				summary,
 				steeringStatus: formatContextWatchSteeringStatus(assessment),
 				autoCompact,
 				operatorSignal,
@@ -1586,7 +1617,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatingCadence,
 			};
 			return {
-				content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+				content: [{ type: "text", text: summary }],
 				details: payload,
 			};
 		},
