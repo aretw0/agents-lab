@@ -7935,6 +7935,15 @@
       "method": "live-tool+inspection",
       "timestamp": "2026-04-30T11:58:53.102Z",
       "evidence": "After reload, live runtime validation of blockedRequests in one_slice_human_contract_review succeeded. Blocked path returned `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=packet-dispatch-not-false,human-confirmation-generic,protected-scope,repeat-requested blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope authorization=none`. Green path returned `one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none`, with no blockedRequests field. git status after tool calls showed only explicit .project/handoff.json and .project/tasks.json workflow changes; the tool did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. [rationale:risk-control] Prohibited requests are visible in compact runtime output while executor approval remains false."
+    },
+    {
+      "id": "VER-BUD-635",
+      "target": "TASK-BUD-361",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T12:04:15.127Z",
+      "evidence": "Added read-only runtime tool `context_watch_one_slice_operator_packet_preview` to compose local continuity readiness, one-slice preview plan, no-dispatch decision packet, and human contract review into one operator packet. The tool is zero-param and defaults human confirmation to missing, so even when readiness and packet are green the contract review blocks with `human-confirmation-missing`. Summary exposes readiness, preview, packet, contract, dispatch=no, executor=no, and authorization=none. Details preserve effect=none, mode=read-only-operator-packet, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, plus plan/decisionPacket/contractReview/localContinuity evidence. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, loop, executor, or dispatcher was added. Focal context-watchdog smoke passed 48/48; full monitor smoke passed 269/269. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] Operators can see the full no-executor readiness/contract packet in one place without confusing evidence with authorization."
     }
   ]
 }

@@ -1,39 +1,42 @@
 {
-  "timestamp": "2026-04-30T11:59:01.492Z",
-  "context": "TASK-BUD-360 completed. Live-validated blockedRequests after reload in one_slice_human_contract_review. Blocked output included decision=bloc [snip] ad, or loop was dispatched by the tool. [truncated:+577 chars]",
+  "timestamp": "2026-04-30T12:04:43.146Z",
+  "context": "TASK-BUD-361 completed. Added read-only context_watch_one_slice_operator_packet_preview that composes readiness, one-slice preview plan, deci [snip] fore stronger automation depends on it. [truncated:+654 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "next essential candidate: build a read-only no-executor decision bundle that composes readines [snip] w into one operator packet [truncated:+34 chars]",
-    "do not implement executor/scheduler/repetition without separate explicit authorization"
+    "commit code/tests/board/handoff evidence",
+    "reload before live-validating context_watch_one_slice_operator_packet_preview",
+    "after live validation, prioritize TASK-BUD-362 before implementing stronger executor/repetitio [snip] ler dependency on .project [truncated:+8 chars]"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before operator packet preview tool appears live.",
+    ".project long-term strategy should be resolved before any stronger unattended [snip] operational authority. [truncated:+52 chars]"
+  ],
   "recent_validation": [
-    "live blocked one_slice_human_contract_review: blockedRequests=repeat / scheduler / self-reload [snip] utor=no authorization=none [truncated:+72 chars]",
-    "live green one_slice_human_contract_review: contract-ready-no-executor dispatch=no executor=no [snip] ith blockedRequests absent [truncated:+21 chars]",
-    "git status after tool calls: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 269/269 across 32 files",
+    "operator packet smoke summary: readiness=yes preview=prepare-one-slice packet=ready-for-human- [snip] missing authorization=none [truncated:+77 chars]"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:59:01.492Z",
+    "generatedAtIso": "2026-04-30T12:04:43.146Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; blockedRequests runtime behavior is live-validated.",
+    "recommendation": "Commit evidence; then reload for live validation. Keep TASK-BUD-362 as architecture gate before stronger automation.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:59:01.492Z",
+      "atIso": "2026-04-30T12:04:43.146Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; blockedRequests runtime behavior is live-validated."
+      "recommendation": "Commit evidence; then reload for live validation. Keep TASK-BUD-362 as architecture gate before stronger automation."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-360"
+    "TASK-BUD-361"
   ]
 }

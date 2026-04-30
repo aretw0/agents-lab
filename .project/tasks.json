@@ -8740,6 +8740,61 @@
       ],
       "notes": "[rationale:risk-control] blockedRequests precisa aparecer ao vivo no transcript para diagnosticar pedidos proibidos sem abrir details nem liberar executor.\n[2026-04-30T12:05:00Z] slice=1 focus=TASK-BUD-360 gate=live-one_slice_human_contract_review blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope green=no-blockedRequests dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] blockedRequests validado ao vivo sem executor.",
       "verification": "VER-BUD-634"
+    },
+    {
+      "id": "TASK-BUD-361",
+      "description": "[P1] Criar operator packet read-only para compor readiness, preview, decision packet e contract review.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-360"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar runtime preview read-only que componha readiness/preview one-slice, decision packet e review de contrato humano-confirmado sem confirmação por padrão.",
+        "Summary deve expor readiness, preview, packet, contract, dispatch=no, executor=no, authorization=none.",
+        "A contract review deve bloquear por human-confirmation-missing por padrão, mesmo quando readiness/packet estão verdes.",
+        "Manter effect=none, activation=none, authorization=none, dispatchAllowed=false e executorApproved=false nos details.",
+        "Não executar staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload ou loop.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Um operator packet composto reduz fricção para operação longa segura ao juntar evidência e contrato pendente sem criar executor nem autorização.\n[2026-04-30T12:03:30Z] slice=1 focus=TASK-BUD-361 gate=context-watchdog-48/48+test:monitor:smoke-269/269 commit=pending tool=context_watch_one_slice_operator_packet_preview dispatch=no executor=no contract=blocked-by-missing-human-confirmation reload-needed=yes. [rationale:risk-control] Packet composto criado sem executor; .project long-term strategy captured separately as TASK-BUD-362.",
+      "verification": "VER-BUD-635"
+    },
+    {
+      "id": "TASK-BUD-362",
+      "description": "[P1] Definir estratégia de longo prazo para .project como adapter/memória sem bloquear agentes.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-361"
+      ],
+      "files": [
+        "docs/primitives/continuity-abstraction.md",
+        "docs/guides/project-canonical-pipeline.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Mapear os papéis de .project: board local, handoff, verification, audit trail, adapter para futuros sistemas externos e cache de controle.",
+        "Definir quando .project é fonte canônica hard intent e quando é apenas soft/advisory evidence.",
+        "Definir modos de trabalho: agente único local, múltiplos agentes locais, worktrees/colony, remote/offload, GitHub Actions e futuros issue trackers/adapters.",
+        "Definir ownership/write boundaries para evitar que .project vire ruído, conflito ou indecisão entre agentes.",
+        "Definir compatibilidade futura: como sincronizar ou substituir .project por adapters externos sem lock-in.",
+        "Definir regras de stale evidence, conflict resolution, task focus e protected scope para cada modo.",
+        "Produzir uma decisão/doutrina curta e actionable antes de qualquer executor/repetition/scheduler depender de .project como autoridade operacional."
+      ],
+      "notes": "[rationale:architecture] .project é o adapter local-first atual, mas precisa de estratégia explícita de longo prazo para não virar ruído/lock-in nem bloquear diferentes abordagens de agentes. Hard intent: antes de automação ininterrupta depender de .project, mapear canonicalidade, ownership, sync, stale evidence e conflitos."
     }
   ]
 }

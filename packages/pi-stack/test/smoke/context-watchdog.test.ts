@@ -20,6 +20,7 @@ import contextWatchdogExtension, {
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
 	formatContextWatchOneSliceCanaryPreviewSummary,
+	formatContextWatchOneSliceOperatorPacketPreviewSummary,
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
@@ -1422,6 +1423,12 @@ describe("context-watchdog", () => {
 			expect(schemaText).not.toContain("dispatch");
 			const result = await tool.execute("tc-one-slice-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
+			const operatorTool = getTool(pi, "context_watch_one_slice_operator_packet_preview");
+			const operatorSchemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_one_slice_operator_packet_preview")?.[0]?.parameters ?? {});
+			expect(operatorSchemaText).not.toContain("execute");
+			expect(operatorSchemaText).not.toContain("dispatch");
+			const operatorResult = await operatorTool.execute("tc-one-slice-operator-packet", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
 			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none");
 			expect(result.content?.[0]?.text).not.toContain("packetReasons=");
 			expect(result.details).toMatchObject({
@@ -1448,6 +1455,26 @@ describe("context-watchdog", () => {
 					decision: "ready-for-human-decision",
 				},
 			});
+			expect(operatorResult.content?.[0]?.text).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
+			expect(operatorResult.details).toMatchObject({
+				effect: "none",
+				mode: "read-only-operator-packet",
+				activation: "none",
+				authorization: "none",
+				dispatchAllowed: false,
+				executorApproved: false,
+				readinessReady: true,
+				decisionPacket: {
+					decision: "ready-for-human-decision",
+					dispatchAllowed: false,
+				},
+				contractReview: {
+					decision: "blocked",
+					dispatchAllowed: false,
+					executorApproved: false,
+					reasons: ["human-confirmation-missing"],
+				},
+			});
 			expect(formatContextWatchOneSliceCanaryPreviewSummary({
 				decision: "blocked",
 				canPrepareSlice: false,
@@ -1458,6 +1485,15 @@ describe("context-watchdog", () => {
 				dispatchAllowed: false,
 				decisionPacketReasons: ["preview-not-ready", "rollback-plan-missing"],
 			})).toBe("context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=protected-scope packetReasons=preview-not-ready|rollback-plan-missing authorization=none");
+			expect(formatContextWatchOneSliceOperatorPacketPreviewSummary({
+				readinessReady: true,
+				previewDecision: "prepare-one-slice",
+				packetDecision: "ready-for-human-decision",
+				contractDecision: "blocked",
+				dispatchAllowed: false,
+				executorApproved: false,
+				contractReasons: ["human-confirmation-missing"],
+			})).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

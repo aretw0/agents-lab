@@ -97,7 +97,7 @@ import {
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
-import { buildOneSliceLocalCanaryDispatchDecisionPacket, resolveOneSliceLocalCanaryPlan } from "./guardrails-core-unattended-continuation";
+import { buildOneSliceLocalCanaryDispatchDecisionPacket, resolveOneSliceLocalCanaryPlan, reviewOneSliceLocalHumanConfirmedContract } from "./guardrails-core-unattended-continuation";
 import {
 	buildLocalContinuityAudit,
 	formatLocalContinuityAuditSummary,
@@ -891,6 +891,28 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
 		input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
 		input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
 		input.decisionPacketDecision === "blocked" && input.decisionPacketReasons && input.decisionPacketReasons.length > 0 ? `packetReasons=${input.decisionPacketReasons.slice(0, 3).join("|")}` : undefined,
+		"authorization=none",
+	].filter(Boolean).join(" ");
+}
+
+export function formatContextWatchOneSliceOperatorPacketPreviewSummary(input: {
+	readinessReady: boolean;
+	previewDecision: string;
+	packetDecision: string;
+	contractDecision: string;
+	dispatchAllowed: boolean;
+	executorApproved: boolean;
+	contractReasons: string[];
+}): string {
+	return [
+		"context-watch-one-slice-operator-packet:",
+		`readiness=${input.readinessReady ? "yes" : "no"}`,
+		`preview=${input.previewDecision}`,
+		`packet=${input.packetDecision}`,
+		`contract=${input.contractDecision}`,
+		`dispatch=${input.dispatchAllowed ? "yes" : "no"}`,
+		`executor=${input.executorApproved ? "yes" : "no"}`,
+		input.contractReasons.length > 0 ? `reasons=${input.contractReasons.slice(0, 4).join("|")}` : undefined,
 		"authorization=none",
 	].filter(Boolean).join(" ");
 }
@@ -1999,6 +2021,109 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					mode: "read-only-preview",
 					activation: "none",
 					authorization: "none",
+				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_one_slice_operator_packet_preview",
+		label: "Context Watch One-Slice Operator Packet Preview",
+		description:
+			"Read-only operator packet composing continuation readiness, one-slice preview, decision packet, and human contract review. Never dispatches execution and defaults human confirmation to missing.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
+				readHandoffJson(ctx.cwd),
+				config.handoffFreshMaxAgeMs,
+				Date.now(),
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+			);
+			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
+			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const localAudit = buildLocalContinuityAudit(ctx.cwd);
+			const localAuditReasons = localContinuityAuditReasons(localAudit);
+			const protectedPaths = localContinuityProtectedPaths(localAudit);
+			const localContinuitySummary = formatLocalContinuityAuditSummary(localAudit, localAuditReasons);
+			const collectorStatus = (fact: string) => localAudit.collectorResults.find((entry) => entry.fact === fact)?.status;
+			const focusStatus = focusTasks !== "none-listed" && !focusTasks.includes(",") ? taskStatusById[focusTasks] ?? taskStatusById[focusTasks.toUpperCase()] : undefined;
+			const readinessReady = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const checkpointFresh = collectorStatus("checkpoint") === "observed";
+			const handoffBudgetOk = collectorStatus("handoff-budget") === "observed";
+			const gitStateExpected = collectorStatus("git-state") === "observed";
+			const protectedScopesClear = collectorStatus("protected-scopes") === "observed" && protectedPaths.length === 0;
+			const validationKnown = collectorStatus("validation") === "observed";
+			const stopConditionsClear = collectorStatus("stop-conditions") === "observed";
+			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
+			const plan = resolveOneSliceLocalCanaryPlan({
+				readinessReady,
+				authorization: "none",
+				checkpointFresh,
+				handoffBudgetOk,
+				gitStateExpected,
+				protectedScopesClear,
+				validationKnown,
+				stopConditionsClear,
+				risk: false,
+				ambiguous: false,
+				repeatRequested: false,
+				sliceAlreadyCompleted: focusStatus === "completed",
+			});
+			const decisionPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+				plan,
+				rollbackPlanKnown: gitStateExpected,
+				validationGateKnown: validationKnown,
+				stagingScopeKnown: singleFocus && protectedScopesClear,
+				commitScopeKnown: singleFocus && gitStateExpected,
+				checkpointPlanned: checkpointFresh && handoffBudgetOk,
+				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
+			});
+			const contractReview = reviewOneSliceLocalHumanConfirmedContract({
+				decisionPacket,
+				humanConfirmation: "missing",
+				singleFocus,
+				localSafeScope: protectedScopesClear,
+				declaredFilesKnown: singleFocus,
+				protectedScopesClear,
+				rollbackPlanKnown: gitStateExpected,
+				validationGateKnown: validationKnown,
+				stagingScopeKnown: singleFocus && protectedScopesClear,
+				commitScopeKnown: singleFocus && gitStateExpected,
+				checkpointPlanned: checkpointFresh && handoffBudgetOk,
+				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
+			});
+			const summary = formatContextWatchOneSliceOperatorPacketPreviewSummary({
+				readinessReady,
+				previewDecision: plan.decision,
+				packetDecision: decisionPacket.decision,
+				contractDecision: contractReview.decision,
+				dispatchAllowed: decisionPacket.dispatchAllowed || contractReview.dispatchAllowed,
+				executorApproved: contractReview.executorApproved,
+				contractReasons: contractReview.reasons,
+			});
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					readinessReady,
+					plan,
+					decisionPacket,
+					contractReview,
+					focusTasks,
+					focusStatus,
+					diagnosticsSummary,
+					localContinuitySummary,
+					localContinuityReasons: localAuditReasons,
+					protectedPaths,
+					localContinuity: localAudit,
+					autoResumePrompt: resumeEnvelope.prompt,
+					effect: "none",
+					mode: "read-only-operator-packet",
+					activation: "none",
+					authorization: "none",
+					dispatchAllowed: false,
+					executorApproved: false,
 				},
 			};
 		},
