@@ -7836,6 +7836,15 @@
       "method": "live-tool",
       "timestamp": "2026-04-30T11:25:56.242Z",
       "evidence": "Live green-path validation of the compact one-slice preview summary succeeded after creating a fresh local-safe focus with explicit smoke validation. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-349 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only explicit board/handoff changes, confirming the preview did not stage/commit/close/checkpoint/dispatch anything by itself. [rationale:risk-control] The compact summary now proves the decision packet is ready for human decision while dispatch remains no."
+    },
+    {
+      "id": "VER-BUD-624",
+      "target": "TASK-BUD-350",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T11:30:22.145Z",
+      "evidence": "Documented the compact readiness/preview/decision-packet ladder in docs/guides/control-plane-operating-doctrine.md. The doctrine now records the validated chain: context_watch_continuation_readiness ready=yes authorization=none; context_watch_one_slice_canary_preview decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no authorization=none. It explicitly states this is graduated evidence, not permission; `packet=ready-for-human-decision` means enough material for a future human decision, and `dispatch=no` is a hard boundary until a separate execution path is authorized. It also documents stop=yes/oneSliceOnly=yes as anti-repetition safety and explains packet=blocked dispatch=no as diagnostic. Validation: safe_marker_check initially caught command-sensitive backtick markers in the validation request, then the corrected non-command-sensitive marker check passed 7/7; focal context/watchdog + unattended-continuation tests passed 89/89. No .pi/settings.json or .github changes. [rationale:risk-control] Compact runtime summaries now have explicit operator semantics, reducing the chance that evidence is misread as permission."
     }
   ]
 }

@@ -8454,6 +8454,32 @@
       ],
       "notes": "[rationale:risk-control] TASK-BUD-348 validou fail-closed compacto; esta task declara validação conhecida para provar o caminho verde do summary packet/dispatch.\n[2026-04-30T11:26:00Z] slice=1 focus=TASK-BUD-349 gate=live-preview-green packet=ready-for-human-decision dispatch=no readiness=ready authorization=none commit=pending. [rationale:risk-control] Caminho verde compacto validado sem execução automática.",
       "verification": "VER-BUD-623"
+    },
+    {
+      "id": "TASK-BUD-350",
+      "description": "[P1] Documentar semântica compacta da cadeia readiness/preview/decision packet.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-349"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar a cadeia compacta validada: readiness ready=yes, preview prepare=yes, packet=ready-for-human-decision, dispatch=no, authorization=none.",
+        "Explicar que packet=ready-for-human-decision significa decisão humana futura, não autorização nem execução.",
+        "Explicar que dispatch=no é hard boundary até existir caminho de execução separado e explicitamente autorizado.",
+        "Preservar que stop=yes/oneSliceOnly=yes impede repetição automática.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Validar com safe_marker_check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A saída compacta da preview agora carrega a semântica crítica; documentá-la evita que ready/prepare/packet sejam interpretados como permissão operacional.\n[2026-04-30T11:30:07Z] slice=1 focus=TASK-BUD-350 gate=safe_marker_check-7/7+focal-89/89 commit=pending docs=compact-decision-ladder. [rationale:risk-control] Escada compacta documentada como evidência, não permissão.",
+      "verification": "VER-BUD-624"
     }
   ]
 }

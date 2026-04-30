@@ -165,6 +165,21 @@ A repetição automática ainda não faz parte desse canário. Para repetir, é 
 
 Stop imediato: escopo protegido, diff inesperado, teste falhando sem correção óbvia, ambiguidade de produto, contexto em compact sem progresso salvo, reload necessário, checkpoint rejeitado, budget/custo indefinido ou qualquer sinal de perda de dados. Scheduler, remote/offload, self-reload e GitHub Actions continuam fora de escopo até haver tarefa e autorização separadas.
 
+### Escada compacta de decisão
+
+A cadeia compacta validada para o canário local é:
+
+```text
+context_watch_continuation_readiness: ready=yes ... authorization=none
+context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no ... authorization=none
+```
+
+Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão humana futura. `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
+
+`stop=yes` e `oneSliceOnly=yes` são parte do contrato de segurança. Mesmo um futuro caminho explicitamente autorizado deve parar depois de uma fatia, registrar validação, commit e checkpoint, e só considerar outra iteração com contrato separado de repetição/cooldown/cancelamento.
+
+Se o summary mostrar `packet=blocked dispatch=no`, trate como diagnóstico e não tente “forçar” execução. A correção deve ser voltar aos fatos locais: foco, checkpoint, git state, protected scopes, validation, stop conditions e handoff budget.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:

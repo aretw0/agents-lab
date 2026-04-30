@@ -1,38 +1,39 @@
 {
-  "timestamp": "2026-04-30T11:26:10.636Z",
-  "context": "TASK-BUD-348 and TASK-BUD-349 completed. After reload, context_watch_one_slice_canary_preview compact summary was live-validated in both fail [snip] t/commit are explicit workflow actions. [truncated:+758 chars]",
+  "timestamp": "2026-04-30T11:30:35.212Z",
+  "context": "TASK-BUD-350 completed. Documented the compact decision ladder semantics in control-plane operating doctrine: readiness ready=yes -> preview [snip] ub changes and no automation activated. [truncated:+306 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "continue local-first hardening; next possible slice is documenting compact summary semantics o [snip] l no activation by default [truncated:+60 chars]"
+    "commit docs/board/handoff evidence",
+    "continue local-first hardening; possible next slice is a pure helper for summarizing missing c [snip] m blocked decision packets [truncated:+12 chars]",
+    "do not implement execution path without explicit operator authorization and stop/rollback contract"
   ],
   "blockers": [],
   "recent_validation": [
-    "live blocked preview: packet=blocked dispatch=no authorization=none for TASK-BUD-348",
-    "live green preview: packet=ready-for-human-decision dispatch=no authorization=none for TASK-BUD-349",
-    "live readiness: ready=yes focus=TASK-BUD-349 audit=ready staleFocus=0 authorization=none"
+    "safe_marker_check first caught command-sensitive backtick markers in the validation request; c [snip] with commandSensitive=none [truncated:+34 chars]",
+    "cmd.exe /c npx vitest run context-watchdog + guardrails-unattended-continuation passed 89/89",
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-350 verification=VER-BUD-624 status=completed"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:26:10.636Z",
+    "generatedAtIso": "2026-04-30T11:30:35.212Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; compact packet/dispatch summary is live-validated in blocked and green paths.",
+    "recommendation": "Commit evidence; compact summary semantics are now documented.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:26:10.636Z",
+      "atIso": "2026-04-30T11:30:35.212Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; compact packet/dispatch summary is live-validated in blocked and green paths."
+      "recommendation": "Commit evidence; compact summary semantics are now documented."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-349"
+    "TASK-BUD-350"
   ]
 }
