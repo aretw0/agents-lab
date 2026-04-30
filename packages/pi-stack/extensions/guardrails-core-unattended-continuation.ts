@@ -488,6 +488,30 @@ export function resolveValidationKnownCollectorResult(input: {
   };
 }
 
+export function resolveCooldownReadyCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  lastRunAtIso?: string;
+  nowMs: number;
+  cooldownMs: number;
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "cooldown", status: "missing", evidence: "cooldown=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "cooldown", status: "invalid", evidence: "cooldown=read-error" };
+  }
+  const signal = resolveCooldownReadyMeasuredSignal({
+    lastRunAtIso: input.lastRunAtIso,
+    nowMs: input.nowMs,
+    cooldownMs: input.cooldownMs,
+  });
+  return {
+    fact: "cooldown",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 export function resolveStopConditionsClearCollectorResult(input: {
   readStatus: NudgeFreeLoopLocalReadStatus;
   conditions?: NudgeFreeLoopStopConditionSignal[];

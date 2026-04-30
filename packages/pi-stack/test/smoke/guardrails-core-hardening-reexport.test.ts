@@ -7,6 +7,7 @@ import {
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
   resolveCheckpointFreshCollectorResult,
+  resolveCooldownReadyCollectorResult,
   resolveGitStateExpectedCollectorResult,
   resolveHandoffBudgetCollectorResult,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
@@ -309,6 +310,26 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "stop-conditions",
       status: "invalid",
       evidence: "stops=present count=1 first=blocker",
+    });
+    expect(resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "2026-04-30T04:28:30.000Z",
+      nowMs: Date.parse("2026-04-30T04:30:00.000Z"),
+      cooldownMs: 60_000,
+    })).toEqual({
+      fact: "cooldown",
+      status: "observed",
+      evidence: "cooldown=ready elapsedSec=90 maxSec=60",
+    });
+    expect(resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "2026-04-30T04:29:30.000Z",
+      nowMs: Date.parse("2026-04-30T04:30:00.000Z"),
+      cooldownMs: 60_000,
+    })).toEqual({
+      fact: "cooldown",
+      status: "invalid",
+      evidence: "cooldown=wait remainingSec=30 elapsedSec=30",
     });
   });
 });

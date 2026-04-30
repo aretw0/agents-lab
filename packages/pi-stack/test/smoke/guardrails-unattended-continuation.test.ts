@@ -5,6 +5,7 @@ import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshCollectorResult,
   resolveCheckpointFreshMeasuredSignal,
+  resolveCooldownReadyCollectorResult,
   resolveCooldownReadyMeasuredSignal,
   resolveGitStateExpectedCollectorResult,
   resolveGitStateExpectedMeasuredSignal,
@@ -43,6 +44,63 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives cooldown collector results from local read outcomes", () => {
+    const nowMs = Date.parse("2026-04-30T04:30:00.000Z");
+    const previousNone = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const elapsedReady = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "2026-04-30T04:28:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const wait = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "2026-04-30T04:29:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const missing = resolveCooldownReadyCollectorResult({
+      readStatus: "missing",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const readError = resolveCooldownReadyCollectorResult({
+      readStatus: "error",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const invalidTimestamp = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "not-a-date",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const futureTimestamp = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      lastRunAtIso: "2026-04-30T04:30:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const invalidCooldown = resolveCooldownReadyCollectorResult({
+      readStatus: "observed",
+      nowMs,
+      cooldownMs: -1,
+    });
+
+    expect(previousNone).toEqual({ fact: "cooldown", status: "observed", evidence: "cooldown=ready previous=none maxSec=60" });
+    expect(elapsedReady).toEqual({ fact: "cooldown", status: "observed", evidence: "cooldown=ready elapsedSec=90 maxSec=60" });
+    expect(wait).toEqual({ fact: "cooldown", status: "invalid", evidence: "cooldown=wait remainingSec=30 elapsedSec=30" });
+    expect(missing).toEqual({ fact: "cooldown", status: "missing", evidence: "cooldown=missing" });
+    expect(readError).toEqual({ fact: "cooldown", status: "invalid", evidence: "cooldown=read-error" });
+    expect(invalidTimestamp).toEqual({ fact: "cooldown", status: "invalid", evidence: "cooldown=invalid-ts" });
+    expect(futureTimestamp).toEqual({ fact: "cooldown", status: "invalid", evidence: "cooldown=future-ts" });
+    expect(invalidCooldown).toEqual({ fact: "cooldown", status: "invalid", evidence: "cooldown=invalid-max" });
+  });
+
   it("derives stop-conditions collector results from local read outcomes", () => {
     const clear = resolveStopConditionsClearCollectorResult({
       readStatus: "observed",

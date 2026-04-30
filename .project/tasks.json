@@ -6985,6 +6985,36 @@
       ],
       "notes": "Criado para continuar lane essencial de coletores locais. [rationale:risk-control] Stop conditions são a barreira direta contra continuação ininterrupta quando há risco, blocker ou obrigação de compact/checkpoint.\n[2026-04-30T04:27:33Z] slice=1 focus=TASK-BUD-292 gate=test:monitor:smoke-251/251 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor stop-conditions puro criado e re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-567"
+    },
+    {
+      "id": "TASK-BUD-293",
+      "description": "[P1] Criar e re-exportar coletor local puro cooldown-ready.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-292"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro resolveCooldownReadyCollectorResult reutilizando resolveCooldownReadyMeasuredSignal.",
+        "Helper deve derivar observed/invalid a partir de leitura local de lastRunAtIso, nowMs e cooldownMs, com missing/error para leitura local ausente/falha quando aplicável.",
+        "Não aceitar readiness manual nem fonte caller-supplied como elegível.",
+        "Re-exportar helper via guardrails-core-exports/guardrails-core.",
+        "Testes cobrem previous none, elapsed ready, wait, missing read, read-error, invalid timestamp, future timestamp e invalid cooldown.",
+        "Validar que runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado para completar o conjunto básico de coletores locais. [rationale:risk-control] Cooldown observado localmente evita loops apertados e repetição agressiva antes de qualquer continuação ininterrupta.\n[2026-04-30T04:32:00Z] slice=1 focus=TASK-BUD-293 gate=test:monitor:smoke-252/252 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor cooldown-ready puro criado e re-exportado; runtime segue manual-only.",
+      "verification": "VER-BUD-568"
     }
   ]
 }
