@@ -199,15 +199,17 @@ export function summarizeAutoResumePromptDiagnostics(
 	const summarizeCollection = (label: string, row: AutoResumePromptCollectionDiagnostics) => (
 		`${label}(in=${row.inputCount},listed=${row.listedCount},dedup=${row.dedupedCount},trunc=${row.truncatedCount},drop=${row.droppedByLimitCount})`
 	);
+	const staleFocusCount = diagnostics.staleFocusTasks?.length ?? 0;
 	const global = diagnostics.globalTruncated
 		? `global=truncated(+${diagnostics.globalTruncatedChars})`
 		: "global=ok";
 	return [
 		summarizeCollection("tasks", diagnostics.tasks),
+		staleFocusCount > 0 ? `staleFocus=${staleFocusCount}` : undefined,
 		summarizeCollection("blockers", diagnostics.blockers),
 		summarizeCollection("next", diagnostics.nextActions),
 		global,
-	].join(" ");
+	].filter(Boolean).join(" ");
 }
 
 const AUTO_RESUME_PROMPT_MAX_CHARS = 700;

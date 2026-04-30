@@ -731,6 +731,17 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("staleFocus: TASK-BUD-305=completed");
 		expect(prompt).not.toContain("focusTasks: TASK-BUD-305");
 		expect(prompt).toContain("policy: latest user steering wins");
+		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
+			current_tasks: ["TASK-BUD-305"],
+			next_actions: ["improve expected-path calculation for TASK-BUD-306"],
+		} as any, 5 * 60 * 1000, Date.parse("2026-04-30T05:20:00.000Z"), {
+			taskStatusById: { "TASK-BUD-305": "completed", "TASK-BUD-306": "planned" },
+		});
+		expect(summarizeAutoResumePromptDiagnostics(envelope.diagnostics)).toContain("staleFocus=1");
+		expect(summarizeAutoResumePromptDiagnostics({
+			...envelope.diagnostics,
+			staleFocusTasks: undefined,
+		})).not.toContain("staleFocus=");
 	});
 
 	it("derives focusTasks from next_actions when current_tasks are missing", () => {

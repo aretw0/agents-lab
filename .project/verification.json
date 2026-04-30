@@ -7467,6 +7467,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:20:36.760Z",
       "evidence": "Hardened auto-resume focus handling. buildAutoResumePromptEnvelopeFromHandoff/buildAutoResumePromptFromHandoff now accept optional taskStatusById evidence. Auto-resume filters current_tasks to active statuses (in-progress/planned/unknown); completed or other known non-active statuses are omitted from focusTasks and summarized compactly as staleFocus. Runtime auto-resume now reads local .project/tasks.json statuses and passes them to prompt generation, so completed/stale handoff current_tasks are not used as resume focus when local status evidence exists. Added smoke proving current_tasks TASK-BUD-305=completed is omitted, next_actions-derived TASK-BUD-306 becomes focusTasks, and staleFocus: TASK-BUD-305=completed is shown. Validation: context-watchdog focal smoke passed 43/43; cmd.exe /c npm run test:monitor:smoke --silent passed 258/258 across 32 files. Policy/thresholds unchanged; no new scheduler, self-reload, loop, remote, or auto-continuation activated. [rationale:risk-control] Auto-resume should not steer continuation back into completed stale tasks when local board evidence can prove they are done."
+    },
+    {
+      "id": "VER-BUD-583",
+      "target": "TASK-BUD-309",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:23:10.170Z",
+      "evidence": "Added compact stale focus evidence to auto-resume diagnosticsSummary. summarizeAutoResumePromptDiagnostics now emits `staleFocus=N` only when staleFocusTasks were filtered from current_tasks; it omits the field when no stale focus was removed. This makes runtime auto-resume audit logs explain why focus changed without bloating the prompt. Validation: context-watchdog focal smoke passed 43/43; cmd.exe /c npm run test:monitor:smoke --silent passed 258/258 across 32 files. Prompt policy/thresholds unchanged; no scheduler, self-reload, loop, remote, or auto-continuation activated. [rationale:risk-control] Auto-resume focus filtering is now auditable without broad diagnostics."
     }
   ]
 }

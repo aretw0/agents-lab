@@ -7403,6 +7403,32 @@
       ],
       "notes": "Criado após reload e auto-resume com focusTasks stale=TASK-BUD-305. [rationale:risk-control] Auto-resume não deve orientar continuação em task já concluída, pois isso conflita com latest user steering e pode reabrir trabalho encerrado.\n[2026-04-30T05:20:21Z] slice=1 focus=TASK-BUD-308 gate=test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume filtra focusTasks completed/stale usando status local do board.",
       "verification": "VER-BUD-582"
+    },
+    {
+      "id": "TASK-BUD-309",
+      "description": "[P1] Expor stale focus removido no diagnosticsSummary do auto-resume.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-308"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "summarizeAutoResumePromptDiagnostics deve indicar quando staleFocusTasks foram filtradas.",
+        "O resumo deve permanecer compacto e omitir staleFocus quando não houver remoção.",
+        "Prompt runtime continua enxuto e sem broad diagnostics.",
+        "Não alterar política de auto-compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação novo é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload de TASK-BUD-308. [rationale:risk-control] Se auto-resume remover focusTasks concluídas, o audit log precisa evidência compacta para explicar por que o foco mudou.\n[2026-04-30T05:22:51Z] slice=1 focus=TASK-BUD-309 gate=test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] diagnosticsSummary agora expõe staleFocus=N apenas quando focus stale foi filtrado.",
+      "verification": "VER-BUD-583"
     }
   ]
 }
