@@ -1,45 +1,45 @@
 {
-  "timestamp": "2026-04-30T21:52:24.220Z",
-  "context": "Completed TASK-BUD-383 first essential slice. Diagnosed TUI confirmation/monitor block mismatch as trusted-evidence propagation gap, not poli [snip] actual trusted runtime evidence bridge. [truncated:+614 chars]",
+  "timestamp": "2026-04-30T21:56:17.057Z",
+  "context": "Completed TASK-BUD-387 Ops hardening. Added packages/git-skills/skills/git-checkout-cache/checkout.sh to avoid fragile shell-variable recipes [snip] che incidents from derailing main lane. [truncated:+318 chars]",
   "next_actions": [
-    "Commit TASK-BUD-383 completion slice.",
-    "Continue essential lane: consider TASK-BUD-390 if focus remains human-control, or TASK-BUD-387 [snip] Ops blocks research flow. [truncated:+18 chars]",
-    "Do not relax unauthorized-action or enable stronger unattended until trusted confirmation brid [snip] back evidence is complete. [truncated:+14 chars]"
+    "Commit TASK-BUD-387 helper/docs/test slice.",
+    "Re-check next essential local-safe task after commit; likely TASK-BUD-390 for trusted confirmation evidence bridge.",
+    "Keep /btw design curation and other lateral research as future tasks unless selected explicitly."
   ],
   "blockers": [
     "Strong unattended/loop/scheduler/remote remains blocked.",
-    "Trusted runtime evidence bridge for confirmations remains planned as TASK-BUD-390.",
+    "Trusted runtime confirmation evidence bridge remains planned as TASK-BUD-390.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi- [snip] export.test.ts => 5 passed [truncated:+45 chars]",
+    "bash scripts/test/git-checkout-cache-smoke.sh => git-checkout-cache-smoke: ok",
     "npm run docs:package:sync => ok",
     "npm run docs:package:check => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:52:24.220Z",
+    "generatedAtIso": "2026-04-30T21:56:17.057Z",
     "level": "ok",
-    "percent": 21,
+    "percent": 32,
     "action": "continue",
-    "recommendation": "commit-human-confirmation-audit-slice",
+    "recommendation": "commit-checkout-cache-helper",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:52:24.220Z",
+      "atIso": "2026-04-30T21:56:17.057Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 21,
+      "percent": 32,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-human-confirmation-audit-slice"
+      "recommendation": "commit-checkout-cache-helper"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-383"
+    "TASK-BUD-387"
   ]
 }

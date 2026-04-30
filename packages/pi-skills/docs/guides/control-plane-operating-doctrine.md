@@ -56,6 +56,8 @@ Skills confiáveis também são superfície de leitura operacional. Em devcontai
 
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito. O guardrail bloqueia scans de blast radius sobre source maps: leitura direta de `*.map` com ferramentas de conteúdo e varreduras recursivas em `node_modules`/`dist`/`build`/`coverage` sem exclusão explícita de `*.map` devem falhar antes de despejar saída no contexto.
 
+Pesquisa remota bounded deve usar helper versionado, não receitas frágeis com variáveis shell embutidas. Para cache de repositórios de referência, prefira `bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --path-only`; para validar sem rede, use `--dry-run --path-only`. Evite comandos do tipo `CACHE=...; echo $CACHE` no `bash` tool, pois alguns harnesses podem interpolar `$VAR` antes de o comando chegar ao shell. Se o helper não estiver disponível, use caminhos literais curtos ou registre blocker Ops; não deixe uma falha de cache contaminar a conclusão da pesquisa principal.
+
 Fallback operacional enquanto `Esc` estiver incerto:
 
 - não iniciar long-run, loop, scheduler, self-reload, remote/offload ou executor;

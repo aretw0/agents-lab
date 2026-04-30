@@ -20,17 +20,22 @@ Example: `github.com/aretw0/agents-lab` → `~/.cache/checkouts/github.com/aretw
 
 ## Command
 
+Use the versioned helper from this skill directory. From the repository root:
+
 ```bash
-bash checkout.sh <repo> --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --path-only
 ```
 
 Examples:
 
 ```bash
-bash checkout.sh aretw0/agents-lab --path-only
-bash checkout.sh github.com/mitsuhiko/minijinja --path-only
-bash checkout.sh https://github.com/mitsuhiko/minijinja --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh aretw0/agents-lab --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh github.com/mitsuhiko/minijinja --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh https://github.com/mitsuhiko/minijinja --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh git@github.com:mitsuhiko/minijinja.git --path-only
 ```
+
+Avoid recipes that set shell variables in the pi `bash` tool command string (for example `CACHE=...; echo $CACHE`), because some harnesses can pre-expand `$VAR` before the command reaches bash. Prefer direct helper arguments and literal paths.
 
 The script will:
 1. Parse the repo reference into `host/org/repo`
@@ -42,8 +47,18 @@ The script will:
 ## Force refresh
 
 ```bash
-bash checkout.sh <repo> --force-update --path-only
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --force-update --path-only
 ```
+
+## Dry-run/path validation
+
+For local smoke checks or path-only planning without network access:
+
+```bash
+bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --dry-run --path-only
+```
+
+The dry-run mode parses the repo reference and prints the deterministic cache path without cloning or fetching.
 
 ## Recommended workflow
 
@@ -53,5 +68,7 @@ bash checkout.sh <repo> --force-update --path-only
 
 ## Notes
 
-- `owner/repo` shorthand defaults to `github.com`
-- Prefer not to edit directly in the shared cache — create a worktree or copy for task-specific changes
+- `owner/repo` shorthand defaults to `github.com`.
+- Prefer not to edit directly in the shared cache — create a worktree or copy for task-specific changes.
+- If the helper is unavailable, do not improvise a long shell-variable recipe. Either use `git clone --filter=blob:none <url> <literal-cache-path>` with escaped variables avoided, or record an Ops blocker and continue the main lane with already available local evidence.
+- The helper accepts `--cache-root <dir>` for tests/sandboxes and `--stale-seconds <n>` for refresh tuning.

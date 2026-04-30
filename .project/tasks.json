@@ -9393,7 +9393,7 @@
     {
       "id": "TASK-BUD-387",
       "description": "Backlog Ops: harden remote checkout/cache workflow against shell-variable interpolation and missing helper scripts.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/git-skills/skills/git-checkout-cache/SKILL.md",
@@ -9407,7 +9407,8 @@
         "Registrar fallback seguro quando o helper não estiver instalado, sem bloquear a lane principal."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "Criado a partir de steering do operador: tratar como incidente significa anotar para resolver depois e voltar ao trabalho essencial. [rationale:risk-control] Falha de construção de comando para checkout cache afeta pesquisa remota bounded e pode levar a conclusões incompletas; precisa hardening Ops separado sem interromper a lane atual."
+      "notes": "Criado a partir de steering do operador: tratar como incidente significa anotar para resolver depois e voltar ao trabalho essencial. [rationale:risk-control] Falha de construção de comando para checkout cache afeta pesquisa remota bounded e pode levar a conclusões incompletas; precisa hardening Ops separado sem interromper a lane atual.\n2026-04-30: fatia bounded executada. Adicionado helper versionado checkout.sh com --dry-run/--path-only, parser para owner/repo, host/org/repo, https e git@; docs atualizadas para evitar receitas frágeis com $VAR no bash tool. Smoke local cobre dry-run/path-only sem rede.\n2026-04-30: concluído. O incidente de $VAR pré-expandido virou helper versionado e smoke dry-run/path-only sem rede; fallback documentado para não contaminar pesquisa principal quando cache remoto falhar.",
+      "verification": "VER-BUD-709"
     },
     {
       "id": "TASK-BUD-388",

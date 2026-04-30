@@ -8601,6 +8601,15 @@
       "method": "conservative-root-cause-and-audit-plan",
       "timestamp": "2026-04-30T21:52:09.403Z",
       "evidence": "Closed first essential slice for TASK-BUD-383. The reported TUI-confirmation/monitor-block mismatch is classified as an auditable-evidence propagation gap, not a reason to relax unauthorized-action. Code path shows monitor-visible tool_call context lacks a trusted confirmation signal; therefore fail-closed is correct when confirmation is not visible to the monitor/guard. Added resolveHumanConfirmationAuditPlan and smoke coverage; doctrine records minimum trusted confirmation contract. Created TASK-BUD-390 for actual trusted evidence bridge/consumption before stronger unattended operation."
+    },
+    {
+      "id": "VER-BUD-709",
+      "target": "TASK-BUD-387",
+      "target_type": "task",
+      "status": "passed",
+      "method": "helper+dry-run-smoke",
+      "timestamp": "2026-04-30T21:56:05.681Z",
+      "evidence": "Implemented versioned git checkout cache helper at packages/git-skills/skills/git-checkout-cache/checkout.sh. It parses owner/repo, host/org/repo, https URL, git@ URL, supports --path-only, --dry-run, --force-update, --cache-root, --stale-seconds, clones with --filter=blob:none when needed, fetches stale existing checkouts, and fast-forwards only when clean/upstream exists. Updated git-checkout-cache skill docs and control-plane doctrine to avoid fragile shell-variable recipes in pi bash tool and document fallback when helper is unavailable. Added scripts/test/git-checkout-cache-smoke.sh. Validation: bash scripts/test/git-checkout-cache-smoke.sh => git-checkout-cache-smoke: ok; docs:package:sync/check ok; safe_marker_check skill 4/4, doctrine 4/4, helper 4/4."
     }
   ]
 }
