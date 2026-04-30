@@ -7476,6 +7476,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:23:10.170Z",
       "evidence": "Added compact stale focus evidence to auto-resume diagnosticsSummary. summarizeAutoResumePromptDiagnostics now emits `staleFocus=N` only when staleFocusTasks were filtered from current_tasks; it omits the field when no stale focus was removed. This makes runtime auto-resume audit logs explain why focus changed without bloating the prompt. Validation: context-watchdog focal smoke passed 43/43; cmd.exe /c npm run test:monitor:smoke --silent passed 258/258 across 32 files. Prompt policy/thresholds unchanged; no scheduler, self-reload, loop, remote, or auto-continuation activated. [rationale:risk-control] Auto-resume focus filtering is now auditable without broad diagnostics."
+    },
+    {
+      "id": "VER-BUD-584",
+      "target": "TASK-BUD-310",
+      "target_type": "task",
+      "status": "passed",
+      "method": "preview+test",
+      "timestamp": "2026-04-30T05:26:44.440Z",
+      "evidence": "Post-reload validation found and fixed a stale focus reintroduction path. The current handoff had current_tasks TASK-BUD-309=completed; the real auto-resume helper initially filtered it from current_tasks but re-derived TASK-BUD-309 from next_actions. Fix: filtered stale current task IDs are now tracked as staleIds and excluded from derived next_actions task hints. Local preview with the real helper now returns `focusTasks: none-listed`, `staleFocus: TASK-BUD-309=completed`, and diagnosticsSummary includes `staleFocus=1`. Added smoke asserting repeated stale IDs from next_actions do not re-enter focusTasks. Validation: context-watchdog focal smoke passed 43/43; cmd.exe /c npm run test:monitor:smoke --silent passed 258/258 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation was triggered. [rationale:risk-control] Completed focus tasks must not be reintroduced indirectly from handoff next_actions during auto-resume."
     }
   ]
 }

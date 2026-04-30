@@ -7429,6 +7429,29 @@
       ],
       "notes": "Criado após reload de TASK-BUD-308. [rationale:risk-control] Se auto-resume remover focusTasks concluídas, o audit log precisa evidência compacta para explicar por que o foco mudou.\n[2026-04-30T05:22:51Z] slice=1 focus=TASK-BUD-309 gate=test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] diagnosticsSummary agora expõe staleFocus=N apenas quando focus stale foi filtrado.",
       "verification": "VER-BUD-583"
+    },
+    {
+      "id": "TASK-BUD-310",
+      "description": "[P1] Validar pós-reload que auto-resume não reintroduz focus stale.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-309"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Gerar preview local/read-only do auto-resume a partir de .project/handoff.json e .project/tasks.json.",
+        "Confirmar que focusTasks não aponta para task completed/stale quando status local prova conclusão.",
+        "Confirmar que diagnosticsSummary inclui staleFocus=N quando aplicável ou omite quando não aplicável.",
+        "Não disparar compact, resume, scheduler, self-reload, remoto ou auto-continuação.",
+        "Registrar evidência no board e checkpoint."
+      ],
+      "notes": "Criado após reload de TASK-BUD-309. [rationale:risk-control] A correção de stale focus precisa ser validada no código carregado/atual sem acionar auto-resume operacional.\n[2026-04-30T05:26:30Z] slice=1 focus=TASK-BUD-310 gate=real-helper-preview+test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume agora bloqueia reintrodução de stale focus via next_actions.",
+      "verification": "VER-BUD-584"
     }
   ]
 }

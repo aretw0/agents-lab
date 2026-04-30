@@ -742,6 +742,15 @@ describe("context-watchdog", () => {
 			...envelope.diagnostics,
 			staleFocusTasks: undefined,
 		})).not.toContain("staleFocus=");
+		const repeatedStale = buildAutoResumePromptFromHandoff({
+			current_tasks: ["TASK-BUD-305"],
+			next_actions: ["after reload validate TASK-BUD-305 only"],
+		} as any, 5 * 60 * 1000, Date.parse("2026-04-30T05:20:00.000Z"), {
+			taskStatusById: { "TASK-BUD-305": "completed" },
+		});
+		expect(repeatedStale).toContain("focusTasks: none-listed");
+		expect(repeatedStale).toContain("staleFocus: TASK-BUD-305=completed");
+		expect(repeatedStale).not.toContain("focusTasks: TASK-BUD-305");
 	});
 
 	it("derives focusTasks from next_actions when current_tasks are missing", () => {

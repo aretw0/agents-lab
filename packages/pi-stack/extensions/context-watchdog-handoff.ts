@@ -317,20 +317,24 @@ function isAutoResumeActiveTaskStatus(status: string | undefined): boolean {
 	return status === undefined || status === "in-progress" || status === "planned";
 }
 
-function filterAutoResumeFocusTasks(rawTasks: string[], options?: AutoResumePromptOptions): { active: string[]; stale: string[] } {
+function filterAutoResumeFocusTasks(rawTasks: string[], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string> } {
 	const statuses = options?.taskStatusById ?? {};
 	const active: string[] = [];
 	const stale: string[] = [];
+	const staleIds = new Set<string>();
 	for (const task of rawTasks) {
 		const normalizedTask = normalizePromptSegment(task);
-		const status = statuses[normalizedTask] ?? statuses[normalizedTask.toUpperCase()];
+		const normalizedUpper = normalizedTask.toUpperCase();
+		const status = statuses[normalizedTask] ?? statuses[normalizedUpper];
 		if (isAutoResumeActiveTaskStatus(status)) {
 			active.push(task);
 		} else {
 			stale.push(`${normalizedTask}=${status}`);
+			staleIds.add(normalizedTask);
+			staleIds.add(normalizedUpper);
 		}
 	}
-	return { active, stale };
+	return { active, stale, staleIds };
 }
 
 export function buildAutoResumePromptEnvelopeFromHandoff(
@@ -352,7 +356,7 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	];
 	const derivedTaskHints = filteredCurrentTasks.active.length > 0
 		? []
-		: extractTaskIdsFromTextLines(focusSourceLines);
+		: extractTaskIdsFromTextLines(focusSourceLines).filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()));
 	const operationalFocusHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0
 		? []
 		: extractOperationalFocusHints(focusSourceLines);
