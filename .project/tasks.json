@@ -6271,6 +6271,32 @@
       ],
       "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] Cooldown do loop sem empurrões deve ser derivado de tempo real/última execução, não de boolean manual.\n[2026-04-30T02:35:17Z] slice=1 focus=TASK-BUD-265 gate=test:monitor:smoke-233/233 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured cooldown-ready derivado de lastRun/now/cooldown, sem runtime loop.",
       "verification": "VER-BUD-540"
+    },
+    {
+      "id": "TASK-BUD-266",
+      "description": "[P1] Criar helper puro para sinal measured de validação conhecida.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-265"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured validation-known a partir de tipo de validação e gate focal, sem aceitar ok manual.",
+        "Sinal fica ok para marker-check/structured-read e focal-test com gate focal não vazio.",
+        "Sinal falha com evidência compacta para unknown ou focal-test sem gate.",
+        "Testes cobrem métodos conhecidos, focal sem gate e unknown.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] O gate validation-known precisa ser derivado de método/gate de validação, não de boolean manual.\n[2026-04-30T02:40:43Z] slice=1 focus=TASK-BUD-266 gate=test:monitor:smoke-234/234 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured validation-known derivado de método/gate de validação, sem runtime loop.",
+      "verification": "VER-BUD-541"
     }
   ]
 }

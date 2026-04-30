@@ -19,6 +19,7 @@ export interface UnattendedContinuationPlan {
 }
 
 export type NudgeFreeLoopCanarySignalSource = "manual" | "measured";
+export type NudgeFreeLoopValidationKind = "marker-check" | "focal-test" | "structured-read" | "unknown";
 export type NudgeFreeLoopMeasuredGate =
   | "next-local-safe"
   | "checkpoint-fresh"
@@ -196,6 +197,23 @@ export function resolveCooldownReadyMeasuredSignal(input: {
     return { ok: false, evidence: `cooldown=wait remainingSec=${remainingSec} elapsedSec=${elapsedSec}` };
   }
   return { ok: true, evidence: `cooldown=ready elapsedSec=${elapsedSec} maxSec=${cooldownSec}` };
+}
+
+export function resolveValidationKnownMeasuredSignal(input: {
+  kind: NudgeFreeLoopValidationKind;
+  focalGate?: string;
+}): NudgeFreeLoopMeasuredSignal {
+  if (input.kind === "unknown") {
+    return { ok: false, evidence: "validation=unknown" };
+  }
+  if (input.kind === "focal-test") {
+    const gate = input.focalGate?.trim();
+    if (!gate) {
+      return { ok: false, evidence: "validation=focal-test gate=missing" };
+    }
+    return { ok: true, evidence: `validation=focal-test gate=${gate.length > 32 ? `${gate.slice(0, 29)}...` : gate}` };
+  }
+  return { ok: true, evidence: `validation=${input.kind}` };
 }
 
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [

@@ -9,6 +9,7 @@ import {
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesMeasuredSignal,
   resolveUnattendedContinuationPlan,
+  resolveValidationKnownMeasuredSignal,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [
@@ -142,6 +143,21 @@ describe("guardrails unattended continuation", () => {
     expect(invalid).toEqual({ ok: false, evidence: "cooldown=invalid-ts" });
     expect(future).toEqual({ ok: false, evidence: "cooldown=future-ts" });
     expect(wait.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact validation-known measured signals from validation method", () => {
+    const marker = resolveValidationKnownMeasuredSignal({ kind: "marker-check" });
+    const structured = resolveValidationKnownMeasuredSignal({ kind: "structured-read" });
+    const focal = resolveValidationKnownMeasuredSignal({ kind: "focal-test", focalGate: "npm-run-smoke" });
+    const focalMissing = resolveValidationKnownMeasuredSignal({ kind: "focal-test" });
+    const unknown = resolveValidationKnownMeasuredSignal({ kind: "unknown" });
+
+    expect(marker).toEqual({ ok: true, evidence: "validation=marker-check" });
+    expect(structured).toEqual({ ok: true, evidence: "validation=structured-read" });
+    expect(focal).toEqual({ ok: true, evidence: "validation=focal-test gate=npm-run-smoke" });
+    expect(focalMissing).toEqual({ ok: false, evidence: "validation=focal-test gate=missing" });
+    expect(unknown).toEqual({ ok: false, evidence: "validation=unknown" });
+    expect(focal.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {
