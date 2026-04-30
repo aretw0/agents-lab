@@ -7980,6 +7980,33 @@
       "method": "test",
       "timestamp": "2026-04-30T12:23:32.939Z",
       "evidence": "Tightened context_watch_one_slice_operator_packet_preview so the composed human contract review derives declaredFilesKnown from the local continuity candidate estimatedFiles rather than assuming a single focus implies declared files. The existing green fixture with task.files still yields contract=blocked only by human-confirmation-missing, dispatch=no, executor=no, authorization=none. A new smoke path with the same single focus but no task.files keeps readiness/packet green while contract review blocks with human-confirmation-missing|declared-files-missing. No executor, dispatcher, scheduler, loop, staging, commit, board close, checkpoint, remote/offload, or self-reload was added. Validation: focal context-watchdog passed 48/48; full monitor smoke passed 269/269. Runtime behavior belongs to the not-yet-live operator packet tool, so reload is required before live validation. [rationale:risk-control] The operator packet now distinguishes a focus task from a declared reversible file scope before any future execution path."
+    },
+    {
+      "id": "VER-BUD-640",
+      "target": "TASK-BUD-366",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T12:48:19.262Z",
+      "evidence": "Live post-reload operator packet preview correctly failed closed for a focus that did not declare a recognized validation gate. context_watch_one_slice_operator_packet_preview returned `context-watch-one-slice-operator-packet: readiness=no preview=blocked packet=blocked contract=blocked dispatch=no executor=no reasons=packet-not-ready|human-confirmation-missing|validation-gate-missing authorization=none`. This confirmed the tool was available after reload and does not invent validation. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, or loop was dispatched by the preview. Green-path validation moved to TASK-BUD-367 with explicit smoke validation. [rationale:risk-control] Fail-closed behavior is correct when validation is unknown."
+    },
+    {
+      "id": "VER-BUD-641",
+      "target": "TASK-BUD-367",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T12:48:32.753Z",
+      "evidence": "Live green-path validation of context_watch_one_slice_operator_packet_preview succeeded with a fresh local-safe focus that declared task.files and explicit smoke validation. Operator packet returned `context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-367 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. No declared-files-missing appeared when task.files was declared. git status after preview showed only explicit .project/handoff.json and .project/tasks.json workflow changes; preview did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or loop. [rationale:risk-control] The composed operator packet is green up to the intentionally missing human confirmation while dispatch/executor remain off."
+    },
+    {
+      "id": "VER-BUD-642",
+      "target": "TASK-BUD-368",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T12:48:46.482Z",
+      "evidence": "Live safety validation of context_watch_one_slice_operator_packet_preview succeeded for a focus with explicit smoke validation but no task.files field. Operator packet returned `context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none`. This proves the tightened declaredFilesKnown derivation blocks a contract when file scope is missing even with a single focus and known validation. git status after preview showed only explicit .project/handoff.json and .project/tasks.json workflow changes; preview did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or loop. [rationale:risk-control] A future execution path cannot rely on focus alone; file scope must be declared."
     }
   ]
 }

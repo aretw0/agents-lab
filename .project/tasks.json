@@ -8870,6 +8870,68 @@
       ],
       "notes": "[rationale:risk-control] Antes de qualquer execução futura, o pacote composto precisa diferenciar foco único de escopo de arquivos realmente declarado.\n[2026-04-30T12:23:09Z] slice=1 focus=TASK-BUD-365 gate=context-watchdog-48/48+test:monitor:smoke-269/269 commit=pending contract=declared-files-derived-from-candidate reload-needed=yes. [rationale:risk-control] Foco único não equivale mais a arquivos declarados no packet composto.",
       "verification": "VER-BUD-639"
+    },
+    {
+      "id": "TASK-BUD-366",
+      "description": "[P1] Live-validar operator packet preview após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-365"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar foco local-safe fresco com arquivos declarados e validação conhecida.",
+        "Executar context_watch_one_slice_operator_packet_preview e confirmar readiness=yes, packet=ready-for-human-decision, contract=blocked, dispatch=no, executor=no, authorization=none.",
+        "Confirmar que com arquivos declarados o bloqueio compacto é human-confirmation-missing, não declared-files-missing.",
+        "Confirmar que a preview não stageia, commita, fecha task, checkpointa, aciona scheduler/remote/self-reload ou loop; ações de board/commit/checkpoint são explícitas.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A nova tool composta precisa ser validada ao vivo após reload, provando que junta readiness/packet/contract sem autorizar executor.\n[2026-04-30T12:31:00Z] slice=1 focus=TASK-BUD-366 gate=live-operator-packet-blocked reason=validation-gate-missing dispatch=no executor=no authorization=none followup=TASK-BUD-367. [rationale:risk-control] Packet composto validado em fail-closed por validação desconhecida.",
+      "verification": "VER-BUD-640"
+    },
+    {
+      "id": "TASK-BUD-367",
+      "description": "[P1] Live-validar caminho verde do operator packet preview com smoke explícito.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-366"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke principal permanece verde.",
+        "context_watch_one_slice_operator_packet_preview retorna readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no authorization=none.",
+        "O bloqueio do contrato é human-confirmation-missing sem declared-files-missing quando task.files está declarado.",
+        "A preview não executa staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload ou loop."
+      ],
+      "notes": "[rationale:risk-control] TASK-BUD-366 provou fail-closed por validation-gate-missing; esta task declara smoke explícito para provar o caminho verde do operator packet.\n[2026-04-30T12:32:00Z] slice=1 focus=TASK-BUD-367 gate=live-operator-packet-green readiness=yes packet=ready-for-human-decision contract=blocked:human-confirmation-missing dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] Caminho verde validado sem executor.",
+      "verification": "VER-BUD-641"
+    },
+    {
+      "id": "TASK-BUD-368",
+      "description": "[P1] Live-validar operator packet bloqueia quando faltam arquivos declarados.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-367"
+      ],
+      "acceptance_criteria": [
+        "Smoke principal permanece verde.",
+        "context_watch_one_slice_operator_packet_preview retorna contract=blocked com declared-files-missing quando task.files não está declarado.",
+        "A preview mantém dispatch=no executor=no authorization=none.",
+        "A preview não executa staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload ou loop."
+      ],
+      "notes": "[rationale:risk-control] Mesmo com foco único e validação conhecida, o operator packet deve bloquear se não houver escopo de arquivos declarado.\n[2026-04-30T12:33:00Z] slice=1 focus=TASK-BUD-368 gate=live-operator-packet-missing-files reasons=human-confirmation-missing|declared-files-missing dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] Falta de task.files bloqueia contrato mesmo com validation conhecida.",
+      "verification": "VER-BUD-642"
     }
   ]
 }
