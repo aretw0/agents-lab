@@ -115,6 +115,19 @@ export interface NudgeFreeLoopLocalMeasuredCanaryPacket {
   summary: string;
 }
 
+export type NudgeFreeLoopPacketFactSource = "local-observed" | "caller-supplied" | "mixed" | "unknown";
+
+export interface NudgeFreeLoopMeasuredPacketTrust {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  factSource: NudgeFreeLoopPacketFactSource;
+  eligibleForAuditedRuntimeSurface: boolean;
+  reasons: string[];
+  summary: string;
+}
+
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
 
 export interface NudgeFreeLoopCanaryGate {
@@ -405,6 +418,31 @@ export function buildLocalMeasuredNudgeFreeLoopCanaryPacket(input: NudgeFreeLoop
 
 export function resolveLocalMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
   return buildLocalMeasuredNudgeFreeLoopCanaryPacket(input).gate;
+}
+
+export function resolveMeasuredPacketTrust(input: {
+  packet: NudgeFreeLoopLocalMeasuredCanaryPacket;
+  factSource: NudgeFreeLoopPacketFactSource;
+}): NudgeFreeLoopMeasuredPacketTrust {
+  const reasons: string[] = [];
+  if (input.factSource !== "local-observed") reasons.push("untrusted-fact-source");
+  if (input.packet.gate.decision !== "ready") reasons.push("gate-not-ready");
+  if (input.packet.gate.signalSource !== "measured") reasons.push("signal-source-not-measured");
+  if (input.packet.gate.measuredEvidenceCount !== REQUIRED_NUDGE_FREE_MEASURED_GATES.length) reasons.push("evidence-incomplete");
+  if (input.packet.gate.invalidMeasuredEvidenceGates.length > 0) reasons.push("evidence-invalid");
+  if (input.packet.evidence.some((entry) => entry.evidence.length > NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS)) reasons.push("evidence-too-large");
+
+  const eligible = reasons.length === 0;
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    factSource: input.factSource,
+    eligibleForAuditedRuntimeSurface: eligible,
+    reasons: eligible ? ["local-observed-ready-packet"] : reasons,
+    summary: `nudge-free-packet-trust: eligible=${eligible ? "yes" : "no"} source=${input.factSource} reasons=${eligible ? "local-observed-ready-packet" : reasons.join("|")}`,
+  };
 }
 
 export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {

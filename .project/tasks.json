@@ -6548,6 +6548,33 @@
       ],
       "notes": "Criado após reload e reforço do operador sobre evitar overlap de primitivas. [rationale:risk-control] Antes de expor packet measured em runtime, precisamos de contrato explícito e checagem de overlap para não criar superfície redundante ou permissiva.\n[2026-04-30T03:30:00Z] slice=1 focus=TASK-BUD-276 gate=safe_marker_check-8/8 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato de superfície measured futura documentado com checagem de overlap de primitivas.",
       "verification": "VER-BUD-551"
+    },
+    {
+      "id": "TASK-BUD-277",
+      "description": "[P1] Adicionar guard puro de confiança/origem para packet measured local.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-274",
+        "TASK-BUD-276"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que classifica se um packet measured é elegível para futura superfície runtime auditada com base em origem dos fatos e integridade da evidência.",
+        "Helper deve falhar fechado para caller-supplied/manual/mixed/unknown, mesmo quando o gate interno estiver ready.",
+        "Helper deve explicitar effect/mode/activation none e não ser autorização operacional.",
+        "Testes cobrem local-observed ready, caller-supplied ready e packet blocked/incompleto.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload na lane essencial. [rationale:risk-control] Um packet ready só é útil para operação futura se a origem dos fatos for confiável; fatos caller-supplied não podem virar readiness operacional.\n[2026-04-30T03:31:27Z] slice=1 focus=TASK-BUD-277 gate=test:monitor:smoke-242/242 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Guard de origem/confianca do packet measured criado; caller-supplied não vira elegível.",
+      "verification": "VER-BUD-552"
     }
   ]
 }

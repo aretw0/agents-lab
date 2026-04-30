@@ -8,6 +8,7 @@ import {
   resolveHandoffBudgetMeasuredSignal,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredNudgeFreeLoopCanaryGate,
+  resolveMeasuredPacketTrust,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesMeasuredSignal,
@@ -311,6 +312,74 @@ describe("guardrails unattended continuation", () => {
       "protected-scope-pending",
       "stop-condition-present",
     ]));
+  });
+
+  it("classifies measured packet trust without granting operational authorization", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const readyPacket = buildLocalMeasuredNudgeFreeLoopCanaryPacket({
+      optIn: true,
+      nowMs,
+      candidate: {
+        taskId: "TASK-BUD-277",
+        scope: "local",
+        estimatedFiles: 1,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "none",
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      cooldownMs: 60_000,
+      validation: { kind: "marker-check" },
+      stopConditions: [],
+    });
+    const blockedPacket = buildLocalMeasuredNudgeFreeLoopCanaryPacket({
+      optIn: true,
+      nowMs,
+      candidate: {
+        taskId: "TASK-RISK",
+        scope: "local",
+        estimatedFiles: 1,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "none",
+        protectedPaths: [".github/workflows/ci.yml"],
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: [".github/workflows/ci.yml"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      cooldownMs: 60_000,
+      validation: { kind: "marker-check" },
+      stopConditions: [{ kind: "protected-scope", present: true, evidence: "protected=.github" }],
+    });
+
+    expect(resolveMeasuredPacketTrust({ packet: readyPacket, factSource: "local-observed" })).toEqual({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "local-observed",
+      eligibleForAuditedRuntimeSurface: true,
+      reasons: ["local-observed-ready-packet"],
+      summary: "nudge-free-packet-trust: eligible=yes source=local-observed reasons=local-observed-ready-packet",
+    });
+    expect(resolveMeasuredPacketTrust({ packet: readyPacket, factSource: "caller-supplied" })).toMatchObject({
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: ["untrusted-fact-source"],
+    });
+    expect(resolveMeasuredPacketTrust({ packet: blockedPacket, factSource: "local-observed" })).toMatchObject({
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: expect.arrayContaining(["gate-not-ready", "evidence-incomplete"]),
+    });
   });
 
   it("composes local facts into measured nudge-free canary readiness", () => {
