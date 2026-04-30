@@ -8043,6 +8043,15 @@
       "method": "test",
       "timestamp": "2026-04-30T13:19:35.805Z",
       "evidence": "Implemented pure/read-only resolveOneSliceExecutorBacklogGate(...) in guardrails-core-unattended-continuation and re-exported it through guardrails-core. The helper evaluates whether a future one-slice executor idea is eligible for a separate backlog/design task, but always returns effect=none, mode=backlog-gate, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, implementationAllowed=false, oneSliceOnly=true. The ready path returns decision=ready-for-separate-task with implementation=no/dispatch=no/executor=no and reasons criteria-present,separate-task-required,implementation-still-not-authorized. Blocked path covers missing .project strategy, missing operator packet validations, missing explicit contract/budgets, and prohibited requests such as repeat/scheduler/self-reload/remote-or-offload/GitHub Actions/protected scope/destructive maintenance with compact blockedRequests. No runtime tool, executor, dispatcher, scheduler, loop, or automation was added. Validation: focal guardrails-unattended-continuation + re-export smoke passed 44/44; full monitor smoke passed 270/270. [rationale:risk-control] The executor backlog boundary is now testable without authorizing implementation or dispatch."
+    },
+    {
+      "id": "VER-BUD-647",
+      "target": "TASK-BUD-373",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T13:27:03.840Z",
+      "evidence": "Exposed resolveOneSliceExecutorBacklogGate(...) as read-only runtime tool `one_slice_executor_backlog_gate` in guardrails-core-unattended-continuation-surface. The tool returns the helper summary/details only and never approves implementation or dispatch. Ready path summary is `one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none`, with dispatchAllowed=false, executorApproved=false, implementationAllowed=false. Blocked path surfaces prohibited requests as `blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance`. No executor, dispatcher, scheduler, loop, staging, commit, checkpoint, remote/offload, self-reload, or automation was added. Validation: focal surface smoke passed 9/9; full monitor smoke passed 271/271. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] The backlog gate is now inspectable in the runtime transcript without weakening the no-implementation boundary."
     }
   ]
 }

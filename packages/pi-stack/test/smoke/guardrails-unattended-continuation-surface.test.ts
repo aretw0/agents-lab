@@ -286,6 +286,80 @@ describe("guardrails unattended continuation surface", () => {
     expect(result?.details.summary).toBe("unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved");
   });
 
+  it("registers read-only one-slice executor backlog gate tool", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsUnattendedContinuationSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const gateTool = tools.find((tool) => tool.name === "one_slice_executor_backlog_gate");
+    const ready = gateTool?.execute("call-ready", {
+      project_strategy_resolved: true,
+      operator_packet_green_validated: true,
+      operator_packet_fail_closed_validated: true,
+      operator_packet_missing_files_validated: true,
+      explicit_human_contract_defined: true,
+      declared_files_known: true,
+      rollback_plan_known: true,
+      validation_gate_known: true,
+      staging_scope_known: true,
+      commit_scope_known: true,
+      time_budget_known: true,
+      cost_budget_known: true,
+      cancellation_known: true,
+      checkpoint_planned: true,
+      stop_contract_known: true,
+      separate_task_required: true,
+      starts_disabled_or_dry_run: true,
+    });
+    const blocked = gateTool?.execute("call-blocked", {
+      project_strategy_resolved: false,
+      operator_packet_green_validated: true,
+      operator_packet_fail_closed_validated: true,
+      operator_packet_missing_files_validated: false,
+      explicit_human_contract_defined: false,
+      declared_files_known: true,
+      rollback_plan_known: true,
+      validation_gate_known: true,
+      staging_scope_known: true,
+      commit_scope_known: true,
+      time_budget_known: false,
+      cost_budget_known: true,
+      cancellation_known: true,
+      checkpoint_planned: true,
+      stop_contract_known: true,
+      separate_task_required: true,
+      starts_disabled_or_dry_run: true,
+      repeat_requested: true,
+      scheduler_requested: true,
+      self_reload_requested: true,
+      remote_or_offload_requested: true,
+      github_actions_requested: true,
+      protected_scope_requested: true,
+      destructive_maintenance_requested: true,
+    });
+
+    expect(ready?.content?.[0]?.text).toBe("one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none");
+    expect(ready?.details).toMatchObject({
+      effect: "none",
+      mode: "backlog-gate",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+      decision: "ready-for-separate-task",
+    });
+    expect(blocked?.content?.[0]?.text).toContain("one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no");
+    expect(blocked?.content?.[0]?.text).toContain("blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance");
+    expect(blocked?.details).toMatchObject({
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+      decision: "blocked",
+    });
+  });
+
   it("registers read-only human-confirmed one-slice contract review tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

@@ -9041,6 +9041,33 @@
       ],
       "notes": "[rationale:risk-control] O gate de backlog do executor precisa ser testável sem transformar readiness em autorização operacional.\n[2026-04-30T13:19:14Z] slice=1 focus=TASK-BUD-372 gate=focal-44/44+test:monitor:smoke-270/270 commit=pending helper=resolveOneSliceExecutorBacklogGate implementationAllowed=false dispatchAllowed=false executorApproved=false. [rationale:risk-control] Gate de backlog virou helper puro sem runtime/executor.",
       "verification": "VER-BUD-646"
+    },
+    {
+      "id": "TASK-BUD-373",
+      "description": "[P1] Expor gate de backlog do executor one-slice como tool read-only.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-372"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar runtime tool read-only para resolveOneSliceExecutorBacklogGate.",
+        "Tool deve retornar implementation=no dispatch=no executor=no authorization=none mesmo quando decision=ready-for-separate-task.",
+        "Tool deve bloquear repeat/scheduler/self-reload/remote/offload/GitHub Actions/protected/destructive-maintenance com blockedRequests visível.",
+        "Não criar executor, dispatcher, scheduler, loop, staging, commit, checkpoint ou automação.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Expor o gate como tool read-only reduz ambiguidade para a próxima decisão sem liberar implementação ou execução.\n[2026-04-30T13:26:35Z] slice=1 focus=TASK-BUD-373 gate=surface-9/9+test:monitor:smoke-271/271 commit=pending tool=one_slice_executor_backlog_gate implementation=no dispatch=no executor=no reload-needed=yes. [rationale:risk-control] Gate de backlog exposto como tool read-only sem executor.",
+      "verification": "VER-BUD-647"
     }
   ]
 }
