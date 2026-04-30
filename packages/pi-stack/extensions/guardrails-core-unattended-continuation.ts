@@ -153,6 +153,23 @@ export function resolveProtectedScopesMeasuredSignal(input: {
   return { ok: false, evidence: `protected=pending count=${protectedPaths.length} first=${first}` };
 }
 
+export function resolveGitStateExpectedMeasuredSignal(input: {
+  changedPaths: string[];
+  expectedPaths: string[];
+}): NudgeFreeLoopMeasuredSignal {
+  const changed = input.changedPaths.map(normalizeMeasuredPath).filter(Boolean);
+  if (changed.length === 0) {
+    return { ok: true, evidence: "git=clean changed=0" };
+  }
+  const expected = new Set(input.expectedPaths.map(normalizeMeasuredPath).filter(Boolean));
+  const unexpected = changed.filter((path) => !expected.has(path));
+  if (unexpected.length === 0) {
+    return { ok: true, evidence: `git=expected changed=${changed.length}` };
+  }
+  const first = unexpected.slice(0, 2).map(compactMeasuredPath).join("|");
+  return { ok: false, evidence: `git=unexpected count=${unexpected.length} first=${first}` };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

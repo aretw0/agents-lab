@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshMeasuredSignal,
+  resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
@@ -83,6 +84,31 @@ describe("guardrails unattended continuation", () => {
     expect(pending).toEqual({ ok: false, evidence: "protected=pending count=3 first=.github/workflows/ci.yml|.pi/settings.json" });
     expect(normalized).toEqual({ ok: false, evidence: "protected=pending count=1 first=.obsidian/note.md" });
     expect(pending.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact git-state measured signals from changed and expected paths", () => {
+    const clean = resolveGitStateExpectedMeasuredSignal({
+      changedPaths: [],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const expected = resolveGitStateExpectedMeasuredSignal({
+      changedPaths: ["packages/pi-stack/extensions/foo.ts", "docs/guides/a.md"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts", "docs/guides/a.md"],
+    });
+    const unexpected = resolveGitStateExpectedMeasuredSignal({
+      changedPaths: ["packages/pi-stack/extensions/foo.ts", ".pi/settings.json"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const normalized = resolveGitStateExpectedMeasuredSignal({
+      changedPaths: ["packages\\pi-stack\\extensions\\foo.ts"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+
+    expect(clean).toEqual({ ok: true, evidence: "git=clean changed=0" });
+    expect(expected).toEqual({ ok: true, evidence: "git=expected changed=2" });
+    expect(unexpected).toEqual({ ok: false, evidence: "git=unexpected count=1 first=.pi/settings.json" });
+    expect(normalized).toEqual({ ok: true, evidence: "git=expected changed=1" });
+    expect(unexpected.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {

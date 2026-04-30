@@ -6198,6 +6198,53 @@
       ],
       "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] O gate de protected scopes precisa ser derivado de paths reais, não de boolean manual.\n[2026-04-30T02:23:12Z] slice=1 focus=TASK-BUD-262 gate=test:monitor:smoke-231/231 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured protected-scopes derivado de paths reais; fixture de normalização corrigida.",
       "verification": "VER-BUD-538"
+    },
+    {
+      "id": "TASK-BUD-263",
+      "description": "[P1] Criar helper puro para sinal measured de git state esperado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-262"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured git-state-expected a partir de paths alterados e paths esperados, sem aceitar ok manual.",
+        "Sinal fica ok quando não há alterações ou quando todas as alterações estão no conjunto esperado.",
+        "Sinal falha com evidência compacta quando há paths inesperados.",
+        "Testes cobrem clean, expected, unexpected e normalização básica.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] O gate de git state esperado deve ser derivado de paths alterados vs intenção esperada, não de boolean manual.\n[2026-04-30T02:26:47Z] slice=1 focus=TASK-BUD-263 gate=test:monitor:smoke-232/232 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured git-state derivado de paths; preocupação cross-platform registrada em TASK-BUD-264.",
+      "verification": "VER-BUD-539"
+    },
+    {
+      "id": "TASK-BUD-264",
+      "description": "[P1/backlog] Criar higiene cross-platform para testes de paths e sinais measured.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-263"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke",
+        "packages/pi-stack/extensions",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documentar que testes de path devem ser agnósticos a Windows/Linux/macOS e validar strings normalizadas, não comportamento acidental do host.",
+        "Identificar helpers de normalização que merecem fixtures com separadores POSIX e Windows.",
+        "Evitar uso de path.join/path.resolve em expectativas quando a regra testada é formato canônico portátil.",
+        "Adicionar regressões onde a suite puder acoplar ao OS atual."
+      ],
+      "notes": "Backlog criado a partir da preocupação do operador sobre acoplamento da suite ao sistema atual. [rationale:risk-control] Loops unattended precisam de testes portáveis; sinais measured não podem depender do host por acidente."
     }
   ]
 }

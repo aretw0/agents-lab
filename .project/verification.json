@@ -7071,6 +7071,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:23:25.585Z",
       "evidence": "Added pure resolveProtectedScopesMeasuredSignal helper. It derives protected-scopes-clear from touched/planned paths without accepting a manual ok boolean. It treats .github, .pi/settings.json, and .obsidian as protected, normalizes path separators, and returns compact bounded evidence for clear or pending protected paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent initially caught a Windows normalization fixture issue; fixed the fixture from .\\\\obsidian to .obsidian\\\\. Final focal test passed 16/16; cmd.exe /c npm run test:monitor:smoke --silent passed 231/231 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Protected-scope readiness now starts from concrete paths rather than spoofable booleans."
+    },
+    {
+      "id": "VER-BUD-539",
+      "target": "TASK-BUD-263",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:27:33.173Z",
+      "evidence": "Added pure resolveGitStateExpectedMeasuredSignal helper. It derives git-state-expected from changedPaths and expectedPaths without accepting a manual ok boolean. It returns compact bounded evidence for clean, expected, unexpected, and separator-normalized paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 17/17; cmd.exe /c npm run test:monitor:smoke --silent passed 232/232 across 32 files. The path fixtures are string-normalization checks and should remain host-agnostic; created planned TASK-BUD-264 for broader cross-platform test hygiene. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Git-state readiness now derives from concrete changed-vs-expected paths, while preserving portability concerns for follow-up hygiene."
     }
   ]
 }
