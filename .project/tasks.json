@@ -9187,7 +9187,7 @@
     {
       "id": "TASK-BUD-379",
       "description": "Adicionar bloqueios precisos para impedir alterações diretas no pacote upstream/original do pi.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-378"
@@ -9205,7 +9205,8 @@
         "Adicionar cobertura de regressão para o path guard/command guard."
       ],
       "milestone": "human-control",
-      "notes": "2026-04-30: criado a pedido do operador. Lembrete hard: não alterar o pacote original do pi; apenas extender, wrappar ou aplicar patch controlado. Nesta fatia, apenas backlog/planejamento; nenhuma alteração em node_modules upstream."
+      "notes": "2026-04-30: criado a pedido do operador. Lembrete hard: não alterar o pacote original do pi; apenas extender, wrappar ou aplicar patch controlado. Nesta fatia, apenas backlog/planejamento; nenhuma alteração em node_modules upstream.\n2026-04-30: implementada primeira camada de guardrail local: bloqueio de mutações diretas no pacote upstream/original do pi via edit/write e via comandos shell mutantes conhecidos; leituras bounded continuam permitidas. Docs atualizadas para exigir extensão/wrapper/patch controlado/PR upstream.\n2026-04-30: [rationale:risk-control] Guardrail reduz risco de drift e corrupção de dependência instalada; leitura bounded segue permitida para diagnóstico.\n[rationale:risk-control] Bloquear mutação direta do pacote upstream/original do pi preserva reprodutibilidade e impede que correções locais silenciosas se confundam com extensões, wrappers, patches controlados ou PRs upstream.\n2026-04-30: completed precise guardrail for upstream/original pi mutation protection. Runtime guard changed; reload required before live enforcement validation.",
+      "verification": "VER-BUD-657"
     }
   ]
 }

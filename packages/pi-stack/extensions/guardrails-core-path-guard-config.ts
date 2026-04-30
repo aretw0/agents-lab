@@ -15,6 +15,10 @@ export const SENSITIVE_PATHS = [
   "secret",
 ];
 
+export const UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST = [
+  "node_modules/@mariozechner/pi-coding-agent",
+];
+
 export const ALLOWED_OUTSIDE = [
   ".pi",
   ".cache/checkouts",

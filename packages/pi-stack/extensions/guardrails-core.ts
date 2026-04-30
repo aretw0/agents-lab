@@ -117,7 +117,7 @@ import { registerGuardrailsUnattendedRehearsalSurface } from "./guardrails-core-
 import { registerGuardrailsValidationMethodSurface } from "./guardrails-core-validation-method-surface";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
-import { ALLOWED_OUTSIDE, SENSITIVE_PATHS } from "./guardrails-core-path-guard-config";
+import { ALLOWED_OUTSIDE, SENSITIVE_PATHS, UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST } from "./guardrails-core-path-guard-config";
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
@@ -141,6 +141,22 @@ export function isSensitive(filePath: string): boolean {
 export function isAllowedOutside(filePath: string): boolean {
   const lower = filePath.toLowerCase().replace(/\\/g, "/");
   return ALLOWED_OUTSIDE.some((a) => lower.includes(a));
+}
+
+export function isUpstreamPiPackagePath(filePath: string, cwd: string): boolean {
+  const resolved = resolve(cwd, filePath);
+  return UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST.some((blockedRoot) => {
+    const root = resolve(cwd, blockedRoot);
+    const rel = relative(root, resolved);
+    return rel === "" || (!rel.startsWith("..") && !rel.startsWith(sep));
+  });
+}
+
+export function upstreamPiPackageMutationToolReason(filePath: string): string {
+  return [
+    `Mutação bloqueada: pacote upstream/original do pi (${filePath}).`,
+    "Use extensão, wrapper, patch controlado ou PR upstream; leitura bounded continua permitida.",
+  ].join(" ");
 }
 
 /** Basic heuristic to extract file paths from bash read-like commands. */
@@ -2830,6 +2846,18 @@ export default function (pi: ExtensionAPI) {
     } else if (isToolCallEventType("write", event)) {
       structuredMutationToolType = "write";
       structuredMutationPath = event.input.path;
+    }
+
+    if (structuredMutationToolType && structuredMutationPath && isUpstreamPiPackagePath(structuredMutationPath, ctx.cwd)) {
+      appendAuditEntry(ctx, "guardrails-core.upstream-pi-package-mutation-block", {
+        atIso: new Date().toISOString(),
+        toolType: structuredMutationToolType,
+        path: structuredMutationPath,
+      });
+      return {
+        block: true,
+        reason: upstreamPiPackageMutationToolReason(structuredMutationPath),
+      };
     }
 
     if (structuredMutationToolType) {

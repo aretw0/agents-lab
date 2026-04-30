@@ -94,9 +94,11 @@ export {
   BASH_GUARD_POLICIES,
   detectHighRiskPiRootRecursiveScan,
   detectHighRiskSessionLogScan,
+  detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
   highRiskPiRootRecursiveScanReason,
   highRiskSessionLogScanReason,
+  upstreamPiPackageMutationReason,
 } from "./guardrails-core-bash-guard-policies";
 export {
   commandSensitiveShellMarkerCheckReason,

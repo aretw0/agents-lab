@@ -14,6 +14,10 @@ const PI_ROOT_PATH_PATTERN =
   /(^|\s)(?:\.\/)?\.pi(?=\s|$|[|;&])|(^|\s)~\/\.pi(?=\s|$|[|;&])|(^|\s)[a-z]:\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])|(^|\s)\/mnt\/[a-z]\/users\/[^/\s]+\/\.pi(?=\s|$|[|;&])/i;
 const PI_ROOT_RECURSIVE_SCAN_TOOL_PATTERN =
   /\brg\b|\bgrep\b[\s\S]*\b--recursive\b|\bgrep\b[\s\S]*\s-[a-z]*r[a-z]*\b|\bfindstr\b[\s\S]*\s\/s\b/i;
+const UPSTREAM_PI_PACKAGE_PATH_PATTERN = /(?:^|[\s"'=:(]|\.\.?\/|[a-z]:\/|\/)(?:[^\s"']*\/)?node_modules\/@mariozechner\/pi-coding-agent(?:\/|$|[\s"')])/i;
+const UPSTREAM_PI_MUTATION_TOOL_PATTERN =
+  /\b(?:rm|rmdir|del|erase|mv|move|cp|copy|xcopy|robocopy|mkdir|touch|chmod|chown)\b|\bsed\b[\s\S]*\s-i\b|\bperl\b[\s\S]*\s-pi\b|\b(?:set-content|add-content|out-file)\b|\bgit\s+(?:checkout|restore|apply|reset)\b/i;
+const REDIRECT_TO_UPSTREAM_PI_PACKAGE_PATTERN = />{1,2}\s*["']?[^\s"']*node_modules\/@mariozechner\/pi-coding-agent(?:\/|$)/i;
 
 export type BashGuardPolicy = {
   id: string;
@@ -55,6 +59,20 @@ export function highRiskPiRootRecursiveScanReason(): string {
   ].join(" ");
 }
 
+export function detectUpstreamPiPackageMutation(command: string): boolean {
+  const normalized = command.toLowerCase().replace(/\\/g, "/");
+  if (REDIRECT_TO_UPSTREAM_PI_PACKAGE_PATTERN.test(normalized)) return true;
+  if (!UPSTREAM_PI_PACKAGE_PATH_PATTERN.test(normalized)) return false;
+  return UPSTREAM_PI_MUTATION_TOOL_PATTERN.test(normalized);
+}
+
+export function upstreamPiPackageMutationReason(): string {
+  return [
+    "Blocked by guardrails-core (upstream_pi_package_mutation): do not mutate the original pi package under node_modules/@mariozechner/pi-coding-agent.",
+    "Use an extension, wrapper, controlled patch workflow, or upstream PR instead; bounded reads remain allowed.",
+  ].join(" ");
+}
+
 export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
   {
     id: "command-sensitive-shell-marker-check",
@@ -62,6 +80,13 @@ export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
     detect: detectShellInlineCommandSensitiveMarkerCheck,
     reason: commandSensitiveShellMarkerCheckReason,
     auditKey: "guardrails-core.command-sensitive-shell-marker-check-block",
+  },
+  {
+    id: "upstream-pi-package-mutation",
+    when: "tool(bash)",
+    detect: detectUpstreamPiPackageMutation,
+    reason: upstreamPiPackageMutationReason,
+    auditKey: "guardrails-core.upstream-pi-package-mutation-block",
   },
   {
     id: "pi-root-recursive-scan",

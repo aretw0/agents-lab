@@ -8124,6 +8124,24 @@
       "method": "test+dry-run+local-apply",
       "timestamp": "2026-04-30T16:38:44.987Z",
       "evidence": "Canonicalized pi isolated/dev settings path handling. scripts/pi-isolated.mjs now detects/canonicalizes repo-local absolute package sources to paths relative to .sandbox/pi-agent, exposes canonicalize-settings, reports canonical paths in status, and auto-normalizes before launch. Tests: cmd.exe /c node --test scripts/test/pi-isolated-canonical-settings.test.mjs => 3 passed. Dry-run showed the host-specific @davidorex path rewrite. Applied to derived .sandbox/pi-agent/settings.json (ignored local state, not .pi/settings.json): path is now ../../node_modules/@davidorex/pi-project-workflows. npm run pi:isolated:status reports canonical paths=unchanged and active mode isolated. No upstream pi package files were modified. [rationale:risk-control] This removes machine-specific dev drift while preserving project/upstream boundaries."
+    },
+    {
+      "id": "VER-BUD-656",
+      "target": "TASK-BUD-379",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T16:53:55.690Z",
+      "evidence": "Added precise local guardrails against direct mutation of upstream/original pi package. edit/write tool calls targeting node_modules/@mariozechner/pi-coding-agent are blocked by isUpstreamPiPackagePath/upstreamPiPackageMutationToolReason. Bash guard policy upstream-pi-package-mutation blocks mutating shell commands (rm/cp/mv/touch/sed -i/redirect/etc.) targeting that package while allowing bounded reads such as grep. Docs state fixes must use extension/wrapper/controlled patch/PR upstream. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed; safe_marker_check docs matched 4/4."
+    },
+    {
+      "id": "VER-BUD-657",
+      "target": "TASK-BUD-379",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T16:54:27.997Z",
+      "evidence": "Completed upstream/original pi mutation guard. Implemented UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST, isUpstreamPiPackagePath, edit/write tool blocking with audit key guardrails-core.upstream-pi-package-mutation-block, and bash policy upstream-pi-package-mutation. Bounded reads remain allowed by tests. Docs require extension/wrapper/controlled patch/PR upstream instead of direct package mutation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed; safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4. [rationale:risk-control] This prevents silent local mutation of upstream pi while preserving diagnostic reads."
     }
   ]
 }

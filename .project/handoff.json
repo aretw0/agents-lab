@@ -1,38 +1,38 @@
 {
-  "timestamp": "2026-04-30T16:38:55.652Z",
-  "context": "Completed TASK-BUD-378. pi isolated/dev settings canonicalization is implemented in scripts/pi-isolated.mjs and tested. The current derived s [snip] ks future precise guards for that rule. [truncated:+312 chars]",
+  "timestamp": "2026-04-30T16:54:37.833Z",
+  "context": "Completed precise guardrails for the operator rule: never mutate the upstream/original pi package directly. Implemented a path blocklist for [snip] pstream pi package files were modified. [truncated:+300 chars]",
   "next_actions": [
-    "Commit TASK-BUD-378 implementation/tests/board/handoff evidence.",
-    "Continue essential lane with TASK-BUD-379 path guard for upstream/original pi mutation protect [snip] -375 final close decision. [truncated:+25 chars]",
-    "Do not edit node_modules/@mariozechner/pi-coding-agent; only read, extend, wrap, patch controlled, or PR upstream."
+    "Commit TASK-BUD-379 guardrails/docs/board evidence.",
+    "Reload before live enforcement validation because runtime guard changed.",
+    "After reload, validate with non-destructive blocked-path dry check if available; do not mutate upstream pi package."
   ],
   "blockers": [
-    "Upstream/original pi direct mutation guard remains planned TASK-BUD-379.",
-    "TASK-BUD-375 broader Esc/cancel final closure decision remains open.",
+    "Reload required before live validation of the new guardrail.",
+    "TASK-BUD-375 final close decision remains open for broader Esc/cancel classification.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c node --test scripts/test/pi-isolated-canonical-settings.test.mjs: 3 passed",
-    "node scripts/pi-isolated.mjs canonicalize-settings: rewritten one repo-local absolute package path",
-    "npm run pi:isolated:status: canonical paths=unchanged active mode isolated"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts: 1 passed",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
+    "board_verification_append VER-BUD-656 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T16:38:55.652Z",
+    "generatedAtIso": "2026-04-30T16:54:37.833Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-task-378",
+    "recommendation": "commit-then-reload-before-live-validation",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T16:38:55.652Z",
+      "atIso": "2026-04-30T16:54:37.833Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-378"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-378"
+    "TASK-BUD-379"
   ]
 }

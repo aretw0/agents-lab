@@ -50,6 +50,8 @@ Status local da auditoria de cancelamento:
 - comandos interativos/slash commands que disparam execução longa sem contrato explícito de cancelamento não devem ser usados como base para unattended forte;
 - qualquer nova ferramenta que invoque subprocesso longo precisa declarar como propaga cancelamento e qual fallback operacional existe.
 
+Pacote upstream/original do pi é superfície protegida. O repositório pode ler `node_modules/@mariozechner/pi-coding-agent` para diagnóstico bounded, mas não deve editar, remover, sobrescrever ou aplicar mudanças diretas nesse pacote instalado. Correções devem ser implementadas por extensão local, wrapper, patch controlado e auditável, ou PR upstream. O guardrail bloqueia mutações diretas por tools de edição/escrita e comandos shell mutantes conhecidos; leituras bounded seguem permitidas.
+
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
 
 Fallback operacional enquanto `Esc` estiver incerto:
