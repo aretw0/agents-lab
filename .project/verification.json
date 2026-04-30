@@ -7062,6 +7062,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:19:32.138Z",
       "evidence": "Added pure resolveHandoffBudgetMeasuredSignal helper. It derives the handoff-budget-ok measured signal from jsonChars and maxJsonChars without accepting a manual ok boolean. It returns compact bounded evidence for ok, over budget, invalid jsonChars, and invalid maxJsonChars cases. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 15/15; cmd.exe /c npm run test:monitor:smoke --silent passed 230/230 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] This adds another real measured signal derived from objective local size facts instead of spoofable booleans."
+    },
+    {
+      "id": "VER-BUD-538",
+      "target": "TASK-BUD-262",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:23:25.585Z",
+      "evidence": "Added pure resolveProtectedScopesMeasuredSignal helper. It derives protected-scopes-clear from touched/planned paths without accepting a manual ok boolean. It treats .github, .pi/settings.json, and .obsidian as protected, normalizes path separators, and returns compact bounded evidence for clear or pending protected paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent initially caught a Windows normalization fixture issue; fixed the fixture from .\\\\obsidian to .obsidian\\\\. Final focal test passed 16/16; cmd.exe /c npm run test:monitor:smoke --silent passed 231/231 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Protected-scope readiness now starts from concrete paths rather than spoofable booleans."
     }
   ]
 }

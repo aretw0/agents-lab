@@ -5,6 +5,7 @@ import {
   resolveHandoffBudgetMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
+  resolveProtectedScopesMeasuredSignal,
   resolveUnattendedContinuationPlan,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
@@ -65,6 +66,23 @@ describe("guardrails unattended continuation", () => {
     expect(invalidChars).toEqual({ ok: false, evidence: "handoff-budget=invalid-jsonChars" });
     expect(invalidMax).toEqual({ ok: false, evidence: "handoff-budget=invalid-max" });
     expect(ok.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact protected-scope measured signals from paths", () => {
+    const clear = resolveProtectedScopesMeasuredSignal({
+      paths: ["packages/pi-stack/extensions/foo.ts", "docs/guides/a.md"],
+    });
+    const pending = resolveProtectedScopesMeasuredSignal({
+      paths: [".github/workflows/ci.yml", ".pi/settings.json", ".obsidian/work.md"],
+    });
+    const normalized = resolveProtectedScopesMeasuredSignal({
+      paths: [".obsidian\\note.md"],
+    });
+
+    expect(clear).toEqual({ ok: true, evidence: "protected=clear paths=2" });
+    expect(pending).toEqual({ ok: false, evidence: "protected=pending count=3 first=.github/workflows/ci.yml|.pi/settings.json" });
+    expect(normalized).toEqual({ ok: false, evidence: "protected=pending count=1 first=.obsidian/note.md" });
+    expect(pending.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {

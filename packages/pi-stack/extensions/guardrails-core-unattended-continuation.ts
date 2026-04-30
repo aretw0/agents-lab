@@ -125,6 +125,34 @@ export function resolveHandoffBudgetMeasuredSignal(input: {
   return { ok: true, evidence: `handoff-budget=ok chars=${Math.floor(input.jsonChars)} max=${Math.floor(input.maxJsonChars)}` };
 }
 
+function normalizeMeasuredPath(path: string): string {
+  return path.replace(/\\/g, "/").replace(/^\.\//, "").toLowerCase();
+}
+
+function compactMeasuredPath(path: string): string {
+  const normalized = normalizeMeasuredPath(path);
+  return normalized.length > 28 ? `${normalized.slice(0, 25)}...` : normalized;
+}
+
+function isProtectedMeasuredPath(path: string): boolean {
+  const normalized = normalizeMeasuredPath(path);
+  return normalized === ".pi/settings.json"
+    || normalized.startsWith(".obsidian/")
+    || normalized === ".obsidian"
+    || normalized.startsWith(".github/");
+}
+
+export function resolveProtectedScopesMeasuredSignal(input: {
+  paths: string[];
+}): NudgeFreeLoopMeasuredSignal {
+  const protectedPaths = input.paths.filter(isProtectedMeasuredPath);
+  if (protectedPaths.length === 0) {
+    return { ok: true, evidence: `protected=clear paths=${input.paths.length}` };
+  }
+  const first = protectedPaths.slice(0, 2).map(compactMeasuredPath).join("|");
+  return { ok: false, evidence: `protected=pending count=${protectedPaths.length} first=${first}` };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",
