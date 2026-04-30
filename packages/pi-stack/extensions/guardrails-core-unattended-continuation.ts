@@ -466,6 +466,28 @@ export function resolveProtectedScopesCollectorResult(input: {
   };
 }
 
+export function resolveValidationKnownCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  kind?: NudgeFreeLoopValidationKind;
+  focalGate?: string;
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "validation", status: "missing", evidence: "validation=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "validation", status: "invalid", evidence: "validation=read-error" };
+  }
+  if (!input.kind) {
+    return { fact: "validation", status: "invalid", evidence: "validation=missing-kind" };
+  }
+  const signal = resolveValidationKnownMeasuredSignal({ kind: input.kind, focalGate: input.focalGate });
+  return {
+    fact: "validation",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

@@ -17,6 +17,7 @@ import {
   resolveMeasuredPacketTrust,
   resolveProtectedScopesCollectorResult,
   resolveRecurringFailureHardening,
+  resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
 } from "../../extensions/guardrails-core";
 
@@ -274,6 +275,23 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "protected-scopes",
       status: "observed",
       evidence: "protected=clear paths=1",
+    });
+    expect(resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "focal-test",
+      focalGate: "npm-run-smoke",
+    })).toEqual({
+      fact: "validation",
+      status: "observed",
+      evidence: "validation=focal-test gate=npm-run-smoke",
+    });
+    expect(resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "unknown",
+    })).toEqual({
+      fact: "validation",
+      status: "invalid",
+      evidence: "validation=unknown",
     });
   });
 });

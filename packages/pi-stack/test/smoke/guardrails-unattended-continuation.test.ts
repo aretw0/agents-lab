@@ -21,6 +21,7 @@ import {
   resolveProtectedScopesMeasuredSignal,
   resolveStopConditionsClearMeasuredSignal,
   resolveUnattendedContinuationPlan,
+  resolveValidationKnownCollectorResult,
   resolveValidationKnownMeasuredSignal,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
@@ -41,6 +42,48 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives validation collector results from local read outcomes", () => {
+    const markerCheck = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "marker-check",
+    });
+    const structuredRead = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "structured-read",
+    });
+    const focalTest = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "focal-test",
+      focalGate: "npm-run-smoke",
+    });
+    const missingFocalGate = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "focal-test",
+    });
+    const unknown = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+      kind: "unknown",
+    });
+    const missing = resolveValidationKnownCollectorResult({
+      readStatus: "missing",
+    });
+    const readError = resolveValidationKnownCollectorResult({
+      readStatus: "error",
+    });
+    const missingKind = resolveValidationKnownCollectorResult({
+      readStatus: "observed",
+    });
+
+    expect(markerCheck).toEqual({ fact: "validation", status: "observed", evidence: "validation=marker-check" });
+    expect(structuredRead).toEqual({ fact: "validation", status: "observed", evidence: "validation=structured-read" });
+    expect(focalTest).toEqual({ fact: "validation", status: "observed", evidence: "validation=focal-test gate=npm-run-smoke" });
+    expect(missingFocalGate).toEqual({ fact: "validation", status: "invalid", evidence: "validation=focal-test gate=missing" });
+    expect(unknown).toEqual({ fact: "validation", status: "invalid", evidence: "validation=unknown" });
+    expect(missing).toEqual({ fact: "validation", status: "missing", evidence: "validation=missing" });
+    expect(readError).toEqual({ fact: "validation", status: "invalid", evidence: "validation=read-error" });
+    expect(missingKind).toEqual({ fact: "validation", status: "invalid", evidence: "validation=missing-kind" });
+  });
+
   it("derives protected-scopes collector results from local read outcomes", () => {
     const clear = resolveProtectedScopesCollectorResult({
       readStatus: "observed",

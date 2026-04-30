@@ -7314,6 +7314,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:15:14.154Z",
       "evidence": "Added and re-exported pure resolveProtectedScopesCollectorResult. It derives protected-scopes collector status from local readStatus and observed paths by reusing resolveProtectedScopesMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover clear observed, protected pending invalid, missing read, read-error, and missing paths. Canonical re-export smoke covers pending and clear. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 37/37; cmd.exe /c npm run test:monitor:smoke --silent passed 249/249 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Protected-scope detection now has a local-observed collector building block for future audit envelopes and safe unattended stops."
+    },
+    {
+      "id": "VER-BUD-566",
+      "target": "TASK-BUD-291",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:22:41.286Z",
+      "evidence": "Added and re-exported pure resolveValidationKnownCollectorResult. It derives validation collector status from local readStatus, validation kind, and optional focalGate by reusing resolveValidationKnownMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover marker-check, structured-read, focal-test with gate, focal-test missing gate, unknown, missing read, read-error, and missing kind. Canonical re-export smoke covers focal-test with gate and unknown. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 38/38; cmd.exe /c npm run test:monitor:smoke --silent passed 250/250 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Validation-known now has a local-observed collector building block so future audit envelopes cannot continue without an explicit focal validation gate."
     }
   ]
 }
