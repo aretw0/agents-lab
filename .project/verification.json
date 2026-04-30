@@ -7674,6 +7674,15 @@
       "method": "read-only-diff+status",
       "timestamp": "2026-04-30T10:09:37.644Z",
       "evidence": "Read-only classification of current .pi/settings.json drift completed; file was not modified or staged. `git diff -- .pi/settings.json` shows mostly formatting churn plus semantic changes consistent with conservative/safe-core governance: colonyPilot.budgetPolicy.defaultMaxCostUsd 6 -> 0.5; colonyPilot.deliveryPolicy.mode apply-to-branch -> report-only; guardrailsCore.longRunIntentQueue.enabled true -> false with autoDrainOnIdle false; new schedulerGovernance {enabled:true, policy:observe, requireTextConfirmation:true}; new webSessionGateway {mode:local}; new governanceProfile {active:conservative}. governance_profile status confirms `active governance profile: conservative`. Classification: canonical-candidate with risk-control intent, not temporary agent overlay, because it changes baseline project governance/safety defaults rather than per-agent behavior. Operator-aware options: (1) keep as protected drift until explicit decision; (2) promote/commit as canonical conservative baseline after normalizing formatting/newline; (3) revert to HEAD if this was accidental; (4) snapshot then apply via governance profile/safe boot path; (5) do not move these specific changes to derived overlay because they define shared baseline policy. [rationale:risk-control] This preserves fail-closed protected drift while turning the mystery settings diff into an explicit operator decision packet."
+    },
+    {
+      "id": "VER-BUD-606",
+      "target": "TASK-BUD-332",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T10:11:46.746Z",
+      "evidence": "Consolidated read-only provider/quota settings readers on the canonical settings helper without modifying .pi/settings.json. provider-readiness readWorkspaceSettings now delegates to context-watchdog-storage readProjectSettings. handoff-advisor readPiStackSettings now delegates to readProjectSettings instead of parsing .pi/settings.json directly. Behavior remains canonical project settings only; no derived overlay is consumed implicitly. Focal smokes passed: provider-readiness.test.ts + handoff-advisor.test.ts 24/24. Full monitor smoke passed 264/264. Existing protected .pi/settings.json drift remains unstaged and visible. [rationale:risk-control] Reducing ad hoc readers makes the canonical settings contract reusable without changing protected baseline contents."
     }
   ]
 }

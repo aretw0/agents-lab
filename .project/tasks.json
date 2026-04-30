@@ -7998,6 +7998,34 @@
       ],
       "notes": "[rationale:risk-control] O operador autorizou seguir na ponta solta do settings; a primeira ação segura é classificação read-only do drift real antes de qualquer promoção/reversão/migração.\n[2026-04-30T09:56:00Z] slice=1 focus=TASK-BUD-331 gate=read-only-git-diff+governance_profile-status commit=pending classification=canonical-candidate protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Settings drift classificado sem editar/stagear o canonical.",
       "verification": "VER-BUD-605"
+    },
+    {
+      "id": "TASK-BUD-332",
+      "description": "[P1] Consolidar leitura canonical de settings em superfícies read-only de provider/quota.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-331"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/provider-readiness.ts",
+        "packages/pi-stack/extensions/handoff-advisor.ts",
+        "packages/pi-stack/test/smoke/provider-readiness.test.ts",
+        "packages/pi-stack/test/smoke/handoff-advisor.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Substituir leituras ad hoc de .pi/settings.json por helper canônico quando local-safe e sem mudar comportamento.",
+        "Não modificar .pi/settings.json.",
+        "Preservar fallback/erro existente das tools read-only ou advisor.",
+        "Adicionar/ajustar smoke pequeno se já houver cobertura local; caso não exista, validar por teste focal existente/tsx bounded.",
+        "Smoke principal permanece verde.",
+        "Registrar evidência e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Após definir topology canonical/derived, reduzir leitores ad hoc diminui risco de cada tool interpretar/mutar settings de modo divergente, sem exigir decisão sobre o drift protegido atual.\n[2026-04-30T10:11:20Z] slice=1 focus=TASK-BUD-332 gate=provider-readiness+handoff-advisor-24/24+test:monitor:smoke-264/264 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Leitores provider/quota agora passam pelo helper canônico.",
+      "verification": "VER-BUD-606"
     }
   ]
 }

@@ -16,8 +16,6 @@
  * @capability-id handoff-advisor
  * @capability-criticality high
  */
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
@@ -28,6 +26,7 @@ import {
   safeNum,
   type RoutingProfile,
 } from "./quota-visibility";
+import { readProjectSettings } from "./context-watchdog-storage";
 import { buildProviderReadinessMatrix } from "./provider-readiness";
 
 const RATE_LIMIT_RE = /(\b429\b|rate.?limit|too many requests|quota\s*exceeded|capacity\s*reached|resource\s*exhausted)/i;
@@ -110,12 +109,8 @@ export function selectNextProvider(
 // ---------------------------------------------------------------------------
 
 function readPiStackSettings(cwd: string): Record<string, unknown> {
-  try {
-    const raw = JSON.parse(readFileSync(join(cwd, ".pi", "settings.json"), "utf8")) as Record<string, unknown>;
-    return (raw.piStack ?? {}) as Record<string, unknown>;
-  } catch {
-    return {};
-  }
+  const raw = readProjectSettings(cwd);
+  return (raw.piStack ?? {}) as Record<string, unknown>;
 }
 
 export async function buildHandoffAdvisory(

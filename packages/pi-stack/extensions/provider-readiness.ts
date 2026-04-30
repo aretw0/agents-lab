@@ -18,6 +18,7 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
+import { readProjectSettings } from "./context-watchdog-storage";
 import {
   analyzeQuota,
   parseProviderBudgets,
@@ -52,12 +53,7 @@ interface RuntimeSignal {
 }
 
 function readWorkspaceSettings(cwd: string): Record<string, unknown> {
-  try {
-    const p = path.join(cwd, ".pi", "settings.json");
-    return JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown>;
-  } catch {
-    return {};
-  }
+  return readProjectSettings(cwd);
 }
 
 function piStackSettings(raw: Record<string, unknown>): Record<string, unknown> {
