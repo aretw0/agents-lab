@@ -7788,6 +7788,29 @@
       ],
       "notes": "[rationale:risk-control] Readiness fail-closed precisa explicar bloqueio de forma compacta para apoiar continuação segura sem abrir detalhes grandes.\n[2026-04-30T06:13:03Z] slice=1 focus=TASK-BUD-323 gate=test:monitor:smoke-262/262 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Readiness summary agora inclui top reasons compactos do audit local.",
       "verification": "VER-BUD-597"
+    },
+    {
+      "id": "TASK-BUD-324",
+      "description": "[P1] Live-validar reasons compactos do context_watch_continuation_readiness após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-323"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_continuation_readiness no runtime carregado após reload.",
+        "Confirmar que o summary inclui reasons=... quando audit estiver blocked.",
+        "Confirmar ready=no e authorization=none.",
+        "Confirmar que nenhum compact/resume/scheduler/self-reload/remoto/auto-continuação é disparado.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Reasons compactos do readiness precisam ser validados no runtime carregado para apoiar continuação segura sem diagnóstico amplo.\n[2026-04-30T06:15:07Z] slice=1 focus=TASK-BUD-324 gate=live-context_watch_continuation_readiness+context-watchdog-smoke-47/47 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons compactos do readiness validados ao vivo após reload.",
+      "verification": "VER-BUD-598"
     }
   ]
 }
