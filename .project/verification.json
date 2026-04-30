@@ -7881,6 +7881,15 @@
       "method": "advisory-gate+marker-check+test",
       "timestamp": "2026-04-30T11:42:31.919Z",
       "evidence": "Consolidated local rehearsal maturity in docs/guides/control-plane-operating-doctrine.md under `Rehearsal local acumulado`. The doctrine now records accumulated evidence: canonical settings baseline separated from derived overlays, stale protected focus removed from default selection, green readiness validated with authorization=none, one-slice preview validated in green and blocked paths, decision packet visible with dispatch=no, packetReasons visible only on blocked packets, and explicit board/verification/commit/checkpoint closure per slice. It defines the next maturity gate as one local-safe slice per dispatch with rollback, known validation, intentional commit, board/checkpoint, and mandatory stop. It explicitly says unattended_rehearsal_gate is advisory/read-only; ready=yes/ready-for-canary is evidence for discussion, not authorization for scheduler, self-reload, remote/offload, GitHub Actions, automatic repetition, or execution without human decision. Advisory tool result: unattended-rehearsal decision=ready-for-canary ready=yes score=6/6 blockers=none. Validation: corrected safe_marker_check passed 11/11 after an initial over-specific marker mismatch; focal context-watchdog + guardrails-unattended-continuation tests passed 89/89. [rationale:risk-control] This turns accumulated local proof into an auditable maturity gate without enabling unattended dispatch."
+    },
+    {
+      "id": "VER-BUD-629",
+      "target": "TASK-BUD-355",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T11:45:06.039Z",
+      "evidence": "Added `Contrato design-only de execução humana confirmada` to docs/guides/control-plane-operating-doctrine.md. The contract states that before any executor exists, a future one-slice local execution would require a recent live summary with packet=ready-for-human-decision dispatch=no authorization=none, a single local-safe in-progress focus with declared reversible files, explicit rollback, known validation, intentional staging/commit scope, bounded board close, mandatory checkpoint, and mandatory stop after one slice. It defines explicit human confirmation language by task/action and clarifies that generic 'pode seguir' only authorizes continued rehearsal/control-plane work, not an executor. It also states the contract does not cover scheduler, repetition, self-reload, remote/offload, GitHub Actions, publish, .pi/settings.json, .github, .obsidian, destructive git maintenance, or protected scopes. Validation: safe_marker_check passed 11/11; focal context-watchdog + guardrails-unattended-continuation tests passed 89/89. [rationale:risk-control] The next execution boundary is now explicit and auditable without implementing or authorizing execution."
     }
   ]
 }

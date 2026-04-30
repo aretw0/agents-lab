@@ -198,6 +198,27 @@ Use `unattended_rehearsal_gate` apenas como evidência advisory/read-only. Um re
 
 A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de preparar, diagnosticar e fechar fatias com menos ambiguidade, mantendo controle humano sobre qualquer dispatch. Enquanto não houver tarefa separada com autorização explícita, rollback, limite de tempo/custo, cancelamento, cooldown e stop conditions, o modo ininterrupto permanece rehearsal local supervisionado.
 
+### Contrato design-only de execução humana confirmada
+
+A próxima fronteira antes de qualquer executor é um contrato explícito para uma única fatia local confirmada por humano. Esse contrato ainda é design-only: ele define condições mínimas, mas não cria executor aprovado.
+
+Pré-condições mínimas:
+
+1. summary live recente com `packet=ready-for-human-decision dispatch=no authorization=none`;
+2. foco único `in-progress`, local-safe, com arquivos declarados e reversíveis por git;
+3. rollback explícito: `git restore <arquivos>` ou equivalente não destrutivo para cada arquivo tocado;
+4. validação conhecida antes da edição: smoke focal, `safe_marker_check` ou structured-read;
+5. staging e commit intencionais: somente arquivos listados no contrato;
+6. fechamento bounded: `board_task_complete` ou pacote de decisão quando fechamento automático não for adequado;
+7. checkpoint obrigatório após a fatia;
+8. stop obrigatório após uma fatia, mesmo se outra oportunidade estiver pronta.
+
+A confirmação humana precisa nomear a tarefa e a ação, por exemplo: “autorizo executar uma fatia local para TASK-BUD-XYZ com os arquivos listados”. Uma frase genérica como “pode seguir” continua sendo autorização para continuar rehearsal/control-plane, não autorização para um executor.
+
+Mesmo com confirmação explícita, o contrato só cobre uma fatia local. Ele não cobre scheduler, repetição automática, self-reload, remote/offload, GitHub Actions, publish, `.pi/settings.json`, `.github`, `.obsidian`, manutenção destrutiva de git ou qualquer escopo protegido. Cada um desses itens exige tarefa, gate e autorização separados.
+
+Se qualquer pré-condição cair entre o packet e a execução — diff inesperado, teste desconhecido, checkpoint stale, protected scope, ambiguidade, contexto sem handoff fresco ou reload pendente — o contrato expira e volta para preview/readiness.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:

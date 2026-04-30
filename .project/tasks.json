@@ -8582,6 +8582,32 @@
       ],
       "notes": "[rationale:risk-control] A sequência de provas locais já desbloqueou potencial; precisamos consolidar maturidade e próximo gate sem transformar evidência em automação.\n[2026-04-30T11:42:00Z] slice=1 focus=TASK-BUD-354 gate=unattended_rehearsal_gate-ready-for-canary+safe_marker_check-11/11+focal-89/89 commit=pending docs=local-rehearsal-maturity. [rationale:risk-control] Potencial acumulado consolidado como rehearsal supervisionado, não automação.",
       "verification": "VER-BUD-628"
+    },
+    {
+      "id": "TASK-BUD-355",
+      "description": "[P1] Definir contrato design-only para execução humana confirmada de uma fatia local.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-354"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar contrato design-only para uma futura execução humana confirmada de uma única fatia local.",
+        "Exigir packet=ready-for-human-decision dispatch=no como evidência prévia, não como autorização.",
+        "Definir confirmação humana explícita, escopo de arquivos, rollback, validação, staging/commit intencional, checkpoint e stop obrigatório.",
+        "Declarar que ainda não existe executor aprovado e que scheduler, repetição, self-reload, remote/offload e GitHub Actions continuam fora de escopo.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Validar com safe_marker_check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Para desbloquear trabalho ininterrupto com controle, a próxima fronteira precisa ser um contrato explícito de execução humana confirmada antes de qualquer implementação de executor.\n[2026-04-30T11:45:00Z] slice=1 focus=TASK-BUD-355 gate=safe_marker_check-11/11+focal-89/89 commit=pending docs=human-confirmed-one-slice-contract. [rationale:risk-control] Fronteira de execução futura definida como design-only sem executor aprovado.",
+      "verification": "VER-BUD-629"
     }
   ]
 }
