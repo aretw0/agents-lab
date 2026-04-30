@@ -7738,6 +7738,29 @@
       ],
       "notes": "[rationale:risk-control] Para desbloquear operação ininterrupta segura, precisamos de um pacote único de decisão read-only que una foco primário e audit local sem ainda conceder autorização operacional.\n[2026-04-30T06:08:05Z] slice=1 focus=TASK-BUD-321 gate=test:monitor:smoke-262/262 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Pacote read-only de continuation readiness combina foco primário e audit local sem auto-run.",
       "verification": "VER-BUD-595"
+    },
+    {
+      "id": "TASK-BUD-322",
+      "description": "[P1] Live-validar context_watch_continuation_readiness após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-321"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_continuation_readiness no runtime carregado após reload.",
+        "Confirmar summary com context-watch-continuation-readiness, foco primário, audit local, staleFocus e authorization=none.",
+        "Confirmar details effect=none/mode=read-only-readiness/authorization=none quando observável via tool.",
+        "Confirmar que não dispara compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A nova superfície de readiness deve ser validada no runtime carregado antes de virar pacote canônico para decisões de continuação local-safe.\n[2026-04-30T06:09:55Z] slice=1 focus=TASK-BUD-322 gate=live-context_watch_continuation_readiness+focal-smoke-52/52 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Readiness packet validado ao vivo após reload com ready=no/authorization=none.",
+      "verification": "VER-BUD-596"
     }
   ]
 }

@@ -7584,6 +7584,15 @@
       "method": "test",
       "timestamp": "2026-04-30T06:08:19.064Z",
       "evidence": "Added read-only `context_watch_continuation_readiness` packet combining auto-resume primary focus with local_continuity_audit. The tool accepts zero parameters, derives handoff/task statuses locally from .project/handoff.json and .project/tasks.json, reuses buildAutoResumePromptEnvelopeFromHandoff for primary focus and buildLocalContinuityAudit/formatLocalContinuityAuditSummary/localContinuityAuditReasons for local audit, and returns compact summary `context-watch-continuation-readiness: ready=... focus=... audit=... staleFocus=... authorization=none`. Details include effect=none, mode=read-only-readiness, authorization=none, autoResumePrompt, diagnosticsSummary, localContinuitySummary, and localContinuityReasons. It never dispatches compact/resume/scheduler/self-reload/remote/automation. Added smoke proving no spoofable taskStatusById/preferredTaskIds params, concrete focus TASK-BUD-321, staleFocus TASK-BUD-320=completed, local-continuity-audit summary, ready=no, and authorization=none. Validation: focal context-watchdog + guardrails surface smokes passed 52/52; cmd.exe /c npm run test:monitor:smoke --silent passed 262/262 across 32 files. [rationale:risk-control] This creates a single read-only decision packet for uninterrupted-safe continuation without granting operational authorization."
+    },
+    {
+      "id": "VER-BUD-596",
+      "target": "TASK-BUD-322",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T06:10:09.753Z",
+      "evidence": "Live runtime after operator reload validated context_watch_continuation_readiness. The loaded tool returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-322 audit=blocked staleFocus=1 authorization=none`, confirming the read-only readiness packet combines primary focus, local audit decision, stale focus evidence, and authorization=none. Focal context-watchdog + guardrails surface smokes passed 52/52. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Runtime readiness packet is live and fail-closed while providing a concrete local focus for controlled continuation."
     }
   ]
 }
