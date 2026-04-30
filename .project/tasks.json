@@ -5850,6 +5850,29 @@
       ],
       "notes": "Criado após reload para validar a trava contra manipulação direta de booleans. [rationale:risk-control] A tool manual não pode liberar readiness do loop sem sinais medidos reais.\n[2026-04-30T01:41:00Z] slice=1 focus=TASK-BUD-247 gate=live-nudge_free_loop_canary-manual-signal-source commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Validação live confirmou que booleans manuais não produzem ready.",
       "verification": "VER-BUD-525"
+    },
+    {
+      "id": "TASK-BUD-248",
+      "description": "[P1] Cobrir que a tool nudge_free_loop_canary não expõe override measured/signal_source.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-247"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke da surface confirma que o schema runtime não expõe signal_source ou override equivalente para measured.",
+        "Smoke continua confirmando que booleans manuais com todos gates true retornam manual-signal-source.",
+        "Smoke principal permanece verde.",
+        "Fechamento usa board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado para reforçar que signalSource=measured não é parâmetro manipulável pela tool manual. [rationale:risk-control] A fronteira runtime deve impedir spoofing de sinais medidos por input direto.\n[2026-04-30T01:41:50Z] slice=1 focus=TASK-BUD-248 gate=test:monitor:smoke-223/223 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Schema runtime agora tem regressão contra override signal_source.",
+      "verification": "VER-BUD-526"
     }
   ]
 }

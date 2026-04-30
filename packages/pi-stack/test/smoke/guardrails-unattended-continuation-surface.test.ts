@@ -3,6 +3,7 @@ import { registerGuardrailsUnattendedContinuationSurface } from "../../extension
 
 type RegisteredTool = {
   name: string;
+  parameters?: unknown;
   execute: (toolCallId: string, params: Record<string, unknown>) => {
     content?: Array<{ type: string; text: string }>;
     details: Record<string, unknown>;
@@ -39,6 +40,9 @@ describe("guardrails unattended continuation surface", () => {
     } as never);
 
     const canaryTool = tools.find((tool) => tool.name === "nudge_free_loop_canary");
+    const schemaText = JSON.stringify(canaryTool?.parameters ?? {});
+    expect(schemaText).not.toContain("signal_source");
+    expect(schemaText).not.toContain("signalSource");
     const manual = canaryTool?.execute("call-manual", {
       opt_in: true,
       next_local_safe: true,

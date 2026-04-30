@@ -6954,6 +6954,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T01:40:09.354Z",
       "evidence": "Live-validated nudge_free_loop_canary after reload with opt_in=true and every exposed boolean gate set true. The runtime tool returned compact advisory defer content: nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source. This proves the current manual-boolean surface cannot produce ready/all-gates-green; ready remains reserved for future measured-signal input. [rationale:risk-control] Direct parameter manipulation cannot open or authorize a nudge-free loop."
+    },
+    {
+      "id": "VER-BUD-526",
+      "target": "TASK-BUD-248",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:42:03.104Z",
+      "evidence": "Added smoke coverage asserting the nudge_free_loop_canary runtime schema does not expose signal_source or signalSource override parameters. The same surface test continues to assert that all manual booleans true returns defer/manual-signal-source, preventing spoofed measured readiness through the current tool. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 2/2; cmd.exe /c npm run test:monitor:smoke --silent passed 223/223 across 32 files. [rationale:risk-control] Runtime callers cannot request measured-signal mode through the manual advisory tool."
     }
   ]
 }
