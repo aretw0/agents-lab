@@ -6470,6 +6470,34 @@
       ],
       "notes": "Criado após reload como follow-up documental de TASK-BUD-272. [rationale:risk-control] A lei anti-spoof exige separar exposição/import canônico de permissão operacional.\n[2026-04-30T03:08:00Z] slice=1 focus=TASK-BUD-273 gate=safe_marker_check-6/6 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Doutrina atualizada para separar helper measured canônico de autorização operacional.",
       "verification": "VER-BUD-547"
+    },
+    {
+      "id": "TASK-BUD-274",
+      "description": "[P1] Criar packet puro de auditoria para canary measured local.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-271",
+        "TASK-BUD-272",
+        "TASK-BUD-273"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que produz gate + sinais/evidências measured derivados de fatos locais para auditoria bounded.",
+        "Packet deve derivar os sinais com os mesmos helpers locais e não aceitar ok manual, signalSource ou measured overrides.",
+        "Packet deve incluir evidência completa por gate para auditoria futura e resumo compacto.",
+        "Testes cobrem packet ready e packet blocked com evidência derivada.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado a partir da lane essencial para trabalho ininterrupto seguro/controlado. [rationale:risk-control] Antes de qualquer runtime measured, precisamos de packet auditável com evidência derivada e bounded, não apenas uma decisão booleana.\n[2026-04-30T03:22:37Z] slice=1 focus=TASK-BUD-274 gate=test:monitor:smoke-241/241 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Packet measured auditável criado; regressão corrigiu duplicação de protected path derivado.",
+      "verification": "VER-BUD-549"
     }
   ]
 }

@@ -7161,6 +7161,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:12:06.967Z",
       "evidence": "Added cross-platform path testing doctrine and regression coverage. Doctrine now states path tests must be host-agnostic, using literal POSIX/Windows separator strings and normalized evidence instead of host-derived expectations from path.join/path.resolve. Added guardrails-unattended-continuation tests proving literal Windows protected path strings block next-local-safe and mixed Windows/POSIX strings normalize consistently for protected-scope and git-state signals. Validation: safe_marker_check passed 6/6 with command-sensitive-free markers after an initial command-sensitive marker attempt was rejected; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 24/24; cmd.exe /c npm run test:monitor:smoke --silent passed 239/239 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Measured path signals must remain portable across Windows/Linux/macOS and not pass only by accident on the current host."
+    },
+    {
+      "id": "VER-BUD-549",
+      "target": "TASK-BUD-274",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:23:09.883Z",
+      "evidence": "Added pure auditable local measured canary packet helpers: resolveLocalNudgeFreeLoopMeasuredSignals and buildLocalMeasuredNudgeFreeLoopCanaryPacket. The packet derives all measured signals from local facts, returns gate + signals + complete evidence entries + compact summary, and does not accept manual ok, signalSource, or measured overrides. Focal test initially caught duplicate protected path evidence when a protected path appeared in both changedPaths and candidate.protectedPaths; fixed default protectedScopePaths derivation to normalize/dedupe before evaluating protected scopes. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 26/26 after fix; cmd.exe /c npm run test:monitor:smoke --silent passed 241/241 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future uninterrupted operation needs bounded derived evidence packets, not just gate decisions."
     }
   ]
 }

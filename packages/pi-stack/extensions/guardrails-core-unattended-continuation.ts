@@ -108,6 +108,13 @@ export interface NudgeFreeLoopLocalMeasuredCanaryInput {
   stopConditions: NudgeFreeLoopStopConditionSignal[];
 }
 
+export interface NudgeFreeLoopLocalMeasuredCanaryPacket {
+  gate: NudgeFreeLoopCanaryGate;
+  signals: NudgeFreeLoopMeasuredSignals;
+  evidence: NudgeFreeLoopMeasuredEvidenceEntry[];
+  summary: string;
+}
+
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
 
 export interface NudgeFreeLoopCanaryGate {
@@ -347,38 +354,57 @@ export function resolveMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopMeasu
   });
 }
 
-export function resolveLocalMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
+export function resolveLocalNudgeFreeLoopMeasuredSignals(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopMeasuredSignals {
   const protectedScopePaths = input.protectedScopePaths ?? [
-    ...input.changedPaths,
-    ...(input.candidate.protectedPaths ?? []),
+    ...new Set([
+      ...input.changedPaths,
+      ...(input.candidate.protectedPaths ?? []),
+    ].map(normalizeMeasuredPath).filter(Boolean)),
   ];
-  return resolveMeasuredNudgeFreeLoopCanaryGate({
-    optIn: input.optIn,
-    signals: {
-      "next-local-safe": resolveNextLocalSafeMeasuredSignal(input.candidate),
-      "checkpoint-fresh": resolveCheckpointFreshMeasuredSignal({
-        handoffTimestampIso: input.handoffTimestampIso,
-        nowMs: input.nowMs,
-        maxAgeMs: input.maxCheckpointAgeMs,
-      }),
-      "handoff-budget-ok": resolveHandoffBudgetMeasuredSignal({
-        jsonChars: input.handoffJsonChars,
-        maxJsonChars: input.maxHandoffJsonChars,
-      }),
-      "git-state-expected": resolveGitStateExpectedMeasuredSignal({
-        changedPaths: input.changedPaths,
-        expectedPaths: input.expectedPaths,
-      }),
-      "protected-scopes-clear": resolveProtectedScopesMeasuredSignal({ paths: protectedScopePaths }),
-      "cooldown-ready": resolveCooldownReadyMeasuredSignal({
-        lastRunAtIso: input.lastRunAtIso,
-        nowMs: input.nowMs,
-        cooldownMs: input.cooldownMs,
-      }),
-      "validation-known": resolveValidationKnownMeasuredSignal(input.validation),
-      "stop-conditions-clear": resolveStopConditionsClearMeasuredSignal({ conditions: input.stopConditions }),
-    },
-  });
+  return {
+    "next-local-safe": resolveNextLocalSafeMeasuredSignal(input.candidate),
+    "checkpoint-fresh": resolveCheckpointFreshMeasuredSignal({
+      handoffTimestampIso: input.handoffTimestampIso,
+      nowMs: input.nowMs,
+      maxAgeMs: input.maxCheckpointAgeMs,
+    }),
+    "handoff-budget-ok": resolveHandoffBudgetMeasuredSignal({
+      jsonChars: input.handoffJsonChars,
+      maxJsonChars: input.maxHandoffJsonChars,
+    }),
+    "git-state-expected": resolveGitStateExpectedMeasuredSignal({
+      changedPaths: input.changedPaths,
+      expectedPaths: input.expectedPaths,
+    }),
+    "protected-scopes-clear": resolveProtectedScopesMeasuredSignal({ paths: protectedScopePaths }),
+    "cooldown-ready": resolveCooldownReadyMeasuredSignal({
+      lastRunAtIso: input.lastRunAtIso,
+      nowMs: input.nowMs,
+      cooldownMs: input.cooldownMs,
+    }),
+    "validation-known": resolveValidationKnownMeasuredSignal(input.validation),
+    "stop-conditions-clear": resolveStopConditionsClearMeasuredSignal({ conditions: input.stopConditions }),
+  };
+}
+
+export function buildLocalMeasuredNudgeFreeLoopCanaryPacket(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopLocalMeasuredCanaryPacket {
+  const signals = resolveLocalNudgeFreeLoopMeasuredSignals(input);
+  const gate = resolveMeasuredNudgeFreeLoopCanaryGate({ optIn: input.optIn, signals });
+  const evidence = REQUIRED_NUDGE_FREE_MEASURED_GATES.map((gateName) => ({
+    gate: gateName,
+    ok: signals[gateName].ok,
+    evidence: signals[gateName].evidence,
+  }));
+  return {
+    gate,
+    signals,
+    evidence,
+    summary: `nudge-free-loop-packet: decision=${gate.decision} continue=${gate.canContinueWithoutNudge ? "yes" : "no"} evidence=${gate.measuredEvidenceCount}/${REQUIRED_NUDGE_FREE_MEASURED_GATES.length}`,
+  };
+}
+
+export function resolveLocalMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
+  return buildLocalMeasuredNudgeFreeLoopCanaryPacket(input).gate;
 }
 
 export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {
