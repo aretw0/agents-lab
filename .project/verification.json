@@ -7782,6 +7782,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:04:45.351Z",
       "evidence": "Implemented pure no-execution decision packet helper buildOneSliceLocalCanaryDispatchDecisionPacket. The helper turns a prepare-one-slice preview into a human decision packet only when explicit contracts are present: rollback plan, validation gate, staging scope, commit scope, checkpoint plan, and stop contract. It always returns effect=none, activation=none, authorization=none, dispatchAllowed=false, requiresHumanDecision=true, oneSliceOnly=true. It blocks when preview is not prepare-one-slice, when contracts are missing, when repetition is requested, and even records operatorIntent=execute-one-slice as `execute-intent-recorded-not-authorization` without allowing dispatch. Smoke tests cover ready-for-human-decision, blocked preview, missing rollback contract, and execute intent without dispatch. Focal guardrails-unattended-continuation passed 41/41; full monitor smoke passed 267/267. No runtime tool was exposed and no automation was activated. [rationale:risk-control] This prevents prepare=yes from becoming dispatch; execution still requires a separate explicit path."
+    },
+    {
+      "id": "VER-BUD-618",
+      "target": "TASK-BUD-344",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:06:23.681Z",
+      "evidence": "Re-exported buildOneSliceLocalCanaryDispatchDecisionPacket through the canonical guardrails-core export surface. Updated hardening re-export smoke to import the packet helper via ../../extensions/guardrails-core and assert it returns mode=decision-packet, activation=none, authorization=none, dispatchAllowed=false, decision=ready-for-human-decision when supplied a safe one-slice plan and all contracts. Focal re-export smoke passed 1/1; full monitor smoke passed 267/267. No runtime tool exposed, no .pi/settings.json/.github changes, and no automation activated. [rationale:risk-control] Future internal consumers can use the no-execution decision packet through the canonical export without conflating helper availability with dispatch permission."
     }
   ]
 }

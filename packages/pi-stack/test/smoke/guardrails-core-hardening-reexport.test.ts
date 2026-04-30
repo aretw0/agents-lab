@@ -3,6 +3,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
+  buildOneSliceLocalCanaryDispatchDecisionPacket,
   commandSensitiveShellMarkerCheckReason,
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
@@ -70,7 +71,7 @@ describe("guardrails-core hardening re-exports", () => {
       canValidate: true,
     });
 
-    expect(resolveOneSliceLocalCanaryPlan({
+    const oneSlicePlan = resolveOneSliceLocalCanaryPlan({
       readinessReady: true,
       authorization: "none",
       checkpointFresh: true,
@@ -81,12 +82,28 @@ describe("guardrails-core hardening re-exports", () => {
       stopConditionsClear: true,
       risk: false,
       ambiguous: false,
-    })).toMatchObject({
+    });
+    expect(oneSlicePlan).toMatchObject({
       effect: "none",
       activation: "none",
       authorization: "none",
       oneSliceOnly: true,
       decision: "prepare-one-slice",
+    });
+    expect(buildOneSliceLocalCanaryDispatchDecisionPacket({
+      plan: oneSlicePlan,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    })).toMatchObject({
+      mode: "decision-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      decision: "ready-for-human-decision",
     });
 
     expect(resolveMeasuredNudgeFreeLoopCanaryGate({

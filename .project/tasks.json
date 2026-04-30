@@ -8303,6 +8303,31 @@
       ],
       "notes": "[rationale:risk-control] Antes de qualquer execução real de uma fatia, precisamos de um pacote de decisão que mantenha ready/prepare como evidência e não como autorização automática.\n[2026-04-30T11:04:31Z] slice=1 focus=TASK-BUD-343 gate=guardrails-unattended-continuation-41/41+test:monitor:smoke-267/267 commit=pending helper=dispatch-decision-packet dispatchAllowed=false. [rationale:risk-control] Decision packet criado como evidência, não execução.",
       "verification": "VER-BUD-617"
+    },
+    {
+      "id": "TASK-BUD-344",
+      "description": "[P1] Reexportar helper de decision packet de dispatch de uma fatia.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-343"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Reexportar buildOneSliceLocalCanaryDispatchDecisionPacket pelo guardrails-core export canônico.",
+        "Adicionar smoke de reexport confirmando dispatchAllowed=false e authorization=none.",
+        "Não expor tool runtime, não ativar automação, não modificar .pi/settings.json/.github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O decision packet de dispatch deve estar disponível para composição futura via export canônico, sem virar execução ou autorização operacional.\n[2026-04-30T11:06:01Z] slice=1 focus=TASK-BUD-344 gate=reexport-1/1+test:monitor:smoke-267/267 commit=pending export=buildOneSliceLocalCanaryDispatchDecisionPacket dispatchAllowed=false. [rationale:risk-control] Decision packet reexportado sem tool/runtime.",
+      "verification": "VER-BUD-618"
     }
   ]
 }

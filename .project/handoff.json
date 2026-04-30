@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-04-30T11:04:55.582Z",
-  "context": "TASK-BUD-343 completed. Added pure helper buildOneSliceLocalCanaryDispatchDecisionPacket. It converts prepare-one-slice preview evidence into [snip] ol exposed and no automation activated. [truncated:+414 chars]",
+  "timestamp": "2026-04-30T11:06:32.401Z",
+  "context": "TASK-BUD-344 completed. buildOneSliceLocalCanaryDispatchDecisionPacket is now re-exported through guardrails-core canonical exports and cover [snip] as exposed and no automation activated. [truncated:+175 chars]",
   "next_actions": [
-    "commit helper/board/handoff evidence",
-    "consider canonical re-export in a separate small slice if future internal consumers need the decision packet",
-    "do not expose execution path or runtime dispatch without explicit separate task/authorization"
+    "commit re-export/board/handoff evidence",
+    "future optional slice: compose the dispatch decision packet into a read-only preview/details s [snip] till dispatchAllowed=false [truncated:+9 chars]",
+    "do not implement execution path without explicit operator authorization and stop/rollback contract"
   ],
   "blockers": [],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 41/41",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts --silent passed 1/1",
     "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-343 verification=VER-BUD-617 status=completed"
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-344 verification=VER-BUD-618 status=completed"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:04:55.582Z",
+    "generatedAtIso": "2026-04-30T11:06:32.401Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; dispatch decision packet is pure and non-operational.",
+    "recommendation": "Commit evidence; no-execution dispatch packet is now canonical and non-operational.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:04:55.582Z",
+      "atIso": "2026-04-30T11:06:32.401Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; dispatch decision packet is pure and non-operational."
+      "recommendation": "Commit evidence; no-execution dispatch packet is now canonical and non-operational."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-343"
+    "TASK-BUD-344"
   ]
 }
