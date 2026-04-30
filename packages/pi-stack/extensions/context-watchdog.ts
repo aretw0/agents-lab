@@ -66,6 +66,7 @@ import {
 	type AutoResumePromptDiagnostics,
 	type HandoffFreshnessLabel,
 	type HandoffRefreshMode,
+	type LocalSliceHandoffCheckpointInput,
 } from "./context-watchdog-handoff";
 import {
 	describeAutoResumeDispatchReason,
@@ -766,6 +767,30 @@ function readContextWatchdogSourceMtimeMs(): number | undefined {
 }
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
+
+export function writeLocalSliceHandoffCheckpoint(
+	cwd: string,
+	input: LocalSliceHandoffCheckpointInput,
+): { ok: boolean; summary: string; path?: string; checkpoint?: Record<string, unknown>; reason?: string } {
+	try {
+		const checkpoint = buildLocalSliceHandoffCheckpoint(input);
+		const handoffPath = writeHandoffJson(cwd, checkpoint);
+		const taskId = input.taskId || "n/a";
+		return {
+			ok: true,
+			summary: `context-watch-checkpoint: ok=yes task=${taskId} path=.project/handoff.json`,
+			path: handoffPath,
+			checkpoint,
+		};
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : "write-failed";
+		return {
+			ok: false,
+			reason,
+			summary: `context-watch-checkpoint: ok=no task=${input.taskId || "n/a"} reason=write-failed`,
+		};
+	}
+}
 
 function persistContextWatchHandoffEvent(
 	ctx: ExtensionContext,
@@ -1529,6 +1554,64 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			return {
 				content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
 				details: payload,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_checkpoint",
+		label: "Context Watch Checkpoint",
+		description:
+			"Write a compact bounded local-slice handoff checkpoint to .project/handoff.json.",
+		parameters: Type.Object({
+			task_id: Type.Optional(Type.String()),
+			context: Type.String(),
+			validation: Type.Optional(Type.Array(Type.String())),
+			commits: Type.Optional(Type.Array(Type.String())),
+			next_actions: Type.Optional(Type.Array(Type.String())),
+			blockers: Type.Optional(Type.Array(Type.String())),
+			context_level: Type.Optional(Type.Union([
+				Type.Literal("ok"),
+				Type.Literal("warn"),
+				Type.Literal("checkpoint"),
+				Type.Literal("compact"),
+			])),
+			context_percent: Type.Optional(Type.Number()),
+			recommendation: Type.Optional(Type.String()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = params as {
+				task_id?: string;
+				context?: string;
+				validation?: string[];
+				commits?: string[];
+				next_actions?: string[];
+				blockers?: string[];
+				context_level?: "ok" | "warn" | "checkpoint" | "compact";
+				context_percent?: number;
+				recommendation?: string;
+			};
+			const result = writeLocalSliceHandoffCheckpoint(ctx.cwd, {
+				timestampIso: new Date().toISOString(),
+				taskId: p.task_id,
+				context: String(p.context ?? "Local slice checkpoint saved."),
+				validation: p.validation,
+				commits: p.commits,
+				nextActions: p.next_actions,
+				blockers: p.blockers,
+				contextLevel: p.context_level,
+				contextPercent: p.context_percent,
+				recommendation: p.recommendation,
+			});
+			const details = {
+				ok: result.ok,
+				reason: result.reason,
+				summary: result.summary,
+				path: result.ok ? ".project/handoff.json" : undefined,
+			};
+			return {
+				content: [{ type: "text", text: result.summary }],
+				details,
 			};
 		},
 	});

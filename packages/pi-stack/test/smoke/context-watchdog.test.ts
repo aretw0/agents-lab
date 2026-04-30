@@ -1,3 +1,6 @@
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	applyContextWatchBootstrapToSettings,
@@ -52,6 +55,7 @@ import {
 	shouldRefreshHandoffBeforeAutoCompact,
 	shouldScheduleAutoCompactRetry,
 	shouldTriggerAutoCompact,
+	writeLocalSliceHandoffCheckpoint,
 } from "../../extensions/context-watchdog";
 
 describe("context-watchdog", () => {
@@ -981,6 +985,32 @@ describe("context-watchdog", () => {
 		expect(checkpoint.context_watch).toMatchObject({ level: "ok", percent: 14, action: "continue" });
 		expect(checkpoint.context_watch_events).toHaveLength(1);
 		expect(checkpoint.context_watch_events[0]).toMatchObject({ reason: "manual_checkpoint", action: "checkpoint-refresh" });
+	});
+
+	it("writes compact local slice handoff checkpoints", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-handoff-"));
+		try {
+			const result = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2026-04-30T00:25:00.000Z",
+				taskId: "TASK-BUD-226",
+				context: "TASK-BUD-226 completed with bounded checkpoint writer.",
+				validation: ["context-watchdog.test.ts passed 34/34"],
+				commits: ["def5678 feat(context): write handoff checkpoints"],
+				nextActions: ["reload before live use"],
+				blockers: [],
+				contextLevel: "ok",
+				contextPercent: 14,
+			});
+			expect(result.ok).toBe(true);
+			expect(result.summary).toBe("context-watch-checkpoint: ok=yes task=TASK-BUD-226 path=.project/handoff.json");
+			expect(existsSync(join(cwd, ".project", "handoff.json"))).toBe(true);
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.current_tasks).toEqual(["TASK-BUD-226"]);
+			expect(written.recent_validation).toEqual(["context-watchdog.test.ts passed 34/34"]);
+			expect(written.context_watch).toMatchObject({ level: "ok", percent: 14 });
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
 	});
 
 	it("computes handoff freshness deterministically", () => {

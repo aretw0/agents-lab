@@ -5329,6 +5329,29 @@
       ],
       "notes": "Criado após reload. [rationale:risk-control] Ainda usamos scripts ad hoc para handoff; um builder puro reduz drift e bloat antes de expor uma primitive/tool de checkpoint.\n[2026-04-30T00:19:06Z] slice=1 focus=TASK-BUD-225 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Builder puro de handoff compacto prepara substituição de scripts ad hoc.",
       "verification": "VER-BUD-504"
+    },
+    {
+      "id": "TASK-BUD-226",
+      "description": "[P1] Expor writer bounded de checkpoint handoff para substituir scripts ad hoc.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-225"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper writeLocalSliceHandoffCheckpoint grava .project/handoff.json usando buildLocalSliceHandoffCheckpoint.",
+        "Tool context_watch_checkpoint grava checkpoint compacto e retorna summary curto.",
+        "Teste focal cobre gravação bounded e resumo.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload do builder de handoff compacto. [rationale:risk-control] Substituir node -e ad hoc por writer bounded reduz drift e preserva progresso de forma segura para unattended.\n[2026-04-30T00:22:44Z] slice=1 focus=TASK-BUD-226 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-duplicate-export next=commit-and-handoff. [rationale:risk-control] context_watch_checkpoint adiciona primitive bounded para checkpoint local.",
+      "verification": "VER-BUD-505"
     }
   ]
 }

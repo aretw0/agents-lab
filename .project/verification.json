@@ -6765,6 +6765,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:19:22.056Z",
       "evidence": "Added buildLocalSliceHandoffCheckpoint as a pure helper for compact local-slice handoff snapshots. It bounds context, validation, commits, next_actions, blockers, context_watch, and context_watch_events so checkpoint payloads stay resumable without verbose ad hoc JSON. Exported through context-watchdog and covered truncation/list-limit behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 33/33; cmd.exe /c npm run test:monitor:smoke --silent passed 209/209 across 32 files. [rationale:risk-control] Reduces checkpoint drift/bloat and prepares a safer primitive for unattended progress preservation."
+    },
+    {
+      "id": "VER-BUD-505",
+      "target": "TASK-BUD-226",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:23:06.923Z",
+      "evidence": "Added writeLocalSliceHandoffCheckpoint and runtime tool context_watch_checkpoint. The writer builds bounded handoff snapshots via buildLocalSliceHandoffCheckpoint and writes .project/handoff.json; the tool returns compact summary content and bounded details. Tests cover writing .project/handoff.json with current_tasks, recent_validation, and context_watch. Validation: first focal run exposed duplicate export, fixed; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 34/34; cmd.exe /c npm run test:monitor:smoke --silent passed 210/210 across 32 files. [rationale:risk-control] Replaces ad hoc handoff scripts with a bounded checkpoint primitive for safer unattended progress preservation."
     }
   ]
 }
