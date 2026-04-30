@@ -8,6 +8,7 @@ import {
   resolveHumanConfirmationAuditPlan,
   resolveHumanConfirmationEvidenceMatch,
   resolveHumanConfirmationRuntimeConsumptionPlan,
+  resolveHumanConfirmationSignalSourcePlan,
   type PendingHumanConfirmedAction,
   type TrustedHumanConfirmationEvidence,
 } from "../../extensions/guardrails-core-human-confirmation";
@@ -249,5 +250,33 @@ describe("human confirmation audit plan", () => {
     expect(guardOwned.nextActions).toEqual(["consume-envelope-with-exact-match-ttl-single-use"]);
     expect(guardOwned.dispatchAllowed).toBe(false);
     expect(guardOwned.canOverrideMonitorBlock).toBe(false);
+  });
+
+  it("plans signal source without direct upstream mutation", () => {
+    const currentPiShape = resolveHumanConfirmationSignalSourcePlan({
+      guardOwnsConfirmationDialog: false,
+      toolCallEventHasConfirmationSignal: false,
+      extensionContextCanSendStructuredMessage: false,
+      customMessagesPreserveDetails: false,
+      upstreamMutationAllowed: false,
+    });
+    expect(currentPiShape.decision).toBe("blocked");
+    expect(currentPiShape.reasons).toContain("tool-call-confirmation-signal-missing");
+    expect(currentPiShape.recommendedPath).toContain("keep fail-closed");
+
+    const guardOwned = resolveHumanConfirmationSignalSourcePlan({
+      guardOwnsConfirmationDialog: true,
+      auditEntryAppendAvailable: true,
+    });
+    expect(guardOwned.decision).toBe("use-guard-owned-audit-entry");
+    expect(guardOwned.implementationAllowed).toBe(false);
+    expect(guardOwned.dispatchAllowed).toBe(false);
+    expect(guardOwned.canOverrideMonitorBlock).toBe(false);
+
+    const upstream = resolveHumanConfirmationSignalSourcePlan({
+      upstreamMutationAllowed: true,
+    });
+    expect(upstream.decision).toBe("propose-upstream-tool-call-signal");
+    expect(upstream.recommendedPath).toContain("do not patch node_modules directly");
   });
 });

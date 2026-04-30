@@ -135,7 +135,112 @@ export type HumanConfirmationRuntimeConsumptionPlan = {
   summary: string;
 };
 
+export type HumanConfirmationSignalSourceDecision = "use-guard-owned-audit-entry" | "propose-upstream-tool-call-signal" | "build-wrapper-signal" | "blocked";
+
+export type HumanConfirmationSignalSourcePlanInput = {
+  guardOwnsConfirmationDialog?: boolean;
+  toolCallEventHasConfirmationSignal?: boolean;
+  extensionContextCanSendStructuredMessage?: boolean;
+  auditEntryAppendAvailable?: boolean;
+  customMessagesPreserveDetails?: boolean;
+  upstreamMutationAllowed?: boolean;
+};
+
+export type HumanConfirmationSignalSourcePlan = {
+  decision: HumanConfirmationSignalSourceDecision;
+  authorization: "none";
+  dispatchAllowed: false;
+  implementationAllowed: false;
+  canOverrideMonitorBlock: false;
+  reasons: string[];
+  recommendedPath: string;
+  nextActions: string[];
+  summary: string;
+};
+
 const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
+
+export function resolveHumanConfirmationSignalSourcePlan(
+  input: HumanConfirmationSignalSourcePlanInput,
+): HumanConfirmationSignalSourcePlan {
+  const reasons: string[] = [];
+
+  if (input.guardOwnsConfirmationDialog && input.auditEntryAppendAvailable) {
+    reasons.push("guard-owns-dialog");
+    reasons.push("audit-entry-append-available");
+    return {
+      decision: "use-guard-owned-audit-entry",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons,
+      recommendedPath: "record trusted evidence from the guard-owned dialog via audit entry; consume only structured envelope details",
+      nextActions: ["wire-guard-owned-dialog-to-recordTrustedHumanConfirmationUiDecision", "consume-structured-envelope-details-only"],
+      summary: `human-confirmation-signal-source: decision=use-guard-owned-audit-entry dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.toolCallEventHasConfirmationSignal) {
+    reasons.push("tool-call-confirmation-signal-available");
+    return {
+      decision: "build-wrapper-signal",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons,
+      recommendedPath: "wrap the exposed confirmation signal into human-confirmation-evidence details before monitor/guard consumption",
+      nextActions: ["map-upstream-signal-to-exact-action-fingerprint", "consume-envelope-with-ttl-single-use"],
+      summary: `human-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.extensionContextCanSendStructuredMessage && input.customMessagesPreserveDetails) {
+    reasons.push("structured-custom-message-available");
+    return {
+      decision: "build-wrapper-signal",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons,
+      recommendedPath: "emit hidden structured human-confirmation-evidence custom messages and consume details, not content text",
+      nextActions: ["emit-display-false-structured-envelope", "verify-consumer-receives-details"],
+      summary: `human-confirmation-signal-source: decision=build-wrapper-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.upstreamMutationAllowed) {
+    reasons.push("upstream-change-required");
+    return {
+      decision: "propose-upstream-tool-call-signal",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons,
+      recommendedPath: "propose an upstream ToolCallEvent confirmation field or structured pre-tool confirmation event; do not patch node_modules directly",
+      nextActions: ["draft-upstream-pr-or-wrapper-design", "keep-local-fail-closed-until-signal-exists"],
+      summary: `human-confirmation-signal-source: decision=propose-upstream-tool-call-signal dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  reasons.push("no-trusted-structured-signal-source");
+  if (input.customMessagesPreserveDetails === false) reasons.push("custom-messages-details-not-preserved");
+  if (input.toolCallEventHasConfirmationSignal === false) reasons.push("tool-call-confirmation-signal-missing");
+  return {
+    decision: "blocked",
+    authorization: "none",
+    dispatchAllowed: false,
+    implementationAllowed: false,
+    canOverrideMonitorBlock: false,
+    reasons,
+    recommendedPath: "keep fail-closed; do not consume text-only confirmation evidence",
+    nextActions: ["use-guard-owned-dialog-or-upstream-wrapper-before-consuming-confirmation"],
+    summary: `human-confirmation-signal-source: decision=blocked dispatch=no implementation=no override=no reasons=${reasons.join("|")} authorization=none`,
+  };
+}
 
 export function resolveHumanConfirmationRuntimeConsumptionPlan(
   input: HumanConfirmationRuntimeConsumptionPlanInput,

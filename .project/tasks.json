@@ -9524,7 +9524,7 @@
     {
       "id": "TASK-BUD-393",
       "description": "Follow-up: fornecer sinal runtime/upstream estruturado para confirmações destrutivas antes do tool_call.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-392"
@@ -9542,7 +9542,7 @@
         "Preservar fail-closed quando o sinal não existe, é stale, consumido, mismatched ou spoofable."
       ],
       "milestone": "human-control",
-      "notes": "Follow-up de TASK-BUD-392. O consumo core e plano runtime foram concluídos, mas behavior monitor custom_messages atual é text-only e não basta; confirmações destrutivas upstream antes do tool_call precisam de sinal estruturado via PR/wrapper/guard-owned dialog. [rationale:risk-control] Sem sinal runtime estruturado, aceitar confirmação textual criaria spoofing; com sinal estruturado, podemos reduzir falso bloqueio sem relaxar fail-closed."
+      "notes": "Follow-up de TASK-BUD-392. O consumo core e plano runtime foram concluídos, mas behavior monitor custom_messages atual é text-only e não basta; confirmações destrutivas upstream antes do tool_call precisam de sinal estruturado via PR/wrapper/guard-owned dialog. [rationale:risk-control] Sem sinal runtime estruturado, aceitar confirmação textual criaria spoofing; com sinal estruturado, podemos reduzir falso bloqueio sem relaxar fail-closed.\n2026-04-30: iniciado após reload. Micro-fatia bounded: investigar ponto upstream/wrapper para sinal estruturado de confirmação destrutiva antes do tool_call, sem mutar node_modules; registrar decisão técnica e testes/core se seguro.\n2026-04-30: primeira fatia validada (VER-BUD-718): resolveHumanConfirmationSignalSourcePlan codifica decisão upstream/wrapper. Evidência bounded: ToolCallEvent não tem confirmation field; ExtensionContext em tool_call não expõe sendMessage; behavior monitor custom_messages é text-only. Caminho seguro: guard-owned audit entry quando o guard possui diálogo, wrapper/sinal upstream quando confirmação destrutiva vem antes do tool_call; sem patch direto em node_modules."
     }
   ]
 }

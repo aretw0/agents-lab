@@ -8682,6 +8682,15 @@
       "method": "core-consumption-and-runtime-boundary-closure",
       "timestamp": "2026-04-30T22:24:21.474Z",
       "evidence": "TASK-BUD-392 completed for bounded scope. Implemented structured envelope extraction/consumption (VER-BUD-715) requiring customType=human-confirmation-evidence, display=false, structured details, trusted origin, exact fingerprint, TTL/single-use, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none; rejects text-only spoofed content and unsafe override fields. Implemented runtime consumption plan (VER-BUD-716) that explicitly rejects text-only custom_messages as spoofable; ready only when guard owns the confirmation or structured audit details are readable; when upstream destructive confirmation is not exposed, decision is needs-upstream-signal. Tests passed: latest focused suite 15 passed; docs sync/check ok. Follow-up TASK-BUD-393 tracks upstream/wrapper signal for actual destructive confirmations beyond current read guard audit paths."
+    },
+    {
+      "id": "VER-BUD-718",
+      "target": "TASK-BUD-393",
+      "target_type": "task",
+      "status": "passed",
+      "method": "upstream-wrapper-signal-plan-smoke",
+      "timestamp": "2026-04-30T22:29:52.586Z",
+      "evidence": "First bounded slice for TASK-BUD-393 investigated the current safe signal-source boundary. Bounded grep/read showed pi ToolCallEvent exposes toolName/toolCallId/input and no confirmation field; ExtensionContext exposes ui.confirm but not sendMessage in tool_call contexts; behavior monitor custom_messages collector is text-only. Added resolveHumanConfirmationSignalSourcePlan to choose between use-guard-owned-audit-entry, build-wrapper-signal, propose-upstream-tool-call-signal, or blocked. The current direct upstream shape without guard-owned dialog is blocked/needs upstream or wrapper; direct node_modules patch remains prohibited. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 16 passed. Docs sync/check ok."
     }
   ]
 }
