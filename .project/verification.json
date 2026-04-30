@@ -6918,6 +6918,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T01:28:21.768Z",
       "evidence": "Live-validated nudge_free_loop_canary after reload. Without opt-in it returned compact defer content: nudge-free-loop: decision=defer continue=no reasons=missing-opt-in. With all gates green and opt-in true it returned compact ready content: nudge-free-loop: decision=ready continue=yes reasons=all-gates-green. [rationale:risk-control] Confirms the nudge-free loop readiness surface works in runtime without mutation and keeps content compact."
+    },
+    {
+      "id": "VER-BUD-522",
+      "target": "TASK-BUD-244",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:32:37.042Z",
+      "evidence": "Updated nudge-free loop gate summaries to include effect=none, making clear that ready/defer/blocked are advisory diagnostics and do not activate automation. Updated runtime tool description to say advisory only, read-only, side-effect-free, and never starts automation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Addresses operator concern that manipulating booleans could accidentally open the loop; the tool now communicates no activation side effect."
     }
   ]
 }

@@ -5752,6 +5752,32 @@
       ],
       "notes": "Criado após reload para validar a nova tool live. [rationale:risk-control] A superfície read-only do loop sem empurrões precisa ser comprovada em runtime antes de qualquer automação.\n[2026-04-30T01:29:00Z] slice=1 focus=TASK-BUD-243 gate=live-nudge_free_loop_canary-defer-and-ready commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Tool runtime do canário sem empurrões validada ao vivo após reload.",
       "verification": "VER-BUD-521"
+    },
+    {
+      "id": "TASK-BUD-244",
+      "description": "[P1] Tornar explícito que o canário nudge-free é advisory sem efeito de ativação.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-243"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Summary do gate nudge-free deixa explícito que a avaliação tem effect=none/advisory e não ativa loop.",
+        "Descrição da tool runtime deixa explícito que ela nunca inicia automação.",
+        "Testes atualizados cobrem o summary advisory.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado a partir do receio do operador sobre manipulação direta dos booleans abrir loop sem querer. [rationale:risk-control] A tool deve comunicar que ready é apenas diagnóstico/advisory, não habilitação de automação.\n[2026-04-30T01:32:18Z] slice=1 focus=TASK-BUD-244 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Summary do canário agora explicita effect=none para evitar confusão com ativação real.",
+      "verification": "VER-BUD-522"
     }
   ]
 }

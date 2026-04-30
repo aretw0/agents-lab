@@ -64,7 +64,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons,
-      summary: `nudge-free-loop: decision=blocked continue=no reasons=${reasons.join(",")}`,
+      summary: `nudge-free-loop: effect=none decision=blocked continue=no reasons=${reasons.join(",")}`,
       recommendation: "Stop the idle loop and ask the operator before continuing.",
     };
   }
@@ -74,7 +74,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons,
-      summary: `nudge-free-loop: decision=defer continue=no reasons=${reasons.join(",")}`,
+      summary: `nudge-free-loop: effect=none decision=defer continue=no reasons=${reasons.join(",")}`,
       recommendation: "Do not continue without a nudge; satisfy the missing local gates first.",
     };
   }
@@ -83,7 +83,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
     decision: "ready",
     canContinueWithoutNudge: true,
     reasons: ["all-gates-green"],
-    summary: "nudge-free-loop: decision=ready continue=yes reasons=all-gates-green",
+    summary: "nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green",
     recommendation: "A canary idle loop may continue the next small local-safe slice.",
   };
 }

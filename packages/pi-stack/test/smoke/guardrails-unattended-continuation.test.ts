@@ -19,7 +19,7 @@ describe("guardrails unattended continuation", () => {
       decision: "ready",
       canContinueWithoutNudge: true,
       reasons: ["all-gates-green"],
-      summary: "nudge-free-loop: decision=ready continue=yes reasons=all-gates-green",
+      summary: "nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green",
     });
   });
 
@@ -40,7 +40,7 @@ describe("guardrails unattended continuation", () => {
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["missing-opt-in"],
-      summary: "nudge-free-loop: decision=defer continue=no reasons=missing-opt-in",
+      summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=missing-opt-in",
     });
   });
 
@@ -61,7 +61,7 @@ describe("guardrails unattended continuation", () => {
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons: ["unexpected-git-state", "protected-scope-pending", "stop-condition-present"],
-      summary: "nudge-free-loop: decision=blocked continue=no reasons=unexpected-git-state,protected-scope-pending,stop-condition-present",
+      summary: "nudge-free-loop: effect=none decision=blocked continue=no reasons=unexpected-git-state,protected-scope-pending,stop-condition-present",
     });
   });
 
