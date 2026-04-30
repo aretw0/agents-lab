@@ -8196,6 +8196,15 @@
       "method": "test+safe_marker_check",
       "timestamp": "2026-04-30T17:27:20.158Z",
       "evidence": "Completed diagnostic blast-radius hardening. Added source-map-blast-radius-scan bash guard to prevent direct source-map content reads and recursive scans over generated/dependency roots without explicit *.map exclusion. Exported detector/reason, documented the rule, and added regression coverage. Safe alternatives remain allowed: bounded read/offset, filename/count-only search, and explicit --exclude='*.map' or -g '!*.map'. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed; safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4. [rationale:risk-control] This prevents repeated context overflow from diagnostic output while preserving bounded investigation."
+    },
+    {
+      "id": "VER-BUD-664",
+      "target": "TASK-BUD-377",
+      "target_type": "task",
+      "status": "failed",
+      "method": "live-guard-validation",
+      "timestamp": "2026-04-30T17:56:22.523Z",
+      "evidence": "Live validation after user message 'reload' did not block source-map blast-radius test commands: `grep -n \"__PI_STACK_IMPOSSIBLE_MARKER__\" node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map` returned exit 1 without guard block; `grep -RIn \"__PI_STACK_IMPOSSIBLE_MARKER__\" node_modules/@mariozechner/pi-coding-agent/dist/core --include=\"*.map\" | head -1` also did not block. Existing upstream_pi_package_mutation guard still blocked `rm --version node_modules/@mariozechner/pi-coding-agent`, so guardrails-core is active but this new policy is not live or not matching runtime input. No large output or mutation occurred."
     }
   ]
 }

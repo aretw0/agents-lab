@@ -1,38 +1,37 @@
 {
-  "timestamp": "2026-04-30T17:27:32.533Z",
-  "context": "Completed TASK-BUD-377. Added deterministic bash guard source-map-blast-radius-scan to block diagnostic commands likely to dump source maps/g [snip] oad is required before live validation. [truncated:+335 chars]",
+  "timestamp": "2026-04-30T18:09:30.035Z",
+  "context": "Second live validation attempt after user said reload still did not block direct *.map grep, while upstream_pi_package_mutation control check [snip] ive source-map guard validation passes. [truncated:+286 chars]",
+  "current_tasks": [
+    "TASK-BUD-377"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-377 implementation/docs/board evidence.",
-    "Reload before live validation of the new bash guard.",
-    "After reload, validate a blocked source-map scan command and an allowed excluded scan command."
+    "Run an actual /reload in the pi session so runtime reloads local extension source, then retry [snip] urce-map guard validation. [truncated:+10 chars]",
+    "If it still fails after confirmed real /reload, inspect loaded package/sourceInfo path for gua [snip] e with bounded reads only. [truncated:+11 chars]",
+    "Do not run broad source-map scans."
   ],
   "blockers": [
-    "Reload required before live validation because runtime bash guard changed.",
+    "Source-map blast-radius guard not live-validated yet.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts: 1 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
-    "board_verification_append VER-BUD-662 ok"
+    "direct *.map grep impossible marker: not blocked, exit=1/no output",
+    "control check upstream pi mutation: blocked by upstream_pi_package_mutation",
+    "board_update TASK-BUD-377 note ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T17:27:32.533Z",
+    "generatedAtIso": "2026-04-30T18:09:30.035Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation",
-    "focus_task_status": "completed"
+    "recommendation": "real-reload-required-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T17:27:32.533Z",
+      "atIso": "2026-04-30T18:09:30.035Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "real-reload-required-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-377"
   ]
 }
