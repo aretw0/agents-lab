@@ -6819,6 +6819,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:47:36.278Z",
       "evidence": "Added assessLocalSliceHandoffBudget and enforced checkpoint budget in writeLocalSliceHandoffCheckpoint before writing .project/handoff.json. context_watch_checkpoint details now include jsonChars/maxJsonChars for audit while content remains compact. Tests cover pure budget assessment and writer blocking with an artificial 501-char budget, verifying .project/handoff.json is not created. Initial focal test showed the fixture was too small for the artificial budget; adjusted fixture to cross the limit. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 37/37; cmd.exe /c npm run test:monitor:smoke --silent passed 213/213 across 32 files. [rationale:risk-control] Prevents oversized checkpoint writes from replacing useful handoff state during unattended operation."
+    },
+    {
+      "id": "VER-BUD-511",
+      "target": "TASK-BUD-232",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:53:57.902Z",
+      "evidence": "Hardened writeLocalSliceHandoffCheckpoint to reject stale checkpoint writes when input.timestampIso is older than the existing .project/handoff.json timestamp. The failure returns compact summary context-watch-checkpoint ok=no reason=stale-checkpoint and preserves the newer handoff. Tests cover writing a fresh checkpoint, attempting an older checkpoint, and verifying the original timestamp/current_tasks remain. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 38/38; cmd.exe /c npm run test:monitor:smoke --silent passed 214/214 across 32 files. [rationale:risk-control] Prevents old/parallel unattended workers from overwriting newer handoff progress."
     }
   ]
 }

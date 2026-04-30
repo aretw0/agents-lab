@@ -5471,6 +5471,31 @@
       ],
       "notes": "Criado após reload do orçamento de handoff. [rationale:risk-control] O orçamento precisa ser enforcement no writer, não só teste de regressão do builder, para evitar sobrescrever handoff útil com payload grande.\n[2026-04-30T00:47:19Z] slice=1 focus=TASK-BUD-231 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-budget-fixture next=commit-and-context_watch_checkpoint. [rationale:risk-control] Writer bounded agora bloqueia checkpoint acima do orçamento antes de escrever.",
       "verification": "VER-BUD-510"
+    },
+    {
+      "id": "TASK-BUD-232",
+      "description": "[P1] Bloquear sobrescrita stale de handoff por checkpoint antigo.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-226",
+        "TASK-BUD-231"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "writeLocalSliceHandoffCheckpoint bloqueia escrita quando timestampIso é mais antigo que o handoff existente.",
+        "Bloqueio retorna summary compacto ok=no reason=stale-checkpoint.",
+        "Teste cobre preservação do handoff mais novo quando tentativa stale ocorre.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload do enforcement de orçamento. [rationale:risk-control] Em operação unattended/parallel, um agente antigo não deve sobrescrever um handoff mais novo e perder progresso.\n[2026-04-30T00:53:45Z] slice=1 focus=TASK-BUD-232 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Checkpoint bounded agora bloqueia sobrescrita stale por timestamp antigo.",
+      "verification": "VER-BUD-511"
     }
   ]
 }

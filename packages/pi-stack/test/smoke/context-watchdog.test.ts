@@ -1045,6 +1045,34 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("does not overwrite newer handoff checkpoints with stale timestamps", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-handoff-stale-"));
+		try {
+			const first = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2026-04-30T00:50:00.000Z",
+				taskId: "TASK-BUD-232",
+				context: "Fresh checkpoint should survive stale writes.",
+			});
+			expect(first.ok).toBe(true);
+
+			const stale = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2026-04-30T00:49:00.000Z",
+				taskId: "TASK-BUD-OLD",
+				context: "Stale checkpoint must not replace newer progress.",
+			});
+			expect(stale).toMatchObject({
+				ok: false,
+				reason: "stale-checkpoint",
+				summary: "context-watch-checkpoint: ok=no task=TASK-BUD-OLD reason=stale-checkpoint",
+			});
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.timestamp).toBe("2026-04-30T00:50:00.000Z");
+			expect(written.current_tasks).toEqual(["TASK-BUD-232"]);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("writes compact local slice handoff checkpoints", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-handoff-"));
 		try {

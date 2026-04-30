@@ -786,6 +786,16 @@ export function writeLocalSliceHandoffCheckpoint(
 		};
 	}
 	try {
+		const current = readHandoffJson(cwd);
+		const currentTimestamp = typeof current.timestamp === "string" ? Date.parse(current.timestamp) : NaN;
+		const nextTimestamp = Date.parse(input.timestampIso);
+		if (Number.isFinite(currentTimestamp) && Number.isFinite(nextTimestamp) && nextTimestamp < currentTimestamp) {
+			return {
+				ok: false,
+				reason: "stale-checkpoint",
+				summary: `context-watch-checkpoint: ok=no task=${taskId} reason=stale-checkpoint`,
+			};
+		}
 		const checkpoint = buildLocalSliceHandoffCheckpoint(input);
 		const budget = assessLocalSliceHandoffBudget(checkpoint, options.maxJsonChars);
 		if (!budget.ok) {
