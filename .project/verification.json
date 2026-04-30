@@ -6774,6 +6774,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:23:06.923Z",
       "evidence": "Added writeLocalSliceHandoffCheckpoint and runtime tool context_watch_checkpoint. The writer builds bounded handoff snapshots via buildLocalSliceHandoffCheckpoint and writes .project/handoff.json; the tool returns compact summary content and bounded details. Tests cover writing .project/handoff.json with current_tasks, recent_validation, and context_watch. Validation: first focal run exposed duplicate export, fixed; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 34/34; cmd.exe /c npm run test:monitor:smoke --silent passed 210/210 across 32 files. [rationale:risk-control] Replaces ad hoc handoff scripts with a bounded checkpoint primitive for safer unattended progress preservation."
+    },
+    {
+      "id": "VER-BUD-506",
+      "target": "TASK-BUD-227",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T00:26:17.559Z",
+      "evidence": "Live-validated context_watch_checkpoint after reload. It returned compact summary: context-watch-checkpoint: ok=yes task=TASK-BUD-227 path=.project/handoff.json, and wrote the current slice handoff through the bounded primitive rather than a node -e ad hoc script. [rationale:risk-control] Confirms the checkpoint primitive is usable in the real hot path for safer unattended progress preservation."
     }
   ]
 }

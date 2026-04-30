@@ -5352,6 +5352,27 @@
       ],
       "notes": "Criado após reload do builder de handoff compacto. [rationale:risk-control] Substituir node -e ad hoc por writer bounded reduz drift e preserva progresso de forma segura para unattended.\n[2026-04-30T00:22:44Z] slice=1 focus=TASK-BUD-226 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-duplicate-export next=commit-and-handoff. [rationale:risk-control] context_watch_checkpoint adiciona primitive bounded para checkpoint local.",
       "verification": "VER-BUD-505"
+    },
+    {
+      "id": "TASK-BUD-227",
+      "description": "[P1] Validar context_watch_checkpoint ao vivo e remover checkpoint ad hoc do fluxo atual.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-226"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_checkpoint grava .project/handoff.json ao vivo com summary compacto.",
+        "Handoff da fatia atual é produzido pela primitive, não por script node -e ad hoc.",
+        "Task fechada com board_task_complete e commit inclui somente board/verification desta validação."
+      ],
+      "notes": "Criado após reload para validar a nova primitive live. [rationale:risk-control] Antes de seguir criando mais hardening, precisamos provar que o checkpoint bounded substitui o script ad hoc no fluxo real.\n[2026-04-30T00:27:00Z] slice=1 focus=TASK-BUD-227 gate=live-context_watch_checkpoint-summary-ok-yes commit=pending drift=no next=commit-board-validation-only. [rationale:risk-control] Checkpoint desta fatia foi gravado pela primitive bounded.",
+      "verification": "VER-BUD-506"
     }
   ]
 }
