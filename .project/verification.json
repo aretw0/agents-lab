@@ -6900,6 +6900,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:24:00.772Z",
       "evidence": "Added pure resolveNudgeFreeLoopCanaryGate helper and exported it. The gate requires explicit opt-in, local-safe next slice, fresh checkpoint, handoff budget OK, expected git state, protected scopes clear, cooldown ready, known validation, and stop conditions clear before allowing continuation without a manual nudge. It defers missing opt-in/local gates and blocks unexpected git state, protected scope, or stop conditions. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 7/7; cmd.exe /c npm run test:monitor:smoke --silent passed 221/221 across 32 files. [rationale:risk-control] This creates a deterministic gate before any runtime nudge-free loop automation."
+    },
+    {
+      "id": "VER-BUD-520",
+      "target": "TASK-BUD-242",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:26:38.183Z",
+      "evidence": "Exposed resolveNudgeFreeLoopCanaryGate through a read-only runtime tool nudge_free_loop_canary with compact summary content and structured details. Also compacted unattended_continuation_plan tool content to its summary while preserving details. Surface smoke covers continuation plan compact content and nudge_free_loop_canary ready/blocked behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Runtime can now inspect nudge-free readiness without mutation or verbose context bloat."
     }
   ]
 }

@@ -5706,6 +5706,31 @@
       ],
       "notes": "Criado em checkpoint lane como micro-slice de helper puro. [rationale:risk-control] O loop sem empurrões precisa de um gate determinístico antes de virar qualquer automação runtime.\n[2026-04-30T01:23:16Z] slice=1 focus=TASK-BUD-241 gate=test:monitor:smoke-221/221 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Gate puro criado antes de qualquer automação do loop sem empurrões.",
       "verification": "VER-BUD-519"
+    },
+    {
+      "id": "TASK-BUD-242",
+      "description": "[P1] Expor gate do loop sem empurrões como tool read-only compacta.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-241"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar tool read-only para avaliar resolveNudgeFreeLoopCanaryGate em runtime.",
+        "Tool retorna summary compacto no content e payload estruturado em details.",
+        "unattended_continuation_plan também evita JSON verbose no content se alterado no mesmo surface.",
+        "Smoke de surface cobre ready/defer ou blocked.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload para expor o gate puro em runtime de forma read-only. [rationale:risk-control] O caminho para reduzir empurrões manuais precisa primeiro de uma superfície diagnóstica compacta e sem mutação.\n[2026-04-30T01:26:19Z] slice=1 focus=TASK-BUD-242 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Gate do loop sem empurrões exposto como tool read-only compacta.",
+      "verification": "VER-BUD-520"
     }
   ]
 }
