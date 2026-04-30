@@ -1,8 +1,8 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
-import {
+import { describe, expect, it, vi } from "vitest";
+import contextWatchdogExtension, {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
@@ -61,6 +61,30 @@ import {
 } from "../../extensions/context-watchdog";
 
 describe("context-watchdog", () => {
+	function makeMockPi() {
+		return {
+			on: vi.fn(),
+			registerTool: vi.fn(),
+			registerCommand: vi.fn(),
+		} as unknown as Parameters<typeof contextWatchdogExtension>[0];
+	}
+
+	function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+		const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+			([tool]) => tool?.name === name,
+		);
+		if (!call) throw new Error(`tool not found: ${name}`);
+		return call[0] as {
+			execute: (
+				toolCallId: string,
+				params: Record<string, unknown>,
+				signal: AbortSignal,
+				onUpdate: (update: unknown) => void,
+				ctx: { cwd: string },
+			) => Promise<{ content?: Array<{ text?: string }>; details?: Record<string, unknown> }>;
+		};
+	}
+
 	it("normalizes defaults and bounds", () => {
 		const cfg = normalizeContextWatchdogConfig({
 			checkpointPct: 999,
@@ -1094,6 +1118,69 @@ describe("context-watchdog", () => {
 			expect(written.current_tasks).toEqual(["TASK-BUD-226"]);
 			expect(written.recent_validation).toEqual(["context-watchdog.test.ts passed 34/34"]);
 			expect(written.context_watch).toMatchObject({ level: "ok", percent: 14 });
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_checkpoint tool writes compact bounded checkpoints", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			const result = await tool.execute(
+				"tc-context-watch-checkpoint",
+				{
+					task_id: "TASK-BUD-234",
+					context: "TASK-BUD-234 tool smoke checkpoint.",
+					validation: ["tool checkpoint smoke passed"],
+					commits: ["abc1234 test(context): smoke checkpoint tool"],
+					next_actions: ["continue bounded lane"],
+					blockers: [],
+					context_level: "ok",
+					context_percent: 14,
+				},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+			expect(result.content?.[0]?.text).toBe("context-watch-checkpoint: ok=yes task=TASK-BUD-234 path=.project/handoff.json");
+			expect(result.details).toMatchObject({
+				ok: true,
+				summary: "context-watch-checkpoint: ok=yes task=TASK-BUD-234 path=.project/handoff.json",
+				path: ".project/handoff.json",
+			});
+			expect(result.details?.checkpoint).toBeUndefined();
+			expect(typeof result.details?.jsonChars).toBe("number");
+			expect(typeof result.details?.maxJsonChars).toBe("number");
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.current_tasks).toEqual(["TASK-BUD-234"]);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_checkpoint tool rejects missing context without writing", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-empty-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			const result = await tool.execute(
+				"tc-context-watch-checkpoint-empty",
+				{ task_id: "TASK-BUD-234", context: "   " },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+			expect(result.content?.[0]?.text).toBe("context-watch-checkpoint: ok=no task=TASK-BUD-234 reason=missing-context");
+			expect(result.details).toMatchObject({
+				ok: false,
+				reason: "missing-context",
+				summary: "context-watch-checkpoint: ok=no task=TASK-BUD-234 reason=missing-context",
+			});
+			expect(existsSync(join(cwd, ".project", "handoff.json"))).toBe(false);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
