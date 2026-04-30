@@ -8408,6 +8408,52 @@
       ],
       "notes": "[rationale:risk-control] Como details do runtime nem sempre aparecem no transcript, o summary precisa expor que o decision packet permanece dispatch=no sem autorizar execução.\n[2026-04-30T11:20:01Z] slice=1 focus=TASK-BUD-347 gate=context-watchdog-48/48+test:monitor:smoke-267/267 commit=pending summary=packet+dispatch reload-needed=yes. [rationale:risk-control] Summary agora expõe dispatch=no sem executar nada.",
       "verification": "VER-BUD-621"
+    },
+    {
+      "id": "TASK-BUD-348",
+      "description": "[P1] Live-validar summary compacto packet/dispatch da one-slice preview após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-347"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar foco local-safe fresco para validação live pós-reload.",
+        "Escrever checkpoint fresco sem blockers reais.",
+        "Executar context_watch_one_slice_canary_preview e confirmar summary com packet=ready-for-human-decision e dispatch=no quando verde.",
+        "Executar context_watch_continuation_readiness e confirmar ready=yes/authorization=none para o mesmo foco.",
+        "Confirmar que preview não stageia, commita, fecha task, checkpointa, aciona scheduler/remote/self-reload ou loop; ações de board/commit/checkpoint são explícitas.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O summary compacto precisa provar ao vivo que o decision packet está visível e continua dispatch=no, reduzindo ambiguidade quando details não aparecem.\n[2026-04-30T11:25:00Z] slice=1 focus=TASK-BUD-348 gate=live-preview-blocked packet=blocked dispatch=no authorization=none followup=TASK-BUD-349. [rationale:risk-control] Summary compacto validado no caminho bloqueado; caminho verde separado com validação conhecida.",
+      "verification": "VER-BUD-622"
+    },
+    {
+      "id": "TASK-BUD-349",
+      "description": "[P1] Live-validar caminho verde do summary packet/dispatch da one-slice preview.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-348"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke principal permanece verde.",
+        "context_watch_one_slice_canary_preview retorna packet=ready-for-human-decision dispatch=no authorization=none quando o foco fresco está verde.",
+        "context_watch_continuation_readiness retorna ready=yes authorization=none para o mesmo foco.",
+        "A preview não executa staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload ou loop."
+      ],
+      "notes": "[rationale:risk-control] TASK-BUD-348 validou fail-closed compacto; esta task declara validação conhecida para provar o caminho verde do summary packet/dispatch.\n[2026-04-30T11:26:00Z] slice=1 focus=TASK-BUD-349 gate=live-preview-green packet=ready-for-human-decision dispatch=no readiness=ready authorization=none commit=pending. [rationale:risk-control] Caminho verde compacto validado sem execução automática.",
+      "verification": "VER-BUD-623"
     }
   ]
 }

@@ -1,41 +1,38 @@
 {
-  "timestamp": "2026-04-30T11:20:27.088Z",
-  "context": "TASK-BUD-347 completed. context_watch_one_slice_canary_preview summary now includes compact decision packet fields: packet=<decision> and dis [snip] ore live validation of the new summary. [truncated:+310 chars]",
+  "timestamp": "2026-04-30T11:26:10.636Z",
+  "context": "TASK-BUD-348 and TASK-BUD-349 completed. After reload, context_watch_one_slice_canary_preview compact summary was live-validated in both fail [snip] t/commit are explicit workflow actions. [truncated:+758 chars]",
   "next_actions": [
-    "commit summary/board/handoff evidence",
-    "reload before live-validating packet=ready-for-human-decision dispatch=no in context_watch_one [snip] lice_canary_preview output [truncated:+2 chars]",
-    "after reload, create a fresh local-safe focus and confirm compact output shows dispatch=no"
+    "commit board/handoff/verification evidence",
+    "continue local-first hardening; next possible slice is documenting compact summary semantics o [snip] l no activation by default [truncated:+60 chars]"
   ],
-  "blockers": [
-    "Runtime reload needed before compact decision packet summary appears live."
-  ],
+  "blockers": [],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
-    "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
-    "green smoke summary includes packet=ready-for-human-decision dispatch=no"
+    "live blocked preview: packet=blocked dispatch=no authorization=none for TASK-BUD-348",
+    "live green preview: packet=ready-for-human-decision dispatch=no authorization=none for TASK-BUD-349",
+    "live readiness: ready=yes focus=TASK-BUD-349 audit=ready staleFocus=0 authorization=none"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:20:27.088Z",
+    "generatedAtIso": "2026-04-30T11:26:10.636Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; reload before live validation of the new compact summary.",
+    "recommendation": "Commit evidence; compact packet/dispatch summary is live-validated in blocked and green paths.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:20:27.088Z",
+      "atIso": "2026-04-30T11:26:10.636Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; reload before live validation of the new compact summary."
+      "recommendation": "Commit evidence; compact packet/dispatch summary is live-validated in blocked and green paths."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-347"
+    "TASK-BUD-349"
   ]
 }

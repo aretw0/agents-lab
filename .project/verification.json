@@ -7818,6 +7818,24 @@
       "method": "test",
       "timestamp": "2026-04-30T11:20:16.390Z",
       "evidence": "Added compact decision packet fields to context_watch_one_slice_canary_preview summary so live transcripts show packet and dispatch state without requiring details expansion. Summary now includes `packet=<decision>` and `dispatch=yes|no` when decisionPacket is present. Green smoke expected summary is now `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`; blocked formatter smoke includes `packet=blocked dispatch=no`. This preserves authorization=none, does not add execute/dispatch parameters, and does not dispatch staging/commit/board/checkpoint/scheduler/remote/self-reload/loop. Focal context-watchdog passed 48/48; full monitor smoke passed 267/267. Runtime summary behavior changed, so live validation requires reload. [rationale:risk-control] The operator can now see dispatch=no in the compact output, reducing ambiguity when details are not visible."
+    },
+    {
+      "id": "VER-BUD-622",
+      "target": "TASK-BUD-348",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T11:25:46.324Z",
+      "evidence": "Live post-reload validation confirmed the new compact decision packet fields appear in the one-slice preview even when fail-closed. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=readiness-not-ready|validation-unknown authorization=none`. This proves the loaded runtime exposes packet=blocked and dispatch=no in the summary and does not treat unknown validation as permission. Green-path validation moved to TASK-BUD-349 with explicit smoke validation. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, or loop was dispatched by the preview. [rationale:risk-control] Fail-closed compact summary is a valid safety boundary and revealed that green proof requires known validation."
+    },
+    {
+      "id": "VER-BUD-623",
+      "target": "TASK-BUD-349",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T11:25:56.242Z",
+      "evidence": "Live green-path validation of the compact one-slice preview summary succeeded after creating a fresh local-safe focus with explicit smoke validation. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-349 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only explicit board/handoff changes, confirming the preview did not stage/commit/close/checkpoint/dispatch anything by itself. [rationale:risk-control] The compact summary now proves the decision packet is ready for human decision while dispatch remains no."
     }
   ]
 }
