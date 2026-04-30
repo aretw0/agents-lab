@@ -16,6 +16,7 @@ import {
   resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
+  resolveNextLocalSafeCollectorResult,
   resolveProtectedScopesCollectorResult,
   resolveStopConditionsClearCollectorResult,
   resolveRecurringFailureHardening,
@@ -330,6 +331,37 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "cooldown",
       status: "invalid",
       evidence: "cooldown=wait remainingSec=30 elapsedSec=30",
+    });
+    expect(resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        taskId: "TASK-BUD-294",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+      },
+    })).toEqual({
+      fact: "candidate",
+      status: "observed",
+      evidence: "next-local-safe=yes task=TASK-BUD-294 files=2",
+    });
+    expect(resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        taskId: "TASK-PATH",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+        protectedPaths: [".github/workflows/ci.yml"],
+      },
+    })).toEqual({
+      fact: "candidate",
+      status: "invalid",
+      evidence: "next-local-safe=no reasons=protected-paths-1",
     });
   });
 });

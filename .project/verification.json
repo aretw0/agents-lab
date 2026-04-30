@@ -7341,6 +7341,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:32:13.144Z",
       "evidence": "Added and re-exported pure resolveCooldownReadyCollectorResult. It derives cooldown collector status from local readStatus, lastRunAtIso, nowMs, and cooldownMs by reusing resolveCooldownReadyMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover previous none, elapsed ready, wait invalid, missing read, read-error, invalid timestamp, future timestamp, and invalid cooldown. Canonical re-export smoke covers elapsed ready and wait invalid. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 40/40; cmd.exe /c npm run test:monitor:smoke --silent passed 252/252 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Cooldown now has a local-observed collector building block so future audit envelopes can avoid tight repeated unattended loops."
+    },
+    {
+      "id": "VER-BUD-569",
+      "target": "TASK-BUD-294",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:37:54.931Z",
+      "evidence": "Added and re-exported pure resolveNextLocalSafeCollectorResult. It derives candidate collector status from local readStatus and observed NudgeFreeLoopLocalCandidate by reusing resolveNextLocalSafeMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover local-safe candidate observed, missing task invalid, protected scope invalid, protected path invalid, missing read, read-error, and missing candidate. Canonical re-export smoke covers local-safe and protected-path invalid. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 41/41; cmd.exe /c npm run test:monitor:smoke --silent passed 253/253 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Candidate/next-local-safe now has a local-observed collector building block so future audit envelopes can identify the intended slice without granting operational authorization."
     }
   ]
 }

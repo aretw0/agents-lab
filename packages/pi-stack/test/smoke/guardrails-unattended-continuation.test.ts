@@ -16,6 +16,7 @@ import {
   resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
+  resolveNextLocalSafeCollectorResult,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesCollectorResult,
@@ -44,6 +45,64 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives candidate collector results from local read outcomes", () => {
+    const localSafe = resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        taskId: "TASK-BUD-294",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+      },
+    });
+    const missingTask = resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+      },
+    });
+    const protectedScope = resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        taskId: "TASK-PROTECTED",
+        scope: "protected",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+      },
+    });
+    const protectedPath = resolveNextLocalSafeCollectorResult({
+      readStatus: "observed",
+      candidate: {
+        taskId: "TASK-PATH",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "marker-check",
+        risk: "low",
+        protectedPaths: [".github/workflows/ci.yml"],
+      },
+    });
+    const missing = resolveNextLocalSafeCollectorResult({ readStatus: "missing" });
+    const readError = resolveNextLocalSafeCollectorResult({ readStatus: "error" });
+    const missingCandidate = resolveNextLocalSafeCollectorResult({ readStatus: "observed" });
+
+    expect(localSafe).toEqual({ fact: "candidate", status: "observed", evidence: "next-local-safe=yes task=TASK-BUD-294 files=2" });
+    expect(missingTask).toEqual({ fact: "candidate", status: "invalid", evidence: "next-local-safe=no reasons=missing-task" });
+    expect(protectedScope).toEqual({ fact: "candidate", status: "invalid", evidence: "next-local-safe=no reasons=scope-protected" });
+    expect(protectedPath).toEqual({ fact: "candidate", status: "invalid", evidence: "next-local-safe=no reasons=protected-paths-1" });
+    expect(missing).toEqual({ fact: "candidate", status: "missing", evidence: "candidate=missing" });
+    expect(readError).toEqual({ fact: "candidate", status: "invalid", evidence: "candidate=read-error" });
+    expect(missingCandidate).toEqual({ fact: "candidate", status: "invalid", evidence: "candidate=missing-candidate" });
+  });
+
   it("derives cooldown collector results from local read outcomes", () => {
     const nowMs = Date.parse("2026-04-30T04:30:00.000Z");
     const previousNone = resolveCooldownReadyCollectorResult({

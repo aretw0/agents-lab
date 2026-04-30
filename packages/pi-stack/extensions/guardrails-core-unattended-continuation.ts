@@ -371,6 +371,27 @@ export function resolveStopConditionsClearMeasuredSignal(input: {
   return { ok: false, evidence: `stops=present count=${present.length} first=${first}` };
 }
 
+export function resolveNextLocalSafeCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  candidate?: NudgeFreeLoopLocalCandidate;
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "candidate", status: "missing", evidence: "candidate=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "candidate", status: "invalid", evidence: "candidate=read-error" };
+  }
+  if (!input.candidate) {
+    return { fact: "candidate", status: "invalid", evidence: "candidate=missing-candidate" };
+  }
+  const signal = resolveNextLocalSafeMeasuredSignal(input.candidate);
+  return {
+    fact: "candidate",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 export function resolveHandoffBudgetCollectorResult(input: {
   readStatus: NudgeFreeLoopLocalReadStatus;
   handoffJson?: string;
