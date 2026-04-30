@@ -125,6 +125,7 @@ import { ALLOWED_OUTSIDE, SENSITIVE_PATHS, UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIS
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 import { resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
+import { recordTrustedHumanConfirmationUiDecision, type HumanConfirmationActionFingerprint } from "./guardrails-core-human-confirmation";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
 
@@ -203,6 +204,12 @@ async function guardReadPath(filePath: string, ctx: ExtensionContext) {
       "⚠️ Path Sensível",
       `Leitura de arquivo sensível:\n${filePath}\n\nPermitir?`
     );
+    appendTrustedUiConfirmationEvidence(ctx, {
+      actionKind: "protected",
+      toolName: "read",
+      path: filePath,
+      scope: "sensitive-path-read",
+    }, ok);
     if (!ok) return { block: true, reason: `Bloqueado pelo usuário: ${filePath}` };
     return undefined;
   }
@@ -220,6 +227,12 @@ async function guardReadPath(filePath: string, ctx: ExtensionContext) {
       "Leitura fora do projeto",
       `O agente quer ler um arquivo fora do projeto:\n${filePath}\n\nPermitir?`
     );
+    appendTrustedUiConfirmationEvidence(ctx, {
+      actionKind: "protected",
+      toolName: "read",
+      path: filePath,
+      scope: "outside-project-read",
+    }, ok);
     if (!ok) return { block: true, reason: `Bloqueado pelo usuário: ${filePath}` };
   }
 
@@ -241,6 +254,13 @@ async function guardBashPathReads(command: string, ctx: ExtensionContext) {
         "⚠️ Comando lê path sensível",
         `O comando acessa arquivo sensível:\n${command}\n\nPath: ${filePath}\n\nPermitir?`
       );
+      appendTrustedUiConfirmationEvidence(ctx, {
+        actionKind: "protected",
+        toolName: "bash",
+        path: filePath,
+        scope: "sensitive-path-read",
+        payloadHash: `command:${command.slice(0, 160)}`,
+      }, ok);
       if (!ok) return { block: true, reason: `Bloqueado pelo usuário: ${filePath}` };
     }
   }
@@ -419,6 +439,27 @@ function appendAuditEntry(ctx: ExtensionContext, key: string, value: Record<stri
   if (typeof maybeAppend === "function") {
     maybeAppend(key, value);
   }
+}
+
+function appendTrustedUiConfirmationEvidence(
+  ctx: ExtensionContext,
+  fingerprint: HumanConfirmationActionFingerprint,
+  confirmed: boolean,
+): void {
+  const result = recordTrustedHumanConfirmationUiDecision({
+    ...fingerprint,
+    confirmed,
+    nowIso: new Date().toISOString(),
+  });
+  appendAuditEntry(ctx, "guardrails-core.human-confirmation-ui-decision", {
+    atIso: new Date().toISOString(),
+    decision: result.decision,
+    reasons: result.reasons,
+    dispatchAllowed: result.dispatchAllowed,
+    canOverrideMonitorBlock: result.canOverrideMonitorBlock,
+    authorization: result.authorization,
+    evidence: result.envelope?.details,
+  });
 }
 
 function normalizeCmdName(text: string): string {
