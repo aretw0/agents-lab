@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-04-30T12:53:37.644Z",
-  "context": "TASK-BUD-369 completed. Documented Operator packet sem executor in control-plane operating doctrine. It explains context_watch_one_slice_oper [snip] otected scopes/destructive maintenance. [truncated:+499 chars]",
+  "timestamp": "2026-04-30T12:57:13.552Z",
+  "context": "TASK-BUD-370 completed. Added final-turn communication convention to operating doctrine: when runtime/tool registration/surface changes requi [snip] y, not a new gate or confirmation loop. [truncated:+313 chars]",
   "next_actions": [
     "commit docs/board/handoff evidence",
-    "continue essential lane; next candidates: design explicit executor backlog gate or improve mea [snip] lement executor by default [truncated:+36 chars]"
+    "continue essential lane; no reload needed for this docs-only slice",
+    "future final responses should visibly highlight reload needs when runtime changed"
   ],
-  "blockers": [
-    "No runtime blocker for read-only/local work. Executor/scheduler/repetition sti [snip] xplicit authorization. [truncated:+21 chars]"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "safe_marker_check: ok=yes matched=10/10 commandSensitive=none",
+    "safe_marker_check: ok=yes matched=6/6 commandSensitive=none",
     "cmd.exe /c npx vitest run context-watchdog + guardrails-unattended-continuation passed 90/90",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-369 verification=VER-BUD-643 status=completed"
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-370 verification=VER-BUD-644 status=completed"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T12:53:37.644Z",
+    "generatedAtIso": "2026-04-30T12:57:13.552Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; operator packet semantics are documented.",
+    "recommendation": "Commit evidence; apply final-turn reload callout convention going forward.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T12:53:37.644Z",
+      "atIso": "2026-04-30T12:57:13.552Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; operator packet semantics are documented."
+      "recommendation": "Commit evidence; apply final-turn reload callout convention going forward."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-369"
+    "TASK-BUD-370"
   ]
 }

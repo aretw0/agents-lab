@@ -8016,6 +8016,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T12:53:22.980Z",
       "evidence": "Documented live semantics of context_watch_one_slice_operator_packet_preview in docs/guides/control-plane-operating-doctrine.md. The section `Operator packet sem executor` now records the composed read-only packet as readiness + one-slice preview + decision packet + contract review, with live examples for: green local facts but missing explicit human confirmation (`readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none`); fail-closed unknown validation (`validation-gate-missing`); and known validation with missing file scope (`declared-files-missing`). It states focus alone is not reversible file scope, and that the operator packet reduces friction but does not authorize executor, repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes, or destructive maintenance. Validation: safe_marker_check passed 10/10; focal context-watchdog + guardrails-unattended-continuation tests passed 90/90. [rationale:risk-control] The new packet is now documented as evidence, not operational permission."
+    },
+    {
+      "id": "VER-BUD-644",
+      "target": "TASK-BUD-370",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T12:56:49.132Z",
+      "evidence": "Documented final-turn communication convention in docs/guides/control-plane-operating-doctrine.md. When a slice changes runtime/tool registration/surface behavior and needs reload before live validation, the final response should include the exact highlighted line `**Reload necessário antes da validação live.**` and a short `Próximos passos diretos:` block with at most 3 bullets (reload, user says reload done, validate expected tool/summary). When reload is not needed but ambiguity is likely, the response may state `Reload não necessário para a próxima fatia`. The rule is communication only, not a new gate or confirmation loop. Validation: safe_marker_check passed 6/6; focal context-watchdog + guardrails-unattended-continuation tests passed 90/90. [rationale:risk-control] This encodes the operator reminder so reload/action needs are visible without adding process fat."
     }
   ]
 }

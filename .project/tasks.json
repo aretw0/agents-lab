@@ -8958,6 +8958,31 @@
       ],
       "notes": "[rationale:risk-control] O pacote composto novo precisa de semântica documentada para não ser confundido com autorização de executor.\n[2026-04-30T12:53:02Z] slice=1 focus=TASK-BUD-369 gate=safe_marker_check-10/10+focal-90/90 commit=pending docs=operator-packet-no-executor-semantics. [rationale:risk-control] Semântica live do operator packet consolidada como evidência sem executor.",
       "verification": "VER-BUD-643"
+    },
+    {
+      "id": "TASK-BUD-370",
+      "description": "[P1] Padronizar final de turno quando reload for necessário.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-369"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar que final de turno deve destacar reload necessário em negrito quando runtime/tool registration mudar.",
+        "Definir bloco curto de próximos passos diretos quando houver reload ou ação necessária para continuar.",
+        "Distinguir reload necessário de reload não necessário.",
+        "Evitar transformar isso em fricção: apenas uma convenção de comunicação/checkpoint.",
+        "Validar com safe_marker_check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O operador pediu que reload necessário fique mais claro no final de turno; tornar isso convenção reduz ambiguidade e evita perda de continuidade.\n[2026-04-30T12:56:34Z] slice=1 focus=TASK-BUD-370 gate=safe_marker_check-6/6+focal-90/90 commit=pending docs=final-turn-reload-callout. [rationale:risk-control] Final de turno agora deve destacar reload necessário em negrito e próximos passos diretos.",
+      "verification": "VER-BUD-644"
     }
   ]
 }

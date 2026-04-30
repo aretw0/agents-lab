@@ -294,6 +294,27 @@ slice=<n> focus=<task> gate=<comando-ou-inspeção> commit=<sha> drift=<yes|no> 
 
 Essa linha deve ser suficiente para explicar continuidade sem inflar handoff, board ou docs.
 
+### Final de turno com reload ou ação necessária
+
+Quando uma fatia alterar runtime, registro de tool, surface ou comportamento que só aparece após `/reload`, o final de turno deve destacar claramente:
+
+```text
+**Reload necessário antes da validação live.**
+```
+
+Em seguida, liste próximos passos diretos em até 3 bullets, por exemplo:
+
+```text
+Próximos passos diretos:
+1. fazer /reload;
+2. pedir "reload feito, prossiga";
+3. validar <tool/summary esperado>.
+```
+
+Quando não houver reload necessário, diga isso de forma curta se houver risco de dúvida: `Reload não necessário para a próxima fatia`. A regra é comunicação, não gate novo: ela não deve interromper trabalho local-safe nem pedir confirmação quando o próximo passo é óbvio e reversível.
+
+Use o mesmo formato para outros bloqueios simples de continuidade: **ação necessária**, motivo em uma linha e próximos passos diretos. O objetivo é reduzir ambiguidade no fim do turno, não criar mais cerimônia.
+
 ## Falhas recorrentes
 
 Quando o mesmo problema operacional se repetir, use `recurring_failure_hardening_plan` antes de escrever mais um lembrete. A regra é: primeira ocorrência pode virar regra curta; segunda ocorrência deve virar hard intent com primitiva e teste; depois disso, adicionar guard runtime ou bloquear o caminho antigo se ele continuar disponível.
