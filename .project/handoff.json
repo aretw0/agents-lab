@@ -1,41 +1,42 @@
 {
-  "timestamp": "2026-04-30T12:16:28.224Z",
-  "context": "TASK-BUD-362 completed. Defined long-term .project strategy: .project remains the current local-first adapter, not mandatory final storage; c [snip] d on .project as operational authority. [truncated:+506 chars]",
+  "timestamp": "2026-04-30T12:18:26.262Z",
+  "context": "TASK-BUD-364 completed. Applied simple-signal ladder to recurring Git maintenance warning. Read-only git_maintenance_status classified severi [snip] e, or .git/gc.log removal was executed. [truncated:+295 chars]",
   "next_actions": [
-    "commit docs/board/handoff evidence",
+    "commit board/handoff/verification evidence",
     "reload still needed for TASK-BUD-361 operator packet runtime validation",
-    "after reload, live-validate context_watch_one_slice_operator_packet_preview"
+    "if operator explicitly authorizes Git maintenance later, run a separate protected task with ba [snip] ns and exact command scope [truncated:+24 chars]"
   ],
   "blockers": [
-    "Runtime reload still needed before live validation of context_watch_one_slice_ [snip] iew from TASK-BUD-361. [truncated:+20 chars]"
+    "Runtime reload still needed before live validation of context_watch_one_slice_ [snip] iew from TASK-BUD-361. [truncated:+20 chars]",
+    "Git maintenance cleanup remains opt-in; repeated warning is classified as monitor, not auto-clean."
   ],
   "recent_validation": [
-    "safe_marker_check project-canonical-pipeline corrected markers: ok=yes matched=14/14 commandSensitive=none",
-    "safe_marker_check operating-doctrine corrected markers: ok=yes matched=5/5 commandSensitive=none",
-    "initial marker checks only had over-specific backtick/text mismatches"
+    "git_maintenance_status: severity=warning action=monitor reasons=gc-log-present / many-loose-ob [snip] cleanupCommandsExecuted=[] [truncated:+40 chars]",
+    "recurring_failure_hardening_plan: decision=block-old-path hardIntent=yes occurrences=3 reasons [snip] ailable / third-occurrence [truncated:+18 chars]",
+    "git status after diagnostics: only M .project/tasks.json from explicit workflow steps"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T12:16:28.224Z",
+    "generatedAtIso": "2026-04-30T12:18:26.262Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; .project strategy gate is resolved for current maturity level.",
+    "recommendation": "Commit evidence; continue local-first. Do not run git cleanup without explicit authorization.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T12:16:28.224Z",
+      "atIso": "2026-04-30T12:18:26.262Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; .project strategy gate is resolved for current maturity level."
+      "recommendation": "Commit evidence; continue local-first. Do not run git cleanup without explicit authorization."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-362"
+    "TASK-BUD-364"
   ]
 }

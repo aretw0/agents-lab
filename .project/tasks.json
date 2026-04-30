@@ -8821,6 +8821,28 @@
       ],
       "notes": "[rationale:risk-control] Precisamos de uma regra básica para não deixar sinais simples acumularem ruído, sem voltar à gordura de tentativas passadas nem autorizar ações destrutivas.\n[2026-04-30T12:10:14Z] slice=1 focus=TASK-BUD-363 gate=safe_marker_check-10/10+focal-54/54 commit=pending docs=simple-signal-ladder. [rationale:risk-control] Sinais simples agora têm escada mínima: corrigir só se local-safe/reversível; git maintenance destrutivo segue com autorização explícita.",
       "verification": "VER-BUD-636"
+    },
+    {
+      "id": "TASK-BUD-364",
+      "description": "[P1] Classificar aviso recorrente de manutenção Git pela escada de sinais simples.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-363"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Usar git_maintenance_status em modo read-only para classificar o aviso recorrente de gc/prune.",
+        "Registrar que diagnóstico/recomendação são permitidos, mas git gc, git prune e remoção de .git/gc.log exigem autorização explícita.",
+        "Não executar manutenção destrutiva nem remover arquivos Git.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O aviso de Git maintenance é um sinal simples recorrente: deve ser classificado e registrado sem virar limpeza destrutiva automática.\n[2026-04-30T12:21:00Z] slice=1 focus=TASK-BUD-364 gate=git_maintenance_status-read-only severity=warning action=monitor cleanupAllowedAutomatically=false cleanupCommandsExecuted=0 loose=8285 sizeMiB=93.31 gcLog=yes commit=pending. [rationale:risk-control] Aviso recorrente classificado; manutenção destrutiva segue opt-in.",
+      "verification": "VER-BUD-638"
     }
   ]
 }
