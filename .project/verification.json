@@ -8538,6 +8538,15 @@
       "method": "read-only-canary+smoke-tests",
       "timestamp": "2026-04-30T21:21:28.991Z",
       "evidence": "Implemented read-only self_reload_autoresume_canary. Pure helper resolveSelfReloadAutoresumeCanaryPlan returns ready-for-human-decision on green gates but always reloadAllowed=false, autoResumeDispatchAllowed=false, dispatchAllowed=false, authorization=none, with execution-not-implemented. It returns blocked when checkpoint is stale/missing, handoff budget fails, git state is unexpected, protected scopes are pending, cooldown not ready, auto-resume preview missing, pending messages/recent steer/lane queue exist, stop conditions are present, or scheduler/remote/GitHub Actions/protected scope/destructive maintenance is requested. Surface tool added and documented. Validation: vitest guardrails-unattended-continuation.test.ts + guardrails-unattended-continuation-surface.test.ts + guardrails-core-hardening-reexport.test.ts => 55 passed; docs package sync/check ok; safe_marker_check docs 5/5, core 5/5, surface 4/4. Reload required before live tool validation."
+    },
+    {
+      "id": "VER-BUD-702",
+      "target": "TASK-BUD-237",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-after-reload",
+      "timestamp": "2026-04-30T21:24:40.394Z",
+      "evidence": "After reload, self_reload_autoresume_canary live green-path validation returned decision=ready-for-human-decision reload=no autoResume=no dispatch=no reasons=all-gates-green,human-decision-required,execution-not-implemented authorization=none. Live blocked-path validation returned decision=blocked reload=no autoResume=no dispatch=no reasons=checkpoint-not-fresh,pending-messages,compact-without-fresh-checkpoint,remote-or-offload-requested blockedRequests=remote-or-offload authorization=none. context_watch_status remained bounded with handoff=fresh. This validates the canary as evidence-only and non-executing."
     }
   ]
 }
