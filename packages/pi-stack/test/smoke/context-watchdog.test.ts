@@ -1161,6 +1161,39 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_checkpoint tool rejects stale checkpoints without overwriting newer handoff", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-stale-"));
+		try {
+			const seeded = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2099-01-01T00:00:00.000Z",
+				taskId: "TASK-BUD-FUTURE",
+				context: "Future checkpoint should survive stale tool writes.",
+			});
+			expect(seeded.ok).toBe(true);
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			const result = await tool.execute(
+				"tc-context-watch-checkpoint-stale",
+				{ task_id: "TASK-BUD-235", context: "Stale runtime checkpoint should be rejected." },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+			expect(result.content?.[0]?.text).toBe("context-watch-checkpoint: ok=no task=TASK-BUD-235 reason=stale-checkpoint");
+			expect(result.details).toMatchObject({
+				ok: false,
+				reason: "stale-checkpoint",
+				summary: "context-watch-checkpoint: ok=no task=TASK-BUD-235 reason=stale-checkpoint",
+			});
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.timestamp).toBe("2099-01-01T00:00:00.000Z");
+			expect(written.current_tasks).toEqual(["TASK-BUD-FUTURE"]);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_checkpoint tool rejects missing context without writing", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-empty-"));
 		try {

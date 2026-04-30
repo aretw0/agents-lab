@@ -5542,6 +5542,29 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] A primitive de checkpoint só é segura para unattended se a superfície runtime estiver protegida por smoke, não apenas helper/live validation.\n[2026-04-30T01:03:19Z] slice=1 focus=TASK-BUD-234 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Tool runtime context_watch_checkpoint agora está coberta no smoke principal.",
       "verification": "VER-BUD-513"
+    },
+    {
+      "id": "TASK-BUD-235",
+      "description": "[P1] Cobrir stale-checkpoint na tool context_watch_checkpoint em smoke.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-232",
+        "TASK-BUD-234"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida que context_watch_checkpoint retorna ok=no reason=stale-checkpoint quando já existe handoff mais novo.",
+        "Smoke confirma que o handoff mais novo não é sobrescrito pela tentativa stale.",
+        "Smoke principal permanece verde e handoff final é salvo via context_watch_checkpoint."
+      ],
+      "notes": "Criado via board_task_create. [rationale:risk-control] O guard stale-checkpoint foi validado ao vivo, mas precisa ficar protegido na superfície runtime usada por loops unattended.\n[2026-04-30T01:05:21Z] slice=1 focus=TASK-BUD-235 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Smoke cobre stale-checkpoint na superfície runtime context_watch_checkpoint.",
+      "verification": "VER-BUD-514"
     }
   ]
 }
