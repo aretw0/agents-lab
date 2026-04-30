@@ -7554,6 +7554,33 @@
       ],
       "notes": "Criado após reload de TASK-BUD-313. [rationale:risk-control] A correção que evita foco stale na origem precisa ser validada no runtime carregado.\n[2026-04-30T05:37:19Z] slice=1 focus=TASK-BUD-314 gate=live-context_watch_checkpoint+structured-read+auto-resume-preview commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Correção de completed checkpoint focus validada ao vivo após reload.",
       "verification": "VER-BUD-588"
+    },
+    {
+      "id": "TASK-BUD-315",
+      "description": "[P1] Tratar completed_tasks do handoff como staleIds no auto-resume.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-314"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume deve tratar handoff.completed_tasks como IDs stale para filtragem de foco.",
+        "Quando next_actions/context mencionarem task presente em completed_tasks, ela não deve ser reintroduzida em focusTasks.",
+        "O prompt/preview deve preservar evidência compacta via staleFocus quando completed_tasks forem usados como stale evidence.",
+        "Manter prompt enxuto e diagnosticsSummary compacto.",
+        "Não alterar política de compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Mesmo sem current_tasks, completed_tasks recém-gravadas pelo checkpoint podem aparecer em next_actions/context; auto-resume deve impedir reentrada indireta de trabalho concluído.\n[2026-04-30T05:40:01Z] slice=1 focus=TASK-BUD-315 gate=test:monitor:smoke-260/260 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] completed_tasks agora alimenta staleIds do auto-resume para impedir reentrada por next_actions/context.",
+      "verification": "VER-BUD-589"
     }
   ]
 }

@@ -7521,6 +7521,15 @@
       "method": "live-tool+structured-read",
       "timestamp": "2026-04-30T05:37:40.074Z",
       "evidence": "Live runtime after operator reload validated completed-task checkpoint behavior. Ran context_watch_checkpoint with task_id TASK-BUD-313, which was already completed. The written .project/handoff.json had no current_tasks, included completed_tasks=[TASK-BUD-313], and set context_watch.focus_task_status=completed. context_watch_auto_resume_preview then returned `context-watch-auto-resume-preview: focusTasks=none-listed staleFocus=0 diagnostics=tasks(in=0,listed=0,dedup=0,trunc=0,drop=0);blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=1,listed=1,dedup=0,trunc=0,drop=0);global=ok`, confirming the checkpoint did not create stale resume focus. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Runtime checkpoint now prevents stale focus at the source while preserving completion evidence."
+    },
+    {
+      "id": "VER-BUD-589",
+      "target": "TASK-BUD-315",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:40:16.250Z",
+      "evidence": "Auto-resume now treats handoff.completed_tasks as stale focus evidence. buildAutoResumePromptEnvelopeFromHandoff normalizes completed_tasks into staleIds before deriving focus from next_actions/context, so a completed task cannot be reintroduced indirectly when current_tasks is absent. The prompt preserves compact evidence as `staleFocus: TASK-BUD-314=completed` and diagnosticsSummary includes `staleFocus=1`. Added smoke proving completed_tasks=[TASK-BUD-314] plus next_actions/context mentioning TASK-BUD-314 yields `focusTasks: none-listed` and does not include `focusTasks: TASK-BUD-314`. Validation: context-watchdog focal smoke passed 45/45; cmd.exe /c npm run test:monitor:smoke --silent passed 260/260 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] Completion evidence in handoff now blocks stale work reentry even without current_tasks."
     }
   ]
 }

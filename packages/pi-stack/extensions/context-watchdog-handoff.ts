@@ -317,21 +317,31 @@ function isAutoResumeActiveTaskStatus(status: string | undefined): boolean {
 	return status === undefined || status === "in-progress" || status === "planned";
 }
 
-function filterAutoResumeFocusTasks(rawTasks: string[], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string> } {
+function addAutoResumeStaleFocus(stale: string[], staleIds: Set<string>, task: string, status = "completed"): void {
+	const normalizedTask = normalizePromptSegment(task);
+	if (!normalizedTask) return;
+	const normalizedUpper = normalizedTask.toUpperCase();
+	if (!staleIds.has(normalizedUpper)) stale.push(`${normalizedTask}=${status}`);
+	staleIds.add(normalizedTask);
+	staleIds.add(normalizedUpper);
+}
+
+function filterAutoResumeFocusTasks(rawTasks: string[], completedTasks: string[] = [], options?: AutoResumePromptOptions): { active: string[]; stale: string[]; staleIds: Set<string> } {
 	const statuses = options?.taskStatusById ?? {};
 	const active: string[] = [];
 	const stale: string[] = [];
 	const staleIds = new Set<string>();
+	for (const task of completedTasks) {
+		addAutoResumeStaleFocus(stale, staleIds, task, "completed");
+	}
 	for (const task of rawTasks) {
 		const normalizedTask = normalizePromptSegment(task);
 		const normalizedUpper = normalizedTask.toUpperCase();
 		const status = statuses[normalizedTask] ?? statuses[normalizedUpper];
-		if (isAutoResumeActiveTaskStatus(status)) {
+		if (isAutoResumeActiveTaskStatus(status) && !staleIds.has(normalizedUpper)) {
 			active.push(task);
 		} else {
-			stale.push(`${normalizedTask}=${status}`);
-			staleIds.add(normalizedTask);
-			staleIds.add(normalizedUpper);
+			addAutoResumeStaleFocus(stale, staleIds, normalizedTask, status ?? "completed");
 		}
 	}
 	return { active, stale, staleIds };
@@ -348,7 +358,8 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		? handoff.timestamp
 		: undefined;
 	const rawCurrentTasks = normalizeStringArray(handoff.current_tasks);
-	const filteredCurrentTasks = filterAutoResumeFocusTasks(rawCurrentTasks, options);
+	const completedTasks = normalizeStringArray(handoff.completed_tasks);
+	const filteredCurrentTasks = filterAutoResumeFocusTasks(rawCurrentTasks, completedTasks, options);
 	const focusSourceLines = [
 		...normalizeStringArray(handoff.next_actions),
 		...normalizeStringArray(handoff.blockers),

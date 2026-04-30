@@ -752,6 +752,15 @@ describe("context-watchdog", () => {
 		expect(repeatedStale).toContain("focusTasks: none-listed");
 		expect(repeatedStale).toContain("staleFocus: TASK-BUD-305=completed");
 		expect(repeatedStale).not.toContain("focusTasks: TASK-BUD-305");
+		const completedOnly = buildAutoResumePromptEnvelopeFromHandoff({
+			completed_tasks: ["TASK-BUD-314"],
+			next_actions: ["continue after validating TASK-BUD-314 checkpoint behavior"],
+			context: "TASK-BUD-314 completed checkpoint focus validation",
+		} as any);
+		expect(completedOnly.prompt).toContain("focusTasks: none-listed");
+		expect(completedOnly.prompt).toContain("staleFocus: TASK-BUD-314=completed");
+		expect(completedOnly.prompt).not.toContain("focusTasks: TASK-BUD-314");
+		expect(summarizeAutoResumePromptDiagnostics(completedOnly.diagnostics)).toContain("staleFocus=1");
 	});
 
 	it("derives focusTasks from next_actions when current_tasks are missing", () => {
