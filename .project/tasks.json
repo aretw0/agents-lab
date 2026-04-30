@@ -7167,6 +7167,33 @@
       ],
       "notes": "Criado após reload feito pelo operador. [rationale:risk-control] Superfície runtime recém-criada precisa de validação live antes de ser tratada como trust surface operacional read-only.\n[2026-04-30T04:52:33Z] slice=1 focus=TASK-BUD-299 gate=live-local_continuity_audit+surface-smoke-3/3 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] local_continuity_audit validado ao vivo após reload; fail-closed e authorization=none.",
       "verification": "VER-BUD-573"
+    },
+    {
+      "id": "TASK-BUD-300",
+      "description": "[P1] Ajustar summary visível de local_continuity_audit para naming da primitiva.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-299",
+        "TASK-BUD-297"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Tool local_continuity_audit deve exibir summary público começando com local-continuity-audit.",
+        "Manter helpers internos NudgeFree/nudge-free compatíveis sem rename amplo.",
+        "Details devem preservar envelope/prep original e também expor localContinuitySummary.",
+        "nudge_free_loop_canary continua manual-only e sem measured overrides.",
+        "Nenhuma tool runtime nova, scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após live validação TASK-BUD-299. [rationale:architecture] A superfície nova deve usar naming da primitiva local continuity audit, sem quebrar compatibilidade dos helpers nudge-free internos.\n[2026-04-30T04:54:37Z] slice=1 focus=TASK-BUD-300 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:architecture] Summary visível local_continuity_audit alinhado ao naming da primitiva; compat mantida.",
+      "verification": "VER-BUD-574"
     }
   ]
 }

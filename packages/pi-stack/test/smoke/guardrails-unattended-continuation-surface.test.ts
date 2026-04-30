@@ -42,13 +42,15 @@ describe("guardrails unattended continuation surface", () => {
       expect(schemaText).not.toContain("measuredEvidence");
       const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
 
-      expect(result?.content?.[0]?.text).toContain("nudge-free-local-audit-prep: eligible=no collectors=8/8");
+      expect(result?.content?.[0]?.text).toContain("local-continuity-audit: eligible=no collectors=8/8");
       expect(result?.content?.[0]?.text).toContain("authorization=none");
       expect(result?.details).toMatchObject({
         effect: "none",
         mode: "advisory",
         activation: "none",
         authorization: "none",
+        localContinuitySummary: expect.stringContaining("local-continuity-audit: eligible=no collectors=8/8"),
+        summary: expect.stringContaining("nudge-free-local-audit-prep: eligible=no collectors=8/8"),
         envelope: {
           effect: "none",
           mode: "advisory",

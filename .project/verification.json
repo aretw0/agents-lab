@@ -7386,6 +7386,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T04:52:43.203Z",
       "evidence": "Live runtime after operator reload: local_continuity_audit returned compact summary `nudge-free-local-audit-prep: eligible=no collectors=8/8 packet=blocked authorization=none`, proving the loaded tool is present, read-only/advisory, fail-closed on current repo state, and exposes authorization=none. Focal surface smoke also passed 3/3 and asserts details include effect=none, mode=advisory, activation=none, authorization=none, envelope details, no measured overrides, and nudge_free_loop_canary remains manual-only. No scheduler, loop, self-reload, remote, or auto-continuation was started. [rationale:risk-control] Live validation confirms the new trust surface is diagnostic evidence only."
+    },
+    {
+      "id": "VER-BUD-574",
+      "target": "TASK-BUD-300",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:54:50.057Z",
+      "evidence": "Adjusted the visible local_continuity_audit tool summary to the primitive naming: content now starts with `local-continuity-audit: ... authorization=none`. Internal helper summary remains preserved in details.summary as `nudge-free-local-audit-prep...` for compatibility, and details.localContinuitySummary exposes the public primitive summary. nudge_free_loop_canary remains manual-only with no measured overrides. Validation: focal surface smoke passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. No new runtime tool, scheduler, self-reload, loop, remote, or auto-continuation was activated. [rationale:architecture] The new surface now speaks primitive naming while preserving NudgeFree compatibility."
     }
   ]
 }

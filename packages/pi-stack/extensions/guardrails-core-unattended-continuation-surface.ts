@@ -83,6 +83,10 @@ function deriveCandidate(task: any): NudgeFreeLoopLocalCandidate | undefined {
   };
 }
 
+function formatLocalContinuityAuditSummary(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string {
+  return `local-continuity-audit: eligible=${result.envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"} collectors=${result.collectorResults.length}/8 packet=${result.envelope.packet.gate.decision} authorization=none`;
+}
+
 function buildLocalContinuityAudit(cwd: string) {
   const handoff = readJsonFile(join(cwd, ".project", "handoff.json"));
   const tasks = readJsonFile(join(cwd, ".project", "tasks.json"));
@@ -148,9 +152,10 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, _params, _signal, _onUpdate, context) {
       const cwd = typeof (context as { cwd?: unknown } | undefined)?.cwd === "string" ? (context as { cwd: string }).cwd : process.cwd();
       const result = buildLocalContinuityAudit(cwd);
+      const localContinuitySummary = formatLocalContinuityAuditSummary(result);
       return {
-        content: [{ type: "text", text: result.summary }],
-        details: result,
+        content: [{ type: "text", text: localContinuitySummary }],
+        details: { ...result, localContinuitySummary },
       };
     },
   });
