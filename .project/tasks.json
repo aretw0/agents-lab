@@ -7604,6 +7604,35 @@
       ],
       "notes": "Criado após reload de TASK-BUD-315. [rationale:risk-control] A proteção completed_tasks→staleIds precisa ser validada no runtime carregado para impedir reentrada indireta de trabalho concluído.\n[2026-04-30T05:42:01Z] slice=1 focus=TASK-BUD-316 gate=live-context_watch_auto_resume_preview+structured-read+context-watchdog-smoke-45/45 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] completed_tasks→staleIds validado ao vivo após reload.",
       "verification": "VER-BUD-590"
+    },
+    {
+      "id": "TASK-BUD-317",
+      "description": "[P1] Preferir task real ativa/planejada no auto-resume antes de fallback genérico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-316"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Quando current_tasks estiver ausente/stale e next_actions/context só produzirem hints operacionais genéricos, auto-resume deve preferir uma task local in-progress/planned derivada de .project/tasks.json.",
+        "Não reintroduzir tasks completed/stale vindas de completed_tasks/current_tasks.",
+        "Manter fallback operacional como board-task-selection apenas quando não houver task ativa/planejada segura disponível.",
+        "Preview read-only deve usar a mesma seleção que o auto-resume runtime.",
+        "Manter prompt enxuto e diagnosticsSummary compacto.",
+        "Não alterar política de compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Para trabalho ininterrupto controlado, o auto-resume deve apontar para uma task concreta local-safe quando disponível, em vez de reiniciar com foco genérico de seleção.\n[2026-04-30T05:46:19Z] slice=1 focus=TASK-BUD-317 gate=test:monitor:smoke-261/261 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume prefere task ativa concreta e bloqueia TASK-SELECTION falso de board-task-selection.",
+      "verification": "VER-BUD-591"
     }
   ]
 }

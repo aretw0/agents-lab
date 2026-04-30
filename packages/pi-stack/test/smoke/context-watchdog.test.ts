@@ -1286,6 +1286,37 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_auto_resume_preview prefers active board task before generic focus", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-auto-resume-active-focus-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-04-30T05:43:29.396Z",
+				completed_tasks: ["TASK-BUD-316"],
+				next_actions: ["continue essential lane with board-task-selection after TASK-BUD-316"],
+				context: "TASK-BUD-316 completed; use task selection for next work.",
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-316", status: "completed" },
+				{ id: "TASK-BUD-317", status: "in-progress", files: ["packages/pi-stack/extensions/context-watchdog.ts"] },
+			] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_auto_resume_preview");
+			const result = await tool.execute("tc-auto-resume-active-focus", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
+			expect(result.content?.[0]?.text).toContain("focusTasks=TASK-BUD-317");
+			expect(result.content?.[0]?.text).toContain("staleFocus=1");
+			expect(result.details?.focusTasks).toBe("TASK-BUD-317");
+			expect(result.details?.staleFocus).toBe("TASK-BUD-316=completed");
+			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");
+			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-316");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_checkpoint tool writes compact bounded checkpoints", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-"));
 		try {

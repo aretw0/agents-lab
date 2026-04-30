@@ -772,25 +772,58 @@ function readContextWatchdogSourceMtimeMs(): number | undefined {
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
-function readProjectTaskStatusById(cwd: string): Record<string, string | undefined> {
+function readProjectTasksArray(cwd: string): unknown[] {
 	const filePath = path.join(cwd, ".project", "tasks.json");
-	if (!existsSync(filePath)) return {};
+	if (!existsSync(filePath)) return [];
 	try {
 		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
 		const tasks = Array.isArray(parsed) ? parsed : (parsed as { tasks?: unknown[] } | undefined)?.tasks;
-		if (!Array.isArray(tasks)) return {};
-		const statuses: Record<string, string | undefined> = {};
-		for (const task of tasks) {
-			const id = (task as { id?: unknown } | undefined)?.id;
-			const status = (task as { status?: unknown } | undefined)?.status;
-			if (typeof id !== "string" || typeof status !== "string") continue;
-			statuses[id] = status;
-			statuses[id.toUpperCase()] = status;
-		}
-		return statuses;
+		return Array.isArray(tasks) ? tasks : [];
 	} catch {
-		return {};
+		return [];
 	}
+}
+
+function readProjectTaskStatusById(cwd: string): Record<string, string | undefined> {
+	const statuses: Record<string, string | undefined> = {};
+	for (const task of readProjectTasksArray(cwd)) {
+		const id = (task as { id?: unknown } | undefined)?.id;
+		const status = (task as { status?: unknown } | undefined)?.status;
+		if (typeof id !== "string" || typeof status !== "string") continue;
+		statuses[id] = status;
+		statuses[id.toUpperCase()] = status;
+	}
+	return statuses;
+}
+
+function isProtectedAutoResumeTaskPath(value: unknown): boolean {
+	const normalized = String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "").toLowerCase();
+	return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
+}
+
+function taskIdNumericSuffix(id: string): number {
+	const match = id.match(/(\d+)(?!.*\d)/);
+	return match ? Number(match[1]) : -1;
+}
+
+function readProjectPreferredActiveTaskIds(cwd: string, limit = 3): string[] {
+	return readProjectTasksArray(cwd)
+		.filter((task): task is { id: string; status: string; files?: unknown[] } => {
+			const id = (task as { id?: unknown }).id;
+			const status = (task as { status?: unknown }).status;
+			if (typeof id !== "string" || typeof status !== "string") return false;
+			if (status !== "in-progress" && status !== "planned") return false;
+			const files = (task as { files?: unknown }).files;
+			return !Array.isArray(files) || !files.some(isProtectedAutoResumeTaskPath);
+		})
+		.sort((a, b) => {
+			const statusRank = (row: { status: string }) => row.status === "in-progress" ? 0 : 1;
+			const byStatus = statusRank(a) - statusRank(b);
+			if (byStatus !== 0) return byStatus;
+			return taskIdNumericSuffix(b.id) - taskIdNumericSuffix(a.id);
+		})
+		.slice(0, limit)
+		.map((task) => task.id);
 }
 
 function extractAutoResumePromptValue(prompt: string, label: string, fallback: string): string {
@@ -1378,7 +1411,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							readHandoffJson(ctx.cwd),
 							config.handoffFreshMaxAgeMs,
 							Date.now(),
-							{ taskStatusById: readProjectTaskStatusById(ctx.cwd) },
+							{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd) },
 						);
 						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
@@ -1757,7 +1790,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				readHandoffJson(ctx.cwd),
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");

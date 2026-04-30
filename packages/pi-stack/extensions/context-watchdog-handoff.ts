@@ -190,6 +190,7 @@ export type AutoResumePromptEnvelope = {
 
 export type AutoResumePromptOptions = {
 	taskStatusById?: Record<string, string | undefined>;
+	preferredTaskIds?: string[];
 };
 
 export function summarizeAutoResumePromptDiagnostics(
@@ -273,7 +274,7 @@ function extractTaskIdsFromTextLines(values: string[], limit = 3): string[] {
 	const ids: string[] = [];
 	const seen = new Set<string>();
 	for (const value of values) {
-		const matches = String(value ?? "").toUpperCase().match(/TASK-[A-Z0-9-]+/g) ?? [];
+		const matches = String(value ?? "").toUpperCase().match(/TASK-[A-Z0-9-]*\d[A-Z0-9-]*/g) ?? [];
 		for (const id of matches) {
 			if (seen.has(id)) continue;
 			seen.add(id);
@@ -368,11 +369,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	const derivedTaskHints = filteredCurrentTasks.active.length > 0
 		? []
 		: extractTaskIdsFromTextLines(focusSourceLines).filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()));
-	const operationalFocusHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0
+	const preferredTaskHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0
+		? []
+		: normalizeStringArray(options?.preferredTaskIds)
+			.filter((id) => !filteredCurrentTasks.staleIds.has(id) && !filteredCurrentTasks.staleIds.has(id.toUpperCase()))
+			.slice(0, 3);
+	const operationalFocusHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0 || preferredTaskHints.length > 0
 		? []
 		: extractOperationalFocusHints(focusSourceLines);
 	const tasksPrepared = preparePromptCollection({
-		values: filteredCurrentTasks.active.length > 0 ? filteredCurrentTasks.active : (derivedTaskHints.length > 0 ? derivedTaskHints : operationalFocusHints),
+		values: filteredCurrentTasks.active.length > 0 ? filteredCurrentTasks.active : (derivedTaskHints.length > 0 ? derivedTaskHints : (preferredTaskHints.length > 0 ? preferredTaskHints : operationalFocusHints)),
 		maxChars: 48,
 		limit: 3,
 	});
