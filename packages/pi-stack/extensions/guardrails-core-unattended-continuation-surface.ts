@@ -35,9 +35,20 @@ function normalizePathForAudit(path: string): string {
   return path.replace(/\\/g, "/").replace(/^\.\//, "");
 }
 
+const LOCAL_CONTINUITY_AUDIT_BOOKKEEPING_PATHS = [
+  ".project/tasks.json",
+  ".project/verification.json",
+  ".project/handoff.json",
+];
+
 function isProtectedAuditPath(path: string): boolean {
   const normalized = normalizePathForAudit(path).toLowerCase();
   return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
+}
+
+function localContinuityExpectedPaths(task: any): string[] {
+  const taskFiles = Array.isArray(task?.files) ? task.files.map((file: unknown) => normalizePathForAudit(String(file))) : [];
+  return [...new Set([...taskFiles, ...LOCAL_CONTINUITY_AUDIT_BOOKKEEPING_PATHS])];
 }
 
 function listGitChangedPaths(cwd: string): { status: NudgeFreeLoopLocalReadStatus; paths?: string[] } {
@@ -135,7 +146,7 @@ function buildLocalContinuityAudit(cwd: string) {
   const candidate = deriveCandidate(task);
   const validation = task ? deriveValidationKind(task) : { kind: "unknown" as const };
   const git = listGitChangedPaths(cwd);
-  const expectedPaths = Array.isArray(task?.files) ? task.files.map((file: unknown) => normalizePathForAudit(String(file))) : [];
+  const expectedPaths = localContinuityExpectedPaths(task);
   const changedPaths = git.paths ?? [];
   const protectedPaths = [...new Set([...changedPaths, ...expectedPaths].filter(isProtectedAuditPath))];
   const blockers = Array.isArray(handoff.json?.blockers) ? handoff.json.blockers.filter(Boolean) : [];

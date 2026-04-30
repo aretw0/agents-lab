@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -66,6 +67,67 @@ describe("guardrails unattended continuation surface", () => {
       expect(reasons.length).toBeLessThanOrEqual(5);
       expect(reasons).not.toContain("measured-evidence-incomplete");
       expect(reasons).toContain("git-state:invalid");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("treats canonical project bookkeeping as expected audit paths", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-bookkeeping-"));
+    try {
+      execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      mkdirSync(join(cwd, "packages", "pi-stack", "extensions"), { recursive: true });
+      writeFileSync(join(cwd, "packages", "pi-stack", "extensions", "foo.ts"), "export const foo = 1;\n");
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: "2026-04-30T04:40:00.000Z",
+        current_tasks: ["TASK-SURFACE"],
+        blockers: [],
+      }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+        id: "TASK-SURFACE",
+        status: "in-progress",
+        description: "Marker based local audit surface smoke",
+        files: ["packages/pi-stack/extensions/foo.ts"],
+        acceptance_criteria: ["Use marker validation."],
+      }] }));
+      writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }));
+      execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+      execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+        id: "TASK-SURFACE",
+        status: "in-progress",
+        description: "Marker based local audit surface smoke",
+        files: ["packages/pi-stack/extensions/foo.ts"],
+        acceptance_criteria: ["Use marker validation."],
+        notes: "bookkeeping changed",
+      }] }));
+      writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [{ id: "VER-SURFACE" }] }));
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: new Date().toISOString(),
+        current_tasks: ["TASK-SURFACE"],
+        blockers: [],
+      }));
+
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+      const collectorResults = result?.details.collectorResults as Array<{ fact: string; status: string; evidence: string }>;
+      const gitState = collectorResults.find((entry) => entry.fact === "git-state");
+
+      expect(gitState).toEqual({
+        fact: "git-state",
+        status: "observed",
+        evidence: "git=expected changed=3",
+      });
+      expect(result?.content?.[0]?.text).toContain("local-continuity-audit:");
+      expect(result?.content?.[0]?.text).toContain("authorization=none");
+      expect(result?.content?.[0]?.text).not.toContain("git-state:invalid");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

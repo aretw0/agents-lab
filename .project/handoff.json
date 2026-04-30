@@ -1,40 +1,34 @@
 {
-  "timestamp": "2026-04-30T01:34:21.514Z",
-  "context": "TASK-BUD-244 completed. Nudge-free loop summaries now include effect=none to communicate advisory/no-side-effect evaluation, and the runtime [snip] hardening, not an activation mechanism. [truncated:+78 chars]",
+  "timestamp": "2026-04-30T05:10:30.201Z",
+  "context": "Checkpoint preventivo durante TASK-BUD-306 após alerta de auto-compact agressivo. Implementado hardening para local_continuity_audit incluir [snip] isa ser encerrada no board e commitada. [truncated:+260 chars]",
   "current_tasks": [
-    "TASK-BUD-244"
+    "TASK-BUD-306"
   ],
   "next_actions": [
-    "reload before live-validating advisory effect=none summary",
-    "continue essential local hardening with small bounded slices",
-    "consider structured activation/advisory fields in details so future automations do not parse only text"
+    "encerrar TASK-BUD-306 com board_task_complete",
+    "commitar alterações de TASK-BUD-306",
+    "abrir hardening para reduzir/deduplicar warning de context-watch compact-checkpoint-required"
   ],
-  "blockers": [
-    "reload-recommended-for-updated-nudge-free-tool-summary"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test [snip] est.ts --silent passed 9/9 [truncated:+77 chars]",
-    "cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-244 verification=VER-BUD-522 status=completed"
-  ],
-  "recent_commits": [
-    "f8e7c0e fix(guardrails): mark nudge gate advisory"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surf [snip] est.ts --silent passou 5/5 [truncated:+5 chars]",
+    "cmd.exe /c npm run test:monitor:smoke --silent passou 257/257 across 32 files"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T01:34:21.514Z",
-    "level": "ok",
-    "percent": 15,
-    "action": "continue",
-    "recommendation": "Progress saved; reload recommended before live validation of the updated runtime summary."
+    "generatedAtIso": "2026-04-30T05:10:30.201Z",
+    "level": "compact",
+    "percent": 72,
+    "action": "checkpoint-refresh",
+    "recommendation": "Progress saved before addressing warning bloat; compact warning appears redundant and should b [snip] ped into one compact line. [truncated:+6 chars]"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T01:34:21.514Z",
+      "atIso": "2026-04-30T05:10:30.201Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 15,
+      "level": "compact",
+      "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Progress saved; reload recommended before live validation of the updated runtime summary."
+      "recommendation": "Progress saved before addressing warning bloat; compact warning appears redundant and should b [snip] ped into one compact line. [truncated:+6 chars]"
     }
   ]
 }

@@ -7440,6 +7440,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:06:49.221Z",
       "evidence": "Hardened local_continuity_audit current-task/candidate derivation. The audit surface now treats handoff current_tasks as candidate only when the referenced task status is in-progress or planned; completed/stale handoff tasks are ignored and fallback selection uses in-progress then planned tasks. Added smoke proving a completed handoff task is skipped and a planned local task becomes the candidate with evidence `next-local-safe=yes task=TASK-PLANNED files=1`. Validation: focal surface smoke passed 4/4; cmd.exe /c npm run test:monitor:smoke --silent passed 256/256 across 32 files. authorization=none and read-only/advisory behavior unchanged; nudge_free_loop_canary remains manual-only. No scheduler, self-reload, loop, remote, or auto-continuation was activated. [rationale:risk-control] The audit surface no longer treats stale completed handoff tasks as active continuation candidates."
+    },
+    {
+      "id": "VER-BUD-580",
+      "target": "TASK-BUD-306",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+checkpoint",
+      "timestamp": "2026-04-30T05:10:37.611Z",
+      "evidence": "Hardened local_continuity_audit expectedPaths. The audit surface now includes canonical local bookkeeping paths `.project/tasks.json`, `.project/verification.json`, and `.project/handoff.json` in expectedPaths so normal board/verification/handoff updates do not cause git-state:invalid. Protected scopes remain excluded from automatic expected paths: `.pi/settings.json`, `.obsidian`, and `.github` are not auto-expected. Added smoke with a temporary git repo proving changed bookkeeping paths produce observed git evidence `git=expected changed=3` and the visible summary does not include `git-state:invalid`. Validation: focal surface smoke passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 257/257 across 32 files. Preventive checkpoint was written after auto-compact warning concern: context-watch-checkpoint ok=yes task=TASK-BUD-306. authorization=none and read-only/advisory behavior unchanged; no scheduler, self-reload, loop, remote, or auto-continuation activated. [rationale:risk-control] Normal local bookkeeping should not be misclassified as unexpected drift, while protected scopes remain explicit risk."
     }
   ]
 }

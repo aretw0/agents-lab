@@ -7321,6 +7321,34 @@
       ],
       "notes": "Criado após TASK-BUD-304. [rationale:risk-control] Audit local não deve tratar handoff stale/completed como próximo slice ativo, pois isso gera candidate inválido e obscurece o próximo trabalho real.\n[2026-04-30T05:06:37Z] slice=1 focus=TASK-BUD-305 gate=test:monitor:smoke-256/256 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Candidate derivation ignora handoff completed/stale e faz fallback para in-progress/planned.",
       "verification": "VER-BUD-579"
+    },
+    {
+      "id": "TASK-BUD-306",
+      "description": "[P1] Tratar bookkeeping canônico como expectedPaths no local_continuity_audit.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-305"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "local_continuity_audit deve incluir .project/tasks.json, .project/verification.json e .project/handoff.json nos expectedPaths de auditoria local.",
+        "Bookkeeping canônico esperado não deve causar git-state:invalid quando presente em git status.",
+        "Não incluir escopos protegidos como .pi/settings.json, .obsidian ou .github como expected automático.",
+        "Adicionar smoke cobrindo changedPaths com bookkeeping esperado sem git-state invalid.",
+        "Manter reasons compactos, authorization=none e comportamento read-only/advisory.",
+        "nudge_free_loop_canary continua manual-only e sem measured overrides.",
+        "Nenhuma scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após TASK-BUD-305. [rationale:risk-control] O audit local deve distinguir bookkeeping normal da própria fatia de drift inesperado, sem mascarar escopos protegidos.\n[2026-04-30T05:08:35Z] slice=1 focus=TASK-BUD-306 gate=test:monitor:smoke-257/257 checkpoint=ok commit=pending drift=no next=commit. [rationale:risk-control] Bookkeeping canônico agora é expectedPaths sem mascarar escopos protegidos.",
+      "verification": "VER-BUD-580"
     }
   ]
 }
