@@ -5233,6 +5233,29 @@
       ],
       "notes": "Criado via board_task_create após reload dos payloads compactos. [rationale:risk-control] Fechar a consistência de summaries nas bounded board tools reduz bloat desde a criação da fatia.\n[2026-04-29T23:56:42Z] slice=1 focus=TASK-BUD-221 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] board_task_create agora também emite summary compacto no content.",
       "verification": "VER-BUD-500"
+    },
+    {
+      "id": "TASK-BUD-222",
+      "description": "[P1] Proteger auto-compact para exigir checkpoint fresco antes de compactar.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-221"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Auto-compact não inicia compact quando o handoff/checkpoint não está fresco.",
+        "Com checkpoint fresco, comportamento de compact permanece permitido.",
+        "Teste focal cobre a decisão para evitar compact agressivo sem progresso salvo.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado na lane essencial após feedback sobre compactação agressiva. [rationale:risk-control] Trabalho uninterrupted precisa garantir progresso salvo antes de compact/reload para manter segurança e controle.\n[2026-04-30T00:02:16Z] slice=1 focus=TASK-BUD-222 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Auto-compact agora tem freio explícito quando falta checkpoint fresco.",
+      "verification": "VER-BUD-501"
     }
   ]
 }

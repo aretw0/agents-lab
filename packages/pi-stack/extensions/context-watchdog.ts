@@ -1100,6 +1100,27 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			if (shouldRefreshHandoffBeforeAutoCompact(assessment, config, handoffFreshnessForPrep.label) && !handoffPath) {
 				handoffPath = persistContextWatchHandoffEvent(ctx, assessment, "auto_compact_prep");
 			}
+			const handoffAfterPrep = handoffPath ? readHandoffJson(ctx.cwd) : handoffForPrep;
+			const handoffEventAfterPrep = latestContextWatchEvent(handoffAfterPrep);
+			const checkpointEvidenceReadyBeforeCompact = Boolean(handoffPath) || resolveCheckpointEvidenceReadyForCalmClose({
+				handoffLastEventLevel: handoffEventAfterPrep?.level,
+				handoffLastEventAgeMs: contextWatchEventAgeMs(handoffEventAfterPrep, now),
+				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+			});
+			if (!checkpointEvidenceReadyBeforeCompact) {
+				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+					"context-watchdog.auto-compact-suppressed",
+					{
+						atIso: new Date(now).toISOString(),
+						reason: "checkpoint-evidence-missing",
+						freshness: handoffFreshnessForPrep.label,
+					},
+				);
+				if (config.notify) {
+					ctx.ui.notify("context-watch: auto compact waiting for fresh handoff checkpoint", "warning");
+				}
+				return;
+			}
 			clearAutoCompactRetryTimer();
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;

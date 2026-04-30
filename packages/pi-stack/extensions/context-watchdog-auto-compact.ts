@@ -19,6 +19,7 @@ export type ContextWatchAutoCompactDecision = {
 		| "cooldown"
 		| "not-idle"
 		| "pending-messages"
+		| "checkpoint-evidence-missing"
 		| "trigger";
 };
 
@@ -95,6 +96,7 @@ export function buildAutoCompactDiagnostics(
 		inFlight: boolean;
 		isIdle: boolean;
 		hasPendingMessages: boolean;
+		checkpointEvidenceReady?: boolean;
 		reason?: string;
 	},
 	defaultRetryMs = 2_000,
@@ -132,6 +134,7 @@ export function shouldTriggerAutoCompact(
 		inFlight: boolean;
 		isIdle: boolean;
 		hasPendingMessages: boolean;
+		checkpointEvidenceReady?: boolean;
 	},
 ): ContextWatchAutoCompactDecision {
 	if (assessment.level !== "compact") return { trigger: false, reason: "level-not-compact" };
@@ -145,6 +148,9 @@ export function shouldTriggerAutoCompact(
 	}
 	if (config.autoCompactRequireIdle && state.hasPendingMessages) {
 		return { trigger: false, reason: "pending-messages" };
+	}
+	if (state.checkpointEvidenceReady === false) {
+		return { trigger: false, reason: "checkpoint-evidence-missing" };
 	}
 	return { trigger: true, reason: "trigger" };
 }

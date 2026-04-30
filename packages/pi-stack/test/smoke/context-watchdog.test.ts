@@ -174,6 +174,24 @@ describe("context-watchdog", () => {
 		})).toEqual({ trigger: true, reason: "trigger" });
 
 		expect(shouldTriggerAutoCompact(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: true,
+			hasPendingMessages: false,
+			checkpointEvidenceReady: false,
+		})).toEqual({ trigger: false, reason: "checkpoint-evidence-missing" });
+
+		expect(buildAutoCompactDiagnostics(compact, cfg, {
+			nowMs: 200_000,
+			lastAutoCompactAt: 0,
+			inFlight: false,
+			isIdle: true,
+			hasPendingMessages: false,
+			checkpointEvidenceReady: false,
+		}).decision).toEqual({ trigger: false, reason: "checkpoint-evidence-missing" });
+
+		expect(shouldTriggerAutoCompact(compact, cfg, {
 			nowMs: 30_000,
 			lastAutoCompactAt: 0,
 			inFlight: false,

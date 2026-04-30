@@ -6729,6 +6729,15 @@
       "method": "test",
       "timestamp": "2026-04-29T23:56:54.950Z",
       "evidence": "Changed board_task_create tool content to emit the compact summary line when available, while keeping details.task available for automation. Added smoke assertion that board_task_create content equals its summary. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Makes all bounded board tool content prefer compact summaries, reducing live context bloat from slice creation onward."
+    },
+    {
+      "id": "VER-BUD-501",
+      "target": "TASK-BUD-222",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:02:40.280Z",
+      "evidence": "Hardened context auto-compact so compact trigger can be suppressed when checkpoint evidence is missing. Added checkpoint-evidence-missing decision reason to auto-compact helper and guarded the runtime compact trigger to persist auto_compact_prep first, then suppress compact with audit/notification if fresh checkpoint evidence is still absent. Tests cover shouldTriggerAutoCompact and buildAutoCompactDiagnostics returning checkpoint-evidence-missing. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Prevents aggressive compact from proceeding without saved progress evidence."
     }
   ]
 }
