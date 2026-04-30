@@ -1,13 +1,17 @@
 {
-  "version": "2026-04-14",
+  "version": "2026-04-30",
   "capabilities": [
     {
       "id": "scheduler-runtime-governance",
       "name": "Scheduler ownership/lease governance",
       "criticality": "high",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@ifi/oh-pi-extensions"],
-      "conflictsWithPackages": ["@ifi/oh-pi-extensions"],
+      "secondaryPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
       "coexistencePolicy": "policy-first-party-engine-third-party",
       "defaultAction": "consolidate"
     },
@@ -16,8 +20,12 @@
       "name": "Monitor provider/model governance",
       "criticality": "high",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@davidorex/pi-project-workflows"],
-      "conflictsWithPackages": ["@davidorex/pi-project-workflows"],
+      "secondaryPackages": [
+        "@davidorex/pi-project-workflows"
+      ],
+      "conflictsWithPackages": [
+        "@davidorex/pi-project-workflows"
+      ],
       "coexistencePolicy": "policy-first-party-engine-third-party",
       "defaultAction": "consolidate"
     },
@@ -26,8 +34,13 @@
       "name": "Colony runtime governance",
       "criticality": "medium",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@ifi/oh-pi-ant-colony", "@ifi/pi-web-remote"],
-      "conflictsWithPackages": ["@ifi/oh-pi-ant-colony"],
+      "secondaryPackages": [
+        "@ifi/oh-pi-ant-colony",
+        "@ifi/pi-web-remote"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-ant-colony"
+      ],
       "coexistencePolicy": "policy-first-party-engine-third-party",
       "defaultAction": "consolidate"
     },
@@ -46,20 +59,87 @@
       "name": "Quota visibility operations",
       "criticality": "medium",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@ifi/oh-pi-extensions", "mitsupi"],
-      "conflictsWithPackages": ["@ifi/oh-pi-extensions", "mitsupi"],
+      "secondaryPackages": [
+        "@ifi/oh-pi-extensions",
+        "mitsupi"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-extensions",
+        "mitsupi"
+      ],
       "coexistencePolicy": "coexist-with-boundaries",
-      "defaultAction": "maintain"
+      "defaultAction": "maintain",
+      "curationCoverage": [
+        {
+          "id": "oh-pi-usage-tracker",
+          "coveredSurface": "quota/usage visibility",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/usage-tracker.ts",
+            "extensions/usage-tracker-providers.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "quota-visibility is first-party and avoids misleading unlimited-plan provider quota output."
+        }
+      ]
     },
     {
       "id": "web-research-policy",
       "name": "Web research/browser policy",
       "criticality": "medium",
       "primaryPackage": "@aretw0/web-skills",
-      "secondaryPackages": ["pi-web-access", "@ifi/oh-pi-skills", "mitsupi"],
-      "conflictsWithPackages": ["pi-web-access", "@ifi/oh-pi-skills", "mitsupi"],
+      "secondaryPackages": [
+        "pi-web-access",
+        "@ifi/oh-pi-skills",
+        "mitsupi"
+      ],
+      "conflictsWithPackages": [
+        "pi-web-access",
+        "@ifi/oh-pi-skills",
+        "mitsupi"
+      ],
       "coexistencePolicy": "first-party-policy-multi-engine",
-      "defaultAction": "filter-migrate"
+      "defaultAction": "filter-migrate",
+      "curationCoverage": [
+        {
+          "id": "mitsupi-git-web-skills",
+          "firstPartyPackage": "@aretw0/git-skills",
+          "coveredSurface": "commit/github/web-browser skills",
+          "thirdPartyPackage": "mitsupi",
+          "thirdPartySurfaces": [
+            "skills/commit",
+            "skills/github",
+            "skills/web-browser"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party git/web skills replace overlapping mitsupi skills in curated installs."
+        },
+        {
+          "id": "pi-web-access-librarian",
+          "coveredSurface": "source research/librarian skill",
+          "thirdPartyPackage": "pi-web-access",
+          "thirdPartySurfaces": [
+            "skills/librarian"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "source-research assimilates the user-facing librarian capability while other web access capabilities can remain available by profile."
+        },
+        {
+          "id": "oh-pi-git-workflow-skill",
+          "firstPartyPackage": "@aretw0/git-skills",
+          "coveredSurface": "git workflow skill",
+          "thirdPartyPackage": "@ifi/oh-pi-skills",
+          "thirdPartySurfaces": [
+            "skills/git-workflow"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party git-workflow skill is canonical in the curated stack."
+        }
+      ]
     },
     {
       "id": "stack-sovereignty-governance",
@@ -76,20 +156,108 @@
       "name": "Runtime guardrails and tool-call safety policy",
       "criticality": "high",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@ifi/oh-pi-extensions"],
-      "conflictsWithPackages": ["@ifi/oh-pi-extensions"],
+      "secondaryPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
       "coexistencePolicy": "first-party-policy-third-party-fallback",
-      "defaultAction": "consolidate"
+      "defaultAction": "consolidate",
+      "curationCoverage": [
+        {
+          "id": "oh-pi-watchdog",
+          "coveredSurface": "context watchdog/auto-compact/resume policy",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/watchdog.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party context-watch stack owns compact/resume policy for the curated profile."
+        }
+      ]
     },
     {
       "id": "session-web-observability",
       "name": "Session web observability gateway",
       "criticality": "medium",
       "primaryPackage": "@aretw0/pi-stack",
-      "secondaryPackages": ["@ifi/pi-web-remote"],
-      "conflictsWithPackages": ["@ifi/pi-web-remote"],
+      "secondaryPackages": [
+        "@ifi/pi-web-remote"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/pi-web-remote"
+      ],
       "coexistencePolicy": "coexist-with-boundaries",
       "defaultAction": "maintain"
+    },
+    {
+      "id": "background-process-control",
+      "name": "Background process lifecycle governance",
+      "criticality": "high",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [
+        "@ifi/oh-pi-extensions",
+        "mitsupi"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-extensions",
+        "mitsupi"
+      ],
+      "coexistencePolicy": "first-party-planning-third-party-runtime-until-mature",
+      "defaultAction": "consolidate",
+      "curationCoverage": [
+        {
+          "id": "mitsupi-uv-bash-conflict",
+          "coveredSurface": "background/process and shell/tool governance",
+          "thirdPartyPackage": "mitsupi",
+          "thirdPartySurfaces": [
+            "pi-extensions/uv.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "mitsupi uv.ts registers bash and conflicts with third-party bg-process; installer filter preserves user installability while first-party governance matures."
+        },
+        {
+          "id": "oh-pi-bg-process-future",
+          "coveredSurface": "background process lifecycle governance",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/bg-process.ts"
+          ],
+          "strategy": "needs-decision",
+          "status": "tracked",
+          "reason": "third-party bg-process remains useful while first-party background process control is planning-only; revisit when launch/stop/restart registry exists."
+        }
+      ]
+    },
+    {
+      "id": "session-ui-footer",
+      "name": "Session footer/status UI",
+      "criticality": "low",
+      "primaryPackage": "@aretw0/pi-stack",
+      "secondaryPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
+      "conflictsWithPackages": [
+        "@ifi/oh-pi-extensions"
+      ],
+      "coexistencePolicy": "single-curated-footer",
+      "defaultAction": "consolidate",
+      "curationCoverage": [
+        {
+          "id": "oh-pi-custom-footer",
+          "coveredSurface": "custom footer/status line",
+          "thirdPartyPackage": "@ifi/oh-pi-extensions",
+          "thirdPartySurfaces": [
+            "extensions/custom-footer.ts"
+          ],
+          "strategy": "suppress-by-filter",
+          "status": "filtered",
+          "reason": "first-party custom-footer owns the curated footer surface."
+        }
+      ]
     }
   ]
 }

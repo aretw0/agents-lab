@@ -38,6 +38,19 @@ Remover/arquivar quando:
 - Não manter tool lab-only indefinidamente sem owner e prazo.
 - Preferir converter padrão recorrente em **sinal de operação** (status/audit/tool estável) em vez de script ad-hoc permanente.
 
+## Sinal de cobertura first-party
+
+Quando uma capability first-party passa a cobrir parte de uma extensão/skill third-party, isso deve aparecer em `packages/pi-stack/extensions/data/capability-owners.json`, não em uma memória paralela. O campo `curationCoverage` registra a superfície coberta, o pacote third-party, os arquivos filtrados e a estratégia: `keep`, `suppress-by-filter`, `remove-from-profile` ou `needs-decision`.
+
+O sinal é avaliado por `stack_sovereignty_status` como `curationCoverage`. Ele deve mostrar:
+
+- filtros aplicados pelo instalador para usuários, como `mitsupi` `pi-extensions/uv.ts`;
+- overlaps que ainda dependem de decisão, como background process third-party enquanto a versão first-party ainda é planejamento;
+- falhas de installability quando uma superfície marcada `suppress-by-filter` não tem filtro correspondente;
+- oportunidades de reduzir dependências quando a cobertura first-party amadurece.
+
+Regra: se a curadoria cobre uma superfície, ela precisa estar filtrada, removida do perfil, ou explicitamente justificada como decisão pendente.
+
 ## Inventário de slimming da superfície distribuída
 
 Classificação atual da distribuição `@aretw0/pi-stack`:

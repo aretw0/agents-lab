@@ -9267,7 +9267,7 @@
     {
       "id": "TASK-BUD-382",
       "description": "Criar sinal de curadoria first-party coverage para acompanhar substituição/desativação/remoção de capacidades third-party cobertas pela stack.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-252",
@@ -9290,7 +9290,30 @@
         "Documentar rollout/rollback para desativar partes de extensões third-party sem quebrar installability."
       ],
       "milestone": "curation-sovereignty",
-      "notes": "2026-04-30: criado a pedido do operador. Motivação: ao avançar first-parties, a cobertura própria deve virar sinal operacional/devops; dependências third-party cobertas devem ser desativadas, removidas do perfil ou mantidas com decisão explícita. Exemplo concreto: conflito uv/bash com background process third-party exigiu filtro para garantir installability também para usuários.\n2026-04-30: [rationale:risk-control] O sinal deve trazer à superfície cobertura first-party crescente, overlaps ainda ativos, filtros aplicados e decisões de remover/desabilitar/manter third-party.\n[rationale:risk-control] Sem um sinal de curadoria first-party coverage, a stack pode acumular dependências e conflitos de extensões third-party mesmo após cobrir capacidades internamente; isso ameaça installability, soberania e segurança operacional dos usuários."
+      "notes": "2026-04-30: criado a pedido do operador. Motivação: ao avançar first-parties, a cobertura própria deve virar sinal operacional/devops; dependências third-party cobertas devem ser desativadas, removidas do perfil ou mantidas com decisão explícita. Exemplo concreto: conflito uv/bash com background process third-party exigiu filtro para garantir installability também para usuários.\n2026-04-30: [rationale:risk-control] O sinal deve trazer à superfície cobertura first-party crescente, overlaps ainda ativos, filtros aplicados e decisões de remover/desabilitar/manter third-party.\n[rationale:risk-control] Sem um sinal de curadoria first-party coverage, a stack pode acumular dependências e conflitos de extensões third-party mesmo após cobrir capacidades internamente; isso ameaça installability, soberania e segurança operacional dos usuários.\n2026-04-30: iniciando fatia bounded essencial. Escopo inicial: sinal determinístico de first-party coverage/third-party suppression, read-only, com testes; sem remover dependências ainda.\n2026-04-30: primeira fatia implementada conforme crítica do operador: usar capability-owners.json como registry único, com campo curationCoverage, em vez de criar JSON paralelo. stack_sovereignty_status agora inclui resumo curationCoverage. VER-BUD-685 registra testes/docs. Reload necessário para validação live."
+    },
+    {
+      "id": "TASK-BUD-383",
+      "description": "Investigar perda de confirmação humana em guard/monitor de deleção de arquivo recém-criado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-375"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
+        "packages/pi-stack/extensions/write-preview-guard.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir caso em que UI pede autorização para remover arquivo recém-criado, operador autoriza, mas monitor/guard ainda bloqueia como não autorizado.",
+        "Identificar se a confirmação não chega ao detector, se é um falso positivo de política, ou se há conflito entre tool guard e monitor.",
+        "Registrar camada responsável: terminal/harness, upstream pi, ou pi-stack extension.",
+        "Adicionar teste ou auditoria que preserve evidência de confirmação humana quando ação destrutiva é permitida.",
+        "Manter bloqueio fail-closed quando não houver confirmação real."
+      ],
+      "milestone": "human-control",
+      "notes": "2026-04-30: operador relatou que autorizou a remoção quando perguntado, mas o monitor ainda disse que a ação destrutiva não estava autorizada. Registrar para correção posterior de passagem/auditoria de confirmação humana.\n[rationale:risk-control] Confirmação humana para ação destrutiva precisa ser audível e chegar corretamente ao guard; se a confirmação se perde, o sistema gera falso bloqueio e reduz controle operacional confiável.\n2026-04-30: detalhe adicional do operador: a confirmação foi um dialog real da TUI, respondido com sim. O bloqueio posterior parece desconexão entre confirmação TUI/upstream e monitor/guard local, especialmente para arquivo recém-criado. Investigar propagação/auditoria dessa confirmação, não simplesmente relaxar o bloqueio."
     }
   ]
 }

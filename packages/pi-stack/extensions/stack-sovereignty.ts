@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { buildSchedulerOwnershipSnapshot, resolveSchedulerGovernanceConfig } from "./scheduler-governance";
+import { evaluateCurationCoverage, readCurationCoverageRegistry } from "./curation-coverage";
 
 export type CapabilityCriticality = "high" | "medium" | "low";
 export type CapabilityStatus = "owned" | "coexisting" | "owner-missing" | "inactive";
@@ -190,6 +191,7 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
       const registry = readCapabilityRegistry();
       const evaluations = evaluateCapabilityOwnership(registry, installed);
       const summary = summarizeEvaluations(evaluations);
+      const curationCoverage = evaluateCurationCoverage({ registry: readCurationCoverageRegistry(), installedPackages: installed });
 
       const schedCfg = resolveSchedulerGovernanceConfig(ctx.cwd);
       const schedSnapshot = buildSchedulerOwnershipSnapshot(ctx.cwd, schedCfg.policy, schedCfg.staleAfterMs);
@@ -199,6 +201,7 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
         installedPackages: [...installed].sort(),
         summary,
         capabilities: evaluations,
+        curationCoverage,
         schedulerGovernance: {
           config: schedCfg,
           snapshot: schedSnapshot,
@@ -220,6 +223,7 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
       const registry = readCapabilityRegistry();
       const evaluations = evaluateCapabilityOwnership(registry, installed);
       const summary = summarizeEvaluations(evaluations);
+      const curationCoverage = evaluateCurationCoverage({ registry: readCurationCoverageRegistry(), installedPackages: installed });
 
       const schedCfg = resolveSchedulerGovernanceConfig(ctx.cwd);
       const schedSnapshot = buildSchedulerOwnershipSnapshot(ctx.cwd, schedCfg.policy, schedCfg.staleAfterMs);
@@ -229,6 +233,7 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
         `registryVersion: ${registry.version}`,
         `installedPackages: ${installed.size}`,
         `summary: ownerMissing=${summary.ownerMissing} coexisting=${summary.coexisting} highRisk=${summary.highRisk}`,
+        `curationCoverage: filtered=${curationCoverage.summary.filtered} missingFilter=${curationCoverage.summary.missingFilter} needsDecision=${curationCoverage.summary.needsDecision} activeOverlaps=${curationCoverage.summary.activeThirdPartyOverlaps}`,
         "",
         "capabilities:",
         ...evaluations.map((e) =>

@@ -8385,6 +8385,15 @@
       "method": "test+live-tool+docs",
       "timestamp": "2026-04-30T20:01:52.512Z",
       "evidence": "Completed first background process control primitive as a read-only planning contract. Implementation added resolveBackgroundProcessControlPlan and runtime tool background_process_plan. Tests passed: guardrails-background-process.test.ts => 4 passed. Docs added in docs/primitives/background-process-control.md and operating doctrine with package-doc sync/check. Live after reload passed port-lease, ready-for-design, human-decision, and blocked paths. All outputs keep activation=none authorization=none dispatchAllowed=false processStartAllowed=false processStopAllowed=false mutationAllowed=false. [rationale:risk-control] This closes the planning/safety contract needed before any future operational launch/stop/restart primitive, without starting processes or reserving ports."
+    },
+    {
+      "id": "VER-BUD-685",
+      "target": "TASK-BUD-382",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+docs+registry-consolidation",
+      "timestamp": "2026-04-30T20:14:23.097Z",
+      "evidence": "Implemented first-party curation coverage signal using existing capability-owners.json instead of a second registry, following operator critique. Added curationCoverage fields to capability records, including mitsupi uv/bash filter, git/web skill filters, usage-tracker/watchdog/custom-footer filters, and bg-process needs-decision while first-party background process control is planning-only. Added curation-coverage evaluator and integrated summary into stack_sovereignty_status payload/command. Tests passed: curation-coverage.test.ts + stack-sovereignty.test.ts => 10 passed. docs:package:check passed and lab-user-surface-parity documents the signal. Runtime stack_sovereignty_status live validation requires reload."
     }
   ]
 }

@@ -1,38 +1,37 @@
 {
-  "timestamp": "2026-04-30T20:02:11.141Z",
-  "context": "After reload, live-validated background_process_plan and completed TASK-BUD-381 as the read-only planning primitive. Also captured operator's [snip] topped/restarted; no port was reserved. [truncated:+355 chars]",
+  "timestamp": "2026-04-30T20:14:42.265Z",
+  "context": "Implemented first bounded slice of first-party curation coverage signal. After operator critique, consolidated coverage metadata into existin [snip] o reload needed before live validation. [truncated:+405 chars]",
+  "current_tasks": [
+    "TASK-BUD-382"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-381 closure and TASK-BUD-382 backlog capture.",
-    "Continue essential lane; likely next task should address curation first-party coverage signal [snip] interrupted readiness gap. [truncated:+26 chars]",
-    "Do not implement operational process launch/stop/restart without separate protected design/task."
+    "Commit TASK-BUD-382 curation coverage slice and TASK-BUD-383 backlog note.",
+    "Reload before live validation of stack_sovereignty_status curationCoverage output.",
+    "After reload, live validate stack_sovereignty_status includes curationCoverage summary and dec [snip] nstall/profile gate slice. [truncated:+53 chars]"
   ],
   "blockers": [
-    "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
-    "Operational background process control remains future work after planning primitive.",
-    "Git maintenance cleanup remains opt-in."
+    "Reload required before stack_sovereignty_status live validation.",
+    "TASK-BUD-383 confirmation propagation bug remains planned.",
+    "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]"
   ],
   "recent_validation": [
-    "background_process_plan live needs-port-lease path ok",
-    "background_process_plan live ready-for-design shared-service path ok",
-    "background_process_plan live needs-human-decision parallel agents path ok"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/curation-coverage.test.ts packages/pi-s [snip] > 2 files, 10 tests passed [truncated:+43 chars]",
+    "safe_marker_check docs/guides/lab-user-surface-parity.md matched=7/7",
+    "cmd.exe /c npm run docs:package:check => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T20:02:11.141Z",
+    "generatedAtIso": "2026-04-30T20:14:42.265Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-closure-and-curation-backlog",
-    "focus_task_status": "completed"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T20:02:11.141Z",
+      "atIso": "2026-04-30T20:14:42.265Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-closure-and-curation-backlog"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-381"
   ]
 }
