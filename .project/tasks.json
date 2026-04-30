@@ -6026,6 +6026,32 @@
         "Documentar comportamento esperado e, se necessário, criar guard/teste para operações longas canceláveis."
       ],
       "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual."
+    },
+    {
+      "id": "TASK-BUD-256",
+      "description": "[P1] Limitar evidência medida do canário nudge-free para evitar bloat/spoof.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-253",
+        "TASK-BUD-251"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Evidência medida só cobre gate quando for não vazia e dentro de limite compacto.",
+        "Evidência medida longa demais é reportada em invalidMeasuredEvidenceGates e não conta como cobertura.",
+        "Details incluem maxMeasuredEvidenceChars para auditoria.",
+        "Testes cobrem evidência completa bounded e evidência overlong inválida.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado como micro-slice anti-spoof/bloat. [rationale:risk-control] Readiness medida precisa de evidência compacta; strings longas podem virar bloat ou mascarar origem não confiável.\n[2026-04-30T02:01:19Z] slice=1 focus=TASK-BUD-256 gate=test:monitor:smoke-226/226 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Evidência measured agora é compacta e overlong não cobre gates.",
+      "verification": "VER-BUD-532"
     }
   ]
 }

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveNudgeFreeLoopCanaryGate, resolveUnattendedContinuationPlan } from "../../extensions/guardrails-core-unattended-continuation";
+import {
+  NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
+  resolveNudgeFreeLoopCanaryGate,
+  resolveUnattendedContinuationPlan,
+} from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [
   { gate: "next-local-safe", ok: true, evidence: "selector=local-safe" },
@@ -36,7 +40,9 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "measured",
       measuredEvidenceCount: 8,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: [],
+      invalidMeasuredEvidenceGates: [],
       decision: "ready",
       canContinueWithoutNudge: true,
       reasons: ["all-gates-green"],
@@ -64,7 +70,9 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "measured",
       measuredEvidenceCount: 0,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: allMeasuredEvidenceGates,
+      invalidMeasuredEvidenceGates: [],
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["measured-evidence-missing"],
@@ -93,6 +101,7 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "measured",
       measuredEvidenceCount: 1,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: [
         "next-local-safe",
         "handoff-budget-ok",
@@ -102,10 +111,46 @@ describe("guardrails unattended continuation", () => {
         "validation-known",
         "stop-conditions-clear",
       ],
+      invalidMeasuredEvidenceGates: [],
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["measured-evidence-incomplete"],
       summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=measured-evidence-incomplete",
+    });
+  });
+
+  it("defers the nudge-free loop canary when measured evidence is too large", () => {
+    const overlongEvidence = "x".repeat(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS + 1);
+    const gate = resolveNudgeFreeLoopCanaryGate({
+      optIn: true,
+      nextLocalSafe: true,
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      validationKnown: true,
+      stopConditionsClear: true,
+      signalSource: "measured",
+      measuredEvidence: [
+        { gate: "checkpoint-fresh", ok: true, evidence: overlongEvidence },
+        ...completeMeasuredEvidence.filter((entry) => entry.gate !== "checkpoint-fresh"),
+      ],
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
+      measuredEvidenceCount: 7,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
+      missingMeasuredEvidenceGates: ["checkpoint-fresh"],
+      invalidMeasuredEvidenceGates: ["checkpoint-fresh"],
+      decision: "defer",
+      canContinueWithoutNudge: false,
+      reasons: ["measured-evidence-invalid", "measured-evidence-incomplete"],
+      summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=measured-evidence-invalid,measured-evidence-incomplete",
     });
   });
 
@@ -130,7 +175,9 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "measured",
       measuredEvidenceCount: 8,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: [],
+      invalidMeasuredEvidenceGates: [],
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["missing-opt-in"],
@@ -157,7 +204,9 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "manual",
       measuredEvidenceCount: 0,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: allMeasuredEvidenceGates,
+      invalidMeasuredEvidenceGates: [],
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["manual-signal-source"],
@@ -186,7 +235,9 @@ describe("guardrails unattended continuation", () => {
       activation: "none",
       signalSource: "measured",
       measuredEvidenceCount: 8,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates: [],
+      invalidMeasuredEvidenceGates: [],
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons: ["unexpected-git-state", "protected-scope-pending", "stop-condition-present"],

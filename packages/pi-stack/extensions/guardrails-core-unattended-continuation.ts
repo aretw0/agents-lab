@@ -57,7 +57,9 @@ export interface NudgeFreeLoopCanaryGate {
   activation: "none";
   signalSource: NudgeFreeLoopCanarySignalSource;
   measuredEvidenceCount: number;
+  maxMeasuredEvidenceChars: number;
   missingMeasuredEvidenceGates: NudgeFreeLoopMeasuredGate[];
+  invalidMeasuredEvidenceGates: NudgeFreeLoopMeasuredGate[];
   decision: NudgeFreeLoopCanaryDecision;
   canContinueWithoutNudge: boolean;
   reasons: string[];
@@ -68,6 +70,8 @@ export interface NudgeFreeLoopCanaryGate {
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
 }
+
+export const NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS = 120;
 
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
@@ -83,23 +87,32 @@ const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
 function evaluateMeasuredEvidenceCoverage(entries: NudgeFreeLoopMeasuredEvidenceEntry[] | undefined): {
   measuredEvidenceCount: number;
   missingMeasuredEvidenceGates: NudgeFreeLoopMeasuredGate[];
+  invalidMeasuredEvidenceGates: NudgeFreeLoopMeasuredGate[];
 } {
   const covered = new Set<NudgeFreeLoopMeasuredGate>();
+  const invalid = new Set<NudgeFreeLoopMeasuredGate>();
   for (const entry of entries ?? []) {
-    if (!entry.ok || entry.evidence.trim().length === 0) continue;
+    const evidence = entry.evidence.trim();
+    if (!entry.ok || evidence.length === 0) continue;
+    if (evidence.length > NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS) {
+      invalid.add(entry.gate);
+      continue;
+    }
     covered.add(entry.gate);
   }
   return {
     measuredEvidenceCount: covered.size,
     missingMeasuredEvidenceGates: REQUIRED_NUDGE_FREE_MEASURED_GATES.filter((gate) => !covered.has(gate)),
+    invalidMeasuredEvidenceGates: [...invalid],
   };
 }
 
 export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {
   const reasons: string[] = [];
   const signalSource: NudgeFreeLoopCanarySignalSource = input.signalSource === "measured" ? "measured" : "manual";
-  const { measuredEvidenceCount, missingMeasuredEvidenceGates } = evaluateMeasuredEvidenceCoverage(input.measuredEvidence);
+  const { measuredEvidenceCount, missingMeasuredEvidenceGates, invalidMeasuredEvidenceGates } = evaluateMeasuredEvidenceCoverage(input.measuredEvidence);
   if (signalSource !== "measured") reasons.push("manual-signal-source");
+  if (signalSource === "measured" && invalidMeasuredEvidenceGates.length > 0) reasons.push("measured-evidence-invalid");
   if (signalSource === "measured" && measuredEvidenceCount === 0) reasons.push("measured-evidence-missing");
   if (signalSource === "measured" && measuredEvidenceCount > 0 && missingMeasuredEvidenceGates.length > 0) reasons.push("measured-evidence-incomplete");
   if (!input.optIn) reasons.push("missing-opt-in");
@@ -122,7 +135,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       activation: "none",
       signalSource,
       measuredEvidenceCount,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates,
+      invalidMeasuredEvidenceGates,
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons,
@@ -138,7 +153,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       activation: "none",
       signalSource,
       measuredEvidenceCount,
+      maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
       missingMeasuredEvidenceGates,
+      invalidMeasuredEvidenceGates,
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons,
@@ -153,7 +170,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
     activation: "none",
     signalSource,
     measuredEvidenceCount,
+    maxMeasuredEvidenceChars: NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
     missingMeasuredEvidenceGates,
+    invalidMeasuredEvidenceGates,
     decision: "ready",
     canContinueWithoutNudge: true,
     reasons: ["all-gates-green"],
