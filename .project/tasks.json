@@ -8983,6 +8983,33 @@
       ],
       "notes": "[rationale:risk-control] O operador pediu que reload necessário fique mais claro no final de turno; tornar isso convenção reduz ambiguidade e evita perda de continuidade.\n[2026-04-30T12:56:34Z] slice=1 focus=TASK-BUD-370 gate=safe_marker_check-6/6+focal-90/90 commit=pending docs=final-turn-reload-callout. [rationale:risk-control] Final de turno agora deve destacar reload necessário em negrito e próximos passos diretos.",
       "verification": "VER-BUD-644"
+    },
+    {
+      "id": "TASK-BUD-371",
+      "description": "[P1] Definir gate de backlog para futura implementação de executor one-slice.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-370",
+        "TASK-BUD-362"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar critérios mínimos antes de implementar qualquer executor one-slice.",
+        "Exigir .project strategy resolvida, operator packet live-validado, contrato humano explícito, rollback, validação, escopo de arquivos, time/cost budget, cancelamento e stop obrigatório.",
+        "Declarar que 'vamos seguindo' ou confirmação genérica não autorizam implementação/uso de executor.",
+        "Definir que primeira implementação, se houver, deve nascer desabilitada/read-only ou dry-run, com dispatchAllowed=false até autorização separada.",
+        "Manter scheduler/repetition/self-reload/remote/offload/GitHub Actions fora de escopo.",
+        "Validar com safe_marker_check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Para desbloquear potencial ininterrupto sem gordura, precisamos de um gate claro entre packets read-only e qualquer executor futuro.\n[2026-04-30T13:06:11Z] slice=1 focus=TASK-BUD-371 gate=safe_marker_check-15/15+focal-90/90 commit=pending docs=one-slice-executor-backlog-gate. [rationale:risk-control] Gate de backlog definido: executor só em tarefa separada, desabilitado/dry-run e sem dispatch por padrão.",
+      "verification": "VER-BUD-645"
     }
   ]
 }

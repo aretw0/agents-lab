@@ -251,6 +251,25 @@ Esse caso prova que foco único não equivale a escopo reversível. `task.files`
 
 O operator packet reduz fricção para jornadas longas porque coloca a evidência em uma linha, mas não substitui autorização. Ele não cobre repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes ou manutenção destrutiva.
 
+### Gate de backlog para executor one-slice
+
+Implementar um executor one-slice só entra na fila quando todos os critérios abaixo estiverem verdadeiros:
+
+1. estratégia de `.project` resolvida para a lane atual: hard intent local ou soft evidence/cache com ownership claro;
+2. `context_watch_one_slice_operator_packet_preview` live-validado em caminhos verde, fail-closed e missing-files;
+3. contrato humano explícito definido por tarefa e ação, não confirmação genérica;
+4. arquivos declarados e rollback não destrutivo para cada arquivo;
+5. validação conhecida antes da edição;
+6. escopo de staging/commit fechado e pequeno;
+7. budget de tempo/custo definido;
+8. cancelamento/abort seguro definido;
+9. checkpoint pós-fatia obrigatório;
+10. stop obrigatório depois de uma fatia.
+
+“Vamos seguindo”, “pode continuar” ou confirmação genérica autorizam continuar control-plane/rehearsal, não implementar nem usar executor. A primeira implementação, se for escolhida em tarefa separada, deve nascer desabilitada ou dry-run/report-only, com `dispatchAllowed=false` até uma autorização separada de execução.
+
+Esse gate cobre apenas executor local de uma fatia. Repetition, scheduler, self-reload, remote/offload, GitHub Actions, publish, escopos protegidos e manutenção destrutiva continuam fora de escopo e exigem gates próprios.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:
