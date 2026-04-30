@@ -6873,6 +6873,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T01:12:41.688Z",
       "evidence": "Live-validated context_watch_status after reload. It returned compact content only: context-watch-status: level=checkpoint percent=68 action=write-checkpoint autoCompact=level-not-compact operator=none cadence=micro-slice-only handoff=fresh. This confirms the tool no longer dumps verbose JSON into content while details remain available for automation. [rationale:risk-control] Compact boundary diagnostics reduce context bloat during long-running unattended work."
+    },
+    {
+      "id": "VER-BUD-517",
+      "target": "TASK-BUD-239",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-30T01:15:14.328Z",
+      "evidence": "Documented self-reload/autoresume constraints in docs/guides/control-plane-operating-doctrine.md. The doctrine now states self-reload by the agent is backlog/canary opt-in, not current automatic behavior, and requires fresh bounded checkpoint, handoff budget, expected git state, no protected scopes pending, cooldown, audit, and minimal auto-resume from compact handoff before any unattended real use. Validation: safe_marker_check passed 11/11 with commandSensitive=none. [rationale:risk-control] Prevents the self-reload idea from becoming premature automation without explicit safety gates."
     }
   ]
 }
