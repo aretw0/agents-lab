@@ -7287,6 +7287,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:05:36.604Z",
       "evidence": "Compacted context-watch deterministic-stop/auto-compact visible warnings. Added formatContextWatchDeterministicStopSummary and changed deterministic-stop notify plus passive steering notify from repeated multi-line reason/action/hint/operator/handoff output to compact summaries. Auto-compact trigger notification is now compact key=value form. Policy/thresholds unchanged. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 246/246 across 32 files. [rationale:risk-control] Bloated compact warnings obscure checkpoint state and harm unattended operation trust."
+    },
+    {
+      "id": "VER-BUD-563",
+      "target": "TASK-BUD-287",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:07:45.359Z",
+      "evidence": "Added and re-exported pure resolveCheckpointFreshCollectorResult. It derives checkpoint collector status from local readStatus, handoff timestamp, nowMs, and maxAgeMs by reusing resolveCheckpointFreshMeasuredSignal; it does not accept manual readiness booleans. Tests cover fresh observed, stale invalid, missing read, read-error, missing timestamp, invalid timestamp, and future timestamp; canonical re-export smoke covers observed and read-error. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 35/35; cmd.exe /c npm run test:monitor:smoke --silent passed 247/247 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Checkpoint freshness now has a local-observed collector building block for future audit envelopes without granting operational authorization."
     }
   ]
 }

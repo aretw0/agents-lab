@@ -3,6 +3,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
+  resolveCheckpointFreshCollectorResult,
   resolveCheckpointFreshMeasuredSignal,
   resolveCooldownReadyMeasuredSignal,
   resolveGitStateExpectedMeasuredSignal,
@@ -38,6 +39,57 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives checkpoint collector results from local read outcomes", () => {
+    const nowMs = Date.parse("2026-04-30T04:00:00.000Z");
+    const fresh = resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      handoffTimestampIso: "2026-04-30T03:59:30.000Z",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const stale = resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      handoffTimestampIso: "2026-04-30T03:58:00.000Z",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const missingRead = resolveCheckpointFreshCollectorResult({
+      readStatus: "missing",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const readError = resolveCheckpointFreshCollectorResult({
+      readStatus: "error",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const missingTimestamp = resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const invalidTimestamp = resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      handoffTimestampIso: "not-a-date",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const futureTimestamp = resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      handoffTimestampIso: "2026-04-30T04:00:30.000Z",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+
+    expect(fresh).toEqual({ fact: "checkpoint", status: "observed", evidence: "checkpoint=fresh ageSec=30 maxSec=60" });
+    expect(stale).toEqual({ fact: "checkpoint", status: "invalid", evidence: "checkpoint=stale ageSec=120 maxSec=60" });
+    expect(missingRead).toEqual({ fact: "checkpoint", status: "missing", evidence: "checkpoint=missing" });
+    expect(readError).toEqual({ fact: "checkpoint", status: "invalid", evidence: "checkpoint=read-error" });
+    expect(missingTimestamp).toEqual({ fact: "checkpoint", status: "invalid", evidence: "checkpoint=missing" });
+    expect(invalidTimestamp).toEqual({ fact: "checkpoint", status: "invalid", evidence: "checkpoint=invalid-ts" });
+    expect(futureTimestamp).toEqual({ fact: "checkpoint", status: "invalid", evidence: "checkpoint=future-ts" });
+  });
+
   it("derives handoff-budget collector results from local read outcomes", () => {
     const observed = resolveHandoffBudgetCollectorResult({
       readStatus: "observed",

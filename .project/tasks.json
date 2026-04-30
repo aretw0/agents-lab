@@ -6815,7 +6815,7 @@
     {
       "id": "TASK-BUD-287",
       "description": "[P1] Criar e re-exportar coletor local puro checkpoint-fresh.",
-      "status": "blocked",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-286"
@@ -6838,7 +6838,8 @@
         "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
         "Smoke principal permanece verde."
       ],
-      "notes": "Criado para continuar a lane essencial de coletores locais. [rationale:risk-control] Checkpoint freshness precisa ser fato observado localmente antes de qualquer audit surface futura.\n[2026-04-30T04:00:00Z] Pausado antes de mudança de código substancial: operador observou warning de auto-compact bloated/agressivo. Prioridade imediata vai para compactar o aviso determinístico antes de continuar coletores. [rationale:risk-control] Warning ruidoso prejudica operação ininterrupta e confiança em checkpoint/compact."
+      "notes": "Criado para continuar a lane essencial de coletores locais. [rationale:risk-control] Checkpoint freshness precisa ser fato observado localmente antes de qualquer audit surface futura.\n[2026-04-30T04:00:00Z] Pausado antes de mudança de código substancial: operador observou warning de auto-compact bloated/agressivo. Prioridade imediata vai para compactar o aviso determinístico antes de continuar coletores. [rationale:risk-control] Warning ruidoso prejudica operação ininterrupta e confiança em checkpoint/compact.\n[2026-04-30T04:06:00Z] Retomado após TASK-BUD-288 compactar warning deterministic-stop. Auto-resume antigo apontava TASK-BUD-286, mas handoff mais novo/steering atual apontam retomar checkpoint-fresh collector. [rationale:risk-control] Seguir checkpoint mais novo evita stale evidence como fonte de verdade.\n[2026-04-30T04:07:33Z] slice=1 focus=TASK-BUD-287 gate=test:monitor:smoke-247/247 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor checkpoint-fresh puro criado e re-exportado; runtime segue manual-only.",
+      "verification": "VER-BUD-563"
     },
     {
       "id": "TASK-BUD-288",

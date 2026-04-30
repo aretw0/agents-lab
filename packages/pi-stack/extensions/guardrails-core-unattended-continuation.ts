@@ -396,6 +396,30 @@ export function resolveHandoffBudgetCollectorResult(input: {
   };
 }
 
+export function resolveCheckpointFreshCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  handoffTimestampIso?: string;
+  nowMs: number;
+  maxAgeMs: number;
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "checkpoint", status: "missing", evidence: "checkpoint=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "checkpoint", status: "invalid", evidence: "checkpoint=read-error" };
+  }
+  const signal = resolveCheckpointFreshMeasuredSignal({
+    handoffTimestampIso: input.handoffTimestampIso,
+    nowMs: input.nowMs,
+    maxAgeMs: input.maxAgeMs,
+  });
+  return {
+    fact: "checkpoint",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

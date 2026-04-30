@@ -6,6 +6,7 @@ import {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
+  resolveCheckpointFreshCollectorResult,
   resolveHandoffBudgetCollectorResult,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
@@ -218,6 +219,25 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "handoff-budget",
       status: "missing",
       evidence: "handoff-budget=missing",
+    });
+    expect(resolveCheckpointFreshCollectorResult({
+      readStatus: "observed",
+      handoffTimestampIso: "2026-04-30T03:59:30.000Z",
+      nowMs: Date.parse("2026-04-30T04:00:00.000Z"),
+      maxAgeMs: 60_000,
+    })).toEqual({
+      fact: "checkpoint",
+      status: "observed",
+      evidence: "checkpoint=fresh ageSec=30 maxSec=60",
+    });
+    expect(resolveCheckpointFreshCollectorResult({
+      readStatus: "error",
+      nowMs: Date.parse("2026-04-30T04:00:00.000Z"),
+      maxAgeMs: 60_000,
+    })).toEqual({
+      fact: "checkpoint",
+      status: "invalid",
+      evidence: "checkpoint=read-error",
     });
   });
 });
