@@ -7,6 +7,7 @@ import {
   evaluateTextMarkerCheck,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
+  resolveMeasuredFactCollectorAssessment,
   resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
@@ -148,6 +149,33 @@ describe("guardrails-core hardening re-exports", () => {
       factSource: "mixed",
       eligibleForMeasuredPacket: false,
       reasons: ["missing-local-facts", "untrusted-fact-source"],
+    });
+
+    expect(resolveMeasuredFactCollectorAssessment({
+      results: [
+        { fact: "candidate", status: "observed", evidence: "candidate=board-task" },
+        { fact: "checkpoint", status: "missing", evidence: "" },
+        { fact: "handoff-budget", status: "untrusted", evidence: "handoff-budget=ok", source: "caller-supplied" },
+        { fact: "git-state", status: "invalid", evidence: "git=expected" },
+      ],
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "mixed",
+      eligibleForMeasuredPacket: false,
+      collectorMissingFacts: ["checkpoint"],
+      collectorUntrustedFacts: ["handoff-budget"],
+      collectorInvalidFacts: ["git-state"],
+      reasons: expect.arrayContaining([
+        "missing-local-facts",
+        "untrusted-fact-source",
+        "fact-evidence-invalid",
+        "collector-missing",
+        "collector-untrusted",
+        "collector-invalid",
+      ]),
     });
   });
 });
