@@ -231,6 +231,23 @@ Quando a fatia pode continuar mas o método de validação não está óbvio, us
 
 Registre o `summary` compacto da decisão quando ele explicar por que o método escolhido é seguro.
 
+## Escada mínima para sinais simples
+
+Sinais simples não devem acumular ruído nem virar desculpa para manutenção ampla. A decisão básica é:
+
+1. observar e classificar o sinal;
+2. corrigir na fatia atual se a solução for local-safe, pequena, reversível por git e tiver validação bounded;
+3. registrar no checkpoint/board quando o sinal for relevante para continuidade;
+4. pedir autorização explícita quando a solução for destrutiva, protegida, externa, custosa ou irreversível;
+5. criar tarefa/decisão quando a solução exigir desenho, ownership, sync, migração ou política nova;
+6. usar hardening quando o mesmo sinal se repetir.
+
+“Simples” não significa “automático”. Simples significa que o custo de decisão é baixo, o blast radius é pequeno, o rollback é claro e a validação cabe na fatia. Se qualquer uma dessas condições faltar, a ação deixa de ser correção simples e vira task, decision packet ou pergunta ao operador.
+
+Para manutenção git, a regra é conservadora: diagnosticar, registrar e recomendar são permitidos; executar `git gc`, executar `git prune` ou remover `.git/gc.log` exige autorização explícita. Um aviso de manutenção não deve ser ignorado, mas também não deve virar limpeza destrutiva automática.
+
+Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
+
 ## Testes de path cross-platform
 
 Testes que validam paths devem ser agnósticos ao host. Quando a regra testada é formato canônico portátil, use fixtures literais com `/` e `\\` como strings de entrada e compare com evidência normalizada, em vez de montar expectativas com `path.join`, `path.resolve` ou separadores do sistema atual. O objetivo é provar que Windows, Linux e macOS chegam ao mesmo sinal medido, não que a suite passou por acidente no host local.

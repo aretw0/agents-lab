@@ -8795,6 +8795,31 @@
         "Produzir uma decisão/doutrina curta e actionable antes de qualquer executor/repetition/scheduler depender de .project como autoridade operacional."
       ],
       "notes": "[rationale:architecture] .project é o adapter local-first atual, mas precisa de estratégia explícita de longo prazo para não virar ruído/lock-in nem bloquear diferentes abordagens de agentes. Hard intent: antes de automação ininterrupta depender de .project, mapear canonicalidade, ownership, sync, stale evidence e conflitos."
+    },
+    {
+      "id": "TASK-BUD-363",
+      "description": "[P1] Definir escada mínima para resolver sinais simples sem gordura operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-362"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar uma decisão básica para sinais simples: observar, classificar, corrigir se local-safe/reversível, pedir autorização se destrutivo/protegido, ou criar tarefa se recorrente.",
+        "Aplicar a regra ao caso git maintenance: diagnosticar e registrar é permitido; git gc, git prune e remover .git/gc.log continuam exigindo autorização explícita.",
+        "Separar sinais simples de gordura operacional: solução pequena, reversível e validável pode entrar na fatia atual; solução ampla vira task/decision.",
+        "Explicar que a autonomia cultivada deve reduzir hesitação e ruído, não aumentar superfície de ferramentas nem executar manutenção destrutiva.",
+        "Validar com safe_marker_check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Precisamos de uma regra básica para não deixar sinais simples acumularem ruído, sem voltar à gordura de tentativas passadas nem autorizar ações destrutivas.\n[2026-04-30T12:10:14Z] slice=1 focus=TASK-BUD-363 gate=safe_marker_check-10/10+focal-54/54 commit=pending docs=simple-signal-ladder. [rationale:risk-control] Sinais simples agora têm escada mínima: corrigir só se local-safe/reversível; git maintenance destrutivo segue com autorização explícita.",
+      "verification": "VER-BUD-636"
     }
   ]
 }

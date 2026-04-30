@@ -7944,6 +7944,15 @@
       "method": "test",
       "timestamp": "2026-04-30T12:04:15.127Z",
       "evidence": "Added read-only runtime tool `context_watch_one_slice_operator_packet_preview` to compose local continuity readiness, one-slice preview plan, no-dispatch decision packet, and human contract review into one operator packet. The tool is zero-param and defaults human confirmation to missing, so even when readiness and packet are green the contract review blocks with `human-confirmation-missing`. Summary exposes readiness, preview, packet, contract, dispatch=no, executor=no, and authorization=none. Details preserve effect=none, mode=read-only-operator-packet, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, plus plan/decisionPacket/contractReview/localContinuity evidence. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, loop, executor, or dispatcher was added. Focal context-watchdog smoke passed 48/48; full monitor smoke passed 269/269. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] Operators can see the full no-executor readiness/contract packet in one place without confusing evidence with authorization."
+    },
+    {
+      "id": "VER-BUD-636",
+      "target": "TASK-BUD-363",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T12:10:43.669Z",
+      "evidence": "Added `Escada mínima para sinais simples` to docs/guides/control-plane-operating-doctrine.md. The doctrine now says simple signals should be observed/classified, fixed in the current slice only when local-safe, small, reversible by git, and bounded-validatable, recorded when relevant, escalated for explicit authorization when destructive/protected/external/costly/irreversible, turned into a task/decision when structural, and hardened when recurring. It explicitly states 'simples' does not mean automatic. For git maintenance, diagnosing/recording/recommending is allowed, while `git gc`, `git prune`, and removing `.git/gc.log` require explicit authorization. Validation: corrected safe_marker_check passed 10/10 after one over-specific marker mismatch; focal git-maintenance/context-watchdog smoke passed 54/54. [rationale:risk-control] This creates the basic decision ladder requested by the operator without authorizing destructive maintenance or adding operational fat."
     }
   ]
 }
