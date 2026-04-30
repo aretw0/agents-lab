@@ -5829,6 +5829,27 @@
       ],
       "notes": "Criado a partir do risco percebido de manipular booleans manuais para obter all-gates-green. [rationale:risk-control] Ready para loop sem empurrões deve depender de sinais medidos, não de parâmetros manuais arbitrários.\n[2026-04-30T01:37:58Z] slice=1 focus=TASK-BUD-246 gate=test:monitor:smoke-223/223 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Ready do canário agora exige signalSource=measured; booleans manuais deferem.",
       "verification": "VER-BUD-524"
+    },
+    {
+      "id": "TASK-BUD-247",
+      "description": "[P1] Validar ao vivo que nudge_free_loop_canary manual não produz ready.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-246"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Após reload, chamada live de nudge_free_loop_canary com todos os booleans true retorna defer/manual-signal-source.",
+        "Validação confirma que ready não é possível por input manual da tool atual.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar a trava contra manipulação direta de booleans. [rationale:risk-control] A tool manual não pode liberar readiness do loop sem sinais medidos reais.\n[2026-04-30T01:41:00Z] slice=1 focus=TASK-BUD-247 gate=live-nudge_free_loop_canary-manual-signal-source commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Validação live confirmou que booleans manuais não produzem ready.",
+      "verification": "VER-BUD-525"
     }
   ]
 }
