@@ -6393,6 +6393,33 @@
       ],
       "notes": "Criado após operador observar que a auto-compactação foi agressiva novamente e que o warning está bloated. Checkpoint TASK-BUD-269 foi confirmado saudável em .project/handoff.json. [rationale:risk-control] Avisos de contexto devem preservar progresso sem inundar a retomada.\n[2026-04-30T02:57:51Z] slice=1 focus=TASK-BUD-270 gate=test:monitor:smoke-236/236 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Warning visível compactado; checkpoint anterior confirmado saudável.",
       "verification": "VER-BUD-544"
+    },
+    {
+      "id": "TASK-BUD-271",
+      "description": "[P1] Compor helpers measured em um canary local puro para nudge-free loop.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-269",
+        "TASK-BUD-270"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que recebe fatos locais estruturados e deriva todos os sinais measured necessários para resolveMeasuredNudgeFreeLoopCanaryGate.",
+        "Helper usa os helpers existentes para next-local-safe, checkpoint-fresh, handoff-budget-ok, git-state-expected, protected-scopes-clear, cooldown-ready, validation-known e stop-conditions-clear.",
+        "Helper não aceita signalSource, ok manual ou overrides measured prontos.",
+        "Testes cobrem caminho ready medido e falha representativa derivada de fatos locais.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload. [rationale:risk-control] Depois de derivar gates individuais, precisamos de composição pura a partir de fatos locais antes de qualquer superfície operacional.\n[2026-04-30T03:01:08Z] slice=1 focus=TASK-BUD-271 gate=test:monitor:smoke-238/238 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Composição measured pura criada a partir de fatos locais, sem runtime loop.",
+      "verification": "VER-BUD-545"
     }
   ]
 }

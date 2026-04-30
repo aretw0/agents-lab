@@ -5,6 +5,7 @@ import {
   resolveCooldownReadyMeasuredSignal,
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
+  resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
@@ -214,6 +215,96 @@ describe("guardrails unattended continuation", () => {
     expect(clear).toEqual({ ok: true, evidence: "stops=clear checked=2" });
     expect(present).toEqual({ ok: false, evidence: "stops=present count=2 first=risk|protected-scope" });
     expect(present.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("composes local facts into measured nudge-free canary readiness", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const gate = resolveLocalMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      nowMs,
+      candidate: {
+        taskId: "TASK-BUD-271",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "focal-test",
+        risk: "low",
+        protectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: [
+        "packages/pi-stack/extensions/foo.ts",
+        "packages/pi-stack/test/smoke/foo.test.ts",
+      ],
+      expectedPaths: [
+        "packages/pi-stack/extensions/foo.ts",
+        "packages/pi-stack/test/smoke/foo.test.ts",
+      ],
+      cooldownMs: 60_000,
+      validation: { kind: "focal-test", focalGate: "guardrails-smoke" },
+      stopConditions: [
+        { kind: "risk", present: false, evidence: "risk=none" },
+        { kind: "blocker", present: false, evidence: "blocker=none" },
+      ],
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
+      measuredEvidenceCount: 8,
+      missingMeasuredEvidenceGates: [],
+      invalidMeasuredEvidenceGates: [],
+      decision: "ready",
+      canContinueWithoutNudge: true,
+      reasons: ["all-gates-green"],
+    });
+  });
+
+  it("blocks local measured canary composition on derived unsafe facts", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const gate = resolveLocalMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      nowMs,
+      candidate: {
+        taskId: "TASK-RISK",
+        scope: "local",
+        estimatedFiles: 5,
+        reversible: "git",
+        validationKind: "unknown",
+        risk: "high",
+        protectedPaths: [".github/workflows/ci.yml"],
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: [".github/workflows/ci.yml"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      cooldownMs: 60_000,
+      validation: { kind: "unknown" },
+      stopConditions: [
+        { kind: "protected-scope", present: true, evidence: "protected=.github" },
+      ],
+    });
+
+    expect(gate).toMatchObject({
+      signalSource: "measured",
+      decision: "blocked",
+      canContinueWithoutNudge: false,
+      reasons: expect.arrayContaining([
+        "measured-evidence-incomplete",
+        "no-local-safe-next-step",
+        "unexpected-git-state",
+        "protected-scope-pending",
+        "validation-unknown",
+        "stop-condition-present",
+      ]),
+    });
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {

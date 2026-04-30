@@ -88,6 +88,26 @@ export interface NudgeFreeLoopMeasuredCanaryInput {
   signals: NudgeFreeLoopMeasuredSignals;
 }
 
+export interface NudgeFreeLoopLocalMeasuredCanaryInput {
+  optIn: boolean;
+  nowMs: number;
+  candidate: NudgeFreeLoopLocalCandidate;
+  handoffTimestampIso?: string;
+  maxCheckpointAgeMs: number;
+  handoffJsonChars: number;
+  maxHandoffJsonChars: number;
+  changedPaths: string[];
+  expectedPaths: string[];
+  protectedScopePaths?: string[];
+  lastRunAtIso?: string;
+  cooldownMs: number;
+  validation: {
+    kind: NudgeFreeLoopValidationKind;
+    focalGate?: string;
+  };
+  stopConditions: NudgeFreeLoopStopConditionSignal[];
+}
+
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
 
 export interface NudgeFreeLoopCanaryGate {
@@ -324,6 +344,40 @@ export function resolveMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopMeasu
       ok: signal(gate).ok,
       evidence: signal(gate).evidence,
     })),
+  });
+}
+
+export function resolveLocalMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
+  const protectedScopePaths = input.protectedScopePaths ?? [
+    ...input.changedPaths,
+    ...(input.candidate.protectedPaths ?? []),
+  ];
+  return resolveMeasuredNudgeFreeLoopCanaryGate({
+    optIn: input.optIn,
+    signals: {
+      "next-local-safe": resolveNextLocalSafeMeasuredSignal(input.candidate),
+      "checkpoint-fresh": resolveCheckpointFreshMeasuredSignal({
+        handoffTimestampIso: input.handoffTimestampIso,
+        nowMs: input.nowMs,
+        maxAgeMs: input.maxCheckpointAgeMs,
+      }),
+      "handoff-budget-ok": resolveHandoffBudgetMeasuredSignal({
+        jsonChars: input.handoffJsonChars,
+        maxJsonChars: input.maxHandoffJsonChars,
+      }),
+      "git-state-expected": resolveGitStateExpectedMeasuredSignal({
+        changedPaths: input.changedPaths,
+        expectedPaths: input.expectedPaths,
+      }),
+      "protected-scopes-clear": resolveProtectedScopesMeasuredSignal({ paths: protectedScopePaths }),
+      "cooldown-ready": resolveCooldownReadyMeasuredSignal({
+        lastRunAtIso: input.lastRunAtIso,
+        nowMs: input.nowMs,
+        cooldownMs: input.cooldownMs,
+      }),
+      "validation-known": resolveValidationKnownMeasuredSignal(input.validation),
+      "stop-conditions-clear": resolveStopConditionsClearMeasuredSignal({ conditions: input.stopConditions }),
+    },
   });
 }
 
