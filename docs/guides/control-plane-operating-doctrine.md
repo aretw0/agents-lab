@@ -59,6 +59,18 @@ Fallback operacional enquanto `Esc` estiver incerto:
 - manter checkpoint fresco antes de qualquer compact/reload;
 - se `Esc` falhar, usar fallback explícito do ambiente (`Ctrl+C`, comando de stop do processo, fechar a sessão, ou kill manual pelo operador) e registrar a camada provável.
 
+Matriz go/no-go para trabalho ininterrupto local:
+
+| Condição | Decisão | Observação |
+| --- | --- | --- |
+| ferramenta passiva/read-only com timeout curto e saída limitada | pode continuar localmente | não prova cancelamento de long-run |
+| subprocesso longo com `AbortSignal` propagado, timeout, checkpoint fresco e fallback documentado | candidato a rehearsal local bounded | ainda não autoriza loop/scheduler/remote |
+| slash command/interativo sem contrato explícito de cancelamento | no-go para unattended forte | usar apenas com operador presente |
+| `Esc` não chega ao TUI ou não aciona abort | no-go para long-run | registrar camada terminal/TUI e usar fallback humano |
+| ferramenta ignora abort ou deixa subprocesso órfão | no-go até correção/teste | criar task de hardening antes de promover |
+
+Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
+
 ## Settings canônico e overlays derivados
 
 `.pi/settings.json` é baseline canônico protegido do projeto. Ele pode ser lido para descobrir políticas, budgets, providers e gates, mas não deve ser reescrito por agentes comuns nem por fatias unattended locais. Mudanças nele exigem intenção explícita do operador, snapshot/rollback quando aplicável e evidência no board.
