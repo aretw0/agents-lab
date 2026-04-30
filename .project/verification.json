@@ -7278,6 +7278,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:58:09.543Z",
       "evidence": "Re-exported resolveHandoffBudgetCollectorResult through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying over-budget returns status=invalid and missing returns status=missing. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: focal re-export + surface tests passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 246/246 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] The first local collector is canonical while preserving non-operational fail-closed semantics."
+    },
+    {
+      "id": "VER-BUD-562",
+      "target": "TASK-BUD-288",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:05:36.604Z",
+      "evidence": "Compacted context-watch deterministic-stop/auto-compact visible warnings. Added formatContextWatchDeterministicStopSummary and changed deterministic-stop notify plus passive steering notify from repeated multi-line reason/action/hint/operator/handoff output to compact summaries. Auto-compact trigger notification is now compact key=value form. Policy/thresholds unchanged. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 246/246 across 32 files. [rationale:risk-control] Bloated compact warnings obscure checkpoint state and harm unattended operation trust."
     }
   ]
 }

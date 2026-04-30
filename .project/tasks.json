@@ -6811,6 +6811,59 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-285. [rationale:risk-control] O primeiro coletor local puro deve ficar disponível por import canônico sem virar superfície operacional.\n[2026-04-30T03:57:43Z] slice=1 focus=TASK-BUD-286 gate=test:monitor:smoke-246/246 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor handoff-budget re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-561"
+    },
+    {
+      "id": "TASK-BUD-287",
+      "description": "[P1] Criar e re-exportar coletor local puro checkpoint-fresh.",
+      "status": "blocked",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-286"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro resolveCheckpointFreshCollectorResult reutilizando resolveCheckpointFreshMeasuredSignal.",
+        "Helper deve derivar observed/missing/invalid a partir de leitura local, timestamp, nowMs e maxAgeMs, sem readiness manual.",
+        "Re-exportar helper via guardrails-core-exports/guardrails-core.",
+        "Testes cobrem fresh, stale, missing read, read-error, timestamp ausente/invalid/future.",
+        "Validar que runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado para continuar a lane essencial de coletores locais. [rationale:risk-control] Checkpoint freshness precisa ser fato observado localmente antes de qualquer audit surface futura.\n[2026-04-30T04:00:00Z] Pausado antes de mudança de código substancial: operador observou warning de auto-compact bloated/agressivo. Prioridade imediata vai para compactar o aviso determinístico antes de continuar coletores. [rationale:risk-control] Warning ruidoso prejudica operação ininterrupta e confiança em checkpoint/compact."
+    },
+    {
+      "id": "TASK-BUD-288",
+      "description": "[P1] Compactar warning de auto-compact deterministic-stop.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-270"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Reduzir warning visível de auto-compact/deterministic-stop para resumo compacto sem repetição de action/reason.",
+        "Manter detalhes estruturados disponíveis quando necessário, mas evitar múltiplas linhas redundantes no output principal.",
+        "Cobrir com teste focal de formatação compacta.",
+        "Não alterar threshold/política de auto-compact.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado por observação do operador após auto compact warning repetir deterministic-stop/action/handoff. [rationale:risk-control] Output bloated atrapalha operação ininterrupta e pode obscurecer se checkpoint já existe ou precisa ser persistido.\n[2026-04-30T04:05:23Z] slice=1 focus=TASK-BUD-288 gate=test:monitor:smoke-246/246 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Warning deterministic-stop compactado sem alterar política.",
+      "verification": "VER-BUD-562"
     }
   ]
 }

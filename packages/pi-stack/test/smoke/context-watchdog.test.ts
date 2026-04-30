@@ -17,6 +17,7 @@ import contextWatchdogExtension, {
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
 	formatContextWatchCommandStatusSummary,
+	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
@@ -1167,6 +1168,14 @@ describe("context-watchdog", () => {
 				handoffFreshness: "fresh",
 			}))
 				.toBe("context-watch: level=compact percent=91 action=compact-now autoCompact=checkpoint-evidence-missing trigger=no retry=yes calm=no checkpoint=missing operator=ask handoff=fresh");
+			expect(formatContextWatchDeterministicStopSummary({
+				required: true,
+				reason: "compact-checkpoint-required",
+				action: "persist-checkpoint-and-compact",
+				operatorActionKind: "checkpoint-compact",
+				handoffPath: ".project/handoff.json",
+			}))
+				.toBe("context-watch-stop: required=yes reason=compact-checkpoint-required action=persist-checkpoint-and-compact operator=checkpoint-compact handoff=.project/handoff.json");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

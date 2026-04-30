@@ -820,6 +820,23 @@ export function formatContextWatchCommandStatusSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function formatContextWatchDeterministicStopSummary(input: {
+	required: boolean;
+	reason: ContextWatchDeterministicStopReason;
+	action: string;
+	operatorActionKind?: string;
+	handoffPath?: string;
+}): string {
+	return [
+		"context-watch-stop:",
+		`required=${input.required ? "yes" : "no"}`,
+		input.required ? `reason=${input.reason}` : undefined,
+		input.required ? `action=${input.action}` : undefined,
+		input.operatorActionKind ? `operator=${input.operatorActionKind}` : undefined,
+		input.handoffPath ? `handoff=${input.handoffPath}` : undefined,
+	].filter(Boolean).join(" ");
+}
+
 export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
@@ -1158,7 +1175,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			);
 			if (config.notify) {
 				ctx.ui.notify(
-					`context-watch deterministic-stop: reason=${deterministicStop.reason} action=${deterministicStop.action}${operatorAction.commandHint ? ` cmd=${operatorAction.commandHint}` : ""}${deterministicStopHint ? ` · ${deterministicStopHint}` : ""}`,
+					formatContextWatchDeterministicStopSummary({
+						required: deterministicStop.required,
+						reason: deterministicStop.reason,
+						action: deterministicStop.action,
+						operatorActionKind: operatorAction.kind,
+					}),
 					"warning",
 				);
 			}
@@ -1239,7 +1261,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;
 			lastAutoCompactTriggerAt = now;
-			ctx.ui.notify("context-watch: auto compact triggered", "warning");
+			ctx.ui.notify("context-watch: autoCompact=triggered action=compact-now", "warning");
 			ctx.compact({
 				onComplete: () => {
 					autoCompactInFlight = false;
@@ -1363,21 +1385,27 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const persistedPath = steeringDispatch.shouldPersist
 			? (handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason))
 			: handoffPath;
-		const label = reason === "session_start" ? "context-watch start" : "context-watch";
+		const persistedRelPath = persistedPath ? path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/") : undefined;
 		const lines = [
-			`${label}: ${formatContextWatchStatus(assessment)}`,
-			`action: ${assessment.action}`,
-			assessment.recommendation,
-			deterministicStop.required
-				? `deterministic-stop: required=yes reason=${deterministicStop.reason} action=${deterministicStop.action}`
-				: "deterministic-stop: required=no",
-			deterministicStopHint ? `deterministic-stop hint: ${deterministicStopHint}` : "",
-			`operator-action: kind=${operatorAction.kind} blocking=${operatorAction.blocking ? "yes" : "no"}${operatorAction.commandHint ? ` cmd=${operatorAction.commandHint}` : ""} summary=${operatorAction.summary}`,
+			formatContextWatchCommandStatusSummary({
+				level: assessment.level,
+				percent: assessment.percent,
+				action: assessment.action,
+				autoCompactDecision: autoCompactState.decision.reason,
+				autoCompactTrigger: autoCompactState.decision.trigger,
+				retryScheduled: autoCompactState.retryDelayMs !== undefined,
+				calmCloseReady: calmCloseSignal.readyForCompact,
+				checkpointEvidenceReady: calmCloseSignal.checkpointEvidenceReady,
+				operatorActionKind: operatorAction.kind,
+			}),
+			formatContextWatchDeterministicStopSummary({
+				required: deterministicStop.required,
+				reason: deterministicStop.reason,
+				action: deterministicStop.action,
+				operatorActionKind: operatorAction.kind,
+				handoffPath: persistedRelPath,
+			}),
 		];
-		if (persistedPath) {
-			const rel = path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/");
-			lines.push(`handoff: ${rel}`);
-		}
 		const signalAtIso = new Date(now).toISOString();
 		lastSteeringSignal = {
 			atIso: signalAtIso,
