@@ -1411,7 +1411,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							readHandoffJson(ctx.cwd),
 							config.handoffFreshMaxAgeMs,
 							Date.now(),
-							{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd) },
+							{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
 						);
 						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
@@ -1790,7 +1790,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				readHandoffJson(ctx.cwd),
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd) },
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
 			const focusTasks = extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");

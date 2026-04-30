@@ -1300,6 +1300,7 @@ describe("context-watchdog", () => {
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
 				{ id: "TASK-BUD-316", status: "completed" },
 				{ id: "TASK-BUD-317", status: "in-progress", files: ["packages/pi-stack/extensions/context-watchdog.ts"] },
+				{ id: "TASK-BUD-296", status: "planned", files: ["packages/pi-stack/extensions/context-watchdog-handoff.ts"] },
 			] }));
 			const pi = makeMockPi();
 			contextWatchdogExtension(pi);
@@ -1312,6 +1313,7 @@ describe("context-watchdog", () => {
 			expect(result.details?.staleFocus).toBe("TASK-BUD-316=completed");
 			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-316");
+			expect(result.details?.prompt).not.toContain("TASK-BUD-296");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

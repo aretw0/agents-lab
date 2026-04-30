@@ -7657,6 +7657,34 @@
       ],
       "notes": "Criado após reload de TASK-BUD-317. [rationale:risk-control] A seleção concreta de foco precisa ser validada no runtime carregado para sustentar operação ininterrupta sem voltar a hints genéricos/falsos.\n[2026-04-30T05:48:26Z] slice=1 focus=TASK-BUD-318 gate=live-context_watch_auto_resume_preview+context-watchdog-smoke-46/46 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Foco concreto do auto-resume validado ao vivo após reload.",
       "verification": "VER-BUD-592"
+    },
+    {
+      "id": "TASK-BUD-319",
+      "description": "[P1] Limitar auto-resume runtime a um foco primário concreto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-318"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_auto_resume_preview/runtime auto-resume deve usar somente um preferredTaskId primário quando derivar foco concreto do board local.",
+        "Foco primário deve preferir task in-progress antes de planned e não incluir backlog planned antigo junto com foco ativo fresco.",
+        "Não alterar o comportamento de current_tasks explícitas nem task IDs não-stale derivados diretamente de next_actions/context.",
+        "Manter bloqueio de completed_tasks/staleIds e evitar TASK-SELECTION falso.",
+        "Manter fallback genérico apenas quando não houver foco concreto local-safe.",
+        "Não alterar política de compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Operação ininterrupta precisa de um foco primário claro; listar backlog antigo junto com a task ativa aumenta drift e ruído no resume.\n[2026-04-30T06:02:16Z] slice=1 focus=TASK-BUD-319 gate=test:monitor:smoke-261/261 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume runtime agora usa um preferredTaskId primário para reduzir drift de backlog.",
+      "verification": "VER-BUD-593"
     }
   ]
 }
