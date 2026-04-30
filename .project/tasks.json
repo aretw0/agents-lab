@@ -7194,6 +7194,29 @@
       ],
       "notes": "Criado após live validação TASK-BUD-299. [rationale:architecture] A superfície nova deve usar naming da primitiva local continuity audit, sem quebrar compatibilidade dos helpers nudge-free internos.\n[2026-04-30T04:54:37Z] slice=1 focus=TASK-BUD-300 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:architecture] Summary visível local_continuity_audit alinhado ao naming da primitiva; compat mantida.",
       "verification": "VER-BUD-574"
+    },
+    {
+      "id": "TASK-BUD-301",
+      "description": "[P1] Live-validar summary público local-continuity-audit após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-300"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar local_continuity_audit no runtime carregado após reload.",
+        "Confirmar que o content visível começa com local-continuity-audit, não nudge-free-local-audit-prep.",
+        "Confirmar authorization=none no summary live.",
+        "Confirmar que não inicia scheduler, loop, self-reload, remoto ou auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload feito pelo operador. [rationale:risk-control] Summary visível da nova superfície precisa ser validado no runtime carregado para confirmar naming da primitiva.\n[2026-04-30T04:56:58Z] slice=1 focus=TASK-BUD-301 gate=live-local_continuity_audit+surface-smoke-3/3 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Summary público local-continuity-audit validado ao vivo após reload.",
+      "verification": "VER-BUD-575"
     }
   ]
 }
