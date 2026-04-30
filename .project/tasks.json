@@ -5988,6 +5988,44 @@
       ],
       "notes": "Criado a partir da lei anti-spoof. [rationale:risk-control] signalSource=measured com qualquer string não vazia ainda é spoofável; readiness precisa de cobertura estruturada por gate.\n[2026-04-30T01:54:45Z] slice=1 focus=TASK-BUD-253 gate=test:monitor:smoke-225/225 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Evidência measured agora precisa cobrir todos os gates obrigatórios.",
       "verification": "VER-BUD-530"
+    },
+    {
+      "id": "TASK-BUD-254",
+      "description": "[P1] Validar ao vivo pós-reload que a tool nudge_free_loop_canary segue sem caminho measured.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-253"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Após reload, nudge_free_loop_canary com todos os booleans manuais true retorna defer/manual-signal-source.",
+        "Validação registra que a tool runtime segue sem caminho measuredEvidence/ready.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar runtime depois da mudança de evidência estruturada. [rationale:risk-control] A ferramenta manual precisa continuar sem caminho para readiness medida ou ready por parâmetro.\n[2026-04-30T01:58:00Z] slice=1 focus=TASK-BUD-254 gate=live-nudge_free_loop_canary-manual-signal-source-after-structured-evidence commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Runtime pós-reload validado; ESC/cancelamento registrado como backlog separado.",
+      "verification": "VER-BUD-531"
+    },
+    {
+      "id": "TASK-BUD-255",
+      "description": "[P2/backlog] Investigar confiabilidade de ESC/cancelamento durante comandos ou operações no pi.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke",
+        "packages/pi-stack/extensions"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir se ESC não cancela, se cancelamento chegou tarde, ou se o comando já estava concluído.",
+        "Verificar terminal/keybindings/sinal de abort sem modificar configuração protegida sem intenção explícita.",
+        "Documentar comportamento esperado e, se necessário, criar guard/teste para operações longas canceláveis."
+      ],
+      "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual."
     }
   ]
 }

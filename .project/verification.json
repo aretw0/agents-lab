@@ -6999,6 +6999,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:55:07.098Z",
       "evidence": "Changed nudge-free measured readiness to require structured per-gate evidence instead of any non-empty evidence string. Added NudgeFreeLoopMeasuredEvidenceEntry and required coverage for next-local-safe, checkpoint-fresh, handoff-budget-ok, git-state-expected, protected-scopes-clear, cooldown-ready, validation-known, and stop-conditions-clear. Details now include missingMeasuredEvidenceGates; measured source with partial evidence defers with measured-evidence-incomplete. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 12/12; cmd.exe /c npm run test:monitor:smoke --silent passed 225/225 across 32 files. [rationale:risk-control] Prevents measured readiness from being spoofed by arbitrary non-empty evidence strings."
+    },
+    {
+      "id": "VER-BUD-531",
+      "target": "TASK-BUD-254",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T01:57:34.857Z",
+      "evidence": "Live-validated nudge_free_loop_canary after reload following structured measured-evidence coverage. With opt_in=true and every exposed manual boolean true, the runtime tool returned compact advisory defer content: nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source. The current runtime tool still exposes no measuredEvidence path and cannot produce ready. Also created planned TASK-BUD-255 for later ESC/cancel reliability investigation. [rationale:risk-control] Confirms the manual runtime surface remains unable to spoof measured readiness after reload."
     }
   ]
 }
