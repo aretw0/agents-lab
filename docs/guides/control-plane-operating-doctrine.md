@@ -140,6 +140,14 @@ Os empurrões manuais do operador ainda substituem um idle continuation loop seg
 
 Stop conditions reais incluem risco de perda de dados, escopo protegido, ambiguidade de produto, falha sem correção local óbvia, compact sem progresso salvo, reload sem contrato aprovado ou handoff inválido. Até esse canário existir, a continuidade sem empurrões permanece backlog explícito, não automação implícita.
 
+### Prova verde de readiness local
+
+Um `ready=yes` em `context_watch_continuation_readiness` é evidência read-only, não permissão operacional. Ele não inicia scheduler, loop unattended, self-reload, remoto, offload, compact ou resume por conta própria; a saída deve continuar mostrando `authorization=none`.
+
+A primeira prova verde local só vale quando as condições observáveis estão limpas: baseline canônico de settings já decidido, escopos protegidos fora do foco default, foco `in-progress` pequeno/local-safe, checkpoint fresco sem blockers reais, git state esperado, validation conhecida e smoke/readiness focal passando. Se qualquer uma dessas condições cair, o gate deve voltar a falhar fechado.
+
+Use essa prova como critério de maturidade para desenhar o próximo canário, não como atalho para ativar automação. A promoção de `ready=yes` para execução unattended exige tarefa separada, autorização explícita, rollback e contrato de parada.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:

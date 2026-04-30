@@ -8100,6 +8100,31 @@
       ],
       "notes": "[rationale:risk-control] Depois de promover settings e retirar TASK-BUD-153 do foco default, precisamos provar que um foco fresco local-safe elimina blockers stale sem virar autorização operacional.\n[2026-04-30T10:24:36Z] slice=1 focus=TASK-BUD-335 gate=live-readiness-ready+focal-54/54 commit=pending readiness=ready authorization=none protected=none. [rationale:risk-control] Readiness verde validado como evidência read-only, não permissão operacional.",
       "verification": "VER-BUD-609"
+    },
+    {
+      "id": "TASK-BUD-336",
+      "description": "[P1] Documentar prova verde de local continuity readiness sem autorização operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-335"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar que o primeiro ready=yes local foi evidência read-only, não autorização para scheduler/loop/remote/self-reload.",
+        "Registrar precondições observadas: settings canonical promovido, protected CI stale removido do foco default, foco local-safe fresco, checkpoint sem blockers reais, validation conhecida.",
+        "Preservar a regra: ready não aciona nada sozinho; operação unattended ainda exige desenho/seleção separado.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Validar por safe_marker_check ou teste focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A primeira evidência verde de readiness precisa virar doutrina explícita para evitar spoof operacional ou interpretação de ready como autorização.\n[2026-04-30T10:26:05Z] slice=1 focus=TASK-BUD-336 gate=safe_marker_check-4/4+focal-54/54 commit=pending docs=ready-evidence-not-permission. [rationale:risk-control] Prova verde documentada sem autorizar automação.",
+      "verification": "VER-BUD-610"
     }
   ]
 }
