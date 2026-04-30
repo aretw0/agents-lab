@@ -5398,6 +5398,27 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] Um checkpoint bounded só é seguro se não puder substituir handoff útil por payload vazio ou sem contexto retomável.\n[2026-04-30T00:31:35Z] slice=1 focus=TASK-BUD-228 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-checkpoint-with-context_watch_checkpoint. [rationale:risk-control] Checkpoint bounded agora bloqueia contexto vazio antes de escrever.",
       "verification": "VER-BUD-507"
+    },
+    {
+      "id": "TASK-BUD-229",
+      "description": "[P1] Validar ao vivo bloqueio de checkpoint vazio após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-228"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_checkpoint com contexto whitespace retorna ok=no reason=missing-context ao vivo.",
+        "Falha não sobrescreve handoff útil atual.",
+        "Task é fechada e handoff final é salvo com context_watch_checkpoint válido."
+      ],
+      "notes": "Criado após reload para validar o guard missing-context em runtime. [rationale:risk-control] Guard só desbloqueia operação unattended segura depois de provado no caminho live.\n[2026-04-30T00:36:00Z] slice=1 focus=TASK-BUD-229 gate=live-context_watch_checkpoint-missing-context commit=pending drift=no next=valid-checkpoint-and-commit. [rationale:risk-control] Guard missing-context confirmado ao vivo sem sobrescrever handoff útil.",
+      "verification": "VER-BUD-508"
     }
   ]
 }

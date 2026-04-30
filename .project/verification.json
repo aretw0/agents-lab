@@ -6792,6 +6792,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:31:52.702Z",
       "evidence": "Hardened writeLocalSliceHandoffCheckpoint to reject empty/whitespace context before writing .project/handoff.json and return compact failure summary context-watch-checkpoint ok=no reason=missing-context. context_watch_checkpoint now passes raw/missing context through instead of replacing it with a default, so invalid input is blocked rather than producing an unresumeable checkpoint. Tests verify no handoff file is created for whitespace context. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 35/35; cmd.exe /c npm run test:monitor:smoke --silent passed 211/211 across 32 files. [rationale:risk-control] Prevents corrupting useful handoff state with empty checkpoints during unattended operation."
+    },
+    {
+      "id": "VER-BUD-508",
+      "target": "TASK-BUD-229",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T00:38:45.585Z",
+      "evidence": "Live-validated context_watch_checkpoint missing-context guard after reload. Calling context_watch_checkpoint with whitespace context returned compact failure summary: context-watch-checkpoint: ok=no task=TASK-BUD-229 reason=missing-context. Re-reading .project/handoff.json showed the previous useful TASK-BUD-228 checkpoint timestamp remained 2026-04-30T00:32:12.530Z, so the invalid checkpoint did not overwrite handoff state. [rationale:risk-control] Confirms the checkpoint primitive blocks unresumeable/empty handoff writes in the live hot path."
     }
   ]
 }
