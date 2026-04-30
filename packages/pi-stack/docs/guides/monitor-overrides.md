@@ -235,6 +235,8 @@ A direção de pesquisa é reduzir dependência de LLM para steering: preferir c
 
 Superfície de apoio: `monitor_classify_failure_readiness` resume impacto sem mutação, sem dispatch e sem autorizar operação.
 
+O instalador `@aretw0/pi-stack` também consegue sugerir um patch idempotente nos agents/templates de monitores existentes para alinhar o contrato: se o template fala em JSON, esse JSON deve ser tratado como argumentos de `classify_verdict`; não deve haver resposta em plain text/raw JSON fora da tool call. Por leniência com o usuário, isso não é aplicado automaticamente: o instalador apenas avisa quando há novo estilo disponível, e a aplicação exige opt-in explícito com `--monitor-prompt-patch`. Assim a correção é distribuível para usuários, mas mudanças em monitores locais permanecem autorizadas pelo operador.
+
 ## Gate operacional de release (monitors)
 
 Antes de qualquer publish RC/final:

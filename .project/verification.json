@@ -8421,6 +8421,33 @@
       "method": "test+docs+readiness-signal",
       "timestamp": "2026-04-30T20:26:43.185Z",
       "evidence": "Implemented first deterministic readiness signal for monitor classify failures. Added resolveMonitorClassifyFailureReadiness and runtime tool monitor_classify_failure_readiness via monitor-summary. It classifies no failures as ok, one classifier-format failure as warn/advisory, repeated failures as degrade-unattended, and threshold volume as block-unattended, always with activation=none authorization=none dispatchAllowed=false. Tests passed: monitor-classify-failure-readiness.test.ts + monitor-summary.test.ts => 10 passed. Docs updated in monitor-overrides to record research direction: minimize LLM use for steering via sovereign/deterministic classifiers, local heuristics, and structured evidence; classifier LLM should be calibrated fallback. docs:package:sync/check passed. Runtime live validation requires reload."
+    },
+    {
+      "id": "VER-BUD-689",
+      "target": "TASK-BUD-384",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+prompt-alignment+test",
+      "timestamp": "2026-04-30T20:33:46.439Z",
+      "evidence": "After reload, monitor_classify_failure_readiness live validation worked and surfaced the current monitor state as decision=degrade total=2 last=commit-hygiene readinessImpact=degrade-unattended lastErrorClass=classifier-format, with authorization=none dispatchAllowed=false. Follow-up inspection found monitor agents instruct classify_verdict tool calls, while all project classify.md templates still said 'Respond with a JSON object', which can encourage plain text/raw JSON and match the observed 'No tool call in response'. Updated all five project monitor templates to say 'Call classify_verdict exactly once' and forbid plain text/raw JSON outside the tool call. safe_marker_check matched 2/2 for each template; grep found no remaining 'Respond with a JSON object' in .pi/monitors; monitor readiness tests still passed 10/10. Monitor-template live behavior needs reload/next monitor cycle."
+    },
+    {
+      "id": "VER-BUD-690",
+      "target": "TASK-BUD-384",
+      "target_type": "task",
+      "status": "passed",
+      "method": "agent-prompt-hardening+marker-check",
+      "timestamp": "2026-04-30T20:38:42.768Z",
+      "evidence": "Added a tracked classifier-agent hardening line to all five .pi/agents/*-classifier.agent.yaml files: if a task template says to respond with JSON, interpret that shape as classify_verdict arguments and do not answer with plain text/raw JSON outside the tool call. This complements the local ignored .pi/monitors classify.md template alignment and makes the rule versioned. safe_marker_check matched 2/2 markers in each agent file. Monitor readiness tests still passed 10/10. Reload/new monitor cycle required to verify the repeated commit-hygiene classify failure stops increasing."
+    },
+    {
+      "id": "VER-BUD-691",
+      "target": "TASK-BUD-384",
+      "target_type": "task",
+      "status": "passed",
+      "method": "installer-opt-in+tests+docs",
+      "timestamp": "2026-04-30T20:43:59.722Z",
+      "evidence": "Corrected canonical monitor prompt patch strategy per operator guidance. The backend installer now only suggests monitor prompt updates by default and requires explicit --monitor-prompt-patch opt-in before mutating local agents/templates. Added planMonitorClassifierPromptPatches for non-mutating detection and kept applyMonitorClassifierPromptPatches as explicit operator-consent path. Tests passed: installer-monitor-prompts.test.ts + installer-filters.test.ts + monitor-classify-failure-readiness.test.ts => 11 passed. Docs updated to state user leniency/opt-in; safe_marker_check matched 3/3; docs package sync/check passed."
     }
   ]
 }

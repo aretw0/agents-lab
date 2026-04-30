@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T20:27:01.387Z",
-  "context": "Implemented bounded monitor classify-failure readiness signal. Added resolveMonitorClassifyFailureReadiness and monitor_classify_failure_read [snip] o reload needed before live validation. [truncated:+466 chars]",
+  "timestamp": "2026-04-30T20:44:31.713Z",
+  "context": "Adjusted monitor prompt patch strategy based on operator guidance. Canonical backend now lives in packages/pi-stack/install.mjs but is opt-in [snip] ss and possibly after opt-in patch use. [truncated:+429 chars]",
   "current_tasks": [
     "TASK-BUD-384"
   ],
   "next_actions": [
-    "Commit TASK-BUD-384 readiness signal slice.",
-    "Reload before live validation of monitor_classify_failure_readiness.",
-    "After reload, live validate current isolated failure returns warn/advisory rather than broad monitor failure."
+    "Commit TASK-BUD-384 opt-in installer patch strategy and local classifier agent hardening.",
+    "After reload/new monitor cycle, validate classify failure counter stops increasing.",
+    "Do not auto-apply monitor prompt patch for users; only suggest unless --monitor-prompt-patch is explicit."
   ],
   "blockers": [
-    "Reload required before monitor_classify_failure_readiness live validation.",
+    "Reload/new monitor cycle needed to validate monitor-template prompt fix.",
     "TASK-BUD-383 confirmation propagation bug remains planned.",
-    "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]"
+    "Strong unattended remains blocked/degraded while monitor classify failures are repeated."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test [snip] > 2 files, 10 tests passed [truncated:+58 chars]",
-    "safe_marker_check docs/guides/monitor-overrides.md matched=6/6",
+    "cmd.exe /c npx vitest run installer-monitor-prompts.test.ts installer-filters.test.ts monitor- [snip] > 3 files, 11 tests passed [truncated:+36 chars]",
+    "safe_marker_check docs/guides/monitor-overrides.md matched=3/3",
     "cmd.exe /c npm run docs:package:sync => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T20:27:01.387Z",
+    "generatedAtIso": "2026-04-30T20:44:31.713Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation"
+    "recommendation": "commit-then-reload-or-monitor-cycle"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T20:27:01.387Z",
+      "atIso": "2026-04-30T20:44:31.713Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "commit-then-reload-or-monitor-cycle"
     }
   ]
 }

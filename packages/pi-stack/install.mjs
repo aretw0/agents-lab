@@ -18,7 +18,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -223,6 +223,7 @@ function parseArgs(argv) {
 	let remove = false;
 	let help = false;
 	let baseline = false;
+	let monitorPromptPatch = false;
 	let profile = DEFAULT_INSTALL_PROFILE;
 
 	for (let i = 0; i < args.length; i++) {
@@ -251,6 +252,8 @@ function parseArgs(argv) {
 			remove = true;
 		} else if (arg === "--baseline" || arg === "-b") {
 			baseline = true;
+		} else if (arg === "--monitor-prompt-patch") {
+			monitorPromptPatch = true;
 		} else if (arg === "--help" || arg === "-h") {
 			help = true;
 		} else {
@@ -264,7 +267,7 @@ function parseArgs(argv) {
 		process.exit(1);
 	}
 
-	return { version, local, remove, help, baseline, profile };
+	return { version, local, remove, help, baseline, monitorPromptPatch, profile };
 }
 
 function printHelp() {
@@ -289,6 +292,8 @@ Options:
   --stack-full          Alias for --profile stack-full
   -l, --local           Install project-locally instead of globally
   -b, --baseline        Merge default baseline settings (theme, colony-pilot, claude-code)
+  --monitor-prompt-patch
+                         Opt-in patch for existing local monitor prompts to the classify_verdict tool-call style
   -r, --remove          Remove all managed packages from pi
   -h, --help            Show this help
 
@@ -357,6 +362,96 @@ function arraysEqual(a = [], b = []) {
 		if (a[i] !== b[i]) return false;
 	}
 	return true;
+}
+
+export const MONITOR_CLASSIFIER_TOOLCALL_BRIDGE =
+	"    If the task template says to respond with JSON, interpret that JSON shape as the classify_verdict arguments; do not answer with plain text or raw JSON outside the tool call.";
+
+export const MONITOR_TEMPLATE_TOOLCALL_FOOTER =
+	"Do not answer with plain text or raw JSON outside the tool call.";
+
+export function patchMonitorAgentPromptText(text) {
+	if (typeof text !== "string" || !text.includes("Return your decision by calling classify_verdict exactly once.")) {
+		return { text, changed: false };
+	}
+	if (text.includes(MONITOR_CLASSIFIER_TOOLCALL_BRIDGE.trim())) {
+		return { text, changed: false };
+	}
+	return {
+		text: text.replace(
+			"    Return your decision by calling classify_verdict exactly once.\n",
+			`    Return your decision by calling classify_verdict exactly once.\n${MONITOR_CLASSIFIER_TOOLCALL_BRIDGE}\n`,
+		),
+		changed: true,
+	};
+}
+
+export function patchMonitorClassifyTemplateText(text) {
+	if (typeof text !== "string" || !text.includes("Respond with a JSON object:")) {
+		return { text, changed: false };
+	}
+	const next = text
+		.replace("Respond with a JSON object:", "Call classify_verdict exactly once with:")
+		.replace(/\n?$/, `\n${MONITOR_TEMPLATE_TOOLCALL_FOOTER}\n`);
+	return { text: next, changed: next !== text };
+}
+
+function walkFiles(root, predicate) {
+	if (!existsSync(root)) return [];
+	const out = [];
+	for (const entry of readdirSync(root)) {
+		const full = join(root, entry);
+		const st = statSync(full);
+		if (st.isDirectory()) out.push(...walkFiles(full, predicate));
+		else if (st.isFile() && predicate(full)) out.push(full);
+	}
+	return out;
+}
+
+function collectMonitorClassifierPromptPatchCandidates(configRoot) {
+	const candidates = [];
+	const agentsDir = join(configRoot, "agents");
+	for (const file of walkFiles(agentsDir, (full) => full.endsWith("-classifier.agent.yaml"))) {
+		const current = readFileSync(file, "utf8");
+		if (patchMonitorAgentPromptText(current).changed) candidates.push(file);
+	}
+
+	const monitorsDir = join(configRoot, "monitors");
+	for (const file of walkFiles(monitorsDir, (full) => full.replace(/\\/g, "/").endsWith("/classify.md"))) {
+		const current = readFileSync(file, "utf8");
+		if (patchMonitorClassifyTemplateText(current).changed) candidates.push(file);
+	}
+	return candidates;
+}
+
+export function planMonitorClassifierPromptPatches(configRoot) {
+	const candidateFiles = collectMonitorClassifierPromptPatchCandidates(configRoot);
+	return { needed: candidateFiles.length > 0, candidateFiles };
+}
+
+export function applyMonitorClassifierPromptPatches(configRoot) {
+	const changedFiles = [];
+	const agentsDir = join(configRoot, "agents");
+	for (const file of walkFiles(agentsDir, (full) => full.endsWith("-classifier.agent.yaml"))) {
+		const current = readFileSync(file, "utf8");
+		const patched = patchMonitorAgentPromptText(current);
+		if (patched.changed) {
+			writeFileSync(file, patched.text, "utf8");
+			changedFiles.push(file);
+		}
+	}
+
+	const monitorsDir = join(configRoot, "monitors");
+	for (const file of walkFiles(monitorsDir, (full) => full.replace(/\\/g, "/").endsWith("/classify.md"))) {
+		const current = readFileSync(file, "utf8");
+		const patched = patchMonitorClassifyTemplateText(current);
+		if (patched.changed) {
+			writeFileSync(file, patched.text, "utf8");
+			changedFiles.push(file);
+		}
+	}
+
+	return { changed: changedFiles.length > 0, changedFiles };
 }
 
 /**
@@ -497,6 +592,20 @@ if (IS_MAIN) {
   const patched = applyFilterPatches(settingsPath);
   if (patched) {
     console.log("\n🔧 Applied conflict filters (mitsupi/uv.ts excluded — conflicts with bg-process).");
+  }
+
+  // Align behavior monitor classifier prompts only with explicit operator consent.
+  const monitorPromptPlan = planMonitorClassifierPromptPatches(dirname(settingsPath));
+  if (opts.monitorPromptPatch) {
+    const monitorPromptPatched = applyMonitorClassifierPromptPatches(dirname(settingsPath));
+    if (monitorPromptPatched.changed) {
+      console.log(`\n🛡️  Patched monitor classifier prompts (${monitorPromptPatched.changedFiles.length} file(s)).`);
+    } else {
+      console.log("\n🛡️  Monitor classifier prompts already use the classify_verdict tool-call style.");
+    }
+  } else if (monitorPromptPlan.needed) {
+    console.log(`\nℹ️  Monitor classifier prompt update available (${monitorPromptPlan.candidateFiles.length} file(s)).`);
+    console.log("   To apply with explicit consent, re-run with --monitor-prompt-patch.");
   }
 
   // Apply baseline settings (theme, colony-pilot, claude-code defaults)
