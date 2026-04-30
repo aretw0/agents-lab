@@ -7899,6 +7899,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:48:55.849Z",
       "evidence": "Implemented pure/read-only helper reviewOneSliceLocalHumanConfirmedContract(...) in guardrails-core-unattended-continuation and re-exported it through guardrails-core. The helper reviews a proposed human-confirmed one-slice local contract but always returns effect=none, mode=contract-review, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, oneSliceOnly=true. A valid proposal returns decision=contract-ready-no-executor with reasons contract-valid,human-confirmation-explicit,executor-not-approved; generic/missing confirmation, non-ready packets, missing rollback/validation/staging/commit/checkpoint/stop contracts, protected scope, repeat, scheduler, self-reload, remote/offload, and GitHub Actions requests all block. No runtime executor/tool/dispatcher was added. Validation: focal guardrails-unattended-continuation + re-export smoke passed 43/43; full monitor smoke passed 268/268. [rationale:risk-control] The human-confirmed execution boundary is now testable while preserving no-dispatch until a separate executor is explicitly authorized."
+    },
+    {
+      "id": "VER-BUD-631",
+      "target": "TASK-BUD-357",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:51:41.770Z",
+      "evidence": "Exposed reviewOneSliceLocalHumanConfirmedContract(...) as read-only runtime tool `one_slice_human_contract_review` in guardrails-core-unattended-continuation-surface. The tool accepts explicit packet/contract fields and returns the helper summary/details only; it never dispatches execution and always preserves dispatchAllowed=false and executorApproved=false. Green contract-review summary is `one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none`. Blocked smoke covers packet_dispatch_allowed=true, generic confirmation, protected scope, scheduler, remote/offload, and GitHub Actions requests. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, loop, executor, or dispatcher was added. Validation: focal surface smoke passed 8/8; full monitor smoke passed 269/269. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] Operators can now review proposed one-slice contracts in transcript while dispatch remains impossible."
     }
   ]
 }

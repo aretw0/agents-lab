@@ -286,6 +286,78 @@ describe("guardrails unattended continuation surface", () => {
     expect(result?.details.summary).toBe("unattended-continuation: decision=continue-local continue=yes reasons=local-safe-next-step,checkpoint-progress-saved");
   });
 
+  it("registers read-only human-confirmed one-slice contract review tool", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsUnattendedContinuationSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const reviewTool = tools.find((tool) => tool.name === "one_slice_human_contract_review");
+    const ready = reviewTool?.execute("call-ready", {
+      packet_decision: "ready-for-human-decision",
+      packet_dispatch_allowed: false,
+      packet_requires_human_decision: true,
+      packet_one_slice_only: true,
+      packet_activation: "none",
+      packet_authorization: "none",
+      human_confirmation: "explicit-task-action",
+      single_focus: true,
+      local_safe_scope: true,
+      declared_files_known: true,
+      protected_scopes_clear: true,
+      rollback_plan_known: true,
+      validation_gate_known: true,
+      staging_scope_known: true,
+      commit_scope_known: true,
+      checkpoint_planned: true,
+      stop_contract_known: true,
+    });
+    const blocked = reviewTool?.execute("call-blocked", {
+      packet_decision: "ready-for-human-decision",
+      packet_dispatch_allowed: true,
+      packet_requires_human_decision: true,
+      packet_one_slice_only: true,
+      packet_activation: "none",
+      packet_authorization: "none",
+      human_confirmation: "generic",
+      single_focus: true,
+      local_safe_scope: true,
+      declared_files_known: true,
+      protected_scopes_clear: false,
+      rollback_plan_known: true,
+      validation_gate_known: true,
+      staging_scope_known: true,
+      commit_scope_known: true,
+      checkpoint_planned: true,
+      stop_contract_known: true,
+      scheduler_requested: true,
+      remote_or_offload_requested: true,
+      github_actions_requested: true,
+    });
+
+    expect(ready?.content?.[0]?.text).toBe("one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none");
+    expect(ready?.details).toMatchObject({
+      effect: "none",
+      mode: "contract-review",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      decision: "contract-ready-no-executor",
+    });
+    expect(blocked?.content?.[0]?.text).toContain("one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no");
+    expect(blocked?.details.dispatchAllowed).toBe(false);
+    expect(blocked?.details.executorApproved).toBe(false);
+    expect(blocked?.details.reasons).toEqual(expect.arrayContaining([
+      "packet-dispatch-not-false",
+      "human-confirmation-generic",
+      "protected-scope",
+      "scheduler-requested",
+      "remote-or-offload-requested",
+      "github-actions-requested",
+    ]));
+  });
+
   it("registers compact read-only nudge-free loop canary tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

@@ -8639,6 +8639,33 @@
       ],
       "notes": "[rationale:risk-control] Transformar a doutrina do contrato humano-confirmado em gate testável sem criar executor nem autorização operacional.\n[2026-04-30T11:48:28Z] slice=1 focus=TASK-BUD-356 gate=focal-43/43+test:monitor:smoke-268/268 commit=pending helper=reviewOneSliceLocalHumanConfirmedContract dispatchAllowed=false executorApproved=false. [rationale:risk-control] Contrato humano-confirmado virou gate puro sem executor.",
       "verification": "VER-BUD-630"
+    },
+    {
+      "id": "TASK-BUD-357",
+      "description": "[P1] Expor review de contrato humano-confirmado como tool read-only.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-356"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar runtime tool read-only para revisar contrato humano-confirmado de uma fatia local.",
+        "A tool deve retornar summary do helper com mode=contract-review, dispatch=no, executor=no, authorization=none.",
+        "Validar caminho pronto sem executor e caminho bloqueado por confirmação genérica/protected/scheduler/remote.",
+        "Não executar staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload ou loop.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Expor o gate como tool read-only permite revisão auditável no transcript sem criar executor nem autorização operacional.\n[2026-04-30T11:51:14Z] slice=1 focus=TASK-BUD-357 gate=surface-8/8+test:monitor:smoke-269/269 commit=pending tool=one_slice_human_contract_review dispatchAllowed=false executorApproved=false reload-needed=yes. [rationale:risk-control] Review runtime read-only exposto sem executor.",
+      "verification": "VER-BUD-631"
     }
   ]
 }

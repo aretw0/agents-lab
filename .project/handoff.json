@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-04-30T11:49:13.618Z",
-  "context": "TASK-BUD-356 completed. Added pure/read-only reviewOneSliceLocalHumanConfirmedContract([ellipsis]) helper and canonical re-export. It turns t [snip] runtime executor/tool/dispatcher added. [truncated:+442 chars]",
+  "timestamp": "2026-04-30T11:51:50.271Z",
+  "context": "TASK-BUD-357 completed. Added read-only runtime tool one_slice_human_contract_review that exposes reviewOneSliceLocalHumanConfirmedContract([ [snip] oad is required before live validation. [truncated:+393 chars]",
   "next_actions": [
     "commit code/tests/board/handoff evidence",
-    "next essential candidate: expose this helper as a read-only runtime review tool, still zero ex [snip] and dispatchAllowed=false [truncated:+7 chars]",
-    "reload needed only if runtime tool is added later, not for current pure helper"
+    "reload before live-validating one_slice_human_contract_review",
+    "after reload, run green and blocked contract review; confirm dispatch=no executor=no authorization=none"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before the new one_slice_human_contract_review tool is available live."
+  ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run guardrails-unattended-continuation + guardrails-core-hardening-reexport passed 43/43",
-    "cmd.exe /c npm run test:monitor:smoke --silent passed 268/268 across 32 files",
-    "green helper smoke: decision=contract-ready-no-executor dispatchAllowed=false executorApproved=false"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surf [snip] est.ts --silent passed 8/8 [truncated:+5 chars]",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 269/269 across 32 files",
+    "green surface smoke: decision=contract-ready-no-executor dispatch=no executor=no authorization=none"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:49:13.618Z",
+    "generatedAtIso": "2026-04-30T11:51:50.271Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; pure contract-review gate is ready.",
+    "recommendation": "Commit evidence; request reload before live validation of the new read-only tool.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:49:13.618Z",
+      "atIso": "2026-04-30T11:51:50.271Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; pure contract-review gate is ready."
+      "recommendation": "Commit evidence; request reload before live validation of the new read-only tool."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-356"
+    "TASK-BUD-357"
   ]
 }

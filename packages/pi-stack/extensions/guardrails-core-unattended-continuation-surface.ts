@@ -7,9 +7,12 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   resolveNudgeFreeLoopCanaryGate,
   resolveUnattendedContinuationPlan,
+  reviewOneSliceLocalHumanConfirmedContract,
   type NudgeFreeLoopLocalCandidate,
   type NudgeFreeLoopLocalReadStatus,
   type NudgeFreeLoopValidationKind,
+  type OneSliceLocalCanaryDispatchPacketDecision,
+  type OneSliceLocalHumanConfirmationKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
 
@@ -19,6 +22,14 @@ function asBool(value: unknown, fallback: boolean): boolean {
 
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
+}
+
+function normalizePacketDecision(value: unknown): OneSliceLocalCanaryDispatchPacketDecision {
+  return value === "ready-for-human-decision" ? "ready-for-human-decision" : "blocked";
+}
+
+function normalizeHumanConfirmation(value: unknown): OneSliceLocalHumanConfirmationKind {
+  return value === "explicit-task-action" || value === "generic" || value === "missing" ? value : "missing";
 }
 
 function readJsonFile(path: string): { status: NudgeFreeLoopLocalReadStatus; json?: any; text?: string } {
@@ -261,6 +272,71 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
         ambiguous: asBool(p.ambiguous, false),
         progressSaved: asBool(p.progress_saved, false),
         contextLevel: normalizeContextLevel(p.context_level),
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "one_slice_human_contract_review",
+    label: "One-Slice Human Contract Review",
+    description: "Read-only review for a proposed human-confirmed one-slice local execution contract. Never dispatches execution; always keeps dispatchAllowed=false and executorApproved=false.",
+    parameters: Type.Object({
+      packet_decision: Type.String({ description: "Decision from one-slice decision packet: ready-for-human-decision | blocked." }),
+      packet_dispatch_allowed: Type.Boolean({ description: "Must be false; packet evidence never authorizes dispatch." }),
+      packet_requires_human_decision: Type.Boolean({ description: "Must be true." }),
+      packet_one_slice_only: Type.Boolean({ description: "Must be true." }),
+      packet_activation: Type.Optional(Type.String({ description: "Expected none." })),
+      packet_authorization: Type.Optional(Type.String({ description: "Expected none." })),
+      human_confirmation: Type.String({ description: "missing | generic | explicit-task-action." }),
+      single_focus: Type.Boolean({ description: "Whether exactly one focus task is named." }),
+      local_safe_scope: Type.Boolean({ description: "Whether scope is local-safe." }),
+      declared_files_known: Type.Boolean({ description: "Whether all touched files are declared." }),
+      protected_scopes_clear: Type.Boolean({ description: "Whether protected scopes are absent." }),
+      rollback_plan_known: Type.Boolean({ description: "Whether rollback is explicit and non-destructive." }),
+      validation_gate_known: Type.Boolean({ description: "Whether bounded validation is known before editing." }),
+      staging_scope_known: Type.Boolean({ description: "Whether staging scope is intentional and bounded." }),
+      commit_scope_known: Type.Boolean({ description: "Whether commit scope is intentional and bounded." }),
+      checkpoint_planned: Type.Boolean({ description: "Whether a post-slice checkpoint is planned." }),
+      stop_contract_known: Type.Boolean({ description: "Whether stop after one slice is explicit." }),
+      repeat_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      scheduler_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      self_reload_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      remote_or_offload_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      github_actions_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Blocks when true." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = reviewOneSliceLocalHumanConfirmedContract({
+        decisionPacket: {
+          decision: normalizePacketDecision(p.packet_decision),
+          dispatchAllowed: asBool(p.packet_dispatch_allowed, false) as false,
+          requiresHumanDecision: asBool(p.packet_requires_human_decision, false),
+          oneSliceOnly: asBool(p.packet_one_slice_only, false),
+          activation: (p.packet_activation === "none" ? "none" : String(p.packet_activation ?? "unknown")) as "none",
+          authorization: (p.packet_authorization === "none" ? "none" : String(p.packet_authorization ?? "unknown")) as "none",
+        },
+        humanConfirmation: normalizeHumanConfirmation(p.human_confirmation),
+        singleFocus: asBool(p.single_focus, false),
+        localSafeScope: asBool(p.local_safe_scope, false),
+        declaredFilesKnown: asBool(p.declared_files_known, false),
+        protectedScopesClear: asBool(p.protected_scopes_clear, false),
+        rollbackPlanKnown: asBool(p.rollback_plan_known, false),
+        validationGateKnown: asBool(p.validation_gate_known, false),
+        stagingScopeKnown: asBool(p.staging_scope_known, false),
+        commitScopeKnown: asBool(p.commit_scope_known, false),
+        checkpointPlanned: asBool(p.checkpoint_planned, false),
+        stopContractKnown: asBool(p.stop_contract_known, false),
+        repeatRequested: asBool(p.repeat_requested, false),
+        schedulerRequested: asBool(p.scheduler_requested, false),
+        selfReloadRequested: asBool(p.self_reload_requested, false),
+        remoteOrOffloadRequested: asBool(p.remote_or_offload_requested, false),
+        githubActionsRequested: asBool(p.github_actions_requested, false),
+        protectedScopeRequested: asBool(p.protected_scope_requested, false),
       });
       return {
         content: [{ type: "text", text: result.summary }],
