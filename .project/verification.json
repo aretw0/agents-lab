@@ -8367,6 +8367,24 @@
       "method": "test+docs+package-doc-check",
       "timestamp": "2026-04-30T19:52:19.230Z",
       "evidence": "Implemented first read-only background process control planning primitive. Added resolveBackgroundProcessControlPlan core and background_process_plan runtime surface. It never launches/stops/restarts/reserves ports and always returns activation=none authorization=none dispatchAllowed=false processStartAllowed=false processStopAllowed=false mutationAllowed=false. It plans shared-service vs isolated-worker, requires port lease for servers, fail-closes port collisions, blocks destructive restarts, and defines bounded log/stacktrace policy plus required metadata/capabilities. Tests passed: npx vitest run guardrails-background-process.test.ts => 4 passed. Docs added in docs/primitives/background-process-control.md and doctrine updated; docs package sync/check passed. Runtime live validation requires reload."
+    },
+    {
+      "id": "VER-BUD-683",
+      "target": "TASK-BUD-381",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload",
+      "timestamp": "2026-04-30T20:01:40.983Z",
+      "evidence": "After reload, background_process_plan live validation passed for four paths. Missing server port returned needs-port-lease with port-lease-required; shared backend with requested port/healthcheck returned ready-for-design; parallel test-server with two agents returned needs-human-decision/manual-decision; destructive restart returned blocked with destructive-restart-requires-human-approval. All outputs preserved activation=none authorization=none dispatchAllowed=false processStartAllowed=false processStopAllowed=false mutationAllowed=false."
+    },
+    {
+      "id": "VER-BUD-684",
+      "target": "TASK-BUD-381",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-tool+docs",
+      "timestamp": "2026-04-30T20:01:52.512Z",
+      "evidence": "Completed first background process control primitive as a read-only planning contract. Implementation added resolveBackgroundProcessControlPlan and runtime tool background_process_plan. Tests passed: guardrails-background-process.test.ts => 4 passed. Docs added in docs/primitives/background-process-control.md and operating doctrine with package-doc sync/check. Live after reload passed port-lease, ready-for-design, human-decision, and blocked paths. All outputs keep activation=none authorization=none dispatchAllowed=false processStartAllowed=false processStopAllowed=false mutationAllowed=false. [rationale:risk-control] This closes the planning/safety contract needed before any future operational launch/stop/restart primitive, without starting processes or reserving ports."
     }
   ]
 }
