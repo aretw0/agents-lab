@@ -8356,6 +8356,31 @@
       ],
       "notes": "[rationale:risk-control] Mostrar o decision packet na preview ajuda o operador a ver o que faltaria para uma decisão futura sem transformar prepare=yes em dispatch.\n[2026-04-30T11:14:51Z] slice=1 focus=TASK-BUD-345 gate=context-watchdog-48/48+test:monitor:smoke-267/267 commit=pending preview.details.decisionPacket=yes dispatchAllowed=false reload-needed=yes. [rationale:risk-control] Decision packet entrou na preview sem execução/autorização.",
       "verification": "VER-BUD-619"
+    },
+    {
+      "id": "TASK-BUD-346",
+      "description": "[P1] Live-validar preview one-slice com decision packet após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-345"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar foco local-safe fresco para validação live pós-reload.",
+        "Escrever checkpoint fresco sem blockers reais.",
+        "Executar context_watch_one_slice_canary_preview e confirmar summary verde prepare-one-slice com authorization=none.",
+        "Executar context_watch_continuation_readiness e confirmar ready=yes/authorization=none para o mesmo foco.",
+        "Registrar que a versão carregada é a nova preview com decisionPacket nos details; dispatchAllowed=false foi coberto por smoke e nenhum dispatch ocorreu ao vivo.",
+        "Não disparar staging/commit/board close/checkpoint/scheduler/remote/self-reload/loop pela preview; ações de board/commit/checkpoint devem ser explícitas.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Depois do reload, precisamos provar que a preview com decisionPacket continua read-only em runtime e que o caminho verde não aciona dispatch.\n[2026-04-30T11:20:00Z] slice=1 focus=TASK-BUD-346 gate=live-preview-prepare-one-slice+readiness-ready+git-status-expected commit=pending authorization=none dispatch=none. [rationale:risk-control] Preview com decisionPacket validada após reload sem automação.",
+      "verification": "VER-BUD-620"
     }
   ]
 }

@@ -7800,6 +7800,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:15:07.503Z",
       "evidence": "Composed the no-execution dispatch decision packet into context_watch_one_slice_canary_preview details. The preview now includes decisionPacket built from local readiness/audit evidence and conservative derived contracts: rollback from expected git state, validation gate from observed validation, staging scope from single local focus + protected clear, commit scope from single focus + git expected, checkpoint plan from fresh checkpoint + handoff budget, and stop contract from oneSliceOnly/stop. The packet remains read-only with mode=decision-packet, activation=none, authorization=none, dispatchAllowed=false, requiresHumanDecision=true. Schema remains zero-param with no execute/dispatch knobs; preview still does not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. Smoke validates green fixture has decisionPacket ready-for-human-decision and dispatchAllowed=false. Focal context-watchdog passed 48/48; full monitor smoke passed 267/267. Runtime behavior changed, so live validation requires reload. [rationale:risk-control] Operators can now see dispatch decision readiness without granting dispatch permission."
+    },
+    {
+      "id": "VER-BUD-620",
+      "target": "TASK-BUD-346",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T11:18:22.457Z",
+      "evidence": "After reload, live runtime validated context_watch_one_slice_canary_preview with decisionPacket-enabled implementation on a fresh local-safe focus. Preflight checkpoint was written explicitly, then context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-346 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only expected explicit board/handoff changes (`.project/handoff.json`, `.project/tasks.json`), confirming the preview did not stage/commit/close/checkpoint/dispatch anything by itself. The dispatch decision packet details were introduced and covered by smoke in TASK-BUD-345 with dispatchAllowed=false/requiresHumanDecision=true; live summary confirms the loaded runtime stays authorization=none and read-only. [rationale:risk-control] The decision-packet preview is live and green, but still evidence-only and non-dispatching."
     }
   ]
 }

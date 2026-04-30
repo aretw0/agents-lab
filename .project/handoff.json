@@ -1,41 +1,39 @@
 {
-  "timestamp": "2026-04-30T11:15:18.332Z",
-  "context": "TASK-BUD-345 completed. context_watch_one_slice_canary_preview now includes a decisionPacket in details, built from the no-execution buildOne [snip] eload is needed before live validation. [truncated:+379 chars]",
+  "timestamp": "2026-04-30T11:18:48.707Z",
+  "context": "TASK-BUD-346 completed. Live-validated context_watch_one_slice_canary_preview after reload of the decisionPacket-enabled implementation. With [snip] ive runtime remains authorization=none. [truncated:+578 chars]",
   "next_actions": [
-    "commit preview decisionPacket/board/handoff evidence",
-    "reload before live-validating decisionPacket details in context_watch_one_slice_canary_preview",
-    "after reload, run preview and confirm decisionPacket.dispatchAllowed=false"
+    "commit board/handoff/verification evidence",
+    "continue next local-safe slice: optionally expose a compact decision-packet summary field in p [snip] ils are not visible enough [truncated:+26 chars]",
+    "do not implement execution path without explicit operator authorization and stop/rollback contract"
   ],
-  "blockers": [
-    "Runtime reload needed before updated preview details are available live."
-  ],
+  "blockers": [],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
-    "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
-    "smoke asserts decisionPacket mode=decision-packet activation=none authorization=none dispatchA [snip] n=ready-for-human-decision [truncated:+47 chars]"
+    "live context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes o [snip] ce-only authorization=none [truncated:+49 chars]",
+    "live context_watch_continuation_readiness: ready=yes focus=TASK-BUD-346 audit=ready reasons=al [snip] Focus=0 authorization=none [truncated:+45 chars]",
+    "git status after preview: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:15:18.332Z",
+    "generatedAtIso": "2026-04-30T11:18:48.707Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; reload before live validation of decisionPacket in preview details.",
+    "recommendation": "Commit evidence; preview with decision packet is live and still non-dispatching.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:15:18.332Z",
+      "atIso": "2026-04-30T11:18:48.707Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; reload before live validation of decisionPacket in preview details."
+      "recommendation": "Commit evidence; preview with decision packet is live and still non-dispatching."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-345"
+    "TASK-BUD-346"
   ]
 }
