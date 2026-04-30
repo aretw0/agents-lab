@@ -127,7 +127,7 @@ describe("claude-code adapter — execute signature", () => {
   it("usa params como segundo argumento na assinatura real do pi", async () => {
     let registeredTool: {
       name: string;
-      execute: (toolCallId: string, params: Record<string, unknown>) => Promise<{ details: Record<string, unknown> }>;
+      execute: (toolCallId: string, params: Record<string, unknown>, signal?: AbortSignal) => Promise<{ details: Record<string, unknown> }>;
     } | undefined;
 
     claudeCodeAdapterExtension({
@@ -148,6 +148,36 @@ describe("claude-code adapter — execute signature", () => {
     expect(output?.details.dryRun).toBe(true);
     expect(output?.details.goal).toBe("hello");
     expect(output?.details.cwd).toBe("C:/tmp/work");
+  });
+
+  it("propaga AbortSignal para probes e subprocesso do claude", async () => {
+    let registeredTool: {
+      name: string;
+      execute: (toolCallId: string, params: Record<string, unknown>, signal?: AbortSignal) => Promise<{ details: Record<string, unknown> }>;
+    } | undefined;
+    const controller = new AbortController();
+    const seen: Array<{ command: string; signal?: AbortSignal }> = [];
+
+    claudeCodeAdapterExtension({
+      registerTool(tool: unknown) {
+        const candidate = tool as typeof registeredTool;
+        if (candidate?.name === "claude_code_execute") registeredTool = candidate;
+      },
+      registerCommand() {},
+      async exec(command: string, _args: string[], options?: { signal?: AbortSignal }) {
+        seen.push({ command, signal: options?.signal });
+        if (command === "which" || command === "where") {
+          return { stdout: "/usr/bin/claude\n", stderr: "", code: 0, killed: false };
+        }
+        return { stdout: "ok", stderr: "", code: 0, killed: false };
+      },
+    } as never);
+
+    const output = await registeredTool?.execute("call-test", { goal: "hello" }, controller.signal);
+
+    expect(output?.details.exitCode).toBe(0);
+    expect(seen.length).toBeGreaterThanOrEqual(2);
+    expect(seen.every((call) => call.signal === controller.signal)).toBe(true);
   });
 });
 

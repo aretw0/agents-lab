@@ -41,6 +41,8 @@ Checklist source-aware para `pi:dev`:
 - listar somente os pacotes carregados que podem tocar input (`registerShortcut`, `setEditorComponent`, `onTerminalInput`, overlays) com busca curta e sem source maps;
 - separar “tecla não chegou ao TUI” de “abort foi chamado, mas a operação não respeitou o sinal”.
 
+Em ferramentas locais que executam subprocessos, `AbortSignal` deve ser repassado para a camada de execução (`pi.exec`/equivalente), mesmo quando há timeout. Timeout é limite temporal; cancelamento é controle humano imediato. Se uma ferramenta longa não propaga o sinal, classifique como risco de controle humano antes de habilitar uso unattended forte.
+
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
 
 Fallback operacional enquanto `Esc` estiver incerto:

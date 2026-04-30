@@ -157,14 +157,14 @@ export function parseAuthStatusOutput(
   return "unknown";
 }
 
-async function detectClaudeBinary(pi: ExtensionAPI): Promise<string | undefined> {
+async function detectClaudeBinary(pi: ExtensionAPI, signal?: AbortSignal): Promise<string | undefined> {
   const candidates = process.platform === "win32"
     ? [["where", ["claude"]], ["where", ["claude-code"]]]
     : [["which", ["claude"]], ["which", ["claude-code"]]];
 
   for (const [cmd, args] of candidates) {
     try {
-      const r = await pi.exec(cmd, args as string[], { timeout: 5000 });
+      const r = await pi.exec(cmd, args as string[], { timeout: 5000, signal });
       if (r.code !== 0) continue;
       const path = parseWhichLikeOutput(r.stdout ?? "");
       if (path) return path;
@@ -176,10 +176,10 @@ async function detectClaudeBinary(pi: ExtensionAPI): Promise<string | undefined>
   return undefined;
 }
 
-async function detectClaudeAuth(pi: ExtensionAPI, binaryPath: string): Promise<ClaudeCodeRuntimeStatus["authStatus"]> {
+async function detectClaudeAuth(pi: ExtensionAPI, binaryPath: string, signal?: AbortSignal): Promise<ClaudeCodeRuntimeStatus["authStatus"]> {
   const cmd = binaryPath.toLowerCase().endsWith(".exe") ? binaryPath : "claude";
   try {
-    const r = await pi.exec(cmd, ["auth", "status"], { timeout: 8000 });
+    const r = await pi.exec(cmd, ["auth", "status"], { timeout: 8000, signal });
     return parseAuthStatusOutput(r.stdout ?? "", r.stderr ?? "", r.code);
   } catch {
     return "unknown";
@@ -208,7 +208,7 @@ async function runClaudeSubprocess(
   pi: ExtensionAPI,
   binaryPath: string,
   printArgs: string[],
-  opts: { timeout: number; cwd?: string },
+  opts: { timeout: number; cwd?: string; signal?: AbortSignal },
 ): Promise<{ output: string; exitCode: number; error?: string }> {
   const cmd = binaryPath.toLowerCase().endsWith(".exe") ? binaryPath : "claude";
   try {
@@ -279,7 +279,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       dry_run: Type.Optional(Type.Boolean({ description: "Preview budget state without executing. Default: false." })),
       timeout_ms: Type.Optional(Type.Number({ description: "Subprocess timeout in milliseconds. Default: 120000." })),
     }),
-    async execute(_toolCallId, params) {
+    async execute(_toolCallId, params, signal) {
       const p = (params ?? {}) as Record<string, unknown>;
       const goal = typeof p.goal === "string" ? p.goal : "";
       const cwd = typeof p.cwd === "string" ? p.cwd : undefined;
@@ -311,7 +311,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
         };
       }
 
-      const binaryPath = await detectClaudeBinary(pi);
+      const binaryPath = await detectClaudeBinary(pi, signal);
       if (!binaryPath) {
         return {
           content: [{ type: "text", text: JSON.stringify({ ...base, error: "Claude Code binary not found." }, null, 2) }],
@@ -323,7 +323,7 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
       // Array-form args: ["--print", goal] — goal is a separate element, not shell-interpolated.
       const subprocessArgs = ["--print", goal];
       const { output, exitCode, error } = await runClaudeSubprocess(
-        pi, binaryPath, subprocessArgs, { timeout: timeoutMs, cwd },
+        pi, binaryPath, subprocessArgs, { timeout: timeoutMs, cwd, signal },
       );
       const updated = checkBudgetGate(sessionRequests, budgetCfg);
 

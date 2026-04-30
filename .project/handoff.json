@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T14:01:23.520Z",
-  "context": "Continuing essential human-control lane. Source-aware pi:dev diagnostics found active isolated mode and no sandbox keybindings override. Oper [snip] list for future Esc/cancel diagnostics. [truncated:+298 chars]",
+  "timestamp": "2026-04-30T14:14:21.739Z",
+  "context": "Essential human-control lane continued. Found a concrete local subprocess cancellation gap in claude_code_execute: timeout existed, but Abort [snip] ttings paths; settings were not edited. [truncated:+330 chars]",
   "current_tasks": [
     "TASK-BUD-375"
   ],
   "next_actions": [
-    "Do not edit settings now; handle host-specific settings paths under TASK-BUD-378 as separate slice.",
-    "Continue TASK-BUD-375 with minimal source-aware diagnostics or document remaining matrix.",
-    "Commit bounded docs/board/handoff evidence when ready."
+    "Commit AbortSignal propagation slice.",
+    "Reload before live validation because runtime/tool behavior changed.",
+    "After reload, live-validate claude_code_execute dry-run path and keep stronger unattended bloc [snip] back contract is accepted. [truncated:+29 chars]"
   ],
   "blockers": [
-    "Esc/cancel live reliability unproven.",
-    "Host-specific path canonicalization is now backlog TASK-BUD-378.",
+    "Esc/cancel live reliability still unproven until reload/live validation.",
+    "Host-specific settings path canonicalization remains separate TASK-BUD-378.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "npm run pi:isolated:status: active mode isolated",
-    "sandbox keybindings check: NO_SANDBOX_KEYBINDINGS",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4"
+    "npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts: 23 passed",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=3/3 for AbortSignal/ [snip] meout/control-risk markers [truncated:+2 chars]",
+    "board_verification_append VER-BUD-650 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T14:01:23.520Z",
+    "generatedAtIso": "2026-04-30T14:14:21.739Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "continue-bounded-read-only"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T14:01:23.520Z",
+      "atIso": "2026-04-30T14:14:21.739Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "continue-bounded-read-only"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
   ]
 }

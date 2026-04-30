@@ -8070,6 +8070,15 @@
       "method": "inspection+safe_marker_check",
       "timestamp": "2026-04-30T13:53:47.472Z",
       "evidence": "TASK-BUD-375 bounded investigation documented human-control classification in docs/guides/control-plane-operating-doctrine.md. Evidence markers present: Controle humano, cancelamento e blast radius; npm run pi:dev; PI_CODING_AGENT_DIR=.sandbox/pi-agent; node_modules/@mariozechner/pi-coding-agent/dist/cli.js. Runtime not changed; live Esc remains future/operator validation before stronger long-run."
+    },
+    {
+      "id": "VER-BUD-650",
+      "target": "TASK-BUD-375",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T14:14:04.999Z",
+      "evidence": "Propagated AbortSignal through claude_code_execute: tool execute now receives signal, passes it to detectClaudeBinary and runClaudeSubprocess, and runClaudeSubprocess forwards it to pi.exec. Added smoke coverage asserting the same signal reaches probe and subprocess calls. Validation: npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts => 23 passed. A prior incorrect node --test invocation failed due TS module resolution and is not the applicable gate."
     }
   ]
 }
