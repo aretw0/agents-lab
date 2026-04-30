@@ -1,35 +1,34 @@
 {
-  "timestamp": "2026-04-30T17:10:42.845Z",
-  "context": "Completed TASK-BUD-380. Added trusted global/devcontainer skill doc read policy so bounded Markdown reads under trusted package skill roots s [snip] oad is required before live validation. [truncated:+386 chars]",
+  "timestamp": "2026-04-30T17:19:32.017Z",
+  "context": "Operator reloaded and TASK-BUD-380 was live-validated. The current global npm root contains @aretw0/git-skills; a bounded read of the global [snip] ive stops in global/devcontainer usage. [truncated:+219 chars]",
   "next_actions": [
-    "Commit TASK-BUD-380 implementation/docs/board evidence.",
-    "Reload before live validation of trusted global skill read guard.",
-    "After reload, validate with resolve/tool path if practical; otherwise validate in devcontainer [snip] prompt no longer appears. [truncated:+18 chars]"
+    "Commit TASK-BUD-380 live validation evidence.",
+    "Return to TASK-BUD-375 final Esc/cancel classification/closure decision.",
+    "Continue avoiding direct upstream pi package mutation; bounded reads only."
   ],
   "blockers": [
-    "Reload required before live validation because runtime read guard changed.",
     "TASK-BUD-375 final close decision remains open.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts: 7 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4 for trusted skill read markers",
-    "board_task_complete TASK-BUD-380 with VER-BUD-659 ok"
+    "cmd.exe /c npm root -g: C:\\Users\\aretw\\scoop\\persist\\nodejs\\bin\\node_modules",
+    "global skill present: @aretw0/git-skills/skills/commit/SKILL.md",
+    "read global SKILL.md limit=20 succeeded without prompt/block"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T17:10:42.845Z",
+    "generatedAtIso": "2026-04-30T17:19:32.017Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation",
+    "recommendation": "commit-live-validation-then-close-375",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T17:10:42.845Z",
+      "atIso": "2026-04-30T17:19:32.017Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "commit-live-validation-then-close-375"
     }
   ],
   "completed_tasks": [
