@@ -7701,6 +7701,15 @@
       "method": "board-update+live-tool+test",
       "timestamp": "2026-04-30T10:17:46.194Z",
       "evidence": "Reclassified stale protected TASK-BUD-153 from in-progress to planned/backlog with risk-control rationale. Inspection showed TASK-BUD-153 is broad multi-mode work with 13 files including protected `.github/workflows/ci.yml`; it should not remain the only default in-progress focus for local unattended continuity. The task was not closed and its historical notes remain preserved; future CI/.github work still requires explicit protected-scope selection. Live validation after reclassification: local_continuity_audit no longer reports protected=.github/workflows/ci.yml and returns reasons `candidate:invalid|validation:invalid|stop-conditions:invalid|no-local-safe-next-step|validation-unknown authorization=none`; context_watch_continuation_readiness no longer reports protected path and returns `ready=no focus=TASK-BUD-334 audit=blocked reasons=candidate:invalid|validation:invalid|stop-conditions:invalid staleFocus=1 authorization=none`. Focal board/audit/context tests passed 108/108. No .github or .pi/settings.json modifications. [rationale:risk-control] This removes stale protected backlog from the hot path while preserving fail-closed behavior for explicit protected work."
+    },
+    {
+      "id": "VER-BUD-609",
+      "target": "TASK-BUD-335",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T10:24:53.799Z",
+      "evidence": "Validated fresh local-safe readiness state after promoting settings and deferring stale protected CI focus. Created TASK-BUD-335 as in-progress with only .project bookkeeping files and known smoke/readiness validation, then wrote a fresh checkpoint with blockers=[]. Live local_continuity_audit returned `local-continuity-audit: eligible=yes collectors=8/8 packet=ready reasons=all-gates-green|audit-envelope-eligible authorization=none`. Live context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-335 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. No protected=.pi/settings.json and no protected=.github/workflows/ci.yml appeared. Focal guardrails/context tests passed 54/54. This ready state is evidence only; no scheduler, auto-continuation, remote/offload, self-reload, or permission was activated. [rationale:risk-control] Demonstrates the local continuity gates can become green only from measured local facts after protected blockers are resolved, while authorization remains none."
     }
   ]
 }
