@@ -118,6 +118,10 @@ Quando a fatia pode continuar mas o método de validação não está óbvio, us
 
 Registre o `summary` compacto da decisão quando ele explicar por que o método escolhido é seguro.
 
+## Testes de path cross-platform
+
+Testes que validam paths devem ser agnósticos ao host. Quando a regra testada é formato canônico portátil, use fixtures literais com `/` e `\\` como strings de entrada e compare com evidência normalizada, em vez de montar expectativas com `path.join`, `path.resolve` ou separadores do sistema atual. O objetivo é provar que Windows, Linux e macOS chegam ao mesmo sinal medido, não que a suite passou por acidente no host local.
+
 ## Evidência mínima por fatia
 
 Use uma linha curta:

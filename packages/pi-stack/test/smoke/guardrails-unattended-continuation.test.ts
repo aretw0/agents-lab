@@ -62,8 +62,34 @@ describe("guardrails unattended continuation", () => {
 
     expect(ok).toEqual({ ok: true, evidence: "next-local-safe=yes task=TASK-BUD-269 files=2" });
     expect(missingTask).toEqual({ ok: false, evidence: "next-local-safe=no reasons=missing-task" });
+    const protectedWindowsPath = resolveNextLocalSafeMeasuredSignal({
+      taskId: "TASK-PATH",
+      scope: "local",
+      estimatedFiles: 1,
+      reversible: "git",
+      validationKind: "marker-check",
+      risk: "none",
+      protectedPaths: [".github\\workflows\\ci.yml"],
+    });
+
+    expect(ok).toEqual({ ok: true, evidence: "next-local-safe=yes task=TASK-BUD-269 files=2" });
+    expect(missingTask).toEqual({ ok: false, evidence: "next-local-safe=no reasons=missing-task" });
     expect(risky).toEqual({ ok: false, evidence: "next-local-safe=no reasons=files-large|reversible-none|validation-unknown" });
+    expect(protectedWindowsPath).toEqual({ ok: false, evidence: "next-local-safe=no reasons=protected-paths-1" });
     expect(risky.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("keeps path fixtures host-agnostic by normalizing literal Windows and POSIX strings", () => {
+    const protectedMixed = resolveProtectedScopesMeasuredSignal({
+      paths: [".github\\workflows\\ci.yml", ".pi/settings.json", "packages/pi-stack/extensions/foo.ts"],
+    });
+    const gitMixed = resolveGitStateExpectedMeasuredSignal({
+      changedPaths: ["packages\\pi-stack\\extensions\\foo.ts", "docs/guides/a.md"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts", "docs\\guides\\a.md"],
+    });
+
+    expect(protectedMixed).toEqual({ ok: false, evidence: "protected=pending count=2 first=.github/workflows/ci.yml|.pi/settings.json" });
+    expect(gitMixed).toEqual({ ok: true, evidence: "git=expected changed=2" });
   });
 
   it("derives compact checkpoint-fresh measured signals from timestamps", () => {

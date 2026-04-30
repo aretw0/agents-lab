@@ -6228,7 +6228,7 @@
     {
       "id": "TASK-BUD-264",
       "description": "[P1/backlog] Criar higiene cross-platform para testes de paths e sinais measured.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-263"
@@ -6244,7 +6244,8 @@
         "Evitar uso de path.join/path.resolve em expectativas quando a regra testada é formato canônico portátil.",
         "Adicionar regressões onde a suite puder acoplar ao OS atual."
       ],
-      "notes": "Backlog criado a partir da preocupação do operador sobre acoplamento da suite ao sistema atual. [rationale:risk-control] Loops unattended precisam de testes portáveis; sinais measured não podem depender do host por acidente."
+      "notes": "Backlog criado a partir da preocupação do operador sobre acoplamento da suite ao sistema atual. [rationale:risk-control] Loops unattended precisam de testes portáveis; sinais measured não podem depender do host por acidente.\n[2026-04-30T03:12:00Z] Retomada após reload para micro-slice de higiene cross-platform em testes de path. [rationale:risk-control] Sinais measured de paths devem validar strings canônicas, não comportamento acidental do host.\n[2026-04-30T03:11:47Z] slice=1 focus=TASK-BUD-264 gate=test:monitor:smoke-239/239 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Higiene cross-platform documentada e coberta por regressões de strings Windows/POSIX literais.",
+      "verification": "VER-BUD-548"
     },
     {
       "id": "TASK-BUD-265",

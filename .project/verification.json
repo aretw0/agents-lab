@@ -7152,6 +7152,15 @@
       "method": "inspection",
       "timestamp": "2026-04-30T03:06:13.729Z",
       "evidence": "Updated docs/guides/control-plane-operating-doctrine.md under Lei anti-spoof. The note states that measured helpers and canonical re-exports are not operational authorization; resolveLocalMeasuredNudgeFreeLoopCanaryGate can compose local evidence for tests/internal consumers but does not create scheduler, self-reload, loop, auto-continuation, or remote permission. It also states runtime nudge_free_loop_canary remains advisory/manual-only and fail-closed with manual-signal-source until a separate audited design exists. Validation: safe_marker_check passed 6/6 markers. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Documentation now prevents confusing canonical helper exposure with operational permission."
+    },
+    {
+      "id": "VER-BUD-548",
+      "target": "TASK-BUD-264",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:12:06.967Z",
+      "evidence": "Added cross-platform path testing doctrine and regression coverage. Doctrine now states path tests must be host-agnostic, using literal POSIX/Windows separator strings and normalized evidence instead of host-derived expectations from path.join/path.resolve. Added guardrails-unattended-continuation tests proving literal Windows protected path strings block next-local-safe and mixed Windows/POSIX strings normalize consistently for protected-scope and git-state signals. Validation: safe_marker_check passed 6/6 with command-sensitive-free markers after an initial command-sensitive marker attempt was rejected; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 24/24; cmd.exe /c npm run test:monitor:smoke --silent passed 239/239 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Measured path signals must remain portable across Windows/Linux/macOS and not pass only by accident on the current host."
     }
   ]
 }
