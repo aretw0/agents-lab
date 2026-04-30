@@ -83,8 +83,27 @@ function deriveCandidate(task: any): NudgeFreeLoopLocalCandidate | undefined {
   };
 }
 
-function formatLocalContinuityAuditSummary(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string {
-  return `local-continuity-audit: eligible=${result.envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"} collectors=${result.collectorResults.length}/8 packet=${result.envelope.packet.gate.decision} authorization=none`;
+function localContinuityAuditReasons(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string[] {
+  const reasons = new Set<string>();
+  for (const collector of result.collectorResults) {
+    if (collector.status !== "observed") reasons.add(`${collector.fact}:${collector.status}`);
+  }
+  for (const reason of result.envelope.packet.gate.reasons) reasons.add(reason);
+  for (const reason of result.envelope.reasons) reasons.add(reason);
+  return [...reasons].slice(0, 5);
+}
+
+function formatLocalContinuityAuditSummary(
+  result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>,
+  reasons = localContinuityAuditReasons(result),
+): string {
+  return [
+    `local-continuity-audit: eligible=${result.envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"}`,
+    `collectors=${result.collectorResults.length}/8`,
+    `packet=${result.envelope.packet.gate.decision}`,
+    reasons.length > 0 ? `reasons=${reasons.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
 }
 
 function buildLocalContinuityAudit(cwd: string) {
@@ -152,10 +171,11 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
     execute(_toolCallId, _params, _signal, _onUpdate, context) {
       const cwd = typeof (context as { cwd?: unknown } | undefined)?.cwd === "string" ? (context as { cwd: string }).cwd : process.cwd();
       const result = buildLocalContinuityAudit(cwd);
-      const localContinuitySummary = formatLocalContinuityAuditSummary(result);
+      const localContinuityReasons = localContinuityAuditReasons(result);
+      const localContinuitySummary = formatLocalContinuityAuditSummary(result, localContinuityReasons);
       return {
         content: [{ type: "text", text: localContinuitySummary }],
-        details: { ...result, localContinuitySummary },
+        details: { ...result, localContinuitySummary, localContinuityReasons },
       };
     },
   });

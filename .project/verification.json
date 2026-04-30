@@ -7404,6 +7404,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T04:57:07.313Z",
       "evidence": "Live runtime after operator reload: local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked authorization=none`. This confirms the loaded tool now uses the public primitive naming instead of nudge-free-local-audit-prep and still exposes authorization=none. Focal surface smoke passed 3/3. No scheduler, loop, self-reload, remote, or auto-continuation was started. [rationale:risk-control] Live validation confirms the read-only trust surface naming is correct in the loaded runtime."
+    },
+    {
+      "id": "VER-BUD-576",
+      "target": "TASK-BUD-302",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:00:03.230Z",
+      "evidence": "Added compact top reasons to local_continuity_audit. The visible content now includes `reasons=...` when the audit is ineligible/blocked, derived from non-observed collector statuses, packet gate reasons, and envelope reasons, capped to five entries. Details expose localContinuityReasons as a short array while preserving localContinuitySummary and the internal compatibility summary. authorization=none and read-only/advisory behavior are unchanged; nudge_free_loop_canary remains manual-only with no measured overrides. Validation: focal surface smoke passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. No new runtime tool, scheduler, self-reload, loop, remote, or auto-continuation was activated. [rationale:risk-control] The trust surface now explains fail-closed state compactly without broad diagnostics."
     }
   ]
 }

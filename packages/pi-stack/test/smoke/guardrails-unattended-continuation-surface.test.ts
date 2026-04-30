@@ -43,6 +43,7 @@ describe("guardrails unattended continuation surface", () => {
       const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
 
       expect(result?.content?.[0]?.text).toContain("local-continuity-audit: eligible=no collectors=8/8");
+      expect(result?.content?.[0]?.text).toContain("reasons=");
       expect(result?.content?.[0]?.text).toContain("authorization=none");
       expect(result?.details).toMatchObject({
         effect: "none",
@@ -50,6 +51,7 @@ describe("guardrails unattended continuation surface", () => {
         activation: "none",
         authorization: "none",
         localContinuitySummary: expect.stringContaining("local-continuity-audit: eligible=no collectors=8/8"),
+        localContinuityReasons: expect.any(Array),
         summary: expect.stringContaining("nudge-free-local-audit-prep: eligible=no collectors=8/8"),
         envelope: {
           effect: "none",
@@ -60,6 +62,7 @@ describe("guardrails unattended continuation surface", () => {
         },
       });
       expect(result?.details.envelope).toBeTruthy();
+      expect((result?.details.localContinuityReasons as string[]).length).toBeLessThanOrEqual(5);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

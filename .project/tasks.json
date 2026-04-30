@@ -7217,6 +7217,33 @@
       ],
       "notes": "Criado após reload feito pelo operador. [rationale:risk-control] Summary visível da nova superfície precisa ser validado no runtime carregado para confirmar naming da primitiva.\n[2026-04-30T04:56:58Z] slice=1 focus=TASK-BUD-301 gate=live-local_continuity_audit+surface-smoke-3/3 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Summary público local-continuity-audit validado ao vivo após reload.",
       "verification": "VER-BUD-575"
+    },
+    {
+      "id": "TASK-BUD-302",
+      "description": "[P1] Adicionar top reasons compactos ao local_continuity_audit.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-301"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "local_continuity_audit content deve incluir reasons compactos quando inelegível/bloqueado.",
+        "Reasons devem ser derivados de envelope/collector results sem broad diagnostics.",
+        "Details devem expor localContinuityReasons como array curto.",
+        "Manter authorization=none e comportamento read-only/advisory.",
+        "nudge_free_loop_canary continua manual-only e sem measured overrides.",
+        "Nenhuma tool runtime nova, scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após live validação TASK-BUD-301. [rationale:risk-control] A trust surface precisa explicar compactamente por que falha fechada para guiar correção sem poluir contexto.\n[2026-04-30T04:59:40Z] slice=1 focus=TASK-BUD-302 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons compactos adicionados ao local_continuity_audit sem mudar política.",
+      "verification": "VER-BUD-576"
     }
   ]
 }
