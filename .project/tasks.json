@@ -8230,6 +8230,29 @@
       ],
       "notes": "[rationale:risk-control] A preview read-only permite inspecionar se uma única fatia poderia ser preparada sem transformar readiness verde em execução ou autorização operacional.\n[2026-04-30T10:55:58Z] slice=1 focus=TASK-BUD-340 gate=context-watchdog-48/48+test:monitor:smoke-266/266 commit=pending tool=context_watch_one_slice_canary_preview mode=read-only-preview activation=none reload-needed=yes. [rationale:risk-control] Preview runtime adicionada sem execução; validação live requer reload.",
       "verification": "VER-BUD-614"
+    },
+    {
+      "id": "TASK-BUD-341",
+      "description": "[P1] Live-validar context_watch_one_slice_canary_preview após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-340"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_one_slice_canary_preview no runtime carregado após reload.",
+        "Confirmar que o summary inclui authorization=none e que a decisão é preview/advisory, não execução.",
+        "Confirmar que details preserva effect=none, mode=read-only-preview, activation=none, authorization=none.",
+        "Confirmar que nenhuma automação foi disparada: sem staging, commit, board close automático, checkpoint automático, scheduler, self-reload, remote/offload ou loop.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Nova tool runtime precisa de validação live pós-reload para provar que a preview do canário de uma fatia é apenas evidência read-only.\n[2026-04-30T11:05:00Z] slice=1 focus=TASK-BUD-341 gate=live-context_watch_one_slice_canary_preview blocked-fail-closed authorization=none commit=pending. [rationale:risk-control] Preview validada ao vivo: disponível, read-only, e bloqueia sem readiness verde.",
+      "verification": "VER-BUD-615"
     }
   ]
 }

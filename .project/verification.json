@@ -7755,6 +7755,15 @@
       "method": "test",
       "timestamp": "2026-04-30T10:56:12.928Z",
       "evidence": "Added read-only zero-param runtime surface context_watch_one_slice_canary_preview. It composes auto-resume focus, local continuity audit, and resolveOneSliceLocalCanaryPlan into a preview summary without executing anything. The tool returns effect=none, mode=read-only-preview, activation=none, authorization=none; it never stages, commits, closes tasks, checkpoints, dispatches scheduler/remote/self-reload, or starts a loop. Summary reports decision, prepare=yes/no, stop=yes/no, oneSliceOnly=yes, reasons, authorization=none. Smoke covers zero-param schema without execution/dispatch knobs and a green local fixture returning `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. Focal context-watchdog tests passed 48/48; full monitor smoke passed 266/266. Runtime live validation will require reload because a new tool was registered. [rationale:risk-control] The one-slice canary is now inspectable as a preview, still separated from execution and authorization."
+    },
+    {
+      "id": "VER-BUD-615",
+      "target": "TASK-BUD-341",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T10:59:21.396Z",
+      "evidence": "After operator reload, live runtime validates the new context_watch_one_slice_canary_preview surface is available and fail-closed/read-only. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes reasons=readiness-not-ready|validation-unknown|stop-conditions-present authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-341 audit=blocked reasons=candidate:invalid|validation:invalid|stop-conditions:invalid staleFocus=1 authorization=none`. This confirms the preview does not treat tool availability as permission, keeps oneSliceOnly/stop=yes, and blocks when the current transient live-validation task lacks green readiness/known validation. No staging, commit, board close, checkpoint, scheduler, self-reload, remote/offload, or loop was dispatched by the preview; board closure/checkpoint here are explicit operator-commanded workflow steps. [rationale:risk-control] Live preview proves fail-closed behavior after reload rather than silently preparing a canary slice."
     }
   ]
 }
