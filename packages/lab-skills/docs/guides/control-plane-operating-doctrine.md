@@ -127,11 +127,11 @@ Quando uma tool usar `board`, leia como a superfície local atual para esse cont
 
 ## Discussões laterais rápidas (`/btw`)
 
-O prompt `/btw` é um canal curto para perguntas paralelas sem desviar a task principal. Ele é conversacional/advisory: não troca o foco atual, não executa mudanças automaticamente e não dispara comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva.
+`/btw` permanece em fase de pesquisa/curadoria, não como prompt first-party canônico. Antes de expor uma versão própria, compare a prior art instalada: `@ifi/oh-pi-extensions/extensions/btw.ts` implementa `/btw` e `/qq` como conversa lateral em widget, mantém thread separada fora do contexto principal, e só injeta de volta por comandos explícitos (`/btw:inject`, `/btw:summarize`). A skill `@ifi/oh-pi-skills/skills/btw/SKILL.md` documenta também `/btw:new`, `/btw:clear` e `--save`.
 
-Use `/btw [assunto]` quando a conversa lateral puder caber em uma resposta curta. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
+Contrato desejado para qualquer versão futura: canal conversacional/advisory, sem trocar foco atual por padrão, sem executar mudanças automaticamente e sem disparar comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
 
-A versão distribuível do prompt vive em `packages/lab-skills/prompts/btw.md`, carregada pelo manifesto `pi.prompts` do pacote. Evite duplicar como `.pi/prompts/btw.md` salvo quando for override local deliberado.
+Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design: reutilizar `oh-pi`, envolver/filtrar a extensão existente, ou criar uma alternativa first-party opt-in.
 
 ## Fluxo bounded do board local
 

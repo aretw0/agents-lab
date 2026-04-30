@@ -8511,6 +8511,24 @@
       "method": "prompt-template+docs+manifest-check",
       "timestamp": "2026-04-30T21:08:37.294Z",
       "evidence": "Implemented distributed /btw prompt at packages/lab-skills/prompts/btw.md and exposed it through @aretw0/lab-skills package.json pi.prompts plus files=['prompts']. The prompt contract preserves current task/focus by default, is conversational/advisory, forbids automatic changes/commands/staging/commit/scheduler/remote/destructive maintenance, and only captures decisions/backlog through bounded board/block surfaces when explicitly requested by the operator. Doctrine documents /btw and notes package prompt is canonical while .pi/prompts/btw.md should be local override only. Validation: safe_marker_check prompt matched 4/4; doctrine matched 5/5; npm run docs:package:sync ok; npm run docs:package:check ok; lab-skills-prompts-manifest node check ok."
+    },
+    {
+      "id": "VER-BUD-699",
+      "target": "TASK-BUD-386",
+      "target_type": "task",
+      "status": "passed",
+      "method": "prior-art-research+manifest-guard",
+      "timestamp": "2026-04-30T21:14:53.487Z",
+      "evidence": "Recalibrated /btw after operator steering. Inspected @ifi/oh-pi-extensions/extensions/btw.ts and @ifi/oh-pi-skills/skills/btw/SKILL.md: prior art implements /btw and /qq as runtime side conversation with widget, thread state, --save, /btw:new, /btw:clear, /btw:inject, and /btw:summarize, keeping side entries out of main context until explicit injection. Bounded mitsupi check found adjacent pi-share/summarize skills but no direct /btw equivalent. Removed premature package exposure: packages/lab-skills/package.json has no pi.prompts and files excludes prompts; kept packages/lab-skills/prompts/btw.md as local draft/reference only. Added docs/research/btw-prior-art-2026-04-30.md and updated doctrine to keep /btw in research/curation. Validation: safe_marker_check research 6/6; doctrine 5/5; structured_io_json confirmed pi.prompts absent and files=[skills,docs,README.md]; docs sync/check ok; node manifest guard ok."
+    },
+    {
+      "id": "VER-BUD-700",
+      "target": "TASK-BUD-386",
+      "target_type": "task",
+      "status": "passed",
+      "method": "curation-correction+docs-check",
+      "timestamp": "2026-04-30T21:15:04.762Z",
+      "evidence": "Completed /btw recalibration: first-party /btw is no longer exposed as a package prompt, prior art is documented, and doctrine requires explicit design decision before publishing/reusing/wrapping. The draft prompt remains in repo for comparison but is not listed in package files or pi.prompts. Focal validations passed: docs:package:sync, docs:package:check, marker checks, and manifest guard."
     }
   ]
 }

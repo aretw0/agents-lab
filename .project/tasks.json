@@ -9362,6 +9362,30 @@
       "milestone": "local-first-control-plane",
       "notes": "Criado após warning: context-watch auto compact completed; auto resume suppressed (checkpoint-evidence-missing). Suspeita confirmada: handoff manual existia, mas context_watch_events de context_watch_checkpoint era lightweight e o normalizador exigia percent/thresholds, causando falso negativo de evidência.\n2026-04-30: root cause corrigida e commitada em 05b5a19. Manual checkpoints agora são aceitos como evidência de compact/resume; buildLocalSliceHandoffCheckpoint passa a emitir percent/thresholds default. Reload necessário antes de confiar na versão runtime. Git maintenance warning classificado como monitor/opt-in.\n2026-04-30: pós-reload validado. context_watch_status=ok, handoff=fresh, sem checkpoint-evidence-missing atual. Fix de compatibilidade de checkpoint manual está live.\n[rationale:risk-control] Reconhecer checkpoints manuais bounded como evidência válida reduz risco de perda de continuidade em compact/auto-resume durante long-runs locais, sem autorizar execução automática.\n2026-04-30: concluído após validação live pós-reload; handoff=fresh e sem supressão checkpoint-evidence-missing no status atual.",
       "verification": "VER-BUD-695"
+    },
+    {
+      "id": "TASK-BUD-386",
+      "description": "Recalibrar /btw como pesquisa de prior art antes de expor prompt first-party canônico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-296"
+      ],
+      "files": [
+        "packages/lab-skills/package.json",
+        "packages/lab-skills/prompts/btw.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/research/btw-prior-art-2026-04-30.md"
+      ],
+      "acceptance_criteria": [
+        "Remover exposição canônica prematura de /btw first-party até comparação com oh-pi/mitsupi.",
+        "Registrar prior art local bounded de oh-pi /btw e /qq, incluindo thread separado, widget, inject/summarize, save e exclusão do contexto principal.",
+        "Documentar que qualquer /btw first-party futuro deve ser desenho opt-in após decisão, não prompt package-level automático.",
+        "Preservar foco da lane essencial sem acionar extensão externa, scheduler, remote/offload ou execução automática."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "Criado por steering do operador: não atacar /btw antes de ver como outros fizeram; há referência em @ifi/oh-pi e possivelmente mitsupi. [rationale:risk-control] Evita transformar uma ergonomia lateral em superfície canônica antes de entender prior art e riscos de contexto/injeção.\n2026-04-30: concluído após steering do operador. /btw first-party foi demovido de superfície canônica: sem pi.prompts e sem files prompts; rascunho preservado só para comparação. Prior art oh-pi/mitsupi documentado em docs/research/btw-prior-art-2026-04-30.md.",
+      "verification": "VER-BUD-700"
     }
   ]
 }
