@@ -7197,6 +7197,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:31:41.551Z",
       "evidence": "Added pure resolveMeasuredPacketTrust helper and related types. It classifies whether a measured canary packet is eligible for a future audited runtime surface based on fact source and evidence/gate integrity, while explicitly returning effect=none, mode=advisory, activation=none, authorization=none. It fails closed for caller-supplied/mixed/unknown fact sources even if the internal gate is ready, and fails for blocked/incomplete packets. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 27/27; cmd.exe /c npm run test:monitor:smoke --silent passed 242/242 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future uninterrupted operation needs trusted local observation, not just a ready packet from caller-supplied facts."
+    },
+    {
+      "id": "VER-BUD-553",
+      "target": "TASK-BUD-278",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:34:29.416Z",
+      "evidence": "Re-exported resolveMeasuredPacketTrust through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying that a caller-supplied ready packet is not eligible for audited runtime surface and keeps authorization=none. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 242/242 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Packet trust classification is available to internal consumers by canonical import while preserving fail-closed operational boundaries."
     }
   ]
 }

@@ -6575,6 +6575,32 @@
       ],
       "notes": "Criado após reload na lane essencial. [rationale:risk-control] Um packet ready só é útil para operação futura se a origem dos fatos for confiável; fatos caller-supplied não podem virar readiness operacional.\n[2026-04-30T03:31:27Z] slice=1 focus=TASK-BUD-277 gate=test:monitor:smoke-242/242 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Guard de origem/confianca do packet measured criado; caller-supplied não vira elegível.",
       "verification": "VER-BUD-552"
+    },
+    {
+      "id": "TASK-BUD-278",
+      "description": "[P1] Re-exportar guard de confiança do packet measured pela superfície canônica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-277"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar resolveMeasuredPacketTrust via guardrails-core-exports/guardrails-core.",
+        "Adicionar smoke provando import canônico do guard de confiança do packet measured.",
+        "Validar que caller-supplied ready packet não é elegível e authorization permanece none.",
+        "Validar que a superfície runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-277. [rationale:risk-control] O guard de confiança precisa estar disponível por import canônico para consumidores internos sem virar permissão operacional.\n[2026-04-30T03:34:16Z] slice=1 focus=TASK-BUD-278 gate=test:monitor:smoke-242/242 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Trust guard re-exportado canonicamente; caller-supplied ready permanece authorization=none.",
+      "verification": "VER-BUD-553"
     }
   ]
 }

@@ -8,6 +8,7 @@ import {
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
   resolveMeasuredNudgeFreeLoopCanaryGate,
+  resolveMeasuredPacketTrust,
   resolveRecurringFailureHardening,
   resolveValidationMethodPlan,
 } from "../../extensions/guardrails-core";
@@ -110,7 +111,8 @@ describe("guardrails-core hardening re-exports", () => {
     expect(resolveLocalNudgeFreeLoopMeasuredSignals(localFacts)["git-state-expected"])
       .toEqual({ ok: true, evidence: "git=expected changed=1" });
 
-    expect(buildLocalMeasuredNudgeFreeLoopCanaryPacket(localFacts)).toMatchObject({
+    const packet = buildLocalMeasuredNudgeFreeLoopCanaryPacket(localFacts);
+    expect(packet).toMatchObject({
       summary: "nudge-free-loop-packet: decision=ready continue=yes evidence=8/8",
       gate: {
         effect: "none",
@@ -120,6 +122,16 @@ describe("guardrails-core hardening re-exports", () => {
         decision: "ready",
         canContinueWithoutNudge: true,
       },
+    });
+
+    expect(resolveMeasuredPacketTrust({ packet, factSource: "caller-supplied" })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "caller-supplied",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: ["untrusted-fact-source"],
     });
   });
 });
