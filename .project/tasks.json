@@ -7841,6 +7841,30 @@
       ],
       "notes": "[rationale:risk-control] Readiness precisa avaliar o mesmo foco primário concreto que apresenta ao operador; divergência entre focus e local audit causa blocked state pouco acionável.\n[2026-04-30T06:18:58Z] slice=1 focus=TASK-BUD-325 gate=test:monitor:smoke-263/263 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Candidate do audit alinhado ao foco primário sem mascarar .pi/settings.json protegido.",
       "verification": "VER-BUD-599"
+    },
+    {
+      "id": "TASK-BUD-326",
+      "description": "[P1] Live-validar alinhamento de candidate do readiness/local audit após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-325"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_continuation_readiness no runtime carregado após reload.",
+        "Confirmar que reasons não incluem validation:invalid quando a task ativa tem smoke/test conhecido.",
+        "Confirmar que protected real .pi/settings.json permanece como blocker e não é mascarado.",
+        "Confirmar que .github de task antiga não aparece como protected blocker do readiness atual.",
+        "Não disparar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O alinhamento de audit candidate precisa ser validado no runtime carregado para garantir que readiness avalia a fatia atual sem esconder protected drift real.\n[2026-04-30T06:21:36Z] slice=1 focus=TASK-BUD-326 gate=live-readiness+local_continuity_audit+focal-smoke-53/53 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Alinhamento candidate/readiness validado ao vivo; blockers restantes são git/protected reais.",
+      "verification": "VER-BUD-600"
     }
   ]
 }
