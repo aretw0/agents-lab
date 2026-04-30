@@ -7,6 +7,7 @@ import {
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
+  resolveMeasuredFactCollectorAssessment,
   resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
@@ -35,6 +36,71 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("classifies local collector results before measured packet use", () => {
+    const observedResults = [
+      { fact: "candidate", status: "observed", evidence: "candidate=board-task" },
+      { fact: "checkpoint", status: "observed", evidence: "checkpoint=fresh" },
+      { fact: "handoff-budget", status: "observed", evidence: "handoff-budget=ok" },
+      { fact: "git-state", status: "observed", evidence: "git=expected" },
+      { fact: "protected-scopes", status: "observed", evidence: "protected=clear" },
+      { fact: "cooldown", status: "observed", evidence: "cooldown=ready" },
+      { fact: "validation", status: "observed", evidence: "validation=known" },
+      { fact: "stop-conditions", status: "observed", evidence: "stops=clear" },
+    ] as const;
+    const allObserved = resolveMeasuredFactCollectorAssessment({ results: [...observedResults] });
+    const unsafe = resolveMeasuredFactCollectorAssessment({
+      results: [
+        ...observedResults.slice(0, 5),
+        { fact: "cooldown", status: "missing", evidence: "" },
+        { fact: "validation", status: "untrusted", evidence: "validation=known", source: "caller-supplied" },
+        { fact: "stop-conditions", status: "invalid", evidence: "stops=clear" },
+      ],
+    });
+    const overlong = resolveMeasuredFactCollectorAssessment({
+      results: [
+        ...observedResults.slice(0, 7),
+        { fact: "stop-conditions", status: "observed", evidence: "x".repeat(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS + 1) },
+      ],
+    });
+
+    expect(allObserved).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "local-observed",
+      localObservedCount: 8,
+      eligibleForMeasuredPacket: true,
+      collectorMissingFacts: [],
+      collectorUntrustedFacts: [],
+      collectorInvalidFacts: [],
+      reasons: ["all-collectors-local-observed"],
+      summary: "nudge-free-fact-collectors: eligible=yes source=local-observed local=8/8 reasons=all-collectors-local-observed",
+    });
+    expect(unsafe).toMatchObject({
+      authorization: "none",
+      factSource: "mixed",
+      eligibleForMeasuredPacket: false,
+      collectorMissingFacts: ["cooldown"],
+      collectorUntrustedFacts: ["validation"],
+      collectorInvalidFacts: ["stop-conditions"],
+      reasons: expect.arrayContaining([
+        "missing-local-facts",
+        "untrusted-fact-source",
+        "fact-evidence-invalid",
+        "collector-missing",
+        "collector-untrusted",
+        "collector-invalid",
+      ]),
+    });
+    expect(overlong).toMatchObject({
+      authorization: "none",
+      eligibleForMeasuredPacket: false,
+      invalidEvidenceFacts: ["stop-conditions"],
+      reasons: ["fact-evidence-invalid"],
+    });
+  });
+
   it("classifies local-observed fact sources before measured packet use", () => {
     const localFacts = [
       { fact: "candidate", source: "local-observed", evidence: "candidate=board-task" },

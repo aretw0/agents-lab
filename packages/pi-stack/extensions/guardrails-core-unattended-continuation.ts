@@ -132,6 +132,15 @@ export interface NudgeFreeLoopLocalFactOrigin {
   evidence: string;
 }
 
+export type NudgeFreeLoopLocalFactCollectorStatus = "observed" | "missing" | "untrusted" | "invalid";
+
+export interface NudgeFreeLoopLocalFactCollectorResult {
+  fact: NudgeFreeLoopLocalFactKey;
+  status: NudgeFreeLoopLocalFactCollectorStatus;
+  evidence: string;
+  source?: NudgeFreeLoopPacketFactSource;
+}
+
 export interface NudgeFreeLoopFactSourceAssessment {
   effect: "none";
   mode: "advisory";
@@ -145,6 +154,12 @@ export interface NudgeFreeLoopFactSourceAssessment {
   eligibleForMeasuredPacket: boolean;
   reasons: string[];
   summary: string;
+}
+
+export interface NudgeFreeLoopFactCollectorAssessment extends NudgeFreeLoopFactSourceAssessment {
+  collectorMissingFacts: NudgeFreeLoopLocalFactKey[];
+  collectorUntrustedFacts: NudgeFreeLoopLocalFactKey[];
+  collectorInvalidFacts: NudgeFreeLoopLocalFactKey[];
 }
 
 export interface NudgeFreeLoopMeasuredPacketTrust {
@@ -508,6 +523,43 @@ export function resolveMeasuredFactSourceAssessment(input: {
     eligibleForMeasuredPacket: eligible,
     reasons: eligible ? ["all-facts-local-observed"] : reasons,
     summary: `nudge-free-fact-source: eligible=${eligible ? "yes" : "no"} source=${factSource} local=${localObservedCount}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} reasons=${eligible ? "all-facts-local-observed" : reasons.join("|")}`,
+  };
+}
+
+export function resolveMeasuredFactCollectorAssessment(input: {
+  results: NudgeFreeLoopLocalFactCollectorResult[];
+}): NudgeFreeLoopFactCollectorAssessment {
+  const collectorMissingFacts = input.results.filter((result) => result.status === "missing").map((result) => result.fact);
+  const collectorUntrustedFacts = input.results.filter((result) => result.status === "untrusted").map((result) => result.fact);
+  const collectorInvalidFacts = input.results.filter((result) => result.status === "invalid").map((result) => result.fact);
+  const facts = input.results
+    .filter((result) => result.status !== "missing")
+    .map((result) => ({
+      fact: result.fact,
+      source: result.status === "observed" || result.status === "invalid"
+        ? "local-observed" as const
+        : result.source ?? "caller-supplied" as const,
+      evidence: result.status === "invalid" && result.evidence.trim().length > 0
+        ? ""
+        : result.evidence,
+    }));
+  const assessment = resolveMeasuredFactSourceAssessment({ facts });
+  const reasons = new Set(assessment.reasons);
+  if (collectorMissingFacts.length > 0) reasons.add("collector-missing");
+  if (collectorUntrustedFacts.length > 0) reasons.add("collector-untrusted");
+  if (collectorInvalidFacts.length > 0) reasons.add("collector-invalid");
+  const eligible = assessment.eligibleForMeasuredPacket
+    && collectorMissingFacts.length === 0
+    && collectorUntrustedFacts.length === 0
+    && collectorInvalidFacts.length === 0;
+  return {
+    ...assessment,
+    eligibleForMeasuredPacket: eligible,
+    collectorMissingFacts,
+    collectorUntrustedFacts,
+    collectorInvalidFacts,
+    reasons: eligible ? ["all-collectors-local-observed"] : [...reasons],
+    summary: `nudge-free-fact-collectors: eligible=${eligible ? "yes" : "no"} source=${assessment.factSource} local=${assessment.localObservedCount}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} reasons=${eligible ? "all-collectors-local-observed" : [...reasons].join("|")}`,
   };
 }
 

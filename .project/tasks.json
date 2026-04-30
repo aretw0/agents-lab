@@ -6653,6 +6653,32 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-279. [rationale:risk-control] O boundary de origem local-observed precisa estar disponível por import canônico sem virar permissão operacional.\n[2026-04-30T03:40:52Z] slice=1 focus=TASK-BUD-280 gate=test:monitor:smoke-243/243 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Assessment local-observed re-exportado; missing vs invalid evidence refinado.",
       "verification": "VER-BUD-555"
+    },
+    {
+      "id": "TASK-BUD-281",
+      "description": "[P1] Definir contrato puro para coletores locais de fatos measured.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-280"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar tipos/helper puros para resultados de coletores locais por fato measured.",
+        "Helper deve transformar resultados observed/missing/untrusted/invalid em assessment de origem sem aceitar readiness manual.",
+        "Helper deve falhar fechado para missing, untrusted, invalid ou evidência overlong, mantendo authorization none.",
+        "Testes cobrem todos observed, missing/untrusted/invalid e evidência overlong.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo contrato antes de qualquer superfície runtime measured. [rationale:risk-control] Coletores locais precisam de contrato explícito para não confundir fatos observados com input caller-supplied.\n[2026-04-30T03:43:50Z] slice=1 focus=TASK-BUD-281 gate=test:monitor:smoke-244/244 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato de coletores locais measured criado sem runtime surface.",
+      "verification": "VER-BUD-556"
     }
   ]
 }

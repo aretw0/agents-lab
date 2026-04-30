@@ -7224,6 +7224,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:41:03.945Z",
       "evidence": "Re-exported resolveMeasuredFactSourceAssessment through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying mixed/caller-supplied facts remain ineligible with authorization=none. Focal test initially showed missing facts were also counted as invalid evidence; refined helper so invalidEvidenceFacts only applies to present facts, keeping missing and invalid evidence distinct. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: focal re-export + continuation + surface tests passed 31/31; cmd.exe /c npm run test:monitor:smoke --silent passed 243/243 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Fact-source boundary is canonical while preserving fail-closed and non-operational semantics."
+    },
+    {
+      "id": "VER-BUD-556",
+      "target": "TASK-BUD-281",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:44:03.958Z",
+      "evidence": "Added pure local fact collector contract: NudgeFreeLoopLocalFactCollectorResult/status and resolveMeasuredFactCollectorAssessment. The helper maps observed/missing/untrusted/invalid collector results into source assessment, keeps authorization=none, and fails closed for missing, untrusted, invalid, or overlong evidence. It does not accept readiness booleans or activate runtime behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 29/29; cmd.exe /c npm run test:monitor:smoke --silent passed 244/244 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future audit surfaces need collector-result contracts so local observation cannot be confused with caller-supplied facts."
     }
   ]
 }
