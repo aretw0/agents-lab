@@ -101,7 +101,35 @@ export type TrustedHumanConfirmationUiDecisionResult = {
   summary: string;
 };
 
+export type TrustedHumanConfirmationEnvelopeConsumption = {
+  decision: "consumed" | "rejected";
+  authorization: "none";
+  dispatchAllowed: false;
+  canOverrideMonitorBlock: false;
+  reasons: string[];
+  match: HumanConfirmationEvidenceMatch;
+  evidence?: TrustedHumanConfirmationEvidence;
+  envelope?: TrustedHumanConfirmationAuditEnvelope;
+  summary: string;
+};
+
 const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function isKnownTrustedOrigin(value: unknown): value is TrustedHumanConfirmationOrigin {
+  return value === "runtime-ui-confirm" || value === "operator-contract-review";
+}
+
+function isProtectedActionKind(value: unknown): value is Exclude<HumanConfirmationActionKind, "local-safe"> {
+  return value === "destructive" || value === "protected";
+}
 
 function truncateValue(value: string | undefined, max = 160): string | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
@@ -350,6 +378,84 @@ export function recordTrustedHumanConfirmationUiDecision(
     evidence,
     envelope,
     summary: `human-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created authorization=none`,
+  };
+}
+
+export function extractTrustedHumanConfirmationEvidenceFromEnvelope(
+  envelope: unknown,
+): TrustedHumanConfirmationEvidence | undefined {
+  const root = asRecord(envelope);
+  if (!root) return undefined;
+  if (root.customType !== "human-confirmation-evidence") return undefined;
+  if (root.display !== false) return undefined;
+  const details = asRecord(root.details);
+  if (!details) return undefined;
+  if (details.dispatchAllowed !== false || details.canOverrideMonitorBlock !== false || details.authorization !== "none") return undefined;
+  if (!isKnownTrustedOrigin(details.origin)) return undefined;
+  if (!isProtectedActionKind(details.actionKind)) return undefined;
+  const id = asString(details.evidenceId);
+  const toolName = asString(details.toolName);
+  const createdAtIso = asString(details.createdAtIso);
+  const expiresAtIso = asString(details.expiresAtIso);
+  if (!id || !toolName || !createdAtIso || !expiresAtIso) return undefined;
+  return {
+    id,
+    origin: details.origin,
+    trusted: true,
+    actionKind: details.actionKind,
+    toolName,
+    path: asString(details.path),
+    scope: asString(details.scope),
+    payloadHash: asString(details.payloadHash),
+    createdAtIso,
+    expiresAtIso,
+    consumedAtIso: asString(details.consumedAtIso),
+  };
+}
+
+export function consumeTrustedHumanConfirmationAuditEnvelope(
+  envelope: unknown,
+  pending: PendingHumanConfirmedAction,
+): TrustedHumanConfirmationEnvelopeConsumption {
+  const evidence = extractTrustedHumanConfirmationEvidenceFromEnvelope(envelope);
+  if (!evidence) {
+    const match = resolveHumanConfirmationEvidenceMatch(undefined, pending);
+    return {
+      decision: "rejected",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons: ["confirmation-envelope-invalid-or-untrusted"],
+      match,
+      summary: "human-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=confirmation-envelope-invalid-or-untrusted authorization=none",
+    };
+  }
+
+  const consumed = consumeTrustedHumanConfirmationEvidence(evidence, pending);
+  if (!consumed.ok) {
+    return {
+      decision: "rejected",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons: consumed.match.reasons,
+      match: consumed.match,
+      evidence,
+      summary: `human-confirmation-envelope-consume: decision=rejected dispatch=no override=no reasons=${consumed.match.reasons.join("|")} authorization=none`,
+    };
+  }
+
+  const consumedEnvelope = buildTrustedHumanConfirmationAuditEnvelope(consumed.evidence, consumed.match);
+  return {
+    decision: "consumed",
+    authorization: "none",
+    dispatchAllowed: false,
+    canOverrideMonitorBlock: false,
+    reasons: ["trusted-envelope-consumed", "confirmation-single-use"],
+    match: consumed.match,
+    evidence: consumed.evidence,
+    envelope: consumedEnvelope,
+    summary: "human-confirmation-envelope-consume: decision=consumed dispatch=no override=no reasons=trusted-envelope-consumed|confirmation-single-use authorization=none",
   };
 }
 

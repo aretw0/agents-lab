@@ -8655,6 +8655,15 @@
       "method": "trusted-confirmation-bridge-closure",
       "timestamp": "2026-04-30T22:15:18.276Z",
       "evidence": "TASK-BUD-390 completed for its bounded bridge scope. Implemented trusted confirmation core contract (trusted origins, exact action fingerprint, TTL, single-use consumption), bounded audit envelope customType=human-confirmation-evidence, UI decision recorder, and guardrails-core runtime audit wiring for existing UI confirmation paths (sensitive/outside-project read and sensitive bash-read). All surfaces preserve dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Validation: VER-BUD-710 core contract, VER-BUD-711 audit envelope, VER-BUD-712 UI decision recording, VER-BUD-713 guard runtime audit wiring. Latest focused tests: guardrails-human-confirmation, guardrails-human-confirmation-runtime-wiring, guardrails-core-hardening-reexport => 12 passed; docs sync/check ok. Follow-up TASK-BUD-392 tracks explicit monitor/guard consumption and destructive confirmation pipeline beyond read guards."
+    },
+    {
+      "id": "VER-BUD-715",
+      "target": "TASK-BUD-392",
+      "target_type": "task",
+      "status": "passed",
+      "method": "core-envelope-consumption-smoke",
+      "timestamp": "2026-04-30T22:19:30.247Z",
+      "evidence": "First bounded slice for TASK-BUD-392 added structured envelope consumption without trusting spoofable text. Implemented extractTrustedHumanConfirmationEvidenceFromEnvelope and consumeTrustedHumanConfirmationAuditEnvelope: require customType=human-confirmation-evidence, display=false, structured details, trusted origin, protected/destructive actionKind, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none, then reuse exact-match/TTL/single-use evidence consumption. Text-only spoofed content and envelopes with unsafe override fields are rejected. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 14 passed. Docs sync/check ok. Remaining: wire actual monitor/guard runtime context to supply structured envelope details instead of only text content."
     }
   ]
 }
