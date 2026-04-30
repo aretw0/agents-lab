@@ -6420,6 +6420,31 @@
       ],
       "notes": "Criado após reload. [rationale:risk-control] Depois de derivar gates individuais, precisamos de composição pura a partir de fatos locais antes de qualquer superfície operacional.\n[2026-04-30T03:01:08Z] slice=1 focus=TASK-BUD-271 gate=test:monitor:smoke-238/238 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Composição measured pura criada a partir de fatos locais, sem runtime loop.",
       "verification": "VER-BUD-545"
+    },
+    {
+      "id": "TASK-BUD-272",
+      "description": "[P1] Re-exportar canary measured local na superfície canônica de guardrails.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-271"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar resolveLocalMeasuredNudgeFreeLoopCanaryGate pela superfície canônica guardrails-core-exports.",
+        "Adicionar smoke que prova o re-export sem abrir runtime tool measured.",
+        "Manter nudge_free_loop_canary runtime manual-only; não expor signalSource ou measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-271. [rationale:risk-control] O helper measured local deve ficar acessível por import canônico para testes/consumidores internos, sem virar autorização operacional.\n[2026-04-30T03:03:56Z] slice=1 focus=TASK-BUD-272 gate=test:monitor:smoke-238/238 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Re-export canônico validado; runtime canary permanece manual-only.",
+      "verification": "VER-BUD-546"
     }
   ]
 }

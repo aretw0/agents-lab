@@ -4,6 +4,7 @@ import {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
+  resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveRecurringFailureHardening,
   resolveValidationMethodPlan,
@@ -69,6 +70,35 @@ describe("guardrails-core hardening re-exports", () => {
       effect: "none",
       mode: "advisory",
       activation: "none",
+      decision: "ready",
+      canContinueWithoutNudge: true,
+    });
+
+    expect(resolveLocalMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      nowMs: Date.parse("2026-04-30T02:00:00.000Z"),
+      candidate: {
+        taskId: "TASK-BUD-272",
+        scope: "local",
+        estimatedFiles: 2,
+        reversible: "git",
+        validationKind: "focal-test",
+        risk: "low",
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: ["packages/pi-stack/extensions/guardrails-core-exports.ts"],
+      expectedPaths: ["packages/pi-stack/extensions/guardrails-core-exports.ts"],
+      cooldownMs: 60_000,
+      validation: { kind: "focal-test", focalGate: "hardening-reexport" },
+      stopConditions: [],
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
       decision: "ready",
       canContinueWithoutNudge: true,
     });

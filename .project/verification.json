@@ -7134,6 +7134,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:01:22.691Z",
       "evidence": "Added pure resolveLocalMeasuredNudgeFreeLoopCanaryGate helper. It accepts structured local facts and derives all required measured signals through existing helpers: next-local-safe, checkpoint-fresh, handoff-budget-ok, git-state-expected, protected-scopes-clear, cooldown-ready, validation-known, and stop-conditions-clear. It does not accept signalSource, manual ok booleans, or prebuilt measured overrides. Tests cover ready measured composition and blocked composition from derived unsafe facts. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 23/23; cmd.exe /c npm run test:monitor:smoke --silent passed 238/238 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Measured canary readiness is now composable from local facts before any operational surface is exposed."
+    },
+    {
+      "id": "VER-BUD-546",
+      "target": "TASK-BUD-272",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:04:10.488Z",
+      "evidence": "Re-exported resolveLocalMeasuredNudgeFreeLoopCanaryGate through guardrails-core-exports/guardrails-core and added hardening re-export smoke coverage. Also ran unattended continuation surface smoke to verify the runtime nudge_free_loop_canary schema remains manual-only with no signalSource/signal_source measured override. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 238/238 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Canonical imports can consume the pure measured helper without turning development exposure into operational permission."
     }
   ]
 }
