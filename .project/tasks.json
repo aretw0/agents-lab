@@ -5658,6 +5658,29 @@
       ],
       "notes": "Criado em checkpoint lane como micro-slice documental. [rationale:risk-control] A ideia de self-reload precisa estar explicitamente limitada para não virar automação prematura sem contrato de segurança.\n[2026-04-30T01:15:00Z] slice=1 focus=TASK-BUD-239 gate=safe_marker_check-summary-ok-yes-matched-11/11 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Doutrina limita self-reload a backlog/canary opt-in com gates explícitos.",
       "verification": "VER-BUD-517"
+    },
+    {
+      "id": "TASK-BUD-240",
+      "description": "[P1] Documentar contrato do loop local sem empurrões manuais.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-237",
+        "TASK-BUD-239"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina explica que os empurrões manuais ainda substituem um idle continuation loop seguro.",
+        "Critérios mínimos do futuro loop incluem seleção de próxima fatia, checkpoint bounded, orçamento, git state, escopos protegidos, cooldown, smoke/validação e stop conditions.",
+        "Validação usa safe_marker_check e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado em checkpoint lane como micro-slice documental. [rationale:risk-control] Para parar de depender de nudges humanos, precisamos explicitar o contrato mínimo do loop local unattended antes de automatizar.\n[2026-04-30T01:19:00Z] slice=1 focus=TASK-BUD-240 gate=safe_marker_check-summary-ok-yes-matched-11/11 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato do loop sem empurrões ficou explícito sem automatizar prematuramente.",
+      "verification": "VER-BUD-518"
     }
   ]
 }

@@ -6882,6 +6882,15 @@
       "method": "inspection",
       "timestamp": "2026-04-30T01:15:14.328Z",
       "evidence": "Documented self-reload/autoresume constraints in docs/guides/control-plane-operating-doctrine.md. The doctrine now states self-reload by the agent is backlog/canary opt-in, not current automatic behavior, and requires fresh bounded checkpoint, handoff budget, expected git state, no protected scopes pending, cooldown, audit, and minimal auto-resume from compact handoff before any unattended real use. Validation: safe_marker_check passed 11/11 with commandSensitive=none. [rationale:risk-control] Prevents the self-reload idea from becoming premature automation without explicit safety gates."
+    },
+    {
+      "id": "VER-BUD-518",
+      "target": "TASK-BUD-240",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-30T01:17:22.903Z",
+      "evidence": "Documented the local loop without manual nudges in docs/guides/control-plane-operating-doctrine.md. It states manual nudges currently substitute for a safe idle continuation loop, and a future canary must handle local-safe task selection, fresh bounded checkpoint, handoff budget, expected git state, protected scopes, cooldown, known validation/smoke, and real stop conditions before automation. Validation: safe_marker_check passed 11/11 with commandSensitive=none. [rationale:risk-control] Prevents premature implicit automation while defining the path to stop needing human nudges."
     }
   ]
 }
