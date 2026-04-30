@@ -7581,6 +7581,29 @@
       ],
       "notes": "[rationale:risk-control] Mesmo sem current_tasks, completed_tasks recém-gravadas pelo checkpoint podem aparecer em next_actions/context; auto-resume deve impedir reentrada indireta de trabalho concluído.\n[2026-04-30T05:40:01Z] slice=1 focus=TASK-BUD-315 gate=test:monitor:smoke-260/260 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] completed_tasks agora alimenta staleIds do auto-resume para impedir reentrada por next_actions/context.",
       "verification": "VER-BUD-589"
+    },
+    {
+      "id": "TASK-BUD-316",
+      "description": "[P1] Live-validar completed_tasks como staleIds no auto-resume após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-315"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_auto_resume_preview no runtime carregado após reload.",
+        "Confirmar que completed_tasks do handoff aparece como staleFocus quando aplicável.",
+        "Confirmar que task concluída mencionada em next_actions/context não reaparece em focusTasks.",
+        "Confirmar que nenhum compact/resume/scheduler/self-reload/remoto/auto-continuação é disparado.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload de TASK-BUD-315. [rationale:risk-control] A proteção completed_tasks→staleIds precisa ser validada no runtime carregado para impedir reentrada indireta de trabalho concluído.\n[2026-04-30T05:42:01Z] slice=1 focus=TASK-BUD-316 gate=live-context_watch_auto_resume_preview+structured-read+context-watchdog-smoke-45/45 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] completed_tasks→staleIds validado ao vivo após reload.",
+      "verification": "VER-BUD-590"
     }
   ]
 }
