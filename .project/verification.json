@@ -8241,6 +8241,15 @@
       "method": "live-tool-after-reload",
       "timestamp": "2026-04-30T18:37:43.327Z",
       "evidence": "After reload, structured_interview_plan live validation passed across three paths. needs-human-answer path returned decision=needs-human-answer nextQuestionId=validation dispatchAllowed=false authorization=none. complete path accepted default scope=local, unknown rollback, optional skipped notes, decision=complete dispatchAllowed=false. invalid path rejected single-choice value remote and unauthorized skip, decision=invalid dispatchAllowed=false. All outputs preserved backendFirst=true uiCoupling=none activation=none authorization=none."
+    },
+    {
+      "id": "VER-BUD-669",
+      "target": "TASK-BUD-374",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-tool+docs",
+      "timestamp": "2026-04-30T18:38:58.249Z",
+      "evidence": "Completed backend-first structured interview primitive. Implementation includes pure resolver resolveStructuredInterview, runtime tool structured_interview_plan, exports, tests, and doctrine docs. Tests passed: npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts => 3 passed. Live after reload passed needs-human-answer, complete, and invalid paths. All outputs preserve backendFirst=true, uiCoupling=none, activation=none, authorization=none, dispatchAllowed=false, proving this is a structured evidence primitive rather than an execution permission surface. [rationale:risk-control] The primitive reduces human-gap ambiguity without UI-first coupling or accidental dispatch authority."
     }
   ]
 }
