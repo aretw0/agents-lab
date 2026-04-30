@@ -8178,6 +8178,24 @@
       "method": "classification+live-dry-run+docs",
       "timestamp": "2026-04-30T17:20:17.050Z",
       "evidence": "Completed conservative Esc/cancel human-control investigation. Evidence: doctrine documents terminal/sandbox vs upstream pi/TUI vs local extensions responsibility matrix, source-aware npm run pi:dev/isolated caveats, diagnostic blast-radius rules, AbortSignal requirements, fallback procedure, and go/no-go matrix for uninterrupted local work. Concrete local gap fixed and live dry-run validated: claude_code_execute now propagates AbortSignal to pi.exec and after reload returned dryRun=true without subprocess. Related control hardening completed: upstream/original pi mutation guard live-validated; trusted global skill reads live-validated. Final classification is conservative: small bounded local work may continue; stronger unattended/loop/scheduler/remote remains no-go until a long local path has tested cancel/fallback, checkpoint, output limits, and explicit operator decision. [rationale:risk-control] Closing the investigation records a no-go/fallback policy, not permission for stronger unattended execution."
+    },
+    {
+      "id": "VER-BUD-662",
+      "target": "TASK-BUD-377",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T17:27:01.163Z",
+      "evidence": "Implemented source-map blast-radius bash guard. New policy source-map-blast-radius-scan blocks content tools reading direct *.map files and recursive content scans over node_modules/dist/build/coverage without explicit *.map exclusion. Tests cover block for grep -RIn over node_modules, allow for --exclude=\"*.map\" and rg -g \"!*.map\", block direct index.js.map content grep, and allow filename-only grep -RIl. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed. safe_marker_check docs matched 4/4."
+    },
+    {
+      "id": "VER-BUD-663",
+      "target": "TASK-BUD-377",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T17:27:20.158Z",
+      "evidence": "Completed diagnostic blast-radius hardening. Added source-map-blast-radius-scan bash guard to prevent direct source-map content reads and recursive scans over generated/dependency roots without explicit *.map exclusion. Exported detector/reason, documented the rule, and added regression coverage. Safe alternatives remain allowed: bounded read/offset, filename/count-only search, and explicit --exclude='*.map' or -g '!*.map'. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed; safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4. [rationale:risk-control] This prevents repeated context overflow from diagnostic output while preserving bounded investigation."
     }
   ]
 }

@@ -18,6 +18,12 @@ const UPSTREAM_PI_PACKAGE_PATH_PATTERN = /(?:^|[\s"'=:(]|\.\.?\/|[a-z]:\/|\/)(?:
 const UPSTREAM_PI_MUTATION_TOOL_PATTERN =
   /\b(?:rm|rmdir|del|erase|mv|move|cp|copy|xcopy|robocopy|mkdir|touch|chmod|chown)\b|\bsed\b[\s\S]*\s-i\b|\bperl\b[\s\S]*\s-pi\b|\b(?:set-content|add-content|out-file)\b|\bgit\s+(?:checkout|restore|apply|reset)\b/i;
 const REDIRECT_TO_UPSTREAM_PI_PACKAGE_PATTERN = />{1,2}\s*["']?[^\s"']*node_modules\/@mariozechner\/pi-coding-agent(?:\/|$)/i;
+const SOURCE_MAP_PATH_PATTERN = /(?:^|[\s"'])(?:[^\s"'*]*\/)?[^\s"'*]+\.map(?:$|[\s"'|;)])/i;
+const SOURCE_MAP_CONTENT_TOOL_PATTERN = /\b(?:grep|rg|findstr|awk|sed|cat|tail|head|more|less)\b/i;
+const SOURCE_MAP_RECURSIVE_SCAN_ROOT_PATTERN = /(?:^|[\s"'])(?:\.\/)?(?:node_modules|dist|build|coverage)(?:$|[\s"'|;)])/i;
+const SOURCE_MAP_RECURSIVE_SCAN_TOOL_PATTERN =
+  /\brg\b|\bgrep\b[\s\S]*\b--recursive\b|\bgrep\b[\s\S]*\s-[a-z]*r[a-z]*\b|\bfindstr\b[\s\S]*\s\/s\b/i;
+const SOURCE_MAP_EXCLUDE_PATTERN = /--exclude(?:=|\s+)["']?\*\.map["']?|(?:--glob|-g)\s+["']?!\*\.map["']?/i;
 
 export type BashGuardPolicy = {
   id: string;
@@ -73,6 +79,23 @@ export function upstreamPiPackageMutationReason(): string {
   ].join(" ");
 }
 
+export function detectSourceMapBlastRadiusScan(command: string): boolean {
+  const normalized = command.toLowerCase().replace(/\\/g, "/");
+  if (SESSION_LOG_FILENAME_ONLY_PATTERN.test(normalized)) return false;
+  if (SESSION_LOG_COUNT_ONLY_PATTERN.test(normalized)) return false;
+  if (SOURCE_MAP_PATH_PATTERN.test(normalized) && SOURCE_MAP_CONTENT_TOOL_PATTERN.test(normalized)) return true;
+  if (!SOURCE_MAP_RECURSIVE_SCAN_TOOL_PATTERN.test(normalized)) return false;
+  if (!SOURCE_MAP_RECURSIVE_SCAN_ROOT_PATTERN.test(normalized)) return false;
+  return !SOURCE_MAP_EXCLUDE_PATTERN.test(normalized);
+}
+
+export function sourceMapBlastRadiusScanReason(): string {
+  return [
+    "Blocked by guardrails-core (source_map_blast_radius): command can dump source maps or generated bundles into context.",
+    "Use bounded read/offset, filename/count-only search, or add an explicit *.map exclude such as --exclude='*.map' or -g '!*.map'.",
+  ].join(" ");
+}
+
 export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
   {
     id: "command-sensitive-shell-marker-check",
@@ -87,6 +110,13 @@ export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
     detect: detectUpstreamPiPackageMutation,
     reason: upstreamPiPackageMutationReason,
     auditKey: "guardrails-core.upstream-pi-package-mutation-block",
+  },
+  {
+    id: "source-map-blast-radius-scan",
+    when: "tool(bash)",
+    detect: detectSourceMapBlastRadiusScan,
+    reason: sourceMapBlastRadiusScanReason,
+    auditKey: "guardrails-core.source-map-blast-radius-scan-block",
   },
   {
     id: "pi-root-recursive-scan",
