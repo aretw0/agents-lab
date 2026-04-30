@@ -19,6 +19,7 @@ import {
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesCollectorResult,
   resolveProtectedScopesMeasuredSignal,
+  resolveStopConditionsClearCollectorResult,
   resolveStopConditionsClearMeasuredSignal,
   resolveUnattendedContinuationPlan,
   resolveValidationKnownCollectorResult,
@@ -42,6 +43,38 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives stop-conditions collector results from local read outcomes", () => {
+    const clear = resolveStopConditionsClearCollectorResult({
+      readStatus: "observed",
+      conditions: [
+        { kind: "risk", present: false, evidence: "risk=none" },
+        { kind: "blocker", present: false, evidence: "blocker=none" },
+      ],
+    });
+    const present = resolveStopConditionsClearCollectorResult({
+      readStatus: "observed",
+      conditions: [
+        { kind: "risk", present: true, evidence: "risk=high" },
+        { kind: "protected-scope", present: true, evidence: "protected=.github" },
+      ],
+    });
+    const missing = resolveStopConditionsClearCollectorResult({
+      readStatus: "missing",
+    });
+    const readError = resolveStopConditionsClearCollectorResult({
+      readStatus: "error",
+    });
+    const missingConditions = resolveStopConditionsClearCollectorResult({
+      readStatus: "observed",
+    });
+
+    expect(clear).toEqual({ fact: "stop-conditions", status: "observed", evidence: "stops=clear checked=2" });
+    expect(present).toEqual({ fact: "stop-conditions", status: "invalid", evidence: "stops=present count=2 first=risk|protected-scope" });
+    expect(missing).toEqual({ fact: "stop-conditions", status: "missing", evidence: "stops=missing" });
+    expect(readError).toEqual({ fact: "stop-conditions", status: "invalid", evidence: "stops=read-error" });
+    expect(missingConditions).toEqual({ fact: "stop-conditions", status: "invalid", evidence: "stops=missing-conditions" });
+  });
+
   it("derives validation collector results from local read outcomes", () => {
     const markerCheck = resolveValidationKnownCollectorResult({
       readStatus: "observed",

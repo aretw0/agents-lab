@@ -16,6 +16,7 @@ import {
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveProtectedScopesCollectorResult,
+  resolveStopConditionsClearCollectorResult,
   resolveRecurringFailureHardening,
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
@@ -292,6 +293,22 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "validation",
       status: "invalid",
       evidence: "validation=unknown",
+    });
+    expect(resolveStopConditionsClearCollectorResult({
+      readStatus: "observed",
+      conditions: [{ kind: "blocker", present: false, evidence: "blocker=none" }],
+    })).toEqual({
+      fact: "stop-conditions",
+      status: "observed",
+      evidence: "stops=clear checked=1",
+    });
+    expect(resolveStopConditionsClearCollectorResult({
+      readStatus: "observed",
+      conditions: [{ kind: "blocker", present: true, evidence: "blocker=yes" }],
+    })).toEqual({
+      fact: "stop-conditions",
+      status: "invalid",
+      evidence: "stops=present count=1 first=blocker",
     });
   });
 });

@@ -488,6 +488,27 @@ export function resolveValidationKnownCollectorResult(input: {
   };
 }
 
+export function resolveStopConditionsClearCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  conditions?: NudgeFreeLoopStopConditionSignal[];
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "stop-conditions", status: "missing", evidence: "stops=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "stop-conditions", status: "invalid", evidence: "stops=read-error" };
+  }
+  if (!Array.isArray(input.conditions)) {
+    return { fact: "stop-conditions", status: "invalid", evidence: "stops=missing-conditions" };
+  }
+  const signal = resolveStopConditionsClearMeasuredSignal({ conditions: input.conditions });
+  return {
+    fact: "stop-conditions",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

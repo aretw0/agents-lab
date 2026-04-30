@@ -7323,6 +7323,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:22:41.286Z",
       "evidence": "Added and re-exported pure resolveValidationKnownCollectorResult. It derives validation collector status from local readStatus, validation kind, and optional focalGate by reusing resolveValidationKnownMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover marker-check, structured-read, focal-test with gate, focal-test missing gate, unknown, missing read, read-error, and missing kind. Canonical re-export smoke covers focal-test with gate and unknown. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 38/38; cmd.exe /c npm run test:monitor:smoke --silent passed 250/250 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Validation-known now has a local-observed collector building block so future audit envelopes cannot continue without an explicit focal validation gate."
+    },
+    {
+      "id": "VER-BUD-567",
+      "target": "TASK-BUD-292",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:27:45.860Z",
+      "evidence": "Added and re-exported pure resolveStopConditionsClearCollectorResult. It derives stop-conditions collector status from local readStatus and observed stop condition signals by reusing resolveStopConditionsClearMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover clear observed, present stop conditions invalid, missing read, read-error, and missing conditions. Canonical re-export smoke covers clear and blocker-present invalid. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 39/39; cmd.exe /c npm run test:monitor:smoke --silent passed 251/251 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Stop-conditions now has a local-observed collector building block so future audit envelopes cannot continue through blockers or risk conditions."
     }
   ]
 }
