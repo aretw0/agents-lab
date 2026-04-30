@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T18:29:21.036Z",
-  "context": "After confirmed real /reload, source-map blast-radius guard live validation passed. Direct grep against a .map file was blocked with source_m [snip] s TASK-BUD-377 again as runtime-proven. [truncated:+165 chars]",
+  "timestamp": "2026-04-30T18:35:09.371Z",
+  "context": "Implemented first backend-first structured interview primitive for human decision gaps. Added pure resolver resolveStructuredInterview, runti [snip] oad is required before live validation. [truncated:+287 chars]",
+  "current_tasks": [
+    "TASK-BUD-374"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-377 live validation evidence.",
-    "Continue next essential local-first task, likely TASK-BUD-374 backend-first structured interview/forms primitive.",
-    "Keep strong unattended blocked until tested long-run cancel/fallback and explicit operator decision."
+    "Commit TASK-BUD-374 implementation/docs/board evidence.",
+    "Reload before live validation of structured_interview_plan tool.",
+    "After reload, validate needs-human-answer, complete, and invalid paths via tool."
   ],
   "blockers": [
+    "Reload required before live validation because runtime tool surface changed.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "blocked: grep direct node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map [snip] => source_map_blast_radius [truncated:+1 chars]",
-    "allowed: grep -RIn --exclude=\"*.map\" impossible marker over dist/core => no guard block/no output",
-    "board_verification_append VER-BUD-665 ok"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts: 3 passed",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
+    "board_verification_append VER-BUD-667 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T18:29:21.036Z",
+    "generatedAtIso": "2026-04-30T18:35:09.371Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-live-validation",
-    "focus_task_status": "completed"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T18:29:21.036Z",
+      "atIso": "2026-04-30T18:35:09.371Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-live-validation"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-377"
   ]
 }

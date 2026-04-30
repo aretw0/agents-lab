@@ -83,6 +83,7 @@ export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessSt
 export { buildRefactorFormatTargetResult, buildRefactorOrganizeImportsResult, buildRefactorRenameSymbolResult } from "./guardrails-core-macro-refactor";
 export { parseStructuredJsonSelector, resolveStructuredIoKind, structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
 export { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
+export { resolveStructuredInterview } from "./guardrails-core-structured-interview";
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";

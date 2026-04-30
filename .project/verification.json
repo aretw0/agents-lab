@@ -8223,6 +8223,15 @@
       "method": "live-guard-after-reload",
       "timestamp": "2026-04-30T18:29:10.506Z",
       "evidence": "Completed live validation after confirmed /reload. The source-map blast-radius guard blocked direct grep of node_modules/@mariozechner/pi-coding-agent/dist/core/agent-session.js.map with source_map_blast_radius. The allowed alternative grep -RIn --exclude=\"*.map\" over the same root executed without guard block and produced no output. Prior mismatch was due stale runtime before real reload. [rationale:risk-control] Runtime now prevents source-map/context blast while preserving bounded/excluded diagnostics."
+    },
+    {
+      "id": "VER-BUD-667",
+      "target": "TASK-BUD-374",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T18:34:57.912Z",
+      "evidence": "Implemented backend-first structured interview primitive and runtime surface. Added resolveStructuredInterview helper and structured_interview_plan tool: validates question schema/answers, supports defaults, allowUnknown, allowSkip, nextQuestionId, decisions complete/needs-human-answer/invalid, compact evidence, UI-independent semantics, authorization=none, dispatchAllowed=false. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts => 3 passed. safe_marker_check docs matched 5/5."
     }
   ]
 }
