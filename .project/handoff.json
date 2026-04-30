@@ -1,45 +1,45 @@
 {
-  "timestamp": "2026-04-30T21:35:03.633Z",
-  "context": "Applied operator correction: /btw prior-art research should not couple us to mitsuhiko/agent-stuff. Updated research/doctrine to say the next [snip] ix. /btw first-party remains unexposed. [truncated:+246 chars]",
+  "timestamp": "2026-04-30T21:37:40.906Z",
+  "context": "Closed older ESC/cancel backlog TASK-BUD-255 by subsumption into completed TASK-BUD-375. No new interactive ESC test run. Evidence from TASK- [snip] allback and explicit operator decision. [truncated:+318 chars]",
   "next_actions": [
-    "Commit anti-coupling correction and TASK-BUD-389 backlog.",
-    "Continue bounded local-safe lane; do not implement /btw until curatorial matrix task is explicitly selected.",
-    "Keep checkout-cache Ops incident TASK-BUD-387 planned."
+    "Commit TASK-BUD-255 completion evidence.",
+    "Select next bounded local-safe task; context is near checkpoint threshold, keep output short.",
+    "Keep TASK-BUD-383 and TASK-BUD-387 planned."
   ],
   "blockers": [
-    "Context is warn/bounded-slices; keep slices short and checkpoint fresh.",
-    "/btw first-party remains not exposed.",
-    "TASK-BUD-387 Ops checkout-cache hardening remains planned."
+    "Context is warn near checkpoint; keep bounded slices and checkpoint fresh.",
+    "Git maintenance cleanup remains opt-in.",
+    "Strong unattended/remote/scheduler remain blocked without explicit operator de [snip] n and remaining gates. [truncated:+5 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check research anti-coupling markers matched=4/4",
-    "safe_marker_check doctrine anti-coupling markers matched=3/3",
-    "npm run docs:package:sync => ok"
+    "board_update TASK-BUD-255 status=in-progress ok",
+    "board_task_complete TASK-BUD-255 VER-BUD-706 ok",
+    "context_watch_status before slice => warn 67 continue-bounded handoff=fresh"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:35:03.633Z",
+    "generatedAtIso": "2026-04-30T21:37:40.906Z",
     "level": "warn",
-    "percent": 62,
+    "percent": 67,
     "action": "continue",
-    "recommendation": "commit-btw-anti-coupling-correction",
+    "recommendation": "commit-completion-then-recheck-gates",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:35:03.633Z",
+      "atIso": "2026-04-30T21:37:40.906Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 62,
+      "percent": 67,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-btw-anti-coupling-correction"
+      "recommendation": "commit-completion-then-recheck-gates"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-388"
+    "TASK-BUD-255"
   ]
 }

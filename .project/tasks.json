@@ -6018,7 +6018,7 @@
     {
       "id": "TASK-BUD-255",
       "description": "[P2/backlog] Investigar confiabilidade de ESC/cancelamento durante comandos ou operações no pi.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/guides/control-plane-operating-doctrine.md",
@@ -6030,7 +6030,8 @@
         "Verificar terminal/keybindings/sinal de abort sem modificar configuração protegida sem intenção explícita.",
         "Documentar comportamento esperado e, se necessário, criar guard/teste para operações longas canceláveis."
       ],
-      "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual.\n2026-04-30: triagem bounded encontrou que esta investigação foi subsumida e concluída com mais profundidade em TASK-BUD-375: política por camadas, fallback, go/no-go matrix e fix concreto de AbortSignal em claude_code_execute. Fechamento por evidência acumulada, sem nova investigação interativa de ESC.\n2026-04-30: desvio interrompido por steering do operador para preservar o fio do /btw. Voltando esta task para planned; continuar TASK-BUD-388 antes de retomar cancelamento/ESC."
+      "notes": "Backlog criado a partir do relato do operador sobre tentativa de ESC para cancelar /reloadd. [rationale:risk-control] Cancelamento confiável é relevante para trabalho ininterrupto seguro, mas não bloqueia a micro-slice atual.\n2026-04-30: triagem bounded encontrou que esta investigação foi subsumida e concluída com mais profundidade em TASK-BUD-375: política por camadas, fallback, go/no-go matrix e fix concreto de AbortSignal em claude_code_execute. Fechamento por evidência acumulada, sem nova investigação interativa de ESC.\n2026-04-30: desvio interrompido por steering do operador para preservar o fio do /btw. Voltando esta task para planned; continuar TASK-BUD-388 antes de retomar cancelamento/ESC.\n2026-04-30: retomado e fechado por subsunção: investigação mais específica e completa foi executada em TASK-BUD-375, com classificação por camadas, fallback, matriz go/no-go e fix/teste de AbortSignal em claude_code_execute. Não repetir teste interativo de Esc nesta fatia bounded.\n2026-04-30: concluído por evidência de TASK-BUD-375/VER-BUD-661. Esta backlog item era duplicata mais antiga da investigação de Esc/cancelamento já fechada de forma conservadora.",
+      "verification": "VER-BUD-706"
     },
     {
       "id": "TASK-BUD-256",

@@ -8574,6 +8574,15 @@
       "method": "curation-anti-coupling-correction",
       "timestamp": "2026-04-30T21:34:54.965Z",
       "evidence": "Adjusted /btw prior-art docs to avoid coupling to mitsuhiko/agent-stuff. Research now states the work is curatorial: oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw and other references are design-decision sources, not automatic backend targets; agent-stuff is not the preferred target by default. Doctrine now says the next step is a curatorial comparison, not package coupling. Created TASK-BUD-389 for a future design-decision matrix. Validation: safe_marker_check research 4/4; doctrine 3/3; docs sync/check ok."
+    },
+    {
+      "id": "VER-BUD-706",
+      "target": "TASK-BUD-255",
+      "target_type": "task",
+      "status": "passed",
+      "method": "superseded-by-completed-investigation",
+      "timestamp": "2026-04-30T21:37:31.668Z",
+      "evidence": "TASK-BUD-255 acceptance is satisfied by the later, more specific completed TASK-BUD-375 (verification VER-BUD-661). Evidence accumulated there: Esc/cancel reliability classified as a human-control incident; responsibility separated across terminal/sandbox/host, upstream pi/TUI/runtime, and local pi-stack extensions; npm run pi:dev/source-aware caveats documented; fallback procedure and go/no-go matrix documented in control-plane doctrine; concrete AbortSignal propagation gap fixed in claude_code_execute and smoke-tested/live dry-run validated. Conservative conclusion remains: small bounded local work may continue, but strong unattended/loop/scheduler/remote remains blocked until tested long-run cancel/fallback and explicit operator decision."
     }
   ]
 }
