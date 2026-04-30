@@ -12,8 +12,12 @@
     "url": "git+https://github.com/aretw0/agents-lab.git",
     "directory": "packages/lab-skills"
   },
+  "scripts": {
+    "prepack": "node ../../scripts/sync-package-docs.mjs --package @aretw0/lab-skills"
+  },
   "files": [
     "skills",
+    "docs",
     "README.md"
   ],
   "pi": {

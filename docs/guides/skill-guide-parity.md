@@ -38,6 +38,17 @@ Paridade mínima: <principio-1>; <principio-2>; <hard-stop-ou-tool>
 
 Os markers devem evitar crases/backticks desnecessários para facilitar validação por `safe_marker_check`.
 
+## Distribuição dos guides citados
+
+Quando uma skill cita `docs/guides/...`, o pacote que distribui a skill deve levar uma cópia mínima desses guides. Caso contrário, a referência funciona no monorepo mas quebra para usuários que instalaram via npm, diferente do padrão do próprio pi de consultar documentação distribuída junto do pacote.
+
+Regra operacional:
+
+1. Se uma skill referencia um guide, adicionar esse guide ao manifesto de empacotamento em `scripts/sync-package-docs.mjs`.
+2. O pacote deve incluir `docs` em `files` e rodar `prepack` para sincronizar as cópias.
+3. Validar com `npm run docs:package:check` antes de publicar.
+4. As cópias empacotadas são geradas; editar sempre o guide canônico em `docs/guides`.
+
 ## Fluxo incremental de revisão
 
 1. Escolher uma família pequena de guides/skills, não o repositório inteiro.
@@ -51,6 +62,8 @@ Os markers devem evitar crases/backticks desnecessários para facilitar validaç
 ## Influência MDT
 
 A referência concreta para inspiração futura é https://github.com/ifiokjr/mdt. Ela deve ser usada como fonte bounded para pensar em estrutura, descoberta e manutenção documental, não como pesquisa ampla automática. Quando TASK-BUD-191 for explicitamente selecionada para essa etapa, extrair poucos princípios aplicáveis e registrar decisões no board.
+
+Aplicação imediata inspirada nessa lembrança: tratar docs como artefatos distribuíveis junto das skills, reduzir duplicação manual por geração/sync, e manter o guide canônico como fonte única enquanto pacotes recebem cópias auditáveis.
 
 ## Critério de qualidade
 

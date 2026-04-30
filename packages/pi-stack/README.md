@@ -85,7 +85,7 @@ Diagnóstico/aplicação rápida:
 /monitor-provider template
 ```
 
-Detalhes: [`docs/guides/monitor-overrides.md`](../../docs/guides/monitor-overrides.md)
+Detalhes: [`docs/guides/monitor-overrides.md`](docs/guides/monitor-overrides.md)
 
 > Gate de release: não publicar RC/final com monitor runtime instável. Faça smoke (>=3 turns) com monitores ligados e bloqueie publish se surgir novo `classify failed`.
 
@@ -131,11 +131,11 @@ Ativar: `/settings` → selecionar `agents-lab`
 
 > Convenção: `/doctor` permanece o diagnóstico global de ambiente/runtime. Comandos verticais como `/monitor-provider`, `/colony-pilot` e `/scheduler-governance` fazem diagnóstico/controle de domínio.
 >
-> Guia de governança provider/model para colônia e multi-agentes: [`docs/guides/colony-provider-model-governance.md`](../../docs/guides/colony-provider-model-governance.md)
+> Guia de governança provider/model para colônia e multi-agentes: [`docs/guides/colony-provider-model-governance.md`](docs/guides/colony-provider-model-governance.md)
 >
-> Guia de governança forte do scheduler: [`docs/guides/scheduler-governance.md`](../../docs/guides/scheduler-governance.md)
+> Guia de governança forte do scheduler: [`docs/guides/scheduler-governance.md`](docs/guides/scheduler-governance.md)
 >
-> Guia operacional de soberania (inclui CI artifact + comentário de PR): [`docs/guides/stack-sovereignty-user-guide.md`](../../docs/guides/stack-sovereignty-user-guide.md)
+> Guia operacional de soberania (inclui CI artifact + comentário de PR): [`docs/guides/stack-sovereignty-user-guide.md`](docs/guides/stack-sovereignty-user-guide.md)
 
 ## Baseline de projeto (.pi/settings.json)
 

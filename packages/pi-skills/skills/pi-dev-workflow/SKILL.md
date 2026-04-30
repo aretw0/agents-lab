@@ -11,6 +11,13 @@ description: >
 
 Desenvolver extensões, skills ou temas para o pi exige alternar entre **código local** (para iterar rápido) e **pacotes publicados** (para validar a experiência do usuário final). Esta skill documenta os padrões que funcionam.
 
+## Paridade guide-skill
+
+Guide canônico: docs/guides/testing-isolation.md
+Guide complementar: docs/guides/control-plane-operating-doctrine.md
+Paridade mínima: PI_CODING_AGENT_DIR isolado; settings canônico vs derivado; paths portáveis; reload obrigatório; não mutar pacote upstream do pi
+Última revisão de paridade: 2026-04-30
+
 ## O Problema
 
 Quando você desenvolve um pacote pi dentro de um monorepo, surgem 3 conflitos comuns:
@@ -101,6 +108,19 @@ npm run pi:local       # pi carrega do workspace
 npm run pi:published   # pi carrega do npm
 ```
 
+## Workflow isolado neste repositório
+
+No `agents-lab`, o fluxo de desenvolvimento local usa `npm run pi:dev`, que chama `scripts/pi-isolated.mjs --dev`, define `PI_CODING_AGENT_DIR=.sandbox/pi-agent` e carrega o CLI local em `node_modules/@mariozechner/pi-coding-agent/dist/cli.js`. Esse sandbox é estado derivado local e não deve ser tratado como configuração canônica do projeto.
+
+Regras práticas:
+
+- `.pi/settings.json` é o baseline canônico versionável do projeto;
+- `.sandbox/pi-agent/settings.json` é derivado local e deve evitar paths absolutos específicos da máquina;
+- paths repo-local no sandbox devem ser normalizados para paths relativos portáveis;
+- depois de mudar extensões/tools carregadas, fazer `/reload` antes de validação live;
+- nunca editar diretamente o pacote upstream/original do pi em `node_modules/@mariozechner/pi-coding-agent`; use extensão, wrapper, patch controlado ou PR upstream;
+- para diagnosticar fontes carregadas, verificar launcher, `PI_CODING_AGENT_DIR` e sourceInfo antes de culpar pacote publicado/global.
+
 ## Configuração do Projeto (.pi/settings.json)
 
 Para quem clona o monorepo e quer usar com pi imediatamente:
@@ -141,9 +161,13 @@ npm workspaces faz hoisting → `node_modules/` local vazio → tarball sem deps
 
 Hack frágil que duplica deps e não resolve o tarball publicado.
 
-### ❌ Editar o pacote que o pi está carregando
+### ❌ Editar o pacote upstream/original do pi
 
-Editar extensões carregadas na sessão ativa causa conflitos. Use `/reload` ou reinicie o pi.
+Não altere diretamente `node_modules/@mariozechner/pi-coding-agent`. Correções locais devem virar extensão, wrapper, patch controlado e auditável, ou PR upstream.
+
+### ❌ Validar runtime sem reload
+
+Editar extensões carregadas na sessão ativa causa conflitos ou validação stale. Use `/reload` ou reinicie o pi antes de validar comportamento live.
 
 ## Estrutura Recomendada
 

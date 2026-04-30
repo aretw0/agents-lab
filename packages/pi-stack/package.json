@@ -12,6 +12,9 @@
 		"url": "git+https://github.com/aretw0/agents-lab.git",
 		"directory": "packages/pi-stack"
 	},
+	"scripts": {
+		"prepack": "node ../../scripts/sync-package-docs.mjs --package @aretw0/pi-stack"
+	},
 	"bin": {
 		"pi-stack": "install.mjs"
 	},
@@ -20,6 +23,7 @@
 		"package-list.mjs",
 		"extensions",
 		"themes",
+		"docs",
 		"README.md"
 	],
 	"pi": {

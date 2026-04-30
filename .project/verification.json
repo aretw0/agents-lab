@@ -8304,6 +8304,15 @@
       "method": "skill-parity+safe_marker_check",
       "timestamp": "2026-04-30T19:05:31.861Z",
       "evidence": "Updated packages/lab-skills/skills/control-plane-ops/SKILL.md with guide-skill parity markers for docs/guides/control-plane-operating-doctrine.md and a concise hard-stop section covering recent local-first control rules: no dispatch from readiness evidence, no strong unattended without tested cancel/fallback, no upstream pi mutation, no source-map/log blast diagnostics, no automatic background servers without process primitive, and trusted SKILL.md bounded reads only. safe_marker_check matched 6/6 markers. This is a bounded slice of TASK-BUD-191, not full task closure."
+    },
+    {
+      "id": "VER-BUD-676",
+      "target": "TASK-BUD-191",
+      "target_type": "task",
+      "status": "passed",
+      "method": "packaged-docs-sync+safe_marker_check",
+      "timestamp": "2026-04-30T19:17:53.231Z",
+      "evidence": "Addressed package-doc availability for skill guide references. Added scripts/sync-package-docs.mjs, root docs:package:sync/check scripts, prepack hooks and files docs entries for @aretw0/lab-skills, @aretw0/pi-skills, and @aretw0/pi-stack. Synced cited guides into package-local docs/guides and updated pi-stack README guide links to package-local docs. npm run docs:package:sync and npm run docs:package:check both passed. safe_marker_check passed for pi-dev-workflow parity markers and skill-guide-parity distribution/MDT policy markers. This follows the MDT reminder by keeping canonical docs in root guides and generated package copies for distribution."
     }
   ]
 }
