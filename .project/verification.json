@@ -7035,6 +7035,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:10:20.354Z",
       "evidence": "Added pure resolveMeasuredNudgeFreeLoopCanaryGate helper. It accepts one structured signal bundle keyed by measured gate, derives all canary booleans internally, and calls resolveNudgeFreeLoopCanaryGate with signalSource='measured' plus structured measuredEvidence. It does not expose runtime automation or scheduler behavior. Tests cover ready with all signals ok and blocked when critical measured signals report unexpected git state, protected scope pending, and stop condition present. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 13/13; cmd.exe /c npm run test:monitor:smoke --silent passed 228/228 across 32 files. [rationale:risk-control] Measured readiness now has a pure helper that derives booleans and evidence from the same signal bundle instead of accepting separate spoofable parameters."
+    },
+    {
+      "id": "VER-BUD-535",
+      "target": "TASK-BUD-259",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:12:52.040Z",
+      "evidence": "Re-exported resolveMeasuredNudgeFreeLoopCanaryGate via guardrails-core exports and added hardening re-export smoke coverage. The test verifies the helper is reachable through the canonical guardrails-core surface and still returns advisory/effect=none/activation=none readiness when supplied complete measured signals. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 228/228 across 32 files. [rationale:risk-control] Future measured aggregators can import the safe primitive from the canonical surface rather than duplicating readiness logic."
     }
   ]
 }

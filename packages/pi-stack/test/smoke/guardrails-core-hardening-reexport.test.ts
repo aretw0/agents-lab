@@ -4,6 +4,7 @@ import {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
+  resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveRecurringFailureHardening,
   resolveValidationMethodPlan,
 } from "../../extensions/guardrails-core";
@@ -50,6 +51,26 @@ describe("guardrails-core hardening re-exports", () => {
     })).toMatchObject({
       decision: "use-safe-marker-check",
       canValidate: true,
+    });
+
+    expect(resolveMeasuredNudgeFreeLoopCanaryGate({
+      optIn: true,
+      signals: {
+        "next-local-safe": { ok: true, evidence: "selector=local-safe" },
+        "checkpoint-fresh": { ok: true, evidence: "handoff=fresh" },
+        "handoff-budget-ok": { ok: true, evidence: "handoff-budget=ok" },
+        "git-state-expected": { ok: true, evidence: "git=expected" },
+        "protected-scopes-clear": { ok: true, evidence: "protected=clear" },
+        "cooldown-ready": { ok: true, evidence: "cooldown=ready" },
+        "validation-known": { ok: true, evidence: "validation=known" },
+        "stop-conditions-clear": { ok: true, evidence: "stops=clear" },
+      },
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      decision: "ready",
+      canContinueWithoutNudge: true,
     });
   });
 });

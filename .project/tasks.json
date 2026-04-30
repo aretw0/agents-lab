@@ -6098,6 +6098,30 @@
       ],
       "notes": "Criado como próximo passo do caminho measured sem abrir runtime/loop. [rationale:risk-control] A origem measured deve derivar booleans e evidência do mesmo pacote de sinais, evitando mismatch/spoof por parâmetros separados.\n[2026-04-30T02:09:47Z] slice=1 focus=TASK-BUD-258 gate=test:monitor:smoke-228/228 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Helper measured puro criado sem ativar loop/scheduler.",
       "verification": "VER-BUD-534"
+    },
+    {
+      "id": "TASK-BUD-259",
+      "description": "[P1] Reexportar helper measured nudge-free pelo guardrails-core.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-258"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "resolveMeasuredNudgeFreeLoopCanaryGate fica disponível via guardrails-core exports.",
+        "Teste de reexport cobre que o helper measured continua advisory/effect=none e sem ativação.",
+        "Smoke principal permanece verde.",
+        "Fechamento usa board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para tornar o helper measured disponível pelo caminho canônico de guardrails. [rationale:risk-control] Futuros agregadores devem importar a primitive segura pelo surface canônico, não recriar lógica paralela.\n[2026-04-30T02:12:30Z] slice=1 focus=TASK-BUD-259 gate=test:monitor:smoke-228/228 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Helper measured reexportado pelo caminho canônico.",
+      "verification": "VER-BUD-535"
     }
   ]
 }
