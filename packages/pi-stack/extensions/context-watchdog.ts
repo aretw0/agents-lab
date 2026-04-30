@@ -97,7 +97,7 @@ import {
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
-import { resolveOneSliceLocalCanaryPlan } from "./guardrails-core-unattended-continuation";
+import { buildOneSliceLocalCanaryDispatchDecisionPacket, resolveOneSliceLocalCanaryPlan } from "./guardrails-core-unattended-continuation";
 import {
 	buildLocalContinuityAudit,
 	formatLocalContinuityAuditSummary,
@@ -1939,19 +1939,35 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const collectorStatus = (fact: string) => localAudit.collectorResults.find((entry) => entry.fact === fact)?.status;
 			const focusStatus = focusTasks !== "none-listed" && !focusTasks.includes(",") ? taskStatusById[focusTasks] ?? taskStatusById[focusTasks.toUpperCase()] : undefined;
 			const readinessReady = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const checkpointFresh = collectorStatus("checkpoint") === "observed";
+			const handoffBudgetOk = collectorStatus("handoff-budget") === "observed";
+			const gitStateExpected = collectorStatus("git-state") === "observed";
+			const protectedScopesClear = collectorStatus("protected-scopes") === "observed" && protectedPaths.length === 0;
+			const validationKnown = collectorStatus("validation") === "observed";
+			const stopConditionsClear = collectorStatus("stop-conditions") === "observed";
+			const singleFocus = focusTasks !== "none-listed" && !focusTasks.includes(",");
 			const plan = resolveOneSliceLocalCanaryPlan({
 				readinessReady,
 				authorization: "none",
-				checkpointFresh: collectorStatus("checkpoint") === "observed",
-				handoffBudgetOk: collectorStatus("handoff-budget") === "observed",
-				gitStateExpected: collectorStatus("git-state") === "observed",
-				protectedScopesClear: collectorStatus("protected-scopes") === "observed" && protectedPaths.length === 0,
-				validationKnown: collectorStatus("validation") === "observed",
-				stopConditionsClear: collectorStatus("stop-conditions") === "observed",
+				checkpointFresh,
+				handoffBudgetOk,
+				gitStateExpected,
+				protectedScopesClear,
+				validationKnown,
+				stopConditionsClear,
 				risk: false,
 				ambiguous: false,
 				repeatRequested: false,
 				sliceAlreadyCompleted: focusStatus === "completed",
+			});
+			const decisionPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+				plan,
+				rollbackPlanKnown: gitStateExpected,
+				validationGateKnown: validationKnown,
+				stagingScopeKnown: singleFocus && protectedScopesClear,
+				commitScopeKnown: singleFocus && gitStateExpected,
+				checkpointPlanned: checkpointFresh && handoffBudgetOk,
+				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
 			});
 			const summary = formatContextWatchOneSliceCanaryPreviewSummary(plan);
 			return {
@@ -1959,6 +1975,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				details: {
 					summary,
 					plan,
+					decisionPacket,
 					focusTasks,
 					focusStatus,
 					diagnosticsSummary,

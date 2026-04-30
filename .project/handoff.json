@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-04-30T11:06:32.401Z",
-  "context": "TASK-BUD-344 completed. buildOneSliceLocalCanaryDispatchDecisionPacket is now re-exported through guardrails-core canonical exports and cover [snip] as exposed and no automation activated. [truncated:+175 chars]",
+  "timestamp": "2026-04-30T11:15:18.332Z",
+  "context": "TASK-BUD-345 completed. context_watch_one_slice_canary_preview now includes a decisionPacket in details, built from the no-execution buildOne [snip] eload is needed before live validation. [truncated:+379 chars]",
   "next_actions": [
-    "commit re-export/board/handoff evidence",
-    "future optional slice: compose the dispatch decision packet into a read-only preview/details s [snip] till dispatchAllowed=false [truncated:+9 chars]",
-    "do not implement execution path without explicit operator authorization and stop/rollback contract"
+    "commit preview decisionPacket/board/handoff evidence",
+    "reload before live-validating decisionPacket details in context_watch_one_slice_canary_preview",
+    "after reload, run preview and confirm decisionPacket.dispatchAllowed=false"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before updated preview details are available live."
+  ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts --silent passed 1/1",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
     "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-344 verification=VER-BUD-618 status=completed"
+    "smoke asserts decisionPacket mode=decision-packet activation=none authorization=none dispatchA [snip] n=ready-for-human-decision [truncated:+47 chars]"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:06:32.401Z",
+    "generatedAtIso": "2026-04-30T11:15:18.332Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; no-execution dispatch packet is now canonical and non-operational.",
+    "recommendation": "Commit evidence; reload before live validation of decisionPacket in preview details.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:06:32.401Z",
+      "atIso": "2026-04-30T11:15:18.332Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; no-execution dispatch packet is now canonical and non-operational."
+      "recommendation": "Commit evidence; reload before live validation of decisionPacket in preview details."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-344"
+    "TASK-BUD-345"
   ]
 }

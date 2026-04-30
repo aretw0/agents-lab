@@ -1437,6 +1437,15 @@ describe("context-watchdog", () => {
 					canPrepareSlice: true,
 					mustStopAfterSlice: true,
 				},
+				decisionPacket: {
+					mode: "decision-packet",
+					activation: "none",
+					authorization: "none",
+					dispatchAllowed: false,
+					requiresHumanDecision: true,
+					oneSliceOnly: true,
+					decision: "ready-for-human-decision",
+				},
 			});
 			expect(formatContextWatchOneSliceCanaryPreviewSummary({
 				decision: "blocked",

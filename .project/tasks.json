@@ -8328,6 +8328,34 @@
       ],
       "notes": "[rationale:risk-control] O decision packet de dispatch deve estar disponível para composição futura via export canônico, sem virar execução ou autorização operacional.\n[2026-04-30T11:06:01Z] slice=1 focus=TASK-BUD-344 gate=reexport-1/1+test:monitor:smoke-267/267 commit=pending export=buildOneSliceLocalCanaryDispatchDecisionPacket dispatchAllowed=false. [rationale:risk-control] Decision packet reexportado sem tool/runtime.",
       "verification": "VER-BUD-618"
+    },
+    {
+      "id": "TASK-BUD-345",
+      "description": "[P1] Compor decision packet no details da preview one-slice sem execução.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-344"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_one_slice_canary_preview deve incluir decisionPacket read-only em details usando buildOneSliceLocalCanaryDispatchDecisionPacket.",
+        "O packet deve manter dispatchAllowed=false, requiresHumanDecision=true, authorization=none e activation=none.",
+        "A preview não deve ganhar parâmetros de execução nem disparar staging/commit/board/checkpoint/scheduler/remote/self-reload/loop.",
+        "Contracts usados para o packet devem ser derivados de evidência local/readiness existente e permanecer conservadores.",
+        "Smoke deve validar cenário verde com decisionPacket ready-for-human-decision e dispatchAllowed=false.",
+        "Smoke deve validar ausência de knobs execute/dispatch no schema.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload porque comportamento de tool runtime mudou."
+      ],
+      "notes": "[rationale:risk-control] Mostrar o decision packet na preview ajuda o operador a ver o que faltaria para uma decisão futura sem transformar prepare=yes em dispatch.\n[2026-04-30T11:14:51Z] slice=1 focus=TASK-BUD-345 gate=context-watchdog-48/48+test:monitor:smoke-267/267 commit=pending preview.details.decisionPacket=yes dispatchAllowed=false reload-needed=yes. [rationale:risk-control] Decision packet entrou na preview sem execução/autorização.",
+      "verification": "VER-BUD-619"
     }
   ]
 }
