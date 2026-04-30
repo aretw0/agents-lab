@@ -6,6 +6,7 @@ import {
   resolveCheckpointFreshCollectorResult,
   resolveCheckpointFreshMeasuredSignal,
   resolveCooldownReadyMeasuredSignal,
+  resolveGitStateExpectedCollectorResult,
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetCollectorResult,
   resolveHandoffBudgetMeasuredSignal,
@@ -39,6 +40,43 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives git-state collector results from local read outcomes", () => {
+    const clean = resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      changedPaths: [],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const expected = resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      changedPaths: ["packages/pi-stack/extensions/foo.ts", "packages/pi-stack/test/foo.test.ts"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts", "packages/pi-stack/test/foo.test.ts"],
+    });
+    const unexpected = resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      changedPaths: ["packages/pi-stack/extensions/foo.ts", ".pi/settings.json"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const missing = resolveGitStateExpectedCollectorResult({
+      readStatus: "missing",
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const readError = resolveGitStateExpectedCollectorResult({
+      readStatus: "error",
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const missingChanges = resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+
+    expect(clean).toEqual({ fact: "git-state", status: "observed", evidence: "git=clean changed=0" });
+    expect(expected).toEqual({ fact: "git-state", status: "observed", evidence: "git=expected changed=2" });
+    expect(unexpected).toEqual({ fact: "git-state", status: "invalid", evidence: "git=unexpected count=1 first=.pi/settings.json" });
+    expect(missing).toEqual({ fact: "git-state", status: "missing", evidence: "git=missing" });
+    expect(readError).toEqual({ fact: "git-state", status: "invalid", evidence: "git=read-error" });
+    expect(missingChanges).toEqual({ fact: "git-state", status: "invalid", evidence: "git=missing-changes" });
+  });
+
   it("derives checkpoint collector results from local read outcomes", () => {
     const nowMs = Date.parse("2026-04-30T04:00:00.000Z");
     const fresh = resolveCheckpointFreshCollectorResult({

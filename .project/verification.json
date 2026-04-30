@@ -7296,6 +7296,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:07:45.359Z",
       "evidence": "Added and re-exported pure resolveCheckpointFreshCollectorResult. It derives checkpoint collector status from local readStatus, handoff timestamp, nowMs, and maxAgeMs by reusing resolveCheckpointFreshMeasuredSignal; it does not accept manual readiness booleans. Tests cover fresh observed, stale invalid, missing read, read-error, missing timestamp, invalid timestamp, and future timestamp; canonical re-export smoke covers observed and read-error. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 35/35; cmd.exe /c npm run test:monitor:smoke --silent passed 247/247 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Checkpoint freshness now has a local-observed collector building block for future audit envelopes without granting operational authorization."
+    },
+    {
+      "id": "VER-BUD-564",
+      "target": "TASK-BUD-289",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:11:46.215Z",
+      "evidence": "Added and re-exported pure resolveGitStateExpectedCollectorResult. It derives git-state collector status from local readStatus, changedPaths, and expectedPaths by reusing resolveGitStateExpectedMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover clean observed, expected changes observed, unexpected changes invalid, missing read, read-error, and missing changedPaths. Canonical re-export smoke covers unexpected and clean. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 36/36; cmd.exe /c npm run test:monitor:smoke --silent passed 248/248 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Git state expected now has a local-observed collector building block for future audit envelopes and safe intended-file commits."
     }
   ]
 }

@@ -7,6 +7,7 @@ import {
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
   resolveCheckpointFreshCollectorResult,
+  resolveGitStateExpectedCollectorResult,
   resolveHandoffBudgetCollectorResult,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
@@ -238,6 +239,24 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "checkpoint",
       status: "invalid",
       evidence: "checkpoint=read-error",
+    });
+    expect(resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      changedPaths: ["packages/pi-stack/extensions/foo.ts", ".pi/settings.json"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    })).toEqual({
+      fact: "git-state",
+      status: "invalid",
+      evidence: "git=unexpected count=1 first=.pi/settings.json",
+    });
+    expect(resolveGitStateExpectedCollectorResult({
+      readStatus: "observed",
+      changedPaths: [],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    })).toEqual({
+      fact: "git-state",
+      status: "observed",
+      evidence: "git=clean changed=0",
     });
   });
 });

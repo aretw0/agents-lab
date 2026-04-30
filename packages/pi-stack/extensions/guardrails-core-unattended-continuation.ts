@@ -420,6 +420,31 @@ export function resolveCheckpointFreshCollectorResult(input: {
   };
 }
 
+export function resolveGitStateExpectedCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  changedPaths?: string[];
+  expectedPaths: string[];
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "git-state", status: "missing", evidence: "git=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "git-state", status: "invalid", evidence: "git=read-error" };
+  }
+  if (!Array.isArray(input.changedPaths)) {
+    return { fact: "git-state", status: "invalid", evidence: "git=missing-changes" };
+  }
+  const signal = resolveGitStateExpectedMeasuredSignal({
+    changedPaths: input.changedPaths,
+    expectedPaths: input.expectedPaths,
+  });
+  return {
+    fact: "git-state",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",
