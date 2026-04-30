@@ -7115,6 +7115,35 @@
       ],
       "notes": "Criado por dúvida arquitetural do operador em 2026-04-30. [rationale:architecture] O termo nudge-free pode estar vazando semântica de UX para camadas que deveriam representar uma primitiva mais geral de continuidade local auditada.\n[2026-04-30T04:42:00Z] Iniciando revisão de naming antes de qualquer runtime measured surface. [rationale:architecture] Evitar que semântica UX 'nudge-free' contamine a primitiva de continuidade local auditada.\n[2026-04-30T04:42:00Z] slice=1 focus=TASK-BUD-297 gate=safe_marker_check-7/7 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:architecture] Naming decidido: canary nudge-free fica; primitiva futura local_continuity_audit.",
       "verification": "VER-BUD-571"
+    },
+    {
+      "id": "TASK-BUD-298",
+      "description": "[P1] Expor primeira superfície read-only local_continuity_audit.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-297",
+        "TASK-BUD-295"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar tool runtime read-only local_continuity_audit com effect/mode/activation/authorization none.",
+        "Tool deve derivar fatos de leitura local observável e falhar fechada quando candidato local não puder ser derivado com segurança.",
+        "Tool não deve aceitar measured facts, signalSource, readiness booleans ou caller-supplied fact source.",
+        "Tool deve retornar audit envelope/prep summary e detalhes compactos sem iniciar scheduler, loop, self-reload, remoto ou auto-continuação.",
+        "Manter nudge_free_loop_canary manual-only e sem measured overrides.",
+        "Adicionar smoke cobrindo local_continuity_audit fail-closed/read-only e superfície nudge-free intacta.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após decisão de naming TASK-BUD-297. [rationale:risk-control] A primeira superfície runtime deve ser apenas auditável/read-only, derivada localmente e sem autorização operacional.\n[2026-04-30T04:49:15Z] slice=1 focus=TASK-BUD-298 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Primeira superfície local_continuity_audit read-only criada; sem ativação operacional.",
+      "verification": "VER-BUD-572"
     }
   ]
 }

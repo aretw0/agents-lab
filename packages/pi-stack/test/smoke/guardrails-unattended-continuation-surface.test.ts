@@ -1,16 +1,68 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { registerGuardrailsUnattendedContinuationSurface } from "../../extensions/guardrails-core-unattended-continuation-surface";
 
 type RegisteredTool = {
   name: string;
   parameters?: unknown;
-  execute: (toolCallId: string, params: Record<string, unknown>) => {
+  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, context?: { cwd?: string }) => {
     content?: Array<{ type: string; text: string }>;
     details: Record<string, unknown>;
   };
 };
 
 describe("guardrails unattended continuation surface", () => {
+  it("registers read-only local continuity audit tool that fails closed from local facts", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-audit-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: "2026-04-30T04:40:00.000Z",
+        current_tasks: ["TASK-SURFACE"],
+        blockers: [],
+      }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+        id: "TASK-SURFACE",
+        status: "in-progress",
+        description: "Local audit surface smoke",
+        files: ["packages/pi-stack/extensions/foo.ts"],
+        acceptance_criteria: ["Smoke principal permanece verde."],
+      }] }));
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const schemaText = JSON.stringify(auditTool?.parameters ?? {});
+      expect(schemaText).not.toContain("signal_source");
+      expect(schemaText).not.toContain("signalSource");
+      expect(schemaText).not.toContain("measuredEvidence");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+
+      expect(result?.content?.[0]?.text).toContain("nudge-free-local-audit-prep: eligible=no collectors=8/8");
+      expect(result?.content?.[0]?.text).toContain("authorization=none");
+      expect(result?.details).toMatchObject({
+        effect: "none",
+        mode: "advisory",
+        activation: "none",
+        authorization: "none",
+        envelope: {
+          effect: "none",
+          mode: "advisory",
+          activation: "none",
+          authorization: "none",
+          eligibleForAuditedRuntimeSurface: false,
+        },
+      });
+      expect(result?.details.envelope).toBeTruthy();
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("registers read-only continuation plan tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

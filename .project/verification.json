@@ -7368,6 +7368,15 @@
       "method": "inspection",
       "timestamp": "2026-04-30T04:45:27.757Z",
       "evidence": "Documented naming decision before any runtime measured surface. Doctrine now keeps nudge-free as the historical canary/manual-only tool naming and selects local continuity audit / local_continuity_audit as the primitive naming for future read-only runtime surfaces. It explicitly avoids broad premature rename, requires aliases/compatibility before public renames, and states neither naming layer authorizes scheduler, loop, self-reload, remote, or auto-continuation. Validation: safe_marker_check passed 7/7 using non-command-sensitive markers. [rationale:architecture] This prevents UX wording from becoming the operational primitive name while preserving compatibility with existing helpers."
+    },
+    {
+      "id": "VER-BUD-572",
+      "target": "TASK-BUD-298",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:49:38.525Z",
+      "evidence": "Exposed first read-only runtime surface local_continuity_audit. The tool accepts no parameters, derives facts from local workspace reads (.project/handoff.json, .project/tasks.json, git status --short read-only), builds the local continuity audit prep/envelope, and returns compact advisory details with effect=none/mode=advisory/activation=none/authorization=none. It does not accept measured facts, signalSource, readiness booleans, or caller-supplied fact source, and it does not start scheduler, loop, self-reload, remote, or auto-continuation. Smoke covers fail-closed/read-only local_continuity_audit and confirms nudge_free_loop_canary remains manual-only with no measured overrides. Validation: local surface focal passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. [rationale:risk-control] This creates the first audited local continuity runtime evidence surface without granting operational authorization."
     }
   ]
 }

@@ -1,8 +1,15 @@
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
+  buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   resolveNudgeFreeLoopCanaryGate,
   resolveUnattendedContinuationPlan,
+  type NudgeFreeLoopLocalCandidate,
+  type NudgeFreeLoopLocalReadStatus,
+  type NudgeFreeLoopValidationKind,
   type UnattendedContinuationContextLevel,
 } from "./guardrails-core-unattended-continuation";
 
@@ -14,7 +21,140 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
 }
 
+function readJsonFile(path: string): { status: NudgeFreeLoopLocalReadStatus; json?: any; text?: string } {
+  if (!existsSync(path)) return { status: "missing" };
+  try {
+    const text = readFileSync(path, "utf8");
+    return { status: "observed", json: JSON.parse(text), text };
+  } catch {
+    return { status: "error" };
+  }
+}
+
+function normalizePathForAudit(path: string): string {
+  return path.replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function isProtectedAuditPath(path: string): boolean {
+  const normalized = normalizePathForAudit(path).toLowerCase();
+  return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
+}
+
+function listGitChangedPaths(cwd: string): { status: NudgeFreeLoopLocalReadStatus; paths?: string[] } {
+  try {
+    const output = execFileSync("git", ["status", "--short"], { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    const paths = output.split(/\r?\n/).map((line) => line.trimEnd()).filter(Boolean).map((line) => {
+      const raw = line.slice(3).trim();
+      const renamed = raw.split(" -> ");
+      return normalizePathForAudit(renamed[renamed.length - 1] ?? raw);
+    }).filter(Boolean);
+    return { status: "observed", paths };
+  } catch {
+    return { status: "error" };
+  }
+}
+
+function findTask(tasksJson: unknown, taskId?: string): any | undefined {
+  const tasks = Array.isArray(tasksJson) ? tasksJson : (tasksJson as { tasks?: unknown[] } | undefined)?.tasks;
+  if (!Array.isArray(tasks)) return undefined;
+  if (taskId) return tasks.find((task: any) => task?.id === taskId);
+  return tasks.find((task: any) => task?.status === "in-progress") ?? tasks.find((task: any) => task?.status === "planned");
+}
+
+function deriveValidationKind(task: any): { kind: NudgeFreeLoopValidationKind; focalGate?: string } {
+  const text = [task?.description, ...(Array.isArray(task?.acceptance_criteria) ? task.acceptance_criteria : [])].join("\n").toLowerCase();
+  if (text.includes("smoke") || text.includes("test")) return { kind: "focal-test", focalGate: "npm-run-smoke" };
+  if (text.includes("marker")) return { kind: "marker-check" };
+  return { kind: "unknown" };
+}
+
+function deriveCandidate(task: any): NudgeFreeLoopLocalCandidate | undefined {
+  if (!task?.id) return undefined;
+  const files = Array.isArray(task.files) ? task.files.map((file: unknown) => String(file)) : [];
+  const protectedPaths = files.filter(isProtectedAuditPath).map(normalizePathForAudit);
+  return {
+    taskId: String(task.id),
+    scope: protectedPaths.length > 0 ? "protected" : "local",
+    estimatedFiles: files.length,
+    reversible: "git",
+    validationKind: deriveValidationKind(task).kind,
+    risk: protectedPaths.length > 0 ? "medium" : "low",
+    protectedPaths,
+  };
+}
+
+function buildLocalContinuityAudit(cwd: string) {
+  const handoff = readJsonFile(join(cwd, ".project", "handoff.json"));
+  const tasks = readJsonFile(join(cwd, ".project", "tasks.json"));
+  const handoffTaskId = Array.isArray(handoff.json?.current_tasks) ? String(handoff.json.current_tasks[0] ?? "") : undefined;
+  const task = findTask(tasks.json, handoffTaskId) ?? findTask(tasks.json);
+  const candidate = deriveCandidate(task);
+  const validation = task ? deriveValidationKind(task) : { kind: "unknown" as const };
+  const git = listGitChangedPaths(cwd);
+  const expectedPaths = Array.isArray(task?.files) ? task.files.map((file: unknown) => normalizePathForAudit(String(file))) : [];
+  const changedPaths = git.paths ?? [];
+  const protectedPaths = [...new Set([...changedPaths, ...expectedPaths].filter(isProtectedAuditPath))];
+  const blockers = Array.isArray(handoff.json?.blockers) ? handoff.json.blockers.filter(Boolean) : [];
+  return buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
+    optIn: true,
+    nowMs: Date.now(),
+    candidate: {
+      readStatus: tasks.status === "observed" && candidate ? "observed" : tasks.status === "missing" ? "missing" : tasks.status === "error" ? "error" : "missing",
+      candidate,
+    },
+    checkpoint: {
+      readStatus: handoff.status,
+      handoffTimestampIso: typeof handoff.json?.timestamp === "string" ? handoff.json.timestamp : undefined,
+      maxAgeMs: 5 * 60_000,
+    },
+    handoffBudget: {
+      readStatus: handoff.status,
+      handoffJson: handoff.text,
+      maxJsonChars: 2700,
+    },
+    gitState: {
+      readStatus: git.status,
+      changedPaths,
+      expectedPaths,
+    },
+    protectedScopes: {
+      readStatus: git.status,
+      paths: protectedPaths,
+    },
+    cooldown: {
+      readStatus: "observed",
+      cooldownMs: 60_000,
+    },
+    validation: {
+      readStatus: task ? "observed" : tasks.status,
+      ...validation,
+    },
+    stopConditions: {
+      readStatus: handoff.status,
+      conditions: [
+        { kind: "blocker", present: blockers.length > 0, evidence: blockers.length > 0 ? "blocker=present" : "blocker=none" },
+        { kind: "protected-scope", present: protectedPaths.length > 0, evidence: protectedPaths.length > 0 ? "protected=present" : "protected=none" },
+      ],
+    },
+  });
+}
+
 export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI): void {
+  pi.registerTool({
+    name: "local_continuity_audit",
+    label: "Local Continuity Audit",
+    description: "Read-only local continuity audit packet. Derives local facts from the workspace, returns advisory evidence only, and never starts automation.",
+    parameters: Type.Object({}),
+    execute(_toolCallId, _params, _signal, _onUpdate, context) {
+      const cwd = typeof (context as { cwd?: unknown } | undefined)?.cwd === "string" ? (context as { cwd: string }).cwd : process.cwd();
+      const result = buildLocalContinuityAudit(cwd);
+      return {
+        content: [{ type: "text", text: result.summary }],
+        details: result,
+      };
+    },
+  });
+
   pi.registerTool({
     name: "unattended_continuation_plan",
     label: "Unattended Continuation Plan",
