@@ -8169,6 +8169,15 @@
       "method": "live-read-after-reload",
       "timestamp": "2026-04-30T17:18:54.010Z",
       "evidence": "After operator reload, live read guard allowed bounded read of trusted global skill Markdown outside the project without prompting/blocking: C:\\Users\\aretw\\scoop\\persist\\nodejs\\bin\\node_modules\\@aretw0\\git-skills\\skills\\commit\\SKILL.md read with limit=20 returned the expected SKILL.md header/content. This validates the trusted global skill read allow path in the current global-install environment. Non-skill/arbitrary reads remain covered by tests."
+    },
+    {
+      "id": "VER-BUD-661",
+      "target": "TASK-BUD-375",
+      "target_type": "task",
+      "status": "passed",
+      "method": "classification+live-dry-run+docs",
+      "timestamp": "2026-04-30T17:20:17.050Z",
+      "evidence": "Completed conservative Esc/cancel human-control investigation. Evidence: doctrine documents terminal/sandbox vs upstream pi/TUI vs local extensions responsibility matrix, source-aware npm run pi:dev/isolated caveats, diagnostic blast-radius rules, AbortSignal requirements, fallback procedure, and go/no-go matrix for uninterrupted local work. Concrete local gap fixed and live dry-run validated: claude_code_execute now propagates AbortSignal to pi.exec and after reload returned dryRun=true without subprocess. Related control hardening completed: upstream/original pi mutation guard live-validated; trusted global skill reads live-validated. Final classification is conservative: small bounded local work may continue; stronger unattended/loop/scheduler/remote remains no-go until a long local path has tested cancel/fallback, checkpoint, output limits, and explicit operator decision. [rationale:risk-control] Closing the investigation records a no-go/fallback policy, not permission for stronger unattended execution."
     }
   ]
 }

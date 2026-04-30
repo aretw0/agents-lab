@@ -1,37 +1,40 @@
 {
-  "timestamp": "2026-04-30T17:19:32.017Z",
-  "context": "Operator reloaded and TASK-BUD-380 was live-validated. The current global npm root contains @aretw0/git-skills; a bounded read of the global [snip] ive stops in global/devcontainer usage. [truncated:+219 chars]",
+  "timestamp": "2026-04-30T17:20:35.225Z",
+  "context": "TASK-BUD-375 completed as a conservative human-control classification, not as permission for stronger unattended mode. The outcome is: local [snip] reserving the block on strong autonomy. [truncated:+506 chars]",
   "next_actions": [
-    "Commit TASK-BUD-380 live validation evidence.",
-    "Return to TASK-BUD-375 final Esc/cancel classification/closure decision.",
-    "Continue avoiding direct upstream pi package mutation; bounded reads only."
+    "Commit TASK-BUD-375 closure evidence.",
+    "Select next essential local-first task for safe uninterrupted work; avoid scheduler/remote/loo [snip] d-cancel criteria are met. [truncated:+22 chars]",
+    "Do not run Git maintenance cleanup without explicit authorization."
   ],
   "blockers": [
-    "TASK-BUD-375 final close decision remains open.",
+    "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npm root -g: C:\\Users\\aretw\\scoop\\persist\\nodejs\\bin\\node_modules",
-    "global skill present: @aretw0/git-skills/skills/commit/SKILL.md",
-    "read global SKILL.md limit=20 succeeded without prompt/block"
+    "board_task_complete TASK-BUD-375 with VER-BUD-661 ok",
+    "commit 8802ee0 chore(control): validate global skill reads",
+    "TASK-BUD-380 live read validation recorded as VER-BUD-660"
+  ],
+  "recent_commits": [
+    "8802ee0 chore(control): validate global skill reads"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T17:19:32.017Z",
+    "generatedAtIso": "2026-04-30T17:20:35.225Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-live-validation-then-close-375",
+    "recommendation": "commit-task-375-closure",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T17:19:32.017Z",
+      "atIso": "2026-04-30T17:20:35.225Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-live-validation-then-close-375"
+      "recommendation": "commit-task-375-closure"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-380"
+    "TASK-BUD-375"
   ]
 }
