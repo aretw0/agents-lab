@@ -5918,6 +5918,50 @@
       ],
       "notes": "Criado após reload para validar comportamento runtime pós measuredEvidence. [rationale:risk-control] A tool manual deve continuar incapaz de produzir ready mesmo após o gate puro exigir evidência medida.\n[2026-04-30T01:47:00Z] slice=1 focus=TASK-BUD-250 gate=live-nudge_free_loop_canary-manual-signal-source-after-measuredEvidence commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Validação live confirmou que a tool manual segue incapaz de produzir ready após measuredEvidence.",
       "verification": "VER-BUD-528"
+    },
+    {
+      "id": "TASK-BUD-251",
+      "description": "[P1] Registrar lei anti-spoof para tools de desenvolvimento e gates de autonomia.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-250"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Doutrina registra que tools disponíveis ao agente para desenvolvimento/feedback não equivalem a autorização operacional.",
+        "Gates de autonomia não podem aceitar readiness sensível baseada em input manual spoofável; precisam de sinais medidos/evidência bounded.",
+        "Regra diferencia superfície de desenvolvimento/advisory de superfície operacional madura.",
+        "Validação usa safe_marker_check e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado a partir da direção do operador para transformar anti-spoof em lei de desenvolvimento. [rationale:risk-control] Quando a stack amadurecer, tools convenientes ao agente não devem virar permissões operacionais indevidas.\n[2026-04-30T01:52:00Z] slice=1 focus=TASK-BUD-251 gate=safe_marker_check-summary-ok-yes-matched-11/11 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Lei anti-spoof documentada e backlog de higiene de tools criado.",
+      "verification": "VER-BUD-529"
+    },
+    {
+      "id": "TASK-BUD-252",
+      "description": "[P1/backlog] Criar scorecard/higiene de tools expostas ao agente antes de loops grandes.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-251"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Inventariar tools advisory/development vs operational.",
+        "Identificar overrides/input manual que não devem existir quando a stack estiver em modo maduro.",
+        "Definir promoção: advisory -> measured -> operational, com evidência bounded e testes.",
+        "Bloquear ou esconder superfícies que não fazem sentido para o agente em operação contínua."
+      ],
+      "notes": "Backlog criado a partir da direção do operador sobre higiene futura das tools quando loops grandes estiverem maduros. [rationale:risk-control] O potencial acumulado deve ser usado para arrumar a própria casa, não para ampliar permissões indevidas."
     }
   ]
 }

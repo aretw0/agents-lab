@@ -84,6 +84,14 @@ Quando o foco termina e não há canário remoto autorizado, priorize:
 
 Remote/offload só vem depois de scorecard local verde e intenção explícita do operador.
 
+## Lei anti-spoof
+
+Tools disponíveis ao agente para desenvolvimento, feedback constante e validação manual não equivalem a autorização operacional. Uma superfície advisory pode receber parâmetros manuais para facilitar calibração, mas gates de autonomia não podem produzir readiness sensível a partir de input spoofável.
+
+Quando um gate desbloqueia continuidade, reload, scheduler, remoto, custo, escrita ampla ou qualquer ação sensível, o caminho maduro deve derivar sinais medidos do estado local e anexar evidência bounded. Flags como `ready`, `measured` ou `all-gates-green` não bastam sem origem confiável, evidência compacta e falha fechada.
+
+A regra de maturidade é separar ferramenta conveniente de desenvolvimento de permissão operacional. Quando a stack estiver funcional o suficiente para loops maiores, parte do trabalho desses loops deve ser higiene da própria casa: reduzir tools desnecessárias ao agente, esconder overrides de desenvolvimento, promover apenas superfícies medidas e manter as demais como advisory/read-only.
+
 ## Self-reload e autoresume
 
 Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportamento automático atual. Antes de qualquer tentativa unattended real, o contrato mínimo precisa provar: checkpoint bounded fresco, orçamento do handoff dentro do limite, git state esperado, ausência de escopos protegidos pendentes, cooldown, auditoria e auto-resume minimal a partir do handoff compacto.

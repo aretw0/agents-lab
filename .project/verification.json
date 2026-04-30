@@ -6981,6 +6981,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T01:47:34.310Z",
       "evidence": "Live-validated nudge_free_loop_canary after reload following measuredEvidence hardening. With opt_in=true and every exposed manual boolean true, the runtime tool returned compact advisory defer content: nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source. The current runtime schema does not expose signalSource or measuredEvidence, so the manual tool remains unable to produce ready. [rationale:risk-control] Confirms the measured-evidence requirement did not accidentally create a runtime override path."
+    },
+    {
+      "id": "VER-BUD-529",
+      "target": "TASK-BUD-251",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-30T01:50:50.552Z",
+      "evidence": "Added 'Lei anti-spoof' to docs/guides/control-plane-operating-doctrine.md. The doctrine now states that tools exposed for development/feedback are not operational authorization, autonomy gates must not produce sensitive readiness from spoofable manual input, measured local signals need bounded evidence and fail-closed behavior, and future mature loops should include hygiene to reduce unnecessary agent tool access and hide development overrides. Validation: safe_marker_check passed 11/11 with commandSensitive=none. Also created backlog TASK-BUD-252 for future tool-exposure hygiene/scorecard. [rationale:risk-control] Makes anti-spoof a general development law rather than a one-off nudge-free rule."
     }
   ]
 }
