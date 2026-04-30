@@ -8007,6 +8007,15 @@
       "method": "live-tool",
       "timestamp": "2026-04-30T12:48:46.482Z",
       "evidence": "Live safety validation of context_watch_one_slice_operator_packet_preview succeeded for a focus with explicit smoke validation but no task.files field. Operator packet returned `context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none`. This proves the tightened declaredFilesKnown derivation blocks a contract when file scope is missing even with a single focus and known validation. git status after preview showed only explicit .project/handoff.json and .project/tasks.json workflow changes; preview did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or loop. [rationale:risk-control] A future execution path cannot rely on focus alone; file scope must be declared."
+    },
+    {
+      "id": "VER-BUD-643",
+      "target": "TASK-BUD-369",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T12:53:22.980Z",
+      "evidence": "Documented live semantics of context_watch_one_slice_operator_packet_preview in docs/guides/control-plane-operating-doctrine.md. The section `Operator packet sem executor` now records the composed read-only packet as readiness + one-slice preview + decision packet + contract review, with live examples for: green local facts but missing explicit human confirmation (`readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none`); fail-closed unknown validation (`validation-gate-missing`); and known validation with missing file scope (`declared-files-missing`). It states focus alone is not reversible file scope, and that the operator packet reduces friction but does not authorize executor, repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes, or destructive maintenance. Validation: safe_marker_check passed 10/10; focal context-watchdog + guardrails-unattended-continuation tests passed 90/90. [rationale:risk-control] The new packet is now documented as evidence, not operational permission."
     }
   ]
 }

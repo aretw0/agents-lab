@@ -221,6 +221,36 @@ Mesmo com confirmação explícita, o contrato só cobre uma fatia local. Ele n�
 
 Se qualquer pré-condição cair entre o packet e a execução — diff inesperado, teste desconhecido, checkpoint stale, protected scope, ambiguidade, contexto sem handoff fresco ou reload pendente — o contrato expira e volta para preview/readiness.
 
+### Operator packet sem executor
+
+`context_watch_one_slice_operator_packet_preview` é o pacote composto read-only para reduzir fricção sem liberar execução. Ele junta readiness, preview one-slice, decision packet e contract review em uma única linha de operador.
+
+Caminho verde atual, ainda sem executor:
+
+```text
+context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none
+```
+
+Leia isso como: os fatos locais estão verdes, a fatia pode ser preparada, há decision packet suficiente para decisão humana, mas o contrato segue bloqueado porque a confirmação humana explícita não está presente. `dispatch=no` e `executor=no` continuam sendo fronteiras duras.
+
+Caminho fail-closed por validação desconhecida:
+
+```text
+context-watch-one-slice-operator-packet: readiness=no preview=blocked packet=blocked contract=blocked dispatch=no executor=no reasons=packet-not-ready|human-confirmation-missing|validation-gate-missing authorization=none
+```
+
+Esse caso prova que o pacote não inventa validação; foco sem gate conhecido volta para diagnóstico.
+
+Caminho com validação conhecida mas sem arquivos declarados:
+
+```text
+context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none
+```
+
+Esse caso prova que foco único não equivale a escopo reversível. `task.files` ou evidência equivalente precisa existir antes de qualquer execução futura.
+
+O operator packet reduz fricção para jornadas longas porque coloca a evidência em uma linha, mas não substitui autorização. Ele não cobre repetition, scheduler, self-reload, remote/offload, GitHub Actions, protected scopes ou manutenção destrutiva.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:
