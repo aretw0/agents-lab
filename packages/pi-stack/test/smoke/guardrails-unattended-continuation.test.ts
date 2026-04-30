@@ -20,6 +20,7 @@ import {
   resolveNextLocalSafeCollectorResult,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
+  resolveOneSliceLocalCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveProtectedScopesMeasuredSignal,
   resolveStopConditionsClearCollectorResult,
@@ -45,7 +46,74 @@ const completeMeasuredSignals = Object.fromEntries(
   completeMeasuredEvidence.map((entry) => [entry.gate, { ok: entry.ok, evidence: entry.evidence }]),
 ) as any;
 
+function greenInput() {
+  return {
+    readinessReady: true,
+    authorization: "none" as const,
+    checkpointFresh: true,
+    handoffBudgetOk: true,
+    gitStateExpected: true,
+    protectedScopesClear: true,
+    validationKnown: true,
+    stopConditionsClear: true,
+    risk: false,
+    ambiguous: false,
+  };
+}
+
 describe("guardrails unattended continuation", () => {
+  it("plans one-slice local canary without activation or repetition", () => {
+    const green = resolveOneSliceLocalCanaryPlan({
+      readinessReady: true,
+      authorization: "none",
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      validationKnown: true,
+      stopConditionsClear: true,
+      risk: false,
+      ambiguous: false,
+    });
+    const protectedBlocked = resolveOneSliceLocalCanaryPlan({
+      ...greenInput(),
+      protectedScopesClear: false,
+    });
+    const repeatBlocked = resolveOneSliceLocalCanaryPlan({
+      ...greenInput(),
+      repeatRequested: true,
+    });
+    const stopped = resolveOneSliceLocalCanaryPlan({
+      ...greenInput(),
+      sliceAlreadyCompleted: true,
+    });
+
+    expect(green).toMatchObject({
+      effect: "none",
+      activation: "none",
+      authorization: "none",
+      oneSliceOnly: true,
+      decision: "prepare-one-slice",
+      canPrepareSlice: true,
+      mustStopAfterSlice: true,
+      summary: "one-slice-local-canary: decision=prepare-one-slice prepare=yes stop=yes reasons=readiness-green,one-slice-only authorization=none",
+    });
+    expect(protectedBlocked).toMatchObject({
+      decision: "blocked",
+      canPrepareSlice: false,
+      mustStopAfterSlice: true,
+      reasons: ["protected-scope"],
+    });
+    expect(repeatBlocked.reasons).toContain("repeat-requested");
+    expect(repeatBlocked.summary).toContain("decision=blocked");
+    expect(stopped).toMatchObject({
+      decision: "stop-after-slice",
+      canPrepareSlice: false,
+      mustStopAfterSlice: true,
+      reasons: ["slice-complete", "one-slice-limit"],
+    });
+  });
+
   it("prepares a local measured audit envelope from collected facts", () => {
     const nowMs = Date.parse("2026-04-30T04:40:00.000Z");
     const baseInput = {

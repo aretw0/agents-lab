@@ -18,6 +18,37 @@ export interface UnattendedContinuationPlan {
   recommendation: string;
 }
 
+export type OneSliceLocalCanaryDecision = "prepare-one-slice" | "stop-after-slice" | "blocked";
+
+export interface OneSliceLocalCanaryInput {
+  readinessReady: boolean;
+  authorization: "none" | "operator" | "unknown";
+  checkpointFresh: boolean;
+  handoffBudgetOk: boolean;
+  gitStateExpected: boolean;
+  protectedScopesClear: boolean;
+  validationKnown: boolean;
+  stopConditionsClear: boolean;
+  risk: boolean;
+  ambiguous: boolean;
+  repeatRequested?: boolean;
+  sliceAlreadyCompleted?: boolean;
+}
+
+export interface OneSliceLocalCanaryPlan {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  oneSliceOnly: true;
+  decision: OneSliceLocalCanaryDecision;
+  canPrepareSlice: boolean;
+  mustStopAfterSlice: boolean;
+  reasons: string[];
+  summary: string;
+  recommendation: string;
+}
+
 export type NudgeFreeLoopCanarySignalSource = "manual" | "measured";
 export type NudgeFreeLoopValidationKind = "marker-check" | "focal-test" | "structured-read" | "unknown";
 export type NudgeFreeLoopStopConditionKind =
@@ -1011,6 +1042,68 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
     reasons: ["all-gates-green"],
     summary: "nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green",
     recommendation: "A canary idle loop may continue the next small local-safe slice.",
+  };
+}
+
+export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput): OneSliceLocalCanaryPlan {
+  const reasons: string[] = [];
+
+  if (input.sliceAlreadyCompleted) {
+    return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      oneSliceOnly: true,
+      decision: "stop-after-slice",
+      canPrepareSlice: false,
+      mustStopAfterSlice: true,
+      reasons: ["slice-complete", "one-slice-limit"],
+      summary: "one-slice-local-canary: decision=stop-after-slice prepare=no stop=yes reasons=slice-complete,one-slice-limit authorization=none",
+      recommendation: "Stop after this slice; any repetition needs a separate cooldown/iteration contract and operator authorization.",
+    };
+  }
+
+  if (input.repeatRequested) reasons.push("repeat-requested");
+  if (!input.readinessReady) reasons.push("readiness-not-ready");
+  if (input.authorization !== "none") reasons.push(`authorization-${input.authorization}`);
+  if (!input.checkpointFresh) reasons.push("checkpoint-not-fresh");
+  if (!input.handoffBudgetOk) reasons.push("handoff-budget-not-ok");
+  if (!input.gitStateExpected) reasons.push("git-state-unexpected");
+  if (!input.protectedScopesClear) reasons.push("protected-scope");
+  if (!input.validationKnown) reasons.push("validation-unknown");
+  if (!input.stopConditionsClear) reasons.push("stop-conditions-present");
+  if (input.risk) reasons.push("risk");
+  if (input.ambiguous) reasons.push("ambiguous");
+
+  if (reasons.length > 0) {
+    return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      oneSliceOnly: true,
+      decision: "blocked",
+      canPrepareSlice: false,
+      mustStopAfterSlice: true,
+      reasons,
+      summary: `one-slice-local-canary: decision=blocked prepare=no stop=yes reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      recommendation: "Do not prepare the canary slice; resolve blockers or ask the operator before any local unattended dispatch.",
+    };
+  }
+
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    oneSliceOnly: true,
+    decision: "prepare-one-slice",
+    canPrepareSlice: true,
+    mustStopAfterSlice: true,
+    reasons: ["readiness-green", "one-slice-only"],
+    summary: "one-slice-local-canary: decision=prepare-one-slice prepare=yes stop=yes reasons=readiness-green,one-slice-only authorization=none",
+    recommendation: "Prepare at most one local-safe slice, then validate, commit, checkpoint, and stop.",
   };
 }
 

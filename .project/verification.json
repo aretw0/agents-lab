@@ -7728,6 +7728,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T10:39:00.861Z",
       "evidence": "Documented the contract for the next local unattended canary without activating it. The doctrine now requires the future canary to execute at most one slice per dispatch: read-only preflight, small local-safe task selection, declared reversible files only, focal validation, intentional staging, bounded board close, checkpoint, then stop. It explicitly says automatic repetition is out of scope until a separate cooldown/iteration/cost/time/cancel/stop-condition contract exists, and that scheduler, remote/offload, self-reload, and GitHub Actions remain out of scope without separate authorization. Validation: safe_marker_check matched 4/4 markers; focal context/watchdog smokes passed 54/54. No .pi/settings.json or .github changes. [rationale:risk-control] This converts green readiness into a one-slice canary design boundary rather than implicit automation."
+    },
+    {
+      "id": "VER-BUD-612",
+      "target": "TASK-BUD-338",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T10:41:55.848Z",
+      "evidence": "Implemented pure deterministic helper resolveOneSliceLocalCanaryPlan for the documented one-slice local canary contract. The helper is advisory only (`effect=none`, `activation=none`, `authorization=none`, `oneSliceOnly=true`) and never starts automation. It returns prepare-one-slice only when readiness is green, authorization is none, checkpoint/handoff/git/protected/validation/stop gates are safe, and no risk/ambiguity/repetition is present. It blocks on protected scope, repeatRequested, non-green readiness, stale checkpoint, unexpected git state, unknown validation, present stop conditions, risk, or ambiguity. If sliceAlreadyCompleted is set, it returns stop-after-slice with mustStopAfterSlice=true. Smoke tests cover ready, protected blocked, repetition blocked, and stop-after-slice. Validation: focal guardrails-unattended-continuation passed 40/40; full monitor smoke passed 265/265. No runtime tool was exposed and no scheduler/loop/remote/self-reload was activated. [rationale:risk-control] The next canary boundary is now executable as pure logic without becoming permission or automation."
     }
   ]
 }

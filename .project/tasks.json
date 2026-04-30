@@ -8152,6 +8152,32 @@
       ],
       "notes": "[rationale:risk-control] Depois da primeira prova verde, o próximo risco é pular de evidência para automação; precisamos de um contrato de canário explícito, local-only e de uma fatia antes de qualquer loop repetitivo.\n[2026-04-30T10:38:38Z] slice=1 focus=TASK-BUD-337 gate=safe_marker_check-4/4+focal-54/54 commit=pending docs=one-slice-canary-contract. [rationale:risk-control] Contrato do próximo canário documentado sem ativar automação.",
       "verification": "VER-BUD-611"
+    },
+    {
+      "id": "TASK-BUD-338",
+      "description": "[P1] Implementar helper puro para plano de canário local de uma fatia sem ativação.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-337"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro determinístico para decidir se um canário local de uma fatia pode ser preparado, bloqueado ou deve parar após a fatia.",
+        "O helper deve deixar explícito effect=none/activation=none e oneSliceOnly=true; não deve iniciar automação.",
+        "Bloquear quando readiness não estiver verde, quando protected/risk/ambiguous/diff/test/validation/checkpoint não estiverem seguros, ou quando repetition for solicitada.",
+        "Adicionar smoke tests para ready, blocked por protected scope, blocked por repetition, e stop-after-slice.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O contrato de canário de uma fatia deve virar helper puro antes de qualquer tool/runtime, mantendo ready como evidência e não permissão.\n[2026-04-30T10:41:39Z] slice=1 focus=TASK-BUD-338 gate=guardrails-unattended-continuation-40/40+test:monitor:smoke-265/265 commit=pending helper=resolveOneSliceLocalCanaryPlan activation=none. [rationale:risk-control] Contrato do canário de uma fatia virou helper puro/testado, sem tool/runtime.",
+      "verification": "VER-BUD-612"
     }
   ]
 }
