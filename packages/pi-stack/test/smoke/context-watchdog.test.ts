@@ -11,6 +11,7 @@ import {
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
 	buildLocalSliceHandoffCheckpoint,
+	LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchSteeringStatus,
@@ -980,11 +981,33 @@ describe("context-watchdog", () => {
 		expect(checkpoint.current_tasks).toEqual(["TASK-BUD-225"]);
 		expect(checkpoint.context.length).toBeLessThanOrEqual(320);
 		expect(checkpoint.recent_validation).toHaveLength(3);
-		expect(checkpoint.next_actions).toHaveLength(4);
+		expect(checkpoint.next_actions).toHaveLength(3);
 		expect(checkpoint.blockers).toEqual([]);
 		expect(checkpoint.context_watch).toMatchObject({ level: "ok", percent: 14, action: "continue" });
 		expect(checkpoint.context_watch_events).toHaveLength(1);
 		expect(checkpoint.context_watch_events[0]).toMatchObject({ reason: "manual_checkpoint", action: "checkpoint-refresh" });
+	});
+
+	it("keeps compact local slice handoff checkpoints within budget", () => {
+		const noisy = "payload ".repeat(200);
+		const checkpoint = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-04-30T00:40:00.000Z",
+			taskId: `TASK-BUD-230-${noisy}`,
+			context: `TASK-BUD-230 completed. ${noisy}`,
+			validation: Array.from({ length: 20 }, (_, index) => `validation-${index}: ${noisy}`),
+			commits: Array.from({ length: 20 }, (_, index) => `commit-${index}-${noisy}`),
+			nextActions: Array.from({ length: 20 }, (_, index) => `next-${index}: ${noisy}`),
+			blockers: Array.from({ length: 20 }, (_, index) => `blocker-${index}: ${noisy}`),
+			contextLevel: "ok",
+			contextPercent: 14,
+			recommendation: noisy,
+		});
+		const size = JSON.stringify(checkpoint).length;
+		expect(size).toBeLessThanOrEqual(LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS);
+		expect((checkpoint as any).recent_validation).toHaveLength(3);
+		expect((checkpoint as any).recent_commits).toHaveLength(2);
+		expect((checkpoint as any).next_actions).toHaveLength(3);
+		expect((checkpoint as any).blockers).toHaveLength(3);
 	});
 
 	it("writes compact local slice handoff checkpoints", () => {

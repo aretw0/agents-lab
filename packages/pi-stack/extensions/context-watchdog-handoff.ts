@@ -2,6 +2,7 @@ export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
+export const LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS = 2_700;
 
 function normalizeStringArray(value: unknown): string[] {
 	if (!Array.isArray(value)) return [];
@@ -75,13 +76,13 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 	const contextLevel = input.contextLevel ?? "ok";
 	const contextPercent = Number.isFinite(input.contextPercent) ? Math.max(0, Math.floor(Number(input.contextPercent))) : undefined;
 	const currentTasks = input.taskId ? [truncateForPrompt(input.taskId, 64)] : undefined;
-	const recentValidation = compactHandoffList(input.validation, 3, 160);
-	const recentCommits = compactHandoffList(input.commits, 3, 100);
-	const nextActions = compactHandoffList(input.nextActions, 4, 160);
-	const blockers = compactHandoffList(input.blockers, 4, 120);
+	const recentValidation = compactHandoffList(input.validation, 3, 120);
+	const recentCommits = compactHandoffList(input.commits, 2, 80);
+	const nextActions = compactHandoffList(input.nextActions, 3, 120);
+	const blockers = compactHandoffList(input.blockers, 3, 100);
 	return {
 		timestamp,
-		context: truncateForPrompt(input.context, 260),
+		context: truncateForPrompt(input.context, 180),
 		...(currentTasks ? { current_tasks: currentTasks } : {}),
 		...(nextActions ? { next_actions: nextActions } : {}),
 		blockers: blockers ?? [],
@@ -92,7 +93,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			level: contextLevel,
 			...(contextPercent !== undefined ? { percent: contextPercent } : {}),
 			action: contextLevel === "ok" || contextLevel === "warn" ? "continue" : "checkpoint-refresh",
-			recommendation: truncateForPrompt(input.recommendation ?? "Progress saved; continue bounded local hardening.", 180),
+			recommendation: truncateForPrompt(input.recommendation ?? "Progress saved; continue bounded local hardening.", 120),
 		},
 		context_watch_events: [{
 			atIso: timestamp,
@@ -100,7 +101,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			level: contextLevel,
 			...(contextPercent !== undefined ? { percent: contextPercent } : {}),
 			action: "checkpoint-refresh",
-			recommendation: truncateForPrompt(input.recommendation ?? "Local slice checkpoint saved.", 180),
+			recommendation: truncateForPrompt(input.recommendation ?? "Local slice checkpoint saved.", 120),
 		}],
 	};
 }

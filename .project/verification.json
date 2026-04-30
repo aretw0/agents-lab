@@ -6801,6 +6801,15 @@
       "method": "live-tool-validation",
       "timestamp": "2026-04-30T00:38:45.585Z",
       "evidence": "Live-validated context_watch_checkpoint missing-context guard after reload. Calling context_watch_checkpoint with whitespace context returned compact failure summary: context-watch-checkpoint: ok=no task=TASK-BUD-229 reason=missing-context. Re-reading .project/handoff.json showed the previous useful TASK-BUD-228 checkpoint timestamp remained 2026-04-30T00:32:12.530Z, so the invalid checkpoint did not overwrite handoff state. [rationale:risk-control] Confirms the checkpoint primitive blocks unresumeable/empty handoff writes in the live hot path."
+    },
+    {
+      "id": "VER-BUD-509",
+      "target": "TASK-BUD-230",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:43:34.206Z",
+      "evidence": "Added LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS budget for compact local-slice handoff checkpoints and regression coverage with intentionally noisy input. Tightened buildLocalSliceHandoffCheckpoint bounds for context, validation, commits, next_actions, blockers, and recommendations so worst-case checkpoint JSON stays <= 2700 chars. Initial focal test exposed current worst-case bloat at 3642 chars and then 2614 chars against a 2600 budget; tuned bounds and budget, then validation passed. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 36/36; cmd.exe /c npm run test:monitor:smoke --silent passed 212/212 across 32 files. [rationale:risk-control] Prevents future regressions that would make checkpoints verbose and accelerate compact pressure in unattended loops."
     }
   ]
 }

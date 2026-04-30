@@ -5419,6 +5419,33 @@
       ],
       "notes": "Criado após reload para validar o guard missing-context em runtime. [rationale:risk-control] Guard só desbloqueia operação unattended segura depois de provado no caminho live.\n[2026-04-30T00:36:00Z] slice=1 focus=TASK-BUD-229 gate=live-context_watch_checkpoint-missing-context commit=pending drift=no next=valid-checkpoint-and-commit. [rationale:risk-control] Guard missing-context confirmado ao vivo sem sobrescrever handoff útil.",
       "verification": "VER-BUD-508"
+    },
+    {
+      "id": "TASK-BUD-230",
+      "description": "[P1] Adicionar orçamento regressivo para checkpoints handoff compactos.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-225",
+        "TASK-BUD-226",
+        "TASK-BUD-229"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper de handoff expõe orçamento máximo de JSON compacto.",
+        "Teste cobre input grande e garante snapshot dentro do orçamento.",
+        "context_watch_checkpoint segue produzindo payload bounded e resumo curto.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado via board_task_create. [rationale:risk-control] Para trabalho unattended, não basta ter checkpoint; precisamos impedir regressão futura que volte a inflar handoff e acelere compactação.\n[2026-04-30T00:43:18Z] slice=1 focus=TASK-BUD-230 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-checkpoint-budget next=commit-and-context_watch_checkpoint. [rationale:risk-control] Handoff compacto agora tem orçamento regressivo testado.",
+      "verification": "VER-BUD-509"
     }
   ]
 }
