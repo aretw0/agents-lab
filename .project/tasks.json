@@ -5446,6 +5446,31 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] Para trabalho unattended, não basta ter checkpoint; precisamos impedir regressão futura que volte a inflar handoff e acelere compactação.\n[2026-04-30T00:43:18Z] slice=1 focus=TASK-BUD-230 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-checkpoint-budget next=commit-and-context_watch_checkpoint. [rationale:risk-control] Handoff compacto agora tem orçamento regressivo testado.",
       "verification": "VER-BUD-509"
+    },
+    {
+      "id": "TASK-BUD-231",
+      "description": "[P1] Bloquear escrita de handoff quando checkpoint exceder orçamento compacto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-230"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro avalia tamanho JSON do checkpoint contra LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS.",
+        "writeLocalSliceHandoffCheckpoint bloqueia escrita se o checkpoint exceder orçamento.",
+        "Teste cobre bloqueio sem criar .project/handoff.json usando orçamento artificial pequeno.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload do orçamento de handoff. [rationale:risk-control] O orçamento precisa ser enforcement no writer, não só teste de regressão do builder, para evitar sobrescrever handoff útil com payload grande.\n[2026-04-30T00:47:19Z] slice=1 focus=TASK-BUD-231 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=fixed-budget-fixture next=commit-and-context_watch_checkpoint. [rationale:risk-control] Writer bounded agora bloqueia checkpoint acima do orçamento antes de escrever.",
+      "verification": "VER-BUD-510"
     }
   ]
 }

@@ -55,6 +55,7 @@ import {
 	shouldAutoCheckpoint,
 } from "./context-watchdog-policy";
 import {
+	assessLocalSliceHandoffBudget,
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	buildLocalSliceHandoffCheckpoint,
@@ -100,6 +101,7 @@ import {
 export {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
+	assessLocalSliceHandoffBudget,
 	buildAutoCompactDiagnostics,
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
@@ -773,7 +775,8 @@ const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
-): { ok: boolean; summary: string; path?: string; checkpoint?: Record<string, unknown>; reason?: string } {
+	options: { maxJsonChars?: number } = {},
+): { ok: boolean; summary: string; path?: string; checkpoint?: Record<string, unknown>; reason?: string; jsonChars?: number; maxJsonChars?: number } {
 	const taskId = input.taskId || "n/a";
 	if (typeof input.context !== "string" || input.context.trim().length <= 0) {
 		return {
@@ -784,12 +787,24 @@ export function writeLocalSliceHandoffCheckpoint(
 	}
 	try {
 		const checkpoint = buildLocalSliceHandoffCheckpoint(input);
+		const budget = assessLocalSliceHandoffBudget(checkpoint, options.maxJsonChars);
+		if (!budget.ok) {
+			return {
+				ok: false,
+				reason: budget.reason,
+				summary: `context-watch-checkpoint: ok=no task=${taskId} reason=${budget.reason}`,
+				jsonChars: budget.jsonChars,
+				maxJsonChars: budget.maxJsonChars,
+			};
+		}
 		const handoffPath = writeHandoffJson(cwd, checkpoint);
 		return {
 			ok: true,
 			summary: `context-watch-checkpoint: ok=yes task=${taskId} path=.project/handoff.json`,
 			path: handoffPath,
 			checkpoint,
+			jsonChars: budget.jsonChars,
+			maxJsonChars: budget.maxJsonChars,
 		};
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : "write-failed";
@@ -1617,6 +1632,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				reason: result.reason,
 				summary: result.summary,
 				path: result.ok ? ".project/handoff.json" : undefined,
+				jsonChars: result.jsonChars,
+				maxJsonChars: result.maxJsonChars,
 			};
 			return {
 				content: [{ type: "text", text: result.summary }],

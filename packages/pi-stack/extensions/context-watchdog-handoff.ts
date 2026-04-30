@@ -62,6 +62,24 @@ export type LocalSliceHandoffCheckpointInput = {
 	recommendation?: string;
 };
 
+export type LocalSliceHandoffBudgetAssessment = {
+	ok: boolean;
+	jsonChars: number;
+	maxJsonChars: number;
+	reason?: "checkpoint-too-large";
+};
+
+export function assessLocalSliceHandoffBudget(
+	checkpoint: Record<string, unknown>,
+	maxJsonChars = LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS,
+): LocalSliceHandoffBudgetAssessment {
+	const max = Math.max(500, Math.floor(Number(maxJsonChars) || LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS));
+	const jsonChars = JSON.stringify(checkpoint).length;
+	return jsonChars <= max
+		? { ok: true, jsonChars, maxJsonChars: max }
+		: { ok: false, jsonChars, maxJsonChars: max, reason: "checkpoint-too-large" };
+}
+
 function compactHandoffList(values: string[] | undefined, limit: number, maxChars: number): string[] | undefined {
 	const prepared = preparePromptCollection({
 		values: Array.isArray(values) ? values : [],

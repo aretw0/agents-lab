@@ -6,6 +6,7 @@ import {
 	applyContextWatchBootstrapToSettings,
 	applyContextWatchToHandoff,
 	applyWarnCadenceEscalation,
+	assessLocalSliceHandoffBudget,
 	buildAutoCompactDiagnostics,
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
@@ -1008,6 +1009,40 @@ describe("context-watchdog", () => {
 		expect((checkpoint as any).recent_commits).toHaveLength(2);
 		expect((checkpoint as any).next_actions).toHaveLength(3);
 		expect((checkpoint as any).blockers).toHaveLength(3);
+	});
+
+	it("assesses and blocks oversized local slice handoff checkpoints", () => {
+		const checkpoint = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-04-30T00:45:00.000Z",
+			taskId: "TASK-BUD-231",
+			context: "TASK-BUD-231 oversized budget validation.",
+			validation: ["validation payload large enough to cross the artificial 501 char test budget"],
+		});
+		expect(assessLocalSliceHandoffBudget(checkpoint, LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS).ok).toBe(true);
+		expect(assessLocalSliceHandoffBudget(checkpoint, 501)).toMatchObject({
+			ok: false,
+			maxJsonChars: 501,
+			reason: "checkpoint-too-large",
+		});
+
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-handoff-budget-"));
+		try {
+			const result = writeLocalSliceHandoffCheckpoint(cwd, {
+				timestampIso: "2026-04-30T00:45:00.000Z",
+				taskId: "TASK-BUD-231",
+				context: "TASK-BUD-231 oversized budget validation.",
+				validation: ["validation payload large enough to cross the artificial 501 char test budget"],
+			}, { maxJsonChars: 501 });
+			expect(result).toMatchObject({
+				ok: false,
+				reason: "checkpoint-too-large",
+				summary: "context-watch-checkpoint: ok=no task=TASK-BUD-231 reason=checkpoint-too-large",
+				maxJsonChars: 501,
+			});
+			expect(existsSync(join(cwd, ".project", "handoff.json"))).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
 	});
 
 	it("writes compact local slice handoff checkpoints", () => {

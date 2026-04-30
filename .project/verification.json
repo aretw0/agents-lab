@@ -6810,6 +6810,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:43:34.206Z",
       "evidence": "Added LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS budget for compact local-slice handoff checkpoints and regression coverage with intentionally noisy input. Tightened buildLocalSliceHandoffCheckpoint bounds for context, validation, commits, next_actions, blockers, and recommendations so worst-case checkpoint JSON stays <= 2700 chars. Initial focal test exposed current worst-case bloat at 3642 chars and then 2614 chars against a 2600 budget; tuned bounds and budget, then validation passed. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 36/36; cmd.exe /c npm run test:monitor:smoke --silent passed 212/212 across 32 files. [rationale:risk-control] Prevents future regressions that would make checkpoints verbose and accelerate compact pressure in unattended loops."
+    },
+    {
+      "id": "VER-BUD-510",
+      "target": "TASK-BUD-231",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:47:36.278Z",
+      "evidence": "Added assessLocalSliceHandoffBudget and enforced checkpoint budget in writeLocalSliceHandoffCheckpoint before writing .project/handoff.json. context_watch_checkpoint details now include jsonChars/maxJsonChars for audit while content remains compact. Tests cover pure budget assessment and writer blocking with an artificial 501-char budget, verifying .project/handoff.json is not created. Initial focal test showed the fixture was too small for the artificial budget; adjusted fixture to cross the limit. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 37/37; cmd.exe /c npm run test:monitor:smoke --silent passed 213/213 across 32 files. [rationale:risk-control] Prevents oversized checkpoint writes from replacing useful handoff state during unattended operation."
     }
   ]
 }
