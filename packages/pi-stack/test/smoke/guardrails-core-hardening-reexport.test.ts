@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   commandSensitiveShellMarkerCheckReason,
   detectShellInlineCommandSensitiveMarkerCheck,
@@ -176,6 +177,28 @@ describe("guardrails-core hardening re-exports", () => {
         "collector-untrusted",
         "collector-invalid",
       ]),
+    });
+
+    expect(buildLocalMeasuredNudgeFreeLoopAuditEnvelope({
+      packetInput: localFacts,
+      collectorResults: [
+        { fact: "candidate", status: "observed", evidence: "candidate=board-task" },
+        { fact: "checkpoint", status: "observed", evidence: "checkpoint=fresh" },
+        { fact: "handoff-budget", status: "observed", evidence: "handoff-budget=ok" },
+        { fact: "git-state", status: "observed", evidence: "git=expected" },
+        { fact: "protected-scopes", status: "observed", evidence: "protected=clear" },
+        { fact: "cooldown", status: "observed", evidence: "cooldown=ready" },
+        { fact: "validation", status: "observed", evidence: "validation=known" },
+        { fact: "stop-conditions", status: "untrusted", evidence: "stops=clear", source: "caller-supplied" },
+      ],
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: ["collectors-not-eligible", "trust-not-eligible"],
+      summary: "nudge-free-audit-envelope: eligible=no packet=ready collectors=no trust=no authorization=none",
     });
   });
 });

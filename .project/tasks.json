@@ -6731,6 +6731,32 @@
       ],
       "notes": "Criado após reload como próximo bloco essencial antes de qualquer superfície runtime measured. [rationale:risk-control] Operação ininterrupta futura precisa de uma unidade auditável que componha coleta, packet e trust, sem autorização operacional.\n[2026-04-30T03:48:59Z] slice=1 focus=TASK-BUD-283 gate=test:monitor:smoke-245/245 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Audit envelope measured criado como composição pura; sem runtime surface.",
       "verification": "VER-BUD-558"
+    },
+    {
+      "id": "TASK-BUD-284",
+      "description": "[P1] Re-exportar audit envelope measured pela superfície canônica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-283"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar buildLocalMeasuredNudgeFreeLoopAuditEnvelope via guardrails-core-exports/guardrails-core.",
+        "Adicionar smoke provando import canônico do audit envelope.",
+        "Validar que envelope mantém authorization none e caller/untrusted não vira elegível.",
+        "Validar que a superfície runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-283. [rationale:risk-control] O audit envelope precisa estar disponível por import canônico sem virar autorização operacional.\n[2026-04-30T03:51:05Z] slice=1 focus=TASK-BUD-284 gate=test:monitor:smoke-245/245 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Audit envelope measured re-exportado; runtime segue manual-only.",
+      "verification": "VER-BUD-559"
     }
   ]
 }
