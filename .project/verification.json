@@ -8259,6 +8259,15 @@
       "method": "test+safe_marker_check",
       "timestamp": "2026-04-30T18:47:40.944Z",
       "evidence": "Implemented read-only tool hygiene scorecard before large loops. Added classifyToolHygiene/buildToolHygieneScorecard and runtime tool_hygiene_scorecard. It classifies tools as advisory/measured/operational/protected/development, reports flags such as mutation/scheduler/remote/settings/subprocess/manual override, and recommends safe-for-local-loop/needs-measured-evidence/requires-human-approval/hide-before-long-loop while preserving authorization=none and dispatchAllowed=false. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed; safe_marker_check docs matched 5/5."
+    },
+    {
+      "id": "VER-BUD-671",
+      "target": "TASK-BUD-252",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload+test",
+      "timestamp": "2026-04-30T18:52:05.553Z",
+      "evidence": "After reload, tool_hygiene_scorecard live validation passed on selected tools: ant_colony, schedule_prompt, claude_code_execute classified protected/requires-human-approval; board_task_complete operational/needs-measured-evidence; structured_interview_plan measured/safe-for-local-loop; all outputs kept activation=none authorization=none dispatchAllowed=false. Full scorecard run over 94 tools exposed noisy false positives from schema/negative-language matching, so classifier was refined to ignore parameter text and respect no-dispatch/read-only language. Regression: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed. Reload required again before live validating refined classifier."
     }
   ]
 }

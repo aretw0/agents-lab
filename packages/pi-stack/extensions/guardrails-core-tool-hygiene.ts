@@ -33,25 +33,30 @@ export interface ToolHygieneScorecard {
 }
 
 function lowerText(tool: ToolHygieneInputTool): string {
-  return `${tool.name} ${tool.description ?? ""} ${JSON.stringify(tool.parameters ?? {})}`.toLowerCase();
+  return `${tool.name} ${tool.description ?? ""}`.toLowerCase();
 }
 
 function includesAny(text: string, needles: string[]): boolean {
   return needles.some((needle) => text.includes(needle));
 }
 
+function hasNoDispatchLanguage(text: string): boolean {
+  return includesAny(text, ["never dispatches", "no auto-dispatch", "no-auto", "never authorizes", "read-only", "side-effect-free"]);
+}
+
 function buildFlags(tool: ToolHygieneInputTool): string[] {
   const name = tool.name.toLowerCase();
   const text = lowerText(tool);
+  const noDispatch = hasNoDispatchLanguage(text);
   const flags: string[] = [];
 
   if (includesAny(name, ["update", "append", "complete", "create", "write", "set", "remove", "delete", "edit"])) flags.push("mutation");
-  if (includesAny(text, ["scheduler", "scheduled", "recurring", "reminder"])) flags.push("scheduler");
-  if (includesAny(text, ["remote", "offload", "github actions", " ci ", " pr ", " mr "])) flags.push("remote-or-ci");
-  if (includesAny(text, ["settings", "profile", "safe-core", "snapshot", "restore"])) flags.push("settings-or-profile");
+  if (includesAny(name, ["scheduler", "schedule_prompt"]) || (!noDispatch && includesAny(text, ["scheduled prompts", "recurring", "reminder"]))) flags.push("scheduler");
+  if (includesAny(name, ["remote", "github_actions"]) || (!noDispatch && includesAny(text, ["remote", "offload", "github actions", " ci ", " pr ", " mr "]))) flags.push("remote-or-ci");
+  if (includesAny(name, ["settings", "profile", "safe_boot", "governance_profile"]) || (!noDispatch && includesAny(text, ["settings", "profile", "safe-core", "snapshot", "restore"]))) flags.push("settings-or-profile");
   if (includesAny(text, ["execute", "subprocess", "bash", "shell", "command"])) flags.push("subprocess-or-command");
-  if (includesAny(text, ["execute=true", "execute path", "apply", "confirmed", "human approval", "manual approval", "approval required"])) flags.push("manual-override-like");
-  if (includesAny(text, ["dry-run", "dry run", "read-only", "advisory", "side-effect-free", "never authorizes"])) flags.push("advisory-safe-language");
+  if (!noDispatch && includesAny(text, ["execute=true", "execute path", "apply", "confirmed", "human approval", "manual approval", "approval required"])) flags.push("manual-override-like");
+  if (includesAny(text, ["dry-run", "dry run", "read-only", "advisory", "side-effect-free", "never authorizes", "never dispatches"])) flags.push("advisory-safe-language");
   if (includesAny(name, ["ant_colony", "schedule_prompt", "claude_code_execute"])) flags.push("long-run-capable");
 
   return [...new Set(flags)].sort();

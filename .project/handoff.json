@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T18:47:52.739Z",
-  "context": "Implemented first tool hygiene scorecard for pre-large-loop maturity. Added pure classifier and read-only runtime tool_hygiene_scorecard to i [snip] reload required before live validation. [truncated:+215 chars]",
+  "timestamp": "2026-04-30T18:52:36.136Z",
+  "context": "Live validation after reload passed for selected tool hygiene scorecard paths, but full scorecard revealed noisy false positives from matchin [snip] d before final live validation/closure. [truncated:+251 chars]",
   "current_tasks": [
     "TASK-BUD-252"
   ],
   "next_actions": [
-    "Commit TASK-BUD-252 scorecard implementation/docs/board evidence.",
-    "Reload before live validation of tool_hygiene_scorecard.",
-    "After reload, run tool_hygiene_scorecard with a small selected tool set and decide whether TAS [snip] second integration slice. [truncated:+30 chars]"
+    "Commit classifier refinement and live evidence.",
+    "Reload before validating refined tool_hygiene_scorecard live.",
+    "After reload, run full/selected scorecard again and close TASK-BUD-252 if false positives are acceptable."
   ],
   "blockers": [
-    "Reload required before live validation because runtime tool surface changed.",
+    "Reload required before live validation of refined classifier.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts: 4 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
-    "board_verification_append VER-BUD-670 ok"
+    "tool_hygiene_scorecard selected tools live: protected/operational/measured classifications as [snip] ted, dispatchAllowed=false [truncated:+5 chars]",
+    "full scorecard live exposed false positives; refined classifier locally",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts: 4 passed"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T18:47:52.739Z",
+    "generatedAtIso": "2026-04-30T18:52:36.136Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation"
+    "recommendation": "commit-then-reload-before-final-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T18:47:52.739Z",
+      "atIso": "2026-04-30T18:52:36.136Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "commit-then-reload-before-final-validation"
     }
   ]
 }
