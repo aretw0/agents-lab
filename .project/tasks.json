@@ -8480,6 +8480,34 @@
       ],
       "notes": "[rationale:risk-control] A saída compacta da preview agora carrega a semântica crítica; documentá-la evita que ready/prepare/packet sejam interpretados como permissão operacional.\n[2026-04-30T11:30:07Z] slice=1 focus=TASK-BUD-350 gate=safe_marker_check-7/7+focal-89/89 commit=pending docs=compact-decision-ladder. [rationale:risk-control] Escada compacta documentada como evidência, não permissão.",
       "verification": "VER-BUD-624"
+    },
+    {
+      "id": "TASK-BUD-351",
+      "description": "[P1] Expor packetReasons compactos na one-slice preview quando decision packet bloquear.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-350"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar packetReasons=<...> ao summary de context_watch_one_slice_canary_preview quando decisionPacket.decision=blocked.",
+        "Manter summary verde enxuto sem packetReasons quando packet=ready-for-human-decision.",
+        "Garantir dispatch=no e authorization=none continuam visíveis.",
+        "Atualizar formatter smoke blocked para cobrir packetReasons.",
+        "Atualizar smoke verde para garantir summary não inclui packetReasons.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Se o packet bloquear por contrato faltante, o operador precisa ver os motivos compactos no transcript sem abrir details e sem transformar diagnóstico em execução.\n[2026-04-30T11:31:58Z] slice=1 focus=TASK-BUD-351 gate=context-watchdog-48/48+test:monitor:smoke-267/267 commit=pending summary=packetReasons-on-blocked reload-needed=yes. [rationale:risk-control] Motivos do packet bloqueado agora aparecem compactos sem autorizar execução.",
+      "verification": "VER-BUD-625"
     }
   ]
 }

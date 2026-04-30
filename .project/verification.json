@@ -7845,6 +7845,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T11:30:22.145Z",
       "evidence": "Documented the compact readiness/preview/decision-packet ladder in docs/guides/control-plane-operating-doctrine.md. The doctrine now records the validated chain: context_watch_continuation_readiness ready=yes authorization=none; context_watch_one_slice_canary_preview decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no authorization=none. It explicitly states this is graduated evidence, not permission; `packet=ready-for-human-decision` means enough material for a future human decision, and `dispatch=no` is a hard boundary until a separate execution path is authorized. It also documents stop=yes/oneSliceOnly=yes as anti-repetition safety and explains packet=blocked dispatch=no as diagnostic. Validation: safe_marker_check initially caught command-sensitive backtick markers in the validation request, then the corrected non-command-sensitive marker check passed 7/7; focal context/watchdog + unattended-continuation tests passed 89/89. No .pi/settings.json or .github changes. [rationale:risk-control] Compact runtime summaries now have explicit operator semantics, reducing the chance that evidence is misread as permission."
+    },
+    {
+      "id": "VER-BUD-625",
+      "target": "TASK-BUD-351",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:32:17.040Z",
+      "evidence": "Added packetReasons to context_watch_one_slice_canary_preview compact summary when decisionPacket.decision=blocked. Green summaries stay concise and do not include packetReasons; blocked summaries now include capped packet reasons such as `packetReasons=preview-not-ready|rollback-plan-missing` alongside packet=blocked dispatch=no. This improves transcript-level diagnostics for missing contracts without exposing execution knobs. dispatch=no, authorization=none, oneSliceOnly, and stop remain visible; no runtime dispatch/staging/commit/board/checkpoint/scheduler/remote/self-reload/loop is introduced. Focal context-watchdog passed 48/48; full monitor smoke passed 267/267. Runtime summary behavior changed, so live validation requires reload. [rationale:risk-control] Blocked decision packets now explain why they are blocked without weakening the no-dispatch boundary."
     }
   ]
 }

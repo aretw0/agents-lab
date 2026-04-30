@@ -879,6 +879,7 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
 	reasons: string[];
 	decisionPacketDecision?: string;
 	dispatchAllowed?: boolean;
+	decisionPacketReasons?: string[];
 }): string {
 	return [
 		"context-watch-one-slice-canary-preview:",
@@ -889,6 +890,7 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
 		input.decisionPacketDecision ? `packet=${input.decisionPacketDecision}` : undefined,
 		input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
 		input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
+		input.decisionPacketDecision === "blocked" && input.decisionPacketReasons && input.decisionPacketReasons.length > 0 ? `packetReasons=${input.decisionPacketReasons.slice(0, 3).join("|")}` : undefined,
 		"authorization=none",
 	].filter(Boolean).join(" ");
 }
@@ -1977,6 +1979,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				...plan,
 				decisionPacketDecision: decisionPacket.decision,
 				dispatchAllowed: decisionPacket.dispatchAllowed,
+				decisionPacketReasons: decisionPacket.reasons,
 			});
 			return {
 				content: [{ type: "text", text: summary }],

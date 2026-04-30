@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-04-30T11:30:35.212Z",
-  "context": "TASK-BUD-350 completed. Documented the compact decision ladder semantics in control-plane operating doctrine: readiness ready=yes -> preview [snip] ub changes and no automation activated. [truncated:+306 chars]",
+  "timestamp": "2026-04-30T11:32:36.030Z",
+  "context": "TASK-BUD-351 completed. context_watch_one_slice_canary_preview summary now includes packetReasons=<[ellipsis]> only when the decisionPacket i [snip] ve validation. No automation activated. [truncated:+226 chars]",
   "next_actions": [
-    "commit docs/board/handoff evidence",
-    "continue local-first hardening; possible next slice is a pure helper for summarizing missing c [snip] m blocked decision packets [truncated:+12 chars]",
-    "do not implement execution path without explicit operator authorization and stop/rollback contract"
+    "commit summary/board/handoff evidence",
+    "reload before live-validating packetReasons in blocked preview output",
+    "after reload, create a blocked local-safe validation scenario and confirm packetReasons appears with dispatch=no"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before packetReasons appears live."
+  ],
   "recent_validation": [
-    "safe_marker_check first caught command-sensitive backtick markers in the validation request; c [snip] with commandSensitive=none [truncated:+34 chars]",
-    "cmd.exe /c npx vitest run context-watchdog + guardrails-unattended-continuation passed 89/89",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-350 verification=VER-BUD-624 status=completed"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
+    "green smoke asserts no packetReasons= in ready-for-human-decision output"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:30:35.212Z",
+    "generatedAtIso": "2026-04-30T11:32:36.030Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; compact summary semantics are now documented.",
+    "recommendation": "Commit evidence; reload before live validation of packetReasons.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:30:35.212Z",
+      "atIso": "2026-04-30T11:32:36.030Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; compact summary semantics are now documented."
+      "recommendation": "Commit evidence; reload before live validation of packetReasons."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-350"
+    "TASK-BUD-351"
   ]
 }
