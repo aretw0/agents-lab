@@ -1,37 +1,38 @@
 {
-  "timestamp": "2026-04-30T16:31:45.251Z",
-  "context": "Responded to background git status notification and continued TASK-BUD-375. Added final-ish go/no-go matrix for local uninterrupted work: pas [snip] allback and explicit operator decision. [truncated:+369 chars]",
-  "current_tasks": [
-    "TASK-BUD-375"
-  ],
+  "timestamp": "2026-04-30T16:38:55.652Z",
+  "context": "Completed TASK-BUD-378. pi isolated/dev settings canonicalization is implemented in scripts/pi-isolated.mjs and tested. The current derived s [snip] ks future precise guards for that rule. [truncated:+312 chars]",
   "next_actions": [
-    "Commit go/no-go matrix evidence.",
-    "Optionally decide whether TASK-BUD-375 can close as a conservative no-go/fallback classificati [snip] ne live operator Esc test. [truncated:+13 chars]",
-    "Keep TASK-BUD-378 separate for canonical settings paths."
+    "Commit TASK-BUD-378 implementation/tests/board/handoff evidence.",
+    "Continue essential lane with TASK-BUD-379 path guard for upstream/original pi mutation protect [snip] -375 final close decision. [truncated:+25 chars]",
+    "Do not edit node_modules/@mariozechner/pi-coding-agent; only read, extend, wrap, patch controlled, or PR upstream."
   ],
   "blockers": [
-    "Stronger unattended remains blocked without tested long-run cancel/fallback an [snip] cit operator decision. [truncated:+7 chars]",
-    "Host-specific settings canonicalization remains separate TASK-BUD-378.",
+    "Upstream/original pi direct mutation guard remains planned TASK-BUD-379.",
+    "TASK-BUD-375 broader Esc/cancel final closure decision remains open.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4 for go/no-go matrix",
-    "board_verification_append VER-BUD-653 ok",
-    "board_update TASK-BUD-375 ok"
+    "cmd.exe /c node --test scripts/test/pi-isolated-canonical-settings.test.mjs: 3 passed",
+    "node scripts/pi-isolated.mjs canonicalize-settings: rewritten one repo-local absolute package path",
+    "npm run pi:isolated:status: canonical paths=unchanged active mode isolated"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T16:31:45.251Z",
+    "generatedAtIso": "2026-04-30T16:38:55.652Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-go-no-go-matrix"
+    "recommendation": "commit-task-378",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T16:31:45.251Z",
+      "atIso": "2026-04-30T16:38:55.652Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-go-no-go-matrix"
+      "recommendation": "commit-task-378"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-378"
   ]
 }

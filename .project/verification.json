@@ -8106,6 +8106,24 @@
       "method": "documentation+safe_marker_check",
       "timestamp": "2026-04-30T16:31:19.185Z",
       "evidence": "Added go/no-go matrix for local uninterrupted work to docs/guides/control-plane-operating-doctrine.md. It distinguishes passive short read-only tools, bounded long subprocess candidates with AbortSignal+timeout+checkpoint+fallback, slash/interative no-go paths without explicit cancel contract, Esc-not-reaching-TUI no-go, and abort-ignoring orphan-process no-go. safe_marker_check matched 4/4 markers."
+    },
+    {
+      "id": "VER-BUD-654",
+      "target": "TASK-BUD-378",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+dry-run",
+      "timestamp": "2026-04-30T16:37:04.903Z",
+      "evidence": "Implemented canonicalization helpers in scripts/pi-isolated.mjs to rewrite repo-local absolute package paths in .sandbox/pi-agent/settings.json to paths relative to the local agent dir, preserving npm/external sources. Added scripts/test/pi-isolated-canonical-settings.test.mjs. Validation: cmd.exe /c node --test scripts/test/pi-isolated-canonical-settings.test.mjs => 3 passed. Dry-run: node scripts/pi-isolated.mjs canonicalize-settings --dry-run proposed C:/Users/.../agents-lab/node_modules/@davidorex/pi-project-workflows -> ../../node_modules/@davidorex/pi-project-workflows without editing settings. status reports canonical paths=needs-normalization."
+    },
+    {
+      "id": "VER-BUD-655",
+      "target": "TASK-BUD-378",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+dry-run+local-apply",
+      "timestamp": "2026-04-30T16:38:44.987Z",
+      "evidence": "Canonicalized pi isolated/dev settings path handling. scripts/pi-isolated.mjs now detects/canonicalizes repo-local absolute package sources to paths relative to .sandbox/pi-agent, exposes canonicalize-settings, reports canonical paths in status, and auto-normalizes before launch. Tests: cmd.exe /c node --test scripts/test/pi-isolated-canonical-settings.test.mjs => 3 passed. Dry-run showed the host-specific @davidorex path rewrite. Applied to derived .sandbox/pi-agent/settings.json (ignored local state, not .pi/settings.json): path is now ../../node_modules/@davidorex/pi-project-workflows. npm run pi:isolated:status reports canonical paths=unchanged and active mode isolated. No upstream pi package files were modified. [rationale:risk-control] This removes machine-specific dev drift while preserving project/upstream boundaries."
     }
   ]
 }

@@ -29,6 +29,7 @@ import {
 import { homedir } from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 const REPO_ROOT = path.resolve(process.cwd());
 const LOCAL_AGENT_DIR = path.join(REPO_ROOT, ".sandbox", "pi-agent");
@@ -51,6 +52,7 @@ function parseArgs(argv) {
 		help: false,
 		status: false,
 		adoptLatest: false,
+		canonicalizeSettings: false,
 		reset: false,
 		dryRun: false,
 		noAuthImport: false,
@@ -70,6 +72,10 @@ function parseArgs(argv) {
 		}
 		if (a === "adopt-latest") {
 			out.adoptLatest = true;
+			continue;
+		}
+		if (a === "canonicalize-settings") {
+			out.canonicalizeSettings = true;
 			continue;
 		}
 		if (a === "--reset") {
@@ -128,11 +134,12 @@ function printHelp() {
 		"  npm run pi:isolated:resume",
 		"  npm run pi:isolated:status",
 		"  npm run pi:isolated:adopt-latest",
+		"  node scripts/pi-isolated.mjs canonicalize-settings --dry-run",
 		"  npm run pi:isolated:reset",
 		"  npm run pi:isolated:help",
 		"",
 		"Execução direta:",
-		"  node scripts/pi-isolated.mjs [status|help|adopt-latest] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
+		"  node scripts/pi-isolated.mjs [status|help|adopt-latest|canonicalize-settings] [--reset] [--dev] [--dry-run] [--no-auth-import] [-- <args do pi>]",
 		"",
 		"--dev: pausa o loop autônomo (stopCondition=manual-pause) antes de iniciar pi.",
 		"       Use 'npm run pi:loop:resume' para retomar a fábrica depois.",
@@ -314,6 +321,83 @@ function ensureLocalSettings() {
 	return true;
 }
 
+function isRecord(value) {
+	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getPackageSource(entry) {
+	if (typeof entry === "string") return entry;
+	if (isRecord(entry) && typeof entry.source === "string") return entry.source;
+	return undefined;
+}
+
+function setPackageSource(entry, source) {
+	if (typeof entry === "string") return source;
+	if (isRecord(entry) && typeof entry.source === "string") return { ...entry, source };
+	return entry;
+}
+
+function toPortableRelativePath(fromDir, targetPath) {
+	const rel = path.relative(fromDir, targetPath) || ".";
+	return rel.split(path.sep).join("/");
+}
+
+export function canonicalizePackageSourceForLocalAgent(
+	source,
+	{ repoRoot = REPO_ROOT, localAgentDir = LOCAL_AGENT_DIR } = {},
+) {
+	if (typeof source !== "string") return source;
+	if (source.startsWith("npm:") || source.startsWith("git+") || /^[a-z]+:\/\//i.test(source)) return source;
+	if (!path.isAbsolute(source)) return source;
+
+	const resolvedSource = path.resolve(source);
+	const resolvedRepo = path.resolve(repoRoot);
+	const relToRepo = path.relative(resolvedRepo, resolvedSource);
+	if (relToRepo.startsWith("..") || path.isAbsolute(relToRepo)) return source;
+	return toPortableRelativePath(path.resolve(localAgentDir), resolvedSource);
+}
+
+export function canonicalizeSettingsObjectForLocalAgent(
+	settings,
+	{ repoRoot = REPO_ROOT, localAgentDir = LOCAL_AGENT_DIR } = {},
+) {
+	if (!isRecord(settings) || !Array.isArray(settings.packages)) {
+		return { settings, changed: false, changes: [] };
+	}
+
+	let changed = false;
+	const changes = [];
+	const packages = settings.packages.map((entry) => {
+		const source = getPackageSource(entry);
+		if (!source) return entry;
+		const nextSource = canonicalizePackageSourceForLocalAgent(source, { repoRoot, localAgentDir });
+		if (nextSource === source) return entry;
+		changed = true;
+		changes.push({ from: source, to: nextSource });
+		return setPackageSource(entry, nextSource);
+	});
+
+	if (!changed) return { settings, changed: false, changes: [] };
+	return { settings: { ...settings, packages }, changed: true, changes };
+}
+
+function canonicalizeLocalSettings({ dryRun = false } = {}) {
+	if (!existsSync(LOCAL_SETTINGS)) return { status: "missing", changed: false, changes: [] };
+	let settings;
+	try {
+		settings = JSON.parse(readFileSync(LOCAL_SETTINGS, "utf8"));
+	} catch {
+		return { status: "parse-error", changed: false, changes: [] };
+	}
+
+	const result = canonicalizeSettingsObjectForLocalAgent(settings);
+	if (!result.changed) return { status: "unchanged", changed: false, changes: [] };
+	if (!dryRun) {
+		writeFileSync(LOCAL_SETTINGS, JSON.stringify(result.settings, null, 2) + "\n", "utf8");
+	}
+	return { status: dryRun ? "dry-run" : "rewritten", changed: true, changes: result.changes };
+}
+
 function maybeImportAuth(skip) {
 	if (skip) return "skipped";
 	if (existsSync(LOCAL_AUTH)) return "already-present";
@@ -330,6 +414,7 @@ function printStatus() {
 	const hasLocalAuth = existsSync(LOCAL_AUTH);
 	const hasGlobalAuth = existsSync(GLOBAL_AUTH);
 	const hasLocalPiCli = existsSync(LOCAL_PI_CLI);
+	const canonicalSettings = canonicalizeLocalSettings({ dryRun: true });
 
 	console.log("pi isolated status");
 	console.log("");
@@ -342,6 +427,7 @@ function printStatus() {
 	console.log(`local auth:       ${hasLocalAuth ? "yes" : "no"}`);
 	console.log(`global auth:      ${hasGlobalAuth ? "yes" : "no"}`);
 	console.log(`local pi cli:     ${hasLocalPiCli ? "yes" : "no"}`);
+	console.log(`canonical paths:  ${canonicalSettings.changed ? "needs-normalization" : canonicalSettings.status}`);
 
 	const envValue = process.env.PI_CODING_AGENT_DIR;
 	console.log("");
@@ -378,10 +464,21 @@ function run() {
 		return;
 	}
 
+	if (opts.canonicalizeSettings) {
+		const result = canonicalizeLocalSettings({ dryRun: opts.dryRun });
+		console.log(`pi-isolated: canonicalize-settings ${result.status}`);
+		for (const change of result.changes) {
+			console.log(`  ${change.from} -> ${change.to}`);
+		}
+		return;
+	}
+
 	if (opts.adoptLatest) {
 		adoptLatestSession(opts.dryRun);
 		return;
 	}
+
+	const canonicalSettings = canonicalizeLocalSettings({ dryRun: opts.dryRun });
 
 	const env = {
 		...process.env,
@@ -404,6 +501,10 @@ function run() {
 		console.log(`PI_CODING_AGENT_DIR=${LOCAL_AGENT_DIR}`);
 		console.log(`settings created: ${created ? "yes" : "no"}`);
 		console.log(`auth import:      ${authAction}`);
+		console.log(`settings canon:   ${canonicalSettings.status}`);
+		for (const change of canonicalSettings.changes) {
+			console.log(`  ${change.from} -> ${change.to}`);
+		}
 		console.log(`loop pause:       ${devPauseResult}`);
 		console.log(`local cli:        ${LOCAL_PI_CLI}`);
 		console.log(`exec:             ${bin} ${launchArgs.join(" ")}`);
@@ -447,4 +548,6 @@ function run() {
 	}
 }
 
-run();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	run();
+}
