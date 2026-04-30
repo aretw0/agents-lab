@@ -5873,6 +5873,30 @@
       ],
       "notes": "Criado para reforçar que signalSource=measured não é parâmetro manipulável pela tool manual. [rationale:risk-control] A fronteira runtime deve impedir spoofing de sinais medidos por input direto.\n[2026-04-30T01:41:50Z] slice=1 focus=TASK-BUD-248 gate=test:monitor:smoke-223/223 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Schema runtime agora tem regressão contra override signal_source.",
       "verification": "VER-BUD-526"
+    },
+    {
+      "id": "TASK-BUD-249",
+      "description": "[P1] Exigir evidência para signalSource=measured no canário nudge-free.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-248"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Gate puro só retorna ready com signalSource=measured quando houver evidência medida não vazia.",
+        "signalSource=measured sem evidência retorna defer com measured-evidence-missing.",
+        "Details incluem measuredEvidenceCount para auditoria.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado para evitar que signalSource=measured vire apenas outro boolean spoofável em código futuro. [rationale:risk-control] Readiness sem empurrões precisa de sinais medidos com evidência, não só uma flag measured.\n[2026-04-30T01:44:17Z] slice=1 focus=TASK-BUD-249 gate=test:monitor:smoke-224/224 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] signalSource=measured agora exige measuredEvidence não vazia para ready.",
+      "verification": "VER-BUD-527"
     }
   ]
 }

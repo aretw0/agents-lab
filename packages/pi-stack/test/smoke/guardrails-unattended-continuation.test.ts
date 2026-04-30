@@ -14,6 +14,7 @@ describe("guardrails unattended continuation", () => {
       validationKnown: true,
       stopConditionsClear: true,
       signalSource: "measured",
+      measuredEvidence: ["checkpoint=fresh", "git=expected", "validation=known"],
     });
 
     expect(gate).toMatchObject({
@@ -21,6 +22,7 @@ describe("guardrails unattended continuation", () => {
       mode: "advisory",
       activation: "none",
       signalSource: "measured",
+      measuredEvidenceCount: 3,
       decision: "ready",
       canContinueWithoutNudge: true,
       reasons: ["all-gates-green"],
@@ -28,9 +30,9 @@ describe("guardrails unattended continuation", () => {
     });
   });
 
-  it("defers the nudge-free loop canary without explicit opt-in", () => {
+  it("defers the nudge-free loop canary when measured evidence is missing", () => {
     const gate = resolveNudgeFreeLoopCanaryGate({
-      optIn: false,
+      optIn: true,
       nextLocalSafe: true,
       checkpointFresh: true,
       handoffBudgetOk: true,
@@ -47,6 +49,35 @@ describe("guardrails unattended continuation", () => {
       mode: "advisory",
       activation: "none",
       signalSource: "measured",
+      measuredEvidenceCount: 0,
+      decision: "defer",
+      canContinueWithoutNudge: false,
+      reasons: ["measured-evidence-missing"],
+      summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=measured-evidence-missing",
+    });
+  });
+
+  it("defers the nudge-free loop canary without explicit opt-in", () => {
+    const gate = resolveNudgeFreeLoopCanaryGate({
+      optIn: false,
+      nextLocalSafe: true,
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      validationKnown: true,
+      stopConditionsClear: true,
+      signalSource: "measured",
+      measuredEvidence: ["checkpoint=fresh"],
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "measured",
+      measuredEvidenceCount: 1,
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["missing-opt-in"],
@@ -72,6 +103,7 @@ describe("guardrails unattended continuation", () => {
       mode: "advisory",
       activation: "none",
       signalSource: "manual",
+      measuredEvidenceCount: 0,
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["manual-signal-source"],
@@ -91,6 +123,7 @@ describe("guardrails unattended continuation", () => {
       validationKnown: true,
       stopConditionsClear: false,
       signalSource: "measured",
+      measuredEvidence: ["checkpoint=fresh"],
     });
 
     expect(gate).toMatchObject({
@@ -98,6 +131,7 @@ describe("guardrails unattended continuation", () => {
       mode: "advisory",
       activation: "none",
       signalSource: "measured",
+      measuredEvidenceCount: 1,
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons: ["unexpected-git-state", "protected-scope-pending", "stop-condition-present"],

@@ -6963,6 +6963,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:42:03.104Z",
       "evidence": "Added smoke coverage asserting the nudge_free_loop_canary runtime schema does not expose signal_source or signalSource override parameters. The same surface test continues to assert that all manual booleans true returns defer/manual-signal-source, preventing spoofed measured readiness through the current tool. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 2/2; cmd.exe /c npm run test:monitor:smoke --silent passed 223/223 across 32 files. [rationale:risk-control] Runtime callers cannot request measured-signal mode through the manual advisory tool."
+    },
+    {
+      "id": "VER-BUD-527",
+      "target": "TASK-BUD-249",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:44:30.004Z",
+      "evidence": "Changed resolveNudgeFreeLoopCanaryGate so signalSource='measured' is insufficient by itself: ready now requires non-empty measuredEvidence. Measured source without evidence returns defer with reason measured-evidence-missing. Details include measuredEvidenceCount for audit. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 11/11; cmd.exe /c npm run test:monitor:smoke --silent passed 224/224 across 32 files. [rationale:risk-control] Prevents future code from spoofing measured readiness by setting only a signalSource flag."
     }
   ]
 }
