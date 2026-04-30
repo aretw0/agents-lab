@@ -7044,6 +7044,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:12:52.040Z",
       "evidence": "Re-exported resolveMeasuredNudgeFreeLoopCanaryGate via guardrails-core exports and added hardening re-export smoke coverage. The test verifies the helper is reachable through the canonical guardrails-core surface and still returns advisory/effect=none/activation=none readiness when supplied complete measured signals. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 228/228 across 32 files. [rationale:risk-control] Future measured aggregators can import the safe primitive from the canonical surface rather than duplicating readiness logic."
+    },
+    {
+      "id": "VER-BUD-536",
+      "target": "TASK-BUD-260",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:15:11.459Z",
+      "evidence": "Added pure resolveCheckpointFreshMeasuredSignal helper. It derives the checkpoint-fresh measured signal from handoffTimestampIso, nowMs, and maxAgeMs without accepting a manual ok boolean. It returns compact bounded evidence for fresh, stale, missing, invalid, and future timestamps. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 229/229 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] This starts the measured aggregator path from real local timestamp facts rather than spoofable booleans."
     }
   ]
 }

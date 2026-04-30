@@ -6122,6 +6122,31 @@
       ],
       "notes": "Criado após reload para tornar o helper measured disponível pelo caminho canônico de guardrails. [rationale:risk-control] Futuros agregadores devem importar a primitive segura pelo surface canônico, não recriar lógica paralela.\n[2026-04-30T02:12:30Z] slice=1 focus=TASK-BUD-259 gate=test:monitor:smoke-228/228 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Helper measured reexportado pelo caminho canônico.",
       "verification": "VER-BUD-535"
+    },
+    {
+      "id": "TASK-BUD-260",
+      "description": "[P1] Criar helper puro para sinal measured de checkpoint fresco.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-259"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured checkpoint-fresh a partir de timestamp/now/maxAge, sem aceitar ok manual.",
+        "Evidência gerada é compacta e dentro do limite de measured evidence.",
+        "Testes cobrem fresh, stale e missing/invalid timestamp.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como primeiro bloco de agregador measured real. [rationale:risk-control] O caminho measured deve começar derivando sinais do estado local, não de booleans manuais.\n[2026-04-30T02:14:50Z] slice=1 focus=TASK-BUD-260 gate=test:monitor:smoke-229/229 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Primeiro sinal measured real derivado de timestamp local, sem runtime loop.",
+      "verification": "VER-BUD-536"
     }
   ]
 }

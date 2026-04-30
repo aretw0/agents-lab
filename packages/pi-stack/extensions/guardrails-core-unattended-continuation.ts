@@ -85,6 +85,30 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
 
 export const NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS = 120;
 
+export function resolveCheckpointFreshMeasuredSignal(input: {
+  handoffTimestampIso?: string;
+  nowMs: number;
+  maxAgeMs: number;
+}): NudgeFreeLoopMeasuredSignal {
+  if (!input.handoffTimestampIso?.trim()) {
+    return { ok: false, evidence: "checkpoint=missing" };
+  }
+  const timestampMs = Date.parse(input.handoffTimestampIso);
+  if (!Number.isFinite(timestampMs)) {
+    return { ok: false, evidence: "checkpoint=invalid-ts" };
+  }
+  const ageMs = input.nowMs - timestampMs;
+  if (ageMs < 0) {
+    return { ok: false, evidence: "checkpoint=future-ts" };
+  }
+  const ageSec = Math.floor(ageMs / 1000);
+  const maxAgeSec = Math.floor(input.maxAgeMs / 1000);
+  if (ageMs > input.maxAgeMs) {
+    return { ok: false, evidence: `checkpoint=stale ageSec=${ageSec} maxSec=${maxAgeSec}` };
+  }
+  return { ok: true, evidence: `checkpoint=fresh ageSec=${ageSec} maxSec=${maxAgeSec}` };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

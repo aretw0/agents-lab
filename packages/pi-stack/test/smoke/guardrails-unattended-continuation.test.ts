@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
+  resolveCheckpointFreshMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
   resolveUnattendedContinuationPlan,
@@ -23,6 +24,35 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives compact checkpoint-fresh measured signals from timestamps", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const fresh = resolveCheckpointFreshMeasuredSignal({
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const stale = resolveCheckpointFreshMeasuredSignal({
+      handoffTimestampIso: "2026-04-30T01:58:00.000Z",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const missing = resolveCheckpointFreshMeasuredSignal({
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+    const invalid = resolveCheckpointFreshMeasuredSignal({
+      handoffTimestampIso: "not-a-date",
+      nowMs,
+      maxAgeMs: 60_000,
+    });
+
+    expect(fresh).toEqual({ ok: true, evidence: "checkpoint=fresh ageSec=30 maxSec=60" });
+    expect(stale).toEqual({ ok: false, evidence: "checkpoint=stale ageSec=120 maxSec=60" });
+    expect(missing).toEqual({ ok: false, evidence: "checkpoint=missing" });
+    expect(invalid).toEqual({ ok: false, evidence: "checkpoint=invalid-ts" });
+    expect(fresh.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
   it("derives nudge-free measured readiness from one structured signal bundle", () => {
     const gate = resolveMeasuredNudgeFreeLoopCanaryGate({
       optIn: true,
