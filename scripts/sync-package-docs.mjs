@@ -104,6 +104,58 @@ function writeIndex(packageName, spec, targetDir, check) {
   return [];
 }
 
+function collectMarkdownFiles(dir) {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...collectMarkdownFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      out.push(fullPath);
+    }
+  }
+  return out;
+}
+
+function packageReferenceFiles(packageDir) {
+  const root = path.join(REPO_ROOT, packageDir);
+  const files = [];
+  const readme = path.join(root, "README.md");
+  if (existsSync(readme)) files.push(readme);
+  files.push(...collectMarkdownFiles(path.join(root, "skills")));
+  return files;
+}
+
+function findGuideReferences(file) {
+  const text = readFileSync(file, "utf8");
+  const refs = new Set();
+  const pattern = /docs\/guides\/([A-Za-z0-9._-]+\.md)/g;
+  for (const match of text.matchAll(pattern)) {
+    refs.add(match[1]);
+  }
+  return [...refs];
+}
+
+function checkReferencedGuidesArePackaged(packageName, spec) {
+  const packageDir = path.join(REPO_ROOT, spec.dir);
+  const declared = new Set(spec.guides);
+  const stale = [];
+  for (const file of packageReferenceFiles(spec.dir)) {
+    for (const guide of findGuideReferences(file)) {
+      const relativeFile = path.relative(REPO_ROOT, file);
+      if (!declared.has(guide)) {
+        stale.push(`unpackaged-reference:${relativeFile}:docs/guides/${guide}`);
+      }
+      const packagedGuide = path.join(packageDir, "docs", "guides", guide);
+      if (!existsSync(packagedGuide)) {
+        stale.push(`missing-packaged-reference:${relativeFile}:docs/guides/${guide}`);
+      }
+    }
+  }
+  return stale;
+}
+
 function syncOne(packageName, spec, check) {
   const targetDir = packageGuideDir(spec.dir);
   const wanted = new Set([...spec.guides, "README.md"]);
@@ -142,6 +194,9 @@ function syncOne(packageName, spec, check) {
   }
 
   stale.push(...writeIndex(packageName, spec, targetDir, check));
+  if (check) {
+    stale.push(...checkReferencedGuidesArePackaged(packageName, spec));
+  }
   return stale;
 }
 

@@ -8313,6 +8313,15 @@
       "method": "packaged-docs-sync+safe_marker_check",
       "timestamp": "2026-04-30T19:17:53.231Z",
       "evidence": "Addressed package-doc availability for skill guide references. Added scripts/sync-package-docs.mjs, root docs:package:sync/check scripts, prepack hooks and files docs entries for @aretw0/lab-skills, @aretw0/pi-skills, and @aretw0/pi-stack. Synced cited guides into package-local docs/guides and updated pi-stack README guide links to package-local docs. npm run docs:package:sync and npm run docs:package:check both passed. safe_marker_check passed for pi-dev-workflow parity markers and skill-guide-parity distribution/MDT policy markers. This follows the MDT reminder by keeping canonical docs in root guides and generated package copies for distribution."
+    },
+    {
+      "id": "VER-BUD-677",
+      "target": "TASK-BUD-191",
+      "target_type": "task",
+      "status": "passed",
+      "method": "reference-coverage-check",
+      "timestamp": "2026-04-30T19:33:08.261Z",
+      "evidence": "Strengthened scripts/sync-package-docs.mjs so docs:package:check now scans package README.md and skills/*.md for docs/guides/<file>.md references and fails if a referenced guide is not declared in the package manifest or missing from package-local docs/guides. Validation passed: node --check scripts/sync-package-docs.mjs, npm run docs:package:check, and safe_marker_check for skill-guide-parity markers. This closes the immediate drift gap identified after packaging referenced guides."
     }
   ]
 }

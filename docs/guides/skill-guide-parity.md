@@ -46,7 +46,7 @@ Regra operacional:
 
 1. Se uma skill referencia um guide, adicionar esse guide ao manifesto de empacotamento em `scripts/sync-package-docs.mjs`.
 2. O pacote deve incluir `docs` em `files` e rodar `prepack` para sincronizar as cópias.
-3. Validar com `npm run docs:package:check` antes de publicar.
+3. Validar com `npm run docs:package:check` antes de publicar; o check também falha quando uma skill/README referencia `docs/guides/<arquivo>.md` sem esse guide no manifesto do pacote.
 4. As cópias empacotadas são geradas; editar sempre o guide canônico em `docs/guides`.
 
 ## Fluxo incremental de revisão

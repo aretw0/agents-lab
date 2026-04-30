@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T19:18:10.240Z",
-  "context": "Implemented package-doc distribution slice for TASK-BUD-191 after operator reminder. Skills can cite docs only if package carries those docs. [snip] ributed package copies to reduce drift. [truncated:+392 chars]",
+  "timestamp": "2026-04-30T19:33:21.367Z",
+  "context": "Continued TASK-BUD-191 with an anti-drift coverage check for packaged docs. scripts/sync-package-docs.mjs now checks package README.md and sk [snip] rule enforceable, not just documented. [truncated:+198 chars]",
   "current_tasks": [
     "TASK-BUD-191"
   ],
   "next_actions": [
-    "Commit TASK-BUD-191 package-doc distribution slice.",
-    "Continue bounded skill parity review, or select next local-first task after commit.",
-    "Consider a future tighter test that checks every docs/guides reference in packaged skills is r [snip] pts/sync-package-docs.mjs. [truncated:+18 chars]"
+    "Commit TASK-BUD-191 anti-drift coverage check slice.",
+    "Then decide whether TASK-BUD-191 can close as practical parity foundation or needs one more bounded inventory slice.",
+    "Keep strong unattended blocked until tested-cancel criteria and explicit operator decision."
   ],
   "blockers": [
-    "TASK-BUD-191 broader skill parity review remains incomplete.",
+    "TASK-BUD-191 broader skill parity review remains incomplete until closure decision.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npm run docs:package:sync => ok",
+    "cmd.exe /c node --check scripts/sync-package-docs.mjs => ok",
     "cmd.exe /c npm run docs:package:check => ok",
-    "cmd.exe /c node --check scripts/sync-package-docs.mjs => ok"
+    "safe_marker_check docs/guides/skill-guide-parity.md matched=3/3"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T19:18:10.240Z",
+    "generatedAtIso": "2026-04-30T19:33:21.367Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-package-docs-slice"
+    "recommendation": "commit-coverage-check-slice"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T19:18:10.240Z",
+      "atIso": "2026-04-30T19:33:21.367Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-package-docs-slice"
+      "recommendation": "commit-coverage-check-slice"
     }
   ]
 }
