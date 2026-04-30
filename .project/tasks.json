@@ -7144,6 +7144,29 @@
       ],
       "notes": "Criado após decisão de naming TASK-BUD-297. [rationale:risk-control] A primeira superfície runtime deve ser apenas auditável/read-only, derivada localmente e sem autorização operacional.\n[2026-04-30T04:49:15Z] slice=1 focus=TASK-BUD-298 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Primeira superfície local_continuity_audit read-only criada; sem ativação operacional.",
       "verification": "VER-BUD-572"
+    },
+    {
+      "id": "TASK-BUD-299",
+      "description": "[P1] Live-validar superfície runtime local_continuity_audit após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-298"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar local_continuity_audit no runtime carregado após reload.",
+        "Confirmar que a tool retorna effect/mode/activation/authorization none.",
+        "Confirmar que retorna summary compacto e details com envelope auditável.",
+        "Confirmar que não inicia scheduler, loop, self-reload, remoto ou auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload feito pelo operador. [rationale:risk-control] Superfície runtime recém-criada precisa de validação live antes de ser tratada como trust surface operacional read-only.\n[2026-04-30T04:52:33Z] slice=1 focus=TASK-BUD-299 gate=live-local_continuity_audit+surface-smoke-3/3 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] local_continuity_audit validado ao vivo após reload; fail-closed e authorization=none.",
+      "verification": "VER-BUD-573"
     }
   ]
 }

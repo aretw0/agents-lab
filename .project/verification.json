@@ -7377,6 +7377,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:49:38.525Z",
       "evidence": "Exposed first read-only runtime surface local_continuity_audit. The tool accepts no parameters, derives facts from local workspace reads (.project/handoff.json, .project/tasks.json, git status --short read-only), builds the local continuity audit prep/envelope, and returns compact advisory details with effect=none/mode=advisory/activation=none/authorization=none. It does not accept measured facts, signalSource, readiness booleans, or caller-supplied fact source, and it does not start scheduler, loop, self-reload, remote, or auto-continuation. Smoke covers fail-closed/read-only local_continuity_audit and confirms nudge_free_loop_canary remains manual-only with no measured overrides. Validation: local surface focal passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. [rationale:risk-control] This creates the first audited local continuity runtime evidence surface without granting operational authorization."
+    },
+    {
+      "id": "VER-BUD-573",
+      "target": "TASK-BUD-299",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T04:52:43.203Z",
+      "evidence": "Live runtime after operator reload: local_continuity_audit returned compact summary `nudge-free-local-audit-prep: eligible=no collectors=8/8 packet=blocked authorization=none`, proving the loaded tool is present, read-only/advisory, fail-closed on current repo state, and exposes authorization=none. Focal surface smoke also passed 3/3 and asserts details include effect=none, mode=advisory, activation=none, authorization=none, envelope details, no measured overrides, and nudge_free_loop_canary remains manual-only. No scheduler, loop, self-reload, remote, or auto-continuation was started. [rationale:risk-control] Live validation confirms the new trust surface is diagnostic evidence only."
     }
   ]
 }
