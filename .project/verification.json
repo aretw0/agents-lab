@@ -7692,6 +7692,15 @@
       "method": "snapshot+test+inspection",
       "timestamp": "2026-04-30T10:15:11.110Z",
       "evidence": "Promoted .pi/settings.json as intentional canonical conservative baseline after explicit operator authorization. Saved rollback snapshot via safe_boot snapshot: .pi/snapshots/20260430-101408-manual.json. Normalized .pi/settings.json with tab-indented JSON and final newline, preserving previously classified semantic baseline changes: colonyPilot default max cost 0.5, delivery report-only, longRunIntentQueue disabled with autoDrainOnIdle false, schedulerGovernance observe/confirmation, webSessionGateway local, governanceProfile active conservative. Focal settings/provider/handoff tests passed 29/29; full monitor smoke passed 264/264. The settings file is intentionally staged for canonical promotion in the upcoming commit. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Operator decided to promote the conservative baseline; snapshot plus smoke makes the protected change auditable and reversible."
+    },
+    {
+      "id": "VER-BUD-608",
+      "target": "TASK-BUD-334",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board-update+live-tool+test",
+      "timestamp": "2026-04-30T10:17:46.194Z",
+      "evidence": "Reclassified stale protected TASK-BUD-153 from in-progress to planned/backlog with risk-control rationale. Inspection showed TASK-BUD-153 is broad multi-mode work with 13 files including protected `.github/workflows/ci.yml`; it should not remain the only default in-progress focus for local unattended continuity. The task was not closed and its historical notes remain preserved; future CI/.github work still requires explicit protected-scope selection. Live validation after reclassification: local_continuity_audit no longer reports protected=.github/workflows/ci.yml and returns reasons `candidate:invalid|validation:invalid|stop-conditions:invalid|no-local-safe-next-step|validation-unknown authorization=none`; context_watch_continuation_readiness no longer reports protected path and returns `ready=no focus=TASK-BUD-334 audit=blocked reasons=candidate:invalid|validation:invalid|stop-conditions:invalid staleFocus=1 authorization=none`. Focal board/audit/context tests passed 108/108. No .github or .pi/settings.json modifications. [rationale:risk-control] This removes stale protected backlog from the hot path while preserving fail-closed behavior for explicit protected work."
     }
   ]
 }
