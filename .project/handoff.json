@@ -1,35 +1,35 @@
 {
-  "timestamp": "2026-04-30T16:54:37.833Z",
-  "context": "Completed precise guardrails for the operator rule: never mutate the upstream/original pi package directly. Implemented a path blocklist for [snip] pstream pi package files were modified. [truncated:+300 chars]",
+  "timestamp": "2026-04-30T17:06:46.434Z",
+  "context": "Operator reloaded. Added TASK-BUD-380 backlog for trusted global/devcontainer SKILL.md reads outside project to avoid blocking runtime on leg [snip] upstream pi package mutation occurred. [truncated:+305 chars]",
   "next_actions": [
-    "Commit TASK-BUD-379 guardrails/docs/board evidence.",
-    "Reload before live enforcement validation because runtime guard changed.",
-    "After reload, validate with non-destructive blocked-path dry check if available; do not mutate upstream pi package."
+    "Commit backlog/live-validation evidence.",
+    "Continue essential lane: either close TASK-BUD-375 final cancel classification or start TASK-B [snip] ill read allowlist design. [truncated:+17 chars]",
+    "Do not mutate upstream pi package; keep reads bounded."
   ],
   "blockers": [
-    "Reload required before live validation of the new guardrail.",
-    "TASK-BUD-375 final close decision remains open for broader Esc/cancel classification.",
+    "TASK-BUD-375 final close decision remains open.",
+    "TASK-BUD-380 planned: trusted global skill read prompts can still interrupt de [snip] ons until implemented. [truncated:+21 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts: 1 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
-    "board_verification_append VER-BUD-656 ok"
+    "board_task_create TASK-BUD-380 ok",
+    "bash live guard: rm --version node_modules/@mariozechner/pi-coding-agent blocked by upstream_pi_package_mutation",
+    "board_verification_append VER-BUD-658 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T16:54:37.833Z",
+    "generatedAtIso": "2026-04-30T17:06:46.434Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation",
+    "recommendation": "commit-live-validation-and-backlog",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T16:54:37.833Z",
+      "atIso": "2026-04-30T17:06:46.434Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "commit-live-validation-and-backlog"
     }
   ],
   "completed_tasks": [

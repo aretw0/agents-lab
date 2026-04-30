@@ -8142,6 +8142,15 @@
       "method": "test+safe_marker_check",
       "timestamp": "2026-04-30T16:54:27.997Z",
       "evidence": "Completed upstream/original pi mutation guard. Implemented UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST, isUpstreamPiPackagePath, edit/write tool blocking with audit key guardrails-core.upstream-pi-package-mutation-block, and bash policy upstream-pi-package-mutation. Bounded reads remain allowed by tests. Docs require extension/wrapper/controlled patch/PR upstream instead of direct package mutation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts => 1 passed; safe_marker_check docs/guides/control-plane-operating-doctrine.md matched 4/4. [rationale:risk-control] This prevents silent local mutation of upstream pi while preserving diagnostic reads."
+    },
+    {
+      "id": "VER-BUD-658",
+      "target": "TASK-BUD-379",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-guard-block",
+      "timestamp": "2026-04-30T17:06:24.274Z",
+      "evidence": "After operator reload, live bash guard blocked a non-destructive mutation-pattern command targeting node_modules/@mariozechner/pi-coding-agent: `rm --version node_modules/@mariozechner/pi-coding-agent`. Guard returned upstream_pi_package_mutation block reason and command did not execute mutation. This validates live enforcement for shell guard after reload; bounded reads remain allowed by unit coverage."
     }
   ]
 }

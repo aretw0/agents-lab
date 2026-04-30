@@ -9205,8 +9205,32 @@
         "Adicionar cobertura de regressão para o path guard/command guard."
       ],
       "milestone": "human-control",
-      "notes": "2026-04-30: criado a pedido do operador. Lembrete hard: não alterar o pacote original do pi; apenas extender, wrappar ou aplicar patch controlado. Nesta fatia, apenas backlog/planejamento; nenhuma alteração em node_modules upstream.\n2026-04-30: implementada primeira camada de guardrail local: bloqueio de mutações diretas no pacote upstream/original do pi via edit/write e via comandos shell mutantes conhecidos; leituras bounded continuam permitidas. Docs atualizadas para exigir extensão/wrapper/patch controlado/PR upstream.\n2026-04-30: [rationale:risk-control] Guardrail reduz risco de drift e corrupção de dependência instalada; leitura bounded segue permitida para diagnóstico.\n[rationale:risk-control] Bloquear mutação direta do pacote upstream/original do pi preserva reprodutibilidade e impede que correções locais silenciosas se confundam com extensões, wrappers, patches controlados ou PRs upstream.\n2026-04-30: completed precise guardrail for upstream/original pi mutation protection. Runtime guard changed; reload required before live enforcement validation.",
+      "notes": "2026-04-30: criado a pedido do operador. Lembrete hard: não alterar o pacote original do pi; apenas extender, wrappar ou aplicar patch controlado. Nesta fatia, apenas backlog/planejamento; nenhuma alteração em node_modules upstream.\n2026-04-30: implementada primeira camada de guardrail local: bloqueio de mutações diretas no pacote upstream/original do pi via edit/write e via comandos shell mutantes conhecidos; leituras bounded continuam permitidas. Docs atualizadas para exigir extensão/wrapper/patch controlado/PR upstream.\n2026-04-30: [rationale:risk-control] Guardrail reduz risco de drift e corrupção de dependência instalada; leitura bounded segue permitida para diagnóstico.\n[rationale:risk-control] Bloquear mutação direta do pacote upstream/original do pi preserva reprodutibilidade e impede que correções locais silenciosas se confundam com extensões, wrappers, patches controlados ou PRs upstream.\n2026-04-30: completed precise guardrail for upstream/original pi mutation protection. Runtime guard changed; reload required before live enforcement validation.\n2026-04-30: reload feito pelo operador; validação live do bash guard passou. Comando não destrutivo com padrão mutante para node_modules/@mariozechner/pi-coding-agent foi bloqueado por upstream_pi_package_mutation. VER-BUD-658 registrada.",
       "verification": "VER-BUD-657"
+    },
+    {
+      "id": "TASK-BUD-380",
+      "description": "Permitir leitura segura de SKILL.md de pacotes pi globais/confiáveis fora do projeto sem prompt bloqueante indevido.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-379"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-skill-access-policy.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Reconhecer leituras de arquivos SKILL.md em pacotes pi globais/confiáveis instalados fora do projeto, como ~/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md, sem exigir confirmação interativa quando a origem for allowlisted/derivável da configuração de packages.",
+        "Preservar bloqueio/prompt para leituras fora do projeto que não sejam skill roots confiáveis ou que sejam sensíveis.",
+        "Funcionar em devcontainer/instalação global do pi, onde skills do usuário ficam fora do workspace, sem depender de paths específicos de uma máquina.",
+        "Adicionar testes cobrindo allow e deny para skill global fora do projeto.",
+        "Documentar que leitura de skill confiável é diferente de mutação ou leitura arbitrária fora do projeto."
+      ],
+      "milestone": "human-control",
+      "notes": "2026-04-30: criado a partir de observação do operador em outra sessão pi via devcontainer usando pi-stack como usuário. Prompt visto: leitura fora do projeto para /home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md. Objetivo: evitar interrupção do runtime quando é uma skill que o agente deveria poder ler."
     }
   ]
 }
