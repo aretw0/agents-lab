@@ -715,6 +715,24 @@ describe("context-watchdog", () => {
 		expect(prompt).toContain("[truncated:+");
 	});
 
+	it("omits completed stale focus tasks from auto-resume prompt when statuses are known", () => {
+		const prompt = buildAutoResumePromptFromHandoff({
+			current_tasks: ["TASK-BUD-305"],
+			next_actions: [
+				"improve expected-path calculation for TASK-BUD-306",
+			],
+		} as any, 5 * 60 * 1000, Date.parse("2026-04-30T05:20:00.000Z"), {
+			taskStatusById: {
+				"TASK-BUD-305": "completed",
+				"TASK-BUD-306": "planned",
+			},
+		});
+		expect(prompt).toContain("focusTasks: TASK-BUD-306");
+		expect(prompt).toContain("staleFocus: TASK-BUD-305=completed");
+		expect(prompt).not.toContain("focusTasks: TASK-BUD-305");
+		expect(prompt).toContain("policy: latest user steering wins");
+	});
+
 	it("derives focusTasks from next_actions when current_tasks are missing", () => {
 		const prompt = buildAutoResumePromptFromHandoff({
 			next_actions: [

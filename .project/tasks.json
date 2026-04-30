@@ -7376,6 +7376,33 @@
       ],
       "notes": "Criado após auto-resume com foco stale. [rationale:risk-control] Warning bloated no momento de compactação aumenta pressão de contexto e pode confundir checkpoint missing específico da decisão com ausência total de handoff.\n[2026-04-30T05:13:47Z] slice=1 focus=TASK-BUD-307 gate=test:monitor:smoke-257/257 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Warning de compact/checkpoint-required deduplicado sem alterar gate/política.",
       "verification": "VER-BUD-581"
+    },
+    {
+      "id": "TASK-BUD-308",
+      "description": "[P1] Evitar focusTasks stale/completed no auto-resume.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-307"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume prompt não deve usar focusTasks concluídas/stale quando houver evidência local suficiente para filtrar.",
+        "Quando current_tasks do handoff apontar para task completed, o prompt deve sinalizar foco stale ou omitir foco em vez de instruir continuação naquela task.",
+        "Adicionar smoke cobrindo focusTasks stale/completed em auto-resume.",
+        "Manter prompt enxuto e sem broad diagnostics.",
+        "Não alterar política de auto-compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação novo é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload e auto-resume com focusTasks stale=TASK-BUD-305. [rationale:risk-control] Auto-resume não deve orientar continuação em task já concluída, pois isso conflita com latest user steering e pode reabrir trabalho encerrado.\n[2026-04-30T05:20:21Z] slice=1 focus=TASK-BUD-308 gate=test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume filtra focusTasks completed/stale usando status local do board.",
+      "verification": "VER-BUD-582"
     }
   ]
 }

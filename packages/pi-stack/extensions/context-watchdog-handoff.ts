@@ -178,6 +178,7 @@ export type AutoResumePromptDiagnostics = {
 	tasks: AutoResumePromptCollectionDiagnostics;
 	blockers: AutoResumePromptCollectionDiagnostics;
 	nextActions: AutoResumePromptCollectionDiagnostics;
+	staleFocusTasks?: string[];
 	globalTruncated: boolean;
 	globalTruncatedChars: number;
 };
@@ -185,6 +186,10 @@ export type AutoResumePromptDiagnostics = {
 export type AutoResumePromptEnvelope = {
 	prompt: string;
 	diagnostics: AutoResumePromptDiagnostics;
+};
+
+export type AutoResumePromptOptions = {
+	taskStatusById?: Record<string, string | undefined>;
 };
 
 export function summarizeAutoResumePromptDiagnostics(
@@ -306,29 +311,51 @@ function formatPromptList(values: string[], droppedByLimitCount: number, fallbac
 	return droppedByLimitCount > 0 ? `${base} (+${droppedByLimitCount} more)` : base;
 }
 
+function isAutoResumeActiveTaskStatus(status: string | undefined): boolean {
+	return status === undefined || status === "in-progress" || status === "planned";
+}
+
+function filterAutoResumeFocusTasks(rawTasks: string[], options?: AutoResumePromptOptions): { active: string[]; stale: string[] } {
+	const statuses = options?.taskStatusById ?? {};
+	const active: string[] = [];
+	const stale: string[] = [];
+	for (const task of rawTasks) {
+		const normalizedTask = normalizePromptSegment(task);
+		const status = statuses[normalizedTask] ?? statuses[normalizedTask.toUpperCase()];
+		if (isAutoResumeActiveTaskStatus(status)) {
+			active.push(task);
+		} else {
+			stale.push(`${normalizedTask}=${status}`);
+		}
+	}
+	return { active, stale };
+}
+
 export function buildAutoResumePromptEnvelopeFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	_maxFreshAgeMs = 30 * 60 * 1000,
 	_nowMs = Date.now(),
+	options?: AutoResumePromptOptions,
 ): AutoResumePromptEnvelope {
 	const handoff = (handoffInput && typeof handoffInput === "object") ? handoffInput : {};
 	const timestamp = typeof handoff.timestamp === "string" && handoff.timestamp
 		? handoff.timestamp
 		: undefined;
 	const rawCurrentTasks = normalizeStringArray(handoff.current_tasks);
+	const filteredCurrentTasks = filterAutoResumeFocusTasks(rawCurrentTasks, options);
 	const focusSourceLines = [
 		...normalizeStringArray(handoff.next_actions),
 		...normalizeStringArray(handoff.blockers),
 		typeof handoff.context === "string" ? handoff.context : "",
 	];
-	const derivedTaskHints = rawCurrentTasks.length > 0
+	const derivedTaskHints = filteredCurrentTasks.active.length > 0
 		? []
 		: extractTaskIdsFromTextLines(focusSourceLines);
-	const operationalFocusHints = rawCurrentTasks.length > 0 || derivedTaskHints.length > 0
+	const operationalFocusHints = filteredCurrentTasks.active.length > 0 || derivedTaskHints.length > 0
 		? []
 		: extractOperationalFocusHints(focusSourceLines);
 	const tasksPrepared = preparePromptCollection({
-		values: rawCurrentTasks.length > 0 ? rawCurrentTasks : (derivedTaskHints.length > 0 ? derivedTaskHints : operationalFocusHints),
+		values: filteredCurrentTasks.active.length > 0 ? filteredCurrentTasks.active : (derivedTaskHints.length > 0 ? derivedTaskHints : operationalFocusHints),
 		maxChars: 48,
 		limit: 3,
 	});
@@ -353,6 +380,9 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
 		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
 	];
+	if (filteredCurrentTasks.stale.length > 0) {
+		lines.push(`staleFocus: ${formatPromptList(filteredCurrentTasks.stale.slice(0, 2), Math.max(0, filteredCurrentTasks.stale.length - 2), "none", ", ")}`);
+	}
 	if (blockersPrepared.values.length > 0) {
 		lines.push(`blockers: ${formatPromptList(blockersPrepared.values, blockersPrepared.diagnostics.droppedByLimitCount, "none", " | ")}`);
 	}
@@ -374,6 +404,7 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 			tasks: tasksPrepared.diagnostics,
 			blockers: blockersPrepared.diagnostics,
 			nextActions: nextPrepared.diagnostics,
+			...(filteredCurrentTasks.stale.length > 0 ? { staleFocusTasks: filteredCurrentTasks.stale } : {}),
 			globalTruncated,
 			globalTruncatedChars,
 		},
@@ -384,6 +415,7 @@ export function buildAutoResumePromptFromHandoff(
 	handoffInput: Record<string, unknown> | undefined,
 	maxFreshAgeMs = 30 * 60 * 1000,
 	nowMs = Date.now(),
+	options?: AutoResumePromptOptions,
 ): string {
-	return buildAutoResumePromptEnvelopeFromHandoff(handoffInput, maxFreshAgeMs, nowMs).prompt;
+	return buildAutoResumePromptEnvelopeFromHandoff(handoffInput, maxFreshAgeMs, nowMs, options).prompt;
 }

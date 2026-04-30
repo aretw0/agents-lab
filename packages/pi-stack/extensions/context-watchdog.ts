@@ -772,6 +772,27 @@ function readContextWatchdogSourceMtimeMs(): number | undefined {
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
+function readProjectTaskStatusById(cwd: string): Record<string, string | undefined> {
+	const filePath = path.join(cwd, ".project", "tasks.json");
+	if (!existsSync(filePath)) return {};
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		const tasks = Array.isArray(parsed) ? parsed : (parsed as { tasks?: unknown[] } | undefined)?.tasks;
+		if (!Array.isArray(tasks)) return {};
+		const statuses: Record<string, string | undefined> = {};
+		for (const task of tasks) {
+			const id = (task as { id?: unknown } | undefined)?.id;
+			const status = (task as { status?: unknown } | undefined)?.status;
+			if (typeof id !== "string" || typeof status !== "string") continue;
+			statuses[id] = status;
+			statuses[id.toUpperCase()] = status;
+		}
+		return statuses;
+	} catch {
+		return {};
+	}
+}
+
 export function formatContextWatchStatusToolSummary(input: {
 	level: ContextWatchdogLevel;
 	percent?: number;
@@ -1320,6 +1341,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 							readHandoffJson(ctx.cwd),
 							config.handoffFreshMaxAgeMs,
+							Date.now(),
+							{ taskStatusById: readProjectTaskStatusById(ctx.cwd) },
 						);
 						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
