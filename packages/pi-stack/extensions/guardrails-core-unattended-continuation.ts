@@ -445,6 +445,27 @@ export function resolveGitStateExpectedCollectorResult(input: {
   };
 }
 
+export function resolveProtectedScopesCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  paths?: string[];
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "protected-scopes", status: "missing", evidence: "protected=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "protected-scopes", status: "invalid", evidence: "protected=read-error" };
+  }
+  if (!Array.isArray(input.paths)) {
+    return { fact: "protected-scopes", status: "invalid", evidence: "protected=missing-paths" };
+  }
+  const signal = resolveProtectedScopesMeasuredSignal({ paths: input.paths });
+  return {
+    fact: "protected-scopes",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

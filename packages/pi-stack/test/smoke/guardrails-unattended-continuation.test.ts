@@ -17,6 +17,7 @@ import {
   resolveMeasuredPacketTrust,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
+  resolveProtectedScopesCollectorResult,
   resolveProtectedScopesMeasuredSignal,
   resolveStopConditionsClearMeasuredSignal,
   resolveUnattendedContinuationPlan,
@@ -40,6 +41,32 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives protected-scopes collector results from local read outcomes", () => {
+    const clear = resolveProtectedScopesCollectorResult({
+      readStatus: "observed",
+      paths: ["packages/pi-stack/extensions/foo.ts", "packages/pi-stack/test/foo.test.ts"],
+    });
+    const pending = resolveProtectedScopesCollectorResult({
+      readStatus: "observed",
+      paths: ["packages/pi-stack/extensions/foo.ts", ".github/workflows/ci.yml", ".pi/settings.json"],
+    });
+    const missing = resolveProtectedScopesCollectorResult({
+      readStatus: "missing",
+    });
+    const readError = resolveProtectedScopesCollectorResult({
+      readStatus: "error",
+    });
+    const missingPaths = resolveProtectedScopesCollectorResult({
+      readStatus: "observed",
+    });
+
+    expect(clear).toEqual({ fact: "protected-scopes", status: "observed", evidence: "protected=clear paths=2" });
+    expect(pending).toEqual({ fact: "protected-scopes", status: "invalid", evidence: "protected=pending count=2 first=.github/workflows/ci.yml|.pi/settings.json" });
+    expect(missing).toEqual({ fact: "protected-scopes", status: "missing", evidence: "protected=missing" });
+    expect(readError).toEqual({ fact: "protected-scopes", status: "invalid", evidence: "protected=read-error" });
+    expect(missingPaths).toEqual({ fact: "protected-scopes", status: "invalid", evidence: "protected=missing-paths" });
+  });
+
   it("derives git-state collector results from local read outcomes", () => {
     const clean = resolveGitStateExpectedCollectorResult({
       readStatus: "observed",

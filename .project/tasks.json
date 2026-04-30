@@ -6895,6 +6895,36 @@
       ],
       "notes": "Criado para continuar lane essencial de coletores locais. [rationale:risk-control] Git state esperado é pré-condição crítica para operação ininterrupta segura e commits intencionais.\n[2026-04-30T04:11:34Z] slice=1 focus=TASK-BUD-289 gate=test:monitor:smoke-248/248 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor git-state puro criado e re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-564"
+    },
+    {
+      "id": "TASK-BUD-290",
+      "description": "[P1] Criar e re-exportar coletor local puro protected-scopes.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-289"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro resolveProtectedScopesCollectorResult reutilizando resolveProtectedScopesMeasuredSignal.",
+        "Helper deve derivar observed/invalid a partir de paths observados localmente, com missing/error para leitura local ausente/falha.",
+        "Não aceitar readiness manual nem fonte caller-supplied como elegível.",
+        "Re-exportar helper via guardrails-core-exports/guardrails-core.",
+        "Testes cobrem clear, protected pending, missing read, read-error e missing paths.",
+        "Validar que runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado para continuar lane essencial de coletores locais. [rationale:risk-control] Escopos protegidos precisam ser detectados localmente antes de qualquer continuação ininterrupta segura.\n[2026-04-30T04:15:01Z] slice=1 focus=TASK-BUD-290 gate=test:monitor:smoke-249/249 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor protected-scopes puro criado e re-exportado; runtime segue manual-only.",
+      "verification": "VER-BUD-565"
     }
   ]
 }

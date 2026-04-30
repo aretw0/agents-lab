@@ -7305,6 +7305,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:11:46.215Z",
       "evidence": "Added and re-exported pure resolveGitStateExpectedCollectorResult. It derives git-state collector status from local readStatus, changedPaths, and expectedPaths by reusing resolveGitStateExpectedMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover clean observed, expected changes observed, unexpected changes invalid, missing read, read-error, and missing changedPaths. Canonical re-export smoke covers unexpected and clean. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 36/36; cmd.exe /c npm run test:monitor:smoke --silent passed 248/248 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Git state expected now has a local-observed collector building block for future audit envelopes and safe intended-file commits."
+    },
+    {
+      "id": "VER-BUD-565",
+      "target": "TASK-BUD-290",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:15:14.154Z",
+      "evidence": "Added and re-exported pure resolveProtectedScopesCollectorResult. It derives protected-scopes collector status from local readStatus and observed paths by reusing resolveProtectedScopesMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover clear observed, protected pending invalid, missing read, read-error, and missing paths. Canonical re-export smoke covers pending and clear. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 37/37; cmd.exe /c npm run test:monitor:smoke --silent passed 249/249 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Protected-scope detection now has a local-observed collector building block for future audit envelopes and safe unattended stops."
     }
   ]
 }

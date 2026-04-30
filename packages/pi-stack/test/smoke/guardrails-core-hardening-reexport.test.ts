@@ -15,6 +15,7 @@ import {
   resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
+  resolveProtectedScopesCollectorResult,
   resolveRecurringFailureHardening,
   resolveValidationMethodPlan,
 } from "../../extensions/guardrails-core";
@@ -257,6 +258,22 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "git-state",
       status: "observed",
       evidence: "git=clean changed=0",
+    });
+    expect(resolveProtectedScopesCollectorResult({
+      readStatus: "observed",
+      paths: ["packages/pi-stack/extensions/foo.ts", ".github/workflows/ci.yml"],
+    })).toEqual({
+      fact: "protected-scopes",
+      status: "invalid",
+      evidence: "protected=pending count=1 first=.github/workflows/ci.yml",
+    });
+    expect(resolveProtectedScopesCollectorResult({
+      readStatus: "observed",
+      paths: ["packages/pi-stack/extensions/foo.ts"],
+    })).toEqual({
+      fact: "protected-scopes",
+      status: "observed",
+      evidence: "protected=clear paths=1",
     });
   });
 });
