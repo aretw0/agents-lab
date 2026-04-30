@@ -1724,6 +1724,25 @@ describe("context-watchdog", () => {
 		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});
 
+	it("treats bounded manual checkpoints as valid compact/resume evidence", () => {
+		const checkpoint = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-04-21T21:33:00.000Z",
+			taskId: "TASK-BUD-384",
+			context: "manual checkpoint before compact",
+			contextLevel: "checkpoint",
+			recommendation: "resume from saved checkpoint",
+		}) as any;
+		const event = latestContextWatchEvent(checkpoint);
+		expect(event?.reason).toBe("manual_checkpoint");
+		expect(event?.level).toBe("checkpoint");
+		expect(contextWatchEventAgeMs(event, Date.parse("2026-04-21T21:33:10.000Z"))).toBe(10_000);
+		expect(resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: event?.level,
+			handoffLastEventAgeMs: contextWatchEventAgeMs(event, Date.parse("2026-04-21T21:33:10.000Z")),
+			maxCheckpointAgeMs: 30 * 60 * 1000,
+		})).toBe(true);
+	});
+
 	it("does not refresh stale machine-maintenance payload when writing context-watch events", () => {
 		const assessment = evaluateContextWatch(57, {
 			warnPct: 50,

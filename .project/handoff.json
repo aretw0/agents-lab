@@ -1,37 +1,43 @@
 {
-  "timestamp": "2026-04-30T20:44:31.713Z",
-  "context": "Adjusted monitor prompt patch strategy based on operator guidance. Canonical backend now lives in packages/pi-stack/install.mjs but is opt-in [snip] ss and possibly after opt-in patch use. [truncated:+429 chars]",
+  "timestamp": "2026-04-30T20:53:23.551Z",
+  "context": "Investigated auto-compact completed followed by auto-resume suppressed checkpoint-evidence-missing. Root cause: bounded manual checkpoint exi [snip] so current runtime sees handoff=fresh. [truncated:+433 chars]",
   "current_tasks": [
-    "TASK-BUD-384"
+    "TASK-BUD-385"
   ],
   "next_actions": [
-    "Commit TASK-BUD-384 opt-in installer patch strategy and local classifier agent hardening.",
-    "After reload/new monitor cycle, validate classify failure counter stops increasing.",
-    "Do not auto-apply monitor prompt patch for users; only suggest unless --monitor-prompt-patch is explicit."
+    "Commit TASK-BUD-385 context-watch checkpoint evidence compatibility fix.",
+    "Reload before relying on patched runtime behavior.",
+    "After reload, re-check context_watch_status/auto-resume diagnostics and continue TASK-BUD-384 monitor cycle validation."
   ],
   "blockers": [
-    "Reload/new monitor cycle needed to validate monitor-template prompt fix.",
-    "TASK-BUD-383 confirmation propagation bug remains planned.",
-    "Strong unattended remains blocked/degraded while monitor classify failures are repeated."
+    "Reload required for patched context-watchdog handoff-event normalization to be live.",
+    "Auto-resume remains evidence-only; no scheduler/loop/remote authorization.",
+    "Strong unattended still blocked by monitor classify-failure stabilization and TASK-BUD-383."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run installer-monitor-prompts.test.ts installer-filters.test.ts monitor- [snip] > 3 files, 11 tests passed [truncated:+36 chars]",
-    "safe_marker_check docs/guides/monitor-overrides.md matched=3/3",
-    "cmd.exe /c npm run docs:package:sync => ok"
+    "read .project/handoff.json showed fresh checkpoint timestamp 2026-04-30T20:45:28.625Z but ligh [snip] lacked percent/thresholds [truncated:+13 chars]",
+    "cmd.exe /c npx vitest run context-watchdog.test.ts monitor-classify-failure-readiness.test.ts [snip] > 3 files, 56 tests passed [truncated:+35 chars]",
+    "structured_io_json dryRun then apply touched 11 lines to add percent/default thresholds to current handoff event"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T20:44:31.713Z",
+    "generatedAtIso": "2026-04-30T20:53:23.551Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-or-monitor-cycle"
+    "recommendation": "commit-then-reload-before-long-run"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T20:44:31.713Z",
+      "atIso": "2026-04-30T20:53:23.551Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
+      "percent": 0,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 68,
+        "compactPct": 72
+      },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-or-monitor-cycle"
+      "recommendation": "commit-then-reload-before-long-run"
     }
   ]
 }

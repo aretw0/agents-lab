@@ -8448,6 +8448,24 @@
       "method": "installer-opt-in+tests+docs",
       "timestamp": "2026-04-30T20:43:59.722Z",
       "evidence": "Corrected canonical monitor prompt patch strategy per operator guidance. The backend installer now only suggests monitor prompt updates by default and requires explicit --monitor-prompt-patch opt-in before mutating local agents/templates. Added planMonitorClassifierPromptPatches for non-mutating detection and kept applyMonitorClassifierPromptPatches as explicit operator-consent path. Tests passed: installer-monitor-prompts.test.ts + installer-filters.test.ts + monitor-classify-failure-readiness.test.ts => 11 passed. Docs updated to state user leniency/opt-in; safe_marker_check matched 3/3; docs package sync/check passed."
+    },
+    {
+      "id": "VER-BUD-692",
+      "target": "TASK-BUD-385",
+      "target_type": "task",
+      "status": "passed",
+      "method": "root-cause+regression-test",
+      "timestamp": "2026-04-30T20:52:07.834Z",
+      "evidence": "Investigated warning 'auto compact completed' followed by 'auto resume suppressed (checkpoint-evidence-missing)'. A fresh .project/handoff.json existed, but its context_watch_events entry from context_watch_checkpoint was lightweight/manual_checkpoint without percent/thresholds. latestContextWatchEvent normalized only schema-complete events, so the resume gate could see no checkpoint evidence. Patched context-watchdog-handoff-events to accept manual_checkpoint and fallback missing percent/thresholds; patched buildLocalSliceHandoffCheckpoint to emit default thresholds/percent. Added regression test that a bounded manual checkpoint is valid compact/resume evidence. Validation: cmd.exe /c npx vitest run context-watchdog.test.ts monitor-classify-failure-readiness.test.ts installer-monitor-prompts.test.ts => 3 files, 56 tests passed."
+    },
+    {
+      "id": "VER-BUD-693",
+      "target": "TASK-BUD-385",
+      "target_type": "task",
+      "status": "passed",
+      "method": "current-handoff-refresh+status",
+      "timestamp": "2026-04-30T20:53:14.687Z",
+      "evidence": "Applied bounded structured_io_json update to current .project/handoff.json context_watch_events[0] to add percent=0 and default thresholds so the currently loaded runtime can treat the existing manual checkpoint as checkpoint evidence before reload. context_watch_status then reported level=ok percent=27 action=continue handoff=fresh. This is a local continuity refresh, not auto-resume authorization."
     }
   ]
 }

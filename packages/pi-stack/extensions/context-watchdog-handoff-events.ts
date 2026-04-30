@@ -14,7 +14,7 @@ export type ContextWatchAssessmentLike = {
 	recommendation: string;
 };
 
-export type ContextWatchHandoffReason = "session_start" | "message_end" | "auto_compact_prep";
+export type ContextWatchHandoffReason = "session_start" | "message_end" | "auto_compact_prep" | "manual_checkpoint";
 
 export type ContextWatchHandoffEvent = {
 	atIso: string;
@@ -40,6 +40,11 @@ const CONTEXT_WATCH_BLOCKER_PREFIX = "context-watch-";
 const MACHINE_MAINTENANCE_BLOCKER_PREFIXES = ["memory-pressure-", "disk-pressure-"];
 const CONTEXT_WATCH_EVENTS_KEY = "context_watch_events";
 const CONTEXT_WATCH_EVENTS_MAX = 12;
+const DEFAULT_CONTEXT_WATCH_THRESHOLDS: ContextWatchThresholds = {
+	warnPct: 50,
+	checkpointPct: 68,
+	compactPct: 72,
+};
 
 function contextWatchActionForLevel(level: ContextWatchdogLevel): string {
 	switch (level) {
@@ -69,19 +74,22 @@ function normalizeContextWatchEventList(value: unknown): ContextWatchHandoffEven
 		if (level !== "ok" && level !== "warn" && level !== "checkpoint" && level !== "compact") {
 			continue;
 		}
-		const percent = Number(row.percent);
+		const percentRaw = Number(row.percent);
 		const thresholdsRaw = row.thresholds as Record<string, unknown> | undefined;
-		const warnPct = Number(thresholdsRaw?.warnPct);
-		const checkpointPct = Number(thresholdsRaw?.checkpointPct);
-		const compactPct = Number(thresholdsRaw?.compactPct);
-		if (!Number.isFinite(percent) || !Number.isFinite(warnPct) || !Number.isFinite(checkpointPct) || !Number.isFinite(compactPct)) {
-			continue;
-		}
+		const warnPctRaw = Number(thresholdsRaw?.warnPct);
+		const checkpointPctRaw = Number(thresholdsRaw?.checkpointPct);
+		const compactPctRaw = Number(thresholdsRaw?.compactPct);
+		const percent = Number.isFinite(percentRaw) ? percentRaw : 0;
+		const warnPct = Number.isFinite(warnPctRaw) ? warnPctRaw : DEFAULT_CONTEXT_WATCH_THRESHOLDS.warnPct;
+		const checkpointPct = Number.isFinite(checkpointPctRaw) ? checkpointPctRaw : DEFAULT_CONTEXT_WATCH_THRESHOLDS.checkpointPct;
+		const compactPct = Number.isFinite(compactPctRaw) ? compactPctRaw : DEFAULT_CONTEXT_WATCH_THRESHOLDS.compactPct;
 		const reason = row.reason === "session_start"
 			? "session_start"
 			: row.reason === "auto_compact_prep"
 				? "auto_compact_prep"
-				: "message_end";
+				: row.reason === "manual_checkpoint"
+					? "manual_checkpoint"
+					: "message_end";
 		out.push({
 			atIso: typeof row.atIso === "string" && row.atIso ? row.atIso : new Date().toISOString(),
 			reason,

@@ -2,6 +2,11 @@ export type HandoffFreshnessLabel = "fresh" | "stale" | "unknown";
 export type HandoffRefreshMode = "none" | "auto-on-compact" | "manual" | "unknown";
 
 const CONTEXT_WATCH_ACTION_PREFIX = "Context-watch action:";
+const DEFAULT_CONTEXT_WATCH_THRESHOLDS = {
+	warnPct: 50,
+	checkpointPct: 68,
+	compactPct: 72,
+};
 export const LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS = 2_700;
 
 function normalizeStringArray(value: unknown): string[] {
@@ -117,7 +122,8 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			atIso: timestamp,
 			reason: "manual_checkpoint",
 			level: contextLevel,
-			...(contextPercent !== undefined ? { percent: contextPercent } : {}),
+			percent: contextPercent ?? 0,
+			thresholds: DEFAULT_CONTEXT_WATCH_THRESHOLDS,
 			action: "checkpoint-refresh",
 			recommendation: truncateForPrompt(input.recommendation ?? "Local slice checkpoint saved.", 120),
 		}],
