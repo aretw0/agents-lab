@@ -8666,6 +8666,28 @@
       ],
       "notes": "[rationale:risk-control] Expor o gate como tool read-only permite revisão auditável no transcript sem criar executor nem autorização operacional.\n[2026-04-30T11:51:14Z] slice=1 focus=TASK-BUD-357 gate=surface-8/8+test:monitor:smoke-269/269 commit=pending tool=one_slice_human_contract_review dispatchAllowed=false executorApproved=false reload-needed=yes. [rationale:risk-control] Review runtime read-only exposto sem executor.",
       "verification": "VER-BUD-631"
+    },
+    {
+      "id": "TASK-BUD-358",
+      "description": "[P1] Live-validar one_slice_human_contract_review após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-357"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar one_slice_human_contract_review no caminho verde e confirmar contract-ready-no-executor dispatch=no executor=no authorization=none.",
+        "Executar one_slice_human_contract_review no caminho bloqueado e confirmar reasons de bloqueio com dispatch=no executor=no authorization=none.",
+        "Confirmar que a tool não stageia, commita, fecha task, checkpointa, aciona scheduler/remote/self-reload ou loop; ações de board/commit/checkpoint são explícitas.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A nova runtime tool deve ser validada ao vivo como revisão read-only de contrato, não como executor.\n[2026-04-30T11:58:00Z] slice=1 focus=TASK-BUD-358 gate=live-one_slice_human_contract_review green=contract-ready-no-executor blocked=blocked dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] Tool runtime validada como revisão sem executor.",
+      "verification": "VER-BUD-632"
     }
   ]
 }

@@ -7908,6 +7908,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:51:41.770Z",
       "evidence": "Exposed reviewOneSliceLocalHumanConfirmedContract(...) as read-only runtime tool `one_slice_human_contract_review` in guardrails-core-unattended-continuation-surface. The tool accepts explicit packet/contract fields and returns the helper summary/details only; it never dispatches execution and always preserves dispatchAllowed=false and executorApproved=false. Green contract-review summary is `one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none`. Blocked smoke covers packet_dispatch_allowed=true, generic confirmation, protected scope, scheduler, remote/offload, and GitHub Actions requests. No staging, commit, board close, checkpoint, scheduler, remote/offload, self-reload, loop, executor, or dispatcher was added. Validation: focal surface smoke passed 8/8; full monitor smoke passed 269/269. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] Operators can now review proposed one-slice contracts in transcript while dispatch remains impossible."
+    },
+    {
+      "id": "VER-BUD-632",
+      "target": "TASK-BUD-358",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T11:55:06.917Z",
+      "evidence": "After reload, live runtime validation of one_slice_human_contract_review succeeded. Green path returned `one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none`. Blocked path returned `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=packet-dispatch-not-false,human-confirmation-generic,protected-scope,repeat-requested authorization=none`; blocked inputs also requested scheduler/self-reload/remote/GitHub/protected scope, but the compact summary caps reasons while details preserve the full review. git status after tool calls showed only explicit .project/handoff.json and .project/tasks.json workflow changes; the tool did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. [rationale:risk-control] The runtime review surface is live, read-only, and keeps executor approval false."
     }
   ]
 }
