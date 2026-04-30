@@ -7854,6 +7854,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:32:17.040Z",
       "evidence": "Added packetReasons to context_watch_one_slice_canary_preview compact summary when decisionPacket.decision=blocked. Green summaries stay concise and do not include packetReasons; blocked summaries now include capped packet reasons such as `packetReasons=preview-not-ready|rollback-plan-missing` alongside packet=blocked dispatch=no. This improves transcript-level diagnostics for missing contracts without exposing execution knobs. dispatch=no, authorization=none, oneSliceOnly, and stop remain visible; no runtime dispatch/staging/commit/board/checkpoint/scheduler/remote/self-reload/loop is introduced. Focal context-watchdog passed 48/48; full monitor smoke passed 267/267. Runtime summary behavior changed, so live validation requires reload. [rationale:risk-control] Blocked decision packets now explain why they are blocked without weakening the no-dispatch boundary."
+    },
+    {
+      "id": "VER-BUD-626",
+      "target": "TASK-BUD-352",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T11:35:32.392Z",
+      "evidence": "After reload, live runtime validated blocked packetReasons in context_watch_one_slice_canary_preview. With a fresh local-safe focus intentionally lacking known validation, preview returned `context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=readiness-not-ready|validation-unknown packetReasons=preview-not-ready|validation-gate-missing authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-352 audit=defer reasons=candidate:invalid|validation:invalid|no-local-safe-next-step staleFocus=0 authorization=none`. git status after preview showed only explicit .project/handoff.json and .project/tasks.json changes from workflow steps; the preview did not stage, commit, close board tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. [rationale:risk-control] Blocked packet diagnostics are visible in compact output while dispatch remains no."
     }
   ]
 }
