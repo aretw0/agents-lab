@@ -7890,6 +7890,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T11:45:06.039Z",
       "evidence": "Added `Contrato design-only de execução humana confirmada` to docs/guides/control-plane-operating-doctrine.md. The contract states that before any executor exists, a future one-slice local execution would require a recent live summary with packet=ready-for-human-decision dispatch=no authorization=none, a single local-safe in-progress focus with declared reversible files, explicit rollback, known validation, intentional staging/commit scope, bounded board close, mandatory checkpoint, and mandatory stop after one slice. It defines explicit human confirmation language by task/action and clarifies that generic 'pode seguir' only authorizes continued rehearsal/control-plane work, not an executor. It also states the contract does not cover scheduler, repetition, self-reload, remote/offload, GitHub Actions, publish, .pi/settings.json, .github, .obsidian, destructive git maintenance, or protected scopes. Validation: safe_marker_check passed 11/11; focal context-watchdog + guardrails-unattended-continuation tests passed 89/89. [rationale:risk-control] The next execution boundary is now explicit and auditable without implementing or authorizing execution."
+    },
+    {
+      "id": "VER-BUD-630",
+      "target": "TASK-BUD-356",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:48:55.849Z",
+      "evidence": "Implemented pure/read-only helper reviewOneSliceLocalHumanConfirmedContract(...) in guardrails-core-unattended-continuation and re-exported it through guardrails-core. The helper reviews a proposed human-confirmed one-slice local contract but always returns effect=none, mode=contract-review, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, oneSliceOnly=true. A valid proposal returns decision=contract-ready-no-executor with reasons contract-valid,human-confirmation-explicit,executor-not-approved; generic/missing confirmation, non-ready packets, missing rollback/validation/staging/commit/checkpoint/stop contracts, protected scope, repeat, scheduler, self-reload, remote/offload, and GitHub Actions requests all block. No runtime executor/tool/dispatcher was added. Validation: focal guardrails-unattended-continuation + re-export smoke passed 43/43; full monitor smoke passed 268/268. [rationale:risk-control] The human-confirmed execution boundary is now testable while preserving no-dispatch until a separate executor is explicitly authorized."
     }
   ]
 }

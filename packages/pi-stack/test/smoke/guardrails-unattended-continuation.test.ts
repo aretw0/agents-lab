@@ -29,6 +29,7 @@ import {
   resolveUnattendedContinuationPlan,
   resolveValidationKnownCollectorResult,
   resolveValidationKnownMeasuredSignal,
+  reviewOneSliceLocalHumanConfirmedContract,
 } from "../../extensions/guardrails-core-unattended-continuation";
 
 const completeMeasuredEvidence = [
@@ -108,6 +109,97 @@ describe("guardrails unattended continuation", () => {
     expect(blockedByContract.dispatchAllowed).toBe(false);
     expect(executeIntent.reasons).toContain("execute-intent-recorded-not-authorization");
     expect(executeIntent.dispatchAllowed).toBe(false);
+  });
+
+  it("reviews a human-confirmed one-slice contract without approving an executor", () => {
+    const readyPlan = resolveOneSliceLocalCanaryPlan(greenInput());
+    const readyPacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
+      plan: readyPlan,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    });
+    const readyReview = reviewOneSliceLocalHumanConfirmedContract({
+      decisionPacket: readyPacket,
+      humanConfirmation: "explicit-task-action",
+      singleFocus: true,
+      localSafeScope: true,
+      declaredFilesKnown: true,
+      protectedScopesClear: true,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    });
+    const genericConfirmation = reviewOneSliceLocalHumanConfirmedContract({
+      decisionPacket: readyPacket,
+      humanConfirmation: "generic",
+      singleFocus: true,
+      localSafeScope: true,
+      declaredFilesKnown: true,
+      protectedScopesClear: true,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    });
+    const protectedRepeat = reviewOneSliceLocalHumanConfirmedContract({
+      decisionPacket: readyPacket,
+      humanConfirmation: "explicit-task-action",
+      singleFocus: true,
+      localSafeScope: true,
+      declaredFilesKnown: true,
+      protectedScopesClear: false,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+      repeatRequested: true,
+      schedulerRequested: true,
+      selfReloadRequested: true,
+      remoteOrOffloadRequested: true,
+      githubActionsRequested: true,
+      protectedScopeRequested: true,
+    });
+
+    expect(readyReview).toMatchObject({
+      effect: "none",
+      mode: "contract-review",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      oneSliceOnly: true,
+      decision: "contract-ready-no-executor",
+      reasons: ["contract-valid", "human-confirmation-explicit", "executor-not-approved"],
+      summary: "one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none",
+    });
+    expect(genericConfirmation).toMatchObject({
+      decision: "blocked",
+      dispatchAllowed: false,
+      executorApproved: false,
+      reasons: ["human-confirmation-generic"],
+    });
+    expect(protectedRepeat.dispatchAllowed).toBe(false);
+    expect(protectedRepeat.executorApproved).toBe(false);
+    expect(protectedRepeat.reasons).toEqual(expect.arrayContaining([
+      "protected-scope",
+      "repeat-requested",
+      "scheduler-requested",
+      "self-reload-requested",
+      "remote-or-offload-requested",
+      "github-actions-requested",
+      "protected-scope-requested",
+    ]));
   });
 
   it("plans one-slice local canary without activation or repetition", () => {

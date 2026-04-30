@@ -8608,6 +8608,37 @@
       ],
       "notes": "[rationale:risk-control] Para desbloquear trabalho ininterrupto com controle, a próxima fronteira precisa ser um contrato explícito de execução humana confirmada antes de qualquer implementação de executor.\n[2026-04-30T11:45:00Z] slice=1 focus=TASK-BUD-355 gate=safe_marker_check-11/11+focal-89/89 commit=pending docs=human-confirmed-one-slice-contract. [rationale:risk-control] Fronteira de execução futura definida como design-only sem executor aprovado.",
       "verification": "VER-BUD-629"
+    },
+    {
+      "id": "TASK-BUD-356",
+      "description": "[P1] Implementar helper puro para revisar contrato humano-confirmado de uma fatia local.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-355"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar helper puro/read-only que revise contrato proposto para execução humana confirmada de uma única fatia local.",
+        "O helper deve exigir decision packet ready-for-human-decision, dispatchAllowed=false, confirmação humana explícita, foco único, escopo/rollback/validation/staging/commit/checkpoint/stop conhecidos.",
+        "O helper deve retornar effect=none, mode=contract-review, activation=none, authorization=none, dispatchAllowed=false, requiresExecutor=false ou executorApproved=false.",
+        "Bloquear confirmação genérica e repeat/scheduler/self-reload/remote/offload/GitHub Actions/protected scopes.",
+        "Re-exportar helper na superfície canônica.",
+        "Adicionar testes verdes/bloqueados e smoke de re-export.",
+        "Não criar runtime executor nem tool operacional.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Transformar a doutrina do contrato humano-confirmado em gate testável sem criar executor nem autorização operacional.\n[2026-04-30T11:48:28Z] slice=1 focus=TASK-BUD-356 gate=focal-43/43+test:monitor:smoke-268/268 commit=pending helper=reviewOneSliceLocalHumanConfirmedContract dispatchAllowed=false executorApproved=false. [rationale:risk-control] Contrato humano-confirmado virou gate puro sem executor.",
+      "verification": "VER-BUD-630"
     }
   ]
 }

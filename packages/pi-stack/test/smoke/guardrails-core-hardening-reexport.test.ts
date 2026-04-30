@@ -25,6 +25,7 @@ import {
   resolveRecurringFailureHardening,
   resolveValidationKnownCollectorResult,
   resolveValidationMethodPlan,
+  reviewOneSliceLocalHumanConfirmedContract,
 } from "../../extensions/guardrails-core";
 
 describe("guardrails-core hardening re-exports", () => {
@@ -90,7 +91,7 @@ describe("guardrails-core hardening re-exports", () => {
       oneSliceOnly: true,
       decision: "prepare-one-slice",
     });
-    expect(buildOneSliceLocalCanaryDispatchDecisionPacket({
+    const oneSlicePacket = buildOneSliceLocalCanaryDispatchDecisionPacket({
       plan: oneSlicePlan,
       rollbackPlanKnown: true,
       validationGateKnown: true,
@@ -98,12 +99,34 @@ describe("guardrails-core hardening re-exports", () => {
       commitScopeKnown: true,
       checkpointPlanned: true,
       stopContractKnown: true,
-    })).toMatchObject({
+    });
+    expect(oneSlicePacket).toMatchObject({
       mode: "decision-packet",
       activation: "none",
       authorization: "none",
       dispatchAllowed: false,
       decision: "ready-for-human-decision",
+    });
+    expect(reviewOneSliceLocalHumanConfirmedContract({
+      decisionPacket: oneSlicePacket,
+      humanConfirmation: "explicit-task-action",
+      singleFocus: true,
+      localSafeScope: true,
+      declaredFilesKnown: true,
+      protectedScopesClear: true,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    })).toMatchObject({
+      mode: "contract-review",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      decision: "contract-ready-no-executor",
     });
 
     expect(resolveMeasuredNudgeFreeLoopCanaryGate({
