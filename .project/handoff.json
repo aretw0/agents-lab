@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-04-30T11:37:30.447Z",
-  "context": "TASK-BUD-353 completed. Live-validated green one-slice preview after packetReasons rollout. Preview output was decision=prepare-one-slice pre [snip] tomation was dispatched by the preview. [truncated:+430 chars]",
+  "timestamp": "2026-04-30T11:42:42.389Z",
+  "context": "TASK-BUD-354 completed. Added Rehearsal local acumulado to control-plane operating doctrine. It consolidates the evidence chain for safe/in-c [snip] ition/execution without human decision. [truncated:+650 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "continue local-first hardening; possible next slice is decide whether an explicit human-confir [snip] or get a design-only task [truncated:+40 chars]",
-    "do not implement execution path without explicit operator authorization"
+    "commit docs/board/handoff evidence",
+    "next essential lane candidate: design-only task for explicit human-confirmed one-slice executi [snip] l no activation by default [truncated:+17 chars]",
+    "do not implement automatic repetition/scheduler/self-reload/remote/offload without separate authorization"
   ],
   "blockers": [],
   "recent_validation": [
-    "live context_watch_one_slice_canary_preview: packet=ready-for-human-decision dispatch=no autho [snip] with packetReasons absent [truncated:+13 chars]",
-    "live context_watch_continuation_readiness: ready=yes focus=TASK-BUD-353 audit=ready staleFocus=0 authorization=none",
-    "git status after preview: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
+    "unattended_rehearsal_gate: decision=ready-for-canary ready=yes score=6/6 blockers=none",
+    "safe_marker_check corrected markers: ok=yes matched=11/11 commandSensitive=none",
+    "initial safe_marker_check had only over-specific marker mismatch; no command-sensitive markers"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:37:30.447Z",
+    "generatedAtIso": "2026-04-30T11:42:42.389Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; packetReasons behavior is live-validated for blocked and green paths.",
+    "recommendation": "Commit evidence; continue with design-only execution contract if selected.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:37:30.447Z",
+      "atIso": "2026-04-30T11:42:42.389Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; packetReasons behavior is live-validated for blocked and green paths."
+      "recommendation": "Commit evidence; continue with design-only execution contract if selected."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-353"
+    "TASK-BUD-354"
   ]
 }

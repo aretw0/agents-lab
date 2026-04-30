@@ -180,6 +180,24 @@ Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz
 
 Se o summary mostrar `packet=blocked dispatch=no`, trate como diagnóstico e não tente “forçar” execução. A correção deve ser voltar aos fatos locais: foco, checkpoint, git state, protected scopes, validation, stop conditions e handoff budget.
 
+### Rehearsal local acumulado
+
+A maturidade para trabalho ininterrupto seguro deve ser acumulada por rehearsal local, não por salto direto para automação. A evidência mínima já consolidada nesta lane é:
+
+- baseline canônico de `.pi/settings.json` decidido e separado de overlays derivados;
+- foco protegido stale removido da seleção default;
+- readiness verde validada com `ready=yes` e `authorization=none`;
+- preview one-slice validada nos caminhos verde e bloqueado;
+- decision packet visível no summary compacto com `dispatch=no`;
+- motivos de bloqueio visíveis como `packetReasons=...` somente quando o packet bloqueia;
+- board, verificação, commit e checkpoint usados como fechamento explícito de cada fatia.
+
+O próximo gate de maturidade para operar por períodos longos é um rehearsal de uma fatia por disparo: selecionar uma fatia local-safe, declarar rollback, executar só arquivos reversíveis, validar com gate conhecido, commitar escopo intencional, registrar board/checkpoint e parar. O sucesso de uma fatia não autoriza a próxima; repetição exige contrato separado.
+
+Use `unattended_rehearsal_gate` apenas como evidência advisory/read-only. Um resultado `ready=yes` ou `ready-for-canary` nesse gate significa que a sequência local tem maturidade suficiente para discutir um canário controlado; não autoriza scheduler, self-reload, remote/offload, GitHub Actions, repetição automática ou execução sem decisão humana.
+
+A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de preparar, diagnosticar e fechar fatias com menos ambiguidade, mantendo controle humano sobre qualquer dispatch. Enquanto não houver tarefa separada com autorização explícita, rollback, limite de tempo/custo, cancelamento, cooldown e stop conditions, o modo ininterrupto permanece rehearsal local supervisionado.
+
 ## Método de validação
 
 Quando a fatia pode continuar mas o método de validação não está óbvio, use `validation_method_plan` como checagem curta. A regra operacional é:

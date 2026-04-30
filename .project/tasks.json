@@ -8556,6 +8556,32 @@
       ],
       "notes": "[rationale:risk-control] Depois de validar packetReasons no caminho bloqueado, precisamos confirmar que o caminho verde permanece enxuto e sem motivos de bloqueio.\n[2026-04-30T11:38:00Z] slice=1 focus=TASK-BUD-353 gate=live-preview-green packet=ready-for-human-decision dispatch=no packetReasons=absent authorization=none commit=pending. [rationale:risk-control] Caminho verde validado sem packetReasons e sem automação.",
       "verification": "VER-BUD-627"
+    },
+    {
+      "id": "TASK-BUD-354",
+      "description": "[P1] Consolidar evidência de rehearsal local para maturidade de trabalho ininterrupto seguro.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-353"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Consolidar no doctrine a evidência acumulada: settings canônico resolvido, protected stale focus removido, readiness verde, preview one-slice verde/bloqueada validada, decision packet dispatch=no validado.",
+        "Definir próximo gate de maturidade para trabalho ininterrupto: rehearsal de uma fatia por disparo, com stop obrigatório, rollback, validação, commit e checkpoint.",
+        "Explicitar o que ainda não está autorizado: repetição automática, scheduler, self-reload, remote/offload e GitHub Actions.",
+        "Usar unattended_rehearsal_gate como evidência advisory/read-only quando aplicável.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Validar por marker check e smoke focal adequado.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A sequência de provas locais já desbloqueou potencial; precisamos consolidar maturidade e próximo gate sem transformar evidência em automação.\n[2026-04-30T11:42:00Z] slice=1 focus=TASK-BUD-354 gate=unattended_rehearsal_gate-ready-for-canary+safe_marker_check-11/11+focal-89/89 commit=pending docs=local-rehearsal-maturity. [rationale:risk-control] Potencial acumulado consolidado como rehearsal supervisionado, não automação.",
+      "verification": "VER-BUD-628"
     }
   ]
 }

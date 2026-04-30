@@ -7872,6 +7872,15 @@
       "method": "live-tool+inspection",
       "timestamp": "2026-04-30T11:37:18.067Z",
       "evidence": "Live green-path validation after packetReasons rollout succeeded. With a fresh local-safe focus and known smoke validation, context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`; no `packetReasons=` field appeared in the green summary. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-353 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only explicit .project/handoff.json and .project/tasks.json workflow changes; preview did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or loop. [rationale:risk-control] Green output remains concise while blocked packet diagnostics stay available only when needed."
+    },
+    {
+      "id": "VER-BUD-628",
+      "target": "TASK-BUD-354",
+      "target_type": "task",
+      "status": "passed",
+      "method": "advisory-gate+marker-check+test",
+      "timestamp": "2026-04-30T11:42:31.919Z",
+      "evidence": "Consolidated local rehearsal maturity in docs/guides/control-plane-operating-doctrine.md under `Rehearsal local acumulado`. The doctrine now records accumulated evidence: canonical settings baseline separated from derived overlays, stale protected focus removed from default selection, green readiness validated with authorization=none, one-slice preview validated in green and blocked paths, decision packet visible with dispatch=no, packetReasons visible only on blocked packets, and explicit board/verification/commit/checkpoint closure per slice. It defines the next maturity gate as one local-safe slice per dispatch with rollback, known validation, intentional commit, board/checkpoint, and mandatory stop. It explicitly says unattended_rehearsal_gate is advisory/read-only; ready=yes/ready-for-canary is evidence for discussion, not authorization for scheduler, self-reload, remote/offload, GitHub Actions, automatic repetition, or execution without human decision. Advisory tool result: unattended-rehearsal decision=ready-for-canary ready=yes score=6/6 blockers=none. Validation: corrected safe_marker_check passed 11/11 after an initial over-specific marker mismatch; focal context-watchdog + guardrails-unattended-continuation tests passed 89/89. [rationale:risk-control] This turns accumulated local proof into an auditable maturity gate without enabling unattended dispatch."
     }
   ]
 }
