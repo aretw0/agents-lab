@@ -8772,7 +8772,7 @@
     {
       "id": "TASK-BUD-362",
       "description": "[P1] Definir estratégia de longo prazo para .project como adapter/memória sem bloquear agentes.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-361"
@@ -8794,7 +8794,8 @@
         "Definir regras de stale evidence, conflict resolution, task focus e protected scope para cada modo.",
         "Produzir uma decisão/doutrina curta e actionable antes de qualquer executor/repetition/scheduler depender de .project como autoridade operacional."
       ],
-      "notes": "[rationale:architecture] .project é o adapter local-first atual, mas precisa de estratégia explícita de longo prazo para não virar ruído/lock-in nem bloquear diferentes abordagens de agentes. Hard intent: antes de automação ininterrupta depender de .project, mapear canonicalidade, ownership, sync, stale evidence e conflitos."
+      "notes": "[rationale:architecture] .project é o adapter local-first atual, mas precisa de estratégia explícita de longo prazo para não virar ruído/lock-in nem bloquear diferentes abordagens de agentes. Hard intent: antes de automação ininterrupta depender de .project, mapear canonicalidade, ownership, sync, stale evidence e conflitos.\n[2026-04-30T12:14:00Z] Iniciando fatia de arquitetura curta: definir papel de .project como adapter local-first, hard/soft intent e boundaries por modo de trabalho antes de automação mais forte. [rationale:architecture] Evitar lock-in, ruído e conflito entre agentes.\n[2026-04-30T12:15:35Z] slice=1 focus=TASK-BUD-362 gate=safe_marker_check-14/14+5/5+focal-102/102 commit=pending docs=project-long-term-adapter-strategy. [rationale:architecture] .project strategy defined as adapter local-first with hard/soft intent and ownership boundaries by mode.",
+      "verification": "VER-BUD-637"
     },
     {
       "id": "TASK-BUD-363",

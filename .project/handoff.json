@@ -1,42 +1,41 @@
 {
-  "timestamp": "2026-04-30T12:10:52.016Z",
-  "context": "TASK-BUD-363 completed. Documented a minimal ladder for simple signals in control-plane operating doctrine: observe/classify, fix in current [snip] /gc.log require explicit authorization. [truncated:+392 chars]",
+  "timestamp": "2026-04-30T12:16:28.224Z",
+  "context": "TASK-BUD-362 completed. Defined long-term .project strategy: .project remains the current local-first adapter, not mandatory final storage; c [snip] d on .project as operational authority. [truncated:+506 chars]",
   "next_actions": [
     "commit docs/board/handoff evidence",
     "reload still needed for TASK-BUD-361 operator packet runtime validation",
-    "prioritize TASK-BUD-362 before stronger automation depends on .project authority"
+    "after reload, live-validate context_watch_one_slice_operator_packet_preview"
   ],
   "blockers": [
-    "Runtime reload still needed before live validation of context_watch_one_slice_ [snip] iew from TASK-BUD-361. [truncated:+20 chars]",
-    ".project long-term strategy remains planned TASK-BUD-362 before stronger execu [snip] /scheduler dependency. [truncated:+14 chars]"
+    "Runtime reload still needed before live validation of context_watch_one_slice_ [snip] iew from TASK-BUD-361. [truncated:+20 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check corrected markers: ok=yes matched=10/10 commandSensitive=none",
-    "initial safe_marker_check had one over-specific capitalization mismatch only",
-    "cmd.exe /c npx vitest run guardrails-git-maintenance + surface + context-watchdog passed 54/54"
+    "safe_marker_check project-canonical-pipeline corrected markers: ok=yes matched=14/14 commandSensitive=none",
+    "safe_marker_check operating-doctrine corrected markers: ok=yes matched=5/5 commandSensitive=none",
+    "initial marker checks only had over-specific backtick/text mismatches"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T12:10:52.016Z",
+    "generatedAtIso": "2026-04-30T12:16:28.224Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; then reload/operator-packet validation or tackle .project strategy gate.",
+    "recommendation": "Commit evidence; .project strategy gate is resolved for current maturity level.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T12:10:52.016Z",
+      "atIso": "2026-04-30T12:16:28.224Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; then reload/operator-packet validation or tackle .project strategy gate."
+      "recommendation": "Commit evidence; .project strategy gate is resolved for current maturity level."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-363"
+    "TASK-BUD-362"
   ]
 }

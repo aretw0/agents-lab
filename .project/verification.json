@@ -7953,6 +7953,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T12:10:43.669Z",
       "evidence": "Added `Escada mínima para sinais simples` to docs/guides/control-plane-operating-doctrine.md. The doctrine now says simple signals should be observed/classified, fixed in the current slice only when local-safe, small, reversible by git, and bounded-validatable, recorded when relevant, escalated for explicit authorization when destructive/protected/external/costly/irreversible, turned into a task/decision when structural, and hardened when recurring. It explicitly states 'simples' does not mean automatic. For git maintenance, diagnosing/recording/recommending is allowed, while `git gc`, `git prune`, and removing `.git/gc.log` require explicit authorization. Validation: corrected safe_marker_check passed 10/10 after one over-specific marker mismatch; focal git-maintenance/context-watchdog smoke passed 54/54. [rationale:risk-control] This creates the basic decision ladder requested by the operator without authorizing destructive maintenance or adding operational fat."
+    },
+    {
+      "id": "VER-BUD-637",
+      "target": "TASK-BUD-362",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+test",
+      "timestamp": "2026-04-30T12:16:18.374Z",
+      "evidence": "Defined long-term .project strategy in docs/guides/project-canonical-pipeline.md and linked it from docs/guides/control-plane-operating-doctrine.md. The doctrine now states .project is the current local-first adapter, not mandatory final storage; canonical semantics come first and storage remains replaceable. It maps roles for tasks, verification, handoff, auxiliary decision blocks, and adapter/cache behavior. It distinguishes hard intent local usage (local task close, verification gates, handoff continuity, one local slice with clear ownership through bounded surfaces) from soft evidence usage (external selected systems, mirrors, stale focus, multiple writers, remote/CI/colony without ownership). It defines mode/ownership boundaries for single local agent, multiple local agents, worktree/colony, remote/offload, GitHub Actions/CI, external issue trackers, and Markdown/Obsidian; conflict rules fail closed to checkpoint/ask/promotion gates rather than overwrite. It states before executor/repetition/scheduler depend on .project as authority, ownership/stale-evidence mode must be explicit. Validation: safe_marker_check passed 14/14 for project-canonical-pipeline and 5/5 for operating doctrine after initial over-specific marker mismatch; focal project-board/context-watchdog smoke passed 102/102. [rationale:architecture] This answers the operator concern by preventing .project from becoming lock-in, noise, or ambiguous authority across agent modes."
     }
   ]
 }

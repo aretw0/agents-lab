@@ -198,6 +198,8 @@ Use `unattended_rehearsal_gate` apenas como evidência advisory/read-only. Um re
 
 A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de preparar, diagnosticar e fechar fatias com menos ambiguidade, mantendo controle humano sobre qualquer dispatch. Enquanto não houver tarefa separada com autorização explícita, rollback, limite de tempo/custo, cancelamento, cooldown e stop conditions, o modo ininterrupto permanece rehearsal local supervisionado.
 
+Antes de qualquer executor, repetition ou scheduler depender de `.project` como autoridade operacional forte, use a estratégia em `docs/guides/project-canonical-pipeline.md#estratégia-de-longo-prazo-para-project`: `.project` é adapter local-first atual, hard intent apenas em lanes locais com ownership claro, e soft evidence/cache quando houver múltiplos escritores, adapters externos, CI/remote/offload ou stale focus.
+
 ### Contrato design-only de execução humana confirmada
 
 A próxima fronteira antes de qualquer executor é um contrato explícito para uma única fatia local confirmada por humano. Esse contrato ainda é design-only: ele define condições mínimas, mas não cria executor aprovado.

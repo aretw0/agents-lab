@@ -48,6 +48,49 @@ Invariantes em ambos os modos:
 - verificação auditável (`verification`) antes de `completed`;
 - decisões/handoff curtos para retomada determinística.
 
+## Estratégia de longo prazo para `.project`
+
+`.project` é o adapter local-first atual, não o destino final obrigatório. O papel correto dele é preservar semântica operacional enquanto outros adapters amadurecem. A regra de longo prazo é: **semântica canônica primeiro, storage substituível depois**.
+
+### Papéis do `.project`
+
+- `tasks.json`: board local e foco de continuidade.
+- `verification.json`: evidência auditável para gates de conclusão.
+- `handoff.json`: checkpoint curto para retomar contexto, não histórico completo.
+- blocos auxiliares (`decisions`, `issues`, `requirements`): trilha de decisão e requisitos quando forem relevantes para governança.
+- adapter/cache: ponte para GitHub/Gitea, Markdown/Obsidian, SQLite ou backend first-party futuro.
+
+### Hard intent vs soft evidence
+
+Trate `.project` como **hard intent local** quando a ação for fechamento de task, handoff de continuidade, verificação de gate, foco de uma fatia local ou replay de sessão dentro do workspace atual. Nesses casos, use superfícies bounded (`board_task_create`, `board_update`, `board_task_complete`, `context_watch_checkpoint`) e evite scripts ad hoc.
+
+Trate `.project` como **soft evidence** quando houver outro sistema explicitamente escolhido pelo usuário, quando o dado veio de espelho externo, quando o foco estiver stale, quando houver múltiplos escritores ou quando a sessão estiver em modo remoto/CI/colony sem ownership claro. Soft evidence pode orientar seleção e diagnóstico, mas não deve fechar task, disparar executor nem decidir conflito sozinho.
+
+### Modos de trabalho e ownership
+
+| Modo | Leitura | Escrita permitida | Regra de conflito |
+| --- | --- | --- | --- |
+| Agente único local | `.project` é adapter canônico local | board/handoff/verification bounded | git diff esperado + checkpoint fresco |
+| Múltiplos agentes locais | `.project` é shared evidence | um owner por task/fatia; outros só append evidence | conflito vira checkpoint/ask, não overwrite |
+| Worktree/colony | espelho por worktree ou merge controlado | artifacts locais + promoção seletiva | reconciliar por task/evidence, nunca por merge cego |
+| Remote/offload | `.project` é contrato de entrada/saída | report/artifact primeiro; apply só com canal autorizado | delivery gate decide promoção |
+| GitHub Actions/CI | `.project` é snapshot/gate evidence | preferir comments/artifacts; escrita direta só por política | PR/MR revisável antes de canônico |
+| Issue tracker externo | `.project` é adapter/cache | sync por mapeamento task/event/evidence | tracker pode ser fonte hard se escolhido explicitamente |
+| Markdown/Obsidian | inbox/espelho humano | captura/projeção, não fechamento estratégico | promover para task só via decision gate |
+
+### Regras para não virar ruído
+
+1. Um agente não deve tratar stale focus como autoridade; completed/stale precisa cair para diagnóstico.
+2. Board/handoff são hot path; blocos amplos são contexto, não motivo para varredura recorrente.
+3. Escrita em `.project` deve ser pequena, auditable e ligada a uma fatia; se exigir migração/sync, vira tarefa própria.
+4. Em paralelismo, prefira append evidence ou task ownership explícito; evite reordenar/reescrever o board inteiro.
+5. `.project` não deve bloquear agente que opera em adapter externo escolhido; nesses casos ele registra espelho/handoff mínimo.
+6. Antes de executor, repetition ou scheduler dependerem de `.project` como autoridade, o modo de ownership e stale evidence precisa estar explícito para aquela lane.
+
+### Compatibilidade futura
+
+A saída de `.project` não é “remover”, é tornar substituível. Todo adapter futuro deve preservar `task/event/intent/evidence`, `decisionGate`, verificação antes de conclusão e replay idempotente. Quando um backend externo virar fonte hard intent, `.project` passa a cache local ou espelho de recuperação, com sync auditável e conflito fail-closed.
+
 ### Modo de entrega multi-ambiente (native/container/CI)
 
 Para calibrar execução contínua entre máquina local, container e CI:
