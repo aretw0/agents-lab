@@ -7656,6 +7656,15 @@
       "method": "test+inspection",
       "timestamp": "2026-04-30T09:46:42.854Z",
       "evidence": "Added read-only protected path evidence to local_continuity_audit/readiness without changing .pi/settings.json. buildLocalContinuityAudit now returns compact protectedPaths derived from local git/expected-path collectors. local_continuity_audit summary includes `protected=...` when protected drift is present and details includes protectedPaths. context_watch_continuation_readiness propagates the same list into details and summary via optional protectedPaths; authorization remains none. Smoke added for a git repo with modified .pi/settings.json verifying summary contains `protected=.pi/settings.json`, details.protectedPaths is [`.pi/settings.json`], and authorization stays none. Formatter smoke verifies readiness summary can show protected=.pi/settings.json. Validation: focal guardrails/context smokes passed 54/54; full monitor smoke passed 264/264. No .pi/settings.json mutation was made; blocker remains fail-closed until operator decides. [rationale:risk-control] The remaining protected settings drift is now explicit evidence for the operator, not hidden or auto-resolved."
+    },
+    {
+      "id": "VER-BUD-604",
+      "target": "TASK-BUD-330",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T10:08:20.846Z",
+      "evidence": "After operator reload, live runtime validates protected path propagation. local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked reasons=candidate:invalid|checkpoint:invalid|git-state:invalid|protected-scopes:invalid|validation:invalid protected=.pi/settings.json authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-330 audit=blocked reasons=candidate:invalid|checkpoint:invalid|git-state:invalid protected=.pi/settings.json staleFocus=1 authorization=none`. This confirms protected path evidence is visible in live summaries, readiness remains fail-closed, and authorization remains none. No .pi/settings.json mutation, compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Protected drift is now operator-visible evidence, not a hidden blocker or automatic permission."
     }
   ]
 }

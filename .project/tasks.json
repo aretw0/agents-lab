@@ -7949,6 +7949,30 @@
       ],
       "notes": "[rationale:risk-control] Depois de alinhar canonical/derived settings, o operador precisa ver rapidamente qual protected drift real bloqueia a continuidade; isso deve ser evidência read-only e não autorização.\n[2026-04-30T09:46:27Z] slice=1 focus=TASK-BUD-329 gate=focal-54/54+test:monitor:smoke-264/264 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Readiness/audit agora mostram protected path real como evidência read-only.",
       "verification": "VER-BUD-603"
+    },
+    {
+      "id": "TASK-BUD-330",
+      "description": "[P1] Live-validar protected path explícito em readiness/local audit após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-329"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar local_continuity_audit no runtime carregado após reload e confirmar protected=.pi/settings.json quando houver drift protegido.",
+        "Executar context_watch_continuation_readiness e confirmar propagação compacta/read-only de protected path se aplicável.",
+        "Confirmar que authorization=none permanece e que readiness continua fail-closed.",
+        "Não modificar .pi/settings.json.",
+        "Não disparar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] A explicabilidade de protected drift só vira confiável depois de reload e validação live; deve continuar evidência read-only sem autorizar ação sobre settings.\n[2026-04-30T09:52:00Z] slice=1 focus=TASK-BUD-330 gate=live-local_continuity_audit+context_watch_continuation_readiness commit=pending protected=.pi/settings.json authorization=none. [rationale:risk-control] Evidência protected validada ao vivo após reload.",
+      "verification": "VER-BUD-604"
     }
   ]
 }
