@@ -8026,6 +8026,33 @@
       ],
       "notes": "[rationale:risk-control] Após definir topology canonical/derived, reduzir leitores ad hoc diminui risco de cada tool interpretar/mutar settings de modo divergente, sem exigir decisão sobre o drift protegido atual.\n[2026-04-30T10:11:20Z] slice=1 focus=TASK-BUD-332 gate=provider-readiness+handoff-advisor-24/24+test:monitor:smoke-264/264 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Leitores provider/quota agora passam pelo helper canônico.",
       "verification": "VER-BUD-606"
+    },
+    {
+      "id": "TASK-BUD-333",
+      "description": "[P1] Promover .pi/settings.json como baseline canônico conservador e validar impacto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-331",
+        "TASK-BUD-332"
+      ],
+      "files": [
+        ".pi/settings.json",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar snapshot/rollback ou registrar evidência suficiente antes de promover o settings canônico.",
+        "Normalizar .pi/settings.json para JSON formatado com newline final antes do commit, preservando as mudanças semânticas classificadas como conservative baseline.",
+        "Commitar .pi/settings.json intencionalmente como baseline canônico, junto da evidência de board necessária.",
+        "Executar validação focal/adequada e confirmar que settings protegido não fica mais como drift após commit.",
+        "Executar readiness/local audit após commit para observar impacto; readiness deve continuar authorization=none e falhar fechado se houver outro blocker real.",
+        "Não disparar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar implicações e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O operador decidiu promover o drift de settings como canonical; isso resolve o blocker protegido recorrente e torna explícito que o baseline local do projeto é conservador/report-only/observe.\n[2026-04-30T10:15:00Z] slice=1 focus=TASK-BUD-333 gate=safe_boot-snapshot+settings-focal-29/29+test:monitor:smoke-264/264 commit=pending promote=.pi/settings.json canonical=conservative. [rationale:risk-control] Settings canônico promovido intencionalmente com snapshot e validação.",
+      "verification": "VER-BUD-607"
     }
   ]
 }

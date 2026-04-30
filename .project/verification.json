@@ -7683,6 +7683,15 @@
       "method": "test+inspection",
       "timestamp": "2026-04-30T10:11:46.746Z",
       "evidence": "Consolidated read-only provider/quota settings readers on the canonical settings helper without modifying .pi/settings.json. provider-readiness readWorkspaceSettings now delegates to context-watchdog-storage readProjectSettings. handoff-advisor readPiStackSettings now delegates to readProjectSettings instead of parsing .pi/settings.json directly. Behavior remains canonical project settings only; no derived overlay is consumed implicitly. Focal smokes passed: provider-readiness.test.ts + handoff-advisor.test.ts 24/24. Full monitor smoke passed 264/264. Existing protected .pi/settings.json drift remains unstaged and visible. [rationale:risk-control] Reducing ad hoc readers makes the canonical settings contract reusable without changing protected baseline contents."
+    },
+    {
+      "id": "VER-BUD-607",
+      "target": "TASK-BUD-333",
+      "target_type": "task",
+      "status": "passed",
+      "method": "snapshot+test+inspection",
+      "timestamp": "2026-04-30T10:15:11.110Z",
+      "evidence": "Promoted .pi/settings.json as intentional canonical conservative baseline after explicit operator authorization. Saved rollback snapshot via safe_boot snapshot: .pi/snapshots/20260430-101408-manual.json. Normalized .pi/settings.json with tab-indented JSON and final newline, preserving previously classified semantic baseline changes: colonyPilot default max cost 0.5, delivery report-only, longRunIntentQueue disabled with autoDrainOnIdle false, schedulerGovernance observe/confirmation, webSessionGateway local, governanceProfile active conservative. Focal settings/provider/handoff tests passed 29/29; full monitor smoke passed 264/264. The settings file is intentionally staged for canonical promotion in the upcoming commit. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Operator decided to promote the conservative baseline; snapshot plus smoke makes the protected change auditable and reversible."
     }
   ]
 }

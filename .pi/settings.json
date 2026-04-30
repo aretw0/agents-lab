@@ -62,14 +62,22 @@
 			"preflight": {
 				"enabled": true,
 				"enforceOnAntColonyTool": true,
-				"requiredExecutables": ["node", "git"]
+				"requiredExecutables": [
+					"node",
+					"git"
+				]
 			},
 			"modelPolicy": {
 				"enabled": true,
 				"allowMixedProviders": false,
-				"allowedProviders": ["openai-codex"],
+				"allowedProviders": [
+					"openai-codex"
+				],
 				"sparkGateEnabled": true,
-				"sparkAllowedGoalTriggers": ["planning recovery", "scout burst"],
+				"sparkAllowedGoalTriggers": [
+					"planning recovery",
+					"scout burst"
+				],
 				"sparkScoutOnlyTrigger": "scout burst"
 			},
 			"budgetPolicy": {
@@ -77,7 +85,7 @@
 				"enforceOnAntColonyTool": true,
 				"requireMaxCost": true,
 				"autoInjectMaxCost": true,
-				"defaultMaxCostUsd": 6,
+				"defaultMaxCostUsd": 0.5,
 				"hardCapUsd": 60,
 				"minMaxCostUsd": 0.05,
 				"enforceProviderBudgetBlock": true,
@@ -96,7 +104,7 @@
 			},
 			"deliveryPolicy": {
 				"enabled": true,
-				"mode": "apply-to-branch",
+				"mode": "report-only",
 				"requireWorkspaceReport": true,
 				"requireTaskSummary": true,
 				"requireFileInventory": true,
@@ -119,10 +127,16 @@
 				"lookbackDays": 30,
 				"allowOverride": true,
 				"overrideToken": "budget-override:",
-				"recoveryCommands": ["doctor", "quota-visibility", "model", "login"]
+				"recoveryCommands": [
+					"doctor",
+					"quota-visibility",
+					"model",
+					"login"
+				]
 			},
 			"longRunIntentQueue": {
-				"enabled": true
+				"enabled": false,
+				"autoDrainOnIdle": false
 			}
 		},
 		"quotaVisibility": {
@@ -149,6 +163,17 @@
 			"mode": "auto",
 			"autoOpenCountThreshold": 4,
 			"maxVisibleColonies": 8
+		},
+		"schedulerGovernance": {
+			"enabled": true,
+			"policy": "observe",
+			"requireTextConfirmation": true
+		},
+		"webSessionGateway": {
+			"mode": "local"
+		},
+		"governanceProfile": {
+			"active": "conservative"
 		}
 	}
 }
