@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshMeasuredSignal,
@@ -98,6 +99,92 @@ describe("guardrails unattended continuation", () => {
       eligibleForMeasuredPacket: false,
       invalidEvidenceFacts: ["stop-conditions"],
       reasons: ["fact-evidence-invalid"],
+    });
+  });
+
+  it("builds a local measured audit envelope from collectors, packet, and trust", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const packetInput = {
+      optIn: true,
+      nowMs,
+      candidate: {
+        taskId: "TASK-BUD-283",
+        scope: "local" as const,
+        estimatedFiles: 1,
+        reversible: "git" as const,
+        validationKind: "marker-check" as const,
+        risk: "none" as const,
+      },
+      handoffTimestampIso: "2026-04-30T01:59:30.000Z",
+      maxCheckpointAgeMs: 60_000,
+      handoffJsonChars: 1200,
+      maxHandoffJsonChars: 2700,
+      changedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      cooldownMs: 60_000,
+      validation: { kind: "marker-check" as const },
+      stopConditions: [],
+    };
+    const collectorResults = [
+      { fact: "candidate", status: "observed", evidence: "candidate=board-task" },
+      { fact: "checkpoint", status: "observed", evidence: "checkpoint=fresh" },
+      { fact: "handoff-budget", status: "observed", evidence: "handoff-budget=ok" },
+      { fact: "git-state", status: "observed", evidence: "git=expected" },
+      { fact: "protected-scopes", status: "observed", evidence: "protected=clear" },
+      { fact: "cooldown", status: "observed", evidence: "cooldown=ready" },
+      { fact: "validation", status: "observed", evidence: "validation=known" },
+      { fact: "stop-conditions", status: "observed", evidence: "stops=clear" },
+    ] as const;
+    const eligible = buildLocalMeasuredNudgeFreeLoopAuditEnvelope({
+      packetInput,
+      collectorResults: [...collectorResults],
+    });
+    const untrusted = buildLocalMeasuredNudgeFreeLoopAuditEnvelope({
+      packetInput,
+      collectorResults: [
+        ...collectorResults.slice(0, 7),
+        { fact: "stop-conditions", status: "untrusted", evidence: "stops=clear", source: "caller-supplied" },
+      ],
+    });
+    const blocked = buildLocalMeasuredNudgeFreeLoopAuditEnvelope({
+      packetInput: {
+        ...packetInput,
+        candidate: {
+          taskId: "TASK-RISK",
+          scope: "local" as const,
+          estimatedFiles: 1,
+          reversible: "git" as const,
+          validationKind: "marker-check" as const,
+          risk: "none" as const,
+          protectedPaths: [".github/workflows/ci.yml"],
+        },
+        changedPaths: [".github/workflows/ci.yml"],
+        expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+        stopConditions: [{ kind: "protected-scope" as const, present: true, evidence: "protected=.github" }],
+      },
+      collectorResults: [...collectorResults],
+    });
+
+    expect(eligible).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: true,
+      reasons: ["audit-envelope-eligible"],
+      summary: "nudge-free-audit-envelope: eligible=yes packet=ready collectors=yes trust=yes authorization=none",
+    });
+    expect(untrusted).toMatchObject({
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: ["collectors-not-eligible", "trust-not-eligible"],
+      summary: "nudge-free-audit-envelope: eligible=no packet=ready collectors=no trust=no authorization=none",
+    });
+    expect(blocked).toMatchObject({
+      authorization: "none",
+      eligibleForAuditedRuntimeSurface: false,
+      reasons: ["packet-not-ready", "trust-not-eligible"],
+      summary: "nudge-free-audit-envelope: eligible=no packet=blocked collectors=yes trust=no authorization=none",
     });
   });
 

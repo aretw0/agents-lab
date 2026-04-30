@@ -7242,6 +7242,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:46:50.713Z",
       "evidence": "Re-exported resolveMeasuredFactCollectorAssessment through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying collector missing/untrusted/invalid facts remain ineligible with authorization=none. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: focal re-export + surface tests passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 244/244 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Collector-result contract is canonical while preserving fail-closed and non-operational semantics."
+    },
+    {
+      "id": "VER-BUD-558",
+      "target": "TASK-BUD-283",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:49:14.024Z",
+      "evidence": "Added pure buildLocalMeasuredNudgeFreeLoopAuditEnvelope helper. It composes collector assessment, local measured packet, and packet trust into one audit envelope with effect=none/mode=advisory/activation=none/authorization=none. Envelope is eligible only when collectors are local-observed, packet gate is ready, and packet trust is eligible; untrusted collectors or blocked packet fail closed. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 30/30; cmd.exe /c npm run test:monitor:smoke --silent passed 245/245 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future uninterrupted operation needs a single bounded audit unit joining collection, measured packet, and trust without granting authorization."
     }
   ]
 }

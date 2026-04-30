@@ -162,6 +162,19 @@ export interface NudgeFreeLoopFactCollectorAssessment extends NudgeFreeLoopFactS
   collectorInvalidFacts: NudgeFreeLoopLocalFactKey[];
 }
 
+export interface NudgeFreeLoopLocalMeasuredAuditEnvelope {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  eligibleForAuditedRuntimeSurface: boolean;
+  collectorAssessment: NudgeFreeLoopFactCollectorAssessment;
+  packet: NudgeFreeLoopLocalMeasuredCanaryPacket;
+  trust: NudgeFreeLoopMeasuredPacketTrust;
+  reasons: string[];
+  summary: string;
+}
+
 export interface NudgeFreeLoopMeasuredPacketTrust {
   effect: "none";
   mode: "advisory";
@@ -560,6 +573,32 @@ export function resolveMeasuredFactCollectorAssessment(input: {
     collectorInvalidFacts,
     reasons: eligible ? ["all-collectors-local-observed"] : [...reasons],
     summary: `nudge-free-fact-collectors: eligible=${eligible ? "yes" : "no"} source=${assessment.factSource} local=${assessment.localObservedCount}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} reasons=${eligible ? "all-collectors-local-observed" : [...reasons].join("|")}`,
+  };
+}
+
+export function buildLocalMeasuredNudgeFreeLoopAuditEnvelope(input: {
+  packetInput: NudgeFreeLoopLocalMeasuredCanaryInput;
+  collectorResults: NudgeFreeLoopLocalFactCollectorResult[];
+}): NudgeFreeLoopLocalMeasuredAuditEnvelope {
+  const collectorAssessment = resolveMeasuredFactCollectorAssessment({ results: input.collectorResults });
+  const packet = buildLocalMeasuredNudgeFreeLoopCanaryPacket(input.packetInput);
+  const trust = resolveMeasuredPacketTrust({ packet, factSource: collectorAssessment.factSource });
+  const reasons = new Set<string>();
+  if (!collectorAssessment.eligibleForMeasuredPacket) reasons.add("collectors-not-eligible");
+  if (packet.gate.decision !== "ready") reasons.add("packet-not-ready");
+  if (!trust.eligibleForAuditedRuntimeSurface) reasons.add("trust-not-eligible");
+  const eligible = reasons.size === 0;
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    eligibleForAuditedRuntimeSurface: eligible,
+    collectorAssessment,
+    packet,
+    trust,
+    reasons: eligible ? ["audit-envelope-eligible"] : [...reasons],
+    summary: `nudge-free-audit-envelope: eligible=${eligible ? "yes" : "no"} packet=${packet.gate.decision} collectors=${collectorAssessment.eligibleForMeasuredPacket ? "yes" : "no"} trust=${trust.eligibleForAuditedRuntimeSurface ? "yes" : "no"} authorization=none`,
   };
 }
 

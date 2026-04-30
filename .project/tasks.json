@@ -6705,6 +6705,32 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-281. [rationale:risk-control] O contrato de coletores locais measured precisa estar disponível por import canônico sem virar permissão operacional.\n[2026-04-30T03:46:38Z] slice=1 focus=TASK-BUD-282 gate=test:monitor:smoke-244/244 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Assessment de coletores locais measured re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-557"
+    },
+    {
+      "id": "TASK-BUD-283",
+      "description": "[P1] Criar audit envelope puro para measured canary local.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-282"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que combina collector assessment, measured packet e packet trust em um audit envelope único.",
+        "Envelope deve derivar collector assessment e packet/trust a partir de inputs estruturados, mantendo authorization none.",
+        "Envelope só fica elegível quando coletores são local-observed, packet está ready e trust está elegível.",
+        "Testes cobrem envelope elegível e envelope inelegível por collector untrusted/packet blocked.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo bloco essencial antes de qualquer superfície runtime measured. [rationale:risk-control] Operação ininterrupta futura precisa de uma unidade auditável que componha coleta, packet e trust, sem autorização operacional.\n[2026-04-30T03:48:59Z] slice=1 focus=TASK-BUD-283 gate=test:monitor:smoke-245/245 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Audit envelope measured criado como composição pura; sem runtime surface.",
+      "verification": "VER-BUD-558"
     }
   ]
 }
