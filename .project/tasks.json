@@ -7045,6 +7045,36 @@
       ],
       "notes": "Criado antes do preparador único porque candidate é o fato local restante para cobrir next-local-safe. [rationale:risk-control] Operação ininterrupta segura precisa saber localmente qual slice candidato é pequeno, reversível e validável antes de qualquer continuação.\n[2026-04-30T04:37:38Z] slice=1 focus=TASK-BUD-294 gate=test:monitor:smoke-253/253 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor candidate/next-local-safe puro criado e re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-569"
+    },
+    {
+      "id": "TASK-BUD-295",
+      "description": "[P1] Compor coletores locais em preparador puro de audit envelope.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-294"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts que compose os coletores locais existentes.",
+        "Helper deve produzir collectorResults, collector assessment, measured packet, packet trust e audit envelope em uma resposta única.",
+        "Helper deve aceitar somente facts/readStatus estruturados, sem readiness manual nem signalSource caller-supplied.",
+        "Re-exportar helper via guardrails-core-exports/guardrails-core.",
+        "Testes cobrem cenário elegível local-observed e cenário inelegível por protected scope/git unexpected/validation unknown.",
+        "Validar que runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após completar coletores básicos. [rationale:risk-control] A operação ininterrupta segura precisa de um pacote auditável único a partir de fatos locais antes de qualquer superfície runtime futura.\n[2026-04-30T04:41:18Z] slice=1 focus=TASK-BUD-295 gate=test:monitor:smoke-254/254 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Preparador único de audit envelope criado como helper puro; runtime segue manual-only.",
+      "verification": "VER-BUD-570"
     }
   ]
 }

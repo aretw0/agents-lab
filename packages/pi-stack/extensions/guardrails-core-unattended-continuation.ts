@@ -176,6 +176,59 @@ export interface NudgeFreeLoopLocalMeasuredAuditEnvelope {
   summary: string;
 }
 
+export interface NudgeFreeLoopLocalCollectedFactsInput {
+  optIn: boolean;
+  nowMs: number;
+  candidate: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    candidate?: NudgeFreeLoopLocalCandidate;
+  };
+  checkpoint: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    handoffTimestampIso?: string;
+    maxAgeMs: number;
+  };
+  handoffBudget: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    handoffJson?: string;
+    maxJsonChars: number;
+  };
+  gitState: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    changedPaths?: string[];
+    expectedPaths: string[];
+  };
+  protectedScopes: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    paths?: string[];
+  };
+  cooldown: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    lastRunAtIso?: string;
+    cooldownMs: number;
+  };
+  validation: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    kind?: NudgeFreeLoopValidationKind;
+    focalGate?: string;
+  };
+  stopConditions: {
+    readStatus: NudgeFreeLoopLocalReadStatus;
+    conditions?: NudgeFreeLoopStopConditionSignal[];
+  };
+}
+
+export interface NudgeFreeLoopPreparedLocalMeasuredAuditEnvelope {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  collectorResults: NudgeFreeLoopLocalFactCollectorResult[];
+  packetInput: NudgeFreeLoopLocalMeasuredCanaryInput;
+  envelope: NudgeFreeLoopLocalMeasuredAuditEnvelope;
+  summary: string;
+}
+
 export interface NudgeFreeLoopMeasuredPacketTrust {
   effect: "none";
   mode: "advisory";
@@ -783,6 +836,82 @@ export function buildLocalMeasuredNudgeFreeLoopAuditEnvelope(input: {
     trust,
     reasons: eligible ? ["audit-envelope-eligible"] : [...reasons],
     summary: `nudge-free-audit-envelope: eligible=${eligible ? "yes" : "no"} packet=${packet.gate.decision} collectors=${collectorAssessment.eligibleForMeasuredPacket ? "yes" : "no"} trust=${trust.eligibleForAuditedRuntimeSurface ? "yes" : "no"} authorization=none`,
+  };
+}
+
+function fallbackNudgeFreeLoopCandidate(): NudgeFreeLoopLocalCandidate {
+  return {
+    scope: "unknown",
+    estimatedFiles: Number.NaN,
+    reversible: "unknown",
+    validationKind: "unknown",
+    risk: "high",
+  };
+}
+
+export function buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts(
+  input: NudgeFreeLoopLocalCollectedFactsInput,
+): NudgeFreeLoopPreparedLocalMeasuredAuditEnvelope {
+  const candidate = input.candidate.candidate ?? fallbackNudgeFreeLoopCandidate();
+  const changedPaths = input.gitState.changedPaths ?? [];
+  const expectedPaths = input.gitState.expectedPaths;
+  const protectedScopePaths = input.protectedScopes.paths ?? [
+    ...new Set([
+      ...changedPaths,
+      ...(candidate.protectedPaths ?? []),
+    ].map(normalizeMeasuredPath).filter(Boolean)),
+  ];
+  const validation = {
+    kind: input.validation.kind ?? "unknown" as const,
+    focalGate: input.validation.focalGate,
+  };
+  const stopConditions = input.stopConditions.conditions ?? [];
+  const collectorResults = [
+    resolveNextLocalSafeCollectorResult(input.candidate),
+    resolveCheckpointFreshCollectorResult({
+      readStatus: input.checkpoint.readStatus,
+      handoffTimestampIso: input.checkpoint.handoffTimestampIso,
+      nowMs: input.nowMs,
+      maxAgeMs: input.checkpoint.maxAgeMs,
+    }),
+    resolveHandoffBudgetCollectorResult(input.handoffBudget),
+    resolveGitStateExpectedCollectorResult(input.gitState),
+    resolveProtectedScopesCollectorResult(input.protectedScopes),
+    resolveCooldownReadyCollectorResult({
+      readStatus: input.cooldown.readStatus,
+      lastRunAtIso: input.cooldown.lastRunAtIso,
+      nowMs: input.nowMs,
+      cooldownMs: input.cooldown.cooldownMs,
+    }),
+    resolveValidationKnownCollectorResult(input.validation),
+    resolveStopConditionsClearCollectorResult(input.stopConditions),
+  ];
+  const packetInput: NudgeFreeLoopLocalMeasuredCanaryInput = {
+    optIn: input.optIn,
+    nowMs: input.nowMs,
+    candidate,
+    handoffTimestampIso: input.checkpoint.handoffTimestampIso,
+    maxCheckpointAgeMs: input.checkpoint.maxAgeMs,
+    handoffJsonChars: typeof input.handoffBudget.handoffJson === "string" ? input.handoffBudget.handoffJson.length : -1,
+    maxHandoffJsonChars: input.handoffBudget.maxJsonChars,
+    changedPaths,
+    expectedPaths,
+    protectedScopePaths,
+    lastRunAtIso: input.cooldown.lastRunAtIso,
+    cooldownMs: input.cooldown.cooldownMs,
+    validation,
+    stopConditions,
+  };
+  const envelope = buildLocalMeasuredNudgeFreeLoopAuditEnvelope({ packetInput, collectorResults });
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    collectorResults,
+    packetInput,
+    envelope,
+    summary: `nudge-free-local-audit-prep: eligible=${envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"} collectors=${collectorResults.length}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} packet=${envelope.packet.gate.decision} authorization=none`,
   };
 }
 

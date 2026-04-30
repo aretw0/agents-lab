@@ -7350,6 +7350,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:37:54.931Z",
       "evidence": "Added and re-exported pure resolveNextLocalSafeCollectorResult. It derives candidate collector status from local readStatus and observed NudgeFreeLoopLocalCandidate by reusing resolveNextLocalSafeMeasuredSignal; it does not accept manual readiness or caller-supplied source. Tests cover local-safe candidate observed, missing task invalid, protected scope invalid, protected path invalid, missing read, read-error, and missing candidate. Canonical re-export smoke covers local-safe and protected-path invalid. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 41/41; cmd.exe /c npm run test:monitor:smoke --silent passed 253/253 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Candidate/next-local-safe now has a local-observed collector building block so future audit envelopes can identify the intended slice without granting operational authorization."
+    },
+    {
+      "id": "VER-BUD-570",
+      "target": "TASK-BUD-295",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T04:41:30.962Z",
+      "evidence": "Added and re-exported pure buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts. It composes the local collectors for candidate, checkpoint, handoff-budget, git-state, protected-scopes, cooldown, validation, and stop-conditions into collectorResults, packetInput, measured packet, collector assessment, packet trust, and audit envelope. It accepts structured local facts/readStatus only and does not accept readiness booleans, signalSource, or caller-supplied measured overrides. Tests cover eligible all-local-observed preparation and ineligible protected/git/validation failures. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 254/254 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] This creates the single local audit packet building block needed before any future read-only runtime surface."
     }
   ]
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
+  buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   commandSensitiveShellMarkerCheckReason,
   detectShellInlineCommandSensitiveMarkerCheck,
@@ -362,6 +363,35 @@ describe("guardrails-core hardening re-exports", () => {
       fact: "candidate",
       status: "invalid",
       evidence: "next-local-safe=no reasons=protected-paths-1",
+    });
+    expect(buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
+      optIn: true,
+      nowMs: Date.parse("2026-04-30T04:40:00.000Z"),
+      candidate: {
+        readStatus: "observed",
+        candidate: {
+          taskId: "TASK-BUD-295",
+          scope: "local",
+          estimatedFiles: 1,
+          reversible: "git",
+          validationKind: "marker-check",
+          risk: "low",
+        },
+      },
+      checkpoint: { readStatus: "observed", handoffTimestampIso: "2026-04-30T04:39:30.000Z", maxAgeMs: 60_000 },
+      handoffBudget: { readStatus: "observed", handoffJson: "{}", maxJsonChars: 2700 },
+      gitState: { readStatus: "observed", changedPaths: [], expectedPaths: [] },
+      protectedScopes: { readStatus: "observed", paths: [] },
+      cooldown: { readStatus: "observed", cooldownMs: 60_000 },
+      validation: { readStatus: "observed", kind: "marker-check" },
+      stopConditions: { readStatus: "observed", conditions: [] },
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      summary: "nudge-free-local-audit-prep: eligible=yes collectors=8/8 packet=ready authorization=none",
+      envelope: { eligibleForAuditedRuntimeSurface: true },
     });
   });
 });

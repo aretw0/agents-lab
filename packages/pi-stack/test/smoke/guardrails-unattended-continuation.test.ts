@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
+  buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshCollectorResult,
@@ -45,6 +46,118 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("prepares a local measured audit envelope from collected facts", () => {
+    const nowMs = Date.parse("2026-04-30T04:40:00.000Z");
+    const baseInput = {
+      optIn: true,
+      nowMs,
+      candidate: {
+        readStatus: "observed" as const,
+        candidate: {
+          taskId: "TASK-BUD-295",
+          scope: "local" as const,
+          estimatedFiles: 2,
+          reversible: "git" as const,
+          validationKind: "marker-check" as const,
+          risk: "low" as const,
+        },
+      },
+      checkpoint: {
+        readStatus: "observed" as const,
+        handoffTimestampIso: "2026-04-30T04:39:30.000Z",
+        maxAgeMs: 60_000,
+      },
+      handoffBudget: {
+        readStatus: "observed" as const,
+        handoffJson: "x".repeat(1200),
+        maxJsonChars: 2700,
+      },
+      gitState: {
+        readStatus: "observed" as const,
+        changedPaths: ["packages/pi-stack/extensions/foo.ts"],
+        expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      },
+      protectedScopes: {
+        readStatus: "observed" as const,
+        paths: ["packages/pi-stack/extensions/foo.ts"],
+      },
+      cooldown: {
+        readStatus: "observed" as const,
+        lastRunAtIso: "2026-04-30T04:38:30.000Z",
+        cooldownMs: 60_000,
+      },
+      validation: {
+        readStatus: "observed" as const,
+        kind: "marker-check" as const,
+      },
+      stopConditions: {
+        readStatus: "observed" as const,
+        conditions: [{ kind: "blocker" as const, present: false, evidence: "blocker=none" }],
+      },
+    };
+    const eligible = buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts(baseInput);
+    const blocked = buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
+      ...baseInput,
+      candidate: {
+        readStatus: "observed" as const,
+        candidate: {
+          taskId: "TASK-RISK",
+          scope: "local" as const,
+          estimatedFiles: 2,
+          reversible: "git" as const,
+          validationKind: "unknown" as const,
+          risk: "low" as const,
+          protectedPaths: [".github/workflows/ci.yml"],
+        },
+      },
+      gitState: {
+        readStatus: "observed" as const,
+        changedPaths: ["packages/pi-stack/extensions/foo.ts", ".pi/settings.json"],
+        expectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+      },
+      protectedScopes: {
+        readStatus: "observed" as const,
+        paths: ["packages/pi-stack/extensions/foo.ts", ".github/workflows/ci.yml"],
+      },
+      validation: {
+        readStatus: "observed" as const,
+        kind: "unknown" as const,
+      },
+    });
+
+    expect(eligible).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      summary: "nudge-free-local-audit-prep: eligible=yes collectors=8/8 packet=ready authorization=none",
+      envelope: {
+        eligibleForAuditedRuntimeSurface: true,
+        summary: "nudge-free-audit-envelope: eligible=yes packet=ready collectors=yes trust=yes authorization=none",
+      },
+    });
+    expect(eligible.collectorResults.map((result) => result.status)).toEqual([
+      "observed",
+      "observed",
+      "observed",
+      "observed",
+      "observed",
+      "observed",
+      "observed",
+      "observed",
+    ]);
+    expect(blocked).toMatchObject({
+      authorization: "none",
+      summary: "nudge-free-local-audit-prep: eligible=no collectors=8/8 packet=blocked authorization=none",
+      envelope: {
+        eligibleForAuditedRuntimeSurface: false,
+        reasons: ["collectors-not-eligible", "packet-not-ready", "trust-not-eligible"],
+      },
+    });
+    expect(blocked.collectorResults.filter((result) => result.status === "invalid").map((result) => result.fact))
+      .toEqual(["candidate", "git-state", "protected-scopes", "validation"]);
+  });
+
   it("derives candidate collector results from local read outcomes", () => {
     const localSafe = resolveNextLocalSafeCollectorResult({
       readStatus: "observed",
