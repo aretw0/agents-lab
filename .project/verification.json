@@ -7593,6 +7593,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T06:10:09.753Z",
       "evidence": "Live runtime after operator reload validated context_watch_continuation_readiness. The loaded tool returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-322 audit=blocked staleFocus=1 authorization=none`, confirming the read-only readiness packet combines primary focus, local audit decision, stale focus evidence, and authorization=none. Focal context-watchdog + guardrails surface smokes passed 52/52. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Runtime readiness packet is live and fail-closed while providing a concrete local focus for controlled continuation."
+    },
+    {
+      "id": "VER-BUD-597",
+      "target": "TASK-BUD-323",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T06:13:16.263Z",
+      "evidence": "Added compact local audit top reasons to context_watch_continuation_readiness summary. formatContextWatchContinuationReadinessSummary now accepts localAuditReasons and emits `reasons=...` capped to three entries when reasons exist. The runtime readiness tool passes localContinuityAuditReasons(localAudit), preserving full details separately while keeping content compact. Summary still includes ready/focus/audit/staleFocus/authorization=none and preserves effect=none/mode=read-only-readiness/authorization=none in details. Validation: context-watchdog focal smoke passed 47/47; cmd.exe /c npm run test:monitor:smoke --silent passed 262/262 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] Readiness fail-closed state now explains top blockers without broad diagnostics or operational authorization."
     }
   ]
 }

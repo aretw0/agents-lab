@@ -854,15 +854,17 @@ export function formatContextWatchContinuationReadinessSummary(input: {
 	focusTasks: string;
 	localAuditDecision: string;
 	staleFocusCount: number;
+	localAuditReasons?: string[];
 }): string {
 	return [
 		"context-watch-continuation-readiness:",
 		`ready=${input.ready ? "yes" : "no"}`,
 		`focus=${input.focusTasks.replace(/\s+/g, "_")}`,
 		`audit=${input.localAuditDecision}`,
+		input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
 		`staleFocus=${input.staleFocusCount}`,
 		"authorization=none",
-	].join(" ");
+	].filter(Boolean).join(" ");
 }
 
 export function formatContextWatchStatusToolSummary(input: {
@@ -1865,6 +1867,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				ready,
 				focusTasks,
 				localAuditDecision,
+				localAuditReasons,
 				staleFocusCount,
 			});
 			return {

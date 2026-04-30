@@ -7761,6 +7761,33 @@
       ],
       "notes": "[rationale:risk-control] A nova superfície de readiness deve ser validada no runtime carregado antes de virar pacote canônico para decisões de continuação local-safe.\n[2026-04-30T06:09:55Z] slice=1 focus=TASK-BUD-322 gate=live-context_watch_continuation_readiness+focal-smoke-52/52 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Readiness packet validado ao vivo após reload com ready=no/authorization=none.",
       "verification": "VER-BUD-596"
+    },
+    {
+      "id": "TASK-BUD-323",
+      "description": "[P1] Incluir top reasons compactos no context_watch_continuation_readiness.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-322"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Summary de context_watch_continuation_readiness deve incluir reasons compactos quando audit estiver blocked/ineligible.",
+        "Reasons devem vir de localContinuityAuditReasons e permanecer limitados/compactos.",
+        "Não deve despejar diagnostics grandes no content.",
+        "Preservar effect=none/mode=read-only-readiness/authorization=none.",
+        "Não alterar política de compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Readiness fail-closed precisa explicar bloqueio de forma compacta para apoiar continuação segura sem abrir detalhes grandes.\n[2026-04-30T06:13:03Z] slice=1 focus=TASK-BUD-323 gate=test:monitor:smoke-262/262 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Readiness summary agora inclui top reasons compactos do audit local.",
+      "verification": "VER-BUD-597"
     }
   ]
 }

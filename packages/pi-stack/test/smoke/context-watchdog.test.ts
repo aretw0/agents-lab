@@ -1346,6 +1346,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("context-watch-continuation-readiness:");
 			expect(result.content?.[0]?.text).toContain("ready=no");
 			expect(result.content?.[0]?.text).toContain("focus=TASK-BUD-321");
+			expect(result.content?.[0]?.text).toContain("reasons=");
 			expect(result.content?.[0]?.text).toContain("authorization=none");
 			expect(result.details).toMatchObject({
 				effect: "none",
@@ -1361,8 +1362,9 @@ describe("context-watchdog", () => {
 				ready: false,
 				focusTasks: "TASK-BUD-321",
 				localAuditDecision: "blocked",
+				localAuditReasons: ["git-state:invalid", "protected-scopes:invalid", "stop-conditions:invalid", "extra"],
 				staleFocusCount: 1,
-			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked staleFocus=1 authorization=none");
+			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked reasons=git-state:invalid|protected-scopes:invalid|stop-conditions:invalid staleFocus=1 authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
