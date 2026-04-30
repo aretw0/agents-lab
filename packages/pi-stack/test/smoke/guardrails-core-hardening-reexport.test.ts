@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildLocalMeasuredNudgeFreeLoopCanaryPacket,
   commandSensitiveShellMarkerCheckReason,
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
+  resolveLocalNudgeFreeLoopMeasuredSignals,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveRecurringFailureHardening,
   resolveValidationMethodPlan,
@@ -74,16 +76,16 @@ describe("guardrails-core hardening re-exports", () => {
       canContinueWithoutNudge: true,
     });
 
-    expect(resolveLocalMeasuredNudgeFreeLoopCanaryGate({
+    const localFacts = {
       optIn: true,
       nowMs: Date.parse("2026-04-30T02:00:00.000Z"),
       candidate: {
-        taskId: "TASK-BUD-272",
-        scope: "local",
+        taskId: "TASK-BUD-275",
+        scope: "local" as const,
         estimatedFiles: 2,
-        reversible: "git",
-        validationKind: "focal-test",
-        risk: "low",
+        reversible: "git" as const,
+        validationKind: "focal-test" as const,
+        risk: "low" as const,
       },
       handoffTimestampIso: "2026-04-30T01:59:30.000Z",
       maxCheckpointAgeMs: 60_000,
@@ -92,15 +94,32 @@ describe("guardrails-core hardening re-exports", () => {
       changedPaths: ["packages/pi-stack/extensions/guardrails-core-exports.ts"],
       expectedPaths: ["packages/pi-stack/extensions/guardrails-core-exports.ts"],
       cooldownMs: 60_000,
-      validation: { kind: "focal-test", focalGate: "hardening-reexport" },
+      validation: { kind: "focal-test" as const, focalGate: "hardening-reexport" },
       stopConditions: [],
-    })).toMatchObject({
+    };
+
+    expect(resolveLocalMeasuredNudgeFreeLoopCanaryGate(localFacts)).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
       signalSource: "measured",
       decision: "ready",
       canContinueWithoutNudge: true,
+    });
+
+    expect(resolveLocalNudgeFreeLoopMeasuredSignals(localFacts)["git-state-expected"])
+      .toEqual({ ok: true, evidence: "git=expected changed=1" });
+
+    expect(buildLocalMeasuredNudgeFreeLoopCanaryPacket(localFacts)).toMatchObject({
+      summary: "nudge-free-loop-packet: decision=ready continue=yes evidence=8/8",
+      gate: {
+        effect: "none",
+        mode: "advisory",
+        activation: "none",
+        signalSource: "measured",
+        decision: "ready",
+        canContinueWithoutNudge: true,
+      },
     });
   });
 });

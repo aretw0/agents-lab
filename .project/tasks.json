@@ -6498,6 +6498,31 @@
       ],
       "notes": "Criado a partir da lane essencial para trabalho ininterrupto seguro/controlado. [rationale:risk-control] Antes de qualquer runtime measured, precisamos de packet auditável com evidência derivada e bounded, não apenas uma decisão booleana.\n[2026-04-30T03:22:37Z] slice=1 focus=TASK-BUD-274 gate=test:monitor:smoke-241/241 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Packet measured auditável criado; regressão corrigiu duplicação de protected path derivado.",
       "verification": "VER-BUD-549"
+    },
+    {
+      "id": "TASK-BUD-275",
+      "description": "[P1] Re-exportar helpers de packet measured local pela superfície canônica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-274"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar buildLocalMeasuredNudgeFreeLoopCanaryPacket e resolveLocalNudgeFreeLoopMeasuredSignals via guardrails-core-exports.",
+        "Adicionar smoke provando import canônico dos helpers de packet/auditoria.",
+        "Validar que a superfície runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-274. [rationale:risk-control] Consumidores internos precisam do packet auditável por import canônico, sem transformar helper em autorização operacional.\n[2026-04-30T03:25:45Z] slice=1 focus=TASK-BUD-275 gate=test:monitor:smoke-241/241 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Packet measured re-exportado canonicamente; runtime canary segue manual-only.",
+      "verification": "VER-BUD-550"
     }
   ]
 }

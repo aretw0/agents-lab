@@ -7170,6 +7170,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:23:09.883Z",
       "evidence": "Added pure auditable local measured canary packet helpers: resolveLocalNudgeFreeLoopMeasuredSignals and buildLocalMeasuredNudgeFreeLoopCanaryPacket. The packet derives all measured signals from local facts, returns gate + signals + complete evidence entries + compact summary, and does not accept manual ok, signalSource, or measured overrides. Focal test initially caught duplicate protected path evidence when a protected path appeared in both changedPaths and candidate.protectedPaths; fixed default protectedScopePaths derivation to normalize/dedupe before evaluating protected scopes. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 26/26 after fix; cmd.exe /c npm run test:monitor:smoke --silent passed 241/241 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future uninterrupted operation needs bounded derived evidence packets, not just gate decisions."
+    },
+    {
+      "id": "VER-BUD-550",
+      "target": "TASK-BUD-275",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:25:59.271Z",
+      "evidence": "Re-exported buildLocalMeasuredNudgeFreeLoopCanaryPacket and resolveLocalNudgeFreeLoopMeasuredSignals through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical imports for local measured gate, signals, and packet. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 241/241 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Audit packet helpers are available to internal consumers by canonical import without becoming operational permission."
     }
   ]
 }
