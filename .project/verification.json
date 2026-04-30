@@ -7053,6 +7053,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:15:11.459Z",
       "evidence": "Added pure resolveCheckpointFreshMeasuredSignal helper. It derives the checkpoint-fresh measured signal from handoffTimestampIso, nowMs, and maxAgeMs without accepting a manual ok boolean. It returns compact bounded evidence for fresh, stale, missing, invalid, and future timestamps. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 14/14; cmd.exe /c npm run test:monitor:smoke --silent passed 229/229 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] This starts the measured aggregator path from real local timestamp facts rather than spoofable booleans."
+    },
+    {
+      "id": "VER-BUD-537",
+      "target": "TASK-BUD-261",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:19:32.138Z",
+      "evidence": "Added pure resolveHandoffBudgetMeasuredSignal helper. It derives the handoff-budget-ok measured signal from jsonChars and maxJsonChars without accepting a manual ok boolean. It returns compact bounded evidence for ok, over budget, invalid jsonChars, and invalid maxJsonChars cases. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 15/15; cmd.exe /c npm run test:monitor:smoke --silent passed 230/230 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] This adds another real measured signal derived from objective local size facts instead of spoofable booleans."
     }
   ]
 }

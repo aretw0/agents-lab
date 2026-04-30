@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshMeasuredSignal,
+  resolveHandoffBudgetMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
   resolveUnattendedContinuationPlan,
@@ -51,6 +52,19 @@ describe("guardrails unattended continuation", () => {
     expect(missing).toEqual({ ok: false, evidence: "checkpoint=missing" });
     expect(invalid).toEqual({ ok: false, evidence: "checkpoint=invalid-ts" });
     expect(fresh.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact handoff-budget measured signals from size bounds", () => {
+    const ok = resolveHandoffBudgetMeasuredSignal({ jsonChars: 1200, maxJsonChars: 2700 });
+    const over = resolveHandoffBudgetMeasuredSignal({ jsonChars: 2701, maxJsonChars: 2700 });
+    const invalidChars = resolveHandoffBudgetMeasuredSignal({ jsonChars: -1, maxJsonChars: 2700 });
+    const invalidMax = resolveHandoffBudgetMeasuredSignal({ jsonChars: 1200, maxJsonChars: 0 });
+
+    expect(ok).toEqual({ ok: true, evidence: "handoff-budget=ok chars=1200 max=2700" });
+    expect(over).toEqual({ ok: false, evidence: "handoff-budget=over chars=2701 max=2700" });
+    expect(invalidChars).toEqual({ ok: false, evidence: "handoff-budget=invalid-jsonChars" });
+    expect(invalidMax).toEqual({ ok: false, evidence: "handoff-budget=invalid-max" });
+    expect(ok.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {

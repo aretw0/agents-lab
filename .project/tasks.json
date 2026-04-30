@@ -6147,6 +6147,31 @@
       ],
       "notes": "Criado após reload como primeiro bloco de agregador measured real. [rationale:risk-control] O caminho measured deve começar derivando sinais do estado local, não de booleans manuais.\n[2026-04-30T02:14:50Z] slice=1 focus=TASK-BUD-260 gate=test:monitor:smoke-229/229 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Primeiro sinal measured real derivado de timestamp local, sem runtime loop.",
       "verification": "VER-BUD-536"
+    },
+    {
+      "id": "TASK-BUD-261",
+      "description": "[P1] Criar helper puro para sinal measured de orçamento do handoff.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-260"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured handoff-budget-ok a partir de jsonChars/maxJsonChars, sem aceitar ok manual.",
+        "Evidência gerada é compacta e dentro do limite de measured evidence.",
+        "Testes cobrem dentro do orçamento, acima do orçamento e valores inválidos.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como segundo bloco de agregador measured real. [rationale:risk-control] O gate de handoff budget precisa ser derivado de contagem/teto reais, não de boolean manual.\n[2026-04-30T02:19:12Z] slice=1 focus=TASK-BUD-261 gate=test:monitor:smoke-230/230 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured handoff-budget derivado de contagem/teto reais, sem runtime loop.",
+      "verification": "VER-BUD-537"
     }
   ]
 }

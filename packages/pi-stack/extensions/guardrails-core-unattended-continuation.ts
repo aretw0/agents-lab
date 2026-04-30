@@ -109,6 +109,22 @@ export function resolveCheckpointFreshMeasuredSignal(input: {
   return { ok: true, evidence: `checkpoint=fresh ageSec=${ageSec} maxSec=${maxAgeSec}` };
 }
 
+export function resolveHandoffBudgetMeasuredSignal(input: {
+  jsonChars: number;
+  maxJsonChars: number;
+}): NudgeFreeLoopMeasuredSignal {
+  if (!Number.isFinite(input.jsonChars) || input.jsonChars < 0) {
+    return { ok: false, evidence: "handoff-budget=invalid-jsonChars" };
+  }
+  if (!Number.isFinite(input.maxJsonChars) || input.maxJsonChars <= 0) {
+    return { ok: false, evidence: "handoff-budget=invalid-max" };
+  }
+  if (input.jsonChars > input.maxJsonChars) {
+    return { ok: false, evidence: `handoff-budget=over chars=${Math.floor(input.jsonChars)} max=${Math.floor(input.maxJsonChars)}` };
+  }
+  return { ok: true, evidence: `handoff-budget=ok chars=${Math.floor(input.jsonChars)} max=${Math.floor(input.maxJsonChars)}` };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",
