@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -16,6 +16,7 @@ import contextWatchdogExtension, {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
+	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
@@ -1228,6 +1229,49 @@ describe("context-watchdog", () => {
 				handoffPath: ".project/handoff.json",
 			}))
 				.toBe("context-watch-stop: required=yes reason=compact-checkpoint-required action=persist-checkpoint-and-compact operator=checkpoint-compact handoff=.project/handoff.json");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_auto_resume_preview tool is read-only and filters stale focus", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-auto-resume-preview-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-04-30T05:23:29.396Z",
+				current_tasks: ["TASK-BUD-309"],
+				next_actions: ["after reload validate TASK-BUD-309 only"],
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-309", status: "completed" },
+			] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_auto_resume_preview");
+			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_auto_resume_preview")?.[0]?.parameters ?? {});
+			expect(schemaText).not.toContain("taskStatusById");
+			const result = await tool.execute("tc-auto-resume-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
+			expect(result.content?.[0]?.text).toContain("context-watch-auto-resume-preview:");
+			expect(result.content?.[0]?.text).toContain("focusTasks=none-listed");
+			expect(result.content?.[0]?.text).toContain("staleFocus=1");
+			expect(result.content?.[0]?.text).toContain("diagnostics=");
+			expect(result.details).toMatchObject({
+				effect: "none",
+				mode: "read-only-preview",
+				authorization: "none",
+				focusTasks: "none-listed",
+				staleFocus: "TASK-BUD-309=completed",
+				diagnosticsSummary: expect.stringContaining("staleFocus=1"),
+			});
+			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-309");
+			expect(formatContextWatchAutoResumePreviewSummary({
+				focusTasks: "none-listed",
+				staleFocusCount: 1,
+				diagnosticsSummary: "tasks(in=0,listed=0,dedup=0,trunc=0,drop=0) staleFocus=1 global=ok",
+			})).toContain("staleFocus=1");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

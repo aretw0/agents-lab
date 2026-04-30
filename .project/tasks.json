@@ -7452,6 +7452,33 @@
       ],
       "notes": "Criado após reload de TASK-BUD-309. [rationale:risk-control] A correção de stale focus precisa ser validada no código carregado/atual sem acionar auto-resume operacional.\n[2026-04-30T05:26:30Z] slice=1 focus=TASK-BUD-310 gate=real-helper-preview+test:monitor:smoke-258/258 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume agora bloqueia reintrodução de stale focus via next_actions.",
       "verification": "VER-BUD-584"
+    },
+    {
+      "id": "TASK-BUD-311",
+      "description": "[P1] Expor preview read-only do auto-resume para evitar scripts ad hoc.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-310"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar tool read-only para preview do auto-resume a partir de .project/handoff.json e .project/tasks.json.",
+        "A tool deve retornar summary compacto com focusTasks/staleFocus/diagnosticsSummary sem disparar compact/resume/scheduler/self-reload/remoto.",
+        "A tool deve usar o mesmo builder runtime do auto-resume e a mesma filtragem de stale focus.",
+        "A tool deve aceitar zero parâmetros para evitar spoof de facts/statuses pelo caller.",
+        "Adicionar smoke cobrindo registro e execução do preview.",
+        "Manter política/thresholds de context-watch inalterados.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload de TASK-BUD-310. [rationale:risk-control] Preview read-only evita scripts ad hoc para validar auto-resume e torna a trust surface auditável sem conceder autorização operacional.\n[2026-04-30T05:31:04Z] slice=1 focus=TASK-BUD-311 gate=test:monitor:smoke-259/259 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume preview agora é primitiva read-only zero-param em vez de script ad hoc.",
+      "verification": "VER-BUD-585"
     }
   ]
 }

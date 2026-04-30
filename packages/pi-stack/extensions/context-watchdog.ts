@@ -793,6 +793,24 @@ function readProjectTaskStatusById(cwd: string): Record<string, string | undefin
 	}
 }
 
+function extractAutoResumePromptValue(prompt: string, label: string, fallback: string): string {
+	const line = prompt.split(/\r?\n/).find((row) => row.startsWith(`${label}:`));
+	return line ? line.slice(label.length + 1).trim() : fallback;
+}
+
+export function formatContextWatchAutoResumePreviewSummary(input: {
+	focusTasks: string;
+	staleFocusCount: number;
+	diagnosticsSummary: string;
+}): string {
+	return [
+		"context-watch-auto-resume-preview:",
+		`focusTasks=${input.focusTasks.replace(/\s+/g, "_")}`,
+		`staleFocus=${input.staleFocusCount}`,
+		`diagnostics=${input.diagnosticsSummary.replace(/\s+/g, ";")}`,
+	].join(" ");
+}
+
 export function formatContextWatchStatusToolSummary(input: {
 	level: ContextWatchdogLevel;
 	percent?: number;
@@ -1706,6 +1724,45 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			return {
 				content: [{ type: "text", text: summary }],
 				details: payload,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_auto_resume_preview",
+		label: "Context Watch Auto-Resume Preview",
+		description:
+			"Read-only preview of the auto-resume prompt from .project/handoff.json and .project/tasks.json. Never dispatches resume, compact, scheduler, remote, or automation.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const envelope = buildAutoResumePromptEnvelopeFromHandoff(
+				readHandoffJson(ctx.cwd),
+				config.handoffFreshMaxAgeMs,
+				Date.now(),
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd) },
+			);
+			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
+			const focusTasks = extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
+			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
+			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
+			const summary = formatContextWatchAutoResumePreviewSummary({
+				focusTasks,
+				staleFocusCount,
+				diagnosticsSummary,
+			});
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					prompt: envelope.prompt,
+					focusTasks,
+					staleFocus,
+					diagnostics: envelope.diagnostics,
+					diagnosticsSummary,
+					effect: "none",
+					mode: "read-only-preview",
+					authorization: "none",
+				},
 			};
 		},
 	});

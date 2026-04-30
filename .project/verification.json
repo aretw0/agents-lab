@@ -7485,6 +7485,15 @@
       "method": "preview+test",
       "timestamp": "2026-04-30T05:26:44.440Z",
       "evidence": "Post-reload validation found and fixed a stale focus reintroduction path. The current handoff had current_tasks TASK-BUD-309=completed; the real auto-resume helper initially filtered it from current_tasks but re-derived TASK-BUD-309 from next_actions. Fix: filtered stale current task IDs are now tracked as staleIds and excluded from derived next_actions task hints. Local preview with the real helper now returns `focusTasks: none-listed`, `staleFocus: TASK-BUD-309=completed`, and diagnosticsSummary includes `staleFocus=1`. Added smoke asserting repeated stale IDs from next_actions do not re-enter focusTasks. Validation: context-watchdog focal smoke passed 43/43; cmd.exe /c npm run test:monitor:smoke --silent passed 258/258 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation was triggered. [rationale:risk-control] Completed focus tasks must not be reintroduced indirectly from handoff next_actions during auto-resume."
+    },
+    {
+      "id": "VER-BUD-585",
+      "target": "TASK-BUD-311",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:31:17.015Z",
+      "evidence": "Added read-only `context_watch_auto_resume_preview` tool to avoid ad hoc auto-resume preview scripts. The tool accepts zero parameters, reads `.project/handoff.json` and local `.project/tasks.json` statuses, uses the same buildAutoResumePromptEnvelopeFromHandoff path as runtime auto-resume, and returns compact summary/details with focusTasks, staleFocus, diagnosticsSummary, effect=none, mode=read-only-preview, authorization=none. It never dispatches compact/resume/scheduler/self-reload/remote/automation. Added smoke proving completed TASK-BUD-309 is filtered to focusTasks=none-listed with staleFocus=1 and no caller-supplied taskStatusById parameter. Validation: context-watchdog focal smoke passed 44/44; cmd.exe /c npm run test:monitor:smoke --silent passed 259/259 across 32 files. [rationale:risk-control] A bounded read-only primitive replaces repeated scripts while preserving no operational authorization."
     }
   ]
 }
