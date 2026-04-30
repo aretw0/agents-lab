@@ -7629,6 +7629,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T06:21:51.038Z",
       "evidence": "Live runtime after operator reload validated candidate/readiness alignment. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-326 audit=blocked reasons=git-state:invalid|protected-scopes:invalid|stop-conditions:invalid staleFocus=1 authorization=none`. local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked reasons=git-state:invalid|protected-scopes:invalid|stop-conditions:invalid|unexpected-git-state|protected-scope-pending authorization=none`. This confirms candidate and validation blockers were removed from the top readiness reasons, old .github protected scope is no longer surfaced, and the remaining fail-closed blockers are real current git/protected state, including .pi/settings.json drift. Focal guardrails/context smokes passed 53/53. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Readiness now evaluates current local focus while preserving real protected-state blockers."
+    },
+    {
+      "id": "VER-BUD-601",
+      "target": "TASK-BUD-327",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T09:40:46.307Z",
+      "evidence": "Established canonical settings/derived overlay contract without modifying .pi/settings.json. Added storage topology constants/helpers: canonical .pi/settings.json remains the protected baseline; derived agent overlays live under .pi/derived-settings/<agent-id>.settings.json with sanitized ids. Added readDerivedAgentSettings/writeDerivedAgentSettings and a smoke test proving derived overlays stay separate from canonical settings and are not returned by readSettingsJson by default. Documented doctrine: agents must not silently rewrite canonical settings; temporary agent/worker/rehearsal/overnight variation uses explicit overlays; promotion to canonical requires operator intent/snapshot; readiness/local audit must continue treating modified .pi/settings.json as real protected drift. Validation: focal context-watchdog-storage passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 263/263 across 32 files. No .pi/settings.json edit was made by this slice; existing protected drift remains visible. [rationale:risk-control] Separating canonical baseline from derived overlays removes future spurious agent settings churn while preserving fail-closed protection on real canonical drift."
     }
   ]
 }

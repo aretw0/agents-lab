@@ -3,8 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  readDerivedAgentSettings,
   readHandoffJson,
   readProjectSettings,
+  readSettingsJson,
+  resolveProjectSettingsTopology,
+  writeDerivedAgentSettings,
   writeHandoffJson,
   writeProjectSettings,
 } from "../../extensions/context-watchdog-storage";
@@ -31,6 +35,36 @@ describe("context-watchdog storage", () => {
       expect(leftovers).toEqual([]);
       const locks = readdirSync(piDir).filter((name) => name === "settings.lock");
       expect(locks).toEqual([]);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps derived agent settings separate from canonical project settings", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-context-storage-"));
+    try {
+      writeProjectSettings(cwd, {
+        piStack: {
+          contextWatchdog: {
+            notify: false,
+          },
+        },
+      });
+      const derivedPath = writeDerivedAgentSettings(cwd, "worker/overnight", {
+        piStack: {
+          contextWatchdog: {
+            notify: true,
+          },
+        },
+      });
+      const topology = resolveProjectSettingsTopology(cwd, "worker/overnight");
+
+      expect(derivedPath).toBe(topology.derivedPath);
+      expect(topology.canonicalRelativePath).toBe(".pi/settings.json");
+      expect(topology.derivedRelativePath).toBe(".pi/derived-settings/worker-overnight.settings.json");
+      expect((readProjectSettings(cwd).piStack as any)?.contextWatchdog?.notify).toBe(false);
+      expect((readSettingsJson(cwd).piStack as any)?.contextWatchdog?.notify).toBe(false);
+      expect((readDerivedAgentSettings(cwd, "worker/overnight").piStack as any)?.contextWatchdog?.notify).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

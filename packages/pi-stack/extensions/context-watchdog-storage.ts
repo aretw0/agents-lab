@@ -17,6 +17,9 @@ export interface JsonFileLockOptions {
 	staleMs?: number;
 }
 
+export const PROJECT_SETTINGS_CANONICAL_RELATIVE_PATH = ".pi/settings.json";
+export const PROJECT_DERIVED_SETTINGS_RELATIVE_DIR = ".pi/derived-settings";
+
 const DEFAULT_JSON_FILE_LOCK_OPTIONS: Required<JsonFileLockOptions> = {
 	maxWaitMs: 1500,
 	retryMs: 25,
@@ -145,8 +148,37 @@ function writeJsonFileAtomic(
 	return filePath;
 }
 
+function sanitizeDerivedSettingsId(value: string | undefined): string {
+	const normalized = String(value ?? "agent")
+		.replace(/[\\/]+/g, "-")
+		.replace(/[^a-zA-Z0-9._-]+/g, "-")
+		.replace(/^-+|-+$/g, "")
+		.replace(/^\.+/, "");
+	return normalized || "agent";
+}
+
+export function resolveProjectSettingsTopology(cwd: string, agentId = "agent"): {
+	canonicalRelativePath: string;
+	canonicalPath: string;
+	derivedRelativeDir: string;
+	derivedDir: string;
+	derivedRelativePath: string;
+	derivedPath: string;
+} {
+	const safeAgentId = sanitizeDerivedSettingsId(agentId);
+	const derivedRelativePath = path.join(PROJECT_DERIVED_SETTINGS_RELATIVE_DIR, `${safeAgentId}.settings.json`).replace(/\\/g, "/");
+	return {
+		canonicalRelativePath: PROJECT_SETTINGS_CANONICAL_RELATIVE_PATH,
+		canonicalPath: path.join(cwd, ".pi", "settings.json"),
+		derivedRelativeDir: PROJECT_DERIVED_SETTINGS_RELATIVE_DIR,
+		derivedDir: path.join(cwd, ".pi", "derived-settings"),
+		derivedRelativePath,
+		derivedPath: path.join(cwd, derivedRelativePath),
+	};
+}
+
 export function readProjectSettings(cwd: string): Record<string, unknown> {
-	const filePath = path.join(cwd, ".pi", "settings.json");
+	const filePath = resolveProjectSettingsTopology(cwd).canonicalPath;
 	if (!existsSync(filePath)) return {};
 	try {
 		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
@@ -161,7 +193,28 @@ export function writeProjectSettings(
 	settings: Record<string, unknown>,
 	lockOptions?: JsonFileLockOptions,
 ): string {
-	const filePath = path.join(cwd, ".pi", "settings.json");
+	const filePath = resolveProjectSettingsTopology(cwd).canonicalPath;
+	return writeJsonFileAtomic(filePath, settings, lockOptions);
+}
+
+export function readDerivedAgentSettings(cwd: string, agentId = "agent"): Record<string, unknown> {
+	const filePath = resolveProjectSettingsTopology(cwd, agentId).derivedPath;
+	if (!existsSync(filePath)) return {};
+	try {
+		const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+		return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : {};
+	} catch {
+		return {};
+	}
+}
+
+export function writeDerivedAgentSettings(
+	cwd: string,
+	agentId: string,
+	settings: Record<string, unknown>,
+	lockOptions?: JsonFileLockOptions,
+): string {
+	const filePath = resolveProjectSettingsTopology(cwd, agentId).derivedPath;
 	return writeJsonFileAtomic(filePath, settings, lockOptions);
 }
 

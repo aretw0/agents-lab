@@ -20,6 +20,22 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 10. **Qualidade vem de síntese, remoção e consistência** — preferir reduzir superfícies redundantes e consolidar opiniões antes de adicionar novas ferramentas.
 11. **Unattended é malemolência com trilho** — continuar sozinho em fatias seguras, mas deixar rastro curto para auditoria e retomada.
 
+## Settings canônico e overlays derivados
+
+`.pi/settings.json` é baseline canônico protegido do projeto. Ele pode ser lido para descobrir políticas, budgets, providers e gates, mas não deve ser reescrito por agentes comuns nem por fatias unattended locais. Mudanças nele exigem intenção explícita do operador, snapshot/rollback quando aplicável e evidência no board.
+
+Configurações específicas de agente, worker, rehearsal ou overnight devem usar overlays derivados separados do canonical. O caminho local reservado é `.pi/derived-settings/<agent-id>.settings.json`. Esses overlays podem ser gerados por ferramentas de preparação ou por adapters específicos, mas não substituem `.pi/settings.json`, não são input para `readSettingsJson` por padrão e não devem fazer o canonical parecer limpo ou sujo.
+
+Regras práticas:
+
+- leitura de política global: usar o settings canônico (`.pi/settings.json`) e fallback de usuário (`~/.pi/agent/settings.json`) quando a tool já tiver esse contrato;
+- variação por agente: escrever/ler overlay derivado por id explícito, nunca editar o canonical silenciosamente;
+- promoção de overlay para canonical: só com comando/intenção explícita do operador e snapshot;
+- readiness/local audit: `.pi/settings.json` modificado continua protected drift real até o operador decidir commitar, reverter ou promover uma mudança;
+- agentes específicos não devem depender de mutar o canonical para ajustar comportamento temporário.
+
+Essa separação evita que a própria operação unattended gere bloqueios espúrios em `.pi/settings.json`, mas preserva a proteção quando o baseline canônico realmente diverge.
+
 ## Memória de projeto e adapters
 
 A stack recomenda que cada projeto tenha alguma memória operacional: tarefas, decisões, verificações e handoff precisam existir em uma forma recuperável. O formato atual em `.project/` é o adapter local-first inicial porque é simples, versionável e auditável no PC.

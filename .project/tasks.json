@@ -7865,6 +7865,35 @@
       ],
       "notes": "[rationale:risk-control] O alinhamento de audit candidate precisa ser validado no runtime carregado para garantir que readiness avalia a fatia atual sem esconder protected drift real.\n[2026-04-30T06:21:36Z] slice=1 focus=TASK-BUD-326 gate=live-readiness+local_continuity_audit+focal-smoke-53/53 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Alinhamento candidate/readiness validado ao vivo; blockers restantes são git/protected reais.",
       "verification": "VER-BUD-600"
+    },
+    {
+      "id": "TASK-BUD-327",
+      "description": "[P1] Definir contrato canônico para settings e overlays derivados sem sobrescrever .pi/settings.json.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-326"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/extensions/context-watchdog-storage.ts",
+        "packages/pi-stack/extensions/safe-boot.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-storage.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato: .pi/settings.json é canonical baseline protegido e não deve ser mutado por agentes comuns.",
+        "Definir caminho/semântica para settings derivados/overlays de agente que não sobrescrevem o canonical.",
+        "Mapear pontos atuais que leem/escrevem .pi/settings.json e separar leitura canonical de escrita protegida.",
+        "Não modificar .pi/settings.json nesta fatia.",
+        "Não mascarar drift real de .pi/settings.json no readiness/local_continuity_audit ainda; apenas criar contrato e helpers/testes se local-safe.",
+        "Preservar remote/offload/scheduler como opt-in.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] .pi/settings.json como drift protegido bloqueia corretamente, mas precisamos de um contrato canônico para evitar que agentes usem/mutem settings de forma acidental; overlays derivados devem ser separados e auditáveis.\n[2026-04-30T09:40:23Z] slice=1 focus=TASK-BUD-327 gate=context-watchdog-storage-5/5+test:monitor:smoke-263/263 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Contrato canonical/overlay criado sem alterar o settings canônico.",
+      "verification": "VER-BUD-601"
     }
   ]
 }
