@@ -7548,6 +7548,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:46:33.347Z",
       "evidence": "Auto-resume/preview now prefers concrete local active/planned tasks before generic operational hints. Added preferredTaskIds to AutoResumePromptOptions and runtime preview/auto-resume now derive preferred in-progress/planned task IDs from local .project/tasks.json, skipping protected task paths and sorting in-progress before planned, then latest numeric task id. When current_tasks is absent/stale and no non-stale task is derived from next_actions/context, preferredTaskIds are used before fallback hints such as board-task-selection. Also hardened task extraction so `board-task-selection` no longer becomes fake `TASK-SELECTION`; task IDs must include a digit. Added smoke proving completed TASK-BUD-316 stays stale, active TASK-BUD-317 becomes focus, and board-task-selection is not used. Validation: focal context-watchdog smoke passed 46/46; cmd.exe /c npm run test:monitor:smoke --silent passed 261/261 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] Auto-resume should carry forward a concrete local-safe task when available instead of generic selection hints, while avoiding stale/protected focus."
+    },
+    {
+      "id": "VER-BUD-592",
+      "target": "TASK-BUD-318",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T05:48:43.990Z",
+      "evidence": "Live runtime after operator reload validated concrete auto-resume focus selection. After creating active TASK-BUD-318, context_watch_auto_resume_preview returned `context-watch-auto-resume-preview: focusTasks=TASK-BUD-318,_TASK-BUD-296,_TASK-BUD-268 staleFocus=1 diagnostics=tasks(in=3,listed=3,dedup=0,trunc=0,drop=0);staleFocus=1;blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=3,listed=2,dedup=0,trunc=2,drop=1);global=ok`. This confirms the loaded runtime prefers concrete local tasks over generic board-task-selection and does not emit fake TASK-SELECTION. staleFocus=1 confirms completed_tasks still blocks reentry. Focal context-watchdog smoke passed 46/46. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Concrete focus selection is live and reduces ambiguity for uninterrupted local-safe continuation."
     }
   ]
 }

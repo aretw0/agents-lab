@@ -7633,6 +7633,30 @@
       ],
       "notes": "[rationale:risk-control] Para trabalho ininterrupto controlado, o auto-resume deve apontar para uma task concreta local-safe quando disponível, em vez de reiniciar com foco genérico de seleção.\n[2026-04-30T05:46:19Z] slice=1 focus=TASK-BUD-317 gate=test:monitor:smoke-261/261 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume prefere task ativa concreta e bloqueia TASK-SELECTION falso de board-task-selection.",
       "verification": "VER-BUD-591"
+    },
+    {
+      "id": "TASK-BUD-318",
+      "description": "[P1] Live-validar foco concreto do auto-resume após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-317"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_auto_resume_preview no runtime carregado após reload de TASK-BUD-317.",
+        "Confirmar que o preview prefere task real in-progress/planned disponível em vez de board-task-selection genérico.",
+        "Confirmar que não aparece foco falso TASK-SELECTION.",
+        "Confirmar que completed_tasks/stale focus continuam bloqueando reentrada de task concluída.",
+        "Não disparar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload de TASK-BUD-317. [rationale:risk-control] A seleção concreta de foco precisa ser validada no runtime carregado para sustentar operação ininterrupta sem voltar a hints genéricos/falsos.\n[2026-04-30T05:48:26Z] slice=1 focus=TASK-BUD-318 gate=live-context_watch_auto_resume_preview+context-watchdog-smoke-46/46 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Foco concreto do auto-resume validado ao vivo após reload.",
+      "verification": "VER-BUD-592"
     }
   ]
 }
