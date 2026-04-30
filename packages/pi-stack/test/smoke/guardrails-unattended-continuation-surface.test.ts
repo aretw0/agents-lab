@@ -62,7 +62,10 @@ describe("guardrails unattended continuation surface", () => {
         },
       });
       expect(result?.details.envelope).toBeTruthy();
-      expect((result?.details.localContinuityReasons as string[]).length).toBeLessThanOrEqual(5);
+      const reasons = result?.details.localContinuityReasons as string[];
+      expect(reasons.length).toBeLessThanOrEqual(5);
+      expect(reasons).not.toContain("measured-evidence-incomplete");
+      expect(reasons).toContain("git-state:invalid");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

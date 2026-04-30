@@ -7422,6 +7422,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T05:01:59.966Z",
       "evidence": "Live runtime after operator reload: local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked reasons=candidate:invalid|git-state:invalid|protected-scopes:invalid|stop-conditions:invalid|measured-evidence-incomplete authorization=none`. This confirms the loaded tool uses primitive naming, includes compact fail-closed reasons, caps the visible reason set, and still exposes authorization=none. Focal surface smoke passed 3/3. No scheduler, loop, self-reload, remote, or auto-continuation was started. [rationale:risk-control] Live validation confirms compact blocker explanations work in the loaded runtime without granting operational authorization."
+    },
+    {
+      "id": "VER-BUD-578",
+      "target": "TASK-BUD-304",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:04:23.482Z",
+      "evidence": "Prioritized actionable local reasons in local_continuity_audit. localContinuityReasons now lists non-observed collector reasons first and suppresses generic measured-evidence-incomplete/measured-evidence-invalid/collectors-not-eligible/packet-not-ready/trust-not-eligible from the visible top reasons when collector invalid/missing already explains the failure. The reason list remains capped to five entries and derived from envelope/collectors without broad diagnostics. Validation: focal surface smoke passed 3/3 and asserts measured-evidence-incomplete is suppressed when git-state:invalid is present; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. authorization=none and read-only/advisory behavior unchanged; nudge_free_loop_canary remains manual-only. [rationale:risk-control] Visible reasons now guide local correction instead of showing generic packet symptoms first."
     }
   ]
 }

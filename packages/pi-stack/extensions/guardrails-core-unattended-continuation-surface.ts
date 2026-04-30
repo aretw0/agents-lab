@@ -84,12 +84,26 @@ function deriveCandidate(task: any): NudgeFreeLoopLocalCandidate | undefined {
 }
 
 function localContinuityAuditReasons(result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>): string[] {
-  const reasons = new Set<string>();
-  for (const collector of result.collectorResults) {
-    if (collector.status !== "observed") reasons.add(`${collector.fact}:${collector.status}`);
+  const collectorReasons = result.collectorResults
+    .filter((collector) => collector.status !== "observed")
+    .map((collector) => `${collector.fact}:${collector.status}`);
+  const hasActionableCollectorReason = collectorReasons.length > 0;
+  const genericWhenCollectorsExplain = new Set([
+    "measured-evidence-incomplete",
+    "measured-evidence-invalid",
+    "collectors-not-eligible",
+    "packet-not-ready",
+    "trust-not-eligible",
+  ]);
+  const reasons = new Set<string>(collectorReasons);
+  for (const reason of result.envelope.packet.gate.reasons) {
+    if (hasActionableCollectorReason && genericWhenCollectorsExplain.has(reason)) continue;
+    reasons.add(reason);
   }
-  for (const reason of result.envelope.packet.gate.reasons) reasons.add(reason);
-  for (const reason of result.envelope.reasons) reasons.add(reason);
+  for (const reason of result.envelope.reasons) {
+    if (hasActionableCollectorReason && genericWhenCollectorsExplain.has(reason)) continue;
+    reasons.add(reason);
+  }
   return [...reasons].slice(0, 5);
 }
 
