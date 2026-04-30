@@ -6445,6 +6445,30 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-271. [rationale:risk-control] O helper measured local deve ficar acessível por import canônico para testes/consumidores internos, sem virar autorização operacional.\n[2026-04-30T03:03:56Z] slice=1 focus=TASK-BUD-272 gate=test:monitor:smoke-238/238 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Re-export canônico validado; runtime canary permanece manual-only.",
       "verification": "VER-BUD-546"
+    },
+    {
+      "id": "TASK-BUD-273",
+      "description": "[P1] Documentar que helper measured canônico não autoriza operação unattended.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-272"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar nota curta na doutrina diferenciando helper measured canônico de autorização operacional.",
+        "Reforçar que nudge_free_loop_canary runtime permanece advisory/manual-only até desenho auditado separado.",
+        "Reforçar que nenhuma scheduler/self-reload/loop/autocontinuação é ativada por helpers ou re-exports.",
+        "Validar marcadores com safe_marker_check.",
+        "Commit e checkpoint bounded."
+      ],
+      "notes": "Criado após reload como follow-up documental de TASK-BUD-272. [rationale:risk-control] A lei anti-spoof exige separar exposição/import canônico de permissão operacional.\n[2026-04-30T03:08:00Z] slice=1 focus=TASK-BUD-273 gate=safe_marker_check-6/6 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Doutrina atualizada para separar helper measured canônico de autorização operacional.",
+      "verification": "VER-BUD-547"
     }
   ]
 }

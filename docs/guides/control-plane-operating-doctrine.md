@@ -92,6 +92,8 @@ Quando um gate desbloqueia continuidade, reload, scheduler, remoto, custo, escri
 
 A regra de maturidade é separar ferramenta conveniente de desenvolvimento de permissão operacional. Quando a stack estiver funcional o suficiente para loops maiores, parte do trabalho desses loops deve ser higiene da própria casa: reduzir tools desnecessárias ao agente, esconder overrides de desenvolvimento, promover apenas superfícies medidas e manter as demais como advisory/read-only.
 
+Helpers medidos e re-exports canônicos também não são autorização operacional. Um helper como `resolveLocalMeasuredNudgeFreeLoopCanaryGate` pode compor evidência local para testes e consumidores internos, mas isso não cria scheduler, self-reload, loop, auto-continuação nem permissão remota. Até existir um desenho auditado separado, a tool runtime `nudge_free_loop_canary` permanece advisory/manual-only e deve continuar falhando fechado com `manual-signal-source` quando receber apenas parâmetros manuais.
+
 ## Self-reload e autoresume
 
 Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportamento automático atual. Antes de qualquer tentativa unattended real, o contrato mínimo precisa provar: checkpoint bounded fresco, orçamento do handoff dentro do limite, git state esperado, ausência de escopos protegidos pendentes, cooldown, auditoria e auto-resume minimal a partir do handoff compacto.

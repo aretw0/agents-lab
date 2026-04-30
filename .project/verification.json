@@ -7143,6 +7143,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:04:10.488Z",
       "evidence": "Re-exported resolveLocalMeasuredNudgeFreeLoopCanaryGate through guardrails-core-exports/guardrails-core and added hardening re-export smoke coverage. Also ran unattended continuation surface smoke to verify the runtime nudge_free_loop_canary schema remains manual-only with no signalSource/signal_source measured override. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 238/238 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Canonical imports can consume the pure measured helper without turning development exposure into operational permission."
+    },
+    {
+      "id": "VER-BUD-547",
+      "target": "TASK-BUD-273",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-30T03:06:13.729Z",
+      "evidence": "Updated docs/guides/control-plane-operating-doctrine.md under Lei anti-spoof. The note states that measured helpers and canonical re-exports are not operational authorization; resolveLocalMeasuredNudgeFreeLoopCanaryGate can compose local evidence for tests/internal consumers but does not create scheduler, self-reload, loop, auto-continuation, or remote permission. It also states runtime nudge_free_loop_canary remains advisory/manual-only and fail-closed with manual-signal-source until a separate audited design exists. Validation: safe_marker_check passed 6/6 markers. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Documentation now prevents confusing canonical helper exposure with operational permission."
     }
   ]
 }
