@@ -3,6 +3,7 @@ import {
   buildLocalMeasuredNudgeFreeLoopAuditEnvelope,
   buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts,
   buildLocalMeasuredNudgeFreeLoopCanaryPacket,
+  buildOneSliceLocalCanaryDispatchDecisionPacket,
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshCollectorResult,
   resolveCheckpointFreshMeasuredSignal,
@@ -62,6 +63,53 @@ function greenInput() {
 }
 
 describe("guardrails unattended continuation", () => {
+  it("builds a no-execution decision packet for one-slice dispatch", () => {
+    const readyPlan = resolveOneSliceLocalCanaryPlan(greenInput());
+    const baseInput = {
+      plan: readyPlan,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+    };
+    const readyPacket = buildOneSliceLocalCanaryDispatchDecisionPacket(baseInput);
+    const blockedByPreview = buildOneSliceLocalCanaryDispatchDecisionPacket({
+      ...baseInput,
+      plan: resolveOneSliceLocalCanaryPlan({ ...greenInput(), protectedScopesClear: false }),
+    });
+    const blockedByContract = buildOneSliceLocalCanaryDispatchDecisionPacket({
+      ...baseInput,
+      rollbackPlanKnown: false,
+    });
+    const executeIntent = buildOneSliceLocalCanaryDispatchDecisionPacket({
+      ...baseInput,
+      operatorIntent: "execute-one-slice",
+    });
+
+    expect(readyPacket).toMatchObject({
+      effect: "none",
+      mode: "decision-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      requiresHumanDecision: true,
+      oneSliceOnly: true,
+      decision: "ready-for-human-decision",
+      summary: "one-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+    });
+    expect(blockedByPreview).toMatchObject({
+      decision: "blocked",
+      dispatchAllowed: false,
+      reasons: ["preview-not-ready"],
+    });
+    expect(blockedByContract.reasons).toContain("rollback-plan-missing");
+    expect(blockedByContract.dispatchAllowed).toBe(false);
+    expect(executeIntent.reasons).toContain("execute-intent-recorded-not-authorization");
+    expect(executeIntent.dispatchAllowed).toBe(false);
+  });
+
   it("plans one-slice local canary without activation or repetition", () => {
     const green = resolveOneSliceLocalCanaryPlan({
       readinessReady: true,

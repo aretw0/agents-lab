@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-04-30T11:00:53.256Z",
-  "context": "TASK-BUD-342 completed. Live green-path preview validation succeeded. context_watch_one_slice_canary_preview returned decision=prepare-one-sl [snip] ask close was triggered by the preview. [truncated:+480 chars]",
+  "timestamp": "2026-04-30T11:04:55.582Z",
+  "context": "TASK-BUD-343 completed. Added pure helper buildOneSliceLocalCanaryDispatchDecisionPacket. It converts prepare-one-slice preview evidence into [snip] ol exposed and no automation activated. [truncated:+414 chars]",
   "next_actions": [
-    "commit board/handoff evidence",
-    "continue local-first hardening: next possible slice is a no-execution decision packet for an a [snip] e canary dispatch contract [truncated:+14 chars]",
-    "do not activate execution/repetition without explicit separate operator authorization"
+    "commit helper/board/handoff evidence",
+    "consider canonical re-export in a separate small slice if future internal consumers need the decision packet",
+    "do not expose execution path or runtime dispatch without explicit separate task/authorization"
   ],
   "blockers": [],
   "recent_validation": [
-    "live context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes o [snip] ce-only authorization=none [truncated:+49 chars]",
-    "live context_watch_continuation_readiness: ready=yes focus=TASK-BUD-342 audit=ready reasons=al [snip] Focus=0 authorization=none [truncated:+45 chars]",
-    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-342 verification=VER-BUD-616 status=completed"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 41/41",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-343 verification=VER-BUD-617 status=completed"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:00:53.256Z",
+    "generatedAtIso": "2026-04-30T11:04:55.582Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; green preview is proven as read-only evidence, not execution.",
+    "recommendation": "Commit evidence; dispatch decision packet is pure and non-operational.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:00:53.256Z",
+      "atIso": "2026-04-30T11:04:55.582Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; green preview is proven as read-only evidence, not execution."
+      "recommendation": "Commit evidence; dispatch decision packet is pure and non-operational."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-342"
+    "TASK-BUD-343"
   ]
 }

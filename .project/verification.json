@@ -7773,6 +7773,15 @@
       "method": "live-tool",
       "timestamp": "2026-04-30T11:00:41.706Z",
       "evidence": "Live green-path validation of context_watch_one_slice_canary_preview succeeded with a fresh local-safe focus and fresh checkpoint. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-342 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. This proves the preview can surface a green one-slice preparation recommendation only when readiness/local audit are green, while still requiring stop=yes and authorization=none. No canary slice was executed, and the preview did not stage, commit, close tasks, checkpoint, dispatch scheduler, self-reload, remote/offload, or loop; board close/checkpoint are explicit workflow actions. [rationale:risk-control] Green preview is now validated as evidence, not execution permission."
+    },
+    {
+      "id": "VER-BUD-617",
+      "target": "TASK-BUD-343",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:04:45.351Z",
+      "evidence": "Implemented pure no-execution decision packet helper buildOneSliceLocalCanaryDispatchDecisionPacket. The helper turns a prepare-one-slice preview into a human decision packet only when explicit contracts are present: rollback plan, validation gate, staging scope, commit scope, checkpoint plan, and stop contract. It always returns effect=none, activation=none, authorization=none, dispatchAllowed=false, requiresHumanDecision=true, oneSliceOnly=true. It blocks when preview is not prepare-one-slice, when contracts are missing, when repetition is requested, and even records operatorIntent=execute-one-slice as `execute-intent-recorded-not-authorization` without allowing dispatch. Smoke tests cover ready-for-human-decision, blocked preview, missing rollback contract, and execute intent without dispatch. Focal guardrails-unattended-continuation passed 41/41; full monitor smoke passed 267/267. No runtime tool was exposed and no automation was activated. [rationale:risk-control] This prevents prepare=yes from becoming dispatch; execution still requires a separate explicit path."
     }
   ]
 }

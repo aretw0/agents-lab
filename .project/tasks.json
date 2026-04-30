@@ -8276,6 +8276,33 @@
       ],
       "notes": "[rationale:risk-control] Depois de validar fail-closed, precisamos provar o caminho verde da preview sob condições locais medidas e frescas, sem transformar prepare=yes em execução.\n[2026-04-30T11:08:00Z] slice=1 focus=TASK-BUD-342 gate=live-preview-prepare-one-slice+readiness-ready commit=pending prepare=yes stop=yes authorization=none. [rationale:risk-control] Caminho verde da preview validado sem execução automática.",
       "verification": "VER-BUD-616"
+    },
+    {
+      "id": "TASK-BUD-343",
+      "description": "[P1] Implementar helper puro de decision packet sem execução para dispatch de uma fatia.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-342"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que transforme a preview prepare-one-slice em um pacote de decisão humana, sem permitir dispatch automático.",
+        "O packet deve manter effect=none, activation=none, authorization=none e dispatchAllowed=false sempre.",
+        "O packet deve exigir contratos explícitos: rollback conhecido, validation gate, staging scope, commit scope, checkpoint planejado e stop contract.",
+        "Bloquear/deferir quando preview não está prepare-one-slice, contratos faltam, ou repetição/stop não estão seguros.",
+        "Adicionar smoke tests para ready-for-human-decision, blocked por preview, blocked por contrato faltante, e input execute intent sem dispatch.",
+        "Não expor tool runtime, não modificar .pi/settings.json/.github, não ativar automação.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Antes de qualquer execução real de uma fatia, precisamos de um pacote de decisão que mantenha ready/prepare como evidência e não como autorização automática.\n[2026-04-30T11:04:31Z] slice=1 focus=TASK-BUD-343 gate=guardrails-unattended-continuation-41/41+test:monitor:smoke-267/267 commit=pending helper=dispatch-decision-packet dispatchAllowed=false. [rationale:risk-control] Decision packet criado como evidência, não execução.",
+      "verification": "VER-BUD-617"
     }
   ]
 }

@@ -49,6 +49,35 @@ export interface OneSliceLocalCanaryPlan {
   recommendation: string;
 }
 
+export type OneSliceLocalCanaryDispatchPacketDecision = "ready-for-human-decision" | "blocked";
+export type OneSliceLocalCanaryOperatorIntent = "none" | "review" | "execute-one-slice";
+
+export interface OneSliceLocalCanaryDispatchPacketInput {
+  plan: Pick<OneSliceLocalCanaryPlan, "decision" | "canPrepareSlice" | "mustStopAfterSlice" | "oneSliceOnly" | "authorization">;
+  rollbackPlanKnown: boolean;
+  validationGateKnown: boolean;
+  stagingScopeKnown: boolean;
+  commitScopeKnown: boolean;
+  checkpointPlanned: boolean;
+  stopContractKnown: boolean;
+  repeatRequested?: boolean;
+  operatorIntent?: OneSliceLocalCanaryOperatorIntent;
+}
+
+export interface OneSliceLocalCanaryDispatchDecisionPacket {
+  effect: "none";
+  mode: "decision-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  requiresHumanDecision: true;
+  oneSliceOnly: true;
+  decision: OneSliceLocalCanaryDispatchPacketDecision;
+  reasons: string[];
+  summary: string;
+  recommendation: string;
+}
+
 export type NudgeFreeLoopCanarySignalSource = "manual" | "measured";
 export type NudgeFreeLoopValidationKind = "marker-check" | "focal-test" | "structured-read" | "unknown";
 export type NudgeFreeLoopStopConditionKind =
@@ -1104,6 +1133,53 @@ export function resolveOneSliceLocalCanaryPlan(input: OneSliceLocalCanaryInput):
     reasons: ["readiness-green", "one-slice-only"],
     summary: "one-slice-local-canary: decision=prepare-one-slice prepare=yes stop=yes reasons=readiness-green,one-slice-only authorization=none",
     recommendation: "Prepare at most one local-safe slice, then validate, commit, checkpoint, and stop.",
+  };
+}
+
+export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLocalCanaryDispatchPacketInput): OneSliceLocalCanaryDispatchDecisionPacket {
+  const reasons: string[] = [];
+
+  if (input.plan.decision !== "prepare-one-slice" || !input.plan.canPrepareSlice) reasons.push("preview-not-ready");
+  if (!input.plan.mustStopAfterSlice) reasons.push("stop-after-slice-missing");
+  if (!input.plan.oneSliceOnly) reasons.push("one-slice-contract-missing");
+  if (input.plan.authorization !== "none") reasons.push(`plan-authorization-${input.plan.authorization}`);
+  if (!input.rollbackPlanKnown) reasons.push("rollback-plan-missing");
+  if (!input.validationGateKnown) reasons.push("validation-gate-missing");
+  if (!input.stagingScopeKnown) reasons.push("staging-scope-missing");
+  if (!input.commitScopeKnown) reasons.push("commit-scope-missing");
+  if (!input.checkpointPlanned) reasons.push("checkpoint-plan-missing");
+  if (!input.stopContractKnown) reasons.push("stop-contract-missing");
+  if (input.repeatRequested) reasons.push("repeat-requested");
+  if (input.operatorIntent === "execute-one-slice") reasons.push("execute-intent-recorded-not-authorization");
+
+  if (reasons.length > 0) {
+    return {
+      effect: "none",
+      mode: "decision-packet",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      requiresHumanDecision: true,
+      oneSliceOnly: true,
+      decision: "blocked",
+      reasons,
+      summary: `one-slice-dispatch-decision-packet: decision=blocked dispatch=no reasons=${reasons.slice(0, 4).join(",")} authorization=none`,
+      recommendation: "Do not dispatch; complete the missing contracts and ask for an explicit human decision first.",
+    };
+  }
+
+  return {
+    effect: "none",
+    mode: "decision-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    requiresHumanDecision: true,
+    oneSliceOnly: true,
+    decision: "ready-for-human-decision",
+    reasons: ["preview-ready", "contracts-present", "human-decision-required"],
+    summary: "one-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
+    recommendation: "Present this packet to the operator; do not dispatch until a separate execution path is explicitly authorized.",
   };
 }
 
