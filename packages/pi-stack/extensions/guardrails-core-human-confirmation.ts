@@ -59,6 +59,34 @@ export type HumanConfirmationEvidenceMatch = {
   summary: string;
 };
 
+export type TrustedHumanConfirmationAuditEnvelope = {
+  customType: "human-confirmation-evidence";
+  content: string;
+  display: false;
+  details: {
+    evidenceId: string;
+    decision: HumanConfirmationEvidenceDecision;
+    origin: TrustedHumanConfirmationOrigin;
+    actionKind: Exclude<HumanConfirmationActionKind, "local-safe">;
+    toolName: string;
+    path?: string;
+    scope?: string;
+    payloadHash?: string;
+    createdAtIso: string;
+    expiresAtIso: string;
+    consumedAtIso?: string;
+    reasons: string[];
+    dispatchAllowed: false;
+    canOverrideMonitorBlock: false;
+    authorization: "none";
+  };
+};
+
+function truncateValue(value: string | undefined, max = 160): string | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  return value.length > max ? `${value.slice(0, max)}…` : value;
+}
+
 function normalizeComparable(value: string | undefined): string {
   return typeof value === "string" ? value.replace(/\\/g, "/").trim() : "";
 }
@@ -181,6 +209,49 @@ export function resolveHumanConfirmationEvidenceMatch(
     reasons,
     evidenceId: evidence.id,
     summary: `human-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+  };
+}
+
+export function buildTrustedHumanConfirmationAuditEnvelope(
+  evidence: TrustedHumanConfirmationEvidence,
+  match: HumanConfirmationEvidenceMatch,
+): TrustedHumanConfirmationAuditEnvelope {
+  const path = truncateValue(evidence.path);
+  const scope = truncateValue(evidence.scope);
+  const payloadHash = truncateValue(evidence.payloadHash, 96);
+  const contentParts = [
+    "human-confirmation-evidence:",
+    `decision=${match.decision}`,
+    `id=${evidence.id}`,
+    `tool=${evidence.toolName}`,
+    path ? `path=${path}` : undefined,
+    scope ? `scope=${scope}` : undefined,
+    `dispatch=no`,
+    `override=no`,
+    `authorization=none`,
+  ].filter((part): part is string => Boolean(part));
+
+  return {
+    customType: "human-confirmation-evidence",
+    content: contentParts.join(" "),
+    display: false,
+    details: {
+      evidenceId: evidence.id,
+      decision: match.decision,
+      origin: evidence.origin,
+      actionKind: evidence.actionKind,
+      toolName: evidence.toolName,
+      path,
+      scope,
+      payloadHash,
+      createdAtIso: evidence.createdAtIso,
+      expiresAtIso: evidence.expiresAtIso,
+      consumedAtIso: evidence.consumedAtIso,
+      reasons: match.reasons.slice(0, 8),
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      authorization: "none",
+    },
   };
 }
 

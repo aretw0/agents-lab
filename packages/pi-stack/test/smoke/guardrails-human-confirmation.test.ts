@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildTrustedHumanConfirmationAuditEnvelope,
   consumeTrustedHumanConfirmationEvidence,
   resolveHumanConfirmationAuditPlan,
   resolveHumanConfirmationEvidenceMatch,
@@ -130,5 +131,25 @@ describe("human confirmation audit plan", () => {
     expect(consumed.ok).toBe(true);
     expect(consumed.evidence.consumedAtIso).toBe(pendingDelete.nowIso);
     expect(resolveHumanConfirmationEvidenceMatch(consumed.evidence, pendingDelete).decision).toBe("consumed");
+  });
+
+  it("builds a bounded audit/custom-message envelope for future monitor consumption", () => {
+    const match = resolveHumanConfirmationEvidenceMatch(trustedEvidence, pendingDelete);
+    const envelope = buildTrustedHumanConfirmationAuditEnvelope(trustedEvidence, match);
+
+    expect(envelope.customType).toBe("human-confirmation-evidence");
+    expect(envelope.display).toBe(false);
+    expect(envelope.content).toContain("decision=match");
+    expect(envelope.content).toContain("dispatch=no");
+    expect(envelope.content).toContain("override=no");
+    expect(envelope.details).toMatchObject({
+      evidenceId: "confirm-1",
+      decision: "match",
+      origin: "runtime-ui-confirm",
+      toolName: "bash",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      authorization: "none",
+    });
   });
 });

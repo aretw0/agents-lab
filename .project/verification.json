@@ -8619,6 +8619,15 @@
       "method": "core-evidence-contract-smoke",
       "timestamp": "2026-04-30T21:59:29.672Z",
       "evidence": "First bounded slice for TASK-BUD-390 implemented the core trusted human-confirmation evidence contract without dispatch. Added resolveHumanConfirmationEvidenceMatch and consumeTrustedHumanConfirmationEvidence: trusted origins runtime-ui-confirm/operator-contract-review, exact match on actionKind/toolName/path/scope/payloadHash, TTL expiry, consumed evidence rejection, mismatch reasons, and single-use consumed copy. Invariants preserved: dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-core-hardening-reexport.test.ts => 8 passed. Docs sync/check ok. Remaining: wire trusted runtime-origin evidence into actual TUI/guard/monitor path or upstream PR design; do not mark full bridge complete yet."
+    },
+    {
+      "id": "VER-BUD-711",
+      "target": "TASK-BUD-390",
+      "target_type": "task",
+      "status": "passed",
+      "method": "audit-envelope-smoke",
+      "timestamp": "2026-04-30T22:02:00.611Z",
+      "evidence": "Second bounded slice for TASK-BUD-390 added buildTrustedHumanConfirmationAuditEnvelope. It creates bounded customType=human-confirmation-evidence envelopes with display=false and details carrying evidenceId, decision, origin, exact action fingerprint, reasons, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. This provides a future monitor/custom-message/audit-entry payload shape without granting permission. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-core-hardening-reexport.test.ts => 9 passed. Docs sync/check ok. Remaining: actual runtime wiring that emits/consumes this envelope from trusted TUI confirmation path."
     }
   ]
 }
