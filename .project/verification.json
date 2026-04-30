@@ -6990,6 +6990,15 @@
       "method": "inspection",
       "timestamp": "2026-04-30T01:50:50.552Z",
       "evidence": "Added 'Lei anti-spoof' to docs/guides/control-plane-operating-doctrine.md. The doctrine now states that tools exposed for development/feedback are not operational authorization, autonomy gates must not produce sensitive readiness from spoofable manual input, measured local signals need bounded evidence and fail-closed behavior, and future mature loops should include hygiene to reduce unnecessary agent tool access and hide development overrides. Validation: safe_marker_check passed 11/11 with commandSensitive=none. Also created backlog TASK-BUD-252 for future tool-exposure hygiene/scorecard. [rationale:risk-control] Makes anti-spoof a general development law rather than a one-off nudge-free rule."
+    },
+    {
+      "id": "VER-BUD-530",
+      "target": "TASK-BUD-253",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:55:07.098Z",
+      "evidence": "Changed nudge-free measured readiness to require structured per-gate evidence instead of any non-empty evidence string. Added NudgeFreeLoopMeasuredEvidenceEntry and required coverage for next-local-safe, checkpoint-fresh, handoff-budget-ok, git-state-expected, protected-scopes-clear, cooldown-ready, validation-known, and stop-conditions-clear. Details now include missingMeasuredEvidenceGates; measured source with partial evidence defers with measured-evidence-incomplete. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 12/12; cmd.exe /c npm run test:monitor:smoke --silent passed 225/225 across 32 files. [rationale:risk-control] Prevents measured readiness from being spoofed by arbitrary non-empty evidence strings."
     }
   ]
 }

@@ -5962,6 +5962,32 @@
         "Bloquear ou esconder superfícies que não fazem sentido para o agente em operação contínua."
       ],
       "notes": "Backlog criado a partir da direção do operador sobre higiene futura das tools quando loops grandes estiverem maduros. [rationale:risk-control] O potencial acumulado deve ser usado para arrumar a própria casa, não para ampliar permissões indevidas."
+    },
+    {
+      "id": "TASK-BUD-253",
+      "description": "[P1] Exigir cobertura estruturada de evidência medida no canário nudge-free.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-249",
+        "TASK-BUD-251"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Measured readiness exige evidência estruturada por gate, não apenas lista de strings não vazia.",
+        "Ready só ocorre quando todos os gates medidos obrigatórios têm evidência ok e bounded.",
+        "Details incluem missingMeasuredEvidenceGates para auditoria.",
+        "Testes cobrem evidência completa, ausente e incompleta.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado a partir da lei anti-spoof. [rationale:risk-control] signalSource=measured com qualquer string não vazia ainda é spoofável; readiness precisa de cobertura estruturada por gate.\n[2026-04-30T01:54:45Z] slice=1 focus=TASK-BUD-253 gate=test:monitor:smoke-225/225 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Evidência measured agora precisa cobrir todos os gates obrigatórios.",
+      "verification": "VER-BUD-530"
     }
   ]
 }
