@@ -75,6 +75,12 @@ Matriz go/no-go para trabalho ininterrupto local:
 
 Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
 
+## Higiene de tools antes de loops grandes
+
+Antes de qualquer loop grande, a stack deve tratar tools expostas como superfície de risco. A primitiva `tool_hygiene_scorecard` é read-only e classifica tools como `advisory`, `measured`, `operational`, `protected` ou `development`, sinalizando flags como mutação, scheduler, remote/CI, settings/profile, subprocesso e override manual. O resultado mantém `authorization=none` e `dispatchAllowed=false`.
+
+A promoção é conservadora: tools advisory/measured podem permanecer visíveis para fatias locais bounded; tools operational exigem evidência medida e vínculo explícito com task; tools protected exigem aprovação humana e não entram em auto-dispatch; tools de development com subprocesso devem ser ocultadas/desabilitadas antes de loops longos salvo debugging explícito. O scorecard é evidência de higiene, não permissão para executar.
+
 ## Entrevistas estruturadas e gaps humanos
 
 Gaps humanos devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-human-answer` ou `invalid` com `nextQuestionId` e evidência compacta.

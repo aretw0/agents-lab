@@ -1,40 +1,37 @@
 {
-  "timestamp": "2026-04-30T18:39:09.182Z",
-  "context": "Committed live validation as 7958b61 and completed TASK-BUD-374 with VER-BUD-669. structured_interview_plan is now implemented, tested, docum [snip] o-close can be separate follow-up work. [truncated:+172 chars]",
+  "timestamp": "2026-04-30T18:47:52.739Z",
+  "context": "Implemented first tool hygiene scorecard for pre-large-loop maturity. Added pure classifier and read-only runtime tool_hygiene_scorecard to i [snip] reload required before live validation. [truncated:+215 chars]",
+  "current_tasks": [
+    "TASK-BUD-252"
+  ],
   "next_actions": [
-    "Select next essential local-first task from board; likely consolidate follow-up integration fo [snip] -slice rehearsal criteria. [truncated:+47 chars]",
-    "Keep strong unattended blocked until tested long-run cancel/fallback and explicit operator decision.",
-    "Do not run Git maintenance cleanup without explicit authorization."
+    "Commit TASK-BUD-252 scorecard implementation/docs/board evidence.",
+    "Reload before live validation of tool_hygiene_scorecard.",
+    "After reload, run tool_hygiene_scorecard with a small selected tool set and decide whether TAS [snip] second integration slice. [truncated:+30 chars]"
   ],
   "blockers": [
+    "Reload required before live validation because runtime tool surface changed.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "commit 7958b61 chore(control): validate structured interview tool",
-    "board_task_complete TASK-BUD-374 with VER-BUD-669 ok",
-    "git-maintenance: severity=warning action=monitor loose=9694 sizeMiB=111.81 gcLog=yes cleanupAllowedAutomatically=false"
-  ],
-  "recent_commits": [
-    "7958b61 chore(control): validate structured interview tool"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts: 4 passed",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
+    "board_verification_append VER-BUD-670 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T18:39:09.182Z",
+    "generatedAtIso": "2026-04-30T18:47:52.739Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "select-next-essential-task",
-    "focus_task_status": "completed"
+    "recommendation": "commit-then-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T18:39:09.182Z",
+      "atIso": "2026-04-30T18:47:52.739Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "select-next-essential-task"
+      "recommendation": "commit-then-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-374"
   ]
 }

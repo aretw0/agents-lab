@@ -8250,6 +8250,15 @@
       "method": "test+live-tool+docs",
       "timestamp": "2026-04-30T18:38:58.249Z",
       "evidence": "Completed backend-first structured interview primitive. Implementation includes pure resolver resolveStructuredInterview, runtime tool structured_interview_plan, exports, tests, and doctrine docs. Tests passed: npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts => 3 passed. Live after reload passed needs-human-answer, complete, and invalid paths. All outputs preserve backendFirst=true, uiCoupling=none, activation=none, authorization=none, dispatchAllowed=false, proving this is a structured evidence primitive rather than an execution permission surface. [rationale:risk-control] The primitive reduces human-gap ambiguity without UI-first coupling or accidental dispatch authority."
+    },
+    {
+      "id": "VER-BUD-670",
+      "target": "TASK-BUD-252",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T18:47:40.944Z",
+      "evidence": "Implemented read-only tool hygiene scorecard before large loops. Added classifyToolHygiene/buildToolHygieneScorecard and runtime tool_hygiene_scorecard. It classifies tools as advisory/measured/operational/protected/development, reports flags such as mutation/scheduler/remote/settings/subprocess/manual override, and recommends safe-for-local-loop/needs-measured-evidence/requires-human-approval/hide-before-long-loop while preserving authorization=none and dispatchAllowed=false. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed; safe_marker_check docs matched 5/5."
     }
   ]
 }
