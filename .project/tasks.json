@@ -9499,7 +9499,7 @@
     {
       "id": "TASK-BUD-392",
       "description": "Follow-up: consumir evidência trusted de confirmação humana em monitor/guard para confirmações destrutivas além dos read guards.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-390"
@@ -9518,7 +9518,31 @@
         "Manter dispatchAllowed=false até uma task separada autorizar qualquer executor/override operacional."
       ],
       "milestone": "human-control",
-      "notes": "Follow-up de TASK-BUD-390. A task 390 criou contrato core, envelope e audit wiring para confirmações UI existentes em guardrails-core; ainda falta consumo explícito por monitor/guard e cobertura de confirmações destrutivas que vêm de pipeline upstream/third-party. [rationale:risk-control] A evidência trusted só reduz falso bloqueio de confirmação humana se o consumidor local souber validá-la sem abrir caminho para spoofing ou override automático.\n2026-04-30: iniciado após reload. Fatia bounded: consumidor core/testável de envelope trusted human-confirmation-evidence, exigindo details estruturados e recusando texto spoofable; ainda sem hook operacional/override.\n2026-04-30: primeira fatia validada (VER-BUD-715): consumidor core de envelope structured human-confirmation-evidence. Exige details trusted e recusa texto spoofable/override fields. Falta wiring runtime que entregue details estruturado ao monitor/guard.\n2026-04-30: segunda fatia validada (VER-BUD-716): resolveHumanConfirmationRuntimeConsumptionPlan codifica fronteira runtime. custom_messages texto-only não é aceito; consumo só fica ready com details estruturado guard-owned/audit-readable; sem sinal upstream vira needs-upstream-signal."
+      "notes": "Follow-up de TASK-BUD-390. A task 390 criou contrato core, envelope e audit wiring para confirmações UI existentes em guardrails-core; ainda falta consumo explícito por monitor/guard e cobertura de confirmações destrutivas que vêm de pipeline upstream/third-party. [rationale:risk-control] A evidência trusted só reduz falso bloqueio de confirmação humana se o consumidor local souber validá-la sem abrir caminho para spoofing ou override automático.\n2026-04-30: iniciado após reload. Fatia bounded: consumidor core/testável de envelope trusted human-confirmation-evidence, exigindo details estruturados e recusando texto spoofable; ainda sem hook operacional/override.\n2026-04-30: primeira fatia validada (VER-BUD-715): consumidor core de envelope structured human-confirmation-evidence. Exige details trusted e recusa texto spoofable/override fields. Falta wiring runtime que entregue details estruturado ao monitor/guard.\n2026-04-30: segunda fatia validada (VER-BUD-716): resolveHumanConfirmationRuntimeConsumptionPlan codifica fronteira runtime. custom_messages texto-only não é aceito; consumo só fica ready com details estruturado guard-owned/audit-readable; sem sinal upstream vira needs-upstream-signal.\n2026-04-30: concluído no escopo bounded: consumidor core de envelope + plano runtime fail-closed. Custom_messages text-only não é evidência trusted. TASK-BUD-393 criado para sinal upstream/wrapper estruturado antes de tool_call em confirmações destrutivas reais.",
+      "verification": "VER-BUD-717"
+    },
+    {
+      "id": "TASK-BUD-393",
+      "description": "Follow-up: fornecer sinal runtime/upstream estruturado para confirmações destrutivas antes do tool_call.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-392"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-human-confirmation.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "node_modules/@mariozechner/pi-coding-agent"
+      ],
+      "acceptance_criteria": [
+        "Investigar ponto upstream/wrapper onde confirmações destrutivas reais são solicitadas antes do tool_call sem mutar node_modules diretamente.",
+        "Propor PR upstream ou wrapper first-party que exponha confirmação trusted como details estruturados, não texto em custom_messages.",
+        "Garantir vínculo com tool/action/path/scope, TTL curto e single-use.",
+        "Validar que monitor/guard consome somente envelope estruturado via consumeTrustedHumanConfirmationAuditEnvelope.",
+        "Preservar fail-closed quando o sinal não existe, é stale, consumido, mismatched ou spoofable."
+      ],
+      "milestone": "human-control",
+      "notes": "Follow-up de TASK-BUD-392. O consumo core e plano runtime foram concluídos, mas behavior monitor custom_messages atual é text-only e não basta; confirmações destrutivas upstream antes do tool_call precisam de sinal estruturado via PR/wrapper/guard-owned dialog. [rationale:risk-control] Sem sinal runtime estruturado, aceitar confirmação textual criaria spoofing; com sinal estruturado, podemos reduzir falso bloqueio sem relaxar fail-closed."
     }
   ]
 }
