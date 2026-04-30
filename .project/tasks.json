@@ -8717,6 +8717,29 @@
       ],
       "notes": "[rationale:risk-control] Como details nem sempre aparecem no transcript, pedidos proibidos precisam ficar visíveis no summary bloqueado sem liberar execução.\n[2026-04-30T11:56:30Z] slice=1 focus=TASK-BUD-359 gate=focal-50/50+test:monitor:smoke-269/269 commit=pending summary=blockedRequests-on-contract-block reload-needed=yes. [rationale:risk-control] Pedidos proibidos agora aparecem compactos em bloqueios sem autorizar execução.",
       "verification": "VER-BUD-633"
+    },
+    {
+      "id": "TASK-BUD-360",
+      "description": "[P1] Live-validar blockedRequests em one_slice_human_contract_review após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-359"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar one_slice_human_contract_review em caminho bloqueado e confirmar blockedRequests=... no summary.",
+        "Confirmar dispatch=no executor=no authorization=none no caminho bloqueado.",
+        "Opcionalmente validar caminho verde permanece sem blockedRequests.",
+        "Confirmar que a tool não stageia, commita, fecha task, checkpointa, aciona scheduler/remote/self-reload ou loop; ações de board/commit/checkpoint são explícitas.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] blockedRequests precisa aparecer ao vivo no transcript para diagnosticar pedidos proibidos sem abrir details nem liberar executor.\n[2026-04-30T12:05:00Z] slice=1 focus=TASK-BUD-360 gate=live-one_slice_human_contract_review blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope green=no-blockedRequests dispatch=no executor=no authorization=none commit=pending. [rationale:risk-control] blockedRequests validado ao vivo sem executor.",
+      "verification": "VER-BUD-634"
     }
   ]
 }

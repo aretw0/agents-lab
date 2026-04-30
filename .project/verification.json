@@ -7926,6 +7926,15 @@
       "method": "test",
       "timestamp": "2026-04-30T11:56:54.194Z",
       "evidence": "Added blockedRequests=<...> to reviewOneSliceLocalHumanConfirmedContract blocked summaries when prohibited requests are present. The pure helper now surfaces blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope in compact output while preserving dispatch=no executor=no authorization=none. The green summary remains unchanged and explicitly omits blockedRequests. Surface smoke validates blockedRequests=scheduler|remote-or-offload|github-actions in the runtime tool transcript output. No executor, dispatcher, scheduler, loop, staging, commit, board close, checkpoint, remote/offload, or self-reload was introduced. Validation: focal guardrails-unattended-continuation + surface tests passed 50/50; full monitor smoke passed 269/269. Runtime summary behavior changed, so live validation requires reload. [rationale:risk-control] Prohibited requests are now visible in the summary when details are not shown, without weakening the no-executor boundary."
+    },
+    {
+      "id": "VER-BUD-634",
+      "target": "TASK-BUD-360",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T11:58:53.102Z",
+      "evidence": "After reload, live runtime validation of blockedRequests in one_slice_human_contract_review succeeded. Blocked path returned `one-slice-human-confirmed-contract: decision=blocked dispatch=no executor=no reasons=packet-dispatch-not-false,human-confirmation-generic,protected-scope,repeat-requested blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope authorization=none`. Green path returned `one-slice-human-confirmed-contract: decision=contract-ready-no-executor dispatch=no executor=no reasons=contract-valid,human-confirmation-explicit,executor-not-approved authorization=none`, with no blockedRequests field. git status after tool calls showed only explicit .project/handoff.json and .project/tasks.json workflow changes; the tool did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. [rationale:risk-control] Prohibited requests are visible in compact runtime output while executor approval remains false."
     }
   ]
 }
