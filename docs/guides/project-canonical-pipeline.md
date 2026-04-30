@@ -718,6 +718,7 @@ Contrato operacional:
 - quando auto-resume for suprimido, inspecionar `autoCompact.autoResumeLastDecisionReason` / linha `auto-resume-last` em `/context-watch` para confirmar se a causa foi `reload-required`, `checkpoint-evidence-missing`, `pending-messages`, `recent-steer`, `lane-queue-pending` ou cooldown/off.
 - usar `autoResumeLastDecisionHint`/`auto-resume-last hint` para ação imediata sem mapear reason manualmente.
 - em supressões críticas (`reload-required`, `checkpoint-evidence-missing`) o runtime pode emitir notify warning explícito para evitar silêncio operacional.
+- `checkpoint-evidence-missing` com handoff fresco deve ser tratado como bug de compatibilidade de evidência: checkpoints manuais/bounded precisam gerar ou ser normalizados como `context_watch_events` válidos (`manual_checkpoint`, `level`, `percent`, `thresholds`) antes de qualquer long-run depender de auto-resume.
 - prompt de auto-resume usa normalização canônica (single-line, sem artefatos markdown/backticks) e truncamento explícito com preservação de cauda (`[snip] ... [truncated:+N chars]`, `[auto-resume-prompt-truncated:+N chars]`) para evitar reticências opacas e manter contexto operacional útil.
 - quando `current_tasks` não vier no handoff, o prompt tenta derivar `focusTasks` por IDs `TASK-*` presentes em `next_actions`/`blockers`/`context`, mantendo limite curto e dedupe.
 - quando alguma lista estoura limite (tasks/blockers/next), o prompt explicita overflow com `(+N more)` em vez de silêncio implícito.
