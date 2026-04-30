@@ -6297,6 +6297,50 @@
       ],
       "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] O gate validation-known precisa ser derivado de método/gate de validação, não de boolean manual.\n[2026-04-30T02:40:43Z] slice=1 focus=TASK-BUD-266 gate=test:monitor:smoke-234/234 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured validation-known derivado de método/gate de validação, sem runtime loop.",
       "verification": "VER-BUD-541"
+    },
+    {
+      "id": "TASK-BUD-267",
+      "description": "[P1] Criar helper puro para sinal measured de stop conditions livres.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-266"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured stop-conditions-clear a partir de stop conditions estruturadas, sem aceitar ok manual.",
+        "Sinal fica ok quando nenhuma stop condition medida está presente.",
+        "Sinal falha com evidência compacta quando há stop conditions presentes.",
+        "Testes cobrem clear, present e evidência compacta/bounded.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] Stop conditions precisam ser agregadas de condições estruturadas, não de boolean manual.\n[2026-04-30T02:49:13Z] slice=1 focus=TASK-BUD-267 gate=test:monitor:smoke-235/235 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured stop-conditions-clear derivado de condições estruturadas; link externo registrado como backlog TASK-BUD-268.",
+      "verification": "VER-BUD-542"
+    },
+    {
+      "id": "TASK-BUD-268",
+      "description": "[P2/backlog] Avaliar https://github.com/amosblomqvist/pi-config como inspiração bounded para configuração pi.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/research",
+        "docs/guides/recommended-pi-stack.md",
+        "packages/pi-stack"
+      ],
+      "acceptance_criteria": [
+        "Ler o repositório como referência externa apenas quando explicitamente selecionado.",
+        "Extrair ideias aplicáveis à configuração pi/local-first sem copiar cegamente.",
+        "Registrar diferenças, riscos e possíveis primitives/backlog.",
+        "Manter pesquisa externa como escopo protegido/opt-in."
+      ],
+      "notes": "Backlog criado a pedido do operador. Link: https://github.com/amosblomqvist/pi-config. [rationale:risk-control] Referências externas podem inspirar, mas devem entrar como pesquisa bounded e opt-in, sem interromper a lane essencial atual."
     }
   ]
 }

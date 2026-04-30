@@ -7098,6 +7098,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:41:12.669Z",
       "evidence": "Added pure resolveValidationKnownMeasuredSignal helper. It derives validation-known from validation kind and optional focalGate without accepting a manual ok boolean. marker-check and structured-read are known, focal-test requires a non-empty focalGate, and unknown/focal missing fail with compact evidence. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 19/19; cmd.exe /c npm run test:monitor:smoke --silent passed 234/234 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Validation readiness now derives from a declared validation method/gate instead of a spoofable boolean."
+    },
+    {
+      "id": "VER-BUD-542",
+      "target": "TASK-BUD-267",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:49:28.902Z",
+      "evidence": "Added pure resolveStopConditionsClearMeasuredSignal helper. It derives stop-conditions-clear from structured stop condition signals without accepting a manual ok boolean. It returns compact bounded evidence for clear and present stop conditions, summarizing count and first condition kinds. Also created planned TASK-BUD-268 for https://github.com/amosblomqvist/pi-config as bounded external inspiration per operator request. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 20/20; cmd.exe /c npm run test:monitor:smoke --silent passed 235/235 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Stop-condition readiness now derives from structured conditions instead of a spoofable boolean."
     }
   ]
 }

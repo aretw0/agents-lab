@@ -8,6 +8,7 @@ import {
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesMeasuredSignal,
+  resolveStopConditionsClearMeasuredSignal,
   resolveUnattendedContinuationPlan,
   resolveValidationKnownMeasuredSignal,
 } from "../../extensions/guardrails-core-unattended-continuation";
@@ -158,6 +159,26 @@ describe("guardrails unattended continuation", () => {
     expect(focalMissing).toEqual({ ok: false, evidence: "validation=focal-test gate=missing" });
     expect(unknown).toEqual({ ok: false, evidence: "validation=unknown" });
     expect(focal.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact stop-condition measured signals from structured conditions", () => {
+    const clear = resolveStopConditionsClearMeasuredSignal({
+      conditions: [
+        { kind: "risk", present: false, evidence: "risk=none" },
+        { kind: "blocker", present: false, evidence: "blocker=none" },
+      ],
+    });
+    const present = resolveStopConditionsClearMeasuredSignal({
+      conditions: [
+        { kind: "risk", present: true, evidence: "risk=data-loss" },
+        { kind: "protected-scope", present: true, evidence: "protected=.github" },
+        { kind: "blocker", present: false, evidence: "blocker=none" },
+      ],
+    });
+
+    expect(clear).toEqual({ ok: true, evidence: "stops=clear checked=2" });
+    expect(present).toEqual({ ok: false, evidence: "stops=present count=2 first=risk|protected-scope" });
+    expect(present.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {

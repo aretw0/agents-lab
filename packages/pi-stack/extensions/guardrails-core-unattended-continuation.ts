@@ -20,6 +20,15 @@ export interface UnattendedContinuationPlan {
 
 export type NudgeFreeLoopCanarySignalSource = "manual" | "measured";
 export type NudgeFreeLoopValidationKind = "marker-check" | "focal-test" | "structured-read" | "unknown";
+export type NudgeFreeLoopStopConditionKind =
+  | "risk"
+  | "protected-scope"
+  | "ambiguous"
+  | "test-failure"
+  | "compact-unsaved"
+  | "reload-required"
+  | "handoff-invalid"
+  | "blocker";
 export type NudgeFreeLoopMeasuredGate =
   | "next-local-safe"
   | "checkpoint-fresh"
@@ -52,6 +61,12 @@ export interface NudgeFreeLoopCanaryInput {
 
 export interface NudgeFreeLoopMeasuredSignal {
   ok: boolean;
+  evidence: string;
+}
+
+export interface NudgeFreeLoopStopConditionSignal {
+  kind: NudgeFreeLoopStopConditionKind;
+  present: boolean;
   evidence: string;
 }
 
@@ -214,6 +229,17 @@ export function resolveValidationKnownMeasuredSignal(input: {
     return { ok: true, evidence: `validation=focal-test gate=${gate.length > 32 ? `${gate.slice(0, 29)}...` : gate}` };
   }
   return { ok: true, evidence: `validation=${input.kind}` };
+}
+
+export function resolveStopConditionsClearMeasuredSignal(input: {
+  conditions: NudgeFreeLoopStopConditionSignal[];
+}): NudgeFreeLoopMeasuredSignal {
+  const present = input.conditions.filter((condition) => condition.present);
+  if (present.length === 0) {
+    return { ok: true, evidence: `stops=clear checked=${input.conditions.length}` };
+  }
+  const first = present.slice(0, 2).map((condition) => condition.kind).join("|");
+  return { ok: false, evidence: `stops=present count=${present.length} first=${first}` };
 }
 
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
