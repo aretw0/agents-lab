@@ -97,6 +97,7 @@ import {
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
+import { resolveOneSliceLocalCanaryPlan } from "./guardrails-core-unattended-continuation";
 import {
 	buildLocalContinuityAudit,
 	formatLocalContinuityAuditSummary,
@@ -866,6 +867,24 @@ export function formatContextWatchContinuationReadinessSummary(input: {
 		input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
 		input.protectedPaths && input.protectedPaths.length > 0 ? `protected=${input.protectedPaths.slice(0, 3).join("|")}` : undefined,
 		`staleFocus=${input.staleFocusCount}`,
+		"authorization=none",
+	].filter(Boolean).join(" ");
+}
+
+export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
+	decision: string;
+	canPrepareSlice: boolean;
+	mustStopAfterSlice: boolean;
+	oneSliceOnly: boolean;
+	reasons: string[];
+}): string {
+	return [
+		"context-watch-one-slice-canary-preview:",
+		`decision=${input.decision}`,
+		`prepare=${input.canPrepareSlice ? "yes" : "no"}`,
+		`stop=${input.mustStopAfterSlice ? "yes" : "no"}`,
+		`oneSliceOnly=${input.oneSliceOnly ? "yes" : "no"}`,
+		input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
 		"authorization=none",
 	].filter(Boolean).join(" ");
 }
@@ -1891,6 +1910,66 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",
 					mode: "read-only-readiness",
+					authorization: "none",
+				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_one_slice_canary_preview",
+		label: "Context Watch One-Slice Canary Preview",
+		description:
+			"Read-only preview that composes continuation readiness with the one-slice local canary plan. Never dispatches automation, staging, commits, checkpoints, remote, or scheduler work.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
+				readHandoffJson(ctx.cwd),
+				config.handoffFreshMaxAgeMs,
+				Date.now(),
+				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+			);
+			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics);
+			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const localAudit = buildLocalContinuityAudit(ctx.cwd);
+			const localAuditReasons = localContinuityAuditReasons(localAudit);
+			const protectedPaths = localContinuityProtectedPaths(localAudit);
+			const localContinuitySummary = formatLocalContinuityAuditSummary(localAudit, localAuditReasons);
+			const collectorStatus = (fact: string) => localAudit.collectorResults.find((entry) => entry.fact === fact)?.status;
+			const focusStatus = focusTasks !== "none-listed" && !focusTasks.includes(",") ? taskStatusById[focusTasks] ?? taskStatusById[focusTasks.toUpperCase()] : undefined;
+			const readinessReady = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const plan = resolveOneSliceLocalCanaryPlan({
+				readinessReady,
+				authorization: "none",
+				checkpointFresh: collectorStatus("checkpoint") === "observed",
+				handoffBudgetOk: collectorStatus("handoff-budget") === "observed",
+				gitStateExpected: collectorStatus("git-state") === "observed",
+				protectedScopesClear: collectorStatus("protected-scopes") === "observed" && protectedPaths.length === 0,
+				validationKnown: collectorStatus("validation") === "observed",
+				stopConditionsClear: collectorStatus("stop-conditions") === "observed",
+				risk: false,
+				ambiguous: false,
+				repeatRequested: false,
+				sliceAlreadyCompleted: focusStatus === "completed",
+			});
+			const summary = formatContextWatchOneSliceCanaryPreviewSummary(plan);
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					plan,
+					focusTasks,
+					focusStatus,
+					diagnosticsSummary,
+					localContinuitySummary,
+					localContinuityReasons: localAuditReasons,
+					protectedPaths,
+					localContinuity: localAudit,
+					autoResumePrompt: resumeEnvelope.prompt,
+					effect: "none",
+					mode: "read-only-preview",
+					activation: "none",
 					authorization: "none",
 				},
 			};

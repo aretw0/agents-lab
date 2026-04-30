@@ -8203,6 +8203,33 @@
       ],
       "notes": "[rationale:risk-control] O helper puro do canário de uma fatia deve ser consumível por código interno futuro via export canônico, sem expor permissão operacional nem tool runtime.\n[2026-04-30T10:43:29Z] slice=1 focus=TASK-BUD-339 gate=reexport-1/1+test:monitor:smoke-265/265 commit=pending helper-exported=yes runtime-tool=no. [rationale:risk-control] Helper canônico disponível sem virar tool/permissão.",
       "verification": "VER-BUD-613"
+    },
+    {
+      "id": "TASK-BUD-340",
+      "description": "[P1] Expor preview read-only do canário local de uma fatia sem execução.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-339"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar surface read-only/zero-param que compõe context_watch_continuation_readiness/local audit com resolveOneSliceLocalCanaryPlan.",
+        "A preview deve retornar effect=none, mode=read-only-preview/advisory, activation=none, authorization=none e nunca executar/stagear/commitar/fechar task/checkpoint/remoto.",
+        "Summary deve deixar claro prepare=yes/no, stop=yes e oneSliceOnly=true quando aplicável.",
+        "Bloquear se readiness não estiver verde, protected scopes não estiverem clear, checkpoint/handoff/git/validation/stop gates não estiverem seguros, ou se slice já estiver completo.",
+        "Adicionar smoke cobrindo schema zero-param, no automation fields, e summary prepare-one-slice para cenário verde.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Registrar evidência, commit e checkpoint; live validation exigirá reload."
+      ],
+      "notes": "[rationale:risk-control] A preview read-only permite inspecionar se uma única fatia poderia ser preparada sem transformar readiness verde em execução ou autorização operacional.\n[2026-04-30T10:55:58Z] slice=1 focus=TASK-BUD-340 gate=context-watchdog-48/48+test:monitor:smoke-266/266 commit=pending tool=context_watch_one_slice_canary_preview mode=read-only-preview activation=none reload-needed=yes. [rationale:risk-control] Preview runtime adicionada sem execução; validação live requer reload.",
+      "verification": "VER-BUD-614"
     }
   ]
 }

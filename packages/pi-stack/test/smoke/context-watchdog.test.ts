@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -18,6 +19,7 @@ import contextWatchdogExtension, {
 	formatContextWatchStatusToolSummary,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
+	formatContextWatchOneSliceCanaryPreviewSummary,
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchDeterministicStopSummary,
 	formatContextWatchSteeringStatus,
@@ -1373,6 +1375,76 @@ describe("context-watchdog", () => {
 				protectedPaths: [".pi/settings.json"],
 				staleFocusCount: 0,
 			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked reasons=protected-scopes:invalid protected=.pi/settings.json staleFocus=0 authorization=none");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_one_slice_canary_preview composes readiness without activation", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-one-slice-preview-"));
+		try {
+			execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-04-30T04:40:00.000Z",
+				current_tasks: ["TASK-BUD-340"],
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+				id: "TASK-BUD-340",
+				status: "in-progress",
+				description: "One-slice preview smoke",
+				files: [".project/tasks.json"],
+				acceptance_criteria: ["Smoke principal permanece verde."],
+			}] }));
+			execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-340"],
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+				id: "TASK-BUD-340",
+				status: "in-progress",
+				description: "One-slice preview smoke",
+				files: [".project/tasks.json"],
+				acceptance_criteria: ["Smoke principal permanece verde."],
+				notes: "preview changed",
+			}] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_one_slice_canary_preview");
+			const schemaText = JSON.stringify((pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([registered]) => registered?.name === "context_watch_one_slice_canary_preview")?.[0]?.parameters ?? {});
+			expect(schemaText).not.toContain("execute");
+			expect(schemaText).not.toContain("dispatch");
+			const result = await tool.execute("tc-one-slice-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
+			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none");
+			expect(result.details).toMatchObject({
+				effect: "none",
+				mode: "read-only-preview",
+				activation: "none",
+				authorization: "none",
+				focusTasks: "TASK-BUD-340",
+				plan: {
+					activation: "none",
+					authorization: "none",
+					oneSliceOnly: true,
+					decision: "prepare-one-slice",
+					canPrepareSlice: true,
+					mustStopAfterSlice: true,
+				},
+			});
+			expect(formatContextWatchOneSliceCanaryPreviewSummary({
+				decision: "blocked",
+				canPrepareSlice: false,
+				mustStopAfterSlice: true,
+				oneSliceOnly: true,
+				reasons: ["protected-scope"],
+			})).toBe("context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes reasons=protected-scope authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

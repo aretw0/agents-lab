@@ -7746,6 +7746,15 @@
       "method": "test",
       "timestamp": "2026-04-30T10:43:52.745Z",
       "evidence": "Re-exported resolveOneSliceLocalCanaryPlan through the canonical guardrails-core export surface without registering any runtime tool. Added smoke coverage in guardrails-core-hardening-reexport.test.ts proving the helper is available via ../../extensions/guardrails-core and still returns effect=none, activation=none, authorization=none, oneSliceOnly=true, decision=prepare-one-slice for green inputs. Focal re-export smoke passed 1/1; full monitor smoke passed 265/265. No runtime tool exposure, no reload requirement for editing/testing, and no scheduler/loop/remote/self-reload activation. [rationale:risk-control] Canonical re-export makes the pure helper reusable while preserving separation between helper availability and operational authorization."
+    },
+    {
+      "id": "VER-BUD-614",
+      "target": "TASK-BUD-340",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T10:56:12.928Z",
+      "evidence": "Added read-only zero-param runtime surface context_watch_one_slice_canary_preview. It composes auto-resume focus, local continuity audit, and resolveOneSliceLocalCanaryPlan into a preview summary without executing anything. The tool returns effect=none, mode=read-only-preview, activation=none, authorization=none; it never stages, commits, closes tasks, checkpoints, dispatches scheduler/remote/self-reload, or starts a loop. Summary reports decision, prepare=yes/no, stop=yes/no, oneSliceOnly=yes, reasons, authorization=none. Smoke covers zero-param schema without execution/dispatch knobs and a green local fixture returning `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. Focal context-watchdog tests passed 48/48; full monitor smoke passed 266/266. Runtime live validation will require reload because a new tool was registered. [rationale:risk-control] The one-slice canary is now inspectable as a preview, still separated from execution and authorization."
     }
   ]
 }
