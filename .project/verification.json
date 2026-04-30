@@ -7764,6 +7764,15 @@
       "method": "live-tool",
       "timestamp": "2026-04-30T10:59:21.396Z",
       "evidence": "After operator reload, live runtime validates the new context_watch_one_slice_canary_preview surface is available and fail-closed/read-only. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes reasons=readiness-not-ready|validation-unknown|stop-conditions-present authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-341 audit=blocked reasons=candidate:invalid|validation:invalid|stop-conditions:invalid staleFocus=1 authorization=none`. This confirms the preview does not treat tool availability as permission, keeps oneSliceOnly/stop=yes, and blocks when the current transient live-validation task lacks green readiness/known validation. No staging, commit, board close, checkpoint, scheduler, self-reload, remote/offload, or loop was dispatched by the preview; board closure/checkpoint here are explicit operator-commanded workflow steps. [rationale:risk-control] Live preview proves fail-closed behavior after reload rather than silently preparing a canary slice."
+    },
+    {
+      "id": "VER-BUD-616",
+      "target": "TASK-BUD-342",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool",
+      "timestamp": "2026-04-30T11:00:41.706Z",
+      "evidence": "Live green-path validation of context_watch_one_slice_canary_preview succeeded with a fresh local-safe focus and fresh checkpoint. context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-342 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. This proves the preview can surface a green one-slice preparation recommendation only when readiness/local audit are green, while still requiring stop=yes and authorization=none. No canary slice was executed, and the preview did not stage, commit, close tasks, checkpoint, dispatch scheduler, self-reload, remote/offload, or loop; board close/checkpoint are explicit workflow actions. [rationale:risk-control] Green preview is now validated as evidence, not execution permission."
     }
   ]
 }

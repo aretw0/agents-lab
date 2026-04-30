@@ -8253,6 +8253,29 @@
       ],
       "notes": "[rationale:risk-control] Nova tool runtime precisa de validação live pós-reload para provar que a preview do canário de uma fatia é apenas evidência read-only.\n[2026-04-30T11:05:00Z] slice=1 focus=TASK-BUD-341 gate=live-context_watch_one_slice_canary_preview blocked-fail-closed authorization=none commit=pending. [rationale:risk-control] Preview validada ao vivo: disponível, read-only, e bloqueia sem readiness verde.",
       "verification": "VER-BUD-615"
+    },
+    {
+      "id": "TASK-BUD-342",
+      "description": "[P1] Live-validar caminho verde prepare-one-slice da preview com foco fresco.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-341"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar foco local-safe fresco com validação conhecida de smoke/readiness.",
+        "Escrever checkpoint fresco sem blockers reais antes da preview.",
+        "Executar context_watch_one_slice_canary_preview e confirmar decision=prepare-one-slice, prepare=yes, stop=yes, oneSliceOnly=yes, authorization=none.",
+        "Confirmar que isso continua preview read-only e não executa/stageia/commita/fecha task/checkpoint automaticamente.",
+        "Registrar evidência live; fechar task explicitamente por board_task_complete e commit manual limitado ao board/handoff."
+      ],
+      "notes": "[rationale:risk-control] Depois de validar fail-closed, precisamos provar o caminho verde da preview sob condições locais medidas e frescas, sem transformar prepare=yes em execução.\n[2026-04-30T11:08:00Z] slice=1 focus=TASK-BUD-342 gate=live-preview-prepare-one-slice+readiness-ready commit=pending prepare=yes stop=yes authorization=none. [rationale:risk-control] Caminho verde da preview validado sem execução automática.",
+      "verification": "VER-BUD-616"
     }
   ]
 }
