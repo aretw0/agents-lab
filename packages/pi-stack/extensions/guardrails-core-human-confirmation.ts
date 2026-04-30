@@ -82,6 +82,27 @@ export type TrustedHumanConfirmationAuditEnvelope = {
   };
 };
 
+export type TrustedHumanConfirmationUiDecisionInput = HumanConfirmationActionFingerprint & {
+  confirmed: boolean;
+  nowIso: string;
+  ttlMs?: number;
+  origin?: TrustedHumanConfirmationOrigin;
+  evidenceId?: string;
+};
+
+export type TrustedHumanConfirmationUiDecisionResult = {
+  decision: "declined" | "recorded" | "invalid";
+  authorization: "none";
+  dispatchAllowed: false;
+  canOverrideMonitorBlock: false;
+  reasons: string[];
+  evidence?: TrustedHumanConfirmationEvidence;
+  envelope?: TrustedHumanConfirmationAuditEnvelope;
+  summary: string;
+};
+
+const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
+
 function truncateValue(value: string | undefined, max = 160): string | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
   return value.length > max ? `${value.slice(0, max)}…` : value;
@@ -93,6 +114,29 @@ function normalizeComparable(value: string | undefined): string {
 
 function sameOptionalField(a: string | undefined, b: string | undefined): boolean {
   return normalizeComparable(a) === normalizeComparable(b);
+}
+
+function addMsIso(nowIso: string, ttlMs: number): string | undefined {
+  const now = Date.parse(nowIso);
+  if (!Number.isFinite(now) || !Number.isFinite(ttlMs) || ttlMs <= 0) return undefined;
+  return new Date(now + ttlMs).toISOString();
+}
+
+function stableEvidenceId(input: TrustedHumanConfirmationUiDecisionInput): string {
+  const raw = [
+    input.origin ?? "runtime-ui-confirm",
+    input.actionKind,
+    normalizeComparable(input.toolName),
+    normalizeComparable(input.path),
+    normalizeComparable(input.scope),
+    normalizeComparable(input.payloadHash),
+    input.nowIso,
+  ].join("|");
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+  }
+  return `confirm-${Math.abs(hash).toString(36)}`;
 }
 
 function isExpired(expiresAtIso: string, nowIso: string): boolean {
@@ -252,6 +296,60 @@ export function buildTrustedHumanConfirmationAuditEnvelope(
       canOverrideMonitorBlock: false,
       authorization: "none",
     },
+  };
+}
+
+export function recordTrustedHumanConfirmationUiDecision(
+  input: TrustedHumanConfirmationUiDecisionInput,
+): TrustedHumanConfirmationUiDecisionResult {
+  if (!input.confirmed) {
+    return {
+      decision: "declined",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons: ["ui-confirmation-declined"],
+      summary: "human-confirmation-ui: decision=declined dispatch=no override=no reasons=ui-confirmation-declined authorization=none",
+    };
+  }
+
+  const ttlMs = input.ttlMs ?? DEFAULT_CONFIRMATION_TTL_MS;
+  const expiresAtIso = addMsIso(input.nowIso, ttlMs);
+  if (!expiresAtIso) {
+    return {
+      decision: "invalid",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      reasons: ["invalid-confirmation-ttl-or-timestamp"],
+      summary: "human-confirmation-ui: decision=invalid dispatch=no override=no reasons=invalid-confirmation-ttl-or-timestamp authorization=none",
+    };
+  }
+
+  const evidence: TrustedHumanConfirmationEvidence = {
+    id: input.evidenceId ?? stableEvidenceId(input),
+    origin: input.origin ?? "runtime-ui-confirm",
+    trusted: true,
+    actionKind: input.actionKind,
+    toolName: input.toolName,
+    path: input.path,
+    scope: input.scope,
+    payloadHash: input.payloadHash,
+    createdAtIso: input.nowIso,
+    expiresAtIso,
+  };
+  const pending: PendingHumanConfirmedAction = { ...input, nowIso: input.nowIso };
+  const match = resolveHumanConfirmationEvidenceMatch(evidence, pending);
+  const envelope = buildTrustedHumanConfirmationAuditEnvelope(evidence, match);
+  return {
+    decision: "recorded",
+    authorization: "none",
+    dispatchAllowed: false,
+    canOverrideMonitorBlock: false,
+    reasons: ["trusted-ui-confirmation-recorded", "single-use-evidence-created"],
+    evidence,
+    envelope,
+    summary: `human-confirmation-ui: decision=recorded dispatch=no override=no reasons=trusted-ui-confirmation-recorded|single-use-evidence-created authorization=none`,
   };
 }
 

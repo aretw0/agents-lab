@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTrustedHumanConfirmationAuditEnvelope,
   consumeTrustedHumanConfirmationEvidence,
+  recordTrustedHumanConfirmationUiDecision,
   resolveHumanConfirmationAuditPlan,
   resolveHumanConfirmationEvidenceMatch,
   type PendingHumanConfirmedAction,
@@ -151,5 +152,43 @@ describe("human confirmation audit plan", () => {
       canOverrideMonitorBlock: false,
       authorization: "none",
     });
+  });
+
+  it("records a trusted UI decision as short-lived single-use evidence", () => {
+    const recorded = recordTrustedHumanConfirmationUiDecision({
+      ...pendingDelete,
+      confirmed: true,
+      ttlMs: 10_000,
+      evidenceId: "confirm-ui-1",
+    });
+
+    expect(recorded.decision).toBe("recorded");
+    expect(recorded.dispatchAllowed).toBe(false);
+    expect(recorded.canOverrideMonitorBlock).toBe(false);
+    expect(recorded.evidence).toMatchObject({
+      id: "confirm-ui-1",
+      origin: "runtime-ui-confirm",
+      trusted: true,
+      expiresAtIso: "2026-04-30T22:00:10.000Z",
+    });
+    expect(recorded.envelope?.customType).toBe("human-confirmation-evidence");
+    expect(recorded.envelope?.display).toBe(false);
+  });
+
+  it("does not create evidence for declined or invalid UI decisions", () => {
+    const declined = recordTrustedHumanConfirmationUiDecision({
+      ...pendingDelete,
+      confirmed: false,
+    });
+    expect(declined.decision).toBe("declined");
+    expect(declined.evidence).toBeUndefined();
+
+    const invalid = recordTrustedHumanConfirmationUiDecision({
+      ...pendingDelete,
+      confirmed: true,
+      ttlMs: 0,
+    });
+    expect(invalid.decision).toBe("invalid");
+    expect(invalid.evidence).toBeUndefined();
   });
 });

@@ -8628,6 +8628,15 @@
       "method": "audit-envelope-smoke",
       "timestamp": "2026-04-30T22:02:00.611Z",
       "evidence": "Second bounded slice for TASK-BUD-390 added buildTrustedHumanConfirmationAuditEnvelope. It creates bounded customType=human-confirmation-evidence envelopes with display=false and details carrying evidenceId, decision, origin, exact action fingerprint, reasons, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. This provides a future monitor/custom-message/audit-entry payload shape without granting permission. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-core-hardening-reexport.test.ts => 9 passed. Docs sync/check ok. Remaining: actual runtime wiring that emits/consumes this envelope from trusted TUI confirmation path."
+    },
+    {
+      "id": "VER-BUD-712",
+      "target": "TASK-BUD-390",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ui-decision-evidence-contract-smoke",
+      "timestamp": "2026-04-30T22:06:03.455Z",
+      "evidence": "Third bounded slice for TASK-BUD-390 added recordTrustedHumanConfirmationUiDecision. It converts a trusted UI decision into short-lived evidence+bounded envelope only when confirmed=true and ttl/now are valid; declined/invalid decisions create no evidence. The produced evidence uses origin=runtime-ui-confirm by default, trusted=true, exact action fingerprint, TTL expiry, and still dispatchAllowed=false/canOverrideMonitorBlock=false/authorization=none. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-core-hardening-reexport.test.ts => 11 passed. Docs sync/check ok. Remaining: actual integration hook that calls this helper from the trusted TUI confirm path and exposes envelope to monitor/guard context."
     }
   ]
 }
