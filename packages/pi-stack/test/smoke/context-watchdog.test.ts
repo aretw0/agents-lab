@@ -1168,6 +1168,20 @@ describe("context-watchdog", () => {
 				handoffFreshness: "fresh",
 			}))
 				.toBe("context-watch: level=compact percent=91 action=compact-now autoCompact=checkpoint-evidence-missing trigger=no retry=yes calm=no checkpoint=missing operator=ask handoff=fresh");
+			expect(formatContextWatchCommandStatusSummary({
+				level: "compact",
+				percent: 72,
+				action: "compact-now",
+				autoCompactDecision: "trigger",
+				autoCompactTrigger: true,
+				retryScheduled: false,
+				checkpointEvidenceReady: false,
+				operatorActionKind: "checkpoint-compact",
+				deterministicStopReason: "compact-checkpoint-required",
+				deterministicStopAction: "persist-checkpoint-and-compact",
+				handoffPath: ".project/handoff.json",
+			}))
+				.toBe("context-watch: level=compact percent=72 action=compact-now autoCompact=trigger trigger=yes retry=no checkpoint=missing operator=checkpoint-compact stop=compact-checkpoint-required next=persist-checkpoint-and-compact handoff=.project/handoff.json");
 			expect(formatContextWatchDeterministicStopSummary({
 				required: true,
 				reason: "compact-checkpoint-required",

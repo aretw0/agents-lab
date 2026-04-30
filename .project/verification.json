@@ -7449,6 +7449,15 @@
       "method": "test+checkpoint",
       "timestamp": "2026-04-30T05:10:37.611Z",
       "evidence": "Hardened local_continuity_audit expectedPaths. The audit surface now includes canonical local bookkeeping paths `.project/tasks.json`, `.project/verification.json`, and `.project/handoff.json` in expectedPaths so normal board/verification/handoff updates do not cause git-state:invalid. Protected scopes remain excluded from automatic expected paths: `.pi/settings.json`, `.obsidian`, and `.github` are not auto-expected. Added smoke with a temporary git repo proving changed bookkeeping paths produce observed git evidence `git=expected changed=3` and the visible summary does not include `git-state:invalid`. Validation: focal surface smoke passed 5/5; cmd.exe /c npm run test:monitor:smoke --silent passed 257/257 across 32 files. Preventive checkpoint was written after auto-compact warning concern: context-watch-checkpoint ok=yes task=TASK-BUD-306. authorization=none and read-only/advisory behavior unchanged; no scheduler, self-reload, loop, remote, or auto-continuation activated. [rationale:risk-control] Normal local bookkeeping should not be misclassified as unexpected drift, while protected scopes remain explicit risk."
+    },
+    {
+      "id": "VER-BUD-581",
+      "target": "TASK-BUD-307",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:13:59.980Z",
+      "evidence": "Compacted/deduplicated context-watch compact-checkpoint-required warnings. The passive steering notification now inlines compact-checkpoint-required stop details into the single context-watch summary instead of appending a second context-watch-stop line for the same decision. The separate deterministic-stop warning is suppressed for compact-checkpoint-required because the steering summary carries the same required action. Auto-compact triggered notification is demoted to info and explicitly says checkpoint=ready, avoiding an extra warning that conflicts with checkpoint=missing. Added smoke coverage for the compact one-line format: `context-watch: level=compact percent=72 action=compact-now autoCompact=trigger trigger=yes retry=no checkpoint=missing operator=checkpoint-compact stop=compact-checkpoint-required next=persist-checkpoint-and-compact handoff=.project/handoff.json`. Policy/thresholds unchanged; fail-closed checkpoint gate unchanged. Validation: context-watchdog focal smoke passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 257/257 across 32 files. [rationale:risk-control] Compact pressure warnings now preserve required action without triple-reporting the same checkpoint requirement."
     }
   ]
 }

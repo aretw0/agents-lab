@@ -7349,6 +7349,33 @@
       ],
       "notes": "Criado após TASK-BUD-305. [rationale:risk-control] O audit local deve distinguir bookkeeping normal da própria fatia de drift inesperado, sem mascarar escopos protegidos.\n[2026-04-30T05:08:35Z] slice=1 focus=TASK-BUD-306 gate=test:monitor:smoke-257/257 checkpoint=ok commit=pending drift=no next=commit. [rationale:risk-control] Bookkeeping canônico agora é expectedPaths sem mascarar escopos protegidos.",
       "verification": "VER-BUD-580"
+    },
+    {
+      "id": "TASK-BUD-307",
+      "description": "[P1] Compactar e deduplicar warnings de context-watch auto-compact/checkpoint-required.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-306"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Quando compact/checkpoint-required ocorrer, o warning visível deve evitar três mensagens redundantes para a mesma decisão.",
+        "Preservar a informação essencial: nível/percentual, checkpoint missing/ready, ação recomendada, operador e handoff path quando aplicável.",
+        "Não alterar thresholds/política de auto-compact; mudança deve ser apenas apresentação/deduplicação.",
+        "Adicionar/ajustar smoke para formato compacto de compact-checkpoint-required.",
+        "Manter checkpoint gate fail-closed: compact não deve ocorrer sem checkpoint fresco.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após auto-resume com foco stale. [rationale:risk-control] Warning bloated no momento de compactação aumenta pressão de contexto e pode confundir checkpoint missing específico da decisão com ausência total de handoff.\n[2026-04-30T05:13:47Z] slice=1 focus=TASK-BUD-307 gate=test:monitor:smoke-257/257 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Warning de compact/checkpoint-required deduplicado sem alterar gate/política.",
+      "verification": "VER-BUD-581"
     }
   ]
 }

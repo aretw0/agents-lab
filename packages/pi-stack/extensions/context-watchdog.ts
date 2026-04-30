@@ -804,6 +804,9 @@ export function formatContextWatchCommandStatusSummary(input: {
 	checkpointEvidenceReady?: boolean;
 	operatorActionKind?: string;
 	handoffFreshness?: HandoffFreshnessLabel;
+	deterministicStopReason?: ContextWatchDeterministicStopReason;
+	deterministicStopAction?: string;
+	handoffPath?: string;
 }): string {
 	return [
 		"context-watch:",
@@ -816,7 +819,9 @@ export function formatContextWatchCommandStatusSummary(input: {
 		input.calmCloseReady !== undefined ? `calm=${input.calmCloseReady ? "ready" : "no"}` : undefined,
 		input.checkpointEvidenceReady !== undefined ? `checkpoint=${input.checkpointEvidenceReady ? "ready" : "missing"}` : undefined,
 		input.operatorActionKind ? `operator=${input.operatorActionKind}` : undefined,
-		input.handoffFreshness ? `handoff=${input.handoffFreshness}` : undefined,
+		input.deterministicStopReason && input.deterministicStopReason !== "none" ? `stop=${input.deterministicStopReason}` : undefined,
+		input.deterministicStopAction && input.deterministicStopAction !== "none" ? `next=${input.deterministicStopAction}` : undefined,
+		input.handoffPath ? `handoff=${input.handoffPath}` : input.handoffFreshness ? `handoff=${input.handoffFreshness}` : undefined,
 	].filter(Boolean).join(" ");
 }
 
@@ -1173,7 +1178,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					operatorReasons: operatorSignal.reasons,
 				},
 			);
-			if (config.notify) {
+			if (config.notify && deterministicStop.reason !== "compact-checkpoint-required") {
 				ctx.ui.notify(
 					formatContextWatchDeterministicStopSummary({
 						required: deterministicStop.required,
@@ -1261,7 +1266,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoCompactInFlight = true;
 			lastAutoCompactAt = now;
 			lastAutoCompactTriggerAt = now;
-			ctx.ui.notify("context-watch: autoCompact=triggered action=compact-now", "warning");
+			ctx.ui.notify("context-watch: autoCompact=triggered action=compact-now checkpoint=ready", "info");
 			ctx.compact({
 				onComplete: () => {
 					autoCompactInFlight = false;
@@ -1386,6 +1391,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			? (handoffPath ?? persistContextWatchHandoffEvent(ctx, assessment, reason))
 			: handoffPath;
 		const persistedRelPath = persistedPath ? path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/") : undefined;
+		const inlineCompactCheckpointStop = deterministicStop.required && deterministicStop.reason === "compact-checkpoint-required";
 		const lines = [
 			formatContextWatchCommandStatusSummary({
 				level: assessment.level,
@@ -1397,15 +1403,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				calmCloseReady: calmCloseSignal.readyForCompact,
 				checkpointEvidenceReady: calmCloseSignal.checkpointEvidenceReady,
 				operatorActionKind: operatorAction.kind,
+				deterministicStopReason: inlineCompactCheckpointStop ? deterministicStop.reason : undefined,
+				deterministicStopAction: inlineCompactCheckpointStop ? deterministicStop.action : undefined,
+				handoffPath: inlineCompactCheckpointStop ? persistedRelPath : undefined,
 			}),
-			formatContextWatchDeterministicStopSummary({
+			inlineCompactCheckpointStop ? undefined : formatContextWatchDeterministicStopSummary({
 				required: deterministicStop.required,
 				reason: deterministicStop.reason,
 				action: deterministicStop.action,
 				operatorActionKind: operatorAction.kind,
 				handoffPath: persistedRelPath,
 			}),
-		];
+		].filter(Boolean);
 		const signalAtIso = new Date(now).toISOString();
 		lastSteeringSignal = {
 			atIso: signalAtIso,
