@@ -7494,6 +7494,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:31:17.015Z",
       "evidence": "Added read-only `context_watch_auto_resume_preview` tool to avoid ad hoc auto-resume preview scripts. The tool accepts zero parameters, reads `.project/handoff.json` and local `.project/tasks.json` statuses, uses the same buildAutoResumePromptEnvelopeFromHandoff path as runtime auto-resume, and returns compact summary/details with focusTasks, staleFocus, diagnosticsSummary, effect=none, mode=read-only-preview, authorization=none. It never dispatches compact/resume/scheduler/self-reload/remote/automation. Added smoke proving completed TASK-BUD-309 is filtered to focusTasks=none-listed with staleFocus=1 and no caller-supplied taskStatusById parameter. Validation: context-watchdog focal smoke passed 44/44; cmd.exe /c npm run test:monitor:smoke --silent passed 259/259 across 32 files. [rationale:risk-control] A bounded read-only primitive replaces repeated scripts while preserving no operational authorization."
+    },
+    {
+      "id": "VER-BUD-586",
+      "target": "TASK-BUD-312",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T05:32:45.372Z",
+      "evidence": "Live runtime after operator reload: context_watch_auto_resume_preview returned `context-watch-auto-resume-preview: focusTasks=none-listed staleFocus=1 diagnostics=tasks(in=0,listed=0,dedup=0,trunc=0,drop=0);staleFocus=1;blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=3,listed=2,dedup=0,trunc=1,drop=1);global=ok`. This confirms the loaded tool uses the read-only preview surface, derives local statuses, does not reintroduce completed stale focus, and exposes compact diagnostics. Focal context-watchdog smoke passed 44/44. No compact, resume, scheduler, self-reload, remote, or auto-continuation was dispatched. [rationale:risk-control] Live validation proves the bounded preview primitive can replace ad hoc auto-resume preview scripts without operational authorization."
     }
   ]
 }

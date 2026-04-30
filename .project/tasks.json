@@ -7479,6 +7479,29 @@
       ],
       "notes": "Criado após reload de TASK-BUD-310. [rationale:risk-control] Preview read-only evita scripts ad hoc para validar auto-resume e torna a trust surface auditável sem conceder autorização operacional.\n[2026-04-30T05:31:04Z] slice=1 focus=TASK-BUD-311 gate=test:monitor:smoke-259/259 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Auto-resume preview agora é primitiva read-only zero-param em vez de script ad hoc.",
       "verification": "VER-BUD-585"
+    },
+    {
+      "id": "TASK-BUD-312",
+      "description": "[P1] Live-validar context_watch_auto_resume_preview após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-311"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar context_watch_auto_resume_preview no runtime carregado após reload.",
+        "Confirmar que a tool é read-only e retorna effect=none/mode=read-only-preview/authorization=none em details.",
+        "Confirmar que o summary expõe focusTasks/staleFocus/diagnostics sem disparar compact/resume/scheduler/self-reload/remoto.",
+        "Confirmar que stale focus não é reintroduzido quando current_tasks aponta para task completed.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload de TASK-BUD-311. [rationale:risk-control] A nova primitiva read-only precisa ser validada no runtime carregado antes de substituir previews ad hoc.\n[2026-04-30T05:32:35Z] slice=1 focus=TASK-BUD-312 gate=live-context_watch_auto_resume_preview+context-watchdog-smoke-44/44 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Preview read-only validado ao vivo após reload.",
+      "verification": "VER-BUD-586"
     }
   ]
 }
