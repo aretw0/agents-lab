@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-04-30T11:18:48.707Z",
-  "context": "TASK-BUD-346 completed. Live-validated context_watch_one_slice_canary_preview after reload of the decisionPacket-enabled implementation. With [snip] ive runtime remains authorization=none. [truncated:+578 chars]",
+  "timestamp": "2026-04-30T11:20:27.088Z",
+  "context": "TASK-BUD-347 completed. context_watch_one_slice_canary_preview summary now includes compact decision packet fields: packet=<decision> and dis [snip] ore live validation of the new summary. [truncated:+310 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "continue next local-safe slice: optionally expose a compact decision-packet summary field in p [snip] ils are not visible enough [truncated:+26 chars]",
-    "do not implement execution path without explicit operator authorization and stop/rollback contract"
+    "commit summary/board/handoff evidence",
+    "reload before live-validating packet=ready-for-human-decision dispatch=no in context_watch_one [snip] lice_canary_preview output [truncated:+2 chars]",
+    "after reload, create a fresh local-safe focus and confirm compact output shows dispatch=no"
   ],
-  "blockers": [],
+  "blockers": [
+    "Runtime reload needed before compact decision packet summary appears live."
+  ],
   "recent_validation": [
-    "live context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes o [snip] ce-only authorization=none [truncated:+49 chars]",
-    "live context_watch_continuation_readiness: ready=yes focus=TASK-BUD-346 audit=ready reasons=al [snip] Focus=0 authorization=none [truncated:+45 chars]",
-    "git status after preview: only M .project/handoff.json and M .project/tasks.json from explicit workflow steps"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 267/267 across 32 files",
+    "green smoke summary includes packet=ready-for-human-decision dispatch=no"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T11:18:48.707Z",
+    "generatedAtIso": "2026-04-30T11:20:27.088Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; preview with decision packet is live and still non-dispatching.",
+    "recommendation": "Commit evidence; reload before live validation of the new compact summary.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T11:18:48.707Z",
+      "atIso": "2026-04-30T11:20:27.088Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; preview with decision packet is live and still non-dispatching."
+      "recommendation": "Commit evidence; reload before live validation of the new compact summary."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-346"
+    "TASK-BUD-347"
   ]
 }

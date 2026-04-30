@@ -1422,7 +1422,7 @@ describe("context-watchdog", () => {
 			expect(schemaText).not.toContain("dispatch");
 			const result = await tool.execute("tc-one-slice-preview", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
-			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none");
+			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-preview",
@@ -1453,7 +1453,9 @@ describe("context-watchdog", () => {
 				mustStopAfterSlice: true,
 				oneSliceOnly: true,
 				reasons: ["protected-scope"],
-			})).toBe("context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes reasons=protected-scope authorization=none");
+				decisionPacketDecision: "blocked",
+				dispatchAllowed: false,
+			})).toBe("context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=protected-scope authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

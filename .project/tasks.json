@@ -8381,6 +8381,33 @@
       ],
       "notes": "[rationale:risk-control] Depois do reload, precisamos provar que a preview com decisionPacket continua read-only em runtime e que o caminho verde não aciona dispatch.\n[2026-04-30T11:20:00Z] slice=1 focus=TASK-BUD-346 gate=live-preview-prepare-one-slice+readiness-ready+git-status-expected commit=pending authorization=none dispatch=none. [rationale:risk-control] Preview com decisionPacket validada após reload sem automação.",
       "verification": "VER-BUD-620"
+    },
+    {
+      "id": "TASK-BUD-347",
+      "description": "[P1] Mostrar decision packet compacto no summary da preview one-slice.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-346"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar ao summary de context_watch_one_slice_canary_preview campos compactos do decisionPacket, incluindo packet=<decision> e dispatch=no.",
+        "Manter authorization=none, activation=none e sem execução.",
+        "Atualizar smoke do cenário verde para esperar packet=ready-for-human-decision dispatch=no.",
+        "Atualizar formatter smoke do cenário blocked para packet=blocked dispatch=no.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload."
+      ],
+      "notes": "[rationale:risk-control] Como details do runtime nem sempre aparecem no transcript, o summary precisa expor que o decision packet permanece dispatch=no sem autorizar execução.\n[2026-04-30T11:20:01Z] slice=1 focus=TASK-BUD-347 gate=context-watchdog-48/48+test:monitor:smoke-267/267 commit=pending summary=packet+dispatch reload-needed=yes. [rationale:risk-control] Summary agora expõe dispatch=no sem executar nada.",
+      "verification": "VER-BUD-621"
     }
   ]
 }

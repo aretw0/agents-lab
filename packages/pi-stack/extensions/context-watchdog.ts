@@ -877,6 +877,8 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
 	mustStopAfterSlice: boolean;
 	oneSliceOnly: boolean;
 	reasons: string[];
+	decisionPacketDecision?: string;
+	dispatchAllowed?: boolean;
 }): string {
 	return [
 		"context-watch-one-slice-canary-preview:",
@@ -884,6 +886,8 @@ export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
 		`prepare=${input.canPrepareSlice ? "yes" : "no"}`,
 		`stop=${input.mustStopAfterSlice ? "yes" : "no"}`,
 		`oneSliceOnly=${input.oneSliceOnly ? "yes" : "no"}`,
+		input.decisionPacketDecision ? `packet=${input.decisionPacketDecision}` : undefined,
+		input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
 		input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
 		"authorization=none",
 	].filter(Boolean).join(" ");
@@ -1969,7 +1973,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
 				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
 			});
-			const summary = formatContextWatchOneSliceCanaryPreviewSummary(plan);
+			const summary = formatContextWatchOneSliceCanaryPreviewSummary({
+				...plan,
+				decisionPacketDecision: decisionPacket.decision,
+				dispatchAllowed: decisionPacket.dispatchAllowed,
+			});
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {

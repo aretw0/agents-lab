@@ -7809,6 +7809,15 @@
       "method": "live-tool+inspection",
       "timestamp": "2026-04-30T11:18:22.457Z",
       "evidence": "After reload, live runtime validated context_watch_one_slice_canary_preview with decisionPacket-enabled implementation on a fresh local-safe focus. Preflight checkpoint was written explicitly, then context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes reasons=readiness-green|one-slice-only authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-346 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only expected explicit board/handoff changes (`.project/handoff.json`, `.project/tasks.json`), confirming the preview did not stage/commit/close/checkpoint/dispatch anything by itself. The dispatch decision packet details were introduced and covered by smoke in TASK-BUD-345 with dispatchAllowed=false/requiresHumanDecision=true; live summary confirms the loaded runtime stays authorization=none and read-only. [rationale:risk-control] The decision-packet preview is live and green, but still evidence-only and non-dispatching."
+    },
+    {
+      "id": "VER-BUD-621",
+      "target": "TASK-BUD-347",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T11:20:16.390Z",
+      "evidence": "Added compact decision packet fields to context_watch_one_slice_canary_preview summary so live transcripts show packet and dispatch state without requiring details expansion. Summary now includes `packet=<decision>` and `dispatch=yes|no` when decisionPacket is present. Green smoke expected summary is now `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`; blocked formatter smoke includes `packet=blocked dispatch=no`. This preserves authorization=none, does not add execute/dispatch parameters, and does not dispatch staging/commit/board/checkpoint/scheduler/remote/self-reload/loop. Focal context-watchdog passed 48/48; full monitor smoke passed 267/267. Runtime summary behavior changed, so live validation requires reload. [rationale:risk-control] The operator can now see dispatch=no in the compact output, reducing ambiguity when details are not visible."
     }
   ]
 }
