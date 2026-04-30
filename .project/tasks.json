@@ -6367,6 +6367,32 @@
       ],
       "notes": "Criado após reload como último gate grande do agregador measured puro. [rationale:risk-control] next-local-safe deve ser derivado de uma candidata estruturada, não de boolean manual.\n[2026-04-30T02:53:06Z] slice=1 focus=TASK-BUD-269 gate=test:monitor:smoke-236/236 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured next-local-safe derivado de candidata estruturada, sem runtime loop.",
       "verification": "VER-BUD-543"
+    },
+    {
+      "id": "TASK-BUD-270",
+      "description": "[P1] Compactar warning de auto-compact/context watch para não poluir a retomada.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-269"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Identificar a mensagem/warning bloated emitida no caminho de auto-compact/context watch.",
+        "Reduzir o conteúdo visível para uma linha compacta com detalhes preservados apenas no payload estruturado quando aplicável.",
+        "Não alterar thresholds/política de auto-compact nesta slice, apenas ergonomia do warning.",
+        "Teste focal cobre o formato compacto ou ausência de payload excessivo.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após operador observar que a auto-compactação foi agressiva novamente e que o warning está bloated. Checkpoint TASK-BUD-269 foi confirmado saudável em .project/handoff.json. [rationale:risk-control] Avisos de contexto devem preservar progresso sem inundar a retomada.\n[2026-04-30T02:57:51Z] slice=1 focus=TASK-BUD-270 gate=test:monitor:smoke-236/236 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Warning visível compactado; checkpoint anterior confirmado saudável.",
+      "verification": "VER-BUD-544"
     }
   ]
 }

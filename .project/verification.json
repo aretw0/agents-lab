@@ -7116,6 +7116,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:53:26.921Z",
       "evidence": "Added pure resolveNextLocalSafeMeasuredSignal helper. It derives next-local-safe from a structured local candidate without accepting a manual ok boolean. It requires taskId, local scope, small estimatedFiles (<=3), git reversibility, known validation, no product decision, none/low risk, and no protected paths. It returns compact bounded evidence for ok and representative failure reasons. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 21/21; cmd.exe /c npm run test:monitor:smoke --silent passed 236/236 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] The final major nudge-free measured gate now derives from structured candidate facts instead of a spoofable boolean."
+    },
+    {
+      "id": "VER-BUD-544",
+      "target": "TASK-BUD-270",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:58:08.183Z",
+      "evidence": "Confirmed TASK-BUD-269 checkpoint was healthy in .project/handoff.json at 2026-04-30T02:53:59.064Z with commit e249bf2 and validation evidence. Compactified visible /context-watch status notification by adding formatContextWatchCommandStatusSummary and replacing the multi-line diagnostic warning with a compact summary plus recommendation and details hint; structured context_watch_status tool details remain available. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 236/236 across 32 files. No threshold/policy change, no runtime loop/scheduler activation. [rationale:risk-control] Context warnings should preserve progress without bloating resumptions or operator attention."
     }
   ]
 }

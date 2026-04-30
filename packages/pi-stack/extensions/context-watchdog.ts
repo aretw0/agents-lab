@@ -793,6 +793,33 @@ export function formatContextWatchStatusToolSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function formatContextWatchCommandStatusSummary(input: {
+	level: ContextWatchdogLevel;
+	percent?: number;
+	action?: string;
+	autoCompactDecision?: string;
+	autoCompactTrigger?: boolean;
+	retryScheduled?: boolean;
+	calmCloseReady?: boolean;
+	checkpointEvidenceReady?: boolean;
+	operatorActionKind?: string;
+	handoffFreshness?: HandoffFreshnessLabel;
+}): string {
+	return [
+		"context-watch:",
+		`level=${input.level}`,
+		input.percent !== undefined ? `percent=${Math.floor(Number(input.percent))}` : undefined,
+		input.action ? `action=${input.action}` : undefined,
+		input.autoCompactDecision ? `autoCompact=${input.autoCompactDecision}` : undefined,
+		input.autoCompactTrigger !== undefined ? `trigger=${input.autoCompactTrigger ? "yes" : "no"}` : undefined,
+		input.retryScheduled !== undefined ? `retry=${input.retryScheduled ? "yes" : "no"}` : undefined,
+		input.calmCloseReady !== undefined ? `calm=${input.calmCloseReady ? "ready" : "no"}` : undefined,
+		input.checkpointEvidenceReady !== undefined ? `checkpoint=${input.checkpointEvidenceReady ? "ready" : "missing"}` : undefined,
+		input.operatorActionKind ? `operator=${input.operatorActionKind}` : undefined,
+		input.handoffFreshness ? `handoff=${input.handoffFreshness}` : undefined,
+	].filter(Boolean).join(" ");
+}
+
 export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
@@ -1794,30 +1821,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			});
 			ctx.ui.notify(
 				[
-					formatContextWatchStatus(assessment),
-					`action: ${assessment.action}`,
-					assessment.recommendation,
-					`steering-status: ${formatContextWatchSteeringStatus(assessment)}`,
-					`steering-thresholds: modelFrom=${config.modelSteeringFromLevel} userNotifyFrom=${config.userNotifyFromLevel} userNotifyEnabled=${config.notify ? "yes" : "no"}`,
-					`auto-compact: decision=${autoCompact.decision.reason} trigger=${autoCompact.decision.trigger ? "yes" : "no"} retryRecommended=${autoCompact.retryRecommended ? "yes" : "no"} retryDelayMs=${autoCompact.retryDelayMs ?? "n/a"} retryScheduled=${autoCompact.retryScheduled ? "yes" : "no"} retryInMs=${autoCompact.retryInMs ?? "n/a"}`,
-					`calm-close: ready=${autoCompact.calmCloseReady ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.checkpointEvidenceReady ? "yes" : "no"} deferCount=${autoCompact.deferCount}/${autoCompact.deferThreshold} antiParalysis=${autoCompact.antiParalysisTriggered ? "yes" : "no"} dispatch=${autoCompact.antiParalysisDispatchReason} graceRemainingMs=${autoCompact.antiParalysisGraceRemainingMs ?? "n/a"} cooldownRemainingMs=${autoCompact.antiParalysisCooldownRemainingMs ?? "n/a"} notifyCount=${autoCompact.antiParalysisNotifyCountInWindow}/${autoCompact.antiParalysisMaxNotifiesPerWindow}`,
-					autoCompact.calmCloseRecommendation ? `calm-close recommendation: ${autoCompact.calmCloseRecommendation}` : "",
-					`auto-resume: enabled=${autoCompact.autoResumeEnabled ? "yes" : "no"} ready=${autoCompact.autoResumeReady ? "yes" : "no"} cooldownMs=${autoCompact.autoResumeCooldownMs} freshMaxAgeMs=${config.handoffFreshMaxAgeMs}`,
-					`auto-resume-last: reason=${autoCompact.autoResumeLastDecisionReason} summary=${autoCompact.autoResumeLastDecisionSummary ?? "n/a"} dispatched=${autoCompact.autoResumeLastDispatched ? "yes" : "no"} reloadRequired=${autoCompact.autoResumeLastReloadRequired ? "yes" : "no"} checkpointEvidenceReady=${autoCompact.autoResumeLastCheckpointEvidenceReady ? "yes" : "no"} at=${autoCompact.autoResumeLastDecisionAtIso ?? "n/a"}`,
-					autoCompact.autoResumeLastDecisionHint ? `auto-resume-last hint: ${autoCompact.autoResumeLastDecisionHint}` : "",
-					`auto-resume-last-prompt: ${autoCompact.autoResumeLastPromptDiagnosticsSummary ?? "none"}`,
-					`steering-last: ${autoCompact.steeringLastSignalSummary ?? "none"}`,
-					`operator-signal: humanActionRequired=${operatorSignal.humanActionRequired ? "yes" : "no"} reloadRequired=${operatorSignal.reloadRequired ? "yes" : "no"} reasons=${operatorSignal.reasons.length > 0 ? operatorSignal.reasons.join(",") : "none"}`,
-					`deterministic-stop: required=${deterministicStop.required ? "yes" : "no"} reason=${deterministicStop.reason} action=${deterministicStop.action}`,
-					deterministicStopHint ? `deterministic-stop hint: ${deterministicStopHint}` : "",
-					`operator-action: kind=${operatorAction.kind} blocking=${operatorAction.blocking ? "yes" : "no"}${operatorAction.commandHint ? ` cmd=${operatorAction.commandHint}` : ""} summary=${operatorAction.summary}`,
-					`operating-cadence: ${operatingCadence.operatingCadence} postResumeRecalibrated=${operatingCadence.postResumeRecalibrated ? "yes" : "no"} reason=${operatingCadence.reason}`,
-					`handoff: ts=${autoCompact.handoffTimestamp ?? "unknown"} freshness=${autoCompact.handoffFreshness.label}${autoCompact.handoffFreshnessAgeSec !== undefined ? ` ageSec=${autoCompact.handoffFreshnessAgeSec}` : ""}`,
-					`handoff-last-event: ${autoCompact.handoffLastEventSummary}${autoCompact.handoffLastEventAgeSec !== undefined ? ` ageSec=${autoCompact.handoffLastEventAgeSec}` : ""}`,
-					`handoff-advice: ${autoCompact.handoffAdvice}`,
-					`handoff-refresh: mode=${autoCompact.handoffRefreshMode} manualRequired=${autoCompact.handoffManualRefreshRequired ? "yes" : "no"}`,
-					`handoff-prep: refreshOnTrigger=${autoCompact.handoffPrepRefreshOnTrigger ? "yes" : "no"} reason=${autoCompact.handoffPrepReason}`,
-					`compact-checkpoint-persist: recommended=${autoCompact.compactCheckpointPersistRecommended ? "yes" : "no"} reason=${autoCompact.compactCheckpointPersistReason}`,
+					formatContextWatchCommandStatusSummary({
+						level: assessment.level,
+						percent: assessment.percent,
+						action: assessment.action,
+						autoCompactDecision: autoCompact.decision.reason,
+						autoCompactTrigger: autoCompact.decision.trigger,
+						retryScheduled: autoCompact.retryScheduled,
+						calmCloseReady: autoCompact.calmCloseReady,
+						checkpointEvidenceReady: autoCompact.checkpointEvidenceReady,
+						operatorActionKind: operatorAction.kind,
+						handoffFreshness: autoCompact.handoffFreshness.label,
+					}),
+					`recommendation=${assessment.recommendation}`,
+					"details=context_watch_status structured payload",
 				].join("\n"),
 				assessment.severity,
 			);

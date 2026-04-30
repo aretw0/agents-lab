@@ -16,6 +16,7 @@ import contextWatchdogExtension, {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
+	formatContextWatchCommandStatusSummary,
 	formatContextWatchSteeringStatus,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
@@ -1153,6 +1154,19 @@ describe("context-watchdog", () => {
 			expect(result.details?.operatorAction).toBeTruthy();
 			expect(formatContextWatchStatusToolSummary({ level: "ok", percent: 14, action: "continue" }))
 				.toBe("context-watch-status: level=ok percent=14 action=continue");
+			expect(formatContextWatchCommandStatusSummary({
+				level: "compact",
+				percent: 91,
+				action: "compact-now",
+				autoCompactDecision: "checkpoint-evidence-missing",
+				autoCompactTrigger: false,
+				retryScheduled: true,
+				calmCloseReady: false,
+				checkpointEvidenceReady: false,
+				operatorActionKind: "ask",
+				handoffFreshness: "fresh",
+			}))
+				.toBe("context-watch: level=compact percent=91 action=compact-now autoCompact=checkpoint-evidence-missing trigger=no retry=yes calm=no checkpoint=missing operator=ask handoff=fresh");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
