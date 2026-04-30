@@ -8691,6 +8691,24 @@
       "method": "upstream-wrapper-signal-plan-smoke",
       "timestamp": "2026-04-30T22:29:52.586Z",
       "evidence": "First bounded slice for TASK-BUD-393 investigated the current safe signal-source boundary. Bounded grep/read showed pi ToolCallEvent exposes toolName/toolCallId/input and no confirmation field; ExtensionContext exposes ui.confirm but not sendMessage in tool_call contexts; behavior monitor custom_messages collector is text-only. Added resolveHumanConfirmationSignalSourcePlan to choose between use-guard-owned-audit-entry, build-wrapper-signal, propose-upstream-tool-call-signal, or blocked. The current direct upstream shape without guard-owned dialog is blocked/needs upstream or wrapper; direct node_modules patch remains prohibited. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 16 passed. Docs sync/check ok."
+    },
+    {
+      "id": "VER-BUD-719",
+      "target": "TASK-BUD-393",
+      "target_type": "task",
+      "status": "passed",
+      "method": "design-boundary-doc",
+      "timestamp": "2026-04-30T22:32:25.677Z",
+      "evidence": "Added docs/primitives/human-confirmation-signal.md to capture the upstream/wrapper signal boundary for destructive confirmations before tool_call. The doc records current bounded evidence: ToolCallEvent has toolName/toolCallId/input but no confirmation field; ExtensionContext in tool_call has ui.confirm but no command-context sendMessage; behavior-monitor custom_messages is text-only for this purpose; direct node_modules mutation is prohibited. It defines required action fingerprint, trusted evidence envelope, acceptable paths (guard-owned dialog, wrapper signal, upstream PR/design) and rejected paths (text parsing, model-written confirmations, stale/consumed evidence, direct node_modules patch, treating decision=match as dispatch). Docs sync/check ok; safe_marker_check doc 5/5 and doctrine link 1/1."
+    },
+    {
+      "id": "VER-BUD-720",
+      "target": "TASK-BUD-393",
+      "target_type": "task",
+      "status": "passed",
+      "method": "signal-source-boundary-closure",
+      "timestamp": "2026-04-30T22:32:52.051Z",
+      "evidence": "TASK-BUD-393 completed as bounded upstream/wrapper signal-source investigation and proposal. Evidence: VER-BUD-718 added resolveHumanConfirmationSignalSourcePlan and tests; VER-BUD-719 added docs/primitives/human-confirmation-signal.md. The resulting boundary: use guard-owned audit entry when first-party guard owns ctx.ui.confirm; use wrapper/upstream signal for destructive confirmations that happen before tool_call; do not patch node_modules directly; never consume text-only custom_messages or model-written confirmation as trusted evidence. Focused tests passed: 16 tests; docs sync/check ok. Created TASK-BUD-394 for actual implementation/PR/wrapper channel selection and live validation."
     }
   ]
 }

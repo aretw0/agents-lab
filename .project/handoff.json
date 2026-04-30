@@ -1,44 +1,45 @@
 {
-  "timestamp": "2026-04-30T22:30:38.355Z",
-  "context": "TASK-BUD-393 first bounded slice complete, task remains in-progress. Added resolveHumanConfirmationSignalSourcePlan and tests/docs. Findings: [snip] de_modules mutation remains prohibited. [truncated:+410 chars]",
-  "current_tasks": [
-    "TASK-BUD-393"
-  ],
+  "timestamp": "2026-04-30T22:33:00.527Z",
+  "context": "Closed TASK-BUD-393 as bounded upstream/wrapper signal-source investigation/proposal. Added docs/primitives/human-confirmation-signal.md and [snip] D-391 remains lateral planned incident. [truncated:+367 chars]",
   "next_actions": [
-    "Commit TASK-BUD-393 signal-source plan slice.",
-    "Given context warn, re-check context before continuing.",
-    "Next slice could draft upstream/wrapper interface doc or close TASK-BUD-393 if design boundary [snip] implementation follow-up. [truncated:+21 chars]"
+    "Commit TASK-BUD-393 doc/closure and TASK-BUD-394 follow-up.",
+    "Context is warn/bounded; re-check gates after commit.",
+    "Next essential task likely TASK-BUD-394; TASK-BUD-391 remains lateral unless explicitly selected."
   ],
   "blockers": [
-    "No actual upstream/wrapper signal implemented yet.",
-    "Behavior monitor custom_messages text-only cannot carry trusted details.",
-    "Strong unattended/loop/scheduler/remote remains blocked."
+    "Actual runtime/upstream implementation remains TASK-BUD-394.",
+    "Strong unattended/loop/scheduler/remote remains blocked.",
+    "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "bounded grep/read of upstream pi extension types and agent-session/runner",
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi- [snip] xport.test.ts => 16 passed [truncated:+128 chars]",
-    "npm run docs:package:sync => ok"
+    "docs:package:sync => ok",
+    "docs:package:check => ok",
+    "safe_marker_check human-confirmation-signal doc => 5/5"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T22:30:38.355Z",
+    "generatedAtIso": "2026-04-30T22:33:00.527Z",
     "level": "warn",
-    "percent": 57,
+    "percent": 60,
     "action": "continue",
-    "recommendation": "commit-signal-source-plan"
+    "recommendation": "commit-signal-source-boundary-closure",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T22:30:38.355Z",
+      "atIso": "2026-04-30T22:33:00.527Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 57,
+      "percent": 60,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-signal-source-plan"
+      "recommendation": "commit-signal-source-boundary-closure"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-393"
   ]
 }

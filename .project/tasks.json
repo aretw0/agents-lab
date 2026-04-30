@@ -9524,7 +9524,7 @@
     {
       "id": "TASK-BUD-393",
       "description": "Follow-up: fornecer sinal runtime/upstream estruturado para confirmações destrutivas antes do tool_call.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-392"
@@ -9542,7 +9542,31 @@
         "Preservar fail-closed quando o sinal não existe, é stale, consumido, mismatched ou spoofable."
       ],
       "milestone": "human-control",
-      "notes": "Follow-up de TASK-BUD-392. O consumo core e plano runtime foram concluídos, mas behavior monitor custom_messages atual é text-only e não basta; confirmações destrutivas upstream antes do tool_call precisam de sinal estruturado via PR/wrapper/guard-owned dialog. [rationale:risk-control] Sem sinal runtime estruturado, aceitar confirmação textual criaria spoofing; com sinal estruturado, podemos reduzir falso bloqueio sem relaxar fail-closed.\n2026-04-30: iniciado após reload. Micro-fatia bounded: investigar ponto upstream/wrapper para sinal estruturado de confirmação destrutiva antes do tool_call, sem mutar node_modules; registrar decisão técnica e testes/core se seguro.\n2026-04-30: primeira fatia validada (VER-BUD-718): resolveHumanConfirmationSignalSourcePlan codifica decisão upstream/wrapper. Evidência bounded: ToolCallEvent não tem confirmation field; ExtensionContext em tool_call não expõe sendMessage; behavior monitor custom_messages é text-only. Caminho seguro: guard-owned audit entry quando o guard possui diálogo, wrapper/sinal upstream quando confirmação destrutiva vem antes do tool_call; sem patch direto em node_modules."
+      "notes": "Follow-up de TASK-BUD-392. O consumo core e plano runtime foram concluídos, mas behavior monitor custom_messages atual é text-only e não basta; confirmações destrutivas upstream antes do tool_call precisam de sinal estruturado via PR/wrapper/guard-owned dialog. [rationale:risk-control] Sem sinal runtime estruturado, aceitar confirmação textual criaria spoofing; com sinal estruturado, podemos reduzir falso bloqueio sem relaxar fail-closed.\n2026-04-30: iniciado após reload. Micro-fatia bounded: investigar ponto upstream/wrapper para sinal estruturado de confirmação destrutiva antes do tool_call, sem mutar node_modules; registrar decisão técnica e testes/core se seguro.\n2026-04-30: primeira fatia validada (VER-BUD-718): resolveHumanConfirmationSignalSourcePlan codifica decisão upstream/wrapper. Evidência bounded: ToolCallEvent não tem confirmation field; ExtensionContext em tool_call não expõe sendMessage; behavior monitor custom_messages é text-only. Caminho seguro: guard-owned audit entry quando o guard possui diálogo, wrapper/sinal upstream quando confirmação destrutiva vem antes do tool_call; sem patch direto em node_modules.\n2026-04-30: concluído como investigação/proposta bounded. Interface de sinal estruturado documentada; core plan implementado/testado; implementação runtime/upstream real movida para TASK-BUD-394 para decisão explícita de canal (PR, wrapper ou guard-owned destructive dialog).",
+      "verification": "VER-BUD-720"
+    },
+    {
+      "id": "TASK-BUD-394",
+      "description": "Implement or upstream PR/wrapper for structured destructive confirmation signal before tool_call.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-393"
+      ],
+      "files": [
+        "docs/primitives/human-confirmation-signal.md",
+        "packages/pi-stack/extensions/guardrails-core-human-confirmation.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts"
+      ],
+      "acceptance_criteria": [
+        "Choose implementation channel explicitly: upstream PR, wrapper, or guard-owned destructive dialog path.",
+        "Expose structured confirmation details to the consuming guard/monitor without relying on text-only custom_messages.",
+        "Validate exact match, TTL, single-use, stale/consumed/mismatched rejection, and no dispatch/override by default.",
+        "Avoid direct mutation of node_modules/@mariozechner/pi-coding-agent.",
+        "Live-validate after reload if a runtime surface changes."
+      ],
+      "milestone": "human-control",
+      "notes": "Follow-up after TASK-BUD-393 design boundary. TASK-BUD-393 identified the safe signal-source choices and documented the interface; this task is for actual implementation or upstream PR/wrapper execution. [rationale:risk-control] Moving from design to runtime signal affects protected/destructive confirmation handling; it must be explicit, tested, and fail-closed."
     }
   ]
 }
