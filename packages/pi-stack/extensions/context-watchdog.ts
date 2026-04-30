@@ -881,6 +881,23 @@ export function formatContextWatchDeterministicStopSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+function applyCheckpointTaskStatusFocus(
+	cwd: string,
+	checkpoint: Record<string, unknown>,
+	taskId: string,
+): void {
+	if (!taskId || taskId === "n/a") return;
+	const taskStatusById = readProjectTaskStatusById(cwd);
+	const status = taskStatusById[taskId] ?? taskStatusById[taskId.toUpperCase()];
+	if (status !== "completed") return;
+	delete checkpoint.current_tasks;
+	checkpoint.completed_tasks = [taskId];
+	const contextWatch = checkpoint.context_watch;
+	if (contextWatch && typeof contextWatch === "object") {
+		(contextWatch as Record<string, unknown>).focus_task_status = "completed";
+	}
+}
+
 export function writeLocalSliceHandoffCheckpoint(
 	cwd: string,
 	input: LocalSliceHandoffCheckpointInput,
@@ -906,6 +923,7 @@ export function writeLocalSliceHandoffCheckpoint(
 			};
 		}
 		const checkpoint = buildLocalSliceHandoffCheckpoint(input);
+		applyCheckpointTaskStatusFocus(cwd, checkpoint, taskId);
 		const budget = assessLocalSliceHandoffBudget(checkpoint, options.maxJsonChars);
 		if (!budget.ok) {
 			return {

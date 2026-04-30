@@ -1315,6 +1315,40 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_checkpoint omits completed task from current focus", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-completed-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-DONE", status: "completed" },
+			] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			const result = await tool.execute(
+				"tc-context-watch-checkpoint-completed",
+				{
+					task_id: "TASK-BUD-DONE",
+					context: "TASK-BUD-DONE completed checkpoint should not become resume focus.",
+					validation: ["completed task checkpoint smoke"],
+					context_level: "ok",
+					context_percent: 14,
+				},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+
+			expect(result.content?.[0]?.text).toBe("context-watch-checkpoint: ok=yes task=TASK-BUD-DONE path=.project/handoff.json");
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.current_tasks).toBeUndefined();
+			expect(written.completed_tasks).toEqual(["TASK-BUD-DONE"]);
+			expect(written.context_watch.focus_task_status).toBe("completed");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_checkpoint tool rejects stale checkpoints without overwriting newer handoff", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-stale-"));
 		try {

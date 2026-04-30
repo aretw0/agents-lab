@@ -7502,6 +7502,34 @@
       ],
       "notes": "Criado após reload de TASK-BUD-311. [rationale:risk-control] A nova primitiva read-only precisa ser validada no runtime carregado antes de substituir previews ad hoc.\n[2026-04-30T05:32:35Z] slice=1 focus=TASK-BUD-312 gate=live-context_watch_auto_resume_preview+context-watchdog-smoke-44/44 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Preview read-only validado ao vivo após reload.",
       "verification": "VER-BUD-586"
+    },
+    {
+      "id": "TASK-BUD-313",
+      "description": "[P1] Evitar que context_watch_checkpoint grave task concluída como current_tasks.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-312"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_checkpoint deve preservar o task_id no summary/evidência, mas não gravar current_tasks quando .project/tasks.json indicar que a task está completed.",
+        "Tasks in-progress/planned continuam podendo ser gravadas em current_tasks.",
+        "Quando task_id completed for omitida de current_tasks, o checkpoint deve manter evidência compacta de foco concluído para auditoria, sem instruir auto-resume a continuar nela.",
+        "Adicionar smoke cobrindo checkpoint com task completed e ausência de current_tasks.",
+        "Manter auto-resume preview sem stale focus artificial gerado pelo próprio checkpoint.",
+        "Não alterar política de compact, thresholds ou autorização operacional.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Para trabalho ininterrupto seguro, o checkpoint deve evitar gerar foco stale na origem em vez de depender só da filtragem posterior do auto-resume.\n[2026-04-30T05:35:34Z] slice=1 focus=TASK-BUD-313 gate=test:monitor:smoke-260/260 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Checkpoint não grava task completed em current_tasks, preservando evidência sem criar foco stale.",
+      "verification": "VER-BUD-587"
     }
   ]
 }

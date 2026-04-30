@@ -7503,6 +7503,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T05:32:45.372Z",
       "evidence": "Live runtime after operator reload: context_watch_auto_resume_preview returned `context-watch-auto-resume-preview: focusTasks=none-listed staleFocus=1 diagnostics=tasks(in=0,listed=0,dedup=0,trunc=0,drop=0);staleFocus=1;blockers(in=0,listed=0,dedup=0,trunc=0,drop=0);next(in=3,listed=2,dedup=0,trunc=1,drop=1);global=ok`. This confirms the loaded tool uses the read-only preview surface, derives local statuses, does not reintroduce completed stale focus, and exposes compact diagnostics. Focal context-watchdog smoke passed 44/44. No compact, resume, scheduler, self-reload, remote, or auto-continuation was dispatched. [rationale:risk-control] Live validation proves the bounded preview primitive can replace ad hoc auto-resume preview scripts without operational authorization."
+    },
+    {
+      "id": "VER-BUD-587",
+      "target": "TASK-BUD-313",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T05:35:48.544Z",
+      "evidence": "Prevented context_watch_checkpoint from writing completed tasks as current resume focus. writeLocalSliceHandoffCheckpoint now reads local .project/tasks.json status for the provided task_id; when status is completed, it preserves the task_id in the checkpoint summary/evidence but removes current_tasks, writes completed_tasks=[task_id], and marks context_watch.focus_task_status=completed. in-progress/planned/unknown behavior remains unchanged. Added smoke proving a completed TASK-BUD-DONE checkpoint returns `context-watch-checkpoint: ok=yes task=TASK-BUD-DONE path=.project/handoff.json` while the written handoff has no current_tasks and includes completed_tasks/context_watch.focus_task_status. Validation: context-watchdog focal smoke passed 45/45; cmd.exe /c npm run test:monitor:smoke --silent passed 260/260 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] Handoff should not generate stale resume focus in the first place after a task is completed."
     }
   ]
 }
