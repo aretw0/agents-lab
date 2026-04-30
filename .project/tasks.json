@@ -5961,7 +5961,7 @@
         "Definir promoção: advisory -> measured -> operational, com evidência bounded e testes.",
         "Bloquear ou esconder superfícies que não fazem sentido para o agente em operação contínua."
       ],
-      "notes": "Backlog criado a partir da direção do operador sobre higiene futura das tools quando loops grandes estiverem maduros. [rationale:risk-control] O potencial acumulado deve ser usado para arrumar a própria casa, não para ampliar permissões indevidas."
+      "notes": "Backlog criado a partir da direção do operador sobre higiene futura das tools quando loops grandes estiverem maduros. [rationale:risk-control] O potencial acumulado deve ser usado para arrumar a própria casa, não para ampliar permissões indevidas.\n[2026-04-30T03:30:00Z] Operador reforçou que, quando a calibração estiver madura, devemos revisar primitivas/tools no médio-longo prazo para detectar overlap funcional e consolidar em vez de criar algo novo. Antes de criar primitiva/superfície nova, procurar equivalente existente e preferir extensão/refactor/merge quando houver similar. [rationale:risk-control] Higiene natural de primitivas reduz acoplamento, ruído e permissões redundantes antes de loops grandes."
     },
     {
       "id": "TASK-BUD-253",
@@ -6523,6 +6523,31 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-274. [rationale:risk-control] Consumidores internos precisam do packet auditável por import canônico, sem transformar helper em autorização operacional.\n[2026-04-30T03:25:45Z] slice=1 focus=TASK-BUD-275 gate=test:monitor:smoke-241/241 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Packet measured re-exportado canonicamente; runtime canary segue manual-only.",
       "verification": "VER-BUD-550"
+    },
+    {
+      "id": "TASK-BUD-276",
+      "description": "[P1] Planejar superfície runtime measured auditada sem implementá-la.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-275",
+        "TASK-BUD-252"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar contrato mínimo para uma futura superfície runtime measured auditada antes de qualquer implementação.",
+        "Explicitar que deve procurar/estender primitivas existentes antes de criar tool nova, alinhado a TASK-BUD-252.",
+        "Definir requisitos: read-only/advisory primeiro, packet completo, origem local confiável, fail-closed, sem scheduler/loop/self-reload, sem autorização por import/re-export.",
+        "Validar marcadores com safe_marker_check.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado."
+      ],
+      "notes": "Criado após reload e reforço do operador sobre evitar overlap de primitivas. [rationale:risk-control] Antes de expor packet measured em runtime, precisamos de contrato explícito e checagem de overlap para não criar superfície redundante ou permissiva.\n[2026-04-30T03:30:00Z] slice=1 focus=TASK-BUD-276 gate=safe_marker_check-8/8 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato de superfície measured futura documentado com checagem de overlap de primitivas.",
+      "verification": "VER-BUD-551"
     }
   ]
 }

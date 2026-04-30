@@ -94,6 +94,14 @@ A regra de maturidade é separar ferramenta conveniente de desenvolvimento de pe
 
 Helpers medidos e re-exports canônicos também não são autorização operacional. Um helper como `resolveLocalMeasuredNudgeFreeLoopCanaryGate` pode compor evidência local para testes e consumidores internos, mas isso não cria scheduler, self-reload, loop, auto-continuação nem permissão remota. Até existir um desenho auditado separado, a tool runtime `nudge_free_loop_canary` permanece advisory/manual-only e deve continuar falhando fechado com `manual-signal-source` quando receber apenas parâmetros manuais.
 
+## Superfície measured auditada futura
+
+Antes de implementar qualquer superfície runtime measured, revise as primitivas existentes e o scorecard de higiene (`TASK-BUD-252`). Se já houver helper, tool ou doutrina com responsabilidade parecida, prefira estender, fundir ou refatorar em vez de criar uma nova superfície. A pergunta padrão deve ser: isso reduz ambiguidade operacional ou apenas adiciona mais um caminho sobreposto?
+
+O contrato mínimo para uma primeira superfície measured deve ser read-only e advisory. Ela pode mostrar um packet derivado de fatos locais confiáveis, com evidência completa e bounded por gate, mas não pode iniciar scheduler, self-reload, loop, auto-continuação, remoto ou escrita ampla. Import canônico, helper medido e re-export não são permissões operacionais.
+
+A superfície deve falhar fechada quando faltar origem local confiável, checkpoint fresco, orçamento de handoff, git state esperado, escopos protegidos clear, cooldown, validação conhecida, stop conditions clear ou evidência compacta. Um resultado `ready` só pode ser tratado como evidência para decisão posterior; autorização para operação ininterrupta exige desenho separado, auditável e explicitamente selecionado.
+
 ## Self-reload e autoresume
 
 Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportamento automático atual. Antes de qualquer tentativa unattended real, o contrato mínimo precisa provar: checkpoint bounded fresco, orçamento do handoff dentro do limite, git state esperado, ausência de escopos protegidos pendentes, cooldown, auditoria e auto-resume minimal a partir do handoff compacto.
