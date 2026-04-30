@@ -170,6 +170,34 @@ export function resolveGitStateExpectedMeasuredSignal(input: {
   return { ok: false, evidence: `git=unexpected count=${unexpected.length} first=${first}` };
 }
 
+export function resolveCooldownReadyMeasuredSignal(input: {
+  lastRunAtIso?: string;
+  nowMs: number;
+  cooldownMs: number;
+}): NudgeFreeLoopMeasuredSignal {
+  if (!Number.isFinite(input.cooldownMs) || input.cooldownMs < 0) {
+    return { ok: false, evidence: "cooldown=invalid-max" };
+  }
+  const cooldownSec = Math.floor(input.cooldownMs / 1000);
+  if (!input.lastRunAtIso?.trim()) {
+    return { ok: true, evidence: `cooldown=ready previous=none maxSec=${cooldownSec}` };
+  }
+  const lastRunMs = Date.parse(input.lastRunAtIso);
+  if (!Number.isFinite(lastRunMs)) {
+    return { ok: false, evidence: "cooldown=invalid-ts" };
+  }
+  const elapsedMs = input.nowMs - lastRunMs;
+  if (elapsedMs < 0) {
+    return { ok: false, evidence: "cooldown=future-ts" };
+  }
+  const elapsedSec = Math.floor(elapsedMs / 1000);
+  if (elapsedMs < input.cooldownMs) {
+    const remainingSec = Math.ceil((input.cooldownMs - elapsedMs) / 1000);
+    return { ok: false, evidence: `cooldown=wait remainingSec=${remainingSec} elapsedSec=${elapsedSec}` };
+  }
+  return { ok: true, evidence: `cooldown=ready elapsedSec=${elapsedSec} maxSec=${cooldownSec}` };
+}
+
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "next-local-safe",
   "checkpoint-fresh",

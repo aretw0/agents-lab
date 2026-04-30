@@ -6245,6 +6245,32 @@
         "Adicionar regressões onde a suite puder acoplar ao OS atual."
       ],
       "notes": "Backlog criado a partir da preocupação do operador sobre acoplamento da suite ao sistema atual. [rationale:risk-control] Loops unattended precisam de testes portáveis; sinais measured não podem depender do host por acidente."
+    },
+    {
+      "id": "TASK-BUD-265",
+      "description": "[P1] Criar helper puro para sinal measured de cooldown pronto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-263"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured cooldown-ready a partir de lastRunAt/now/cooldownMs, sem aceitar ok manual.",
+        "Sinal fica ok quando não há execução anterior ou quando cooldown expirou.",
+        "Sinal falha com evidência compacta quando ainda há cooldown restante ou timestamp inválido/futuro.",
+        "Testes cobrem no previous run, ready, waiting, invalid e future timestamp.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como próximo bloco de agregador measured real. [rationale:risk-control] Cooldown do loop sem empurrões deve ser derivado de tempo real/última execução, não de boolean manual.\n[2026-04-30T02:35:17Z] slice=1 focus=TASK-BUD-265 gate=test:monitor:smoke-233/233 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured cooldown-ready derivado de lastRun/now/cooldown, sem runtime loop.",
+      "verification": "VER-BUD-540"
     }
   ]
 }

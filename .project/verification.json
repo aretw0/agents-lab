@@ -7080,6 +7080,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:27:33.173Z",
       "evidence": "Added pure resolveGitStateExpectedMeasuredSignal helper. It derives git-state-expected from changedPaths and expectedPaths without accepting a manual ok boolean. It returns compact bounded evidence for clean, expected, unexpected, and separator-normalized paths. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 17/17; cmd.exe /c npm run test:monitor:smoke --silent passed 232/232 across 32 files. The path fixtures are string-normalization checks and should remain host-agnostic; created planned TASK-BUD-264 for broader cross-platform test hygiene. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Git-state readiness now derives from concrete changed-vs-expected paths, while preserving portability concerns for follow-up hygiene."
+    },
+    {
+      "id": "VER-BUD-540",
+      "target": "TASK-BUD-265",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:35:40.801Z",
+      "evidence": "Added pure resolveCooldownReadyMeasuredSignal helper. It derives cooldown-ready from lastRunAtIso, nowMs, and cooldownMs without accepting a manual ok boolean. It returns compact bounded evidence for no previous run, ready/expired cooldown, waiting cooldown, invalid timestamp, future timestamp, and invalid cooldown. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 18/18; cmd.exe /c npm run test:monitor:smoke --silent passed 233/233 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Cooldown readiness now derives from time facts rather than spoofable booleans."
     }
   ]
 }

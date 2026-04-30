@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS,
   resolveCheckpointFreshMeasuredSignal,
+  resolveCooldownReadyMeasuredSignal,
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
@@ -109,6 +110,38 @@ describe("guardrails unattended continuation", () => {
     expect(unexpected).toEqual({ ok: false, evidence: "git=unexpected count=1 first=.pi/settings.json" });
     expect(normalized).toEqual({ ok: true, evidence: "git=expected changed=1" });
     expect(unexpected.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
+  it("derives compact cooldown measured signals from last run timestamps", () => {
+    const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
+    const none = resolveCooldownReadyMeasuredSignal({ nowMs, cooldownMs: 60_000 });
+    const ready = resolveCooldownReadyMeasuredSignal({
+      lastRunAtIso: "2026-04-30T01:58:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const wait = resolveCooldownReadyMeasuredSignal({
+      lastRunAtIso: "2026-04-30T01:59:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const invalid = resolveCooldownReadyMeasuredSignal({
+      lastRunAtIso: "not-a-date",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+    const future = resolveCooldownReadyMeasuredSignal({
+      lastRunAtIso: "2026-04-30T02:00:30.000Z",
+      nowMs,
+      cooldownMs: 60_000,
+    });
+
+    expect(none).toEqual({ ok: true, evidence: "cooldown=ready previous=none maxSec=60" });
+    expect(ready).toEqual({ ok: true, evidence: "cooldown=ready elapsedSec=90 maxSec=60" });
+    expect(wait).toEqual({ ok: false, evidence: "cooldown=wait remainingSec=30 elapsedSec=30" });
+    expect(invalid).toEqual({ ok: false, evidence: "cooldown=invalid-ts" });
+    expect(future).toEqual({ ok: false, evidence: "cooldown=future-ts" });
+    expect(wait.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
   });
 
   it("derives nudge-free measured readiness from one structured signal bundle", () => {
