@@ -7973,6 +7973,31 @@
       ],
       "notes": "[rationale:risk-control] A explicabilidade de protected drift só vira confiável depois de reload e validação live; deve continuar evidência read-only sem autorizar ação sobre settings.\n[2026-04-30T09:52:00Z] slice=1 focus=TASK-BUD-330 gate=live-local_continuity_audit+context_watch_continuation_readiness commit=pending protected=.pi/settings.json authorization=none. [rationale:risk-control] Evidência protected validada ao vivo após reload.",
       "verification": "VER-BUD-604"
+    },
+    {
+      "id": "TASK-BUD-331",
+      "description": "[P1] Classificar read-only o drift atual de .pi/settings.json e propor decisão operator-aware.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-330"
+      ],
+      "files": [
+        ".pi/settings.json",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Inspecionar read-only o diff atual de .pi/settings.json sem modificar nem stagear esse arquivo.",
+        "Classificar o drift como canonical-candidate, temporary-agent-overlay-candidate, local-user-change, ou unknown-risk quando possível.",
+        "Registrar opções seguras: manter protected drift, reverter, promover/commitar como canonical, snapshot-normalizar, ou mover para overlay derivado.",
+        "Não alterar .pi/settings.json nesta fatia.",
+        "Não disparar compact/resume/scheduler/self-reload/remoto/auto-continuação.",
+        "Registrar evidência e checkpoint; se houver commit, stagear apenas board/handoff/verificação, não .pi/settings.json."
+      ],
+      "notes": "[rationale:risk-control] O operador autorizou seguir na ponta solta do settings; a primeira ação segura é classificação read-only do drift real antes de qualquer promoção/reversão/migração.\n[2026-04-30T09:56:00Z] slice=1 focus=TASK-BUD-331 gate=read-only-git-diff+governance_profile-status commit=pending classification=canonical-candidate protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Settings drift classificado sem editar/stagear o canonical.",
+      "verification": "VER-BUD-605"
     }
   ]
 }

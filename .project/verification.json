@@ -7665,6 +7665,15 @@
       "method": "live-tool",
       "timestamp": "2026-04-30T10:08:20.846Z",
       "evidence": "After operator reload, live runtime validates protected path propagation. local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked reasons=candidate:invalid|checkpoint:invalid|git-state:invalid|protected-scopes:invalid|validation:invalid protected=.pi/settings.json authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-330 audit=blocked reasons=candidate:invalid|checkpoint:invalid|git-state:invalid protected=.pi/settings.json staleFocus=1 authorization=none`. This confirms protected path evidence is visible in live summaries, readiness remains fail-closed, and authorization remains none. No .pi/settings.json mutation, compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Protected drift is now operator-visible evidence, not a hidden blocker or automatic permission."
+    },
+    {
+      "id": "VER-BUD-605",
+      "target": "TASK-BUD-331",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-diff+status",
+      "timestamp": "2026-04-30T10:09:37.644Z",
+      "evidence": "Read-only classification of current .pi/settings.json drift completed; file was not modified or staged. `git diff -- .pi/settings.json` shows mostly formatting churn plus semantic changes consistent with conservative/safe-core governance: colonyPilot.budgetPolicy.defaultMaxCostUsd 6 -> 0.5; colonyPilot.deliveryPolicy.mode apply-to-branch -> report-only; guardrailsCore.longRunIntentQueue.enabled true -> false with autoDrainOnIdle false; new schedulerGovernance {enabled:true, policy:observe, requireTextConfirmation:true}; new webSessionGateway {mode:local}; new governanceProfile {active:conservative}. governance_profile status confirms `active governance profile: conservative`. Classification: canonical-candidate with risk-control intent, not temporary agent overlay, because it changes baseline project governance/safety defaults rather than per-agent behavior. Operator-aware options: (1) keep as protected drift until explicit decision; (2) promote/commit as canonical conservative baseline after normalizing formatting/newline; (3) revert to HEAD if this was accidental; (4) snapshot then apply via governance profile/safe boot path; (5) do not move these specific changes to derived overlay because they define shared baseline policy. [rationale:risk-control] This preserves fail-closed protected drift while turning the mystery settings diff into an explicit operator decision packet."
     }
   ]
 }
