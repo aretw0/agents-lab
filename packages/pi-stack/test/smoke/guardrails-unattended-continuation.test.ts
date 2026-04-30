@@ -21,6 +21,7 @@ import {
   resolveNextLocalSafeCollectorResult,
   resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
+  resolveOneSliceExecutorBacklogGate,
   resolveOneSliceLocalCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveProtectedScopesMeasuredSignal,
@@ -109,6 +110,74 @@ describe("guardrails unattended continuation", () => {
     expect(blockedByContract.dispatchAllowed).toBe(false);
     expect(executeIntent.reasons).toContain("execute-intent-recorded-not-authorization");
     expect(executeIntent.dispatchAllowed).toBe(false);
+  });
+
+  it("gates one-slice executor backlog without authorizing implementation", () => {
+    const readyInput = {
+      projectStrategyResolved: true,
+      operatorPacketGreenValidated: true,
+      operatorPacketFailClosedValidated: true,
+      operatorPacketMissingFilesValidated: true,
+      explicitHumanContractDefined: true,
+      declaredFilesKnown: true,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      timeBudgetKnown: true,
+      costBudgetKnown: true,
+      cancellationKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+      separateTaskRequired: true,
+      startsDisabledOrDryRun: true,
+    };
+    const ready = resolveOneSliceExecutorBacklogGate(readyInput);
+    const blocked = resolveOneSliceExecutorBacklogGate({
+      ...readyInput,
+      projectStrategyResolved: false,
+      operatorPacketMissingFilesValidated: false,
+      explicitHumanContractDefined: false,
+      timeBudgetKnown: false,
+      repeatRequested: true,
+      schedulerRequested: true,
+      selfReloadRequested: true,
+      remoteOrOffloadRequested: true,
+      githubActionsRequested: true,
+      protectedScopeRequested: true,
+      destructiveMaintenanceRequested: true,
+    });
+
+    expect(ready).toMatchObject({
+      effect: "none",
+      mode: "backlog-gate",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+      oneSliceOnly: true,
+      decision: "ready-for-separate-task",
+      reasons: ["criteria-present", "separate-task-required", "implementation-still-not-authorized"],
+      summary: "one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
+    });
+    expect(blocked).toMatchObject({
+      decision: "blocked",
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+    });
+    expect(blocked.summary).toContain("blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance");
+    expect(blocked.reasons).toEqual(expect.arrayContaining([
+      "project-strategy-missing",
+      "operator-packet-missing-files-missing",
+      "explicit-human-contract-missing",
+      "time-budget-missing",
+      "repeat-requested",
+      "scheduler-requested",
+      "remote-or-offload-requested",
+      "destructive-maintenance-requested",
+    ]));
   });
 
   it("reviews a human-confirmed one-slice contract without approving an executor", () => {

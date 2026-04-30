@@ -19,6 +19,7 @@ import {
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveNextLocalSafeCollectorResult,
+  resolveOneSliceExecutorBacklogGate,
   resolveOneSliceLocalCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveStopConditionsClearCollectorResult,
@@ -127,6 +128,33 @@ describe("guardrails-core hardening re-exports", () => {
       dispatchAllowed: false,
       executorApproved: false,
       decision: "contract-ready-no-executor",
+    });
+    expect(resolveOneSliceExecutorBacklogGate({
+      projectStrategyResolved: true,
+      operatorPacketGreenValidated: true,
+      operatorPacketFailClosedValidated: true,
+      operatorPacketMissingFilesValidated: true,
+      explicitHumanContractDefined: true,
+      declaredFilesKnown: true,
+      rollbackPlanKnown: true,
+      validationGateKnown: true,
+      stagingScopeKnown: true,
+      commitScopeKnown: true,
+      timeBudgetKnown: true,
+      costBudgetKnown: true,
+      cancellationKnown: true,
+      checkpointPlanned: true,
+      stopContractKnown: true,
+      separateTaskRequired: true,
+      startsDisabledOrDryRun: true,
+    })).toMatchObject({
+      mode: "backlog-gate",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+      decision: "ready-for-separate-task",
     });
 
     expect(resolveMeasuredNudgeFreeLoopCanaryGate({

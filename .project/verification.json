@@ -8034,6 +8034,15 @@
       "method": "marker-check+test",
       "timestamp": "2026-04-30T13:06:32.287Z",
       "evidence": "Documented `Gate de backlog para executor one-slice` in docs/guides/control-plane-operating-doctrine.md. The gate requires the .project strategy to be resolved for the lane, context_watch_one_slice_operator_packet_preview live-validated in green/fail-closed/missing-files paths, explicit human task/action contract, declared files plus non-destructive rollback, known validation before editing, bounded staging/commit scope, time/cost budget, safe cancellation/abort, mandatory post-slice checkpoint, and mandatory stop after one slice. It states generic confirmations such as `vamos seguindo` authorize continued control-plane/rehearsal, not implementation or use of an executor. Any first implementation must be a separate task and start disabled or dry-run/report-only with dispatchAllowed=false until separate execution authorization. Repetition, scheduler, self-reload, remote/offload, GitHub Actions, publish, protected scopes, and destructive maintenance remain out of scope with their own gates. Validation: corrected safe_marker_check passed 15/15 after one over-specific marker mismatch; focal context-watchdog + guardrails-unattended-continuation tests passed 90/90. [rationale:risk-control] This defines the boundary between read-only packets and future execution without silently authorizing an executor."
+    },
+    {
+      "id": "VER-BUD-646",
+      "target": "TASK-BUD-372",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T13:19:35.805Z",
+      "evidence": "Implemented pure/read-only resolveOneSliceExecutorBacklogGate(...) in guardrails-core-unattended-continuation and re-exported it through guardrails-core. The helper evaluates whether a future one-slice executor idea is eligible for a separate backlog/design task, but always returns effect=none, mode=backlog-gate, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false, implementationAllowed=false, oneSliceOnly=true. The ready path returns decision=ready-for-separate-task with implementation=no/dispatch=no/executor=no and reasons criteria-present,separate-task-required,implementation-still-not-authorized. Blocked path covers missing .project strategy, missing operator packet validations, missing explicit contract/budgets, and prohibited requests such as repeat/scheduler/self-reload/remote-or-offload/GitHub Actions/protected scope/destructive maintenance with compact blockedRequests. No runtime tool, executor, dispatcher, scheduler, loop, or automation was added. Validation: focal guardrails-unattended-continuation + re-export smoke passed 44/44; full monitor smoke passed 270/270. [rationale:risk-control] The executor backlog boundary is now testable without authorizing implementation or dispatch."
     }
   ]
 }

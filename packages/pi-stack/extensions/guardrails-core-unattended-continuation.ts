@@ -53,6 +53,7 @@ export type OneSliceLocalCanaryDispatchPacketDecision = "ready-for-human-decisio
 export type OneSliceLocalCanaryOperatorIntent = "none" | "review" | "execute-one-slice";
 export type OneSliceLocalHumanConfirmationKind = "missing" | "generic" | "explicit-task-action";
 export type OneSliceLocalHumanConfirmedContractDecision = "contract-ready-no-executor" | "blocked";
+export type OneSliceExecutorBacklogGateDecision = "ready-for-separate-task" | "blocked";
 
 export interface OneSliceLocalCanaryDispatchPacketInput {
   plan: Pick<OneSliceLocalCanaryPlan, "decision" | "canPrepareSlice" | "mustStopAfterSlice" | "oneSliceOnly" | "authorization">;
@@ -110,6 +111,48 @@ export interface OneSliceLocalHumanConfirmedContractReview {
   executorApproved: false;
   oneSliceOnly: true;
   decision: OneSliceLocalHumanConfirmedContractDecision;
+  reasons: string[];
+  summary: string;
+  recommendation: string;
+}
+
+export interface OneSliceExecutorBacklogGateInput {
+  projectStrategyResolved: boolean;
+  operatorPacketGreenValidated: boolean;
+  operatorPacketFailClosedValidated: boolean;
+  operatorPacketMissingFilesValidated: boolean;
+  explicitHumanContractDefined: boolean;
+  declaredFilesKnown: boolean;
+  rollbackPlanKnown: boolean;
+  validationGateKnown: boolean;
+  stagingScopeKnown: boolean;
+  commitScopeKnown: boolean;
+  timeBudgetKnown: boolean;
+  costBudgetKnown: boolean;
+  cancellationKnown: boolean;
+  checkpointPlanned: boolean;
+  stopContractKnown: boolean;
+  separateTaskRequired: boolean;
+  startsDisabledOrDryRun: boolean;
+  repeatRequested?: boolean;
+  schedulerRequested?: boolean;
+  selfReloadRequested?: boolean;
+  remoteOrOffloadRequested?: boolean;
+  githubActionsRequested?: boolean;
+  protectedScopeRequested?: boolean;
+  destructiveMaintenanceRequested?: boolean;
+}
+
+export interface OneSliceExecutorBacklogGate {
+  effect: "none";
+  mode: "backlog-gate";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  executorApproved: false;
+  implementationAllowed: false;
+  oneSliceOnly: true;
+  decision: OneSliceExecutorBacklogGateDecision;
   reasons: string[];
   summary: string;
   recommendation: string;
@@ -1217,6 +1260,90 @@ export function buildOneSliceLocalCanaryDispatchDecisionPacket(input: OneSliceLo
     reasons: ["preview-ready", "contracts-present", "human-decision-required"],
     summary: "one-slice-dispatch-decision-packet: decision=ready-for-human-decision dispatch=no reasons=preview-ready,contracts-present,human-decision-required authorization=none",
     recommendation: "Present this packet to the operator; do not dispatch until a separate execution path is explicitly authorized.",
+  };
+}
+
+export function resolveOneSliceExecutorBacklogGate(input: OneSliceExecutorBacklogGateInput): OneSliceExecutorBacklogGate {
+  const reasons: string[] = [];
+  const blockedRequests: string[] = [];
+
+  if (!input.projectStrategyResolved) reasons.push("project-strategy-missing");
+  if (!input.operatorPacketGreenValidated) reasons.push("operator-packet-green-missing");
+  if (!input.operatorPacketFailClosedValidated) reasons.push("operator-packet-fail-closed-missing");
+  if (!input.operatorPacketMissingFilesValidated) reasons.push("operator-packet-missing-files-missing");
+  if (!input.explicitHumanContractDefined) reasons.push("explicit-human-contract-missing");
+  if (!input.declaredFilesKnown) reasons.push("declared-files-missing");
+  if (!input.rollbackPlanKnown) reasons.push("rollback-plan-missing");
+  if (!input.validationGateKnown) reasons.push("validation-gate-missing");
+  if (!input.stagingScopeKnown) reasons.push("staging-scope-missing");
+  if (!input.commitScopeKnown) reasons.push("commit-scope-missing");
+  if (!input.timeBudgetKnown) reasons.push("time-budget-missing");
+  if (!input.costBudgetKnown) reasons.push("cost-budget-missing");
+  if (!input.cancellationKnown) reasons.push("cancellation-missing");
+  if (!input.checkpointPlanned) reasons.push("checkpoint-plan-missing");
+  if (!input.stopContractKnown) reasons.push("stop-contract-missing");
+  if (!input.separateTaskRequired) reasons.push("separate-task-missing");
+  if (!input.startsDisabledOrDryRun) reasons.push("disabled-or-dry-run-missing");
+  if (input.repeatRequested) {
+    reasons.push("repeat-requested");
+    blockedRequests.push("repeat");
+  }
+  if (input.schedulerRequested) {
+    reasons.push("scheduler-requested");
+    blockedRequests.push("scheduler");
+  }
+  if (input.selfReloadRequested) {
+    reasons.push("self-reload-requested");
+    blockedRequests.push("self-reload");
+  }
+  if (input.remoteOrOffloadRequested) {
+    reasons.push("remote-or-offload-requested");
+    blockedRequests.push("remote-or-offload");
+  }
+  if (input.githubActionsRequested) {
+    reasons.push("github-actions-requested");
+    blockedRequests.push("github-actions");
+  }
+  if (input.protectedScopeRequested) {
+    reasons.push("protected-scope-requested");
+    blockedRequests.push("protected-scope");
+  }
+  if (input.destructiveMaintenanceRequested) {
+    reasons.push("destructive-maintenance-requested");
+    blockedRequests.push("destructive-maintenance");
+  }
+
+  if (reasons.length > 0) {
+    const blockedRequestsSummary = blockedRequests.length > 0 ? ` blockedRequests=${blockedRequests.slice(0, 7).join("|")}` : "";
+    return {
+      effect: "none",
+      mode: "backlog-gate",
+      activation: "none",
+      authorization: "none",
+      dispatchAllowed: false,
+      executorApproved: false,
+      implementationAllowed: false,
+      oneSliceOnly: true,
+      decision: "blocked",
+      reasons,
+      summary: `one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=${reasons.slice(0, 4).join(",")}${blockedRequestsSummary} authorization=none`,
+      recommendation: "Do not implement or use an executor; resolve the backlog-gate blockers in a separate design task first.",
+    };
+  }
+
+  return {
+    effect: "none",
+    mode: "backlog-gate",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    executorApproved: false,
+    implementationAllowed: false,
+    oneSliceOnly: true,
+    decision: "ready-for-separate-task",
+    reasons: ["criteria-present", "separate-task-required", "implementation-still-not-authorized"],
+    summary: "one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none",
+    recommendation: "The executor idea is eligible for a separate design/backlog task only; implementation and dispatch remain unauthorized.",
   };
 }
 

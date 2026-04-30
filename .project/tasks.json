@@ -9010,6 +9010,37 @@
       ],
       "notes": "[rationale:risk-control] Para desbloquear potencial ininterrupto sem gordura, precisamos de um gate claro entre packets read-only e qualquer executor futuro.\n[2026-04-30T13:06:11Z] slice=1 focus=TASK-BUD-371 gate=safe_marker_check-15/15+focal-90/90 commit=pending docs=one-slice-executor-backlog-gate. [rationale:risk-control] Gate de backlog definido: executor só em tarefa separada, desabilitado/dry-run e sem dispatch por padrão.",
       "verification": "VER-BUD-645"
+    },
+    {
+      "id": "TASK-BUD-372",
+      "description": "[P1] Implementar helper puro para gate de backlog do executor one-slice.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-371"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Criar helper puro/read-only que avalie se um executor one-slice pode entrar em tarefa separada de backlog/design.",
+        "O helper deve exigir estratégia .project resolvida, operator packet live-validado em caminhos verde/fail-closed/missing-files, contrato humano explícito, arquivos/rollback/validação/staging/commit/budget/cancelamento/checkpoint/stop.",
+        "O helper deve bloquear repetition/scheduler/self-reload/remote/offload/GitHub Actions/protected scopes/destructive maintenance.",
+        "Mesmo quando pronto, o helper deve manter effect=none, activation=none, authorization=none, dispatchAllowed=false, executorApproved=false e implementationAllowed=false.",
+        "Re-exportar pela superfície canônica.",
+        "Adicionar testes de caminho pronto e bloqueado.",
+        "Não criar runtime tool, executor, dispatcher, scheduler, loop ou automação.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O gate de backlog do executor precisa ser testável sem transformar readiness em autorização operacional.\n[2026-04-30T13:19:14Z] slice=1 focus=TASK-BUD-372 gate=focal-44/44+test:monitor:smoke-270/270 commit=pending helper=resolveOneSliceExecutorBacklogGate implementationAllowed=false dispatchAllowed=false executorApproved=false. [rationale:risk-control] Gate de backlog virou helper puro sem runtime/executor.",
+      "verification": "VER-BUD-646"
     }
   ]
 }
