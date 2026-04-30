@@ -8268,6 +8268,24 @@
       "method": "live-tool-after-reload+test",
       "timestamp": "2026-04-30T18:52:05.553Z",
       "evidence": "After reload, tool_hygiene_scorecard live validation passed on selected tools: ant_colony, schedule_prompt, claude_code_execute classified protected/requires-human-approval; board_task_complete operational/needs-measured-evidence; structured_interview_plan measured/safe-for-local-loop; all outputs kept activation=none authorization=none dispatchAllowed=false. Full scorecard run over 94 tools exposed noisy false positives from schema/negative-language matching, so classifier was refined to ignore parameter text and respect no-dispatch/read-only language. Regression: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed. Reload required again before live validating refined classifier."
+    },
+    {
+      "id": "VER-BUD-672",
+      "target": "TASK-BUD-252",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload",
+      "timestamp": "2026-04-30T18:55:11.830Z",
+      "evidence": "After reload of refined classifier, tool_hygiene_scorecard live validation passed. Selected tools: ant_colony/claude_code_execute/schedule_prompt => protected/requires-human-approval; board_task_complete => operational/needs-measured-evidence; structured_interview_plan => measured/safe-for-local-loop. Full scorecard over 94 tools returned protected=6, operational=5, requiresHumanApproval=8, manualOverrideLike=5, dispatchAllowed=false, authorization=none. Prior noisy false positives reduced from requiresHumanApproval=17/manualOverrideLike=8 to 8/5 while preserving protected classifications."
+    },
+    {
+      "id": "VER-BUD-673",
+      "target": "TASK-BUD-252",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-tool+docs",
+      "timestamp": "2026-04-30T18:55:24.335Z",
+      "evidence": "Completed tool hygiene scorecard. Implementation includes classifyToolHygiene/buildToolHygieneScorecard and runtime tool_hygiene_scorecard. Tests passed: npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed. Docs marker validation passed 5/5. Live after reload passed selected and full scorecards, with selected protected/operational/measured classifications as expected and full scorecard total=94 protected=6 operational=5 requiresHumanApproval=8. All outputs preserve activation=none authorization=none dispatchAllowed=false. [rationale:risk-control] This gives a read-only hygiene evidence surface before large loops without granting operation authority."
     }
   ]
 }
