@@ -8079,6 +8079,24 @@
       "method": "test+inspection",
       "timestamp": "2026-04-30T14:14:04.999Z",
       "evidence": "Propagated AbortSignal through claude_code_execute: tool execute now receives signal, passes it to detectClaudeBinary and runClaudeSubprocess, and runClaudeSubprocess forwards it to pi.exec. Added smoke coverage asserting the same signal reaches probe and subprocess calls. Validation: npx vitest run packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts => 23 passed. A prior incorrect node --test invocation failed due TS module resolution and is not the applicable gate."
+    },
+    {
+      "id": "VER-BUD-651",
+      "target": "TASK-BUD-375",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-dry-run",
+      "timestamp": "2026-04-30T16:27:27.437Z",
+      "evidence": "After operator reload, live claude_code_execute registration was validated with dry_run=true and timeout_ms=1000. Result returned dryRun=true, budgetState.state=ok, cwd=C:\\Users\\aretw\\Documents\\GitHub\\agents-lab, and note='Dry-run: subprocess not invoked.' This validates updated tool surface is loaded without starting a subprocess; broader Esc/cancel live reliability remains unproven."
+    },
+    {
+      "id": "VER-BUD-652",
+      "target": "TASK-BUD-375",
+      "target_type": "task",
+      "status": "passed",
+      "method": "documentation+safe_marker_check",
+      "timestamp": "2026-04-30T16:28:40.505Z",
+      "evidence": "Documented post-reload cancellation audit status in docs/guides/control-plane-operating-doctrine.md: claude_code_execute propagates tool AbortSignal; short passive/status tools are not proof for long-run cancellation; slash commands that start long execution remain unsuitable for unattended proof without explicit cancel contract; new long subprocess tools must declare cancel propagation/fallback. safe_marker_check matched 4/4 markers."
     }
   ]
 }

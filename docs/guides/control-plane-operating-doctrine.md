@@ -43,6 +43,13 @@ Checklist source-aware para `pi:dev`:
 
 Em ferramentas locais que executam subprocessos, `AbortSignal` deve ser repassado para a camada de execução (`pi.exec`/equivalente), mesmo quando há timeout. Timeout é limite temporal; cancelamento é controle humano imediato. Se uma ferramenta longa não propaga o sinal, classifique como risco de controle humano antes de habilitar uso unattended forte.
 
+Status local da auditoria de cancelamento:
+
+- `claude_code_execute` propaga o sinal recebido pelo tool para probes e subprocesso; esse caminho tem smoke test e validação dry-run após reload;
+- ferramentas que apenas abrem URL, consultam status curto ou fazem diagnóstico passivo continuam aceitáveis com timeout curto, mas não são prova de cancelamento para long-run;
+- comandos interativos/slash commands que disparam execução longa sem contrato explícito de cancelamento não devem ser usados como base para unattended forte;
+- qualquer nova ferramenta que invoque subprocesso longo precisa declarar como propaga cancelamento e qual fallback operacional existe.
+
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
 
 Fallback operacional enquanto `Esc` estiver incerto:
