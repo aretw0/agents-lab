@@ -4921,7 +4921,7 @@
     {
       "id": "TASK-BUD-208",
       "description": "[P2] Backlog: lint ortográfico i18n-aware para strings user-facing.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-201"
@@ -4938,7 +4938,8 @@
         "Evitar conflito com futuro suporte a internacionalização: suportar allowlist, marcadores no-i18n/no-spellcheck, arquivos de tradução e fallback por locale.",
         "Rodar como gate local opcional ou smoke bounded antes de virar CI/GitHub Actions."
       ],
-      "notes": "Backlog criado a pedido do operador. [rationale:quality] Queremos capturar typos em strings sem misturar isso com tradução automática; o lint deve ser i18n-aware, local-first e opt-in antes de qualquer promoção para CI.\n2026-04-30: iniciando fatia bounded local-safe. Implementado lint i18n-aware read-only para texto user-facing, alinhado ao hard intent de artefatos e sem mutação/dispatch.\n2026-04-30: primeira implementação concluída. Novo core lintI18nUserFacingText e tool i18n_lint_text adicionados com teste focal 7 passed e docs package check. Reload necessário antes de validação live da surface runtime."
+      "notes": "Backlog criado a pedido do operador. [rationale:quality] Queremos capturar typos em strings sem misturar isso com tradução automática; o lint deve ser i18n-aware, local-first e opt-in antes de qualquer promoção para CI.\n2026-04-30: iniciando fatia bounded local-safe. Implementado lint i18n-aware read-only para texto user-facing, alinhado ao hard intent de artefatos e sem mutação/dispatch.\n2026-04-30: primeira implementação concluída. Novo core lintI18nUserFacingText e tool i18n_lint_text adicionados com teste focal 7 passed e docs package check. Reload necessário antes de validação live da surface runtime.\n2026-04-30: completed after reload live validation. This is a safety/evidence primitive, not readiness for strong unattended by itself.",
+      "verification": "VER-BUD-681"
     },
     {
       "id": "TASK-BUD-209",

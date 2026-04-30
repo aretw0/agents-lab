@@ -8340,6 +8340,24 @@
       "method": "test+docs+package-doc-check",
       "timestamp": "2026-04-30T19:42:25.418Z",
       "evidence": "Implemented first i18n-aware user-facing lint primitive. Added lintI18nUserFacingText core and i18n_lint_text runtime surface: read-only, bounded, ignores code fences/paths/URLs/task IDs, detects likely mixed-language and unexpected-language drift, fail-closes on oversized input, and always returns authorization=none dispatchAllowed=false mutationAllowed=false. Tests passed: npx vitest run guardrails-i18n-lint.test.ts guardrails-i18n-intents.test.ts => 7 passed. Docs updated in docs/guides/i18n-intents.md and packaged into @aretw0/pi-stack docs; docs:package:sync/check passed. Runtime live validation requires reload before using i18n_lint_text."
+    },
+    {
+      "id": "VER-BUD-680",
+      "target": "TASK-BUD-208",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload",
+      "timestamp": "2026-04-30T19:45:51.278Z",
+      "evidence": "After reload, i18n_lint_text live validation passed for pass/warn/invalid paths. pt-BR consistent text returned decision=pass severity=ok; mixed pt/en text returned decision=warn severity=warn with mixed-language issue; oversized bounded input returned decision=invalid severity=block with input-too-large issue. All live outputs preserved activation=none authorization=none dispatchAllowed=false mutationAllowed=false."
+    },
+    {
+      "id": "VER-BUD-681",
+      "target": "TASK-BUD-208",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-tool+docs",
+      "timestamp": "2026-04-30T19:45:59.230Z",
+      "evidence": "Completed i18n-aware lint primitive. Implementation added lintI18nUserFacingText and runtime tool i18n_lint_text with bounded read-only pass/warn/invalid behavior; tests passed 7/7; docs/package-doc checks passed; after reload live validation passed pass/warn/invalid cases. Outputs preserve activation=none authorization=none dispatchAllowed=false mutationAllowed=false. [rationale:risk-control] This reduces user-facing language drift during long local work without granting operation authority."
     }
   ]
 }
