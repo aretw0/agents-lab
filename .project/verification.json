@@ -7017,6 +7017,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:01:36.541Z",
       "evidence": "Added compactness bounds to nudge-free measured evidence. Evidence only covers a measured gate when it is ok, non-empty, and <= NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS (120). Overlong evidence is reported in invalidMeasuredEvidenceGates, does not count toward measuredEvidenceCount, and yields measured-evidence-invalid plus measured-evidence-incomplete. Details now include maxMeasuredEvidenceChars. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 13/13; cmd.exe /c npm run test:monitor:smoke --silent passed 226/226 across 32 files. [rationale:risk-control] Keeps measured evidence bounded and prevents bloat/spoof through oversized strings."
+    },
+    {
+      "id": "VER-BUD-533",
+      "target": "TASK-BUD-257",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T02:07:09.374Z",
+      "evidence": "Live-validated nudge_free_loop_canary after reload following bounded measured-evidence hardening. With opt_in=true and every exposed manual boolean true, the runtime tool returned compact advisory defer content: nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source. The current manual runtime tool still exposes no signalSource, measuredEvidence, maxMeasuredEvidence, or invalidMeasuredEvidence override path, so bounded evidence hardening did not open a ready path. [rationale:risk-control] Runtime remains advisory/manual and cannot spoof measured readiness."
     }
   ]
 }

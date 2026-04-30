@@ -6052,6 +6052,27 @@
       ],
       "notes": "Criado como micro-slice anti-spoof/bloat. [rationale:risk-control] Readiness medida precisa de evidência compacta; strings longas podem virar bloat ou mascarar origem não confiável.\n[2026-04-30T02:01:19Z] slice=1 focus=TASK-BUD-256 gate=test:monitor:smoke-226/226 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Evidência measured agora é compacta e overlong não cobre gates.",
       "verification": "VER-BUD-532"
+    },
+    {
+      "id": "TASK-BUD-257",
+      "description": "[P1] Validar ao vivo que bounded measured evidence não abriu ready runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-256"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Após reload, nudge_free_loop_canary com todos os booleans manuais true ainda retorna defer/manual-signal-source.",
+        "Validação registra que maxMeasuredEvidence/invalidMeasuredEvidence não são overrides expostos pela tool manual atual.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar runtime depois do bound de evidência medida. [rationale:risk-control] O endurecimento de evidência bounded não deve abrir caminho runtime para ready por parâmetros manuais.\n[2026-04-30T02:05:00Z] slice=1 focus=TASK-BUD-257 gate=live-nudge_free_loop_canary-manual-signal-source-after-bounded-evidence commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Runtime pós-reload confirmou que bounded evidence não abriu ready manual.",
+      "verification": "VER-BUD-533"
     }
   ]
 }
