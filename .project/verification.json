@@ -7413,6 +7413,15 @@
       "method": "test",
       "timestamp": "2026-04-30T05:00:03.230Z",
       "evidence": "Added compact top reasons to local_continuity_audit. The visible content now includes `reasons=...` when the audit is ineligible/blocked, derived from non-observed collector statuses, packet gate reasons, and envelope reasons, capped to five entries. Details expose localContinuityReasons as a short array while preserving localContinuitySummary and the internal compatibility summary. authorization=none and read-only/advisory behavior are unchanged; nudge_free_loop_canary remains manual-only with no measured overrides. Validation: focal surface smoke passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 255/255 across 32 files. No new runtime tool, scheduler, self-reload, loop, remote, or auto-continuation was activated. [rationale:risk-control] The trust surface now explains fail-closed state compactly without broad diagnostics."
+    },
+    {
+      "id": "VER-BUD-577",
+      "target": "TASK-BUD-303",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+test",
+      "timestamp": "2026-04-30T05:01:59.966Z",
+      "evidence": "Live runtime after operator reload: local_continuity_audit returned `local-continuity-audit: eligible=no collectors=8/8 packet=blocked reasons=candidate:invalid|git-state:invalid|protected-scopes:invalid|stop-conditions:invalid|measured-evidence-incomplete authorization=none`. This confirms the loaded tool uses primitive naming, includes compact fail-closed reasons, caps the visible reason set, and still exposes authorization=none. Focal surface smoke passed 3/3. No scheduler, loop, self-reload, remote, or auto-continuation was started. [rationale:risk-control] Live validation confirms compact blocker explanations work in the loaded runtime without granting operational authorization."
     }
   ]
 }

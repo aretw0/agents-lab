@@ -7244,6 +7244,29 @@
       ],
       "notes": "Criado após live validação TASK-BUD-301. [rationale:risk-control] A trust surface precisa explicar compactamente por que falha fechada para guiar correção sem poluir contexto.\n[2026-04-30T04:59:40Z] slice=1 focus=TASK-BUD-302 gate=test:monitor:smoke-255/255 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons compactos adicionados ao local_continuity_audit sem mudar política.",
       "verification": "VER-BUD-576"
+    },
+    {
+      "id": "TASK-BUD-303",
+      "description": "[P1] Live-validar reasons compactos do local_continuity_audit após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-302"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar local_continuity_audit no runtime carregado após reload.",
+        "Confirmar que o content visível usa local-continuity-audit e inclui reasons= quando inelegível/bloqueado.",
+        "Confirmar authorization=none no summary live.",
+        "Confirmar que não inicia scheduler, loop, self-reload, remoto ou auto-continuação.",
+        "Registrar evidência live no board e checkpoint."
+      ],
+      "notes": "Criado após reload feito pelo operador. [rationale:risk-control] Reasons compactos precisam ser validados no runtime carregado para confirmar explicabilidade fail-closed sem diagnóstico grande.\n[2026-04-30T05:01:47Z] slice=1 focus=TASK-BUD-303 gate=live-local_continuity_audit+surface-smoke-3/3 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons compactos do local_continuity_audit validados ao vivo após reload.",
+      "verification": "VER-BUD-577"
     }
   ]
 }
