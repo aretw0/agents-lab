@@ -6,6 +6,7 @@ import {
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
   resolveMeasuredNudgeFreeLoopCanaryGate,
+  resolveNextLocalSafeMeasuredSignal,
   resolveNudgeFreeLoopCanaryGate,
   resolveProtectedScopesMeasuredSignal,
   resolveStopConditionsClearMeasuredSignal,
@@ -30,6 +31,40 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives compact next-local-safe measured signals from structured candidates", () => {
+    const ok = resolveNextLocalSafeMeasuredSignal({
+      taskId: "TASK-BUD-269",
+      scope: "local",
+      estimatedFiles: 2,
+      reversible: "git",
+      validationKind: "focal-test",
+      risk: "low",
+      protectedPaths: ["packages/pi-stack/extensions/foo.ts"],
+    });
+    const missingTask = resolveNextLocalSafeMeasuredSignal({
+      scope: "local",
+      estimatedFiles: 1,
+      reversible: "git",
+      validationKind: "marker-check",
+      risk: "none",
+    });
+    const risky = resolveNextLocalSafeMeasuredSignal({
+      taskId: "TASK-RISK",
+      scope: "local",
+      estimatedFiles: 5,
+      reversible: "none",
+      validationKind: "unknown",
+      requiresProductDecision: true,
+      risk: "high",
+      protectedPaths: [".github/workflows/ci.yml"],
+    });
+
+    expect(ok).toEqual({ ok: true, evidence: "next-local-safe=yes task=TASK-BUD-269 files=2" });
+    expect(missingTask).toEqual({ ok: false, evidence: "next-local-safe=no reasons=missing-task" });
+    expect(risky).toEqual({ ok: false, evidence: "next-local-safe=no reasons=files-large|reversible-none|validation-unknown" });
+    expect(risky.evidence.length).toBeLessThanOrEqual(NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS);
+  });
+
   it("derives compact checkpoint-fresh measured signals from timestamps", () => {
     const nowMs = Date.parse("2026-04-30T02:00:00.000Z");
     const fresh = resolveCheckpointFreshMeasuredSignal({

@@ -6341,6 +6341,32 @@
         "Manter pesquisa externa como escopo protegido/opt-in."
       ],
       "notes": "Backlog criado a pedido do operador. Link: https://github.com/amosblomqvist/pi-config. [rationale:risk-control] Referências externas podem inspirar, mas devem entrar como pesquisa bounded e opt-in, sem interromper a lane essencial atual."
+    },
+    {
+      "id": "TASK-BUD-269",
+      "description": "[P1] Criar helper puro para sinal measured de próxima fatia local-safe.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-267"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro deriva o sinal measured next-local-safe a partir de uma candidata estruturada, sem aceitar ok manual.",
+        "Sinal fica ok apenas quando há task id, escopo local, tamanho pequeno, reversibilidade git, validação conhecida, sem decisão de produto, sem risco e sem protected paths.",
+        "Sinal falha com evidência compacta quando a candidata é ambígua, arriscada, grande, sem validação, sem task id ou toca protected paths.",
+        "Testes cobrem candidata ok e falhas representativas.",
+        "Nenhuma tool runtime, scheduler ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como último gate grande do agregador measured puro. [rationale:risk-control] next-local-safe deve ser derivado de uma candidata estruturada, não de boolean manual.\n[2026-04-30T02:53:06Z] slice=1 focus=TASK-BUD-269 gate=test:monitor:smoke-236/236 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Sinal measured next-local-safe derivado de candidata estruturada, sem runtime loop.",
+      "verification": "VER-BUD-543"
     }
   ]
 }

@@ -70,6 +70,17 @@ export interface NudgeFreeLoopStopConditionSignal {
   evidence: string;
 }
 
+export interface NudgeFreeLoopLocalCandidate {
+  taskId?: string;
+  scope: "local" | "protected" | "remote" | "unknown";
+  estimatedFiles: number;
+  reversible: "git" | "none" | "unknown";
+  validationKind: NudgeFreeLoopValidationKind;
+  requiresProductDecision?: boolean;
+  risk: "none" | "low" | "medium" | "high";
+  protectedPaths?: string[];
+}
+
 export type NudgeFreeLoopMeasuredSignals = Record<NudgeFreeLoopMeasuredGate, NudgeFreeLoopMeasuredSignal>;
 
 export interface NudgeFreeLoopMeasuredCanaryInput {
@@ -100,6 +111,25 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
 }
 
 export const NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS = 120;
+
+export function resolveNextLocalSafeMeasuredSignal(candidate: NudgeFreeLoopLocalCandidate): NudgeFreeLoopMeasuredSignal {
+  const reasons: string[] = [];
+  if (!candidate.taskId?.trim()) reasons.push("missing-task");
+  if (candidate.scope !== "local") reasons.push(`scope-${candidate.scope}`);
+  if (!Number.isFinite(candidate.estimatedFiles) || candidate.estimatedFiles < 0) reasons.push("files-invalid");
+  else if (candidate.estimatedFiles > 3) reasons.push("files-large");
+  if (candidate.reversible !== "git") reasons.push(`reversible-${candidate.reversible}`);
+  if (candidate.validationKind === "unknown") reasons.push("validation-unknown");
+  if (candidate.requiresProductDecision) reasons.push("product-decision");
+  if (candidate.risk !== "none" && candidate.risk !== "low") reasons.push(`risk-${candidate.risk}`);
+  const protectedPathCount = (candidate.protectedPaths ?? []).filter(isProtectedMeasuredPath).length;
+  if (protectedPathCount > 0) reasons.push(`protected-paths-${protectedPathCount}`);
+
+  if (reasons.length > 0) {
+    return { ok: false, evidence: `next-local-safe=no reasons=${reasons.slice(0, 3).join("|")}` };
+  }
+  return { ok: true, evidence: `next-local-safe=yes task=${candidate.taskId?.trim()} files=${candidate.estimatedFiles}` };
+}
 
 export function resolveCheckpointFreshMeasuredSignal(input: {
   handoffTimestampIso?: string;

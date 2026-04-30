@@ -7107,6 +7107,15 @@
       "method": "test",
       "timestamp": "2026-04-30T02:49:28.902Z",
       "evidence": "Added pure resolveStopConditionsClearMeasuredSignal helper. It derives stop-conditions-clear from structured stop condition signals without accepting a manual ok boolean. It returns compact bounded evidence for clear and present stop conditions, summarizing count and first condition kinds. Also created planned TASK-BUD-268 for https://github.com/amosblomqvist/pi-config as bounded external inspiration per operator request. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 20/20; cmd.exe /c npm run test:monitor:smoke --silent passed 235/235 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] Stop-condition readiness now derives from structured conditions instead of a spoofable boolean."
+    },
+    {
+      "id": "VER-BUD-543",
+      "target": "TASK-BUD-269",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T02:53:26.921Z",
+      "evidence": "Added pure resolveNextLocalSafeMeasuredSignal helper. It derives next-local-safe from a structured local candidate without accepting a manual ok boolean. It requires taskId, local scope, small estimatedFiles (<=3), git reversibility, known validation, no product decision, none/low risk, and no protected paths. It returns compact bounded evidence for ok and representative failure reasons. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 21/21; cmd.exe /c npm run test:monitor:smoke --silent passed 236/236 across 32 files. No runtime tool, scheduler, or loop was activated. [rationale:risk-control] The final major nudge-free measured gate now derives from structured candidate facts instead of a spoofable boolean."
     }
   ]
 }
