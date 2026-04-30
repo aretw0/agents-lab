@@ -6972,6 +6972,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:44:30.004Z",
       "evidence": "Changed resolveNudgeFreeLoopCanaryGate so signalSource='measured' is insufficient by itself: ready now requires non-empty measuredEvidence. Measured source without evidence returns defer with reason measured-evidence-missing. Details include measuredEvidenceCount for audit. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 11/11; cmd.exe /c npm run test:monitor:smoke --silent passed 224/224 across 32 files. [rationale:risk-control] Prevents future code from spoofing measured readiness by setting only a signalSource flag."
+    },
+    {
+      "id": "VER-BUD-528",
+      "target": "TASK-BUD-250",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T01:47:34.310Z",
+      "evidence": "Live-validated nudge_free_loop_canary after reload following measuredEvidence hardening. With opt_in=true and every exposed manual boolean true, the runtime tool returned compact advisory defer content: nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source. The current runtime schema does not expose signalSource or measuredEvidence, so the manual tool remains unable to produce ready. [rationale:risk-control] Confirms the measured-evidence requirement did not accidentally create a runtime override path."
     }
   ]
 }

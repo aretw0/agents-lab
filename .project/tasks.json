@@ -5897,6 +5897,27 @@
       ],
       "notes": "Criado para evitar que signalSource=measured vire apenas outro boolean spoofável em código futuro. [rationale:risk-control] Readiness sem empurrões precisa de sinais medidos com evidência, não só uma flag measured.\n[2026-04-30T01:44:17Z] slice=1 focus=TASK-BUD-249 gate=test:monitor:smoke-224/224 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] signalSource=measured agora exige measuredEvidence não vazia para ready.",
       "verification": "VER-BUD-527"
+    },
+    {
+      "id": "TASK-BUD-250",
+      "description": "[P1] Validar ao vivo que nudge_free_loop_canary não expõe measured evidence após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-249"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Após reload, nudge_free_loop_canary com todos os booleans true ainda retorna defer/manual-signal-source.",
+        "Validação registra que measuredEvidence não é aceito/exposto pela tool manual atual.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar comportamento runtime pós measuredEvidence. [rationale:risk-control] A tool manual deve continuar incapaz de produzir ready mesmo após o gate puro exigir evidência medida.\n[2026-04-30T01:47:00Z] slice=1 focus=TASK-BUD-250 gate=live-nudge_free_loop_canary-manual-signal-source-after-measuredEvidence commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Validação live confirmou que a tool manual segue incapaz de produzir ready após measuredEvidence.",
+      "verification": "VER-BUD-528"
     }
   ]
 }
