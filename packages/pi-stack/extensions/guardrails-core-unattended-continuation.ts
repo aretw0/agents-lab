@@ -133,6 +133,7 @@ export interface NudgeFreeLoopLocalFactOrigin {
 }
 
 export type NudgeFreeLoopLocalFactCollectorStatus = "observed" | "missing" | "untrusted" | "invalid";
+export type NudgeFreeLoopLocalReadStatus = "observed" | "missing" | "error";
 
 export interface NudgeFreeLoopLocalFactCollectorResult {
   fact: NudgeFreeLoopLocalFactKey;
@@ -368,6 +369,31 @@ export function resolveStopConditionsClearMeasuredSignal(input: {
   }
   const first = present.slice(0, 2).map((condition) => condition.kind).join("|");
   return { ok: false, evidence: `stops=present count=${present.length} first=${first}` };
+}
+
+export function resolveHandoffBudgetCollectorResult(input: {
+  readStatus: NudgeFreeLoopLocalReadStatus;
+  handoffJson?: string;
+  maxJsonChars: number;
+}): NudgeFreeLoopLocalFactCollectorResult {
+  if (input.readStatus === "missing") {
+    return { fact: "handoff-budget", status: "missing", evidence: "handoff-budget=missing" };
+  }
+  if (input.readStatus === "error") {
+    return { fact: "handoff-budget", status: "invalid", evidence: "handoff-budget=read-error" };
+  }
+  if (typeof input.handoffJson !== "string") {
+    return { fact: "handoff-budget", status: "invalid", evidence: "handoff-budget=missing-json" };
+  }
+  const signal = resolveHandoffBudgetMeasuredSignal({
+    jsonChars: input.handoffJson.length,
+    maxJsonChars: input.maxJsonChars,
+  });
+  return {
+    fact: "handoff-budget",
+    status: signal.ok ? "observed" : "invalid",
+    evidence: signal.evidence,
+  };
 }
 
 const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [

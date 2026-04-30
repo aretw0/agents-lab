@@ -6,6 +6,7 @@ import {
   resolveCheckpointFreshMeasuredSignal,
   resolveCooldownReadyMeasuredSignal,
   resolveGitStateExpectedMeasuredSignal,
+  resolveHandoffBudgetCollectorResult,
   resolveHandoffBudgetMeasuredSignal,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredFactCollectorAssessment,
@@ -37,6 +38,38 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("derives handoff-budget collector results from local read outcomes", () => {
+    const observed = resolveHandoffBudgetCollectorResult({
+      readStatus: "observed",
+      handoffJson: "x".repeat(1200),
+      maxJsonChars: 2700,
+    });
+    const over = resolveHandoffBudgetCollectorResult({
+      readStatus: "observed",
+      handoffJson: "x".repeat(2701),
+      maxJsonChars: 2700,
+    });
+    const missing = resolveHandoffBudgetCollectorResult({
+      readStatus: "missing",
+      maxJsonChars: 2700,
+    });
+    const readError = resolveHandoffBudgetCollectorResult({
+      readStatus: "error",
+      maxJsonChars: 2700,
+    });
+    const invalidMax = resolveHandoffBudgetCollectorResult({
+      readStatus: "observed",
+      handoffJson: "{}",
+      maxJsonChars: 0,
+    });
+
+    expect(observed).toEqual({ fact: "handoff-budget", status: "observed", evidence: "handoff-budget=ok chars=1200 max=2700" });
+    expect(over).toEqual({ fact: "handoff-budget", status: "invalid", evidence: "handoff-budget=over chars=2701 max=2700" });
+    expect(missing).toEqual({ fact: "handoff-budget", status: "missing", evidence: "handoff-budget=missing" });
+    expect(readError).toEqual({ fact: "handoff-budget", status: "invalid", evidence: "handoff-budget=read-error" });
+    expect(invalidMax).toEqual({ fact: "handoff-budget", status: "invalid", evidence: "handoff-budget=invalid-max" });
+  });
+
   it("classifies local collector results before measured packet use", () => {
     const observedResults = [
       { fact: "candidate", status: "observed", evidence: "candidate=board-task" },

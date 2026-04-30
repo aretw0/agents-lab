@@ -102,6 +102,8 @@ O contrato mínimo para uma primeira superfície measured deve ser read-only e a
 
 A superfície deve falhar fechada quando faltar origem local confiável, checkpoint fresco, orçamento de handoff, git state esperado, escopos protegidos clear, cooldown, validação conhecida, stop conditions clear ou evidência compacta. Um resultado `ready` só pode ser tratado como evidência para decisão posterior; autorização para operação ininterrupta exige desenho separado, auditável e explicitamente selecionado.
 
+A primeira superfície read-only de audit envelope, quando existir, deve reutilizar o `buildLocalMeasuredNudgeFreeLoopAuditEnvelope` e os coletores locais já existentes. Ela não deve aceitar fatos caller-supplied como elegíveis; deve derivar cada fato a partir de leitura local observável, anexar o collector assessment, mostrar `authorization=none` e apontar claramente que o resultado é evidência para decisão posterior, não comando para continuar. Se algum coletor estiver faltante, untrusted, invalid ou overlong, o envelope deve continuar visível para diagnóstico, mas inelegível.
+
 ## Self-reload e autoresume
 
 Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportamento automático atual. Antes de qualquer tentativa unattended real, o contrato mínimo precisa provar: checkpoint bounded fresco, orçamento do handoff dentro do limite, git state esperado, ausência de escopos protegidos pendentes, cooldown, auditoria e auto-resume minimal a partir do handoff compacto.

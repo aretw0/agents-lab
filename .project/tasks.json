@@ -6757,6 +6757,34 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-283. [rationale:risk-control] O audit envelope precisa estar disponível por import canônico sem virar autorização operacional.\n[2026-04-30T03:51:05Z] slice=1 focus=TASK-BUD-284 gate=test:monitor:smoke-245/245 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Audit envelope measured re-exportado; runtime segue manual-only.",
       "verification": "VER-BUD-559"
+    },
+    {
+      "id": "TASK-BUD-285",
+      "description": "[P1] Planejar superfície read-only de audit envelope e criar primeiro coletor local puro.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-284"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documentar contrato da futura superfície read-only de audit envelope sem implementação runtime.",
+        "Contrato deve exigir reutilizar audit envelope/collectors existentes, derivar fatos localmente e não aceitar fatos caller-supplied como elegíveis.",
+        "Adicionar primeiro helper puro de coletor local para o fato handoff-budget a partir de resultado de leitura local e conteúdo JSON.",
+        "Helper deve derivar observed/missing/invalid sem aceitar readiness manual.",
+        "Testes cobrem handoff-budget observed, over-budget, missing, read-error e invalid max.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload a pedido do operador para fazer as duas fatias bounded juntas. [rationale:risk-control] Podemos avançar contrato + primeiro coletor puro desde que não abramos superfície operacional nem autorização.\n[2026-04-30T03:55:13Z] slice=1 focus=TASK-BUD-285 gate=test:monitor:smoke-246/246 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato read-only audit surface documentado e primeiro coletor handoff-budget puro criado.",
+      "verification": "VER-BUD-560"
     }
   ]
 }
