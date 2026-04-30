@@ -9428,6 +9428,27 @@
       "milestone": "local-first-control-plane",
       "notes": "Criado após operador apontar https://github.com/mitsuhiko/agent-stuff/blob/main/extensions/btw.ts. [rationale:risk-control] A pesquisa anterior só cobriu node_modules/mitsupi local; decisão canônica de /btw precisa incluir prior art remoto relevante.\n2026-04-30: retomado como foco atual para completar prior art de /btw com mitsuhiko/agent-stuff remoto apontado pelo operador, antes de qualquer decisão first-party.\n2026-04-30: concluído. Prior art remoto mitsuhiko/agent-stuff incluído e conclusão corrigida: Mitsuhiko tem implementação remota de /btw; a ausência em node_modules/mitsupi era só limite da pesquisa local. /btw first-party segue não exposto.",
       "verification": "VER-BUD-704"
+    },
+    {
+      "id": "TASK-BUD-389",
+      "description": "Backlog: matriz curatorial de decisões de design para /btw sem acoplar a uma implementação específica.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-388"
+      ],
+      "files": [
+        "docs/research/btw-prior-art-2026-04-30.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Comparar decisões de design de oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw e outras referências conhecidas.",
+        "Separar capacidades desejadas de implementação específica: overlay/widget, thread, save, inject/summarize, tool access, custo, isolamento de contexto e governança.",
+        "Definir critérios para reutilizar, adaptar/wrappar, filtrar, criar runtime first-party ou manter docs-only.",
+        "Manter /btw first-party não exposto até decisão explícita."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "Criado por steering do operador: não acoplar demais ao mitsupi/agent-stuff; curar as melhores decisões entre todos que fizeram algum /btw conhecido. [rationale:risk-control] Superfície lateral pode afetar foco, contexto, custos e injeção no fluxo principal; precisa matriz curatorial antes de implementação."
     }
   ]
 }

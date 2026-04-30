@@ -8565,6 +8565,15 @@
       "method": "prior-art-comparison-closure",
       "timestamp": "2026-04-30T21:32:52.730Z",
       "evidence": "TASK-BUD-388 closed after correcting /btw prior art. Research now compares @ifi/oh-pi /btw with mitsuhiko/agent-stuff extensions/btw.ts and preserves the decision not to expose first-party /btw through pi.prompts or package files until explicit design choice. The earlier cache command failure was recorded separately as TASK-BUD-387 Ops backlog, and TASK-BUD-255 was returned to planned to preserve /btw focus."
+    },
+    {
+      "id": "VER-BUD-705",
+      "target": "TASK-BUD-388",
+      "target_type": "task",
+      "status": "passed",
+      "method": "curation-anti-coupling-correction",
+      "timestamp": "2026-04-30T21:34:54.965Z",
+      "evidence": "Adjusted /btw prior-art docs to avoid coupling to mitsuhiko/agent-stuff. Research now states the work is curatorial: oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw and other references are design-decision sources, not automatic backend targets; agent-stuff is not the preferred target by default. Doctrine now says the next step is a curatorial comparison, not package coupling. Created TASK-BUD-389 for a future design-decision matrix. Validation: safe_marker_check research 4/4; doctrine 3/3; docs sync/check ok."
     }
   ]
 }

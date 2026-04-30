@@ -1,32 +1,32 @@
 {
-  "timestamp": "2026-04-30T21:33:13.601Z",
-  "context": "Preserved and completed /btw thread after operator steer. Corrected earlier local-only conclusion: mitsuhiko/agent-stuff remote has extension [snip] dent; returned TASK-BUD-255 to planned. [truncated:+431 chars]",
+  "timestamp": "2026-04-30T21:35:03.633Z",
+  "context": "Applied operator correction: /btw prior-art research should not couple us to mitsuhiko/agent-stuff. Updated research/doctrine to say the next [snip] ix. /btw first-party remains unexposed. [truncated:+246 chars]",
   "next_actions": [
-    "Commit TASK-BUD-388 completion and Ops backlog evidence.",
-    "Continue bounded local-safe lane; likely next task from selector after commit.",
-    "Do not expose /btw first-party until explicit design decision: use oh-pi, adapt/wrap mitsuhiko [snip] n, or first-party runtime. [truncated:+38 chars]"
+    "Commit anti-coupling correction and TASK-BUD-389 backlog.",
+    "Continue bounded local-safe lane; do not implement /btw until curatorial matrix task is explicitly selected.",
+    "Keep checkout-cache Ops incident TASK-BUD-387 planned."
   ],
   "blockers": [
     "Context is warn/bounded-slices; keep slices short and checkpoint fresh.",
-    "TASK-BUD-387 Ops checkout-cache hardening remains planned.",
-    "TASK-BUD-383 confirmation propagation mismatch remains planned."
+    "/btw first-party remains not exposed.",
+    "TASK-BUD-387 Ops checkout-cache hardening remains planned."
   ],
   "recent_validation": [
-    "safe_marker_check docs/research/btw-prior-art-2026-04-30.md matched=5/5",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=4/4",
-    "structured_io_json packages/lab-skills/package.json pi.prompts => selector-not-found"
+    "safe_marker_check research anti-coupling markers matched=4/4",
+    "safe_marker_check doctrine anti-coupling markers matched=3/3",
+    "npm run docs:package:sync => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:33:13.601Z",
+    "generatedAtIso": "2026-04-30T21:35:03.633Z",
     "level": "warn",
     "percent": 62,
     "action": "continue",
-    "recommendation": "commit-btw-prior-art-correction-then-select-next",
+    "recommendation": "commit-btw-anti-coupling-correction",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:33:13.601Z",
+      "atIso": "2026-04-30T21:35:03.633Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 62,
@@ -36,7 +36,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-btw-prior-art-correction-then-select-next"
+      "recommendation": "commit-btw-anti-coupling-correction"
     }
   ],
   "completed_tasks": [

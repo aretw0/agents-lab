@@ -4,7 +4,7 @@
 
 `TASK-BUD-296` criou um rascunho first-party de prompt `/btw`, mas o operador lembrou que não devemos tornar isso canônico antes de comparar com implementações já instaladas, especialmente `oh-pi` e Mitsuhiko/mitsupi.
 
-Conclusão desta fatia: manter o rascunho como referência local, mas **não expor via `pi.prompts` nem empacotar como superfície canônica** até decisão explícita.
+Conclusão desta fatia: manter o rascunho como referência local, mas **não expor via `pi.prompts` nem empacotar como superfície canônica** até decisão explícita. A pesquisa é curatorial: `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências são fontes de decisões de design, não backends aos quais devemos acoplar automaticamente.
 
 ## Referência principal: `@ifi/oh-pi`
 
@@ -49,7 +49,7 @@ Características observadas:
 - resumo usa sessão temporária separada com prompt `BTW_SUMMARY_PROMPT`;
 - injeção no chat principal usa `pi.sendUserMessage`, com `followUp` quando o contexto principal não está idle.
 
-Ponto de design importante: a implementação de Mitsuhiko também é runtime/extension, não prompt template. Ela é mais próxima de uma side-session real com overlay e potencial uso de tools, enquanto `oh-pi` enfatiza `/btw`/`/qq`, thread/widget, `--save`, inject/summarize e aliases explícitos.
+Ponto de design importante: a implementação de Mitsuhiko também é runtime/extension, não prompt template. Ela é mais próxima de uma side-session real com overlay e potencial uso de tools, enquanto `oh-pi` enfatiza `/btw`/`/qq`, thread/widget, `--save`, inject/summarize e aliases explícitos. Isso não torna `agent-stuff` o alvo preferido; torna explícitas decisões que precisam ser comparadas e filtradas.
 
 ## Referências adjacentes: `node_modules/mitsupi`
 
@@ -71,10 +71,10 @@ Essas skills locais são úteis para contexto, resumo e análise de sessões/doc
 
 Qualquer versão futura deve ser opt-in e decidir explicitamente entre:
 
-1. reutilizar `oh-pi` como implementação preferida;
-2. adaptar/wrappar a abordagem de `mitsuhiko/agent-stuff`;
-3. envolver/filtrar uma extensão existente com guardrails locais;
-4. criar alternativa first-party runtime, não apenas prompt;
+1. curar decisões de design de `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências conhecidas;
+2. reutilizar uma implementação externa quando ela for claramente suficiente e compatível com nossa governança;
+3. adaptar/wrappar uma implementação existente com guardrails locais quando houver ganho claro;
+4. criar alternativa first-party runtime, não apenas prompt, se as referências não preservarem nossos invariantes;
 5. manter somente skill/docs orientando o uso de uma implementação externa.
 
 Invariantes mínimos:
@@ -92,4 +92,4 @@ Invariantes mínimos:
 - Não publicar `packages/lab-skills/prompts/btw.md` via `pi.prompts`.
 - Não incluir `prompts` em `files` de `@aretw0/lab-skills` por enquanto.
 - Preservar o rascunho local como material de comparação, não como superfície carregada para usuários.
-- Reabrir design somente com uma task dedicada se o operador quiser wrapper first-party, filtro de `oh-pi`, adaptação de `mitsuhiko/agent-stuff` ou alternativa runtime.
+- Reabrir design somente com uma task dedicada se o operador quiser uma matriz curatorial de decisões, wrapper first-party, filtro de extensão existente, adaptação de referência externa ou alternativa runtime.
