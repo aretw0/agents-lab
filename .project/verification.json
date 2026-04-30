@@ -8358,6 +8358,15 @@
       "method": "test+live-tool+docs",
       "timestamp": "2026-04-30T19:45:59.230Z",
       "evidence": "Completed i18n-aware lint primitive. Implementation added lintI18nUserFacingText and runtime tool i18n_lint_text with bounded read-only pass/warn/invalid behavior; tests passed 7/7; docs/package-doc checks passed; after reload live validation passed pass/warn/invalid cases. Outputs preserve activation=none authorization=none dispatchAllowed=false mutationAllowed=false. [rationale:risk-control] This reduces user-facing language drift during long local work without granting operation authority."
+    },
+    {
+      "id": "VER-BUD-682",
+      "target": "TASK-BUD-381",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+docs+package-doc-check",
+      "timestamp": "2026-04-30T19:52:19.230Z",
+      "evidence": "Implemented first read-only background process control planning primitive. Added resolveBackgroundProcessControlPlan core and background_process_plan runtime surface. It never launches/stops/restarts/reserves ports and always returns activation=none authorization=none dispatchAllowed=false processStartAllowed=false processStopAllowed=false mutationAllowed=false. It plans shared-service vs isolated-worker, requires port lease for servers, fail-closes port collisions, blocks destructive restarts, and defines bounded log/stacktrace policy plus required metadata/capabilities. Tests passed: npx vitest run guardrails-background-process.test.ts => 4 passed. Docs added in docs/primitives/background-process-control.md and doctrine updated; docs package sync/check passed. Runtime live validation requires reload."
     }
   ]
 }

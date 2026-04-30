@@ -83,7 +83,9 @@ A direção para a primitiva futura é local-first e governada: processos devem 
 
 A política deve suportar dois modos sem impor opinião única: serviço compartilhado por workspace quando faz sentido reutilizar um único server para testes, e workers isolados/paralelos quando trabalhos diferentes realmente precisam rodar lado a lado. Em ambos os casos, colisão de portas, processos órfãos, subprocessos zumbis e testes concorrentes com o mesmo server devem falhar fechado ou pedir decisão explícita.
 
-Enquanto essa primitiva não existir, não iniciar servers/background longos automaticamente; preferir comandos curtos, status bounded e parada manual explícita.
+A primeira superfície dessa direção é `background_process_plan`, uma primitiva read-only de planejamento. Ela define metadata, port lease, modo compartilhado/isolado, logs bounded e bloqueios de restart destrutivo, mas ainda não lança, para, reinicia ou reserva portas. O contrato detalhado fica em `docs/primitives/background-process-control.md`.
+
+Enquanto a primitiva operacional completa não existir, não iniciar servers/background longos automaticamente; preferir comandos curtos, status bounded e parada manual explícita.
 
 ## Higiene de tools antes de loops grandes
 

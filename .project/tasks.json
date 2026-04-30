@@ -9242,7 +9242,7 @@
     {
       "id": "TASK-BUD-381",
       "description": "Projetar primitivas robustas para controle de processos em background usados por front/backend/testes.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-252"
@@ -9261,7 +9261,7 @@
         "Adicionar testes/guards para evitar processos órfãos, portas conflitantes e dumps grandes."
       ],
       "milestone": "unattended-control",
-      "notes": "2026-04-30: criado a pedido do operador. Motivação: muitos projetos precisam que o pi lance front/backend/testes com servidor e tenha controle total para matar/reiniciar/capturar stacktrace estruturado sem estourar contexto. Deve considerar múltiplos agentes no mesmo PC, porta/lock, reuse de serviços, e modo paralelo isolado quando apropriado.\n2026-04-30: [rationale:risk-control] Background process control precisa ser governado antes de usar pi para servers/testes em loops longos ou paralelos.\n[rationale:risk-control] Controle robusto de processos em background é pré-requisito para fechar feedback loop de front/backend/testes sem processos órfãos, colisão de portas ou dumps de log que estourem contexto."
+      "notes": "2026-04-30: criado a pedido do operador. Motivação: muitos projetos precisam que o pi lance front/backend/testes com servidor e tenha controle total para matar/reiniciar/capturar stacktrace estruturado sem estourar contexto. Deve considerar múltiplos agentes no mesmo PC, porta/lock, reuse de serviços, e modo paralelo isolado quando apropriado.\n2026-04-30: [rationale:risk-control] Background process control precisa ser governado antes de usar pi para servers/testes em loops longos ou paralelos.\n[rationale:risk-control] Controle robusto de processos em background é pré-requisito para fechar feedback loop de front/backend/testes sem processos órfãos, colisão de portas ou dumps de log que estourem contexto.\n2026-04-30: iniciando fatia bounded essencial. Escopo desta fatia: primitiva read-only de planejamento/contrato para controle de processos em background; não lançar/parar/reiniciar processos ainda.\n2026-04-30: primeira fatia implementada: primitiva read-only background_process_plan para contrato/planejamento de processos em background. Teste focal 4 passed; docs e package-doc check OK. Reload necessário antes da validação live da surface runtime."
     }
   ]
 }
