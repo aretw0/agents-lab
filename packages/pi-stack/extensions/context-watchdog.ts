@@ -22,6 +22,7 @@ import {
 } from "./custom-footer";
 import {
 	buildAutoCompactDiagnostics,
+	resolveAutoCompactCheckpointGate,
 	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	isAutoCompactDeferralReason,
@@ -113,6 +114,7 @@ export {
 	resolveCompactCheckpointPersistence,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
+	resolveAutoCompactCheckpointGate,
 	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
@@ -1102,17 +1104,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			}
 			const handoffAfterPrep = handoffPath ? readHandoffJson(ctx.cwd) : handoffForPrep;
 			const handoffEventAfterPrep = latestContextWatchEvent(handoffAfterPrep);
-			const checkpointEvidenceReadyBeforeCompact = Boolean(handoffPath) || resolveCheckpointEvidenceReadyForCalmClose({
-				handoffLastEventLevel: handoffEventAfterPrep?.level,
-				handoffLastEventAgeMs: contextWatchEventAgeMs(handoffEventAfterPrep, now),
-				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+			const checkpointGate = resolveAutoCompactCheckpointGate({
+				handoffPath,
+				checkpointEvidenceReady: resolveCheckpointEvidenceReadyForCalmClose({
+					handoffLastEventLevel: handoffEventAfterPrep?.level,
+					handoffLastEventAgeMs: contextWatchEventAgeMs(handoffEventAfterPrep, now),
+					maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+				}),
 			});
-			if (!checkpointEvidenceReadyBeforeCompact) {
+			if (!checkpointGate.proceed) {
 				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 					"context-watchdog.auto-compact-suppressed",
 					{
 						atIso: new Date(now).toISOString(),
-						reason: "checkpoint-evidence-missing",
+						reason: checkpointGate.reason,
 						freshness: handoffFreshnessForPrep.label,
 					},
 				);

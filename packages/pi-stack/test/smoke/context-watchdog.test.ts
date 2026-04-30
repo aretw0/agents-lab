@@ -18,6 +18,7 @@ import {
 	toAgeSec,
 	normalizeContextWatchdogConfig,
 	parseContextBootstrapPreset,
+	resolveAutoCompactCheckpointGate,
 	resolveAutoCompactEffectiveIdle,
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
@@ -190,6 +191,17 @@ describe("context-watchdog", () => {
 			hasPendingMessages: false,
 			checkpointEvidenceReady: false,
 		}).decision).toEqual({ trigger: false, reason: "checkpoint-evidence-missing" });
+
+		expect(resolveAutoCompactCheckpointGate({
+			handoffPath: ".project/handoff.json",
+			checkpointEvidenceReady: false,
+		})).toEqual({ proceed: true, reason: "checkpoint-written" });
+		expect(resolveAutoCompactCheckpointGate({
+			checkpointEvidenceReady: true,
+		})).toEqual({ proceed: true, reason: "checkpoint-ready" });
+		expect(resolveAutoCompactCheckpointGate({
+			checkpointEvidenceReady: false,
+		})).toEqual({ proceed: false, reason: "checkpoint-evidence-missing" });
 
 		expect(shouldTriggerAutoCompact(compact, cfg, {
 			nowMs: 30_000,

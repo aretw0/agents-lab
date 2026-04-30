@@ -5256,6 +5256,30 @@
       ],
       "notes": "Criado na lane essencial após feedback sobre compactação agressiva. [rationale:risk-control] Trabalho uninterrupted precisa garantir progresso salvo antes de compact/reload para manter segurança e controle.\n[2026-04-30T00:02:16Z] slice=1 focus=TASK-BUD-222 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Auto-compact agora tem freio explícito quando falta checkpoint fresco.",
       "verification": "VER-BUD-501"
+    },
+    {
+      "id": "TASK-BUD-223",
+      "description": "[P1] Extrair gate determinístico de checkpoint antes do auto-compact.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-222"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Decisão proceed/suppress do auto-compact antes de ctx.compact é coberta por helper puro.",
+        "Runtime usa o helper puro para bloquear compact sem checkpoint fresco.",
+        "Teste cobre proceed por handoffPath, proceed por checkpointEvidenceReady e suppress por checkpoint-evidence-missing.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload do guard de auto-compact. [rationale:risk-control] O freio crítico contra compact agressivo precisa ficar determinístico e testável, não apenas embutido no runtime.\n[2026-04-30T00:06:05Z] slice=1 focus=TASK-BUD-223 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Gate crítico de checkpoint antes de compact agora é helper puro coberto por teste.",
+      "verification": "VER-BUD-502"
     }
   ]
 }

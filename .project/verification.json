@@ -6738,6 +6738,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:02:40.280Z",
       "evidence": "Hardened context auto-compact so compact trigger can be suppressed when checkpoint evidence is missing. Added checkpoint-evidence-missing decision reason to auto-compact helper and guarded the runtime compact trigger to persist auto_compact_prep first, then suppress compact with audit/notification if fresh checkpoint evidence is still absent. Tests cover shouldTriggerAutoCompact and buildAutoCompactDiagnostics returning checkpoint-evidence-missing. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Prevents aggressive compact from proceeding without saved progress evidence."
+    },
+    {
+      "id": "VER-BUD-502",
+      "target": "TASK-BUD-223",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:06:17.362Z",
+      "evidence": "Extracted resolveAutoCompactCheckpointGate as a pure deterministic checkpoint gate for auto-compact. Runtime now uses the helper before ctx.compact, proceeding only when a checkpoint was just written or fresh checkpoint evidence is already ready, otherwise suppressing with checkpoint-evidence-missing. Tests cover proceed by handoffPath, proceed by checkpointEvidenceReady, and suppress by missing checkpoint evidence. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 32/32; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Makes the critical compact guard testable and auditable for safer unattended operation."
     }
   ]
 }

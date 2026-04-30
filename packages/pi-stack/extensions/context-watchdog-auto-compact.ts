@@ -70,6 +70,20 @@ export type ContextWatchAutoCompactDiagnostics = {
 	idle: ContextWatchAutoCompactIdleState;
 };
 
+export type AutoCompactCheckpointGateDecision = {
+	proceed: boolean;
+	reason: "checkpoint-ready" | "checkpoint-written" | "checkpoint-evidence-missing";
+};
+
+export function resolveAutoCompactCheckpointGate(input: {
+	handoffPath?: string;
+	checkpointEvidenceReady: boolean;
+}): AutoCompactCheckpointGateDecision {
+	if (input.handoffPath) return { proceed: true, reason: "checkpoint-written" };
+	if (input.checkpointEvidenceReady) return { proceed: true, reason: "checkpoint-ready" };
+	return { proceed: false, reason: "checkpoint-evidence-missing" };
+}
+
 export function resolveAutoCompactEffectiveIdle(input: {
 	autoCompactRequireIdle: boolean;
 	reason?: string;
