@@ -116,6 +116,36 @@ export interface NudgeFreeLoopLocalMeasuredCanaryPacket {
 }
 
 export type NudgeFreeLoopPacketFactSource = "local-observed" | "caller-supplied" | "mixed" | "unknown";
+export type NudgeFreeLoopLocalFactKey =
+  | "candidate"
+  | "checkpoint"
+  | "handoff-budget"
+  | "git-state"
+  | "protected-scopes"
+  | "cooldown"
+  | "validation"
+  | "stop-conditions";
+
+export interface NudgeFreeLoopLocalFactOrigin {
+  fact: NudgeFreeLoopLocalFactKey;
+  source: NudgeFreeLoopPacketFactSource;
+  evidence: string;
+}
+
+export interface NudgeFreeLoopFactSourceAssessment {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
+  authorization: "none";
+  factSource: NudgeFreeLoopPacketFactSource;
+  localObservedCount: number;
+  missingLocalFacts: NudgeFreeLoopLocalFactKey[];
+  untrustedLocalFacts: NudgeFreeLoopLocalFactKey[];
+  invalidEvidenceFacts: NudgeFreeLoopLocalFactKey[];
+  eligibleForMeasuredPacket: boolean;
+  reasons: string[];
+  summary: string;
+}
 
 export interface NudgeFreeLoopMeasuredPacketTrust {
   effect: "none";
@@ -323,6 +353,17 @@ const REQUIRED_NUDGE_FREE_MEASURED_GATES: NudgeFreeLoopMeasuredGate[] = [
   "stop-conditions-clear",
 ];
 
+const REQUIRED_NUDGE_FREE_LOCAL_FACTS: NudgeFreeLoopLocalFactKey[] = [
+  "candidate",
+  "checkpoint",
+  "handoff-budget",
+  "git-state",
+  "protected-scopes",
+  "cooldown",
+  "validation",
+  "stop-conditions",
+];
+
 function evaluateMeasuredEvidenceCoverage(entries: NudgeFreeLoopMeasuredEvidenceEntry[] | undefined): {
   measuredEvidenceCount: number;
   missingMeasuredEvidenceGates: NudgeFreeLoopMeasuredGate[];
@@ -418,6 +459,54 @@ export function buildLocalMeasuredNudgeFreeLoopCanaryPacket(input: NudgeFreeLoop
 
 export function resolveLocalMeasuredNudgeFreeLoopCanaryGate(input: NudgeFreeLoopLocalMeasuredCanaryInput): NudgeFreeLoopCanaryGate {
   return buildLocalMeasuredNudgeFreeLoopCanaryPacket(input).gate;
+}
+
+export function resolveMeasuredFactSourceAssessment(input: {
+  facts: NudgeFreeLoopLocalFactOrigin[];
+}): NudgeFreeLoopFactSourceAssessment {
+  const byFact = new Map<NudgeFreeLoopLocalFactKey, NudgeFreeLoopLocalFactOrigin>();
+  for (const fact of input.facts) {
+    if (!byFact.has(fact.fact)) byFact.set(fact.fact, fact);
+  }
+  const missingLocalFacts = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => !byFact.has(fact));
+  const untrustedLocalFacts = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => {
+    const origin = byFact.get(fact);
+    return Boolean(origin && origin.source !== "local-observed");
+  });
+  const invalidEvidenceFacts = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => {
+    const evidence = byFact.get(fact)?.evidence.trim() ?? "";
+    return evidence.length === 0 || evidence.length > NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS;
+  });
+  const localObservedCount = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => byFact.get(fact)?.source === "local-observed").length;
+  const hasAnyFact = input.facts.length > 0;
+  const factSource: NudgeFreeLoopPacketFactSource = missingLocalFacts.length === 0 && untrustedLocalFacts.length === 0 && invalidEvidenceFacts.length === 0
+    ? "local-observed"
+    : !hasAnyFact
+      ? "unknown"
+      : localObservedCount > 0
+        ? "mixed"
+        : input.facts.some((fact) => fact.source === "caller-supplied")
+          ? "caller-supplied"
+          : "unknown";
+  const reasons: string[] = [];
+  if (missingLocalFacts.length > 0) reasons.push("missing-local-facts");
+  if (untrustedLocalFacts.length > 0) reasons.push("untrusted-fact-source");
+  if (invalidEvidenceFacts.length > 0) reasons.push("fact-evidence-invalid");
+  const eligible = factSource === "local-observed" && reasons.length === 0;
+  return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
+    authorization: "none",
+    factSource,
+    localObservedCount,
+    missingLocalFacts,
+    untrustedLocalFacts,
+    invalidEvidenceFacts,
+    eligibleForMeasuredPacket: eligible,
+    reasons: eligible ? ["all-facts-local-observed"] : reasons,
+    summary: `nudge-free-fact-source: eligible=${eligible ? "yes" : "no"} source=${factSource} local=${localObservedCount}/${REQUIRED_NUDGE_FREE_LOCAL_FACTS.length} reasons=${eligible ? "all-facts-local-observed" : reasons.join("|")}`,
+  };
 }
 
 export function resolveMeasuredPacketTrust(input: {

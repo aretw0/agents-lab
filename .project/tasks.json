@@ -6601,6 +6601,32 @@
       ],
       "notes": "Criado após reload como follow-up de TASK-BUD-277. [rationale:risk-control] O guard de confiança precisa estar disponível por import canônico para consumidores internos sem virar permissão operacional.\n[2026-04-30T03:34:16Z] slice=1 focus=TASK-BUD-278 gate=test:monitor:smoke-242/242 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Trust guard re-exportado canonicamente; caller-supplied ready permanece authorization=none.",
       "verification": "VER-BUD-553"
+    },
+    {
+      "id": "TASK-BUD-279",
+      "description": "[P1] Criar helper puro para classificar origem local-observed dos fatos measured.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-278"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar helper puro que classifica se todos os fatos necessários do packet measured têm origem local-observed.",
+        "Helper deve identificar fatos faltantes, origem untrusted e evidência de origem inválida/overlong.",
+        "Resultado deve explicitar effect/mode/activation/authorization none e nunca autorizar operação.",
+        "Testes cobrem all local-observed, caller-supplied/mixed e missing/invalid evidence.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como boundary de coleta local-observed. [rationale:risk-control] Antes de uma superfície auditada, precisamos distinguir fatos observados localmente de fatos fornecidos pelo caller.\n[2026-04-30T03:37:24Z] slice=1 focus=TASK-BUD-279 gate=test:monitor:smoke-243/243 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Boundary local-observed para fatos measured criado, sem runtime surface.",
+      "verification": "VER-BUD-554"
     }
   ]
 }

@@ -7,6 +7,7 @@ import {
   resolveGitStateExpectedMeasuredSignal,
   resolveHandoffBudgetMeasuredSignal,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
+  resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveNextLocalSafeMeasuredSignal,
@@ -34,6 +35,68 @@ const completeMeasuredSignals = Object.fromEntries(
 ) as any;
 
 describe("guardrails unattended continuation", () => {
+  it("classifies local-observed fact sources before measured packet use", () => {
+    const localFacts = [
+      { fact: "candidate", source: "local-observed", evidence: "candidate=board-task" },
+      { fact: "checkpoint", source: "local-observed", evidence: "checkpoint=fresh" },
+      { fact: "handoff-budget", source: "local-observed", evidence: "handoff-budget=ok" },
+      { fact: "git-state", source: "local-observed", evidence: "git=expected" },
+      { fact: "protected-scopes", source: "local-observed", evidence: "protected=clear" },
+      { fact: "cooldown", source: "local-observed", evidence: "cooldown=ready" },
+      { fact: "validation", source: "local-observed", evidence: "validation=known" },
+      { fact: "stop-conditions", source: "local-observed", evidence: "stops=clear" },
+    ] as const;
+    const allLocal = resolveMeasuredFactSourceAssessment({ facts: [...localFacts] });
+    const mixed = resolveMeasuredFactSourceAssessment({
+      facts: [
+        ...localFacts.slice(0, 7),
+        { fact: "stop-conditions", source: "caller-supplied", evidence: "stops=clear" },
+      ],
+    });
+    const missingInvalid = resolveMeasuredFactSourceAssessment({
+      facts: [
+        { fact: "candidate", source: "local-observed", evidence: "" },
+        { fact: "checkpoint", source: "caller-supplied", evidence: "checkpoint=fresh" },
+      ],
+    });
+
+    expect(allLocal).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "local-observed",
+      localObservedCount: 8,
+      eligibleForMeasuredPacket: true,
+      reasons: ["all-facts-local-observed"],
+      summary: "nudge-free-fact-source: eligible=yes source=local-observed local=8/8 reasons=all-facts-local-observed",
+    });
+    expect(mixed).toMatchObject({
+      authorization: "none",
+      factSource: "mixed",
+      localObservedCount: 7,
+      eligibleForMeasuredPacket: false,
+      untrustedLocalFacts: ["stop-conditions"],
+      reasons: ["untrusted-fact-source"],
+    });
+    expect(missingInvalid).toMatchObject({
+      authorization: "none",
+      factSource: "mixed",
+      eligibleForMeasuredPacket: false,
+      missingLocalFacts: [
+        "handoff-budget",
+        "git-state",
+        "protected-scopes",
+        "cooldown",
+        "validation",
+        "stop-conditions",
+      ],
+      untrustedLocalFacts: ["checkpoint"],
+      invalidEvidenceFacts: expect.arrayContaining(["candidate"]),
+      reasons: ["missing-local-facts", "untrusted-fact-source", "fact-evidence-invalid"],
+    });
+  });
+
   it("derives compact next-local-safe measured signals from structured candidates", () => {
     const ok = resolveNextLocalSafeMeasuredSignal({
       taskId: "TASK-BUD-269",
