@@ -9068,6 +9068,78 @@
       ],
       "notes": "[rationale:risk-control] Expor o gate como tool read-only reduz ambiguidade para a próxima decisão sem liberar implementação ou execução.\n[2026-04-30T13:26:35Z] slice=1 focus=TASK-BUD-373 gate=surface-9/9+test:monitor:smoke-271/271 commit=pending tool=one_slice_executor_backlog_gate implementation=no dispatch=no executor=no reload-needed=yes. [rationale:risk-control] Gate de backlog exposto como tool read-only sem executor.",
       "verification": "VER-BUD-647"
+    },
+    {
+      "id": "TASK-BUD-374",
+      "description": "[P2] Cultivar primitiva de entrevistas/forms estruturados para desambiguação sequencial.",
+      "status": "in-progress",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-373"
+      ],
+      "files": [
+        "docs/primitives/continuity-abstraction.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Mapear casos em que lacunas humanas precisam ser preenchidas de forma estruturada e sequencial, em vez de perguntas soltas.",
+        "Definir primitive backend-first para interview/form schema: perguntas, respostas, validação, defaults, skip/unknown, decisão final e evidência.",
+        "Conectar a primitive a gates existentes: human contract review, executor backlog gate, .project adapter strategy, no-auto-close e verification.",
+        "Avaliar referências/experiências de outras ferramentas como Claude Code sem copiar UI/fluxo diretamente.",
+        "Separar backend contract de apresentação TUI/Web/Telegram/forms.",
+        "Produzir backlog/design antes de implementação runtime."
+      ],
+      "notes": "[rationale:architecture] Para desbloquear decisões humanas sem ruído, precisamos cultivar uma primitiva de entrevista/form estruturado que preencha lacunas em sequência clara e alimente gates como evidência, independente da UI.\n[2026-04-30T13:31:00Z] Iniciando design backend-first da primitiva de interview/form estruturado para preencher lacunas humanas em sequência clara antes de executor/scheduler/repetition. [rationale:architecture] Decisões humanas precisam virar evidência estruturada para gates, não perguntas soltas."
+    },
+    {
+      "id": "TASK-BUD-375",
+      "description": "[P1] Investigar falha de Esc/cancelamento como controle humano de interrupção.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-370"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/terminal-setup.md",
+        "packages/pi-skills/skills/terminal-setup/SKILL.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar evidência de que Esc não interrompeu uma operação quando o operador tentou cancelar.",
+        "Classificar Esc/cancelamento como controle humano crítico para operações longas/ininterruptas.",
+        "Investigar se o problema é keybinding, terminal, TUI event handling, long-running tool non-interruptible, ou reload/runtime state.",
+        "Definir fallback operacional quando Esc falhar: mensagem curta, checkpoint, reload/restart seguro, e evitar iniciar nova operação longa até recuperar cancelamento.",
+        "Documentar diagnóstico mínimo e próximos passos sem editar configurações pessoais automaticamente.",
+        "Preservar que runtime/tool long-run precisa respeitar AbortSignal/cancelamento quando aplicável."
+      ],
+      "notes": "[rationale:risk-control] O operador tentou cancelar com Esc e não conseguiu; isso reduz controle humano sobre operações longas e precisa virar incidente/backlog antes de avançar autonomia."
+    },
+    {
+      "id": "TASK-BUD-376",
+      "description": "[P1] Live-validar one_slice_executor_backlog_gate após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-373"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar one_slice_executor_backlog_gate no caminho ready-for-separate-task e confirmar implementation=no dispatch=no executor=no authorization=none.",
+        "Executar one_slice_executor_backlog_gate no caminho bloqueado e confirmar blockedRequests=... com implementation=no dispatch=no executor=no authorization=none.",
+        "Confirmar que a tool não stageia, commita, fecha task, checkpointa, aciona scheduler/remote/self-reload ou loop; ações de board/commit/checkpoint são explícitas.",
+        "Registrar evidência, commit e checkpoint.",
+        "Deixar TASK-BUD-375 como próximo foco P1 para investigar Esc/cancelamento antes de long-runs fortes."
+      ],
+      "notes": "[rationale:risk-control] A runtime tool do gate de backlog precisa ser validada ao vivo após reload antes de ser usada como evidência operacional.\n[2026-04-30T13:36:00Z] slice=1 focus=TASK-BUD-376 gate=live-one_slice_executor_backlog_gate ready=ready-for-separate-task blocked=blocked implementation=no dispatch=no executor=no authorization=none commit=pending next=TASK-BUD-375. [rationale:risk-control] Gate runtime validado; Esc/cancel segue próximo bloqueio P1 para long-run.",
+      "verification": "VER-BUD-648"
     }
   ]
 }

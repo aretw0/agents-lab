@@ -8052,6 +8052,15 @@
       "method": "test",
       "timestamp": "2026-04-30T13:27:03.840Z",
       "evidence": "Exposed resolveOneSliceExecutorBacklogGate(...) as read-only runtime tool `one_slice_executor_backlog_gate` in guardrails-core-unattended-continuation-surface. The tool returns the helper summary/details only and never approves implementation or dispatch. Ready path summary is `one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none`, with dispatchAllowed=false, executorApproved=false, implementationAllowed=false. Blocked path surfaces prohibited requests as `blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance`. No executor, dispatcher, scheduler, loop, staging, commit, checkpoint, remote/offload, self-reload, or automation was added. Validation: focal surface smoke passed 9/9; full monitor smoke passed 271/271. Runtime tool registration changed, so live validation requires reload. [rationale:risk-control] The backlog gate is now inspectable in the runtime transcript without weakening the no-implementation boundary."
+    },
+    {
+      "id": "VER-BUD-648",
+      "target": "TASK-BUD-376",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T13:31:56.587Z",
+      "evidence": "After reload, live runtime validation of one_slice_executor_backlog_gate succeeded. Ready path returned `one-slice-executor-backlog-gate: decision=ready-for-separate-task implementation=no dispatch=no executor=no reasons=criteria-present,separate-task-required,implementation-still-not-authorized authorization=none`. Blocked path returned `one-slice-executor-backlog-gate: decision=blocked implementation=no dispatch=no executor=no reasons=project-strategy-missing,operator-packet-missing-files-missing,explicit-human-contract-missing,time-budget-missing blockedRequests=repeat|scheduler|self-reload|remote-or-offload|github-actions|protected-scope|destructive-maintenance authorization=none`. git status after tool calls showed only explicit .project/handoff.json and .project/tasks.json workflow changes; the tool did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, start a loop, approve executor, or allow implementation. TASK-BUD-375 remains the next P1 focus before stronger long-run autonomy because Esc/cancel reliability is uncertain. [rationale:risk-control] The backlog gate is live and preserves no-implementation/no-dispatch boundaries."
     }
   ]
 }
