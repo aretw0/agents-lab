@@ -5778,6 +5778,30 @@
       ],
       "notes": "Criado a partir do receio do operador sobre manipulação direta dos booleans abrir loop sem querer. [rationale:risk-control] A tool deve comunicar que ready é apenas diagnóstico/advisory, não habilitação de automação.\n[2026-04-30T01:32:18Z] slice=1 focus=TASK-BUD-244 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Summary do canário agora explicita effect=none para evitar confusão com ativação real.",
       "verification": "VER-BUD-522"
+    },
+    {
+      "id": "TASK-BUD-245",
+      "description": "[P1] Adicionar campos estruturados advisory/activation ao gate nudge-free.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-244"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Resultado estruturado do gate inclui effect ou activation explícito em details, não apenas no summary textual.",
+        "Campos deixam claro que a avaliação é advisory/read-only e não inicia loop.",
+        "Testes cobrem ready/defer/blocked preservando os campos estruturados.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado para transformar effect=none de mera comunicação textual em campo estruturado auditável nos details. [rationale:risk-control] Agentes futuros não devem precisar parsear apenas summary para saber que a tool não ativa automação.\n[2026-04-30T01:35:37Z] slice=1 focus=TASK-BUD-245 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] effect/mode/activation agora são campos estruturados, não apenas texto.",
+      "verification": "VER-BUD-523"
     }
   ]
 }

@@ -33,6 +33,9 @@ export interface NudgeFreeLoopCanaryInput {
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
 
 export interface NudgeFreeLoopCanaryGate {
+  effect: "none";
+  mode: "advisory";
+  activation: "none";
   decision: NudgeFreeLoopCanaryDecision;
   canContinueWithoutNudge: boolean;
   reasons: string[];
@@ -61,6 +64,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
   ));
   if (blocked) {
     return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons,
@@ -71,6 +77,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
 
   if (reasons.length > 0) {
     return {
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons,
@@ -80,6 +89,9 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
   }
 
   return {
+    effect: "none",
+    mode: "advisory",
+    activation: "none",
     decision: "ready",
     canContinueWithoutNudge: true,
     reasons: ["all-gates-green"],

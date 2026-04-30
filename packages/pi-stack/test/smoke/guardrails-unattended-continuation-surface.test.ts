@@ -63,8 +63,18 @@ describe("guardrails unattended continuation surface", () => {
     });
 
     expect(ready?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green");
-    expect(ready?.details.canContinueWithoutNudge).toBe(true);
+    expect(ready?.details).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      canContinueWithoutNudge: true,
+    });
     expect(blocked?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=blocked continue=no reasons=unexpected-git-state,protected-scope-pending,stop-condition-present");
-    expect(blocked?.details.canContinueWithoutNudge).toBe(false);
+    expect(blocked?.details).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      canContinueWithoutNudge: false,
+    });
   });
 });

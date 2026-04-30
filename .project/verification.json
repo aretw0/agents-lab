@@ -6927,6 +6927,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:32:37.042Z",
       "evidence": "Updated nudge-free loop gate summaries to include effect=none, making clear that ready/defer/blocked are advisory diagnostics and do not activate automation. Updated runtime tool description to say advisory only, read-only, side-effect-free, and never starts automation. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Addresses operator concern that manipulating booleans could accidentally open the loop; the tool now communicates no activation side effect."
+    },
+    {
+      "id": "VER-BUD-523",
+      "target": "TASK-BUD-245",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:35:50.332Z",
+      "evidence": "Added structured no-activation fields to NudgeFreeLoopCanaryGate: effect='none', mode='advisory', activation='none'. Tests now assert these fields for ready, defer, and blocked paths, and surface tests assert runtime details preserve the structured advisory/no-activation fields while content remains compact. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Future agents/automations can inspect details instead of parsing summary text to know the gate does not start a loop."
     }
   ]
 }

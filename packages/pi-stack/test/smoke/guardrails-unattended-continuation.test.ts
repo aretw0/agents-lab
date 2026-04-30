@@ -16,6 +16,9 @@ describe("guardrails unattended continuation", () => {
     });
 
     expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
       decision: "ready",
       canContinueWithoutNudge: true,
       reasons: ["all-gates-green"],
@@ -37,6 +40,9 @@ describe("guardrails unattended continuation", () => {
     });
 
     expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["missing-opt-in"],
@@ -58,6 +64,9 @@ describe("guardrails unattended continuation", () => {
     });
 
     expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons: ["unexpected-git-state", "protected-scope-pending", "stop-condition-present"],

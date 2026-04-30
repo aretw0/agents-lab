@@ -1,38 +1,40 @@
 {
-  "timestamp": "2026-04-30T01:21:11.557Z",
-  "context": "Post-compact repair checkpoint. Auto-compact occurred after a healthy TASK-BUD-240 checkpoint. A new TASK-BUD-241 was created in-progress for [snip] ata is dirty plus preserved user files. [truncated:+209 chars]",
+  "timestamp": "2026-04-30T01:34:21.514Z",
+  "context": "TASK-BUD-244 completed. Nudge-free loop summaries now include effect=none to communicate advisory/no-side-effect evaluation, and the runtime [snip] hardening, not an activation mechanism. [truncated:+78 chars]",
   "current_tasks": [
-    "TASK-BUD-241"
+    "TASK-BUD-244"
   ],
   "next_actions": [
-    "continue TASK-BUD-241 as a small pure-helper slice or close it if superseded",
-    "checkpoint again before any nontrivial mutation",
-    "avoid broad diagnostics"
+    "reload before live-validating advisory effect=none summary",
+    "continue essential local hardening with small bounded slices",
+    "consider structured activation/advisory fields in details so future automations do not parse only text"
   ],
-  "blockers": [],
+  "blockers": [
+    "reload-recommended-for-updated-nudge-free-tool-summary"
+  ],
   "recent_validation": [
-    "context_watch_status summary: context-watch-status level=ok percent=15 action=continue autoCom [snip] ndard-slices handoff=fresh [truncated:+48 chars]",
-    "handoff before repair pointed to TASK-BUD-240 and recorded compact event at 72 percent compact-now",
-    "git status shows preserved .pi/settings.json and .obsidian plus .project/tasks.json/.project/handoff.json local metadata"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test [snip] est.ts --silent passed 9/9 [truncated:+77 chars]",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files",
+    "live board_task_complete summary: board-task-complete ok=yes task=TASK-BUD-244 verification=VER-BUD-522 status=completed"
   ],
   "recent_commits": [
-    "c7de4cb docs(control-plane): define nudge-free loop"
+    "f8e7c0e fix(guardrails): mark nudge gate advisory"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T01:21:11.557Z",
+    "generatedAtIso": "2026-04-30T01:34:21.514Z",
     "level": "ok",
     "percent": 15,
     "action": "continue",
-    "recommendation": "Proceed from repaired checkpoint; the compact was aggressive but not data-loss because TASK-BUD-240 was saved."
+    "recommendation": "Progress saved; reload recommended before live validation of the updated runtime summary."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T01:21:11.557Z",
+      "atIso": "2026-04-30T01:34:21.514Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 15,
       "action": "checkpoint-refresh",
-      "recommendation": "Proceed from repaired checkpoint; the compact was aggressive but not data-loss because TASK-BUD-240 was saved."
+      "recommendation": "Progress saved; reload recommended before live validation of the updated runtime summary."
     }
   ]
 }
