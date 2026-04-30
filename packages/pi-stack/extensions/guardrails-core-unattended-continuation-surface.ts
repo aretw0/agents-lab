@@ -69,14 +69,34 @@ function isCandidateTask(task: any): boolean {
   return task?.status === "in-progress" || task?.status === "planned";
 }
 
+function taskProtectedPaths(task: any): string[] {
+  const files = Array.isArray(task?.files) ? task.files.map((file: unknown) => String(file)) : [];
+  return files.filter(isProtectedAuditPath).map(normalizePathForAudit);
+}
+
+function taskNumericSuffix(task: any): number {
+  const id = typeof task?.id === "string" ? task.id : "";
+  const match = id.match(/(\d+)(?!.*\d)/);
+  return match ? Number(match[1]) : -1;
+}
+
+function sortLocalContinuityCandidateTasks(a: any, b: any): number {
+  const statusRank = (task: any) => task?.status === "in-progress" ? 0 : 1;
+  const byStatus = statusRank(a) - statusRank(b);
+  if (byStatus !== 0) return byStatus;
+  const byProtected = taskProtectedPaths(a).length - taskProtectedPaths(b).length;
+  if (byProtected !== 0) return byProtected;
+  return taskNumericSuffix(b) - taskNumericSuffix(a);
+}
+
 function findTask(tasksJson: unknown, taskId?: string): any | undefined {
   const tasks = Array.isArray(tasksJson) ? tasksJson : (tasksJson as { tasks?: unknown[] } | undefined)?.tasks;
   if (!Array.isArray(tasks)) return undefined;
   if (taskId) {
     const handoffTask = tasks.find((task: any) => task?.id === taskId);
-    if (isCandidateTask(handoffTask)) return handoffTask;
+    if (isCandidateTask(handoffTask) && taskProtectedPaths(handoffTask).length <= 0) return handoffTask;
   }
-  return tasks.find((task: any) => task?.status === "in-progress") ?? tasks.find((task: any) => task?.status === "planned");
+  return tasks.filter(isCandidateTask).sort(sortLocalContinuityCandidateTasks)[0];
 }
 
 function deriveValidationKind(task: any): { kind: NudgeFreeLoopValidationKind; focalGate?: string } {

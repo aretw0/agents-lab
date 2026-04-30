@@ -180,6 +180,52 @@ describe("guardrails unattended continuation surface", () => {
     }
   });
 
+  it("prefers recent local-safe active task over older protected in-progress task", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-active-focus-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: "2026-04-30T04:40:00.000Z",
+        blockers: [],
+      }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+        {
+          id: "TASK-BUD-153",
+          status: "in-progress",
+          description: "Old protected multi-mode calibration",
+          files: ["packages/pi-stack/extensions/foo.ts", ".github/workflows/ci.yml"],
+          acceptance_criteria: ["Smoke principal permanece verde."],
+        },
+        {
+          id: "TASK-BUD-325",
+          status: "in-progress",
+          description: "Current local-safe audit alignment smoke",
+          files: ["packages/pi-stack/extensions/context-watchdog.ts"],
+          acceptance_criteria: ["Smoke principal permanece verde."],
+        },
+      ] }));
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+      const collectorResults = result?.details.collectorResults as Array<{ fact: string; status: string; evidence: string }>;
+      const candidate = collectorResults.find((entry) => entry.fact === "candidate");
+
+      expect(candidate).toEqual({
+        fact: "candidate",
+        status: "observed",
+        evidence: "next-local-safe=yes task=TASK-BUD-325 files=1",
+      });
+      expect(result?.content?.[0]?.text).toContain("local-continuity-audit:");
+      expect(result?.content?.[0]?.text).toContain("authorization=none");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("registers read-only continuation plan tool", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsUnattendedContinuationSurface({

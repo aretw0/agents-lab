@@ -7611,6 +7611,15 @@
       "method": "live-tool+test",
       "timestamp": "2026-04-30T06:15:17.954Z",
       "evidence": "Live runtime after operator reload validated compact readiness reasons. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-324 audit=blocked reasons=candidate:invalid|git-state:invalid|protected-scopes:invalid staleFocus=1 authorization=none`. This confirms the loaded readiness packet includes top local audit blockers compactly, remains fail-closed with ready=no, and preserves authorization=none. Focal context-watchdog smoke passed 47/47. No compact/resume/scheduler/self-reload/remote/auto-continuation was dispatched. [rationale:risk-control] Readiness now gives actionable blocked-state causes without broad diagnostics or operational authorization."
+    },
+    {
+      "id": "VER-BUD-599",
+      "target": "TASK-BUD-325",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T06:19:17.128Z",
+      "evidence": "Aligned local_continuity_audit candidate selection with the readiness primary-focus intent without masking protected paths. The audit fallback now sorts active candidate tasks by in-progress before planned, unprotected before protected, and latest numeric task id first; handoff current_tasks is used only when active and unprotected. Added smoke proving an older protected in-progress TASK-BUD-153 with `.github/workflows/ci.yml` is skipped and newer local-safe TASK-BUD-325 is selected as candidate. Bounded inspection after the change shows current local audit still fail-closed due real protected user file `.pi/settings.json`, but no longer reports `.github/workflows/ci.yml` or validation unknown: candidate evidence is now `next-local-safe=no reasons=files-large`, validation is observed `validation=focal-test gate=npm-run-smoke`, protected evidence is `protected=pending count=1 first=.pi/settings.json`. Validation: focal context-watchdog + guardrails surface smokes passed 53/53; cmd.exe /c npm run test:monitor:smoke --silent passed 263/263 across 32 files. No compact/resume/scheduler/self-reload/remote/auto-continuation activated. [rationale:risk-control] Readiness and audit now inspect the same local-safe focus while preserving real protected-scope blockers."
     }
   ]
 }

@@ -7811,6 +7811,36 @@
       ],
       "notes": "[rationale:risk-control] Reasons compactos do readiness precisam ser validados no runtime carregado para apoiar continuação segura sem diagnóstico amplo.\n[2026-04-30T06:15:07Z] slice=1 focus=TASK-BUD-324 gate=live-context_watch_continuation_readiness+context-watchdog-smoke-47/47 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Reasons compactos do readiness validados ao vivo após reload.",
       "verification": "VER-BUD-598"
+    },
+    {
+      "id": "TASK-BUD-325",
+      "description": "[P1] Alinhar candidate do local_continuity_audit com foco primário do readiness sem mascarar protected paths.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-324"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Investigar bounded reasons candidate/git/protected do context_watch_continuation_readiness.",
+        "local_continuity_audit deve preferir o mesmo foco primário local-safe do readiness quando current_tasks está ausente/stale.",
+        "Não mascarar protected paths reais como .pi/settings.json, .obsidian ou .github.",
+        "Manter protected-scopes invalid quando protected path real está modificado.",
+        "Adicionar smoke cobrindo alinhamento de candidate com task ativa recente quando há in-progress antigo no board.",
+        "Manter authorization=none e comportamento read-only/advisory.",
+        "Nenhum scheduler, self-reload, loop, remoto ou auto-continuação é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "[rationale:risk-control] Readiness precisa avaliar o mesmo foco primário concreto que apresenta ao operador; divergência entre focus e local audit causa blocked state pouco acionável.\n[2026-04-30T06:18:58Z] slice=1 focus=TASK-BUD-325 gate=test:monitor:smoke-263/263 commit=pending drift=no next=commit-and=context_watch_checkpoint. [rationale:risk-control] Candidate do audit alinhado ao foco primário sem mascarar .pi/settings.json protegido.",
+      "verification": "VER-BUD-599"
     }
   ]
 }
