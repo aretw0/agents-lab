@@ -8232,6 +8232,15 @@
       "method": "test+safe_marker_check",
       "timestamp": "2026-04-30T18:34:57.912Z",
       "evidence": "Implemented backend-first structured interview primitive and runtime surface. Added resolveStructuredInterview helper and structured_interview_plan tool: validates question schema/answers, supports defaults, allowUnknown, allowSkip, nextQuestionId, decisions complete/needs-human-answer/invalid, compact evidence, UI-independent semantics, authorization=none, dispatchAllowed=false. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts => 3 passed. safe_marker_check docs matched 5/5."
+    },
+    {
+      "id": "VER-BUD-668",
+      "target": "TASK-BUD-374",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload",
+      "timestamp": "2026-04-30T18:37:43.327Z",
+      "evidence": "After reload, structured_interview_plan live validation passed across three paths. needs-human-answer path returned decision=needs-human-answer nextQuestionId=validation dispatchAllowed=false authorization=none. complete path accepted default scope=local, unknown rollback, optional skipped notes, decision=complete dispatchAllowed=false. invalid path rejected single-choice value remote and unauthorized skip, decision=invalid dispatchAllowed=false. All outputs preserved backendFirst=true uiCoupling=none activation=none authorization=none."
     }
   ]
 }

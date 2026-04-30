@@ -1,37 +1,36 @@
 {
-  "timestamp": "2026-04-30T18:35:09.371Z",
-  "context": "Implemented first backend-first structured interview primitive for human decision gaps. Added pure resolver resolveStructuredInterview, runti [snip] oad is required before live validation. [truncated:+287 chars]",
+  "timestamp": "2026-04-30T18:38:06.928Z",
+  "context": "After reload, live validation of structured_interview_plan passed. Validated needs-human-answer with nextQuestionId, complete with default/un [snip] possible integration/closure decision. [truncated:+230 chars]",
   "current_tasks": [
     "TASK-BUD-374"
   ],
   "next_actions": [
-    "Commit TASK-BUD-374 implementation/docs/board evidence.",
-    "Reload before live validation of structured_interview_plan tool.",
-    "After reload, validate needs-human-answer, complete, and invalid paths via tool."
+    "Commit live validation evidence.",
+    "Decide whether to close TASK-BUD-374 as primitive live-validated or add a follow-up task for i [snip] act/no-auto-close packets. [truncated:+27 chars]",
+    "Continue local-first only; strong unattended remains blocked."
   ],
   "blockers": [
-    "Reload required before live validation because runtime tool surface changed.",
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts: 3 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
-    "board_verification_append VER-BUD-667 ok"
+    "structured_interview_plan needs-human-answer: nextQuestionId=validation dispatchAllowed=false",
+    "structured_interview_plan complete: accepted default/unknown/optional skip dispatchAllowed=false",
+    "structured_interview_plan invalid: invalid reasons single-choice-value-not-in-options and skip [snip] owed dispatchAllowed=false [truncated:+8 chars]"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T18:35:09.371Z",
+    "generatedAtIso": "2026-04-30T18:38:06.928Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-then-reload-before-live-validation"
+    "recommendation": "commit-live-validation-then-close-or-follow-up"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T18:35:09.371Z",
+      "atIso": "2026-04-30T18:38:06.928Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-before-live-validation"
+      "recommendation": "commit-live-validation-then-close-or-follow-up"
     }
   ]
 }
