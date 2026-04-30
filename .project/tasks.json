@@ -5011,7 +5011,7 @@
     {
       "id": "TASK-BUD-212",
       "description": "[P2] Backlog: desenhar protocolo agnóstico para memória de projeto e ticket systems.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-210",
@@ -5027,7 +5027,8 @@
         "Preservar a recomendação ampla: o usuário deve construir uma memória de projeto de algum jeito, mas escolher a montagem.",
         "Manter tools atuais como começo local-first, sem vender .project como único caminho."
       ],
-      "notes": "Criado a partir de steering do operador após reload. [rationale:risk-control] As superfícies atuais começam em .project/davidorex, mas devem evoluir para primitivas/adaptadores agnósticos para não travar a arquitetura em um ticket system."
+      "notes": "Criado a partir de steering do operador após reload. [rationale:risk-control] As superfícies atuais começam em .project/davidorex, mas devem evoluir para primitivas/adaptadores agnósticos para não travar a arquitetura em um ticket system.\n2026-04-30: verificação de evidência existente confirmou que o protocolo agnóstico já está documentado em docs/primitives/continuity-abstraction.md, docs/guides/project-canonical-pipeline.md e docs/guides/control-plane-operating-doctrine.md. Fechamento será por evidência documental/marker-check, sem mudança adicional de runtime.\n2026-04-30: concluído por evidência documental existente + safe_marker_check 5/5 em três docs; sem runtime change.",
+      "verification": "VER-BUD-697"
     },
     {
       "id": "TASK-BUD-213",

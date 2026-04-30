@@ -8493,6 +8493,15 @@
       "method": "live-after-reload",
       "timestamp": "2026-04-30T21:01:14.480Z",
       "evidence": "After reload, monitor_classify_failure_readiness returned decision=ok total=0 readinessImpact=none readyForStrongUnattended=true with activation=none authorization=none dispatchAllowed=false. monitors_compact_status reported classifyFail=0 across 5 enabled monitors. This validates the classifier-format failure readiness signal and the prompt/tool-call alignment slice; strong unattended is still governed by other gates and not authorized by this task alone."
+    },
+    {
+      "id": "VER-BUD-697",
+      "target": "TASK-BUD-212",
+      "target_type": "task",
+      "status": "passed",
+      "method": "documentation-marker-check",
+      "timestamp": "2026-04-30T21:03:48.411Z",
+      "evidence": "Existing docs satisfy the tracker-agnostic project memory protocol acceptance criteria. docs/primitives/continuity-abstraction.md defines canonical v1 task/event/intent/evidence/decisionGate/deliveryState, transitions, invariants, and adapter matrix for .project, first-party backend, GitHub/Gitea trackers, Markdown/Obsidian, and SQLite. docs/guides/project-canonical-pipeline.md states .project is the current local adapter, coordination is backend-agnostic, and storage is substitutable. docs/guides/control-plane-operating-doctrine.md recommends some recoverable project memory while allowing .project, GitHub Issues, GitLab, Linear/Jira or other systems. safe_marker_check passed 5/5 on each of the three docs. No runtime mutation required."
     }
   ]
 }
