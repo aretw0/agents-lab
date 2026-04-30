@@ -1,5 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { resolveHumanConfirmationAuditPlan } from "../../extensions/guardrails-core-human-confirmation";
+import {
+  consumeTrustedHumanConfirmationEvidence,
+  resolveHumanConfirmationAuditPlan,
+  resolveHumanConfirmationEvidenceMatch,
+  type PendingHumanConfirmedAction,
+  type TrustedHumanConfirmationEvidence,
+} from "../../extensions/guardrails-core-human-confirmation";
+
+const pendingDelete: PendingHumanConfirmedAction = {
+  actionKind: "destructive",
+  toolName: "bash",
+  path: "tmp/demo.txt",
+  scope: "workspace",
+  payloadHash: "sha256:delete-demo",
+  nowIso: "2026-04-30T22:00:00.000Z",
+};
+
+const trustedEvidence: TrustedHumanConfirmationEvidence = {
+  id: "confirm-1",
+  origin: "runtime-ui-confirm",
+  trusted: true,
+  actionKind: "destructive",
+  toolName: "bash",
+  path: "tmp/demo.txt",
+  scope: "workspace",
+  payloadHash: "sha256:delete-demo",
+  createdAtIso: "2026-04-30T21:59:50.000Z",
+  expiresAtIso: "2026-04-30T22:00:20.000Z",
+};
 
 describe("human confirmation audit plan", () => {
   it("classifies observed TUI confirmation without monitor-visible evidence as an audit gap", () => {
@@ -64,5 +92,43 @@ describe("human confirmation audit plan", () => {
     expect(result.decision).toBe("not-required");
     expect(result.layer).toBe("not-required");
     expect(result.reasons).toEqual(["confirmation-not-required-for-local-safe-action"]);
+  });
+
+  it("matches trusted exact action evidence without granting dispatch", () => {
+    const result = resolveHumanConfirmationEvidenceMatch(trustedEvidence, pendingDelete);
+
+    expect(result.decision).toBe("match");
+    expect(result.usableAsAuditEvidence).toBe(true);
+    expect(result.consumeAllowed).toBe(true);
+    expect(result.dispatchAllowed).toBe(false);
+    expect(result.canOverrideMonitorBlock).toBe(false);
+    expect(result.authorization).toBe("none");
+  });
+
+  it("rejects stale, consumed, and mismatched evidence", () => {
+    expect(resolveHumanConfirmationEvidenceMatch({
+      ...trustedEvidence,
+      expiresAtIso: "2026-04-30T21:59:59.000Z",
+    }, pendingDelete).decision).toBe("expired");
+
+    expect(resolveHumanConfirmationEvidenceMatch({
+      ...trustedEvidence,
+      consumedAtIso: "2026-04-30T22:00:01.000Z",
+    }, pendingDelete).decision).toBe("consumed");
+
+    const mismatch = resolveHumanConfirmationEvidenceMatch({
+      ...trustedEvidence,
+      path: "tmp/other.txt",
+    }, pendingDelete);
+    expect(mismatch.decision).toBe("mismatch");
+    expect(mismatch.reasons).toContain("path-mismatch");
+  });
+
+  it("consumes trusted confirmation evidence as a single-use copy", () => {
+    const consumed = consumeTrustedHumanConfirmationEvidence(trustedEvidence, pendingDelete);
+
+    expect(consumed.ok).toBe(true);
+    expect(consumed.evidence.consumedAtIso).toBe(pendingDelete.nowIso);
+    expect(resolveHumanConfirmationEvidenceMatch(consumed.evidence, pendingDelete).decision).toBe("consumed");
   });
 });

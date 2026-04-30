@@ -1,6 +1,8 @@
 export type HumanConfirmationActionKind = "local-safe" | "destructive" | "protected";
 export type HumanConfirmationAuditDecision = "not-required" | "auditable" | "audit-gap" | "blocked";
 export type HumanConfirmationEvidenceOrigin = "tool-call" | "custom-message" | "audit-entry";
+export type TrustedHumanConfirmationOrigin = "runtime-ui-confirm" | "operator-contract-review";
+export type HumanConfirmationEvidenceDecision = "match" | "missing" | "expired" | "consumed" | "mismatch" | "untrusted";
 
 export type HumanConfirmationAuditInput = {
   actionKind: HumanConfirmationActionKind;
@@ -24,12 +26,178 @@ export type HumanConfirmationAuditPlan = {
   summary: string;
 };
 
+export type HumanConfirmationActionFingerprint = {
+  actionKind: Exclude<HumanConfirmationActionKind, "local-safe">;
+  toolName: string;
+  path?: string;
+  scope?: string;
+  payloadHash?: string;
+};
+
+export type TrustedHumanConfirmationEvidence = HumanConfirmationActionFingerprint & {
+  id: string;
+  origin: TrustedHumanConfirmationOrigin;
+  trusted: true;
+  createdAtIso: string;
+  expiresAtIso: string;
+  consumedAtIso?: string;
+};
+
+export type PendingHumanConfirmedAction = HumanConfirmationActionFingerprint & {
+  nowIso: string;
+};
+
+export type HumanConfirmationEvidenceMatch = {
+  decision: HumanConfirmationEvidenceDecision;
+  authorization: "none";
+  dispatchAllowed: false;
+  canOverrideMonitorBlock: false;
+  usableAsAuditEvidence: boolean;
+  consumeAllowed: boolean;
+  reasons: string[];
+  evidenceId?: string;
+  summary: string;
+};
+
+function normalizeComparable(value: string | undefined): string {
+  return typeof value === "string" ? value.replace(/\\/g, "/").trim() : "";
+}
+
+function sameOptionalField(a: string | undefined, b: string | undefined): boolean {
+  return normalizeComparable(a) === normalizeComparable(b);
+}
+
+function isExpired(expiresAtIso: string, nowIso: string): boolean {
+  const expires = Date.parse(expiresAtIso);
+  const now = Date.parse(nowIso);
+  if (!Number.isFinite(expires) || !Number.isFinite(now)) return true;
+  return now > expires;
+}
+
 function collectOrigins(input: HumanConfirmationAuditInput): HumanConfirmationEvidenceOrigin[] {
   const origins: HumanConfirmationEvidenceOrigin[] = [];
   if (input.toolCallEvidence) origins.push("tool-call");
   if (input.customMessageEvidence) origins.push("custom-message");
   if (input.auditEntryEvidence) origins.push("audit-entry");
   return origins;
+}
+
+export function resolveHumanConfirmationEvidenceMatch(
+  evidence: TrustedHumanConfirmationEvidence | undefined,
+  pending: PendingHumanConfirmedAction,
+): HumanConfirmationEvidenceMatch {
+  const reasons: string[] = [];
+
+  if (!evidence) {
+    reasons.push("confirmation-evidence-missing");
+    return {
+      decision: "missing",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      usableAsAuditEvidence: false,
+      consumeAllowed: false,
+      reasons,
+      summary: "human-confirmation-evidence: decision=missing dispatch=no override=no reasons=confirmation-evidence-missing authorization=none",
+    };
+  }
+
+  if (evidence.trusted !== true || !["runtime-ui-confirm", "operator-contract-review"].includes(evidence.origin)) {
+    reasons.push("confirmation-origin-untrusted");
+    return {
+      decision: "untrusted",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      usableAsAuditEvidence: false,
+      consumeAllowed: false,
+      reasons,
+      evidenceId: evidence.id,
+      summary: `human-confirmation-evidence: decision=untrusted dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (evidence.consumedAtIso) {
+    reasons.push("confirmation-already-consumed");
+    return {
+      decision: "consumed",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      usableAsAuditEvidence: false,
+      consumeAllowed: false,
+      reasons,
+      evidenceId: evidence.id,
+      summary: `human-confirmation-evidence: decision=consumed dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (isExpired(evidence.expiresAtIso, pending.nowIso)) {
+    reasons.push("confirmation-expired");
+    return {
+      decision: "expired",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      usableAsAuditEvidence: false,
+      consumeAllowed: false,
+      reasons,
+      evidenceId: evidence.id,
+      summary: `human-confirmation-evidence: decision=expired dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  const mismatchReasons: string[] = [];
+  if (evidence.actionKind !== pending.actionKind) mismatchReasons.push("action-kind-mismatch");
+  if (normalizeComparable(evidence.toolName) !== normalizeComparable(pending.toolName)) mismatchReasons.push("tool-name-mismatch");
+  if (!sameOptionalField(evidence.path, pending.path)) mismatchReasons.push("path-mismatch");
+  if (!sameOptionalField(evidence.scope, pending.scope)) mismatchReasons.push("scope-mismatch");
+  if (!sameOptionalField(evidence.payloadHash, pending.payloadHash)) mismatchReasons.push("payload-hash-mismatch");
+
+  if (mismatchReasons.length > 0) {
+    return {
+      decision: "mismatch",
+      authorization: "none",
+      dispatchAllowed: false,
+      canOverrideMonitorBlock: false,
+      usableAsAuditEvidence: false,
+      consumeAllowed: false,
+      reasons: mismatchReasons,
+      evidenceId: evidence.id,
+      summary: `human-confirmation-evidence: decision=mismatch dispatch=no override=no reasons=${mismatchReasons.join("|")} authorization=none`,
+    };
+  }
+
+  reasons.push("trusted-confirmation-evidence-present");
+  reasons.push("confirmation-exact-match");
+  reasons.push("confirmation-single-use-ready");
+  return {
+    decision: "match",
+    authorization: "none",
+    dispatchAllowed: false,
+    canOverrideMonitorBlock: false,
+    usableAsAuditEvidence: true,
+    consumeAllowed: true,
+    reasons,
+    evidenceId: evidence.id,
+    summary: `human-confirmation-evidence: decision=match dispatch=no override=no reasons=${reasons.join("|")} authorization=none`,
+  };
+}
+
+export function consumeTrustedHumanConfirmationEvidence(
+  evidence: TrustedHumanConfirmationEvidence,
+  pending: PendingHumanConfirmedAction,
+): { ok: true; evidence: TrustedHumanConfirmationEvidence; match: HumanConfirmationEvidenceMatch } | { ok: false; evidence: TrustedHumanConfirmationEvidence; match: HumanConfirmationEvidenceMatch } {
+  const match = resolveHumanConfirmationEvidenceMatch(evidence, pending);
+  if (!match.consumeAllowed) return { ok: false, evidence, match };
+  return {
+    ok: true,
+    evidence: {
+      ...evidence,
+      consumedAtIso: pending.nowIso,
+    },
+    match,
+  };
 }
 
 export function resolveHumanConfirmationAuditPlan(input: HumanConfirmationAuditInput): HumanConfirmationAuditPlan {

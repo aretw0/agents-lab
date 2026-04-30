@@ -1,45 +1,44 @@
 {
-  "timestamp": "2026-04-30T21:56:17.057Z",
-  "context": "Completed TASK-BUD-387 Ops hardening. Added packages/git-skills/skills/git-checkout-cache/checkout.sh to avoid fragile shell-variable recipes [snip] che incidents from derailing main lane. [truncated:+318 chars]",
+  "timestamp": "2026-04-30T21:59:59.050Z",
+  "context": "TASK-BUD-390 first bounded slice complete, task remains in-progress. Added core trusted human-confirmation evidence contract: resolveHumanCon [snip] ard/monitor path or upstream PR design. [truncated:+444 chars]",
+  "current_tasks": [
+    "TASK-BUD-390"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-387 helper/docs/test slice.",
-    "Re-check next essential local-safe task after commit; likely TASK-BUD-390 for trusted confirmation evidence bridge.",
-    "Keep /btw design curation and other lateral research as future tasks unless selected explicitly."
+    "Commit TASK-BUD-390 core evidence contract slice.",
+    "Continue TASK-BUD-390 with runtime wiring design if context/gates allow.",
+    "Do not expose executor/override; dispatchAllowed remains false."
   ],
   "blockers": [
+    "Actual TUI/guard/monitor wiring not done yet.",
     "Strong unattended/loop/scheduler/remote remains blocked.",
-    "Trusted runtime confirmation evidence bridge remains planned as TASK-BUD-390.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "bash scripts/test/git-checkout-cache-smoke.sh => git-checkout-cache-smoke: ok",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi- [snip] export.test.ts => 8 passed [truncated:+45 chars]",
     "npm run docs:package:sync => ok",
     "npm run docs:package:check => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:56:17.057Z",
+    "generatedAtIso": "2026-04-30T21:59:59.050Z",
     "level": "ok",
-    "percent": 32,
+    "percent": 36,
     "action": "continue",
-    "recommendation": "commit-checkout-cache-helper",
-    "focus_task_status": "completed"
+    "recommendation": "commit-confirmation-evidence-core-slice"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:56:17.057Z",
+      "atIso": "2026-04-30T21:59:59.050Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 32,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-checkout-cache-helper"
+      "recommendation": "commit-confirmation-evidence-core-slice"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-387"
   ]
 }
