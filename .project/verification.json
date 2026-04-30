@@ -7269,6 +7269,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:55:38.072Z",
       "evidence": "Documented the future read-only audit envelope surface contract and added the first pure local collector helper, resolveHandoffBudgetCollectorResult. Doctrine now requires the read-only audit envelope surface to reuse buildLocalMeasuredNudgeFreeLoopAuditEnvelope and existing collectors, derive facts from observable local reads, reject caller-supplied facts as eligible, show authorization=none, and remain diagnostic/inelegible when collectors are missing/untrusted/invalid/overlong. The handoff-budget collector derives observed/missing/invalid from local read status and JSON size without accepting readiness booleans. Validation: safe_marker_check passed 6/6 markers; cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 31/31; cmd.exe /c npm run test:monitor:smoke --silent passed 246/246 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] This advances toward a safe read-only audit surface while keeping collection local/fail-closed and non-operational."
+    },
+    {
+      "id": "VER-BUD-561",
+      "target": "TASK-BUD-286",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:58:09.543Z",
+      "evidence": "Re-exported resolveHandoffBudgetCollectorResult through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying over-budget returns status=invalid and missing returns status=missing. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: focal re-export + surface tests passed 3/3; cmd.exe /c npm run test:monitor:smoke --silent passed 246/246 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] The first local collector is canonical while preserving non-operational fail-closed semantics."
     }
   ]
 }

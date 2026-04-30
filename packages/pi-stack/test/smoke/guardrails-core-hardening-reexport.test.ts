@@ -6,6 +6,7 @@ import {
   detectShellInlineCommandSensitiveMarkerCheck,
   evaluateGitMaintenanceSignal,
   evaluateTextMarkerCheck,
+  resolveHandoffBudgetCollectorResult,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
   resolveMeasuredFactCollectorAssessment,
@@ -199,6 +200,24 @@ describe("guardrails-core hardening re-exports", () => {
       eligibleForAuditedRuntimeSurface: false,
       reasons: ["collectors-not-eligible", "trust-not-eligible"],
       summary: "nudge-free-audit-envelope: eligible=no packet=ready collectors=no trust=no authorization=none",
+    });
+
+    expect(resolveHandoffBudgetCollectorResult({
+      readStatus: "observed",
+      handoffJson: "x".repeat(2701),
+      maxJsonChars: 2700,
+    })).toEqual({
+      fact: "handoff-budget",
+      status: "invalid",
+      evidence: "handoff-budget=over chars=2701 max=2700",
+    });
+    expect(resolveHandoffBudgetCollectorResult({
+      readStatus: "missing",
+      maxJsonChars: 2700,
+    })).toEqual({
+      fact: "handoff-budget",
+      status: "missing",
+      evidence: "handoff-budget=missing",
     });
   });
 });

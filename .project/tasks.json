@@ -6785,6 +6785,32 @@
       ],
       "notes": "Criado após reload a pedido do operador para fazer as duas fatias bounded juntas. [rationale:risk-control] Podemos avançar contrato + primeiro coletor puro desde que não abramos superfície operacional nem autorização.\n[2026-04-30T03:55:13Z] slice=1 focus=TASK-BUD-285 gate=test:monitor:smoke-246/246 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato read-only audit surface documentado e primeiro coletor handoff-budget puro criado.",
       "verification": "VER-BUD-560"
+    },
+    {
+      "id": "TASK-BUD-286",
+      "description": "[P1] Re-exportar coletor handoff-budget pela superfície canônica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-285"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar resolveHandoffBudgetCollectorResult via guardrails-core-exports/guardrails-core.",
+        "Adicionar smoke provando import canônico do coletor handoff-budget.",
+        "Validar que over-budget/missing/invalid permanecem collector status invalid/missing e não autorização.",
+        "Validar que a superfície runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-285. [rationale:risk-control] O primeiro coletor local puro deve ficar disponível por import canônico sem virar superfície operacional.\n[2026-04-30T03:57:43Z] slice=1 focus=TASK-BUD-286 gate=test:monitor:smoke-246/246 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Coletor handoff-budget re-exportado; runtime segue manual-only.",
+      "verification": "VER-BUD-561"
     }
   ]
 }
