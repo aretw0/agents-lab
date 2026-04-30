@@ -18,6 +18,14 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 5. **Escala progressiva**: L1 control-plane direto por default; L2 subagente só com readiness; L3 swarm só com preflight/budget/escopo paralelo.
 5. **Sem auto-close externo**: GitHub/Gitea/trackers espelham o board; completion local requer verificação local.
 
+## Paridade guide-skill
+
+Guide canônico: docs/guides/control-plane-operating-doctrine.md
+Paridade mínima: controle humano de cancelamento; blast radius diagnóstico; leitura de skills confiáveis; higiene de tools; processos em background; no-go para strong unattended sem cancelamento testado
+Última revisão de paridade: 2026-04-30
+
+Use esta skill como superfície de descoberta. O guide canônico continua sendo a fonte de detalhes, mas as regras abaixo são hard intent operacional para qualquer fatia local-first.
+
 ## Mapa guide -> skill/playbook
 
 | Conteúdo crítico | Guia canônico | Aplicação nesta skill |
@@ -29,6 +37,15 @@ Use esta skill quando a tarefa envolver long-runs, board-first, continuidade, ha
 | Rollout/rollback de delegação | `docs/guides/control-plane-evolution-playbook.md` | canário curto, evidência no parent, rollback para L1 |
 | Mirror GitHub/Gitea | `packages/git-skills/skills/github/SKILL.md` | tratar issue externa como referência, não autoridade |
 | Higiene e drift de board | `docs/guides/project-canonical-pipeline.md` | single writer, lock+atomic, generated apply step |
+
+## Hard stops recentes da doutrina
+
+- Não tratar `ready`, `complete` ou scorecards como autorização de dispatch.
+- Não iniciar loop/scheduler/remote/offload/strong unattended sem cancelamento long-run testado, fallback humano claro, checkpoint e decisão explícita.
+- Não mutar pacote upstream/original do pi; usar extensão, wrapper, patch controlado ou PR upstream.
+- Não fazer diagnóstico que despeje source maps/bundles/logs grandes; usar leitura bounded, filename/count-only ou exclusão explícita de `*.map`.
+- Não iniciar servers/processos em background automaticamente até existir primitiva com owner/workspace/session, port lock, tail bounded e cleanup.
+- Leitura bounded de `SKILL.md` confiável fora do projeto pode ser permitida; execução/instalação/scan recursivo continuam protegidos.
 
 ## Checklist de execução bounded
 

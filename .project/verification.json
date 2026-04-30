@@ -8295,6 +8295,15 @@
       "method": "documentation+safe_marker_check",
       "timestamp": "2026-04-30T19:01:51.094Z",
       "evidence": "Captured initial background process control doctrine in docs/guides/control-plane-operating-doctrine.md. It defines the future primitive direction: local-first owner/workspace/session metadata, port lease/lock, explicit lifecycle launch/status/tail/stop/restart, bounded stdout/stderr/stacktrace capture, cleanup on reload/compact/handoff, shared workspace service and isolated parallel worker modes, and fail-closed behavior for port collisions/orphans/concurrent server tests. safe_marker_check matched 6/6 markers. No background servers/processes were started."
+    },
+    {
+      "id": "VER-BUD-675",
+      "target": "TASK-BUD-191",
+      "target_type": "task",
+      "status": "passed",
+      "method": "skill-parity+safe_marker_check",
+      "timestamp": "2026-04-30T19:05:31.861Z",
+      "evidence": "Updated packages/lab-skills/skills/control-plane-ops/SKILL.md with guide-skill parity markers for docs/guides/control-plane-operating-doctrine.md and a concise hard-stop section covering recent local-first control rules: no dispatch from readiness evidence, no strong unattended without tested cancel/fallback, no upstream pi mutation, no source-map/log blast diagnostics, no automatic background servers without process primitive, and trusted SKILL.md bounded reads only. safe_marker_check matched 6/6 markers. This is a bounded slice of TASK-BUD-191, not full task closure."
     }
   ]
 }
