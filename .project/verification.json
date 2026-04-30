@@ -8502,6 +8502,15 @@
       "method": "documentation-marker-check",
       "timestamp": "2026-04-30T21:03:48.411Z",
       "evidence": "Existing docs satisfy the tracker-agnostic project memory protocol acceptance criteria. docs/primitives/continuity-abstraction.md defines canonical v1 task/event/intent/evidence/decisionGate/deliveryState, transitions, invariants, and adapter matrix for .project, first-party backend, GitHub/Gitea trackers, Markdown/Obsidian, and SQLite. docs/guides/project-canonical-pipeline.md states .project is the current local adapter, coordination is backend-agnostic, and storage is substitutable. docs/guides/control-plane-operating-doctrine.md recommends some recoverable project memory while allowing .project, GitHub Issues, GitLab, Linear/Jira or other systems. safe_marker_check passed 5/5 on each of the three docs. No runtime mutation required."
+    },
+    {
+      "id": "VER-BUD-698",
+      "target": "TASK-BUD-296",
+      "target_type": "task",
+      "status": "passed",
+      "method": "prompt-template+docs+manifest-check",
+      "timestamp": "2026-04-30T21:08:37.294Z",
+      "evidence": "Implemented distributed /btw prompt at packages/lab-skills/prompts/btw.md and exposed it through @aretw0/lab-skills package.json pi.prompts plus files=['prompts']. The prompt contract preserves current task/focus by default, is conversational/advisory, forbids automatic changes/commands/staging/commit/scheduler/remote/destructive maintenance, and only captures decisions/backlog through bounded board/block surfaces when explicitly requested by the operator. Doctrine documents /btw and notes package prompt is canonical while .pi/prompts/btw.md should be local override only. Validation: safe_marker_check prompt matched 4/4; doctrine matched 5/5; npm run docs:package:sync ok; npm run docs:package:check ok; lab-skills-prompts-manifest node check ok."
     }
   ]
 }

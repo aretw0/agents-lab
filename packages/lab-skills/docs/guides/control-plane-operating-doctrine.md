@@ -125,6 +125,14 @@ Esse começo não deve virar lock-in. As primitivas devem permanecer agnósticas
 
 Quando uma tool usar `board`, leia como a superfície local atual para esse contrato, não como a única arquitetura futura.
 
+## Discussões laterais rápidas (`/btw`)
+
+O prompt `/btw` é um canal curto para perguntas paralelas sem desviar a task principal. Ele é conversacional/advisory: não troca o foco atual, não executa mudanças automaticamente e não dispara comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva.
+
+Use `/btw [assunto]` quando a conversa lateral puder caber em uma resposta curta. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
+
+A versão distribuível do prompt vive em `packages/lab-skills/prompts/btw.md`, carregada pelo manifesto `pi.prompts` do pacote. Evite duplicar como `.pi/prompts/btw.md` salvo quando for override local deliberado.
+
 ## Fluxo bounded do board local
 
 Para fatias unattended locais, prefira as primitivas bounded em vez de scripts ad hoc sobre JSON:

@@ -1,31 +1,31 @@
 {
-  "timestamp": "2026-04-30T21:03:56.904Z",
-  "context": "Selected next local-safe task TASK-BUD-212 after TASK-BUD-384/TASK-BUD-385 closure. Found existing documentation already satisfies the tracke [snip] 2 by evidence only, no runtime changes. [truncated:+355 chars]",
+  "timestamp": "2026-04-30T21:08:58.457Z",
+  "context": "Implemented and completed /btw prompt slice. Created distributed prompt packages/lab-skills/prompts/btw.md, exposed through @aretw0/lab-skill [snip] canonical for users after apply/reload. [truncated:+319 chars]",
   "next_actions": [
-    "Commit TASK-BUD-212 board/handoff evidence.",
-    "Select next local-first safe task after gates.",
-    "Keep TASK-BUD-383 planned for TUI confirmation propagation mismatch."
+    "Commit TASK-BUD-296 changes.",
+    "Reload before using /btw live in this pi session.",
+    "Select next local-first safe task after gates."
   ],
   "blockers": [
+    "Reload required before /btw prompt is live-loaded from package manifest.",
     "TASK-BUD-383 confirmation propagation mismatch remains planned.",
-    "Git maintenance cleanup remains opt-in.",
-    "Strong unattended/remote/scheduler remain blocked without explicit operator de [snip] n and remaining gates. [truncated:+5 chars]"
+    "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "safe_marker_check docs/primitives/continuity-abstraction.md matched=5/5",
-    "safe_marker_check docs/guides/project-canonical-pipeline.md matched=5/5",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5"
+    "safe_marker_check packages/lab-skills/prompts/btw.md matched=4/4",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md matched=5/5",
+    "structured_io_json packages/lab-skills/package.json pi.prompts.0 => ./prompts"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T21:03:56.904Z",
+    "generatedAtIso": "2026-04-30T21:08:58.457Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-task-212-evidence-then-select-next",
+    "recommendation": "commit-then-reload-before-live-prompt-use",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T21:03:56.904Z",
+      "atIso": "2026-04-30T21:08:58.457Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -35,10 +35,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-212-evidence-then-select-next"
+      "recommendation": "commit-then-reload-before-live-prompt-use"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-212"
+    "TASK-BUD-296"
   ]
 }

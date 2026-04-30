@@ -7083,7 +7083,7 @@
     {
       "id": "TASK-BUD-296",
       "description": "[P2] Criar prompt /btw para discussões rápidas paralelas sem desviar a task principal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         ".pi/prompts",
@@ -7095,7 +7095,8 @@
         "Permitir capturar decisão/backlog quando a discussão lateral gerar ação futura.",
         "Documentar que /btw é conversacional/advisory e não executa mudanças automaticamente."
       ],
-      "notes": "Criado por sugestão do operador em 2026-04-30. [rationale:ergonomics] Um /btw curado permitiria levantar dúvidas laterais rápidas sem interromper a lane essencial nem confundir checkpoint/current task."
+      "notes": "Criado por sugestão do operador em 2026-04-30. [rationale:ergonomics] Um /btw curado permitiria levantar dúvidas laterais rápidas sem interromper a lane essencial nem confundir checkpoint/current task.\n2026-04-30: implementado prompt distribuível /btw em packages/lab-skills/prompts/btw.md e manifesto pi.prompts do pacote, evitando depender de override local .pi/prompts. Doutrina documenta contrato conversacional/advisory, sem troca de foco, sem execução automática e captura bounded só com pedido explícito.\n2026-04-30: concluído. /btw criado como prompt package-level distribuível, com contrato de lateral curta sem desviar foco nem executar automaticamente.",
+      "verification": "VER-BUD-698"
     },
     {
       "id": "TASK-BUD-297",
