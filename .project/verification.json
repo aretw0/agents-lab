@@ -6909,6 +6909,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:26:38.183Z",
       "evidence": "Exposed resolveNudgeFreeLoopCanaryGate through a read-only runtime tool nudge_free_loop_canary with compact summary content and structured details. Also compacted unattended_continuation_plan tool content to its summary while preserving details. Surface smoke covers continuation plan compact content and nudge_free_loop_canary ready/blocked behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Runtime can now inspect nudge-free readiness without mutation or verbose context bloat."
+    },
+    {
+      "id": "VER-BUD-521",
+      "target": "TASK-BUD-243",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-validation",
+      "timestamp": "2026-04-30T01:28:21.768Z",
+      "evidence": "Live-validated nudge_free_loop_canary after reload. Without opt-in it returned compact defer content: nudge-free-loop: decision=defer continue=no reasons=missing-opt-in. With all gates green and opt-in true it returned compact ready content: nudge-free-loop: decision=ready continue=yes reasons=all-gates-green. [rationale:risk-control] Confirms the nudge-free loop readiness surface works in runtime without mutation and keeps content compact."
     }
   ]
 }

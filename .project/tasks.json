@@ -5731,6 +5731,27 @@
       ],
       "notes": "Criado após reload para expor o gate puro em runtime de forma read-only. [rationale:risk-control] O caminho para reduzir empurrões manuais precisa primeiro de uma superfície diagnóstica compacta e sem mutação.\n[2026-04-30T01:26:19Z] slice=1 focus=TASK-BUD-242 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Gate do loop sem empurrões exposto como tool read-only compacta.",
       "verification": "VER-BUD-520"
+    },
+    {
+      "id": "TASK-BUD-243",
+      "description": "[P1] Validar ao vivo nudge_free_loop_canary após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-242"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "nudge_free_loop_canary retorna summary compacto ao vivo após reload.",
+        "Validação cobre pelo menos caminho defer/sem opt-in ou ready com gates verdes.",
+        "Task é fechada com board_task_complete e handoff final usa context_watch_checkpoint."
+      ],
+      "notes": "Criado após reload para validar a nova tool live. [rationale:risk-control] A superfície read-only do loop sem empurrões precisa ser comprovada em runtime antes de qualquer automação.\n[2026-04-30T01:29:00Z] slice=1 focus=TASK-BUD-243 gate=live-nudge_free_loop_canary-defer-and-ready commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Tool runtime do canário sem empurrões validada ao vivo após reload.",
+      "verification": "VER-BUD-521"
     }
   ]
 }
