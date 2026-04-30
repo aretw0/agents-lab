@@ -9236,6 +9236,30 @@
       "milestone": "human-control",
       "notes": "2026-04-30: criado a partir de observação do operador em outra sessão pi via devcontainer usando pi-stack como usuário. Prompt visto: leitura fora do projeto para /home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md. Objetivo: evitar interrupção do runtime quando é uma skill que o agente deveria poder ler.\n2026-04-30: implementada primeira versão do allow de leitura bounded para docs Markdown em roots de skills confiáveis globais/devcontainer, com foco em @aretw0/*-skills/skills/<skill>/SKILL.md. Execução/instalação/scans/leitura arbitrária continuam fora do allow.\n2026-04-30: [rationale:risk-control] O allow é estreito: pacote confiável, root /skills/<nome>/ e arquivo Markdown; preserva controle para operações não-read.\n[rationale:risk-control] Permitir leitura bounded de SKILL.md confiável evita prompts interativos que interrompem sessões devcontainer/globais, sem ampliar permissão para execução, instalação, scans recursivos ou leituras arbitrárias fora do root da skill.\n2026-04-30: completed trusted global skill read allowlist. Runtime guard changed; reload required before live validation in this session/devcontainer.\n2026-04-30: reload feito pelo operador; validação live passou. Read bounded de SKILL.md global confiável fora do projeto em C:\\Users\\aretw\\scoop\\persist\\nodejs\\bin\\node_modules\\@aretw0\\git-skills\\skills\\commit\\SKILL.md retornou conteúdo sem prompt/bloqueio. VER-BUD-660 registrada.",
       "verification": "VER-BUD-659"
+    },
+    {
+      "id": "TASK-BUD-381",
+      "description": "Projetar primitivas robustas para controle de processos em background usados por front/backend/testes.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-252"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato local-first para lançar, listar, parar, reiniciar e observar processos de background iniciados pelo pi, com owner/session/workspace metadata.",
+        "Capturar stdout/stderr/stacktrace de forma estruturada e bounded, com tail/filters e sem estourar contexto.",
+        "Gerenciar portas e locks para evitar colisão entre agentes no mesmo PC, incluindo política de reuse de server único quando apropriado.",
+        "Suportar futuramente tanto modo shared service quanto isolated parallel workers quando fizer sentido, sem impor uma opinião única.",
+        "Integrar com scheduler/governance/handoff para cleanup seguro, troubleshooting e retomada após reload/compact.",
+        "Adicionar testes/guards para evitar processos órfãos, portas conflitantes e dumps grandes."
+      ],
+      "milestone": "unattended-control",
+      "notes": "2026-04-30: criado a pedido do operador. Motivação: muitos projetos precisam que o pi lance front/backend/testes com servidor e tenha controle total para matar/reiniciar/capturar stacktrace estruturado sem estourar contexto. Deve considerar múltiplos agentes no mesmo PC, porta/lock, reuse de serviços, e modo paralelo isolado quando apropriado.\n2026-04-30: [rationale:risk-control] Background process control precisa ser governado antes de usar pi para servers/testes em loops longos ou paralelos.\n[rationale:risk-control] Controle robusto de processos em background é pré-requisito para fechar feedback loop de front/backend/testes sem processos órfãos, colisão de portas ou dumps de log que estourem contexto."
     }
   ]
 }

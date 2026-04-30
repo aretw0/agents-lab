@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-04-30T18:55:32.721Z",
-  "context": "After reload, refined tool_hygiene_scorecard live validation passed. Selected and full scorecards behaved as expected with no dispatch/author [snip] rcement can be separate protected task. [truncated:+108 chars]",
+  "timestamp": "2026-04-30T19:02:01.866Z",
+  "context": "Captured and started TASK-BUD-381 after operator request. Added rationale and initial doctrine for robust background process control primitiv [snip] isions/orphans/concurrent server tests. [truncated:+285 chars]",
+  "current_tasks": [
+    "TASK-BUD-381"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-252 live validation/closure evidence.",
-    "Select next local-first essential task; possible follow-up: use scorecard to plan hide/disable [snip] ate protected design task. [truncated:+21 chars]",
-    "Keep strong unattended blocked until tested long-run cancel/fallback and explicit operator decision."
+    "Commit TASK-BUD-381 backlog/doctrine evidence.",
+    "Return to selecting next essential local-first implementation slice; TASK-BUD-381 can remain p [snip] for design/implementation. [truncated:+34 chars]",
+    "Do not start background servers/processes automatically."
   ],
   "blockers": [
     "Strong unattended remains blocked without tested long-run cancel/fallback and [snip] cit operator decision. [truncated:+5 chars]",
+    "Background process primitive is backlog/planned, not implemented.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "tool_hygiene_scorecard selected live: 3 protected, 1 operational, 1 measured, dispatchAllowed=false",
-    "tool_hygiene_scorecard full live: total=94 protected=6 operational=5 requiresHumanApproval=8 m [snip] ke=5 dispatchAllowed=false [truncated:+15 chars]",
-    "board_verification_append VER-BUD-672 ok"
+    "board_task_create TASK-BUD-381 ok",
+    "board_update TASK-BUD-381 rationale ok",
+    "safe_marker_check background process doctrine matched=6/6"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T18:55:32.721Z",
+    "generatedAtIso": "2026-04-30T19:02:01.866Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "commit-task-252-closure",
-    "focus_task_status": "completed"
+    "recommendation": "commit-backlog-doctrine-then-continue"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T18:55:32.721Z",
+      "atIso": "2026-04-30T19:02:01.866Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-252-closure"
+      "recommendation": "commit-backlog-doctrine-then-continue"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-252"
   ]
 }

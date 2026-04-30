@@ -8286,6 +8286,15 @@
       "method": "test+live-tool+docs",
       "timestamp": "2026-04-30T18:55:24.335Z",
       "evidence": "Completed tool hygiene scorecard. Implementation includes classifyToolHygiene/buildToolHygieneScorecard and runtime tool_hygiene_scorecard. Tests passed: npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts => 4 passed. Docs marker validation passed 5/5. Live after reload passed selected and full scorecards, with selected protected/operational/measured classifications as expected and full scorecard total=94 protected=6 operational=5 requiresHumanApproval=8. All outputs preserve activation=none authorization=none dispatchAllowed=false. [rationale:risk-control] This gives a read-only hygiene evidence surface before large loops without granting operation authority."
+    },
+    {
+      "id": "VER-BUD-674",
+      "target": "TASK-BUD-381",
+      "target_type": "task",
+      "status": "passed",
+      "method": "documentation+safe_marker_check",
+      "timestamp": "2026-04-30T19:01:51.094Z",
+      "evidence": "Captured initial background process control doctrine in docs/guides/control-plane-operating-doctrine.md. It defines the future primitive direction: local-first owner/workspace/session metadata, port lease/lock, explicit lifecycle launch/status/tail/stop/restart, bounded stdout/stderr/stacktrace capture, cleanup on reload/compact/handoff, shared workspace service and isolated parallel worker modes, and fail-closed behavior for port collisions/orphans/concurrent server tests. safe_marker_check matched 6/6 markers. No background servers/processes were started."
     }
   ]
 }

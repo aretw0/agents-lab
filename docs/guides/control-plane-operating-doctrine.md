@@ -75,6 +75,16 @@ Matriz go/no-go para trabalho ininterrupto local:
 
 Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
 
+## Controle de processos em background
+
+Projetos que usam pi para desenvolvimento local frequentemente precisam subir frontend, backend, workers ou servidores de teste. Isso é uma superfície crítica antes de loops longos: o agente precisa saber o que iniciou, em qual workspace, com qual owner/session, em qual porta, como parar/reiniciar e como coletar erro sem despejar logs grandes no contexto.
+
+A direção para a primitiva futura é local-first e governada: processos devem ter metadata de owner/workspace/session, lease/lock de porta, lifecycle explícito (`launch`, `status`, `tail`, `stop`, `restart`), captura bounded de stdout/stderr/stacktrace e cleanup seguro em reload/compact/handoff. Logs devem ser consultados por tail, filtro e resumo estruturado, nunca por dump bruto.
+
+A política deve suportar dois modos sem impor opinião única: serviço compartilhado por workspace quando faz sentido reutilizar um único server para testes, e workers isolados/paralelos quando trabalhos diferentes realmente precisam rodar lado a lado. Em ambos os casos, colisão de portas, processos órfãos, subprocessos zumbis e testes concorrentes com o mesmo server devem falhar fechado ou pedir decisão explícita.
+
+Enquanto essa primitiva não existir, não iniciar servers/background longos automaticamente; preferir comandos curtos, status bounded e parada manual explícita.
+
 ## Higiene de tools antes de loops grandes
 
 Antes de qualquer loop grande, a stack deve tratar tools expostas como superfície de risco. A primitiva `tool_hygiene_scorecard` é read-only e classifica tools como `advisory`, `measured`, `operational`, `protected` ou `development`, sinalizando flags como mutação, scheduler, remote/CI, settings/profile, subprocesso e override manual. O resultado mantém `authorization=none` e `dispatchAllowed=false`.
