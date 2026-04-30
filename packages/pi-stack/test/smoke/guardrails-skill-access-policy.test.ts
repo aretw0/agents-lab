@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   resolveSkillAccessRoot,
   resolveSkillReadAccess,
+  resolveTrustedGlobalSkillReadAccess,
   type SkillAccessCandidateRoot,
 } from "../../extensions/guardrails-core-skill-access-policy";
 
@@ -89,5 +90,31 @@ describe("guardrails skill access policy", () => {
       reason: "operation-requires-human-approval",
       humanApprovalRequired: true,
     });
+  });
+
+  it("allows trusted global package SKILL.md reads without host-specific paths", () => {
+    const decision = resolveTrustedGlobalSkillReadAccess(
+      "/home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md",
+    );
+
+    expect(decision).toMatchObject({
+      status: "allow",
+      source: "global",
+      boundedRead: true,
+      humanApprovalRequired: false,
+      relativePath: "SKILL.md",
+    });
+  });
+
+  it("does not allow arbitrary global package reads as trusted skill docs", () => {
+    expect(resolveTrustedGlobalSkillReadAccess(
+      "/home/vscode/.npm-global/lib/node_modules/@random/pkg/skills/commit/SKILL.md",
+    )).toBeUndefined();
+    expect(resolveTrustedGlobalSkillReadAccess(
+      "/home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/package.json",
+    )).toBeUndefined();
+    expect(resolveTrustedGlobalSkillReadAccess(
+      "/home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/script.sh",
+    )).toBeUndefined();
   });
 });

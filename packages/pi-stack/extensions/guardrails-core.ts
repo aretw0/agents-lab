@@ -119,6 +119,7 @@ import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import { ALLOWED_OUTSIDE, SENSITIVE_PATHS, UPSTREAM_PI_PACKAGE_MUTATION_BLOCKLIST } from "./guardrails-core-path-guard-config";
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
+import { resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
@@ -201,6 +202,10 @@ async function guardReadPath(filePath: string, ctx: ExtensionContext) {
     if (!ok) return { block: true, reason: `Bloqueado pelo usuário: ${filePath}` };
     return undefined;
   }
+
+  // Trusted global/devcontainer pi skill docs — bounded reads allowed.
+  const trustedSkillRead = resolveTrustedGlobalSkillReadAccess(filePath);
+  if (trustedSkillRead?.status === "allow") return undefined;
 
   // Allowed pi paths — no prompt needed
   if (isAllowedOutside(filePath)) return undefined;

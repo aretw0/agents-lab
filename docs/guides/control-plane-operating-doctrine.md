@@ -52,6 +52,8 @@ Status local da auditoria de cancelamento:
 
 Pacote upstream/original do pi é superfície protegida. O repositório pode ler `node_modules/@mariozechner/pi-coding-agent` para diagnóstico bounded, mas não deve editar, remover, sobrescrever ou aplicar mudanças diretas nesse pacote instalado. Correções devem ser implementadas por extensão local, wrapper, patch controlado e auditável, ou PR upstream. O guardrail bloqueia mutações diretas por tools de edição/escrita e comandos shell mutantes conhecidos; leituras bounded seguem permitidas.
 
+Skills confiáveis também são superfície de leitura operacional. Em devcontainers ou instalações globais, `SKILL.md` pode viver fora do workspace (por exemplo, em `~/.npm-global/lib/node_modules/@aretw0/...-skills/skills/<nome>/SKILL.md`). Leituras bounded de documentação Markdown dentro de roots de skills confiáveis não devem interromper o runtime com prompt de “leitura fora do projeto”; execução, instalação, scans recursivos e leituras arbitrárias fora do root da skill continuam exigindo bloqueio ou aprovação explícita.
+
 Também existe controle humano sobre o tamanho do diagnóstico. Investigações live não devem abrir saídas grandes, source maps ou scans amplos que empurrem a sessão para auto-compact. Use leitura por arquivo/offset, `head` estrito, `--exclude='*.map'` quando buscar em dependências, `safe_marker_check`/structured-read quando couber, e registre apenas a síntese operacional no board/handoff. Estouro de contexto por diagnóstico é incidente separado e deve virar hardening, não ruído aceito.
 
 Fallback operacional enquanto `Esc` estiver incerto:

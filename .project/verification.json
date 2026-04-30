@@ -8151,6 +8151,15 @@
       "method": "live-guard-block",
       "timestamp": "2026-04-30T17:06:24.274Z",
       "evidence": "After operator reload, live bash guard blocked a non-destructive mutation-pattern command targeting node_modules/@mariozechner/pi-coding-agent: `rm --version node_modules/@mariozechner/pi-coding-agent`. Guard returned upstream_pi_package_mutation block reason and command did not execute mutation. This validates live enforcement for shell guard after reload; bounded reads remain allowed by unit coverage."
+    },
+    {
+      "id": "VER-BUD-659",
+      "target": "TASK-BUD-380",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+safe_marker_check",
+      "timestamp": "2026-04-30T17:10:25.714Z",
+      "evidence": "Implemented trusted global/devcontainer skill doc read policy. resolveTrustedGlobalSkillReadAccess recognizes trusted packages such as @aretw0/*-skills under node_modules, allows bounded Markdown reads inside skills/<name>/ roots (including /home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md), and returns undefined for arbitrary packages, package.json, or non-Markdown files. guardReadPath now allows these trusted bounded skill reads before generic outside-project prompt, while sensitive paths and non-skill paths remain protected. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-skill-access-policy.test.ts => 7 passed; safe_marker_check docs matched 4/4. [rationale:risk-control] This removes a recurring interactive runtime stop without authorizing execution/scans/arbitrary outside reads."
     }
   ]
 }

@@ -9211,7 +9211,7 @@
     {
       "id": "TASK-BUD-380",
       "description": "Permitir leitura segura de SKILL.md de pacotes pi globais/confiáveis fora do projeto sem prompt bloqueante indevido.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-379"
@@ -9230,7 +9230,8 @@
         "Documentar que leitura de skill confiável é diferente de mutação ou leitura arbitrária fora do projeto."
       ],
       "milestone": "human-control",
-      "notes": "2026-04-30: criado a partir de observação do operador em outra sessão pi via devcontainer usando pi-stack como usuário. Prompt visto: leitura fora do projeto para /home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md. Objetivo: evitar interrupção do runtime quando é uma skill que o agente deveria poder ler."
+      "notes": "2026-04-30: criado a partir de observação do operador em outra sessão pi via devcontainer usando pi-stack como usuário. Prompt visto: leitura fora do projeto para /home/vscode/.npm-global/lib/node_modules/@aretw0/git-skills/skills/commit/SKILL.md. Objetivo: evitar interrupção do runtime quando é uma skill que o agente deveria poder ler.\n2026-04-30: implementada primeira versão do allow de leitura bounded para docs Markdown em roots de skills confiáveis globais/devcontainer, com foco em @aretw0/*-skills/skills/<skill>/SKILL.md. Execução/instalação/scans/leitura arbitrária continuam fora do allow.\n2026-04-30: [rationale:risk-control] O allow é estreito: pacote confiável, root /skills/<nome>/ e arquivo Markdown; preserva controle para operações não-read.\n[rationale:risk-control] Permitir leitura bounded de SKILL.md confiável evita prompts interativos que interrompem sessões devcontainer/globais, sem ampliar permissão para execução, instalação, scans recursivos ou leituras arbitrárias fora do root da skill.\n2026-04-30: completed trusted global skill read allowlist. Runtime guard changed; reload required before live validation in this session/devcontainer.",
+      "verification": "VER-BUD-659"
     }
   ]
 }

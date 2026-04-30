@@ -41,12 +41,77 @@ const SOURCE_RANK: Record<SkillAccessSource, number> = {
   global: 2,
 };
 
+const TRUSTED_GLOBAL_SKILL_PACKAGE_PATTERNS = [
+  /^@aretw0\/[a-z0-9-]+-skills$/i,
+  /^@davidorex\/pi-project-workflows$/i,
+];
+
 function normalizePath(value: string): string {
   return path.resolve(value).replace(/\\/g, "/");
 }
 
 function sourceAllowed(candidate: SkillAccessCandidateRoot): boolean {
   return candidate.source !== "global" || candidate.globalAllowlisted === true;
+}
+
+function isTrustedGlobalSkillPackage(packageName: string): boolean {
+  return TRUSTED_GLOBAL_SKILL_PACKAGE_PATTERNS.some((pattern) => pattern.test(packageName));
+}
+
+function parseNodeModulesPackagePath(filePath: string): {
+  packageName: string;
+  packageRoot: string;
+  relativeParts: string[];
+} | undefined {
+  const normalized = String(filePath || "").replace(/\\/g, "/");
+  const parts = normalized.split("/").filter(Boolean);
+  const nodeModulesIndex = parts.lastIndexOf("node_modules");
+  if (nodeModulesIndex < 0) return undefined;
+
+  const first = parts[nodeModulesIndex + 1];
+  if (!first) return undefined;
+
+  let packageName = first;
+  let packageEndIndex = nodeModulesIndex + 1;
+  if (first.startsWith("@")) {
+    const second = parts[nodeModulesIndex + 2];
+    if (!second) return undefined;
+    packageName = `${first}/${second}`;
+    packageEndIndex = nodeModulesIndex + 2;
+  }
+
+  const prefix = normalized.startsWith("/") ? "/" : "";
+  const packageRoot = `${prefix}${parts.slice(0, packageEndIndex + 1).join("/")}`;
+  return {
+    packageName,
+    packageRoot,
+    relativeParts: parts.slice(packageEndIndex + 1),
+  };
+}
+
+export function resolveTrustedGlobalSkillReadAccess(filePath: string): SkillAccessDecision | undefined {
+  const parsed = parseNodeModulesPackagePath(filePath);
+  if (!parsed) return undefined;
+  if (!isTrustedGlobalSkillPackage(parsed.packageName)) return undefined;
+
+  const [skillsDir, skillName, ...rest] = parsed.relativeParts;
+  if (skillsDir !== "skills" || !skillName || rest.length === 0) return undefined;
+  const requestedLeaf = rest[rest.length - 1] ?? "";
+  const markdownSkillDoc = requestedLeaf.toLowerCase().endsWith(".md");
+  if (!markdownSkillDoc) return undefined;
+
+  const skillRoot = `${parsed.packageRoot}/skills/${skillName}`;
+  return resolveSkillReadAccess({
+    skillRoot: {
+      skillName,
+      root: skillRoot,
+      source: "global",
+      globalAllowlisted: true,
+    },
+    requestedPath: filePath,
+    operation: "read",
+    recursive: false,
+  });
 }
 
 export function resolveSkillAccessRoot(
