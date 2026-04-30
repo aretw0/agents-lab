@@ -9267,7 +9267,7 @@
     {
       "id": "TASK-BUD-382",
       "description": "Criar sinal de curadoria first-party coverage para acompanhar substituição/desativação/remoção de capacidades third-party cobertas pela stack.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-252",
@@ -9290,7 +9290,8 @@
         "Documentar rollout/rollback para desativar partes de extensões third-party sem quebrar installability."
       ],
       "milestone": "curation-sovereignty",
-      "notes": "2026-04-30: criado a pedido do operador. Motivação: ao avançar first-parties, a cobertura própria deve virar sinal operacional/devops; dependências third-party cobertas devem ser desativadas, removidas do perfil ou mantidas com decisão explícita. Exemplo concreto: conflito uv/bash com background process third-party exigiu filtro para garantir installability também para usuários.\n2026-04-30: [rationale:risk-control] O sinal deve trazer à superfície cobertura first-party crescente, overlaps ainda ativos, filtros aplicados e decisões de remover/desabilitar/manter third-party.\n[rationale:risk-control] Sem um sinal de curadoria first-party coverage, a stack pode acumular dependências e conflitos de extensões third-party mesmo após cobrir capacidades internamente; isso ameaça installability, soberania e segurança operacional dos usuários.\n2026-04-30: iniciando fatia bounded essencial. Escopo inicial: sinal determinístico de first-party coverage/third-party suppression, read-only, com testes; sem remover dependências ainda.\n2026-04-30: primeira fatia implementada conforme crítica do operador: usar capability-owners.json como registry único, com campo curationCoverage, em vez de criar JSON paralelo. stack_sovereignty_status agora inclui resumo curationCoverage. VER-BUD-685 registra testes/docs. Reload necessário para validação live."
+      "notes": "2026-04-30: criado a pedido do operador. Motivação: ao avançar first-parties, a cobertura própria deve virar sinal operacional/devops; dependências third-party cobertas devem ser desativadas, removidas do perfil ou mantidas com decisão explícita. Exemplo concreto: conflito uv/bash com background process third-party exigiu filtro para garantir installability também para usuários.\n2026-04-30: [rationale:risk-control] O sinal deve trazer à superfície cobertura first-party crescente, overlaps ainda ativos, filtros aplicados e decisões de remover/desabilitar/manter third-party.\n[rationale:risk-control] Sem um sinal de curadoria first-party coverage, a stack pode acumular dependências e conflitos de extensões third-party mesmo após cobrir capacidades internamente; isso ameaça installability, soberania e segurança operacional dos usuários.\n2026-04-30: iniciando fatia bounded essencial. Escopo inicial: sinal determinístico de first-party coverage/third-party suppression, read-only, com testes; sem remover dependências ainda.\n2026-04-30: primeira fatia implementada conforme crítica do operador: usar capability-owners.json como registry único, com campo curationCoverage, em vez de criar JSON paralelo. stack_sovereignty_status agora inclui resumo curationCoverage. VER-BUD-685 registra testes/docs. Reload necessário para validação live.\n2026-04-30: completed signal slice after live validation. Future work can add stricter profile/install gates or automated dependency reduction decisions as separate protected tasks.",
+      "verification": "VER-BUD-687"
     },
     {
       "id": "TASK-BUD-383",
@@ -9314,6 +9315,29 @@
       ],
       "milestone": "human-control",
       "notes": "2026-04-30: operador relatou que autorizou a remoção quando perguntado, mas o monitor ainda disse que a ação destrutiva não estava autorizada. Registrar para correção posterior de passagem/auditoria de confirmação humana.\n[rationale:risk-control] Confirmação humana para ação destrutiva precisa ser audível e chegar corretamente ao guard; se a confirmação se perde, o sistema gera falso bloqueio e reduz controle operacional confiável.\n2026-04-30: detalhe adicional do operador: a confirmação foi um dialog real da TUI, respondido com sim. O bloqueio posterior parece desconexão entre confirmação TUI/upstream e monitor/guard local, especialmente para arquivo recém-criado. Investigar propagação/auditoria dessa confirmação, não simplesmente relaxar o bloqueio."
+    },
+    {
+      "id": "TASK-BUD-384",
+      "description": "Investigar classify failed intermitente em behavior monitors quando classifier responde texto sem tool call.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-147"
+      ],
+      "files": [
+        ".pi/monitors",
+        "packages/pi-stack/extensions/monitor-sovereign.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir ou coletar evidência de classify failed com stopReason=stop e content=[text] sem tool call.",
+        "Diferenciar falha de provider/model, prompt/tool schema, monitor específico e runtime upstream.",
+        "Definir limite de tolerância: falha isolada é warning; falha repetida degrada readiness de unattended.",
+        "Adicionar teste/telemetria/sovereign fallback se o padrão repetir.",
+        "Garantir que falha de classifier não seja confundida com ação operacional autorizada ou bloqueio definitivo."
+      ],
+      "milestone": "monitor-stability",
+      "notes": "2026-04-30: criado após warning observado pelo operador: [commit-hygiene] classify failed: No tool call in response (stopReason: stop, content: [text]). Diagnóstico inicial: monitors_compact_status mostra classifyFail=1 lastFail=commit-hygiene; monitor-sovereign em audit reporta tpFail=1/tpDelta=1; não há evidência de avalanche no scan bounded.\n[rationale:risk-control] Behavior monitors são parte do controle para trabalho longo; classify failures isoladas podem ser toleradas, mas repetição precisa degradar readiness e virar correção de prompt/schema/provider."
     }
   ]
 }

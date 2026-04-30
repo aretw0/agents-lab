@@ -8394,6 +8394,24 @@
       "method": "test+docs+registry-consolidation",
       "timestamp": "2026-04-30T20:14:23.097Z",
       "evidence": "Implemented first-party curation coverage signal using existing capability-owners.json instead of a second registry, following operator critique. Added curationCoverage fields to capability records, including mitsupi uv/bash filter, git/web skill filters, usage-tracker/watchdog/custom-footer filters, and bg-process needs-decision while first-party background process control is planning-only. Added curation-coverage evaluator and integrated summary into stack_sovereignty_status payload/command. Tests passed: curation-coverage.test.ts + stack-sovereignty.test.ts => 10 passed. docs:package:check passed and lab-user-surface-parity documents the signal. Runtime stack_sovereignty_status live validation requires reload."
+    },
+    {
+      "id": "VER-BUD-686",
+      "target": "TASK-BUD-382",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool-after-reload",
+      "timestamp": "2026-04-30T20:19:50.571Z",
+      "evidence": "After reload, stack_sovereignty_status live validation exposed curationCoverage summary: total=8 filtered=7 missingFilter=0 needsDecision=1 activeThirdPartyOverlaps=1, with dispatchAllowed=false and authorization=none. Live details show uv/bash conflict covered by mitsupi-uv-bash-conflict filter, and oh-pi-bg-process-future remains needs-decision while first-party background process control is planning-only. This confirms the first-party coverage signal is surfaced to operators/users via stack sovereignty status."
+    },
+    {
+      "id": "VER-BUD-687",
+      "target": "TASK-BUD-382",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+live-tool+docs",
+      "timestamp": "2026-04-30T20:19:58.230Z",
+      "evidence": "Completed first-party curation coverage signal. Implementation consolidates curationCoverage into capability-owners.json, evaluates filter/remove/needs-decision state via curation-coverage.ts, integrates the summary into stack_sovereignty_status, and documents the policy in lab-user-surface-parity. Tests passed: curation-coverage.test.ts + stack-sovereignty.test.ts => 10 passed. Live after reload showed total=8 filtered=7 missingFilter=0 needsDecision=1 activeThirdPartyOverlaps=1. [rationale:risk-control] This brings first-party coverage and third-party suppression/removal decisions to the operator surface so growing internal coverage reduces dependency/conflict risk instead of silently accumulating overlap."
     }
   ]
 }
