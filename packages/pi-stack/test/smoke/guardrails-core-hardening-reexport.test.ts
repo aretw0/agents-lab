@@ -18,6 +18,7 @@ import {
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveNextLocalSafeCollectorResult,
+  resolveOneSliceLocalCanaryPlan,
   resolveProtectedScopesCollectorResult,
   resolveStopConditionsClearCollectorResult,
   resolveRecurringFailureHardening,
@@ -67,6 +68,25 @@ describe("guardrails-core hardening re-exports", () => {
     })).toMatchObject({
       decision: "use-safe-marker-check",
       canValidate: true,
+    });
+
+    expect(resolveOneSliceLocalCanaryPlan({
+      readinessReady: true,
+      authorization: "none",
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      validationKnown: true,
+      stopConditionsClear: true,
+      risk: false,
+      ambiguous: false,
+    })).toMatchObject({
+      effect: "none",
+      activation: "none",
+      authorization: "none",
+      oneSliceOnly: true,
+      decision: "prepare-one-slice",
     });
 
     expect(resolveMeasuredNudgeFreeLoopCanaryGate({

@@ -7737,6 +7737,15 @@
       "method": "test",
       "timestamp": "2026-04-30T10:41:55.848Z",
       "evidence": "Implemented pure deterministic helper resolveOneSliceLocalCanaryPlan for the documented one-slice local canary contract. The helper is advisory only (`effect=none`, `activation=none`, `authorization=none`, `oneSliceOnly=true`) and never starts automation. It returns prepare-one-slice only when readiness is green, authorization is none, checkpoint/handoff/git/protected/validation/stop gates are safe, and no risk/ambiguity/repetition is present. It blocks on protected scope, repeatRequested, non-green readiness, stale checkpoint, unexpected git state, unknown validation, present stop conditions, risk, or ambiguity. If sliceAlreadyCompleted is set, it returns stop-after-slice with mustStopAfterSlice=true. Smoke tests cover ready, protected blocked, repetition blocked, and stop-after-slice. Validation: focal guardrails-unattended-continuation passed 40/40; full monitor smoke passed 265/265. No runtime tool was exposed and no scheduler/loop/remote/self-reload was activated. [rationale:risk-control] The next canary boundary is now executable as pure logic without becoming permission or automation."
+    },
+    {
+      "id": "VER-BUD-613",
+      "target": "TASK-BUD-339",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T10:43:52.745Z",
+      "evidence": "Re-exported resolveOneSliceLocalCanaryPlan through the canonical guardrails-core export surface without registering any runtime tool. Added smoke coverage in guardrails-core-hardening-reexport.test.ts proving the helper is available via ../../extensions/guardrails-core and still returns effect=none, activation=none, authorization=none, oneSliceOnly=true, decision=prepare-one-slice for green inputs. Focal re-export smoke passed 1/1; full monitor smoke passed 265/265. No runtime tool exposure, no reload requirement for editing/testing, and no scheduler/loop/remote/self-reload activation. [rationale:risk-control] Canonical re-export makes the pure helper reusable while preserving separation between helper availability and operational authorization."
     }
   ]
 }

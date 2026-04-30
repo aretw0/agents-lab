@@ -8178,6 +8178,31 @@
       ],
       "notes": "[rationale:risk-control] O contrato de canário de uma fatia deve virar helper puro antes de qualquer tool/runtime, mantendo ready como evidência e não permissão.\n[2026-04-30T10:41:39Z] slice=1 focus=TASK-BUD-338 gate=guardrails-unattended-continuation-40/40+test:monitor:smoke-265/265 commit=pending helper=resolveOneSliceLocalCanaryPlan activation=none. [rationale:risk-control] Contrato do canário de uma fatia virou helper puro/testado, sem tool/runtime.",
       "verification": "VER-BUD-612"
+    },
+    {
+      "id": "TASK-BUD-339",
+      "description": "[P1] Reexportar helper puro resolveOneSliceLocalCanaryPlan no surface canônico de guardrails.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-338"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Reexportar resolveOneSliceLocalCanaryPlan e tipos relacionados pelo arquivo canônico de exports quando aplicável.",
+        "Adicionar/ajustar smoke de reexport para garantir que o helper fica acessível sem criar tool runtime.",
+        "Não registrar nova tool, não exigir reload para a mudança de helper puro, e não ativar automação.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] O helper puro do canário de uma fatia deve ser consumível por código interno futuro via export canônico, sem expor permissão operacional nem tool runtime.\n[2026-04-30T10:43:29Z] slice=1 focus=TASK-BUD-339 gate=reexport-1/1+test:monitor:smoke-265/265 commit=pending helper-exported=yes runtime-tool=no. [rationale:risk-control] Helper canônico disponível sem virar tool/permissão.",
+      "verification": "VER-BUD-613"
     }
   ]
 }
