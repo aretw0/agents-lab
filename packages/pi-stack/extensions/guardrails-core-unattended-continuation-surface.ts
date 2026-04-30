@@ -47,7 +47,7 @@ export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI
   pi.registerTool({
     name: "nudge_free_loop_canary",
     label: "Nudge-Free Loop Canary",
-    description: "Evaluate whether a local unattended loop can continue without a manual nudge. Advisory only: read-only, side-effect-free, and never starts automation.",
+    description: "Evaluate whether a local unattended loop can continue without a manual nudge. Advisory only: read-only, side-effect-free, never starts automation, and manual boolean input cannot produce ready.",
     parameters: Type.Object({
       opt_in: Type.Boolean({ description: "Explicit opt-in for the nudge-free loop canary." }),
       next_local_safe: Type.Boolean({ description: "Whether the next slice is local-first, small, reversible, and has a known focal gate." }),

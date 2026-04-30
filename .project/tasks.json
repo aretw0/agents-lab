@@ -5802,6 +5802,33 @@
       ],
       "notes": "Criado para transformar effect=none de mera comunicação textual em campo estruturado auditável nos details. [rationale:risk-control] Agentes futuros não devem precisar parsear apenas summary para saber que a tool não ativa automação.\n[2026-04-30T01:35:37Z] slice=1 focus=TASK-BUD-245 gate=test:monitor:smoke-222/222 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] effect/mode/activation agora são campos estruturados, não apenas texto.",
       "verification": "VER-BUD-523"
+    },
+    {
+      "id": "TASK-BUD-246",
+      "description": "[P1] Impedir que booleans manuais produzam ready no canário nudge-free.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-245"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Gate puro só retorna ready quando a fonte dos sinais é measured, além dos gates verdes.",
+        "Tool runtime baseada em booleans manuais fica advisory/defer mesmo com todos os booleans true.",
+        "Details incluem signalSource para auditoria.",
+        "Smoke cobre measured ready e manual defer.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado a partir do risco percebido de manipular booleans manuais para obter all-gates-green. [rationale:risk-control] Ready para loop sem empurrões deve depender de sinais medidos, não de parâmetros manuais arbitrários.\n[2026-04-30T01:37:58Z] slice=1 focus=TASK-BUD-246 gate=test:monitor:smoke-223/223 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Ready do canário agora exige signalSource=measured; booleans manuais deferem.",
+      "verification": "VER-BUD-524"
     }
   ]
 }

@@ -18,6 +18,8 @@ export interface UnattendedContinuationPlan {
   recommendation: string;
 }
 
+export type NudgeFreeLoopCanarySignalSource = "manual" | "measured";
+
 export interface NudgeFreeLoopCanaryInput {
   optIn: boolean;
   nextLocalSafe: boolean;
@@ -28,6 +30,7 @@ export interface NudgeFreeLoopCanaryInput {
   cooldownReady: boolean;
   validationKnown: boolean;
   stopConditionsClear: boolean;
+  signalSource?: NudgeFreeLoopCanarySignalSource;
 }
 
 export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
@@ -36,6 +39,7 @@ export interface NudgeFreeLoopCanaryGate {
   effect: "none";
   mode: "advisory";
   activation: "none";
+  signalSource: NudgeFreeLoopCanarySignalSource;
   decision: NudgeFreeLoopCanaryDecision;
   canContinueWithoutNudge: boolean;
   reasons: string[];
@@ -49,6 +53,8 @@ function normalizeContextLevel(value: unknown): UnattendedContinuationContextLev
 
 export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {
   const reasons: string[] = [];
+  const signalSource: NudgeFreeLoopCanarySignalSource = input.signalSource === "measured" ? "measured" : "manual";
+  if (signalSource !== "measured") reasons.push("manual-signal-source");
   if (!input.optIn) reasons.push("missing-opt-in");
   if (!input.nextLocalSafe) reasons.push("no-local-safe-next-step");
   if (!input.checkpointFresh) reasons.push("checkpoint-not-fresh");
@@ -67,6 +73,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource,
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons,
@@ -80,6 +87,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource,
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons,
@@ -92,6 +100,7 @@ export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput):
     effect: "none",
     mode: "advisory",
     activation: "none",
+    signalSource,
     decision: "ready",
     canContinueWithoutNudge: true,
     reasons: ["all-gates-green"],

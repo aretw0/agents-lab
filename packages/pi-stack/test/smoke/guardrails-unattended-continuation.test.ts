@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolveNudgeFreeLoopCanaryGate, resolveUnattendedContinuationPlan } from "../../extensions/guardrails-core-unattended-continuation";
 
 describe("guardrails unattended continuation", () => {
-  it("marks the nudge-free loop canary ready only when every gate is green", () => {
+  it("marks the nudge-free loop canary ready only when measured gates are green", () => {
     const gate = resolveNudgeFreeLoopCanaryGate({
       optIn: true,
       nextLocalSafe: true,
@@ -13,12 +13,14 @@ describe("guardrails unattended continuation", () => {
       cooldownReady: true,
       validationKnown: true,
       stopConditionsClear: true,
+      signalSource: "measured",
     });
 
     expect(gate).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource: "measured",
       decision: "ready",
       canContinueWithoutNudge: true,
       reasons: ["all-gates-green"],
@@ -37,16 +39,43 @@ describe("guardrails unattended continuation", () => {
       cooldownReady: true,
       validationKnown: true,
       stopConditionsClear: true,
+      signalSource: "measured",
     });
 
     expect(gate).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource: "measured",
       decision: "defer",
       canContinueWithoutNudge: false,
       reasons: ["missing-opt-in"],
       summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=missing-opt-in",
+    });
+  });
+
+  it("defers the nudge-free loop canary when booleans are manually supplied", () => {
+    const gate = resolveNudgeFreeLoopCanaryGate({
+      optIn: true,
+      nextLocalSafe: true,
+      checkpointFresh: true,
+      handoffBudgetOk: true,
+      gitStateExpected: true,
+      protectedScopesClear: true,
+      cooldownReady: true,
+      validationKnown: true,
+      stopConditionsClear: true,
+    });
+
+    expect(gate).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      signalSource: "manual",
+      decision: "defer",
+      canContinueWithoutNudge: false,
+      reasons: ["manual-signal-source"],
+      summary: "nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source",
     });
   });
 
@@ -61,12 +90,14 @@ describe("guardrails unattended continuation", () => {
       cooldownReady: true,
       validationKnown: true,
       stopConditionsClear: false,
+      signalSource: "measured",
     });
 
     expect(gate).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource: "measured",
       decision: "blocked",
       canContinueWithoutNudge: false,
       reasons: ["unexpected-git-state", "protected-scope-pending", "stop-condition-present"],

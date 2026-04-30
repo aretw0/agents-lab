@@ -6936,6 +6936,15 @@
       "method": "test",
       "timestamp": "2026-04-30T01:35:50.332Z",
       "evidence": "Added structured no-activation fields to NudgeFreeLoopCanaryGate: effect='none', mode='advisory', activation='none'. Tests now assert these fields for ready, defer, and blocked paths, and surface tests assert runtime details preserve the structured advisory/no-activation fields while content remains compact. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 9/9; cmd.exe /c npm run test:monitor:smoke --silent passed 222/222 across 32 files. [rationale:risk-control] Future agents/automations can inspect details instead of parsing summary text to know the gate does not start a loop."
+    },
+    {
+      "id": "VER-BUD-524",
+      "target": "TASK-BUD-246",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:38:20.185Z",
+      "evidence": "Changed resolveNudgeFreeLoopCanaryGate so ready requires signalSource='measured' in addition to all gates green. Omitted/default source is treated as manual and yields defer with reason manual-signal-source even when all booleans are true. Runtime nudge_free_loop_canary still accepts manual booleans only, so it cannot produce ready until a future measured-signal surface exists. Details include signalSource for audit. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts --silent passed 10/10; cmd.exe /c npm run test:monitor:smoke --silent passed 223/223 across 32 files. [rationale:risk-control] Prevents direct parameter manipulation from producing all-gates-green readiness."
     }
   ]
 }

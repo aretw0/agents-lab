@@ -39,7 +39,7 @@ describe("guardrails unattended continuation surface", () => {
     } as never);
 
     const canaryTool = tools.find((tool) => tool.name === "nudge_free_loop_canary");
-    const ready = canaryTool?.execute("call-ready", {
+    const manual = canaryTool?.execute("call-manual", {
       opt_in: true,
       next_local_safe: true,
       checkpoint_fresh: true,
@@ -62,18 +62,20 @@ describe("guardrails unattended continuation surface", () => {
       stop_conditions_clear: false,
     });
 
-    expect(ready?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=ready continue=yes reasons=all-gates-green");
-    expect(ready?.details).toMatchObject({
+    expect(manual?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=defer continue=no reasons=manual-signal-source");
+    expect(manual?.details).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
-      canContinueWithoutNudge: true,
+      signalSource: "manual",
+      canContinueWithoutNudge: false,
     });
-    expect(blocked?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=blocked continue=no reasons=unexpected-git-state,protected-scope-pending,stop-condition-present");
+    expect(blocked?.content?.[0]?.text).toBe("nudge-free-loop: effect=none decision=blocked continue=no reasons=manual-signal-source,unexpected-git-state,protected-scope-pending,stop-condition-present");
     expect(blocked?.details).toMatchObject({
       effect: "none",
       mode: "advisory",
       activation: "none",
+      signalSource: "manual",
       canContinueWithoutNudge: false,
     });
   });
