@@ -6891,6 +6891,15 @@
       "method": "inspection",
       "timestamp": "2026-04-30T01:17:22.903Z",
       "evidence": "Documented the local loop without manual nudges in docs/guides/control-plane-operating-doctrine.md. It states manual nudges currently substitute for a safe idle continuation loop, and a future canary must handle local-safe task selection, fresh bounded checkpoint, handoff budget, expected git state, protected scopes, cooldown, known validation/smoke, and real stop conditions before automation. Validation: safe_marker_check passed 11/11 with commandSensitive=none. [rationale:risk-control] Prevents premature implicit automation while defining the path to stop needing human nudges."
+    },
+    {
+      "id": "VER-BUD-519",
+      "target": "TASK-BUD-241",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T01:24:00.772Z",
+      "evidence": "Added pure resolveNudgeFreeLoopCanaryGate helper and exported it. The gate requires explicit opt-in, local-safe next slice, fresh checkpoint, handoff budget OK, expected git state, protected scopes clear, cooldown ready, known validation, and stop conditions clear before allowing continuation without a manual nudge. It defers missing opt-in/local gates and blocks unexpected git state, protected scope, or stop conditions. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 7/7; cmd.exe /c npm run test:monitor:smoke --silent passed 221/221 across 32 files. [rationale:risk-control] This creates a deterministic gate before any runtime nudge-free loop automation."
     }
   ]
 }

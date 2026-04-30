@@ -18,8 +18,74 @@ export interface UnattendedContinuationPlan {
   recommendation: string;
 }
 
+export interface NudgeFreeLoopCanaryInput {
+  optIn: boolean;
+  nextLocalSafe: boolean;
+  checkpointFresh: boolean;
+  handoffBudgetOk: boolean;
+  gitStateExpected: boolean;
+  protectedScopesClear: boolean;
+  cooldownReady: boolean;
+  validationKnown: boolean;
+  stopConditionsClear: boolean;
+}
+
+export type NudgeFreeLoopCanaryDecision = "ready" | "defer" | "blocked";
+
+export interface NudgeFreeLoopCanaryGate {
+  decision: NudgeFreeLoopCanaryDecision;
+  canContinueWithoutNudge: boolean;
+  reasons: string[];
+  summary: string;
+  recommendation: string;
+}
+
 function normalizeContextLevel(value: unknown): UnattendedContinuationContextLevel {
   return value === "warn" || value === "checkpoint" || value === "compact" || value === "ok" ? value : "ok";
+}
+
+export function resolveNudgeFreeLoopCanaryGate(input: NudgeFreeLoopCanaryInput): NudgeFreeLoopCanaryGate {
+  const reasons: string[] = [];
+  if (!input.optIn) reasons.push("missing-opt-in");
+  if (!input.nextLocalSafe) reasons.push("no-local-safe-next-step");
+  if (!input.checkpointFresh) reasons.push("checkpoint-not-fresh");
+  if (!input.handoffBudgetOk) reasons.push("handoff-budget-not-ok");
+  if (!input.gitStateExpected) reasons.push("unexpected-git-state");
+  if (!input.protectedScopesClear) reasons.push("protected-scope-pending");
+  if (!input.cooldownReady) reasons.push("cooldown-not-ready");
+  if (!input.validationKnown) reasons.push("validation-unknown");
+  if (!input.stopConditionsClear) reasons.push("stop-condition-present");
+
+  const blocked = reasons.some((reason) => (
+    reason === "unexpected-git-state" || reason === "protected-scope-pending" || reason === "stop-condition-present"
+  ));
+  if (blocked) {
+    return {
+      decision: "blocked",
+      canContinueWithoutNudge: false,
+      reasons,
+      summary: `nudge-free-loop: decision=blocked continue=no reasons=${reasons.join(",")}`,
+      recommendation: "Stop the idle loop and ask the operator before continuing.",
+    };
+  }
+
+  if (reasons.length > 0) {
+    return {
+      decision: "defer",
+      canContinueWithoutNudge: false,
+      reasons,
+      summary: `nudge-free-loop: decision=defer continue=no reasons=${reasons.join(",")}`,
+      recommendation: "Do not continue without a nudge; satisfy the missing local gates first.",
+    };
+  }
+
+  return {
+    decision: "ready",
+    canContinueWithoutNudge: true,
+    reasons: ["all-gates-green"],
+    summary: "nudge-free-loop: decision=ready continue=yes reasons=all-gates-green",
+    recommendation: "A canary idle loop may continue the next small local-safe slice.",
+  };
 }
 
 export function resolveUnattendedContinuationPlan(input: UnattendedContinuationInput): UnattendedContinuationPlan {

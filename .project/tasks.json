@@ -5681,6 +5681,31 @@
       ],
       "notes": "Criado em checkpoint lane como micro-slice documental. [rationale:risk-control] Para parar de depender de nudges humanos, precisamos explicitar o contrato mínimo do loop local unattended antes de automatizar.\n[2026-04-30T01:19:00Z] slice=1 focus=TASK-BUD-240 gate=safe_marker_check-summary-ok-yes-matched-11/11 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Contrato do loop sem empurrões ficou explícito sem automatizar prematuramente.",
       "verification": "VER-BUD-518"
+    },
+    {
+      "id": "TASK-BUD-241",
+      "description": "[P1] Criar gate puro para canário do loop local sem empurrões.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-240"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro avalia se o canário nudge-free pode continuar sem operador.",
+        "Gate exige opt-in, próxima fatia local-safe, checkpoint fresco, orçamento de handoff ok, git state esperado, escopos protegidos livres, cooldown pronto e validação conhecida.",
+        "Testes cobrem ready, opt-in ausente e bloqueios por risco/escopo/progresso.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado em checkpoint lane como micro-slice de helper puro. [rationale:risk-control] O loop sem empurrões precisa de um gate determinístico antes de virar qualquer automação runtime.\n[2026-04-30T01:23:16Z] slice=1 focus=TASK-BUD-241 gate=test:monitor:smoke-221/221 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Gate puro criado antes de qualquer automação do loop sem empurrões.",
+      "verification": "VER-BUD-519"
     }
   ]
 }
