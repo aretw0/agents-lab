@@ -474,7 +474,9 @@ export function resolveMeasuredFactSourceAssessment(input: {
     return Boolean(origin && origin.source !== "local-observed");
   });
   const invalidEvidenceFacts = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => {
-    const evidence = byFact.get(fact)?.evidence.trim() ?? "";
+    const origin = byFact.get(fact);
+    if (!origin) return false;
+    const evidence = origin.evidence.trim();
     return evidence.length === 0 || evidence.length > NUDGE_FREE_MAX_MEASURED_EVIDENCE_CHARS;
   });
   const localObservedCount = REQUIRED_NUDGE_FREE_LOCAL_FACTS.filter((fact) => byFact.get(fact)?.source === "local-observed").length;

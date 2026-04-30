@@ -7,6 +7,7 @@ import {
   evaluateTextMarkerCheck,
   resolveLocalMeasuredNudgeFreeLoopCanaryGate,
   resolveLocalNudgeFreeLoopMeasuredSignals,
+  resolveMeasuredFactSourceAssessment,
   resolveMeasuredNudgeFreeLoopCanaryGate,
   resolveMeasuredPacketTrust,
   resolveRecurringFailureHardening,
@@ -132,6 +133,21 @@ describe("guardrails-core hardening re-exports", () => {
       factSource: "caller-supplied",
       eligibleForAuditedRuntimeSurface: false,
       reasons: ["untrusted-fact-source"],
+    });
+
+    expect(resolveMeasuredFactSourceAssessment({
+      facts: [
+        { fact: "candidate", source: "local-observed", evidence: "candidate=board-task" },
+        { fact: "checkpoint", source: "caller-supplied", evidence: "checkpoint=fresh" },
+      ],
+    })).toMatchObject({
+      effect: "none",
+      mode: "advisory",
+      activation: "none",
+      authorization: "none",
+      factSource: "mixed",
+      eligibleForMeasuredPacket: false,
+      reasons: ["missing-local-facts", "untrusted-fact-source"],
     });
   });
 });

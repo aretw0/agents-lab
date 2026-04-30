@@ -7215,6 +7215,15 @@
       "method": "test",
       "timestamp": "2026-04-30T03:37:37.118Z",
       "evidence": "Added pure resolveMeasuredFactSourceAssessment helper and local fact origin types. It classifies whether all required measured packet facts are local-observed before a packet can be considered for future measured use. It tracks missing facts, untrusted fact sources, invalid/overlong evidence, local observed count, and returns effect=none/mode=advisory/activation=none/authorization=none. It fails closed for caller-supplied/mixed/unknown or incomplete facts. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts --silent passed 28/28; cmd.exe /c npm run test:monitor:smoke --silent passed 243/243 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Future measured packets require trusted local observation boundaries before any audit surface can be safe."
+    },
+    {
+      "id": "VER-BUD-555",
+      "target": "TASK-BUD-280",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T03:41:03.945Z",
+      "evidence": "Re-exported resolveMeasuredFactSourceAssessment through guardrails-core-exports/guardrails-core. Added hardening re-export smoke proving canonical import and verifying mixed/caller-supplied facts remain ineligible with authorization=none. Focal test initially showed missing facts were also counted as invalid evidence; refined helper so invalidEvidenceFacts only applies to present facts, keeping missing and invalid evidence distinct. Also ran unattended continuation surface smoke to verify runtime nudge_free_loop_canary remains manual-only with no signalSource/signal_source measured override. Validation: focal re-export + continuation + surface tests passed 31/31; cmd.exe /c npm run test:monitor:smoke --silent passed 243/243 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] Fact-source boundary is canonical while preserving fail-closed and non-operational semantics."
     }
   ]
 }

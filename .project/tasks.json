@@ -6627,6 +6627,32 @@
       ],
       "notes": "Criado após reload como boundary de coleta local-observed. [rationale:risk-control] Antes de uma superfície auditada, precisamos distinguir fatos observados localmente de fatos fornecidos pelo caller.\n[2026-04-30T03:37:24Z] slice=1 focus=TASK-BUD-279 gate=test:monitor:smoke-243/243 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Boundary local-observed para fatos measured criado, sem runtime surface.",
       "verification": "VER-BUD-554"
+    },
+    {
+      "id": "TASK-BUD-280",
+      "description": "[P1] Re-exportar assessment de origem dos fatos measured pela superfície canônica.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-279"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Re-exportar resolveMeasuredFactSourceAssessment via guardrails-core-exports/guardrails-core.",
+        "Adicionar smoke provando import canônico do assessment de origem local-observed.",
+        "Validar que fatos caller-supplied/mixed não ficam elegíveis e authorization permanece none.",
+        "Validar que a superfície runtime nudge_free_loop_canary continua manual-only sem measured overrides.",
+        "Nenhuma tool runtime, scheduler, self-reload ou loop é ativado.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload como follow-up de TASK-BUD-279. [rationale:risk-control] O boundary de origem local-observed precisa estar disponível por import canônico sem virar permissão operacional.\n[2026-04-30T03:40:52Z] slice=1 focus=TASK-BUD-280 gate=test:monitor:smoke-243/243 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Assessment local-observed re-exportado; missing vs invalid evidence refinado.",
+      "verification": "VER-BUD-555"
     }
   ]
 }

@@ -86,7 +86,7 @@ export { resolveStructuredFirstMutationDecision } from "./guardrails-core-struct
 export { resolveSkillAccessRoot, resolveSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";
-export { buildLocalMeasuredNudgeFreeLoopCanaryPacket, resolveLocalMeasuredNudgeFreeLoopCanaryGate, resolveLocalNudgeFreeLoopMeasuredSignals, resolveMeasuredNudgeFreeLoopCanaryGate, resolveMeasuredPacketTrust, resolveNudgeFreeLoopCanaryGate, resolveUnattendedContinuationPlan } from "./guardrails-core-unattended-continuation";
+export { buildLocalMeasuredNudgeFreeLoopCanaryPacket, resolveLocalMeasuredNudgeFreeLoopCanaryGate, resolveLocalNudgeFreeLoopMeasuredSignals, resolveMeasuredFactSourceAssessment, resolveMeasuredNudgeFreeLoopCanaryGate, resolveMeasuredPacketTrust, resolveNudgeFreeLoopCanaryGate, resolveUnattendedContinuationPlan } from "./guardrails-core-unattended-continuation";
 export { resolveValidationMethodPlan } from "./guardrails-core-validation-method";
 export { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
 export { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
