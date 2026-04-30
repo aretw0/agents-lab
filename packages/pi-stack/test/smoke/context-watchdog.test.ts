@@ -1475,6 +1475,21 @@ describe("context-watchdog", () => {
 					reasons: ["human-confirmation-missing"],
 				},
 			});
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+				id: "TASK-BUD-340",
+				status: "in-progress",
+				description: "One-slice preview smoke without declared files",
+				acceptance_criteria: ["Smoke principal permanece verde."],
+				notes: "preview changed without files",
+			}] }));
+			const missingFilesOperatorResult = await operatorTool.execute("tc-one-slice-operator-packet-missing-files", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			expect(missingFilesOperatorResult.content?.[0]?.text).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing|declared-files-missing authorization=none");
+			expect(missingFilesOperatorResult.details.contractReview).toMatchObject({
+				decision: "blocked",
+				dispatchAllowed: false,
+				executorApproved: false,
+				reasons: ["human-confirmation-missing", "declared-files-missing"],
+			});
 			expect(formatContextWatchOneSliceCanaryPreviewSummary({
 				decision: "blocked",
 				canPrepareSlice: false,

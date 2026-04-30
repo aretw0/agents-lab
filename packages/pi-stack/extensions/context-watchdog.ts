@@ -2079,12 +2079,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
 				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
 			});
+			const declaredFilesKnown = Number(localAudit.packetInput?.candidate?.estimatedFiles ?? 0) > 0;
 			const contractReview = reviewOneSliceLocalHumanConfirmedContract({
 				decisionPacket,
 				humanConfirmation: "missing",
 				singleFocus,
 				localSafeScope: protectedScopesClear,
-				declaredFilesKnown: singleFocus,
+				declaredFilesKnown,
 				protectedScopesClear,
 				rollbackPlanKnown: gitStateExpected,
 				validationGateKnown: validationKnown,

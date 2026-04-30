@@ -1,42 +1,41 @@
 {
-  "timestamp": "2026-04-30T12:18:26.262Z",
-  "context": "TASK-BUD-364 completed. Applied simple-signal ladder to recurring Git maintenance warning. Read-only git_maintenance_status classified severi [snip] e, or .git/gc.log removal was executed. [truncated:+295 chars]",
+  "timestamp": "2026-04-30T12:23:47.575Z",
+  "context": "TASK-BUD-365 completed. Tightened context_watch_one_slice_operator_packet_preview contract derivation: declaredFilesKnown now comes from loca [snip] acket tool and this tightened behavior. [truncated:+384 chars]",
   "next_actions": [
-    "commit board/handoff/verification evidence",
-    "reload still needed for TASK-BUD-361 operator packet runtime validation",
-    "if operator explicitly authorizes Git maintenance later, run a separate protected task with ba [snip] ns and exact command scope [truncated:+24 chars]"
+    "commit code/tests/board/handoff evidence",
+    "reload before live-validating context_watch_one_slice_operator_packet_preview",
+    "after reload, validate green declared-files path and missing-files blocked path if practical"
   ],
   "blockers": [
-    "Runtime reload still needed before live validation of context_watch_one_slice_ [snip] iew from TASK-BUD-361. [truncated:+20 chars]",
-    "Git maintenance cleanup remains opt-in; repeated warning is classified as monitor, not auto-clean."
+    "Runtime reload needed before context_watch_one_slice_operator_packet_preview is available live."
   ],
   "recent_validation": [
-    "git_maintenance_status: severity=warning action=monitor reasons=gc-log-present / many-loose-ob [snip] cleanupCommandsExecuted=[] [truncated:+40 chars]",
-    "recurring_failure_hardening_plan: decision=block-old-path hardIntent=yes occurrences=3 reasons [snip] ailable / third-occurrence [truncated:+18 chars]",
-    "git status after diagnostics: only M .project/tasks.json from explicit workflow steps"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 48/48",
+    "cmd.exe /c npm run test:monitor:smoke --silent passed 269/269 across 32 files",
+    "green operator packet smoke: reasons=human-confirmation-missing only when task.files is declared"
   ],
   "recent_commits": [
     "pending"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T12:18:26.262Z",
+    "generatedAtIso": "2026-04-30T12:23:47.575Z",
     "level": "compact",
     "percent": 72,
     "action": "checkpoint-refresh",
-    "recommendation": "Commit evidence; continue local-first. Do not run git cleanup without explicit authorization.",
+    "recommendation": "Commit evidence; request reload before live validation of operator packet preview.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T12:18:26.262Z",
+      "atIso": "2026-04-30T12:23:47.575Z",
       "reason": "manual_checkpoint",
       "level": "compact",
       "percent": 72,
       "action": "checkpoint-refresh",
-      "recommendation": "Commit evidence; continue local-first. Do not run git cleanup without explicit authorization."
+      "recommendation": "Commit evidence; request reload before live validation of operator packet preview."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-364"
+    "TASK-BUD-365"
   ]
 }

@@ -8843,6 +8843,33 @@
       ],
       "notes": "[rationale:risk-control] O aviso de Git maintenance é um sinal simples recorrente: deve ser classificado e registrado sem virar limpeza destrutiva automática.\n[2026-04-30T12:21:00Z] slice=1 focus=TASK-BUD-364 gate=git_maintenance_status-read-only severity=warning action=monitor cleanupAllowedAutomatically=false cleanupCommandsExecuted=0 loose=8285 sizeMiB=93.31 gcLog=yes commit=pending. [rationale:risk-control] Aviso recorrente classificado; manutenção destrutiva segue opt-in.",
       "verification": "VER-BUD-638"
+    },
+    {
+      "id": "TASK-BUD-365",
+      "description": "[P1] Apertar operator packet para exigir arquivos declarados reais.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-361"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "context_watch_one_slice_operator_packet_preview deve derivar declaredFilesKnown de arquivos/candidate, não apenas de foco único.",
+        "Cenário com foco único mas sem task.files deve bloquear contract review com declared-files-missing.",
+        "Cenário verde existente continua bloqueado apenas por human-confirmation-missing e mantém dispatch=no executor=no authorization=none.",
+        "Não criar executor, dispatcher, scheduler, loop ou automação.",
+        "Não modificar .pi/settings.json nem .github.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência, commit e checkpoint; live validation requer reload junto com a tool nova."
+      ],
+      "notes": "[rationale:risk-control] Antes de qualquer execução futura, o pacote composto precisa diferenciar foco único de escopo de arquivos realmente declarado.\n[2026-04-30T12:23:09Z] slice=1 focus=TASK-BUD-365 gate=context-watchdog-48/48+test:monitor:smoke-269/269 commit=pending contract=declared-files-derived-from-candidate reload-needed=yes. [rationale:risk-control] Foco único não equivale mais a arquivos declarados no packet composto.",
+      "verification": "VER-BUD-639"
     }
   ]
 }

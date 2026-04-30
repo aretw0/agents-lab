@@ -7971,6 +7971,15 @@
       "method": "read-only-diagnostic",
       "timestamp": "2026-04-30T12:18:15.191Z",
       "evidence": "Applied the simple-signal ladder to the recurring Git maintenance warning without executing cleanup. git_maintenance_status returned `git-maintenance: severity=warning action=monitor loose=8285 sizeMiB=93.31 garbage=0 gcLog=yes`, reasons gc-log-present and many-loose-objects, cleanupAllowedAutomatically=false, cleanupCommandsExecuted=[]. Recommendation is to record the signal and continue if responsive; maintenance remains opt-in. recurring_failure_hardening_plan for a third occurrence with existing rule/primitive/test/runtime guard returned block-old-path/hardIntent=yes, confirming the unsafe old path should stay routed to guarded diagnostics rather than ad hoc cleanup. git status after diagnostics showed only explicit .project/tasks.json workflow changes. No git gc, git prune, or .git/gc.log removal was executed. [rationale:risk-control] The repeated signal is now classified and recorded while preserving explicit authorization for destructive maintenance."
+    },
+    {
+      "id": "VER-BUD-639",
+      "target": "TASK-BUD-365",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T12:23:32.939Z",
+      "evidence": "Tightened context_watch_one_slice_operator_packet_preview so the composed human contract review derives declaredFilesKnown from the local continuity candidate estimatedFiles rather than assuming a single focus implies declared files. The existing green fixture with task.files still yields contract=blocked only by human-confirmation-missing, dispatch=no, executor=no, authorization=none. A new smoke path with the same single focus but no task.files keeps readiness/packet green while contract review blocks with human-confirmation-missing|declared-files-missing. No executor, dispatcher, scheduler, loop, staging, commit, board close, checkpoint, remote/offload, or self-reload was added. Validation: focal context-watchdog passed 48/48; full monitor smoke passed 269/269. Runtime behavior belongs to the not-yet-live operator packet tool, so reload is required before live validation. [rationale:risk-control] The operator packet now distinguishes a focus task from a declared reversible file scope before any future execution path."
     }
   ]
 }
