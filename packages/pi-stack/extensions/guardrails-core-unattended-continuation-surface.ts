@@ -145,15 +145,22 @@ export function localContinuityAuditReasons(result: ReturnType<typeof buildLocal
   return [...reasons].slice(0, 5);
 }
 
+export function localContinuityProtectedPaths(result: unknown): string[] {
+  const paths = (result as { protectedPaths?: unknown } | undefined)?.protectedPaths;
+  return Array.isArray(paths) ? paths.map((path) => normalizePathForAudit(String(path))).filter(Boolean).slice(0, 3) : [];
+}
+
 export function formatLocalContinuityAuditSummary(
   result: ReturnType<typeof buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts>,
   reasons = localContinuityAuditReasons(result),
 ): string {
+  const protectedPaths = localContinuityProtectedPaths(result);
   return [
     `local-continuity-audit: eligible=${result.envelope.eligibleForAuditedRuntimeSurface ? "yes" : "no"}`,
     `collectors=${result.collectorResults.length}/8`,
     `packet=${result.envelope.packet.gate.decision}`,
     reasons.length > 0 ? `reasons=${reasons.join("|")}` : undefined,
+    protectedPaths.length > 0 ? `protected=${protectedPaths.join("|")}` : undefined,
     "authorization=none",
   ].filter(Boolean).join(" ");
 }
@@ -170,7 +177,7 @@ export function buildLocalContinuityAudit(cwd: string) {
   const changedPaths = git.paths ?? [];
   const protectedPaths = [...new Set([...changedPaths, ...expectedPaths].filter(isProtectedAuditPath))];
   const blockers = Array.isArray(handoff.json?.blockers) ? handoff.json.blockers.filter(Boolean) : [];
-  return buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
+  const audit = buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts({
     optIn: true,
     nowMs: Date.now(),
     candidate: {
@@ -212,6 +219,7 @@ export function buildLocalContinuityAudit(cwd: string) {
       ],
     },
   });
+  return { ...audit, protectedPaths: protectedPaths.slice(0, 10) };
 }
 
 export function registerGuardrailsUnattendedContinuationSurface(pi: ExtensionAPI): void {

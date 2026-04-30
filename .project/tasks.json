@@ -7921,6 +7921,34 @@
       ],
       "notes": "[rationale:risk-control] Depois de definir o contrato canonical/derived, precisamos reduzir duplicação de settings helpers para que ferramentas específicas não inventem outro caminho ou sobrescrevam o baseline sem passar pelo contrato comum.\n[2026-04-30T09:43:01Z] slice=1 focus=TASK-BUD-328 gate=tsx-wrapper-smoke+test:monitor:smoke-263/263 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Colony pilot agora reutiliza topology canônico/derivado em vez de inventar path próprio.",
       "verification": "VER-BUD-602"
+    },
+    {
+      "id": "TASK-BUD-329",
+      "description": "[P1] Expor paths protegidos pendentes em detalhes compactos do local_continuity_audit/readiness.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-328"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "local_continuity_audit deve expor de forma read-only uma lista compacta de protected paths pendentes derivados dos collectors locais.",
+        "context_watch_continuation_readiness deve propagar esses paths em details ou summary compacta sem autorizar ação.",
+        "O blocker .pi/settings.json deve continuar fail-closed; a mudança é explicabilidade, não masking.",
+        "Não modificar .pi/settings.json.",
+        "Smoke focal e principal permanecem verdes.",
+        "Registrar evidência e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Depois de alinhar canonical/derived settings, o operador precisa ver rapidamente qual protected drift real bloqueia a continuidade; isso deve ser evidência read-only e não autorização.\n[2026-04-30T09:46:27Z] slice=1 focus=TASK-BUD-329 gate=focal-54/54+test:monitor:smoke-264/264 commit=pending protected-drift-preserved=.pi/settings.json. [rationale:risk-control] Readiness/audit agora mostram protected path real como evidência read-only.",
+      "verification": "VER-BUD-603"
     }
   ]
 }

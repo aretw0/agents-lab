@@ -7647,6 +7647,15 @@
       "method": "test+inspection",
       "timestamp": "2026-04-30T09:43:16.227Z",
       "evidence": "Consolidated colony-pilot settings helpers on the canonical settings topology. colony-pilot-settings now delegates canonical read/write to context-watchdog-storage readProjectSettings/writeProjectSettings and re-exports resolveProjectSettingsTopology; parseColonyPilotSettings/parseQuotaVisibilityBudgetSettings read from the canonical baseline helper instead of duplicating .pi/settings.json path parsing. Added wrapper access for readDerivedAgentSettings/writeDerivedAgentSettings so colony/agent-specific code can use explicit derived overlays without overwriting canonical settings. Verified wrapper behavior with a bounded tsx smoke: canonical path `.pi/settings.json`, derived path `.pi/derived-settings/worker-one.settings.json`, colony settings and quota budgets parsed, derived overlay read separately. Full monitor smoke passed 263/263. No .pi/settings.json mutation was made; existing protected drift remains visible. [rationale:risk-control] Shared topology reduces duplicated settings paths and gives specialized agents a derived overlay route while preserving explicit canonical writes only."
+    },
+    {
+      "id": "VER-BUD-603",
+      "target": "TASK-BUD-329",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-04-30T09:46:42.854Z",
+      "evidence": "Added read-only protected path evidence to local_continuity_audit/readiness without changing .pi/settings.json. buildLocalContinuityAudit now returns compact protectedPaths derived from local git/expected-path collectors. local_continuity_audit summary includes `protected=...` when protected drift is present and details includes protectedPaths. context_watch_continuation_readiness propagates the same list into details and summary via optional protectedPaths; authorization remains none. Smoke added for a git repo with modified .pi/settings.json verifying summary contains `protected=.pi/settings.json`, details.protectedPaths is [`.pi/settings.json`], and authorization stays none. Formatter smoke verifies readiness summary can show protected=.pi/settings.json. Validation: focal guardrails/context smokes passed 54/54; full monitor smoke passed 264/264. No .pi/settings.json mutation was made; blocker remains fail-closed until operator decides. [rationale:risk-control] The remaining protected settings drift is now explicit evidence for the operator, not hidden or auto-resolved."
     }
   ]
 }

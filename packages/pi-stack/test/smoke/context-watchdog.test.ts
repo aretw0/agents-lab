@@ -1365,6 +1365,14 @@ describe("context-watchdog", () => {
 				localAuditReasons: ["git-state:invalid", "protected-scopes:invalid", "stop-conditions:invalid", "extra"],
 				staleFocusCount: 1,
 			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked reasons=git-state:invalid|protected-scopes:invalid|stop-conditions:invalid staleFocus=1 authorization=none");
+			expect(formatContextWatchContinuationReadinessSummary({
+				ready: false,
+				focusTasks: "TASK-BUD-321",
+				localAuditDecision: "blocked",
+				localAuditReasons: ["protected-scopes:invalid"],
+				protectedPaths: [".pi/settings.json"],
+				staleFocusCount: 0,
+			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked reasons=protected-scopes:invalid protected=.pi/settings.json staleFocus=0 authorization=none");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

@@ -101,6 +101,7 @@ import {
 	buildLocalContinuityAudit,
 	formatLocalContinuityAuditSummary,
 	localContinuityAuditReasons,
+	localContinuityProtectedPaths,
 } from "./guardrails-core-unattended-continuation-surface";
 
 export {
@@ -855,6 +856,7 @@ export function formatContextWatchContinuationReadinessSummary(input: {
 	localAuditDecision: string;
 	staleFocusCount: number;
 	localAuditReasons?: string[];
+	protectedPaths?: string[];
 }): string {
 	return [
 		"context-watch-continuation-readiness:",
@@ -862,6 +864,7 @@ export function formatContextWatchContinuationReadinessSummary(input: {
 		`focus=${input.focusTasks.replace(/\s+/g, "_")}`,
 		`audit=${input.localAuditDecision}`,
 		input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
+		input.protectedPaths && input.protectedPaths.length > 0 ? `protected=${input.protectedPaths.slice(0, 3).join("|")}` : undefined,
 		`staleFocus=${input.staleFocusCount}`,
 		"authorization=none",
 	].filter(Boolean).join(" ");
@@ -1860,6 +1863,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
 			const localAudit = buildLocalContinuityAudit(ctx.cwd);
 			const localAuditReasons = localContinuityAuditReasons(localAudit);
+			const protectedPaths = localContinuityProtectedPaths(localAudit);
 			const localContinuitySummary = formatLocalContinuityAuditSummary(localAudit, localAuditReasons);
 			const localAuditDecision = localAudit.envelope.packet.gate.decision;
 			const ready = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
@@ -1868,6 +1872,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				focusTasks,
 				localAuditDecision,
 				localAuditReasons,
+				protectedPaths,
 				staleFocusCount,
 			});
 			return {
@@ -1881,6 +1886,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					diagnosticsSummary,
 					localContinuitySummary,
 					localContinuityReasons: localAuditReasons,
+					protectedPaths,
 					localContinuity: localAudit,
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",

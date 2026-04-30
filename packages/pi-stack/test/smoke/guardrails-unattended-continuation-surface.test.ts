@@ -133,6 +133,44 @@ describe("guardrails unattended continuation surface", () => {
     }
   });
 
+  it("surfaces protected drift paths as read-only audit evidence", () => {
+    const cwd = mkdtempSync(join(tmpdir(), "local-continuity-protected-paths-"));
+    try {
+      execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+      execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      mkdirSync(join(cwd, ".pi"), { recursive: true });
+      mkdirSync(join(cwd, "packages", "pi-stack", "extensions"), { recursive: true });
+      writeFileSync(join(cwd, ".pi", "settings.json"), JSON.stringify({ piStack: { baseline: true } }));
+      writeFileSync(join(cwd, "packages", "pi-stack", "extensions", "foo.ts"), "export const foo = 1;\n");
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ timestamp: new Date().toISOString(), current_tasks: ["TASK-SURFACE"], blockers: [] }));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+        id: "TASK-SURFACE",
+        status: "in-progress",
+        description: "Protected drift evidence smoke",
+        files: ["packages/pi-stack/extensions/foo.ts"],
+        acceptance_criteria: ["Smoke principal permanece verde."],
+      }] }));
+      execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+      execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+      writeFileSync(join(cwd, ".pi", "settings.json"), JSON.stringify({ piStack: { baseline: false } }));
+
+      const tools: RegisteredTool[] = [];
+      registerGuardrailsUnattendedContinuationSurface({
+        registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      } as never);
+      const auditTool = tools.find((tool) => tool.name === "local_continuity_audit");
+      const result = auditTool?.execute("call-audit", {}, undefined, undefined, { cwd });
+
+      expect(result?.content?.[0]?.text).toContain("protected=.pi/settings.json");
+      expect(result?.details.protectedPaths).toEqual([".pi/settings.json"]);
+      expect(result?.details.authorization).toBe("none");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("ignores completed handoff task when deriving local continuity candidate", () => {
     const cwd = mkdtempSync(join(tmpdir(), "local-continuity-stale-task-"));
     try {
