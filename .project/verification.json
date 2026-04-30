@@ -8646,6 +8646,15 @@
       "method": "runtime-audit-wiring-smoke",
       "timestamp": "2026-04-30T22:12:53.782Z",
       "evidence": "Fourth bounded slice for TASK-BUD-390 wired trusted UI confirmation evidence into guardrails-core for existing UI confirmation paths without enabling overrides. Sensitive/outside-project read confirmations and sensitive bash-read confirmations now call appendTrustedUiConfirmationEvidence, which uses recordTrustedHumanConfirmationUiDecision and appends guardrails-core.human-confirmation-ui-decision audit entries carrying envelope details with dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Existing allow/block semantics remain driven by ctx.ui.confirm result; this only adds trusted audit evidence. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 12 passed. Docs sync/check ok. Remaining: expose/consume this audit evidence in monitor context or upstream confirmation pipeline for destructive tool confirmations beyond read guards."
+    },
+    {
+      "id": "VER-BUD-714",
+      "target": "TASK-BUD-390",
+      "target_type": "task",
+      "status": "passed",
+      "method": "trusted-confirmation-bridge-closure",
+      "timestamp": "2026-04-30T22:15:18.276Z",
+      "evidence": "TASK-BUD-390 completed for its bounded bridge scope. Implemented trusted confirmation core contract (trusted origins, exact action fingerprint, TTL, single-use consumption), bounded audit envelope customType=human-confirmation-evidence, UI decision recorder, and guardrails-core runtime audit wiring for existing UI confirmation paths (sensitive/outside-project read and sensitive bash-read). All surfaces preserve dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Validation: VER-BUD-710 core contract, VER-BUD-711 audit envelope, VER-BUD-712 UI decision recording, VER-BUD-713 guard runtime audit wiring. Latest focused tests: guardrails-human-confirmation, guardrails-human-confirmation-runtime-wiring, guardrails-core-hardening-reexport => 12 passed; docs sync/check ok. Follow-up TASK-BUD-392 tracks explicit monitor/guard consumption and destructive confirmation pipeline beyond read guards."
     }
   ]
 }

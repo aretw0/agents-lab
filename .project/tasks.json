@@ -9456,7 +9456,7 @@
     {
       "id": "TASK-BUD-390",
       "description": "Design/implement trusted runtime evidence bridge for TUI human confirmations consumed by guards/monitors.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-383"
@@ -9474,7 +9474,8 @@
         "Keep dispatchAllowed=false until an explicitly authorized executor/guard path consumes the evidence."
       ],
       "milestone": "human-control",
-      "notes": "Follow-up from TASK-BUD-383. Current slice diagnosed the gap and added read-only audit plan; actual trusted evidence propagation/consumption remains separate essential design work before stronger unattended modes. [rationale:risk-control] Human confirmation must be auditable and unspoofable before destructive/protected actions can be safely handled by guards/monitors in long-running local operation.\n2026-04-30: iniciado como lane essencial. Fatia bounded: implementar contrato core/testável de evidência trusted de confirmação (TTL, match exato, consumo único) sem UI/execução ainda e sem relaxar monitores.\n2026-04-30: primeira fatia implementada e validada (VER-BUD-710): contrato core de evidência trusted com TTL, match exato e consumo single-use. Ainda falta wiring runtime/monitor/TUI ou design upstream; manter in-progress, sem dispatch/override.\n2026-04-30: segunda fatia validada (VER-BUD-711): envelope bounded human-confirmation-evidence para future audit/custom-message/monitor consumption, ainda display=false e sem dispatch/override. Falta wiring runtime trusted TUI -> envelope -> guard/monitor.\n2026-04-30: continuando lane essencial. Próxima micro-fatia: helper core para converter decisão trusted de UI/TUI em evidência/envelope bounded, sem acoplar ainda a um diálogo específico e sem dispatch/override.\n2026-04-30: terceira fatia validada (VER-BUD-712): recordTrustedHumanConfirmationUiDecision converte decisão trusted de UI em evidência/envelope curto; declined/invalid não geram evidência. Falta hook runtime real TUI -> helper -> contexto guard/monitor.\n2026-04-30: quarta fatia validada (VER-BUD-713): guardrails-core agora registra audit evidence trusted para confirmações UI existentes de leitura sensível/fora do projeto e bash-read sensível. Sem alterar allow/block semantics e sem override/dispatch. Falta consumo por monitor/contexto e cobertura para confirmações destrutivas além dos read guards."
+      "notes": "Follow-up from TASK-BUD-383. Current slice diagnosed the gap and added read-only audit plan; actual trusted evidence propagation/consumption remains separate essential design work before stronger unattended modes. [rationale:risk-control] Human confirmation must be auditable and unspoofable before destructive/protected actions can be safely handled by guards/monitors in long-running local operation.\n2026-04-30: iniciado como lane essencial. Fatia bounded: implementar contrato core/testável de evidência trusted de confirmação (TTL, match exato, consumo único) sem UI/execução ainda e sem relaxar monitores.\n2026-04-30: primeira fatia implementada e validada (VER-BUD-710): contrato core de evidência trusted com TTL, match exato e consumo single-use. Ainda falta wiring runtime/monitor/TUI ou design upstream; manter in-progress, sem dispatch/override.\n2026-04-30: segunda fatia validada (VER-BUD-711): envelope bounded human-confirmation-evidence para future audit/custom-message/monitor consumption, ainda display=false e sem dispatch/override. Falta wiring runtime trusted TUI -> envelope -> guard/monitor.\n2026-04-30: continuando lane essencial. Próxima micro-fatia: helper core para converter decisão trusted de UI/TUI em evidência/envelope bounded, sem acoplar ainda a um diálogo específico e sem dispatch/override.\n2026-04-30: terceira fatia validada (VER-BUD-712): recordTrustedHumanConfirmationUiDecision converte decisão trusted de UI em evidência/envelope curto; declined/invalid não geram evidência. Falta hook runtime real TUI -> helper -> contexto guard/monitor.\n2026-04-30: quarta fatia validada (VER-BUD-713): guardrails-core agora registra audit evidence trusted para confirmações UI existentes de leitura sensível/fora do projeto e bash-read sensível. Sem alterar allow/block semantics e sem override/dispatch. Falta consumo por monitor/contexto e cobertura para confirmações destrutivas além dos read guards.\n2026-04-30: concluído no escopo bounded: contrato core + envelope + recordTrustedHumanConfirmationUiDecision + audit wiring em confirmações UI existentes do guardrails-core, sem dispatch/override. TASK-BUD-392 criado para consumo explícito por monitor/guard e confirmações destrutivas fora dos read guards.",
+      "verification": "VER-BUD-714"
     },
     {
       "id": "TASK-BUD-391",
@@ -9494,6 +9495,30 @@
       ],
       "milestone": "user-stack-incidents",
       "notes": "Criado por relato do operador de uso real da pi-stack por usuário: bloqueio '🔴 BLOCKED — File modified since read' para /workspaces/refarm/apps/dev/src/lib/surface-diagnostics.ts, com instrução para re-read após modificação em disco. O operador suspeita que já resolvemos caso semelhante aqui de outro jeito, mas a extensão causadora no ambiente do usuário é desconhecida. [rationale:risk-control] Stale-read guards protegem contra edição com modelo mental defasado, mas falsos bloqueios em ambientes com auto-format/edição externa podem travar fluxos seguros e corroer confiança; precisa diagnóstico/curadoria sem desviar a lane essencial atual."
+    },
+    {
+      "id": "TASK-BUD-392",
+      "description": "Follow-up: consumir evidência trusted de confirmação humana em monitor/guard para confirmações destrutivas além dos read guards.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-390"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-human-confirmation.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        ".pi/monitors/unauthorized-action.monitor.json",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Definir como monitores ou guards leem a audit/custom-message evidence human-confirmation-evidence sem aceitar texto spoofable.",
+        "Cobrir confirmações destrutivas reais fora dos read guards ou documentar PR upstream necessário se a confirmação acontece antes do tool_call sem sinal exposto.",
+        "Adicionar testes para exact-match consumido por monitor/guard, stale/consumed/mismatched recusados e ausência de override automático.",
+        "Preservar fail-closed quando evidência trusted não estiver disponível.",
+        "Manter dispatchAllowed=false até uma task separada autorizar qualquer executor/override operacional."
+      ],
+      "milestone": "human-control",
+      "notes": "Follow-up de TASK-BUD-390. A task 390 criou contrato core, envelope e audit wiring para confirmações UI existentes em guardrails-core; ainda falta consumo explícito por monitor/guard e cobertura de confirmações destrutivas que vêm de pipeline upstream/third-party. [rationale:risk-control] A evidência trusted só reduz falso bloqueio de confirmação humana se o consumidor local souber validá-la sem abrir caminho para spoofing ou override automático."
     }
   ]
 }
