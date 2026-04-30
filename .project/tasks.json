@@ -8531,6 +8531,31 @@
       ],
       "notes": "[rationale:risk-control] packetReasons precisa ser validado ao vivo em caminho bloqueado para mostrar contratos faltantes no transcript sem autorizar execução.\n[2026-04-30T11:36:00Z] slice=1 focus=TASK-BUD-352 gate=live-preview-blocked packetReasons=preview-not-ready|validation-gate-missing dispatch=no authorization=none commit=pending. [rationale:risk-control] packetReasons validado ao vivo em caminho bloqueado, sem automação.",
       "verification": "VER-BUD-626"
+    },
+    {
+      "id": "TASK-BUD-353",
+      "description": "[P1] Live-validar summary verde sem packetReasons após reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-352"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke principal permanece verde.",
+        "Criar foco local-safe fresco com validação conhecida.",
+        "Escrever checkpoint fresco sem blockers reais.",
+        "Executar context_watch_one_slice_canary_preview e confirmar packet=ready-for-human-decision dispatch=no authorization=none.",
+        "Confirmar que packetReasons não aparece no caminho verde.",
+        "Executar context_watch_continuation_readiness e confirmar ready=yes authorization=none.",
+        "Registrar evidência, commit e checkpoint."
+      ],
+      "notes": "[rationale:risk-control] Depois de validar packetReasons no caminho bloqueado, precisamos confirmar que o caminho verde permanece enxuto e sem motivos de bloqueio.\n[2026-04-30T11:38:00Z] slice=1 focus=TASK-BUD-353 gate=live-preview-green packet=ready-for-human-decision dispatch=no packetReasons=absent authorization=none commit=pending. [rationale:risk-control] Caminho verde validado sem packetReasons e sem automação.",
+      "verification": "VER-BUD-627"
     }
   ]
 }

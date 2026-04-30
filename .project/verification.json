@@ -7863,6 +7863,15 @@
       "method": "live-tool+inspection",
       "timestamp": "2026-04-30T11:35:32.392Z",
       "evidence": "After reload, live runtime validated blocked packetReasons in context_watch_one_slice_canary_preview. With a fresh local-safe focus intentionally lacking known validation, preview returned `context-watch-one-slice-canary-preview: decision=blocked prepare=no stop=yes oneSliceOnly=yes packet=blocked dispatch=no reasons=readiness-not-ready|validation-unknown packetReasons=preview-not-ready|validation-gate-missing authorization=none`. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=no focus=TASK-BUD-352 audit=defer reasons=candidate:invalid|validation:invalid|no-local-safe-next-step staleFocus=0 authorization=none`. git status after preview showed only explicit .project/handoff.json and .project/tasks.json changes from workflow steps; the preview did not stage, commit, close board tasks, checkpoint, dispatch scheduler/remote/self-reload, or start a loop. [rationale:risk-control] Blocked packet diagnostics are visible in compact output while dispatch remains no."
+    },
+    {
+      "id": "VER-BUD-627",
+      "target": "TASK-BUD-353",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-tool+inspection",
+      "timestamp": "2026-04-30T11:37:18.067Z",
+      "evidence": "Live green-path validation after packetReasons rollout succeeded. With a fresh local-safe focus and known smoke validation, context_watch_one_slice_canary_preview returned `context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none`; no `packetReasons=` field appeared in the green summary. context_watch_continuation_readiness returned `context-watch-continuation-readiness: ready=yes focus=TASK-BUD-353 audit=ready reasons=all-gates-green|audit-envelope-eligible staleFocus=0 authorization=none`. git status after preview showed only explicit .project/handoff.json and .project/tasks.json workflow changes; preview did not stage, commit, close tasks, checkpoint, dispatch scheduler/remote/self-reload, or loop. [rationale:risk-control] Green output remains concise while blocked packet diagnostics stay available only when needed."
     }
   ]
 }
