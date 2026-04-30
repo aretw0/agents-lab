@@ -8331,6 +8331,15 @@
       "method": "inventory+package-doc-check+decision-packet",
       "timestamp": "2026-04-30T19:36:57.939Z",
       "evidence": "Closed practical guide-skill parity foundation. Final inventory found all current package skill/README docs/guides references: lab-skills control-plane-ops and embed-pi-cli, pi-skills create-pi-web-extension and pi-dev-workflow, and pi-stack README. npm run docs:package:check enforces referenced guides are declared and package-local copies exist. Prior evidence VER-BUD-675/676/677 covers parity markers, packaged docs sync, MDT-inspired canonical root/generated package-copy policy, and reference coverage check. [rationale:risk-control] This reduces drift and makes critical local-first safety rules discoverable in installed skills without relying on monorepo-only docs."
+    },
+    {
+      "id": "VER-BUD-679",
+      "target": "TASK-BUD-208",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+docs+package-doc-check",
+      "timestamp": "2026-04-30T19:42:25.418Z",
+      "evidence": "Implemented first i18n-aware user-facing lint primitive. Added lintI18nUserFacingText core and i18n_lint_text runtime surface: read-only, bounded, ignores code fences/paths/URLs/task IDs, detects likely mixed-language and unexpected-language drift, fail-closes on oversized input, and always returns authorization=none dispatchAllowed=false mutationAllowed=false. Tests passed: npx vitest run guardrails-i18n-lint.test.ts guardrails-i18n-intents.test.ts => 7 passed. Docs updated in docs/guides/i18n-intents.md and packaged into @aretw0/pi-stack docs; docs:package:sync/check passed. Runtime live validation requires reload before using i18n_lint_text."
     }
   ]
 }

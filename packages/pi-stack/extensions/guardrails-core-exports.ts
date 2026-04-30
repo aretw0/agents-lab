@@ -77,6 +77,7 @@ export { buildShellRoutingStatusLabel, buildShellRoutingStatusLines, buildShellR
 export { evaluateAutonomyLaneReadiness } from "./guardrails-core-autonomy-lane";
 export { evaluateAutonomyLaneTaskSelection, selectAutonomyLaneTask } from "./guardrails-core-autonomy-task-selector";
 export { buildI18nIntentSystemPrompt, DEFAULT_I18N_INTENT_CONFIG, normalizeI18nIntentConfig, resolveI18nArtifactIntent, resolveI18nIntentConfig, summarizeI18nIntentConfig } from "./guardrails-core-i18n-intents";
+export { lintI18nUserFacingText } from "./guardrails-core-i18n-lint";
 export { formatDeliveryModePlan, resolveDeliveryModePlan } from "./guardrails-core-delivery-mode";
 export { formatStateReconcilePlan, resolveStateReconcilePlan } from "./guardrails-core-state-reconcile";
 export { assessLargeFileMutationRisk, buildSafeLargeFileMutationResult, assessStructuredQueryRisk, buildStructuredQueryPlanResult } from "./guardrails-core-safe-mutation";

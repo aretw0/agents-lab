@@ -29,6 +29,7 @@ export const PACKAGE_DOCS = {
     dir: "packages/pi-stack",
     guides: [
       "colony-provider-model-governance.md",
+      "i18n-intents.md",
       "monitor-overrides.md",
       "scheduler-governance.md",
       "stack-sovereignty-user-guide.md",
