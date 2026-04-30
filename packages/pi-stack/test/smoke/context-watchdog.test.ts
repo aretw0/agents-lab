@@ -7,6 +7,7 @@ import {
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
+	buildLocalSliceHandoffCheckpoint,
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchSteeringStatus,
@@ -944,6 +945,42 @@ describe("context-watchdog", () => {
 			postResumeRecalibrated: false,
 			reason: "healthy",
 		});
+	});
+
+	it("builds compact local slice handoff checkpoints", () => {
+		const checkpoint = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-04-30T00:20:00.000Z",
+			taskId: "TASK-BUD-225",
+			context: `TASK-BUD-225 completed. ${"handoff payload ".repeat(40)}`,
+			validation: [
+				"context-watchdog.test.ts passed 32/32",
+				"test:monitor:smoke passed 208/208 across 32 files",
+				"live board_task_complete emitted compact summary",
+				"extra validation should be dropped",
+			],
+			commits: ["abc1234 feat(context): compact handoff checkpoints"],
+			nextActions: [
+				"continue essential local hardening",
+				"keep critical runtime guards pure/tested where possible",
+				"avoid protected scopes unless selected",
+				"prefer board summaries",
+				"extra next action should be dropped",
+			],
+			blockers: [],
+			contextLevel: "ok",
+			contextPercent: 14,
+			recommendation: "Progress saved; continue bounded local hardening.",
+		}) as any;
+
+		expect(checkpoint.timestamp).toBe("2026-04-30T00:20:00.000Z");
+		expect(checkpoint.current_tasks).toEqual(["TASK-BUD-225"]);
+		expect(checkpoint.context.length).toBeLessThanOrEqual(320);
+		expect(checkpoint.recent_validation).toHaveLength(3);
+		expect(checkpoint.next_actions).toHaveLength(4);
+		expect(checkpoint.blockers).toEqual([]);
+		expect(checkpoint.context_watch).toMatchObject({ level: "ok", percent: 14, action: "continue" });
+		expect(checkpoint.context_watch_events).toHaveLength(1);
+		expect(checkpoint.context_watch_events[0]).toMatchObject({ reason: "manual_checkpoint", action: "checkpoint-refresh" });
 	});
 
 	it("computes handoff freshness deterministically", () => {

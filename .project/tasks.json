@@ -5304,6 +5304,31 @@
       ],
       "notes": "Criado via board_task_create. [rationale:risk-control] O fallback explícito board_verification_append + board_update também precisa evitar JSON verboso em loops unattended.\n[2026-04-30T00:15:54Z] slice=1 focus=TASK-BUD-224 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] board_update agora segue o padrão de summaries compactos para fallback bounded.",
       "verification": "VER-BUD-503"
+    },
+    {
+      "id": "TASK-BUD-225",
+      "description": "[P1] Criar helper puro para montar checkpoint handoff compacto de fatias locais.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-219",
+        "TASK-BUD-224"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Helper puro constrói snapshot de handoff compacto a partir de task, validation, commits e next actions.",
+        "Snapshot preserva context_watch e context_watch_events mínimos sem payloads verbosos.",
+        "Teste cobre truncamento/listas limitadas para evitar bloat.",
+        "Smoke principal permanece verde."
+      ],
+      "notes": "Criado após reload. [rationale:risk-control] Ainda usamos scripts ad hoc para handoff; um builder puro reduz drift e bloat antes de expor uma primitive/tool de checkpoint.\n[2026-04-30T00:19:06Z] slice=1 focus=TASK-BUD-225 gate=cmd.exe-/c-npm-run-test:monitor:smoke---silent commit=pending drift=no next=commit-and-handoff. [rationale:risk-control] Builder puro de handoff compacto prepara substituição de scripts ad hoc.",
+      "verification": "VER-BUD-504"
     }
   ]
 }

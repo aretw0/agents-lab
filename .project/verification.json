@@ -6756,6 +6756,15 @@
       "method": "test",
       "timestamp": "2026-04-30T00:16:07.316Z",
       "evidence": "Added compact summaries to updateProjectTaskBoard success and failure paths, including board-update ok=yes/no task/status/reason lines. Updated board_update tool content to emit the summary when available while keeping details.task and verificationSync for automation. Tests assert helper success summary, helper failure summary, and board_update tool content summary. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts --silent passed 54/54; cmd.exe /c npm run test:monitor:smoke --silent passed 208/208 across 32 files. [rationale:risk-control] Keeps the explicit fallback board_verification_append + board_update bounded and low-bloat for unattended loops."
+    },
+    {
+      "id": "VER-BUD-504",
+      "target": "TASK-BUD-225",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-04-30T00:19:22.056Z",
+      "evidence": "Added buildLocalSliceHandoffCheckpoint as a pure helper for compact local-slice handoff snapshots. It bounds context, validation, commits, next_actions, blockers, context_watch, and context_watch_events so checkpoint payloads stay resumable without verbose ad hoc JSON. Exported through context-watchdog and covered truncation/list-limit behavior. Validation: cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts --silent passed 33/33; cmd.exe /c npm run test:monitor:smoke --silent passed 209/209 across 32 files. [rationale:risk-control] Reduces checkpoint drift/bloat and prepares a safer primitive for unattended progress preservation."
     }
   ]
 }

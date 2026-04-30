@@ -57,6 +57,7 @@ import {
 import {
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
+	buildLocalSliceHandoffCheckpoint,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
 	resolveHandoffFreshness,
@@ -101,6 +102,7 @@ export {
 	buildAutoResumePromptEnvelopeFromHandoff,
 	buildAutoResumePromptFromHandoff,
 	buildContextWatchBootstrapPlan,
+	buildLocalSliceHandoffCheckpoint,
 	contextWatchActionForLevel,
 	contextWatchEventAgeMs,
 	deepMergeSettings,
