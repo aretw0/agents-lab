@@ -1,44 +1,41 @@
 {
-  "timestamp": "2026-04-30T22:06:20.163Z",
-  "context": "TASK-BUD-390 remains in-progress. Added recordTrustedHumanConfirmationUiDecision, a core bridge helper that converts trusted UI confirmation [snip] sing envelope to guard/monitor context. [truncated:+318 chars]",
+  "timestamp": "2026-04-30T22:09:50.233Z",
+  "context": "Backlog incident captured without derailing essential lane: user pi-stack environment showed 'BLOCKED — File modified since read' for /worksp [snip] e exists. Return focus to TASK-BUD-390. [truncated:+276 chars]",
   "current_tasks": [
-    "TASK-BUD-390"
+    "TASK-BUD-391"
   ],
   "next_actions": [
-    "Commit TASK-BUD-390 UI decision evidence helper slice.",
-    "Next essential slice: identify the safest runtime integration point for trusted TUI confirm ev [snip] er than upstream mutation. [truncated:+40 chars]",
-    "Keep all executor/override paths disabled until live trusted path is validated."
+    "Continue TASK-BUD-390 essential lane: trusted TUI confirmation evidence runtime bridge.",
+    "Keep TASK-BUD-391 planned for later user-stack incident triage."
   ],
   "blockers": [
-    "Runtime TUI hook not wired yet.",
+    "Do not investigate TASK-BUD-391 now unless selected explicitly.",
     "Strong unattended/loop/scheduler/remote remains blocked.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi- [snip] xport.test.ts => 11 passed [truncated:+46 chars]",
-    "npm run docs:package:sync => ok",
-    "npm run docs:package:check => ok"
+    "board_task_create TASK-BUD-391 ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-04-30T22:06:20.163Z",
+    "generatedAtIso": "2026-04-30T22:09:50.233Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "commit-ui-confirmation-evidence-helper"
+    "recommendation": "continue-task-bud-390"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-04-30T22:06:20.163Z",
+      "atIso": "2026-04-30T22:09:50.233Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-ui-confirmation-evidence-helper"
+      "recommendation": "continue-task-bud-390"
     }
   ]
 }
