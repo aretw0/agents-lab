@@ -9300,7 +9300,7 @@
     {
       "id": "TASK-BUD-383",
       "description": "Investigar perda de confirmação humana em guard/monitor de deleção de arquivo recém-criado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-375"
@@ -9318,7 +9318,8 @@
         "Manter bloqueio fail-closed quando não houver confirmação real."
       ],
       "milestone": "human-control",
-      "notes": "2026-04-30: operador relatou que autorizou a remoção quando perguntado, mas o monitor ainda disse que a ação destrutiva não estava autorizada. Registrar para correção posterior de passagem/auditoria de confirmação humana.\n[rationale:risk-control] Confirmação humana para ação destrutiva precisa ser audível e chegar corretamente ao guard; se a confirmação se perde, o sistema gera falso bloqueio e reduz controle operacional confiável.\n2026-04-30: detalhe adicional do operador: a confirmação foi um dialog real da TUI, respondido com sim. O bloqueio posterior parece desconexão entre confirmação TUI/upstream e monitor/guard local, especialmente para arquivo recém-criado. Investigar propagação/auditoria dessa confirmação, não simplesmente relaxar o bloqueio."
+      "notes": "2026-04-30: operador relatou que autorizou a remoção quando perguntado, mas o monitor ainda disse que a ação destrutiva não estava autorizada. Registrar para correção posterior de passagem/auditoria de confirmação humana.\n[rationale:risk-control] Confirmação humana para ação destrutiva precisa ser audível e chegar corretamente ao guard; se a confirmação se perde, o sistema gera falso bloqueio e reduz controle operacional confiável.\n2026-04-30: detalhe adicional do operador: a confirmação foi um dialog real da TUI, respondido com sim. O bloqueio posterior parece desconexão entre confirmação TUI/upstream e monitor/guard local, especialmente para arquivo recém-criado. Investigar propagação/auditoria dessa confirmação, não simplesmente relaxar o bloqueio.\n2026-04-30: retomado como lane essencial para segurança/controle em trabalho longo. Escopo desta fatia: diagnosticar caminho de confirmação TUI/guard/monitor e adicionar evidência/teste conservador; laterais viram backlog. Não relaxar bloqueio fail-closed sem confirmação auditável.\n2026-04-30: concluído como diagnóstico conservador + primitiva de auditoria. Não reproduzimos interativamente o diálogo TUI nesta fatia; a evidência de código mostrou que confirmação não propagada ao contexto monitor-visível deve virar audit-gap, não autorização. TASK-BUD-390 cobre ponte runtime trusted como próximo passo essencial antes de modos fortes.",
+      "verification": "VER-BUD-708"
     },
     {
       "id": "TASK-BUD-384",
@@ -9450,6 +9451,29 @@
       ],
       "milestone": "local-first-control-plane",
       "notes": "Criado por steering do operador: não acoplar demais ao mitsupi/agent-stuff; curar as melhores decisões entre todos que fizeram algum /btw conhecido. [rationale:risk-control] Superfície lateral pode afetar foco, contexto, custos e injeção no fluxo principal; precisa matriz curatorial antes de implementação."
+    },
+    {
+      "id": "TASK-BUD-390",
+      "description": "Design/implement trusted runtime evidence bridge for TUI human confirmations consumed by guards/monitors.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-383"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-human-confirmation.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Define trusted origin for confirmation evidence that is not spoofable by model text.",
+        "Bind confirmation evidence to exact pending tool/action/path/scope with TTL and single-use semantics.",
+        "Expose evidence to local guards/monitors through tool_call context, custom message, audit entry, or upstream PR design without relaxing fail-closed behavior.",
+        "Add smoke tests for exact-match, stale, mismatched, missing, and spoofable confirmation evidence.",
+        "Keep dispatchAllowed=false until an explicitly authorized executor/guard path consumes the evidence."
+      ],
+      "milestone": "human-control",
+      "notes": "Follow-up from TASK-BUD-383. Current slice diagnosed the gap and added read-only audit plan; actual trusted evidence propagation/consumption remains separate essential design work before stronger unattended modes. [rationale:risk-control] Human confirmation must be auditable and unspoofable before destructive/protected actions can be safely handled by guards/monitors in long-running local operation."
     }
   ]
 }

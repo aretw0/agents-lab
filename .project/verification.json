@@ -8583,6 +8583,24 @@
       "method": "superseded-by-completed-investigation",
       "timestamp": "2026-04-30T21:37:31.668Z",
       "evidence": "TASK-BUD-255 acceptance is satisfied by the later, more specific completed TASK-BUD-375 (verification VER-BUD-661). Evidence accumulated there: Esc/cancel reliability classified as a human-control incident; responsibility separated across terminal/sandbox/host, upstream pi/TUI/runtime, and local pi-stack extensions; npm run pi:dev/source-aware caveats documented; fallback procedure and go/no-go matrix documented in control-plane doctrine; concrete AbortSignal propagation gap fixed in claude_code_execute and smoke-tested/live dry-run validated. Conservative conclusion remains: small bounded local work may continue, but strong unattended/loop/scheduler/remote remains blocked until tested long-run cancel/fallback and explicit operator decision."
+    },
+    {
+      "id": "VER-BUD-707",
+      "target": "TASK-BUD-383",
+      "target_type": "task",
+      "status": "passed",
+      "method": "code-path-audit+smoke-test",
+      "timestamp": "2026-04-30T21:51:43.918Z",
+      "evidence": "Diagnosed the confirmation mismatch conservatively. Code evidence: pi ToolCallEvent exposes toolName/toolCallId/input but no confirmed/confirmation evidence field; behavior monitor tool_call pipeline builds classifier context only from Pending tool call Tool/Arguments and extra branch context, so a TUI confirmation that is not emitted into tool_call/custom_messages/audit cannot be distinguished from missing confirmation. Added resolveHumanConfirmationAuditPlan: destructive/protected + uiConfirmationObserved without monitor-visible evidence returns decision=audit-gap, layer=upstream-pi-tui-to-monitor-gap, dispatchAllowed=false, canOverrideMonitorBlock=false, authorization=none. Spoofable custom-message evidence blocks; trusted exact-match evidence becomes auditable but still not permission. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-core-hardening-reexport.test.ts => 5 passed. Docs sync/check ok. Doctrine updated with auditable confirmation contract."
+    },
+    {
+      "id": "VER-BUD-708",
+      "target": "TASK-BUD-383",
+      "target_type": "task",
+      "status": "passed",
+      "method": "conservative-root-cause-and-audit-plan",
+      "timestamp": "2026-04-30T21:52:09.403Z",
+      "evidence": "Closed first essential slice for TASK-BUD-383. The reported TUI-confirmation/monitor-block mismatch is classified as an auditable-evidence propagation gap, not a reason to relax unauthorized-action. Code path shows monitor-visible tool_call context lacks a trusted confirmation signal; therefore fail-closed is correct when confirmation is not visible to the monitor/guard. Added resolveHumanConfirmationAuditPlan and smoke coverage; doctrine records minimum trusted confirmation contract. Created TASK-BUD-390 for actual trusted evidence bridge/consumption before stronger unattended operation."
     }
   ]
 }

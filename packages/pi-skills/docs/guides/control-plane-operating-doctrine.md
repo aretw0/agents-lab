@@ -75,6 +75,20 @@ Matriz go/no-go para trabalho ininterrupto local:
 
 Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
 
+### Confirmação humana auditável
+
+Confirmação humana para ação destrutiva/protegida precisa ser evidência auditável, não apenas sensação de UI. Se o operador aceitou um diálogo real da TUI, mas o monitor/guard posterior não vê evidência confiável no `tool_call`, em `custom_messages` ou em audit entry de origem runtime, classifique como **gap upstream pi/TUI → monitor**, preserve o bloqueio fail-closed e registre a incompatibilidade. Não relaxe `unauthorized-action` só porque a conversa contém uma frase de confirmação: isso é spoofable e não deve autorizar destructive/protected execution.
+
+O contrato mínimo para usar confirmação como evidência futura é:
+
+1. origem trusted/runtime, não texto livre do modelo;
+2. vínculo com o mesmo tool/action/path/scope que será executado;
+3. TTL curto e uso único;
+4. audit entry preservada para guards/monitores e handoff;
+5. falha fechada quando a confirmação não casa com a ação pendente.
+
+A primitiva `resolveHumanConfirmationAuditPlan` formaliza essa distinção em código: `uiConfirmationObserved=true` sem evidência monitor-visível retorna `decision=audit-gap`, `dispatchAllowed=false`, `canOverrideMonitorBlock=false` e `authorization=none`. Mesmo evidência trusted/exact-match retorna apenas `decision=auditable`; ela não executa nem aprova dispatch.
+
 ## Controle de processos em background
 
 Projetos que usam pi para desenvolvimento local frequentemente precisam subir frontend, backend, workers ou servidores de teste. Isso é uma superfície crítica antes de loops longos: o agente precisa saber o que iniciou, em qual workspace, com qual owner/session, em qual porta, como parar/reiniciar e como coletar erro sem despejar logs grandes no contexto.
