@@ -104,6 +104,14 @@ A superfície deve falhar fechada quando faltar origem local confiável, checkpo
 
 A primeira superfície read-only de audit envelope, quando existir, deve reutilizar o `buildLocalMeasuredNudgeFreeLoopAuditEnvelope` e os coletores locais já existentes. Ela não deve aceitar fatos caller-supplied como elegíveis; deve derivar cada fato a partir de leitura local observável, anexar o collector assessment, mostrar `authorization=none` e apontar claramente que o resultado é evidência para decisão posterior, não comando para continuar. Se algum coletor estiver faltante, untrusted, invalid ou overlong, o envelope deve continuar visível para diagnóstico, mas inelegível.
 
+### Naming: canário `nudge-free` vs primitiva de continuidade
+
+`nudge-free` fica como nome do canário histórico e da tool manual-only atual: ele descreve a pergunta de UX “dá para continuar sem empurrão manual?”. Esse nome continua útil para `nudge_free_loop_canary` e para helpers já publicados que provam que input manual não vira readiness.
+
+A próxima camada não deve herdar esse nome como primitiva principal. Para superfícies read-only futuras, use a semântica `local continuity audit` / `local_continuity_audit`: ela descreve melhor o objeto operacional — um pacote local, auditável, sem autorização, que classifica se uma continuidade poderia ser considerada depois. Isso evita prometer autonomia, evita confundir evidência com permissão e mantém a linguagem centrada em controle local.
+
+Não faça rename amplo prematuro dos helpers `NudgeFree*` já existentes. Antes de qualquer rename público, planeje aliases e compatibilidade. A regra prática é: `nudge-free` nomeia o canário e compatibilidade histórica; `local continuity audit` nomeia a primitiva nova e qualquer futura superfície runtime read-only. Nenhum dos dois nomes autoriza scheduler, loop, self-reload, remoto ou auto-continuação.
+
 ## Self-reload e autoresume
 
 Self-reload executado pelo agente ainda é backlog/canary opt-in, não comportamento automático atual. Antes de qualquer tentativa unattended real, o contrato mínimo precisa provar: checkpoint bounded fresco, orçamento do handoff dentro do limite, git state esperado, ausência de escopos protegidos pendentes, cooldown, auditoria e auto-resume minimal a partir do handoff compacto.

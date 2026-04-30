@@ -7359,6 +7359,15 @@
       "method": "test",
       "timestamp": "2026-04-30T04:41:30.962Z",
       "evidence": "Added and re-exported pure buildLocalMeasuredNudgeFreeLoopAuditEnvelopeFromCollectedFacts. It composes the local collectors for candidate, checkpoint, handoff-budget, git-state, protected-scopes, cooldown, validation, and stop-conditions into collectorResults, packetInput, measured packet, collector assessment, packet trust, and audit envelope. It accepts structured local facts/readStatus only and does not accept readiness booleans, signalSource, or caller-supplied measured overrides. Tests cover eligible all-local-observed preparation and ineligible protected/git/validation failures. Runtime nudge_free_loop_canary surface remains manual-only with no measured overrides. Validation: focal unattended+reexport+surface tests passed 42/42; cmd.exe /c npm run test:monitor:smoke --silent passed 254/254 across 32 files. No runtime tool, scheduler, self-reload, or loop was activated. [rationale:risk-control] This creates the single local audit packet building block needed before any future read-only runtime surface."
+    },
+    {
+      "id": "VER-BUD-571",
+      "target": "TASK-BUD-297",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-04-30T04:45:27.757Z",
+      "evidence": "Documented naming decision before any runtime measured surface. Doctrine now keeps nudge-free as the historical canary/manual-only tool naming and selects local continuity audit / local_continuity_audit as the primitive naming for future read-only runtime surfaces. It explicitly avoids broad premature rename, requires aliases/compatibility before public renames, and states neither naming layer authorizes scheduler, loop, self-reload, remote, or auto-continuation. Validation: safe_marker_check passed 7/7 using non-command-sensitive markers. [rationale:architecture] This prevents UX wording from becoming the operational primitive name while preserving compatibility with existing helpers."
     }
   ]
 }

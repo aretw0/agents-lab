@@ -7075,6 +7075,46 @@
       ],
       "notes": "Criado após completar coletores básicos. [rationale:risk-control] A operação ininterrupta segura precisa de um pacote auditável único a partir de fatos locais antes de qualquer superfície runtime futura.\n[2026-04-30T04:41:18Z] slice=1 focus=TASK-BUD-295 gate=test:monitor:smoke-254/254 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:risk-control] Preparador único de audit envelope criado como helper puro; runtime segue manual-only.",
       "verification": "VER-BUD-570"
+    },
+    {
+      "id": "TASK-BUD-296",
+      "description": "[P2] Criar prompt /btw para discussões rápidas paralelas sem desviar a task principal.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        ".pi/prompts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato de /btw inspirado no Claude Code para abrir discussão lateral curta enquanto a task principal continua rastreável.",
+        "Garantir que /btw não mude foco/task atual por padrão.",
+        "Permitir capturar decisão/backlog quando a discussão lateral gerar ação futura.",
+        "Documentar que /btw é conversacional/advisory e não executa mudanças automaticamente."
+      ],
+      "notes": "Criado por sugestão do operador em 2026-04-30. [rationale:ergonomics] Um /btw curado permitiria levantar dúvidas laterais rápidas sem interromper a lane essencial nem confundir checkpoint/current task."
+    },
+    {
+      "id": "TASK-BUD-297",
+      "description": "[P1] Revisar naming nudge-free antes de qualquer superfície runtime measured.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-295"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Avaliar se nudge-free deve permanecer como nome de canary específico ou ser encapsulado por uma primitiva com nome mais geral.",
+        "Propor naming para a primitiva de continuidade local auditada sem ativação operacional.",
+        "Evitar rename amplo prematuro se o termo ainda for útil como canary histórico/semântico.",
+        "Se houver rename, planejar compatibilidade e aliases antes de alterar exports públicos.",
+        "Registrar decisão antes de criar runtime read-only surface."
+      ],
+      "notes": "Criado por dúvida arquitetural do operador em 2026-04-30. [rationale:architecture] O termo nudge-free pode estar vazando semântica de UX para camadas que deveriam representar uma primitiva mais geral de continuidade local auditada.\n[2026-04-30T04:42:00Z] Iniciando revisão de naming antes de qualquer runtime measured surface. [rationale:architecture] Evitar que semântica UX 'nudge-free' contamine a primitiva de continuidade local auditada.\n[2026-04-30T04:42:00Z] slice=1 focus=TASK-BUD-297 gate=safe_marker_check-7/7 commit=pending drift=no next=commit-and-context_watch_checkpoint. [rationale:architecture] Naming decidido: canary nudge-free fica; primitiva futura local_continuity_audit.",
+      "verification": "VER-BUD-571"
     }
   ]
 }
