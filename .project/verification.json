@@ -8781,6 +8781,42 @@
       "method": "btw-curatorial-matrix-closure",
       "timestamp": "2026-05-01T02:02:02.275Z",
       "evidence": "TASK-BUD-389 completed. Added the /btw curatorial design matrix and linked it from the prior-art research and operating doctrine. The matrix is explicitly docs-only, not implementation or first-party exposure. It compares design decisions and sets a future decision packet for reuse/wrap/filter/first-party-runtime/docs-only without coupling automatically to oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw, or the local prompt draft. Docs sync/check and marker validations passed."
+    },
+    {
+      "id": "VER-BUD-729",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "passed",
+      "method": "state-reconcile-policy-doc",
+      "timestamp": "2026-05-01T02:08:17.392Z",
+      "evidence": "Calibrated TASK-BUD-153 with a local-safe/read-only state reconciliation policy for uninterrupted multi-mode work. Added docs/primitives/state-reconciliation-modes.md and doctrine link. Deterministic planning evidence: delivery_mode_plan default => runtime=native channel=direct-branch provider=none; prefer pull-request => runtime=native channel=pull-request provider=none; state_reconcile_plan board/native/direct-branch/1 writer => low risk lock-and-atomic-write; settings/container/pull-request/2 writers => medium risk plus single-writer/generated-apply/reviewed-promotion/manual review; handoff/ci/merge-request/4 writers => high risk plus single-writer/generated-apply/reviewed-promotion/manual review. Policy preserves no CI/remote/offload/scheduler/merge operation, no automatic .pi/settings.json mutation, no multi-writer state writes without single-writer/generated apply. Validation: docs sync/check ok; safe_marker_check state doc 5/5 and doctrine 3/3."
+    },
+    {
+      "id": "VER-BUD-730",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "passed",
+      "method": "multi-mode-state-reconciliation-closure",
+      "timestamp": "2026-05-01T02:08:25.987Z",
+      "evidence": "TASK-BUD-153 completed as a calibration/policy task, not as operational CI/remote enablement. The new state reconciliation policy explicitly covers native/direct-branch, pull-request/merge-request promotion, board/settings/handoff artifacts, single-writer/generated apply requirements, settings canonical protection, handoff freshness vs board status, and no-go states for multi-writer/CI/remote/offload/scheduler. Deterministic planning tools and docs/marker validation passed. No protected runtime was enabled and .pi/settings.json was not mutated."
+    },
+    {
+      "id": "VER-BUD-731",
+      "target": "TASK-BUD-395",
+      "target_type": "task",
+      "status": "passed",
+      "method": "tool-error-ergonomics-smoke",
+      "timestamp": "2026-05-01T02:12:38.972Z",
+      "evidence": "Implemented compact validation/alias hardening for delivery_mode_plan and state_reconcile_plan. Replaced TypeBox literal unions on user-facing string params with string schema plus explicit parser validation so invalid values return concise tool feedback with valid values instead of repeated anyOf constant errors. delivery_mode_plan now accepts aliases direct/branch/pr/pull_request/mr/merge_request and rejects invalid preferChannel compactly. state_reconcile_plan now accepts deliveryChannel aliases and reports invalid artifactKind/runtimeMode/deliveryChannel in one compact message. Tests: npx vitest run guardrails-delivery-mode-surface.test.ts guardrails-state-reconcile-surface.test.ts => 8 passed. docs sync/check ok. Safe markers passed helper 4/4 and state reconciliation doc 3/3. Runtime live validation requires reload."
+    },
+    {
+      "id": "VER-BUD-732",
+      "target": "TASK-BUD-402",
+      "target_type": "task",
+      "status": "passed",
+      "method": "compact-final-warning-regression",
+      "timestamp": "2026-05-01T02:33:49.656Z",
+      "evidence": "Implemented compact-final-warning deterministic stop for context compact level when autoCompactDecision is any non-trigger deferral/blocked state; added tests for compact-checkpoint precedence, compact-final-warning, trigger non-stop, operator action, docs sync. Validation: npx vitest run context-watchdog + delivery/state reconcile smoke => 57 passed; npm run docs:package:check => ok."
     }
   ]
 }

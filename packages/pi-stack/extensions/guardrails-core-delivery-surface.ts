@@ -52,17 +52,23 @@ export function registerGuardrailsDeliverySurface(
 		label: "Delivery Mode Plan",
 		description: "Deterministic plan for runtime mode (native/container/ci) and promotion channel (direct/PR/MR).",
 		parameters: Type.Object({
-			preferChannel: Type.Optional(Type.Union([
-				Type.Literal("direct-branch"),
-				Type.Literal("pull-request"),
-				Type.Literal("merge-request"),
-			])),
+			preferChannel: Type.Optional(Type.String({ description: "direct-branch|pull-request|merge-request; aliases accepted: direct|branch|pr|pull_request|mr|merge_request" })),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const preferred = String((params as { preferChannel?: unknown }).preferChannel ?? "").trim().toLowerCase();
-			const preferChannel = preferred === "direct-branch" || preferred === "pull-request" || preferred === "merge-request"
-				? (preferred as DeliveryChannel)
-				: undefined;
+			const rawPreferChannel = (params as { preferChannel?: unknown }).preferChannel;
+			const preferChannel = parseChannel(typeof rawPreferChannel === "string" ? rawPreferChannel : undefined);
+			if (rawPreferChannel !== undefined && !preferChannel) {
+				const details = {
+					ok: false,
+					reason: "invalid-preferChannel",
+					validValues: ["direct-branch", "pull-request", "merge-request"],
+					aliases: ["direct", "branch", "pr", "pull_request", "mr", "merge_request"],
+				};
+				return {
+					content: [{ type: "text", text: "delivery_mode_plan: invalid preferChannel; use direct-branch|pull-request|merge-request (aliases: direct|pr|mr)" }],
+					details,
+				};
+			}
 			const plan = resolveDeliveryModePlan({ preferChannel });
 			appendAuditEntry(ctx, "guardrails-core.delivery-mode-plan", {
 				atIso: new Date().toISOString(),
@@ -146,22 +152,9 @@ export function registerGuardrailsDeliverySurface(
 		label: "State Reconcile Plan",
 		description: "Deterministic conflict-avoidance plan for board/settings/handoff artifacts across native/container/CI flows.",
 		parameters: Type.Object({
-			artifactKind: Type.Optional(Type.Union([
-				Type.Literal("board"),
-				Type.Literal("settings"),
-				Type.Literal("handoff"),
-				Type.Literal("generic-json"),
-			])),
-			runtimeMode: Type.Optional(Type.Union([
-				Type.Literal("native"),
-				Type.Literal("container"),
-				Type.Literal("ci"),
-			])),
-			deliveryChannel: Type.Optional(Type.Union([
-				Type.Literal("direct-branch"),
-				Type.Literal("pull-request"),
-				Type.Literal("merge-request"),
-			])),
+			artifactKind: Type.Optional(Type.String({ description: "board|settings|handoff|generic-json" })),
+			runtimeMode: Type.Optional(Type.String({ description: "native|container|ci" })),
+			deliveryChannel: Type.Optional(Type.String({ description: "direct-branch|pull-request|merge-request; aliases accepted: direct|branch|pr|pull_request|mr|merge_request" })),
 			parallelWriters: Type.Optional(Type.Integer({ minimum: 1, maximum: 20 })),
 			preferGeneratedStep: Type.Optional(Type.Boolean()),
 		}),
@@ -173,11 +166,36 @@ export function registerGuardrailsDeliverySurface(
 				parallelWriters?: unknown;
 				preferGeneratedStep?: unknown;
 			};
+			const artifactKind = parseArtifact(typeof p.artifactKind === "string" ? p.artifactKind : undefined);
+			const runtimeMode = parseRuntime(typeof p.runtimeMode === "string" ? p.runtimeMode : undefined);
+			const deliveryChannel = parseChannel(typeof p.deliveryChannel === "string" ? p.deliveryChannel : undefined);
+			const invalidFields = [
+				p.artifactKind !== undefined && !artifactKind ? "artifactKind" : undefined,
+				p.runtimeMode !== undefined && !runtimeMode ? "runtimeMode" : undefined,
+				p.deliveryChannel !== undefined && !deliveryChannel ? "deliveryChannel" : undefined,
+			].filter(Boolean) as string[];
+			if (invalidFields.length > 0) {
+				const details = {
+					ok: false,
+					reason: "invalid-state-reconcile-params",
+					invalidFields,
+					validValues: {
+						artifactKind: ["board", "settings", "handoff", "generic-json"],
+						runtimeMode: ["native", "container", "ci"],
+						deliveryChannel: ["direct-branch", "pull-request", "merge-request"],
+						deliveryChannelAliases: ["direct", "branch", "pr", "pull_request", "mr", "merge_request"],
+					},
+				};
+				return {
+					content: [{ type: "text", text: `state_reconcile_plan: invalid ${invalidFields.join(",")}; valid artifact=board|settings|handoff|generic-json runtime=native|container|ci channel=direct-branch|pull-request|merge-request (aliases: direct|pr|mr)` }],
+					details,
+				};
+			}
 			const delivery = resolveDeliveryModePlan();
 			const plan = resolveStateReconcilePlan({
-				artifactKind: p.artifactKind as StateArtifactKind | undefined,
-				runtimeMode: (String(p.runtimeMode ?? "").trim().toLowerCase() || delivery.runtimeMode) as DeliveryRuntimeMode,
-				deliveryChannel: (String(p.deliveryChannel ?? "").trim().toLowerCase() || delivery.deliveryChannel) as DeliveryChannel,
+				artifactKind,
+				runtimeMode: runtimeMode ?? delivery.runtimeMode,
+				deliveryChannel: deliveryChannel ?? delivery.deliveryChannel,
 				parallelWriters: p.parallelWriters,
 				preferGeneratedStep: p.preferGeneratedStep === true,
 			});

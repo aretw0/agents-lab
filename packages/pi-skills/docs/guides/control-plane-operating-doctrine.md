@@ -11,7 +11,7 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 1. **Local-first antes de remoto** — provar no PC local antes de GitHub Actions, remote runners, subagentes persistentes ou offload.
 2. **Foco explícito governa a execução** — o foco atual vem do operador, do handoff ou de uma seleção local-safe registrada.
 3. **Foco completo não é parada automática** — se existe uma próxima melhoria local, pequena, segura e óbvia, o agente deve continuar com uma nova fatia auditável.
-4. **Checkpoint não é medo** — em `warn` ou `checkpoint`, salvar progresso e continuar bounded; só parar em `compact`, risco ou bloqueio real.
+4. **Checkpoint não é medo** — em `warn` ou `checkpoint`, salvar progresso e continuar bounded; em `compact`/warning final, parar a fatia atual e não iniciar nova run até checkpoint/auto-compact concluir.
 5. **Board/handoff/verification são a autoridade** — docs e commits explicam, mas o estado operacional deve estar recuperável pelo board e handoff.
 6. **Commits pequenos são uma guardrail** — cada fatia deve ter intenção clara, validação focal e staging limitado.
 7. **Diagnóstico tem cadência** — evitar abrir pacotes de status por hábito; usar quando há reload, checkpoint, seleção, troubleshooting ou risco.
@@ -150,6 +150,10 @@ Quando uma tool usar `board`, leia como a superfície local atual para esse cont
 Contrato desejado para qualquer versão futura: canal conversacional/advisory, sem trocar foco atual por padrão, sem executar mudanças automaticamente e sem disparar comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
 
 Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design. A matriz curatorial fica em `docs/research/btw-curatorial-design-matrix-2026-05-01.md`: comparar decisões de `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências conhecidas; então escolher entre reutilizar, adaptar/wrappar, filtrar uma extensão existente, criar runtime first-party opt-in, ou manter apenas docs/skill.
+
+## Reconciliação de estado por modo
+
+Execução ininterrupta só é segura quando o estado consegue ser reconciliado por modo/canal. A política detalhada fica em `docs/primitives/state-reconciliation-modes.md`: `native/direct-branch` é o default local; `pull-request`/`merge-request` são canais de promoção revisável, não autorização para CI/remoto; board/handoff usam superfícies bounded; `.pi/settings.json` permanece baseline protegido; múltiplos escritores exigem single-writer ou generated apply step antes de qualquer loop forte.
 
 ## Fluxo bounded do board local
 

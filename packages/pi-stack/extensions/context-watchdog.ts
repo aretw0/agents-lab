@@ -187,15 +187,15 @@ export type ContextWatchOperatorSignal = {
 	noiseExcessive: boolean;
 };
 
-export type ContextWatchDeterministicStopReason = "none" | "reload-required" | "compact-checkpoint-required";
+export type ContextWatchDeterministicStopReason = "none" | "reload-required" | "compact-checkpoint-required" | "compact-final-warning";
 
 export type ContextWatchDeterministicStopSignal = {
 	required: boolean;
 	reason: ContextWatchDeterministicStopReason;
-	action: "none" | "reload-and-resume" | "persist-checkpoint-and-compact";
+	action: "none" | "reload-and-resume" | "persist-checkpoint-and-compact" | "stop-and-let-auto-compact";
 };
 
-export type ContextWatchOperatorActionKind = "none" | "reload" | "checkpoint-compact" | "handoff-refresh";
+export type ContextWatchOperatorActionKind = "none" | "reload" | "checkpoint-compact" | "compact-final-warning" | "handoff-refresh";
 
 export type ContextWatchOperatorActionPlan = {
 	blocking: boolean;
@@ -343,6 +343,7 @@ export function resolveContextWatchOperatorSignal(input: {
 export function resolveContextWatchDeterministicStopSignal(input: {
 	assessmentLevel: ContextWatchdogLevel;
 	operatorSignal: Pick<ContextWatchOperatorSignal, "reasons">;
+	autoCompactDecision?: ContextWatchAutoCompactDecision["reason"];
 }): ContextWatchDeterministicStopSignal {
 	const reasons = Array.isArray(input.operatorSignal.reasons)
 		? input.operatorSignal.reasons
@@ -357,6 +358,13 @@ export function resolveContextWatchDeterministicStopSignal(input: {
 			action: "persist-checkpoint-and-compact",
 		};
 	}
+	if (input.assessmentLevel === "compact" && input.autoCompactDecision !== "trigger") {
+		return {
+			required: true,
+			reason: "compact-final-warning",
+			action: "stop-and-let-auto-compact",
+		};
+	}
 	return { required: false, reason: "none", action: "none" };
 }
 
@@ -369,6 +377,9 @@ export function describeContextWatchDeterministicStopHint(
 	}
 	if (signal.reason === "compact-checkpoint-required") {
 		return "persist checkpoint evidence and compact before continuing.";
+	}
+	if (signal.reason === "compact-final-warning") {
+		return "stop the current slice; do not start another run until checkpoint evidence and auto-compact complete.";
 	}
 	return undefined;
 }
@@ -390,6 +401,13 @@ export function resolveContextWatchOperatorActionPlan(input: {
 			blocking: true,
 			kind: "checkpoint-compact",
 			summary: "persist checkpoint and compact before next slice",
+		};
+	}
+	if (input.deterministicStop.reason === "compact-final-warning") {
+		return {
+			blocking: true,
+			kind: "compact-final-warning",
+			summary: "stop current slice and let auto-compact complete before next run",
 		};
 	}
 	if ((input.operatorSignal.reasons ?? []).includes("handoff-refresh-required")) {
@@ -1317,6 +1335,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const deterministicStop = resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: assessment.level,
 			operatorSignal,
+			autoCompactDecision: autoCompactState.decision.reason,
 		});
 		const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 		const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });
@@ -1565,7 +1584,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				autoCompactDecision: autoCompactState.decision.reason,
 				autoCompactTrigger: autoCompactState.decision.trigger,
 				retryScheduled: autoCompactState.retryDelayMs !== undefined,
-				calmCloseReady: calmCloseSignal.readyForCompact,
+				calmCloseReady: calmCloseSignal.calmCloseReady,
 				checkpointEvidenceReady: calmCloseSignal.checkpointEvidenceReady,
 				operatorActionKind: operatorAction.kind,
 				deterministicStopReason: inlineCompactCheckpointStop ? deterministicStop.reason : undefined,
@@ -1818,6 +1837,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const deterministicStop = resolveContextWatchDeterministicStopSignal({
 				assessmentLevel: assessment.level,
 				operatorSignal,
+				autoCompactDecision: autoCompact.decision.reason,
 			});
 			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 			const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });
@@ -2292,6 +2312,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const deterministicStop = resolveContextWatchDeterministicStopSignal({
 				assessmentLevel: assessment.level,
 				operatorSignal,
+				autoCompactDecision: autoCompact.decision.reason,
 			});
 			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
 			const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });

@@ -1,44 +1,42 @@
 {
-  "timestamp": "2026-05-01T02:02:13.636Z",
-  "context": "Completed TASK-BUD-389 after auto-resume. Created docs/research/btw-curatorial-design-matrix-2026-05-01.md and linked it from prior-art resea [snip] board/handoff/docs slice until commit. [truncated:+323 chars]",
+  "timestamp": "2026-05-01T02:25:02.705Z",
+  "context": "Incidente crítico reportado pelo operador: durante ciclo de auto-compact/context warning, o agente teria chegado a ~95%, falhado/chegado a 10 [snip] a de final-warning/compact fail-closed. [truncated:+337 chars]",
+  "current_tasks": [
+    "TASK-BUD-153"
+  ],
   "next_actions": [
-    "Commit TASK-BUD-389 curatorial matrix slice.",
-    "Re-check git status/context after commit.",
-    "Then select next local-safe task only if context remains ok."
+    "Parar continuação automática de slices funcionais nesta retomada.",
+    "Tratar TASK-BUD-402 antes de assumir long-run seguro: modelar warning-final -> compact-require [snip] ar gate/teste fail-closed. [truncated:+26 chars]",
+    "Depois, retomar commit de TASK-BUD-395 somente com contexto saudável e sem mascarar este incidente."
   ],
   "blockers": [
-    "Strong unattended/loop/scheduler/remote remains blocked.",
-    "Git maintenance cleanup remains opt-in."
+    "Strong unattended/loop/scheduler/remote permanece bloqueado.",
+    "TASK-BUD-153 bloqueada por background-process lifecycle e agora também por inc [snip] ou a execução a tempo. [truncated:+48 chars]"
   ],
   "recent_validation": [
-    "context_watch_status before slice => ok 17 standard-slices handoff=fresh",
-    "docs:package:sync => ok",
-    "docs:package:check => ok"
+    "context_watch_status pós-compact retornou ok percent=14 handoff=fresh, mas isso é estado pós-i [snip] gurança do ciclo anterior. [truncated:+23 chars]",
+    "TASK-BUD-402 criado via board_task_create para rastrear regressão de auto-compact/final-warning."
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T02:02:13.636Z",
+    "generatedAtIso": "2026-05-01T02:25:02.705Z",
     "level": "ok",
-    "percent": 17,
+    "percent": 14,
     "action": "continue",
-    "recommendation": "commit-curatorial-matrix",
-    "focus_task_status": "completed"
+    "recommendation": "pause-and-investigate-auto-compact-final-warning"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T02:02:13.636Z",
+      "atIso": "2026-05-01T02:25:02.705Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 17,
+      "percent": 14,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-curatorial-matrix"
+      "recommendation": "pause-and-investigate-auto-compact-final-warning"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-389"
   ]
 }

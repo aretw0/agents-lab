@@ -87,4 +87,41 @@ describe("guardrails-core state reconcile command/tool", () => {
 		expect((result.details as any)?.concurrencyRisk).toBe("high");
 		expect((result.details as any)?.recommendedPolicies).toContain("single-writer-branch");
 	});
+
+	it("accepts channel aliases and returns concise invalid tool feedback", async () => {
+		const pi = makeMockPi();
+		guardrailsCore(pi);
+		const tool = getTool(pi, "state_reconcile_plan");
+
+		const aliasResult = await tool.execute(
+			"tc-state-reconcile-alias",
+			{
+				artifactKind: "board",
+				runtimeMode: "native",
+				deliveryChannel: "direct",
+				parallelWriters: 1,
+			},
+			undefined as unknown as AbortSignal,
+			() => {},
+			{ cwd: process.cwd() },
+		);
+		expect((aliasResult.details as any)?.ok).toBe(true);
+		expect((aliasResult.details as any)?.deliveryChannel).toBe("direct-branch");
+
+		const invalidResult = await tool.execute(
+			"tc-state-reconcile-invalid",
+			{
+				artifactKind: "boardish",
+				runtimeMode: "native-ish",
+				deliveryChannel: "directly",
+				parallelWriters: 1,
+			},
+			undefined as unknown as AbortSignal,
+			() => {},
+			{ cwd: process.cwd() },
+		);
+		expect((invalidResult.details as any)?.ok).toBe(false);
+		expect((invalidResult.details as any)?.invalidFields).toEqual(["artifactKind", "runtimeMode", "deliveryChannel"]);
+		expect(String((invalidResult as any).content[0].text)).toContain("valid artifact=board|settings|handoff|generic-json");
+	});
 });

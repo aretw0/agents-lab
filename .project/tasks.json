@@ -1247,7 +1247,7 @@
       "id": "colony-c-ret-1",
       "description": "[COLONY:ant_colony] Ajustar governança\\n[COLONY_SIGNAL:COMPLETE] [c-ret-1]\",\u001b[39m",
       "status": "blocked",
-      "notes": "[2026-04-24T15:06:10.190Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.352Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-24T15:06:10.437Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.601Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-28T18:11:04.630Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:04.828Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-28T18:11:04.968Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:05.181Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-28T18:11:13.485Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.659Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-28T18:11:13.774Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.959Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-29T17:46:33.418Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.603Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-29T17:46:33.712Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.889Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.682Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.857Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.955Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.132Z] promotion queued automatically: colony-c-ret-1-promotion"
+      "notes": "[2026-04-28T18:11:13.485Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.659Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-28T18:11:13.774Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.959Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-29T17:46:33.418Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.603Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-29T17:46:33.712Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.889Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.682Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.857Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.955Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.132Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:57.956Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.209Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:58.411Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.678Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.506Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.708Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.874Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:16.085Z] promotion queued automatically: colony-c-ret-1-promotion"
     },
     {
       "id": "colony-c-ret-1-promotion",
@@ -1261,7 +1261,7 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-23T13:00:19.864Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:00:20.008Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:01:24.116Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:01:24.293Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:22:08.272Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:22:08.470Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T13:44:50.937Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')\n[2026-04-24T13:44:51.252Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')\n[2026-04-24T14:39:54.984Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T14:39:55.229Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.253Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.521Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:04.714Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:05.084Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.558Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.863Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.513Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.804Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.776Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.042Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)"
+      "notes": "[2026-04-23T13:22:08.272Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T13:22:08.470Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T13:44:50.937Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')\n[2026-04-24T13:44:51.252Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')\n[2026-04-24T14:39:54.984Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T14:39:55.229Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.253Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.521Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:04.714Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:05.084Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.558Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.863Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.513Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.804Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.776Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.042Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.077Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.555Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.610Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.983Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)"
     },
     {
       "id": "TASK-BUD-054",
@@ -1575,7 +1575,7 @@
         "Correção aplicada ou workaround documentado com fallback de label não-nulo em mensagens de output.",
         "Guia curto de operação define política prática de background (foreground com timeout explícito para comandos curtos; background para jobs longos com PID/log e checkpoint)."
       ],
-      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional."
+      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional.\n2026-05-01: reconfirmado como blocker prático para TASK-BUD-153: enquanto `[undefined]` em eventos/background e heurística/controle de processo em background não estiverem resolvidos, não declarar execução ininterrupta multi-modo como pronta."
     },
     {
       "id": "TASK-BUD-068",
@@ -3700,7 +3700,7 @@
     {
       "id": "TASK-BUD-153",
       "description": "[P1] Calibrar execução ininterrupta multi-modo (nativo/container/PR-MR) com estratégia explícita para merge de board/settings",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -3722,8 +3722,8 @@
         "Conflitos de merge em board/settings possuem política explícita (atomic write, lock, ou etapa geradora separada) para evitar corrupção/loop de conflito.",
         "Runbook define modo fábrica em GitHub Actions com guardrails de segurança e continuidade, incluindo fallback manual determinístico."
       ],
-      "verification": "",
-      "notes": "Backlog por steering humano (2026-04-26): convergir para trabalho contínuo sem parada usando recursos atuais, endereçando blocker de merge/conflitos em board/settings entre ambientes e estratégias de entrega.\n[2026-04-26T00:00:00Z] Slice 1 (atomic settings/handoff writes): `guardrails-core.writeProjectPiSettings` e `context-watchdog-storage` (`writeProjectSettings`/`writeHandoffJson`) passaram a gravar JSON por temp+rename com fallback determinístico, reduzindo janela de corrupção/merge parcial em execuções concorrentes (nativo/container/factory). Smoke nova `context-watchdog-storage.test.ts` cobre ausência de artefato temp residual + leitura consistente pós-write.\n[2026-04-26T00:00:00Z] Slice 2 (lock-aware settings/handoff): `context-watchdog-storage` evoluiu para lock síncrono com stale-reclaim/timeout determinístico (`settings.lock`/`handoff.lock`) envolvendo write atômico; `guardrails-core` passou a reutilizar writer centralizado para runtime-config, alinhando política de merge-safety entre comandos e watchdog. Smoke de storage ampliada para stale-lock recovery + active-lock timeout.\n[2026-04-26T00:00:00Z] Slice 3 (multi-mode decision trail): nova primitiva `guardrails-core-delivery-mode.ts` resolve plano determinístico de execução/promoção (`native|container|ci` + `direct-branch|pull-request|merge-request`) via sinais de ambiente/override (`PI_DELIVERY_CHANNEL`), com superfície `delivery_mode_plan` e comando `/delivery-mode` para operação native/container/CI sem heurística ad-hoc. Runbook atualizado com matriz de uso e guardrails de escrita lock-aware.\n[2026-04-26T00:00:00Z] Slice 4 (factory advisory em CI): workflow `.github/workflows/ci.yml` agora publica advisory explícito de modo fábrica (`runtime=ci provider=github-actions channel=...`) distinguindo PR vs push e documenta fallback determinístico para promoção revisada quando gates falharem; runbook canônico recebeu seção dedicada de operação GitHub Actions guardada.\n[2026-04-26T00:00:00Z] Slice 5 (deflação orientada a primitivas): superfície de delivery/state (`/delivery-mode`, `/state-reconcile`, tools `delivery_mode_plan`/`state_reconcile_plan`) foi extraída de `guardrails-core.ts` para módulo coeso `guardrails-core-delivery-surface.ts`, mantendo contrato público intacto e reduzindo risco de reinflação no orquestrador central.\n[2026-04-30T10:18:00Z] Reclassificada para planned/backlog: task ampla/protegida com `.github/workflows/ci.yml` não deve permanecer como único foco in-progress default após promoção do settings canônico. Execução futura requer seleção explícita de escopo protegido.\n[rationale:risk-control] Reclassificada de in-progress para planned/backlog porque é uma task ampla multi-modo com escopo protegido (`.github/workflows/ci.yml`) e não deve ser selecionada como foco default de continuidade local unattended. O histórico e o escopo protegido permanecem preservados para exe…"
+      "verification": "VER-BUD-730",
+      "notes": "Backlog por steering humano (2026-04-26): convergir para trabalho contínuo sem parada usando recursos atuais, endereçando blocker de merge/conflitos em board/settings entre ambientes e estratégias de entrega.\n[2026-04-26T00:00:00Z] Slice 1 (atomic settings/handoff writes): `guardrails-core.writeProjectPiSettings` e `context-watchdog-storage` (`writeProjectSettings`/`writeHandoffJson`) passaram a gravar JSON por temp+rename com fallback determinístico, reduzindo janela de corrupção/merge parcial em execuções concorrentes (nativo/container/factory). Smoke nova `context-watchdog-storage.test.ts` cobre ausência de artefato temp residual + leitura consistente pós-write.\n[2026-04-26T00:00:00Z] Slice 2 (lock-aware settings/handoff): `context-watchdog-storage` evoluiu para lock síncrono com stale-reclaim/timeout determinístico (`settings.lock`/`handoff.lock`) envolvendo write atômico; `guardrails-core` passou a reutilizar writer centralizado para runtime-config, alinhando política de merge-safety entre comandos e watchdog. Smoke de storage ampliada para stale-lock recovery + active-lock timeout.\n[2026-04-26T00:00:00Z] Slice 3 (multi-mode decision trail): nova primitiva `guardrails-core-delivery-mode.ts` resolve plano determinístico de execução/promoção (`native|container|ci` + `direct-branch|pull-request|merge-request`) via sinais de ambiente/override (`PI_DELIVERY_CHANNEL`), com superfície `delivery_mode_plan` e comando `/delivery-mode` para operação native/container/CI sem heurística ad-hoc. Runbook atualizado com matriz de uso e guardrails de escrita lock-aware.\n[2026-04-26T00:00:00Z] Slice 4 (factory advisory em CI): workflow `.github/workflows/ci.yml` agora publica advisory explícito de modo fábrica (`runtime=ci provider=github-actions channel=...`) distinguindo PR vs push e documenta fallback determinístico para promoção revisada quando gates falharem; runbook canônico recebeu seção dedicada de operação GitHub Actions guardada.\n[2026-04-26T00:00:00Z] Slice 5 (deflação orientada a primitivas): superfície de delivery/state (`/delivery-mode`, `/state-reconcile`, tools `delivery_mode_plan`/`state_reconcile_plan`) foi extraída de `guardrails-core.ts` para módulo coeso `guardrails-core-delivery-surface.ts`, mantendo contrato público intacto e reduzindo risco de reinflação no orquestrador central.\n[2026-04-30T10:18:00Z] Reclassificada para planned/backlog: task ampla/protegida com `.github/workflows/ci.yml` não deve permanecer como único foco in-progress default após promoção do settings canônico. Execução futura requer seleção explícita de escopo protegido.\n[rationale:risk-control] Reclassificada de in-progress para planned/backlog porque é uma task ampla multi-modo com escopo protegido (`.github/workflows/ci.yml`) e não deve ser selecionada como foco default de continuidade local unattended. O histórico e o escopo protegido permanecem preservados para exe…\n2026-05-01: iniciada fatia local-safe/read-only. Escopo limitado: consolidar plano explícito de reconciliação board/settings/handoff para nativo/container/CI/PR-MR sem mutar settings, sem CI/remote/offload/scheduler e sem merge operacional.\n2026-05-01: concluído como calibração/política local-first. Estratégia explícita de reconciliação board/settings/handoff por modo/canal registrada em docs/primitives/state-reconciliation-modes.md; sem habilitar CI/remoto/scheduler/merge operacional e sem mutar settings.\n2026-05-01: correção após crítica do operador: fechamento anterior foi amplo demais. VER-BUD-729/730 devem contar como evidência parcial de política de reconciliação de estado, não garantia completa de execução ininterrupta multi-modo. TASK-BUD-153 permanece aberta até cobrir primitivas faltantes: controle operacional de background process, curadoria/ergonomia de tools, reconciliação stale handoff vs board em runtime, cancelamento/fallback de long-run e gates locais medidos."
     },
     {
       "id": "TASK-BUD-154",
@@ -9570,6 +9570,189 @@
       "milestone": "human-control",
       "notes": "Follow-up after TASK-BUD-393 design boundary. TASK-BUD-393 identified the safe signal-source choices and documented the interface; this task is for actual implementation or upstream PR/wrapper execution. [rationale:risk-control] Moving from design to runtime signal affects protected/destructive confirmation handling; it must be explicit, tested, and fail-closed.\n2026-04-30: iniciado após reload. Context-watch está warn/62 e handoff stale; micro-fatia será apenas escolher/codificar canal de implementação report-only/dry-run para sinal de confirmação destrutiva, sem diálogo operacional destrutivo e sem mutar node_modules.\n2026-04-30: primeira fatia validada (VER-BUD-721): canal inicial escolhido/codificado como guard-owned-report-only. Wrapper/upstream PR continuam design-only. Pedido de patch direto em node_modules ou habilitar diálogo destrutivo operacional bloqueia. Ainda sem implementação live destrutiva.\n2026-04-30: segunda fatia validada (VER-BUD-722): adicionada superfície report-only human_confirmation_implementation_channel_plan, registrada no guardrails-core. Nunca habilita diálogo destrutivo, dispatch, override, implementação ou patch em node_modules. Reload necessário para validação live.\n2026-04-30: concluído após validação live pós-reload. human_confirmation_implementation_channel_plan validou caminho verde guard-owned-report-only e caminho bloqueado para patch direto/runtime destrutivo; invariantes preservados.",
       "verification": "VER-BUD-724"
+    },
+    {
+      "id": "TASK-BUD-395",
+      "description": "Hardening: reduzir bloat de erros de schema/validação em tools de planejamento, aceitando aliases seguros e retornando feedback compacto com valores válidos.",
+      "status": "in-progress",
+      "priority": "P1",
+      "depends_on": [
+        "TASK-BUD-153"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-delivery-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-state-reconcile-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "delivery_mode_plan aceita aliases seguros como direct/pr/mr sem erro verboso do TypeBox.",
+        "state_reconcile_plan aceita aliases seguros para deliveryChannel e valida artifact/runtime/channel com erro compacto próprio.",
+        "Testes smoke cobrem caminho de alias e caminho inválido compacto.",
+        "TASK-BUD-153 permanece aberta como macro até as demais primitivas de controle local-first amadurecerem."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Feedback do operador mostrou que erro TypeBox verboso atrapalha operação ininterrupta segura; hardening local-safe reduz ruído e evita falsa impressão de prontidão ampla.\n2026-05-01: código/testes prontos para reduzir bloat de validação TypeBox em delivery_mode_plan/state_reconcile_plan. Mantida in-progress até reload e validação live dos caminhos alias/erro compacto."
+    },
+    {
+      "id": "TASK-BUD-396",
+      "description": "Criar primitiva/surface bounded para decompor macro-tarefas em blockers explícitos e anexar depends_on em tarefas existentes.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Existe caminho bounded/dry-first para propor ou aplicar dependências em tarefa existente sem editar o board inteiro manualmente.",
+        "A surface evita ciclos óbvios e reporta blockers pendentes de uma macro-tarefa de forma compacta.",
+        "A doutrina operacional passa a exigir decomposição de macro-tarefas antes de fechamento de tasks amplas/protegidas."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A crítica do operador mostrou que fechar macro-task sem side quests explícitas perde governança; hoje há depends_on no schema, mas falta uma primitiva forte para decomposição/ligação em tarefas existentes."
+    },
+    {
+      "id": "TASK-BUD-397",
+      "description": "Implementar contrato canônico de lifecycle para eventos/processos em background, incluindo stale/late BG_PROCESS_DONE e ausência de prefixo `[undefined]`.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-067",
+        "TASK-BUD-381"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Estados canônicos documentados e testados: running, stopped, finished, failed, killed, late-after-stop e unknown-origin ou equivalentes.",
+        "Nenhuma saída/evento first-party de background usa label/prefixo indefinido; fallback não-nulo é obrigatório.",
+        "BG_PROCESS_DONE posterior a stop é classificado como late/stale ou finished-after-stop, não como conclusão atual silenciosa.",
+        "A implementação permanece não-operacional para launch/stop reais até existir autorização separada."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional."
+    },
+    {
+      "id": "TASK-BUD-398",
+      "description": "Harden stale handoff vs board reconciliation para impedir que checkpoint/handoff velho seja tratado como estado atual.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/state-reconciliation-modes.md"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume/continuation compara foco do handoff com board/verification atual e sinaliza divergência de status, verificação ou task inexistente.",
+        "Checkpoint velho não é renovado como evidência corrente sem novo fato local ou ação bounded explícita.",
+        "O resultado é compacto e fail-closed: stale-hand-off ou board-handoff-divergence bloqueia strong unattended.",
+        "Teste cobre pelo menos um handoff fresco válido e um handoff stale/divergente."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual."
+    },
+    {
+      "id": "TASK-BUD-399",
+      "description": "Executar e registrar drill local de cancel/fallback para long-run antes de liberar confiança unattended forte.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-397"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Drill local controlado demonstra cancelamento ou fallback seguro de long-run sem perda de estado relevante.",
+        "Evidência distingue cancelamento humano, stop pelo agente, término normal e término tardio após stop.",
+        "Handoff/checkpoint pós-drill registra próximos passos e limites sem autorizar loop/scheduler/remote.",
+        "Falha no drill mantém TASK-BUD-153 bloqueada e produz blocker explícito."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Sem teste local medido de cancel/fallback, operação overnight/unattended continua dependendo de suposição frágil de controle humano."
+    },
+    {
+      "id": "TASK-BUD-400",
+      "description": "Consolidar curadoria/ergonomia de tools expostas antes de loops longos locais, incluindo overlaps first-party/third-party e erros compactos.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-382"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/data/capability-owners.json",
+        "packages/pi-stack/extensions/stack-sovereignty.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/test/smoke/stack-sovereignty.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts"
+      ],
+      "acceptance_criteria": [
+        "tool_hygiene_scorecard/stack_sovereignty expõem decisão compacta para capabilities cobertas: keep, suppress-by-filter, remove-from-profile ou needs-decision.",
+        "Overlaps relevantes para long-run/background/validation aparecem como blockers ou decisões explícitas, não ruído solto.",
+        "Erros de validação de surfaces críticas seguem formato compacto com aliases/valores válidos quando aplicável.",
+        "Nenhuma capability third-party é removida ou suprimida sem decisão explícita registrada."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Antes de unattended forte, a superfície de tools precisa ser pequena, auditável e sem conflito silencioso entre first-party e third-party."
+    },
+    {
+      "id": "TASK-BUD-401",
+      "description": "Rehearsal local medido pós-blockers para validar caminho ininterrupto antes de qualquer remote/offload/GitHub Actions.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-396",
+        "TASK-BUD-397",
+        "TASK-BUD-398",
+        "TASK-BUD-399",
+        "TASK-BUD-400"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Rehearsal roda apenas localmente e cobre slices pequenos com checkpoint, validação focal e decisão stop/continue explícita.",
+        "Inclui evidência dos blockers resolvidos: lifecycle background, stale handoff reconciliation, cancel/fallback e tool hygiene.",
+        "Scorecard final mantém remote/offload/GitHub Actions bloqueados salvo opt-in posterior explícito.",
+        "TASK-BUD-153 só pode receber decisão de fechamento após este rehearsal passar ou após decisão humana documentada de reescopo."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A evidência parcial de state reconciliation não prova execução ininterrupta; é necessário rehearsal local pós-blockers antes de concluir a macro-task."
+    },
+    {
+      "id": "TASK-BUD-402",
+      "description": "Investigar incidente em que warning final de contexto/auto-compact não bloqueou continuidade antes da compactação, permitindo runs adicionais até 100%.",
+      "status": "in-progress",
+      "priority": "p0",
+      "depends_on": [
+        "TASK-BUD-153"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/extensions/context-watchdog-policy.ts",
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Reproduzir ou modelar a sequência: warning final -> agente continua -> auto-compact assume tarde -> compactação/auto-resume.",
+        "Definir gate fail-closed para final warning/compact-level: não iniciar novas runs/slices quando compactação é iminente ou já requerida.",
+        "Separar claramente advisory warn/checkpoint de stop obrigatório em compact/final-warning.",
+        "Adicionar teste/regressão que prova que o agente para/checkpointa antes de continuar quando context level chega ao limiar final.",
+        "Registrar política de auto-resume pós-compact: retomada só por handoff fresco e sem stale continuation."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Operador observou incidente crítico: no warning final era para parar, mas o agente continuou algumas runs antes do auto-compact assumir; isso quebra a premissa de controle em long-run e bloqueia qualquer unattended forte.\n2026-05-01: implementada primeira correção fail-closed para warning final/compact: `resolveContextWatchDeterministicStopSignal` agora trata `compact` com auto-compact deferred/non-trigger como `compact-final-warning`, bloqueando nova run até checkpoint/auto-compact concluir. Corrigido também campo de summary `calmCloseReady` que usava propriedade inexistente. Live validation requer reload.\n[rationale:risk-control] O incidente mostrou que advisory final não pode ser apenas ruído; em nível compact, qualquer defer de auto-compact precisa virar stop determinístico para preservar controle humano e handoff."
     }
   ]
 }

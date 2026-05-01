@@ -80,4 +80,30 @@ describe("guardrails-core delivery mode command/tool", () => {
 		expect((result.details as any)?.deliveryChannel).toBe("merge-request");
 		expect((result.details as any)?.runtimeMode).toBeDefined();
 	});
+
+	it("accepts aliases and returns concise invalid tool feedback", async () => {
+		const pi = makeMockPi();
+		guardrailsCore(pi);
+		const tool = getTool(pi, "delivery_mode_plan");
+
+		const aliasResult = await tool.execute(
+			"tc-delivery-alias",
+			{ preferChannel: "direct" },
+			undefined as unknown as AbortSignal,
+			() => {},
+			{ cwd: process.cwd() },
+		);
+		expect((aliasResult.details as any)?.ok).toBe(true);
+		expect((aliasResult.details as any)?.deliveryChannel).toBe("direct-branch");
+
+		const invalidResult = await tool.execute(
+			"tc-delivery-invalid",
+			{ preferChannel: "directly" },
+			undefined as unknown as AbortSignal,
+			() => {},
+			{ cwd: process.cwd() },
+		);
+		expect((invalidResult.details as any)?.ok).toBe(false);
+		expect(String((invalidResult as any).content[0].text)).toContain("use direct-branch|pull-request|merge-request");
+	});
 });

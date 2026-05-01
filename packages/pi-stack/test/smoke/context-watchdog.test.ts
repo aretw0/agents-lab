@@ -950,6 +950,7 @@ describe("context-watchdog", () => {
 		expect(resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: "compact",
 			operatorSignal: { reasons: ["compact-checkpoint-required"] },
+			autoCompactDecision: "not-idle",
 		})).toEqual({
 			required: true,
 			reason: "compact-checkpoint-required",
@@ -960,6 +961,25 @@ describe("context-watchdog", () => {
 			reason: "compact-checkpoint-required",
 			action: "persist-checkpoint-and-compact",
 		})).toContain("persist checkpoint evidence");
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "compact",
+			operatorSignal: { reasons: [] },
+			autoCompactDecision: "not-idle",
+		})).toEqual({
+			required: true,
+			reason: "compact-final-warning",
+			action: "stop-and-let-auto-compact",
+		});
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "compact",
+			operatorSignal: { reasons: [] },
+			autoCompactDecision: "trigger",
+		})).toEqual({ required: false, reason: "none", action: "none" });
+		expect(describeContextWatchDeterministicStopHint({
+			required: true,
+			reason: "compact-final-warning",
+			action: "stop-and-let-auto-compact",
+		})).toContain("do not start another run");
 		expect(describeContextWatchDeterministicStopHint({
 			required: false,
 			reason: "none",
@@ -989,6 +1009,14 @@ describe("context-watchdog", () => {
 			blocking: true,
 			kind: "checkpoint-compact",
 			summary: "persist checkpoint and compact before next slice",
+		});
+		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: true, reason: "compact-final-warning", action: "stop-and-let-auto-compact" },
+			operatorSignal: { reasons: [] },
+		})).toEqual({
+			blocking: true,
+			kind: "compact-final-warning",
+			summary: "stop current slice and let auto-compact complete before next run",
 		});
 		expect(resolveContextWatchOperatorActionPlan({
 			deterministicStop: { required: false, reason: "none", action: "none" },
