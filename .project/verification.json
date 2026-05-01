@@ -9168,6 +9168,15 @@
       "method": "canonical-primitive-alignment",
       "timestamp": "2026-05-01T05:17:22.199Z",
       "evidence": "Aligned the local continuity profile to existing canonical primitives instead of inventing a separate overnight loop family. Renamed doc path to docs/primitives/nudge-free-local-continuity.md, added 'Martelo das primitivas' mapping to local_continuity_audit, nudge_free_loop_canary, context_watch_checkpoint, autonomy_lane_next_task, board bounded surfaces and one-slice contract. Updated control-plane doctrine, primitives README and glossary so overnight/deixa-rodando are aliases/scenarios of nudge-free local continuity, not new execution authority. Validation: safe_marker_check primitive 4/4, doctrine 3/3, glossary 3/3, README 2/2; i18n_lint pass; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-772",
+      "target": "TASK-BUD-422",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused test + diff check",
+      "timestamp": "2026-05-01T05:32:01.994Z",
+      "evidence": "Focused local write-preview tool-call hint fix completed. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/write-preview-guard.test.ts` => 1 file passed, 4 tests passed. `git diff --check` => no whitespace errors; only existing CRLF conversion warnings for unrelated files. Source change uses `keyHint(\"app.tools.expand\", \"to expand\")` when keybindings are loaded and `rawKeyHint(\"ctrl+o\", \"to expand\")` fallback when app keybindings are absent in tests/runtime, removing the user-visible `expand-tool` action-id hint without mutating node_modules."
     }
   ]
 }

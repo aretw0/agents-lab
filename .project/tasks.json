@@ -10227,7 +10227,7 @@
     {
       "id": "TASK-BUD-422",
       "description": "Corrigir ergonomia TUI de tool calls: recolhidas por default de forma universal e hint mostrando keybinding real (`ctrl+o`), não só id `expand-tool`.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "node_modules/@mariozechner/pi-coding-agent/docs/keybindings.md",
@@ -10243,7 +10243,8 @@
         "Se a correção depender de upstream/TUI, registrar boundary e manter regra como blocker/side quest antes de overnight forte."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Steering do operador: outputs de tools precisam ser recolhíveis por default e o humano precisa ver a tecla real (`ctrl+o`) em vez de `expand-tool`; poluição de chat reduz confiança em loops longos."
+      "notes": "[rationale:risk-control] Steering do operador: outputs de tools precisam ser recolhíveis por default e o humano precisa ver a tecla real (`ctrl+o`) em vez de `expand-tool`; poluição de chat reduz confiança em loops longos.\n2026-05-01: iniciado inventário bounded. Escopo: diagnosticar TUI/tool-call collapse e hint de keybinding real; sem editar node_modules upstream diretamente.\n2026-05-01: bounded inventory/fix complete for local write-preview guard. Found local hardcoded text `use expand-tool keybinding to expand` in `packages/pi-stack/extensions/write-preview-guard.ts`; upstream inspected surfaces use `keyHint(\"app.tools.expand\", \"to expand\")`. Fix stays local (no node_modules mutation), preserves collapsed write preview via `context.expanded`, and falls back to `ctrl+o` when tests/runtime have no app keybinding registry loaded. Universal upstream collapse policy remains a TUI/runtime boundary; this slice removes the local trust blocker text.\n2026-05-01: completed focused write-preview/keybinding hint slice with VER-BUD-772. Stronger universal TUI collapse remains an upstream/runtime policy boundary, not authorization for long-loop promotion.",
+      "verification": "VER-BUD-772"
     }
   ]
 }

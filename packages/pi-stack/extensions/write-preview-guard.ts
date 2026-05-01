@@ -1,10 +1,15 @@
 import { homedir } from "node:os";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { createWriteToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createWriteToolDefinition, keyHint, keyText, rawKeyHint } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 
 const WRITE_PREVIEW_MAX_LINES = 10;
 const WRITE_PREVIEW_MAX_CHARS_PER_LINE = 240;
+
+export function writePreviewExpandHint(): string {
+	const resolvedKey = keyText("app.tools.expand").trim();
+	return resolvedKey ? keyHint("app.tools.expand", "to expand") : rawKeyHint("ctrl+o", "to expand");
+}
 
 function shortenPath(path: string): string {
 	const home = homedir();
@@ -82,13 +87,13 @@ export default function writePreviewGuardExtension(pi: ExtensionAPI) {
 			if (preview.remainingLines > 0) {
 				text += theme.fg(
 					"muted",
-					`\n... (${preview.remainingLines} more lines, ${preview.totalLines} total, use expand-tool keybinding to expand)`,
+					`\n... (${preview.remainingLines} more lines, ${preview.totalLines} total, ${writePreviewExpandHint()})`,
 				);
 			} else if (!context.expanded && preview.clippedLongLines > 0) {
 				const suffix = preview.clippedLongLines === 1 ? "" : "s";
 				text += theme.fg(
 					"muted",
-					`\n... (${preview.clippedLongLines} long line${suffix} clipped, use expand-tool keybinding to expand)`,
+					`\n... (${preview.clippedLongLines} long line${suffix} clipped, ${writePreviewExpandHint()})`,
 				);
 			}
 

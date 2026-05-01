@@ -1,7 +1,19 @@
-import { describe, expect, it } from "vitest";
-import { buildWritePreview } from "../../extensions/write-preview-guard";
+import { beforeAll, describe, expect, it } from "vitest";
+import { initTheme } from "@mariozechner/pi-coding-agent";
+import { buildWritePreview, writePreviewExpandHint } from "../../extensions/write-preview-guard";
 
 describe("write-preview-guard", () => {
+	beforeAll(() => {
+		initTheme(undefined, false);
+	});
+
+	it("uses the resolved expand keybinding in collapsed preview hints", () => {
+		const hint = writePreviewExpandHint();
+		expect(hint).toContain("ctrl+o");
+		expect(hint).toContain("to expand");
+		expect(hint).not.toContain("expand-tool");
+	});
+
 	it("clips long single-line payloads when collapsed", () => {
 		const content = "x".repeat(600);
 		const result = buildWritePreview(content, false, 10, 240);

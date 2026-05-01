@@ -1,44 +1,43 @@
 {
-  "timestamp": "2026-05-01T05:19:15.133Z",
-  "context": "Responded to steering about not inventing another loop name. Canonical decision: overnight/deixa-rodando/loop maior are aliases/scenarios for [snip] ybinding issue as TASK-BUD-422 planned. [truncated:+328 chars]",
+  "timestamp": "2026-05-01T05:32:37.769Z",
+  "context": "Completed micro-slice for TUI write-preview/tool-call hint ergonomics after emergency compact. Local write-preview guard now uses Pi keybindi [snip] duler/remote/CI/colony/provider switch. [truncated:+196 chars]",
   "next_actions": [
-    "Commit TASK-BUD-421 canonical primitive alignment.",
-    "Then choose next bounded slice: likely TASK-BUD-422 TUI collapse/keybinding ergonomics, before [snip] ASK-BUD-420 colony packet. [truncated:+15 chars]"
+    "Commit the bounded TASK-BUD-422 slice only.",
+    "After commit, stop or wait for explicit human focus; do not auto-select protected backlog."
   ],
   "blockers": [
-    "Do not start scheduler/remote/offload/subagents/swarms/colony promotion.",
-    "Do not mutate node_modules/@mariozechner/pi-coding-agent directly; TUI fix mus [snip] or upstream boundary. [truncated:+28 chars]",
-    "Auto-resume handoff mentioning TASK-BUD-420 is stale vs latest steering; lates [snip] free primitives first. [truncated:+46 chars]"
+    "Strong unattended/remote/offload/CI/scheduler remains unauthorized.",
+    "Universal upstream TUI collapse policy remains a runtime/upstream boundary bef [snip] e stronger long loops. [truncated:+2 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check docs/primitives/nudge-free-local-continuity.md 4/4",
-    "safe_marker_check doctrine 3/3",
-    "safe_marker_check glossary 3/3"
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/write-preview-guard.test.ts => 1 file passed, 4 tests passed",
+    "git diff --check => no whitespace errors; unrelated CRLF conversion warnings only",
+    "board_task_complete TASK-BUD-422 with VER-BUD-772 => completed"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T05:19:15.133Z",
+    "generatedAtIso": "2026-05-01T05:32:37.769Z",
     "level": "ok",
-    "percent": 16,
+    "percent": 0,
     "action": "continue",
-    "recommendation": "commit-current-slice",
+    "recommendation": "Commit bounded local-safe slice, then stop for explicit focus.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T05:19:15.133Z",
+      "atIso": "2026-05-01T05:32:37.769Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 16,
+      "percent": 0,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-current-slice"
+      "recommendation": "Commit bounded local-safe slice, then stop for explicit focus."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-421"
+    "TASK-BUD-422"
   ]
 }
