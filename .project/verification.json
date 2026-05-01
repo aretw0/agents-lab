@@ -9744,6 +9744,15 @@
       "method": "project-board regressions + doctrine anchor check",
       "timestamp": "2026-05-01T21:02:18.759Z",
       "evidence": "Implemented board-surface guardrail to block local-safe -> protected dependency coupling and documented planning rule. Changes: - `packages/pi-stack/extensions/project-board-surface.ts`: added protected-scope dependency guard (`local-safe-depends-on-protected`) in both dependency update flow (`updateProjectTaskDependencies`) and task creation flow (`createProjectTaskBoard`). Local-safe tasks now fail when directly depending on protected parked/scope-signaled tasks; protected tasks may still depend on protected tasks. - `packages/pi-stack/test/smoke/project-board-surface.test.ts`: added regressions for blocked local-safe create/update cases and allowed protected->protected dependency cases. - `docs/guides/control-plane-operating-doctrine.md`: added explicit planning decoupling rule (local-safe must not depend directly on `protected-parked-*`). - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts`: added doctrine regression anchor for decoupling rule. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed."
+    },
+    {
+      "id": "VER-BUD-836",
+      "target": "TASK-BUD-469",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board UX/contract update + smoke",
+      "timestamp": "2026-05-01T21:08:08.322Z",
+      "evidence": "Implemented a small UX/contract improvement in board dependency flow with low blast radius and focal smoke. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Enhanced dependency update contract with deterministic guidance fields: - `protectedDependencyIds` (explicit blocked protected deps) - `recommendationCode` (`dependency-update-ready|...blocked-missing|...blocked-cycle|...blocked-protected-coupling|...invalid-input`) - `recommendation` human-readable next step - `board-task-dependencies` summary now includes `code=...` and `protectedDeps=...` when applicable. - Tool description updated to include protected-coupling blockers. - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added assertions for new recommendation contract and explicit protected dependency evidence. - Maintained local-safe/protected guardrail coverage. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed. - `safe_marker_check docs/guides/control-plane-operating-doctrine.md` => matched 3/3 decoupling markers."
     }
   ]
 }

@@ -275,6 +275,7 @@ describe("project-board-surface", () => {
       expect(dryRun.applied).toBe(false);
       expect(dryRun.dryRun).toBe(true);
       expect(dryRun.after).toEqual(["TASK-A"]);
+      expect(dryRun.recommendationCode).toBe("dependency-update-ready");
 
       const applied = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
@@ -311,6 +312,8 @@ describe("project-board-surface", () => {
         ok: false,
         applied: false,
         blockers: ["local-safe-depends-on-protected"],
+        protectedDependencyIds: ["TASK-PROTECTED"],
+        recommendationCode: "dependency-update-blocked-protected-coupling",
       });
 
       createProjectTaskBoard(cwd, {
@@ -426,7 +429,9 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect(depResult.details?.applied).toBe(false);
+      expect(depResult.details?.recommendationCode).toBe("dependency-update-ready");
       expect(String(depResult.details?.summary)).toContain("dryRun=yes");
+      expect(String(depResult.details?.summary)).toContain("code=dependency-update-ready");
 
       const gateResult = await gateTool.execute(
         "tc-quality",

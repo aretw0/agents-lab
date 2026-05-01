@@ -887,6 +887,13 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
   };
 }
 
+export type ProjectTaskDependencyRecommendationCode =
+  | "dependency-update-ready"
+  | "dependency-update-blocked-missing"
+  | "dependency-update-blocked-cycle"
+  | "dependency-update-blocked-protected-coupling"
+  | "dependency-update-invalid-input";
+
 export interface ProjectTaskDependencyUpdateResult {
   ok: boolean;
   applied: boolean;
@@ -898,7 +905,10 @@ export interface ProjectTaskDependencyUpdateResult {
   added: string[];
   missingDependencies: string[];
   cycleDependencies: string[];
+  protectedDependencyIds: string[];
   blockers: string[];
+  recommendationCode: ProjectTaskDependencyRecommendationCode;
+  recommendation: string;
   summary: string;
   task?: ProjectTaskBoardRow;
 }
@@ -928,7 +938,35 @@ function taskDependsOnPath(tasksById: Map<string, TaskRecord>, fromId: string, t
   return false;
 }
 
-function buildBoardTaskDependencySummary(result: Pick<ProjectTaskDependencyUpdateResult, "ok" | "applied" | "dryRun" | "taskId" | "added" | "blockers" | "reason">): string {
+function resolveProjectTaskDependencyRecommendation(blockers: string[]): {
+  recommendationCode: ProjectTaskDependencyRecommendationCode;
+  recommendation: string;
+} {
+  if (blockers.includes("local-safe-depends-on-protected")) {
+    return {
+      recommendationCode: "dependency-update-blocked-protected-coupling",
+      recommendation: "Replaneje para remover acoplamento local-safe -> protected ou promova a task para fluxo protected com decisão humana explícita.",
+    };
+  }
+  if (blockers.includes("dependency-cycle")) {
+    return {
+      recommendationCode: "dependency-update-blocked-cycle",
+      recommendation: "Quebre o ciclo de dependências em tarefas menores antes de aplicar.",
+    };
+  }
+  if (blockers.includes("missing-dependencies")) {
+    return {
+      recommendationCode: "dependency-update-blocked-missing",
+      recommendation: "Crie/reconcilie as tarefas faltantes antes de aplicar dependências.",
+    };
+  }
+  return {
+    recommendationCode: "dependency-update-ready",
+    recommendation: "Dependências consistentes; pode aplicar update mantendo validação focal bounded.",
+  };
+}
+
+function buildBoardTaskDependencySummary(result: Pick<ProjectTaskDependencyUpdateResult, "ok" | "applied" | "dryRun" | "taskId" | "added" | "blockers" | "reason" | "recommendationCode" | "protectedDependencyIds">): string {
   return [
     "board-task-dependencies:",
     `ok=${result.ok ? "yes" : "no"}`,
@@ -937,7 +975,9 @@ function buildBoardTaskDependencySummary(result: Pick<ProjectTaskDependencyUpdat
     result.taskId ? `task=${result.taskId}` : undefined,
     result.added.length > 0 ? `added=${result.added.length}` : undefined,
     result.blockers.length > 0 ? `blockers=${result.blockers.join("|")}` : undefined,
+    result.protectedDependencyIds.length > 0 ? `protectedDeps=${result.protectedDependencyIds.join("|")}` : undefined,
     result.reason ? `reason=${result.reason}` : undefined,
+    `code=${result.recommendationCode}`,
   ].filter(Boolean).join(" ");
 }
 
@@ -964,7 +1004,10 @@ export function updateProjectTaskDependencies(
       added: [],
       missingDependencies: [],
       cycleDependencies: [],
+      protectedDependencyIds: [],
       blockers: [reason],
+      recommendationCode: "dependency-update-invalid-input",
+      recommendation: "Entrada inválida para atualização de dependências; ajuste parâmetros e tente novamente.",
       summary: "",
     };
     result.summary = buildBoardTaskDependencySummary(result);
@@ -999,6 +1042,7 @@ export function updateProjectTaskDependencies(
   ].filter(Boolean) as string[];
   const ok = blockers.length === 0;
   const applied = ok && !dryRun;
+  const recommendation = resolveProjectTaskDependencyRecommendation(blockers);
 
   if (applied) {
     block.tasks[idx] = {
@@ -1020,7 +1064,10 @@ export function updateProjectTaskDependencies(
     added,
     missingDependencies,
     cycleDependencies,
+    protectedDependencyIds,
     blockers,
+    recommendationCode: recommendation.recommendationCode,
+    recommendation: recommendation.recommendation,
     summary: "",
     task: applied ? queryProjectTasks(cwd, { search: taskId, limit: 200 }).rows.find((row) => row.id === taskId) : undefined,
   };
@@ -2034,7 +2081,7 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     name: "board_task_dependencies",
     label: "Board Task Dependencies",
     description:
-      "Dry-first bounded dependency update for existing .project/tasks entries with missing/cycle blockers.",
+      "Dry-first bounded dependency update for existing .project/tasks entries with missing/cycle/protected-coupling blockers.",
     parameters: dependencyParameters,
     execute: executeDependencies,
   });

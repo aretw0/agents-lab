@@ -11230,7 +11230,7 @@
     {
       "id": "TASK-BUD-469",
       "description": "Coisa nova: implementar uma melhoria pequena de UX/contrato derivada da pesquisa (baixo blast radius) com smoke focal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-470"
@@ -11245,7 +11245,8 @@
         "Contrato de controle (no-dispatch/guardrails) preservado."
       ],
       "milestone": "post-cleanup-research",
-      "notes": "[rationale:risk-control] inovar sem bloat após limpeza e pesquisa.\n2026-05-01: inovação nova movida para pós-lane; prioridade atual é limpeza+pesquisa contínua.\n2026-05-01: dependência reconciliada para local-safe (TASK-BUD-470) para evitar acoplamento direto com pesquisa externa parked (TASK-BUD-468)."
+      "notes": "[rationale:risk-control] inovar sem bloat após limpeza e pesquisa.\n2026-05-01: inovação nova movida para pós-lane; prioridade atual é limpeza+pesquisa contínua.\n2026-05-01: dependência reconciliada para local-safe (TASK-BUD-470) para evitar acoplamento direto com pesquisa externa parked (TASK-BUD-468).\n2026-05-01: melhoria pequena de UX/contrato aplicada em board_task_dependencies com recommendationCode e detalhe de protectedDeps para ação mais clara.",
+      "verification": "VER-BUD-836"
     },
     {
       "id": "TASK-BUD-470",
