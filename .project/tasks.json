@@ -1565,7 +1565,7 @@
     {
       "id": "TASK-BUD-067",
       "description": "[P2] Investigar e corrigir o prefixo `[undefined]` em caixas de output de eventos/background no TUI, além de consolidar heurística de uso de processos em background (quando usar timeout maior vs background intencional).",
-      "status": "in-progress",
+      "status": "completed",
       "files": [
         "packages/pi-stack/extensions/monitor-summary.ts",
         "docs/guides/project-canonical-pipeline.md"
@@ -1575,10 +1575,11 @@
         "Correção aplicada ou workaround documentado com fallback de label não-nulo em mensagens de output.",
         "Guia curto de operação define política prática de background (foreground com timeout explícito para comandos curtos; background para jobs longos com PID/log e checkpoint)."
       ],
-      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional.\n2026-05-01: reconfirmado como blocker prático para TASK-BUD-153: enquanto `[undefined]` em eventos/background e heurística/controle de processo em background não estiverem resolvidos, não declarar execução ininterrupta multi-modo como pronta.\n2026-05-01: retomada como blocker essencial de TASK-BUD-153/TASK-BUD-397. Validação live da nova surface `background_process_lifecycle_plan` cobre classificação/label fallback, mas ainda não prova que o emissor real de eventos/background usa esse contrato. Busca bounded por `BG_PROCESS_DONE` em packages/pi-stack/extensions e node_modules/@mariozechner/pi-coding-agent/dist não encontrou o emissor; hits foram apenas `bg_status` em monitor-runtime-contract e `backgrounded` no Ctrl+Z upstream. Próximo passo é tratar boundary de fonte de evento/registry sem mutar upstream pi diretamente.",
+      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional.\n2026-05-01: reconfirmado como blocker prático para TASK-BUD-153: enquanto `[undefined]` em eventos/background e heurística/controle de processo em background não estiverem resolvidos, não declarar execução ininterrupta multi-modo como pronta.\n2026-05-01: retomada como blocker essencial de TASK-BUD-153/TASK-BUD-397. Validação live da nova surface `background_process_lifecycle_plan` cobre classificação/label fallback, mas ainda não prova que o emissor real de eventos/background usa esse contrato. Busca bounded por `BG_PROCESS_DONE` em packages/pi-stack/extensions e node_modules/@mariozechner/pi-coding-agent/dist não encontrou o emissor; hits foram apenas `bg_status` em monitor-runtime-contract e `backgrounded` no Ctrl+Z upstream. Próximo passo é tratar boundary de fonte de evento/registry sem mutar upstream pi diretamente.\n2026-05-01: fechado como investigação/contrato first-party bounded. O prefixo `[undefined]` fica bloqueado no contrato first-party de lifecycle; a fonte real do evento não foi localizada no workspace/upstream dist escaneado e a integração/adaptador real permanece explícita em TASK-BUD-406, sem mutação direta de node_modules upstream.",
       "depends_on": [
         "TASK-BUD-407"
-      ]
+      ],
+      "verification": "VER-BUD-744"
     },
     {
       "id": "TASK-BUD-068",
@@ -9869,7 +9870,7 @@
     {
       "id": "TASK-BUD-407",
       "description": "Investigar de forma bounded a fonte real dos eventos/background exibidos como `[undefined]`/`BG_PROCESS_DONE` e registrar boundary sem mutar upstream.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/primitives/background-process-control.md",
@@ -9883,7 +9884,8 @@
         "Nenhum scan amplo/source-map dump e nenhuma mutação direta de node_modules upstream."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-067 é macro/blocker; antes de corrigir evento real precisamos localizar a fonte sem transformar suspeita em atribuição falsa nem abrir diagnóstico de alto blast radius."
+      "notes": "[rationale:risk-control] TASK-BUD-067 é macro/blocker; antes de corrigir evento real precisamos localizar a fonte sem transformar suspeita em atribuição falsa nem abrir diagnóstico de alto blast radius.\n2026-05-01: concluído como investigação bounded da fonte de eventos. O emissor literal de BG_PROCESS_DONE não foi localizado no código first-party/upstream dist escaneado; tratar origem como boundary externa/não localizada e manter readiness fail-closed até adaptador/wrapper/PR real.",
+      "verification": "VER-BUD-743"
     }
   ]
 }

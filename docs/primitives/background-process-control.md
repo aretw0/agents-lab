@@ -77,6 +77,17 @@ Labels de UI/log nunca devem renderizar `[undefined]`. Label vazia, `undefined` 
 
 A superfície `background_process_lifecycle_plan` é read-only e serve para classificar eventos; ela preserva `dispatchAllowed=false`, `processStartAllowed=false`, `processStopAllowed=false` e `authorization=none`.
 
+### Boundary da fonte de evento
+
+Investigação bounded em 2026-05-01 procurou `BG_PROCESS_DONE`, `backgrounded`, `bg_status` e `[undefined]` em `packages/pi-stack/extensions` e `node_modules/@mariozechner/pi-coding-agent/dist`, excluindo source maps. O emissor literal de `BG_PROCESS_DONE` não apareceu nesses arquivos; os hits relevantes foram apenas `bg_status` em contrato de monitor e `backgrounded` no fluxo upstream de `Ctrl+Z`. Portanto, até nova evidência, a origem do prefixo `[undefined]`/`BG_PROCESS_DONE` observado deve ser tratada como boundary de harness/superfície externa ou caminho de emissão ainda não localizado, não como bug atribuído diretamente ao código first-party atual.
+
+Caminhos aceitos para integração futura:
+
+- registry/adaptador first-party que passe todo evento real por `resolveBackgroundProcessLifecycleEvent` antes de renderizar;
+- wrapper controlado que normalize label, origem e estado antes de encaminhar ao TUI;
+- PR/design upstream se a fonte real estiver no pi/TUI;
+- manter readiness fail-closed quando a fonte real não for observável ou integrável localmente.
+
 ## Stop/restart
 
 Restart destrutivo ou kill de processo existente exige aprovação humana explícita até haver evidência operacional suficiente. A primitiva de planejamento deve bloquear esse caso.

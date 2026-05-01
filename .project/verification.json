@@ -8907,6 +8907,24 @@
       "method": "post-reload-background-lifecycle-live-validation",
       "timestamp": "2026-05-01T03:16:37.869Z",
       "evidence": "After reload, background_process_lifecycle_plan live-validated: done+known_process+stop_requested+exit_code=1+label=undefined returned state=late-after-stop displayLabel=background-process dispatch=no authorization=none; done+unknown process returned unknown-origin; registered known process returned running. TASK-BUD-397 remains open because quality gate blocks unresolved dependency TASK-BUD-067."
+    },
+    {
+      "id": "VER-BUD-743",
+      "target": "TASK-BUD-407",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded-source-boundary-investigation",
+      "timestamp": "2026-05-01T03:31:30.722Z",
+      "evidence": "Bounded source scan for BG_PROCESS_DONE/backgrounded/bg_status/[undefined] across packages/pi-stack/extensions and node_modules/@mariozechner/pi-coding-agent/dist excluding source maps did not find the literal BG_PROCESS_DONE emitter; hits were bg_status in monitor-runtime-contract and backgrounded in upstream Ctrl+Z flow. Documented event-source boundary and accepted integration paths in docs/primitives/background-process-control.md. safe_marker_check matched boundary markers 4/4; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-744",
+      "target": "TASK-BUD-067",
+      "target_type": "task",
+      "status": "passed",
+      "method": "background-event-boundary-and-label-contract",
+      "timestamp": "2026-05-01T03:31:52.469Z",
+      "evidence": "Completed bounded investigation/hardening for the historical [undefined]/BG_PROCESS_DONE issue at current maturity. First-party lifecycle classifier normalizes undefined/null/empty labels to background-process and classifies done-after-stop as late-after-stop; live validation passed after reload. Bounded source scan did not locate literal BG_PROCESS_DONE emitter in packages/pi-stack/extensions or upstream pi dist, so the real event-source integration remains explicit follow-up TASK-BUD-406 rather than an implicit blocker. Docs record accepted paths and fail-closed boundary."
     }
   ]
 }
