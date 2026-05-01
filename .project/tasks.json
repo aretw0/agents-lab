@@ -11475,7 +11475,7 @@
         "Registrar riscos/custos e proposta de experimento bounded."
       ],
       "milestone": "protected-parked-legacy",
-      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone."
+      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: packet protected-focus (report-only) => decision=ready-for-human-decision, recommendedOption=promote, code=protected-focus-promote-canary, risk=medium, value=low. Classificação protected: protected-external-url|protected-external-research|protected-parked-milestone.\n2026-05-01: decisão humana explícita = defer. Manter em protected-parked-legacy; sem promoção de escopo nesta rodada."
     },
     {
       "id": "TASK-BUD-481",
