@@ -11544,6 +11544,28 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] evita regressão de auto-seleção acidental após refino de heurística textual.\n[provenance:tangent-approved] source_task=TASK-BUD-481 reason=higiene pós-implementação detectou risco de drift na fronteira protected/local-safe\n2026-05-01: hardening fail-closed para milestone protected-parked adicionado após revisão pós-slice.",
       "verification": "VER-BUD-832"
+    },
+    {
+      "id": "TASK-BUD-484",
+      "description": "Criar template local-safe de pesquisa de influências externas (hipótese, valor, risco, canário, rollback) para reduzir custo de decisão em futuros focos protected.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-481",
+        "TASK-BUD-482"
+      ],
+      "files": [
+        "docs/primitives/",
+        "docs/research/",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Template curto e reutilizável define campos mínimos antes de promover pesquisa externa.",
+        "Template encaixa com packet protected-focus e contrato canário one-slice.",
+        "Não executa pesquisa externa; apenas prepara decisão futura com baixo custo de token."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] defer de pesquisa externa vira preparação local-safe reaproveitável (compound) em vez de bloqueio improdutivo.\n[provenance:tangent-approved] source_task=TASK-BUD-480 reason=decisão defer pede preparação local-safe para reduzir atrito na próxima avaliação protected"
     }
   ]
 }
