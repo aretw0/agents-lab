@@ -11165,6 +11165,24 @@
       "milestone": "runtime-reload-hygiene",
       "notes": "[rationale:risk-control] tornar necessidade de /reload visível sem bloquear fatias locais desnecessariamente.\n2026-05-01: necessidade de reload passou a aparecer de forma explícita no checkpoint details.",
       "verification": "VER-BUD-817"
+    },
+    {
+      "id": "TASK-BUD-466",
+      "description": "Documentar uso prático do tool `project_intake_plan` para triagem inicial universal com exemplos curtos de perfil leve/médio/pesado.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/guides/session-triage.md",
+        "docs/primitives/project-intake.md"
+      ],
+      "acceptance_criteria": [
+        "Guia inclui exemplo mínimo de chamada e leitura de saída.",
+        "Documento mantém contrato report-only e bloqueio de escopo protegido.",
+        "Marker-check cobre anchors do novo trecho."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] consolidar discoverability sem expandir superfície operacional.\n2026-05-01: discoverability operacional do intake reforçada com exemplos curtos e contrato explícito.",
+      "verification": "VER-BUD-818"
     }
   ]
 }

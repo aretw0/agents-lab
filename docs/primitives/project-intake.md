@@ -38,3 +38,23 @@ Saída (determinística):
 2. confirmar perfil e primeira fatia;
 3. executar só após decisão humana/local gate;
 4. manter checkpoint curto por fatia.
+
+### Exemplo rápido (tool surface)
+
+```json
+{
+  "tool": "project_intake_plan",
+  "params": {
+    "dominant_artifacts": ["markdown", "obsidian"],
+    "has_build_files": false,
+    "repository_scale": "small"
+  }
+}
+```
+
+Leitura esperada da saída:
+
+- `profile` classificado (`light-notes`/`app-medium`/`monorepo-heavy`);
+- `recommendationCode` + `nextAction` curtos;
+- `firstSlice.validation` + `firstSlice.rollback` explícitos;
+- `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`.

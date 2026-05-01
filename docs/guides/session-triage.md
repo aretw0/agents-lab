@@ -29,6 +29,23 @@ Checklist de spawn rápido por modo:
 - coordenador carrega `control-plane-core`;
 - workers carregam `agent-worker-lean`.
 
+## Atalho de intake universal (antes da triagem longa)
+
+Quando o projeto ainda está nebuloso, rode primeiro o tool report-only `project_intake_plan` para escolher a primeira fatia local-safe sem abrir escopo protegido.
+
+Exemplo mínimo de entrada:
+
+- `dominant_artifacts`: linguagens/artefatos dominantes;
+- `has_build_files`, `has_tests`, `has_ci`;
+- `repository_scale`: `small|medium|large`.
+
+A saída deve ser lida como contrato de arranque:
+
+- `profile` (leve/médio/pesado),
+- `recommendationCode` + `nextAction`,
+- `firstSlice.validation` + `firstSlice.rollback`,
+- sempre `dispatchAllowed=false` / `mutationAllowed=false`.
+
 ## Comando principal
 
 ```bash

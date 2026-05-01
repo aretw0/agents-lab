@@ -9582,6 +9582,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T16:48:43.677Z",
       "evidence": "Implemented explicit reload-needed signal in `context_watch_checkpoint` tool output (`packages/pi-stack/extensions/context-watchdog.ts`): details now include `reloadRequired` and conditional `reloadHint` (`run /reload before relying on updated tool/runtime behavior.`). Added regression assertion in `packages/pi-stack/test/smoke/context-watchdog.test.ts` to keep default non-reload case explicit (`reloadRequired=false`) while preserving existing bounded checkpoint contract. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 2 files passed, 55 tests passed."
+    },
+    {
+      "id": "VER-BUD-818",
+      "target": "TASK-BUD-466",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T16:51:12.220Z",
+      "evidence": "Documented practical usage of `project_intake_plan` with concise profile/decision reading in: - `docs/primitives/project-intake.md` (new quick tool example + expected output contract), - `docs/guides/session-triage.md` (new 'Atalho de intake universal' section to run intake before long triage). Validation: marker checks passed on both docs (`project-intake.md` 5/5; `session-triage.md` 5/5), confirming presence of report-only guardrail anchors (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`)."
     }
   ]
 }
