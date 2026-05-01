@@ -10709,7 +10709,7 @@
     {
       "id": "TASK-BUD-444",
       "description": "Extrair builder do lane_brainstorm_packet para módulo dedicado e reduzir acoplamento do guardrails-core-autonomy-lane-surface.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-441"
@@ -10725,12 +10725,13 @@
         "Smoke tests de surface permanecem verdes."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Reduz gordura estrutural e facilita evolução incremental."
+      "notes": "[rationale:risk-control] Reduz gordura estrutural e facilita evolução incremental.\n2026-05-01: surface ficou fina e contrato externo preservado.",
+      "verification": "VER-BUD-797"
     },
     {
       "id": "TASK-BUD-445",
       "description": "Adicionar regressão anti-bloat para docs de operação (checklist obrigatório presente e consistente entre doctrine/glossary).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-441"
@@ -10746,12 +10747,13 @@
         "Sem alterar política de escopos protegidos."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Previne regressão silenciosa da estratégia de qualidade."
+      "notes": "[rationale:risk-control] Previne regressão silenciosa da estratégia de qualidade.\n2026-05-01: iniciada regressão automatizada para garantir presença/consistência do checklist anti-gordura em doctrine e glossary.\n2026-05-01: regressão anti-gordura automatizada adicionada para evitar perda silenciosa de estratégia operacional.",
+      "verification": "VER-BUD-798"
     },
     {
       "id": "TASK-BUD-446",
       "description": "Extrair recommendation resolver de context_watch_continuation_readiness para módulo menor e cobrir contrato dedicado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-441"
@@ -10767,7 +10769,8 @@
         "Manter contexto-watchdog smoke principal verde."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Reduz tamanho/complexidade do arquivo gigante e melhora mantenibilidade."
+      "notes": "[rationale:risk-control] Reduz tamanho/complexidade do arquivo gigante e melhora mantenibilidade.\n2026-05-01: redução de complexidade do arquivo context-watchdog com contrato dedicado e cobertura explícita.",
+      "verification": "VER-BUD-799"
     },
     {
       "id": "TASK-BUD-447",

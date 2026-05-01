@@ -2,13 +2,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
-import {
-  LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
-  NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
-  SEED_LOCAL_SAFE_LANE_CODE,
-  STOP_NO_LOCAL_SAFE_CODE,
-} from "./guardrails-core-local-stop-guidance";
-import { rankBrainstormIdeas, type BrainstormIdeaInput } from "./lane-brainstorm-packet";
+import { buildLaneBrainstormPacket } from "./lane-brainstorm-packet";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -85,46 +79,6 @@ function buildReadinessInput(
   };
 }
 
-function asIdeas(value: unknown): BrainstormIdeaInput[] {
-  if (!Array.isArray(value)) return [];
-  const ideas: BrainstormIdeaInput[] = [];
-  for (const row of value) {
-    const item = row && typeof row === "object" ? row as Record<string, unknown> : undefined;
-    const id = typeof item?.id === "string" ? item.id.trim() : "";
-    const theme = typeof item?.theme === "string" ? item.theme.trim() : "";
-    if (!id || !theme) continue;
-    ideas.push({
-      id,
-      theme,
-      value: typeof item?.value === "string" ? item.value : "medium",
-      risk: typeof item?.risk === "string" ? item.risk : "medium",
-      effort: typeof item?.effort === "string" ? item.effort : "medium",
-    });
-  }
-  return ideas;
-}
-
-function resolveBrainstormRecommendation(selection: { ready: boolean; recommendationCode: string; recommendation: string }) {
-  if (selection.ready) {
-    return {
-      decision: "ready-for-human-review",
-      recommendationCode: SEED_LOCAL_SAFE_LANE_CODE,
-      nextAction: "review ranked slices and materialize bounded local-safe tasks.",
-    };
-  }
-  if (selection.recommendationCode === LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE) {
-    return {
-      decision: "blocked",
-      recommendationCode: NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
-      nextAction: selection.recommendation,
-    };
-  }
-  return {
-    decision: "blocked",
-    recommendationCode: STOP_NO_LOCAL_SAFE_CODE,
-    nextAction: selection.recommendation,
-  };
-}
 
 export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -255,38 +209,13 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
-      const recommendation = resolveBrainstormRecommendation(selection);
-      const rankedIdeas = rankBrainstormIdeas(asIdeas(p.ideas), asNumber(p.max_ideas, 12));
-      const maxSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_slices, 5))));
-      const selectedSlices = rankedIdeas.length > 0
-        ? rankedIdeas.slice(0, maxSlices).map((idea, index) => ({
-          id: `slice-${index + 1}`,
-          sourceIdeaId: idea.id,
-          title: idea.theme,
-          acceptance: ["focal validation green", "scope remains bounded"],
-          rollback: "git revert commit",
-        }))
-        : selection.eligibleTaskIds.slice(0, maxSlices).map((taskId, index) => ({
-          id: `slice-${index + 1}`,
-          sourceTaskId: taskId,
-          title: `execute bounded slice for ${taskId}`,
-          acceptance: ["focal validation green", "scope remains bounded"],
-          rollback: "git revert commit",
-        }));
-
-      const packet = {
-        decision: recommendation.decision,
-        goal: typeof p.goal === "string" && p.goal.trim().length > 0 ? p.goal.trim() : "seed local-safe lane",
-        recommendationCode: recommendation.recommendationCode,
-        nextAction: recommendation.nextAction,
-        ideas: rankedIdeas,
-        selectedSlices,
+      const packet = buildLaneBrainstormPacket({
+        goal: p.goal,
+        ideas: p.ideas,
+        maxIdeas: p.max_ideas,
+        maxSlices: p.max_slices,
         selection,
-        dispatchAllowed: false,
-        mutationAllowed: false,
-        authorization: "none",
-        mode: "report-only",
-      };
+      });
 
       return {
         content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],

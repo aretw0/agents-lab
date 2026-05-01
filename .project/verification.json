@@ -9393,6 +9393,33 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T14:34:18.015Z",
       "evidence": "Hardened lane_brainstorm_packet deterministic limits/fallback behavior via tests while preserving report-only invariants. Added max-ideas clip regression in `lane-brainstorm-packet.test.ts` (cap=50), and surface-level regression in `autonomy-lane-surface.test.ts` for `max_slices` clipping to 10 plus fallback to `selection.eligibleTaskIds` when ideas are invalid/empty. Validation suite: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 5 files passed, 83 tests passed."
+    },
+    {
+      "id": "VER-BUD-797",
+      "target": "TASK-BUD-444",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T15:10:17.876Z",
+      "evidence": "Extracted lane_brainstorm_packet builder/composition into dedicated module `packages/pi-stack/extensions/lane-brainstorm-packet.ts` (`buildLaneBrainstormPacket`, `resolveLaneBrainstormRecommendation`, input parsing + selected-slice builder), reducing coupling in `guardrails-core-autonomy-lane-surface.ts` to wiring + IO. Added module-level tests in `lane-brainstorm-packet.test.ts` for builder/invariants/fallback and kept surface contract tests green. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 5 files passed, 85 tests passed."
+    },
+    {
+      "id": "VER-BUD-798",
+      "target": "TASK-BUD-445",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke test",
+      "timestamp": "2026-05-01T15:11:28.834Z",
+      "evidence": "Added automated anti-bloat docs regression test `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` to fail-closed when mandatory checklist anchors drift or disappear between doctrine and glossary. Test asserts checklist headers in both docs and shared anchors (`intenção dominante`, `sem duplicação`, `validação focal`, `rollback`, `blast radius`, `evidência`, `no-eligible`) across `docs/guides/control-plane-operating-doctrine.md` and `docs/guides/control-plane-glossary.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 1 file passed, 1 test passed."
+    },
+    {
+      "id": "VER-BUD-799",
+      "target": "TASK-BUD-446",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T15:13:39.935Z",
+      "evidence": "Extracted continuation recommendation resolver from monolithic `context-watchdog.ts` into dedicated module `packages/pi-stack/extensions/context-watchdog-continuation.ts` and re-exported it from context-watchdog to preserve existing consumer import surface. Added dedicated contract coverage in `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` for all recommendation code paths and non-empty nextAction semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 7 files passed, 90 tests passed."
     }
   ]
 }

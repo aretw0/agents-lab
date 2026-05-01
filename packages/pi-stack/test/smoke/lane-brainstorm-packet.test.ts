@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { rankBrainstormIdeas, scoreBrainstormIdea } from "../../extensions/lane-brainstorm-packet";
+import { buildLaneBrainstormPacket, rankBrainstormIdeas, scoreBrainstormIdea } from "../../extensions/lane-brainstorm-packet";
 
-describe("lane brainstorm packet scorer", () => {
+describe("lane brainstorm packet module", () => {
   it("scores and ranks ideas by value/risk/effort", () => {
     const ranked = rankBrainstormIdeas([
       { id: "idea-a", theme: "a", value: "high", risk: "low", effort: "low" },
@@ -51,5 +51,44 @@ describe("lane brainstorm packet scorer", () => {
     expect(scored.risk).toBe("medium");
     expect(scored.effort).toBe("medium");
     expect(scored.score).toBe(0);
+  });
+
+  it("builds ready packet with report-only invariants", () => {
+    const packet = buildLaneBrainstormPacket({
+      goal: "desinflar",
+      ideas: [{ id: "idea-a", theme: "dedupe", value: "high", risk: "low", effort: "low" }],
+      maxIdeas: 5,
+      maxSlices: 1,
+      selection: {
+        ready: true,
+        recommendationCode: "execute-bounded-slice",
+        recommendation: "execute bounded slice for TASK-1",
+        eligibleTaskIds: ["TASK-1"],
+      },
+    });
+
+    expect(packet.decision).toBe("ready-for-human-review");
+    expect(packet.recommendationCode).toBe("seed-local-safe-lane");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.mutationAllowed).toBe(false);
+    expect(packet.authorization).toBe("none");
+    expect(packet.mode).toBe("report-only");
+    expect(packet.selectedSlices).toHaveLength(1);
+  });
+
+  it("falls back to eligible task slices when ideas are invalid", () => {
+    const packet = buildLaneBrainstormPacket({
+      ideas: [{ id: "", theme: "" }],
+      maxSlices: 99,
+      selection: {
+        ready: true,
+        recommendationCode: "execute-bounded-slice",
+        recommendation: "execute bounded slice",
+        eligibleTaskIds: ["TASK-1", "TASK-2", "TASK-3"],
+      },
+    });
+
+    expect(packet.selectedSlices).toHaveLength(3);
+    expect(packet.selectedSlices[0]?.sourceTaskId).toBe("TASK-1");
   });
 });
