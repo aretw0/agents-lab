@@ -185,6 +185,37 @@ describe("autonomy lane surface", () => {
     expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
   });
 
+  it("clips max_slices and falls back to eligible tasks when ideas are invalid", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-fallback-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: Array.from({ length: 15 }, (_, i) => ({
+        id: `TASK-LOCAL-${i + 1}`,
+        description: `[P1] local lane ${i + 1}`,
+        status: "planned",
+      })),
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
+    const result = brainstormTool?.execute("call-test", {
+      goal: "preparar lane",
+      ideas: [{ id: "", theme: "" }],
+      max_slices: 999,
+      sample_limit: 20,
+    }, undefined, undefined, { cwd });
+
+    const selected = (result?.details.selectedSlices as Array<{ sourceTaskId?: string }> | undefined) ?? [];
+    expect(result?.details.decision).toBe("ready-for-human-review");
+    expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
+    expect(selected).toHaveLength(10);
+    expect(selected[0]?.sourceTaskId).toBe("TASK-LOCAL-1");
+  });
+
   it("emits blocked lane_brainstorm_packet when only protected lane exists", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-blocked-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

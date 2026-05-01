@@ -33,6 +33,18 @@ describe("lane brainstorm packet scorer", () => {
     expect(new Set(ranked.map((item) => item.id)).size).toBe(1);
   });
 
+  it("clips max ideas to deterministic upper bound", () => {
+    const ideas = Array.from({ length: 70 }, (_, idx) => ({
+      id: `idea-${idx + 1}`,
+      theme: `theme-${idx + 1}`,
+      value: "medium" as const,
+      risk: "medium" as const,
+      effort: "medium" as const,
+    }));
+    const ranked = rankBrainstormIdeas(ideas, 999);
+    expect(ranked).toHaveLength(50);
+  });
+
   it("normalizes unknown levels to medium", () => {
     const scored = scoreBrainstormIdea({ id: "idea-x", theme: "x", value: "weird", risk: "nope", effort: "unknown" });
     expect(scored.value).toBe("medium");

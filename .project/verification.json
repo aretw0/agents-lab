@@ -9384,6 +9384,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T14:30:49.230Z",
       "evidence": "Centralized control-plane recommendation code literals in shared module `guardrails-core-local-stop-guidance.ts` and replaced duplicated literals across `guardrails-core-autonomy-task-selector.ts`, `context-watchdog.ts`, and `guardrails-core-autonomy-lane-surface.ts`. No functional widening; semantics preserved. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 4 files passed, 77 tests passed."
+    },
+    {
+      "id": "VER-BUD-796",
+      "target": "TASK-BUD-443",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T14:34:18.015Z",
+      "evidence": "Hardened lane_brainstorm_packet deterministic limits/fallback behavior via tests while preserving report-only invariants. Added max-ideas clip regression in `lane-brainstorm-packet.test.ts` (cap=50), and surface-level regression in `autonomy-lane-surface.test.ts` for `max_slices` clipping to 10 plus fallback to `selection.eligibleTaskIds` when ideas are invalid/empty. Validation suite: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 5 files passed, 83 tests passed."
     }
   ]
 }

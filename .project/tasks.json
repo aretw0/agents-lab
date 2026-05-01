@@ -10686,7 +10686,7 @@
     {
       "id": "TASK-BUD-443",
       "description": "Endurecer contrato do lane_brainstorm_packet para limites determinísticos (`max_ideas`/`max_slices`) e fallback quando não há ideias válidas.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-441"
@@ -10703,7 +10703,8 @@
         "Preservar invariantes report-only (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`)."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Evita explosão de payload e mantém comportamento previsível."
+      "notes": "[rationale:risk-control] Evita explosão de payload e mantém comportamento previsível.\n2026-05-01: iniciada cobertura de limites determinísticos (max_ideas/max_slices) e fallback de ideias inválidas para selection.eligibleTaskIds no lane_brainstorm_packet.\n2026-05-01: contrato do brainstorm packet ficou mais previsível sob carga e entradas ruins, sem abrir mutação/dispatch.",
+      "verification": "VER-BUD-796"
     },
     {
       "id": "TASK-BUD-444",
