@@ -9060,6 +9060,33 @@
       "method": "human-approved-local-first-calibration-close",
       "timestamp": "2026-05-01T04:30:10.358Z",
       "evidence": "Human operator explicitly chose `close` after board_decision_packet reported noAutoClose=true, readyForHumanDecision=true, recommendedDecision=close, and board_task_quality_gate reported closeAllowed=yes. Closure scope is local-first calibration of controlled/auditable uninterrupted work only: dependencies for background lifecycle/header/stop-source, stale handoff reconciliation, cancel/fallback drill, tool hygiene, and measured local rehearsal were completed. This does not authorize scheduler, remote/offload, GitHub Actions/CI, publish, protected-scope execution, or strong unattended automation; protected `.github/workflows/ci.yml` remains a future explicit lane if needed."
+    },
+    {
+      "id": "VER-BUD-760",
+      "target": "TASK-BUD-414",
+      "target_type": "task",
+      "status": "passed",
+      "method": "read-only-provider-routing-inventory",
+      "timestamp": "2026-05-01T04:35:13.828Z",
+      "evidence": "Read-only inventory only; no settings mutation. Relevant fields: .pi/settings.json defaultProvider=openai-codex defaultModel=gpt-5.3-codex routeModelRefs.openai-codex=openai-codex/gpt-5.3-codex; .sandbox/pi-agent/settings.json defaultProvider=openai-codex defaultModel=gpt-5.5. provider_readiness_matrix: only openai-codex/gpt-5.3-codex ready, budgetState=ok. quota_visibility_provider_budgets: openai-codex state=ok. quota_visibility_route(profile=balanced, execute=false): recommended openai-codex, noAutoSwitch=true. handoff_advisor(execute=false): recommended openai-codex, noAutoSwitch=true. Anthropic is not configured in current routeModelRefs/readiness."
+    },
+    {
+      "id": "VER-BUD-761",
+      "target": "TASK-BUD-415",
+      "target_type": "task",
+      "status": "passed",
+      "method": "provider-routing-noop-patch-preview",
+      "timestamp": "2026-05-01T04:36:32.454Z",
+      "evidence": "Documented a no-op patch preview for the Anthropic/Codex profile without applying .pi/settings.json. Current state only exposes openai-codex in routeModelRefs/readiness, and the operator confirmed the logged Anthropic account asks for extra usage, so there is no viable Anthropic local route now. Doctrine separates manual /model or quota_visibility_route execute=true from any auto-switch, and requires explicit provider/model/account availability before future patch preview. Validation: safe_marker_check doctrine markers 3/3; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-762",
+      "target": "TASK-BUD-405",
+      "target_type": "task",
+      "status": "passed",
+      "method": "provider-routing-pivot-human-steer",
+      "timestamp": "2026-05-01T04:36:51.146Z",
+      "evidence": "Provider routing task closed as a deferred/pivoted local-first plan. Inventory (VER-BUD-760) showed only openai-codex configured/ready; patch preview (VER-BUD-761) is no-op because Anthropic is not configured and the operator confirmed Anthropic asks for extra usage on the logged account. Outcome: keep current Codex route, do not apply settings changes, do not auto-switch, and revisit only with explicit provider/model/account availability. This preserves continuity by avoiding a costly/broken provider lane."
     }
   ]
 }

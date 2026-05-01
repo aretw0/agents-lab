@@ -116,6 +116,37 @@ A promoção é conservadora: tools advisory/measured podem permanecer visíveis
 
 Snapshot local de 2026-05-01 antes do rehearsal: `tool_hygiene_scorecard` listou 102 tools, com 47 advisory, 44 measured, 5 operational e 6 protected; 8 requerem aprovação humana e nenhuma está marcada para esconder automaticamente antes de loop longo. Decisão de curadoria para rehearsal local: manter tools advisory/measured visíveis para fatias bounded; permitir tools operational de board/checkpoint apenas com task/verificação explícitas; manter `ant_colony`, `claude_code_execute`, `schedule_prompt`, `safe_boot`, `governance_profile` e `handoff_advisor` como protected/no-auto-dispatch. `stack_sovereignty_status` apontou 3 riscos médios e um overlap ativo `oh-pi-bg-process-future` com `strategy=needs-decision`; nenhuma capability third-party deve ser removida/suprimida automaticamente sem decisão explícita. Isso é go para rehearsal local bounded, mas no-go para unattended forte sem decisão posterior sobre overlaps de background/scheduler/runtime.
 
+## Roteamento local de cota
+
+Roteamento de provider é uma superfície de continuidade, mas também é settings/provedor protegido. A regra local-first é: inventariar primeiro, gerar patch preview, e só aplicar mudança de provider/model com intenção explícita. `quota_visibility_route` e `handoff_advisor` ficam `noAutoSwitch=true` salvo `execute=true` pedido pelo operador.
+
+Snapshot read-only de 2026-05-01 para `TASK-BUD-405`:
+
+- `.pi/settings.json`: `defaultProvider=openai-codex`, `defaultModel=gpt-5.3-codex`, `routeModelRefs.openai-codex=openai-codex/gpt-5.3-codex`;
+- `.sandbox/pi-agent/settings.json`: `defaultProvider=openai-codex`, `defaultModel=gpt-5.5`;
+- `provider_readiness_matrix`: apenas `openai-codex/gpt-5.3-codex`, `readiness=ready`, `budgetState=ok`;
+- `quota_visibility_route(profile=balanced, execute=false)`: recomenda `openai-codex`, `state=ok`, `noAutoSwitch=true`;
+- `handoff_advisor(execute=false)`: recomenda `openai-codex`, `noAutoSwitch=true`.
+
+Patch preview seguro neste estado é **no-op**: Anthropic não aparece como provider configurado nem em `routeModelRefs`, e o operador confirmou que a conta Anthropic logada pede extra usage; portanto não há rota Anthropic local viável para promover agora. Um preview futuro só pode ser produzido após o operador declarar provider/model exatos e confirmar que a conta/provedor está disponível sem custo/uso extra inesperado, por exemplo em forma auditável:
+
+```json
+{
+  "defaultProvider": "anthropic-ou-github-copilot",
+  "defaultModel": "modelo-declarado-pelo-operador",
+  "piStack": {
+    "quotaVisibility": {
+      "routeModelRefs": {
+        "openai-codex": "openai-codex/gpt-5.3-codex",
+        "anthropic-ou-github-copilot": "provider/model-declarado"
+      }
+    }
+  }
+}
+```
+
+Retorno ao perfil Codex também é manual: usar `/model` ou `quota_visibility_route({ "profile": "balanced", "execute": true })` somente quando o operador pedir explicitamente e quando o advisor ainda mostrar `openai-codex` em `ok`. Classificadores/monitores leves permanecem no caminho Codex enquanto houver cota; se Codex entrar em WARN/BLOCK, registrar handoff advisory e pedir decisão em vez de auto-switch.
+
 ## Entrevistas estruturadas e gaps humanos
 
 Gaps humanos devem ser preenchidos por contrato backend-first antes de qualquer UI. A primitiva `structured_interview_plan` recebe uma lista de perguntas com ids estáveis, tipo, obrigatoriedade, opções, defaults e flags `allowUnknown`/`allowSkip`; recebe respostas parciais; valida sequencialmente; e devolve `complete`, `needs-human-answer` ou `invalid` com `nextQuestionId` e evidência compacta.

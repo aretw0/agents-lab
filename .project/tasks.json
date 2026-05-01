@@ -9836,7 +9836,7 @@
     {
       "id": "TASK-BUD-405",
       "description": "Planejar perfil local de roteamento Anthropic/Codex para preservar cota: control-plane em Anthropic quando disponível, classificadores leves em Codex, e retorno manual ao Codex após janela Anthropic.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         ".pi/settings.json",
@@ -9852,7 +9852,12 @@
         "Registrar como voltar ao perfil Codex após janela Anthropic de ~5h ou quando Anthropic bloquear."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Pedido do operador: cota Codex local está pressionada e Anthropic deve assumir control-plane sem quebrar classificadores/monitores; `.pi/settings.json` é protegido e só pode mudar com intenção explícita e patch auditável."
+      "notes": "[rationale:risk-control] Pedido do operador: cota Codex local está pressionada e Anthropic deve assumir control-plane sem quebrar classificadores/monitores; `.pi/settings.json` é protegido e só pode mudar com intenção explícita e patch auditável.\n2026-05-01: fechado por pivot/defer conforme steering humano. Resultado operacional: manter rota Codex atual e não perseguir Anthropic nesta conta; reabrir só com provider/model viável e decisão explícita.",
+      "depends_on": [
+        "TASK-BUD-414",
+        "TASK-BUD-415"
+      ],
+      "verification": "VER-BUD-762"
     },
     {
       "id": "TASK-BUD-406",
@@ -10040,6 +10045,48 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] TASK-BUD-399 exige distinguir cancelamento humano de stop pelo agente; o contrato atual só carrega `stopRequested`, então a origem precisa virar evidência explícita antes do drill local ser confiável.\n2026-05-01: implementação e smoke do contrato `stop_source` prontos; runtime surface mudou e precisa reload/live validation antes de fechar. TASK-BUD-399 permanece bloqueada até validar origem de cancelamento no runtime.\n2026-05-01: concluído após reload/live validation. `stop_source` diferencia cancelamento humano, stop pelo agente e origem desconhecida; sem dispatch/autorização.",
       "verification": "VER-BUD-755"
+    },
+    {
+      "id": "TASK-BUD-414",
+      "description": "Inventariar providers/readiness e estado atual de roteamento de cota sem alterar settings protegidos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".pi/settings.json",
+        ".sandbox/pi-agent/settings.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Ler apenas os campos relevantes de `.pi/settings.json` e `.sandbox/pi-agent/settings.json`, sem aplicar patch.",
+        "Registrar provider_readiness_matrix, quota provider budgets e route advisory com execute=false.",
+        "Explicitar se Anthropic está configurado ou não para o perfil atual.",
+        "Preservar noAutoSwitch para qualquer recomendação de handoff/route."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] TASK-BUD-405 toca settings protegidos; o inventário precisa ser read-only e auditável antes de qualquer patch preview.\n2026-05-01: concluído inventário read-only de provider/rota/cota. Estado atual só expõe openai-codex como provider roteável; nenhum patch em settings foi aplicado.",
+      "verification": "VER-BUD-760"
+    },
+    {
+      "id": "TASK-BUD-415",
+      "description": "Documentar patch preview/no-op para perfil local Anthropic/Codex sem aplicar `.pi/settings.json`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-414"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documentar que o estado atual só tem `openai-codex` configurado em routeModelRefs e readiness.",
+        "Fornecer preview auditável: no-op enquanto Anthropic não estiver configurado; template futuro exige provider/model explícito do operador.",
+        "Separar troca manual via `/model`/route execute explícito de qualquer auto-switch.",
+        "Registrar retorno ao perfil Codex como ação manual após janela Anthropic ou bloqueio Anthropic.",
+        "Reafirmar que `.pi/settings.json` não foi alterado."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A decisão segura para cota/roteamento deve produzir guia auditável e reversível sem mutar settings protegidos nem criar auto-switch.\n2026-05-01: concluído como preview no-op/pivot. Anthropic não é rota viável nesta conta porque pede extra usage; nenhum settings protegido foi alterado.",
+      "verification": "VER-BUD-761"
     }
   ]
 }
