@@ -29,6 +29,55 @@ function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { ids: st
   return handoff.length > 0 ? { ids: handoff, source: "handoff" } : { ids: [] };
 }
 
+function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
+  const focus = resolveFocusTaskIds(p, cwd);
+  return evaluateAutonomyLaneTaskSelection(cwd, {
+    milestone: typeof p.milestone === "string" ? p.milestone : undefined,
+    includeProtectedScopes: p.include_protected_scopes === true,
+    includeMissingRationale: p.include_missing_rationale === true,
+    sampleLimit: asNumber(p.sample_limit, 5),
+    focusTaskIds: focus.ids,
+    focusSource: focus.source,
+  });
+}
+
+function buildReadinessInput(
+  p: Record<string, unknown>,
+  board: { ready: boolean; nextTaskId?: string },
+) {
+  return {
+    context: {
+      level: normalizeContextLevel(p.context_level),
+      percent: asNumber(p.context_percent, 0),
+    },
+    machine: {
+      severity: typeof p.machine_severity === "string" ? p.machine_severity : "ok",
+      canStartLongRun: asBool(p.can_start_long_run, true),
+      canEvaluateMonitors: true,
+    },
+    provider: {
+      ready: asNumber(p.provider_ready, 1),
+      blocked: asNumber(p.provider_blocked, 0),
+      degraded: asNumber(p.provider_degraded, 0),
+    },
+    quota: {
+      blockAlerts: asNumber(p.quota_block_alerts, 0),
+      warnAlerts: asNumber(p.quota_warn_alerts, 0),
+    },
+    board,
+    monitors: {
+      classifyFailures: asNumber(p.monitor_classify_failures, 0),
+      sovereignDivergence: asNumber(p.monitor_sovereign_divergence, 0),
+    },
+    subagents: {
+      ready: asBool(p.subagents_ready, true),
+    },
+    workspace: {
+      unexpectedDirty: asBool(p.unexpected_dirty, false),
+    },
+  };
+}
+
 export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "autonomy_lane_plan",
@@ -53,40 +102,10 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = evaluateAutonomyLaneReadiness({
-        context: {
-          level: normalizeContextLevel(p.context_level),
-          percent: asNumber(p.context_percent, 0),
-        },
-        machine: {
-          severity: typeof p.machine_severity === "string" ? p.machine_severity : "ok",
-          canStartLongRun: asBool(p.can_start_long_run, true),
-          canEvaluateMonitors: true,
-        },
-        provider: {
-          ready: asNumber(p.provider_ready, 1),
-          blocked: asNumber(p.provider_blocked, 0),
-          degraded: asNumber(p.provider_degraded, 0),
-        },
-        quota: {
-          blockAlerts: asNumber(p.quota_block_alerts, 0),
-          warnAlerts: asNumber(p.quota_warn_alerts, 0),
-        },
-        board: {
-          ready: asBool(p.board_ready, true),
-          nextTaskId: typeof p.next_task_id === "string" ? p.next_task_id : undefined,
-        },
-        monitors: {
-          classifyFailures: asNumber(p.monitor_classify_failures, 0),
-          sovereignDivergence: asNumber(p.monitor_sovereign_divergence, 0),
-        },
-        subagents: {
-          ready: asBool(p.subagents_ready, true),
-        },
-        workspace: {
-          unexpectedDirty: asBool(p.unexpected_dirty, false),
-        },
-      });
+      const result = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
+        ready: asBool(p.board_ready, true),
+        nextTaskId: typeof p.next_task_id === "string" ? p.next_task_id : undefined,
+      }));
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
@@ -121,50 +140,12 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const focus = resolveFocusTaskIds(p, ctx.cwd);
-      const selection = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
-        milestone: typeof p.milestone === "string" ? p.milestone : undefined,
-        includeProtectedScopes: p.include_protected_scopes === true,
-        includeMissingRationale: p.include_missing_rationale === true,
-        sampleLimit: asNumber(p.sample_limit, 5),
-        focusTaskIds: focus.ids,
-        focusSource: focus.source,
-      });
-      const plan = evaluateAutonomyLaneReadiness({
-        context: {
-          level: normalizeContextLevel(p.context_level),
-          percent: asNumber(p.context_percent, 0),
-        },
-        machine: {
-          severity: typeof p.machine_severity === "string" ? p.machine_severity : "ok",
-          canStartLongRun: asBool(p.can_start_long_run, true),
-          canEvaluateMonitors: true,
-        },
-        provider: {
-          ready: asNumber(p.provider_ready, 1),
-          blocked: asNumber(p.provider_blocked, 0),
-          degraded: asNumber(p.provider_degraded, 0),
-        },
-        quota: {
-          blockAlerts: asNumber(p.quota_block_alerts, 0),
-          warnAlerts: asNumber(p.quota_warn_alerts, 0),
-        },
-        board: {
-          // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
-          ready: true,
-          nextTaskId: selection.nextTaskId,
-        },
-        monitors: {
-          classifyFailures: asNumber(p.monitor_classify_failures, 0),
-          sovereignDivergence: asNumber(p.monitor_sovereign_divergence, 0),
-        },
-        subagents: {
-          ready: asBool(p.subagents_ready, true),
-        },
-        workspace: {
-          unexpectedDirty: asBool(p.unexpected_dirty, false),
-        },
-      });
+      const selection = resolveTaskSelection(p, ctx.cwd);
+      const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
+        // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
+        ready: true,
+        nextTaskId: selection.nextTaskId,
+      }));
       const result = {
         ready: plan.ready && selection.ready,
         plan,
@@ -193,15 +174,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const focus = resolveFocusTaskIds(p, ctx.cwd);
-      const result = evaluateAutonomyLaneTaskSelection(ctx.cwd, {
-        milestone: typeof p.milestone === "string" ? p.milestone : undefined,
-        includeProtectedScopes: p.include_protected_scopes === true,
-        includeMissingRationale: p.include_missing_rationale === true,
-        sampleLimit: asNumber(p.sample_limit, 5),
-        focusTaskIds: focus.ids,
-        focusSource: focus.source,
-      });
+      const result = resolveTaskSelection(p, ctx.cwd);
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

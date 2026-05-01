@@ -10378,6 +10378,28 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Menos gordura e menor risco de divergência entre texto/código de recomendação em evoluções futuras.\n2026-05-01: anti-bloat micro-slice; reduced repetition risk between recommendation text and code mappings.",
       "verification": "VER-BUD-780"
+    },
+    {
+      "id": "TASK-BUD-429",
+      "description": "Desinflar `guardrails-core-autonomy-lane-surface` extraindo helpers únicos para seleção/readiness e removendo duplicação de parsing de params.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-427"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Extrair helper para construir seleção (`evaluateAutonomyLaneTaskSelection`) a partir de params/cwd usado por `autonomy_lane_status` e `autonomy_lane_next_task`.",
+        "Extrair helper para construir input de readiness a partir de params + estado de board.",
+        "Manter comportamento atual comprovado por smoke tests existentes."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Reduz repetição e risco de drift sem aumentar superfície funcional.\n2026-05-01: anti-bloat refactor; reduced duplicated parsing/mapping logic without widening scope.",
+      "verification": "VER-BUD-781"
     }
   ]
 }

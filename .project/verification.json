@@ -9249,6 +9249,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T12:40:24.396Z",
       "evidence": "Refactored autonomy task selector recommendation mapping to remove duplicated ternary branches and use a single resolver (`resolveSelectionRecommendation`) keyed by `reason`, while preserving no-eligible blocker-specific guidance from `resolveNoEligibleTaskRecommendation`. Updated smoke tests to assert stable `recommendationCode` for `focus-complete`, `focus-mismatch`, and `no-candidate-tasks`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 2 files passed, 23 tests passed."
+    },
+    {
+      "id": "VER-BUD-781",
+      "target": "TASK-BUD-429",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T12:50:10.058Z",
+      "evidence": "Refactored `guardrails-core-autonomy-lane-surface.ts` to remove repeated params parsing paths by extracting `resolveTaskSelection(...)` and `buildReadinessInput(...)`. `autonomy_lane_plan`, `autonomy_lane_status`, and `autonomy_lane_next_task` now reuse shared helpers while preserving behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts` => 3 files passed, 28 tests passed."
     }
   ]
 }
