@@ -9051,6 +9051,15 @@
       "method": "measured-local-rehearsal-gates",
       "timestamp": "2026-05-01T04:24:25.714Z",
       "evidence": "Measured local rehearsal after blockers: unattended_rehearsal_gate(completed_local_slices=5, focusPreserved=true, focalSmokeGreen=true, smallCommits=true, handoffFresh=true, protectedScopeAutoSelections=0, unresolvedBlockers=0) returned ready=yes decision=ready-for-canary score=6/6. Counter-gates intentionally preserved: local_continuity_audit eligible=no packet=blocked due protected scope .github/workflows/ci.yml/no-local-safe-next-step, and context_watch_continuation_readiness ready=no for TASK-BUD-153 due protected scope. Conclusion: local blocker rehearsal passed, but TASK-BUD-153 must not auto-close into remote/CI/unattended; it needs human re-scope/decision or explicit protected-channel task. Validation: doctrine markers 3/3; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-759",
+      "target": "TASK-BUD-153",
+      "target_type": "task",
+      "status": "passed",
+      "method": "human-approved-local-first-calibration-close",
+      "timestamp": "2026-05-01T04:30:10.358Z",
+      "evidence": "Human operator explicitly chose `close` after board_decision_packet reported noAutoClose=true, readyForHumanDecision=true, recommendedDecision=close, and board_task_quality_gate reported closeAllowed=yes. Closure scope is local-first calibration of controlled/auditable uninterrupted work only: dependencies for background lifecycle/header/stop-source, stale handoff reconciliation, cancel/fallback drill, tool hygiene, and measured local rehearsal were completed. This does not authorize scheduler, remote/offload, GitHub Actions/CI, publish, protected-scope execution, or strong unattended automation; protected `.github/workflows/ci.yml` remains a future explicit lane if needed."
     }
   ]
 }
