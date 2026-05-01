@@ -150,7 +150,8 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           warnAlerts: asNumber(p.quota_warn_alerts, 0),
         },
         board: {
-          ready: selection.ready,
+          // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
+          ready: true,
           nextTaskId: selection.nextTaskId,
         },
         monitors: {

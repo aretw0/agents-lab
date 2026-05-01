@@ -121,4 +121,30 @@ describe("autonomy lane surface", () => {
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-NEXT");
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
   });
+
+  it("keeps plan non-blocked when board is readable but selection has no eligible local-safe task", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-protected-only-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
+    const plan = (result?.details.plan as { decision?: string; stopReasons?: string[] } | undefined);
+    const selection = (result?.details.selection as { reason?: string; recommendationCode?: string } | undefined);
+
+    expect(result?.details.ready).toBe(false);
+    expect(plan?.decision).not.toBe("blocked");
+    expect(plan?.stopReasons ?? []).not.toContain("board-not-ready");
+    expect(selection?.reason).toBe("no-eligible-tasks");
+    expect(selection?.recommendationCode).toBe("local-stop-protected-focus-required");
+  });
 });

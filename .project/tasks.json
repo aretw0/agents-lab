@@ -10311,6 +10311,29 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Garantir que consumers da surface recebam código estável de decisão em stop local, evitando parsing de texto livre.\n2026-05-01: consumer contract hardened so UI/tools can react to stop-local reasons without parsing free-text recommendation.",
       "verification": "VER-BUD-777"
+    },
+    {
+      "id": "TASK-BUD-426",
+      "description": "Evitar falso `board-not-ready` em autonomy_lane_status quando há board válido mas `selection.reason=no-eligible-tasks` (stop local por política).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-424",
+        "TASK-BUD-425"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` não deve marcar `plan.decision=blocked` por `board-not-ready` quando o board existe mas só há tarefas protegidas/ineligíveis.",
+        "`result.ready` continua false quando `selection.ready=false`, preservando stop local.",
+        "Smoke test cobre caso protected-only em `autonomy_lane_status` e verifica ausência de `board-not-ready`."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Evita semântica enganosa de falha de board quando o real estado é stop local por política de segurança.\n2026-05-01: clarified status semantics so no-eligible is policy stop (selection) rather than board failure (plan), reducing false blocked signals.",
+      "verification": "VER-BUD-778"
     }
   ]
 }

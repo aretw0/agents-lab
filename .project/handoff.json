@@ -1,28 +1,29 @@
 {
-  "timestamp": "2026-05-01T12:30:49.614Z",
-  "context": "Completed follow-up micro-slice to expose stable stop-local recommendationCode contract at surface level. Added smoke coverage that autonomy_ [snip] hen only protected tasks are available. [truncated:+109 chars]",
+  "timestamp": "2026-05-01T12:34:58.564Z",
+  "context": "Completed micro-slice clarifying autonomy status semantics: autonomy_lane_status.plan no longer classifies no-eligible-tasks as board-not-rea [snip] follows plan.ready && selection.ready. [truncated:+88 chars]",
   "next_actions": [
-    "Commit TASK-BUD-425 test+board evidence slice.",
-    "Reload runtime before expecting live tool output to include new recommendationCode field."
+    "Commit TASK-BUD-426 source/test/board evidence.",
+    "Reload runtime before expecting live autonomy_lane_status.plan to drop board-not-ready for policy-stop cases."
   ],
   "blockers": [
-    "Strong unattended remote/offload/CI/scheduler remains unauthorized."
+    "Strong unattended remote/offload/CI/scheduler remains unauthorized.",
+    "Only protected backlog remains eligible under include_protected_scopes=false."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/ [snip] es passed, 21 tests passed [truncated:+59 chars]",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/ [snip] es passed, 27 tests passed [truncated:+120 chars]",
     "git diff --check => no whitespace errors"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T12:30:49.614Z",
+    "generatedAtIso": "2026-05-01T12:34:58.564Z",
     "level": "ok",
     "percent": 0,
     "action": "continue",
-    "recommendation": "Commit bounded slice and continue only with explicit local-safe focus.",
+    "recommendation": "Commit bounded slice and wait for explicit focus for any protected lane.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T12:30:49.614Z",
+      "atIso": "2026-05-01T12:34:58.564Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -32,10 +33,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit bounded slice and continue only with explicit local-safe focus."
+      "recommendation": "Commit bounded slice and wait for explicit focus for any protected lane."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-425"
+    "TASK-BUD-426"
   ]
 }
