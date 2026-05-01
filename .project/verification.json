@@ -9231,6 +9231,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T12:34:33.106Z",
       "evidence": "Adjusted `autonomy_lane_status` composition so `plan` no longer reports `board-not-ready` when board is readable but selection has `no-eligible-tasks` due policy filtering (e.g., protected-only queue). In surface composition, board readiness is treated as true after successful board selection read; `result.ready` still remains false when `selection.ready=false`. Added smoke test `keeps plan non-blocked when board is readable but selection has no eligible local-safe task` in `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts` => 3 files passed, 27 tests passed."
+    },
+    {
+      "id": "VER-BUD-779",
+      "target": "TASK-BUD-427",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T12:36:37.848Z",
+      "evidence": "Enhanced `autonomy_lane_status` composed output with top-level `recommendationCode` and `nextAction` aligned to selection gate semantics. `nextAction` now uses `selection.recommendation` when `selection.ready=false`; otherwise it uses `plan.nextAction`. This prevents consumers from inferring continuation when plan is healthy but selection is a policy stop. Updated smoke tests in `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` to validate top-level fields for both ready and protected-only no-eligible scenarios. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts` => 3 files passed, 27 tests passed."
     }
   ]
 }

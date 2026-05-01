@@ -165,7 +165,13 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           unexpectedDirty: asBool(p.unexpected_dirty, false),
         },
       });
-      const result = { ready: plan.ready && selection.ready, plan, selection };
+      const result = {
+        ready: plan.ready && selection.ready,
+        plan,
+        selection,
+        recommendationCode: selection.recommendationCode,
+        nextAction: selection.ready ? plan.nextAction : selection.recommendation,
+      };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

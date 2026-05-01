@@ -120,6 +120,8 @@ describe("autonomy lane surface", () => {
     expect(result?.details.ready).toBe(true);
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-NEXT");
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
+    expect(result?.details.recommendationCode).toBe("execute-bounded-slice");
+    expect(result?.details.nextAction).toContain("next=TASK-NEXT");
   });
 
   it("keeps plan non-blocked when board is readable but selection has no eligible local-safe task", () => {
@@ -146,5 +148,7 @@ describe("autonomy lane surface", () => {
     expect(plan?.stopReasons ?? []).not.toContain("board-not-ready");
     expect(selection?.reason).toBe("no-eligible-tasks");
     expect(selection?.recommendationCode).toBe("local-stop-protected-focus-required");
+    expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
+    expect(result?.details.nextAction).toContain("local stop condition");
   });
 });
