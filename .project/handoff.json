@@ -1,34 +1,34 @@
 {
-  "timestamp": "2026-05-01T03:25:25.608Z",
-  "context": "Post-reload background lifecycle validation passed. background_process_lifecycle_plan classified incident-shaped done-after-stop event as lat [snip] party code or a different emitter path. [truncated:+558 chars]",
+  "timestamp": "2026-05-01T03:29:26.680Z",
+  "context": "Continued background lifecycle dependency decomposition. Because TASK-BUD-067 itself is a macro blocker and quality gate flagged macro-task-m [snip] ncies instead of missing decomposition. [truncated:+443 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit board notes for TASK-BUD-397/TASK-BUD-067 live validation and source boundary.",
-    "Continue TASK-BUD-067 with bounded source-boundary design: how first-party lifecycle classifie [snip] eam node_modules mutation. [truncated:+64 chars]",
-    "Keep output bounded because context is warn/53."
+    "Commit board dependency decomposition for TASK-BUD-067/397/406/407.",
+    "Continue with TASK-BUD-407 bounded source-boundary investigation before claiming TASK-BUD-067 fixed.",
+    "Keep output bounded; context was warn/53 earlier."
   ],
   "blockers": [
-    "TASK-BUD-397 cannot close until TASK-BUD-067/event-source boundary is resolved [snip] explicitly re-scoped. [truncated:+3 chars]",
-    "TASK-BUD-153 remains blocked by unresolved dependencies.",
-    "Strong unattended/loop/scheduler/remote remains blocked."
+    "TASK-BUD-067 depends on TASK-BUD-407.",
+    "TASK-BUD-397 depends on TASK-BUD-067 and TASK-BUD-406.",
+    "TASK-BUD-153 remains blocked by unresolved dependency chain."
   ],
   "recent_validation": [
-    "context_watch_status warn percent=53 action=continue-bounded operator=none handoff=fresh",
-    "background_process_lifecycle_plan done+known+stop_requested+label=undefined => state=late-afte [snip] ayLabel=background-process [truncated:+12 chars]",
-    "background_process_lifecycle_plan done+unknown => state=unknown-origin"
+    "board_task_quality_gate TASK-BUD-067 => closeAllowed=no blockers=unresolved-dependencies",
+    "board_task_quality_gate TASK-BUD-397 => closeAllowed=no blockers=unresolved-dependencies",
+    "board_task_quality_gate TASK-BUD-153 => closeAllowed=no blockers=unresolved-dependencies"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:25:25.608Z",
+    "generatedAtIso": "2026-05-01T03:29:26.680Z",
     "level": "warn",
     "percent": 53,
     "action": "continue",
-    "recommendation": "commit-board-boundary-and-continue-bounded"
+    "recommendation": "commit-dependency-decomposition"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:25:25.608Z",
+      "atIso": "2026-05-01T03:29:26.680Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 53,
@@ -38,7 +38,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-board-boundary-and-continue-bounded"
+      "recommendation": "commit-dependency-decomposition"
     }
   ]
 }

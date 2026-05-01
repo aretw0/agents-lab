@@ -1575,7 +1575,10 @@
         "Correção aplicada ou workaround documentado com fallback de label não-nulo em mensagens de output.",
         "Guia curto de operação define política prática de background (foreground com timeout explícito para comandos curtos; background para jobs longos com PID/log e checkpoint)."
       ],
-      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional.\n2026-05-01: reconfirmado como blocker prático para TASK-BUD-153: enquanto `[undefined]` em eventos/background e heurística/controle de processo em background não estiverem resolvidos, não declarar execução ininterrupta multi-modo como pronta.\n2026-05-01: retomada como blocker essencial de TASK-BUD-153/TASK-BUD-397. Validação live da nova surface `background_process_lifecycle_plan` cobre classificação/label fallback, mas ainda não prova que o emissor real de eventos/background usa esse contrato. Busca bounded por `BG_PROCESS_DONE` em packages/pi-stack/extensions e node_modules/@mariozechner/pi-coding-agent/dist não encontrou o emissor; hits foram apenas `bg_status` em monitor-runtime-contract e `backgrounded` no Ctrl+Z upstream. Próximo passo é tratar boundary de fonte de evento/registry sem mutar upstream pi diretamente."
+      "notes": "Nota operacional solicitada pelo usuário para não perder o tema durante a trilha principal. Escopo: observability/ergonomia, sem desviar de prioridades P0/P1.\n[2026-04-24T14:50:00Z] Incidente em produção observado: lane-queue fez auto-advance repetido para `TASK-BUD-067` com intent `board.execute-task`, porém execução falhou em loop com erro `No tool call found for function call output with call_id ...` (sem tool call correspondente). Sessão registrou compactações sucessivas + watchdog safe-mode e pausa de monitores. Task fica bloqueada até estabilizar dispatch/consumo de intents e dedupe de auto-advance para evitar perda de controle operacional.\n2026-05-01: reconfirmado como blocker prático para TASK-BUD-153: enquanto `[undefined]` em eventos/background e heurística/controle de processo em background não estiverem resolvidos, não declarar execução ininterrupta multi-modo como pronta.\n2026-05-01: retomada como blocker essencial de TASK-BUD-153/TASK-BUD-397. Validação live da nova surface `background_process_lifecycle_plan` cobre classificação/label fallback, mas ainda não prova que o emissor real de eventos/background usa esse contrato. Busca bounded por `BG_PROCESS_DONE` em packages/pi-stack/extensions e node_modules/@mariozechner/pi-coding-agent/dist não encontrou o emissor; hits foram apenas `bg_status` em monitor-runtime-contract e `backgrounded` no Ctrl+Z upstream. Próximo passo é tratar boundary de fonte de evento/registry sem mutar upstream pi diretamente.",
+      "depends_on": [
+        "TASK-BUD-407"
+      ]
     },
     {
       "id": "TASK-BUD-068",
@@ -9630,7 +9633,8 @@
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-067",
-        "TASK-BUD-381"
+        "TASK-BUD-381",
+        "TASK-BUD-406"
       ],
       "files": [
         "packages/pi-stack/extensions/guardrails-core-background-process.ts",
@@ -9837,6 +9841,49 @@
       ],
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Pedido do operador: cota Codex local está pressionada e Anthropic deve assumir control-plane sem quebrar classificadores/monitores; `.pi/settings.json` é protegido e só pode mudar com intenção explícita e patch auditável."
+    },
+    {
+      "id": "TASK-BUD-406",
+      "description": "Definir e implementar boundary/adaptador para que eventos reais de background process usem o contrato canônico de lifecycle sem depender de label `[undefined]` ou conclusão stale.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-067"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Identificar a fonte real dos eventos/background exibidos ao operador ou documentar que está fora do código first-party atual.",
+        "Definir canal aceito para integração: registry first-party, wrapper/adaptador ou upstream PR; sem mutação direta de node_modules upstream.",
+        "Todo evento real/adaptado usa displayLabel normalizado e nunca renderiza `[undefined]`.",
+        "Evento done após stop solicitado é registrado como `late-after-stop`, não como conclusão normal.",
+        "Se a fonte real não for integrável localmente, o gate permanece fail-closed e a limitação fica documentada como blocker de unattended forte."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A classifier read-only reduz ambiguidade, mas o incidente original envolve a fonte real de eventos/background; sem boundary/adaptador, podemos ter contrato correto e UI real ainda emitindo `[undefined]` ou BG_PROCESS_DONE stale."
+    },
+    {
+      "id": "TASK-BUD-407",
+      "description": "Investigar de forma bounded a fonte real dos eventos/background exibidos como `[undefined]`/`BG_PROCESS_DONE` e registrar boundary sem mutar upstream.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/primitives/background-process-control.md",
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Busca bounded identifica o emissor real dos eventos ou documenta que a fonte está fora do workspace/first-party atual.",
+        "Evidência separa upstream pi/TUI, harness externo e pi-stack first-party sem atribuição indevida.",
+        "Resultado define se a correção cabe em wrapper/adaptador first-party, upstream PR ou blocker operacional.",
+        "Nenhum scan amplo/source-map dump e nenhuma mutação direta de node_modules upstream."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] TASK-BUD-067 é macro/blocker; antes de corrigir evento real precisamos localizar a fonte sem transformar suspeita em atribuição falsa nem abrir diagnóstico de alto blast radius."
     }
   ]
 }
