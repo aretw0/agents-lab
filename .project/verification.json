@@ -8727,6 +8727,24 @@
       "method": "report-only-surface-smoke",
       "timestamp": "2026-05-01T01:46:25.333Z",
       "evidence": "Second bounded slice for TASK-BUD-394 added report-only runtime surface human_confirmation_implementation_channel_plan. It exposes resolveHumanConfirmationImplementationChannelPlan as a read-only planning tool and never enables destructive dialogs, dispatch, overrides, implementation, or node_modules patches. Registered via guardrails-core. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-surface.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 19 passed. Docs sync/check ok. Safe markers: surface registration 2/2, doc 2/2, surface test invariants 3/3. Live validation requires reload."
+    },
+    {
+      "id": "VER-BUD-723",
+      "target": "TASK-BUD-394",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live-runtime-tool-validation",
+      "timestamp": "2026-05-01T01:50:53.050Z",
+      "evidence": "Live validation after reload for human_confirmation_implementation_channel_plan passed. Green path guard_can_own_dialog=true returned channel=guard-owned-report-only dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=guard-owned-channel-selected|start-report-only-before-operational-dialog authorization=none. Blocked path direct_node_modules_patch_requested=true and destructive_runtime_enable_requested=true returned channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=direct-node-modules-patch-prohibited|destructive-runtime-enable-requires-separate-authorization authorization=none. Context was checkpoint 68 micro-slice-only; no operational destructive dialog, dispatch, override, implementation or node_modules patch was enabled."
+    },
+    {
+      "id": "VER-BUD-724",
+      "target": "TASK-BUD-394",
+      "target_type": "task",
+      "status": "passed",
+      "method": "report-only-channel-live-closure",
+      "timestamp": "2026-05-01T01:51:05.572Z",
+      "evidence": "TASK-BUD-394 completed. Implemented and live-validated the report-only implementation channel surface for structured human confirmation signals. Code/docs/tests established guard-owned-report-only as the first local channel; wrapper/upstream remain design-only; direct node_modules patches and enabling operational destructive dialogs block. Focused smoke suite passed 19 tests before reload. After reload, live tool validation confirmed green and blocked paths preserve dispatch=no, implementation=no, destructiveDialog=no, nodeModulesPatch=no, authorization=none. No destructive runtime was enabled."
     }
   ]
 }
