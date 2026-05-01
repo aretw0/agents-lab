@@ -211,6 +211,37 @@ function resolveNoEligibleTaskRecommendation(input: {
   };
 }
 
+function resolveSelectionRecommendation(
+  reason: AutonomyTaskSelectionReason,
+  noEligibleGuidance: { recommendationCode: AutonomyTaskRecommendationCode; recommendation: string },
+): { recommendationCode: AutonomyTaskRecommendationCode; recommendation: string } {
+  if (reason === "no-candidate-tasks") {
+    return {
+      recommendationCode: "add-or-select-task",
+      recommendation: "add or select a planned/in-progress task before autonomous continuation.",
+    };
+  }
+  if (reason === "focus-complete") {
+    return {
+      recommendationCode: "choose-next-focus",
+      recommendation: "current focus is complete; choose the next focus explicitly before autonomous continuation.",
+    };
+  }
+  if (reason === "focus-mismatch") {
+    return {
+      recommendationCode: "realign-focus",
+      recommendation: "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation.",
+    };
+  }
+  if (reason === "no-eligible-tasks") {
+    return noEligibleGuidance;
+  }
+  return {
+    recommendationCode: "execute-bounded-slice",
+    recommendation: "execute bounded slice for the selected task; validate focal gate; commit; update board.",
+  };
+}
+
 export function selectAutonomyLaneTask(
   tasks: ProjectTaskItem[],
   options?: AutonomyTaskSelectorOptions,
@@ -327,24 +358,13 @@ export function selectAutonomyLaneTask(
     skippedProtectedScope,
     skippedMissingRationale,
   });
+  const recommendation = resolveSelectionRecommendation(reason, noEligibleGuidance);
 
   return {
     ready: false,
     reason,
-    recommendationCode: reason === "no-candidate-tasks"
-      ? "add-or-select-task"
-      : reason === "focus-complete"
-        ? "choose-next-focus"
-        : reason === "focus-mismatch"
-          ? "realign-focus"
-          : noEligibleGuidance.recommendationCode,
-    recommendation: reason === "no-candidate-tasks"
-      ? "add or select a planned/in-progress task before autonomous continuation."
-      : reason === "focus-complete"
-        ? "current focus is complete; choose the next focus explicitly before autonomous continuation."
-        : reason === "focus-mismatch"
-          ? "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation."
-          : noEligibleGuidance.recommendation,
+    recommendationCode: recommendation.recommendationCode,
+    recommendation: recommendation.recommendation,
     selectionPolicy,
     milestone,
     focusTaskIds: focusTaskIds.length > 0 ? focusTaskIds : undefined,

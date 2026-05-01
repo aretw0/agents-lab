@@ -161,6 +161,7 @@ describe("autonomy task selector", () => {
 
     expect(result.ready).toBe(false);
     expect(result.reason).toBe("focus-complete");
+    expect(result.recommendationCode).toBe("choose-next-focus");
     expect(result.nextTaskId).toBeUndefined();
     expect(result.recommendation).toContain("choose the next focus explicitly");
   });
@@ -173,8 +174,19 @@ describe("autonomy task selector", () => {
 
     expect(result.ready).toBe(false);
     expect(result.reason).toBe("focus-mismatch");
+    expect(result.recommendationCode).toBe("realign-focus");
     expect(result.nextTaskId).toBeUndefined();
     expect(result.recommendation).toContain("do not drift");
+  });
+
+  it("returns add-or-select-task when there are no candidate tasks", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-DONE", status: "completed", description: "[P1] done" }),
+    ]);
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("no-candidate-tasks");
+    expect(result.recommendationCode).toBe("add-or-select-task");
   });
 
   it("filters by milestone", () => {

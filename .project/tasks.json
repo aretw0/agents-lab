@@ -10356,6 +10356,28 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Evita interpretação de continuidade indevida por consumidores quando o gate de seleção bloqueia a próxima fatia local-safe.\n2026-05-01: status packet now exposes stable consumer-facing action + code without requiring plan/selection text parsing.",
       "verification": "VER-BUD-779"
+    },
+    {
+      "id": "TASK-BUD-428",
+      "description": "Desinflar mapeamento de recomendação no autonomy task selector com resolver único por reason (código + texto) para evitar duplicação ternária.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-424"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Substituir ternários duplicados de `recommendationCode`/`recommendation` por um único resolver determinístico por `reason`.",
+        "Manter contratos atuais e recomendações `no-eligible` baseadas em blockers.",
+        "Adicionar/ajustar smoke tests para cobrir recommendationCode em `focus-complete` e `focus-mismatch` (e, se aplicável, `no-candidate-tasks`)."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Menos gordura e menor risco de divergência entre texto/código de recomendação em evoluções futuras.\n2026-05-01: anti-bloat micro-slice; reduced repetition risk between recommendation text and code mappings.",
+      "verification": "VER-BUD-780"
     }
   ]
 }
