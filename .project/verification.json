@@ -9573,6 +9573,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T16:31:20.867Z",
       "evidence": "Added intake-budget regressions to keep onboarding surfaces concise and explicit under noisy inputs. Updates: - `packages/pi-stack/test/smoke/project-intake-primitive.test.ts`: new noisy-artifacts case asserts bounded `nextAction`/`firstSlice` lengths. - `packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts`: new `project_intake_plan` contract case validates concise payload budget (`content` length cap) plus explicit guardrails (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 3 files passed, 19 tests passed."
+    },
+    {
+      "id": "VER-BUD-817",
+      "target": "TASK-BUD-465",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T16:48:43.677Z",
+      "evidence": "Implemented explicit reload-needed signal in `context_watch_checkpoint` tool output (`packages/pi-stack/extensions/context-watchdog.ts`): details now include `reloadRequired` and conditional `reloadHint` (`run /reload before relying on updated tool/runtime behavior.`). Added regression assertion in `packages/pi-stack/test/smoke/context-watchdog.test.ts` to keep default non-reload case explicit (`reloadRequired=false`) while preserving existing bounded checkpoint contract. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 2 files passed, 55 tests passed."
     }
   ]
 }

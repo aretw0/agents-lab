@@ -1702,6 +1702,7 @@ describe("context-watchdog", () => {
 			expect(result.details?.checkpoint).toBeUndefined();
 			expect(typeof result.details?.jsonChars).toBe("number");
 			expect(typeof result.details?.maxJsonChars).toBe("number");
+			expect(result.details?.reloadRequired).toBe(false);
 			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
 			expect(written.current_tasks).toEqual(["TASK-BUD-234"]);
 		} finally {

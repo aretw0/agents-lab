@@ -11147,6 +11147,24 @@
       "milestone": "cross-stack-fluidity",
       "notes": "[rationale:risk-control] preservar custo de token e auditabilidade no onboarding.\n2026-05-01: adicionando regressão de budget textual para surface de intake inicial mantendo decisão explícita.\n2026-05-01: regressões de budget textual para intake adicionadas com contrato de controle explícito.",
       "verification": "VER-BUD-816"
+    },
+    {
+      "id": "TASK-BUD-465",
+      "description": "Expor sinal explícito de reload-needed no retorno de context_watch_checkpoint para evitar ambiguidade após mudanças de extensão/runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "context_watch_checkpoint details inclui reloadRequired boolean.",
+        "Quando reloadRequired=true, details inclui reloadHint curto e acionável.",
+        "Smoke focal permanece verde e não altera autorização/dispatch."
+      ],
+      "milestone": "runtime-reload-hygiene",
+      "notes": "[rationale:risk-control] tornar necessidade de /reload visível sem bloquear fatias locais desnecessariamente.\n2026-05-01: necessidade de reload passou a aparecer de forma explícita no checkpoint details.",
+      "verification": "VER-BUD-817"
     }
   ]
 }

@@ -2284,6 +2284,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				contextPercent: p.context_percent,
 				recommendation: p.recommendation,
 			});
+			const reloadRequired = isReloadRequiredForSourceUpdate();
 			const details = {
 				ok: result.ok,
 				reason: result.reason,
@@ -2291,6 +2292,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				path: result.ok ? ".project/handoff.json" : undefined,
 				jsonChars: result.jsonChars,
 				maxJsonChars: result.maxJsonChars,
+				reloadRequired,
+				reloadHint: reloadRequired
+					? "run /reload before relying on updated tool/runtime behavior."
+					: undefined,
 			};
 			return {
 				content: [{ type: "text", text: result.summary }],
