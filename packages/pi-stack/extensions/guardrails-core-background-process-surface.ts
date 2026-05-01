@@ -62,7 +62,8 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
       exit_code: Type.Optional(Type.Number({ description: "Exit code for done events, if known." })),
       known_process: Type.Optional(Type.Boolean({ description: "Whether the event belongs to a known first-party process registry entry." })),
       stop_requested: Type.Optional(Type.Boolean({ description: "Whether a stop was requested before this event." })),
-      label: Type.Optional(Type.String({ description: "Display label; undefined/null/empty labels fall back to background-process." })),
+      label: Type.Optional(Type.String({ description: "Lifecycle event display label; undefined/null/empty labels fall back to background-process." })),
+      view_title: Type.Optional(Type.String({ description: "Background-process view/header title; undefined/null/empty titles fall back to background-process." })),
     }),
     execute(_toolCallId, params) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -73,6 +74,7 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         knownProcess: typeof p.known_process === "boolean" ? p.known_process : undefined,
         stopRequested: typeof p.stop_requested === "boolean" ? p.stop_requested : undefined,
         label: typeof p.label === "string" ? p.label : undefined,
+        viewTitle: typeof p.view_title === "string" ? p.view_title : undefined,
       });
       return {
         content: [{ type: "text", text: result.evidence }],

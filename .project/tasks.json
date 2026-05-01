@@ -9967,7 +9967,7 @@
     {
       "id": "TASK-BUD-411",
       "description": "Corrigir/normalizar o título/header `[undefined]` da visualização de background process, separado do corpo `BG_PROCESS_DONE`.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "docs/primitives/background-process-control.md",
@@ -9981,7 +9981,34 @@
         "Enquanto o emissor real do header não for integrável, readiness forte permanece fail-closed e o blocker fica explícito."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O operador mostrou que o `[undefined]` aparece no topo da visualização de background process, separado do texto `[BG_PROCESS_DONE]`; o classifier do evento cobre label do lifecycle, mas ainda falta tratar o header/título real da UI/harness."
+      "notes": "[rationale:risk-control] O operador mostrou que o `[undefined]` aparece no topo da visualização de background process, separado do texto `[BG_PROCESS_DONE]`; o classifier do evento cobre label do lifecycle, mas ainda falta tratar o header/título real da UI/harness.\n2026-05-01: TASK-BUD-412 implementou o contrato local para `viewTitle`/header separado de `displayLabel`; smoke passou. Como a surface runtime `background_process_lifecycle_plan` ganhou parâmetro `view_title`, é necessário reload antes de live validation e fechamento desta task.",
+      "depends_on": [
+        "TASK-BUD-412"
+      ]
+    },
+    {
+      "id": "TASK-BUD-412",
+      "description": "Adicionar contrato first-party para normalizar `viewTitle`/header da visualização de background process separado do label do evento lifecycle.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-397"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "`resolveBackgroundProcessLifecycleEvent` aceita header/título opcional da visualização como campo separado do label do evento.",
+        "Header/título vazio, `undefined` ou `null` é normalizado para `background-process` e adiciona warning próprio.",
+        "Tool surface expõe parâmetro bounded para `view_title` sem autorizar dispatch/start/stop.",
+        "Smoke cobre caso com `label=BG_PROCESS_DONE` e `view_title=undefined`, garantindo `displayLabel=BG_PROCESS_DONE` e `viewTitle=background-process`."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Esta fatia isola o contrato local-safe para o defeito observado de header `[undefined]`, sem tentar mutar o harness/TUI real nesta etapa.\n2026-05-01: concluído contrato local para normalizar `viewTitle`/header separadamente de `displayLabel`; live validation da tool surface fica para parent TASK-BUD-411 após reload.",
+      "verification": "VER-BUD-751"
     }
   ]
 }

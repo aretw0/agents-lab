@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T03:58:54.865Z",
-  "context": "Operator clarified the remaining undefined issue: [undefined] appears as the header/title at the top of the background process visualization, [snip] ess-control docs with this distinction. [truncated:+334 chars]",
+  "timestamp": "2026-05-01T04:09:03.507Z",
+  "context": "Micro-slice implemented to unblock controlled/auditable uninterrupted work: TASK-BUD-412 completed a first-party contract for the remaining b [snip] no broader implementation was started. [truncated:+415 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-411/docs update.",
-    "Because context is checkpoint/68, avoid implementation until checkpoint/compact boundary is safe.",
-    "Later implement TASK-BUD-411 or keep TASK-BUD-410 fail-closed until harness header can be normalized."
+    "Commit TASK-BUD-412 implementation.",
+    "Reload required before live-validating background_process_lifecycle_plan with view_title=undefined.",
+    "After reload, validate event_kind=done pid=32696 exit_code=0 known_process=true stop_requested [snip] wTitle=background-process. [truncated:+94 chars]"
   ],
   "blockers": [
-    "TASK-BUD-410 now depends on TASK-BUD-411.",
-    "TASK-BUD-153 and TASK-BUD-399 remain blocked by TASK-BUD-410.",
-    "Context at checkpoint threshold; no broad implementation now."
+    "TASK-BUD-411 cannot close until reload/live validation.",
+    "TASK-BUD-410 depends on TASK-BUD-411; TASK-BUD-399/TASK-BUD-153 remain blocked by TASK-BUD-410.",
+    "Context at checkpoint threshold; stop after commit/reload request."
   ],
   "recent_validation": [
-    "TASK-BUD-411 created planned/p1",
-    "board_task_dependencies added TASK-BUD-411 to TASK-BUD-410",
-    "safe_marker_check background-process-control header markers matched 3/3"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
+    "safe_marker_check docs/primitives/background-process-control.md markers => 3/3",
+    "TASK-BUD-412 completed with VER-BUD-751"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:58:54.865Z",
+    "generatedAtIso": "2026-05-01T04:09:03.507Z",
     "level": "checkpoint",
-    "percent": 68,
+    "percent": 70,
     "action": "checkpoint-refresh",
-    "recommendation": "commit-header-boundary-and-pause"
+    "recommendation": "commit-and-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:58:54.865Z",
+      "atIso": "2026-05-01T04:09:03.507Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 68,
+      "percent": 70,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-header-boundary-and-pause"
+      "recommendation": "commit-and-reload-before-live-validation"
     }
   ]
 }

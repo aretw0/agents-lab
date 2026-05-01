@@ -121,9 +121,27 @@ describe("background process control plan", () => {
     });
     expect(late.state).toBe("late-after-stop");
     expect(late.displayLabel).toBe("background-process");
+    expect(late.viewTitle).toBe("background-process");
     expect(late.warnings).toContain("fallback-display-label");
+    expect(late.warnings).toContain("fallback-view-title");
     expect(late.warnings).toContain("done-after-stop-request");
     expect(late.evidence).not.toContain("label=undefined");
+    expect(late.evidence).not.toContain("viewTitle=undefined");
+
+    const harnessNotification = resolveBackgroundProcessLifecycleEvent({
+      eventKind: "done",
+      pid: 32696,
+      exitCode: 0,
+      knownProcess: true,
+      stopRequested: false,
+      label: "BG_PROCESS_DONE",
+      viewTitle: "undefined",
+    });
+    expect(harnessNotification.state).toBe("finished");
+    expect(harnessNotification.displayLabel).toBe("BG_PROCESS_DONE");
+    expect(harnessNotification.viewTitle).toBe("background-process");
+    expect(harnessNotification.warnings).toContain("fallback-view-title");
+    expect(harnessNotification.evidence).toContain("viewTitle=background-process");
 
     const unknown = resolveBackgroundProcessLifecycleEvent({
       eventKind: "done",
@@ -148,6 +166,7 @@ describe("background process control plan", () => {
         known_process: true,
         stop_requested: true,
         label: "undefined",
+        view_title: "undefined",
       },
       undefined as unknown as AbortSignal,
       () => {},
@@ -155,6 +174,8 @@ describe("background process control plan", () => {
     );
     expect(result.details?.state).toBe("late-after-stop");
     expect(result.details?.displayLabel).toBe("background-process");
+    expect(result.details?.viewTitle).toBe("background-process");
+    expect(String(result.content?.[0]?.text)).toContain("viewTitle=background-process");
     expect(String(result.content?.[0]?.text)).toContain("dispatch=no");
   });
 });

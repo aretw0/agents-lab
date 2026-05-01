@@ -24,6 +24,7 @@ export interface BackgroundProcessLifecycleEventInput {
   knownProcess?: boolean;
   stopRequested?: boolean;
   label?: string;
+  viewTitle?: string;
 }
 
 export interface BackgroundProcessLifecycleEventResult {
@@ -35,6 +36,7 @@ export interface BackgroundProcessLifecycleEventResult {
   knownProcess: boolean;
   stopRequested: boolean;
   displayLabel: string;
+  viewTitle: string;
   staleOrLate: boolean;
   dispatchAllowed: false;
   processStartAllowed: false;
@@ -103,16 +105,24 @@ function normalizeDisplayLabel(value: unknown): string {
   return label.slice(0, 80);
 }
 
+function normalizeViewTitle(value: unknown, fallback: string): string {
+  const title = typeof value === "string" ? value.trim() : "";
+  if (!title || title === "undefined" || title === "null") return fallback;
+  return title.slice(0, 80);
+}
+
 export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLifecycleEventInput = {}): BackgroundProcessLifecycleEventResult {
   const eventKind = normalizeLifecycleEventKind(raw.eventKind);
   const pid = cleanPositiveInteger(raw.pid);
   const knownProcess = raw.knownProcess === true;
   const stopRequested = raw.stopRequested === true;
   const displayLabel = normalizeDisplayLabel(raw.label);
+  const viewTitle = normalizeViewTitle(raw.viewTitle, "background-process");
   const exitCode = typeof raw.exitCode === "number" && Number.isFinite(raw.exitCode) ? Math.floor(raw.exitCode) : raw.exitCode === null ? null : undefined;
   const warnings: string[] = [];
   if (!knownProcess) warnings.push("unknown-origin");
   if (displayLabel === "background-process") warnings.push("fallback-display-label");
+  if (viewTitle === "background-process") warnings.push("fallback-view-title");
 
   let state: BackgroundProcessLifecycleState;
   if (!knownProcess) {
@@ -142,6 +152,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     `stopRequested=${stopRequested ? "yes" : "no"}`,
     exitCode !== undefined ? `exit=${exitCode}` : undefined,
     `label=${displayLabel}`,
+    `viewTitle=${viewTitle}`,
     "dispatch=no",
     "authorization=none",
   ].filter(Boolean).join(" ");
@@ -155,6 +166,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     knownProcess,
     stopRequested,
     displayLabel,
+    viewTitle,
     staleOrLate,
     dispatchAllowed: false,
     processStartAllowed: false,

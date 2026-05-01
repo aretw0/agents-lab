@@ -8979,6 +8979,15 @@
       "method": "post-reload-stale-handoff-gate-validation",
       "timestamp": "2026-05-01T03:56:00.430Z",
       "evidence": "After reload, runtime loaded cleanly: context_watch_status returned operator=none. board_task_quality_gate TASK-BUD-398 returned closeAllowed=yes with dependencies TASK-BUD-408 and TASK-BUD-409 completed. Implemented read-only handoff-board detector and fail-closed auto-resume suppression for stale-hand-off/missing-task/completed-focus/board-handoff-divergence; focal smoke previously passed 50 context-watchdog tests and docs markers matched."
+    },
+    {
+      "id": "VER-BUD-751",
+      "target": "TASK-BUD-412",
+      "target_type": "task",
+      "status": "passed",
+      "method": "background-view-title-contract-smoke",
+      "timestamp": "2026-05-01T04:08:38.597Z",
+      "evidence": "Implemented viewTitle/header normalization as a separate field from lifecycle displayLabel. resolveBackgroundProcessLifecycleEvent now accepts viewTitle, returns viewTitle, emits fallback-view-title when viewTitle is empty/undefined/null, and evidence includes viewTitle. Tool surface exposes view_title. Smoke covers label=BG_PROCESS_DONE with view_title=undefined: state=finished, displayLabel=BG_PROCESS_DONE, viewTitle=background-process. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed; safe_marker_check docs markers => 3/3."
     }
   ]
 }
