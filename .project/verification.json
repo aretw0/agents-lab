@@ -9339,6 +9339,15 @@
       "method": "focused smoke test",
       "timestamp": "2026-05-01T13:47:21.865Z",
       "evidence": "Implemented deterministic brainstorm scorer in `packages/pi-stack/extensions/lane-brainstorm-packet.ts` with `scoreBrainstormIdea` and `rankBrainstormIdeas` (value/risk/effort weighting, level normalization, dedupe by id, capped output, stable tie-break). Added smoke tests in `packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` covering ranking, tie-break determinism, dedupe/maxItems, and unknown-level normalization fallback. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` => 1 file passed, 4 tests passed."
+    },
+    {
+      "id": "VER-BUD-791",
+      "target": "TASK-BUD-439",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T13:50:40.294Z",
+      "evidence": "Implemented report-only tool surface `lane_brainstorm_packet` in `guardrails-core-autonomy-lane-surface.ts` using deterministic idea ranking from `lane-brainstorm-packet.ts`, with stable `recommendationCode` + `nextAction` and fail-closed invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`). Added/updated smoke coverage in `autonomy-lane-surface.test.ts` for ready and blocked protected-only scenarios. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` => 2 files passed, 12 tests passed."
     }
   ]
 }

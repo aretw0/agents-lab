@@ -151,4 +151,60 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
+
+  it("emits report-only lane_brainstorm_packet with ranked slices", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-ready-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-LOCAL", description: "[P1] local lane", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
+    const result = brainstormTool?.execute("call-test", {
+      goal: "desinflar superfícies",
+      ideas: [
+        { id: "idea-a", theme: "dedupe outputs", value: "high", risk: "low", effort: "low" },
+        { id: "idea-b", theme: "expand docs", value: "medium", risk: "medium", effort: "high" },
+      ],
+      max_slices: 2,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.mode).toBe("report-only");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+    expect(result?.details.decision).toBe("ready-for-human-review");
+    expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
+    expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
+  });
+
+  it("emits blocked lane_brainstorm_packet when only protected lane exists", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const brainstormTool = tools.find((tool) => tool.name === "lane_brainstorm_packet");
+    const result = brainstormTool?.execute("call-test", { goal: "lane longa" }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("needs-human-focus-protected");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
 });

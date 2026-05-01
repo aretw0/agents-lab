@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
+import { rankBrainstormIdeas, type BrainstormIdeaInput } from "./lane-brainstorm-packet";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -75,6 +76,47 @@ function buildReadinessInput(
     workspace: {
       unexpectedDirty: asBool(p.unexpected_dirty, false),
     },
+  };
+}
+
+function asIdeas(value: unknown): BrainstormIdeaInput[] {
+  if (!Array.isArray(value)) return [];
+  const ideas: BrainstormIdeaInput[] = [];
+  for (const row of value) {
+    const item = row && typeof row === "object" ? row as Record<string, unknown> : undefined;
+    const id = typeof item?.id === "string" ? item.id.trim() : "";
+    const theme = typeof item?.theme === "string" ? item.theme.trim() : "";
+    if (!id || !theme) continue;
+    ideas.push({
+      id,
+      theme,
+      value: typeof item?.value === "string" ? item.value : "medium",
+      risk: typeof item?.risk === "string" ? item.risk : "medium",
+      effort: typeof item?.effort === "string" ? item.effort : "medium",
+    });
+  }
+  return ideas;
+}
+
+function resolveBrainstormRecommendation(selection: { ready: boolean; recommendationCode: string; recommendation: string }) {
+  if (selection.ready) {
+    return {
+      decision: "ready-for-human-review",
+      recommendationCode: "seed-local-safe-lane",
+      nextAction: "review ranked slices and materialize bounded local-safe tasks.",
+    };
+  }
+  if (selection.recommendationCode === "local-stop-protected-focus-required") {
+    return {
+      decision: "blocked",
+      recommendationCode: "needs-human-focus-protected",
+      nextAction: selection.recommendation,
+    };
+  }
+  return {
+    decision: "blocked",
+    recommendationCode: "stop-no-local-safe",
+    nextAction: selection.recommendation,
   };
 }
 
@@ -178,6 +220,71 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "lane_brainstorm_packet",
+    label: "Lane Brainstorm Packet",
+    description: "Report-only lane brainstorm packet with ranked ideas and stable recommendationCode/nextAction.",
+    parameters: Type.Object({
+      goal: Type.Optional(Type.String({ description: "Short lane objective." })),
+      ideas: Type.Optional(Type.Array(Type.Object({
+        id: Type.String(),
+        theme: Type.String(),
+        value: Type.Optional(Type.String()),
+        risk: Type.Optional(Type.String()),
+        effort: Type.Optional(Type.String()),
+      }))),
+      max_ideas: Type.Optional(Type.Number({ description: "Max ranked ideas (1..50)." })),
+      max_slices: Type.Optional(Type.Number({ description: "Max suggested slices (1..10)." })),
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in protected scopes." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in missing rationale tasks." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String())),
+      use_handoff_focus: Type.Optional(Type.Boolean()),
+      sample_limit: Type.Optional(Type.Number()),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const selection = resolveTaskSelection(p, ctx.cwd);
+      const recommendation = resolveBrainstormRecommendation(selection);
+      const rankedIdeas = rankBrainstormIdeas(asIdeas(p.ideas), asNumber(p.max_ideas, 12));
+      const maxSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_slices, 5))));
+      const selectedSlices = rankedIdeas.length > 0
+        ? rankedIdeas.slice(0, maxSlices).map((idea, index) => ({
+          id: `slice-${index + 1}`,
+          sourceIdeaId: idea.id,
+          title: idea.theme,
+          acceptance: ["focal validation green", "scope remains bounded"],
+          rollback: "git revert commit",
+        }))
+        : selection.eligibleTaskIds.slice(0, maxSlices).map((taskId, index) => ({
+          id: `slice-${index + 1}`,
+          sourceTaskId: taskId,
+          title: `execute bounded slice for ${taskId}`,
+          acceptance: ["focal validation green", "scope remains bounded"],
+          rollback: "git revert commit",
+        }));
+
+      const packet = {
+        decision: recommendation.decision,
+        goal: typeof p.goal === "string" && p.goal.trim().length > 0 ? p.goal.trim() : "seed local-safe lane",
+        recommendationCode: recommendation.recommendationCode,
+        nextAction: recommendation.nextAction,
+        ideas: rankedIdeas,
+        selectedSlices,
+        selection,
+        dispatchAllowed: false,
+        mutationAllowed: false,
+        authorization: "none",
+        mode: "report-only",
+      };
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],
+        details: packet,
       };
     },
   });

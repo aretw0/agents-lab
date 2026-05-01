@@ -10597,7 +10597,7 @@
     {
       "id": "TASK-BUD-439",
       "description": "Adicionar surface report-only para emitir `lane_brainstorm_packet` com recommendationCode/nextAction estáveis.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-438"
@@ -10613,7 +10613,8 @@
         "Sem dispatch, sem stage/commit, sem protected auto-selection."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Surface estável permite consumo por control-plane sem parsing frágil."
+      "notes": "[rationale:risk-control] Surface estável permite consumo por control-plane sem parsing frágil.\n2026-05-01: iniciado surface report-only para lane_brainstorm_packet usando scorer determinístico e recommendationCode/nextAction estáveis.\n2026-05-01: surface pronta para emitir packet de brainstorm sem mutação/dispatch.",
+      "verification": "VER-BUD-791"
     },
     {
       "id": "TASK-BUD-440",
