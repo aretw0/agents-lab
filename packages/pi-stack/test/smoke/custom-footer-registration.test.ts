@@ -128,8 +128,8 @@ describe("custom-footer — context thresholds", () => {
 			"github-copilot",
 			"gpt-5.3-codex",
 		);
-		expect(copilotCodex.warningPct).toBe(48);
-		expect(copilotCodex.errorPct).toBe(70);
+		expect(copilotCodex.warningPct).toBe(45);
+		expect(copilotCodex.errorPct).toBe(65);
 	});
 
 	it("applies explicit overrides by provider/model", () => {

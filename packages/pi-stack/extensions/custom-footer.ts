@@ -85,7 +85,7 @@ export type ContextThresholdOverrides = {
 
 const DEFAULT_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 50, errorPct: 75 };
 const ANTHROPIC_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 65, errorPct: 85 };
-const GITHUB_COPILOT_GPT53_CODEX_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 48, errorPct: 70 };
+const GITHUB_COPILOT_GPT53_CODEX_CONTEXT_THRESHOLDS: ContextThresholds = { warningPct: 45, errorPct: 65 };
 
 function normalizeThresholds(
   input: Partial<ContextThresholds> | undefined,

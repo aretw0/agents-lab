@@ -30,7 +30,7 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 4. avaliar `evaluateAgentSpawnReadiness` (simple spawn bounded) para obter sinal de spawn readiness;
 5. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
 
-O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, e respeita overrides explícitos quando fornecidos.
+O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, respeita overrides explícitos quando fornecidos e mantém `keep-report-only` enquanto o sinal de `background_process_rehearsal_gate` não estiver em `decision=ready`.
 
 ## Invariantes
 

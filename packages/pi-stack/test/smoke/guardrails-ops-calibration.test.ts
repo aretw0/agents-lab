@@ -29,6 +29,32 @@ describe("ops calibration decision packet", () => {
         },
         summary: "bg",
       },
+      backgroundRehearsal: {
+        mode: "background-process-rehearsal",
+        activation: "none",
+        authorization: "none",
+        dispatchAllowed: false,
+        decision: "ready",
+        ready: true,
+        blockers: [],
+        missingEvidence: [],
+        recommendation: "ok",
+        criteria: {
+          readinessScore: 92,
+          readinessThreshold: 80,
+          readinessRecommendationCode: "background-process-readiness-strong",
+          lifecycleClassified: true,
+          stopSourceCoveragePct: 100,
+          stopSourceCoverageThreshold: 80,
+          rollbackPlanKnown: true,
+          rehearsalSlices: 3,
+          requiredRehearsalSlices: 1,
+          unresolvedBlockers: 0,
+          destructiveRestartRequested: false,
+          protectedScopeRequested: false,
+        },
+        summary: "bg-rehearsal",
+      },
       agents: {
         mode: "agents-as-tools-calibration-score",
         activation: "none",
@@ -95,6 +121,32 @@ describe("ops calibration decision packet", () => {
         },
         summary: "bg",
       },
+      backgroundRehearsal: {
+        mode: "background-process-rehearsal",
+        activation: "none",
+        authorization: "none",
+        dispatchAllowed: false,
+        decision: "ready",
+        ready: true,
+        blockers: [],
+        missingEvidence: [],
+        recommendation: "ok",
+        criteria: {
+          readinessScore: 100,
+          readinessThreshold: 80,
+          readinessRecommendationCode: "background-process-readiness-strong",
+          lifecycleClassified: true,
+          stopSourceCoveragePct: 100,
+          stopSourceCoverageThreshold: 80,
+          rollbackPlanKnown: true,
+          rehearsalSlices: 3,
+          requiredRehearsalSlices: 1,
+          unresolvedBlockers: 0,
+          destructiveRestartRequested: false,
+          protectedScopeRequested: false,
+        },
+        summary: "bg-rehearsal",
+      },
       agents: {
         mode: "agents-as-tools-calibration-score",
         activation: "none",
@@ -127,6 +179,92 @@ describe("ops calibration decision packet", () => {
     expect(packet.decision).toBe("keep-report-only");
     expect(packet.recommendationCode).toBe("ops-calibration-keep-report-only-reload");
     expect(packet.blockers).toContain("reload-required-for-live-invocation");
+  });
+
+  it("keeps report-only when background rehearsal signal is not ready", () => {
+    const packet = buildOpsCalibrationDecisionPacket({
+      background: {
+        mode: "background-process-readiness-score",
+        activation: "none",
+        authorization: "none",
+        dispatchAllowed: false,
+        score: 92,
+        recommendationCode: "background-process-readiness-strong",
+        recommendation: "ok",
+        dimensions: { capabilities: 90, surfaceWiring: 100, operationalEvidence: 88 },
+        checks: {
+          hasProcessRegistry: true,
+          hasPortLeaseLock: true,
+          hasBoundedLogTail: true,
+          hasStructuredStacktraceCapture: true,
+          hasHealthcheckProbe: true,
+          hasGracefulStopThenKill: true,
+          hasReloadHandoffCleanup: true,
+          hasPlanSurface: true,
+          hasLifecycleSurface: true,
+          rehearsalSlices: 3,
+          stopSourceCoveragePct: 100,
+        },
+        summary: "bg",
+      },
+      backgroundRehearsal: {
+        mode: "background-process-rehearsal",
+        activation: "none",
+        authorization: "none",
+        dispatchAllowed: false,
+        decision: "needs-evidence",
+        ready: false,
+        blockers: [],
+        missingEvidence: ["stop-source-coverage-below-threshold"],
+        recommendation: "collect more evidence",
+        criteria: {
+          readinessScore: 92,
+          readinessThreshold: 80,
+          readinessRecommendationCode: "background-process-readiness-strong",
+          lifecycleClassified: true,
+          stopSourceCoveragePct: 20,
+          stopSourceCoverageThreshold: 80,
+          rollbackPlanKnown: true,
+          rehearsalSlices: 1,
+          requiredRehearsalSlices: 1,
+          unresolvedBlockers: 0,
+          destructiveRestartRequested: false,
+          protectedScopeRequested: false,
+        },
+        summary: "bg-rehearsal",
+      },
+      agents: {
+        mode: "agents-as-tools-calibration-score",
+        activation: "none",
+        authorization: "none",
+        dispatchAllowed: false,
+        score: 100,
+        recommendationCode: "agents-as-tools-calibration-strong",
+        recommendation: "ok",
+        dimensions: { governance: 100, boundedness: 100, observability: 100 },
+        metrics: {
+          totalTools: 3,
+          executorCandidates: 1,
+          protectedExecutors: 1,
+          longRunCapableTools: 1,
+          manualOverrideLikeTools: 0,
+        },
+        policySignals: {
+          hasBudgetGuard: true,
+          hasCheckpointDiscipline: true,
+          hasDryRunExecutorPath: true,
+          hasCwdIsolationPath: true,
+          hasDecisionPackets: true,
+          hasToolHygieneSurface: true,
+        },
+        summary: "agents",
+      },
+      liveReloadCompleted: true,
+    });
+
+    expect(packet.decision).toBe("keep-report-only");
+    expect(packet.recommendationCode).toBe("ops-calibration-keep-report-only-background-rehearsal");
+    expect(packet.blockers).toContain("background-rehearsal-not-ready");
   });
 
   it("registers ops_calibration_decision_packet as read-only tool", async () => {

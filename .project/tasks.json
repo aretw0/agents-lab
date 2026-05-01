@@ -12353,6 +12353,93 @@
       "milestone": "bg-agents-calibration-wave-2026-05e",
       "notes": "[rationale:risk-control] baseline por wave mantém foco e evita drift estratégico.\n[provenance:human] source_task=TASK-BUD-519 reason=fechar wave com decisão de continuidade auditável\n2026-05-01: baseline live da wave 05e registrado; decisão segue keep-report-only com foco background-first.",
       "verification": "VER-BUD-870"
+    },
+    {
+      "id": "TASK-BUD-521",
+      "description": "Influência externa parked: avaliar futuramente `mattpocock/sandcastle` como referência de isolamento/sandboxing quando a trilha background->spawn estiver madura.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Referência registrada no backlog protegido com URL explícita.",
+        "Permanece fora da seleção local-safe até foco humano explícito.",
+        "Sem execução/pesquisa externa automática nesta fatia."
+      ],
+      "milestone": "protected-parked-legacy",
+      "notes": "[rationale:risk-control] influência externa útil, mas deve entrar só após maturidade local-safe da trilha background/spawn. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito. https://github.com/mattpocock/sandcastle\n[provenance:human] source_task=TASK-BUD-520 reason=nova influência externa fornecida pelo operador para assimilação futura"
+    },
+    {
+      "id": "TASK-BUD-522",
+      "description": "Expor tool read-only para `evaluateAgentSpawnReadiness` (simple spawn gate) no runtime e validar contrato fail-closed.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-520"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Tool `agent_spawn_readiness_gate` registrada com parâmetros bounded e sem dispatch.",
+        "Retorna `ready-for-simple-spawn|keep-report-only` com recommendationCode explícito.",
+        "Smoke cobre registro/execução da tool e caminho fail-closed."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05f",
+      "notes": "[rationale:risk-control] tornar simple spawn gate invocável no runtime fecha a etapa intermediária antes de qualquer discussão de colônia.\n[provenance:human] source_task=TASK-BUD-520 reason=continuar cadência background-first com próximo degrau operacional explícito\n2026-05-01: simple spawn gate agora invocável via tool read-only no runtime, mantendo fail-closed e limites explícitos.",
+      "verification": "VER-BUD-871"
+    },
+    {
+      "id": "TASK-BUD-523",
+      "description": "Compor `background_process_rehearsal_gate` no `ops_calibration_decision_packet` para exigir sinal `ready` antes de recomendar bounded rehearsal.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-522"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts",
+        "docs/primitives/ops-calibration-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Packet inclui bloco `backgroundRehearsal` e blocker explícito quando rehearsal não está `ready`.",
+        "Surface recebe/propaga parâmetros de rehearsal (lifecycle/rollback/stopSource/slices).",
+        "Regressões cobrem caminho ready e caminho bloqueado por rehearsal."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05f",
+      "notes": "[rationale:risk-control] background-first exige rehearsal verde antes de discutir promoção operacional.\n[provenance:human] source_task=TASK-BUD-520 reason=elevar rigor do packet para refletir cadência background-first definida\n2026-05-01: packet agora exige sinal rehearsal=ready para liberar recomendação de bounded rehearsal.",
+      "verification": "VER-BUD-873"
+    },
+    {
+      "id": "TASK-BUD-524",
+      "description": "Reduzir teto de contexto para Copilot/Codex (65%) com checkpoint antecipado para parada graceful antes de 400.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-520"
+      ],
+      "files": [
+        ".pi/settings.json",
+        "packages/pi-stack/extensions/context-watchdog-bootstrap.ts",
+        "packages/pi-stack/extensions/custom-footer.ts",
+        "docs/guides/openai-context-window-playbook.md",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/custom-footer-registration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Config ativa usa `checkpointPct<=60` e `compactPct=65`.",
+        "Baseline de `github-copilot/gpt-5.3-codex` usa `errorPct=65`.",
+        "Smoke de context-watchdog/custom-footer passa com novos thresholds."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05f",
+      "notes": "[rationale:risk-control] erro 400 observado com ~68%; reduzir teto para 65% aumenta margem de parada/checkpoint antes de overflow.\n[provenance:human] source_task=TASK-BUD-520 reason=ajuste urgente solicitado pelo operador após 400 em janela menor do que o baseline anterior\n2026-05-01: teto operacional ajustado para 65% com checkpoint antecipado (60%) após incidente 400 em ~68%.",
+      "verification": "VER-BUD-872"
     }
   ]
 }

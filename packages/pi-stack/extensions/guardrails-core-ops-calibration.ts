@@ -1,16 +1,19 @@
 import type { AgentsAsToolsCalibrationScore } from "./guardrails-core-tool-hygiene";
 import type { BackgroundProcessReadinessScore } from "./guardrails-core-background-process";
+import type { BackgroundProcessRehearsalResult } from "./guardrails-core-background-process-rehearsal";
 
 export type OpsCalibrationDecision = "keep-report-only" | "ready-for-bounded-rehearsal";
 export type OpsCalibrationRecommendationCode =
   | "ops-calibration-ready-bounded-rehearsal"
   | "ops-calibration-keep-report-only-background"
+  | "ops-calibration-keep-report-only-background-rehearsal"
   | "ops-calibration-keep-report-only-agents"
   | "ops-calibration-keep-report-only-threshold"
   | "ops-calibration-keep-report-only-reload";
 
 export interface OpsCalibrationDecisionInput {
   background: BackgroundProcessReadinessScore;
+  backgroundRehearsal?: BackgroundProcessRehearsalResult;
   agents: AgentsAsToolsCalibrationScore;
   minScoreForRehearsal?: number;
   liveReloadCompleted?: boolean;
@@ -32,6 +35,11 @@ export interface OpsCalibrationDecisionPacket {
     score: number;
     recommendationCode: string;
     dimensions: BackgroundProcessReadinessScore["dimensions"];
+  };
+  backgroundRehearsal: {
+    decision: string;
+    blockers: string[];
+    missingEvidence: string[];
   };
   agents: {
     score: number;
@@ -55,6 +63,8 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
   let recommendationCode: OpsCalibrationRecommendationCode = "ops-calibration-ready-bounded-rehearsal";
   let recommendation = "calibration looks strong; bounded local rehearsal is ready under explicit human focus.";
 
+  const backgroundRehearsal = input.backgroundRehearsal;
+
   if (!liveReloadCompleted) {
     blockers.push("reload-required-for-live-invocation");
     recommendationCode = "ops-calibration-keep-report-only-reload";
@@ -63,6 +73,10 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
     blockers.push("background-readiness-not-strong");
     recommendationCode = "ops-calibration-keep-report-only-background";
     recommendation = "background process readiness is not strong yet; keep report-only and close capability/evidence gaps first.";
+  } else if (!backgroundRehearsal || backgroundRehearsal.decision !== "ready") {
+    blockers.push("background-rehearsal-not-ready");
+    recommendationCode = "ops-calibration-keep-report-only-background-rehearsal";
+    recommendation = "background rehearsal evidence is not ready yet; close lifecycle/stopSource/rollback/slice gaps before rehearsal promotion.";
   } else if (input.agents.recommendationCode !== "agents-as-tools-calibration-strong") {
     blockers.push("agents-calibration-not-strong");
     recommendationCode = "ops-calibration-keep-report-only-agents";
@@ -92,6 +106,11 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
       recommendationCode: input.background.recommendationCode,
       dimensions: input.background.dimensions,
     },
+    backgroundRehearsal: {
+      decision: backgroundRehearsal?.decision ?? "unknown",
+      blockers: backgroundRehearsal?.blockers ?? [],
+      missingEvidence: backgroundRehearsal?.missingEvidence ?? ["background-rehearsal-signal-missing"],
+    },
     agents: {
       score: input.agents.score,
       recommendationCode: input.agents.recommendationCode,
@@ -102,6 +121,7 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
       `decision=${decision}`,
       `code=${recommendationCode}`,
       `background=${input.background.score}`,
+      `rehearsal=${backgroundRehearsal?.decision ?? "unknown"}`,
       `agents=${input.agents.score}`,
       `threshold=${minScoreForRehearsal}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,

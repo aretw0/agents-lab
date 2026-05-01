@@ -10059,6 +10059,33 @@
       "method": "live baseline capture + research packet update + marker-check",
       "timestamp": "2026-05-01T23:13:54.276Z",
       "evidence": "Recorded compact live baseline for wave `bg-agents-calibration-wave-2026-05e` and continuity decision. Baseline readings (captured in-session): - `background_process_readiness_score` => `score=59`, `code=background-process-readiness-needs-capabilities`. - `agents_as_tools_calibration_score` => `score=100`, `code=agents-as-tools-calibration-strong`. - `ops_calibration_decision_packet` (`live_reload_completed=true`) => `decision=keep-report-only`, `code=ops-calibration-keep-report-only-background`, blocker `background-readiness-not-strong`. Documentation: - Updated `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` with explicit `Baseline live da wave` section and continuity note. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`Baseline live da wave`, `score=59`, `score=100`, `ops-calibration-keep-report-only-background`, `background-readiness-not-strong`) => matched 5/5. - Full focused smoke suite for guardrails calibration primitives remains green in this slice (latest run: 8 files, 32 tests passed)."
+    },
+    {
+      "id": "VER-BUD-871",
+      "target": "TASK-BUD-522",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface wiring + smoke + marker-check",
+      "timestamp": "2026-05-01T23:45:37.466Z",
+      "evidence": "Implemented runtime surface for simple-agent spawn readiness gate. Changes: - Added `packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts`. - registers read-only tool `agent_spawn_readiness_gate` - maps bounded params to `evaluateAgentSpawnReadiness(...)` - returns structured decision (`ready-for-simple-spawn|keep-report-only`) with no dispatch. - Updated `packages/pi-stack/extensions/guardrails-core.ts` to register new surface. - Extended `packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts` with tool exposure/execute coverage. - Updated `docs/primitives/agents-as-tools-calibration-score.md` to mention runtime gate name. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` => 4 files passed, 24 tests passed. - `safe_marker_check docs/primitives/agents-as-tools-calibration-score.md` markers (`agent_spawn_readiness_gate`, `ready-for-simple-spawn`, `keep-report-only`) => matched 3/3."
+    },
+    {
+      "id": "VER-BUD-872",
+      "target": "TASK-BUD-524",
+      "target_type": "task",
+      "status": "passed",
+      "method": "config + bootstrap/default update + smoke",
+      "timestamp": "2026-05-01T23:55:07.733Z",
+      "evidence": "Applied emergency context headroom reduction for Copilot/Codex. Changes: - `.pi/settings.json` - `contextWatchdog.checkpointPct: 60` - `contextWatchdog.compactPct: 65` - `modelSteeringFromLevel/userNotifyFromLevel: checkpoint` - `customFooter.contextPressure.byProviderModel[github-copilot/gpt-5.3-codex].warningPct/errorPct: 45/65` - `packages/pi-stack/extensions/context-watchdog-bootstrap.ts` - control-plane preset updated to `checkpointPct=60`, `compactPct=65` - note updated to describe 65% compact ceiling - `packages/pi-stack/extensions/custom-footer.ts` - default Copilot Codex thresholds updated to `warningPct=45`, `errorPct=65` - `docs/guides/openai-context-window-playbook.md` - sample config and baseline guidance updated to 60/65 and errorPct=65 - tests updated: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - `packages/pi-stack/test/smoke/custom-footer-registration.test.ts` Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/custom-footer-registration.test.ts` => 2 files passed, 81 tests passed."
+    },
+    {
+      "id": "VER-BUD-873",
+      "target": "TASK-BUD-523",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface+packet composition + smoke",
+      "timestamp": "2026-05-01T23:55:27.185Z",
+      "evidence": "Composed background rehearsal signal into ops calibration packet. Changes: - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts` - added `backgroundRehearsal` input/output support - new recommendation code: `ops-calibration-keep-report-only-background-rehearsal` - fail-closed blocker `background-rehearsal-not-ready` when rehearsal signal is missing/non-ready - summary now includes `rehearsal=<decision>` - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - imports `evaluateBackgroundProcessRehearsal` - adds rehearsal parameters (`lifecycle_classified`, `rollback_plan_known`, `unresolved_blockers`, `destructive_restart_requested`, `protected_scope_requested`) - evaluates rehearsal and passes result into `buildOpsCalibrationDecisionPacket` - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - updated ready path to include `backgroundRehearsal: ready` - added regression for non-ready rehearsal -> keep-report-only with rehearsal blocker/code - `docs/primitives/ops-calibration-decision-packet.md` - documents that packet remains report-only until rehearsal gate is `ready` Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts` => 3 files passed, 17 tests passed."
     }
   ]
 }

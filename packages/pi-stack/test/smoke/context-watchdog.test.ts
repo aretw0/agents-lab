@@ -652,8 +652,8 @@ describe("context-watchdog", () => {
 
 		const control = buildContextWatchBootstrapPlan("control-plane");
 		expect(control.preset).toBe("control-plane");
-		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(65);
-		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(69);
+		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(60);
+		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(65);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.modelSteeringFromLevel).toBe("compact");
 		expect((control.patch.piStack as any).contextWatchdog.userNotifyFromLevel).toBe("compact");

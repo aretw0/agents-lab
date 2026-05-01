@@ -1,12 +1,15 @@
 {
-  "timestamp": "2026-05-01T23:14:14.220Z",
+  "timestamp": "2026-05-01T23:46:41.502Z",
   "context": "Completed bg-agents-calibration-wave-2026-05e (TASK-BUD-517..520): added runtime rehearsal gate tool for background, refined background capab [snip] wave-e with keep-report-only decision. [truncated:+157 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 65% (write-checkpoint) · Write handoff checkpoint before the next large slice.",
     "/reload to activate latest wave-e runtime changes before next live readings",
     "re-run readiness + rehearsal gate + agents calibration + ops packet to measure post-merge drift",
     "seed next local-safe wave targeting concrete background evidence gaps (lifecycle classificatio [snip] overage, rehearsal slices) [truncated:+15 chars]"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required"
+  ],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi- [snip] rails-tool-hygiene.test.ts [truncated:+303 chars]",
     "safe_marker_check docs/primitives/background-process-control.md",
@@ -39,6 +42,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "add-or-select-task"
+    },
+    {
+      "atIso": "2026-05-01T23:46:41.502Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 65,
+      "thresholds": {
+        "warnPct": 48,
+        "checkpointPct": 65,
+        "compactPct": 69
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
     }
   ],
   "completed_tasks": [

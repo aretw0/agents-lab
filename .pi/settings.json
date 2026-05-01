@@ -141,12 +141,12 @@
 		},
 		"contextWatchdog": {
 			"enabled": true,
-			"checkpointPct": 65,
-			"compactPct": 69,
+			"checkpointPct": 60,
+			"compactPct": 65,
 			"cooldownMs": 600000,
 			"notify": true,
-			"modelSteeringFromLevel": "compact",
-			"userNotifyFromLevel": "compact",
+			"modelSteeringFromLevel": "checkpoint",
+			"userNotifyFromLevel": "checkpoint",
 			"status": true,
 			"autoCheckpoint": true,
 			"autoCompact": true,
@@ -160,8 +160,8 @@
 			"contextPressure": {
 				"byProviderModel": {
 					"github-copilot/gpt-5.3-codex": {
-						"warningPct": 48,
-						"errorPct": 70
+						"warningPct": 45,
+						"errorPct": 65
 					}
 				}
 			}

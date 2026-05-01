@@ -24,7 +24,7 @@ Avaliar se a stack está calibrada para usar agentes como tools com governança,
 
 ## Contrato complementar de simple spawn
 
-A primitive `evaluateAgentSpawnReadiness` cobre o próximo passo após calibração geral e exige, em modo report-only:
+A primitive `evaluateAgentSpawnReadiness` (exposta no runtime como `agent_spawn_readiness_gate`) cobre o próximo passo após calibração geral e exige, em modo report-only:
 
 - exatamente 1 agente por execução;
 - timeout explícito e bounded;

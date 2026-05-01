@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore } from "./guardrails-core-background-process";
+import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 
@@ -61,6 +62,11 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       has_reload_handoff_cleanup: Type.Optional(Type.Boolean({ description: "Whether reload/compact/handoff cleanup exists." })),
       rehearsal_slices: Type.Optional(Type.Number({ description: "Completed bounded rehearsal slices (evidence count)." })),
       stop_source_coverage_pct: Type.Optional(Type.Number({ description: "Percent of lifecycle events with explicit stopSource evidence (0..100)." })),
+      lifecycle_classified: Type.Optional(Type.Boolean({ description: "Whether lifecycle evidence is classified." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback plan is known." })),
+      unresolved_blockers: Type.Optional(Type.Number({ description: "Count of unresolved blockers." })),
+      destructive_restart_requested: Type.Optional(Type.Boolean({ description: "Whether destructive restart is being requested." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Whether protected scope was requested." })),
       min_score_for_rehearsal: Type.Optional(Type.Number({ description: "Minimum score threshold (60..95, default=80)." })),
       live_reload_completed: Type.Optional(Type.Boolean({ description: "Whether runtime reload was completed after wiring new tools." })),
       tool_names: Type.Optional(Type.Array(Type.String({ description: "Optional tool-name filter for agents-as-tools calibration scope." }))),
@@ -88,9 +94,21 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
         stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
       });
+      const backgroundRehearsal = evaluateBackgroundProcessRehearsal({
+        readinessScore: background.score,
+        readinessRecommendationCode: background.recommendationCode,
+        lifecycleClassified: asOptionalBoolean(p.lifecycle_classified),
+        stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
+        unresolvedBlockers: typeof p.unresolved_blockers === "number" ? p.unresolved_blockers : undefined,
+        destructiveRestartRequested: asOptionalBoolean(p.destructive_restart_requested),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
       const agents = buildAgentsAsToolsCalibrationScore({ tools: scopedTools });
       const packet = buildOpsCalibrationDecisionPacket({
         background,
+        backgroundRehearsal,
         agents,
         minScoreForRehearsal: typeof p.min_score_for_rehearsal === "number" ? p.min_score_for_rehearsal : undefined,
         liveReloadCompleted: p.live_reload_completed === true,

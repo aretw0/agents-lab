@@ -51,8 +51,8 @@ export function buildContextWatchBootstrapPlan(
 			piStack: {
 				contextWatchdog: {
 					enabled: true,
-					checkpointPct: 65,
-					compactPct: 69,
+					checkpointPct: 60,
+					compactPct: 65,
 					cooldownMs: 10 * 60 * 1000,
 					notify: true,
 					modelSteeringFromLevel: "compact",
@@ -69,7 +69,7 @@ export function buildContextWatchBootstrapPlan(
 			},
 		},
 		notes: [
-			"control-plane preset: conservative checkpoint/compact headroom for copilot-style 400 context-window behavior.",
+			"control-plane preset: checkpoint em 60% e teto de compact em 65% para reduzir risco de 400 antecipado em Copilot/Codex.",
 			"auto-compact runs with idle + cooldown guards.",
 		],
 	};
