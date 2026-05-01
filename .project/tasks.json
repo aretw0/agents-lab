@@ -11233,7 +11233,7 @@
       "status": "planned",
       "priority": "p2",
       "depends_on": [
-        "TASK-BUD-468"
+        "TASK-BUD-470"
       ],
       "files": [
         "packages/pi-stack/extensions/",
@@ -11245,7 +11245,7 @@
         "Contrato de controle (no-dispatch/guardrails) preservado."
       ],
       "milestone": "post-cleanup-research",
-      "notes": "[rationale:risk-control] inovar sem bloat após limpeza e pesquisa.\n2026-05-01: inovação nova movida para pós-lane; prioridade atual é limpeza+pesquisa contínua."
+      "notes": "[rationale:risk-control] inovar sem bloat após limpeza e pesquisa.\n2026-05-01: inovação nova movida para pós-lane; prioridade atual é limpeza+pesquisa contínua.\n2026-05-01: dependência reconciliada para local-safe (TASK-BUD-470) para evitar acoplamento direto com pesquisa externa parked (TASK-BUD-468)."
     },
     {
       "id": "TASK-BUD-470",
@@ -11567,6 +11567,27 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] defer de pesquisa externa vira preparação local-safe reaproveitável (compound) em vez de bloqueio improdutivo.\n[provenance:tangent-approved] source_task=TASK-BUD-480 reason=decisão defer pede preparação local-safe para reduzir atrito na próxima avaliação protected\n2026-05-01: iniciando template local-safe para intake de influências externas alinhado ao packet protected-focus e contrato canário one-slice.\n2026-05-01: template local-safe de intake externo criado para transformar defer em preparação reaproveitável antes de novo foco protected.",
       "verification": "VER-BUD-833"
+    },
+    {
+      "id": "TASK-BUD-485",
+      "description": "Adicionar guardrail para bloquear dependência de task local-safe em task protected (board dependencies/create), com regressão para evitar novo acoplamento.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-483"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Atualização de dependências falha com blocker explícito quando task local-safe depende de task protected.",
+        "Regressão cobre caso bloqueado e caso permitido.",
+        "Doutrina registra regra de desacoplamento local-safe/protected para planejamento."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] prevenir recidiva de deadlock misto entre backlog local-safe e protected parked.\n[provenance:tangent-approved] source_task=TASK-BUD-469 reason=desacoplamento manual revelou necessidade de guardrail estrutural\n2026-05-01: iniciando guardrail anti-acoplamento local-safe -> protected no board surface."
     }
   ]
 }
