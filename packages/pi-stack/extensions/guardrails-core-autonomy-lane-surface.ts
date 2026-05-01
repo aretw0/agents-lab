@@ -2,6 +2,12 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
+import {
+  LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
+  NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
+  SEED_LOCAL_SAFE_LANE_CODE,
+  STOP_NO_LOCAL_SAFE_CODE,
+} from "./guardrails-core-local-stop-guidance";
 import { rankBrainstormIdeas, type BrainstormIdeaInput } from "./lane-brainstorm-packet";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
@@ -102,20 +108,20 @@ function resolveBrainstormRecommendation(selection: { ready: boolean; recommenda
   if (selection.ready) {
     return {
       decision: "ready-for-human-review",
-      recommendationCode: "seed-local-safe-lane",
+      recommendationCode: SEED_LOCAL_SAFE_LANE_CODE,
       nextAction: "review ranked slices and materialize bounded local-safe tasks.",
     };
   }
-  if (selection.recommendationCode === "local-stop-protected-focus-required") {
+  if (selection.recommendationCode === LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE) {
     return {
       decision: "blocked",
-      recommendationCode: "needs-human-focus-protected",
+      recommendationCode: NEEDS_HUMAN_FOCUS_PROTECTED_CODE,
       nextAction: selection.recommendation,
     };
   }
   return {
     decision: "blocked",
-    recommendationCode: "stop-no-local-safe",
+    recommendationCode: STOP_NO_LOCAL_SAFE_CODE,
     nextAction: selection.recommendation,
   };
 }

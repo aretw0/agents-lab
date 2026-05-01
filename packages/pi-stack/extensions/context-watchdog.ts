@@ -72,7 +72,10 @@ import {
 	type LocalSliceHandoffCheckpointInput,
 } from "./context-watchdog-handoff";
 import {
+	CONTINUE_LOCAL_CODE,
+	LOCAL_AUDIT_BLOCKED_CODE,
 	LOCAL_STOP_NO_LOCAL_SAFE_NEXT_STEP_CODE,
+	REFRESH_FOCUS_CHECKPOINT_CODE,
 	localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
 import {
@@ -876,10 +879,10 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 }
 
 export type ContextWatchContinuationRecommendationCode =
-	| "continue-local"
-	| "local-stop-no-local-safe-next-step"
-	| "refresh-focus-checkpoint"
-	| "local-audit-blocked";
+	| typeof CONTINUE_LOCAL_CODE
+	| typeof LOCAL_STOP_NO_LOCAL_SAFE_NEXT_STEP_CODE
+	| typeof REFRESH_FOCUS_CHECKPOINT_CODE
+	| typeof LOCAL_AUDIT_BLOCKED_CODE;
 
 export function resolveContextWatchContinuationRecommendation(input: {
 	ready: boolean;
@@ -889,7 +892,7 @@ export function resolveContextWatchContinuationRecommendation(input: {
 }): { recommendationCode: ContextWatchContinuationRecommendationCode; nextAction: string } {
 	if (input.ready) {
 		return {
-			recommendationCode: "continue-local",
+			recommendationCode: CONTINUE_LOCAL_CODE,
 			nextAction: "continue bounded local-safe slice and keep checkpoint cadence.",
 		};
 	}
@@ -902,12 +905,12 @@ export function resolveContextWatchContinuationRecommendation(input: {
 	}
 	if (input.focusTasks === "none-listed" || reasons.includes("candidate:invalid") || input.staleFocusCount > 0) {
 		return {
-			recommendationCode: "refresh-focus-checkpoint",
+			recommendationCode: REFRESH_FOCUS_CHECKPOINT_CODE,
 			nextAction: "refresh handoff focus/checkpoint with one bounded local-safe candidate before continuing.",
 		};
 	}
 	return {
-		recommendationCode: "local-audit-blocked",
+		recommendationCode: LOCAL_AUDIT_BLOCKED_CODE,
 		nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
 	};
 }

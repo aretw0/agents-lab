@@ -2,7 +2,15 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 import {
+  ADD_OR_SELECT_TASK_CODE,
+  CHOOSE_NEXT_FOCUS_CODE,
+  EXECUTE_BOUNDED_SLICE_CODE,
+  LOCAL_STOP_ADD_RATIONALE_OR_ALLOW_CODE,
+  LOCAL_STOP_DECOMPOSE_BOUNDED_CODE,
+  LOCAL_STOP_MIXED_BLOCKERS_CODE,
   LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
+  LOCAL_STOP_UNBLOCK_DEPENDENCIES_CODE,
+  REALIGN_FOCUS_CODE,
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
 
@@ -23,15 +31,15 @@ export interface AutonomyTaskSelectorOptions {
 }
 
 export type AutonomyTaskRecommendationCode =
-  | "execute-bounded-slice"
-  | "add-or-select-task"
-  | "choose-next-focus"
-  | "realign-focus"
-  | "local-stop-protected-focus-required"
-  | "local-stop-unblock-dependencies"
-  | "local-stop-add-rationale-or-allow"
-  | "local-stop-mixed-blockers"
-  | "local-stop-decompose-bounded";
+  | typeof EXECUTE_BOUNDED_SLICE_CODE
+  | typeof ADD_OR_SELECT_TASK_CODE
+  | typeof CHOOSE_NEXT_FOCUS_CODE
+  | typeof REALIGN_FOCUS_CODE
+  | typeof LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE
+  | typeof LOCAL_STOP_UNBLOCK_DEPENDENCIES_CODE
+  | typeof LOCAL_STOP_ADD_RATIONALE_OR_ALLOW_CODE
+  | typeof LOCAL_STOP_MIXED_BLOCKERS_CODE
+  | typeof LOCAL_STOP_DECOMPOSE_BOUNDED_CODE;
 
 export interface AutonomyTaskSelection {
   ready: boolean;
@@ -193,24 +201,24 @@ function resolveNoEligibleTaskRecommendation(input: {
   }
   if (blockedByDependencies > 0 && skippedProtectedScope === 0 && skippedMissingRationale === 0) {
     return {
-      recommendationCode: "local-stop-unblock-dependencies",
+      recommendationCode: LOCAL_STOP_UNBLOCK_DEPENDENCIES_CODE,
       recommendation: "local stop condition: no eligible tasks remain until dependencies are unblocked or decomposed.",
     };
   }
   if (skippedMissingRationale > 0 && skippedProtectedScope === 0 && blockedByDependencies === 0) {
     return {
-      recommendationCode: "local-stop-add-rationale-or-allow",
+      recommendationCode: LOCAL_STOP_ADD_RATIONALE_OR_ALLOW_CODE,
       recommendation: "local stop condition: only rationale-sensitive tasks remain; add rationale evidence or explicitly opt in to include missing-rationale tasks.",
     };
   }
   if (blockedByDependencies > 0 || skippedProtectedScope > 0 || skippedMissingRationale > 0) {
     return {
-      recommendationCode: "local-stop-mixed-blockers",
+      recommendationCode: LOCAL_STOP_MIXED_BLOCKERS_CODE,
       recommendation: "local stop condition: no eligible local-safe tasks remain; unblock dependencies and/or request explicit focus for protected or rationale-sensitive lanes.",
     };
   }
   return {
-    recommendationCode: "local-stop-decompose-bounded",
+    recommendationCode: LOCAL_STOP_DECOMPOSE_BOUNDED_CODE,
     recommendation: "local stop condition: no eligible tasks remain; decompose or add the next bounded local-safe task before autonomous continuation.",
   };
 }
@@ -221,19 +229,19 @@ function resolveSelectionRecommendation(
 ): { recommendationCode: AutonomyTaskRecommendationCode; recommendation: string } {
   if (reason === "no-candidate-tasks") {
     return {
-      recommendationCode: "add-or-select-task",
+      recommendationCode: ADD_OR_SELECT_TASK_CODE,
       recommendation: "add or select a planned/in-progress task before autonomous continuation.",
     };
   }
   if (reason === "focus-complete") {
     return {
-      recommendationCode: "choose-next-focus",
+      recommendationCode: CHOOSE_NEXT_FOCUS_CODE,
       recommendation: "current focus is complete; choose the next focus explicitly before autonomous continuation.",
     };
   }
   if (reason === "focus-mismatch") {
     return {
-      recommendationCode: "realign-focus",
+      recommendationCode: REALIGN_FOCUS_CODE,
       recommendation: "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation.",
     };
   }
@@ -241,7 +249,7 @@ function resolveSelectionRecommendation(
     return noEligibleGuidance;
   }
   return {
-    recommendationCode: "execute-bounded-slice",
+    recommendationCode: EXECUTE_BOUNDED_SLICE_CODE,
     recommendation: "execute bounded slice for the selected task; validate focal gate; commit; update board.",
   };
 }
@@ -317,7 +325,7 @@ export function selectAutonomyLaneTask(
     return {
       ready: true,
       reason: "ready",
-      recommendationCode: "execute-bounded-slice",
+      recommendationCode: EXECUTE_BOUNDED_SLICE_CODE,
       recommendation: `execute bounded slice for ${eligibleTaskIds[0]}; validate focal gate; commit; update board.`,
       selectionPolicy,
       milestone,

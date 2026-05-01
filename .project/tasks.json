@@ -10662,7 +10662,7 @@
     {
       "id": "TASK-BUD-442",
       "description": "Centralizar recommendation codes do control-plane em módulo compartilhado para reduzir literals duplicados entre autonomy-lane, context-watch e brainstorm packet.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-441"
@@ -10680,7 +10680,8 @@
         "Smoke tests relevantes permanecem verdes sem mudança funcional."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Menos string solta => menos drift semântico e menos gordura de manutenção."
+      "notes": "[rationale:risk-control] Menos string solta => menos drift semântico e menos gordura de manutenção.\n2026-05-01: constants compartilhadas reduziram drift semântico e gordura de manutenção entre autonomy/context-watch/brainstorm surfaces.",
+      "verification": "VER-BUD-795"
     },
     {
       "id": "TASK-BUD-443",

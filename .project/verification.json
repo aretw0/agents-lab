@@ -9375,6 +9375,15 @@
       "method": "board planning + lane readiness check",
       "timestamp": "2026-05-01T14:07:10.254Z",
       "evidence": "Milestone `control-plane-long-run-prep` was established and populated with sequenced local-safe tasks (`TASK-BUD-442`..`TASK-BUD-446` plus `TASK-BUD-448`..`TASK-BUD-452`) focused on anti-bloat hardening and mdt/squeez assimilation from local artifacts. Milestone query confirms 10 planned tasks with rationale, and autonomy lane under this milestone is ready (`recommendationCode=execute-bounded-slice`) with eligible queue present."
+    },
+    {
+      "id": "VER-BUD-795",
+      "target": "TASK-BUD-442",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T14:30:49.230Z",
+      "evidence": "Centralized control-plane recommendation code literals in shared module `guardrails-core-local-stop-guidance.ts` and replaced duplicated literals across `guardrails-core-autonomy-task-selector.ts`, `context-watchdog.ts`, and `guardrails-core-autonomy-lane-surface.ts`. No functional widening; semantics preserved. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 4 files passed, 77 tests passed."
     }
   ]
 }
