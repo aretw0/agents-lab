@@ -9024,6 +9024,15 @@
       "method": "post-reload-background-stop-source-live-validation",
       "timestamp": "2026-05-01T04:19:29.125Z",
       "evidence": "After reload, live background_process_lifecycle_plan accepted stop_source. Validation cases: done-after-stop with stop_source=human returned state=late-after-stop stopSource=human viewTitle=background-process dispatch=no authorization=none; stop-requested with stop_source=agent returned state=stopped stopSource=agent; stopRequested=true without stop_source returned stopSource=unknown, preserving fail-closed warning semantics. This validates cancellation-origin evidence before TASK-BUD-399 drill."
+    },
+    {
+      "id": "VER-BUD-756",
+      "target": "TASK-BUD-399",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-cancel-fallback-drill",
+      "timestamp": "2026-05-01T04:21:18.304Z",
+      "evidence": "Executed bounded local cancel/fallback drill using a disposable Node child process. Command output: DRILL_REGISTERED pid=33608; DRILL_STOP_REQUESTED source=agent pid=33608; DRILL_DONE code=null signal=SIGTERM. Canonical lifecycle classification: registered=>state=running; stop-requested with stopSource=agent=>state=stopped; subsequent done with stopSource=agent=>state=late-after-stop; normal prior BG_PROCESS_DONE event remains state=finished with viewTitle fallback. No scheduler/remote/offload/server was started; only disposable child process was stopped. Handoff/docs record that this does not authorize killing external processes or long servers."
     }
   ]
 }

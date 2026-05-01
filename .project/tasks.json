@@ -9683,7 +9683,7 @@
     {
       "id": "TASK-BUD-399",
       "description": "Executar e registrar drill local de cancel/fallback para long-run antes de liberar confiança unattended forte.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-397",
@@ -9702,7 +9702,8 @@
         "Falha no drill mantém TASK-BUD-153 bloqueada e produz blocker explícito."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Sem teste local medido de cancel/fallback, operação overnight/unattended continua dependendo de suposição frágil de controle humano."
+      "notes": "[rationale:risk-control] Sem teste local medido de cancel/fallback, operação overnight/unattended continua dependendo de suposição frágil de controle humano.\n2026-05-01: concluído drill local bounded de cancel/fallback em subprocesso descartável. Evidência distingue stop pelo agente, término tardio pós-stop e término normal; sem dispatch/autorização e sem promover unattended forte sozinho.",
+      "verification": "VER-BUD-756"
     },
     {
       "id": "TASK-BUD-400",

@@ -1,43 +1,44 @@
 {
-  "timestamp": "2026-05-01T04:19:49.795Z",
-  "context": "Post-reload live validation completed for TASK-BUD-413 stop_source. background_process_lifecycle_plan now distinguishes stopSource=human, sto [snip] ontrolled/auditable uninterrupted work. [truncated:+160 chars]",
+  "timestamp": "2026-05-01T04:21:49.565Z",
+  "context": "Completed TASK-BUD-399 local cancel/fallback drill. A disposable Node child process was started and stopped by the agent: DRILL_REGISTERED pi [snip] 401 remains blocked by unresolved deps. [truncated:+374 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-413 closure.",
-    "Run TASK-BUD-399 as a bounded local cancel/fallback drill using the canonical lifecycle sequen [snip] scheduler/remote/offload. [truncated:+30 chars]",
-    "If drill remains simulated/read-only due protected operational process control, record that li [snip] ational drill task exists. [truncated:+74 chars]"
+    "Commit TASK-BUD-399 drill closure.",
+    "Continue with TASK-BUD-400 tool curation/ergonomics before long loops.",
+    "Keep TASK-BUD-153 open until TASK-BUD-400 and TASK-BUD-401 are complete and quality gate clears."
   ],
   "blockers": [
-    "TASK-BUD-153 still blocked by TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 and any unresolved deps.",
-    "Strong unattended remains blocked."
+    "TASK-BUD-153 still blocked by unresolved dependencies.",
+    "TASK-BUD-401 remains blocked until earlier blockers/rehearsal prerequisites are complete.",
+    "Strong unattended/loop/scheduler/remote remains blocked."
   ],
   "recent_validation": [
-    "background_process_lifecycle_plan done-after-stop stop_source=human => state=late-after-stop s [snip] atch=no authorization=none [truncated:+49 chars]",
-    "background_process_lifecycle_plan stop-requested stop_source=agent => state=stopped stopSource [snip] atch=no authorization=none [truncated:+11 chars]",
-    "background_process_lifecycle_plan stopRequested=true without stop_source => stopSource=unknown"
+    "local child process drill output: DRILL_REGISTERED pid=33608; DRILL_STOP_REQUESTED source=agen [snip] E code=null signal=SIGTERM [truncated:+12 chars]",
+    "background_process_lifecycle_plan pid=33608 registered=>running",
+    "background_process_lifecycle_plan pid=33608 stop-requested stopSource=agent=>stopped"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:19:49.795Z",
+    "generatedAtIso": "2026-05-01T04:21:49.565Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 29,
     "action": "continue",
-    "recommendation": "commit-then-run-task-bud-399-bounded"
+    "recommendation": "commit-then-start-task-bud-400"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:19:49.795Z",
+      "atIso": "2026-05-01T04:21:49.565Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-run-task-bud-399-bounded"
+      "recommendation": "commit-then-start-task-bud-400"
     }
   ]
 }
