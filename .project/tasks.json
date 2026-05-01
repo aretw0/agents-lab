@@ -9630,7 +9630,7 @@
     {
       "id": "TASK-BUD-397",
       "description": "Implementar contrato canônico de lifecycle para eventos/processos em background, incluindo stale/late BG_PROCESS_DONE e ausência de prefixo `[undefined]`.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-067",
@@ -9650,8 +9650,8 @@
         "A implementação permanece não-operacional para launch/stop reais até existir autorização separada."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional.\n2026-05-01: iniciada fatia local-safe do contrato de lifecycle. Escopo: classificador read-only para estados canônicos de eventos/background (`running`, `stopped`, `finished`, `failed`, `killed`, `late-after-stop`, `unknown-origin`), label fallback para impedir `[undefined]`, e smoke tests. Sem start/stop/kill operacional.\n2026-05-01: live validation pós-reload passou para `background_process_lifecycle_plan` (late-after-stop, unknown-origin, running e fallback de label). Não fechar ainda: `board_task_quality_gate` bloqueia por `unresolved-dependencies` porque TASK-BUD-067 segue blocked; a fatia de contrato foi validada, mas o blocker histórico de TUI/event output ainda precisa reconciliação ou reescopo explícito.\n2026-05-01: live validation pós-reload passou para `background_process_lifecycle_plan`: evento `done` conhecido com `stop_requested=true`, `exit_code=1` e `label=undefined` retornou `state=late-after-stop`, `displayLabel=background-process`, `dispatch=no`, `authorization=none`; evento `done` desconhecido retornou `unknown-origin`. Task permanece aberta porque `board_task_quality_gate` bloqueia por `unresolved-dependencies` (TASK-BUD-067) e ainda falta integração real com fonte de eventos/registry.",
-      "verification": "VER-BUD-741"
+      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional.\n2026-05-01: iniciada fatia local-safe do contrato de lifecycle. Escopo: classificador read-only para estados canônicos de eventos/background (`running`, `stopped`, `finished`, `failed`, `killed`, `late-after-stop`, `unknown-origin`), label fallback para impedir `[undefined]`, e smoke tests. Sem start/stop/kill operacional.\n2026-05-01: live validation pós-reload passou para `background_process_lifecycle_plan` (late-after-stop, unknown-origin, running e fallback de label). Não fechar ainda: `board_task_quality_gate` bloqueia por `unresolved-dependencies` porque TASK-BUD-067 segue blocked; a fatia de contrato foi validada, mas o blocker histórico de TUI/event output ainda precisa reconciliação ou reescopo explícito.\n2026-05-01: live validation pós-reload passou para `background_process_lifecycle_plan`: evento `done` conhecido com `stop_requested=true`, `exit_code=1` e `label=undefined` retornou `state=late-after-stop`, `displayLabel=background-process`, `dispatch=no`, `authorization=none`; evento `done` desconhecido retornou `unknown-origin`. Task permanece aberta porque `board_task_quality_gate` bloqueia por `unresolved-dependencies` (TASK-BUD-067) e ainda falta integração real com fonte de eventos/registry.\n2026-05-01: concluído como contrato canônico non-operational. Incidente `[undefined]`/BG_PROCESS_DONE agora tem classifier, docs, boundary e fail-closed; registry operacional/controle real de processos continua fora do escopo e protegido.",
+      "verification": "VER-BUD-746"
     },
     {
       "id": "TASK-BUD-398",
@@ -9846,7 +9846,7 @@
     {
       "id": "TASK-BUD-406",
       "description": "Definir e implementar boundary/adaptador para que eventos reais de background process usem o contrato canônico de lifecycle sem depender de label `[undefined]` ou conclusão stale.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-067"
@@ -9865,7 +9865,8 @@
         "Se a fonte real não for integrável localmente, o gate permanece fail-closed e a limitação fica documentada como blocker de unattended forte."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] A classifier read-only reduz ambiguidade, mas o incidente original envolve a fonte real de eventos/background; sem boundary/adaptador, podemos ter contrato correto e UI real ainda emitindo `[undefined]` ou BG_PROCESS_DONE stale."
+      "notes": "[rationale:risk-control] A classifier read-only reduz ambiguidade, mas o incidente original envolve a fonte real de eventos/background; sem boundary/adaptador, podemos ter contrato correto e UI real ainda emitindo `[undefined]` ou BG_PROCESS_DONE stale.\n2026-05-01: concluído como boundary/adaptador contract fail-closed, não como registry operacional. Fonte real de BG_PROCESS_DONE não integrável/localizada no escopo bounded atual; caminhos aceitos documentados e qualquer evento futuro deve passar pelo classifier first-party antes de renderizar.",
+      "verification": "VER-BUD-745"
     },
     {
       "id": "TASK-BUD-407",

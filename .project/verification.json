@@ -8925,6 +8925,24 @@
       "method": "background-event-boundary-and-label-contract",
       "timestamp": "2026-05-01T03:31:52.469Z",
       "evidence": "Completed bounded investigation/hardening for the historical [undefined]/BG_PROCESS_DONE issue at current maturity. First-party lifecycle classifier normalizes undefined/null/empty labels to background-process and classifies done-after-stop as late-after-stop; live validation passed after reload. Bounded source scan did not locate literal BG_PROCESS_DONE emitter in packages/pi-stack/extensions or upstream pi dist, so the real event-source integration remains explicit follow-up TASK-BUD-406 rather than an implicit blocker. Docs record accepted paths and fail-closed boundary."
+    },
+    {
+      "id": "VER-BUD-745",
+      "target": "TASK-BUD-406",
+      "target_type": "task",
+      "status": "passed",
+      "method": "background-event-boundary-fail-closed-contract",
+      "timestamp": "2026-05-01T03:32:57.334Z",
+      "evidence": "Boundary/adaptor task completed at current non-operational maturity: real BG_PROCESS_DONE emitter was not found in bounded first-party/upstream dist scan, so integration path is documented as first-party registry/adaptor, wrapper, or upstream PR; until such source is observable, readiness remains fail-closed. Existing lifecycle classifier is the adaptor contract for any future real event: normalized displayLabel, late-after-stop, unknown-origin, dispatch/processStart/processStop=false. Docs updated in background-process-control.md."
+    },
+    {
+      "id": "VER-BUD-746",
+      "target": "TASK-BUD-397",
+      "target_type": "task",
+      "status": "passed",
+      "method": "background-lifecycle-contract-live-and-boundary",
+      "timestamp": "2026-05-01T03:33:20.002Z",
+      "evidence": "Canonical background lifecycle contract completed as non-operational control-plane primitive. Implemented and live-validated background_process_lifecycle_plan: running/stopped/finished/failed/killed/late-after-stop/unknown-origin, undefined label fallback to background-process, done-after-stop as late-after-stop, unknown-origin fail-closed, dispatch/processStart/processStop=false authorization=none. Dependencies TASK-BUD-067, TASK-BUD-381 and TASK-BUD-406 are completed; quality gate returned closeAllowed=yes. Operational registry/start/stop remains future protected work, not authorized here."
     }
   ]
 }
