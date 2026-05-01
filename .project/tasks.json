@@ -10400,6 +10400,28 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Reduz repetição e risco de drift sem aumentar superfície funcional.\n2026-05-01: anti-bloat refactor; reduced duplicated parsing/mapping logic without widening scope.",
       "verification": "VER-BUD-781"
+    },
+    {
+      "id": "TASK-BUD-430",
+      "description": "Adicionar recommendationCode/nextAction em context_watch_continuation_readiness para reduzir ambiguidade de stop local e stale focus sem parsing textual.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-429"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Tool `context_watch_continuation_readiness` expõe `recommendationCode` e `nextAction` em `details` sem alterar o contrato read-only.",
+        "Mapeamento cobre ao menos: `continue-local`, `local-stop-no-local-safe-next-step`, `refresh-focus-checkpoint`, `local-audit-blocked`.",
+        "Smoke test em `context-watchdog.test.ts` valida os novos campos e casos de mapeamento."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Consumidores precisam ação estável sem interpretar texto livre; evita loops confusos quando o gate está bloqueado por política/estado.\n2026-05-01: strategy-first anti-bloat slice; removed ambiguity without widening automation scope.",
+      "verification": "VER-BUD-782"
     }
   ]
 }

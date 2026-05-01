@@ -871,6 +871,43 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 	].join(" ");
 }
 
+export type ContextWatchContinuationRecommendationCode =
+	| "continue-local"
+	| "local-stop-no-local-safe-next-step"
+	| "refresh-focus-checkpoint"
+	| "local-audit-blocked";
+
+export function resolveContextWatchContinuationRecommendation(input: {
+	ready: boolean;
+	focusTasks: string;
+	staleFocusCount: number;
+	localAuditReasons?: string[];
+}): { recommendationCode: ContextWatchContinuationRecommendationCode; nextAction: string } {
+	if (input.ready) {
+		return {
+			recommendationCode: "continue-local",
+			nextAction: "continue bounded local-safe slice and keep checkpoint cadence.",
+		};
+	}
+	const reasons = input.localAuditReasons ?? [];
+	if (reasons.includes("no-local-safe-next-step")) {
+		return {
+			recommendationCode: "local-stop-no-local-safe-next-step",
+			nextAction: "local stop condition: no eligible local-safe next step; request explicit focus for protected lane or create a new local-safe task.",
+		};
+	}
+	if (input.focusTasks === "none-listed" || reasons.includes("candidate:invalid") || input.staleFocusCount > 0) {
+		return {
+			recommendationCode: "refresh-focus-checkpoint",
+			nextAction: "refresh handoff focus/checkpoint with one bounded local-safe candidate before continuing.",
+		};
+	}
+	return {
+		recommendationCode: "local-audit-blocked",
+		nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
+	};
+}
+
 export function formatContextWatchContinuationReadinessSummary(input: {
 	ready: boolean;
 	focusTasks: string;
@@ -1949,6 +1986,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const localContinuitySummary = formatLocalContinuityAuditSummary(localAudit, localAuditReasons);
 			const localAuditDecision = localAudit.envelope.packet.gate.decision;
 			const ready = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const recommendation = resolveContextWatchContinuationRecommendation({
+				ready,
+				focusTasks,
+				staleFocusCount,
+				localAuditReasons,
+			});
 			const summary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
@@ -1969,6 +2012,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					localContinuitySummary,
 					localContinuityReasons: localAuditReasons,
 					protectedPaths,
+					recommendationCode: recommendation.recommendationCode,
+					nextAction: recommendation.nextAction,
 					localContinuity: localAudit,
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",

@@ -19,6 +19,7 @@ import contextWatchdogExtension, {
 	formatContextWatchStatusToolSummary,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
+	resolveContextWatchContinuationRecommendation,
 	formatContextWatchOneSliceCanaryPreviewSummary,
 	formatContextWatchOneSliceOperatorPacketPreviewSummary,
 	formatContextWatchCommandStatusSummary,
@@ -1438,6 +1439,8 @@ describe("context-watchdog", () => {
 				ready: false,
 				focusTasks: "TASK-BUD-321",
 				staleFocus: "TASK-BUD-320=completed",
+				recommendationCode: "refresh-focus-checkpoint",
+				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
 				localContinuitySummary: expect.stringContaining("local-continuity-audit:"),
 			});
 			expect(result.details?.autoResumePrompt).not.toContain("focusTasks: board-task-selection");
@@ -1456,6 +1459,18 @@ describe("context-watchdog", () => {
 				protectedPaths: [".pi/settings.json"],
 				staleFocusCount: 0,
 			})).toBe("context-watch-continuation-readiness: ready=no focus=TASK-BUD-321 audit=blocked reasons=protected-scopes:invalid protected=.pi/settings.json staleFocus=0 authorization=none");
+			expect(resolveContextWatchContinuationRecommendation({
+				ready: true,
+				focusTasks: "TASK-BUD-321",
+				staleFocusCount: 0,
+				localAuditReasons: [],
+			})).toMatchObject({ recommendationCode: "continue-local" });
+			expect(resolveContextWatchContinuationRecommendation({
+				ready: false,
+				focusTasks: "TASK-BUD-321",
+				staleFocusCount: 0,
+				localAuditReasons: ["no-local-safe-next-step"],
+			})).toMatchObject({ recommendationCode: "local-stop-no-local-safe-next-step" });
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
