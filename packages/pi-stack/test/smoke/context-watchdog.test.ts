@@ -56,6 +56,7 @@ import contextWatchdogExtension, {
 	summarizeContextEconomySignal,
 	resolveAntiParalysisDispatch,
 	isAutoCompactDeferralReason,
+	resolveHandoffBoardReconciliation,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	summarizeContextWatchEvent,
@@ -406,6 +407,47 @@ describe("context-watchdog", () => {
 		expect(resolveHandoffPrepDecision(compact, cfg, "fresh").reason).toBe("fresh");
 		expect(resolveHandoffPrepDecision(compact, cfg, "stale").reason).toBe("stale");
 		expect(shouldRefreshHandoffBeforeAutoCompact(checkpoint, cfg)).toBe(false);
+	});
+
+	it("detects stale or divergent handoff focus against board state", () => {
+		const nowMs = Date.parse("2026-05-01T00:10:00Z");
+		expect(resolveHandoffBoardReconciliation({
+			handoff: {
+				timestamp: "2026-05-01T00:09:30Z",
+				current_tasks: ["TASK-A"],
+			},
+			taskStatusById: { "TASK-A": "in-progress" },
+			nowMs,
+			maxFreshAgeMs: 60_000,
+		})).toMatchObject({ ok: true, reason: "fresh", blockers: [] });
+
+		const stale = resolveHandoffBoardReconciliation({
+			handoff: {
+				timestamp: "2026-05-01T00:00:00Z",
+				current_tasks: ["TASK-A"],
+			},
+			taskStatusById: { "TASK-A": "in-progress" },
+			nowMs,
+			maxFreshAgeMs: 60_000,
+		});
+		expect(stale.ok).toBe(false);
+		expect(stale.blockers).toContain("stale-hand-off");
+
+		const divergent = resolveHandoffBoardReconciliation({
+			handoff: {
+				timestamp: "2026-05-01T00:09:30Z",
+				current_tasks: ["TASK-DONE", "TASK-MISSING", "TASK-BLOCKED"],
+			},
+			taskStatusById: {
+				"TASK-DONE": "completed",
+				"TASK-BLOCKED": "blocked",
+			},
+			nowMs,
+			maxFreshAgeMs: 60_000,
+		});
+		expect(divergent.ok).toBe(false);
+		expect(divergent.blockers).toEqual(["missing-task", "completed-focus", "board-handoff-divergence"]);
+		expect(divergent.summary).toContain("blockers=missing-task|completed-focus|board-handoff-divergence");
 	});
 
 	it("exposes calm-close readiness and anti-paralysis signal deterministically", () => {

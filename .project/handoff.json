@@ -1,33 +1,33 @@
 {
-  "timestamp": "2026-05-01T03:35:10.253Z",
-  "context": "Decomposed TASK-BUD-398 before implementation, following ticket quality gate. Created TASK-BUD-408 for read-only handoff-vs-board divergence [snip] ead of macro-task-missing-dependencies. [truncated:+220 chars]",
+  "timestamp": "2026-05-01T03:38:15.903Z",
+  "context": "Implemented and completed TASK-BUD-408 detector slice. Added read-only resolveHandoffBoardReconciliation to compare handoff current_tasks/tim [snip] ins blocked by unresolved TASK-BUD-409. [truncated:+284 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-398 decomposition.",
-    "Next bounded implementation slice should start TASK-BUD-408 detector."
+    "Commit TASK-BUD-408 detector slice.",
+    "Continue bounded with TASK-BUD-409 fail-closed auto-resume gating."
   ],
   "blockers": [
-    "TASK-BUD-398 depends on TASK-BUD-408 and TASK-BUD-409.",
-    "TASK-BUD-153 remains blocked by unresolved dependencies.",
-    "Context warn: continue bounded only."
+    "TASK-BUD-398 still depends on TASK-BUD-409.",
+    "TASK-BUD-153 still has unresolved dependencies.",
+    "Context is in warn range; continue bounded/checkpointed only."
   ],
   "recent_validation": [
-    "board_task_dependencies TASK-BUD-398 dry-run/apply ok added=2",
-    "board_task_quality_gate TASK-BUD-398 => closeAllowed=no blockers=unresolved-dependencies",
-    "board_task_quality_gate TASK-BUD-153 => closeAllowed=no blockers=unresolved-dependencies"
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 50 passed",
+    "board_task_complete TASK-BUD-408 with VER-BUD-747",
+    "board_task_quality_gate TASK-BUD-409 => closeAllowed=yes"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:35:10.253Z",
+    "generatedAtIso": "2026-05-01T03:38:15.903Z",
     "level": "warn",
     "percent": 58,
     "action": "continue",
-    "recommendation": "commit-task-bud-398-decomposition"
+    "recommendation": "commit-handoff-board-detector"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:35:10.253Z",
+      "atIso": "2026-05-01T03:38:15.903Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 58,
@@ -37,7 +37,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-398-decomposition"
+      "recommendation": "commit-handoff-board-detector"
     }
   ]
 }

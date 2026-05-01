@@ -9895,7 +9895,7 @@
     {
       "id": "TASK-BUD-408",
       "description": "Criar detector bounded de divergência entre handoff focus/current_tasks e estado real do board/verification para impedir resume com evidência stale.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
@@ -9910,7 +9910,8 @@
         "Função é read-only e tem smoke cobrindo fresh vs stale/divergent handoff."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-398 é macro; antes de bloquear auto-resume precisamos uma primitive read-only que compare handoff e board sem mutar estado nem confiar em checkpoint antigo."
+      "notes": "[rationale:risk-control] TASK-BUD-398 é macro; antes de bloquear auto-resume precisamos uma primitive read-only que compare handoff e board sem mutar estado nem confiar em checkpoint antigo.\n2026-05-01: concluído detector bounded/read-only de divergência handoff-vs-board. Ainda não aplica fail-closed em auto-resume; isso fica em TASK-BUD-409.",
+      "verification": "VER-BUD-747"
     },
     {
       "id": "TASK-BUD-409",

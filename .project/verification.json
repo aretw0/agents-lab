@@ -8943,6 +8943,15 @@
       "method": "background-lifecycle-contract-live-and-boundary",
       "timestamp": "2026-05-01T03:33:20.002Z",
       "evidence": "Canonical background lifecycle contract completed as non-operational control-plane primitive. Implemented and live-validated background_process_lifecycle_plan: running/stopped/finished/failed/killed/late-after-stop/unknown-origin, undefined label fallback to background-process, done-after-stop as late-after-stop, unknown-origin fail-closed, dispatch/processStart/processStop=false authorization=none. Dependencies TASK-BUD-067, TASK-BUD-381 and TASK-BUD-406 are completed; quality gate returned closeAllowed=yes. Operational registry/start/stop remains future protected work, not authorized here."
+    },
+    {
+      "id": "VER-BUD-747",
+      "target": "TASK-BUD-408",
+      "target_type": "task",
+      "status": "passed",
+      "method": "handoff-board-reconciliation-smoke",
+      "timestamp": "2026-05-01T03:37:53.295Z",
+      "evidence": "Implemented read-only resolveHandoffBoardReconciliation in context-watchdog-handoff and re-exported through context-watchdog. Detector compares handoff current_tasks/timestamp against board taskStatusById and returns compact blockers stale-hand-off, missing-task, completed-focus, board-handoff-divergence. Focal validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 50 passed."
     }
   ]
 }

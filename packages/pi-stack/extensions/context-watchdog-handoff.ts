@@ -199,6 +199,75 @@ export type AutoResumePromptOptions = {
 	preferredTaskIds?: string[];
 };
 
+export type HandoffBoardReconciliationReason = "fresh" | "stale-hand-off" | "missing-task" | "completed-focus" | "board-handoff-divergence";
+
+export type HandoffBoardReconciliationResult = {
+	ok: boolean;
+	reason: HandoffBoardReconciliationReason;
+	blockers: HandoffBoardReconciliationReason[];
+	focusTasks: string[];
+	missingTasks: string[];
+	completedTasks: string[];
+	divergentTasks: string[];
+	freshness: HandoffFreshnessLabel;
+	ageMs?: number;
+	summary: string;
+};
+
+function lookupTaskStatus(taskStatusById: Record<string, string | undefined>, taskId: string): string | undefined {
+	const normalized = normalizePromptSegment(taskId);
+	return taskStatusById[normalized] ?? taskStatusById[normalized.toUpperCase()];
+}
+
+export function resolveHandoffBoardReconciliation(input: {
+	handoff?: Record<string, unknown>;
+	taskStatusById?: Record<string, string | undefined>;
+	nowMs?: number;
+	maxFreshAgeMs?: number;
+}): HandoffBoardReconciliationResult {
+	const handoff = input.handoff && typeof input.handoff === "object" ? input.handoff : {};
+	const freshness = resolveHandoffFreshness(
+		typeof handoff.timestamp === "string" ? handoff.timestamp : undefined,
+		input.nowMs ?? Date.now(),
+		input.maxFreshAgeMs ?? 30 * 60 * 1000,
+	);
+	const taskStatusById = input.taskStatusById ?? {};
+	const focusTasks = normalizeStringArray(handoff.current_tasks).map((task) => normalizePromptSegment(task)).filter(Boolean);
+	const missingTasks: string[] = [];
+	const completedTasks: string[] = [];
+	const divergentTasks: string[] = [];
+	for (const task of focusTasks) {
+		const status = lookupTaskStatus(taskStatusById, task);
+		if (status === undefined) missingTasks.push(task);
+		else if (status === "completed") completedTasks.push(`${task}=completed`);
+		else if (status !== "in-progress" && status !== "planned") divergentTasks.push(`${task}=${status}`);
+	}
+	const blockers: HandoffBoardReconciliationReason[] = [];
+	if (freshness.label === "stale") blockers.push("stale-hand-off");
+	if (missingTasks.length > 0) blockers.push("missing-task");
+	if (completedTasks.length > 0) blockers.push("completed-focus");
+	if (divergentTasks.length > 0) blockers.push("board-handoff-divergence");
+	const reason = blockers[0] ?? "fresh";
+	return {
+		ok: blockers.length === 0,
+		reason,
+		blockers,
+		focusTasks,
+		missingTasks,
+		completedTasks,
+		divergentTasks,
+		freshness: freshness.label,
+		...(freshness.ageMs !== undefined ? { ageMs: freshness.ageMs } : {}),
+		summary: [
+			"handoff-board-reconcile:",
+			`ok=${blockers.length === 0 ? "yes" : "no"}`,
+			`reason=${reason}`,
+			`focus=${focusTasks.length}`,
+			blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+		].filter(Boolean).join(" "),
+	};
+}
+
 export function summarizeAutoResumePromptDiagnostics(
 	diagnostics: AutoResumePromptDiagnostics | undefined,
 ): string {
