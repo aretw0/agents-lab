@@ -11437,6 +11437,44 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] garantir estabilidade antes de expandir autonomia da lane.\n2026-05-01: regressões da lane cleanup+research consolidadas para score de clareza + semeadura visível + tangente aprovada.",
       "verification": "VER-BUD-827"
+    },
+    {
+      "id": "TASK-BUD-479",
+      "description": "Criar leitura report-only de classificação protected-scope no seletor (reason codes + evidência curta) para reduzir surpresa operacional em seleção de lane.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-473"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "docs/primitives/"
+      ],
+      "acceptance_criteria": [
+        "Surface report-only expõe motivo de protected-scope por task sem mutação.",
+        "Saída inclui reason code canônico e sinais que acionaram o bloqueio.",
+        "Regressões cobrem caso local-safe e caso protected externo."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] tornar o gate explicável evita bloqueios percebidos como aleatórios e melhora throughput com segurança.\n[provenance:human] source_task=none reason=unspecified"
+    },
+    {
+      "id": "TASK-BUD-480",
+      "description": "Pesquisa futura (externa) de influências: analisar https://github.com/nousresearch/hermes-agent e sintetizar padrões reaproveitáveis para o control-plane local-first.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Documento curto de síntese com padrões aplicáveis ao contexto local-first.",
+        "Sem dispatch automático: decisão humana explícita antes de qualquer promoção de escopo.",
+        "Registrar riscos/custos e proposta de experimento bounded."
+      ],
+      "milestone": "protected-parked-legacy",
+      "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified"
     }
   ]
 }
