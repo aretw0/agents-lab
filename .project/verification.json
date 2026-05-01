@@ -8880,6 +8880,15 @@
       "method": "quality-gate-unresolved-deps-smoke",
       "timestamp": "2026-05-01T02:59:55.147Z",
       "evidence": "Patched buildProjectTaskQualityGate to report unresolvedDependencies and block closeAllowed when any depends_on task is not completed. This fixes live-observed gap where TASK-BUD-153 with planned/blocked dependencies could appear ready after dependency attachment. Focal validation: npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts => 57 passed. Reload required for live validation."
+    },
+    {
+      "id": "VER-BUD-740",
+      "target": "TASK-BUD-403",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-quality-gate-live-validation",
+      "timestamp": "2026-05-01T03:01:40.083Z",
+      "evidence": "After reload, board_task_quality_gate live-validated corrected unresolved dependency behavior. TASK-BUD-153 returned closeAllowed=no decision=blocked macro=yes blockers=unresolved-dependencies warnings=partial-verification-present, proving macro-task cannot close while side quests remain unresolved. TASK-BUD-403 self-gate returned closeAllowed=yes. Prior focal smoke: project-board-surface 57 passed."
     }
   ]
 }

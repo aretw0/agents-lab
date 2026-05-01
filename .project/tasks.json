@@ -9770,7 +9770,7 @@
     {
       "id": "TASK-BUD-403",
       "description": "Criar gate de qualidade de tickets para detectar tarefas soltas/simplistas sem dependências, subtarefas ou verificações rastreáveis antes de fechamento.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-396"
@@ -9790,8 +9790,8 @@
         "Smoke cobre tarefa pequena válida, macro-task sem dependências, dependência inexistente e verificação que só prova fatia parcial."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Steering do operador: progresso vazio precisa ser detectado cedo. O sistema de tickets deve ser rígido o suficiente para impedir tarefas invisíveis/implícitas e fluído o suficiente para permitir decomposição durante o trabalho com rastreio auditável de verificações.\n2026-05-01: implementada primeira fatia do gate read-only: `buildProjectTaskQualityGate` + surface runtime futura `board_task_quality_gate`, distinguindo tarefas pequenas sem dependências de macro-tasks com dependências implícitas, dependências faltantes e verificação parcial usada como fechamento. Live validation requer reload.\n2026-05-01: live validation inicial revelou gap: após anexar depends_on em TASK-BUD-153, `board_task_quality_gate` antigo retornou closeAllowed=yes mesmo com dependências planejadas/bloqueadas. Corrigido no código para bloquear `unresolved-dependencies` quando depends_on existe mas tasks dependentes ainda não estão completed. Requer reload para validar live.",
-      "verification": "VER-BUD-739"
+      "notes": "[rationale:risk-control] Steering do operador: progresso vazio precisa ser detectado cedo. O sistema de tickets deve ser rígido o suficiente para impedir tarefas invisíveis/implícitas e fluído o suficiente para permitir decomposição durante o trabalho com rastreio auditável de verificações.\n2026-05-01: implementada primeira fatia do gate read-only: `buildProjectTaskQualityGate` + surface runtime futura `board_task_quality_gate`, distinguindo tarefas pequenas sem dependências de macro-tasks com dependências implícitas, dependências faltantes e verificação parcial usada como fechamento. Live validation requer reload.\n2026-05-01: live validation inicial revelou gap: após anexar depends_on em TASK-BUD-153, `board_task_quality_gate` antigo retornou closeAllowed=yes mesmo com dependências planejadas/bloqueadas. Corrigido no código para bloquear `unresolved-dependencies` quando depends_on existe mas tasks dependentes ainda não estão completed. Requer reload para validar live.\n2026-05-01: concluído após reload/live validation. Gate corrigido bloqueia TASK-BUD-153 por `unresolved-dependencies`, evitando progresso vazio quando macro-task já tem side quests explícitas mas ainda abertas.",
+      "verification": "VER-BUD-740"
     },
     {
       "id": "TASK-BUD-404",
