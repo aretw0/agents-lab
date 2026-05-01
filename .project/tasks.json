@@ -9609,7 +9609,7 @@
         "A doutrina operacional passa a exigir decomposição de macro-tarefas antes de fechamento de tasks amplas/protegidas."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] A crítica do operador mostrou que fechar macro-task sem side quests explícitas perde governança; hoje há depends_on no schema, mas falta uma primitiva forte para decomposição/ligação em tarefas existentes."
+      "notes": "[rationale:risk-control] A crítica do operador mostrou que fechar macro-task sem side quests explícitas perde governança; hoje há depends_on no schema, mas falta uma primitiva forte para decomposição/ligação em tarefas existentes.\n2026-05-01: escopo refinado pelo operador: a primitiva de decomposição não é só anexar depends_on; ela deve alimentar um gate de qualidade de tickets para impedir side quests invisíveis/implícitas e para exigir que subtarefas descobertas durante execução sejam registradas com verificações próprias. Ver TASK-BUD-403."
     },
     {
       "id": "TASK-BUD-397",
@@ -9753,6 +9753,31 @@
       ],
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Operador observou incidente crítico: no warning final era para parar, mas o agente continuou algumas runs antes do auto-compact assumir; isso quebra a premissa de controle em long-run e bloqueia qualquer unattended forte.\n2026-05-01: implementada primeira correção fail-closed para warning final/compact: `resolveContextWatchDeterministicStopSignal` agora trata `compact` com auto-compact deferred/non-trigger como `compact-final-warning`, bloqueando nova run até checkpoint/auto-compact concluir. Corrigido também campo de summary `calmCloseReady` que usava propriedade inexistente. Live validation requer reload.\n[rationale:risk-control] O incidente mostrou que advisory final não pode ser apenas ruído; em nível compact, qualquer defer de auto-compact precisa virar stop determinístico para preservar controle humano e handoff."
+    },
+    {
+      "id": "TASK-BUD-403",
+      "description": "Criar gate de qualidade de tickets para detectar tarefas soltas/simplistas sem dependências, subtarefas ou verificações rastreáveis antes de fechamento.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-396"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Existe sinal bounded/read-only que identifica macro-tarefas ou tarefas amplas com dependências implícitas, acceptance criteria genéricos, pouca evidência ou verificações desalinhadas.",
+        "Fechamento de tarefa ampla/rationale-sensitive/protegida falha fechado ou exige decisão explícita quando sub-tarefas descobertas durante execução não existem no board.",
+        "Quando o agente descobre side quests durante trabalho, há caminho mínimo para registrar subtarefas explícitas com depends_on e verificações próprias, sem editar o board inteiro manualmente.",
+        "O gate diferencia rigidez útil de burocracia: tarefas pequenas/local-safe podem fechar com verificação focal simples; tarefas macro exigem decomposição e trilha de dependências.",
+        "Smoke cobre tarefa pequena válida, macro-task sem dependências, dependência inexistente e verificação que só prova fatia parcial."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Steering do operador: progresso vazio precisa ser detectado cedo. O sistema de tickets deve ser rígido o suficiente para impedir tarefas invisíveis/implícitas e fluído o suficiente para permitir decomposição durante o trabalho com rastreio auditável de verificações."
     }
   ]
 }
