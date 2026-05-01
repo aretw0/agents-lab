@@ -11588,6 +11588,32 @@
       ],
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] prevenir recidiva de deadlock misto entre backlog local-safe e protected parked.\n[provenance:tangent-approved] source_task=TASK-BUD-469 reason=desacoplamento manual revelou necessidade de guardrail estrutural\n2026-05-01: iniciando guardrail anti-acoplamento local-safe -> protected no board surface."
+    },
+    {
+      "id": "TASK-BUD-486",
+      "description": "Criar score report-only de cobertura anti-spoofing de variáveis shell (policy/runtime/regressão/observabilidade) com recommendationCode para reação de manutenção.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-484"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-shell-spoofing-score.ts",
+        "packages/pi-stack/extensions/guardrails-core-shell-spoofing-score-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts",
+        "docs/primitives/"
+      ],
+      "acceptance_criteria": [
+        "Tool report-only retorna score 0..100 por dimensões canônicas (policy/runtime/regressão/observabilidade).",
+        "Saída inclui recommendationCode determinístico para manutenção (strong/gap-regression/gap-runtime/gap-observability).",
+        "Sem dispatch/mutação; regressões cobrem cenário forte e cenários com gaps."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] transformar cobertura anti-spoofing em score explícito acelera resposta preventiva a regressões de segurança/manutenção.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: iniciando primitive/surface de score anti-spoofing shell com recommendationCode de reação.\n2026-05-01: cobertura anti-spoofing agora tem score report-only com recommendationCode para reação de manutenção.",
+      "verification": "VER-BUD-834"
     }
   ]
 }

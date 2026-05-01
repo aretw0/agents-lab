@@ -9726,6 +9726,15 @@
       "method": "doc checklist + marker-check",
       "timestamp": "2026-05-01T19:52:14.649Z",
       "evidence": "Created reusable local-safe intake template for future external-influence research decisions, aligned with protected-focus packet and one-slice protected canary contract. Changes: - `docs/primitives/external-influence-intake-template.md`: added concise template with mandatory fields (hypothesis/value/risk/effort, declared files, validation gate, rollback, stop conditions, recommendation promote|skip|defer) and no-dispatch invariants. - `docs/research/external-influence-intake-template-hermes-2026-05-01.md`: filled draft using deferred Hermes case (`TASK-BUD-480`) as local-safe preparation example. - `docs/primitives/README.md`: indexed the new primitive. - `docs/guides/control-plane-operating-doctrine.md`: added explicit rule to fill local-safe external influence intake before promoting external research focus. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 1 file passed, 2 tests passed. - marker checks passed for primitive template (6/6), Hermes draft (5/5), and doctrine anchors (2/2)."
+    },
+    {
+      "id": "VER-BUD-834",
+      "target": "TASK-BUD-486",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke tests + marker-check",
+      "timestamp": "2026-05-01T20:30:28.703Z",
+      "evidence": "Implemented dedicated report-only anti-spoofing coverage score primitive/surface with deterministic maintenance recommendation codes. Changes: - `packages/pi-stack/extensions/guardrails-core-shell-spoofing-score.ts`: added `buildShellSpoofingCoverageScore(...)` scoring policy/runtime/regression/observability dimensions with recommendation codes (`shell-spoofing-coverage-strong|...gap-runtime|...gap-regression|...gap-observability|...gap-policy`). - `packages/pi-stack/extensions/guardrails-core-shell-spoofing-score-surface.ts`: added tool surface `shell_spoofing_coverage_score` collecting local evidence from policy wiring, runtime sample trigger, docs markers, regression file presence, and observability tool availability. - `packages/pi-stack/extensions/guardrails-core.ts`: registered new surface. - `packages/pi-stack/extensions/guardrails-core-exports.ts`: re-exported score builder. - tests: added `packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts` and `...-surface.test.ts`. - docs: `docs/primitives/shell-spoofing-coverage-score.md` + README index. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-validation-method.test.ts packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts` => 5 files passed, 12 tests passed. - marker-check passed for score primitive doc (6/6) and doctrine anti-spoofing anchors (3/3)."
     }
   ]
 }

@@ -88,6 +88,7 @@ export { resolveStructuredInterview } from "./guardrails-core-structured-intervi
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
 export { buildToolHygieneScorecard, classifyToolHygiene } from "./guardrails-core-tool-hygiene";
+export { buildShellSpoofingCoverageScore } from "./guardrails-core-shell-spoofing-score";
 export { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "./guardrails-core-background-process";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";
