@@ -10636,6 +10636,136 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Teste de contrato evita regressão de governança.\n2026-05-01: iniciada consolidação final de smoke de contrato para lane_brainstorm_packet (success + blocked + invariantes no-dispatch).\n2026-05-01: contrato do brainstorm packet endurecido com smoke para sucesso/bloqueio sem dispatch.",
       "verification": "VER-BUD-792"
+    },
+    {
+      "id": "TASK-BUD-441",
+      "description": "Fechar o brainstorm anti-bloat com shortlist priorizada e semear múltiplas tasks local-safe de alto valor para manter o control-plane produtivo no longo prazo.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-440"
+      ],
+      "files": [
+        "docs/research/control-plane-anti-bloat-lane-2026-05-01.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar shortlist priorizada de novas tasks local-safe anti-bloat com critérios objetivos.",
+        "Semear no board pelo menos 5 tasks locais (sem escopo protegido automático).",
+        "Anexar verificação de que a lane voltou a ter backlog local-safe elegível."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Consolidar brainstorm em backlog executável evita repetição sem direção e sustenta qualidade no longo prazo.\n2026-05-01: shortlist priorizada materializada; fechamento desta task destrava execução sequencial local-safe das side quests anti-bloat.",
+      "verification": "VER-BUD-793"
+    },
+    {
+      "id": "TASK-BUD-442",
+      "description": "Centralizar recommendation codes do control-plane em módulo compartilhado para reduzir literals duplicados entre autonomy-lane, context-watch e brainstorm packet.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-local-stop-guidance.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Criar/exportar constants type-safe para recommendation codes compartilhados.",
+        "Substituir literals duplicados nas surfaces alvo.",
+        "Smoke tests relevantes permanecem verdes sem mudança funcional."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Menos string solta => menos drift semântico e menos gordura de manutenção."
+    },
+    {
+      "id": "TASK-BUD-443",
+      "description": "Endurecer contrato do lane_brainstorm_packet para limites determinísticos (`max_ideas`/`max_slices`) e fallback quando não há ideias válidas.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/lane-brainstorm-packet.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Cobrir clipping de max_ideas/max_slices em smoke tests.",
+        "Cobrir fallback para selection.eligibleTaskIds quando `ideas` vazio/inválido.",
+        "Preservar invariantes report-only (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`)."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Evita explosão de payload e mantém comportamento previsível."
+    },
+    {
+      "id": "TASK-BUD-444",
+      "description": "Extrair builder do lane_brainstorm_packet para módulo dedicado e reduzir acoplamento do guardrails-core-autonomy-lane-surface.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/lane-brainstorm-packet.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover composição do packet para helper/módulo dedicado sem alterar contrato externo.",
+        "Manter tool surface fina (wiring + IO).",
+        "Smoke tests de surface permanecem verdes."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Reduz gordura estrutural e facilita evolução incremental."
+    },
+    {
+      "id": "TASK-BUD-445",
+      "description": "Adicionar regressão anti-bloat para docs de operação (checklist obrigatório presente e consistente entre doctrine/glossary).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/control-plane-glossary.md",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Teste/checagem automatizada valida marcadores mínimos do checklist anti-gordura.",
+        "Falha fechada quando itens obrigatórios desaparecerem.",
+        "Sem alterar política de escopos protegidos."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Previne regressão silenciosa da estratégia de qualidade."
+    },
+    {
+      "id": "TASK-BUD-446",
+      "description": "Extrair recommendation resolver de context_watch_continuation_readiness para módulo menor e cobrir contrato dedicado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover resolver para módulo dedicado sem mudar saída da tool.",
+        "Adicionar teste dedicado para codes + nextAction non-empty.",
+        "Manter contexto-watchdog smoke principal verde."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Reduz tamanho/complexidade do arquivo gigante e melhora mantenibilidade."
     }
   ]
 }

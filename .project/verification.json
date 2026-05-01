@@ -9357,6 +9357,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T13:52:00.078Z",
       "evidence": "Finalized contract smoke coverage for lane brainstorm packet success + blocked paths in `autonomy-lane-surface.test.ts` and scorer support in `lane-brainstorm-packet.test.ts`. Assertions now enforce recommendationCode/nextAction structured outputs and fail-closed invariants in both paths: `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` => 2 files passed, 12 tests passed."
+    },
+    {
+      "id": "VER-BUD-793",
+      "target": "TASK-BUD-441",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board seeding + lane gating check",
+      "timestamp": "2026-05-01T13:58:03.582Z",
+      "evidence": "Finalized brainstorm anti-bloat consolidation by seeding prioritized local-safe backlog tasks: `TASK-BUD-442`, `TASK-BUD-443`, `TASK-BUD-444`, `TASK-BUD-445`, `TASK-BUD-446` (all planned, non-protected scope). This transforms brainstorm output into executable long-horizon quality lane with explicit acceptance criteria and risk rationale per task. Pre-close lane check showed blocked-by-dependencies while `TASK-BUD-441` was in-progress, confirming dependency gating is active and auditable."
     }
   ]
 }
