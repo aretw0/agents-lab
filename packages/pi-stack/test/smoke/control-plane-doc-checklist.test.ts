@@ -29,4 +29,23 @@ describe("control-plane anti-bloat docs checklist", () => {
       expect(glossary).toContain(marker);
     }
   });
+
+  it("keeps critical guide index links for control-plane operation", () => {
+    const guidesIndex = readRepoFile("docs/guides/README.md").toLowerCase();
+    const doctrine = readRepoFile("docs/guides/control-plane-operating-doctrine.md").toLowerCase();
+
+    const requiredGuideLinks = [
+      "control-plane-operating-doctrine.md",
+      "control-plane-glossary.md",
+      "session-triage.md",
+      "i18n-intents.md",
+      "skill-guide-parity.md",
+    ];
+
+    for (const rel of requiredGuideLinks) {
+      expect(guidesIndex).toContain(rel);
+    }
+
+    expect(doctrine).toContain("docs/guides/control-plane-glossary.md");
+  });
 });

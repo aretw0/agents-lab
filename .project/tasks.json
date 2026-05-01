@@ -10942,7 +10942,7 @@
     {
       "id": "TASK-BUD-455",
       "description": "Introduzir memória curta por fatia no handoff com links canônicos para continuidade local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-451"
@@ -10957,12 +10957,13 @@
         "Smoke focal de context-watch/handoff permanece verde."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] continuidade com contexto curto e auditável."
+      "notes": "[rationale:risk-control] continuidade com contexto curto e auditável.\n2026-05-01: iniciando memória curta por fatia no handoff com links canônicos extraídos de contexto/validação/commits para melhorar retomada local-safe.\n2026-05-01: memória por fatia adicionada com links canônicos e proteção explícita de orçamento do handoff.",
+      "verification": "VER-BUD-807"
     },
     {
       "id": "TASK-BUD-456",
       "description": "Expandir regressões single-source docs para guias críticos além de doctrine/glossary sem aumentar churn desnecessário.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-451"
@@ -10979,12 +10980,13 @@
         "Mudança documental permanece em blast radius curto."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] reduzir drift documental sem burocratizar revisão."
+      "notes": "[rationale:risk-control] reduzir drift documental sem burocratizar revisão.\n2026-05-01: expandindo regressão single-source para guias críticos adicionais com checks de baixo acoplamento e fail-closed.\n2026-05-01: regressão docs ampliada sem aumentar fragilidade (anchors curtos e estáveis).",
+      "verification": "VER-BUD-808"
     },
     {
       "id": "TASK-BUD-457",
       "description": "Adicionar contrato/smoke para microcopy de preview expandível alinhado à identidade `(N earlier lines, ctrl+o to expand)` em superfícies futuras.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-451"
@@ -10999,7 +11001,8 @@
         "Sem alteração de autorização/dispatch; apenas superfície textual."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] preservar consistência de UX sem abrir escopo protegido."
+      "notes": "[rationale:risk-control] preservar consistência de UX sem abrir escopo protegido.\n2026-05-01: adicionando contrato de microcopy para preview expandível alinhado ao padrão `(N earlier lines, ctrl+o to expand)` com fallback robusto.\n2026-05-01: identidade textual de preview expandível fixada por contrato de teste, sem abrir escopo operacional.",
+      "verification": "VER-BUD-809"
     },
     {
       "id": "TASK-BUD-458",

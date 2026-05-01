@@ -11,6 +11,12 @@ export function writePreviewExpandHint(): string {
 	return resolvedKey ? keyHint("app.tools.expand", "to expand") : rawKeyHint("ctrl+o", "to expand");
 }
 
+export function formatWritePreviewCollapsedLinesHint(earlierLines: number): string {
+	const count = Math.max(0, Math.floor(Number(earlierLines) || 0));
+	const label = count === 1 ? "earlier line" : "earlier lines";
+	return `(${count} ${label}, ${writePreviewExpandHint()})`;
+}
+
 function shortenPath(path: string): string {
 	const home = homedir();
 	return path.startsWith(home) ? `~${path.slice(home.length)}` : path;
@@ -87,7 +93,7 @@ export default function writePreviewGuardExtension(pi: ExtensionAPI) {
 			if (preview.remainingLines > 0) {
 				text += theme.fg(
 					"muted",
-					`\n... (${preview.remainingLines} more lines, ${preview.totalLines} total, ${writePreviewExpandHint()})`,
+					`\n... ${formatWritePreviewCollapsedLinesHint(preview.remainingLines)}`,
 				);
 			} else if (!context.expanded && preview.clippedLongLines > 0) {
 				const suffix = preview.clippedLongLines === 1 ? "" : "s";

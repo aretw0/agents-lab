@@ -94,6 +94,32 @@ function compactHandoffList(values: string[] | undefined, limit: number, maxChar
 	return prepared.values.length > 0 ? prepared.values : undefined;
 }
 
+function trimSliceMemoryForBudget(checkpoint: Record<string, unknown>): Record<string, unknown> {
+	let jsonChars = JSON.stringify(checkpoint).length;
+	if (jsonChars <= LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS) return checkpoint;
+	const candidate = { ...checkpoint } as Record<string, unknown>;
+	const memory = candidate.slice_memory;
+	if (!memory || typeof memory !== "object") return candidate;
+	const memoryRecord = { ...(memory as Record<string, unknown>) };
+	const links = Array.isArray(memoryRecord.canonical_links)
+		? memoryRecord.canonical_links.filter((v): v is string => typeof v === "string")
+		: [];
+	if (links.length > 2) {
+		memoryRecord.canonical_links = links.slice(0, 2);
+		candidate.slice_memory = memoryRecord;
+		jsonChars = JSON.stringify(candidate).length;
+	}
+	if (jsonChars > LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS && links.length > 0) {
+		delete memoryRecord.canonical_links;
+		candidate.slice_memory = memoryRecord;
+		jsonChars = JSON.stringify(candidate).length;
+	}
+	if (jsonChars > LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS) {
+		delete candidate.slice_memory;
+	}
+	return candidate;
+}
+
 export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpointInput): Record<string, unknown> {
 	const timestamp = input.timestampIso || new Date().toISOString();
 	const contextLevel = input.contextLevel ?? "ok";
@@ -103,7 +129,18 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 	const recentCommits = compactHandoffList(input.commits, 2, 80);
 	const nextActions = compactHandoffList(input.nextActions, 3, 120);
 	const blockers = compactHandoffList(input.blockers, 3, 100);
-	return {
+	const canonicalLinks = buildLocalSliceCanonicalLinks({
+		taskId: input.taskId,
+		context: input.context,
+		validation: input.validation,
+		commits: input.commits,
+		nextActions: input.nextActions,
+	});
+	const sliceMemory = {
+		focus: currentTasks?.[0] ?? "none",
+		...(canonicalLinks.length > 0 ? { canonical_links: canonicalLinks } : {}),
+	};
+	const checkpoint = {
 		timestamp,
 		context: truncateForPrompt(input.context, 180),
 		...(currentTasks ? { current_tasks: currentTasks } : {}),
@@ -111,6 +148,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 		blockers: blockers ?? [],
 		...(recentValidation ? { recent_validation: recentValidation } : {}),
 		...(recentCommits ? { recent_commits: recentCommits } : {}),
+		slice_memory: sliceMemory,
 		context_watch: {
 			generatedAtIso: timestamp,
 			level: contextLevel,
@@ -128,6 +166,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			recommendation: truncateForPrompt(input.recommendation ?? "Local slice checkpoint saved.", 120),
 		}],
 	};
+	return trimSliceMemoryForBudget(checkpoint);
 }
 
 export function resolveHandoffFreshness(
@@ -360,6 +399,68 @@ function extractTaskIdsFromTextLines(values: string[], limit = 3): string[] {
 	return ids;
 }
 
+function extractVerificationIdsFromTextLines(values: string[], limit = 3): string[] {
+	const ids: string[] = [];
+	const seen = new Set<string>();
+	for (const value of values) {
+		const matches = String(value ?? "").toUpperCase().match(/VER-[A-Z0-9-]*\d[A-Z0-9-]*/g) ?? [];
+		for (const id of matches) {
+			if (seen.has(id)) continue;
+			seen.add(id);
+			ids.push(id);
+			if (ids.length >= limit) return ids;
+		}
+	}
+	return ids;
+}
+
+function extractCommitHashesFromTextLines(values: string[], limit = 3): string[] {
+	const ids: string[] = [];
+	const seen = new Set<string>();
+	for (const value of values) {
+		const matches = String(value ?? "").match(/\b[0-9a-f]{7,40}\b/gi) ?? [];
+		for (const match of matches) {
+			const normalized = match.toLowerCase();
+			if (seen.has(normalized)) continue;
+			seen.add(normalized);
+			ids.push(normalized);
+			if (ids.length >= limit) return ids;
+		}
+	}
+	return ids;
+}
+
+function buildLocalSliceCanonicalLinks(input: {
+	taskId?: string;
+	context: string;
+	validation?: string[];
+	commits?: string[];
+	nextActions?: string[];
+}): string[] {
+	const sourceLines = [
+		input.context,
+		...(input.validation ?? []),
+		...(input.commits ?? []),
+		...(input.nextActions ?? []),
+	];
+	const links: string[] = [];
+	const seen = new Set<string>();
+	const add = (value: string) => {
+		if (!value || seen.has(value) || links.length >= 4) return;
+		seen.add(value);
+		links.push(value);
+	};
+	if (typeof input.taskId === "string" && input.taskId.trim().length > 0) {
+		const directTaskId = extractTaskIdsFromTextLines([input.taskId], 1)[0]
+			?? truncateForPrompt(input.taskId, 24).toUpperCase();
+		add(`task:${directTaskId}`);
+	}
+	for (const id of extractTaskIdsFromTextLines(sourceLines, 2)) add(`task:${id}`);
+	for (const id of extractVerificationIdsFromTextLines(sourceLines, 1)) add(`verification:${id}`);
+	for (const hash of extractCommitHashesFromTextLines(sourceLines, 1)) add(`commit:${hash}`);
+	return links;
+}
+
 function extractOperationalFocusHints(values: string[], limit = 3): string[] {
 	const hints: string[] = [];
 	const add = (hint: string) => {
@@ -474,6 +575,16 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 		),
 	});
 
+	const sliceMemoryLinks = normalizeStringArray(
+		handoff.slice_memory && typeof handoff.slice_memory === "object"
+			? (handoff.slice_memory as Record<string, unknown>).canonical_links
+			: undefined,
+	);
+	const linksPrepared = preparePromptCollection({
+		values: sliceMemoryLinks,
+		maxChars: 48,
+		limit: 3,
+	});
 	const lines = [
 		`auto-resume: continue from .project/handoff.json${timestamp ? ` (ts=${timestamp})` : ""}.`,
 		`focusTasks: ${formatPromptList(tasksPrepared.values, tasksPrepared.diagnostics.droppedByLimitCount, "none-listed", ", ")}`,
@@ -486,6 +597,9 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 	}
 	if (nextPrepared.values.length > 0) {
 		lines.push(`next: ${formatPromptList(nextPrepared.values, nextPrepared.diagnostics.droppedByLimitCount, "keep current lane intent", " | ")}`);
+	}
+	if (linksPrepared.values.length > 0) {
+		lines.push(`links: ${formatPromptList(linksPrepared.values, linksPrepared.diagnostics.droppedByLimitCount, "none", ", ")}`);
 	}
 	lines.push("policy: latest user steering wins; otherwise continue listed tasks.");
 	const promptRaw = lines.join("\n");

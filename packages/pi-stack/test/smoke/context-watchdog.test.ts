@@ -1121,6 +1121,7 @@ describe("context-watchdog", () => {
 			context: `TASK-BUD-225 completed. ${"handoff payload ".repeat(40)}`,
 			validation: [
 				"context-watchdog.test.ts passed 32/32",
+				"verification linked: VER-BUD-225 passed",
 				"test:monitor:smoke passed 208/208 across 32 files",
 				"live board_task_complete emitted compact summary",
 				"extra validation should be dropped",
@@ -1148,6 +1149,14 @@ describe("context-watchdog", () => {
 		expect(checkpoint.context_watch).toMatchObject({ level: "ok", percent: 14, action: "continue" });
 		expect(checkpoint.context_watch_events).toHaveLength(1);
 		expect(checkpoint.context_watch_events[0]).toMatchObject({ reason: "manual_checkpoint", action: "checkpoint-refresh" });
+		expect(checkpoint.slice_memory).toMatchObject({
+			focus: "TASK-BUD-225",
+		});
+		expect((checkpoint.slice_memory as any).canonical_links).toEqual(expect.arrayContaining([
+			"task:TASK-BUD-225",
+			"verification:VER-BUD-225",
+			"commit:abc1234",
+		]));
 	});
 
 	it("keeps compact local slice handoff checkpoints within budget", () => {
@@ -1437,6 +1446,24 @@ describe("context-watchdog", () => {
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
+	});
+
+	it("inclui links canônicos do slice_memory no auto-resume prompt", () => {
+		const envelope = buildAutoResumePromptEnvelopeFromHandoff({
+			timestamp: "2026-05-01T12:00:00.000Z",
+			current_tasks: ["TASK-BUD-455"],
+			next_actions: ["run focal smoke"],
+			slice_memory: {
+				canonical_links: [
+					"task:TASK-BUD-455",
+					"verification:VER-BUD-804",
+					"commit:86f9037",
+				],
+			},
+		});
+
+		expect(envelope.prompt).toContain("focusTasks: TASK-BUD-455");
+		expect(envelope.prompt).toContain("links: task:TASK-BUD-455, verification:VER-BUD-804, commit:86f9037");
 	});
 
 	it("context_watch_continuation_readiness combines primary focus with local audit read-only", async () => {

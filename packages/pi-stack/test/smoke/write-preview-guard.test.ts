@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { initTheme } from "@mariozechner/pi-coding-agent";
-import { buildWritePreview, writePreviewExpandHint } from "../../extensions/write-preview-guard";
+import {
+	buildWritePreview,
+	formatWritePreviewCollapsedLinesHint,
+	writePreviewExpandHint,
+} from "../../extensions/write-preview-guard";
 
 describe("write-preview-guard", () => {
 	beforeAll(() => {
@@ -12,6 +16,13 @@ describe("write-preview-guard", () => {
 		expect(hint).toContain("ctrl+o");
 		expect(hint).toContain("to expand");
 		expect(hint).not.toContain("expand-tool");
+	});
+
+	it("formats collapsed lines hint with canonical earlier-lines microcopy", () => {
+		const hint = formatWritePreviewCollapsedLinesHint(10);
+		expect(hint).toContain("(10 earlier lines,");
+		expect(hint).toContain("ctrl+o");
+		expect(hint).toContain("to expand");
 	});
 
 	it("clips long single-line payloads when collapsed", () => {

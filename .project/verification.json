@@ -9483,6 +9483,33 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T15:58:48.071Z",
       "evidence": "Implemented adaptive output shaping with cooldown for `context_watch_status` in `packages/pi-stack/extensions/context-watchdog.ts` via new primitive `resolveContextWatchAdaptiveStatusSummary(...)`. Behavior: warn/checkpoint summaries emit full output on first/change and switch to compact mode (`mode=compact-output`) during cooldown windows; non-eligible levels remain full. Structured contract preserved with `details.summary`, added `details.fullSummary`, and `details.outputShape` metadata (mode/cooldown). Added regression in `packages/pi-stack/test/smoke/context-watchdog.test.ts` covering cooldown shaping semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts` => 5 files passed, 67 tests passed."
+    },
+    {
+      "id": "VER-BUD-807",
+      "target": "TASK-BUD-455",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T16:10:57.059Z",
+      "evidence": "Introduced compact per-slice handoff memory with canonical links in `packages/pi-stack/extensions/context-watchdog-handoff.ts`. `buildLocalSliceHandoffCheckpoint(...)` now emits `slice_memory` containing bounded `focus` and `canonical_links` extracted deterministically from task/context/validation/commit signals (`task:*`, `verification:*`, `commit:*`). Added budget-safe trimming (`trimSliceMemoryForBudget`) so checkpoints remain within `LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS` under noisy inputs. Auto-resume prompt now includes canonical links when present via `links: ...` line in `buildAutoResumePromptEnvelopeFromHandoff(...)`. Regression coverage updated in `packages/pi-stack/test/smoke/context-watchdog.test.ts` (slice memory links + auto-resume links line + budget behavior preserved). Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 2 files passed, 54 tests passed."
+    },
+    {
+      "id": "VER-BUD-808",
+      "target": "TASK-BUD-456",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T16:12:32.977Z",
+      "evidence": "Expanded single-source docs regression coverage in `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` with a new fail-closed check for critical guide index links (`control-plane-operating-doctrine.md`, `control-plane-glossary.md`, `session-triage.md`, `i18n-intents.md`, `skill-guide-parity.md`) and doctrine→glossary canonical cross-link presence. Existing anti-bloat shared-anchor checks between doctrine/glossary were preserved. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 3 files passed, 56 tests passed."
+    },
+    {
+      "id": "VER-BUD-809",
+      "target": "TASK-BUD-457",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T16:14:30.854Z",
+      "evidence": "Added explicit microcopy contract for expandable write previews in `packages/pi-stack/extensions/write-preview-guard.ts` via `formatWritePreviewCollapsedLinesHint(...)`, standardizing collapsed hint text to the canonical identity format `(N earlier lines, ctrl+o to expand)` while preserving resolved keybinding fallback behavior. Render path now uses this formatter for multiline collapsed previews. Added regression in `packages/pi-stack/test/smoke/write-preview-guard.test.ts` asserting canonical earlier-lines wording and key hint presence. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/write-preview-guard.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 59 tests passed."
     }
   ]
 }
