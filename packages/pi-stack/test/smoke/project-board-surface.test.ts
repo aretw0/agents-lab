@@ -199,6 +199,38 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("blocks creating local-safe task that depends on protected parked dependency", () => {
+    const cwd = seedWorkspace();
+    try {
+      createProjectTaskBoard(cwd, {
+        id: "TASK-PROTECTED",
+        description: "Pesquisa externa parked",
+        milestone: "protected-parked-legacy",
+      });
+
+      const blocked = createProjectTaskBoard(cwd, {
+        id: "TASK-LOCAL-BLOCKED",
+        description: "Task local-safe",
+        dependsOn: ["TASK-PROTECTED"],
+      });
+
+      expect(blocked).toMatchObject({
+        ok: false,
+        reason: "local-safe-depends-on-protected",
+      });
+
+      const allowedProtected = createProjectTaskBoard(cwd, {
+        id: "TASK-PROTECTED-CHILD",
+        description: "Task protected child",
+        milestone: "protected-parked-legacy",
+        dependsOn: ["TASK-PROTECTED"],
+      });
+      expect(allowedProtected.ok).toBe(true);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("buildProjectTaskDecisionPacket summarizes no-auto-close evidence without closing", () => {
     const cwd = seedWorkspace();
     try {
@@ -226,9 +258,15 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("updates task dependencies dry-first and blocks missing/cycles", () => {
+  it("updates task dependencies dry-first and blocks missing/cycles/protected-coupling", () => {
     const cwd = seedWorkspace();
     try {
+      createProjectTaskBoard(cwd, {
+        id: "TASK-PROTECTED",
+        description: "Pesquisa externa parked",
+        milestone: "protected-parked-legacy",
+      });
+
       const dryRun = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
         addDependsOn: ["TASK-A"],
@@ -264,6 +302,29 @@ describe("project-board-surface", () => {
         ok: false,
         blockers: ["dependency-cycle"],
       });
+
+      expect(updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-C",
+        replaceDependsOn: ["TASK-PROTECTED"],
+        dryRun: false,
+      })).toMatchObject({
+        ok: false,
+        applied: false,
+        blockers: ["local-safe-depends-on-protected"],
+      });
+
+      createProjectTaskBoard(cwd, {
+        id: "TASK-PROTECTED-CHILD",
+        description: "Task protected child",
+        milestone: "protected-parked-legacy",
+      });
+      const protectedAllowed = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-PROTECTED-CHILD",
+        replaceDependsOn: ["TASK-PROTECTED"],
+        dryRun: false,
+      });
+      expect(protectedAllowed.ok).toBe(true);
+      expect(protectedAllowed.applied).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

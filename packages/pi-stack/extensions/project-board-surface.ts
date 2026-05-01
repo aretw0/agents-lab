@@ -991,9 +991,11 @@ export function updateProjectTaskDependencies(
   const added = after.filter((dep) => !before.includes(dep));
   const missingDependencies = after.filter((dep) => !tasksById.has(dep));
   const cycleDependencies = after.filter((dep) => dep === taskId || taskDependsOnPath(tasksById, dep, taskId));
+  const protectedDependencyIds = taskDependsOnProtectedScope(current, after, tasksById);
   const blockers = [
     missingDependencies.length > 0 ? "missing-dependencies" : undefined,
     cycleDependencies.length > 0 ? "dependency-cycle" : undefined,
+    protectedDependencyIds.length > 0 ? "local-safe-depends-on-protected" : undefined,
   ].filter(Boolean) as string[];
   const ok = blockers.length === 0;
   const applied = ok && !dryRun;
@@ -1045,6 +1047,34 @@ export interface ProjectTaskQualityGateResult {
 
 function taskHasProtectedFiles(task: TaskRecord): boolean {
   return (task.files ?? []).some((file) => /(^|\/)(\.github|\.obsidian)(\/|$)|(^|\/)\.pi\/settings\.json$/i.test(file));
+}
+
+function isProtectedParkedMilestone(value: string | undefined): boolean {
+  if (!value) return false;
+  return /(^|[-_])protected[-_]parked/i.test(value);
+}
+
+function taskHasProtectedScopeSignals(task: TaskRecord): boolean {
+  if (isProtectedParkedMilestone(task.milestone)) return true;
+  if (taskHasProtectedFiles(task)) return true;
+
+  const text = [task.description, task.notes ?? ""].join("\n").toLowerCase();
+  if (/\bgithub\s+actions\b|\bremote\s+(?:compute|execution|runner|runners)\b|\bpublish\b|\bci\b/.test(text)) return true;
+  if (/https?:\/\//.test(text)) return true;
+  if (/\bcolony\b.*\b(?:promotion|promote|recovery|recover|materializa[cç][aã]o)\b|\b(?:promotion|promote|recovery|recover)\b.*\bcolony\b/.test(text)) return true;
+  if (/\b(?:research|pesquisa)\b.*\b(?:extern[ao]|external|web|internet|url|fonte(?:s)?|source|influ[eê]ncia|inspiration|inspira[cç][aã]o|prior\s*art)\b/.test(text)) return true;
+  return false;
+}
+
+function taskDependsOnProtectedScope(task: TaskRecord, dependencyIds: string[], tasksById: Map<string, TaskRecord>): string[] {
+  if (taskHasProtectedScopeSignals(task)) return [];
+  const blocked: string[] = [];
+  for (const dep of dependencyIds) {
+    const dependencyTask = tasksById.get(dep);
+    if (!dependencyTask) continue;
+    if (taskHasProtectedScopeSignals(dependencyTask)) blocked.push(dep);
+  }
+  return blocked;
 }
 
 function isBroadTaskCandidate(task: TaskRecord): { macro: boolean; signals: string[] } {
@@ -1473,6 +1503,26 @@ export function createProjectTaskBoard(
 
   const block = readProjectTasksBlock(cwd);
   if (block.tasks.some((row) => row?.id === id)) return { ok: false, reason: "task-already-exists", summary: buildBoardTaskCreateSummary(false, id, status, "task-already-exists") };
+
+  const tasksById = new Map(block.tasks.map((row) => [String(row.id), row as TaskRecord] as const));
+  const localCandidate: TaskRecord = {
+    id,
+    description,
+    status,
+    notes: note,
+    milestone,
+    files,
+    depends_on: dependsOn,
+    acceptance_criteria: acceptanceCriteria,
+  };
+  const protectedDependencyIds = taskDependsOnProtectedScope(localCandidate, dependsOn ?? [], tasksById);
+  if (protectedDependencyIds.length > 0) {
+    return {
+      ok: false,
+      reason: "local-safe-depends-on-protected",
+      summary: buildBoardTaskCreateSummary(false, id, status, "local-safe-depends-on-protected"),
+    };
+  }
 
   const task: ProjectTaskItem & { priority?: string } = {
     id,

@@ -11571,7 +11571,7 @@
     {
       "id": "TASK-BUD-485",
       "description": "Adicionar guardrail para bloquear dependência de task local-safe em task protected (board dependencies/create), com regressão para evitar novo acoplamento.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-483"
@@ -11587,7 +11587,8 @@
         "Doutrina registra regra de desacoplamento local-safe/protected para planejamento."
       ],
       "milestone": "cleanup-research-longrun",
-      "notes": "[rationale:risk-control] prevenir recidiva de deadlock misto entre backlog local-safe e protected parked.\n[provenance:tangent-approved] source_task=TASK-BUD-469 reason=desacoplamento manual revelou necessidade de guardrail estrutural\n2026-05-01: iniciando guardrail anti-acoplamento local-safe -> protected no board surface."
+      "notes": "[rationale:risk-control] prevenir recidiva de deadlock misto entre backlog local-safe e protected parked.\n[provenance:tangent-approved] source_task=TASK-BUD-469 reason=desacoplamento manual revelou necessidade de guardrail estrutural\n2026-05-01: iniciando guardrail anti-acoplamento local-safe -> protected no board surface.\n2026-05-01: guardrail estrutural evita recidiva de deadlock local-safe↔protected por dependência direta.",
+      "verification": "VER-BUD-835"
     },
     {
       "id": "TASK-BUD-486",

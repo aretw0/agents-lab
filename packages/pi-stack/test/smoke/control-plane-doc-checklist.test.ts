@@ -35,6 +35,7 @@ describe("control-plane anti-bloat docs checklist", () => {
       "validationgate",
       "rollbackplan",
       "stop conditions canônicas do canário",
+      "regra de desacoplamento de planejamento",
     ];
 
     for (const marker of protectedCanaryAnchors) {

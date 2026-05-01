@@ -9735,6 +9735,15 @@
       "method": "smoke tests + marker-check",
       "timestamp": "2026-05-01T20:30:28.703Z",
       "evidence": "Implemented dedicated report-only anti-spoofing coverage score primitive/surface with deterministic maintenance recommendation codes. Changes: - `packages/pi-stack/extensions/guardrails-core-shell-spoofing-score.ts`: added `buildShellSpoofingCoverageScore(...)` scoring policy/runtime/regression/observability dimensions with recommendation codes (`shell-spoofing-coverage-strong|...gap-runtime|...gap-regression|...gap-observability|...gap-policy`). - `packages/pi-stack/extensions/guardrails-core-shell-spoofing-score-surface.ts`: added tool surface `shell_spoofing_coverage_score` collecting local evidence from policy wiring, runtime sample trigger, docs markers, regression file presence, and observability tool availability. - `packages/pi-stack/extensions/guardrails-core.ts`: registered new surface. - `packages/pi-stack/extensions/guardrails-core-exports.ts`: re-exported score builder. - tests: added `packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts` and `...-surface.test.ts`. - docs: `docs/primitives/shell-spoofing-coverage-score.md` + README index. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-validation-method.test.ts packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts` => 5 files passed, 12 tests passed. - marker-check passed for score primitive doc (6/6) and doctrine anti-spoofing anchors (3/3)."
+    },
+    {
+      "id": "VER-BUD-835",
+      "target": "TASK-BUD-485",
+      "target_type": "task",
+      "status": "passed",
+      "method": "project-board regressions + doctrine anchor check",
+      "timestamp": "2026-05-01T21:02:18.759Z",
+      "evidence": "Implemented board-surface guardrail to block local-safe -> protected dependency coupling and documented planning rule. Changes: - `packages/pi-stack/extensions/project-board-surface.ts`: added protected-scope dependency guard (`local-safe-depends-on-protected`) in both dependency update flow (`updateProjectTaskDependencies`) and task creation flow (`createProjectTaskBoard`). Local-safe tasks now fail when directly depending on protected parked/scope-signaled tasks; protected tasks may still depend on protected tasks. - `packages/pi-stack/test/smoke/project-board-surface.test.ts`: added regressions for blocked local-safe create/update cases and allowed protected->protected dependency cases. - `docs/guides/control-plane-operating-doctrine.md`: added explicit planning decoupling rule (local-safe must not depend directly on `protected-parked-*`). - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts`: added doctrine regression anchor for decoupling rule. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed."
     }
   ]
 }
