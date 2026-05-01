@@ -79,7 +79,9 @@ A superfície `background_process_lifecycle_plan` é read-only e serve para clas
 
 ### Boundary da fonte de evento
 
-Investigação bounded em 2026-05-01 procurou `BG_PROCESS_DONE`, `backgrounded`, `bg_status` e `[undefined]` em `packages/pi-stack/extensions` e `node_modules/@mariozechner/pi-coding-agent/dist`, excluindo source maps. O emissor literal de `BG_PROCESS_DONE` não apareceu nesses arquivos; os hits relevantes foram apenas `bg_status` em contrato de monitor e `backgrounded` no fluxo upstream de `Ctrl+Z`. Portanto, até nova evidência, a origem do prefixo `[undefined]`/`BG_PROCESS_DONE` observado deve ser tratada como boundary de harness/superfície externa ou caminho de emissão ainda não localizado, não como bug atribuído diretamente ao código first-party atual.
+Investigação bounded em 2026-05-01 procurou `BG_PROCESS_DONE`, `backgrounded`, `bg_status` e `[undefined]` em `packages/pi-stack/extensions` e `node_modules/@mariozechner/pi-coding-agent/dist`, excluindo source maps. O emissor literal de `BG_PROCESS_DONE` não apareceu nesses arquivos; os hits relevantes foram apenas `bg_status` em contrato de monitor e `backgrounded` no fluxo upstream de `Ctrl+Z`. Portanto, até nova evidência de código, a origem do prefixo `[undefined]`/`BG_PROCESS_DONE` observado deve ser tratada como boundary de harness/superfície externa ou caminho de emissão ainda não localizado, não como bug atribuído diretamente ao código first-party atual.
+
+Evidência live posterior confirmou a fronteira operacional: o harness emitiu `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` para um comando auto-backgrounded. Classificado pelo contrato first-party como `state=finished`, `known=yes`, `stopRequested=no`, `label=BG_PROCESS_DONE`, `dispatch=no`, `authorization=none`. Isso não prova que o emissor real já usa o contrato; prova que a integração/adaptação da notificação real ainda é a fronteira a resolver antes de readiness forte.
 
 Caminhos aceitos para integração futura:
 

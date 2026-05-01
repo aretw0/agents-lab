@@ -3736,7 +3736,8 @@
         "TASK-BUD-399",
         "TASK-BUD-400",
         "TASK-BUD-401",
-        "TASK-BUD-403"
+        "TASK-BUD-403",
+        "TASK-BUD-410"
       ]
     },
     {
@@ -9685,7 +9686,8 @@
       "status": "planned",
       "priority": "p1",
       "depends_on": [
-        "TASK-BUD-397"
+        "TASK-BUD-397",
+        "TASK-BUD-410"
       ],
       "files": [
         "docs/guides/control-plane-operating-doctrine.md",
@@ -9937,6 +9939,29 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Depois do detector, o risco real é uma continuação usar handoff velho como permissão atual; o gate precisa falhar fechado antes de qualquer dispatch/retomada.\n2026-05-01: concluído fail-closed para auto-resume/continuidade quando handoff e board divergem; não há dispatch quando o detector aponta stale/divergent handoff.",
       "verification": "VER-BUD-748"
+    },
+    {
+      "id": "TASK-BUD-410",
+      "description": "Integrar ou documentar adaptador para notificações reais `BG_PROCESS_DONE` do harness/bg_status passarem pelo contrato canônico de lifecycle antes de serem usadas como readiness.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-397"
+      ],
+      "files": [
+        "docs/primitives/background-process-control.md",
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Registrar evidência live de `BG_PROCESS_DONE` emitido pelo harness/bg_status para processo auto-backgrounded.",
+        "Definir se a integração cabe em wrapper/adaptador first-party ou se permanece boundary externa fail-closed.",
+        "Se houver adaptador local, eventos `BG_PROCESS_DONE` devem ser normalizados por `resolveBackgroundProcessLifecycleEvent` antes de alimentar readiness.",
+        "Evento normal `exit 0` conhecido vira `finished`; evento pós-stop vira `late-after-stop`; origem desconhecida vira `unknown-origin`.",
+        "Enquanto o harness não for integrável, readiness forte permanece bloqueada ou marcada como external-boundary-not-normalized."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] O operador trouxe evidência live de `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` emitido pelo harness após auto-background. Isso confirma que o problema relevante é a fronteira real de notificação/bg_status, não só o classificador first-party já implementado."
     }
   ]
 }

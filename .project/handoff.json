@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T03:43:36.090Z",
-  "context": "Implemented TASK-BUD-409 fail-closed stale handoff gating. Auto-resume dispatch now receives handoffBoardReconciled from resolveHandoffBoardR [snip] er commit and reload before continuing. [truncated:+315 chars]",
+  "timestamp": "2026-05-01T03:47:03.391Z",
+  "context": "Operator provided live BG_PROCESS_DONE notification for PID 35348 from the harness after auto-backgrounded bounded scan. Classified with back [snip] t and fail-closed integration boundary. [truncated:+399 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-409/TASK-BUD-398 partial slice.",
-    "Reload required before live-validating stale handoff fail-closed runtime and deciding TASK-BUD-398 closure.",
-    "After reload, run context_watch_status and a bounded live/read-only validation path for handof [snip] d divergence if available. [truncated:+6 chars]"
+    "Commit TASK-BUD-410/docs update.",
+    "Reload is still required for prior runtime TASK-BUD-398 validation before continuing that lane.",
+    "Later implement or explicitly fail-close TASK-BUD-410 before cancel/fallback drill TASK-BUD-399."
   ],
   "blockers": [
-    "Reload required before continuing runtime validation.",
-    "TASK-BUD-153 remains blocked by unresolved dependencies.",
-    "Context high-warn: no more implementation before reload/checkpoint."
+    "TASK-BUD-153 remains blocked by unresolved dependencies including TASK-BUD-410.",
+    "TASK-BUD-399 now depends on TASK-BUD-410 because cancel/fallback drill needs n [snip] kground notifications. [truncated:+18 chars]",
+    "Context remains warn/operator=reload from prior runtime changes."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 50 passed",
-    "safe_marker_check docs/primitives/state-reconciliation-modes.md => 3/3",
-    "TASK-BUD-409 completed with VER-BUD-748"
+    "background_process_lifecycle_plan PID 35348 => state=finished label=BG_PROCESS_DONE dispatch=no authorization=none",
+    "TASK-BUD-410 created planned/p1 depends_on TASK-BUD-397",
+    "board_task_dependencies added TASK-BUD-410 to TASK-BUD-153 and TASK-BUD-399"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:43:36.090Z",
+    "generatedAtIso": "2026-05-01T03:47:03.391Z",
     "level": "warn",
-    "percent": 67,
+    "percent": 66,
     "action": "continue",
-    "recommendation": "commit-and-reload-before-continuing"
+    "recommendation": "commit-live-bg-process-boundary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:43:36.090Z",
+      "atIso": "2026-05-01T03:47:03.391Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 67,
+      "percent": 66,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-reload-before-continuing"
+      "recommendation": "commit-live-bg-process-boundary"
     }
   ]
 }
