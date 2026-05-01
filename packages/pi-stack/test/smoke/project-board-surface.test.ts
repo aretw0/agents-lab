@@ -286,23 +286,29 @@ describe("project-board-surface", () => {
       expect(applied.applied).toBe(true);
       expect(applied.task?.dependsOnCount).toBe(1);
 
-      expect(updateProjectTaskDependencies(cwd, {
+      const missing = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
         addDependsOn: ["TASK-MISSING"],
         dryRun: false,
-      })).toMatchObject({
+      });
+      expect(missing).toMatchObject({
         ok: false,
         applied: false,
         blockers: ["missing-dependencies"],
+        recommendationCode: "dependency-update-blocked-missing",
       });
+      expect(missing.summary).toContain("code=dependency-update-blocked-missing");
 
-      expect(updateProjectTaskDependencies(cwd, {
+      const cycle = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-A",
         addDependsOn: ["TASK-C"],
-      })).toMatchObject({
+      });
+      expect(cycle).toMatchObject({
         ok: false,
         blockers: ["dependency-cycle"],
+        recommendationCode: "dependency-update-blocked-cycle",
       });
+      expect(cycle.summary).toContain("code=dependency-update-blocked-cycle");
 
       expect(updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",

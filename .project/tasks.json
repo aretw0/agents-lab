@@ -11616,6 +11616,29 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] transformar cobertura anti-spoofing em score explícito acelera resposta preventiva a regressões de segurança/manutenção.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: iniciando primitive/surface de score anti-spoofing shell com recommendationCode de reação.\n2026-05-01: cobertura anti-spoofing agora tem score report-only com recommendationCode para reação de manutenção.",
       "verification": "VER-BUD-834"
+    },
+    {
+      "id": "TASK-BUD-487",
+      "description": "Seed local-safe maintenance: documentar e reforçar contrato de board_task_dependencies (recommendationCode + blockers missing/cycle/protected).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-469"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/primitives/board-task-dependencies-contract.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Contrato documentado com recommendationCode e regras para missing/cycle/protected-coupling.",
+        "Regressões smoke cobrem recommendationCode para cenários ready, missing, cycle e protected-coupling.",
+        "Mudança permanece report-only/board-safe, sem escopo protegido."
+      ],
+      "milestone": "post-cleanup-research",
+      "notes": "[rationale:risk-control] reforçar contrato explícito reduz ambiguidade operacional e evita regressão de interpretação em updates de dependência.\n[provenance:human] source_task=TASK-BUD-469 reason=continuidade local-safe após no-eligible sem entrar em foco protected\n2026-05-01: nova fatia local-safe formaliza recommendationCode de dependências e melhora legibilidade operacional do board.",
+      "verification": "VER-BUD-837"
     }
   ]
 }

@@ -9753,6 +9753,15 @@
       "method": "board UX/contract update + smoke",
       "timestamp": "2026-05-01T21:08:08.322Z",
       "evidence": "Implemented a small UX/contract improvement in board dependency flow with low blast radius and focal smoke. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Enhanced dependency update contract with deterministic guidance fields: - `protectedDependencyIds` (explicit blocked protected deps) - `recommendationCode` (`dependency-update-ready|...blocked-missing|...blocked-cycle|...blocked-protected-coupling|...invalid-input`) - `recommendation` human-readable next step - `board-task-dependencies` summary now includes `code=...` and `protectedDeps=...` when applicable. - Tool description updated to include protected-coupling blockers. - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added assertions for new recommendation contract and explicit protected dependency evidence. - Maintained local-safe/protected guardrail coverage. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed. - `safe_marker_check docs/guides/control-plane-operating-doctrine.md` => matched 3/3 decoupling markers."
+    },
+    {
+      "id": "VER-BUD-837",
+      "target": "TASK-BUD-487",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board dependency contract hardening + smoke",
+      "timestamp": "2026-05-01T21:18:06.718Z",
+      "evidence": "Seeded and completed local-safe maintenance slice to harden/clarify board dependency contract. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Added canonical dependency recommendation model for `updateProjectTaskDependencies`. - Result now carries `protectedDependencyIds`, `recommendationCode`, and `recommendation`. - Added deterministic mapping for blockers: - missing -> `dependency-update-blocked-missing` - cycle -> `dependency-update-blocked-cycle` - local-safe->protected coupling -> `dependency-update-blocked-protected-coupling` - no blockers -> `dependency-update-ready` - invalid input -> `dependency-update-invalid-input` - Summary now includes `code=...` and `protectedDeps=...` when present. - Tool description updated to mention protected-coupling blocker class. - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added/updated assertions for recommendation codes and summary evidence in ready/missing/cycle/protected-coupling flows. - Docs: - Added `docs/primitives/board-task-dependencies-contract.md`. - Indexed in `docs/primitives/README.md`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed. - `safe_marker_check docs/primitives/board-task-dependencies-contract.md` => matched 4/4."
     }
   ]
 }
