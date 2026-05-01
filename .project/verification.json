@@ -8862,6 +8862,24 @@
       "method": "docs-glossary-marker-check",
       "timestamp": "2026-05-01T02:51:20.686Z",
       "evidence": "Created docs/guides/control-plane-glossary.md defining canonical control-plane vocabulary and aliases for task, macro-task, side quest/subtask, dependency, milestone, slice, verification/evidence, gate, nudge-free, surface/primitive, etc. Linked from docs/guides/README.md and control-plane doctrine. Validation: safe_marker_check matched 4/4 key glossary markers; i18n_lint_text pass pt-BR; npm run docs:package:check ok."
+    },
+    {
+      "id": "VER-BUD-738",
+      "target": "TASK-BUD-396",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-dependency-apply",
+      "timestamp": "2026-05-01T02:59:10.291Z",
+      "evidence": "After reload, board_task_dependencies live-validated dry-run and apply paths. Dry-run for TASK-BUD-153 with 8 non-cyclic side quests returned ok; apply added TASK-BUD-067, TASK-BUD-396, TASK-BUD-397, TASK-BUD-398, TASK-BUD-399, TASK-BUD-400, TASK-BUD-401, TASK-BUD-403. Attempts to add TASK-BUD-395 and TASK-BUD-402 correctly blocked with dependency-cycle because those completed incident/slice tasks currently depend on TASK-BUD-153 in the opposite direction."
+    },
+    {
+      "id": "VER-BUD-739",
+      "target": "TASK-BUD-403",
+      "target_type": "task",
+      "status": "passed",
+      "method": "quality-gate-unresolved-deps-smoke",
+      "timestamp": "2026-05-01T02:59:55.147Z",
+      "evidence": "Patched buildProjectTaskQualityGate to report unresolvedDependencies and block closeAllowed when any depends_on task is not completed. This fixes live-observed gap where TASK-BUD-153 with planned/blocked dependencies could appear ready after dependency attachment. Focal validation: npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts => 57 passed. Reload required for live validation."
     }
   ]
 }

@@ -1014,6 +1014,7 @@ export interface ProjectTaskQualityGateResult {
   broadSignals: string[];
   dependencies: string[];
   missingDependencies: string[];
+  unresolvedDependencies: string[];
   verificationIds: string[];
   passedVerificationIds: string[];
   blockers: string[];
@@ -1053,6 +1054,7 @@ export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): P
     broadSignals: [],
     dependencies: [],
     missingDependencies: [],
+    unresolvedDependencies: [],
     verificationIds: [],
     passedVerificationIds: [],
     blockers: [reason],
@@ -1067,6 +1069,10 @@ export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): P
   const tasksById = new Map(block.tasks.map((row) => [row.id, row] as const));
   const dependencies = task.depends_on ?? [];
   const missingDependencies = dependencies.filter((dep) => !tasksById.has(dep));
+  const unresolvedDependencies = dependencies.filter((dep) => {
+    const dependencyTask = tasksById.get(dep);
+    return dependencyTask ? dependencyTask.status !== "completed" : false;
+  });
   const { macro, signals } = isBroadTaskCandidate(task);
   const verificationBlock = readVerificationBlockCached(cwd).block;
   const verificationRows = verificationBlock.verifications.filter((row) => row.target === taskId || row.id === task.verification);
@@ -1075,6 +1081,7 @@ export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): P
   const partialVerificationIds = verificationRows.filter(verificationLooksPartial).map((row) => row.id);
   const blockers = [
     missingDependencies.length > 0 ? "missing-dependencies" : undefined,
+    unresolvedDependencies.length > 0 ? "unresolved-dependencies" : undefined,
     macro && dependencies.length === 0 ? "macro-task-missing-dependencies" : undefined,
     task.status === "completed" && passedVerificationIds.length === 0 ? "completed-without-passed-verification" : undefined,
     task.status === "completed" && macro && partialVerificationIds.length > 0 ? "completed-with-partial-verification" : undefined,
@@ -1095,6 +1102,7 @@ export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): P
     broadSignals: signals,
     dependencies,
     missingDependencies,
+    unresolvedDependencies,
     verificationIds,
     passedVerificationIds,
     blockers,

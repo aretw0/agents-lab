@@ -269,6 +269,16 @@ describe("project-board-surface", () => {
       expect(macro.decision).toBe("needs-decomposition");
       expect(macro.blockers).toContain("macro-task-missing-dependencies");
 
+      updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-MACRO",
+        addDependsOn: ["TASK-C"],
+        dryRun: false,
+      });
+      const unresolved = buildProjectTaskQualityGate(cwd, "TASK-MACRO");
+      expect(unresolved.closeAllowed).toBe(false);
+      expect(unresolved.blockers).toContain("unresolved-dependencies");
+      expect(unresolved.unresolvedDependencies).toEqual(["TASK-C"]);
+
       const small = buildProjectTaskQualityGate(cwd, "TASK-C");
       expect(small.ok).toBe(true);
       expect(small.macroCandidate).toBe(false);
