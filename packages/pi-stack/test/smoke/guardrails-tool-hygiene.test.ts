@@ -88,6 +88,23 @@ describe("tool hygiene scorecard", () => {
     expect(score.summary).toContain("agents-as-tools-calibration:");
   });
 
+  it("keeps governance strong when protected/long-run cohort is guarded despite subprocess noise", () => {
+    const score = buildAgentsAsToolsCalibrationScore({
+      tools: [
+        { name: "claude_code_adapter_status", description: "status budget" },
+        { name: "context_watch_checkpoint", description: "checkpoint evidence" },
+        { name: "ant_colony", description: "autonomous long-run protected approval" },
+        { name: "claude_code_execute", description: "execute dry_run=true cwd" },
+        { name: "custom_exec_a", description: "execute command" },
+        { name: "custom_exec_b", description: "execute command" },
+        { name: "custom_exec_c", description: "execute command" },
+      ],
+    });
+
+    expect(score.dimensions.governance).toBeGreaterThanOrEqual(67);
+    expect(score.recommendationCode).not.toBe("agents-as-tools-calibration-needs-governance");
+  });
+
   it("detects governance gaps in weak agents-as-tools calibration", () => {
     const score = buildAgentsAsToolsCalibrationScore({
       tools: [

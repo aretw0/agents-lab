@@ -12089,6 +12089,93 @@
       "milestone": "bg-agents-calibration-wave-2026-05b",
       "notes": "[rationale:risk-control] runbook reduz erro operacional ao migrar de contrato testado para leitura live.\n[provenance:human] source_task=TASK-BUD-504 reason=preparar transição segura para validação live pós-reload\n2026-05-01: runbook pós-reload formalizado com critério go/no-go para rehearsal local bounded.",
       "verification": "VER-BUD-858"
+    },
+    {
+      "id": "TASK-BUD-509",
+      "description": "Registrar baseline live pós-reload dos scores de calibração (background/agents/packet) e decisão keep-report-only no research packet + handoff.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-508"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documento inclui leituras live com score/recommendationCode das três tools.",
+        "Decisão keep-report-only fica explícita com blockers atuais.",
+        "Checkpoint atualizado com próximos passos locais-safe."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05c",
+      "notes": "[rationale:risk-control] baseline live evita decisão por inferência após reload e orienta próxima wave por evidência.\n[provenance:human] source_task=TASK-BUD-508 reason=executar runbook pós-reload e consolidar leitura da sessão\n2026-05-01: baseline live pós-reload confirmou decisão keep-report-only; próxima wave focará gaps de capabilities/background e governance de agents.",
+      "verification": "VER-BUD-859"
+    },
+    {
+      "id": "TASK-BUD-510",
+      "description": "Adicionar inferência opcional de capacidades no background_process_readiness_score baseada em surface/tooling disponível quando parâmetros não forem fornecidos.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-509"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-readiness-score.md"
+      ],
+      "acceptance_criteria": [
+        "Quando has_* não é informado, tool aplica inferência deterministicamente a partir de surfaces conhecidas.",
+        "Output preserva override explícito por parâmetro.",
+        "Regressões cobrem inferência padrão e override manual."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05c",
+      "notes": "[rationale:risk-control] reduzir default pessimista melhora leitura operacional sem liberar execução automática.\n[provenance:human] source_task=TASK-BUD-509 reason=tornar baseline de readiness mais fiel ao runtime exposto\n2026-05-01: readiness score agora suporta inferência bounded com override explícito para leitura operacional mais fiel.",
+      "verification": "VER-BUD-860"
+    },
+    {
+      "id": "TASK-BUD-511",
+      "description": "Refinar dimensão governance do agents_as_tools_calibration_score para focar executores relevantes e reduzir falso negativo por tools subprocess não-executoras.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-509"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Governance passa a priorizar cohort de executores relevantes (long-run/protected executors) na razão de proteção.",
+        "Regressões cobrem caso forte e caso fraco sem inflar score indevidamente.",
+        "Doc explicita heurística revisada."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05c",
+      "notes": "[rationale:risk-control] heurística mais precisa evita bloquear evolução por ruído de classificação.\n[provenance:human] source_task=TASK-BUD-509 reason=resolver gap governance=67 observado no baseline live\n2026-05-01: governance do score de agents-as-tools recalibrada para cohort relevante, reduzindo penalização por ruído de subprocessos.",
+      "verification": "VER-BUD-861"
+    },
+    {
+      "id": "TASK-BUD-512",
+      "description": "Atualizar runbook pós-reload com sequência de leitura recomendada incluindo inferência/overrides e critério de avanço para rehearsal local.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-510",
+        "TASK-BUD-511"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        "docs/primitives/ops-calibration-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook lista caminho padrão (inferência) e caminho com overrides explícitos.",
+        "Critério GO/NO-GO inclui checks de recommendationCode e score mínimo.",
+        "Marker-check confirma âncoras do novo runbook."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05c",
+      "notes": "[rationale:risk-control] runbook atualizado mantém execução consistente durante recalibração da heurística.\n[provenance:human] source_task=TASK-BUD-509 reason=fechar governança operacional da próxima wave\n2026-05-01: runbook pós-reload agora cobre caminho padrão por inferência e caminho com overrides explícitos para decisão mais auditável.",
+      "verification": "VER-BUD-862"
     }
   ]
 }

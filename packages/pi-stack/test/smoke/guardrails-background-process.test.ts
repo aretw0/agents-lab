@@ -2,14 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 import guardrailsCore, { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core";
 
 describe("background process control plan", () => {
-  function makeMockPi() {
+  function makeMockPi(seedTools: Array<{ name: string; description?: string }> = []) {
     const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
       registerCommand: vi.fn(),
       getAllTools: vi.fn(() => [] as unknown[]),
     };
-    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    rawPi.getAllTools = vi.fn(() => [
+      ...seedTools,
+      ...(rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool),
+    ]);
     return rawPi as unknown as Parameters<typeof guardrailsCore>[0];
   }
 
@@ -201,6 +204,38 @@ describe("background process control plan", () => {
     });
     expect(unknown.state).toBe("unknown-origin");
     expect(unknown.staleOrLate).toBe(true);
+  });
+
+  it("infers readiness capability signals from available tooling and allows explicit override", async () => {
+    const pi = makeMockPi([{ name: "bg_status", description: "background process status/log/stop" }]);
+    guardrailsCore(pi);
+    const readinessTool = getTool(pi, "background_process_readiness_score");
+
+    const inferred = await readinessTool.execute(
+      "tc-bg-readiness-inferred",
+      {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(inferred.details?.checks?.hasProcessRegistry).toBe(true);
+    expect(inferred.details?.checks?.hasBoundedLogTail).toBe(true);
+    expect(inferred.details?.checks?.hasGracefulStopThenKill).toBe(true);
+
+    const override = await readinessTool.execute(
+      "tc-bg-readiness-override",
+      {
+        has_process_registry: false,
+        has_bounded_log_tail: false,
+        has_graceful_stop_then_kill: false,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(override.details?.checks?.hasProcessRegistry).toBe(false);
+    expect(override.details?.checks?.hasBoundedLogTail).toBe(false);
+    expect(override.details?.checks?.hasGracefulStopThenKill).toBe(false);
   });
 
   it("exposes readiness score and lifecycle classifier as read-only tools", async () => {

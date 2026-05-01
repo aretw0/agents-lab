@@ -11,7 +11,7 @@ Avaliar se a stack está calibrada para usar agentes como tools com governança,
 
 ## Dimensões
 
-- `governance` — budget guard, checkpoint discipline e proteção de executores
+- `governance` — budget guard, checkpoint discipline e proteção do cohort relevante de executores (long-run/protected), evitando falso negativo por ruído de tools subprocess genéricas
 - `boundedness` — caminhos de dry-run/isolamento e baixa exposição de override manual
 - `observability` — presença de packets/superfícies de leitura e scorecard
 

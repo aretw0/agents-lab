@@ -211,6 +211,12 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   const longRunCapableTools = rows.filter((row) => row.flags.includes("long-run-capable")).length;
   const manualOverrideLikeTools = rows.filter((row) => row.flags.includes("manual-override-like")).length;
 
+  const governanceExecutorRows = rows.filter((row) => row.flags.includes("long-run-capable"));
+  const governanceProtectedExecutors = governanceExecutorRows.filter((row) => row.maturity === "requires-human-approval");
+  const longRunGoverned = governanceExecutorRows.length === 0
+    ? true
+    : governanceProtectedExecutors.length >= Math.max(1, Math.ceil(governanceExecutorRows.length * 0.67));
+
   const hasBudgetGuard = names.has("claude_code_adapter_status") || names.has("quota_alerts") || names.has("quota_visibility_route");
   const hasCheckpointDiscipline = names.has("context_watch_checkpoint");
   const hasDryRunExecutorPath = tools.some((tool) => /dry[-_ ]run|dry_run/i.test(`${tool.name} ${tool.description ?? ""}`));
@@ -221,7 +227,7 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   const governance = ratioScore([
     hasBudgetGuard,
     hasCheckpointDiscipline,
-    protectedExecutors.length >= Math.max(1, Math.ceil(executorRows.length * 0.6)),
+    longRunGoverned,
   ]);
   const boundedness = ratioScore([
     hasDryRunExecutorPath,

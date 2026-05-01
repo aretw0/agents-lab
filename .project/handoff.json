@@ -1,25 +1,27 @@
 {
-  "timestamp": "2026-05-01T22:28:24.346Z",
-  "context": "Completed two local-safe calibration waves for background process + agents-as-tools: scope/doctrine anchors, readiness/calibration scores, co [snip] -reload runbook with go/no-go criteria. [truncated:+62 chars]",
+  "timestamp": "2026-05-01T22:45:29.204Z",
+  "context": "Executed post-reload live baseline (TASK-BUD-509) and completed follow-up wave TASK-BUD-510..512: readiness inference+override path, agents g [snip] de readings before ops packet decision. [truncated:+74 chars]",
   "next_actions": [
-    "run /reload to activate new runtime tools live",
-    "invoke background_process_readiness_score + agents_as_tools_calibration_score + ops_calibratio [snip] t and record live baseline [truncated:+16 chars]",
-    "seed next local-safe wave only if packet remains keep-report-only"
+    "/reload to activate latest calibration heuristic/inference updates in live runtime",
+    "re-run background_process_readiness_score + agents_as_tools_calibration_score + ops_calibration_decision_packet",
+    "if packet remains keep-report-only, seed next local-safe wave for missing background capabilit [snip] ase/healthcheck contracts) [truncated:+16 chars]"
   ],
   "blockers": [],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] hardening-reexport.test.ts [truncated:+223 chars]",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md",
-    "safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md"
+    "safe_marker_check docs/primitives/background-process-readiness-score.md",
+    "safe_marker_check docs/primitives/agents-as-tools-calibration-score.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-508",
+    "focus": "TASK-BUD-512",
     "canonical_links": [
-      "task:TASK-BUD-508"
+      "task:TASK-BUD-512",
+      "task:TASK-BUD-509",
+      "task:TASK-BUD-510"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T22:28:24.346Z",
+    "generatedAtIso": "2026-05-01T22:45:29.204Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
     "recommendation": "add-or-select-task",
@@ -27,7 +29,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T22:28:24.346Z",
+      "atIso": "2026-05-01T22:45:29.204Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -41,6 +43,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-508"
+    "TASK-BUD-512"
   ]
 }

@@ -9951,6 +9951,42 @@
       "method": "runbook update + marker-check + checkpoint-ready evidence",
       "timestamp": "2026-05-01T22:27:50.789Z",
       "evidence": "Registered post-reload live-run runbook and go/no-go criteria for calibration packet usage. Changes: - Updated `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` with: - `Runbook curto pós-reload` sequence (`/reload` -> scores -> packet -> checkpoint) - explicit GO/NO-GO criteria for bounded rehearsal. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`Runbook curto pós-reload`, `/reload`, `ops_calibration_decision_packet`, `GO bounded rehearsal`, `NO-GO (keep report-only)`) => matched 5/5. - Targeted vitest run remains green (5 files, 20 tests)."
+    },
+    {
+      "id": "VER-BUD-859",
+      "target": "TASK-BUD-509",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live tool baseline + marker-check + checkpoint",
+      "timestamp": "2026-05-01T22:36:58.727Z",
+      "evidence": "Executed post-reload live calibration runbook and recorded session baseline. Live readings: - `background_process_readiness_score` => `score=20`, `code=background-process-readiness-needs-capabilities`, dimensions `capabilities=0 surfaceWiring=100 operationalEvidence=0`. - `agents_as_tools_calibration_score` => `score=85`, `code=agents-as-tools-calibration-needs-governance`, dimensions `governance=67 boundedness=100 observability=100`. - `ops_calibration_decision_packet` (`live_reload_completed=true`) => `decision=keep-report-only`, `code=ops-calibration-keep-report-only-background`, blocker `background-readiness-not-strong`. Documentation update: - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` now includes `Leitura live pós-reload` and updated checklist statuses. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`Leitura live pós-reload`, `score=20`, `score=85`, `decision=keep-report-only`, `background-readiness-not-strong`) => matched 5/5."
+    },
+    {
+      "id": "VER-BUD-860",
+      "target": "TASK-BUD-510",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface inference + override regression + docs marker-check",
+      "timestamp": "2026-05-01T22:44:06.010Z",
+      "evidence": "Implemented optional capability inference path for `background_process_readiness_score` when `has_*` params are omitted. Changes: - `packages/pi-stack/extensions/guardrails-core-background-process-surface.ts` - Added bounded inference helper from available tooling (`inferBackgroundCapabilitySignals`). - Added precedence rule: explicit boolean params override inferred values. - `packages/pi-stack/test/smoke/guardrails-background-process.test.ts` - Added regression for inference from seeded `bg_status` tooling. - Added regression for explicit override forcing inferred booleans to false. - `docs/primitives/background-process-readiness-score.md` - Added section `Inferência e override`. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 10 tests passed. - marker-check doc anchors matched 3/3. Note: live runtime scoring impact requires `/reload` after this code change."
+    },
+    {
+      "id": "VER-BUD-861",
+      "target": "TASK-BUD-511",
+      "target_type": "task",
+      "status": "passed",
+      "method": "heuristic refinement + smoke + docs marker-check",
+      "timestamp": "2026-05-01T22:44:06.261Z",
+      "evidence": "Refined agents-as-tools governance heuristic to focus relevant executor cohort and reduce subprocess-noise false negatives. Changes: - `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts` - Governance dimension now evaluates protection ratio on long-run executor cohort (long-run/protected relevance), rather than broad subprocess noise. - `packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` - Added regression ensuring subprocess noise does not force governance-specific failure. - Preserved weak governance detection scenario. - `docs/primitives/agents-as-tools-calibration-score.md` - Updated governance dimension wording to explicit cohort-based rationale. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` => 2 files passed, 11 tests passed. - marker-check doc anchors matched 3/3. Note: live tool output still reflects pre-change runtime until next `/reload`."
+    },
+    {
+      "id": "VER-BUD-862",
+      "target": "TASK-BUD-512",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook/doc update + marker-check",
+      "timestamp": "2026-05-01T22:44:43.265Z",
+      "evidence": "Updated post-reload runbook to include default inference path and explicit override path for readiness score. Changes: - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` - Runbook now includes sequence: inferência bounded -> optional `has_*` overrides -> agents score -> ops packet -> checkpoint. - `docs/primitives/ops-calibration-decision-packet.md` - Added `Uso recomendado` section with explicit orchestration order and `live_reload_completed=true` guidance. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`inferência bounded`, `overrides explícitos`, `ops_calibration_decision_packet`, `go/no-go`) => matched 4/4. - `safe_marker_check docs/primitives/ops-calibration-decision-packet.md` markers (`Uso recomendado`, `background_process_readiness_score`, `overrides`, `live_reload_completed=true`) => matched 4/4."
     }
   ]
 }

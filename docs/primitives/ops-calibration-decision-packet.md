@@ -22,6 +22,12 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 - `ops-calibration-keep-report-only-threshold`
 - `ops-calibration-keep-report-only-reload`
 
+## Uso recomendado
+
+1. calcular `background_process_readiness_score` (padrão por inferência bounded e, opcionalmente, com overrides `has_*` para contraste);
+2. calcular `agents_as_tools_calibration_score`;
+3. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
+
 ## Invariantes
 
 - `dispatchAllowed=false`
