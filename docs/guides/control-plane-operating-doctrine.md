@@ -58,6 +58,8 @@ Também existe controle humano sobre o tamanho do diagnóstico. Investigações 
 
 Pesquisa remota bounded deve usar helper versionado, não receitas frágeis com variáveis shell embutidas. Para cache de repositórios de referência, prefira `bash packages/git-skills/skills/git-checkout-cache/checkout.sh <repo> --path-only`; para validar sem rede, use `--dry-run --path-only`. Evite comandos do tipo `CACHE=...; echo $CACHE` no `bash` tool, pois alguns harnesses podem interpolar `$VAR` antes de o comando chegar ao shell. Se o helper não estiver disponível, use caminhos literais curtos ou registre blocker Ops; não deixe uma falha de cache contaminar a conclusão da pesquisa principal.
 
+Bloqueios de stale-read (`File modified since read`) em ambientes de usuário devem virar incidente de triage, não desligamento de proteção. A política é falhar fechado para mutações com modelo mental defasado, mas oferecer recuperação mínima: re-read bounded do arquivo exato e re-aplicar a edição com anchors frescos. Se o bloqueio vier de superfície first-party/recomendada e for falso bloqueio com auto-format, criar teste/regra sem aceitar texto livre como prova de conteúdo atual. Ver `docs/primitives/stale-read-guard-incidents.md`.
+
 Fallback operacional enquanto `Esc` estiver incerto:
 
 - não iniciar long-run, loop, scheduler, self-reload, remote/offload ou executor;

@@ -8745,6 +8745,24 @@
       "method": "report-only-channel-live-closure",
       "timestamp": "2026-05-01T01:51:05.572Z",
       "evidence": "TASK-BUD-394 completed. Implemented and live-validated the report-only implementation channel surface for structured human confirmation signals. Code/docs/tests established guard-owned-report-only as the first local channel; wrapper/upstream remain design-only; direct node_modules patches and enabling operational destructive dialogs block. Focused smoke suite passed 19 tests before reload. After reload, live tool validation confirmed green and blocked paths preserve dispatch=no, implementation=no, destructiveDialog=no, nodeModulesPatch=no, authorization=none. No destructive runtime was enabled."
+    },
+    {
+      "id": "VER-BUD-725",
+      "target": "TASK-BUD-391",
+      "target_type": "task",
+      "status": "passed",
+      "method": "incident-triage-doc",
+      "timestamp": "2026-05-01T01:57:02.299Z",
+      "evidence": "Completed bounded triage slice for the user stale-read guard incident. Added docs/primitives/stale-read-guard-incidents.md with the reported message, source-unknown classification, local policy, evidence to collect, and relationship to existing fresh-evidence patterns. Bounded local search did not find the exact message in searched first-party pi-stack files or local pi dist slice, so attribution remains unknown. Doctrine now says File modified since read blocks should fail closed for stale mutations but provide minimal recovery: bounded re-read exact file and re-apply edit with fresh anchors; do not disable stale-read protection or accept free text as current-content evidence. Validation: docs sync/check ok; safe_marker_check incident doc 4/4 and doctrine 3/3."
+    },
+    {
+      "id": "VER-BUD-726",
+      "target": "TASK-BUD-391",
+      "target_type": "task",
+      "status": "passed",
+      "method": "incident-policy-closure",
+      "timestamp": "2026-05-01T01:57:12.628Z",
+      "evidence": "TASK-BUD-391 closed as a bounded incident triage/policy note. We did not identify the emitting extension, and the exact text was not found in the bounded local search slice; attribution remains unknown. The incident is now documented with a safe policy: keep stale-read guard fail-closed for mutations based on stale mental model, recover via bounded re-read of the exact file and fresh anchors, collect extension/sourceInfo next time, and only add a first-party test/rule if evidence points to pi-stack/recommended surface. Docs sync/check and marker validation passed."
     }
   ]
 }

@@ -9480,7 +9480,7 @@
     {
       "id": "TASK-BUD-391",
       "description": "Backlog: investigar falso bloqueio/stale-read guard em ambiente de usuário pi-stack após arquivo modificado desde read.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions",
@@ -9494,7 +9494,8 @@
         "Adicionar teste/regra/nota de curadoria se a causa estiver em superfície first-party ou em extensão recomendada pela stack."
       ],
       "milestone": "user-stack-incidents",
-      "notes": "Criado por relato do operador de uso real da pi-stack por usuário: bloqueio '🔴 BLOCKED — File modified since read' para /workspaces/refarm/apps/dev/src/lib/surface-diagnostics.ts, com instrução para re-read após modificação em disco. O operador suspeita que já resolvemos caso semelhante aqui de outro jeito, mas a extensão causadora no ambiente do usuário é desconhecida. [rationale:risk-control] Stale-read guards protegem contra edição com modelo mental defasado, mas falsos bloqueios em ambientes com auto-format/edição externa podem travar fluxos seguros e corroer confiança; precisa diagnóstico/curadoria sem desviar a lane essencial atual."
+      "notes": "Criado por relato do operador de uso real da pi-stack por usuário: bloqueio '🔴 BLOCKED — File modified since read' para /workspaces/refarm/apps/dev/src/lib/surface-diagnostics.ts, com instrução para re-read após modificação em disco. O operador suspeita que já resolvemos caso semelhante aqui de outro jeito, mas a extensão causadora no ambiente do usuário é desconhecida. [rationale:risk-control] Stale-read guards protegem contra edição com modelo mental defasado, mas falsos bloqueios em ambientes com auto-format/edição externa podem travar fluxos seguros e corroer confiança; precisa diagnóstico/curadoria sem desviar a lane essencial atual.\n2026-05-01: concluído como triage/policy bounded. Fonte da extensão permanece desconhecida; não desligar stale-read guard. Política registrada: re-read bounded + anchors frescos; coletar sourceInfo/extension se repetir.",
+      "verification": "VER-BUD-726"
     },
     {
       "id": "TASK-BUD-392",
