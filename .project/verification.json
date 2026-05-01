@@ -8763,6 +8763,24 @@
       "method": "incident-policy-closure",
       "timestamp": "2026-05-01T01:57:12.628Z",
       "evidence": "TASK-BUD-391 closed as a bounded incident triage/policy note. We did not identify the emitting extension, and the exact text was not found in the bounded local search slice; attribution remains unknown. The incident is now documented with a safe policy: keep stale-read guard fail-closed for mutations based on stale mental model, recover via bounded re-read of the exact file and fresh anchors, collect extension/sourceInfo next time, and only add a first-party test/rule if evidence points to pi-stack/recommended surface. Docs sync/check and marker validation passed."
+    },
+    {
+      "id": "VER-BUD-727",
+      "target": "TASK-BUD-389",
+      "target_type": "task",
+      "status": "passed",
+      "method": "curatorial-design-matrix",
+      "timestamp": "2026-05-01T02:01:53.163Z",
+      "evidence": "Created docs/research/btw-curatorial-design-matrix-2026-05-01.md. It compares /btw design axes across oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw as historical/prior-art reference, and the local prompt draft. It records options to reuse, wrap/adapt, filter/suppress, create opt-in first-party runtime, or keep docs/skill only. Recommendation remains not to publish first-party /btw now; preserve advisory/no-tools by default, explicit injection, explicit bounded backlog capture, command conflict/cost checks, and no automatic coupling to any reference. Updated prior-art doc and doctrine links. Validation: docs sync/check ok; safe_marker_check matrix 4/4, prior-art link 1/1, doctrine link 2/2."
+    },
+    {
+      "id": "VER-BUD-728",
+      "target": "TASK-BUD-389",
+      "target_type": "task",
+      "status": "passed",
+      "method": "btw-curatorial-matrix-closure",
+      "timestamp": "2026-05-01T02:02:02.275Z",
+      "evidence": "TASK-BUD-389 completed. Added the /btw curatorial design matrix and linked it from the prior-art research and operating doctrine. The matrix is explicitly docs-only, not implementation or first-party exposure. It compares design decisions and sets a future decision packet for reuse/wrap/filter/first-party-runtime/docs-only without coupling automatically to oh-pi, mitsuhiko/agent-stuff, dbachelder/pi-btw, or the local prompt draft. Docs sync/check and marker validations passed."
     }
   ]
 }

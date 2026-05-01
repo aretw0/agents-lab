@@ -149,7 +149,7 @@ Quando uma tool usar `board`, leia como a superfície local atual para esse cont
 
 Contrato desejado para qualquer versão futura: canal conversacional/advisory, sem trocar foco atual por padrão, sem executar mudanças automaticamente e sem disparar comandos, staging, commit, scheduler, remote/offload ou manutenção destrutiva. Se a lateral virar trabalho real, capture como decisão/backlog apenas com pedido explícito do operador e por superfície bounded (`board_task_create`, `board_update` ou bloco de decisão), mantendo o handoff/foco principal preservado.
 
-Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design. A próxima etapa deve ser curatorial, não acoplada a um pacote: comparar decisões de `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências conhecidas; então escolher entre reutilizar, adaptar/wrappar, filtrar uma extensão existente, criar runtime first-party opt-in, ou manter apenas docs/skill.
+Não publique `packages/lab-skills/prompts/btw.md` nem manifeste `pi.prompts` para `/btw` até haver decisão explícita de design. A matriz curatorial fica em `docs/research/btw-curatorial-design-matrix-2026-05-01.md`: comparar decisões de `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências conhecidas; então escolher entre reutilizar, adaptar/wrappar, filtrar uma extensão existente, criar runtime first-party opt-in, ou manter apenas docs/skill.
 
 ## Fluxo bounded do board local
 

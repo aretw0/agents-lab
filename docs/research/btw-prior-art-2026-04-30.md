@@ -4,7 +4,7 @@
 
 `TASK-BUD-296` criou um rascunho first-party de prompt `/btw`, mas o operador lembrou que não devemos tornar isso canônico antes de comparar com implementações já instaladas, especialmente `oh-pi` e Mitsuhiko/mitsupi.
 
-Conclusão desta fatia: manter o rascunho como referência local, mas **não expor via `pi.prompts` nem empacotar como superfície canônica** até decisão explícita. A pesquisa é curatorial: `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências são fontes de decisões de design, não backends aos quais devemos acoplar automaticamente.
+Conclusão desta fatia: manter o rascunho como referência local, mas **não expor via `pi.prompts` nem empacotar como superfície canônica** até decisão explícita. A pesquisa é curatorial: `oh-pi`, `mitsuhiko/agent-stuff`, `dbachelder/pi-btw` e outras referências são fontes de decisões de design, não backends aos quais devemos acoplar automaticamente. A matriz de decisão fica em `docs/research/btw-curatorial-design-matrix-2026-05-01.md`.
 
 ## Referência principal: `@ifi/oh-pi`
 

@@ -9435,7 +9435,7 @@
     {
       "id": "TASK-BUD-389",
       "description": "Backlog: matriz curatorial de decisões de design para /btw sem acoplar a uma implementação específica.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-388"
@@ -9451,7 +9451,8 @@
         "Manter /btw first-party não exposto até decisão explícita."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "Criado por steering do operador: não acoplar demais ao mitsupi/agent-stuff; curar as melhores decisões entre todos que fizeram algum /btw conhecido. [rationale:risk-control] Superfície lateral pode afetar foco, contexto, custos e injeção no fluxo principal; precisa matriz curatorial antes de implementação."
+      "notes": "Criado por steering do operador: não acoplar demais ao mitsupi/agent-stuff; curar as melhores decisões entre todos que fizeram algum /btw conhecido. [rationale:risk-control] Superfície lateral pode afetar foco, contexto, custos e injeção no fluxo principal; precisa matriz curatorial antes de implementação.\n2026-05-01: iniciado após auto-resume. Escopo: matriz curatorial docs-only para /btw; comparar prior art e decisões de design sem expor prompt/capacidade first-party nem acoplar a uma implementação específica.\n2026-05-01: concluído. Matriz curatorial criada em docs/research/btw-curatorial-design-matrix-2026-05-01.md; mantém /btw como curadoria/docs-only até decisão explícita futura.",
+      "verification": "VER-BUD-728"
     },
     {
       "id": "TASK-BUD-390",

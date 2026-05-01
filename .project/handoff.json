@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T01:57:23.627Z",
-  "context": "Completed TASK-BUD-391 in micro-slice. Added docs/primitives/stale-read-guard-incidents.md and doctrine note. Incident source remains unknown [snip] nt/micro-slice; no broad follow-up now. [truncated:+339 chars]",
+  "timestamp": "2026-05-01T02:02:13.636Z",
+  "context": "Completed TASK-BUD-389 after auto-resume. Created docs/research/btw-curatorial-design-matrix-2026-05-01.md and linked it from prior-art resea [snip] board/handoff/docs slice until commit. [truncated:+323 chars]",
   "next_actions": [
-    "Commit TASK-BUD-391 incident closure.",
-    "Re-check context after commit; likely stop/compact boundary because checkpoint percent is high.",
-    "Do not start new broad lane before context refresh/compact."
+    "Commit TASK-BUD-389 curatorial matrix slice.",
+    "Re-check git status/context after commit.",
+    "Then select next local-safe task only if context remains ok."
   ],
   "blockers": [
     "Strong unattended/loop/scheduler/remote remains blocked.",
     "Git maintenance cleanup remains opt-in."
   ],
   "recent_validation": [
+    "context_watch_status before slice => ok 17 standard-slices handoff=fresh",
     "docs:package:sync => ok",
-    "docs:package:check => ok",
-    "safe_marker_check stale-read incident doc => 4/4"
+    "docs:package:check => ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T01:57:23.627Z",
-    "level": "checkpoint",
-    "percent": 69,
-    "action": "checkpoint-refresh",
-    "recommendation": "commit-incident-closure-then-recheck",
+    "generatedAtIso": "2026-05-01T02:02:13.636Z",
+    "level": "ok",
+    "percent": 17,
+    "action": "continue",
+    "recommendation": "commit-curatorial-matrix",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T01:57:23.627Z",
+      "atIso": "2026-05-01T02:02:13.636Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 69,
+      "level": "ok",
+      "percent": 17,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-incident-closure-then-recheck"
+      "recommendation": "commit-curatorial-matrix"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-391"
+    "TASK-BUD-389"
   ]
 }
