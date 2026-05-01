@@ -11007,7 +11007,7 @@
     {
       "id": "TASK-BUD-458",
       "description": "Mapear lacunas de skills cross-stack (from notes-app simples até monorepos pesados) e definir matriz mínima de cobertura orientada a fluidez produtiva.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/"
@@ -11018,12 +11018,13 @@
         "Sem acoplamento opinativo à stack do laboratório como requisito de uso."
       ],
       "milestone": "cross-stack-fluidity",
-      "notes": "[rationale:risk-control] ampliar qualidade padrão do pi sem lock-in de domínio."
+      "notes": "[rationale:risk-control] ampliar qualidade padrão do pi sem lock-in de domínio.\n2026-05-01: iniciando matriz de cobertura de skills cross-stack com foco em triagem rápida, fluidez e baixo custo de token.\n2026-05-01: base cross-stack explícita criada para orientar skills/primitives agnósticas de domínio.",
+      "verification": "VER-BUD-810"
     },
     {
       "id": "TASK-BUD-459",
       "description": "Definir primitive de triagem inicial universal (project-intake) para detectar rapidamente classe de projeto e selecionar trilha de execução com baixo custo de token.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-458"
@@ -11038,12 +11039,13 @@
         "Contrato evita seleção prematura de escopo protegido."
       ],
       "milestone": "cross-stack-fluidity",
-      "notes": "[rationale:risk-control] melhorar fluidez inicial sem abrir risco operacional."
+      "notes": "[rationale:risk-control] melhorar fluidez inicial sem abrir risco operacional.\n2026-05-01: intake universal definido como primitive leve, auditável e sem autorização implícita.",
+      "verification": "VER-BUD-811"
     },
     {
       "id": "TASK-BUD-460",
       "description": "Criar/ajustar skill pack de resposta rápida cross-stack (diagnóstico inicial + plano de primeiros passos) com linguagem agnóstica de tecnologia.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-458"
@@ -11058,12 +11060,13 @@
         "Sem exigir conhecimento prévio da pi-stack para produzir valor inicial."
       ],
       "milestone": "cross-stack-fluidity",
-      "notes": "[rationale:risk-control] consistência de onboarding produtivo em contextos heterogêneos."
+      "notes": "[rationale:risk-control] consistência de onboarding produtivo em contextos heterogêneos.\n2026-05-01: criando skill pack cross-stack de resposta rápida (leve/médio/pesado) com foco em primeira fatia local-safe.\n2026-05-01: skill pack cross-stack criado com foco em arranque curto, auditável e agnóstico de stack.",
+      "verification": "VER-BUD-812"
     },
     {
       "id": "TASK-BUD-461",
       "description": "Adicionar smoke/regressões para garantir que superfícies de orientação inicial preservem controle/auditoria com respostas curtas e úteis sob pressão de token.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-459"
@@ -11077,7 +11080,8 @@
         "Ruído textual é reduzido sem perder ação recomendada."
       ],
       "milestone": "cross-stack-fluidity",
-      "notes": "[rationale:risk-control] escalabilidade de qualidade com custo de contexto controlado."
+      "notes": "[rationale:risk-control] escalabilidade de qualidade com custo de contexto controlado.\n2026-05-01: adicionando regressões de orientação inicial para garantir contrato curto/auditável e sem autorização implícita sob cenários leves e pesados.\n2026-05-01: regressões de fluidez inicial cobrem cenários leve/pesado sem perder contrato de controle.",
+      "verification": "VER-BUD-813"
     }
   ]
 }

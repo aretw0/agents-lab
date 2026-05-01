@@ -9510,6 +9510,42 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T16:14:30.854Z",
       "evidence": "Added explicit microcopy contract for expandable write previews in `packages/pi-stack/extensions/write-preview-guard.ts` via `formatWritePreviewCollapsedLinesHint(...)`, standardizing collapsed hint text to the canonical identity format `(N earlier lines, ctrl+o to expand)` while preserving resolved keybinding fallback behavior. Render path now uses this formatter for multiline collapsed previews. Added regression in `packages/pi-stack/test/smoke/write-preview-guard.test.ts` asserting canonical earlier-lines wording and key hint presence. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/write-preview-guard.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 59 tests passed."
+    },
+    {
+      "id": "VER-BUD-810",
+      "target": "TASK-BUD-458",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T16:17:52.942Z",
+      "evidence": "Created cross-stack skill coverage matrix in `docs/research/pi-cross-stack-skill-coverage-matrix-2026-05-01.md`, mapping project profiles (leve/médio/pesado), minimum universal capabilities, explicit gaps, and MVP coverage tracks (A/B/C) for low-token, local-safe onboarding independent of lab stack coupling. Validation: `safe_marker_check(path=docs/research/pi-cross-stack-skill-coverage-matrix-2026-05-01.md, markers=[Perfis de projeto, Capacidades mínimas esperadas, Lacunas atuais identificadas, Track A, Track B, Track C, Critérios de aceitação])` => ok yes, matched 7/7."
+    },
+    {
+      "id": "VER-BUD-811",
+      "target": "TASK-BUD-459",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests + marker-check",
+      "timestamp": "2026-05-01T16:20:34.021Z",
+      "evidence": "Defined first report-only `project-intake` primitive for universal cross-stack triage in `packages/pi-stack/extensions/project-intake-primitive.ts`. Primitive deterministically classifies profile (`light-notes`/`app-medium`/`monorepo-heavy`), emits `recommendationCode` + `nextAction`, returns bounded `firstSlice` with validation/rollback, and fail-closes when protected scope is requested (`intake-needs-human-focus-protected`) while keeping dispatch/mutation blocked. Added primitive smoke coverage in `packages/pi-stack/test/smoke/project-intake-primitive.test.ts` and primitive contract doc in `docs/primitives/project-intake.md` (linked from `docs/primitives/README.md`). Validation: `safe_marker_check` on primitive doc matched 5/5 markers; `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/write-preview-guard.test.ts` => 4 files passed, 62 tests passed."
+    },
+    {
+      "id": "VER-BUD-812",
+      "target": "TASK-BUD-460",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T16:23:12.616Z",
+      "evidence": "Created/adjusted cross-stack quick-response skill pack with technology-agnostic first-slice guidance: - `packages/lab-skills/skills/cross-stack-intake/SKILL.md` (operational triage recipe with tracks `light-notes`, `app-medium`, `monorepo-heavy`, focal validation and rollback guidance); - `packages/pi-skills/skills/project-intake/SKILL.md` (portable intake contract for first actionable step); - updated package discoverability lists in `packages/lab-skills/README.md` and `packages/pi-skills/README.md`. Validation: marker checks passed on both skill files (`cross-stack-intake` matched 6/6 required anchors; `project-intake` matched 5/5), confirming profile coverage and hard-stop guidance presence."
+    },
+    {
+      "id": "VER-BUD-813",
+      "target": "TASK-BUD-461",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T16:24:25.459Z",
+      "evidence": "Added cross-stack orientation regressions in `packages/pi-stack/test/smoke/project-intake-primitive.test.ts` to verify structured/concise intake outputs across lightweight and heavy scenarios. New assertions enforce bounded guidance semantics (`recommendationCode` present, `nextAction` <= 140 chars, bounded validation text, explicit rollback) and governance invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`) while preserving protected-scope fail-closed behavior. Validation run: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/write-preview-guard.test.ts` => 4 files passed, 63 tests passed."
     }
   ]
 }

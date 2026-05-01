@@ -12,6 +12,7 @@
 | `create-pi-web-extension` | Como criar/extender extensão web first-party com contrato determinístico e testes (smoke + e2e) |
 | `create-pi-theme` | Como criar um tema visual para o TUI |
 | `create-pi-prompt` | Como criar prompt templates — argumentos, empacotamento |
+| `project-intake` | Triagem inicial agnóstica para iniciar projetos com primeira fatia local-safe |
 
 ## Uso
 

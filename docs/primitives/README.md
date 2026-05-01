@@ -60,6 +60,7 @@ Como medir e garantir a qualidade de agentes.
 | [nudge-free-local-continuity.md](./nudge-free-local-continuity.md) | Planejamento / Governança / Continuidade | Perfil local para continuidade sem empurrão em batches de 3-5 fatias, checkpoint/commit por fatia e sem escopos protegidos automáticos | Inicial |
 | [colony-promotion-decision-packet.md](./colony-promotion-decision-packet.md) | Planejamento / Governança / Coordenação | Packet read-only para decisão humana `promote`/`skip`/`defer` de um único candidate de colony antes de qualquer materialização | Inicial |
 | [lane-brainstorm-packet.md](./lane-brainstorm-packet.md) | Planejamento / Governança / Continuidade | Contrato report-only para transformar brainstorm em lane local-safe com `recommendationCode`/`nextAction` e sem dispatch | Inicial |
+| [project-intake.md](./project-intake.md) | Planejamento / Governança / Continuidade | Triagem inicial universal report-only para classificar projeto e sugerir primeira fatia local-safe sem autorização implícita | Inicial |
 | [capability-gap-claim.md](./capability-gap-claim.md) | Coordenação / Ferramentas / Governança | Detecta ausência de ferramenta/capability e exige claim de bootstrap/permissão antes da execução principal | Em evolução |
 | _(em breve)_ | Memória | Context window manager | Planejado |
 | _(em breve)_ | Ferramentas | File system tools para Pi | Planejado |
