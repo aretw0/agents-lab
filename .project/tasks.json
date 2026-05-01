@@ -10155,6 +10155,29 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Depois da calibração local-first, o risco passa a ser o agente puxar backlog protegido/ambíguo só para continuar. A fila pós-calibração precisa tornar o no-go explícito e auditável.\n2026-05-01: concluída consolidação da fila pós-calibração. Sem task local-safe elegível, a continuidade deve parar/decompor/pedir decisão; não puxar backlog protegido automaticamente.",
       "verification": "VER-BUD-766"
+    },
+    {
+      "id": "TASK-BUD-419",
+      "description": "Produzir pacote local de decisão pós-calibração para o backlog restante, classificando cada classe como local-safe, protegida, bloqueada ou inspiração bounded.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Listar o snapshot dos planned restantes após a calibração local-first.",
+        "Classificar colony promotion/recovery como revisão/promoção humana com inventário próprio, não continuidade automática.",
+        "Classificar GitHub Actions/remote/release como protected lane com tarefa/decisão explícita.",
+        "Classificar research/config inspiration como opt-in bounded, não seleção automática.",
+        "Definir pelo menos três opções de próxima decisão humana sem executar escopo protegido.",
+        "Validar por marker check e git diff check."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] O operador pediu continuar desbloqueando trabalho ininterrupto; quando não há task local-safe elegível, o próximo desbloqueio é transformar o backlog restante em pacote de decisão auditável, não invadir escopo protegido.\n2026-05-01: concluído pacote de decisão pós-calibração. Backlog restante foi classificado por classe e opções humanas seguras; nenhuma promoção colony, CI/release/remote, pesquisa externa ou config mutation foi executada.",
+      "verification": "VER-BUD-767"
     }
   ]
 }

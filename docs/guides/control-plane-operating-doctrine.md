@@ -259,6 +259,22 @@ Regra de continuidade: `no-eligible-tasks` é um stop condition local, não conv
 
 Promotion/recovery de colony exige inventário/validação própria e revisão humana; GitHub Actions, release, remote/offload e publish exigem tarefa protegida explícita; research/config inspiration só entra como inspiração bounded quando for selecionada pelo operador. Nenhuma dessas classes deve ser selecionada por continuidade automática local.
 
+Pacote de decisão local de 2026-05-01 para o backlog restante:
+
+| Classe | Exemplos no board | Decisão segura |
+| --- | --- | --- |
+| Colony promotion/recovery | `colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion` | Não promover automaticamente. Exigir inventário de arquivos, validação focal e revisão humana antes de materializar candidate no branch alvo. |
+| Remote/CI/release | `TASK-BUD-134`, `TASK-BUD-136` | Escopo protegido. Só entra com tarefa/decisão explícita, rollback, budget de custo/tempo e sem auto-dispatch. |
+| Inspiração/research/config | `TASK-BUD-162`, `TASK-BUD-268` | Opt-in bounded. Não iniciar pesquisa externa ampla nem mutar config; primeiro criar pergunta/artefato local claro. |
+| Dependentes/bloqueadas | tarefas planejadas com `depends_on` não resolvido | Não selecionar até dependencies concluídas ou reescopadas por decisão humana. |
+
+Próximas decisões humanas possíveis, sem executar escopo protegido:
+
+1. autorizar uma revisão bounded de um único `*-promotion` de colony, começando por inventário read-only e decision packet, sem aplicar no branch;
+2. autorizar uma lane protegida para CI/release/remote com contrato próprio;
+3. escolher uma inspiração bounded (`TASK-BUD-162` ou `TASK-BUD-268`) e limitar a saída a um resumo local sem rede ampla/sem settings mutation;
+4. criar uma nova fatia local-safe de hardening/limpeza se o objetivo for continuar sem tocar backlog protegido.
+
 ## Lei anti-spoof
 
 Tools disponíveis ao agente para desenvolvimento, feedback constante e validação manual não equivalem a autorização operacional. Uma superfície advisory pode receber parâmetros manuais para facilitar calibração, mas gates de autonomia não podem produzir readiness sensível a partir de input spoofável.
