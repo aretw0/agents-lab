@@ -9096,6 +9096,24 @@
       "method": "colony-recovery-note-dedupe-smoke",
       "timestamp": "2026-05-01T04:43:39.044Z",
       "evidence": "Investigated unexpected dirty .project/tasks.json after provider pivot: colony completed/recovery replay appended duplicate delivery-policy/promotion notes for c-ret-1. Source boundaries found in colony-pilot.ts and colony-pilot-task-sync.ts. Implemented timestamp-insensitive note dedupe via appendNoteOnceByNormalizedMessage; ensureRecoveryTaskForCandidate returns changed=false for repeated stable recovery messages; colony-pilot delivery-policy/promotion source-task notes only write when stable message/status actually changes. Validation: npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts => 82 passed; git diff --check ok. Partial until reload/live check confirms status/observability no longer dirties board repeatedly."
+    },
+    {
+      "id": "VER-BUD-764",
+      "target": "TASK-BUD-417",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-colony-status-dedupe-live-validation",
+      "timestamp": "2026-05-01T04:49:01.791Z",
+      "evidence": "After reload, started from clean git status. Ran colony_pilot_status as status/observability only; output reported colonies=[] and did not mutate .project/tasks.json. Post-run git status remained clean. This validates that completed colony/recovery replay no longer dirties the board via repeated automatic notes in the loaded runtime."
+    },
+    {
+      "id": "VER-BUD-765",
+      "target": "TASK-BUD-416",
+      "target_type": "task",
+      "status": "passed",
+      "method": "colony-board-dirty-hardening-closure",
+      "timestamp": "2026-05-01T04:49:17.908Z",
+      "evidence": "Closed colony board dirty hardening after implementation and post-reload live validation. Incident evidence: .project/tasks.json was dirtied by completed colony/recovery replay appending timestamped stable messages. Fix: timestamp-insensitive dedupe via appendNoteOnceByNormalizedMessage; ensureRecoveryTaskForCandidate returns changed=false for repeated stable recovery messages; source task delivery-policy/promotion notes only write when status/message changes. Smoke: colony-pilot-parsers 82 passed. Live: clean git status before colony_pilot_status; post-run git status remained clean. This preserves auditability by preventing observability/status from creating dirty board state without new work."
     }
   ]
 }

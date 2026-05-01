@@ -10091,7 +10091,7 @@
     {
       "id": "TASK-BUD-416",
       "description": "Conter mutações repetidas de colony completed/recovery no board para evitar dirty state inesperado durante continuidade local.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/colony-pilot-task-sync.ts",
@@ -10107,8 +10107,8 @@
         "Handoff registra que dirty atual foi tratado como evidência de incidente, não revertido silenciosamente."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Continuidade ininterrupta auditável precisa de git state previsível; colony completed/recovery não pode reescrever board a cada status/replay e criar dirty state fora da fatia ativa.\n2026-05-01: implementação/teste de dedupe prontos. Dirty atual de `.project/tasks.json` foi tratado como evidência do incidente, não revertido silenciosamente. Como `colony_pilot_status`/runtime mudou, requer reload/live validation antes de fechar.",
-      "verification": "VER-BUD-763",
+      "notes": "[rationale:risk-control] Continuidade ininterrupta auditável precisa de git state previsível; colony completed/recovery não pode reescrever board a cada status/replay e criar dirty state fora da fatia ativa.\n2026-05-01: implementação/teste de dedupe prontos. Dirty atual de `.project/tasks.json` foi tratado como evidência do incidente, não revertido silenciosamente. Como `colony_pilot_status`/runtime mudou, requer reload/live validation antes de fechar.\n2026-05-01: concluído hardening de replay/status colony. Observabilidade `colony_pilot_status` não sujou o board após reload; dirty original foi tratado como evidência de incidente e contido por dedupe.",
+      "verification": "VER-BUD-765",
       "depends_on": [
         "TASK-BUD-417"
       ]
@@ -10116,7 +10116,7 @@
     {
       "id": "TASK-BUD-417",
       "description": "Live-validar após reload que `colony_pilot_status` não suja `.project/tasks.json` ao observar colony completed/recovery já registrada.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-397"
@@ -10132,7 +10132,8 @@
         "Se ainda sujar, registrar blocker e manter TASK-BUD-416 aberta."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] A correção de dedupe altera runtime de observabilidade; só o smoke não prova que o harness carregado parou de reescrever o board em completed replay."
+      "notes": "[rationale:risk-control] A correção de dedupe altera runtime de observabilidade; só o smoke não prova que o harness carregado parou de reescrever o board em completed replay.\n2026-05-01: concluído live validation pós-reload. `colony_pilot_status` partiu de git limpo e manteve git limpo; sem reescrever `.project/tasks.json`.",
+      "verification": "VER-BUD-764"
     }
   ]
 }
