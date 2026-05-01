@@ -12202,7 +12202,7 @@
     {
       "id": "TASK-BUD-514",
       "description": "Definir primitive report-only de contrato de rehearsal de background process (drill mínimo, evidências obrigatórias e stopSource coverage).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-513"
@@ -12218,12 +12218,13 @@
         "Sem start/stop automático; apenas avaliação."
       ],
       "milestone": "bg-agents-calibration-wave-2026-05d",
-      "notes": "[rationale:risk-control] rehearsal bounded de background precisa contrato explícito antes de operação real.\n[provenance:human] source_task=TASK-BUD-512 reason=seguir trilha background-first com governança antes de spawn de agentes"
+      "notes": "[rationale:risk-control] rehearsal bounded de background precisa contrato explícito antes de operação real.\n[provenance:human] source_task=TASK-BUD-512 reason=seguir trilha background-first com governança antes de spawn de agentes\n2026-05-01: contrato report-only de rehearsal background definido com evidências mínimas e bloqueios fail-closed.",
+      "verification": "VER-BUD-864"
     },
     {
       "id": "TASK-BUD-515",
       "description": "Criar primitive report-only de simple-agent spawn readiness (single agent, cwd isolado, timeout/budget e rollback).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-514"
@@ -12239,12 +12240,13 @@
         "Regressão cobre cenário forte e fail-closed por ausência de limites."
       ],
       "milestone": "bg-agents-calibration-wave-2026-05d",
-      "notes": "[rationale:risk-control] spawn simples precisa contrato mínimo antes de abrir caminho para colônia.\n[provenance:human] source_task=TASK-BUD-512 reason=sequenciar caminho background -> simple spawn -> colonia"
+      "notes": "[rationale:risk-control] spawn simples precisa contrato mínimo antes de abrir caminho para colônia.\n[provenance:human] source_task=TASK-BUD-512 reason=sequenciar caminho background -> simple spawn -> colonia\n2026-05-01: contrato report-only de simple spawn implementado com limites explícitos e fail-closed.",
+      "verification": "VER-BUD-865"
     },
     {
       "id": "TASK-BUD-516",
       "description": "Definir gate report-only de promoção para colônia condicionado a background+simple-spawn verdes em leitura live.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-515"
@@ -12260,7 +12262,8 @@
         "Mensagem de bloqueio aponta lacuna exata."
       ],
       "milestone": "bg-agents-calibration-wave-2026-05d",
-      "notes": "[rationale:risk-control] colônia deve entrar só após maturidade comprovada das camadas anteriores.\n[provenance:human] source_task=TASK-BUD-515 reason=evitar salto prematuro para execução paralela complexa"
+      "notes": "[rationale:risk-control] colônia deve entrar só após maturidade comprovada das camadas anteriores.\n[provenance:human] source_task=TASK-BUD-515 reason=evitar salto prematuro para execução paralela complexa\n2026-05-01: gate report-only de promoção para colônia agora exige sinais verdes explícitos de background e simple spawn.",
+      "verification": "VER-BUD-866"
     }
   ]
 }

@@ -22,6 +22,22 @@ Avaliar se a stack está calibrada para usar agentes como tools com governança,
 - `agents-as-tools-calibration-needs-boundedness`
 - `agents-as-tools-calibration-needs-observability`
 
+## Contrato complementar de simple spawn
+
+A primitive `evaluateAgentSpawnReadiness` cobre o próximo passo após calibração geral e exige, em modo report-only:
+
+- exatamente 1 agente por execução;
+- timeout explícito e bounded;
+- cwd isolado explícito;
+- budget explícito;
+- rollback e escopo bounded conhecidos;
+- reload confirmado para leitura live.
+
+Decisão canônica:
+
+- `ready-for-simple-spawn`
+- `keep-report-only`
+
 ## Invariantes
 
 - report-only

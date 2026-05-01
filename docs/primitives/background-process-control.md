@@ -19,6 +19,24 @@ Invariantes:
 - `processStopAllowed=false`
 - `mutationAllowed=false`
 
+## Contrato de rehearsal report-only
+
+A primitive `evaluateBackgroundProcessRehearsal` adiciona um gate read-only para decidir maturidade de rehearsal local:
+
+- `decision=ready`
+- `decision=needs-evidence`
+- `decision=blocked`
+
+Evidências mínimas exigidas pelo contrato:
+
+- readiness forte (`background-process-readiness-strong` com score >= 80);
+- lifecycle classificado (`lifecycleClassified=true`);
+- cobertura de `stopSource` >= 80%;
+- rollback conhecido;
+- pelo menos 1 rehearsal slice registrado.
+
+O contrato bloqueia automaticamente quando houver `destructive-restart-requested`, `protected-scope-requested` ou `unresolved-blockers`.
+
 ## Metadata obrigatória futura
 
 Qualquer processo gerenciado deve registrar:

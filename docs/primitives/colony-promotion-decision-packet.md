@@ -108,6 +108,16 @@ Registra que o candidate não deve ser promovido agora. Pode fechar uma task de 
 
 Mantém o candidate sem decisão de promoção. Use quando faltam arquivos declarados, validação focal, contexto de produto, comparação com branch alvo ou confiança de rollback.
 
+## Gate prévio para discutir promotion de colônia
+
+Antes de considerar uma decisão de promotion, a primitiva `evaluateColonyPromotionGate` deve indicar sinais mínimos verdes:
+
+- readiness de background process forte (`background-process-readiness-strong` com score >= 80);
+- simple spawn readiness em `ready-for-simple-spawn`;
+- reload confirmado (`liveReloadCompleted=true`).
+
+Sem esses sinais, a decisão deve permanecer `keep-report-only` com blocker explícito da lacuna (`background-readiness-signal-missing` ou `simple-spawn-readiness-signal-missing`).
+
 ## Relação com nudge-free/local continuity
 
 Este packet é uma boa fatia para continuidade local sem empurrão porque prepara uma decisão humana sem tocar escopo protegido. Ele também é uma barreira: se a próxima ação útil for materializar promotion, o loop deve parar e pedir decisão explícita.
