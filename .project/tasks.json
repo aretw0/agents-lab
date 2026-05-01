@@ -10108,7 +10108,31 @@
       ],
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Continuidade ininterrupta auditável precisa de git state previsível; colony completed/recovery não pode reescrever board a cada status/replay e criar dirty state fora da fatia ativa.\n2026-05-01: implementação/teste de dedupe prontos. Dirty atual de `.project/tasks.json` foi tratado como evidência do incidente, não revertido silenciosamente. Como `colony_pilot_status`/runtime mudou, requer reload/live validation antes de fechar.",
-      "verification": "VER-BUD-763"
+      "verification": "VER-BUD-763",
+      "depends_on": [
+        "TASK-BUD-417"
+      ]
+    },
+    {
+      "id": "TASK-BUD-417",
+      "description": "Live-validar após reload que `colony_pilot_status` não suja `.project/tasks.json` ao observar colony completed/recovery já registrada.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-397"
+      ],
+      "files": [
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Após reload, partir de `git status --short` limpo.",
+        "Executar `colony_pilot_status` em modo observabilidade/status apenas.",
+        "Reexecutar `git status --short` e confirmar que `.project/tasks.json` não mudou por notas automáticas repetidas.",
+        "Se ainda sujar, registrar blocker e manter TASK-BUD-416 aberta."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A correção de dedupe altera runtime de observabilidade; só o smoke não prova que o harness carregado parou de reescrever o board em completed replay."
     }
   ]
 }

@@ -1,43 +1,43 @@
 {
-  "timestamp": "2026-05-01T04:44:15.624Z",
-  "context": "Investigated unexpected dirty .project/tasks.json after colony status/observability. Cause: completed colony c-ret-1/recovery path re-appende [snip] n required before closing TASK-BUD-416. [truncated:+509 chars]",
+  "timestamp": "2026-05-01T04:46:01.998Z",
+  "context": "Post-commit quality gate indicated TASK-BUD-416 is macro-like and needs explicit dependency/live-validation side quest. Created TASK-BUD-417 [snip] te, then reload before live validation. [truncated:+385 chars]",
   "current_tasks": [
     "TASK-BUD-416"
   ],
   "next_actions": [
-    "Commit TASK-BUD-416 implementation slice including incident evidence.",
-    "Reload required before live-validating colony_pilot_status no longer dirties .project/tasks.json on completed replay.",
-    "After reload, run git status clean baseline, colony_pilot_status, then git status; close TASK- [snip] if no dirty delta appears. [truncated:+8 chars]"
+    "Commit board dependency decomposition.",
+    "Reload required.",
+    "After reload: ensure git status clean, run colony_pilot_status, ensure git status still clean; [snip] nd TASK-BUD-416 if passed. [truncated:+29 chars]"
   ],
   "blockers": [
-    "TASK-BUD-416 requires reload/live validation before closure.",
-    "No strong unattended/autoloop should start while board can still be dirtied by observability replay."
+    "TASK-BUD-416 remains open until TASK-BUD-417 live validation passes.",
+    "No strong unattended/autoloop while observability replay hardening is unvalidated."
   ],
   "recent_validation": [
-    "findstr located sources in colony-pilot.ts and colony-pilot-task-sync.ts",
-    "npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts => 82 passed",
-    "git diff --check ok"
+    "TASK-BUD-417 created planned/p1",
+    "board_task_dependencies TASK-BUD-417 replace_depends_on TASK-BUD-397 applied",
+    "board_task_dependencies TASK-BUD-416 add_depends_on TASK-BUD-417 applied"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:44:15.624Z",
+    "generatedAtIso": "2026-05-01T04:46:01.998Z",
     "level": "ok",
-    "percent": 43,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "commit-and-reload-before-live-validation"
+    "recommendation": "commit-and-reload"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:44:15.624Z",
+      "atIso": "2026-05-01T04:46:01.998Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 43,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-reload-before-live-validation"
+      "recommendation": "commit-and-reload"
     }
   ]
 }
