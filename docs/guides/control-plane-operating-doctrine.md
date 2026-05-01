@@ -259,6 +259,8 @@ Regra de continuidade: `no-eligible-tasks` é um stop condition local, não conv
 
 Promotion/recovery de colony exige inventário/validação própria e revisão humana; GitHub Actions, release, remote/offload e publish exigem tarefa protegida explícita; research/config inspiration só entra como inspiração bounded quando for selecionada pelo operador. Nenhuma dessas classes deve ser selecionada por continuidade automática local.
 
+A exceção local-safe é preparar um packet read-only, como `docs/primitives/colony-promotion-decision-packet.md`, para um único candidate `*-promotion`. Esse packet pode inventariar arquivos, validação focal, riscos e opções humanas `promote`/`skip`/`defer`, mas deve preservar `mutationAllowed=false`, `dispatchAllowed=false` e `authorization=none`. Se a opção humana for `promote`, a materialização continua sendo uma fatia protegida separada, nunca uma continuação automática do packet.
+
 Pacote de decisão local de 2026-05-01 para o backlog restante:
 
 | Classe | Exemplos no board | Decisão segura |

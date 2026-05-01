@@ -58,6 +58,7 @@ Como medir e garantir a qualidade de agentes.
 | [continuity-abstraction.md](./continuity-abstraction.md) | Memória / Coordenação / Governança | Continuidade desacoplada de backend/runner com contrato canônico de estado/eventos/gates | Em evolução |
 | [conversation-event-canonical-schema.md](./conversation-event-canonical-schema.md) | Memória / Coordenação / Observabilidade | Schema canônico provider-agnostic para ingestão/triagem de conversas e threads | Em evolução |
 | [nudge-free-local-continuity.md](./nudge-free-local-continuity.md) | Planejamento / Governança / Continuidade | Perfil local para continuidade sem empurrão em batches de 3-5 fatias, checkpoint/commit por fatia e sem escopos protegidos automáticos | Inicial |
+| [colony-promotion-decision-packet.md](./colony-promotion-decision-packet.md) | Planejamento / Governança / Coordenação | Packet read-only para decisão humana `promote`/`skip`/`defer` de um único candidate de colony antes de qualquer materialização | Inicial |
 | [capability-gap-claim.md](./capability-gap-claim.md) | Coordenação / Ferramentas / Governança | Detecta ausência de ferramenta/capability e exige claim de bootstrap/permissão antes da execução principal | Em evolução |
 | _(em breve)_ | Memória | Context window manager | Planejado |
 | _(em breve)_ | Ferramentas | File system tools para Pi | Planejado |

@@ -10183,7 +10183,7 @@
     {
       "id": "TASK-BUD-420",
       "description": "Desenhar packet read-only para revisão de um único `*-promotion` de colony antes de qualquer materialização no branch alvo.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-268"
@@ -10201,7 +10201,8 @@
         "Não executar promoção colony nesta task."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] A inspiração bounded de pi-config apontou que a ida segura para colony promotion review precisa de um packet read-only e decisão humana antes de materializar candidate."
+      "notes": "[rationale:risk-control] A inspiração bounded de pi-config apontou que a ida segura para colony promotion review precisa de um packet read-only e decisão humana antes de materializar candidate.\n2026-05-01: retomado por foco explícito do operador na lane local-first ininterrupta/controlada. Escopo desta fatia: somente contrato read-only `colony_promotion_decision_packet`; sem materializar colony, sem staging/apply/commit de candidates, sem CI/remote/scheduler.\n2026-05-01: progresso de design/doc preservado, mas foco ativo foi retirado da lane de colony por steer do operador. Task fica parked/planned até decisão explícita de retomar revisão de promotion.\n2026-05-01: concluída como boundary de governança (review/read-only), não como execução de colony.",
+      "verification": "VER-BUD-774"
     },
     {
       "id": "TASK-BUD-421",
@@ -10245,6 +10246,28 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Steering do operador: outputs de tools precisam ser recolhíveis por default e o humano precisa ver a tecla real (`ctrl+o`) em vez de `expand-tool`; poluição de chat reduz confiança em loops longos.\n2026-05-01: iniciado inventário bounded. Escopo: diagnosticar TUI/tool-call collapse e hint de keybinding real; sem editar node_modules upstream diretamente.\n2026-05-01: bounded inventory/fix complete for local write-preview guard. Found local hardcoded text `use expand-tool keybinding to expand` in `packages/pi-stack/extensions/write-preview-guard.ts`; upstream inspected surfaces use `keyHint(\"app.tools.expand\", \"to expand\")`. Fix stays local (no node_modules mutation), preserves collapsed write preview via `context.expanded`, and falls back to `ctrl+o` when tests/runtime have no app keybinding registry loaded. Universal upstream collapse policy remains a TUI/runtime boundary; this slice removes the local trust blocker text.\n2026-05-01: completed focused write-preview/keybinding hint slice with VER-BUD-772. Stronger universal TUI collapse remains an upstream/runtime policy boundary, not authorization for long-loop promotion.\n2026-05-01: post-reload live smoke recorded as VER-BUD-773. Disposable `.tmp/task-bud-422-live-preview.txt` write-preview was created/removed to exercise the TUI render path; workspace returned clean. Unintended `package-lock.json` drift from reload/npm tooling was restored and not committed.",
       "verification": "VER-BUD-772"
+    },
+    {
+      "id": "TASK-BUD-423",
+      "description": "Endurecer seleção da autonomy lane para não puxar automaticamente backlog de colony-promotion/recovery sem foco humano explícito.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-418"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Sem `includeProtectedScopes` e sem foco explícito, tarefas com tema colony+promotion/recovery devem ser tratadas como protected e ficar fora da auto-seleção.",
+        "Com `focusTaskIds` + `focusSource=explicit`, o operador pode selecionar intencionalmente uma task protected sem habilitar protected globalmente.",
+        "Cobertura de smoke em `autonomy-task-selector.test.ts` deve provar os dois comportamentos."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Evitar deriva automática para lanes ambíguas/protegidas quando o objetivo é continuidade local controlada/auditada.\n2026-05-01: reduz deriva automática para lane de colony-promotion/recovery mantendo caminho intencional por foco explícito.",
+      "verification": "VER-BUD-775"
     }
   ]
 }

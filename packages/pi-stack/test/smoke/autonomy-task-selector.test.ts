@@ -68,6 +68,26 @@ describe("autonomy task selector", () => {
     expect(result.totals.skippedProtectedScope).toBe(1);
   });
 
+  it("treats colony promotion/recovery themes as protected by default", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-COLONY-PROMOTION", status: "planned", description: "[P0] revisar colony promotion candidate" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local lane gate" }),
+    ]);
+
+    expect(result.nextTaskId).toBe("TASK-LOCAL");
+    expect(result.totals.skippedProtectedScope).toBe(1);
+  });
+
+  it("allows protected lane selection when focus is explicit", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-COLONY-PROMOTION", status: "planned", description: "[P0] revisar colony promotion candidate" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] local lane gate" }),
+    ], { focusTaskIds: ["TASK-COLONY-PROMOTION"], focusSource: "explicit" });
+
+    expect(result.nextTaskId).toBe("TASK-COLONY-PROMOTION");
+    expect(result.selectionPolicy).toContain("protected-scopes-explicit-focus-only");
+  });
+
   it("can include protected scopes only when explicitly authorized", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-CI", status: "planned", description: "[P0] update ci", files: [".github/workflows/test.yml"] }),

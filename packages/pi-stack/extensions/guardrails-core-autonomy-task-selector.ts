@@ -47,6 +47,9 @@ const PROTECTED_SCOPE_PATTERNS = [
   /\bgithub\s+actions\b/i,
   /\bgh\s+actions\b/i,
   /\bremote\s+(?:compute|execution|runner|runners)\b/i,
+  /\bcolony\b.*\b(?:promotion|promote|recovery|recover|materializa[cç][aã]o)\b/i,
+  /\b(?:promotion|promote|recovery|recover)\b.*\bcolony\b/i,
+  /(?:^|\W)[\w-]*-promotion(?:\W|$)/i,
   /https?:\/\//i,
   /\b(?:research|pesquisa|influ[eê]ncia|inspiration|inspira[cç][aã]o)\b/i,
   /\bpublish\b/i,
@@ -170,6 +173,8 @@ export function selectAutonomyLaneTask(
   const includeMissingRationale = options?.includeMissingRationale === true;
   const focusTaskIds = normalizeTaskIdList(options?.focusTaskIds);
   const focusSource = focusTaskIds.length > 0 ? options?.focusSource : undefined;
+  const allowProtectedByExplicitFocus = focusTaskIds.length > 0 && focusSource === "explicit";
+  const includeProtectedByPolicy = includeProtectedScopes || allowProtectedByExplicitFocus;
   const focusSet = new Set(focusTaskIds);
   const completed = new Set(
     tasks
@@ -183,8 +188,8 @@ export function selectAutonomyLaneTask(
     if (!milestone) return true;
     return normalizeMilestone(task.milestone) === milestone;
   });
-  const skippedProtectedScope = candidate.filter((task) => !includeProtectedScopes && taskTouchesProtectedScope(task)).length;
-  const scoped = includeProtectedScopes
+  const skippedProtectedScope = candidate.filter((task) => !includeProtectedByPolicy && taskTouchesProtectedScope(task)).length;
+  const scoped = includeProtectedByPolicy
     ? candidate
     : candidate.filter((task) => !taskTouchesProtectedScope(task));
   const skippedMissingRationale = scoped.filter((task) => !includeMissingRationale && taskMissingRequiredRationale(task)).length;
@@ -215,7 +220,11 @@ export function selectAutonomyLaneTask(
     "deps-completed",
     "priority(P0..P9)",
     "id",
-    includeProtectedScopes ? "protected-scopes-included" : "protected-scopes-skipped",
+    includeProtectedScopes
+      ? "protected-scopes-included"
+      : allowProtectedByExplicitFocus
+        ? "protected-scopes-explicit-focus-only"
+        : "protected-scopes-skipped",
     includeMissingRationale ? "missing-rationale-included" : "missing-rationale-skipped",
     focusTaskIds.length > 0 ? `focus(${focusSource ?? "explicit"}:${focusTaskIds.join(",")})` : undefined,
     milestone ? `milestone(${milestone})` : undefined,

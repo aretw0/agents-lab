@@ -9186,6 +9186,24 @@
       "method": "post-reload live smoke",
       "timestamp": "2026-05-01T12:01:36.016Z",
       "evidence": "After operator confirmed `/reload`, triggered a bounded disposable write-preview smoke via `.tmp/task-bud-422-live-preview.txt` with 15 lines so the live TUI render path could show the collapsed write preview/hint. Disposable file was removed immediately. `git status --porcelain=v1` returned CLEAN after removing the smoke file and restoring an unintended package-lock drift from reload/npm tooling. No node_modules mutation, no protected scope, no remote/CI/scheduler/colony."
+    },
+    {
+      "id": "VER-BUD-774",
+      "target": "TASK-BUD-420",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs contract + marker checks",
+      "timestamp": "2026-05-01T12:20:42.228Z",
+      "evidence": "Documented read-only `colony_promotion_decision_packet` contract in `docs/primitives/colony-promotion-decision-packet.md`, linked from `docs/primitives/README.md`, and integrated doctrine guardrail text in `docs/guides/control-plane-operating-doctrine.md`. Marker validations passed: packet 9/9 (`mutationAllowed=false`, `dispatchAllowed=false`, `authorization=none`, `promote/skip/defer`, `declaredFiles`, `validationGate`, `rollbackPlan`), README 1/1 link, doctrine 7/7 guardrail markers. Scope remains read-only decision packet only; no colony materialization/apply/stage/commit executed."
+    },
+    {
+      "id": "VER-BUD-775",
+      "target": "TASK-BUD-423",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke test",
+      "timestamp": "2026-05-01T12:20:49.186Z",
+      "evidence": "Hardened `selectAutonomyLaneTask` protected-scope policy for unattended lane selection: added colony promotion/recovery task-theme protection patterns and explicit-focus override (`focusTaskIds` + `focusSource=explicit`) without global protected-scope inclusion. Updated tests in `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` for (a) colony promotion skipped by default and (b) explicit focus selecting protected task. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` => 1 file passed, 14 tests passed."
     }
   ]
 }
