@@ -9574,7 +9574,7 @@
     {
       "id": "TASK-BUD-395",
       "description": "Hardening: reduzir bloat de erros de schema/validação em tools de planejamento, aceitando aliases seguros e retornando feedback compacto com valores válidos.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "P1",
       "depends_on": [
         "TASK-BUD-153"
@@ -9591,7 +9591,8 @@
         "TASK-BUD-153 permanece aberta como macro até as demais primitivas de controle local-first amadurecerem."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Feedback do operador mostrou que erro TypeBox verboso atrapalha operação ininterrupta segura; hardening local-safe reduz ruído e evita falsa impressão de prontidão ampla.\n2026-05-01: código/testes prontos para reduzir bloat de validação TypeBox em delivery_mode_plan/state_reconcile_plan. Mantida in-progress até reload e validação live dos caminhos alias/erro compacto."
+      "notes": "[rationale:risk-control] Feedback do operador mostrou que erro TypeBox verboso atrapalha operação ininterrupta segura; hardening local-safe reduz ruído e evita falsa impressão de prontidão ampla.\n2026-05-01: código/testes prontos para reduzir bloat de validação TypeBox em delivery_mode_plan/state_reconcile_plan. Mantida in-progress até reload e validação live dos caminhos alias/erro compacto.\n2026-05-01: concluído após reload/live validation. Aliases `direct` e erros compactos validados em `delivery_mode_plan` e `state_reconcile_plan`; TASK-BUD-153 permanece macro aberta.",
+      "verification": "VER-BUD-733"
     },
     {
       "id": "TASK-BUD-396",
@@ -9731,7 +9732,7 @@
     {
       "id": "TASK-BUD-402",
       "description": "Investigar incidente em que warning final de contexto/auto-compact não bloqueou continuidade antes da compactação, permitindo runs adicionais até 100%.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p0",
       "depends_on": [
         "TASK-BUD-153"
@@ -9752,7 +9753,8 @@
         "Registrar política de auto-resume pós-compact: retomada só por handoff fresco e sem stale continuation."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Operador observou incidente crítico: no warning final era para parar, mas o agente continuou algumas runs antes do auto-compact assumir; isso quebra a premissa de controle em long-run e bloqueia qualquer unattended forte.\n2026-05-01: implementada primeira correção fail-closed para warning final/compact: `resolveContextWatchDeterministicStopSignal` agora trata `compact` com auto-compact deferred/non-trigger como `compact-final-warning`, bloqueando nova run até checkpoint/auto-compact concluir. Corrigido também campo de summary `calmCloseReady` que usava propriedade inexistente. Live validation requer reload.\n[rationale:risk-control] O incidente mostrou que advisory final não pode ser apenas ruído; em nível compact, qualquer defer de auto-compact precisa virar stop determinístico para preservar controle humano e handoff."
+      "notes": "[rationale:risk-control] Operador observou incidente crítico: no warning final era para parar, mas o agente continuou algumas runs antes do auto-compact assumir; isso quebra a premissa de controle em long-run e bloqueia qualquer unattended forte.\n2026-05-01: implementada primeira correção fail-closed para warning final/compact: `resolveContextWatchDeterministicStopSignal` agora trata `compact` com auto-compact deferred/non-trigger como `compact-final-warning`, bloqueando nova run até checkpoint/auto-compact concluir. Corrigido também campo de summary `calmCloseReady` que usava propriedade inexistente. Live validation requer reload.\n[rationale:risk-control] O incidente mostrou que advisory final não pode ser apenas ruído; em nível compact, qualquer defer de auto-compact precisa virar stop determinístico para preservar controle humano e handoff.\n2026-05-01: concluído como correção de incidente local. O warning final/compact agora falha fechado quando auto-compact está deferido/non-trigger, evitando iniciar nova run antes de checkpoint/compact. Validação live pós-reload confirmou runtime carregado; regressão focal cobre a sequência modelada.",
+      "verification": "VER-BUD-734"
     },
     {
       "id": "TASK-BUD-403",
