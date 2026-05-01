@@ -9330,6 +9330,15 @@
       "method": "docs schema + marker checks",
       "timestamp": "2026-05-01T13:45:13.839Z",
       "evidence": "Created `docs/primitives/lane-brainstorm-packet.md` defining read-only schema contract for `lane_brainstorm_packet` with input/output examples, invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`), decision codes, and blocked fail-closed example. Linked primitive in `docs/primitives/README.md`. Validation: safe_marker_check on schema doc 8/8, README 4/4; i18n_lint_text pass."
+    },
+    {
+      "id": "VER-BUD-790",
+      "target": "TASK-BUD-438",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke test",
+      "timestamp": "2026-05-01T13:47:21.865Z",
+      "evidence": "Implemented deterministic brainstorm scorer in `packages/pi-stack/extensions/lane-brainstorm-packet.ts` with `scoreBrainstormIdea` and `rankBrainstormIdeas` (value/risk/effort weighting, level normalization, dedupe by id, capped output, stable tie-break). Added smoke tests in `packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` covering ranking, tie-break determinism, dedupe/maxItems, and unknown-level normalization fallback. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` => 1 file passed, 4 tests passed."
     }
   ]
 }

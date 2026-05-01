@@ -10575,7 +10575,7 @@
     {
       "id": "TASK-BUD-438",
       "description": "Implementar scorer local para priorizar ideias de brainstorm por valor/risco/esforço em modo report-only.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-437"
@@ -10591,7 +10591,8 @@
         "Smoke test cobre estabilidade de ordenação para casos empatados."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Priorização reduz repetição e melhora qualidade da lane."
+      "notes": "[rationale:risk-control] Priorização reduz repetição e melhora qualidade da lane.\n2026-05-01: iniciado scorer determinístico de ideias (valor/risco/esforço) para priorização report-only da lane de brainstorm.\n2026-05-01: priorização local report-only pronta para alimentar lane_brainstorm_packet sem mutação/dispatch.",
+      "verification": "VER-BUD-790"
     },
     {
       "id": "TASK-BUD-439",
