@@ -9672,7 +9672,11 @@
         "Teste cobre pelo menos um handoff fresco válido e um handoff stale/divergente."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual."
+      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual.",
+      "depends_on": [
+        "TASK-BUD-408",
+        "TASK-BUD-409"
+      ]
     },
     {
       "id": "TASK-BUD-399",
@@ -9887,6 +9891,49 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] TASK-BUD-067 é macro/blocker; antes de corrigir evento real precisamos localizar a fonte sem transformar suspeita em atribuição falsa nem abrir diagnóstico de alto blast radius.\n2026-05-01: concluído como investigação bounded da fonte de eventos. O emissor literal de BG_PROCESS_DONE não foi localizado no código first-party/upstream dist escaneado; tratar origem como boundary externa/não localizada e manter readiness fail-closed até adaptador/wrapper/PR real.",
       "verification": "VER-BUD-743"
+    },
+    {
+      "id": "TASK-BUD-408",
+      "description": "Criar detector bounded de divergência entre handoff focus/current_tasks e estado real do board/verification para impedir resume com evidência stale.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Detector identifica foco de handoff concluído, inexistente ou divergente do status atual do board.",
+        "Evidência de verification antiga não pode ser refrescada como estado atual sem nova validação.",
+        "Resultado retorna razões compactas como stale-handoff-focus, completed-focus, missing-task ou board-handoff-divergence.",
+        "Função é read-only e tem smoke cobrindo fresh vs stale/divergent handoff."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] TASK-BUD-398 é macro; antes de bloquear auto-resume precisamos uma primitive read-only que compare handoff e board sem mutar estado nem confiar em checkpoint antigo."
+    },
+    {
+      "id": "TASK-BUD-409",
+      "description": "Aplicar fail-closed em auto-resume/continuidade quando detector apontar stale handoff ou divergência board-handoff.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-408"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/state-reconciliation-modes.md"
+      ],
+      "acceptance_criteria": [
+        "Auto-resume/continuation readiness bloqueia ou suprime dispatch quando handoff está stale/divergente do board.",
+        "Summary compacto expõe blocker sem refreshar evidência antiga como atual.",
+        "Teste cobre caminho fresco permitido e caminhos stale/divergent fail-closed.",
+        "Sem scheduler/remote/offload; mudança permanece local-first e evidence-only."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Depois do detector, o risco real é uma continuação usar handoff velho como permissão atual; o gate precisa falhar fechado antes de qualquer dispatch/retomada."
     }
   ]
 }
