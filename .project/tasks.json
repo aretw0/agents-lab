@@ -9645,7 +9645,7 @@
         "A implementação permanece não-operacional para launch/stop reais até existir autorização separada."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional.\n2026-05-01: iniciada fatia local-safe do contrato de lifecycle. Escopo: classificador read-only para estados canônicos de eventos/background (`running`, `stopped`, `finished`, `failed`, `killed`, `late-after-stop`, `unknown-origin`), label fallback para impedir `[undefined]`, e smoke tests. Sem start/stop/kill operacional.",
+      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional.\n2026-05-01: iniciada fatia local-safe do contrato de lifecycle. Escopo: classificador read-only para estados canônicos de eventos/background (`running`, `stopped`, `finished`, `failed`, `killed`, `late-after-stop`, `unknown-origin`), label fallback para impedir `[undefined]`, e smoke tests. Sem start/stop/kill operacional.\n2026-05-01: live validation pós-reload passou para `background_process_lifecycle_plan` (late-after-stop, unknown-origin, running e fallback de label). Não fechar ainda: `board_task_quality_gate` bloqueia por `unresolved-dependencies` porque TASK-BUD-067 segue blocked; a fatia de contrato foi validada, mas o blocker histórico de TUI/event output ainda precisa reconciliação ou reescopo explícito.",
       "verification": "VER-BUD-741"
     },
     {
@@ -9816,6 +9816,27 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Steering do operador: a stack acumulou nomes demais para conceitos próximos; sem glossário, o agente pode duplicar abstrações, fechar progresso vazio ou tratar aliases como capacidades novas.\n2026-05-01: glossário canônico criado para reduzir alcunhas e gordura conceitual; objetivo explícito é um relógio de trabalho digno e auditável, não proliferação de nomes.",
       "verification": "VER-BUD-737"
+    },
+    {
+      "id": "TASK-BUD-405",
+      "description": "Planejar perfil local de roteamento Anthropic/Codex para preservar cota: control-plane em Anthropic quando disponível, classificadores leves em Codex, e retorno manual ao Codex após janela Anthropic.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        ".pi/settings.json",
+        ".sandbox/pi-agent/settings.json",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/control-plane-glossary.md"
+      ],
+      "acceptance_criteria": [
+        "Inventariar providers configurados/readiness antes de qualquer alteração de settings.",
+        "Definir patch preview para defaultProvider/defaultModel e piStack.quotaVisibility.routeModelRefs sem aplicar automaticamente em .pi/settings.json.",
+        "Preservar classificadores pequenos em openai-codex/gpt-5.4-mini quando houver cota e documentar fallback se Codex entrar em WARN/BLOCK.",
+        "Separar troca manual via /model de qualquer auto-switch; handoff_advisor/quota route continuam advisory unless execute explicitamente solicitado.",
+        "Registrar como voltar ao perfil Codex após janela Anthropic de ~5h ou quando Anthropic bloquear."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Pedido do operador: cota Codex local está pressionada e Anthropic deve assumir control-plane sem quebrar classificadores/monitores; `.pi/settings.json` é protegido e só pode mudar com intenção explícita e patch auditável."
     }
   ]
 }

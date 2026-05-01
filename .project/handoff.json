@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T03:06:32.832Z",
-  "context": "Started TASK-BUD-397 background lifecycle side quest. Implemented read-only canonical lifecycle classifier for background process events with [snip] rational start/stop/kill is authorized. [truncated:+346 chars]",
+  "timestamp": "2026-05-01T03:18:01.772Z",
+  "context": "Context warning acknowledged. Stop broad diagnostics. Important finding: quota_visibility_windows looked empty because quota_visibility_statu [snip] _analytics saw anthropic model changes. [truncated:+527 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-397 lifecycle contract slice.",
-    "Reload required before live-validating new tool background_process_lifecycle_plan.",
-    "After reload, validate live paths for done+stopRequested -> late-after-stop and label undefined -> background-process."
+    "Do not run more broad quota/log scans in this context window.",
+    "Commit board bookkeeping for TASK-BUD-397 live validation and TASK-BUD-405 provider-profile planning.",
+    "Later, add a bounded task to fix quota_visibility window scan semantics for long-lived sessions if needed."
   ],
   "blockers": [
-    "TASK-BUD-397 remains in-progress until live validation after reload.",
-    "TASK-BUD-153 remains blocked by unresolved dependencies and no operational bac [snip] op implementation yet. [truncated:+27 chars]",
-    "Strong unattended/loop/scheduler/remote remains blocked."
+    "Context is warn/bounded; avoid large reads/scans.",
+    "Anthropic route/budget not configured in .pi/settings.json yet.",
+    "TASK-BUD-397 remains open due TASK-BUD-067 dependency."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
-    "safe_marker_check docs/primitives/background-process-control.md => matched 4/4",
-    "VER-BUD-741 linked to TASK-BUD-397"
+    "background_process_lifecycle_plan live validation passed: late-after-stop, unknown-origin, running.",
+    "quota_visibility_status 7d scannedFiles=0; 30d scannedFiles=55 with tokens/cost.",
+    "session_analytics_query model-usage 168h saw providers openai-codex, anthropic, github-copilot."
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:06:32.832Z",
-    "level": "ok",
-    "percent": 47,
+    "generatedAtIso": "2026-05-01T03:18:01.772Z",
+    "level": "warn",
+    "percent": 53,
     "action": "continue",
-    "recommendation": "commit-then-reload-validate-background-lifecycle"
+    "recommendation": "commit-bookkeeping-then-pause-large-diagnostics"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:06:32.832Z",
+      "atIso": "2026-05-01T03:18:01.772Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 47,
+      "level": "warn",
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-validate-background-lifecycle"
+      "recommendation": "commit-bookkeeping-then-pause-large-diagnostics"
     }
   ]
 }

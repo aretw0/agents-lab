@@ -8898,6 +8898,15 @@
       "method": "background-lifecycle-contract-smoke",
       "timestamp": "2026-05-01T03:06:10.771Z",
       "evidence": "Implemented read-only resolveBackgroundProcessLifecycleEvent and runtime surface background_process_lifecycle_plan. Contract classifies running/stopped/finished/failed/killed/late-after-stop/unknown-origin, falls back undefined/null/empty display labels to background-process, marks BG_PROCESS_DONE after stop as late-after-stop, and preserves dispatch/processStart/processStop=false authorization=none. Validation: guardrails-background-process smoke 6 passed; safe_marker_check docs matched 4/4. Reload required for live tool validation."
+    },
+    {
+      "id": "VER-BUD-742",
+      "target": "TASK-BUD-397",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-background-lifecycle-live-validation",
+      "timestamp": "2026-05-01T03:16:37.869Z",
+      "evidence": "After reload, background_process_lifecycle_plan live-validated: done+known_process+stop_requested+exit_code=1+label=undefined returned state=late-after-stop displayLabel=background-process dispatch=no authorization=none; done+unknown process returned unknown-origin; registered known process returned running. TASK-BUD-397 remains open because quality gate blocks unresolved dependency TASK-BUD-067."
     }
   ]
 }
