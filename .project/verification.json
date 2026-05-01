@@ -10023,6 +10023,42 @@
       "method": "colony promotion gate primitive + smoke + marker-check",
       "timestamp": "2026-05-01T23:04:30.686Z",
       "evidence": "Implemented report-only colony promotion gate conditioned on background and simple-spawn readiness signals. Changes: - Added `packages/pi-stack/extensions/guardrails-core-colony-promotion-gate.ts` - `evaluateColonyPromotionGate(...)` requires explicit green signals: - background readiness strong (`score>=80`, `background-process-readiness-strong`) - simple spawn `ready-for-simple-spawn` - reload confirmed - Returns `decision=ready-for-colony-gate|keep-report-only` with precise blockers (`background-readiness-signal-missing`, `simple-spawn-readiness-signal-missing`, etc.). - Invariants: no dispatch (`dispatchAllowed=false`, `colonyDispatchAllowed=false`, `authorization=none`). - Updated exports in `packages/pi-stack/extensions/guardrails-core-exports.ts`. - Added tests `packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts` for ready path + missing background + missing simple-spawn signals. - Updated `docs/primitives/colony-promotion-decision-packet.md` with gate precondition section. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` => 5 files passed, 21 tests passed. - `safe_marker_check docs/primitives/colony-promotion-decision-packet.md` markers (`evaluateColonyPromotionGate`, `background-readiness-signal-missing`, `simple-spawn-readiness-signal-missing`, `keep-report-only`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-867",
+      "target": "TASK-BUD-517",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface wiring + smoke + marker-check",
+      "timestamp": "2026-05-01T23:12:49.663Z",
+      "evidence": "Exposed report-only runtime gate `background_process_rehearsal_gate` from rehearsal primitive. Changes: - `packages/pi-stack/extensions/guardrails-core-background-process-surface.ts` - Added tool `background_process_rehearsal_gate` (read-only, no process start/stop). - Parameters cover rehearsal contract evidence fields (readiness score/code, lifecycle classified, stopSource coverage, rollback, slices, blockers, destructive/protected flags). - `packages/pi-stack/test/smoke/guardrails-background-process.test.ts` - Extended tool exposure test to execute rehearsal gate and assert `decision=ready`, `dispatchAllowed=false`. - `docs/primitives/background-process-control.md` - Updated initial surfaces list to include rehearsal gate. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts` => passed. - `safe_marker_check docs/primitives/background-process-control.md` markers (`background_process_rehearsal_gate`, `background_process_readiness_score`, `ready|needs-evidence|blocked`) => matched 3/3."
+    },
+    {
+      "id": "VER-BUD-868",
+      "target": "TASK-BUD-518",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inference parity refinement + smoke",
+      "timestamp": "2026-05-01T23:12:50.004Z",
+      "evidence": "Refined background capability inference and preserved standalone vs packet parity. Changes: - `packages/pi-stack/extensions/guardrails-core-background-process-surface.ts` - Inference now marks stacktrace capability from background-process contract presence (`background_process_plan`) while preserving explicit override precedence. - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - Mirrored same inference/override behavior for composed packet parity. - `packages/pi-stack/test/smoke/guardrails-background-process.test.ts` - Added assertion for inferred `hasStructuredStacktraceCapture=true` in inferred path. - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Added/updated inferred-vs-override parity assertions aligned with revised inference. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts` => passed. Note: updated live readings require reload after merge."
+    },
+    {
+      "id": "VER-BUD-869",
+      "target": "TASK-BUD-519",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook/doc update + marker-check",
+      "timestamp": "2026-05-01T23:12:50.369Z",
+      "evidence": "Updated calibration runbook and packet usage docs to reflect background-first sequence including rehearsal gate and simple spawn readiness. Changes: - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` - Runbook sequence now: readiness -> optional override -> rehearsal gate -> agents score -> simple spawn readiness -> ops packet -> checkpoint. - `docs/primitives/ops-calibration-decision-packet.md` - Updated usage section with same sequence and explicit mention of rehearsal/simple-spawn signals. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`background_process_rehearsal_gate`, `evaluateAgentSpawnReadiness`, `ops_calibration_decision_packet`, `go/no-go`) => matched 4/4. - `safe_marker_check docs/primitives/ops-calibration-decision-packet.md` markers (`background_process_rehearsal_gate`, `evaluateAgentSpawnReadiness`, `ops_calibration_decision_packet`, `inferência bounded`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-870",
+      "target": "TASK-BUD-520",
+      "target_type": "task",
+      "status": "passed",
+      "method": "live baseline capture + research packet update + marker-check",
+      "timestamp": "2026-05-01T23:13:54.276Z",
+      "evidence": "Recorded compact live baseline for wave `bg-agents-calibration-wave-2026-05e` and continuity decision. Baseline readings (captured in-session): - `background_process_readiness_score` => `score=59`, `code=background-process-readiness-needs-capabilities`. - `agents_as_tools_calibration_score` => `score=100`, `code=agents-as-tools-calibration-strong`. - `ops_calibration_decision_packet` (`live_reload_completed=true`) => `decision=keep-report-only`, `code=ops-calibration-keep-report-only-background`, blocker `background-readiness-not-strong`. Documentation: - Updated `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` with explicit `Baseline live da wave` section and continuity note. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`Baseline live da wave`, `score=59`, `score=100`, `ops-calibration-keep-report-only-background`, `background-readiness-not-strong`) => matched 5/5. - Full focused smoke suite for guardrails calibration primitives remains green in this slice (latest run: 8 files, 32 tests passed)."
     }
   ]
 }

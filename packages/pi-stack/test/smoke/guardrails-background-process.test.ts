@@ -221,6 +221,7 @@ describe("background process control plan", () => {
     expect(inferred.details?.checks?.hasProcessRegistry).toBe(true);
     expect(inferred.details?.checks?.hasBoundedLogTail).toBe(true);
     expect(inferred.details?.checks?.hasGracefulStopThenKill).toBe(true);
+    expect(inferred.details?.checks?.hasStructuredStacktraceCapture).toBe(true);
 
     const override = await readinessTool.execute(
       "tc-bg-readiness-override",
@@ -238,10 +239,11 @@ describe("background process control plan", () => {
     expect(override.details?.checks?.hasGracefulStopThenKill).toBe(false);
   });
 
-  it("exposes readiness score and lifecycle classifier as read-only tools", async () => {
+  it("exposes readiness/rehearsal/lifecycle classifiers as read-only tools", async () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
     const readinessTool = getTool(pi, "background_process_readiness_score");
+    const rehearsalTool = getTool(pi, "background_process_rehearsal_gate");
     const tool = getTool(pi, "background_process_lifecycle_plan");
 
     const readiness = await readinessTool.execute(
@@ -263,6 +265,23 @@ describe("background process control plan", () => {
     );
     expect(readiness.details?.recommendationCode).toBe("background-process-readiness-strong");
     expect(String(readiness.details?.summary)).toContain("background-process-readiness:");
+
+    const rehearsal = await rehearsalTool.execute(
+      "tc-bg-rehearsal",
+      {
+        readiness_score: 85,
+        readiness_recommendation_code: "background-process-readiness-strong",
+        lifecycle_classified: true,
+        stop_source_coverage_pct: 90,
+        rollback_plan_known: true,
+        rehearsal_slices: 1,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(rehearsal.details?.decision).toBe("ready");
+    expect(rehearsal.details?.dispatchAllowed).toBe(false);
 
     const result = await tool.execute(
       "tc-bg-lifecycle",

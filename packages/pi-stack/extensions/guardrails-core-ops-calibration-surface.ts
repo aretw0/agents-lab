@@ -28,7 +28,7 @@ function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
     hasProcessRegistry: hasBgStatus,
     hasPortLeaseLock: has("background_process_plan") && hasAnyContaining("port"),
     hasBoundedLogTail: hasBgStatus,
-    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace"),
+    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace") || has("background_process_plan"),
     hasHealthcheckProbe: hasAnyContaining("healthcheck"),
     hasGracefulStopThenKill: hasBgStatus,
     hasReloadHandoffCleanup: hasAnyContaining("context_watch_checkpoint") || hasAnyContaining("handoff"),

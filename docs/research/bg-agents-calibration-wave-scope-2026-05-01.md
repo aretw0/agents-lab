@@ -71,6 +71,23 @@ Executado após `/reload` com as tools runtime já ativas:
 
 Decisão consolidada: **manter report-only** e abrir nova wave local-safe para fechar gaps de capabilities/background e governança de agents-as-tools.
 
+### Baseline live da wave `bg-agents-calibration-wave-2026-05e`
+
+Leitura live registrada antes das mudanças da wave `05e` (ponto de partida da rodada):
+
+- `background_process_readiness_score`
+  - `score=59`
+  - `code=background-process-readiness-needs-capabilities`
+- `agents_as_tools_calibration_score`
+  - `score=100`
+  - `code=agents-as-tools-calibration-strong`
+- `ops_calibration_decision_packet` (`live_reload_completed=true`)
+  - `decision=keep-report-only`
+  - `code=ops-calibration-keep-report-only-background`
+  - `blockers=background-readiness-not-strong`
+
+Leitura pós-merge da wave requer novo `/reload` para refletir inferência e gates recém-adicionados.
+
 ## Checklist da próxima wave operacional
 
 - [x] rodar as duas tools novas após reload e registrar score real da sessão
@@ -83,9 +100,11 @@ Decisão consolidada: **manter report-only** e abrir nova wave local-safe para f
 1. executar `/reload` para ativar as novas surfaces;
 2. invocar `background_process_readiness_score` no modo padrão (inferência bounded quando `has_*` não for informado);
 3. se necessário, repetir `background_process_readiness_score` com overrides explícitos (`has_*`) para contraste auditável;
-4. invocar `agents_as_tools_calibration_score`;
-5. invocar `ops_calibration_decision_packet` com `live_reload_completed=true`;
-6. registrar checkpoint com scores, recommendationCode e decisão go/no-go para rehearsal local.
+4. invocar `background_process_rehearsal_gate` com evidências disponíveis (lifecycle/stopSource/rollback/slices);
+5. invocar `agents_as_tools_calibration_score`;
+6. invocar `evaluateAgentSpawnReadiness` (primitive/read-only) com limites explícitos de simple spawn;
+7. invocar `ops_calibration_decision_packet` com `live_reload_completed=true`;
+8. registrar checkpoint com scores, recommendationCode e decisão go/no-go para rehearsal local.
 
 Critério go/no-go sugerido:
 

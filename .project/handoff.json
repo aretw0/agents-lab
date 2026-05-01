@@ -1,27 +1,26 @@
 {
-  "timestamp": "2026-05-01T23:04:48.535Z",
-  "context": "Completed bg-agents-calibration-wave-2026-05d (TASK-BUD-513..516): harmonized ops packet inference parity, added background rehearsal contrac [snip] ned on background+simple spawn signals. [truncated:+111 chars]",
+  "timestamp": "2026-05-01T23:14:14.220Z",
+  "context": "Completed bg-agents-calibration-wave-2026-05e (TASK-BUD-517..520): added runtime rehearsal gate tool for background, refined background capab [snip] wave-e with keep-report-only decision. [truncated:+157 chars]",
   "next_actions": [
-    "/reload to activate latest runtime changes (TASK-BUD-514..516 surfaces/reexports)",
-    "re-run live calibration trio and capture updated packet decision",
-    "seed next local-safe wave for background capability gaps if packet remains keep-report-only"
+    "/reload to activate latest wave-e runtime changes before next live readings",
+    "re-run readiness + rehearsal gate + agents calibration + ops packet to measure post-merge drift",
+    "seed next local-safe wave targeting concrete background evidence gaps (lifecycle classificatio [snip] overage, rehearsal slices) [truncated:+15 chars]"
   ],
   "blockers": [],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts pa [snip] ls-ops-calibration.test.ts [truncated:+236 chars]",
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi- [snip] rails-tool-hygiene.test.ts [truncated:+303 chars]",
     "safe_marker_check docs/primitives/background-process-control.md",
-    "safe_marker_check docs/primitives/agents-as-tools-calibration-score.md"
+    "safe_marker_check docs/primitives/ops-calibration-decision-packet.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-516",
+    "focus": "TASK-BUD-520",
     "canonical_links": [
-      "task:TASK-BUD-516",
-      "task:TASK-BUD-513",
-      "task:TASK-BUD-514"
+      "task:TASK-BUD-520",
+      "task:TASK-BUD-517"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T23:04:48.535Z",
+    "generatedAtIso": "2026-05-01T23:14:14.220Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
     "recommendation": "add-or-select-task",
@@ -29,7 +28,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T23:04:48.535Z",
+      "atIso": "2026-05-01T23:14:14.220Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -43,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-516"
+    "TASK-BUD-520"
   ]
 }

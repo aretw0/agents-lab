@@ -12264,6 +12264,95 @@
       "milestone": "bg-agents-calibration-wave-2026-05d",
       "notes": "[rationale:risk-control] colônia deve entrar só após maturidade comprovada das camadas anteriores.\n[provenance:human] source_task=TASK-BUD-515 reason=evitar salto prematuro para execução paralela complexa\n2026-05-01: gate report-only de promoção para colônia agora exige sinais verdes explícitos de background e simple spawn.",
       "verification": "VER-BUD-866"
+    },
+    {
+      "id": "TASK-BUD-517",
+      "description": "Expor tool read-only de rehearsal background (`background_process_rehearsal_gate`) para operacionalizar contrato `evaluateBackgroundProcessRehearsal` em runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-516"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna decisão `ready|needs-evidence|blocked` sem dispatch/start/stop.",
+        "Parâmetros cobrem evidências mínimas (lifecycle, stopSource coverage, rollback, slices).",
+        "Smoke cobre registro e execução básica do gate."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05e",
+      "notes": "[rationale:risk-control] tornar rehearsal gate invocável reduz dependência de avaliação manual textual.\n[provenance:human] source_task=TASK-BUD-516 reason=continuar background-first com primitive operacionalizável report-only\n2026-05-01: rehearsal gate de background agora está operacional via tool report-only no runtime.",
+      "verification": "VER-BUD-867"
+    },
+    {
+      "id": "TASK-BUD-518",
+      "description": "Refinar inferência de capabilities de background (incluindo stacktrace) e manter paridade entre readiness standalone e packet composto.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-517"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Inferência eleva fidelidade sem quebrar override explícito.",
+        "Paridade standalone vs packet preservada em cenários inferidos e override.",
+        "Regressões cobrem caminho inferido e caminho forçado."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05e",
+      "notes": "[rationale:risk-control] reduzir falsos gaps de capability melhora decisão de foco na próxima wave.\n[provenance:human] source_task=TASK-BUD-513 reason=elevar consistência de leitura de readiness no runtime\n2026-05-01: inferência de capabilities de background refinada e mantida em paridade entre readiness standalone e packet composto.",
+      "verification": "VER-BUD-868"
+    },
+    {
+      "id": "TASK-BUD-519",
+      "description": "Atualizar runbook de calibração para incluir sequência padrão com rehearsal gate antes de simple spawn e packet composto.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-517",
+        "TASK-BUD-518"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        "docs/primitives/ops-calibration-decision-packet.md",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook explicita ordem: readiness -> rehearsal gate -> spawn readiness -> ops packet.",
+        "Inclui critério GO/NO-GO alinhado à trilha background-first.",
+        "Marker-check valida novos anchors."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05e",
+      "notes": "[rationale:risk-control] runbook consistente protege a cadência e evita salto prematuro para colônia.\n[provenance:human] source_task=TASK-BUD-516 reason=consolidar cadência operacional desejada pelo operador\n2026-05-01: runbook pós-reload consolidado na cadência background -> simple spawn -> packet composto.",
+      "verification": "VER-BUD-869"
+    },
+    {
+      "id": "TASK-BUD-520",
+      "description": "Registrar baseline live pós-reload da wave e decisão de continuidade (background-first) com evidência compacta.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-519"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Baseline inclui scores + codes + decisão do packet com blockers.",
+        "Decisão explícita de continuidade background-first registrada.",
+        "Checkpoint com próximos passos locais-safe atualizado."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05e",
+      "notes": "[rationale:risk-control] baseline por wave mantém foco e evita drift estratégico.\n[provenance:human] source_task=TASK-BUD-519 reason=fechar wave com decisão de continuidade auditável\n2026-05-01: baseline live da wave 05e registrado; decisão segue keep-report-only com foco background-first.",
+      "verification": "VER-BUD-870"
     }
   ]
 }

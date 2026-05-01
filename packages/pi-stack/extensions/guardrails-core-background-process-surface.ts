@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
+import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -26,7 +27,7 @@ function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
     hasProcessRegistry: hasBgStatus,
     hasPortLeaseLock: has("background_process_plan") && hasAnyContaining("port"),
     hasBoundedLogTail: hasBgStatus,
-    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace"),
+    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace") || has("background_process_plan"),
     hasHealthcheckProbe: hasAnyContaining("healthcheck"),
     hasGracefulStopThenKill: hasBgStatus,
     hasReloadHandoffCleanup: hasAnyContaining("context_watch_checkpoint") || hasAnyContaining("handoff"),
@@ -122,6 +123,41 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         hasLifecycleSurface: allToolNames.has("background_process_lifecycle_plan"),
         rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
         stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "background_process_rehearsal_gate",
+    label: "Background Process Rehearsal Gate",
+    description: "Report-only rehearsal gate for background-process readiness evidence (lifecycle/stopSource/rollback/slices). Never starts or stops processes.",
+    parameters: Type.Object({
+      readiness_score: Type.Optional(Type.Number({ description: "Background readiness score (0..100)." })),
+      readiness_recommendation_code: Type.Optional(Type.String({ description: "Background readiness recommendation code." })),
+      lifecycle_classified: Type.Optional(Type.Boolean({ description: "Whether lifecycle evidence is classified." })),
+      stop_source_coverage_pct: Type.Optional(Type.Number({ description: "stopSource coverage percent (0..100)." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback plan is known." })),
+      rehearsal_slices: Type.Optional(Type.Number({ description: "Count of rehearsal slices with evidence." })),
+      unresolved_blockers: Type.Optional(Type.Number({ description: "Count of unresolved blockers." })),
+      destructive_restart_requested: Type.Optional(Type.Boolean({ description: "Whether destructive restart is being requested." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Whether protected scope was requested." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = evaluateBackgroundProcessRehearsal({
+        readinessScore: typeof p.readiness_score === "number" ? p.readiness_score : undefined,
+        readinessRecommendationCode: typeof p.readiness_recommendation_code === "string" ? p.readiness_recommendation_code : undefined,
+        lifecycleClassified: asOptionalBoolean(p.lifecycle_classified),
+        stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
+        unresolvedBlockers: typeof p.unresolved_blockers === "number" ? p.unresolved_blockers : undefined,
+        destructiveRestartRequested: asOptionalBoolean(p.destructive_restart_requested),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

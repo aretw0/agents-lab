@@ -212,6 +212,7 @@ describe("ops calibration decision packet", () => {
         has_port_lease_lock: false,
         has_bounded_log_tail: false,
         has_graceful_stop_then_kill: false,
+        has_structured_stacktrace_capture: false,
         has_reload_handoff_cleanup: false,
         live_reload_completed: true,
       },

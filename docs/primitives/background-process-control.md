@@ -8,7 +8,11 @@ Permitir que o pi trabalhe com frontend, backend, workers e servidores de teste 
 
 ## Superfície inicial
 
-`background_process_plan` é uma ferramenta read-only que retorna um plano de governança antes de qualquer implementação operacional.
+Ferramentas read-only atuais desta family:
+
+- `background_process_plan` — plano de governança antes de implementação operacional;
+- `background_process_readiness_score` — score de prontidão (capabilities/surface/evidence);
+- `background_process_rehearsal_gate` — gate de rehearsal com decisão `ready|needs-evidence|blocked`.
 
 Invariantes:
 

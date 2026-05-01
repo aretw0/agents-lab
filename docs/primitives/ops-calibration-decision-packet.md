@@ -25,8 +25,10 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 ## Uso recomendado
 
 1. calcular `background_process_readiness_score` (padrão por inferência bounded e, opcionalmente, com overrides `has_*` para contraste);
-2. calcular `agents_as_tools_calibration_score`;
-3. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
+2. avaliar `background_process_rehearsal_gate` para confirmar evidências mínimas de rehearsal;
+3. calcular `agents_as_tools_calibration_score`;
+4. avaliar `evaluateAgentSpawnReadiness` (simple spawn bounded) para obter sinal de spawn readiness;
+5. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
 
 O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, e respeita overrides explícitos quando fornecidos.
 
