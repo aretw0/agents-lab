@@ -84,4 +84,25 @@ describe("control-plane recommendation contract", () => {
       rmSync(cwd, { recursive: true, force: true });
     }
   });
+
+  it("project_intake_plan keeps concise decision payload with explicit guardrails", () => {
+    const pi = makeMockPi();
+    registerGuardrailsAutonomyLaneSurface(pi as never);
+    const tool = getRegisteredTool(pi, "project_intake_plan");
+
+    const result = tool.execute("tc-intake", {
+      dominant_artifacts: Array.from({ length: 100 }, (_, i) => `artifact-${i + 1}-${"x".repeat(50)}`),
+      has_build_files: true,
+      has_tests: true,
+      has_ci: true,
+      repository_scale: "large",
+    }) as { details?: Record<string, unknown>; content?: Array<{ text?: string }> };
+
+    expect(result.details?.recommendationCode).toBe("intake-plan-first-slice");
+    expect((result.details?.nextAction as string).length).toBeLessThanOrEqual(140);
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.mutationAllowed).toBe(false);
+    expect(result.details?.authorization).toBe("none");
+    expect((result.content?.[0]?.text ?? "").length).toBeLessThanOrEqual(1200);
+  });
 });

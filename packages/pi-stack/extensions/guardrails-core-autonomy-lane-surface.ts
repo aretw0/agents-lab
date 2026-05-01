@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
 import { buildLaneBrainstormPacket } from "./lane-brainstorm-packet";
+import { evaluateProjectIntakePlan } from "./project-intake-primitive";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -220,6 +221,35 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],
         details: packet,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "project_intake_plan",
+    label: "Project Intake Plan",
+    description: "Report-only universal project intake plan with deterministic profile/recommendation and no dispatch authorization.",
+    parameters: Type.Object({
+      dominant_artifacts: Type.Optional(Type.Array(Type.String({ description: "Dominant project artifacts/languages." }))),
+      has_build_files: Type.Optional(Type.Boolean()),
+      has_tests: Type.Optional(Type.Boolean()),
+      has_ci: Type.Optional(Type.Boolean()),
+      repository_scale: Type.Optional(Type.String({ description: "small | medium | large" })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "When true, plan blocks and asks explicit human focus." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const plan = evaluateProjectIntakePlan({
+        dominantArtifacts: p.dominant_artifacts as string[] | undefined,
+        hasBuildFiles: p.has_build_files === true,
+        hasTests: p.has_tests === true,
+        hasCi: p.has_ci === true,
+        repositoryScale: typeof p.repository_scale === "string" ? p.repository_scale : undefined,
+        protectedScopeRequested: p.protected_scope_requested === true,
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(plan, null, 2) }],
+        details: plan,
       };
     },
   });

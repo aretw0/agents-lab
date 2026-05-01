@@ -152,6 +152,50 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
+  it("emits report-only project_intake_plan for lightweight project", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const intakeTool = tools.find((tool) => tool.name === "project_intake_plan");
+    const result = intakeTool?.execute("call-test", {
+      dominant_artifacts: ["markdown", "obsidian"],
+      has_build_files: false,
+      repository_scale: "small",
+    });
+
+    expect(result?.details.profile).toBe("light-notes");
+    expect(result?.details.decision).toBe("ready-for-human-review");
+    expect(result?.details.recommendationCode).toBe("intake-plan-first-slice");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+    expect(result?.details.mode).toBe("report-only");
+  });
+
+  it("blocks project_intake_plan when protected scope is requested", () => {
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const intakeTool = tools.find((tool) => tool.name === "project_intake_plan");
+    const result = intakeTool?.execute("call-test", {
+      dominant_artifacts: ["java", "typescript"],
+      has_build_files: true,
+      has_ci: true,
+      protected_scope_requested: true,
+    });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("intake-needs-human-focus-protected");
+    expect(typeof result?.details.nextAction).toBe("string");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
   it("emits report-only lane_brainstorm_packet with ranked slices", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-packet-ready-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

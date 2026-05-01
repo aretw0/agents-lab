@@ -11082,6 +11082,71 @@
       "milestone": "cross-stack-fluidity",
       "notes": "[rationale:risk-control] escalabilidade de qualidade com custo de contexto controlado.\n2026-05-01: adicionando regressões de orientação inicial para garantir contrato curto/auditável e sem autorização implícita sob cenários leves e pesados.\n2026-05-01: regressões de fluidez inicial cobrem cenários leve/pesado sem perder contrato de controle.",
       "verification": "VER-BUD-813"
+    },
+    {
+      "id": "TASK-BUD-462",
+      "description": "Expor primitive project-intake como tool report-only (`project_intake_plan`) para triagem inicial universal com recommendationCode/nextAction.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-461"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/project-intake-primitive.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool é read-only/report-only com dispatch/mutation bloqueados.",
+        "Saída inclui profile, recommendationCode, nextAction e firstSlice.",
+        "Smoke da surface cobre cenário leve, pesado e protected-request."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] levar primitive para superfície operacional sem abrir execução automática.\n2026-05-01: iniciando surface report-only project_intake_plan a partir da primitive determinística.\n2026-05-01: primitive de intake promovida para superfície operacional report-only sem abrir execução automática.",
+      "verification": "VER-BUD-814"
+    },
+    {
+      "id": "TASK-BUD-463",
+      "description": "Adicionar guideline de roteamento inicial para skill `cross-stack-intake`/`project-intake` em superfícies de discoverability com linguagem agnóstica de stack.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-460"
+      ],
+      "files": [
+        "packages/lab-skills/README.md",
+        "packages/pi-skills/README.md",
+        "docs/guides/skill-guide-parity.md"
+      ],
+      "acceptance_criteria": [
+        "Discoverability cita skill de intake em linguagem curta.",
+        "Sem lock-in da stack do laboratório como requisito.",
+        "Marker-check de paridade mantém links canônicos."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] aumentar fluidez de entrada sem inflar catálogo.\n2026-05-01: ajustando discoverability para intake cross-stack em READMEs e guide de paridade.\n2026-05-01: discoverability de intake ficou explícita e agnóstica de stack, com referência canônica única.",
+      "verification": "VER-BUD-815"
+    },
+    {
+      "id": "TASK-BUD-464",
+      "description": "Criar regressão de budget textual para superfícies de intake inicial (resposta curta + decisão explícita sob pressão de contexto).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-462"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/project-intake-primitive.test.ts",
+        "packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste falha se nextAction/recommendation sair do budget textual definido.",
+        "Decisão/guardrails continuam explícitos em todos os cenários.",
+        "Sem regressão em contratos já existentes."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] preservar custo de token e auditabilidade no onboarding.\n2026-05-01: adicionando regressão de budget textual para surface de intake inicial mantendo decisão explícita.\n2026-05-01: regressões de budget textual para intake adicionadas com contrato de controle explícito.",
+      "verification": "VER-BUD-816"
     }
   ]
 }

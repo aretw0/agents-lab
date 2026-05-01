@@ -69,4 +69,20 @@ describe("project-intake-primitive", () => {
       expect(plan.authorization).toBe("none");
     }
   });
+
+  it("keeps output bounded even with noisy artifact inputs", () => {
+    const noisyArtifacts = Array.from({ length: 80 }, (_, i) => `artifact-${i + 1}-${"x".repeat(40)}`);
+    const plan = evaluateProjectIntakePlan({
+      dominantArtifacts: noisyArtifacts,
+      hasBuildFiles: true,
+      hasTests: true,
+      hasCi: true,
+      repositoryScale: "large",
+    });
+
+    expect(plan.profile).toBe("monorepo-heavy");
+    expect(plan.nextAction.length).toBeLessThanOrEqual(140);
+    expect(plan.firstSlice.title.length).toBeLessThanOrEqual(90);
+    expect(plan.firstSlice.validation.length).toBeLessThanOrEqual(80);
+  });
 });

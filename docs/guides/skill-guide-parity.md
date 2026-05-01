@@ -65,6 +65,16 @@ A referência concreta para inspiração futura é https://github.com/ifiokjr/md
 
 Aplicação imediata inspirada nessa lembrança: tratar docs como artefatos distribuíveis junto das skills, reduzir duplicação manual por geração/sync, e manter o guide canônico como fonte única enquanto pacotes recebem cópias auditáveis.
 
+## Discoverability cross-stack mínima
+
+Para onboarding agnóstico de stack, manter visível em superfícies de descoberta:
+
+- `cross-stack-intake` (lab-skills) para triagem operacional leve/médio/pesado;
+- `project-intake` (pi-skills) para contrato mínimo de primeira fatia local-safe;
+- referência canônica única em `docs/primitives/project-intake.md`.
+
+Regra: descoberta deve ser curta e acionável, sem exigir familiaridade prévia com a stack do laboratório.
+
 ## Critério de qualidade
 
 A paridade guide-skill está melhorando quando:
