@@ -394,7 +394,8 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "[2026-04-16T15:57:19.165Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-19T08:15:53.239Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T15:07:30.636Z] auto-queued from colony c1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T15:07:30.869Z] auto-queued from colony c1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:26:18.551Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T15:27:35.382Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T15:27:35.501Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T19:14:19.546Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T19:14:19.700Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T21:21:24.512Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T21:21:24.635Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T22:19:21.305Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T22:19:21.461Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T02:05:29.558Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T02:05:29.738Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T04:44:59.779Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T04:44:59.957Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:27:20.301Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:27:20.497Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:53:05.269Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')"
+      "notes": "[2026-04-16T15:57:19.165Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-19T08:15:53.239Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T15:07:30.636Z] auto-queued from colony c1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T15:07:30.869Z] auto-queued from colony c1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:26:18.551Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T15:27:35.382Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T15:27:35.501Z] auto-queued from colony c1: delivery evidence missing: validation command log\n[2026-04-22T19:14:19.546Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T19:14:19.700Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T21:21:24.512Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T21:21:24.635Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T22:19:21.305Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T22:19:21.461Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T02:05:29.558Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T02:05:29.738Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T04:44:59.779Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T04:44:59.957Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:27:20.301Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:27:20.497Z] auto-queued from colony c1: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-23T22:53:05.269Z] auto-queued from colony c1: delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks); delivery evidence missing: selective promotion inventory (expected sections 'Promoted file inventory' and 'Skipped file inventory')\n2026-05-01: [parking:protected] mantida fora da seleção local-safe; requer foco humano explícito para promoção/materialização colony.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "colony-c2-promotion",
@@ -408,8 +409,9 @@
         "Comandos de validação executados e registrados.",
         "Resultado promovido para revisão humana sem auto-close."
       ],
-      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-22T19:14:19.909Z] auto-queued from colony c2: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T19:14:20.102Z] auto-queued from colony c2: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)",
-      "verification": "VER-LEGACY-colony-c2-promotion"
+      "notes": "Criada para evitar ociosidade de candidate-only após run em delivery mode patch-artifact.\n[2026-04-15T07:51:15.315Z] auto-queued from colony c2: delivery mode 'patch-artifact' requires explicit promotion flow\n[2026-04-15T21:12:19.274Z] auto-queued from colony c2: delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-16T05:29:54Z] Promoção concluída por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-16T05:30:07Z] Promocao concluida por triagem humana (2026-04-16). Recovery confirmado no git log.\n[2026-04-22T19:14:19.909Z] auto-queued from colony c2: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-22T19:14:20.102Z] auto-queued from colony c2: delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n2026-05-01: [parking:protected] mantida fora da seleção local-safe; requer foco humano explícito para promoção/materialização colony.",
+      "verification": "VER-LEGACY-colony-c2-promotion",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "colony-c3",
@@ -1241,7 +1243,8 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-20T02:27:04.919Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.026Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.421Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.523Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:21:12.999Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:21:13.121Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log"
+      "notes": "[2026-04-20T02:27:04.919Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-20T02:27:05.026Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.421Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-21T19:39:26.523Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:21:12.999Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n[2026-04-22T15:21:13.121Z] auto-queued from colony c-123: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log\n2026-05-01: [parking:protected] mantida fora da seleção local-safe; requer foco humano explícito para promoção/materialização colony.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "colony-c-ret-1",
@@ -1261,7 +1264,8 @@
         "Executar/registrar comandos de validação (smoke/regression) e anexar evidências.",
         "Promover candidate para revisão humana (sem auto-close)."
       ],
-      "notes": "[2026-04-24T14:39:54.984Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T14:39:55.229Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.253Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.521Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:04.714Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:05.084Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.558Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.863Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.513Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.804Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.776Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.042Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.077Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.555Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.610Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.983Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.090Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.428Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.507Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.852Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)"
+      "notes": "[2026-04-24T14:39:54.984Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T14:39:55.229Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.253Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-24T15:06:10.521Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:04.714Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:05.084Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.558Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-28T18:11:13.863Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.513Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-29T17:46:33.804Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.776Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.042Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.077Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.555Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.610Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.983Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.090Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.428Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.507Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.852Z] auto-queued from colony c-ret-1: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n2026-05-01: [parking:protected] mantida fora da seleção local-safe; requer foco humano explícito para promoção/materialização colony.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "TASK-BUD-054",
@@ -3332,7 +3336,8 @@
         "Há trilha de evidência de execução remota no board/handoff (job id, resultado, artefatos) sem quebrar governança de budget/qualidade.",
         "Modelo operacional inclui steer/intervenção humana clara (cancelar/retry/override) mantendo objetivo set-and-forget seguro."
       ],
-      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica."
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica.\n2026-05-01: [parking:protected] GitHub Actions/offload permanece fora de execução automática; requer decisão humana explícita.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "TASK-BUD-135",
@@ -3372,7 +3377,8 @@
         "Existe automação mínima validada para criar/preparar release (draft ou publish gateado), sem quebrar governança atual.",
         "Checklist de readiness para v0.8.0 fica explícito no board, com itens obrigatórios e evidência canônica."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta."
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta.\n2026-05-01: [parking:protected] release/publish permanece fora da seleção local-safe; avançar só com foco humano explícito.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "TASK-BUD-137",
@@ -3936,7 +3942,8 @@
         "Posicionar impeccable.style ao lado de Squeez/mdt no mapa de influências, preservando foco no trabalho principal e evitando pesquisa ampla oportunista durante checkpoint/compact."
       ],
       "verification": "",
-      "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual."
+      "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual.\n2026-05-01: [parking:protected] pesquisa externa ampla mantida fora de auto-seleção; usar trilha bounded local quando explicitamente focada.",
+      "milestone": "protected-parked-legacy"
     },
     {
       "id": "TASK-BUD-163",
@@ -11183,6 +11190,104 @@
       "milestone": "cross-stack-fluidity",
       "notes": "[rationale:risk-control] consolidar discoverability sem expandir superfície operacional.\n2026-05-01: discoverability operacional do intake reforçada com exemplos curtos e contrato explícito.",
       "verification": "VER-BUD-818"
+    },
+    {
+      "id": "TASK-BUD-467",
+      "description": "Limpeza: classificar backlog planned protegido com notes/milestone padronizados para evitar seleção ambígua e reduzir ruído operacional.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Tasks planned protegidas recebem nota curta de parking com motivo explícito.",
+        "Milestone das tasks protegidas fica consistente para filtro operacional.",
+        "Nenhuma task local-safe é reclassificada por engano."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] reduzir ruído e risco de seleção acidental em lanes locais.\n2026-05-01: lane consolidada para teste de long-run local-safe focado em limpeza+pesquisa.\n2026-05-01: limpeza de backlog protegido consolidada para reduzir ruído e seleção acidental.",
+      "verification": "VER-BUD-819"
+    },
+    {
+      "id": "TASK-BUD-468",
+      "description": "Pesquisa: sintetizar influência bounded de impeccable.style em regras práticas de clareza/qualidade sem lock-in, com recomendações local-safe.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-467"
+      ],
+      "files": [
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Pesquisa curta com 3-5 regras acionáveis.",
+        "Cada regra inclui risco e validação focal.",
+        "Sem recomendação de escopo protegido automático."
+      ],
+      "milestone": "protected-parked-legacy",
+      "notes": "[rationale:risk-control] pesquisa orientada a ação, evitando exploração difusa.\n2026-05-01: pesquisa passa a rodar na mesma lane de limpeza para teste de continuidade.\n2026-05-01: item envolve influência externa explícita e ficou parked como protegido; substituído por pesquisa local-safe na lane cleanup-research-longrun."
+    },
+    {
+      "id": "TASK-BUD-469",
+      "description": "Coisa nova: implementar uma melhoria pequena de UX/contrato derivada da pesquisa (baixo blast radius) com smoke focal.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-468"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/",
+        "packages/pi-stack/test/smoke/"
+      ],
+      "acceptance_criteria": [
+        "Mudança pequena e reversível com benefício claro.",
+        "Smoke focal verde.",
+        "Contrato de controle (no-dispatch/guardrails) preservado."
+      ],
+      "milestone": "post-cleanup-research",
+      "notes": "[rationale:risk-control] inovar sem bloat após limpeza e pesquisa.\n2026-05-01: inovação nova movida para pós-lane; prioridade atual é limpeza+pesquisa contínua."
+    },
+    {
+      "id": "TASK-BUD-470",
+      "description": "Pesquisa local-safe: sintetizar práticas de clareza/qualidade a partir de artefatos locais já versionados (sem pesquisa externa ativa) para regras acionáveis de operação.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-467"
+      ],
+      "files": [
+        "docs/research/",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documento curto com 3-5 regras acionáveis e riscos.",
+        "Regra inclui validação focal e rollback recomendados.",
+        "Sem dependência de consulta remota durante a fatia."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] pesquisa bounded local para testar run longa sem abrir escopo protegido.\n2026-05-01: pesquisa local-safe consolidada na lane cleanup-research-longrun sem dependência remota.",
+      "verification": "VER-BUD-820"
+    },
+    {
+      "id": "TASK-BUD-471",
+      "description": "Rodar rehearsal da lane cleanup-research-longrun com métricas de continuidade (slices, validações, checkpoints, ruído) e pacote curto de evidência.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-470"
+      ],
+      "files": [
+        "docs/research/",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "Pacote lista métricas mínimas do rehearsal com leitura GO/STOP.",
+        "Inclui próximos passos locais de baixo custo para continuar a lane.",
+        "Sem ativar scheduler/remote/protected scope."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] testar alcance da lane consolidada com evidência objetiva antes de expansão.\n2026-05-01: lane consolidada testada em rehearsal local-safe com métricas objetivas.",
+      "verification": "VER-BUD-821"
     }
   ]
 }

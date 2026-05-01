@@ -9591,6 +9591,33 @@
       "method": "inspection + marker-check",
       "timestamp": "2026-05-01T16:51:12.220Z",
       "evidence": "Documented practical usage of `project_intake_plan` with concise profile/decision reading in: - `docs/primitives/project-intake.md` (new quick tool example + expected output contract), - `docs/guides/session-triage.md` (new 'Atalho de intake universal' section to run intake before long triage). Validation: marker checks passed on both docs (`project-intake.md` 5/5; `session-triage.md` 5/5), confirming presence of report-only guardrail anchors (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`)."
+    },
+    {
+      "id": "VER-BUD-819",
+      "target": "TASK-BUD-467",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board hygiene inspection",
+      "timestamp": "2026-05-01T16:57:00.403Z",
+      "evidence": "Completed cleanup parking pass for protected planned backlog: normalized milestone to `protected-parked-legacy` and appended explicit `[parking:protected]` notes for 7 protected items (`colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion`, `TASK-BUD-134`, `TASK-BUD-136`, `TASK-BUD-162`). Validation evidence: `board_query(status=planned,milestone=protected-parked-legacy)` now returns those 7 tasks with consistent parking milestone; `autonomy_lane_next_task(milestone=cleanup-research-longrun)` returns `TASK-BUD-467` as ready during execution, confirming lane isolation behavior."
+    },
+    {
+      "id": "VER-BUD-820",
+      "target": "TASK-BUD-470",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T16:57:41.793Z",
+      "evidence": "Produced bounded local research synthesis in `docs/research/control-plane-clarity-quality-local-synthesis-2026-05-01.md` using only local versioned sources (doctrine/glossary/pattern matrix/squeez synthesis). Document defines 5 actionable clarity/quality rules (decision explicitness, output shaping with semantics preserved, bounded research scope, protected backlog parking, and cleanup→research→new sequencing), each with risk, focal validation, and rollback guidance. Validation: `safe_marker_check` matched 7/7 anchors (`Regras acionáveis`, `R1..R5`, `Validação focal`)."
+    },
+    {
+      "id": "VER-BUD-821",
+      "target": "TASK-BUD-471",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T16:58:54.277Z",
+      "evidence": "Recorded cleanup+research lane rehearsal packet in `docs/research/cleanup-research-longrun-rehearsal-2026-05-01.md` with bounded continuity metrics and GO/STOP interpretation. Packet covers executed slices (`TASK-BUD-467`, `TASK-BUD-470`), validation ids, checkpoint evidence, protected auto-selection count, and low-cost next local steps. Validation: `safe_marker_check` matched 6/6 required anchors (`Métricas mínimas`, `GO local-safe`, `STOP condition`, `protected-parked-legacy`, `recommendationCode`, `nextAction`)."
     }
   ]
 }
