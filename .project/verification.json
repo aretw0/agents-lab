@@ -9420,6 +9420,51 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T15:13:39.935Z",
       "evidence": "Extracted continuation recommendation resolver from monolithic `context-watchdog.ts` into dedicated module `packages/pi-stack/extensions/context-watchdog-continuation.ts` and re-exported it from context-watchdog to preserve existing consumer import surface. Added dedicated contract coverage in `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` for all recommendation code paths and non-empty nextAction semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 7 files passed, 90 tests passed."
+    },
+    {
+      "id": "VER-BUD-800",
+      "target": "TASK-BUD-448",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T15:28:52.183Z",
+      "evidence": "Synthesized actionable MDT patterns from local versioned artifacts into `docs/research/control-plane-mdt-pattern-synthesis-2026-05-01.md`, with 5 patterns each carrying `regra`, `quando usar`, `risco`, and explicit local-safe mapping (report-only, bounded slices, rollback/checkpoint discipline). Sources are local: `docs/research/agent-factory-vs-squeez-mdt-2026-04-21.md`, doctrine, and canonical pipeline guide. Validation: `safe_marker_check(path=docs/research/control-plane-mdt-pattern-synthesis-2026-05-01.md, markers=[Padrão MDT-1..5, Regras operacionais acionáveis])` => ok yes, matched 6/6."
+    },
+    {
+      "id": "VER-BUD-801",
+      "target": "TASK-BUD-449",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T15:29:54.753Z",
+      "evidence": "Synthesized squeez-inspired anti-bloat rules from local artifacts into `docs/research/control-plane-squeez-pattern-synthesis-2026-05-01.md`, including 5 patterns with `regra`, `quando usar`, `risco`, and explicit `onde reduz gordura`, plus actionable operational rules tailored to local-first control-plane governance. Sources: local versioned research/doctrine files only. Validation: `safe_marker_check(path=docs/research/control-plane-squeez-pattern-synthesis-2026-05-01.md, markers=[Padrão SQZ-1..5, Onde reduz gordura, Regras operacionais acionáveis])` => ok yes, matched 7/7."
+    },
+    {
+      "id": "VER-BUD-802",
+      "target": "TASK-BUD-450",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T15:31:05.816Z",
+      "evidence": "Consolidated MDT + SQUEEZ + brainstorm synthesis into prioritized local-safe matrix at `docs/research/control-plane-pattern-matrix-2026-05-01.md`, with value/risk/validation/rollback fields and explicit P1/P2 ordering for high-value slices. Included future UX identity reference from operator input for expandable previews: `(N earlier lines, ctrl+o to expand)`. Validation: `safe_marker_check(path=docs/research/control-plane-pattern-matrix-2026-05-01.md, markers=[Matriz de decisão, Priorização prática, P1, P2, (N earlier lines, ctrl+o to expand)])` => ok yes, matched 5/5."
+    },
+    {
+      "id": "VER-BUD-803",
+      "target": "TASK-BUD-451",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + board seeding check",
+      "timestamp": "2026-05-01T15:33:40.250Z",
+      "evidence": "Translated prioritized anti-bloat matrix into concrete local-safe side quests via document `docs/research/control-plane-side-quests-local-safe-2026-05-01.md` and seeded board tasks `TASK-BUD-453..457` with explicit focal validation/rollback constraints, bounded files, and risk-control rationale. Validation: (1) `safe_marker_check` on side-quest doc matched SQ-1..SQ-5 + validation/rollback anchors (7/7). (2) `board_query(search=TASK-BUD-45)` confirms TASK-BUD-453..457 created as planned under milestone `control-plane-long-run-prep`."
+    },
+    {
+      "id": "VER-BUD-804",
+      "target": "TASK-BUD-452",
+      "target_type": "task",
+      "status": "passed",
+      "method": "rehearsal evidence packet + gate check",
+      "timestamp": "2026-05-01T15:35:10.981Z",
+      "evidence": "Ran and documented a local-first multi-slice rehearsal maturity packet in `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md`, consolidating completed milestone slices (`TASK-BUD-442..451`), focal validations, commit hygiene evidence, and explicit no-protected-auto-selection posture. Gate result recorded from `unattended_rehearsal_gate(completed_local_slices=10, focus_preserved=true, focal_smoke_green=true, small_commits=true, handoff_fresh=true, protected_scope_auto_selections=0, unresolved_blockers=0)` => decision `ready-for-canary`, score 6/6 (advisory only; no scope promotion executed). Validation: `safe_marker_check` on maturity packet matched 5/5 required anchors."
     }
   ]
 }

@@ -10795,7 +10795,7 @@
     {
       "id": "TASK-BUD-448",
       "description": "Sintetizar padrões mdt a partir de artefatos locais já versionados e extrair regras operacionais acionáveis para o control-plane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-447"
@@ -10809,12 +10809,13 @@
         "Sem ampliar escopo para CI/remote/offload/scheduler."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Síntese explícita evita repetição sem direção e facilita execução por fatias."
+      "notes": "[rationale:risk-control] Síntese explícita evita repetição sem direção e facilita execução por fatias.\n2026-05-01: iniciada síntese de padrões mdt a partir de artefatos locais versionados para regras acionáveis do control-plane.\n2026-05-01: padrões mdt convertidos para contrato operacional local-safe sem acionar escopos protegidos.",
+      "verification": "VER-BUD-800"
     },
     {
       "id": "TASK-BUD-449",
       "description": "Sintetizar padrões squeez a partir de artefatos locais já versionados e extrair regras de poda de gordura aplicáveis ao control-plane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-448"
@@ -10828,12 +10829,13 @@
         "Sem alterar surfaces protegidas."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Curadoria prática de padrões melhora qualidade de longo prazo com baixo risco."
+      "notes": "[rationale:risk-control] Curadoria prática de padrões melhora qualidade de longo prazo com baixo risco.\n2026-05-01: iniciada síntese de padrões squeez para poda de gordura do control-plane com recorte local-safe.\n2026-05-01: trilha squeez convertida em políticas first-party/opt-in para poda de ruído sem perder auditabilidade.",
+      "verification": "VER-BUD-801"
     },
     {
       "id": "TASK-BUD-450",
       "description": "Consolidar matriz de padrões (mdt + squeez + brainstorm) e priorizar aplicação em fatias locais de alto valor.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-449"
@@ -10848,12 +10850,13 @@
         "Adicionar critérios explícitos de no-go para evitar deriva."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Matriz priorizada evita backlog inflado e melhora foco contínuo."
+      "notes": "[rationale:risk-control] Matriz priorizada evita backlog inflado e melhora foco contínuo.\n2026-05-01 (input usuário): preservar microcopy/identidade de expansão de output em superfícies futuras no formato `(N earlier lines, ctrl+o to expand)` como referência de UX cross-box/TUI.\n2026-05-01: consolidando matriz mdt+squeez+brainstorm com priorização de fatias locais de maior retorno; incluindo referência de identidade TUI `(N earlier lines, ctrl+o to expand)` para trilha futura.\n2026-05-01: matriz consolidada pronta para virar side quests locais com validação focal.",
+      "verification": "VER-BUD-802"
     },
     {
       "id": "TASK-BUD-451",
       "description": "Traduzir a matriz priorizada em side quests local-safe com validação focal e rollback explícitos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-450"
@@ -10868,12 +10871,13 @@
         "Garantir que a fila resultante permaneça elegível no autonomy lane."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Quebrar em side quests reduz risco e sustenta execução longa com qualidade."
+      "notes": "[rationale:risk-control] Quebrar em side quests reduz risco e sustenta execução longa com qualidade.\n2026-05-01: convertendo matriz priorizada em side quests locais com gate de validação focal + rollback explícito.\n2026-05-01: matriz virou backlog executável local-safe mantendo disciplina de micro-slice.",
+      "verification": "VER-BUD-803"
     },
     {
       "id": "TASK-BUD-452",
       "description": "Rodar rehearsal local de múltiplas fatias do lote anti-bloat e registrar pacote de maturidade da run longa.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-451"
@@ -10889,7 +10893,111 @@
         "Concluir com decisão report-only de prontidão para próximos passos."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] Rehearsal medido dá evidência real de maturidade antes de outras lanes."
+      "notes": "[rationale:risk-control] Rehearsal medido dá evidência real de maturidade antes de outras lanes.\n2026-05-01: consolidando pacote de maturidade do rehearsal local (slices concluídas, validações, higiene de commit, ausência de protected auto-selection).\n2026-05-01: rehearsal local concluído com pacote de maturidade documentado e fila local-safe pronta para próxima rodada.",
+      "verification": "VER-BUD-804"
+    },
+    {
+      "id": "TASK-BUD-453",
+      "description": "Implementar dedupe semântico de status em monitor summary para reduzir repetição sem perder mudanças relevantes.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando payload consecutivo for semanticamente idêntico, saída deve ser deduplicada sem remover mudança real de estado.",
+        "Campos canônicos de decisão permanecem preservados.",
+        "Smoke focal de monitor-summary permanece verde."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] reduzir ruído de loop mantendo governança auditável."
+    },
+    {
+      "id": "TASK-BUD-454",
+      "description": "Adicionar output shaping adaptativo com cooldown no context-watch para reduzir ruído em warn/checkpoint sem quebrar contrato de decisão.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Verbosidade reduz em cenários de pressão sem perder recommendationCode/nextAction.",
+        "Cooldown evita flapping entre modos de resumo.",
+        "Smokes de context-watch e contrato permanecem verdes."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] poda de ruído deve ser gradual e verificável."
+    },
+    {
+      "id": "TASK-BUD-455",
+      "description": "Introduzir memória curta por fatia no handoff com links canônicos para continuidade local-safe.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Handoff registra resumo por slice com próximos passos/validação/rollback.",
+        "Resumo permanece bounded e legível para retomada.",
+        "Smoke focal de context-watch/handoff permanece verde."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] continuidade com contexto curto e auditável."
+    },
+    {
+      "id": "TASK-BUD-456",
+      "description": "Expandir regressões single-source docs para guias críticos além de doctrine/glossary sem aumentar churn desnecessário.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts",
+        "docs/guides/README.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/control-plane-glossary.md"
+      ],
+      "acceptance_criteria": [
+        "Markers obrigatórios adicionais são verificados de forma fail-closed.",
+        "Teste continua estável e legível (sem snapshot frágil).",
+        "Mudança documental permanece em blast radius curto."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] reduzir drift documental sem burocratizar revisão."
+    },
+    {
+      "id": "TASK-BUD-457",
+      "description": "Adicionar contrato/smoke para microcopy de preview expandível alinhado à identidade `(N earlier lines, ctrl+o to expand)` em superfícies futuras.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/write-preview-guard.ts",
+        "packages/pi-stack/test/smoke/write-preview-guard.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Microcopy alvo é preservada por teste textual/snapshot robusto.",
+        "Fallback de keybinding continua funcional (ex.: ctrl+o).",
+        "Sem alteração de autorização/dispatch; apenas superfície textual."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] preservar consistência de UX sem abrir escopo protegido."
     }
   ]
 }
