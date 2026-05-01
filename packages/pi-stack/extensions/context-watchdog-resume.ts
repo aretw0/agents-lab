@@ -17,6 +17,7 @@ export type AutoResumeDispatchReason =
 	| "auto-resume-off-or-cooldown"
 	| "reload-required"
 	| "checkpoint-evidence-missing"
+	| "board-handoff-divergence"
 	| "pending-messages"
 	| "recent-steer"
 	| "lane-queue-pending"
@@ -30,6 +31,8 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 			return "suppressed: reload-required";
 		case "checkpoint-evidence-missing":
 			return "suppressed: checkpoint-evidence-missing";
+		case "board-handoff-divergence":
+			return "suppressed: board-handoff-divergence";
 		case "pending-messages":
 			return "suppressed: pending-messages";
 		case "recent-steer":
@@ -48,6 +51,8 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 			return "run /reload and continue from handoff checkpoint";
 		case "checkpoint-evidence-missing":
 			return "persist or refresh handoff checkpoint evidence before resume";
+		case "board-handoff-divergence":
+			return "reconcile stale/divergent handoff focus with board state before resume";
 		case "pending-messages":
 			return "wait until pending messages drain before auto-resume";
 		case "recent-steer":
@@ -63,7 +68,7 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 }
 
 export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReason): boolean {
-	return reason === "reload-required" || reason === "checkpoint-evidence-missing";
+	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence";
 }
 
 export function shouldEmitAutoResumeAfterCompact(
@@ -79,6 +84,7 @@ export function resolveAutoResumeDispatchDecision(input: {
 	autoResumeReady: boolean;
 	reloadRequired?: boolean;
 	checkpointEvidenceReady?: boolean;
+	handoffBoardReconciled?: boolean;
 	hasPendingMessages: boolean;
 	hasRecentSteerInput: boolean;
 	queuedLaneIntents: number;
@@ -91,6 +97,9 @@ export function resolveAutoResumeDispatchDecision(input: {
 	}
 	if (input.checkpointEvidenceReady === false) {
 		return { shouldDispatch: false, reason: "checkpoint-evidence-missing" };
+	}
+	if (input.handoffBoardReconciled === false) {
+		return { shouldDispatch: false, reason: "board-handoff-divergence" };
 	}
 	if (input.hasPendingMessages) {
 		return { shouldDispatch: false, reason: "pending-messages" };

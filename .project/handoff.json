@@ -1,43 +1,44 @@
 {
-  "timestamp": "2026-05-01T03:38:15.903Z",
-  "context": "Implemented and completed TASK-BUD-408 detector slice. Added read-only resolveHandoffBoardReconciliation to compare handoff current_tasks/tim [snip] ins blocked by unresolved TASK-BUD-409. [truncated:+284 chars]",
+  "timestamp": "2026-05-01T03:43:36.090Z",
+  "context": "Implemented TASK-BUD-409 fail-closed stale handoff gating. Auto-resume dispatch now receives handoffBoardReconciled from resolveHandoffBoardR [snip] er commit and reload before continuing. [truncated:+315 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-408 detector slice.",
-    "Continue bounded with TASK-BUD-409 fail-closed auto-resume gating."
+    "Commit TASK-BUD-409/TASK-BUD-398 partial slice.",
+    "Reload required before live-validating stale handoff fail-closed runtime and deciding TASK-BUD-398 closure.",
+    "After reload, run context_watch_status and a bounded live/read-only validation path for handof [snip] d divergence if available. [truncated:+6 chars]"
   ],
   "blockers": [
-    "TASK-BUD-398 still depends on TASK-BUD-409.",
-    "TASK-BUD-153 still has unresolved dependencies.",
-    "Context is in warn range; continue bounded/checkpointed only."
+    "Reload required before continuing runtime validation.",
+    "TASK-BUD-153 remains blocked by unresolved dependencies.",
+    "Context high-warn: no more implementation before reload/checkpoint."
   ],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 50 passed",
-    "board_task_complete TASK-BUD-408 with VER-BUD-747",
-    "board_task_quality_gate TASK-BUD-409 => closeAllowed=yes"
+    "safe_marker_check docs/primitives/state-reconciliation-modes.md => 3/3",
+    "TASK-BUD-409 completed with VER-BUD-748"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:38:15.903Z",
+    "generatedAtIso": "2026-05-01T03:43:36.090Z",
     "level": "warn",
-    "percent": 58,
+    "percent": 67,
     "action": "continue",
-    "recommendation": "commit-handoff-board-detector"
+    "recommendation": "commit-and-reload-before-continuing"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:38:15.903Z",
+      "atIso": "2026-05-01T03:43:36.090Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 58,
+      "percent": 67,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-handoff-board-detector"
+      "recommendation": "commit-and-reload-before-continuing"
     }
   ]
 }

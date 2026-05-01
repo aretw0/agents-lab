@@ -1467,12 +1467,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						handoffLastEventAgeMs: handoffEventAgeAfterCompact,
 						maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 					});
+					const handoffBoardReconciliation = resolveHandoffBoardReconciliation({
+						handoff: handoffAfterCompact,
+						taskStatusById: readProjectTaskStatusById(ctx.cwd),
+						nowMs: nowAfterCompact,
+						maxFreshAgeMs: config.handoffFreshMaxAgeMs,
+					});
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
 					const reloadRequired = isReloadRequiredForSourceUpdate();
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
 						autoResumeReady,
 						reloadRequired,
 						checkpointEvidenceReady,
+						handoffBoardReconciled: handoffBoardReconciliation.ok,
 						hasPendingMessages,
 						hasRecentSteerInput,
 						queuedLaneIntents,
@@ -1484,6 +1491,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						dispatched: boolean;
 						reloadRequired: boolean;
 						checkpointEvidenceReady: boolean;
+						handoffBoardReconciled: boolean;
+						handoffBoardReconciliationSummary: string;
 						hasPendingMessages: boolean;
 						hasRecentSteerInput: boolean;
 						queuedLaneIntents: number;
@@ -1495,6 +1504,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						dispatched: autoResumeDecision.shouldDispatch,
 						reloadRequired,
 						checkpointEvidenceReady,
+						handoffBoardReconciled: handoffBoardReconciliation.ok,
+						handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
 						hasPendingMessages,
 						hasRecentSteerInput,
 						queuedLaneIntents,
@@ -1531,6 +1542,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
 								reloadRequired: autoResumeSnapshot.reloadRequired,
 								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
+								handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
+								handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
 							},
 						);
 						if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {

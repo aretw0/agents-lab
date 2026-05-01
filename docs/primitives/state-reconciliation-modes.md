@@ -58,6 +58,7 @@ O board é a fonte operacional de tarefas, status e verificação. Para fatias l
 - checkpoint deve ser fresco antes de compact/reload/retomada;
 - não tratar handoff stale como foco atual quando o board já mudou;
 - auto-resume deve reconciliar `focusTasks` com status do board e preferir o estado mais recente;
+- se a reconciliação apontar `stale-hand-off`, `missing-task`, `completed-focus` ou `board-handoff-divergence`, a retomada deve falhar fechada com `board-handoff-divergence` antes de qualquer dispatch;
 - múltiplos escritores exigem single-writer ou generated apply step, especialmente em CI/MR.
 
 ## Matriz go/no-go

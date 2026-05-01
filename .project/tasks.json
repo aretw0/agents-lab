@@ -9656,7 +9656,7 @@
     {
       "id": "TASK-BUD-398",
       "description": "Harden stale handoff vs board reconciliation para impedir que checkpoint/handoff velho seja tratado como estado atual.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
@@ -9672,11 +9672,12 @@
         "Teste cobre pelo menos um handoff fresco válido e um handoff stale/divergente."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual.",
+      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual.\n2026-05-01: implementação pronta após TASK-BUD-408/409. Handoff-board reconciliation detector e fail-closed em auto-resume foram codificados/testados; resta reload/live validation antes de fechar a macro-task.",
       "depends_on": [
         "TASK-BUD-408",
         "TASK-BUD-409"
-      ]
+      ],
+      "verification": "VER-BUD-749"
     },
     {
       "id": "TASK-BUD-399",
@@ -9916,7 +9917,7 @@
     {
       "id": "TASK-BUD-409",
       "description": "Aplicar fail-closed em auto-resume/continuidade quando detector apontar stale handoff ou divergência board-handoff.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-408"
@@ -9934,7 +9935,8 @@
         "Sem scheduler/remote/offload; mudança permanece local-first e evidence-only."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Depois do detector, o risco real é uma continuação usar handoff velho como permissão atual; o gate precisa falhar fechado antes de qualquer dispatch/retomada."
+      "notes": "[rationale:risk-control] Depois do detector, o risco real é uma continuação usar handoff velho como permissão atual; o gate precisa falhar fechado antes de qualquer dispatch/retomada.\n2026-05-01: concluído fail-closed para auto-resume/continuidade quando handoff e board divergem; não há dispatch quando o detector aponta stale/divergent handoff.",
+      "verification": "VER-BUD-748"
     }
   ]
 }

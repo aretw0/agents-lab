@@ -8952,6 +8952,24 @@
       "method": "handoff-board-reconciliation-smoke",
       "timestamp": "2026-05-01T03:37:53.295Z",
       "evidence": "Implemented read-only resolveHandoffBoardReconciliation in context-watchdog-handoff and re-exported through context-watchdog. Detector compares handoff current_tasks/timestamp against board taskStatusById and returns compact blockers stale-hand-off, missing-task, completed-focus, board-handoff-divergence. Focal validation: npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts => 50 passed."
+    },
+    {
+      "id": "VER-BUD-748",
+      "target": "TASK-BUD-409",
+      "target_type": "task",
+      "status": "passed",
+      "method": "auto-resume-board-handoff-fail-closed-smoke",
+      "timestamp": "2026-05-01T03:42:19.793Z",
+      "evidence": "Implemented fail-closed auto-resume suppression using resolveHandoffBoardReconciliation. Auto-resume dispatch now receives handoffBoardReconciled=false when handoff current_tasks/timestamp diverge from board status and returns reason=board-handoff-divergence before pending messages/recent steer dispatch. Docs state fail-closed blockers stale-hand-off, missing-task, completed-focus, board-handoff-divergence. Validation: context-watchdog smoke 50 passed; safe_marker_check state-reconciliation markers 3/3."
+    },
+    {
+      "id": "VER-BUD-749",
+      "target": "TASK-BUD-398",
+      "target_type": "task",
+      "status": "partial",
+      "method": "stale-handoff-reconciliation-smoke",
+      "timestamp": "2026-05-01T03:43:03.635Z",
+      "evidence": "Implemented detector and fail-closed auto-resume gating through TASK-BUD-408/409. Focal smoke: context-watchdog 50 passed; safe markers for board-handoff divergence docs matched 3/3. This is partial for TASK-BUD-398 until reload/live validation of runtime behavior or explicit decision packet."
     }
   ]
 }
