@@ -9312,6 +9312,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T13:41:16.264Z",
       "evidence": "Added cross-surface contract smoke `packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` covering structured guidance without brittle text parsing: (1) `autonomy_lane_status` protected-only local-stop returns `recommendationCode=local-stop-protected-focus-required` + non-empty `nextAction`; (2) `context_watch_continuation_readiness` emits structured `recommendationCode` from allowed set + non-empty `nextAction`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 3 files passed, 58 tests passed."
+    },
+    {
+      "id": "VER-BUD-788",
+      "target": "TASK-BUD-435",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs marker checks",
+      "timestamp": "2026-05-01T13:43:16.105Z",
+      "evidence": "Defined report-only maturity packet for long local run in `docs/primitives/nudge-free-local-continuity.md` and mirrored governance framing in `docs/guides/control-plane-operating-doctrine.md`. Added explicit measurable metrics (`slicesCompleted`, `focalValidationPassRate`, `protectedAutoSelectionCount`, `checkpointFreshnessViolations`, `noEligibleStopHandled`, etc.), go/no-go interpretation, and fail-closed action path without authorizing protected modes. Validation: safe_marker_check passed on both docs (5/5 + 5/5) and i18n_lint_text passed."
     }
   ]
 }

@@ -107,6 +107,27 @@ Parar e registrar checkpoint quando ocorrer:
 - dirty state inesperado aparece;
 - decisão humana real é necessária.
 
+## Pacote de maturidade para run local longa (report-only)
+
+Antes de considerar outros modos, consolidar um pacote de evidência com métricas mínimas observáveis de uma run local longa, sem scheduler/remote/offload:
+
+- `slicesCompleted` (meta inicial: 3-5 fatias consecutivas);
+- `focalValidationPassRate` (meta: 100% nas validações focais da run);
+- `unexpectedDirtyCount` (meta: 0);
+- `protectedAutoSelectionCount` (meta: 0);
+- `checkpointFreshnessViolations` (meta: 0);
+- `rollbackNeededCount` (meta: 0 ou justificativa explícita);
+- `noEligibleStopHandled` (meta: sempre tratado como stop condition, sem drift);
+- `boardEvidenceCoverage` (meta: cada fatia com verification/handoff curto).
+
+Critério de go/no-go da run local longa:
+
+- **go para novo rehearsal local**: todas as métricas acima dentro da meta em pelo menos um batch completo;
+- **no-go para modos protegidos**: qualquer violação crítica (protected auto-selection, falta de checkpoint, drift sem evidência, validação focal falhando sem correção);
+- **ação padrão quando no-go**: abrir side quest local-safe de hardening e repetir rehearsal.
+
+Este pacote é **report-only**: ele mede maturidade, não autoriza automaticamente CI/remote/offload/scheduler.
+
 ## Saída esperada para a manhã seguinte
 
 O pacote de handoff final deve responder:

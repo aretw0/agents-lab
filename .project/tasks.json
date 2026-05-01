@@ -10509,7 +10509,7 @@
     {
       "id": "TASK-BUD-435",
       "description": "Definir pacote de maturidade de run local longa (report-only) com métricas mínimas e critérios de go/no-go antes de outros modos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-431"
@@ -10525,7 +10525,8 @@
         "Não autoriza automaticamente modos protegidos."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Run longa deve provar maturidade com evidência objetiva."
+      "notes": "[rationale:risk-control] Run longa deve provar maturidade com evidência objetiva.\n2026-05-01: iniciado pacote de maturidade para run local longa (report-only), sem autorizar scheduler/remote/offload.\n2026-05-01: pacote de maturidade local longa consolidado como evidência report-only antes de outros modos.",
+      "verification": "VER-BUD-788"
     },
     {
       "id": "TASK-BUD-436",

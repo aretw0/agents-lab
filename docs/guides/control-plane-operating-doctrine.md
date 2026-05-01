@@ -97,6 +97,26 @@ Matriz go/no-go para trabalho ininterrupto local:
 
 Critério mínimo para promover além de rehearsal bounded: pelo menos um caminho local de execução longa precisa ter cancelamento testado, fallback humano claro, checkpoint prévio, saída limitada e decisão explícita do operador. Sem isso, o trabalho pode continuar em fatias locais pequenas, mas não em modo unattended forte.
 
+### Pacote de maturidade da run local longa (report-only)
+
+Para reduzir decisão subjetiva e evitar promoção por entusiasmo, use um pacote mínimo de métricas locais antes de falar em outros modos:
+
+- `slicesCompleted` em batch (alvo inicial: 3-5);
+- `focalValidationPassRate` (alvo: 100%);
+- `unexpectedDirtyCount` (alvo: 0);
+- `protectedAutoSelectionCount` (alvo: 0);
+- `checkpointFreshnessViolations` (alvo: 0);
+- `noEligibleStopHandled` (alvo: sempre tratado como stop condition);
+- cobertura de board/handoff por fatia (alvo: 1 verification + checkpoint curto por fatia).
+
+Interpretação:
+
+- **go para novo rehearsal local**: métricas dentro do alvo no batch;
+- **no-go para protected modes**: qualquer violação crítica de governança;
+- **ação padrão no no-go**: abrir side quest local-safe de hardening e repetir o rehearsal.
+
+Esse pacote mede maturidade operacional; ele não autoriza automaticamente scheduler, CI, remote/offload ou executor forte.
+
 ### Confirmação humana auditável
 
 Confirmação humana para ação destrutiva/protegida precisa ser evidência auditável, não apenas sensação de UI. Se o operador aceitou um diálogo real da TUI, mas o monitor/guard posterior não vê evidência confiável no `tool_call`, em `custom_messages` ou em audit entry de origem runtime, classifique como **gap upstream pi/TUI → monitor**, preserve o bloqueio fail-closed e registre a incompatibilidade. Não relaxe `unauthorized-action` só porque a conversa contém uma frase de confirmação: isso é spoofable e não deve autorizar destructive/protected execution.
