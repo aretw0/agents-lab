@@ -10619,7 +10619,7 @@
     {
       "id": "TASK-BUD-440",
       "description": "Cobrir contrato do brainstorm packet com smoke tests (success + blocked) e garantir invariantes de não-dispatch.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-439"
@@ -10634,7 +10634,8 @@
         "Asserts garantem dispatchAllowed=false, mutationAllowed=false, authorization=none."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Teste de contrato evita regressão de governança."
+      "notes": "[rationale:risk-control] Teste de contrato evita regressão de governança.\n2026-05-01: iniciada consolidação final de smoke de contrato para lane_brainstorm_packet (success + blocked + invariantes no-dispatch).\n2026-05-01: contrato do brainstorm packet endurecido com smoke para sucesso/bloqueio sem dispatch.",
+      "verification": "VER-BUD-792"
     }
   ]
 }

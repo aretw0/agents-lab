@@ -204,7 +204,9 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.decision).toBe("blocked");
     expect(result?.details.recommendationCode).toBe("needs-human-focus-protected");
+    expect(typeof result?.details.nextAction).toBe("string");
     expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });
 });
