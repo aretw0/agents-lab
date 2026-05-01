@@ -4,6 +4,37 @@ import { buildBackgroundProcessReadinessScore } from "./guardrails-core-backgrou
 import { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 
+function asOptionalBoolean(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
+  hasProcessRegistry: boolean;
+  hasPortLeaseLock: boolean;
+  hasBoundedLogTail: boolean;
+  hasStructuredStacktraceCapture: boolean;
+  hasHealthcheckProbe: boolean;
+  hasGracefulStopThenKill: boolean;
+  hasReloadHandoffCleanup: boolean;
+} {
+  const has = (name: string): boolean => toolNames.has(name);
+  const hasAnyContaining = (fragment: string): boolean => {
+    const f = fragment.toLowerCase();
+    return Array.from(toolNames).some((name) => name.toLowerCase().includes(f));
+  };
+  const hasBgStatus = has("bg_status");
+
+  return {
+    hasProcessRegistry: hasBgStatus,
+    hasPortLeaseLock: has("background_process_plan") && hasAnyContaining("port"),
+    hasBoundedLogTail: hasBgStatus,
+    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace"),
+    hasHealthcheckProbe: hasAnyContaining("healthcheck"),
+    hasGracefulStopThenKill: hasBgStatus,
+    hasReloadHandoffCleanup: hasAnyContaining("context_watch_checkpoint") || hasAnyContaining("handoff"),
+  };
+}
+
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   if (!tool || typeof tool !== "object") return undefined;
   const t = tool as Record<string, unknown>;
@@ -43,14 +74,15 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       const scopedTools = selectedNames ? allTools.filter((tool) => selectedNames.has(tool.name)) : allTools;
 
       const allToolNames = new Set(allTools.map((tool) => tool.name));
+      const inferred = inferBackgroundCapabilitySignals(allToolNames);
       const background = buildBackgroundProcessReadinessScore({
-        hasProcessRegistry: typeof p.has_process_registry === "boolean" ? p.has_process_registry : undefined,
-        hasPortLeaseLock: typeof p.has_port_lease_lock === "boolean" ? p.has_port_lease_lock : undefined,
-        hasBoundedLogTail: typeof p.has_bounded_log_tail === "boolean" ? p.has_bounded_log_tail : undefined,
-        hasStructuredStacktraceCapture: typeof p.has_structured_stacktrace_capture === "boolean" ? p.has_structured_stacktrace_capture : undefined,
-        hasHealthcheckProbe: typeof p.has_healthcheck_probe === "boolean" ? p.has_healthcheck_probe : undefined,
-        hasGracefulStopThenKill: typeof p.has_graceful_stop_then_kill === "boolean" ? p.has_graceful_stop_then_kill : undefined,
-        hasReloadHandoffCleanup: typeof p.has_reload_handoff_cleanup === "boolean" ? p.has_reload_handoff_cleanup : undefined,
+        hasProcessRegistry: asOptionalBoolean(p.has_process_registry) ?? inferred.hasProcessRegistry,
+        hasPortLeaseLock: asOptionalBoolean(p.has_port_lease_lock) ?? inferred.hasPortLeaseLock,
+        hasBoundedLogTail: asOptionalBoolean(p.has_bounded_log_tail) ?? inferred.hasBoundedLogTail,
+        hasStructuredStacktraceCapture: asOptionalBoolean(p.has_structured_stacktrace_capture) ?? inferred.hasStructuredStacktraceCapture,
+        hasHealthcheckProbe: asOptionalBoolean(p.has_healthcheck_probe) ?? inferred.hasHealthcheckProbe,
+        hasGracefulStopThenKill: asOptionalBoolean(p.has_graceful_stop_then_kill) ?? inferred.hasGracefulStopThenKill,
+        hasReloadHandoffCleanup: asOptionalBoolean(p.has_reload_handoff_cleanup) ?? inferred.hasReloadHandoffCleanup,
         hasPlanSurface: allToolNames.has("background_process_plan"),
         hasLifecycleSurface: allToolNames.has("background_process_lifecycle_plan"),
         rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,

@@ -1,35 +1,33 @@
 {
-  "timestamp": "2026-05-01T22:45:29.204Z",
-  "context": "Executed post-reload live baseline (TASK-BUD-509) and completed follow-up wave TASK-BUD-510..512: readiness inference+override path, agents g [snip] de readings before ops packet decision. [truncated:+74 chars]",
+  "timestamp": "2026-05-01T22:53:06.956Z",
+  "context": "Harmonized ops_calibration_decision_packet with background readiness inference/override semantics; composed packet now aligns with standalone [snip] code/tests (live update after reload). [truncated:+22 chars]",
   "next_actions": [
-    "/reload to activate latest calibration heuristic/inference updates in live runtime",
+    "/reload to activate harmonized packet inference in live runtime",
     "re-run background_process_readiness_score + agents_as_tools_calibration_score + ops_calibration_decision_packet",
-    "if packet remains keep-report-only, seed next local-safe wave for missing background capabilit [snip] ase/healthcheck contracts) [truncated:+16 chars]"
+    "execute TASK-BUD-514 (background rehearsal contract primitive)"
   ],
   "blockers": [],
   "recent_validation": [
     "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] hardening-reexport.test.ts [truncated:+223 chars]",
-    "safe_marker_check docs/primitives/background-process-readiness-score.md",
-    "safe_marker_check docs/primitives/agents-as-tools-calibration-score.md"
+    "safe_marker_check docs/primitives/ops-calibration-decision-packet.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-512",
+    "focus": "TASK-BUD-513",
     "canonical_links": [
-      "task:TASK-BUD-512",
-      "task:TASK-BUD-509",
-      "task:TASK-BUD-510"
+      "task:TASK-BUD-513",
+      "task:TASK-BUD-514"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T22:45:29.204Z",
+    "generatedAtIso": "2026-05-01T22:53:06.956Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "add-or-select-task",
+    "recommendation": "execute-bounded-slice",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T22:45:29.204Z",
+      "atIso": "2026-05-01T22:53:06.956Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -39,10 +37,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "add-or-select-task"
+      "recommendation": "execute-bounded-slice"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-512"
+    "TASK-BUD-513"
   ]
 }

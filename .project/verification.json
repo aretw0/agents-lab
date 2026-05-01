@@ -9987,6 +9987,15 @@
       "method": "runbook/doc update + marker-check",
       "timestamp": "2026-05-01T22:44:43.265Z",
       "evidence": "Updated post-reload runbook to include default inference path and explicit override path for readiness score. Changes: - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` - Runbook now includes sequence: inferência bounded -> optional `has_*` overrides -> agents score -> ops packet -> checkpoint. - `docs/primitives/ops-calibration-decision-packet.md` - Added `Uso recomendado` section with explicit orchestration order and `live_reload_completed=true` guidance. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`inferência bounded`, `overrides explícitos`, `ops_calibration_decision_packet`, `go/no-go`) => matched 4/4. - `safe_marker_check docs/primitives/ops-calibration-decision-packet.md` markers (`Uso recomendado`, `background_process_readiness_score`, `overrides`, `live_reload_completed=true`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-863",
+      "target": "TASK-BUD-513",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface harmonization + smoke + marker-check",
+      "timestamp": "2026-05-01T22:51:36.559Z",
+      "evidence": "Harmonized `ops_calibration_decision_packet` background readiness computation with the same inference/override semantics used by `background_process_readiness_score`. Changes: - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - Added bounded background capability inference helper (`inferBackgroundCapabilitySignals`). - Added explicit override precedence (`has_*` params override inferred values). - Packet now builds background score with inferred defaults when parameters are omitted. - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Added regression proving inferred background score > legacy pessimistic baseline in inferred scenario. - Added regression proving explicit overrides force expected lower score (override precedence). - `docs/primitives/ops-calibration-decision-packet.md` - Documented inference/override parity with standalone readiness tool. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` => 5 files passed, 23 tests passed. - `safe_marker_check docs/primitives/ops-calibration-decision-packet.md` => matched 3/3. Note: live runtime packet output reflects this change after next `/reload`."
     }
   ]
 }

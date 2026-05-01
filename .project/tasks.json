@@ -12176,6 +12176,91 @@
       "milestone": "bg-agents-calibration-wave-2026-05c",
       "notes": "[rationale:risk-control] runbook atualizado mantém execução consistente durante recalibração da heurística.\n[provenance:human] source_task=TASK-BUD-509 reason=fechar governança operacional da próxima wave\n2026-05-01: runbook pós-reload agora cobre caminho padrão por inferência e caminho com overrides explícitos para decisão mais auditável.",
       "verification": "VER-BUD-862"
+    },
+    {
+      "id": "TASK-BUD-513",
+      "description": "Harmonizar `ops_calibration_decision_packet` com a inferência de capabilities do `background_process_readiness_score` para eliminar divergência de baseline no pós-reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-512"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts",
+        "docs/primitives/ops-calibration-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Packet usa mesma lógica de inferência/override de background readiness quando parâmetros has_* não são fornecidos.",
+        "Leitura de background no packet fica consistente com tool standalone no mesmo runtime.",
+        "Regressão smoke cobre cenário inferido e override explícito."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05d",
+      "notes": "[rationale:risk-control] reduzir divergência entre tools compostas evita decisão incorreta de promoção/pausa.\n[provenance:human] source_task=TASK-BUD-509 reason=baseline live revelou inconsistencia entre score standalone e packet composto\n2026-05-01: packet de calibração operacional agora está consistente com inferência/override do readiness standalone.",
+      "verification": "VER-BUD-863"
+    },
+    {
+      "id": "TASK-BUD-514",
+      "description": "Definir primitive report-only de contrato de rehearsal de background process (drill mínimo, evidências obrigatórias e stopSource coverage).",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-513"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process-rehearsal.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Primitive retorna decisão read-only (ready|needs-evidence|blocked) com recomendações curtas.",
+        "Exige evidências mínimas: lifecycle classificado + stopSource coverage + rollback conhecido.",
+        "Sem start/stop automático; apenas avaliação."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05d",
+      "notes": "[rationale:risk-control] rehearsal bounded de background precisa contrato explícito antes de operação real.\n[provenance:human] source_task=TASK-BUD-512 reason=seguir trilha background-first com governança antes de spawn de agentes"
+    },
+    {
+      "id": "TASK-BUD-515",
+      "description": "Criar primitive report-only de simple-agent spawn readiness (single agent, cwd isolado, timeout/budget e rollback).",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-514"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Primitive limita a 1 agente por execução e exige timeout + cwd + budget explícitos.",
+        "Retorna decisão `keep-report-only|ready-for-simple-spawn` sem dispatch.",
+        "Regressão cobre cenário forte e fail-closed por ausência de limites."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05d",
+      "notes": "[rationale:risk-control] spawn simples precisa contrato mínimo antes de abrir caminho para colônia.\n[provenance:human] source_task=TASK-BUD-512 reason=sequenciar caminho background -> simple spawn -> colonia"
+    },
+    {
+      "id": "TASK-BUD-516",
+      "description": "Definir gate report-only de promoção para colônia condicionado a background+simple-spawn verdes em leitura live.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-515"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-colony-promotion-gate.ts",
+        "packages/pi-stack/test/smoke/guardrails-colony-promotion-gate.test.ts",
+        "docs/primitives/colony-promotion-decision-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Gate exige sinais explícitos de readiness de background e simple-spawn.",
+        "Sem autorizar dispatch automático de colônia.",
+        "Mensagem de bloqueio aponta lacuna exata."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05d",
+      "notes": "[rationale:risk-control] colônia deve entrar só após maturidade comprovada das camadas anteriores.\n[provenance:human] source_task=TASK-BUD-515 reason=evitar salto prematuro para execução paralela complexa"
     }
   ]
 }

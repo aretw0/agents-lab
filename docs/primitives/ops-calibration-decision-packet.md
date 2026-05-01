@@ -28,6 +28,8 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 2. calcular `agents_as_tools_calibration_score`;
 3. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
 
+O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, e respeita overrides explícitos quando fornecidos.
+
 ## Invariantes
 
 - `dispatchAllowed=false`

@@ -173,4 +173,53 @@ describe("ops calibration decision packet", () => {
     expect(result.details.authorization).toBe("none");
     expect(String(result.details.summary)).toContain("ops-calibration-packet:");
   });
+
+  it("uses inferred background capability signals and honors explicit overrides", async () => {
+    const tools: any[] = [
+      { name: "background_process_plan", description: "read-only plan" },
+      { name: "background_process_lifecycle_plan", description: "read-only lifecycle" },
+      { name: "bg_status", description: "status/log/stop" },
+      { name: "context_watch_checkpoint", description: "checkpoint" },
+      { name: "claude_code_adapter_status", description: "budget guard" },
+      { name: "claude_code_execute", description: "dry_run=true cwd isolation" },
+      { name: "tool_hygiene_scorecard", description: "read-only scorecard" },
+      { name: "board_decision_packet", description: "decision packet" },
+      { name: "ant_colony", description: "long run protected" },
+    ];
+
+    const pi = {
+      registerTool: vi.fn((tool) => tools.push(tool)),
+      getAllTools: vi.fn(() => tools),
+    } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+    registerGuardrailsOpsCalibrationSurface(pi);
+    const tool = tools.find((row) => row?.name === "ops_calibration_decision_packet");
+
+    const inferred = await tool.execute(
+      "tc-ops-calibration-inferred",
+      { live_reload_completed: true },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(inferred.details.background.score).toBeGreaterThan(20);
+    expect(inferred.details.background.dimensions.capabilities).toBeGreaterThan(0);
+
+    const overridden = await tool.execute(
+      "tc-ops-calibration-override",
+      {
+        has_process_registry: false,
+        has_port_lease_lock: false,
+        has_bounded_log_tail: false,
+        has_graceful_stop_then_kill: false,
+        has_reload_handoff_cleanup: false,
+        live_reload_completed: true,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(overridden.details.background.score).toBe(20);
+    expect(overridden.details.background.dimensions.capabilities).toBe(0);
+  });
 });
