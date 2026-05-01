@@ -11288,6 +11288,43 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] testar alcance da lane consolidada com evidência objetiva antes de expansão.\n2026-05-01: lane consolidada testada em rehearsal local-safe com métricas objetivas.",
       "verification": "VER-BUD-821"
+    },
+    {
+      "id": "TASK-BUD-472",
+      "description": "Limpeza: padronizar template de parking-note para tasks protegidas e reduzir variação textual no board.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Template curto de parking-note definido e documentado.",
+        "Novas marcações de parking usam texto consistente.",
+        "Sem alterar política de autorização/proteção."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] reduzir ruído sem mudar governança."
+    },
+    {
+      "id": "TASK-BUD-473",
+      "description": "Pesquisa local-safe: mapear por que tasks entram como protected-scope no seletor e documentar critérios operacionais de classificação.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-472"
+      ],
+      "files": [
+        "docs/research/",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts"
+      ],
+      "acceptance_criteria": [
+        "Matriz curta de critérios de protected classification.",
+        "Inclui exemplos positivos/negativos usando artefatos locais.",
+        "Propõe ajustes apenas se houver baixo risco e validação focal clara."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] pesquisa direcionada para reduzir surpresa no roteamento da lane."
     }
   ]
 }
