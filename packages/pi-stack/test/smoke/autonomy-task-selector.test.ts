@@ -78,6 +78,17 @@ describe("autonomy task selector", () => {
     expect(result.totals.skippedProtectedScope).toBe(1);
   });
 
+  it("classifies protected-only queue as local stop requiring explicit focus", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-COLONY-PROMOTION", status: "planned", description: "[P0] revisar colony promotion candidate" }),
+    ]);
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("no-eligible-tasks");
+    expect(result.recommendationCode).toBe("local-stop-protected-focus-required");
+    expect(result.recommendation).toContain("local stop condition");
+  });
+
   it("allows protected lane selection when focus is explicit", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-COLONY-PROMOTION", status: "planned", description: "[P0] revisar colony promotion candidate" }),
@@ -117,6 +128,17 @@ describe("autonomy task selector", () => {
 
     expect(result.nextTaskId).toBe("TASK-HARDEN");
     expect(result.selectionPolicy).toContain("missing-rationale-included");
+  });
+
+  it("classifies dependency-only queue as local stop for unblocking", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-BLOCKED", status: "planned", description: "[P1] blocked", depends_on: ["TASK-MISSING"] }),
+    ]);
+
+    expect(result.ready).toBe(false);
+    expect(result.reason).toBe("no-eligible-tasks");
+    expect(result.recommendationCode).toBe("local-stop-unblock-dependencies");
+    expect(result.recommendation).toContain("dependencies");
   });
 
   it("respects focus task ids before drifting to unrelated eligible work", () => {

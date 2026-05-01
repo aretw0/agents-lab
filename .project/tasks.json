@@ -10268,6 +10268,28 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Evitar deriva automática para lanes ambíguas/protegidas quando o objetivo é continuidade local controlada/auditada.\n2026-05-01: reduz deriva automática para lane de colony-promotion/recovery mantendo caminho intencional por foco explícito.",
       "verification": "VER-BUD-775"
+    },
+    {
+      "id": "TASK-BUD-424",
+      "description": "Refinar packet de seleção da autonomy lane para classificar `no-eligible-tasks` como stop local explícito com recomendação acionável (desbloquear dependências vs foco humano para protected lane).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-423"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Quando `reason=no-eligible-tasks`, resultado deve explicitar stop local e diferenciar caminho de `protected scope` vs `dependencies`.",
+        "Adicionar código/recommendation estável para consumo de tools/UI sem depender de parsing de texto livre.",
+        "Smoke test cobre cenário sem tarefa local-safe por protected-only e mantém regressões atuais verdes."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Reduz ambiguidade de continuidade: sem tarefa local-safe elegível, o lane deve pedir foco explícito/ação de desbloqueio em vez de parecer pronto para puxar backlog protegido.\n2026-05-01: lane now emits actionable stop semantics for no-eligible state, reducing ambiguity and preventing perceived permission to drift into protected backlog.",
+      "verification": "VER-BUD-776"
     }
   ]
 }

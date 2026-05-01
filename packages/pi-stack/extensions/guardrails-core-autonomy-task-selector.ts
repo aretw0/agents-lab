@@ -18,9 +18,21 @@ export interface AutonomyTaskSelectorOptions {
   focusSource?: "explicit" | "handoff";
 }
 
+export type AutonomyTaskRecommendationCode =
+  | "execute-bounded-slice"
+  | "add-or-select-task"
+  | "choose-next-focus"
+  | "realign-focus"
+  | "local-stop-protected-focus-required"
+  | "local-stop-unblock-dependencies"
+  | "local-stop-add-rationale-or-allow"
+  | "local-stop-mixed-blockers"
+  | "local-stop-decompose-bounded";
+
 export interface AutonomyTaskSelection {
   ready: boolean;
   reason: AutonomyTaskSelectionReason;
+  recommendationCode: AutonomyTaskRecommendationCode;
   recommendation: string;
   selectionPolicy: string;
   milestone?: string;
@@ -163,6 +175,42 @@ function compareTasks(a: ProjectTaskItem, b: ProjectTaskItem): number {
   return (normalizeTaskId(a.id) ?? "").localeCompare(normalizeTaskId(b.id) ?? "");
 }
 
+function resolveNoEligibleTaskRecommendation(input: {
+  blockedByDependencies: number;
+  skippedProtectedScope: number;
+  skippedMissingRationale: number;
+}): { recommendationCode: AutonomyTaskRecommendationCode; recommendation: string } {
+  const { blockedByDependencies, skippedProtectedScope, skippedMissingRationale } = input;
+  if (skippedProtectedScope > 0 && blockedByDependencies === 0 && skippedMissingRationale === 0) {
+    return {
+      recommendationCode: "local-stop-protected-focus-required",
+      recommendation: "local stop condition: no eligible local-safe tasks remain; request explicit human focus before entering protected scope, or create a new local-safe task.",
+    };
+  }
+  if (blockedByDependencies > 0 && skippedProtectedScope === 0 && skippedMissingRationale === 0) {
+    return {
+      recommendationCode: "local-stop-unblock-dependencies",
+      recommendation: "local stop condition: no eligible tasks remain until dependencies are unblocked or decomposed.",
+    };
+  }
+  if (skippedMissingRationale > 0 && skippedProtectedScope === 0 && blockedByDependencies === 0) {
+    return {
+      recommendationCode: "local-stop-add-rationale-or-allow",
+      recommendation: "local stop condition: only rationale-sensitive tasks remain; add rationale evidence or explicitly opt in to include missing-rationale tasks.",
+    };
+  }
+  if (blockedByDependencies > 0 || skippedProtectedScope > 0 || skippedMissingRationale > 0) {
+    return {
+      recommendationCode: "local-stop-mixed-blockers",
+      recommendation: "local stop condition: no eligible local-safe tasks remain; unblock dependencies and/or request explicit focus for protected or rationale-sensitive lanes.",
+    };
+  }
+  return {
+    recommendationCode: "local-stop-decompose-bounded",
+    recommendation: "local stop condition: no eligible tasks remain; decompose or add the next bounded local-safe task before autonomous continuation.",
+  };
+}
+
 export function selectAutonomyLaneTask(
   tasks: ProjectTaskItem[],
   options?: AutonomyTaskSelectorOptions,
@@ -234,6 +282,7 @@ export function selectAutonomyLaneTask(
     return {
       ready: true,
       reason: "ready",
+      recommendationCode: "execute-bounded-slice",
       recommendation: `execute bounded slice for ${eligibleTaskIds[0]}; validate focal gate; commit; update board.`,
       selectionPolicy,
       milestone,
@@ -273,16 +322,29 @@ export function selectAutonomyLaneTask(
         ? "focus-mismatch"
         : "no-eligible-tasks";
 
+  const noEligibleGuidance = resolveNoEligibleTaskRecommendation({
+    blockedByDependencies,
+    skippedProtectedScope,
+    skippedMissingRationale,
+  });
+
   return {
     ready: false,
     reason,
+    recommendationCode: reason === "no-candidate-tasks"
+      ? "add-or-select-task"
+      : reason === "focus-complete"
+        ? "choose-next-focus"
+        : reason === "focus-mismatch"
+          ? "realign-focus"
+          : noEligibleGuidance.recommendationCode,
     recommendation: reason === "no-candidate-tasks"
       ? "add or select a planned/in-progress task before autonomous continuation."
       : reason === "focus-complete"
         ? "current focus is complete; choose the next focus explicitly before autonomous continuation."
         : reason === "focus-mismatch"
           ? "do not drift to an unrelated board task; update handoff/focus or explicitly clear focus before autonomous continuation."
-          : "decompose or unblock the next bounded task; protected scopes and missing-rationale tasks remain skipped unless explicitly authorized.",
+          : noEligibleGuidance.recommendation,
     selectionPolicy,
     milestone,
     focusTaskIds: focusTaskIds.length > 0 ? focusTaskIds : undefined,
