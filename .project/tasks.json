@@ -9943,7 +9943,7 @@
     {
       "id": "TASK-BUD-410",
       "description": "Integrar ou documentar adaptador para notificações reais `BG_PROCESS_DONE` do harness/bg_status passarem pelo contrato canônico de lifecycle antes de serem usadas como readiness.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-397",
@@ -9962,12 +9962,13 @@
         "Enquanto o harness não for integrável, readiness forte permanece bloqueada ou marcada como external-boundary-not-normalized."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O operador trouxe evidência live de `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` emitido pelo harness após auto-background. Isso confirma que o problema relevante é a fronteira real de notificação/bg_status, não só o classificador first-party já implementado.\n2026-05-01: segunda evidência live do mesmo boundary: `[BG_PROCESS_DONE] PID 32696 finished (exit 0)` para comando curto `git status --short && echo status-ok`. Classificação pelo contrato first-party: `state=finished event=done known=yes stopRequested=no exit=0 label=BG_PROCESS_DONE dispatch=no authorization=none`. Confirma que até comandos diagnósticos simples podem gerar notificação harness/bg_status auto-backgrounded; readiness não deve depender desse texto bruto sem normalização.\n2026-05-01: refinamento crítico do operador: o `[undefined]` aparece como header/título no topo da visualização de background process, separado do corpo `[BG_PROCESS_DONE]`. Portanto o adaptador precisa normalizar dois campos: `displayLabel` do evento lifecycle e `viewTitle`/header da UI/harness. Criado TASK-BUD-411 e anexado como dependência explícita."
+      "notes": "[rationale:risk-control] O operador trouxe evidência live de `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` emitido pelo harness após auto-background. Isso confirma que o problema relevante é a fronteira real de notificação/bg_status, não só o classificador first-party já implementado.\n2026-05-01: segunda evidência live do mesmo boundary: `[BG_PROCESS_DONE] PID 32696 finished (exit 0)` para comando curto `git status --short && echo status-ok`. Classificação pelo contrato first-party: `state=finished event=done known=yes stopRequested=no exit=0 label=BG_PROCESS_DONE dispatch=no authorization=none`. Confirma que até comandos diagnósticos simples podem gerar notificação harness/bg_status auto-backgrounded; readiness não deve depender desse texto bruto sem normalização.\n2026-05-01: refinamento crítico do operador: o `[undefined]` aparece como header/título no topo da visualização de background process, separado do corpo `[BG_PROCESS_DONE]`. Portanto o adaptador precisa normalizar dois campos: `displayLabel` do evento lifecycle e `viewTitle`/header da UI/harness. Criado TASK-BUD-411 e anexado como dependência explícita.\n2026-05-01: concluído boundary local-first para notificações reais `BG_PROCESS_DONE`/header `[undefined]`. O contrato first-party agora distingue `displayLabel` e `viewTitle`, valida normal/late/unknown, e mantém dispatch/autorização negados; integração operacional do harness real continua fora de escopo até haver canal first-party/upstream explícito.",
+      "verification": "VER-BUD-753"
     },
     {
       "id": "TASK-BUD-411",
       "description": "Corrigir/normalizar o título/header `[undefined]` da visualização de background process, separado do corpo `BG_PROCESS_DONE`.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/primitives/background-process-control.md",
@@ -9981,10 +9982,11 @@
         "Enquanto o emissor real do header não for integrável, readiness forte permanece fail-closed e o blocker fica explícito."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O operador mostrou que o `[undefined]` aparece no topo da visualização de background process, separado do texto `[BG_PROCESS_DONE]`; o classifier do evento cobre label do lifecycle, mas ainda falta tratar o header/título real da UI/harness.\n2026-05-01: TASK-BUD-412 implementou o contrato local para `viewTitle`/header separado de `displayLabel`; smoke passou. Como a surface runtime `background_process_lifecycle_plan` ganhou parâmetro `view_title`, é necessário reload antes de live validation e fechamento desta task.",
+      "notes": "[rationale:risk-control] O operador mostrou que o `[undefined]` aparece no topo da visualização de background process, separado do texto `[BG_PROCESS_DONE]`; o classifier do evento cobre label do lifecycle, mas ainda falta tratar o header/título real da UI/harness.\n2026-05-01: TASK-BUD-412 implementou o contrato local para `viewTitle`/header separado de `displayLabel`; smoke passou. Como a surface runtime `background_process_lifecycle_plan` ganhou parâmetro `view_title`, é necessário reload antes de live validation e fechamento desta task.\n2026-05-01: concluído após reload/live validation. `view_title=undefined` é normalizado para `viewTitle=background-process` sem perder `displayLabel=BG_PROCESS_DONE`; sem dispatch/autorização.",
       "depends_on": [
         "TASK-BUD-412"
-      ]
+      ],
+      "verification": "VER-BUD-752"
     },
     {
       "id": "TASK-BUD-412",

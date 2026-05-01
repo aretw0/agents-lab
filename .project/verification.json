@@ -8988,6 +8988,24 @@
       "method": "background-view-title-contract-smoke",
       "timestamp": "2026-05-01T04:08:38.597Z",
       "evidence": "Implemented viewTitle/header normalization as a separate field from lifecycle displayLabel. resolveBackgroundProcessLifecycleEvent now accepts viewTitle, returns viewTitle, emits fallback-view-title when viewTitle is empty/undefined/null, and evidence includes viewTitle. Tool surface exposes view_title. Smoke covers label=BG_PROCESS_DONE with view_title=undefined: state=finished, displayLabel=BG_PROCESS_DONE, viewTitle=background-process. Validation: npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed; safe_marker_check docs markers => 3/3."
+    },
+    {
+      "id": "VER-BUD-752",
+      "target": "TASK-BUD-411",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-background-view-title-live-validation",
+      "timestamp": "2026-05-01T04:13:04.960Z",
+      "evidence": "After reload, live tool surface accepted view_title. background_process_lifecycle_plan(event_kind=done,pid=32696,exit_code=0,known_process=true,stop_requested=false,label=BG_PROCESS_DONE,view_title=undefined) returned state=finished label=BG_PROCESS_DONE viewTitle=background-process dispatch=no authorization=none. This validates the header/title normalization contract separately from lifecycle displayLabel."
+    },
+    {
+      "id": "VER-BUD-753",
+      "target": "TASK-BUD-410",
+      "target_type": "task",
+      "status": "passed",
+      "method": "background-notification-boundary-live-contract-validation",
+      "timestamp": "2026-05-01T04:13:32.208Z",
+      "evidence": "Completed the real BG_PROCESS_DONE boundary as a local-first contract/documentation slice. Live evidence from harness/bg_status was recorded for PID 35348 and PID 32696. Post-reload live validation proved the canonical surface normalizes the observed header/body split: normal event returns state=finished label=BG_PROCESS_DONE viewTitle=background-process dispatch=no authorization=none; done-after-stop returns state=late-after-stop; unknown source returns state=unknown-origin. Docs preserve the boundary that the raw harness notification must not be treated as readiness unless normalized, and readiness remains fail-closed where the real emitter/header is not integrable."
     }
   ]
 }

@@ -1,44 +1,43 @@
 {
-  "timestamp": "2026-05-01T04:09:03.507Z",
-  "context": "Micro-slice implemented to unblock controlled/auditable uninterrupted work: TASK-BUD-412 completed a first-party contract for the remaining b [snip] no broader implementation was started. [truncated:+415 chars]",
+  "timestamp": "2026-05-01T04:14:02.677Z",
+  "context": "Post-reload live validation completed for background process notification/header boundary. TASK-BUD-411 closed with VER-BUD-752: view_title=u [snip] ASK-BUD-399 is now unblocked and ready. [truncated:+398 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-412 implementation.",
-    "Reload required before live-validating background_process_lifecycle_plan with view_title=undefined.",
-    "After reload, validate event_kind=done pid=32696 exit_code=0 known_process=true stop_requested [snip] wTitle=background-process. [truncated:+94 chars]"
+    "Commit TASK-BUD-411/TASK-BUD-410 closures.",
+    "Start TASK-BUD-399 local cancel/fallback drill as next unblocker for controlled/auditable uninterrupted work.",
+    "Keep drill read-only/simulated unless explicit safe operational scope is available; no scheduler/remote/offload."
   ],
   "blockers": [
-    "TASK-BUD-411 cannot close until reload/live validation.",
-    "TASK-BUD-410 depends on TASK-BUD-411; TASK-BUD-399/TASK-BUD-153 remain blocked by TASK-BUD-410.",
-    "Context at checkpoint threshold; stop after commit/reload request."
+    "TASK-BUD-153 still blocked by remaining unresolved dependencies after TASK-BUD-410 closure.",
+    "Strong unattended remains blocked until TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 complete."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
-    "safe_marker_check docs/primitives/background-process-control.md markers => 3/3",
-    "TASK-BUD-412 completed with VER-BUD-751"
+    "background_process_lifecycle_plan normal PID 32696 => state=finished label=BG_PROCESS_DONE vie [snip] atch=no authorization=none [truncated:+30 chars]",
+    "background_process_lifecycle_plan after-stop PID 23364 => state=late-after-stop viewTitle=background-process",
+    "background_process_lifecycle_plan unknown PID 99999 => state=unknown-origin viewTitle=background-process"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:09:03.507Z",
-    "level": "checkpoint",
-    "percent": 70,
-    "action": "checkpoint-refresh",
-    "recommendation": "commit-and-reload-before-live-validation"
+    "generatedAtIso": "2026-05-01T04:14:02.677Z",
+    "level": "ok",
+    "percent": 22,
+    "action": "continue",
+    "recommendation": "commit-then-start-task-bud-399"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:09:03.507Z",
+      "atIso": "2026-05-01T04:14:02.677Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 70,
+      "level": "ok",
+      "percent": 22,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-reload-before-live-validation"
+      "recommendation": "commit-then-start-task-bud-399"
     }
   ]
 }
