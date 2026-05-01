@@ -1,44 +1,43 @@
 {
-  "timestamp": "2026-05-01T04:37:11.313Z",
-  "context": "Provider routing lane pivoted/deferred per human steering: Anthropic account asks for extra usage, so do not pursue Anthropic local route now [snip] bounded local-first task if continuing. [truncated:+364 chars]",
+  "timestamp": "2026-05-01T04:44:15.624Z",
+  "context": "Investigated unexpected dirty .project/tasks.json after colony status/observability. Cause: completed colony c-ret-1/recovery path re-appende [snip] n required before closing TASK-BUD-416. [truncated:+509 chars]",
+  "current_tasks": [
+    "TASK-BUD-416"
+  ],
   "next_actions": [
-    "Commit provider pivot closure.",
-    "Create/decompose next local-first bounded task focused on continuity if no eligible board task remains.",
-    "Do not mutate .pi/settings.json or switch providers automatically."
+    "Commit TASK-BUD-416 implementation slice including incident evidence.",
+    "Reload required before live-validating colony_pilot_status no longer dirties .project/tasks.json on completed replay.",
+    "After reload, run git status clean baseline, colony_pilot_status, then git status; close TASK- [snip] if no dirty delta appears. [truncated:+8 chars]"
   ],
   "blockers": [
-    "Anthropic route is unavailable for this account due extra usage; no provider s [snip] h should be attempted. [truncated:+4 chars]",
-    "No eligible non-protected board task currently selected after provider pivot."
+    "TASK-BUD-416 requires reload/live validation before closure.",
+    "No strong unattended/autoloop should start while board can still be dirtied by observability replay."
   ],
   "recent_validation": [
-    "provider_readiness_matrix => only openai-codex ready",
-    "quota_visibility_route execute=false => openai-codex noAutoSwitch=true",
-    "handoff_advisor execute=false => openai-codex noAutoSwitch=true"
+    "findstr located sources in colony-pilot.ts and colony-pilot-task-sync.ts",
+    "npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts => 82 passed",
+    "git diff --check ok"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:37:11.313Z",
+    "generatedAtIso": "2026-05-01T04:44:15.624Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 43,
     "action": "continue",
-    "recommendation": "commit-provider-pivot-then-decompose-next-local-safe-task",
-    "focus_task_status": "completed"
+    "recommendation": "commit-and-reload-before-live-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:37:11.313Z",
+      "atIso": "2026-05-01T04:44:15.624Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-provider-pivot-then-decompose-next-local-safe-task"
+      "recommendation": "commit-and-reload-before-live-validation"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-405"
   ]
 }

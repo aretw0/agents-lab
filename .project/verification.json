@@ -9087,6 +9087,15 @@
       "method": "provider-routing-pivot-human-steer",
       "timestamp": "2026-05-01T04:36:51.146Z",
       "evidence": "Provider routing task closed as a deferred/pivoted local-first plan. Inventory (VER-BUD-760) showed only openai-codex configured/ready; patch preview (VER-BUD-761) is no-op because Anthropic is not configured and the operator confirmed Anthropic asks for extra usage on the logged account. Outcome: keep current Codex route, do not apply settings changes, do not auto-switch, and revisit only with explicit provider/model/account availability. This preserves continuity by avoiding a costly/broken provider lane."
+    },
+    {
+      "id": "VER-BUD-763",
+      "target": "TASK-BUD-416",
+      "target_type": "task",
+      "status": "partial",
+      "method": "colony-recovery-note-dedupe-smoke",
+      "timestamp": "2026-05-01T04:43:39.044Z",
+      "evidence": "Investigated unexpected dirty .project/tasks.json after provider pivot: colony completed/recovery replay appended duplicate delivery-policy/promotion notes for c-ret-1. Source boundaries found in colony-pilot.ts and colony-pilot-task-sync.ts. Implemented timestamp-insensitive note dedupe via appendNoteOnceByNormalizedMessage; ensureRecoveryTaskForCandidate returns changed=false for repeated stable recovery messages; colony-pilot delivery-policy/promotion source-task notes only write when stable message/status actually changes. Validation: npx vitest run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts => 82 passed; git diff --check ok. Partial until reload/live check confirms status/observability no longer dirties board repeatedly."
     }
   ]
 }

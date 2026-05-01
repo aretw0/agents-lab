@@ -1466,6 +1466,16 @@ describe("colony-pilot parsers", () => {
 		});
 
 		expect(result.taskId).toBe("colony-c1-promotion");
+		const repeated = ensureRecoveryTaskForCandidate(dir, {
+			sourceTaskId: "colony-c1",
+			colonyId: "c1",
+			goal: "meu objetivo",
+			deliveryMode: "patch-artifact",
+			issues: [],
+			config: cfg,
+		});
+		expect(repeated.changed).toBe(false);
+
 		const raw = JSON.parse(
 			require("node:fs").readFileSync(
 				join(dir, ".project", "tasks.json"),
@@ -1477,6 +1487,7 @@ describe("colony-pilot parsers", () => {
 		);
 		expect(promotions.length).toBe(1);
 		expect(promotions[0]?.milestone).toBe("MS-LOCAL");
+		expect(String(promotions[0]?.notes).match(/auto-queued from colony/g)?.length).toBe(1);
 
 		rmSync(dir, { recursive: true, force: true });
 	});

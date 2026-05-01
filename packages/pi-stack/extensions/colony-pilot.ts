@@ -92,6 +92,7 @@ import {
 import {
 	type ColonyTaskSyncConfigShape as ColonyTaskSyncConfigShapeImpl,
 	appendNote,
+	appendNoteOnceByNormalizedMessage,
 	ensureRecoveryTaskForCandidate as ensureRecoveryTaskForCandidateInternal,
 	extractColonyGoalFromMessageText,
 	readProjectTasksBlock,
@@ -758,14 +759,22 @@ export default function (pi: ExtensionAPI) {
 					const idx = block.tasks.findIndex((t) => t.id === syncResult.taskId);
 					if (idx >= 0) {
 						const task = block.tasks[idx]!;
-						task.status = "blocked";
+						let changed = false;
+						if (task.status !== "blocked") {
+							task.status = "blocked";
+							changed = true;
+						}
 						const now = new Date().toISOString();
-						task.notes = appendNote(
+						const dedupedNote = appendNoteOnceByNormalizedMessage(
 							task.notes,
 							`[${now}] delivery-policy blocked completion: ${deliveryEval.issues.join("; ")}`,
 							projectTaskSyncConfig.maxNoteLines,
 						);
-						writeProjectTasksBlock(ctx.cwd, block);
+						if (dedupedNote.appended) {
+							task.notes = dedupedNote.notes;
+							changed = true;
+						}
+						if (changed) writeProjectTasksBlock(ctx.cwd, block);
 					}
 				}
 
@@ -792,12 +801,15 @@ export default function (pi: ExtensionAPI) {
 					if (idx >= 0) {
 						const task = block.tasks[idx]!;
 						const now = new Date().toISOString();
-						task.notes = appendNote(
+						const dedupedNote = appendNoteOnceByNormalizedMessage(
 							task.notes,
 							`[${now}] promotion queued automatically: ${recovery.taskId}`,
 							projectTaskSyncConfig.maxNoteLines,
 						);
-						writeProjectTasksBlock(ctx.cwd, block);
+						if (dedupedNote.appended) {
+							task.notes = dedupedNote.notes;
+							writeProjectTasksBlock(ctx.cwd, block);
+						}
 					}
 				}
 			}

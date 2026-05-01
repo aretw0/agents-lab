@@ -209,6 +209,25 @@ export function appendNote(
 	return keep.join("\n");
 }
 
+export function normalizeTaskNoteForDedupe(line: string): string {
+	return line.trim().replace(/^\[[^\]]+\]\s*/, "");
+}
+
+export function appendNoteOnceByNormalizedMessage(
+	existing: string | undefined,
+	line: string,
+	maxLines: number,
+): { notes: string | undefined; appended: boolean } {
+	const normalizedLine = normalizeTaskNoteForDedupe(line);
+	if (!normalizedLine) return { notes: existing, appended: false };
+	const hasSameMessage = (existing ?? "")
+		.split(/\r?\n/)
+		.map(normalizeTaskNoteForDedupe)
+		.some((existingLine) => existingLine === normalizedLine);
+	if (hasSameMessage) return { notes: existing, appended: false };
+	return { notes: appendNote(existing, line, maxLines), appended: true };
+}
+
 function normalizeMilestoneLabel(input: unknown): string | undefined {
 	if (typeof input !== "string") return undefined;
 	const normalized = input.replace(/\s+/g, " ").trim();
@@ -473,24 +492,41 @@ export function ensureRecoveryTaskForCandidate(
 	}
 
 	const task = block.tasks[idx]!;
-	task.notes = appendNote(task.notes, line, options.config.maxNoteLines);
+	let changed = false;
+	const appendedNote = appendNoteOnceByNormalizedMessage(
+		task.notes,
+		line,
+		options.config.maxNoteLines,
+	);
+	if (appendedNote.appended) {
+		task.notes = appendedNote.notes;
+		changed = true;
+	}
 	if (task.status === "completed" || task.status === "cancelled") {
 		task.status = "planned";
+		changed = true;
 	}
-	if (!Array.isArray(task.depends_on)) task.depends_on = [];
-	if (!task.depends_on.includes(options.sourceTaskId))
+	if (!Array.isArray(task.depends_on)) {
+		task.depends_on = [];
+		changed = true;
+	}
+	if (!task.depends_on.includes(options.sourceTaskId)) {
 		task.depends_on.push(options.sourceTaskId);
+		changed = true;
+	}
 	if (
 		!Array.isArray(task.acceptance_criteria) ||
 		task.acceptance_criteria.length === 0
 	) {
 		task.acceptance_criteria = checklist;
+		changed = true;
 	}
 	if (sourceMilestone && task.milestone !== sourceMilestone) {
 		task.milestone = sourceMilestone;
+		changed = true;
 	}
-	writeProjectTasksBlock(cwd, block);
-	return { taskId: recoveryTaskId, changed: true };
+	if (changed) writeProjectTasksBlock(cwd, block);
+	return { taskId: recoveryTaskId, changed };
 }
 
 export function extractColonyGoalFromMessageText(
