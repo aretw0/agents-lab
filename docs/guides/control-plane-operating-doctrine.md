@@ -48,7 +48,8 @@ Status local da auditoria de cancelamento:
 - `claude_code_execute` propaga o sinal recebido pelo tool para probes e subprocesso; esse caminho tem smoke test e validação dry-run após reload;
 - ferramentas que apenas abrem URL, consultam status curto ou fazem diagnóstico passivo continuam aceitáveis com timeout curto, mas não são prova de cancelamento para long-run;
 - comandos interativos/slash commands que disparam execução longa sem contrato explícito de cancelamento não devem ser usados como base para unattended forte;
-- qualquer nova ferramenta que invoque subprocesso longo precisa declarar como propaga cancelamento e qual fallback operacional existe.
+- qualquer nova ferramenta que invoque subprocesso longo precisa declarar como propaga cancelamento e qual fallback operacional existe;
+- drills de processo em background devem registrar a origem do stop/cancelamento como evidência separada: `stopSource=human`, `stopSource=agent`, `stopSource=timeout` ou `stopSource=unknown`. Um `stopRequested=true` sem origem conhecida não basta para liberar unattended forte.
 
 Pacote upstream/original do pi é superfície protegida. O repositório pode ler `node_modules/@mariozechner/pi-coding-agent` para diagnóstico bounded, mas não deve editar, remover, sobrescrever ou aplicar mudanças diretas nesse pacote instalado. Correções devem ser implementadas por extensão local, wrapper, patch controlado e auditável, ou PR upstream. O guardrail bloqueia mutações diretas por tools de edição/escrita e comandos shell mutantes conhecidos; leituras bounded seguem permitidas.
 

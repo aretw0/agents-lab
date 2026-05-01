@@ -1,43 +1,44 @@
 {
-  "timestamp": "2026-05-01T04:14:02.677Z",
-  "context": "Post-reload live validation completed for background process notification/header boundary. TASK-BUD-411 closed with VER-BUD-752: view_title=u [snip] ASK-BUD-399 is now unblocked and ready. [truncated:+398 chars]",
+  "timestamp": "2026-05-01T04:17:00.264Z",
+  "context": "Started TASK-BUD-399 cancel/fallback drill and discovered a real prerequisite: the lifecycle contract could distinguish stopRequested but not [snip] rogress pending reload/live validation. [truncated:+414 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-411/TASK-BUD-410 closures.",
-    "Start TASK-BUD-399 local cancel/fallback drill as next unblocker for controlled/auditable uninterrupted work.",
-    "Keep drill read-only/simulated unless explicit safe operational scope is available; no scheduler/remote/offload."
+    "Commit TASK-BUD-413 implementation slice.",
+    "Reload required before live-validating background_process_lifecycle_plan with stop_source=human/agent.",
+    "After reload, complete TASK-BUD-413 if live validation passes, then run/record TASK-BUD-399 local cancel/fallback drill."
   ],
   "blockers": [
-    "TASK-BUD-153 still blocked by remaining unresolved dependencies after TASK-BUD-410 closure.",
-    "Strong unattended remains blocked until TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 complete."
+    "TASK-BUD-399 remains blocked by TASK-BUD-413 until reload/live validation.",
+    "TASK-BUD-153 remains blocked by TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 and a [snip] emaining dependencies. [truncated:+4 chars]",
+    "Strong unattended/loop/scheduler/remote remains blocked."
   ],
   "recent_validation": [
-    "background_process_lifecycle_plan normal PID 32696 => state=finished label=BG_PROCESS_DONE vie [snip] atch=no authorization=none [truncated:+30 chars]",
-    "background_process_lifecycle_plan after-stop PID 23364 => state=late-after-stop viewTitle=background-process",
-    "background_process_lifecycle_plan unknown PID 99999 => state=unknown-origin viewTitle=background-process"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md stopSource markers => 3/3",
+    "VER-BUD-754 partial linked to TASK-BUD-413"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:14:02.677Z",
+    "generatedAtIso": "2026-05-01T04:17:00.264Z",
     "level": "ok",
-    "percent": 22,
+    "percent": 23,
     "action": "continue",
-    "recommendation": "commit-then-start-task-bud-399"
+    "recommendation": "commit-and-reload-before-live-stop-source-validation"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:14:02.677Z",
+      "atIso": "2026-05-01T04:17:00.264Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 22,
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-start-task-bud-399"
+      "recommendation": "commit-and-reload-before-live-stop-source-validation"
     }
   ]
 }

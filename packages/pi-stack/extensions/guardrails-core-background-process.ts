@@ -3,6 +3,7 @@ export type BackgroundProcessMode = "auto" | "shared-service" | "isolated-worker
 export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-human-decision" | "blocked";
 export type BackgroundProcessLifecycleState = "running" | "stopped" | "finished" | "failed" | "killed" | "late-after-stop" | "unknown-origin";
 export type BackgroundProcessLifecycleEventKind = "registered" | "stop-requested" | "done" | "killed";
+export type BackgroundProcessStopSource = "none" | "human" | "agent" | "timeout" | "unknown";
 
 export interface BackgroundProcessPlanInput {
   kind?: BackgroundProcessKind;
@@ -23,6 +24,7 @@ export interface BackgroundProcessLifecycleEventInput {
   exitCode?: number | null;
   knownProcess?: boolean;
   stopRequested?: boolean;
+  stopSource?: BackgroundProcessStopSource;
   label?: string;
   viewTitle?: string;
 }
@@ -35,6 +37,7 @@ export interface BackgroundProcessLifecycleEventResult {
   exitCode?: number | null;
   knownProcess: boolean;
   stopRequested: boolean;
+  stopSource: BackgroundProcessStopSource;
   displayLabel: string;
   viewTitle: string;
   staleOrLate: boolean;
@@ -99,6 +102,11 @@ function normalizeLifecycleEventKind(value: unknown): BackgroundProcessLifecycle
   return value === "registered" || value === "stop-requested" || value === "done" || value === "killed" ? value : "done";
 }
 
+function normalizeStopSource(value: unknown, stopRequested: boolean): BackgroundProcessStopSource {
+  if (value === "human" || value === "agent" || value === "timeout" || value === "unknown") return value;
+  return stopRequested ? "unknown" : "none";
+}
+
 function normalizeDisplayLabel(value: unknown): string {
   const label = typeof value === "string" ? value.trim() : "";
   if (!label || label === "undefined" || label === "null") return "background-process";
@@ -116,11 +124,13 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
   const pid = cleanPositiveInteger(raw.pid);
   const knownProcess = raw.knownProcess === true;
   const stopRequested = raw.stopRequested === true;
+  const stopSource = normalizeStopSource(raw.stopSource, stopRequested);
   const displayLabel = normalizeDisplayLabel(raw.label);
   const viewTitle = normalizeViewTitle(raw.viewTitle, "background-process");
   const exitCode = typeof raw.exitCode === "number" && Number.isFinite(raw.exitCode) ? Math.floor(raw.exitCode) : raw.exitCode === null ? null : undefined;
   const warnings: string[] = [];
   if (!knownProcess) warnings.push("unknown-origin");
+  if (stopRequested && stopSource === "unknown") warnings.push("unknown-stop-source");
   if (displayLabel === "background-process") warnings.push("fallback-display-label");
   if (viewTitle === "background-process") warnings.push("fallback-view-title");
 
@@ -150,6 +160,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     `pid=${pid ?? "unknown"}`,
     `known=${knownProcess ? "yes" : "no"}`,
     `stopRequested=${stopRequested ? "yes" : "no"}`,
+    stopSource !== "none" ? `stopSource=${stopSource}` : undefined,
     exitCode !== undefined ? `exit=${exitCode}` : undefined,
     `label=${displayLabel}`,
     `viewTitle=${viewTitle}`,
@@ -165,6 +176,7 @@ export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLif
     ...(exitCode !== undefined ? { exitCode } : {}),
     knownProcess,
     stopRequested,
+    stopSource,
     displayLabel,
     viewTitle,
     staleOrLate,

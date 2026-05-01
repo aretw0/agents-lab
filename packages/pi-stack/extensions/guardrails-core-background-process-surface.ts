@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode } from "./guardrails-core-background-process";
+import { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
 
 function normalizeKind(value: unknown): BackgroundProcessKind | undefined {
   return value === "frontend" || value === "backend" || value === "test-server" || value === "worker" || value === "generic" ? value : undefined;
@@ -12,6 +12,10 @@ function normalizeMode(value: unknown): BackgroundProcessMode | undefined {
 
 function normalizeEventKind(value: unknown): BackgroundProcessLifecycleEventKind | undefined {
   return value === "registered" || value === "stop-requested" || value === "done" || value === "killed" ? value : undefined;
+}
+
+function normalizeStopSource(value: unknown): BackgroundProcessStopSource | undefined {
+  return value === "human" || value === "agent" || value === "timeout" || value === "unknown" ? value : undefined;
 }
 
 export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): void {
@@ -62,6 +66,7 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
       exit_code: Type.Optional(Type.Number({ description: "Exit code for done events, if known." })),
       known_process: Type.Optional(Type.Boolean({ description: "Whether the event belongs to a known first-party process registry entry." })),
       stop_requested: Type.Optional(Type.Boolean({ description: "Whether a stop was requested before this event." })),
+      stop_source: Type.Optional(Type.String({ description: "Stop/cancel source: human | agent | timeout | unknown." })),
       label: Type.Optional(Type.String({ description: "Lifecycle event display label; undefined/null/empty labels fall back to background-process." })),
       view_title: Type.Optional(Type.String({ description: "Background-process view/header title; undefined/null/empty titles fall back to background-process." })),
     }),
@@ -73,6 +78,7 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         exitCode: typeof p.exit_code === "number" ? p.exit_code : undefined,
         knownProcess: typeof p.known_process === "boolean" ? p.known_process : undefined,
         stopRequested: typeof p.stop_requested === "boolean" ? p.stop_requested : undefined,
+        stopSource: normalizeStopSource(p.stop_source),
         label: typeof p.label === "string" ? p.label : undefined,
         viewTitle: typeof p.view_title === "string" ? p.view_title : undefined,
       });

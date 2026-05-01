@@ -9006,6 +9006,15 @@
       "method": "background-notification-boundary-live-contract-validation",
       "timestamp": "2026-05-01T04:13:32.208Z",
       "evidence": "Completed the real BG_PROCESS_DONE boundary as a local-first contract/documentation slice. Live evidence from harness/bg_status was recorded for PID 35348 and PID 32696. Post-reload live validation proved the canonical surface normalizes the observed header/body split: normal event returns state=finished label=BG_PROCESS_DONE viewTitle=background-process dispatch=no authorization=none; done-after-stop returns state=late-after-stop; unknown source returns state=unknown-origin. Docs preserve the boundary that the raw harness notification must not be treated as readiness unless normalized, and readiness remains fail-closed where the real emitter/header is not integrable."
+    },
+    {
+      "id": "VER-BUD-754",
+      "target": "TASK-BUD-413",
+      "target_type": "task",
+      "status": "partial",
+      "method": "background-stop-source-contract-smoke",
+      "timestamp": "2026-05-01T04:16:42.076Z",
+      "evidence": "Implemented stopSource contract in code and surface: lifecycle input accepts stopSource, output/evidence includes stopSource when relevant, unknown stop source warns unknown-stop-source, tool surface accepts stop_source. Smoke validates stopSource=human for late-after-stop and stopSource=agent for stop-requested. Docs state stopRequested=true without source is insufficient. Validation: guardrails-background-process smoke 6 passed; safe_marker_check doctrine 3/3. Partial until reload/live validation of background_process_lifecycle_plan(stop_source=...)."
     }
   ]
 }
