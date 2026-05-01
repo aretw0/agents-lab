@@ -9657,7 +9657,7 @@
     {
       "id": "TASK-BUD-398",
       "description": "Harden stale handoff vs board reconciliation para impedir que checkpoint/handoff velho seja tratado como estado atual.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-handoff.ts",
@@ -9673,12 +9673,12 @@
         "Teste cobre pelo menos um handoff fresco válido e um handoff stale/divergente."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual.\n2026-05-01: implementação pronta após TASK-BUD-408/409. Handoff-board reconciliation detector e fail-closed em auto-resume foram codificados/testados; resta reload/live validation antes de fechar a macro-task.",
+      "notes": "[rationale:risk-control] TASK-BUD-153 exige operação ininterrupta; isso falha se handoff stale puder mascarar board real ou refreshar evidência antiga como atual.\n2026-05-01: implementação pronta após TASK-BUD-408/409. Handoff-board reconciliation detector e fail-closed em auto-resume foram codificados/testados; resta reload/live validation antes de fechar a macro-task.\n2026-05-01: concluído após reload. Detector handoff-vs-board e supressão fail-closed de auto-resume estão validados no runtime carregado; handoff stale/divergente não deve virar dispatch/retomada.",
       "depends_on": [
         "TASK-BUD-408",
         "TASK-BUD-409"
       ],
-      "verification": "VER-BUD-749"
+      "verification": "VER-BUD-750"
     },
     {
       "id": "TASK-BUD-399",

@@ -8970,6 +8970,15 @@
       "method": "stale-handoff-reconciliation-smoke",
       "timestamp": "2026-05-01T03:43:03.635Z",
       "evidence": "Implemented detector and fail-closed auto-resume gating through TASK-BUD-408/409. Focal smoke: context-watchdog 50 passed; safe markers for board-handoff divergence docs matched 3/3. This is partial for TASK-BUD-398 until reload/live validation of runtime behavior or explicit decision packet."
+    },
+    {
+      "id": "VER-BUD-750",
+      "target": "TASK-BUD-398",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-stale-handoff-gate-validation",
+      "timestamp": "2026-05-01T03:56:00.430Z",
+      "evidence": "After reload, runtime loaded cleanly: context_watch_status returned operator=none. board_task_quality_gate TASK-BUD-398 returned closeAllowed=yes with dependencies TASK-BUD-408 and TASK-BUD-409 completed. Implemented read-only handoff-board detector and fail-closed auto-resume suppression for stale-hand-off/missing-task/completed-focus/board-handoff-divergence; focal smoke previously passed 50 context-watchdog tests and docs markers matched."
     }
   ]
 }
