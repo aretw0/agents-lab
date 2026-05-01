@@ -11325,6 +11325,111 @@
       ],
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] pesquisa direcionada para reduzir surpresa no roteamento da lane."
+    },
+    {
+      "id": "TASK-BUD-474",
+      "description": "Definir contrato de execução por milestone (sem novo nome): critérios de início/continuação/parada, tamanho de rodada e evidência mínima por fatia.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-472"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/control-plane-glossary.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Contrato usa milestone como unidade de execução contínua, sem introduzir novo termo.",
+        "Define stop reasons canônicos para quando interação humana é obrigatória.",
+        "Define evidência mínima por fatia e por rodada com baixo custo de token."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] reduzir interrupções desnecessárias mantendo governança explícita."
+    },
+    {
+      "id": "TASK-BUD-475",
+      "description": "Projetar primitive de semeadura visível assistida por brainstorm: propostas automáticas só aparecem como preview audível e exigem decisão humana antes de materializar tasks.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-474"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/lane-brainstorm-packet.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "docs/primitives/lane-brainstorm-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Sem auto-semeadura silenciosa: toda proposta vem com preview e estado pendente.",
+        "Materialização de tasks requer confirmação explícita em contrato humano.",
+        "Pacote inclui rastreio de origem da ideia (brainstorm/humano/tangente)."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] automação com visibilidade e controle humano real."
+    },
+    {
+      "id": "TASK-BUD-476",
+      "description": "Criar primitive de captura de tangente aprovada: registrar trabalho emergente com provenance e encaixar naturalmente no board como se fosse planejado.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-475"
+      ],
+      "files": [
+        "docs/primitives/",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tarefa emergente registra origem, motivo e vínculo com foco original.",
+        "Fluxo evita perda de visibilidade quando a execução precisa desviar.",
+        "Sem auto-close; segue gates normais de verificação e rationale."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] tangentes aprovadas viram trilha auditável, não ruído oculto."
+    },
+    {
+      "id": "TASK-BUD-477",
+      "description": "Definir score de clareza/direção de planejamento do board (decomposição, dependências, verificabilidade, foco) com leitura report-only.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-474"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/primitives/"
+      ],
+      "acceptance_criteria": [
+        "Score report-only com submétricas objetivas e recomendação de melhoria.",
+        "Falha de clareza sinaliza necessidade de decomposição antes de execução longa.",
+        "Não autoriza execução automática; apenas orienta decisão humana/agente."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] reduzir delusão de planejamento com indicador objetivo e auditável."
+    },
+    {
+      "id": "TASK-BUD-478",
+      "description": "Adicionar regressões do score de clareza e do fluxo de semeadura visível para garantir consistência em runs longas de cleanup+research.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-475",
+        "TASK-BUD-477"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/",
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Testes cobrem caso bom, caso simplista e caso com tangente aprovada.",
+        "Saídas preservam recommendationCode/nextAction e no-dispatch invariants.",
+        "Pacote de evidência curto para rehearsal da lane."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] garantir estabilidade antes de expandir autonomia da lane."
     }
   ]
 }
