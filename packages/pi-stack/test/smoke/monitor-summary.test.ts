@@ -206,6 +206,83 @@ describe("monitor-summary", () => {
 		expect(result.details.classifyFailures.byMonitor).toEqual({});
 	});
 
+	it("deduplica setStatus quando resumo semântico não muda", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-status-dedupe-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+		writeFileSync(
+			join(cwd, ".pi", "monitors", "fragility.monitor.json"),
+			JSON.stringify({ name: "fragility", event: "message_end" }, null, 2),
+		);
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+		pi.handlers.get("session_start")?.({ reason: "resume" }, ctx);
+
+		expect(ctx.ui.setStatus).toHaveBeenCalledTimes(1);
+	});
+
+	it("mantém atualização de status quando há mudança semântica real", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-status-change-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+		pi.handlers.get("message_end")?.(
+			{
+				message: {
+					content: [
+						{
+							type: "text",
+							text: "Warning: [fragility] classify failed: No tool call in response",
+						},
+					],
+				},
+			},
+			ctx,
+		);
+		pi.handlers.get("message_end")?.(
+			{
+				message: {
+					content: [
+						{
+							type: "text",
+							text: "Warning: [fragility] classify failed: No tool call in response",
+						},
+					],
+				},
+			},
+			ctx,
+		);
+
+		expect(ctx.ui.setStatus).toHaveBeenCalledTimes(3);
+	});
+
 	it("mstatus refresh hidrata classify failures do session file", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-refresh-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });

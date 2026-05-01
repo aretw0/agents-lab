@@ -9465,6 +9465,15 @@
       "method": "rehearsal evidence packet + gate check",
       "timestamp": "2026-05-01T15:35:10.981Z",
       "evidence": "Ran and documented a local-first multi-slice rehearsal maturity packet in `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md`, consolidating completed milestone slices (`TASK-BUD-442..451`), focal validations, commit hygiene evidence, and explicit no-protected-auto-selection posture. Gate result recorded from `unattended_rehearsal_gate(completed_local_slices=10, focus_preserved=true, focal_smoke_green=true, small_commits=true, handoff_fresh=true, protected_scope_auto_selections=0, unresolved_blockers=0)` => decision `ready-for-canary`, score 6/6 (advisory only; no scope promotion executed). Validation: `safe_marker_check` on maturity packet matched 5/5 required anchors."
+    },
+    {
+      "id": "VER-BUD-805",
+      "target": "TASK-BUD-453",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T15:51:31.330Z",
+      "evidence": "Implemented semantic status dedupe in monitor summary via a reusable primitive `packages/pi-stack/extensions/monitor-summary-status-dedupe.ts` (`buildMonitorSummaryStatusSignature`, `shouldEmitMonitorSummaryStatus`) and wired it into `packages/pi-stack/extensions/monitor-summary.ts` so `ctx.ui.setStatus` only emits on semantic state changes (total/enabled/events/classifyFailures). Added coverage in `packages/pi-stack/test/smoke/monitor-summary.test.ts` for dedupe vs real-change behavior and new primitive tests in `packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts` => 3 files passed, 14 tests passed."
     }
   ]
 }

@@ -24,6 +24,7 @@ import {
 	type ClassifyFailureScanState,
 	type ClassifyFailureSummary,
 } from "./monitor-observability";
+import { shouldEmitMonitorSummaryStatus } from "./monitor-summary-status-dedupe";
 
 interface MonitorMeta {
 	name: string;
@@ -44,6 +45,7 @@ interface MonitorSummary {
 interface RuntimeState {
 	summary: MonitorSummary;
 	scan: ClassifyFailureScanState;
+	lastStatusSignature?: string;
 }
 
 function extractText(message: unknown): string {
@@ -141,6 +143,12 @@ export function formatMonitorSummaryInline(summary: MonitorSummary): string {
 }
 
 function updateStatus(ctx: ExtensionContext, state: RuntimeState) {
+	const dedupe = shouldEmitMonitorSummaryStatus(
+		state.lastStatusSignature,
+		state.summary,
+	);
+	if (!dedupe.emit) return;
+	state.lastStatusSignature = dedupe.signature;
 	const last = state.summary.classifyFailures.lastMonitor;
 	ctx.ui.setStatus?.(
 		"monitor-summary",
@@ -165,6 +173,7 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 	const state: RuntimeState = {
 		summary: summarizeMonitors([]),
 		scan: { offset: 0 },
+		lastStatusSignature: undefined,
 	};
 
 	function refresh(ctx: ExtensionContext) {
