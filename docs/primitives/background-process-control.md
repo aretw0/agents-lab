@@ -61,6 +61,22 @@ Se o processo precisa de servidor, precisa de lease antes de prosseguir. Colisã
 
 Logs devem ser consultados por tail bounded, filtro e resumo estruturado. Dump integral de stdout/stderr não é permitido. Stacktraces devem ser extraídos como eventos compactos com comando, pid, janela temporal e linhas relevantes.
 
+## Lifecycle de eventos
+
+Todo evento de processo em background deve ter estado canônico antes de aparecer como evidência operacional:
+
+- `running`: processo conhecido foi registrado e está em execução.
+- `stopped`: stop foi solicitado/registrado para processo conhecido.
+- `finished`: processo conhecido concluiu sem stop prévio e sem falha conhecida.
+- `failed`: processo conhecido concluiu sem stop prévio com exit code diferente de zero.
+- `killed`: kill/control-stop foi registrado para processo conhecido.
+- `late-after-stop`: evento `done` chegou depois de stop solicitado; não deve ser tratado como conclusão normal.
+- `unknown-origin`: evento não corresponde a processo conhecido no registry; deve falhar fechado para readiness.
+
+Labels de UI/log nunca devem renderizar `[undefined]`. Label vazia, `undefined` ou `null` deve cair para `background-process` e registrar warning `fallback-display-label`. `BG_PROCESS_DONE` após stop deve virar `late-after-stop`, com warning `done-after-stop-request`, para diferenciar conclusão esperada de notificação tardia/stale.
+
+A superfície `background_process_lifecycle_plan` é read-only e serve para classificar eventos; ela preserva `dispatchAllowed=false`, `processStartAllowed=false`, `processStopAllowed=false` e `authorization=none`.
+
 ## Stop/restart
 
 Restart destrutivo ou kill de processo existente exige aprovação humana explícita até haver evidência operacional suficiente. A primitiva de planejamento deve bloquear esse caso.

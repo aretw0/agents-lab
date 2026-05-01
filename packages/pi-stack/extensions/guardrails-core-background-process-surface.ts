@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { resolveBackgroundProcessControlPlan, type BackgroundProcessKind, type BackgroundProcessMode } from "./guardrails-core-background-process";
+import { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode } from "./guardrails-core-background-process";
 
 function normalizeKind(value: unknown): BackgroundProcessKind | undefined {
   return value === "frontend" || value === "backend" || value === "test-server" || value === "worker" || value === "generic" ? value : undefined;
@@ -8,6 +8,10 @@ function normalizeKind(value: unknown): BackgroundProcessKind | undefined {
 
 function normalizeMode(value: unknown): BackgroundProcessMode | undefined {
   return value === "auto" || value === "shared-service" || value === "isolated-worker" ? value : undefined;
+}
+
+function normalizeEventKind(value: unknown): BackgroundProcessLifecycleEventKind | undefined {
+  return value === "registered" || value === "stop-requested" || value === "done" || value === "killed" ? value : undefined;
 }
 
 export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): void {
@@ -43,6 +47,35 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "background_process_lifecycle_plan",
+    label: "Background Process Lifecycle Plan",
+    description: "Read-only classifier for background process lifecycle events. Never starts, stops, kills, dispatches, or mutates processes.",
+    parameters: Type.Object({
+      event_kind: Type.Optional(Type.String({ description: "registered | stop-requested | done | killed" })),
+      pid: Type.Optional(Type.Number({ description: "Process id, if known." })),
+      exit_code: Type.Optional(Type.Number({ description: "Exit code for done events, if known." })),
+      known_process: Type.Optional(Type.Boolean({ description: "Whether the event belongs to a known first-party process registry entry." })),
+      stop_requested: Type.Optional(Type.Boolean({ description: "Whether a stop was requested before this event." })),
+      label: Type.Optional(Type.String({ description: "Display label; undefined/null/empty labels fall back to background-process." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = resolveBackgroundProcessLifecycleEvent({
+        eventKind: normalizeEventKind(p.event_kind),
+        pid: typeof p.pid === "number" ? p.pid : undefined,
+        exitCode: typeof p.exit_code === "number" ? p.exit_code : undefined,
+        knownProcess: typeof p.known_process === "boolean" ? p.known_process : undefined,
+        stopRequested: typeof p.stop_requested === "boolean" ? p.stop_requested : undefined,
+        label: typeof p.label === "string" ? p.label : undefined,
+      });
+      return {
+        content: [{ type: "text", text: result.evidence }],
         details: result,
       };
     },

@@ -9626,7 +9626,7 @@
     {
       "id": "TASK-BUD-397",
       "description": "Implementar contrato canônico de lifecycle para eventos/processos em background, incluindo stale/late BG_PROCESS_DONE e ausência de prefixo `[undefined]`.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-067",
@@ -9645,7 +9645,8 @@
         "A implementação permanece não-operacional para launch/stop reais até existir autorização separada."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional."
+      "notes": "[rationale:risk-control] O incidente `[undefined]` + BG_PROCESS_DONE pós-stop é blocker concreto para unattended; background_process_plan foi só planejamento e não cobre lifecycle operacional.\n2026-05-01: iniciada fatia local-safe do contrato de lifecycle. Escopo: classificador read-only para estados canônicos de eventos/background (`running`, `stopped`, `finished`, `failed`, `killed`, `late-after-stop`, `unknown-origin`), label fallback para impedir `[undefined]`, e smoke tests. Sem start/stop/kill operacional.",
+      "verification": "VER-BUD-741"
     },
     {
       "id": "TASK-BUD-398",

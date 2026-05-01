@@ -1,33 +1,34 @@
 {
-  "timestamp": "2026-05-01T03:01:53.543Z",
-  "context": "Post-reload validation completed for ticket quality gate. board_task_quality_gate TASK-BUD-153 now returns closeAllowed=no decision=blocked m [snip] /401 planned/in-progress as applicable. [truncated:+325 chars]",
+  "timestamp": "2026-05-01T03:06:32.832Z",
+  "context": "Started TASK-BUD-397 background lifecycle side quest. Implemented read-only canonical lifecycle classifier for background process events with [snip] rational start/stop/kill is authorized. [truncated:+346 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-403 closure.",
-    "Proceed to next essential side quest: TASK-BUD-397/TASK-BUD-067 background event lifecycle contract.",
-    "Keep strong unattended/loop/scheduler/remote blocked."
+    "Commit TASK-BUD-397 lifecycle contract slice.",
+    "Reload required before live-validating new tool background_process_lifecycle_plan.",
+    "After reload, validate live paths for done+stopRequested -> late-after-stop and label undefined -> background-process."
   ],
   "blockers": [
-    "TASK-BUD-153 remains blocked by unresolved dependencies, especially background [snip] el/fallback rehearsal. [truncated:+19 chars]",
-    "Git maintenance warnings remain opt-in; do not run gc/prune/remove .git/gc.log [snip] xplicit authorization. [truncated:+10 chars]"
+    "TASK-BUD-397 remains in-progress until live validation after reload.",
+    "TASK-BUD-153 remains blocked by unresolved dependencies and no operational bac [snip] op implementation yet. [truncated:+27 chars]",
+    "Strong unattended/loop/scheduler/remote remains blocked."
   ],
   "recent_validation": [
-    "context_watch_status ok percent=47 operator=none handoff=fresh",
-    "board_task_quality_gate TASK-BUD-153 => closeAllowed=no blockers=unresolved-dependencies",
-    "board_task_quality_gate TASK-BUD-403 => closeAllowed=yes"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
+    "safe_marker_check docs/primitives/background-process-control.md => matched 4/4",
+    "VER-BUD-741 linked to TASK-BUD-397"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:01:53.543Z",
+    "generatedAtIso": "2026-05-01T03:06:32.832Z",
     "level": "ok",
     "percent": 47,
     "action": "continue",
-    "recommendation": "commit-then-start-background-lifecycle-slice"
+    "recommendation": "commit-then-reload-validate-background-lifecycle"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:01:53.543Z",
+      "atIso": "2026-05-01T03:06:32.832Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 47,
@@ -37,7 +38,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-start-background-lifecycle-slice"
+      "recommendation": "commit-then-reload-validate-background-lifecycle"
     }
   ]
 }

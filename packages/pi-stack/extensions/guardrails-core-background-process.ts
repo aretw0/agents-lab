@@ -1,6 +1,8 @@
 export type BackgroundProcessKind = "frontend" | "backend" | "test-server" | "worker" | "generic";
 export type BackgroundProcessMode = "auto" | "shared-service" | "isolated-worker";
 export type BackgroundProcessDecision = "ready-for-design" | "needs-port-lease" | "needs-human-decision" | "blocked";
+export type BackgroundProcessLifecycleState = "running" | "stopped" | "finished" | "failed" | "killed" | "late-after-stop" | "unknown-origin";
+export type BackgroundProcessLifecycleEventKind = "registered" | "stop-requested" | "done" | "killed";
 
 export interface BackgroundProcessPlanInput {
   kind?: BackgroundProcessKind;
@@ -13,6 +15,33 @@ export interface BackgroundProcessPlanInput {
   logTailMaxLines?: number;
   stacktraceCapture?: boolean;
   healthcheckKnown?: boolean;
+}
+
+export interface BackgroundProcessLifecycleEventInput {
+  eventKind?: BackgroundProcessLifecycleEventKind;
+  pid?: number;
+  exitCode?: number | null;
+  knownProcess?: boolean;
+  stopRequested?: boolean;
+  label?: string;
+}
+
+export interface BackgroundProcessLifecycleEventResult {
+  mode: "background-process-lifecycle-event";
+  state: BackgroundProcessLifecycleState;
+  eventKind: BackgroundProcessLifecycleEventKind;
+  pid?: number;
+  exitCode?: number | null;
+  knownProcess: boolean;
+  stopRequested: boolean;
+  displayLabel: string;
+  staleOrLate: boolean;
+  dispatchAllowed: false;
+  processStartAllowed: false;
+  processStopAllowed: false;
+  authorization: "none";
+  warnings: string[];
+  evidence: string;
 }
 
 export interface BackgroundProcessPlanResult {
@@ -62,6 +91,78 @@ function cleanPositiveInteger(value: unknown): number | undefined {
 function normalizeTailMaxLines(value: unknown): number {
   const parsed = cleanPositiveInteger(value) ?? 200;
   return Math.max(20, Math.min(1000, parsed));
+}
+
+function normalizeLifecycleEventKind(value: unknown): BackgroundProcessLifecycleEventKind {
+  return value === "registered" || value === "stop-requested" || value === "done" || value === "killed" ? value : "done";
+}
+
+function normalizeDisplayLabel(value: unknown): string {
+  const label = typeof value === "string" ? value.trim() : "";
+  if (!label || label === "undefined" || label === "null") return "background-process";
+  return label.slice(0, 80);
+}
+
+export function resolveBackgroundProcessLifecycleEvent(raw: BackgroundProcessLifecycleEventInput = {}): BackgroundProcessLifecycleEventResult {
+  const eventKind = normalizeLifecycleEventKind(raw.eventKind);
+  const pid = cleanPositiveInteger(raw.pid);
+  const knownProcess = raw.knownProcess === true;
+  const stopRequested = raw.stopRequested === true;
+  const displayLabel = normalizeDisplayLabel(raw.label);
+  const exitCode = typeof raw.exitCode === "number" && Number.isFinite(raw.exitCode) ? Math.floor(raw.exitCode) : raw.exitCode === null ? null : undefined;
+  const warnings: string[] = [];
+  if (!knownProcess) warnings.push("unknown-origin");
+  if (displayLabel === "background-process") warnings.push("fallback-display-label");
+
+  let state: BackgroundProcessLifecycleState;
+  if (!knownProcess) {
+    state = "unknown-origin";
+  } else if (eventKind === "registered") {
+    state = "running";
+  } else if (eventKind === "stop-requested") {
+    state = "stopped";
+  } else if (eventKind === "killed") {
+    state = "killed";
+  } else if (stopRequested) {
+    state = "late-after-stop";
+    warnings.push("done-after-stop-request");
+  } else if (exitCode === 0 || exitCode === undefined || exitCode === null) {
+    state = "finished";
+  } else {
+    state = "failed";
+  }
+
+  const staleOrLate = state === "late-after-stop" || state === "unknown-origin";
+  const evidence = [
+    "background-process-lifecycle",
+    `state=${state}`,
+    `event=${eventKind}`,
+    `pid=${pid ?? "unknown"}`,
+    `known=${knownProcess ? "yes" : "no"}`,
+    `stopRequested=${stopRequested ? "yes" : "no"}`,
+    exitCode !== undefined ? `exit=${exitCode}` : undefined,
+    `label=${displayLabel}`,
+    "dispatch=no",
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "background-process-lifecycle-event",
+    state,
+    eventKind,
+    ...(pid ? { pid } : {}),
+    ...(exitCode !== undefined ? { exitCode } : {}),
+    knownProcess,
+    stopRequested,
+    displayLabel,
+    staleOrLate,
+    dispatchAllowed: false,
+    processStartAllowed: false,
+    processStopAllowed: false,
+    authorization: "none",
+    warnings,
+    evidence,
+  };
 }
 
 function decideRecommendedMode(input: Required<Pick<BackgroundProcessPlanInput, "needsServer" | "existingServiceReusable">> & {
