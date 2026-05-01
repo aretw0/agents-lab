@@ -11522,6 +11522,28 @@
       "milestone": "cleanup-research-longrun",
       "notes": "[rationale:risk-control] canário protegido com contrato explícito reduz risco de regressão operacional.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: iniciando contrato canário protected (1 slice) com checklist mínimo de rollback/validação/evidência.\n2026-05-01: contrato canário protected formalizado com checklist/stop conditions e regressão documental para evitar drift.",
       "verification": "VER-BUD-831"
+    },
+    {
+      "id": "TASK-BUD-483",
+      "description": "Hardening de classificação protected: milestone `protected-parked-*` deve permanecer protegido mesmo sem keyword textual.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-481"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "docs/primitives/autonomy-protected-scope-report.md"
+      ],
+      "acceptance_criteria": [
+        "Tasks em milestone protected-parked são classificadas como protected por reason code explícito.",
+        "Regressão cobre caso sem keyword de descrição/arquivo.",
+        "Documentação lista o reason code de milestone parked."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] evita regressão de auto-seleção acidental após refino de heurística textual.\n[provenance:tangent-approved] source_task=TASK-BUD-481 reason=higiene pós-implementação detectou risco de drift na fronteira protected/local-safe\n2026-05-01: hardening fail-closed para milestone protected-parked adicionado após revisão pós-slice.",
+      "verification": "VER-BUD-832"
     }
   ]
 }

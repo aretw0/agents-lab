@@ -83,6 +83,21 @@ describe("autonomy task selector", () => {
     expect(result.totals.skippedProtectedScope).toBe(0);
   });
 
+  it("treats protected-parked milestone as protected even without keyword match", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-PARKED", status: "planned", description: "[P1] backlog parked", milestone: "protected-parked-legacy" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P2] local unattended loop" }),
+    ]);
+
+    expect(result.nextTaskId).toBe("TASK-LOCAL");
+    expect(result.totals.skippedProtectedScope).toBe(1);
+
+    const report = buildAutonomyProtectedScopeReasonReport([
+      task({ id: "TASK-PARKED", status: "planned", description: "[P1] backlog parked", milestone: "protected-parked-legacy" }),
+    ]);
+    expect(report.rows[0]?.primaryReasonCode).toBe("protected-parked-milestone");
+  });
+
   it("treats colony promotion/recovery themes as protected by default", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-COLONY-PROMOTION", status: "planned", description: "[P0] revisar colony promotion candidate" }),

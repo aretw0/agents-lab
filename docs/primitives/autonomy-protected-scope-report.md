@@ -19,6 +19,8 @@ Para cada task candidata (`planned`/`in-progress`), retorna:
 - `signals[]`
 - `evidence[]` curta (origem + sinal + texto/arquivo)
 
+Exemplos de `reasonCode` canônico: `protected-external-url`, `protected-github-actions`, `protected-parked-milestone`, `local-safe`.
+
 Resumo agregado:
 
 - total de `candidates`

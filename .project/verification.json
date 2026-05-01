@@ -9708,6 +9708,15 @@
       "method": "doctrine/doc regression + smoke tests",
       "timestamp": "2026-05-01T19:30:28.266Z",
       "evidence": "Defined protected canary one-slice contract with explicit checklist and stop conditions, plus regression guard. Changes: - `docs/guides/control-plane-operating-doctrine.md`: added section `Contrato canário protected (uma fatia)` with mandatory pre-edit checklist (`declaredFiles`, `validationGate`, `rollbackPlan`, `timebox`) and canonical stop conditions. - `docs/primitives/protected-canary-one-slice.md`: added primitive contract with required inputs, stop conditions, post-slice evidence, and no-auto-repeat invariants. - `docs/primitives/README.md`: indexed new primitive. - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts`: added protected-canary doctrine anchors regression. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 38 tests passed. - marker-check passed 5/5 for `docs/primitives/protected-canary-one-slice.md` and 5/5 for doctrine canary anchors."
+    },
+    {
+      "id": "VER-BUD-832",
+      "target": "TASK-BUD-483",
+      "target_type": "task",
+      "status": "passed",
+      "method": "targeted regression test + inspection",
+      "timestamp": "2026-05-01T19:33:51.659Z",
+      "evidence": "Hardened protected classification to keep `protected-parked-*` milestones fail-closed regardless of keyword text. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts`: added reason code `protected-parked-milestone`; classifier now appends milestone evidence (`source=milestone`) when task milestone matches protected parked naming. - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts`: added regression ensuring parked milestone task is skipped as protected even without keyword match, and report emits `primaryReasonCode=protected-parked-milestone`. - `docs/primitives/autonomy-protected-scope-report.md`: documented milestone parked reason code example. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 39 tests passed."
     }
   ]
 }

@@ -74,7 +74,8 @@ export type AutonomyProtectedScopeReasonCode =
   | "protected-external-url"
   | "protected-external-research"
   | "protected-publish"
-  | "protected-ci-keyword";
+  | "protected-ci-keyword"
+  | "protected-parked-milestone";
 
 interface ProtectedScopeRule {
   reasonCode: AutonomyProtectedScopeReasonCode;
@@ -172,7 +173,7 @@ function statusRank(task: ProjectTaskItem): number {
 export interface AutonomyProtectedScopeEvidence {
   reasonCode: AutonomyProtectedScopeReasonCode;
   signal: string;
-  source: "file" | "description";
+  source: "file" | "description" | "milestone";
   matchedOn: string;
 }
 
@@ -220,6 +221,16 @@ export function classifyTaskProtectedScope(task: ProjectTaskItem): {
         matchedOn: clipEvidenceText(description, 110),
       });
     }
+  }
+
+  const milestone = normalizeMilestone(task.milestone)?.toLowerCase();
+  if (milestone && /(^|[-_])protected[-_]parked/.test(milestone)) {
+    evidence.push({
+      reasonCode: "protected-parked-milestone",
+      signal: "protected-parked-milestone",
+      source: "milestone",
+      matchedOn: milestone,
+    });
   }
 
   const reasonCodes = [...new Set(evidence.map((row) => row.reasonCode))];
