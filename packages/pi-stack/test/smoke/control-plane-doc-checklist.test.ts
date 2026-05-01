@@ -28,6 +28,18 @@ describe("control-plane anti-bloat docs checklist", () => {
       expect(doctrine).toContain(marker);
       expect(glossary).toContain(marker);
     }
+
+    const protectedCanaryAnchors = [
+      "contrato canário protected",
+      "declaredfiles",
+      "validationgate",
+      "rollbackplan",
+      "stop conditions canônicas do canário",
+    ];
+
+    for (const marker of protectedCanaryAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

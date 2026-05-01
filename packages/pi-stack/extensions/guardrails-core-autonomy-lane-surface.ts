@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import {
   evaluateAutonomyLaneTaskSelection,
+  evaluateAutonomyProtectedFocusDecisionPacket,
   evaluateAutonomyProtectedScopeReasonReport,
   readAutonomyHandoffFocusTaskIds,
 } from "./guardrails-core-autonomy-task-selector";
@@ -205,6 +206,23 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_protected_focus_packet",
+    label: "Autonomy Lane Protected Focus Packet",
+    description: "Report-only decision packet for one protected-focus task (promote|skip|defer) with value/risk/effort and no dispatch authorization.",
+    parameters: Type.Object({
+      task_id: Type.String({ minLength: 1, description: "Task id to evaluate for protected-focus decision." }),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = evaluateAutonomyProtectedFocusDecisionPacket(ctx.cwd, String(p.task_id ?? ""));
+      return {
+        content: [{ type: "text", text: result.summary }],
         details: result,
       };
     },

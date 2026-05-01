@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAutonomyProtectedFocusDecisionPacket,
   buildAutonomyProtectedScopeReasonReport,
   selectAutonomyLaneTask,
 } from "../../extensions/guardrails-core-autonomy-task-selector";
@@ -223,6 +224,32 @@ describe("autonomy task selector", () => {
     expect(local?.protectedScope).toBe(false);
     expect(local?.primaryReasonCode).toBe("local-safe");
     expect(local?.reasonCodes).toHaveLength(0);
+  });
+
+  it("builds protected-focus decision packet and defers when protected evidence is missing", () => {
+    const packet = buildAutonomyProtectedFocusDecisionPacket([
+      task({ id: "TASK-PROT", status: "planned", description: "[P1] pesquisa externa https://example.com" }),
+    ], "TASK-PROT");
+
+    expect(packet.decision).toBe("blocked");
+    expect(packet.recommendedOption).toBe("defer");
+    expect(packet.recommendationCode).toBe("protected-focus-defer-missing-evidence");
+    expect(packet.mutationAllowed).toBe(false);
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.authorization).toBe("none");
+    expect(packet.blockers).toContain("missing-declared-files");
+    expect(packet.blockers).toContain("missing-validation-gate");
+  });
+
+  it("builds protected-focus decision packet and skips for local-safe task", () => {
+    const packet = buildAutonomyProtectedFocusDecisionPacket([
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P1] pesquisa local-safe: mapear critérios" }),
+    ], "TASK-LOCAL");
+
+    expect(packet.decision).toBe("ready-for-human-decision");
+    expect(packet.recommendedOption).toBe("skip");
+    expect(packet.recommendationCode).toBe("protected-focus-skip-local-safe");
+    expect(packet.protectedScope).toBe(false);
   });
 
   it("filters by milestone", () => {

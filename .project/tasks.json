@@ -11476,6 +11476,52 @@
       ],
       "milestone": "protected-parked-legacy",
       "notes": "[rationale:risk-control] registrar influência cedo evita perda de contexto sem interromper lane ativa. [parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n[provenance:human] source_task=none reason=unspecified"
+    },
+    {
+      "id": "TASK-BUD-481",
+      "description": "Criar packet report-only de decisão para foco protected na lane autônoma (promote/skip/defer) com valor/risco/esforço e evidência mínima.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-479"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/primitives/"
+      ],
+      "acceptance_criteria": [
+        "Tool read-only retorna decision packet por task protected com options=promote|skip|defer.",
+        "Packet inclui recommendationCode, rationale curto, value/risk/effort e invariantes no-dispatch.",
+        "Regressões cobrem caso protegido com evidência insuficiente e caso local-safe (skip)."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] padronizar decisão protected reduz atrito recorrente e evita promoções ad hoc.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: iniciando packet report-only de decisão protected (promote/skip/defer) com rationale de valor/risco/esforço e invariantes no-dispatch.\n2026-05-01: packet de decisão protected (promote/skip/defer) entregue em modo report-only com reason codes e invariantes no-dispatch.",
+      "verification": "VER-BUD-830"
+    },
+    {
+      "id": "TASK-BUD-482",
+      "description": "Definir contrato canário de execução protected (1 slice) com checklist obrigatório de rollback/validação/evidência antes de qualquer promoção de escopo.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-481"
+      ],
+      "files": [
+        "docs/primitives/",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Contrato canário define entradas mínimas, stop conditions e limites de blast radius.",
+        "Checklist inclui rollback explícito, validação focal e evidência pós-slice.",
+        "Regressão documental evita remoção acidental do contrato."
+      ],
+      "milestone": "cleanup-research-longrun",
+      "notes": "[rationale:risk-control] canário protegido com contrato explícito reduz risco de regressão operacional.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: iniciando contrato canário protected (1 slice) com checklist mínimo de rollback/validação/evidência.\n2026-05-01: contrato canário protected formalizado com checklist/stop conditions e regressão documental para evitar drift.",
+      "verification": "VER-BUD-831"
     }
   ]
 }

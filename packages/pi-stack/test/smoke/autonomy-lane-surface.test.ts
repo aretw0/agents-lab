@@ -104,6 +104,32 @@ describe("autonomy lane surface", () => {
     expect((local?.primaryReasonCode as string | undefined)).toBe("local-safe");
   });
 
+  it("emits protected-focus decision packet with no-dispatch invariants", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-protected-packet-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-EXT", description: "[P1] avaliar influência externa https://example.com", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_protected_focus_packet");
+    const result = packetTool?.execute("call-test", { task_id: "TASK-EXT" }, undefined, undefined, { cwd });
+
+    expect(result?.details.summary).toContain("autonomy-protected-focus-packet:");
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendedOption).toBe("defer");
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+    expect(result?.details.mode).toBe("report-only");
+  });
+
   it("uses handoff focus by default to avoid drifting to unrelated tasks", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-focus-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

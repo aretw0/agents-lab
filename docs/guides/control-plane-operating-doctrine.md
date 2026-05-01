@@ -84,6 +84,26 @@ Evidência mínima por rodada de milestone:
 - contagem de stop reasons canônicos;
 - próximos passos locais-safe ou razão explícita de parada.
 
+### Contrato canário protected (uma fatia)
+
+Quando houver decisão humana para experimentar escopo protected, a execução deve começar em **uma única fatia canário** com contrato explícito e bounded.
+
+Checklist obrigatório antes de editar:
+
+1. `declaredFiles` bounded e intencionais;
+2. `validationGate` focal conhecida;
+3. `rollbackPlan` não-destrutivo;
+4. `timebox` de uma fatia (sem repetição implícita).
+
+Stop conditions canônicas do canário:
+
+- falha de validação focal;
+- falta de rollback explícito;
+- violação de escopo declarado;
+- necessidade de segunda fatia protected sem nova decisão humana.
+
+O canário é evidência de viabilidade, não promoção automática de escopo: cada nova fatia protected requer confirmação humana renovada.
+
 ## Controle humano, cancelamento e blast radius
 
 Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle humano, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.
