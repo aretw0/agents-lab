@@ -53,6 +53,18 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of waveScopeAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const substrateCalibrationAnchors = [
+      "calibração de substrato operacional",
+      "background process observability/readiness",
+      "agents-as-tools calibration",
+      "report-only first",
+      "checkpoint por wave",
+    ];
+
+    for (const marker of substrateCalibrationAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

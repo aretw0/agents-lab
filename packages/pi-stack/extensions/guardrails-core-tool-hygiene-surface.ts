@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildToolHygieneScorecard, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
+import { buildAgentsAsToolsCalibrationScore, buildToolHygieneScorecard, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   if (!tool || typeof tool !== "object") return undefined;
@@ -33,6 +33,28 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
         tools,
         limit: typeof p.limit === "number" ? p.limit : undefined,
       });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "agents_as_tools_calibration_score",
+    label: "Agents-as-Tools Calibration Score",
+    description: "Report-only calibration score for agents-as-tools governance, boundedness, and observability. Never dispatches execution.",
+    parameters: Type.Object({
+      tool_names: Type.Optional(Type.Array(Type.String({ description: "Optional tool names to include. Default all configured tools." }))),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const selectedNames = Array.isArray(p.tool_names)
+        ? new Set(p.tool_names.filter((name): name is string => typeof name === "string"))
+        : undefined;
+      const allTools = pi.getAllTools().map(toolInfoToInput).filter((tool): tool is ToolHygieneInputTool => Boolean(tool));
+      const tools = selectedNames ? allTools.filter((tool) => selectedNames.has(tool.name)) : allTools;
+      const result = buildAgentsAsToolsCalibrationScore({ tools });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

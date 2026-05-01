@@ -1,33 +1,33 @@
 {
-  "timestamp": "2026-05-01T22:05:49.086Z",
-  "context": "Completed local-safe-maintenance-wave-2026-05 package through TASK-BUD-499. Added dependency health snapshot + hygiene score primitives/surfa [snip] l-safe tasks without new focus seeding. [truncated:+99 chars]",
+  "timestamp": "2026-05-01T22:28:24.346Z",
+  "context": "Completed two local-safe calibration waves for background process + agents-as-tools: scope/doctrine anchors, readiness/calibration scores, co [snip] -reload runbook with go/no-go criteria. [truncated:+62 chars]",
   "next_actions": [
-    "choose next explicit focus",
-    "option A: seed another local-safe maintenance wave package",
-    "option B: provide explicit protected focus decision"
+    "run /reload to activate new runtime tools live",
+    "invoke background_process_readiness_score + agents_as_tools_calibration_score + ops_calibratio [snip] t and record live baseline [truncated:+16 chars]",
+    "seed next local-safe wave only if packet remains keep-report-only"
   ],
   "blockers": [],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/te [snip] lane-doc-checklist.test.ts [truncated:+18 chars]",
-    "safe_marker_check docs/primitives/board-dependency-health-snapshot.md",
-    "safe_marker_check docs/primitives/board-dependency-hygiene-score.md"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] hardening-reexport.test.ts [truncated:+223 chars]",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md",
+    "safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-499",
+    "focus": "TASK-BUD-508",
     "canonical_links": [
-      "task:TASK-BUD-499"
+      "task:TASK-BUD-508"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T22:05:49.086Z",
+    "generatedAtIso": "2026-05-01T22:28:24.346Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "choose-next-focus",
+    "recommendation": "add-or-select-task",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T22:05:49.086Z",
+      "atIso": "2026-05-01T22:28:24.346Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -37,10 +37,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "choose-next-focus"
+      "recommendation": "add-or-select-task"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-499"
+    "TASK-BUD-508"
   ]
 }

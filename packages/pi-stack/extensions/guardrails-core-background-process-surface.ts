@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
+import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
 
 function normalizeKind(value: unknown): BackgroundProcessKind | undefined {
   return value === "frontend" || value === "backend" || value === "test-server" || value === "worker" || value === "generic" ? value : undefined;
@@ -48,6 +48,44 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         logTailMaxLines: typeof p.log_tail_max_lines === "number" ? p.log_tail_max_lines : undefined,
         stacktraceCapture: typeof p.stacktrace_capture === "boolean" ? p.stacktrace_capture : undefined,
         healthcheckKnown: typeof p.healthcheck_known === "boolean" ? p.healthcheck_known : undefined,
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "background_process_readiness_score",
+    label: "Background Process Readiness Score",
+    description: "Report-only readiness score for background-process operational maturity (capabilities/surface/evidence). Never launches or stops processes.",
+    parameters: Type.Object({
+      has_process_registry: Type.Optional(Type.Boolean({ description: "Whether process registry capability exists." })),
+      has_port_lease_lock: Type.Optional(Type.Boolean({ description: "Whether port lease/lock capability exists." })),
+      has_bounded_log_tail: Type.Optional(Type.Boolean({ description: "Whether bounded stdout/stderr tail capability exists." })),
+      has_structured_stacktrace_capture: Type.Optional(Type.Boolean({ description: "Whether structured stacktrace capture exists." })),
+      has_healthcheck_probe: Type.Optional(Type.Boolean({ description: "Whether bounded healthcheck probe exists." })),
+      has_graceful_stop_then_kill: Type.Optional(Type.Boolean({ description: "Whether graceful-stop-then-kill contract exists." })),
+      has_reload_handoff_cleanup: Type.Optional(Type.Boolean({ description: "Whether reload/compact/handoff cleanup exists." })),
+      rehearsal_slices: Type.Optional(Type.Number({ description: "Completed bounded rehearsal slices (evidence count)." })),
+      stop_source_coverage_pct: Type.Optional(Type.Number({ description: "Percent of lifecycle events with explicit stopSource evidence (0..100)." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const allToolNames = new Set(pi.getAllTools().map((tool) => tool?.name));
+      const result = buildBackgroundProcessReadinessScore({
+        hasProcessRegistry: typeof p.has_process_registry === "boolean" ? p.has_process_registry : undefined,
+        hasPortLeaseLock: typeof p.has_port_lease_lock === "boolean" ? p.has_port_lease_lock : undefined,
+        hasBoundedLogTail: typeof p.has_bounded_log_tail === "boolean" ? p.has_bounded_log_tail : undefined,
+        hasStructuredStacktraceCapture: typeof p.has_structured_stacktrace_capture === "boolean" ? p.has_structured_stacktrace_capture : undefined,
+        hasHealthcheckProbe: typeof p.has_healthcheck_probe === "boolean" ? p.has_healthcheck_probe : undefined,
+        hasGracefulStopThenKill: typeof p.has_graceful_stop_then_kill === "boolean" ? p.has_graceful_stop_then_kill : undefined,
+        hasReloadHandoffCleanup: typeof p.has_reload_handoff_cleanup === "boolean" ? p.has_reload_handoff_cleanup : undefined,
+        hasPlanSurface: allToolNames.has("background_process_plan"),
+        hasLifecycleSurface: allToolNames.has("background_process_lifecycle_plan"),
+        rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
+        stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

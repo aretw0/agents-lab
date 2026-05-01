@@ -11894,6 +11894,201 @@
       "milestone": "local-safe-maintenance-wave-2026-05",
       "notes": "[rationale:risk-control] checklist final reduz risco operacional quando a run for executada em lote.\n[provenance:human] source_task=TASK-BUD-487 reason=encerrar escopo com governança explícita de execução em ondas\n2026-05-01: checklist de execução em ondas e evidência mínima por wave consolidado no pacote final da run local-safe.",
       "verification": "VER-BUD-849"
+    },
+    {
+      "id": "TASK-BUD-500",
+      "description": "Definir escopo de calibração local-safe para background-process e agents-as-tools em waves bounded (limites, gates, stop conditions).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-499"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Escopo define waves para background e agents-as-tools sem abrir escopo protegido.",
+        "Doutrina recebe âncoras canônicas de calibração operacional.",
+        "Checklist smoke garante presença dos anchors."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05",
+      "notes": "[rationale:risk-control] migrar foco para substrato operacional com gates explícitos evita regressão de governança.\n[provenance:human] source_task=TASK-BUD-499 reason=continuidade local-safe para calibrar background process e agents-as-tools\n2026-05-01: escopo de calibração background+agents formalizado em waves local-safe com gates explícitos.",
+      "verification": "VER-BUD-850"
+    },
+    {
+      "id": "TASK-BUD-501",
+      "description": "Adicionar score report-only de prontidão de background process (capabilities/surface/evidência operacional) com recommendationCode determinístico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-500"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Primitive retorna score 0..100 com dimensões explícitas.",
+        "Surface expõe tool read-only sem start/stop real.",
+        "Regressões cobrem cenário forte e cenário com gaps críticos."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05",
+      "notes": "[rationale:risk-control] score explícito ajuda decidir quando sair de planejamento read-only para contrato operacional.\n[provenance:human] source_task=TASK-BUD-500 reason=calibração orientada por evidência de background process\n2026-05-01: prontidão de background process agora mensurável por score report-only com recommendationCode.",
+      "verification": "VER-BUD-851"
+    },
+    {
+      "id": "TASK-BUD-502",
+      "description": "Adicionar score report-only de calibração de agents-as-tools (governança/boundedness/observabilidade) via tool hygiene.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-500"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Score 0..100 com recommendationCode determinístico para agents-as-tools.",
+        "Surface expõe tool read-only sem dispatch.",
+        "Regressões cobrem conjunto calibrado e conjunto com lacunas."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05",
+      "notes": "[rationale:risk-control] transformar higiene de tools em score de calibração melhora decisão de uso de agentes como tool.\n[provenance:human] source_task=TASK-BUD-500 reason=calibração prática de agents-as-tools antes de ampliar automação\n2026-05-01: calibração de agents-as-tools convertida em score report-only com sinais de governança e boundedness.",
+      "verification": "VER-BUD-852"
+    },
+    {
+      "id": "TASK-BUD-503",
+      "description": "Documentar primitivas de calibração (background readiness + agents-as-tools score) e indexar no catálogo.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-501",
+        "TASK-BUD-502"
+      ],
+      "files": [
+        "docs/primitives/background-process-readiness-score.md",
+        "docs/primitives/agents-as-tools-calibration-score.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Docs descrevem contrato report-only, dimensões e recommendationCode.",
+        "README inclui novas entradas.",
+        "Marker-check confirma anchors de contrato."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05",
+      "notes": "[rationale:risk-control] documentação canônica evita uso inconsistente dos novos scores em waves futuras.\n[provenance:human] source_task=TASK-BUD-500 reason=fechar camada documental da nova calibração\n2026-05-01: docs canônicas das novas primitivas de calibração publicadas no catálogo.",
+      "verification": "VER-BUD-853"
+    },
+    {
+      "id": "TASK-BUD-504",
+      "description": "Registrar pacote de baseline da calibração com leituras iniciais dos scores e checklist de próxima wave operacional.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-503"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Documento inclui baseline inicial dos dois scores.",
+        "Define gate explícito para próxima wave sem romper no-auto-dispatch.",
+        "Checkpoint atualizado com decisão de continuidade."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05",
+      "notes": "[rationale:risk-control] baseline registrado evita decisões por sensação durante transição de foco.\n[provenance:human] source_task=TASK-BUD-500 reason=encerrar wave com evidência objetiva para próxima rodada\n2026-05-01: baseline da calibração registrado com checklist explícito para próxima wave operacional.",
+      "verification": "VER-BUD-854"
+    },
+    {
+      "id": "TASK-BUD-505",
+      "description": "Criar decision packet report-only que compõe background_process_readiness_score + agents_as_tools_calibration_score para recomendar keep-report-only vs bounded-rehearsal.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-504"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Packet retorna recommendationCode determinístico e invariantes no-dispatch.",
+        "Composição explicita scores/dimensões de background e agents-as-tools.",
+        "Regressões cobrem cenário strong e cenário fail-closed."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05b",
+      "notes": "[rationale:risk-control] packet único reduz ambiguidade ao decidir promoção para rehearsal bounded.\n[provenance:human] source_task=TASK-BUD-504 reason=continuar calibração com decisão composta e auditável\n2026-05-01: packet composto de calibração operacional criado para reduzir ambiguidade de promoção para rehearsal bounded.",
+      "verification": "VER-BUD-855"
+    },
+    {
+      "id": "TASK-BUD-506",
+      "description": "Expor tool read-only de decision packet de calibração operacional e integrar no guardrails-core surface.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-505"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool registrado com contrato read-only e parâmetros bounded.",
+        "Sem dispatch/start/stop automático.",
+        "Teste cobre registro e execução básica da tool."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05b",
+      "notes": "[rationale:risk-control] surface dedicada permite uso operacional do packet sem improviso.\n[provenance:human] source_task=TASK-BUD-505 reason=operacionalizar decisão composta via tool padronizada\n2026-05-01: tool ops_calibration_decision_packet disponível em surface read-only com parâmetros bounded.",
+      "verification": "VER-BUD-856"
+    },
+    {
+      "id": "TASK-BUD-507",
+      "description": "Documentar primitive do packet de calibração operacional e indexar no catálogo de primitivas.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-506"
+      ],
+      "files": [
+        "docs/primitives/ops-calibration-decision-packet.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Doc lista recommendationCodes e critérios de decisão.",
+        "README inclui entrada da nova primitive.",
+        "Marker-check valida anchors do contrato."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05b",
+      "notes": "[rationale:risk-control] documentação evita uso divergente do packet em waves futuras.\n[provenance:human] source_task=TASK-BUD-505 reason=fechar camada documental após surface\n2026-05-01: primitive do packet de calibração operacional documentada e indexada.",
+      "verification": "VER-BUD-857"
+    },
+    {
+      "id": "TASK-BUD-508",
+      "description": "Registrar runbook curto de execução pós-reload para leitura live dos scores e packet de calibração.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-507"
+      ],
+      "files": [
+        "docs/research/bg-agents-calibration-wave-scope-2026-05-01.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook lista sequência mínima (/reload -> tools -> checkpoint).",
+        "Inclui critério go/no-go para bounded rehearsal local.",
+        "Sem sugerir promoção automática para escopo protegido."
+      ],
+      "milestone": "bg-agents-calibration-wave-2026-05b",
+      "notes": "[rationale:risk-control] runbook reduz erro operacional ao migrar de contrato testado para leitura live.\n[provenance:human] source_task=TASK-BUD-504 reason=preparar transição segura para validação live pós-reload\n2026-05-01: runbook pós-reload formalizado com critério go/no-go para rehearsal local bounded.",
+      "verification": "VER-BUD-858"
     }
   ]
 }

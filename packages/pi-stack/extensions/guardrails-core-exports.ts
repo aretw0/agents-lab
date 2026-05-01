@@ -87,9 +87,10 @@ export { resolveStructuredFirstMutationDecision } from "./guardrails-core-struct
 export { resolveStructuredInterview } from "./guardrails-core-structured-interview";
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
-export { buildToolHygieneScorecard, classifyToolHygiene } from "./guardrails-core-tool-hygiene";
+export { buildAgentsAsToolsCalibrationScore, buildToolHygieneScorecard, classifyToolHygiene } from "./guardrails-core-tool-hygiene";
 export { buildShellSpoofingCoverageScore } from "./guardrails-core-shell-spoofing-score";
-export { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "./guardrails-core-background-process";
+export { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "./guardrails-core-background-process";
+export { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 export { buildTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationAuditEnvelope, consumeTrustedHumanConfirmationEvidence, extractTrustedHumanConfirmationEvidenceFromEnvelope, recordTrustedHumanConfirmationUiDecision, resolveHumanConfirmationAuditPlan, resolveHumanConfirmationEvidenceMatch, resolveHumanConfirmationImplementationChannelPlan, resolveHumanConfirmationRuntimeConsumptionPlan, resolveHumanConfirmationSignalSourcePlan } from "./guardrails-core-human-confirmation";
 export { resolveMonitorClassifyFailureReadiness } from "./monitor-observability";
 export { evaluateUnattendedRehearsalGate, formatUnattendedRehearsalSliceEvidence, summarizeUnattendedRehearsalGate, validateUnattendedRehearsalSliceEvidence } from "./guardrails-core-unattended-rehearsal";

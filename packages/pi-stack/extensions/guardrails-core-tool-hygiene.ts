@@ -32,6 +32,43 @@ export interface ToolHygieneScorecard {
   evidence: string;
 }
 
+export type AgentsAsToolsCalibrationRecommendationCode =
+  | "agents-as-tools-calibration-strong"
+  | "agents-as-tools-calibration-needs-governance"
+  | "agents-as-tools-calibration-needs-boundedness"
+  | "agents-as-tools-calibration-needs-observability";
+
+export interface AgentsAsToolsCalibrationScore {
+  mode: "agents-as-tools-calibration-score";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  score: number;
+  recommendationCode: AgentsAsToolsCalibrationRecommendationCode;
+  recommendation: string;
+  dimensions: {
+    governance: number;
+    boundedness: number;
+    observability: number;
+  };
+  metrics: {
+    totalTools: number;
+    executorCandidates: number;
+    protectedExecutors: number;
+    longRunCapableTools: number;
+    manualOverrideLikeTools: number;
+  };
+  policySignals: {
+    hasBudgetGuard: boolean;
+    hasCheckpointDiscipline: boolean;
+    hasDryRunExecutorPath: boolean;
+    hasCwdIsolationPath: boolean;
+    hasDecisionPackets: boolean;
+    hasToolHygieneSurface: boolean;
+  };
+  summary: string;
+}
+
 function lowerText(tool: ToolHygieneInputTool): string {
   return `${tool.name} ${tool.description ?? ""}`.toLowerCase();
 }
@@ -154,5 +191,100 @@ export function buildToolHygieneScorecard(input: {
     riskSummary,
     rows: shownRows,
     evidence,
+  };
+}
+
+function ratioScore(values: boolean[]): number {
+  if (values.length <= 0) return 100;
+  const passed = values.filter(Boolean).length;
+  return Math.round((passed / values.length) * 100);
+}
+
+export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneInputTool[] }): AgentsAsToolsCalibrationScore {
+  const tools = (input.tools ?? []).filter((tool) => typeof tool.name === "string" && tool.name.trim().length > 0)
+    .map((tool) => ({ ...tool, name: tool.name.trim() }));
+  const rows = tools.map((tool) => classifyToolHygiene(tool));
+  const names = new Set(tools.map((tool) => tool.name.toLowerCase()));
+
+  const executorRows = rows.filter((row) => row.flags.includes("long-run-capable") || row.flags.includes("subprocess-or-command"));
+  const protectedExecutors = executorRows.filter((row) => row.maturity === "requires-human-approval");
+  const longRunCapableTools = rows.filter((row) => row.flags.includes("long-run-capable")).length;
+  const manualOverrideLikeTools = rows.filter((row) => row.flags.includes("manual-override-like")).length;
+
+  const hasBudgetGuard = names.has("claude_code_adapter_status") || names.has("quota_alerts") || names.has("quota_visibility_route");
+  const hasCheckpointDiscipline = names.has("context_watch_checkpoint");
+  const hasDryRunExecutorPath = tools.some((tool) => /dry[-_ ]run|dry_run/i.test(`${tool.name} ${tool.description ?? ""}`));
+  const hasCwdIsolationPath = tools.some((tool) => /\bcwd\b|working directory|isolat/i.test(`${tool.name} ${tool.description ?? ""}`));
+  const hasDecisionPackets = names.has("board_decision_packet") || Array.from(names).some((name) => name.includes("decision_packet") || name.includes("focus_packet"));
+  const hasToolHygieneSurface = names.has("tool_hygiene_scorecard");
+
+  const governance = ratioScore([
+    hasBudgetGuard,
+    hasCheckpointDiscipline,
+    protectedExecutors.length >= Math.max(1, Math.ceil(executorRows.length * 0.6)),
+  ]);
+  const boundedness = ratioScore([
+    hasDryRunExecutorPath,
+    hasCwdIsolationPath,
+    manualOverrideLikeTools <= Math.max(1, Math.floor(rows.length * 0.15)),
+  ]);
+  const observability = ratioScore([
+    hasDecisionPackets,
+    hasToolHygieneSurface,
+    names.has("background_process_lifecycle_plan") || names.has("background_process_plan"),
+  ]);
+  const score = Math.round((governance * 0.45) + (boundedness * 0.35) + (observability * 0.2));
+
+  let recommendationCode: AgentsAsToolsCalibrationRecommendationCode = "agents-as-tools-calibration-strong";
+  let recommendation = "agents-as-tools calibration is strong; continue bounded local-safe waves with explicit checkpoints.";
+
+  if (governance < 70) {
+    recommendationCode = "agents-as-tools-calibration-needs-governance";
+    recommendation = "governance calibration is weak; tighten budget/approval/checkpoint controls before broader agents-as-tools usage.";
+  } else if (boundedness < 70) {
+    recommendationCode = "agents-as-tools-calibration-needs-boundedness";
+    recommendation = "boundedness calibration is weak; enforce dry-run/isolation contracts before scaling executor usage.";
+  } else if (observability < 70) {
+    recommendationCode = "agents-as-tools-calibration-needs-observability";
+    recommendation = "observability calibration is weak; improve packet/scorecard visibility before larger waves.";
+  }
+
+  return {
+    mode: "agents-as-tools-calibration-score",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    score,
+    recommendationCode,
+    recommendation,
+    dimensions: {
+      governance,
+      boundedness,
+      observability,
+    },
+    metrics: {
+      totalTools: rows.length,
+      executorCandidates: executorRows.length,
+      protectedExecutors: protectedExecutors.length,
+      longRunCapableTools,
+      manualOverrideLikeTools,
+    },
+    policySignals: {
+      hasBudgetGuard,
+      hasCheckpointDiscipline,
+      hasDryRunExecutorPath,
+      hasCwdIsolationPath,
+      hasDecisionPackets,
+      hasToolHygieneSurface,
+    },
+    summary: [
+      "agents-as-tools-calibration:",
+      "ok=yes",
+      `score=${score}`,
+      `code=${recommendationCode}`,
+      `governance=${governance}`,
+      `boundedness=${boundedness}`,
+      `observability=${observability}`,
+    ].join(" "),
   };
 }

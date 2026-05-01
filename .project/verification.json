@@ -9870,6 +9870,87 @@
       "method": "wave checklist packet + checkpoint evidence",
       "timestamp": "2026-05-01T22:05:14.660Z",
       "evidence": "Closed wave package with explicit execution checklist and minimum evidence contract per wave. Changes: - `docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` - Added `Checklist curto por wave (entrada/saída)` with: - gate de entrada (backlog 4-6 tasks, sem protected, validação focal, rollback) - gate de saída (conclusão/stop reason, falhas tratadas, checkpoint, decisão avançar/pausar) - Preserved explicit `Evidência mínima por wave` section. - `.project/handoff.json` - Updated checkpoint for `TASK-BUD-499` summarizing wave checklist closure and next decision path. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 64 tests passed. - `safe_marker_check docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` => matched 5/5 checklist anchors."
+    },
+    {
+      "id": "VER-BUD-850",
+      "target": "TASK-BUD-500",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doctrine scope update + checklist regression + marker-check",
+      "timestamp": "2026-05-01T22:23:38.163Z",
+      "evidence": "Defined bounded local-safe wave scope for background-process and agents-as-tools calibration. Changes: - `docs/guides/control-plane-operating-doctrine.md` - Added section `Calibração de substrato operacional (background + agents-as-tools)` with ordered focus and safety rules (`report-only first`, no scheduler/remote/CI, checkpoint por wave). - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` - Added calibration wave packet with limits, wave plan, gates, stop conditions, and evidence contract. - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added doctrine anchors for substrate calibration section. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts ...guardrails-background-process.test.ts ...guardrails-tool-hygiene.test.ts ...guardrails-core-hardening-reexport.test.ts` => 4 files passed, 17 tests passed. - `safe_marker_check docs/guides/control-plane-operating-doctrine.md` => matched 5/5 calibration anchors. - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` => matched 5/5 wave anchors."
+    },
+    {
+      "id": "VER-BUD-851",
+      "target": "TASK-BUD-501",
+      "target_type": "task",
+      "status": "passed",
+      "method": "primitive/surface implementation + smoke",
+      "timestamp": "2026-05-01T22:23:38.402Z",
+      "evidence": "Implemented report-only background process readiness score primitive and tool. Changes: - `packages/pi-stack/extensions/guardrails-core-background-process.ts` - Added `buildBackgroundProcessReadinessScore(...)` with dimensions `capabilities`, `surfaceWiring`, `operationalEvidence` and deterministic recommendation codes: - `background-process-readiness-strong` - `background-process-readiness-needs-capabilities` - `background-process-readiness-needs-evidence` - `background-process-readiness-needs-surface-wiring` - `packages/pi-stack/extensions/guardrails-core-background-process-surface.ts` - Added tool `background_process_readiness_score` (read-only, no process start/stop). - `packages/pi-stack/extensions/guardrails-core-exports.ts` - Re-exported readiness score builder. - `packages/pi-stack/test/smoke/guardrails-background-process.test.ts` - Added primitive strong/weak tests and surface execution coverage. Validation: - Targeted vitest run => 4 files passed, 17 tests passed."
+    },
+    {
+      "id": "VER-BUD-852",
+      "target": "TASK-BUD-502",
+      "target_type": "task",
+      "status": "passed",
+      "method": "tool hygiene calibration primitive/surface + smoke",
+      "timestamp": "2026-05-01T22:23:38.638Z",
+      "evidence": "Implemented report-only agents-as-tools calibration score integrated with tool hygiene. Changes: - `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts` - Added `buildAgentsAsToolsCalibrationScore(...)` with dimensions `governance`, `boundedness`, `observability`. - Added deterministic recommendation codes: - `agents-as-tools-calibration-strong` - `agents-as-tools-calibration-needs-governance` - `agents-as-tools-calibration-needs-boundedness` - `agents-as-tools-calibration-needs-observability` - `packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts` - Added tool `agents_as_tools_calibration_score`. - `packages/pi-stack/extensions/guardrails-core-exports.ts` - Re-exported calibration score builder. - `packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` - Added strong/weak calibration tests + read-only tool exposure test. Validation: - Targeted vitest run => 4 files passed, 17 tests passed."
+    },
+    {
+      "id": "VER-BUD-853",
+      "target": "TASK-BUD-503",
+      "target_type": "task",
+      "status": "passed",
+      "method": "primitive docs + marker-check",
+      "timestamp": "2026-05-01T22:23:38.885Z",
+      "evidence": "Documented new calibration primitives and indexed catalog entries. Changes: - Added `docs/primitives/background-process-readiness-score.md`. - Added `docs/primitives/agents-as-tools-calibration-score.md`. - Updated `docs/primitives/README.md` with both entries. Validation: - `safe_marker_check docs/primitives/background-process-readiness-score.md` => matched 5/5. - `safe_marker_check docs/primitives/agents-as-tools-calibration-score.md` => matched 5/5."
+    },
+    {
+      "id": "VER-BUD-854",
+      "target": "TASK-BUD-504",
+      "target_type": "task",
+      "status": "passed",
+      "method": "baseline packet + marker-check + checkpoint evidence",
+      "timestamp": "2026-05-01T22:23:39.098Z",
+      "evidence": "Closed calibration wave baseline packet with initial score references and next-wave checklist. Changes: - `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` - Added baseline reference readings for readiness/calibration score scenarios. - Added explicit next-wave checklist and `/reload` note for live runtime invocation. - `.project/handoff.json` checkpoint updated in this slice with continuation decision context. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` => matched 5/5 (`background_process_readiness_score`, `score=20`, `agents_as_tools_calibration_score`, `Checklist da próxima wave operacional`, `/reload`). - Targeted vitest run remains green for modified guardrails/doc checklist surfaces (4 files, 17 tests)."
+    },
+    {
+      "id": "VER-BUD-855",
+      "target": "TASK-BUD-505",
+      "target_type": "task",
+      "status": "passed",
+      "method": "decision packet primitive + smoke",
+      "timestamp": "2026-05-01T22:27:50.184Z",
+      "evidence": "Implemented report-only composed decision packet for operational calibration. Changes: - Added `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts`. - `buildOpsCalibrationDecisionPacket(...)` composes background and agents score results. - Deterministic recommendation codes: - `ops-calibration-ready-bounded-rehearsal` - `ops-calibration-keep-report-only-background` - `ops-calibration-keep-report-only-agents` - `ops-calibration-keep-report-only-threshold` - `ops-calibration-keep-report-only-reload` - Invariants: `dispatchAllowed=false`, `authorization=none`. - Added tests in `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (strong path + fail-closed reload path). Validation: - `npx vitest run ...guardrails-ops-calibration.test.ts ...guardrails-background-process.test.ts ...guardrails-tool-hygiene.test.ts ...control-plane-doc-checklist.test.ts ...guardrails-core-hardening-reexport.test.ts` => 5 files passed, 20 tests passed."
+    },
+    {
+      "id": "VER-BUD-856",
+      "target": "TASK-BUD-506",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface wiring + smoke",
+      "timestamp": "2026-05-01T22:27:50.413Z",
+      "evidence": "Exposed composed ops calibration packet via read-only guardrails surface. Changes: - Added `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` with tool `ops_calibration_decision_packet`. - Integrated surface in `packages/pi-stack/extensions/guardrails-core.ts`. - Re-exported packet builder in `packages/pi-stack/extensions/guardrails-core-exports.ts`. - Extended `guardrails-ops-calibration.test.ts` with tool registration/execute coverage. Validation: - Targeted vitest run => 5 files passed, 20 tests passed."
+    },
+    {
+      "id": "VER-BUD-857",
+      "target": "TASK-BUD-507",
+      "target_type": "task",
+      "status": "passed",
+      "method": "primitive docs + marker-check",
+      "timestamp": "2026-05-01T22:27:50.595Z",
+      "evidence": "Documented ops calibration decision packet primitive and updated primitives catalog. Changes: - Added `docs/primitives/ops-calibration-decision-packet.md`. - Updated `docs/primitives/README.md` entry. Validation: - `safe_marker_check docs/primitives/ops-calibration-decision-packet.md` markers (`ops_calibration_decision_packet`, `ops-calibration-ready-bounded-rehearsal`, `ops-calibration-keep-report-only-reload`, `dispatchAllowed=false`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-858",
+      "target": "TASK-BUD-508",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook update + marker-check + checkpoint-ready evidence",
+      "timestamp": "2026-05-01T22:27:50.789Z",
+      "evidence": "Registered post-reload live-run runbook and go/no-go criteria for calibration packet usage. Changes: - Updated `docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` with: - `Runbook curto pós-reload` sequence (`/reload` -> scores -> packet -> checkpoint) - explicit GO/NO-GO criteria for bounded rehearsal. Validation: - `safe_marker_check docs/research/bg-agents-calibration-wave-scope-2026-05-01.md` markers (`Runbook curto pós-reload`, `/reload`, `ops_calibration_decision_packet`, `GO bounded rehearsal`, `NO-GO (keep report-only)`) => matched 5/5. - Targeted vitest run remains green (5 files, 20 tests)."
     }
   ]
 }

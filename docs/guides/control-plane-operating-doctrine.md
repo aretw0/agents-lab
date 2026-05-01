@@ -109,6 +109,23 @@ Stop conditions adicionais para waves:
 - surgimento de dependência local-safe -> protected durante a wave;
 - drift de escopo (novas tarefas não planejadas sem justificativa bounded).
 
+### Calibração de substrato operacional (background + agents-as-tools)
+
+Quando o control-plane estiver estável, o foco pode migrar para calibração do substrato operacional sem abandonar governança.
+
+Ordem recomendada:
+
+1. **background process observability/readiness** em modo report-only;
+2. **agents-as-tools calibration** com score de governança/boundedness/observabilidade;
+3. somente depois considerar contrato operacional mais forte, mantendo gates explícitos.
+
+Regras de segurança dessa calibração:
+
+- report-only first para novas surfaces;
+- sem start/stop automático de processo fora de tarefa explícita;
+- sem scheduler/remote/CI durante calibração local-safe;
+- checkpoint por wave com decisão explícita de avançar/pausar.
+
 ### Contrato canário protected (uma fatia)
 
 Quando houver decisão humana para experimentar escopo protected, a execução deve começar em **uma única fatia canário** com contrato explícito e bounded.

@@ -79,6 +79,43 @@ export interface BackgroundProcessPlanResult {
   evidence: string;
 }
 
+export type BackgroundProcessReadinessRecommendationCode =
+  | "background-process-readiness-strong"
+  | "background-process-readiness-needs-capabilities"
+  | "background-process-readiness-needs-evidence"
+  | "background-process-readiness-needs-surface-wiring";
+
+export interface BackgroundProcessReadinessInput {
+  hasProcessRegistry?: boolean;
+  hasPortLeaseLock?: boolean;
+  hasBoundedLogTail?: boolean;
+  hasStructuredStacktraceCapture?: boolean;
+  hasHealthcheckProbe?: boolean;
+  hasGracefulStopThenKill?: boolean;
+  hasReloadHandoffCleanup?: boolean;
+  hasPlanSurface?: boolean;
+  hasLifecycleSurface?: boolean;
+  rehearsalSlices?: number;
+  stopSourceCoveragePct?: number;
+}
+
+export interface BackgroundProcessReadinessScore {
+  mode: "background-process-readiness-score";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  score: number;
+  recommendationCode: BackgroundProcessReadinessRecommendationCode;
+  recommendation: string;
+  dimensions: {
+    capabilities: number;
+    surfaceWiring: number;
+    operationalEvidence: number;
+  };
+  checks: Required<BackgroundProcessReadinessInput>;
+  summary: string;
+}
+
 function normalizeKind(value: unknown): BackgroundProcessKind {
   return value === "frontend" || value === "backend" || value === "test-server" || value === "worker" || value === "generic" ? value : "generic";
 }
@@ -282,5 +319,92 @@ export function resolveBackgroundProcessControlPlan(raw: BackgroundProcessPlanIn
     blockers,
     warnings,
     evidence,
+  };
+}
+
+function normalizePercent(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function scoreRatio(values: boolean[]): number {
+  if (values.length <= 0) return 0;
+  const passed = values.filter(Boolean).length;
+  return Math.round((passed / values.length) * 100);
+}
+
+export function buildBackgroundProcessReadinessScore(raw: BackgroundProcessReadinessInput = {}): BackgroundProcessReadinessScore {
+  const checks: Required<BackgroundProcessReadinessInput> = {
+    hasProcessRegistry: raw.hasProcessRegistry === true,
+    hasPortLeaseLock: raw.hasPortLeaseLock === true,
+    hasBoundedLogTail: raw.hasBoundedLogTail === true,
+    hasStructuredStacktraceCapture: raw.hasStructuredStacktraceCapture === true,
+    hasHealthcheckProbe: raw.hasHealthcheckProbe === true,
+    hasGracefulStopThenKill: raw.hasGracefulStopThenKill === true,
+    hasReloadHandoffCleanup: raw.hasReloadHandoffCleanup === true,
+    hasPlanSurface: raw.hasPlanSurface === true,
+    hasLifecycleSurface: raw.hasLifecycleSurface === true,
+    rehearsalSlices: cleanPositiveInteger(raw.rehearsalSlices) ?? 0,
+    stopSourceCoveragePct: normalizePercent(raw.stopSourceCoveragePct),
+  };
+
+  const capabilities = scoreRatio([
+    checks.hasProcessRegistry,
+    checks.hasPortLeaseLock,
+    checks.hasBoundedLogTail,
+    checks.hasStructuredStacktraceCapture,
+    checks.hasHealthcheckProbe,
+    checks.hasGracefulStopThenKill,
+    checks.hasReloadHandoffCleanup,
+  ]);
+  const surfaceWiring = scoreRatio([checks.hasPlanSurface, checks.hasLifecycleSurface]);
+  const rehearsalScore = checks.rehearsalSlices >= 3
+    ? 100
+    : checks.rehearsalSlices === 2
+      ? 70
+      : checks.rehearsalSlices === 1
+        ? 40
+        : 0;
+  const operationalEvidence = Math.round((rehearsalScore * 0.6) + (checks.stopSourceCoveragePct * 0.4));
+
+  const score = Math.round((capabilities * 0.55) + (surfaceWiring * 0.2) + (operationalEvidence * 0.25));
+
+  let recommendationCode: BackgroundProcessReadinessRecommendationCode = "background-process-readiness-strong";
+  let recommendation = "background process readiness is strong; continue bounded local rehearsal before any operational promotion.";
+
+  if (surfaceWiring < 100) {
+    recommendationCode = "background-process-readiness-needs-surface-wiring";
+    recommendation = "surface wiring is incomplete; keep calibration in report-only mode until plan/lifecycle surfaces are both present.";
+  } else if (capabilities < 75) {
+    recommendationCode = "background-process-readiness-needs-capabilities";
+    recommendation = "core capabilities are incomplete; prioritize registry/lease/log/stop/cleanup contracts before operational control.";
+  } else if (operationalEvidence < 70) {
+    recommendationCode = "background-process-readiness-needs-evidence";
+    recommendation = "operational evidence is insufficient; run bounded local drills and capture stopSource coverage before scaling.";
+  }
+
+  return {
+    mode: "background-process-readiness-score",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    score,
+    recommendationCode,
+    recommendation,
+    dimensions: {
+      capabilities,
+      surfaceWiring,
+      operationalEvidence,
+    },
+    checks,
+    summary: [
+      "background-process-readiness:",
+      "ok=yes",
+      `score=${score}`,
+      `code=${recommendationCode}`,
+      `capabilities=${capabilities}`,
+      `surface=${surfaceWiring}`,
+      `evidence=${operationalEvidence}`,
+    ].join(" "),
   };
 }

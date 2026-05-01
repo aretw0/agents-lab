@@ -1,13 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core";
+import guardrailsCore, { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "../../extensions/guardrails-core";
 
 describe("background process control plan", () => {
   function makeMockPi() {
-    return {
+    const rawPi = {
       on: vi.fn(),
       registerTool: vi.fn(),
       registerCommand: vi.fn(),
-    } as unknown as Parameters<typeof guardrailsCore>[0];
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    return rawPi as unknown as Parameters<typeof guardrailsCore>[0];
   }
 
   function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
@@ -95,6 +98,37 @@ describe("background process control plan", () => {
     expect(result.processStopAllowed).toBe(false);
   });
 
+  it("computes readiness score with deterministic recommendation", () => {
+    const strong = buildBackgroundProcessReadinessScore({
+      hasProcessRegistry: true,
+      hasPortLeaseLock: true,
+      hasBoundedLogTail: true,
+      hasStructuredStacktraceCapture: true,
+      hasHealthcheckProbe: true,
+      hasGracefulStopThenKill: true,
+      hasReloadHandoffCleanup: true,
+      hasPlanSurface: true,
+      hasLifecycleSurface: true,
+      rehearsalSlices: 3,
+      stopSourceCoveragePct: 100,
+    });
+    expect(strong).toMatchObject({
+      recommendationCode: "background-process-readiness-strong",
+      dispatchAllowed: false,
+      authorization: "none",
+      score: 100,
+    });
+
+    const weak = buildBackgroundProcessReadinessScore({
+      hasPlanSurface: true,
+      hasLifecycleSurface: true,
+      rehearsalSlices: 0,
+      stopSourceCoveragePct: 0,
+    });
+    expect(weak.recommendationCode).toBe("background-process-readiness-needs-capabilities");
+    expect(weak.dimensions.capabilities).toBe(0);
+  });
+
   it("classifies lifecycle events with safe labels and no dispatch", () => {
     expect(resolveBackgroundProcessLifecycleEvent({
       eventKind: "registered",
@@ -169,10 +203,32 @@ describe("background process control plan", () => {
     expect(unknown.staleOrLate).toBe(true);
   });
 
-  it("exposes lifecycle classifier as a read-only tool", async () => {
+  it("exposes readiness score and lifecycle classifier as read-only tools", async () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
+    const readinessTool = getTool(pi, "background_process_readiness_score");
     const tool = getTool(pi, "background_process_lifecycle_plan");
+
+    const readiness = await readinessTool.execute(
+      "tc-bg-readiness",
+      {
+        has_process_registry: true,
+        has_port_lease_lock: true,
+        has_bounded_log_tail: true,
+        has_structured_stacktrace_capture: true,
+        has_healthcheck_probe: true,
+        has_graceful_stop_then_kill: true,
+        has_reload_handoff_cleanup: true,
+        rehearsal_slices: 3,
+        stop_source_coverage_pct: 100,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(readiness.details?.recommendationCode).toBe("background-process-readiness-strong");
+    expect(String(readiness.details?.summary)).toContain("background-process-readiness:");
+
     const result = await tool.execute(
       "tc-bg-lifecycle",
       {
