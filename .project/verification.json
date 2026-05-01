@@ -9042,6 +9042,15 @@
       "method": "tool-hygiene-sovereignty-curation-snapshot",
       "timestamp": "2026-05-01T04:22:56.806Z",
       "evidence": "Ran tool_hygiene_scorecard(limit=120): total=102, advisory=47, measured=44, operational=5, protected=6, requiresHumanApproval=8, hideBeforeLongLoop=0, dispatchAllowed=false, authorization=none. Ran stack_sovereignty_status: highRisk=0, mediumRisk=3, coexisting=5; curationCoverage total=8 filtered=7 needsDecision=1 activeThirdPartyOverlaps=1, specifically oh-pi-bg-process-future for background-process-control. Doctrine records rehearsal decision: keep advisory/measured for bounded local slices, board/checkpoint operational only with task/verification linkage, protected tools no-auto-dispatch, no third-party suppression/removal without explicit decision. Validation: safe_marker_check doctrine markers 3/3; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-758",
+      "target": "TASK-BUD-401",
+      "target_type": "task",
+      "status": "passed",
+      "method": "measured-local-rehearsal-gates",
+      "timestamp": "2026-05-01T04:24:25.714Z",
+      "evidence": "Measured local rehearsal after blockers: unattended_rehearsal_gate(completed_local_slices=5, focusPreserved=true, focalSmokeGreen=true, smallCommits=true, handoffFresh=true, protectedScopeAutoSelections=0, unresolvedBlockers=0) returned ready=yes decision=ready-for-canary score=6/6. Counter-gates intentionally preserved: local_continuity_audit eligible=no packet=blocked due protected scope .github/workflows/ci.yml/no-local-safe-next-step, and context_watch_continuation_readiness ready=no for TASK-BUD-153 due protected scope. Conclusion: local blocker rehearsal passed, but TASK-BUD-153 must not auto-close into remote/CI/unattended; it needs human re-scope/decision or explicit protected-channel task. Validation: doctrine markers 3/3; git diff --check ok."
     }
   ]
 }

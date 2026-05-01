@@ -264,6 +264,8 @@ Um `ready=yes` em `context_watch_continuation_readiness` é evidência read-only
 
 A primeira prova verde local só vale quando as condições observáveis estão limpas: baseline canônico de settings já decidido, escopos protegidos fora do foco default, foco `in-progress` pequeno/local-safe, checkpoint fresco sem blockers reais, git state esperado, validation conhecida e smoke/readiness focal passando. Se qualquer uma dessas condições cair, o gate deve voltar a falhar fechado.
 
+Rehearsal local medido de 2026-05-01: `unattended_rehearsal_gate` retornou `ready=yes`, `decision=ready-for-canary`, `score=6/6` para 5 fatias locais concluídas com foco preservado, smoke focal verde, commits pequenos, handoff fresco, 0 seleções automáticas de escopo protegido e 0 blockers locais restantes. Esse sinal é suficiente para considerar o rehearsal local dos blockers resolvido, mas não fecha sozinho a macro-task multi-modo: `local_continuity_audit` e `context_watch_continuation_readiness` continuaram `ready=no` porque o foco amplo `TASK-BUD-153` ainda referencia escopo protegido `.github/workflows/ci.yml`. Portanto, a próxima promoção precisa de decisão humana de reescopo/fechamento ou tarefa explícita para o canal protegido; nada disso autoriza scheduler, remote/offload ou GitHub Actions automático.
+
 Use essa prova como critério de maturidade para desenhar o próximo canário, não como atalho para ativar automação. A promoção de `ready=yes` para execução unattended exige tarefa separada, autorização explícita, rollback e contrato de parada.
 
 ### Contrato do próximo canário local
