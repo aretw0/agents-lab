@@ -5,11 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 import projectBoardSurfaceExtension, {
   appendProjectVerificationBoard,
   buildProjectTaskDecisionPacket,
+  buildProjectTaskQualityGate,
   completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
   queryProjectTasks,
   queryProjectVerification,
   updateProjectTaskBoard,
+  updateProjectTaskDependencies,
 } from "../../extensions/project-board-surface";
 
 describe("project-board-surface", () => {
@@ -194,6 +196,115 @@ describe("project-board-surface", () => {
         reason: "task-not-found",
         noAutoClose: true,
       });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("updates task dependencies dry-first and blocks missing/cycles", () => {
+    const cwd = seedWorkspace();
+    try {
+      const dryRun = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-C",
+        addDependsOn: ["TASK-A"],
+      });
+      expect(dryRun.ok).toBe(true);
+      expect(dryRun.applied).toBe(false);
+      expect(dryRun.dryRun).toBe(true);
+      expect(dryRun.after).toEqual(["TASK-A"]);
+
+      const applied = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-C",
+        addDependsOn: ["TASK-A"],
+        dryRun: false,
+      });
+      expect(applied.ok).toBe(true);
+      expect(applied.applied).toBe(true);
+      expect(applied.task?.dependsOnCount).toBe(1);
+
+      expect(updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-C",
+        addDependsOn: ["TASK-MISSING"],
+        dryRun: false,
+      })).toMatchObject({
+        ok: false,
+        applied: false,
+        blockers: ["missing-dependencies"],
+      });
+
+      expect(updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-A",
+        addDependsOn: ["TASK-C"],
+      })).toMatchObject({
+        ok: false,
+        blockers: ["dependency-cycle"],
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("quality gate flags macro tasks with implicit dependencies but allows small tasks", () => {
+    const cwd = seedWorkspace();
+    try {
+      createProjectTaskBoard(cwd, {
+        id: "TASK-MACRO",
+        description: "Calibrar execução ininterrupta multi-modo com gate de governança",
+        status: "in-progress",
+        files: [
+          "packages/pi-stack/extensions/project-board-surface.ts",
+          "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+          "docs/guides/control-plane-operating-doctrine.md",
+          ".github/workflows/ci.yml",
+          ".project/tasks.json",
+        ],
+        acceptanceCriteria: ["Critério amplo", "Dependências explícitas", "Verificações rastreáveis"],
+        note: "[rationale:risk-control] macro-task precisa de side quests explícitas",
+      });
+
+      const macro = buildProjectTaskQualityGate(cwd, "TASK-MACRO");
+      expect(macro.ok).toBe(true);
+      expect(macro.macroCandidate).toBe(true);
+      expect(macro.closeAllowed).toBe(false);
+      expect(macro.decision).toBe("needs-decomposition");
+      expect(macro.blockers).toContain("macro-task-missing-dependencies");
+
+      const small = buildProjectTaskQualityGate(cwd, "TASK-C");
+      expect(small.ok).toBe(true);
+      expect(small.macroCandidate).toBe(false);
+      expect(small.closeAllowed).toBe(true);
+      expect(small.warnings).toContain("small-task-no-dependencies-ok");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("registers dependency and quality gate tools", async () => {
+    const cwd = seedWorkspace();
+    try {
+      const pi = makeMockPi();
+      projectBoardSurfaceExtension(pi);
+      const depTool = getTool(pi, "board_task_dependencies");
+      const gateTool = getTool(pi, "board_task_quality_gate");
+
+      const depResult = await depTool.execute(
+        "tc-deps",
+        { task_id: "TASK-C", add_depends_on: ["TASK-A"] },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect(depResult.details?.applied).toBe(false);
+      expect(String(depResult.details?.summary)).toContain("dryRun=yes");
+
+      const gateResult = await gateTool.execute(
+        "tc-quality",
+        { task_id: "TASK-C" },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect(gateResult.details?.closeAllowed).toBe(true);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

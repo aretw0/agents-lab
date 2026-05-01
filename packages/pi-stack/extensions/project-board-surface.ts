@@ -42,6 +42,7 @@ interface TaskRecord {
   verification?: string;
   depends_on?: string[];
   files?: string[];
+  acceptance_criteria?: string[];
   milestone?: string;
 }
 
@@ -156,6 +157,9 @@ function normalizeTaskRecord(value: unknown): TaskRecord | undefined {
       : undefined,
     files: Array.isArray(row.files)
       ? row.files.filter((x): x is string => typeof x === "string")
+      : undefined,
+    acceptance_criteria: Array.isArray(row.acceptance_criteria)
+      ? row.acceptance_criteria.filter((x): x is string => typeof x === "string")
       : undefined,
     milestone: typeof row.milestone === "string" && row.milestone.trim().length > 0
       ? row.milestone.trim()
@@ -862,6 +866,252 @@ export function buildProjectTaskDecisionPacket(cwd: string, taskIdInput: string)
   };
 }
 
+export interface ProjectTaskDependencyUpdateResult {
+  ok: boolean;
+  applied: boolean;
+  dryRun: boolean;
+  reason?: string;
+  taskId: string;
+  before: string[];
+  after: string[];
+  added: string[];
+  missingDependencies: string[];
+  cycleDependencies: string[];
+  blockers: string[];
+  summary: string;
+  task?: ProjectTaskBoardRow;
+}
+
+function normalizeDependencyIdList(value: unknown, max = 30): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const id = item.trim();
+    if (!id || out.includes(id)) continue;
+    out.push(id);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+function taskDependsOnPath(tasksById: Map<string, TaskRecord>, fromId: string, targetId: string, seen = new Set<string>()): boolean {
+  if (fromId === targetId) return true;
+  if (seen.has(fromId)) return false;
+  seen.add(fromId);
+  const task = tasksById.get(fromId);
+  for (const dep of task?.depends_on ?? []) {
+    if (dep === targetId) return true;
+    if (taskDependsOnPath(tasksById, dep, targetId, seen)) return true;
+  }
+  return false;
+}
+
+function buildBoardTaskDependencySummary(result: Pick<ProjectTaskDependencyUpdateResult, "ok" | "applied" | "dryRun" | "taskId" | "added" | "blockers" | "reason">): string {
+  return [
+    "board-task-dependencies:",
+    `ok=${result.ok ? "yes" : "no"}`,
+    `applied=${result.applied ? "yes" : "no"}`,
+    `dryRun=${result.dryRun ? "yes" : "no"}`,
+    result.taskId ? `task=${result.taskId}` : undefined,
+    result.added.length > 0 ? `added=${result.added.length}` : undefined,
+    result.blockers.length > 0 ? `blockers=${result.blockers.join("|")}` : undefined,
+    result.reason ? `reason=${result.reason}` : undefined,
+  ].filter(Boolean).join(" ");
+}
+
+export function updateProjectTaskDependencies(
+  cwd: string,
+  input: {
+    taskId?: string;
+    addDependsOn?: string[];
+    replaceDependsOn?: string[];
+    dryRun?: boolean;
+  },
+): ProjectTaskDependencyUpdateResult {
+  const taskId = typeof input.taskId === "string" ? input.taskId.trim() : "";
+  const dryRun = input.dryRun !== false;
+  const fail = (reason: string): ProjectTaskDependencyUpdateResult => {
+    const result: ProjectTaskDependencyUpdateResult = {
+      ok: false,
+      applied: false,
+      dryRun,
+      reason,
+      taskId,
+      before: [],
+      after: [],
+      added: [],
+      missingDependencies: [],
+      cycleDependencies: [],
+      blockers: [reason],
+      summary: "",
+    };
+    result.summary = buildBoardTaskDependencySummary(result);
+    return result;
+  };
+  if (!taskId) return fail("missing-task-id");
+
+  const block = readProjectTasksBlock(cwd);
+  const idx = block.tasks.findIndex((row) => row?.id === taskId);
+  if (idx < 0) return fail("task-not-found");
+  const tasksById = new Map(block.tasks.map((row) => [String(row.id), row as TaskRecord] as const));
+  const current = block.tasks[idx] as TaskRecord;
+  const before = Array.isArray(current.depends_on) ? current.depends_on.filter((x): x is string => typeof x === "string") : [];
+  const replacementProvided = Array.isArray(input.replaceDependsOn);
+  const requested = replacementProvided
+    ? normalizeDependencyIdList(input.replaceDependsOn)
+    : normalizeDependencyIdList(input.addDependsOn);
+  if (requested.length === 0) return { ...fail("missing-dependencies"), before };
+
+  const after = replacementProvided ? requested : [...before];
+  for (const dep of requested) {
+    if (!after.includes(dep)) after.push(dep);
+  }
+  const added = after.filter((dep) => !before.includes(dep));
+  const missingDependencies = after.filter((dep) => !tasksById.has(dep));
+  const cycleDependencies = after.filter((dep) => dep === taskId || taskDependsOnPath(tasksById, dep, taskId));
+  const blockers = [
+    missingDependencies.length > 0 ? "missing-dependencies" : undefined,
+    cycleDependencies.length > 0 ? "dependency-cycle" : undefined,
+  ].filter(Boolean) as string[];
+  const ok = blockers.length === 0;
+  const applied = ok && !dryRun;
+
+  if (applied) {
+    block.tasks[idx] = {
+      ...block.tasks[idx],
+      depends_on: after,
+    };
+    writeProjectTasksBlock(cwd, block);
+    invalidateProjectBlockCaches(cwd);
+  }
+
+  const result: ProjectTaskDependencyUpdateResult = {
+    ok,
+    applied,
+    dryRun,
+    reason: ok ? undefined : "dependency-update-blocked",
+    taskId,
+    before,
+    after,
+    added,
+    missingDependencies,
+    cycleDependencies,
+    blockers,
+    summary: "",
+    task: applied ? queryProjectTasks(cwd, { search: taskId, limit: 200 }).rows.find((row) => row.id === taskId) : undefined,
+  };
+  result.summary = buildBoardTaskDependencySummary(result);
+  return result;
+}
+
+export interface ProjectTaskQualityGateResult {
+  ok: boolean;
+  taskId: string;
+  closeAllowed: boolean;
+  decision: "ready" | "needs-decomposition" | "blocked";
+  macroCandidate: boolean;
+  broadSignals: string[];
+  dependencies: string[];
+  missingDependencies: string[];
+  verificationIds: string[];
+  passedVerificationIds: string[];
+  blockers: string[];
+  warnings: string[];
+  summary: string;
+}
+
+function taskHasProtectedFiles(task: TaskRecord): boolean {
+  return (task.files ?? []).some((file) => /(^|\/)(\.github|\.obsidian)(\/|$)|(^|\/)\.pi\/settings\.json$/i.test(file));
+}
+
+function isBroadTaskCandidate(task: TaskRecord): { macro: boolean; signals: string[] } {
+  const text = [task.id, task.description, task.notes ?? "", task.milestone ?? ""].join("\n").toLowerCase();
+  const signals = [
+    /macro|ampla|protegida|multi-modo|ininterrupta|unattended|overnight|long-run|pipeline|sistema|gate|governança/.test(text) ? "broad-language" : undefined,
+    (task.files?.length ?? 0) >= 5 ? "many-files" : undefined,
+    (task.acceptance_criteria?.length ?? 0) >= 3 ? "multi-criteria" : undefined,
+    taskHasProtectedFiles(task) ? "protected-scope" : undefined,
+    isRationaleSensitiveTask(task) ? "rationale-sensitive" : undefined,
+  ].filter(Boolean) as string[];
+  return { macro: signals.length >= 2 || signals.includes("protected-scope"), signals };
+}
+
+function verificationLooksPartial(row: VerificationRecord): boolean {
+  const text = [row.status ?? "", row.method ?? "", row.evidence ?? ""].join("\n").toLowerCase();
+  return row.status === "partial" || /parcial|partial|slice|fatia|policy-only|read-only|evidência parcial|evidence partial/.test(text);
+}
+
+export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): ProjectTaskQualityGateResult {
+  const taskId = String(taskIdInput ?? "").trim();
+  const empty = (reason: string): ProjectTaskQualityGateResult => ({
+    ok: false,
+    taskId,
+    closeAllowed: false,
+    decision: "blocked",
+    macroCandidate: false,
+    broadSignals: [],
+    dependencies: [],
+    missingDependencies: [],
+    verificationIds: [],
+    passedVerificationIds: [],
+    blockers: [reason],
+    warnings: [],
+    summary: `board-task-quality-gate: ok=no task=${taskId || "?"} closeAllowed=no decision=blocked blockers=${reason}`,
+  });
+  if (!taskId) return empty("missing-task-id");
+
+  const { block } = readTasksBlockCached(cwd);
+  const task = block.tasks.find((row) => row.id === taskId);
+  if (!task) return empty("task-not-found");
+  const tasksById = new Map(block.tasks.map((row) => [row.id, row] as const));
+  const dependencies = task.depends_on ?? [];
+  const missingDependencies = dependencies.filter((dep) => !tasksById.has(dep));
+  const { macro, signals } = isBroadTaskCandidate(task);
+  const verificationBlock = readVerificationBlockCached(cwd).block;
+  const verificationRows = verificationBlock.verifications.filter((row) => row.target === taskId || row.id === task.verification);
+  const verificationIds = verificationRows.map((row) => row.id);
+  const passedVerificationIds = verificationRows.filter((row) => row.status === "passed").map((row) => row.id);
+  const partialVerificationIds = verificationRows.filter(verificationLooksPartial).map((row) => row.id);
+  const blockers = [
+    missingDependencies.length > 0 ? "missing-dependencies" : undefined,
+    macro && dependencies.length === 0 ? "macro-task-missing-dependencies" : undefined,
+    task.status === "completed" && passedVerificationIds.length === 0 ? "completed-without-passed-verification" : undefined,
+    task.status === "completed" && macro && partialVerificationIds.length > 0 ? "completed-with-partial-verification" : undefined,
+  ].filter(Boolean) as string[];
+  const warnings = [
+    !macro && dependencies.length === 0 ? "small-task-no-dependencies-ok" : undefined,
+    partialVerificationIds.length > 0 && task.status !== "completed" ? "partial-verification-present" : undefined,
+    macro && dependencies.length > 0 && passedVerificationIds.length === 0 ? "macro-awaiting-own-verification" : undefined,
+  ].filter(Boolean) as string[];
+  const closeAllowed = blockers.length === 0;
+  const decision = closeAllowed ? "ready" : blockers.includes("macro-task-missing-dependencies") ? "needs-decomposition" : "blocked";
+  return {
+    ok: true,
+    taskId,
+    closeAllowed,
+    decision,
+    macroCandidate: macro,
+    broadSignals: signals,
+    dependencies,
+    missingDependencies,
+    verificationIds,
+    passedVerificationIds,
+    blockers,
+    warnings,
+    summary: [
+      "board-task-quality-gate:",
+      "ok=yes",
+      `task=${taskId}`,
+      `closeAllowed=${closeAllowed ? "yes" : "no"}`,
+      `decision=${decision}`,
+      `macro=${macro ? "yes" : "no"}`,
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      warnings.length > 0 ? `warnings=${warnings.join("|")}` : undefined,
+    ].filter(Boolean).join(" "),
+  };
+}
+
 function invalidateProjectBlockCaches(cwd: string): void {
   tasksCache.delete(tasksPath(cwd));
   verificationCache.delete(verificationPath(cwd));
@@ -1535,6 +1785,73 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Build a compact no-auto-close decision packet (close/keep-open/defer) with recent verification evidence and blockers for one task.",
     parameters: decisionPacketParameters,
     execute: executeDecisionPacket,
+  });
+
+  const dependencyParameters = Type.Object({
+    task_id: Type.String({ minLength: 1, description: "Task id to update/analyze." }),
+    add_depends_on: Type.Optional(Type.Array(Type.String(), { description: "Dependencies to append to the existing depends_on list." })),
+    replace_depends_on: Type.Optional(Type.Array(Type.String(), { description: "Full replacement depends_on list. Use only when intentionally reconciling." })),
+    dry_run: Type.Optional(Type.Boolean({ description: "Preview only by default; set false to apply." })),
+  });
+
+  const executeDependencies = (
+    _toolCallId: string,
+    params: {
+      task_id?: string;
+      add_depends_on?: string[];
+      replace_depends_on?: string[];
+      dry_run?: boolean;
+    },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = updateProjectTaskDependencies(ctx.cwd, {
+      taskId: params?.task_id,
+      addDependsOn: params?.add_depends_on,
+      replaceDependsOn: params?.replace_depends_on,
+      dryRun: params?.dry_run,
+    });
+    return {
+      content: [{ type: "text", text: details.summary }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_task_dependencies",
+    label: "Board Task Dependencies",
+    description:
+      "Dry-first bounded dependency update for existing .project/tasks entries with missing/cycle blockers.",
+    parameters: dependencyParameters,
+    execute: executeDependencies,
+  });
+
+  const qualityGateParameters = Type.Object({
+    task_id: Type.String({ minLength: 1, description: "Task id to inspect before close/decomposition decisions." }),
+  });
+
+  const executeQualityGate = (
+    _toolCallId: string,
+    params: { task_id?: string },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = buildProjectTaskQualityGate(ctx.cwd, String(params?.task_id ?? ""));
+    return {
+      content: [{ type: "text", text: details.summary }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_task_quality_gate",
+    label: "Board Task Quality Gate",
+    description:
+      "Read-only gate for loose/simplistic tickets, implicit dependencies, and verification traceability before task closure.",
+    parameters: qualityGateParameters,
+    execute: executeQualityGate,
   });
 
   const verificationAppendParameters = Type.Object({

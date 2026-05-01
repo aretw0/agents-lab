@@ -1,34 +1,33 @@
 {
-  "timestamp": "2026-05-01T02:36:38.340Z",
-  "context": "Steering do operador incorporado: precisamos de sinal de tarefas soltas/simplistas sem dependências mapeadas e de um gate de ticket/closure q [snip] s/dependency+verification traceability. [truncated:+309 chars]",
+  "timestamp": "2026-05-01T02:47:35.854Z",
+  "context": "Implemented local-safe first slice for explicit side quests/ticket quality. Added dependency primitive updateProjectTaskDependencies with fut [snip] local-safe tasks without dependencies. [truncated:+324 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Após reload, live-validar TASK-BUD-402/TASK-BUD-395 surfaces.",
-    "Implementar TASK-BUD-396 + TASK-BUD-403 como par: decomposição bounded + closure/readiness gate de ticket.",
-    "Manter TASK-BUD-153 aberta até side quests e rehearsal local passarem."
+    "Commit TASK-BUD-396/TASK-BUD-403 first slice.",
+    "Reload required before live-validating new runtime tools board_task_dependencies and board_task_quality_gate.",
+    "After reload, apply dependencies to TASK-BUD-153 with board_task_dependencies, then validate q [snip] lity gate on TASK-BUD-153. [truncated:+2 chars]"
   ],
   "blockers": [
-    "Reload necessário para validação live de mudanças runtime anteriores.",
-    "Strong unattended/loop/scheduler/remote permanece bloqueado.",
-    "TASK-BUD-153 não pode fechar com evidência parcial ou side quests implícitas."
+    "Runtime tool additions require reload before live validation.",
+    "TASK-BUD-153 still blocked by background lifecycle, stale handoff reconciliati [snip] , and local rehearsal. [truncated:+40 chars]"
   ],
   "recent_validation": [
-    "TASK-BUD-403 criado via board_task_create como planned/p1, depends_on TASK-BUD-396.",
-    "TASK-BUD-396 recebeu nota de refinamento ligando decomposição ao gate de qualidade de tickets.",
-    "context_watch_status: ok percent=31, mas operator=reload por mudanças runtime já commitadas; l [snip] ation ainda requer reload. [truncated:+9 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts => 57 passed",
+    "npm run docs:package:check => ok",
+    "VER-BUD-735 linked to TASK-BUD-396"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T02:36:38.340Z",
+    "generatedAtIso": "2026-05-01T02:47:35.854Z",
     "level": "ok",
     "percent": 31,
     "action": "continue",
-    "recommendation": "continue-local-safe-after-reload-validation"
+    "recommendation": "commit-then-reload-validate-board-surfaces"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T02:36:38.340Z",
+      "atIso": "2026-05-01T02:47:35.854Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 31,
@@ -38,7 +37,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe-after-reload-validation"
+      "recommendation": "commit-then-reload-validate-board-surfaces"
     }
   ]
 }

@@ -313,6 +313,12 @@ A fronteira de desbloqueio de potencial acumulado é: aumentar a capacidade de p
 
 Antes de qualquer executor, repetition ou scheduler depender de `.project` como autoridade operacional forte, use a estratégia em `docs/guides/project-canonical-pipeline.md#estratégia-de-longo-prazo-para-project`: `.project` é adapter local-first atual, hard intent apenas em lanes locais com ownership claro, e soft evidence/cache quando houver múltiplos escritores, adapters externos, CI/remote/offload ou stale focus.
 
+### Qualidade de tickets e side quests explícitas
+
+Tarefas pequenas/local-safe podem fechar com verificação focal simples. Tarefas macro, amplas, protegidas, rationale-sensitive ou com muitos arquivos/critérios precisam de decomposição explícita antes de fechamento. Se durante a execução surgir uma dependência real, ela deve virar subtask/side quest no board, com `depends_on`, acceptance criteria e verificação própria esperada; não deve permanecer implícita em conversa ou handoff.
+
+Use uma checagem bounded/read-only de qualidade de ticket antes de fechar tarefas amplas. O sinal deve distinguir rigidez útil de burocracia: `small-task-no-dependencies-ok` é aceitável para tarefas pequenas, enquanto `macro-task-missing-dependencies`, dependência inexistente, verificação parcial usada como fechamento ou tarefa concluída sem verificação passada bloqueiam fechamento automático e exigem decomposição ou decisão explícita.
+
 ### Contrato design-only de execução humana confirmada
 
 A próxima fronteira antes de qualquer executor é um contrato explícito para uma única fatia local confirmada por humano. Esse contrato ainda é design-only: ele define condições mínimas, mas não cria executor aprovado.

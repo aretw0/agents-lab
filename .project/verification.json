@@ -8835,6 +8835,24 @@
       "method": "post-reload-context-watch-regression",
       "timestamp": "2026-05-01T02:41:49.821Z",
       "evidence": "After reload, context_watch_status returned operator=none (new runtime loaded). Regression model added for compact deferred final-warning: compact + non-trigger autoCompactDecision now yields deterministic stop reason=compact-final-warning action=stop-and-let-auto-compact; trigger path remains non-stop and compact-checkpoint-required takes precedence. Focal smoke: context-watch + delivery/state reconcile 57 passed; docs package check ok."
+    },
+    {
+      "id": "VER-BUD-735",
+      "target": "TASK-BUD-396",
+      "target_type": "task",
+      "status": "passed",
+      "method": "dependency-surface-smoke",
+      "timestamp": "2026-05-01T02:46:58.726Z",
+      "evidence": "Implemented bounded dry-first dependency primitive updateProjectTaskDependencies and tool registration board_task_dependencies. It previews by default, applies only with dry_run=false, blocks missing dependencies and obvious dependency cycles. Focal validation: npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts => 57 passed; docs package check ok."
+    },
+    {
+      "id": "VER-BUD-736",
+      "target": "TASK-BUD-403",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ticket-quality-gate-smoke",
+      "timestamp": "2026-05-01T02:47:25.508Z",
+      "evidence": "Implemented read-only buildProjectTaskQualityGate and tool registration board_task_quality_gate. Gate flags macro-task-missing-dependencies, missing dependencies, completed-without-passed-verification, completed-with-partial-verification, while allowing small-task-no-dependencies-ok. Focal validation: project-board-surface smoke 57 passed; docs package check ok."
     }
   ]
 }
