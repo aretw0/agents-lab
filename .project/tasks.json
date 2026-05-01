@@ -9708,7 +9708,7 @@
     {
       "id": "TASK-BUD-400",
       "description": "Consolidar curadoria/ergonomia de tools expostas antes de loops longos locais, incluindo overlaps first-party/third-party e erros compactos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-382"
@@ -9727,7 +9727,8 @@
         "Nenhuma capability third-party é removida ou suprimida sem decisão explícita registrada."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Antes de unattended forte, a superfície de tools precisa ser pequena, auditável e sem conflito silencioso entre first-party e third-party."
+      "notes": "[rationale:risk-control] Antes de unattended forte, a superfície de tools precisa ser pequena, auditável e sem conflito silencioso entre first-party e third-party.\n2026-05-01: concluída curadoria/ergonomia mínima para rehearsal local. Scorecard e sovereignty mostram go apenas para rehearsal bounded; protected tools e overlap `oh-pi-bg-process-future` permanecem sem auto-dispatch/sem remoção automática.",
+      "verification": "VER-BUD-757"
     },
     {
       "id": "TASK-BUD-401",

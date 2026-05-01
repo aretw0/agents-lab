@@ -1,44 +1,43 @@
 {
-  "timestamp": "2026-05-01T04:21:49.565Z",
-  "context": "Completed TASK-BUD-399 local cancel/fallback drill. A disposable Node child process was started and stopped by the agent: DRILL_REGISTERED pi [snip] 401 remains blocked by unresolved deps. [truncated:+374 chars]",
+  "timestamp": "2026-05-01T04:23:14.370Z",
+  "context": "Completed TASK-BUD-400 tool hygiene/sovereignty curation for local rehearsal. Evidence: tool_hygiene_scorecard total=102, advisory=47, measur [snip] it decision. TASK-BUD-401 is now ready. [truncated:+363 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-399 drill closure.",
-    "Continue with TASK-BUD-400 tool curation/ergonomics before long loops.",
-    "Keep TASK-BUD-153 open until TASK-BUD-400 and TASK-BUD-401 are complete and quality gate clears."
+    "Commit TASK-BUD-400 closure.",
+    "Run TASK-BUD-401 measured local rehearsal as next final blocker for TASK-BUD-153.",
+    "Do not promote remote/offload/GitHub Actions; rehearsal is local bounded only."
   ],
   "blockers": [
-    "TASK-BUD-153 still blocked by unresolved dependencies.",
-    "TASK-BUD-401 remains blocked until earlier blockers/rehearsal prerequisites are complete.",
-    "Strong unattended/loop/scheduler/remote remains blocked."
+    "TASK-BUD-153 still blocked until TASK-BUD-401 completion and final quality gate clears.",
+    "Strong unattended/remote/scheduler remains blocked unless rehearsal evidence a [snip] n decision support it. [truncated:+13 chars]"
   ],
   "recent_validation": [
-    "local child process drill output: DRILL_REGISTERED pid=33608; DRILL_STOP_REQUESTED source=agen [snip] E code=null signal=SIGTERM [truncated:+12 chars]",
-    "background_process_lifecycle_plan pid=33608 registered=>running",
-    "background_process_lifecycle_plan pid=33608 stop-requested stopSource=agent=>stopped"
+    "tool_hygiene_scorecard evidence captured in VER-BUD-757",
+    "stack_sovereignty_status evidence captured in VER-BUD-757",
+    "safe_marker_check doctrine tool hygiene markers => 3/3"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:21:49.565Z",
+    "generatedAtIso": "2026-05-01T04:23:14.370Z",
     "level": "ok",
-    "percent": 29,
+    "percent": 34,
     "action": "continue",
-    "recommendation": "commit-then-start-task-bud-400"
+    "recommendation": "commit-then-run-task-bud-401-local-rehearsal"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:21:49.565Z",
+      "atIso": "2026-05-01T04:23:14.370Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 29,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-start-task-bud-400"
+      "recommendation": "commit-then-run-task-bud-401-local-rehearsal"
     }
   ]
 }

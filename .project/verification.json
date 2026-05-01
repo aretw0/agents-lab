@@ -9033,6 +9033,15 @@
       "method": "local-cancel-fallback-drill",
       "timestamp": "2026-05-01T04:21:18.304Z",
       "evidence": "Executed bounded local cancel/fallback drill using a disposable Node child process. Command output: DRILL_REGISTERED pid=33608; DRILL_STOP_REQUESTED source=agent pid=33608; DRILL_DONE code=null signal=SIGTERM. Canonical lifecycle classification: registered=>state=running; stop-requested with stopSource=agent=>state=stopped; subsequent done with stopSource=agent=>state=late-after-stop; normal prior BG_PROCESS_DONE event remains state=finished with viewTitle fallback. No scheduler/remote/offload/server was started; only disposable child process was stopped. Handoff/docs record that this does not authorize killing external processes or long servers."
+    },
+    {
+      "id": "VER-BUD-757",
+      "target": "TASK-BUD-400",
+      "target_type": "task",
+      "status": "passed",
+      "method": "tool-hygiene-sovereignty-curation-snapshot",
+      "timestamp": "2026-05-01T04:22:56.806Z",
+      "evidence": "Ran tool_hygiene_scorecard(limit=120): total=102, advisory=47, measured=44, operational=5, protected=6, requiresHumanApproval=8, hideBeforeLongLoop=0, dispatchAllowed=false, authorization=none. Ran stack_sovereignty_status: highRisk=0, mediumRisk=3, coexisting=5; curationCoverage total=8 filtered=7 needsDecision=1 activeThirdPartyOverlaps=1, specifically oh-pi-bg-process-future for background-process-control. Doctrine records rehearsal decision: keep advisory/measured for bounded local slices, board/checkpoint operational only with task/verification linkage, protected tools no-auto-dispatch, no third-party suppression/removal without explicit decision. Validation: safe_marker_check doctrine markers 3/3; git diff --check ok."
     }
   ]
 }
