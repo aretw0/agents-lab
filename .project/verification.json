@@ -9177,6 +9177,15 @@
       "method": "focused test + diff check",
       "timestamp": "2026-05-01T05:32:01.994Z",
       "evidence": "Focused local write-preview tool-call hint fix completed. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/write-preview-guard.test.ts` => 1 file passed, 4 tests passed. `git diff --check` => no whitespace errors; only existing CRLF conversion warnings for unrelated files. Source change uses `keyHint(\"app.tools.expand\", \"to expand\")` when keybindings are loaded and `rawKeyHint(\"ctrl+o\", \"to expand\")` fallback when app keybindings are absent in tests/runtime, removing the user-visible `expand-tool` action-id hint without mutating node_modules."
+    },
+    {
+      "id": "VER-BUD-773",
+      "target": "TASK-BUD-422",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload live smoke",
+      "timestamp": "2026-05-01T12:01:36.016Z",
+      "evidence": "After operator confirmed `/reload`, triggered a bounded disposable write-preview smoke via `.tmp/task-bud-422-live-preview.txt` with 15 lines so the live TUI render path could show the collapsed write preview/hint. Disposable file was removed immediately. `git status --porcelain=v1` returned CLEAN after removing the smoke file and restoring an unintended package-lock drift from reload/npm tooling. No node_modules mutation, no protected scope, no remote/CI/scheduler/colony."
     }
   ]
 }
