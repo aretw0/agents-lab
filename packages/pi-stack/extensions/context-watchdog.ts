@@ -964,6 +964,48 @@ export function formatContextWatchStatusToolSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function resolveContextWatchAdaptiveStatusSummary(input: {
+	level: ContextWatchdogLevel;
+	summary: string;
+	nowMs: number;
+	lastLevel?: ContextWatchdogLevel;
+	lastEmittedAtMs?: number;
+	cooldownMs?: number;
+}): {
+	summary: string;
+	mode: "full" | "compact";
+	cooldownRemainingSec: number;
+} {
+	const cooldownMs = Number.isFinite(Number(input.cooldownMs))
+		? Math.max(1_000, Math.floor(Number(input.cooldownMs)))
+		: 90_000;
+	const shapeEligible = input.level === "warn" || input.level === "checkpoint";
+	if (!shapeEligible) {
+		return {
+			summary: input.summary,
+			mode: "full",
+			cooldownRemainingSec: 0,
+		};
+	}
+	const lastAt = Number.isFinite(Number(input.lastEmittedAtMs))
+		? Math.max(0, Math.floor(Number(input.lastEmittedAtMs)))
+		: 0;
+	const elapsedMs = lastAt > 0 ? Math.max(0, Math.floor(input.nowMs - lastAt)) : cooldownMs;
+	if (input.lastLevel === input.level && elapsedMs < cooldownMs) {
+		const remainingSec = Math.max(1, Math.ceil((cooldownMs - elapsedMs) / 1000));
+		return {
+			summary: `context-watch-status: level=${input.level} mode=compact-output cooldown=active remainingSec=${remainingSec}`,
+			mode: "compact",
+			cooldownRemainingSec: remainingSec,
+		};
+	}
+	return {
+		summary: input.summary,
+		mode: "full",
+		cooldownRemainingSec: 0,
+	};
+}
+
 export function formatContextWatchCommandStatusSummary(input: {
 	level: ContextWatchdogLevel;
 	percent?: number;
@@ -1159,6 +1201,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAssessment: ContextWatchAssessment | null = null;
 	let lastAnnouncedLevel: ContextWatchdogLevel | null = null;
 	let lastAnnouncedAt = 0;
+	let lastStatusToolLevel: ContextWatchdogLevel | undefined;
+	let lastStatusToolAt = 0;
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
 	let lastAutoResumeAt = 0;
@@ -1866,7 +1910,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
-			const summary = formatContextWatchStatusToolSummary({
+			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
 				action: assessment.action,
@@ -1875,9 +1919,25 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatingCadence: operatingCadence.operatingCadence,
 				handoffFreshness: autoCompact.handoffFreshness.label,
 			});
+			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
+				level: assessment.level,
+				summary: fullSummary,
+				nowMs,
+				lastLevel: lastStatusToolLevel,
+				lastEmittedAtMs: lastStatusToolAt,
+				cooldownMs: config.cooldownMs,
+			});
+			lastStatusToolLevel = assessment.level;
+			lastStatusToolAt = nowMs;
 			const payload = {
 				...assessment,
-				summary,
+				summary: adaptiveSummary.summary,
+				fullSummary,
+				outputShape: {
+					mode: adaptiveSummary.mode,
+					cooldownMs: config.cooldownMs,
+					cooldownRemainingSec: adaptiveSummary.cooldownRemainingSec,
+				},
 				steeringStatus: formatContextWatchSteeringStatus(assessment),
 				autoCompact,
 				operatorSignal,
@@ -1887,7 +1947,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatingCadence,
 			};
 			return {
-				content: [{ type: "text", text: summary }],
+				content: [{ type: "text", text: adaptiveSummary.summary }],
 				details: payload,
 			};
 		},
@@ -2282,6 +2342,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAutoResumeAt = 0;
 				lastAutoResumeDecision = null;
 				lastSteeringSignal = null;
+				lastStatusToolLevel = undefined;
+				lastStatusToolAt = 0;
 				autoCompactInFlight = false;
 				clearAutoCompactRetryTimer();
 				consecutiveWarnCount = 0;

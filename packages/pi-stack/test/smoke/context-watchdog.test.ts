@@ -17,6 +17,7 @@ import contextWatchdogExtension, {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
+	resolveContextWatchAdaptiveStatusSummary,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
 	resolveContextWatchContinuationRecommendation,
@@ -1257,6 +1258,40 @@ describe("context-watchdog", () => {
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
+	});
+
+	it("adapta resumo de status em warn/checkpoint durante cooldown", () => {
+		const full = "context-watch-status: level=warn percent=61 action=continue";
+		const first = resolveContextWatchAdaptiveStatusSummary({
+			level: "warn",
+			summary: full,
+			nowMs: 10_000,
+			cooldownMs: 60_000,
+		});
+		expect(first.mode).toBe("full");
+		expect(first.summary).toBe(full);
+
+		const second = resolveContextWatchAdaptiveStatusSummary({
+			level: "warn",
+			summary: full,
+			nowMs: 20_000,
+			lastLevel: "warn",
+			lastEmittedAtMs: 10_000,
+			cooldownMs: 60_000,
+		});
+		expect(second.mode).toBe("compact");
+		expect(second.summary).toContain("mode=compact-output");
+		expect(second.cooldownRemainingSec).toBeGreaterThan(0);
+
+		const third = resolveContextWatchAdaptiveStatusSummary({
+			level: "compact",
+			summary: "context-watch-status: level=compact",
+			nowMs: 25_000,
+			lastLevel: "compact",
+			lastEmittedAtMs: 20_000,
+			cooldownMs: 60_000,
+		});
+		expect(third.mode).toBe("full");
 	});
 
 	it("context_watch_status tool emits compact content and structured details", async () => {

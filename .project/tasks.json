@@ -10920,7 +10920,7 @@
     {
       "id": "TASK-BUD-454",
       "description": "Adicionar output shaping adaptativo com cooldown no context-watch para reduzir ruído em warn/checkpoint sem quebrar contrato de decisão.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-451"
@@ -10936,7 +10936,8 @@
         "Smokes de context-watch e contrato permanecem verdes."
       ],
       "milestone": "control-plane-long-run-prep",
-      "notes": "[rationale:risk-control] poda de ruído deve ser gradual e verificável."
+      "notes": "[rationale:risk-control] poda de ruído deve ser gradual e verificável.\n2026-05-01: implementando output shaping adaptativo com cooldown no context_watch_status para reduzir ruído em warn/checkpoint sem quebrar contrato estruturado.\n2026-05-01: ruído reduzido em status repetido sem perder payload estruturado e governança.",
+      "verification": "VER-BUD-806"
     },
     {
       "id": "TASK-BUD-455",
@@ -10999,6 +11000,81 @@
       ],
       "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] preservar consistência de UX sem abrir escopo protegido."
+    },
+    {
+      "id": "TASK-BUD-458",
+      "description": "Mapear lacunas de skills cross-stack (from notes-app simples até monorepos pesados) e definir matriz mínima de cobertura orientada a fluidez produtiva.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Existe matriz de cobertura com cenários leves/pesados e gaps objetivos.",
+        "Cada gap inclui proposta de primitiva local-safe e evidência mínima de valor.",
+        "Sem acoplamento opinativo à stack do laboratório como requisito de uso."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] ampliar qualidade padrão do pi sem lock-in de domínio."
+    },
+    {
+      "id": "TASK-BUD-459",
+      "description": "Definir primitive de triagem inicial universal (project-intake) para detectar rapidamente classe de projeto e selecionar trilha de execução com baixo custo de token.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-458"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/",
+        "docs/primitives/"
+      ],
+      "acceptance_criteria": [
+        "Primitive é read-only/report-only na primeira versão.",
+        "Saída inclui recomendação de trilha com rationale auditável.",
+        "Contrato evita seleção prematura de escopo protegido."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] melhorar fluidez inicial sem abrir risco operacional."
+    },
+    {
+      "id": "TASK-BUD-460",
+      "description": "Criar/ajustar skill pack de resposta rápida cross-stack (diagnóstico inicial + plano de primeiros passos) com linguagem agnóstica de tecnologia.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-458"
+      ],
+      "files": [
+        "packages/lab-skills/skills/",
+        "packages/pi-skills/skills/"
+      ],
+      "acceptance_criteria": [
+        "Skill pack cobre pelo menos 3 perfis de jardim digital (notas, app web, backend pesado).",
+        "Diretrizes reforçam micro-slices, validação focal e rollback.",
+        "Sem exigir conhecimento prévio da pi-stack para produzir valor inicial."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] consistência de onboarding produtivo em contextos heterogêneos."
+    },
+    {
+      "id": "TASK-BUD-461",
+      "description": "Adicionar smoke/regressões para garantir que superfícies de orientação inicial preservem controle/auditoria com respostas curtas e úteis sob pressão de token.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-459"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/"
+      ],
+      "acceptance_criteria": [
+        "Casos de teste cobrem cenário simples e cenário complexo sem drift de governança.",
+        "Saídas mantêm recommendationCode/nextAction quando aplicável.",
+        "Ruído textual é reduzido sem perder ação recomendada."
+      ],
+      "milestone": "cross-stack-fluidity",
+      "notes": "[rationale:risk-control] escalabilidade de qualidade com custo de contexto controlado."
     }
   ]
 }

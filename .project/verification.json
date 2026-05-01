@@ -9474,6 +9474,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T15:51:31.330Z",
       "evidence": "Implemented semantic status dedupe in monitor summary via a reusable primitive `packages/pi-stack/extensions/monitor-summary-status-dedupe.ts` (`buildMonitorSummaryStatusSignature`, `shouldEmitMonitorSummaryStatus`) and wired it into `packages/pi-stack/extensions/monitor-summary.ts` so `ctx.ui.setStatus` only emits on semantic state changes (total/enabled/events/classifyFailures). Added coverage in `packages/pi-stack/test/smoke/monitor-summary.test.ts` for dedupe vs real-change behavior and new primitive tests in `packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts` => 3 files passed, 14 tests passed."
+    },
+    {
+      "id": "VER-BUD-806",
+      "target": "TASK-BUD-454",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T15:58:48.071Z",
+      "evidence": "Implemented adaptive output shaping with cooldown for `context_watch_status` in `packages/pi-stack/extensions/context-watchdog.ts` via new primitive `resolveContextWatchAdaptiveStatusSummary(...)`. Behavior: warn/checkpoint summaries emit full output on first/change and switch to compact mode (`mode=compact-output`) during cooldown windows; non-eligible levels remain full. Structured contract preserved with `details.summary`, added `details.fullSummary`, and `details.outputShape` metadata (mode/cooldown). Added regression in `packages/pi-stack/test/smoke/context-watchdog.test.ts` covering cooldown shaping semantics. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-classify-failure-readiness.test.ts` => 5 files passed, 67 tests passed."
     }
   ]
 }
