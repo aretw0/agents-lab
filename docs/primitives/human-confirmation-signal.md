@@ -52,7 +52,7 @@ Consumers must enforce:
 
 ## Implementation channel decision
 
-For the local stack, the first implementation channel should be **guard-owned report-only** unless an explicit later task chooses wrapper or upstream PR work. `resolveHumanConfirmationImplementationChannelPlan` encodes this boundary:
+For the local stack, the first implementation channel should be **guard-owned report-only** unless an explicit later task chooses wrapper or upstream PR work. `resolveHumanConfirmationImplementationChannelPlan` encodes this boundary, and `human_confirmation_implementation_channel_plan` exposes it as a read-only runtime planning tool after reload:
 
 - guard-owned channel starts as report-only/dry-run evidence recording;
 - wrapper channel is design-only until it proves structured details survive to the consumer;

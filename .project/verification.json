@@ -8718,6 +8718,15 @@
       "method": "implementation-channel-plan-smoke",
       "timestamp": "2026-05-01T01:42:21.878Z",
       "evidence": "First bounded slice for TASK-BUD-394 chose/codified the safe initial implementation channel without enabling destructive runtime. Added resolveHumanConfirmationImplementationChannelPlan: guard-owned starts as guard-owned-report-only; wrapper and upstream PR remain design channels until details/acceptance are proven; direct node_modules patch and operational destructive dialog enable requests block. Invariants: dispatchAllowed=false, implementationAllowed=false, runtimeDestructiveDialogEnabled=false, directNodeModulesPatchAllowed=false, authorization=none. Tests: focused vitest suite passed 17 tests; docs sync/check ok. Safe markers passed for helper 4/4, primitive doc 4/4, doctrine 3/3."
+    },
+    {
+      "id": "VER-BUD-722",
+      "target": "TASK-BUD-394",
+      "target_type": "task",
+      "status": "passed",
+      "method": "report-only-surface-smoke",
+      "timestamp": "2026-05-01T01:46:25.333Z",
+      "evidence": "Second bounded slice for TASK-BUD-394 added report-only runtime surface human_confirmation_implementation_channel_plan. It exposes resolveHumanConfirmationImplementationChannelPlan as a read-only planning tool and never enables destructive dialogs, dispatch, overrides, implementation, or node_modules patches. Registered via guardrails-core. Tests: npx vitest run guardrails-human-confirmation.test.ts guardrails-human-confirmation-surface.test.ts guardrails-human-confirmation-runtime-wiring.test.ts guardrails-core-hardening-reexport.test.ts => 19 passed. Docs sync/check ok. Safe markers: surface registration 2/2, doc 2/2, surface test invariants 3/3. Live validation requires reload."
     }
   ]
 }
