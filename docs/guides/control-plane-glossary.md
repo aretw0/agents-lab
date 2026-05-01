@@ -77,3 +77,14 @@ Mitigação:
 - marcar evidência parcial como parcial;
 - usar gate de qualidade de ticket antes de fechamento de macro-task;
 - remover ou rebaixar surfaces redundantes quando a diferença for apenas nome.
+
+Checklist rápido de poda por fatia:
+
+1. intenção dominante única;
+2. sem duplicação sem ganho de contrato;
+3. validação focal definida antes da edição;
+4. rollback simples e conhecido;
+5. blast radius curto e sem protected scope implícito;
+6. saída estruturada preferida sobre texto livre;
+7. evidência curta e auditável;
+8. `no-eligible-tasks` tratado como stop condition.

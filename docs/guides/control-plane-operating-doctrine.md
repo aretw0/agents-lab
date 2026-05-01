@@ -20,6 +20,21 @@ O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, or
 10. **Qualidade vem de síntese, remoção e consistência** — preferir reduzir superfícies redundantes e consolidar opiniões antes de adicionar novas ferramentas.
 11. **Unattended é malemolência com trilho** — continuar sozinho em fatias seguras, mas deixar rastro curto para auditoria e retomada.
 
+### Checklist anti-gordura por fatia (máx. 8 itens)
+
+Antes de iniciar ou fechar uma fatia, validar rapidamente:
+
+1. **Uma intenção dominante** — a fatia resolve um problema principal, não três ao mesmo tempo.
+2. **Sem duplicação sem ganho** — se repetir lógica/texto, justificar com contrato novo ou consolidar.
+3. **Validação focal conhecida** — teste/marker/check de saída definido antes de editar.
+4. **Rollback simples** — reversão por git ou revert local claro.
+5. **Blast radius curto** — poucos arquivos e sem escopo protegido implícito.
+6. **Semântica estável para consumo** — preferir `recommendationCode`/campos estruturados em vez de parsing textual.
+7. **Evidência proporcional** — resumo curto e auditável; sem narrativa longa para mascarar incerteza.
+8. **Parar no `no-eligible`** — ausência de próxima fatia local-safe é stop condition, não convite para drift.
+
+Se 2+ itens falharem, a ação padrão é **decompor** (nova task/side quest) ou **parar** para foco explícito.
+
 ## Controle humano, cancelamento e blast radius
 
 Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle humano, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.

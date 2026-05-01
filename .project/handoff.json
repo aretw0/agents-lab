@@ -1,29 +1,30 @@
 {
-  "timestamp": "2026-05-01T13:37:15.322Z",
-  "context": "Completed local-safe implementation slice for shared stop-local semantics: extracted reusable guidance helper and wired autonomy selector + c [snip] -focus stop action text/code constants. [truncated:+72 chars]",
+  "timestamp": "2026-05-01T13:41:43.736Z",
+  "context": "Completed two anti-gordura slices: TASK-BUD-433 (checklist de poda em doctrine+glossary) and TASK-BUD-434 (cross-surface structured recommend [snip] oss autonomy/status/readiness surfaces. [truncated:+83 chars]",
   "next_actions": [
-    "Commit TASK-BUD-432 source+board evidence.",
-    "Proceed to TASK-BUD-433 (anti-gordura checklist in doctrine/glossary)."
+    "Commit docs+test+board evidence for TASK-BUD-433 and TASK-BUD-434.",
+    "Proceed to TASK-BUD-435 (maturity packet for long local run, report-only)."
   ],
   "blockers": [
-    "Protected backlog still skipped by default.",
+    "Protected backlog still requires explicit focus when selected.",
     "Strong unattended remote/offload/CI/scheduler remains unauthorized."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages [snip] es passed, 73 tests passed [truncated:+113 chars]",
-    "autonomy_lane_next_task => ready=yes next=TASK-BUD-433"
+    "safe_marker_check doctrine checklist markers => matched",
+    "safe_marker_check glossary checklist markers => matched",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/control-plane-recommendation-contract.t [snip] es passed, 58 tests passed [truncated:+128 chars]"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T13:37:15.322Z",
+    "generatedAtIso": "2026-05-01T13:41:43.736Z",
     "level": "ok",
     "percent": 0,
     "action": "continue",
-    "recommendation": "Commit bounded slice and continue next local-safe anti-gordura task.",
+    "recommendation": "Commit bounded slices and continue with local-safe maturity packet task.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T13:37:15.322Z",
+      "atIso": "2026-05-01T13:41:43.736Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -33,10 +34,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit bounded slice and continue next local-safe anti-gordura task."
+      "recommendation": "Commit bounded slices and continue with local-safe maturity packet task."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-432"
+    "TASK-BUD-434"
   ]
 }

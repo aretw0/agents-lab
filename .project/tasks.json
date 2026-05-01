@@ -10466,7 +10466,7 @@
     {
       "id": "TASK-BUD-433",
       "description": "Criar checklist de poda de gordura por fatia (código/teste/docs) e incorporar no handoff operacional.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-431"
@@ -10482,12 +10482,13 @@
         "Linkado à doutrina local-first."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Estratégia explícita evita repetição sem direção."
+      "notes": "[rationale:risk-control] Estratégia explícita evita repetição sem direção.\n2026-05-01: iniciado checklist curto de poda de gordura por fatia para reduzir repetição neurótica com estratégia explícita.\n2026-05-01: checklist operacional curto incorporado para reduzir gordura com estratégia explícita.",
+      "verification": "VER-BUD-786"
     },
     {
       "id": "TASK-BUD-434",
       "description": "Adicionar teste de contrato cross-surface para recommendationCode/nextAction (autonomy_lane_status + context_watch_continuation_readiness).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-431"
@@ -10502,7 +10503,8 @@
         "Sem parsing frágil de texto livre em asserts críticos."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Protege contrato de consumo e reduz regressão silenciosa."
+      "notes": "[rationale:risk-control] Protege contrato de consumo e reduz regressão silenciosa.\n2026-05-01: iniciado smoke de contrato cross-surface para recommendationCode/nextAction sem parsing textual frágil.\n2026-05-01: contrato cross-surface reforçado para consumo por código, sem depender de parsing textual neurótico.",
+      "verification": "VER-BUD-787"
     },
     {
       "id": "TASK-BUD-435",

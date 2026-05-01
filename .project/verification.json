@@ -9294,6 +9294,24 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T13:36:56.121Z",
       "evidence": "Implemented shared stop-local guidance helper in `packages/pi-stack/extensions/guardrails-core-local-stop-guidance.ts` and reused it in both `guardrails-core-autonomy-task-selector.ts` and `context-watchdog.ts` (`resolveContextWatchContinuationRecommendation`). Centralized canonical protected-focus local-stop nextAction text and reused recommendation code constants where applicable. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 3 files passed, 73 tests passed."
+    },
+    {
+      "id": "VER-BUD-786",
+      "target": "TASK-BUD-433",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs marker checks",
+      "timestamp": "2026-05-01T13:40:02.208Z",
+      "evidence": "Added explicit anti-bloat checklist (max 8 items) to `docs/guides/control-plane-operating-doctrine.md` and mirrored concise pruning checklist in `docs/guides/control-plane-glossary.md`. Checklist codifies strategy against repetitive/neurotic changes: single intent, no duplication without contract gain, focal validation, rollback clarity, blast radius, structured output, proportional evidence, and `no-eligible-tasks` as stop condition. Validation: safe_marker_check doctrine 5/5 and glossary 3/3 (command-sensitive markers allowed for backtick literals), i18n_lint_text pass."
+    },
+    {
+      "id": "VER-BUD-787",
+      "target": "TASK-BUD-434",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T13:41:16.264Z",
+      "evidence": "Added cross-surface contract smoke `packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` covering structured guidance without brittle text parsing: (1) `autonomy_lane_status` protected-only local-stop returns `recommendationCode=local-stop-protected-focus-required` + non-empty `nextAction`; (2) `context_watch_continuation_readiness` emits structured `recommendationCode` from allowed set + non-empty `nextAction`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 3 files passed, 58 tests passed."
     }
   ]
 }
