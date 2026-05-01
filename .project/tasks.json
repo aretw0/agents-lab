@@ -10553,7 +10553,7 @@
     {
       "id": "TASK-BUD-437",
       "description": "Especificar schema read-only do `lane_brainstorm_packet` (input/output + invariantes).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-436"
@@ -10569,7 +10569,8 @@
         "Exemplo de payload válido e bloqueado documentado."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Contrato explícito evita brainstorm solto e facilita testes."
+      "notes": "[rationale:risk-control] Contrato explícito evita brainstorm solto e facilita testes.\n2026-05-01: iniciado contrato read-only do lane_brainstorm_packet com schema de entrada/saída e exemplos success/blocked.\n2026-05-01: contrato mínimo do brainstorm packet formalizado para implementação incremental sem scope creep.",
+      "verification": "VER-BUD-789"
     },
     {
       "id": "TASK-BUD-438",

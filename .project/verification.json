@@ -9321,6 +9321,15 @@
       "method": "docs marker checks",
       "timestamp": "2026-05-01T13:43:16.105Z",
       "evidence": "Defined report-only maturity packet for long local run in `docs/primitives/nudge-free-local-continuity.md` and mirrored governance framing in `docs/guides/control-plane-operating-doctrine.md`. Added explicit measurable metrics (`slicesCompleted`, `focalValidationPassRate`, `protectedAutoSelectionCount`, `checkpointFreshnessViolations`, `noEligibleStopHandled`, etc.), go/no-go interpretation, and fail-closed action path without authorizing protected modes. Validation: safe_marker_check passed on both docs (5/5 + 5/5) and i18n_lint_text passed."
+    },
+    {
+      "id": "VER-BUD-789",
+      "target": "TASK-BUD-437",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs schema + marker checks",
+      "timestamp": "2026-05-01T13:45:13.839Z",
+      "evidence": "Created `docs/primitives/lane-brainstorm-packet.md` defining read-only schema contract for `lane_brainstorm_packet` with input/output examples, invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`), decision codes, and blocked fail-closed example. Linked primitive in `docs/primitives/README.md`. Validation: safe_marker_check on schema doc 8/8, README 4/4; i18n_lint_text pass."
     }
   ]
 }
