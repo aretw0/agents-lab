@@ -1,44 +1,43 @@
 {
-  "timestamp": "2026-05-01T04:17:00.264Z",
-  "context": "Started TASK-BUD-399 cancel/fallback drill and discovered a real prerequisite: the lifecycle contract could distinguish stopRequested but not [snip] rogress pending reload/live validation. [truncated:+414 chars]",
+  "timestamp": "2026-05-01T04:19:49.795Z",
+  "context": "Post-reload live validation completed for TASK-BUD-413 stop_source. background_process_lifecycle_plan now distinguishes stopSource=human, sto [snip] ontrolled/auditable uninterrupted work. [truncated:+160 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-413 implementation slice.",
-    "Reload required before live-validating background_process_lifecycle_plan with stop_source=human/agent.",
-    "After reload, complete TASK-BUD-413 if live validation passes, then run/record TASK-BUD-399 local cancel/fallback drill."
+    "Commit TASK-BUD-413 closure.",
+    "Run TASK-BUD-399 as a bounded local cancel/fallback drill using the canonical lifecycle sequen [snip] scheduler/remote/offload. [truncated:+30 chars]",
+    "If drill remains simulated/read-only due protected operational process control, record that li [snip] ational drill task exists. [truncated:+74 chars]"
   ],
   "blockers": [
-    "TASK-BUD-399 remains blocked by TASK-BUD-413 until reload/live validation.",
-    "TASK-BUD-153 remains blocked by TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 and a [snip] emaining dependencies. [truncated:+4 chars]",
-    "Strong unattended/loop/scheduler/remote remains blocked."
+    "TASK-BUD-153 still blocked by TASK-BUD-399, TASK-BUD-400, TASK-BUD-401 and any unresolved deps.",
+    "Strong unattended remains blocked."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts => 6 passed",
-    "safe_marker_check docs/guides/control-plane-operating-doctrine.md stopSource markers => 3/3",
-    "VER-BUD-754 partial linked to TASK-BUD-413"
+    "background_process_lifecycle_plan done-after-stop stop_source=human => state=late-after-stop s [snip] atch=no authorization=none [truncated:+49 chars]",
+    "background_process_lifecycle_plan stop-requested stop_source=agent => state=stopped stopSource [snip] atch=no authorization=none [truncated:+11 chars]",
+    "background_process_lifecycle_plan stopRequested=true without stop_source => stopSource=unknown"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:17:00.264Z",
+    "generatedAtIso": "2026-05-01T04:19:49.795Z",
     "level": "ok",
-    "percent": 23,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "commit-and-reload-before-live-stop-source-validation"
+    "recommendation": "commit-then-run-task-bud-399-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:17:00.264Z",
+      "atIso": "2026-05-01T04:19:49.795Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 23,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-reload-before-live-stop-source-validation"
+      "recommendation": "commit-then-run-task-bud-399-bounded"
     }
   ]
 }

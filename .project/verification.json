@@ -9015,6 +9015,15 @@
       "method": "background-stop-source-contract-smoke",
       "timestamp": "2026-05-01T04:16:42.076Z",
       "evidence": "Implemented stopSource contract in code and surface: lifecycle input accepts stopSource, output/evidence includes stopSource when relevant, unknown stop source warns unknown-stop-source, tool surface accepts stop_source. Smoke validates stopSource=human for late-after-stop and stopSource=agent for stop-requested. Docs state stopRequested=true without source is insufficient. Validation: guardrails-background-process smoke 6 passed; safe_marker_check doctrine 3/3. Partial until reload/live validation of background_process_lifecycle_plan(stop_source=...)."
+    },
+    {
+      "id": "VER-BUD-755",
+      "target": "TASK-BUD-413",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-reload-background-stop-source-live-validation",
+      "timestamp": "2026-05-01T04:19:29.125Z",
+      "evidence": "After reload, live background_process_lifecycle_plan accepted stop_source. Validation cases: done-after-stop with stop_source=human returned state=late-after-stop stopSource=human viewTitle=background-process dispatch=no authorization=none; stop-requested with stop_source=agent returned state=stopped stopSource=agent; stopRequested=true without stop_source returned stopSource=unknown, preserving fail-closed warning semantics. This validates cancellation-origin evidence before TASK-BUD-399 drill."
     }
   ]
 }

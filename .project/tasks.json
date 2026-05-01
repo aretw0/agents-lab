@@ -10016,7 +10016,7 @@
     {
       "id": "TASK-BUD-413",
       "description": "Adicionar `stop_source`/origem de cancelamento ao contrato de lifecycle para distinguir cancelamento humano, stop pelo agente, timeout/fallback e origem desconhecida.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-410"
@@ -10035,8 +10035,8 @@
         "Doutrina registra que drill de cancel/fallback precisa distinguir origem do cancelamento antes de liberar unattended forte."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] TASK-BUD-399 exige distinguir cancelamento humano de stop pelo agente; o contrato atual só carrega `stopRequested`, então a origem precisa virar evidência explícita antes do drill local ser confiável.\n2026-05-01: implementação e smoke do contrato `stop_source` prontos; runtime surface mudou e precisa reload/live validation antes de fechar. TASK-BUD-399 permanece bloqueada até validar origem de cancelamento no runtime.",
-      "verification": "VER-BUD-754"
+      "notes": "[rationale:risk-control] TASK-BUD-399 exige distinguir cancelamento humano de stop pelo agente; o contrato atual só carrega `stopRequested`, então a origem precisa virar evidência explícita antes do drill local ser confiável.\n2026-05-01: implementação e smoke do contrato `stop_source` prontos; runtime surface mudou e precisa reload/live validation antes de fechar. TASK-BUD-399 permanece bloqueada até validar origem de cancelamento no runtime.\n2026-05-01: concluído após reload/live validation. `stop_source` diferencia cancelamento humano, stop pelo agente e origem desconhecida; sem dispatch/autorização.",
+      "verification": "VER-BUD-755"
     }
   ]
 }
