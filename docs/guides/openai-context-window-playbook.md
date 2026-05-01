@@ -175,15 +175,15 @@ Saídas sugerem dois perfis de carga:
 
 Esses perfis servem tanto para `.project-first` quanto para modo adapter/mirror (ex.: projeção para vault Markdown), sem exigir releitura ampla no spawn.
 
-Config opcional em `.pi/settings.json`:
+Config opcional em `.pi/settings.json` (conservador para evitar 400 em provedores sensíveis):
 
 ```json
 {
   "piStack": {
     "contextWatchdog": {
       "enabled": true,
-      "checkpointPct": 68,
-      "compactPct": 72,
+      "checkpointPct": 65,
+      "compactPct": 69,
       "cooldownMs": 600000,
       "notify": true,
       "status": true
@@ -192,6 +192,7 @@ Config opcional em `.pi/settings.json`:
 }
 ```
 
-Observação: `warnPct` é herdado do threshold model-aware do `custom-footer` (`contextPressure`).
+Observação: `warnPct`/`errorPct` são herdados do threshold model-aware do `custom-footer` (`contextPressure`).
+Para `github-copilot/gpt-5.3-codex`, o baseline recomendado é mais conservador (`errorPct=70`) para reduzir risco de `400 input exceeds context window`.
 
 Esse playbook complementa o pipeline canônico: `docs/guides/project-canonical-pipeline.md`.

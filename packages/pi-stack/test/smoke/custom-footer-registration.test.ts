@@ -123,6 +123,13 @@ describe("custom-footer — context thresholds", () => {
 		);
 		expect(copilotClaude.warningPct).toBe(50);
 		expect(copilotClaude.errorPct).toBe(75);
+
+		const copilotCodex = resolveContextThresholds(
+			"github-copilot",
+			"gpt-5.3-codex",
+		);
+		expect(copilotCodex.warningPct).toBe(48);
+		expect(copilotCodex.errorPct).toBe(70);
 	});
 
 	it("applies explicit overrides by provider/model", () => {

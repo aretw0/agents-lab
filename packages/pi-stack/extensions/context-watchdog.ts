@@ -1174,6 +1174,25 @@ function readDeferredLaneQueueCount(cwd: string): number {
 	}
 }
 
+function isContextWindowOverflowErrorMessage(message: string): boolean {
+	const text = String(message ?? "").toLowerCase();
+	return text.includes("input exceeds the context window")
+		|| text.includes("exceeds the context window")
+		|| text.includes("context window of this model");
+}
+
+function applyEmergencyContextWindowFallbackConfig(
+	config: ContextWatchdogConfig,
+): ContextWatchdogConfig {
+	const currentCheckpoint = Number.isFinite(config.checkpointPct) ? Number(config.checkpointPct) : 68;
+	const currentCompact = Number.isFinite(config.compactPct) ? Number(config.compactPct) : 72;
+	return {
+		...config,
+		checkpointPct: Math.min(currentCheckpoint, 65),
+		compactPct: Math.min(currentCompact, 69),
+	};
+}
+
 function buildAssessment(
 	ctx: ExtensionContext,
 	config: ContextWatchdogConfig,
@@ -1607,7 +1626,24 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				},
 				onError: (error) => {
 					autoCompactInFlight = false;
-					ctx.ui.notify(`context-watch: auto compact failed (${error.message})`, "warning");
+					const message = String(error?.message ?? "unknown-error");
+					if (isContextWindowOverflowErrorMessage(message)) {
+						config = applyEmergencyContextWindowFallbackConfig(config);
+						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+							"context-watchdog.context-window-overflow-fallback",
+							{
+								atIso: new Date(Date.now()).toISOString(),
+								message,
+								fallbackCheckpointPct: config.checkpointPct,
+								fallbackCompactPct: config.compactPct,
+							},
+						);
+						ctx.ui.notify(
+							"context-watch: provider context-window overflow detected; emergency thresholds enabled (checkpoint<=65 / compact<=69) for this session.",
+							"warning",
+						);
+					}
+					ctx.ui.notify(`context-watch: auto compact failed (${message})`, "warning");
 				},
 			});
 		} else if (assessment.level === "compact" && autoCompactState.retryDelayMs !== undefined) {

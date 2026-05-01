@@ -142,12 +142,12 @@ describe("context-watchdog", () => {
 		expect(tOpenAi.compactPct).toBe(72);
 	});
 
-	it("respects explicit checkpoint/compact overrides", () => {
+	it("respects explicit checkpoint override and clamps compact below error threshold", () => {
 		const cfg = normalizeContextWatchdogConfig({ checkpointPct: 70, compactPct: 80 });
 		const t = deriveContextWatchThresholds(50, 75, cfg);
 		expect(t.warnPct).toBe(50);
 		expect(t.checkpointPct).toBe(70);
-		expect(t.compactPct).toBe(80);
+		expect(t.compactPct).toBe(74);
 	});
 
 	it("evaluates levels with checkpoint before compact", () => {
@@ -652,8 +652,8 @@ describe("context-watchdog", () => {
 
 		const control = buildContextWatchBootstrapPlan("control-plane");
 		expect(control.preset).toBe("control-plane");
-		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(68);
-		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(72);
+		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(65);
+		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(69);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.modelSteeringFromLevel).toBe("compact");
 		expect((control.patch.piStack as any).contextWatchdog.userNotifyFromLevel).toBe("compact");

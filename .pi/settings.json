@@ -139,6 +139,33 @@
 				"autoDrainOnIdle": false
 			}
 		},
+		"contextWatchdog": {
+			"enabled": true,
+			"checkpointPct": 65,
+			"compactPct": 69,
+			"cooldownMs": 600000,
+			"notify": true,
+			"modelSteeringFromLevel": "compact",
+			"userNotifyFromLevel": "compact",
+			"status": true,
+			"autoCheckpoint": true,
+			"autoCompact": true,
+			"autoCompactCooldownMs": 1200000,
+			"autoCompactRequireIdle": true,
+			"autoResumeAfterCompact": true,
+			"autoResumeCooldownMs": 30000,
+			"handoffFreshMaxAgeMs": 1800000
+		},
+		"customFooter": {
+			"contextPressure": {
+				"byProviderModel": {
+					"github-copilot/gpt-5.3-codex": {
+						"warningPct": 48,
+						"errorPct": 70
+					}
+				}
+			}
+		},
 		"quotaVisibility": {
 			"defaultDays": 30,
 			"providerBudgets": {
