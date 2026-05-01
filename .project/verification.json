@@ -9717,6 +9717,15 @@
       "method": "targeted regression test + inspection",
       "timestamp": "2026-05-01T19:33:51.659Z",
       "evidence": "Hardened protected classification to keep `protected-parked-*` milestones fail-closed regardless of keyword text. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts`: added reason code `protected-parked-milestone`; classifier now appends milestone evidence (`source=milestone`) when task milestone matches protected parked naming. - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts`: added regression ensuring parked milestone task is skipped as protected even without keyword match, and report emits `primaryReasonCode=protected-parked-milestone`. - `docs/primitives/autonomy-protected-scope-report.md`: documented milestone parked reason code example. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 39 tests passed."
+    },
+    {
+      "id": "VER-BUD-833",
+      "target": "TASK-BUD-484",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc checklist + marker-check",
+      "timestamp": "2026-05-01T19:52:14.649Z",
+      "evidence": "Created reusable local-safe intake template for future external-influence research decisions, aligned with protected-focus packet and one-slice protected canary contract. Changes: - `docs/primitives/external-influence-intake-template.md`: added concise template with mandatory fields (hypothesis/value/risk/effort, declared files, validation gate, rollback, stop conditions, recommendation promote|skip|defer) and no-dispatch invariants. - `docs/research/external-influence-intake-template-hermes-2026-05-01.md`: filled draft using deferred Hermes case (`TASK-BUD-480`) as local-safe preparation example. - `docs/primitives/README.md`: indexed the new primitive. - `docs/guides/control-plane-operating-doctrine.md`: added explicit rule to fill local-safe external influence intake before promoting external research focus. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 1 file passed, 2 tests passed. - marker checks passed for primitive template (6/6), Hermes draft (5/5), and doctrine anchors (2/2)."
     }
   ]
 }
