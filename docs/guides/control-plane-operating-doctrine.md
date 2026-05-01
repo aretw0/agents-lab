@@ -313,7 +313,7 @@ A superfície `self_reload_autoresume_canary` é apenas plano read-only: mesmo c
 
 ## Loop local sem empurrões manuais
 
-Os empurrões manuais do operador ainda substituem um idle continuation loop seguro. O canário futuro desse loop só deve continuar sozinho quando conseguir selecionar a próxima fatia local-safe, gravar checkpoint bounded fresco, respeitar orçamento do handoff, confirmar git state esperado, evitar escopos protegidos, aplicar cooldown, executar validação/smoke conhecido e parar em stop conditions reais.
+Os empurrões manuais do operador ainda substituem um idle continuation loop seguro. O canário futuro desse loop só deve continuar sozinho quando conseguir selecionar a próxima fatia local-safe, gravar checkpoint bounded fresco, respeitar orçamento do handoff, confirmar git state esperado, evitar escopos protegidos, aplicar cooldown, executar validação/smoke conhecido e parar em stop conditions reais. O contrato operacional mais simples fica em `docs/primitives/nudge-free-local-continuity.md`: não cria um nome novo; trata “overnight” como cenário/alias de `nudge-free` / `local continuity audit`, com batch local pequeno, 3-5 fatias, commit/checkpoint por fatia, sem scheduler/remote/offload.
 
 Stop conditions reais incluem risco de perda de dados, escopo protegido, ambiguidade de produto, falha sem correção local óbvia, compact sem progresso salvo, reload sem contrato aprovado ou handoff inválido. Até esse canário existir, a continuidade sem empurrões permanece backlog explícito, não automação implícita.
 

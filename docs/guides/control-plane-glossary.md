@@ -32,7 +32,7 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 | **Local-safe** | Escopo pequeno, reversível, sem protected scopes e com validação conhecida. | Seguro para loop forte ou scheduler. | bounded local, safe slice |
 | **Protected scope** | Área que exige intenção explícita: CI/GitHub Actions, remote/offload, publish, `.pi/settings.json`, `.obsidian/`, manutenção destrutiva, etc. | Algo que o agente pode inferir por conveniência. | high-risk scope, guarded scope |
 | **Unattended** | Trabalho com menos intervenção humana, mas ainda governado por gates, checkpoint, cancelamento e escopo local. | Autonomia irrestrita ou execução remota automática. | overnight, deixa rodando |
-| **Nudge-free** | Capacidade futura/advisory de continuar sem empurrão humano quando sinais medidos estiverem verdes. | Permissão manual simulada por boolean ou texto genérico. | no-nudge loop, idle continuation |
+| **Nudge-free** | Capacidade futura/advisory de continuar sem empurrão humano quando sinais medidos estiverem verdes. É o termo canônico para batches locais “deixa rodando/overnight” quando não há scheduler/remote/offload. | Permissão manual simulada por boolean ou texto genérico; nova família de loops com outro nome. | no-nudge loop, idle continuation, overnight local, deixa rodando |
 | **One-slice** | Contrato de executar exatamente uma fatia local e parar. | Loop, scheduler ou executor permanente. | single-slice, one-shot local |
 | **Primitive** | Função reutilizável com contrato determinístico, teste e baixo acoplamento. | Nome bonito para script ad hoc. | helper, kernel, core function |
 | **Surface** | Exposição operacional de uma primitive: tool, command, prompt ou UI. | A lógica em si. | tool surface, runtime surface |

@@ -9141,6 +9141,33 @@
       "method": "bounded-pi-config-inspiration-review",
       "timestamp": "2026-05-01T05:02:22.650Z",
       "evidence": "Bounded external reference review completed for https://github.com/amosblomqvist/pi-config via git-checkout-cache at commit 575a0a5. Read README plus selected extensions/skills only: filechanges, read-only-mode, bash-guard, subagents README, context, memory, stop-slop. Wrote docs/research/pi-config-bounded-inspiration-2026-05-01.md. Extracted applicable ideas for going safely to colony promotion review: read-only review mode, file change inventory before promotion, human decision packet, no apply/stage/commit until explicit decision. Risks recorded: filechanges decline is operational, read-only active tools can surprise, memory writes can dirty state, subagents/web tools add provider/cost/scope. Proposed primitives: colony_promotion_decision_packet, review_mode_plan, file_change_inventory, memory_write_gate. Validation: safe_marker_check 4/4; i18n_lint pass; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-769",
+      "target": "TASK-BUD-421",
+      "target_type": "task",
+      "status": "partial",
+      "method": "overnight-local-loop-contract-doc",
+      "timestamp": "2026-05-01T05:10:20.702Z",
+      "evidence": "Created docs/primitives/control-plane-overnight-local-loop.md defining a simple local control-plane overnight loop: objective is board triage, decomposition, decision packets, bounded research, verification/checkpoint, not protected execution. Contract sets 3-5 slice batch, commit/checkpoint per slice, Codex as current route without settings/provider auto-switch, allowed vs blocked work, stop conditions, and morning handoff output. Validation: safe_marker_check 4/4; i18n_lint pass; git diff --check ok. Partial until linked from doctrine/guide and final task closure."
+    },
+    {
+      "id": "VER-BUD-770",
+      "target": "TASK-BUD-421",
+      "target_type": "task",
+      "status": "passed",
+      "method": "overnight-local-loop-contract",
+      "timestamp": "2026-05-01T05:12:44.153Z",
+      "evidence": "Defined the simple local control-plane overnight loop in docs/primitives/control-plane-overnight-local-loop.md and linked it from control-plane doctrine and primitives catalog. Contract focuses on board triage, decomposition, decision packets, bounded research and checkpoints, with Codex as current route and no provider/settings auto-switch. It sets 3-5 slice batch, commit/checkpoint per slice, allowed vs blocked work, stop conditions, and morning handoff format. It explicitly blocks scheduler, remote/offload, GitHub Actions, colony materialization, settings mutation, subagents/swarms and destructive git maintenance. Validation: safe_marker_check primitive 4/4, doctrine link 3/3, primitives catalog 2/2, i18n_lint pass, git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-771",
+      "target": "TASK-BUD-421",
+      "target_type": "task",
+      "status": "passed",
+      "method": "canonical-primitive-alignment",
+      "timestamp": "2026-05-01T05:17:22.199Z",
+      "evidence": "Aligned the local continuity profile to existing canonical primitives instead of inventing a separate overnight loop family. Renamed doc path to docs/primitives/nudge-free-local-continuity.md, added 'Martelo das primitivas' mapping to local_continuity_audit, nudge_free_loop_canary, context_watch_checkpoint, autonomy_lane_next_task, board bounded surfaces and one-slice contract. Updated control-plane doctrine, primitives README and glossary so overnight/deixa-rodando are aliases/scenarios of nudge-free local continuity, not new execution authority. Validation: safe_marker_check primitive 4/4, doctrine 3/3, glossary 3/3, README 2/2; i18n_lint pass; git diff --check ok."
     }
   ]
 }

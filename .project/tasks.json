@@ -10202,6 +10202,48 @@
       ],
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] A inspiração bounded de pi-config apontou que a ida segura para colony promotion review precisa de um packet read-only e decisão humana antes de materializar candidate."
+    },
+    {
+      "id": "TASK-BUD-421",
+      "description": "Definir loop local simples de overnight/control-plane para triage e pesquisa bounded do board sem scheduler/remote/offload.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/primitives/control-plane-overnight-local-loop.md",
+        ".project/tasks.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir objetivo do loop simples: preparar board/pacotes de decisão para atuação humana posterior, não executar escopos protegidos.",
+        "Declarar cadência, batch size, budget de contexto/custo, checkpoints, commits e stop conditions.",
+        "Separar tarefas permitidas (triage, decomposição, decision packet, pesquisa bounded local) de tarefas bloqueadas (remote/CI/release/promotion materializada/settings).",
+        "Usar Codex como rota atual e registrar que GitHub Copilot quota voltou como recurso futuro, sem mudar settings nem provider automaticamente.",
+        "Definir saída esperada para manhã seguinte: board pronto, pacotes de decisão e handoff curto."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Steering do operador: antes de colônias/subagentes/swarms, acertar o simples no control-plane para overnight/loops que adiantem triage/pesquisa/board com cadência e controle auditável.\n2026-05-01: concluído contrato simples para overnight local do control-plane. Ajuste de foco após steering: antes de colônias/subagentes/swarms, exercitar Codex/control-plane em 3-5 fatias locais com checkpoint/commit por fatia e sem escopos protegidos automáticos.\n2026-05-01: alinhado vocabulário após steering: `overnight` não vira primitive/família nova; caminho canônico do documento agora é `docs/primitives/nudge-free-local-continuity.md`, mapeando o cenário para `nudge-free` / `local_continuity_audit`.",
+      "verification": "VER-BUD-771"
+    },
+    {
+      "id": "TASK-BUD-422",
+      "description": "Corrigir ergonomia TUI de tool calls: recolhidas por default de forma universal e hint mostrando keybinding real (`ctrl+o`), não só id `expand-tool`.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "node_modules/@mariozechner/pi-coding-agent/docs/keybindings.md",
+        "node_modules/@mariozechner/pi-coding-agent/docs/tui.md",
+        "packages/pi-stack/extensions",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Inventariar bounded onde a TUI renderiza tool calls e o texto `use expand-tool keybinding to expand`.",
+        "Não mutar diretamente `node_modules/@mariozechner/pi-coding-agent`; escolher wrapper/extensão local ou PR upstream se necessário.",
+        "Tool calls e blocos volumosos devem nascer recolhidos por default ou seguir política universal de collapse para reduzir poluição da sessão.",
+        "O hint de expansão deve mostrar o keybinding resolvido para o usuário, por exemplo `ctrl+o`, e não apenas o nome da ação.",
+        "Se a correção depender de upstream/TUI, registrar boundary e manter regra como blocker/side quest antes de overnight forte."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Steering do operador: outputs de tools precisam ser recolhíveis por default e o humano precisa ver a tecla real (`ctrl+o`) em vez de `expand-tool`; poluição de chat reduz confiança em loops longos."
     }
   ]
 }

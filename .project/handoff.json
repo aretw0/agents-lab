@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T05:02:58.920Z",
-  "context": "Completed bounded pi-config inspiration review to prepare for safe colony promotion review. Read selected files only from cached repo amosblo [snip] t read-only before any materialization. [truncated:+350 chars]",
+  "timestamp": "2026-05-01T05:19:15.133Z",
+  "context": "Responded to steering about not inventing another loop name. Canonical decision: overnight/deixa-rodando/loop maior are aliases/scenarios for [snip] ybinding issue as TASK-BUD-422 planned. [truncated:+328 chars]",
   "next_actions": [
-    "Commit TASK-BUD-268 research and TASK-BUD-420 creation.",
-    "Next bounded focus: TASK-BUD-420 design read-only colony promotion decision packet.",
-    "Do not execute colony promotion/materialization yet."
+    "Commit TASK-BUD-421 canonical primitive alignment.",
+    "Then choose next bounded slice: likely TASK-BUD-422 TUI collapse/keybinding ergonomics, before [snip] ASK-BUD-420 colony packet. [truncated:+15 chars]"
   ],
   "blockers": [
-    "Context warn/57: continue bounded only.",
-    "Colony promotion review should not start until TASK-BUD-420 defines the packet contract."
+    "Do not start scheduler/remote/offload/subagents/swarms/colony promotion.",
+    "Do not mutate node_modules/@mariozechner/pi-coding-agent directly; TUI fix mus [snip] or upstream boundary. [truncated:+28 chars]",
+    "Auto-resume handoff mentioning TASK-BUD-420 is stale vs latest steering; lates [snip] free primitives first. [truncated:+46 chars]"
   ],
   "recent_validation": [
-    "git-checkout-cache path /home/aretw0/.cache/checkouts/github.com/amosblomqvist/pi-config commit 575a0a5",
-    "safe_marker_check docs/research/pi-config-bounded-inspiration-2026-05-01.md => 4/4",
-    "i18n_lint_text => pass"
+    "safe_marker_check docs/primitives/nudge-free-local-continuity.md 4/4",
+    "safe_marker_check doctrine 3/3",
+    "safe_marker_check glossary 3/3"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T05:02:58.920Z",
-    "level": "warn",
-    "percent": 57,
+    "generatedAtIso": "2026-05-01T05:19:15.133Z",
+    "level": "ok",
+    "percent": 16,
     "action": "continue",
-    "recommendation": "commit-then-start-task-bud-420",
+    "recommendation": "commit-current-slice",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T05:02:58.920Z",
+      "atIso": "2026-05-01T05:19:15.133Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 57,
+      "level": "ok",
+      "percent": 16,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-start-task-bud-420"
+      "recommendation": "commit-current-slice"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-268"
+    "TASK-BUD-421"
   ]
 }
