@@ -9366,6 +9366,15 @@
       "method": "board seeding + lane gating check",
       "timestamp": "2026-05-01T13:58:03.582Z",
       "evidence": "Finalized brainstorm anti-bloat consolidation by seeding prioritized local-safe backlog tasks: `TASK-BUD-442`, `TASK-BUD-443`, `TASK-BUD-444`, `TASK-BUD-445`, `TASK-BUD-446` (all planned, non-protected scope). This transforms brainstorm output into executable long-horizon quality lane with explicit acceptance criteria and risk rationale per task. Pre-close lane check showed blocked-by-dependencies while `TASK-BUD-441` was in-progress, confirming dependency gating is active and auditable."
+    },
+    {
+      "id": "VER-BUD-794",
+      "target": "TASK-BUD-447",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board planning + lane readiness check",
+      "timestamp": "2026-05-01T14:07:10.254Z",
+      "evidence": "Milestone `control-plane-long-run-prep` was established and populated with sequenced local-safe tasks (`TASK-BUD-442`..`TASK-BUD-446` plus `TASK-BUD-448`..`TASK-BUD-452`) focused on anti-bloat hardening and mdt/squeez assimilation from local artifacts. Milestone query confirms 10 planned tasks with rationale, and autonomy lane under this milestone is ready (`recommendationCode=execute-bounded-slice`) with eligible queue present."
     }
   ]
 }

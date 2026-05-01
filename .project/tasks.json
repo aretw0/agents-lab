@@ -10679,7 +10679,7 @@
         "Substituir literals duplicados nas surfaces alvo.",
         "Smoke tests relevantes permanecem verdes sem mudança funcional."
       ],
-      "milestone": "local-first-control-plane",
+      "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] Menos string solta => menos drift semântico e menos gordura de manutenção."
     },
     {
@@ -10701,7 +10701,7 @@
         "Cobrir fallback para selection.eligibleTaskIds quando `ideas` vazio/inválido.",
         "Preservar invariantes report-only (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`)."
       ],
-      "milestone": "local-first-control-plane",
+      "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] Evita explosão de payload e mantém comportamento previsível."
     },
     {
@@ -10722,7 +10722,7 @@
         "Manter tool surface fina (wiring + IO).",
         "Smoke tests de surface permanecem verdes."
       ],
-      "milestone": "local-first-control-plane",
+      "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] Reduz gordura estrutural e facilita evolução incremental."
     },
     {
@@ -10743,7 +10743,7 @@
         "Falha fechada quando itens obrigatórios desaparecerem.",
         "Sem alterar política de escopos protegidos."
       ],
-      "milestone": "local-first-control-plane",
+      "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] Previne regressão silenciosa da estratégia de qualidade."
     },
     {
@@ -10764,8 +10764,127 @@
         "Adicionar teste dedicado para codes + nextAction non-empty.",
         "Manter contexto-watchdog smoke principal verde."
       ],
-      "milestone": "local-first-control-plane",
+      "milestone": "control-plane-long-run-prep",
       "notes": "[rationale:risk-control] Reduz tamanho/complexidade do arquivo gigante e melhora mantenibilidade."
+    },
+    {
+      "id": "TASK-BUD-447",
+      "description": "Estruturar milestone local-safe de longo curso para assimilação de referências (mdt/squeez) e limpeza anti-bloat do control-plane.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-441"
+      ],
+      "files": [
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Definir milestone dedicado para o lote local-safe de longo curso.",
+        "Semear pelo menos 5 tasks locais sequenciadas para assimilação + limpeza.",
+        "Validar que autonomy lane volta a ter fila local-safe elegível sob o milestone."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Um lote local-safe explícito reduz deriva e permite prova de maturidade com acompanhamento humano.\n2026-05-01: brainstorm convertido em lote executável de longo curso local-safe, com fila contínua auditável.",
+      "verification": "VER-BUD-794"
+    },
+    {
+      "id": "TASK-BUD-448",
+      "description": "Sintetizar padrões mdt a partir de artefatos locais já versionados e extrair regras operacionais acionáveis para o control-plane.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-447"
+      ],
+      "files": [
+        "docs/guides/control-plane-reference-patterns.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar 3-5 padrões mdt em formato regra+quando usar+risco.",
+        "Cada padrão deve mapear para comportamento local-safe do control-plane.",
+        "Sem ampliar escopo para CI/remote/offload/scheduler."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Síntese explícita evita repetição sem direção e facilita execução por fatias."
+    },
+    {
+      "id": "TASK-BUD-449",
+      "description": "Sintetizar padrões squeez a partir de artefatos locais já versionados e extrair regras de poda de gordura aplicáveis ao control-plane.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-448"
+      ],
+      "files": [
+        "docs/guides/control-plane-reference-patterns.md"
+      ],
+      "acceptance_criteria": [
+        "Registrar 3-5 padrões squeez em formato regra+quando usar+risco.",
+        "Identificar onde o padrão reduz bloat sem perda de governança.",
+        "Sem alterar surfaces protegidas."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Curadoria prática de padrões melhora qualidade de longo prazo com baixo risco."
+    },
+    {
+      "id": "TASK-BUD-450",
+      "description": "Consolidar matriz de padrões (mdt + squeez + brainstorm) e priorizar aplicação em fatias locais de alto valor.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-449"
+      ],
+      "files": [
+        "docs/guides/control-plane-reference-patterns.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Matriz deve classificar valor/risco/esforço para cada padrão.",
+        "Selecionar top 5 aplicações imediatas no control-plane local-safe.",
+        "Adicionar critérios explícitos de no-go para evitar deriva."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Matriz priorizada evita backlog inflado e melhora foco contínuo."
+    },
+    {
+      "id": "TASK-BUD-451",
+      "description": "Traduzir a matriz priorizada em side quests local-safe com validação focal e rollback explícitos.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-450"
+      ],
+      "files": [
+        ".project/tasks.json",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Criar lote de side quests com intenção única e blast radius curto.",
+        "Cada side quest deve declarar validação focal e rollback simples.",
+        "Garantir que a fila resultante permaneça elegível no autonomy lane."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Quebrar em side quests reduz risco e sustenta execução longa com qualidade."
+    },
+    {
+      "id": "TASK-BUD-452",
+      "description": "Rodar rehearsal local de múltiplas fatias do lote anti-bloat e registrar pacote de maturidade da run longa.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-451"
+      ],
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md",
+        ".project/verification.json",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Executar batch de 3-5 fatias locais com commits pequenos e checkpoint por fatia.",
+        "Registrar métricas do pacote de maturidade definido na doutrina.",
+        "Concluir com decisão report-only de prontidão para próximos passos."
+      ],
+      "milestone": "control-plane-long-run-prep",
+      "notes": "[rationale:risk-control] Rehearsal medido dá evidência real de maturidade antes de outras lanes."
     }
   ]
 }
