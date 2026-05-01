@@ -1,34 +1,34 @@
 {
-  "timestamp": "2026-05-01T03:56:24.153Z",
-  "context": "Post-reload validation for TASK-BUD-398 completed. context_watch_status is checkpoint/68 with operator=none, so runtime loaded but context re [snip] -BUD-410 live BG_PROCESS_DONE boundary. [truncated:+326 chars]",
+  "timestamp": "2026-05-01T03:58:54.865Z",
+  "context": "Operator clarified the remaining undefined issue: [undefined] appears as the header/title at the top of the background process visualization, [snip] ess-control docs with this distinction. [truncated:+334 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-398 closure.",
-    "Because context is checkpoint/68, avoid starting new implementation until after checkpoint/com [snip] eload boundary is handled. [truncated:+6 chars]",
-    "Next safe slice after context relief: TASK-BUD-410 or TASK-BUD-400; TASK-BUD-399 drill waits on TASK-BUD-410."
+    "Commit TASK-BUD-411/docs update.",
+    "Because context is checkpoint/68, avoid implementation until checkpoint/compact boundary is safe.",
+    "Later implement TASK-BUD-411 or keep TASK-BUD-410 fail-closed until harness header can be normalized."
   ],
   "blockers": [
-    "TASK-BUD-153 remains blocked by unresolved dependencies.",
-    "TASK-BUD-410 remains in-progress/planned blocker for real BG_PROCESS_DONE boundary.",
-    "Context at checkpoint threshold; continue only checkpoint/commit, no broad implementation."
+    "TASK-BUD-410 now depends on TASK-BUD-411.",
+    "TASK-BUD-153 and TASK-BUD-399 remain blocked by TASK-BUD-410.",
+    "Context at checkpoint threshold; no broad implementation now."
   ],
   "recent_validation": [
-    "context_watch_status => level=checkpoint percent=68 action=write-checkpoint operator=none",
-    "board_task_quality_gate TASK-BUD-398 => closeAllowed=yes",
-    "board_task_complete TASK-BUD-398 => VER-BUD-750 completed"
+    "TASK-BUD-411 created planned/p1",
+    "board_task_dependencies added TASK-BUD-411 to TASK-BUD-410",
+    "safe_marker_check background-process-control header markers matched 3/3"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T03:56:24.153Z",
+    "generatedAtIso": "2026-05-01T03:58:54.865Z",
     "level": "checkpoint",
     "percent": 68,
     "action": "checkpoint-refresh",
-    "recommendation": "commit-and-pause-for-context"
+    "recommendation": "commit-header-boundary-and-pause"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T03:56:24.153Z",
+      "atIso": "2026-05-01T03:58:54.865Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 68,
@@ -38,7 +38,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-pause-for-context"
+      "recommendation": "commit-header-boundary-and-pause"
     }
   ]
 }

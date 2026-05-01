@@ -75,13 +75,15 @@ Todo evento de processo em background deve ter estado canônico antes de aparece
 
 Labels de UI/log nunca devem renderizar `[undefined]`. Label vazia, `undefined` ou `null` deve cair para `background-process` e registrar warning `fallback-display-label`. `BG_PROCESS_DONE` após stop deve virar `late-after-stop`, com warning `done-after-stop-request`, para diferenciar conclusão esperada de notificação tardia/stale.
 
+Importante: a visualização real tem pelo menos dois campos distintos. O header/título pode aparecer como `[undefined]` no topo da caixa, enquanto o corpo do evento mostra `[BG_PROCESS_DONE] PID ...`. Normalizar só o label do lifecycle event não basta se o header vier de outra propriedade do harness/UI. O contrato de adaptação precisa normalizar ambos: `displayLabel` do evento e `viewTitle`/header da visualização.
+
 A superfície `background_process_lifecycle_plan` é read-only e serve para classificar eventos; ela preserva `dispatchAllowed=false`, `processStartAllowed=false`, `processStopAllowed=false` e `authorization=none`.
 
 ### Boundary da fonte de evento
 
 Investigação bounded em 2026-05-01 procurou `BG_PROCESS_DONE`, `backgrounded`, `bg_status` e `[undefined]` em `packages/pi-stack/extensions` e `node_modules/@mariozechner/pi-coding-agent/dist`, excluindo source maps. O emissor literal de `BG_PROCESS_DONE` não apareceu nesses arquivos; os hits relevantes foram apenas `bg_status` em contrato de monitor e `backgrounded` no fluxo upstream de `Ctrl+Z`. Portanto, até nova evidência de código, a origem do prefixo `[undefined]`/`BG_PROCESS_DONE` observado deve ser tratada como boundary de harness/superfície externa ou caminho de emissão ainda não localizado, não como bug atribuído diretamente ao código first-party atual.
 
-Evidência live posterior confirmou a fronteira operacional: o harness emitiu `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` para um comando auto-backgrounded. Classificado pelo contrato first-party como `state=finished`, `known=yes`, `stopRequested=no`, `label=BG_PROCESS_DONE`, `dispatch=no`, `authorization=none`. Isso não prova que o emissor real já usa o contrato; prova que a integração/adaptação da notificação real ainda é a fronteira a resolver antes de readiness forte.
+Evidência live posterior confirmou a fronteira operacional: o harness emitiu `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` para um comando auto-backgrounded e depois `[BG_PROCESS_DONE] PID 32696 finished (exit 0)` para `git status --short && echo status-ok`. Classificados pelo contrato first-party como `state=finished`, `known=yes`, `stopRequested=no`, `label=BG_PROCESS_DONE`, `dispatch=no`, `authorization=none`. O operador também observou o header separado `[undefined]` no topo da visualização. Isso não prova que o emissor real já usa o contrato; prova que a integração/adaptação da notificação real ainda é a fronteira a resolver antes de readiness forte.
 
 Caminhos aceitos para integração futura:
 
