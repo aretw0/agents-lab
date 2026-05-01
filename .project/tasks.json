@@ -11310,7 +11310,7 @@
     {
       "id": "TASK-BUD-473",
       "description": "Pesquisa local-safe: mapear por que tasks entram como protected-scope no seletor e documentar critérios operacionais de classificação.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-472"
@@ -11325,7 +11325,8 @@
         "Propõe ajustes apenas se houver baixo risco e validação focal clara."
       ],
       "milestone": "cleanup-research-longrun",
-      "notes": "[rationale:risk-control] pesquisa direcionada para reduzir surpresa no roteamento da lane."
+      "notes": "[rationale:risk-control] pesquisa direcionada para reduzir surpresa no roteamento da lane.\n2026-05-01: iniciando mapeamento determinístico de classificação protected-scope no seletor para reduzir falso-positivo de pesquisa local-safe.\n2026-05-01: critérios de protected-scope documentados e heurística de pesquisa ajustada para evitar falso-positivo em pesquisa local-safe (mantendo bloqueio para sinais externos).",
+      "verification": "VER-BUD-828"
     },
     {
       "id": "TASK-BUD-474",

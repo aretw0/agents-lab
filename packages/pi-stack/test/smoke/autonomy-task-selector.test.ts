@@ -58,7 +58,7 @@ describe("autonomy task selector", () => {
     expect(result.totals.skippedProtectedScope).toBe(1);
   });
 
-  it("treats research and external influence tasks as protected autonomy scope", () => {
+  it("treats external research tasks as protected autonomy scope", () => {
     const result = selectAutonomyLaneTask([
       task({ id: "TASK-RESEARCH", status: "planned", description: "[P1] avaliar influência de https://example.com" }),
       task({ id: "TASK-LOCAL", status: "planned", description: "[P2] local unattended loop" }),
@@ -66,6 +66,17 @@ describe("autonomy task selector", () => {
 
     expect(result.nextTaskId).toBe("TASK-LOCAL");
     expect(result.totals.skippedProtectedScope).toBe(1);
+  });
+
+  it("keeps local-safe research criteria tasks eligible", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-RESEARCH-LOCAL", status: "planned", description: "[P1] pesquisa local-safe: mapear critérios de classificação protected" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P2] local unattended loop" }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-RESEARCH-LOCAL");
+    expect(result.totals.skippedProtectedScope).toBe(0);
   });
 
   it("treats colony promotion/recovery themes as protected by default", () => {

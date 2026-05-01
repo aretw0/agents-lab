@@ -75,7 +75,8 @@ const PROTECTED_SCOPE_PATTERNS = [
   /\b(?:promotion|promote|recovery|recover)\b.*\bcolony\b/i,
   /(?:^|\W)[\w-]*-promotion(?:\W|$)/i,
   /https?:\/\//i,
-  /\b(?:research|pesquisa|influ[eê]ncia|inspiration|inspira[cç][aã]o)\b/i,
+  /\b(?:research|pesquisa)\b.*\b(?:extern[ao]|external|web|internet|url|fonte(?:s)?|source|influ[eê]ncia|inspiration|inspira[cç][aã]o|prior\s*art)\b/i,
+  /\b(?:influ[eê]ncia|inspiration|inspira[cç][aã]o)\b.*\b(?:extern[ao]|external|web|internet|fonte(?:s)?|source|prior\s*art)\b/i,
   /\bpublish\b/i,
   /\bci\b/i,
 ];

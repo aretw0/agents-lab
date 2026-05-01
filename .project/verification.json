@@ -9672,6 +9672,15 @@
       "method": "smoke regressions + marker-check",
       "timestamp": "2026-05-01T18:44:31.158Z",
       "evidence": "Added regression pack for planning-clarity scoring and visible seeding/tangent continuity contracts. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts`: added regression for `buildBoardPlanningClarityScore(...)` covering simplista case (macro sem dependências => `planning-clarity-needs-decomposition`) and milestone-filtered output; preserved strong-case checks via tool path. - `packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` + `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: strengthened visible-seeding assertions to preserve `recommendationCode` + `nextAction` and no-dispatch invariants. - `docs/research/cleanup-research-regression-pack-2026-05-01.md`: compact lane evidence packet with caso bom/simplista/tangente aprovada matrix and invariants. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 3 files passed, 81 tests passed. - marker-check on regression packet doc matched 5/5 anchors."
+    },
+    {
+      "id": "VER-BUD-828",
+      "target": "TASK-BUD-473",
+      "target_type": "task",
+      "status": "passed",
+      "method": "selector regression tests + local criteria synthesis",
+      "timestamp": "2026-05-01T18:54:57.482Z",
+      "evidence": "Mapped and refined protected-scope classification criteria from local selector source to reduce false-positive blocking on local-safe research while keeping fail-closed behavior for external/protected scopes. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts`: tightened research-related protected patterns; removed broad `pesquisa/research` standalone trigger and replaced with external-signal coupling (`URL`, `external/web/internet/source/influence/inspiration/prior art`). - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts`: updated protected-research regression and added explicit test proving local-safe research criteria task remains eligible. - `docs/research/protected-scope-classification-criteria-2026-05-01.md`: short matrix with positive/negative examples and low-risk adjustment rationale. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 2 files passed, 31 tests passed. - marker-check on criteria doc matched 5/5 anchors."
     }
   ]
 }

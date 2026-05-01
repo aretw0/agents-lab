@@ -1,35 +1,31 @@
 {
-  "timestamp": "2026-05-01T18:45:26.378Z",
-  "context": "Completed cleanup-research planning primitives: visible seeding preview, emergent tangent provenance, and board planning clarity score with r [snip] remaining candidate is protected-scope. [truncated:+103 chars]",
+  "timestamp": "2026-05-01T18:55:52.066Z",
+  "context": "Completed protected-scope criteria synthesis and selector false-positive hardening for local-safe research. cleanup-research-longrun now has [snip] nned/in-progress local-safe candidates. [truncated:+6 chars]",
   "next_actions": [
-    "human focus needed: either authorize protected-scope TASK-BUD-473 research criteria lane or cr [snip] n cleanup-research-longrun [truncated:+28 chars]",
-    "if protected focus is approved, run bounded slice with explicit scope and rollback before continuing"
+    "/reload to activate updated selector heuristics in live runtime",
+    "choose next milestone focus or seed next local-safe task before autonomous continuation"
   ],
-  "blockers": [
-    "PROTECTED_SCOPE_REQUIRED"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-st [snip] onomy-lane-surface.test.ts [truncated:+137 chars]",
-    "safe_marker_check docs/primitives/board-planning-clarity-score.md",
-    "safe_marker_check docs/research/cleanup-research-regression-pack-2026-05-01.md"
+    "npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/t [snip] onomy-lane-surface.test.ts [truncated:+13 chars]",
+    "safe_marker_check docs/research/protected-scope-classification-criteria-2026-05-01.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-478",
+    "focus": "TASK-BUD-473",
     "canonical_links": [
-      "task:TASK-BUD-478",
       "task:TASK-BUD-473"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T18:45:26.378Z",
+    "generatedAtIso": "2026-05-01T18:55:52.066Z",
     "level": "checkpoint",
     "action": "checkpoint-refresh",
-    "recommendation": "local-stop-protected-focus-required",
+    "recommendation": "add-or-select-task",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T18:45:26.378Z",
+      "atIso": "2026-05-01T18:55:52.066Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 0,
@@ -39,10 +35,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "local-stop-protected-focus-required"
+      "recommendation": "add-or-select-task"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-478"
+    "TASK-BUD-473"
   ]
 }
