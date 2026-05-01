@@ -1,29 +1,28 @@
 {
-  "timestamp": "2026-05-01T12:28:33.195Z",
-  "context": "Completed micro-slice to harden autonomy task selection semantics for no-eligible-tasks. Selector now emits stable recommendationCode plus ac [snip] in unattended local-first continuation. [truncated:+120 chars]",
+  "timestamp": "2026-05-01T12:30:49.614Z",
+  "context": "Completed follow-up micro-slice to expose stable stop-local recommendationCode contract at surface level. Added smoke coverage that autonomy_ [snip] hen only protected tasks are available. [truncated:+109 chars]",
   "next_actions": [
-    "Commit TASK-BUD-424 code+test+board evidence.",
-    "Reload runtime before expecting autonomy_lane_next_task tool output to include the new recommendationCode/live guidance."
+    "Commit TASK-BUD-425 test+board evidence slice.",
+    "Reload runtime before expecting live tool output to include new recommendationCode field."
   ],
   "blockers": [
-    "Strong unattended remote/offload/CI/scheduler remains unauthorized.",
-    "Without reload, current live tool output still reflects previously loaded extension code."
+    "Strong unattended remote/offload/CI/scheduler remains unauthorized."
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages [snip] es passed, 20 tests passed [truncated:+59 chars]",
+    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/ [snip] es passed, 21 tests passed [truncated:+59 chars]",
     "git diff --check => no whitespace errors"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T12:28:33.195Z",
+    "generatedAtIso": "2026-05-01T12:30:49.614Z",
     "level": "ok",
     "percent": 0,
     "action": "continue",
-    "recommendation": "Commit bounded slice and pause for explicit next local-safe focus.",
+    "recommendation": "Commit bounded slice and continue only with explicit local-safe focus.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T12:28:33.195Z",
+      "atIso": "2026-05-01T12:30:49.614Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -33,10 +32,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commit bounded slice and pause for explicit next local-safe focus."
+      "recommendation": "Commit bounded slice and continue only with explicit local-safe focus."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-424"
+    "TASK-BUD-425"
   ]
 }

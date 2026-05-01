@@ -10290,6 +10290,27 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Reduz ambiguidade de continuidade: sem tarefa local-safe elegível, o lane deve pedir foco explícito/ação de desbloqueio em vez de parecer pronto para puxar backlog protegido.\n2026-05-01: lane now emits actionable stop semantics for no-eligible state, reducing ambiguity and preventing perceived permission to drift into protected backlog.",
       "verification": "VER-BUD-776"
+    },
+    {
+      "id": "TASK-BUD-425",
+      "description": "Cobrir contrato da surface autonomy_lane_next_task para recommendationCode em stop local (`no-eligible-tasks`).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-424"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Adicionar smoke test que valida `reason=no-eligible-tasks` + `recommendationCode` esperado no resultado da surface.",
+        "Teste roda focado sem alterar escopos protegidos.",
+        "Registrar verificação no board."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Garantir que consumers da surface recebam código estável de decisão em stop local, evitando parsing de texto livre.\n2026-05-01: consumer contract hardened so UI/tools can react to stop-local reasons without parsing free-text recommendation.",
+      "verification": "VER-BUD-777"
     }
   ]
 }

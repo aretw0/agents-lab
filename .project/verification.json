@@ -9213,6 +9213,15 @@
       "method": "focused smoke tests",
       "timestamp": "2026-05-01T12:28:10.891Z",
       "evidence": "Updated `selectAutonomyLaneTask` to return stable `recommendationCode` and explicit local-stop recommendations when `reason=no-eligible-tasks`, distinguishing protected-only queues, dependency-only queues, missing-rationale-only queues, mixed blockers, and generic decomposition. Added tests for protected-only local-stop classification and dependency-only unblocking classification in `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 2 files passed, 20 tests passed."
+    },
+    {
+      "id": "VER-BUD-777",
+      "target": "TASK-BUD-425",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T12:30:07.896Z",
+      "evidence": "Added surface-level smoke coverage in `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` to assert stable stop packet semantics from `autonomy_lane_next_task` when only protected tasks are present. New assertion validates `ready=false`, `reason=no-eligible-tasks`, and `recommendationCode=local-stop-protected-focus-required`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` => 2 files passed, 21 tests passed."
     }
   ]
 }

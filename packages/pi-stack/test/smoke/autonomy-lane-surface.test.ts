@@ -53,6 +53,28 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
   });
 
+  it("returns stable recommendationCode when no local-safe eligible task exists", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-surface-protected-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const nextTaskTool = tools.find((tool) => tool.name === "autonomy_lane_next_task");
+    const result = nextTaskTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.ready).toBe(false);
+    expect(result?.details.reason).toBe("no-eligible-tasks");
+    expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
+  });
+
   it("uses handoff focus by default to avoid drifting to unrelated tasks", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-focus-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
