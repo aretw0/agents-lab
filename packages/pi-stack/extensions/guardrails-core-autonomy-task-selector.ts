@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
+import {
+  LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
+  localStopProtectedFocusNextAction,
+} from "./guardrails-core-local-stop-guidance";
 
 export type AutonomyTaskSelectionReason =
   | "ready"
@@ -183,8 +187,8 @@ function resolveNoEligibleTaskRecommendation(input: {
   const { blockedByDependencies, skippedProtectedScope, skippedMissingRationale } = input;
   if (skippedProtectedScope > 0 && blockedByDependencies === 0 && skippedMissingRationale === 0) {
     return {
-      recommendationCode: "local-stop-protected-focus-required",
-      recommendation: "local stop condition: no eligible local-safe tasks remain; request explicit human focus before entering protected scope, or create a new local-safe task.",
+      recommendationCode: LOCAL_STOP_PROTECTED_FOCUS_REQUIRED_CODE,
+      recommendation: localStopProtectedFocusNextAction(),
     };
   }
   if (blockedByDependencies > 0 && skippedProtectedScope === 0 && skippedMissingRationale === 0) {

@@ -10444,7 +10444,7 @@
     {
       "id": "TASK-BUD-432",
       "description": "Centralizar mensagens/códigos de stop local em helper compartilhado entre autonomy lane e context-watch para reduzir drift semântico.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-431"
@@ -10460,7 +10460,8 @@
         "Smoke tests focais permanecem verdes."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] Evita inconsistência de guidance entre surfaces."
+      "notes": "[rationale:risk-control] Evita inconsistência de guidance entre surfaces.\n2026-05-01: iniciado micro-slice para centralizar guidance stop-local compartilhado entre autonomy selector e context-watch continuation readiness, reduzindo drift semântico sem ampliar scope funcional.\n2026-05-01: centralização semântica mínima concluída sem ampliar superfície funcional.",
+      "verification": "VER-BUD-785"
     },
     {
       "id": "TASK-BUD-433",

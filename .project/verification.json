@@ -9285,6 +9285,15 @@
       "method": "bounded research synthesis",
       "timestamp": "2026-05-01T13:34:07.656Z",
       "evidence": "Produced bounded research assimilation doc `docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md` reframing Claude ecosystem brainstorm idea into local-first contract (`lane_brainstorm_packet`) with read-only invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`), budget-aware constraints, deterministic fallback, and implementation backlog (`TASK-BUD-437`..`TASK-BUD-440`). Validation: safe_marker_check matched 7/7 required markers; i18n_lint_text passed."
+    },
+    {
+      "id": "VER-BUD-785",
+      "target": "TASK-BUD-432",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests",
+      "timestamp": "2026-05-01T13:36:56.121Z",
+      "evidence": "Implemented shared stop-local guidance helper in `packages/pi-stack/extensions/guardrails-core-local-stop-guidance.ts` and reused it in both `guardrails-core-autonomy-task-selector.ts` and `context-watchdog.ts` (`resolveContextWatchContinuationRecommendation`). Centralized canonical protected-focus local-stop nextAction text and reused recommendation code constants where applicable. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` => 3 files passed, 73 tests passed."
     }
   ]
 }

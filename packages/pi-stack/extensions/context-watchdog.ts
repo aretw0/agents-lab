@@ -72,6 +72,10 @@ import {
 	type LocalSliceHandoffCheckpointInput,
 } from "./context-watchdog-handoff";
 import {
+	LOCAL_STOP_NO_LOCAL_SAFE_NEXT_STEP_CODE,
+	localStopProtectedFocusNextAction,
+} from "./guardrails-core-local-stop-guidance";
+import {
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
 	shouldNotifyAutoResumeSuppression,
@@ -892,8 +896,8 @@ export function resolveContextWatchContinuationRecommendation(input: {
 	const reasons = input.localAuditReasons ?? [];
 	if (reasons.includes("no-local-safe-next-step")) {
 		return {
-			recommendationCode: "local-stop-no-local-safe-next-step",
-			nextAction: "local stop condition: no eligible local-safe next step; request explicit focus for protected lane or create a new local-safe task.",
+			recommendationCode: LOCAL_STOP_NO_LOCAL_SAFE_NEXT_STEP_CODE,
+			nextAction: localStopProtectedFocusNextAction(),
 		};
 	}
 	if (input.focusTasks === "none-listed" || reasons.includes("candidate:invalid") || input.staleFocusCount > 0) {
