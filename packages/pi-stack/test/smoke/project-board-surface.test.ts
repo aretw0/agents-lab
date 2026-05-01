@@ -7,6 +7,8 @@ import projectBoardSurfaceExtension, {
   buildProjectTaskDecisionPacket,
   buildProjectTaskQualityGate,
   buildBoardPlanningClarityScore,
+  buildBoardDependencyHealthSnapshot,
+  buildBoardDependencyHygieneScore,
   completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
   queryProjectTasks,
@@ -472,7 +474,85 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("registers dependency/quality/clarity tools", async () => {
+  it("builds dependency health snapshot for healthy, blocked, and milestone-filtered scopes", () => {
+    const cwd = seedWorkspace();
+    try {
+      const healthy = buildBoardDependencyHealthSnapshot(cwd);
+      expect(healthy.ok).toBe(true);
+      expect(healthy.recommendationCode).toBe("board-dependency-health-strong");
+      expect(healthy.metrics.tasksWithBlockers).toBe(0);
+
+      writeFileSync(
+        join(cwd, ".project", "tasks.json"),
+        `${JSON.stringify(
+          {
+            tasks: [
+              { id: "TASK-LOCAL-A", description: "missing ref", status: "planned", milestone: "MS-A", depends_on: ["TASK-MISSING"] },
+              { id: "TASK-LOCAL-B", description: "cycle b", status: "planned", milestone: "MS-A", depends_on: ["TASK-LOCAL-C"] },
+              { id: "TASK-LOCAL-C", description: "cycle c", status: "planned", milestone: "MS-A", depends_on: ["TASK-LOCAL-B"] },
+              { id: "TASK-PROTECTED", description: "pesquisa externa", status: "planned", milestone: "protected-parked-legacy" },
+              { id: "TASK-LOCAL-D", description: "depends protected", status: "planned", milestone: "MS-A", depends_on: ["TASK-PROTECTED"] },
+              { id: "TASK-MS-B-OK", description: "scope B sem blocker", status: "planned", milestone: "MS-B", depends_on: ["TASK-LOCAL-B"] },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const blocked = buildBoardDependencyHealthSnapshot(cwd);
+      expect(blocked.recommendationCode).toBe("board-dependency-health-protected-coupling");
+      expect(blocked.metrics.tasksWithBlockers).toBeGreaterThan(0);
+      expect(blocked.metrics.missingReferenceCount).toBeGreaterThan(0);
+      expect(blocked.metrics.cycleReferenceCount).toBeGreaterThan(0);
+      expect(blocked.metrics.protectedCouplingCount).toBeGreaterThan(0);
+      expect(blocked.summary).toContain("code=board-dependency-health-protected-coupling");
+
+      const filtered = buildBoardDependencyHealthSnapshot(cwd, { milestone: "MS-B" });
+      expect(filtered.metrics.sampledTasks).toBe(1);
+      expect(filtered.metrics.tasksWithBlockers).toBe(0);
+      expect(filtered.recommendationCode).toBe("board-dependency-health-strong");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("builds dependency hygiene score for healthy and coupling-critical scopes", () => {
+    const cwd = seedWorkspace();
+    try {
+      const healthy = buildBoardDependencyHygieneScore(cwd);
+      expect(healthy.recommendationCode).toBe("board-dependency-hygiene-strong");
+      expect(healthy.score).toBeGreaterThanOrEqual(90);
+
+      writeFileSync(
+        join(cwd, ".project", "tasks.json"),
+        `${JSON.stringify(
+          {
+            tasks: [
+              { id: "TASK-X", description: "missing ref", status: "planned", depends_on: ["TASK-MISSING"] },
+              { id: "TASK-Y", description: "cycle y", status: "planned", depends_on: ["TASK-Z"] },
+              { id: "TASK-Z", description: "cycle z", status: "planned", depends_on: ["TASK-Y"] },
+              { id: "TASK-P", description: "pesquisa externa", status: "planned", milestone: "protected-parked-legacy" },
+              { id: "TASK-L", description: "local", status: "planned", depends_on: ["TASK-P"] },
+            ],
+          },
+          null,
+          2,
+        )}\n`,
+        "utf8",
+      );
+
+      const critical = buildBoardDependencyHygieneScore(cwd);
+      expect(critical.recommendationCode).toBe("board-dependency-hygiene-critical-protected-coupling");
+      expect(critical.dimensions.coupling).toBeLessThan(80);
+      expect(critical.summary).toContain("board-dependency-hygiene-score:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("registers dependency/quality/clarity/snapshot/hygiene tools", async () => {
     const cwd = seedWorkspace();
     try {
       const pi = makeMockPi();
@@ -480,6 +560,8 @@ describe("project-board-surface", () => {
       const depTool = getTool(pi, "board_task_dependencies");
       const gateTool = getTool(pi, "board_task_quality_gate");
       const planningTool = getTool(pi, "board_planning_clarity_score");
+      const snapshotTool = getTool(pi, "board_dependency_health_snapshot");
+      const hygieneTool = getTool(pi, "board_dependency_hygiene_score");
 
       const depResult = await depTool.execute(
         "tc-deps",
@@ -512,6 +594,26 @@ describe("project-board-surface", () => {
       expect(planningResult.details?.ok).toBe(true);
       expect(planningResult.details?.recommendationCode).toBe("planning-clarity-strong");
       expect(String(planningResult.details?.summary)).toContain("board-planning-score:");
+
+      const snapshotResult = await snapshotTool.execute(
+        "tc-dependency-health",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect(snapshotResult.details?.ok).toBe(true);
+      expect(String(snapshotResult.details?.summary)).toContain("board-dependency-health:");
+
+      const hygieneResult = await hygieneTool.execute(
+        "tc-dependency-hygiene",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect(hygieneResult.details?.ok).toBe(true);
+      expect(String(hygieneResult.details?.summary)).toContain("board-dependency-hygiene-score:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

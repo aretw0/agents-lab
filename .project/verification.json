@@ -9807,6 +9807,69 @@
       "method": "smoke regression (dependency summary evidence)",
       "timestamp": "2026-05-01T21:50:38.602Z",
       "evidence": "Expanded dependency summary evidence coverage in board surface smoke tests. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added summary assertions for ready path (`code=dependency-update-ready`). - Added summary assertions for protected-coupling path: - `code=dependency-update-blocked-protected-coupling` - `protectedDeps=TASK-PROTECTED` - Added summary assertion for mixed cycle+missing path (`code=dependency-update-blocked-cycle`). Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` => 1 file passed, 60 tests passed."
+    },
+    {
+      "id": "VER-BUD-843",
+      "target": "TASK-BUD-493",
+      "target_type": "task",
+      "status": "passed",
+      "method": "helper extraction + smoke",
+      "timestamp": "2026-05-01T22:00:40.945Z",
+      "evidence": "Refactored dependency diagnostics into a compact shared helper to reduce duplication in board dependency flows. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Added internal helper `diagnoseTaskDependencyBlockers(...)` that centralizes: - missing/cycle/protected dependency detection - blockers assembly - deterministic recommendation mapping - `updateProjectTaskDependencies(...)` now consumes helper output instead of duplicating blocker/recommendation assembly inline. - Public contract unchanged (`ProjectTaskDependencyUpdateResult` fields preserved). Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 63 tests passed."
+    },
+    {
+      "id": "VER-BUD-844",
+      "target": "TASK-BUD-494",
+      "target_type": "task",
+      "status": "passed",
+      "method": "new read-only surface + smoke",
+      "timestamp": "2026-05-01T22:00:52.102Z",
+      "evidence": "Implemented read-only dependency health snapshot for fast board sampling. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Added `buildBoardDependencyHealthSnapshot(cwd, { milestone?, limit? })`. - Added result contract with counts for missing/cycle/protected-coupling and deterministic recommendation codes: - `board-dependency-health-strong` - `board-dependency-health-needs-reconcile` - `board-dependency-health-protected-coupling` - Added tool registration `board_dependency_health_snapshot` (report-only, optional milestone filter). Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 63 tests passed."
+    },
+    {
+      "id": "VER-BUD-845",
+      "target": "TASK-BUD-495",
+      "target_type": "task",
+      "status": "passed",
+      "method": "primitive documentation + marker-check",
+      "timestamp": "2026-05-01T22:01:11.794Z",
+      "evidence": "Documented the dependency health snapshot primitive and indexed it in the primitives catalog. Changes: - Added `docs/primitives/board-dependency-health-snapshot.md`. - Updated `docs/primitives/README.md` catalog entry. - Documentation includes report-only contract, optional milestone filter, recommendation codes, and invariants. Validation: - `safe_marker_check docs/primitives/board-dependency-health-snapshot.md` markers (`board_dependency_health_snapshot`, `board-dependency-health-protected-coupling`, `milestone`, `report-only`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-846",
+      "target": "TASK-BUD-496",
+      "target_type": "task",
+      "status": "passed",
+      "method": "snapshot regressions (healthy/blockers/milestone)",
+      "timestamp": "2026-05-01T22:01:22.064Z",
+      "evidence": "Expanded snapshot regressions to cover healthy, mixed-blocker, and milestone-filtered scenarios. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added test covering: - healthy snapshot with zero blockers - mixed blocker snapshot (missing + cycle + protected-coupling) - milestone filter returning deterministic scoped output - Added tool registration/execution coverage for `board_dependency_health_snapshot`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 63 tests passed."
+    },
+    {
+      "id": "VER-BUD-847",
+      "target": "TASK-BUD-497",
+      "target_type": "task",
+      "status": "passed",
+      "method": "score primitive + smoke + marker-check",
+      "timestamp": "2026-05-01T22:04:26.409Z",
+      "evidence": "Implemented report-only dependency hygiene score primitive with explicit dimensions and deterministic recommendation codes. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Added `buildBoardDependencyHygieneScore(cwd, { milestone? })`. - Score dimensions: `coupling`, `consistency`, `traceability`. - Deterministic recommendation codes: - `board-dependency-hygiene-strong` - `board-dependency-hygiene-needs-reconcile` - `board-dependency-hygiene-critical-protected-coupling` - Reuses dependency health snapshot metrics (report-only, no mutation). - Docs: - Added `docs/primitives/board-dependency-hygiene-score.md`. - Indexed in `docs/primitives/README.md`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 64 tests passed. - `safe_marker_check docs/primitives/board-dependency-hygiene-score.md` => matched 5/5."
+    },
+    {
+      "id": "VER-BUD-848",
+      "target": "TASK-BUD-498",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface/tool wiring + smoke",
+      "timestamp": "2026-05-01T22:04:36.314Z",
+      "evidence": "Exposed dependency hygiene score as a board surface tool. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Registered new tool `board_dependency_hygiene_score`. - Added optional `milestone` filter parameter. - Tool returns compact summary + structured details. - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Extended tool registration test to include `board_dependency_hygiene_score`. - Added execute-path assertion for hygiene summary (`board-dependency-hygiene-score:`). Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 64 tests passed."
+    },
+    {
+      "id": "VER-BUD-849",
+      "target": "TASK-BUD-499",
+      "target_type": "task",
+      "status": "passed",
+      "method": "wave checklist packet + checkpoint evidence",
+      "timestamp": "2026-05-01T22:05:14.660Z",
+      "evidence": "Closed wave package with explicit execution checklist and minimum evidence contract per wave. Changes: - `docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` - Added `Checklist curto por wave (entrada/saída)` with: - gate de entrada (backlog 4-6 tasks, sem protected, validação focal, rollback) - gate de saída (conclusão/stop reason, falhas tratadas, checkpoint, decisão avançar/pausar) - Preserved explicit `Evidência mínima por wave` section. - `.project/handoff.json` - Updated checkpoint for `TASK-BUD-499` summarizing wave checklist closure and next decision path. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 64 tests passed. - `safe_marker_check docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` => matched 5/5 checklist anchors."
     }
   ]
 }

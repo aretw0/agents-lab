@@ -11748,7 +11748,7 @@
     {
       "id": "TASK-BUD-493",
       "description": "Extrair helper compacto para diagnóstico de blockers de dependência no board surface, reduzindo duplicação de montagem de evidências.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-490",
@@ -11764,12 +11764,13 @@
         "Cobertura smoke valida resultado equivalente ao anterior."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] reduzir duplicação diminui chance de divergência silenciosa em manutenção futura.\n[provenance:human] source_task=TASK-BUD-487 reason=manutenção estrutural local-safe para reduzir fragilidade"
+      "notes": "[rationale:risk-control] reduzir duplicação diminui chance de divergência silenciosa em manutenção futura.\n[provenance:human] source_task=TASK-BUD-487 reason=manutenção estrutural local-safe para reduzir fragilidade\n2026-05-01: diagnóstico de blockers/recommendation de dependências centralizado em helper único para reduzir fragilidade.",
+      "verification": "VER-BUD-843"
     },
     {
       "id": "TASK-BUD-494",
       "description": "Adicionar snapshot read-only de saúde de dependências do board (missing/cycle/protected-coupling) para amostragem rápida por milestone.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-493"
@@ -11784,12 +11785,13 @@
         "Summary compacto inclui recommendationCode canônico."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] snapshot read-only acelera priorização de correções sem abrir escopo operacional novo.\n[provenance:human] source_task=TASK-BUD-487 reason=ganho de visibilidade local-safe para manutenção em lote"
+      "notes": "[rationale:risk-control] snapshot read-only acelera priorização de correções sem abrir escopo operacional novo.\n[provenance:human] source_task=TASK-BUD-487 reason=ganho de visibilidade local-safe para manutenção em lote\n2026-05-01: snapshot read-only de saúde de dependências exposto com filtro de milestone e recommendationCode canônico.",
+      "verification": "VER-BUD-844"
     },
     {
       "id": "TASK-BUD-495",
       "description": "Documentar primitive de snapshot de saúde de dependências e orientar uso em waves de manutenção local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-494"
@@ -11804,12 +11806,13 @@
         "Sem instruções de dispatch automático."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] documentação explícita mantém uso consistente da surface durante run longa.\n[provenance:human] source_task=TASK-BUD-487 reason=completar pacote de governança do snapshot"
+      "notes": "[rationale:risk-control] documentação explícita mantém uso consistente da surface durante run longa.\n[provenance:human] source_task=TASK-BUD-487 reason=completar pacote de governança do snapshot\n2026-05-01: primitive do snapshot de saúde de dependências documentada e indexada no catálogo.",
+      "verification": "VER-BUD-845"
     },
     {
       "id": "TASK-BUD-496",
       "description": "Adicionar regressões de snapshot para cenários sem blockers, com blockers e filtro por milestone.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-494"
@@ -11823,12 +11826,13 @@
         "Cobre filtro por milestone com output determinístico."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] regressões evitam drift na leitura de saúde de dependências ao longo da run.\n[provenance:human] source_task=TASK-BUD-487 reason=assegurar confiabilidade da nova leitura de saúde"
+      "notes": "[rationale:risk-control] regressões evitam drift na leitura de saúde de dependências ao longo da run.\n[provenance:human] source_task=TASK-BUD-487 reason=assegurar confiabilidade da nova leitura de saúde\n2026-05-01: snapshot ganhou regressões completas de cenário saudável, bloqueado e filtrado por milestone.",
+      "verification": "VER-BUD-846"
     },
     {
       "id": "TASK-BUD-497",
       "description": "Criar score report-only de higiene de dependências do board com dimensões acoplamento/consistência/rastreabilidade.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-494",
@@ -11845,12 +11849,13 @@
         "Sem mutação e sem dispatch."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] score único melhora priorização de manutenção sem abrir decisões irreversíveis.\n[provenance:human] source_task=TASK-BUD-487 reason=evoluir de snapshot para priorização orientada por score"
+      "notes": "[rationale:risk-control] score único melhora priorização de manutenção sem abrir decisões irreversíveis.\n[provenance:human] source_task=TASK-BUD-487 reason=evoluir de snapshot para priorização orientada por score\n2026-05-01: score de higiene de dependências adicionado para priorização local-safe por acoplamento/consistência/rastreabilidade.",
+      "verification": "VER-BUD-847"
     },
     {
       "id": "TASK-BUD-498",
       "description": "Adicionar surface/tool para expor score de higiene de dependências e integrar ao conjunto de tools do board.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-497"
@@ -11865,12 +11870,13 @@
         "Smoke cobre registro e execução básica da tool."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] tornar score invocável por tool melhora operação contínua com baixo risco.\n[provenance:human] source_task=TASK-BUD-487 reason=operacionalizar score no board surface"
+      "notes": "[rationale:risk-control] tornar score invocável por tool melhora operação contínua com baixo risco.\n[provenance:human] source_task=TASK-BUD-487 reason=operacionalizar score no board surface\n2026-05-01: score de higiene operacionalizado via tool read-only no board surface.",
+      "verification": "VER-BUD-848"
     },
     {
       "id": "TASK-BUD-499",
       "description": "Fechar pacote de manutenção com checklist curto de execução em ondas e evidência mínima por wave no handoff.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-488",
@@ -11886,7 +11892,8 @@
         "Não altera política de autorização/proteção."
       ],
       "milestone": "local-safe-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] checklist final reduz risco operacional quando a run for executada em lote.\n[provenance:human] source_task=TASK-BUD-487 reason=encerrar escopo com governança explícita de execução em ondas"
+      "notes": "[rationale:risk-control] checklist final reduz risco operacional quando a run for executada em lote.\n[provenance:human] source_task=TASK-BUD-487 reason=encerrar escopo com governança explícita de execução em ondas\n2026-05-01: checklist de execução em ondas e evidência mínima por wave consolidado no pacote final da run local-safe.",
+      "verification": "VER-BUD-849"
     }
   ]
 }

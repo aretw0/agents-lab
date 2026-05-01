@@ -913,6 +913,15 @@ export interface ProjectTaskDependencyUpdateResult {
   task?: ProjectTaskBoardRow;
 }
 
+interface TaskDependencyDiagnostics {
+  missingDependencies: string[];
+  cycleDependencies: string[];
+  protectedDependencyIds: string[];
+  blockers: string[];
+  recommendationCode: ProjectTaskDependencyRecommendationCode;
+  recommendation: string;
+}
+
 function normalizeDependencyIdList(value: unknown, max = 30): string[] {
   if (!Array.isArray(value)) return [];
   const out: string[] = [];
@@ -963,6 +972,31 @@ function resolveProjectTaskDependencyRecommendation(blockers: string[]): {
   return {
     recommendationCode: "dependency-update-ready",
     recommendation: "Dependências consistentes; pode aplicar update mantendo validação focal bounded.",
+  };
+}
+
+function diagnoseTaskDependencyBlockers(
+  taskId: string,
+  currentTask: TaskRecord,
+  dependencyIds: string[],
+  tasksById: Map<string, TaskRecord>,
+): TaskDependencyDiagnostics {
+  const missingDependencies = dependencyIds.filter((dep) => !tasksById.has(dep));
+  const cycleDependencies = dependencyIds.filter((dep) => dep === taskId || taskDependsOnPath(tasksById, dep, taskId));
+  const protectedDependencyIds = taskDependsOnProtectedScope(currentTask, dependencyIds, tasksById);
+  const blockers = [
+    missingDependencies.length > 0 ? "missing-dependencies" : undefined,
+    cycleDependencies.length > 0 ? "dependency-cycle" : undefined,
+    protectedDependencyIds.length > 0 ? "local-safe-depends-on-protected" : undefined,
+  ].filter(Boolean) as string[];
+  const recommendation = resolveProjectTaskDependencyRecommendation(blockers);
+  return {
+    missingDependencies,
+    cycleDependencies,
+    protectedDependencyIds,
+    blockers,
+    recommendationCode: recommendation.recommendationCode,
+    recommendation: recommendation.recommendation,
   };
 }
 
@@ -1032,17 +1066,9 @@ export function updateProjectTaskDependencies(
     if (!after.includes(dep)) after.push(dep);
   }
   const added = after.filter((dep) => !before.includes(dep));
-  const missingDependencies = after.filter((dep) => !tasksById.has(dep));
-  const cycleDependencies = after.filter((dep) => dep === taskId || taskDependsOnPath(tasksById, dep, taskId));
-  const protectedDependencyIds = taskDependsOnProtectedScope(current, after, tasksById);
-  const blockers = [
-    missingDependencies.length > 0 ? "missing-dependencies" : undefined,
-    cycleDependencies.length > 0 ? "dependency-cycle" : undefined,
-    protectedDependencyIds.length > 0 ? "local-safe-depends-on-protected" : undefined,
-  ].filter(Boolean) as string[];
-  const ok = blockers.length === 0;
+  const diagnostics = diagnoseTaskDependencyBlockers(taskId, current, after, tasksById);
+  const ok = diagnostics.blockers.length === 0;
   const applied = ok && !dryRun;
-  const recommendation = resolveProjectTaskDependencyRecommendation(blockers);
 
   if (applied) {
     block.tasks[idx] = {
@@ -1062,12 +1088,12 @@ export function updateProjectTaskDependencies(
     before,
     after,
     added,
-    missingDependencies,
-    cycleDependencies,
-    protectedDependencyIds,
-    blockers,
-    recommendationCode: recommendation.recommendationCode,
-    recommendation: recommendation.recommendation,
+    missingDependencies: diagnostics.missingDependencies,
+    cycleDependencies: diagnostics.cycleDependencies,
+    protectedDependencyIds: diagnostics.protectedDependencyIds,
+    blockers: diagnostics.blockers,
+    recommendationCode: diagnostics.recommendationCode,
+    recommendation: diagnostics.recommendation,
     summary: "",
     task: applied ? queryProjectTasks(cwd, { search: taskId, limit: 200 }).rows.find((row) => row.id === taskId) : undefined,
   };
@@ -1326,6 +1352,221 @@ export function buildBoardPlanningClarityScore(
       `open=${openTasks}`,
       `inProgress=${inProgressTasks}`,
       `macro=${macroOpenTasks}`,
+    ].join(" "),
+  };
+}
+
+export type BoardDependencyHealthRecommendationCode =
+  | "board-dependency-health-strong"
+  | "board-dependency-health-needs-reconcile"
+  | "board-dependency-health-protected-coupling";
+
+export interface BoardDependencyHealthSnapshotRow {
+  taskId: string;
+  blockers: string[];
+  missingDependencies: string[];
+  cycleDependencies: string[];
+  protectedDependencyIds: string[];
+  recommendationCode: ProjectTaskDependencyRecommendationCode;
+}
+
+export interface BoardDependencyHealthSnapshotResult {
+  ok: boolean;
+  milestone?: string;
+  recommendationCode: BoardDependencyHealthRecommendationCode;
+  recommendation: string;
+  metrics: {
+    sampledTasks: number;
+    tasksWithDependencies: number;
+    tasksWithBlockers: number;
+    missingReferenceCount: number;
+    cycleReferenceCount: number;
+    protectedCouplingCount: number;
+  };
+  blockerTaskCounts: {
+    missing: number;
+    cycle: number;
+    protectedCoupling: number;
+  };
+  rows: BoardDependencyHealthSnapshotRow[];
+  summary: string;
+}
+
+export type BoardDependencyHygieneRecommendationCode =
+  | "board-dependency-hygiene-strong"
+  | "board-dependency-hygiene-needs-reconcile"
+  | "board-dependency-hygiene-critical-protected-coupling";
+
+export interface BoardDependencyHygieneScoreResult {
+  ok: boolean;
+  score: number;
+  milestone?: string;
+  recommendationCode: BoardDependencyHygieneRecommendationCode;
+  recommendation: string;
+  dimensions: {
+    coupling: number;
+    consistency: number;
+    traceability: number;
+  };
+  metrics: BoardDependencyHealthSnapshotResult["metrics"];
+  blockerTaskCounts: BoardDependencyHealthSnapshotResult["blockerTaskCounts"];
+  summary: string;
+}
+
+function normalizePositiveInt(value: unknown, fallback: number, max = 100): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  const rounded = Math.floor(value);
+  if (rounded <= 0) return fallback;
+  return Math.min(max, rounded);
+}
+
+export function buildBoardDependencyHealthSnapshot(
+  cwd: string,
+  options: { milestone?: string; limit?: number } = {},
+): BoardDependencyHealthSnapshotResult {
+  const milestone = typeof options.milestone === "string" && options.milestone.trim().length > 0
+    ? options.milestone.trim()
+    : undefined;
+  const rowLimit = normalizePositiveInt(options.limit, 20, 200);
+  const read = queryProjectTasks(cwd, {
+    milestone,
+    limit: 200,
+  });
+  const block = readTasksBlockCached(cwd).block;
+  const tasksById = new Map(block.tasks.map((task) => [task.id, task] as const));
+  const openRows = read.rows.filter((row) => row.status !== "completed");
+
+  let tasksWithDependencies = 0;
+  let tasksWithBlockers = 0;
+  let missingReferenceCount = 0;
+  let cycleReferenceCount = 0;
+  let protectedCouplingCount = 0;
+  let missingTaskCount = 0;
+  let cycleTaskCount = 0;
+  let protectedTaskCount = 0;
+  const rows: BoardDependencyHealthSnapshotRow[] = [];
+
+  for (const row of openRows) {
+    const task = tasksById.get(row.id);
+    if (!task) continue;
+    const dependencyIds = Array.isArray(task.depends_on)
+      ? task.depends_on.filter((dep): dep is string => typeof dep === "string")
+      : [];
+    if (dependencyIds.length === 0) continue;
+    tasksWithDependencies += 1;
+
+    const diagnostics = diagnoseTaskDependencyBlockers(task.id, task, dependencyIds, tasksById);
+    if (diagnostics.blockers.length <= 0) continue;
+
+    tasksWithBlockers += 1;
+    missingReferenceCount += diagnostics.missingDependencies.length;
+    cycleReferenceCount += diagnostics.cycleDependencies.length;
+    protectedCouplingCount += diagnostics.protectedDependencyIds.length;
+    if (diagnostics.missingDependencies.length > 0) missingTaskCount += 1;
+    if (diagnostics.cycleDependencies.length > 0) cycleTaskCount += 1;
+    if (diagnostics.protectedDependencyIds.length > 0) protectedTaskCount += 1;
+
+    if (rows.length < rowLimit) {
+      rows.push({
+        taskId: task.id,
+        blockers: diagnostics.blockers,
+        missingDependencies: diagnostics.missingDependencies,
+        cycleDependencies: diagnostics.cycleDependencies,
+        protectedDependencyIds: diagnostics.protectedDependencyIds,
+        recommendationCode: diagnostics.recommendationCode,
+      });
+    }
+  }
+
+  let recommendationCode: BoardDependencyHealthRecommendationCode = "board-dependency-health-strong";
+  let recommendation = "dependency health is strong; proceed with bounded wave execution.";
+  if (protectedCouplingCount > 0) {
+    recommendationCode = "board-dependency-health-protected-coupling";
+    recommendation = "local-safe/protected coupling detected; reconcile dependencies before continuing local-safe waves.";
+  } else if (tasksWithBlockers > 0) {
+    recommendationCode = "board-dependency-health-needs-reconcile";
+    recommendation = "dependency blockers detected (missing/cycle); reconcile board dependencies before scaling run size.";
+  }
+
+  return {
+    ok: true,
+    milestone,
+    recommendationCode,
+    recommendation,
+    metrics: {
+      sampledTasks: openRows.length,
+      tasksWithDependencies,
+      tasksWithBlockers,
+      missingReferenceCount,
+      cycleReferenceCount,
+      protectedCouplingCount,
+    },
+    blockerTaskCounts: {
+      missing: missingTaskCount,
+      cycle: cycleTaskCount,
+      protectedCoupling: protectedTaskCount,
+    },
+    rows,
+    summary: [
+      "board-dependency-health:",
+      "ok=yes",
+      `sampled=${openRows.length}`,
+      `withDeps=${tasksWithDependencies}`,
+      `blocked=${tasksWithBlockers}`,
+      `missing=${missingReferenceCount}`,
+      `cycle=${cycleReferenceCount}`,
+      `protected=${protectedCouplingCount}`,
+      `code=${recommendationCode}`,
+    ].join(" "),
+  };
+}
+
+export function buildBoardDependencyHygieneScore(
+  cwd: string,
+  options: { milestone?: string } = {},
+): BoardDependencyHygieneScoreResult {
+  const snapshot = buildBoardDependencyHealthSnapshot(cwd, {
+    milestone: options.milestone,
+    limit: 200,
+  });
+
+  const withDeps = snapshot.metrics.tasksWithDependencies;
+  const coupling = scoreRatio(withDeps - snapshot.blockerTaskCounts.protectedCoupling, withDeps);
+  const consistency = scoreRatio(withDeps - snapshot.blockerTaskCounts.cycle, withDeps);
+  const traceability = scoreRatio(withDeps - snapshot.blockerTaskCounts.missing, withDeps);
+  const score = Math.round((coupling * 0.45) + (consistency * 0.3) + (traceability * 0.25));
+
+  let recommendationCode: BoardDependencyHygieneRecommendationCode = "board-dependency-hygiene-strong";
+  let recommendation = "dependency hygiene is strong; continue bounded maintenance waves.";
+  if (snapshot.metrics.protectedCouplingCount > 0 || coupling < 80) {
+    recommendationCode = "board-dependency-hygiene-critical-protected-coupling";
+    recommendation = "critical dependency hygiene issue: protected coupling present; reconcile before scaling local-safe run.";
+  } else if (snapshot.metrics.tasksWithBlockers > 0 || consistency < 85 || traceability < 85 || score < 85) {
+    recommendationCode = "board-dependency-hygiene-needs-reconcile";
+    recommendation = "dependency hygiene needs reconciliation; reduce missing/cycle blockers before larger waves.";
+  }
+
+  return {
+    ok: true,
+    score,
+    milestone: snapshot.milestone,
+    recommendationCode,
+    recommendation,
+    dimensions: {
+      coupling,
+      consistency,
+      traceability,
+    },
+    metrics: snapshot.metrics,
+    blockerTaskCounts: snapshot.blockerTaskCounts,
+    summary: [
+      "board-dependency-hygiene-score:",
+      "ok=yes",
+      `score=${score}`,
+      `code=${recommendationCode}`,
+      `coupling=${coupling}`,
+      `consistency=${consistency}`,
+      `traceability=${traceability}`,
     ].join(" "),
   };
 }
@@ -2138,6 +2379,66 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Report-only planning clarity/direction score for open tasks (decomposition, verification linkage, focus, rationale coverage).",
     parameters: planningScoreParameters,
     execute: executePlanningScore,
+  });
+
+  const dependencyHealthSnapshotParameters = Type.Object({
+    milestone: Type.Optional(Type.String({ description: "Optional milestone filter for dependency health sampling." })),
+    limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, description: "Max affected rows in output (default=20)." })),
+  });
+
+  const executeDependencyHealthSnapshot = (
+    _toolCallId: string,
+    params: { milestone?: string; limit?: number },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = buildBoardDependencyHealthSnapshot(ctx.cwd, {
+      milestone: params?.milestone,
+      limit: params?.limit,
+    });
+    return {
+      content: [{ type: "text", text: details.summary }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_dependency_health_snapshot",
+    label: "Board Dependency Health Snapshot",
+    description:
+      "Report-only dependency health snapshot (missing/cycle/protected-coupling) with optional milestone filter.",
+    parameters: dependencyHealthSnapshotParameters,
+    execute: executeDependencyHealthSnapshot,
+  });
+
+  const dependencyHygieneScoreParameters = Type.Object({
+    milestone: Type.Optional(Type.String({ description: "Optional milestone filter for dependency hygiene score." })),
+  });
+
+  const executeDependencyHygieneScore = (
+    _toolCallId: string,
+    params: { milestone?: string },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = buildBoardDependencyHygieneScore(ctx.cwd, {
+      milestone: params?.milestone,
+    });
+    return {
+      content: [{ type: "text", text: details.summary }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_dependency_hygiene_score",
+    label: "Board Dependency Hygiene Score",
+    description:
+      "Report-only dependency hygiene score with coupling/consistency/traceability dimensions.",
+    parameters: dependencyHygieneScoreParameters,
+    execute: executeDependencyHygieneScore,
   });
 
   const verificationAppendParameters = Type.Object({

@@ -51,6 +51,22 @@ Avançar de uma wave para a próxima somente se:
 - acoplamento local-safe -> protected detectado durante execução
 - drift de escopo sem justificativa bounded
 
+## Checklist curto por wave (entrada/saída)
+
+### Entrada da wave
+
+- [ ] backlog da wave limitado a **4-6 tasks**
+- [ ] nenhuma task protected no conjunto da wave
+- [ ] validação focal conhecida para cada task da wave
+- [ ] rollback simples por task (revert local)
+
+### Saída da wave
+
+- [ ] tarefas da wave concluídas ou stop reason explícito registrado
+- [ ] nenhuma falha focal em aberto sem owner
+- [ ] checkpoint/handoff atualizado com próximo `nextTaskId`
+- [ ] decisão explícita: avançar para próxima wave ou pausar
+
 ## Evidência mínima por wave
 
 - testes focais da wave
