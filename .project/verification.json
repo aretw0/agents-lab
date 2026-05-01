@@ -9132,6 +9132,15 @@
       "method": "post-calibration-backlog-decision-packet",
       "timestamp": "2026-05-01T04:57:04.138Z",
       "evidence": "Produced local decision packet for the remaining post-calibration backlog. Snapshot lists classes: colony promotion/recovery (colony-c1-promotion, colony-c2-promotion, colony-c-123-promotion, colony-c-ret-1-promotion) requiring inventory/focal validation/human review before materialization; Remote/CI/release (TASK-BUD-134, TASK-BUD-136) as protected lane; inspiration/research/config (TASK-BUD-162, TASK-BUD-268) as opt-in bounded; dependency-blocked tasks not selectable until dependencies resolve. Safe next human decisions listed without executing protected scope. Validation: safe_marker_check 5/5; i18n_lint pass; git diff --check ok."
+    },
+    {
+      "id": "VER-BUD-768",
+      "target": "TASK-BUD-268",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded-pi-config-inspiration-review",
+      "timestamp": "2026-05-01T05:02:22.650Z",
+      "evidence": "Bounded external reference review completed for https://github.com/amosblomqvist/pi-config via git-checkout-cache at commit 575a0a5. Read README plus selected extensions/skills only: filechanges, read-only-mode, bash-guard, subagents README, context, memory, stop-slop. Wrote docs/research/pi-config-bounded-inspiration-2026-05-01.md. Extracted applicable ideas for going safely to colony promotion review: read-only review mode, file change inventory before promotion, human decision packet, no apply/stage/commit until explicit decision. Risks recorded: filechanges decline is operational, read-only active tools can surprise, memory writes can dirty state, subagents/web tools add provider/cost/scope. Proposed primitives: colony_promotion_decision_packet, review_mode_plan, file_change_inventory, memory_write_gate. Validation: safe_marker_check 4/4; i18n_lint pass; git diff --check ok."
     }
   ]
 }

@@ -6349,7 +6349,7 @@
     {
       "id": "TASK-BUD-268",
       "description": "[P2/backlog] Avaliar https://github.com/amosblomqvist/pi-config como inspiração bounded para configuração pi.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/research",
@@ -6362,7 +6362,8 @@
         "Registrar diferenças, riscos e possíveis primitives/backlog.",
         "Manter pesquisa externa como escopo protegido/opt-in."
       ],
-      "notes": "Backlog criado a pedido do operador. Link: https://github.com/amosblomqvist/pi-config. [rationale:risk-control] Referências externas podem inspirar, mas devem entrar como pesquisa bounded e opt-in, sem interromper a lane essencial atual."
+      "notes": "Backlog criado a pedido do operador. Link: https://github.com/amosblomqvist/pi-config. [rationale:risk-control] Referências externas podem inspirar, mas devem entrar como pesquisa bounded e opt-in, sem interromper a lane essencial atual.\n2026-05-01: selecionada explicitamente pelo operador como inspiração bounded antes de revisar colony promotion. Escopo: leitura bounded do repo de referência, síntese local e sem mutação de settings/pacotes/escopos protegidos.\n2026-05-01: concluída inspiração bounded de pi-config. Resultado prático para ir à revisão colony: primeiro packet read-only/inventário/decisão humana; não materializar candidate automaticamente.",
+      "verification": "VER-BUD-768"
     },
     {
       "id": "TASK-BUD-269",
@@ -10178,6 +10179,29 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] O operador pediu continuar desbloqueando trabalho ininterrupto; quando não há task local-safe elegível, o próximo desbloqueio é transformar o backlog restante em pacote de decisão auditável, não invadir escopo protegido.\n2026-05-01: concluído pacote de decisão pós-calibração. Backlog restante foi classificado por classe e opções humanas seguras; nenhuma promoção colony, CI/release/remote, pesquisa externa ou config mutation foi executada.",
       "verification": "VER-BUD-767"
+    },
+    {
+      "id": "TASK-BUD-420",
+      "description": "Desenhar packet read-only para revisão de um único `*-promotion` de colony antes de qualquer materialização no branch alvo.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-268"
+      ],
+      "files": [
+        "docs/primitives",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Definir contrato `colony_promotion_decision_packet` read-only com opções humanas `promote`, `skip` e `defer`.",
+        "Exigir inventário de arquivos candidate, validação focal disponível e riscos antes de qualquer apply/stage/commit.",
+        "Declarar `mutationAllowed=false`, `dispatchAllowed=false` e `authorization=none` para o packet.",
+        "Separar revisão/inventário de materialização protegida no branch alvo.",
+        "Não executar promoção colony nesta task."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] A inspiração bounded de pi-config apontou que a ida segura para colony promotion review precisa de um packet read-only e decisão humana antes de materializar candidate."
     }
   ]
 }
