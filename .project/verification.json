@@ -9114,6 +9114,15 @@
       "method": "colony-board-dirty-hardening-closure",
       "timestamp": "2026-05-01T04:49:17.908Z",
       "evidence": "Closed colony board dirty hardening after implementation and post-reload live validation. Incident evidence: .project/tasks.json was dirtied by completed colony/recovery replay appending timestamped stable messages. Fix: timestamp-insensitive dedupe via appendNoteOnceByNormalizedMessage; ensureRecoveryTaskForCandidate returns changed=false for repeated stable recovery messages; source task delivery-policy/promotion notes only write when status/message changes. Smoke: colony-pilot-parsers 82 passed. Live: clean git status before colony_pilot_status; post-run git status remained clean. This preserves auditability by preventing observability/status from creating dirty board state without new work."
+    },
+    {
+      "id": "VER-BUD-766",
+      "target": "TASK-BUD-418",
+      "target_type": "task",
+      "status": "passed",
+      "method": "post-calibration-queue-doctrine",
+      "timestamp": "2026-05-01T04:53:42.232Z",
+      "evidence": "Consolidated post-calibration queue rule after no eligible local-safe board task remained. Evidence: autonomy_lane_next_task without protected scopes returned no-eligible-tasks (8 candidates, 4 dependency-blocked, 4 protected-skipped). Doctrine now states no-eligible-tasks is a local stop condition, not permission to pull protected backlog; remaining classes are colony promotion/recovery, GitHub Actions/remote/release, research/config inspiration, or dependent tasks. Safe continuations are: create/decompose explicit local-safe slice, ask human decision for protected/ambiguous backlog, or defer with checkpoint. Validation: safe_marker_check 4/4; i18n_lint pass; git diff --check ok."
     }
   ]
 }

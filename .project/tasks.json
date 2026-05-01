@@ -10134,6 +10134,27 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] A correção de dedupe altera runtime de observabilidade; só o smoke não prova que o harness carregado parou de reescrever o board em completed replay.\n2026-05-01: concluído live validation pós-reload. `colony_pilot_status` partiu de git limpo e manteve git limpo; sem reescrever `.project/tasks.json`.",
       "verification": "VER-BUD-764"
+    },
+    {
+      "id": "TASK-BUD-418",
+      "description": "Consolidar fila pós-calibração local-safe e separar explicitamente backlog protegido/ambíguo antes de nova continuidade automática.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/handoff.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Registrar que, após TASK-BUD-153/TASK-BUD-416, `autonomy_lane_next_task` sem escopos protegidos retorna `no-eligible-tasks`.",
+        "Listar classes restantes: colony promotion/recovery, GitHub Actions/remote/release, research/config inspiration; não puxar automaticamente escopos protegidos.",
+        "Definir regra de continuidade: quando não houver task local-safe elegível, criar/decompor uma task local-safe explícita ou pedir decisão, em vez de tocar backlog protegido.",
+        "Atualizar handoff com próximo foco seguro e limites de não-autorização.",
+        "Validar por marker check e git diff check."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Depois da calibração local-first, o risco passa a ser o agente puxar backlog protegido/ambíguo só para continuar. A fila pós-calibração precisa tornar o no-go explícito e auditável.\n2026-05-01: concluída consolidação da fila pós-calibração. Sem task local-safe elegível, a continuidade deve parar/decompor/pedir decisão; não puxar backlog protegido automaticamente.",
+      "verification": "VER-BUD-766"
     }
   ]
 }

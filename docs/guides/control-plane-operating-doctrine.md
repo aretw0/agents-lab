@@ -247,6 +247,18 @@ Quando o foco termina e não há canário remoto autorizado, priorize:
 
 Remote/offload só vem depois de scorecard local verde e intenção explícita do operador.
 
+### Fila pós-calibração
+
+Após fechar uma macro-task de calibração, não puxe backlog protegido só para manter movimento. Em 2026-05-01, depois de `TASK-BUD-153`, `TASK-BUD-405` e `TASK-BUD-416`, `autonomy_lane_next_task` sem escopos protegidos retornou `no-eligible-tasks`: 8 candidates, 4 bloqueados por dependência e 4 pulados por escopo protegido. As classes restantes eram promotion/recovery de colony, GitHub Actions/remote/release, research/config inspiration e tarefas dependentes.
+
+Regra de continuidade: `no-eligible-tasks` é um stop condition local, não convite para invadir protected scope. O agente deve escolher uma destas saídas auditáveis:
+
+1. criar/decompor uma nova fatia local-safe explícita, com arquivos, validação e rollback claros;
+2. pedir decisão humana para promover backlog protegido/ambíguo;
+3. deferir e registrar checkpoint quando não houver próxima fatia local-safe útil.
+
+Promotion/recovery de colony exige inventário/validação própria e revisão humana; GitHub Actions, release, remote/offload e publish exigem tarefa protegida explícita; research/config inspiration só entra como inspiração bounded quando for selecionada pelo operador. Nenhuma dessas classes deve ser selecionada por continuidade automática local.
+
 ## Lei anti-spoof
 
 Tools disponíveis ao agente para desenvolvimento, feedback constante e validação manual não equivalem a autorização operacional. Uma superfície advisory pode receber parâmetros manuais para facilitar calibração, mas gates de autonomia não podem produzir readiness sensível a partir de input spoofável.

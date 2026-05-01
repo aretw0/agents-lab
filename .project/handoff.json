@@ -1,44 +1,44 @@
 {
-  "timestamp": "2026-05-01T04:49:45.863Z",
-  "context": "Post-reload live validation passed for colony board dirty hardening. Started from clean git status, ran colony_pilot_status, and post-run git [snip] next focus should be chosen explicitly. [truncated:+352 chars]",
+  "timestamp": "2026-05-01T04:53:52.416Z",
+  "context": "Completed post-calibration queue consolidation. After TASK-BUD-153/405/416, autonomy_lane_next_task with protected scopes excluded returned n [snip] uous backlog, or defer with checkpoint. [truncated:+395 chars]",
   "next_actions": [
-    "Commit TASK-BUD-417/TASK-BUD-416 closure.",
-    "Choose/decompose next local-first focus explicitly; non-protected eligible board task is not c [snip] ently selected by handoff. [truncated:+3 chars]",
-    "Do not start unattended loop/scheduler/remote/offload."
+    "Commit TASK-BUD-418 closure.",
+    "Stop for next focus decision or create a new explicit local-safe task only if user provides/accepts one.",
+    "Do not automatically select colony promotion/recovery, GitHub Actions, release, remote/offload [snip] search/config inspiration. [truncated:+16 chars]"
   ],
   "blockers": [
-    "No blocker remains for TASK-BUD-416.",
-    "Next autonomous continuation blocked by focus-complete/no-local-safe-next-step [snip] new focus is selected. [truncated:+7 chars]"
+    "No eligible local-safe board task remains after TASK-BUD-418.",
+    "Protected/ambiguous backlog needs explicit human decision."
   ],
   "recent_validation": [
-    "pre git status clean",
-    "colony_pilot_status ran status/observability only; no mutation",
-    "post git status clean"
+    "autonomy_lane_next_task => no-eligible-tasks candidates=8 blockedByDependencies=4 skippedProtectedScope=4",
+    "safe_marker_check doctrine post-calibration markers => 4/4",
+    "i18n_lint_text => pass"
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T04:49:45.863Z",
+    "generatedAtIso": "2026-05-01T04:53:52.416Z",
     "level": "warn",
-    "percent": 50,
+    "percent": 51,
     "action": "continue",
-    "recommendation": "commit-and-select-next-focus",
+    "recommendation": "commit-and-ask-next-focus",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T04:49:45.863Z",
+      "atIso": "2026-05-01T04:53:52.416Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 50,
+      "percent": 51,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-and-select-next-focus"
+      "recommendation": "commit-and-ask-next-focus"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-416"
+    "TASK-BUD-418"
   ]
 }
