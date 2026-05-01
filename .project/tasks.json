@@ -9943,7 +9943,7 @@
     {
       "id": "TASK-BUD-410",
       "description": "Integrar ou documentar adaptador para notificações reais `BG_PROCESS_DONE` do harness/bg_status passarem pelo contrato canônico de lifecycle antes de serem usadas como readiness.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-397"
@@ -9961,7 +9961,7 @@
         "Enquanto o harness não for integrável, readiness forte permanece bloqueada ou marcada como external-boundary-not-normalized."
       ],
       "milestone": "local-first-control-plane",
-      "notes": "[rationale:risk-control] O operador trouxe evidência live de `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` emitido pelo harness após auto-background. Isso confirma que o problema relevante é a fronteira real de notificação/bg_status, não só o classificador first-party já implementado."
+      "notes": "[rationale:risk-control] O operador trouxe evidência live de `[BG_PROCESS_DONE] PID 35348 finished (exit 0)` emitido pelo harness após auto-background. Isso confirma que o problema relevante é a fronteira real de notificação/bg_status, não só o classificador first-party já implementado.\n2026-05-01: segunda evidência live do mesmo boundary: `[BG_PROCESS_DONE] PID 32696 finished (exit 0)` para comando curto `git status --short && echo status-ok`. Classificação pelo contrato first-party: `state=finished event=done known=yes stopRequested=no exit=0 label=BG_PROCESS_DONE dispatch=no authorization=none`. Confirma que até comandos diagnósticos simples podem gerar notificação harness/bg_status auto-backgrounded; readiness não deve depender desse texto bruto sem normalização."
     }
   ]
 }
