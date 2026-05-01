@@ -11639,6 +11639,254 @@
       "milestone": "post-cleanup-research",
       "notes": "[rationale:risk-control] reforçar contrato explícito reduz ambiguidade operacional e evita regressão de interpretação em updates de dependência.\n[provenance:human] source_task=TASK-BUD-469 reason=continuidade local-safe após no-eligible sem entrar em foco protected\n2026-05-01: nova fatia local-safe formaliza recommendationCode de dependências e melhora legibilidade operacional do board.",
       "verification": "VER-BUD-837"
+    },
+    {
+      "id": "TASK-BUD-488",
+      "description": "Planejar run de manutenção local-safe em ondas (W1/W2/W3) com limites canônicos, stop conditions e critérios de avanço por wave.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-487"
+      ],
+      "files": [
+        "docs/research/local-safe-maintenance-wave-scope-2026-05-01.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Documento define limites operacionais (seed, wave size, stop conditions) sem abrir escopo protegido.",
+        "Doutrina recebe âncoras curtas para avanço entre waves.",
+        "Checklist smoke garante presença dos anchors novos."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] execução em ondas reduz risco de drift e permite pausa segura sem perder throughput.\n[provenance:human] source_task=TASK-BUD-487 reason=expansão controlada da continuidade local-safe\n2026-05-01: iniciando escopo canônico de waves local-safe (W1/W2/W3) com limites e gates de avanço.\n2026-05-01: escopo de manutenção em ondas formalizado e pacote local-safe seedado para execução bounded em lote.",
+      "verification": "VER-BUD-838"
+    },
+    {
+      "id": "TASK-BUD-489",
+      "description": "Cobrir contrato de invalid-input em board_task_dependencies com recommendationCode canônico e summary verificável.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-487"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Cenários de input inválido retornam recommendationCode dependency-update-invalid-input.",
+        "Summary inclui code=dependency-update-invalid-input.",
+        "Regressão garante estabilidade do contrato."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] entradas inválidas precisam resposta determinística para evitar interpretação ambígua em run longa.\n[provenance:human] source_task=TASK-BUD-487 reason=fechar lacuna de contrato em casos inválidos\n2026-05-01: cenários de invalid-input agora têm cobertura explícita de recommendationCode/sumário no contrato de dependências.",
+      "verification": "VER-BUD-839"
+    },
+    {
+      "id": "TASK-BUD-490",
+      "description": "Adicionar regressão para precedência determinística de blockers em board_task_dependencies (protected-coupling > cycle > missing).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-489"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando múltiplos blockers coexistem, recommendationCode segue ordem de precedência definida.",
+        "Teste cobre pelo menos um cenário com blockers combinados.",
+        "Sem alterar semântica dry-first/applied."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] priorização estável de blockers evita decisões inconsistentes durante manutenção em lote.\n[provenance:human] source_task=TASK-BUD-487 reason=fortalecer determinismo do contrato de dependências\n2026-05-01: precedência de recommendationCode para blockers combinados coberta em regressão (protected > cycle > missing).",
+      "verification": "VER-BUD-840"
+    },
+    {
+      "id": "TASK-BUD-491",
+      "description": "Documentar matriz de blockers e ações operacionais do board_task_dependencies para uso em runs local-safe.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-487"
+      ],
+      "files": [
+        "docs/primitives/board-task-dependencies-contract.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documento inclui tabela blocker -> recommendationCode -> ação sugerida.",
+        "Linguagem mantém foco local-safe sem instruções de escopo protegido automático.",
+        "Conteúdo fica referenciável em checkpoint curto."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] playbook curto reduz tempo de decisão humana e evita erro de roteamento.\n[provenance:human] source_task=TASK-BUD-487 reason=completar camada documental do contrato\n2026-05-01: matriz blocker->code->ação documentada para reduzir ambiguidade operacional em run local-safe.",
+      "verification": "VER-BUD-841"
+    },
+    {
+      "id": "TASK-BUD-492",
+      "description": "Expandir smoke do summary de board_task_dependencies para garantir presença de code e evidência de protectedDeps quando aplicável.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-489"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary contém code=... em cenários ready/missing/cycle/protected-coupling.",
+        "Summary contém protectedDeps=... em cenário de coupling bloqueado.",
+        "Testes permanecem rápidos e focais."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] melhorar observabilidade textual facilita triagem durante lote grande de manutenção.\n[provenance:human] source_task=TASK-BUD-487 reason=fortalecer legibilidade operacional do output\n2026-05-01: summary textual do contrato de dependências agora tem cobertura explícita para code/protectedDeps nos principais cenários.",
+      "verification": "VER-BUD-842"
+    },
+    {
+      "id": "TASK-BUD-493",
+      "description": "Extrair helper compacto para diagnóstico de blockers de dependência no board surface, reduzindo duplicação de montagem de evidências.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-490",
+        "TASK-BUD-492"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Helper único centraliza montagem de blockers/recommendation fields.",
+        "Sem regressão no contrato público do tool.",
+        "Cobertura smoke valida resultado equivalente ao anterior."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir duplicação diminui chance de divergência silenciosa em manutenção futura.\n[provenance:human] source_task=TASK-BUD-487 reason=manutenção estrutural local-safe para reduzir fragilidade"
+    },
+    {
+      "id": "TASK-BUD-494",
+      "description": "Adicionar snapshot read-only de saúde de dependências do board (missing/cycle/protected-coupling) para amostragem rápida por milestone.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-493"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Surface report-only retorna contagens por classe de blocker sem mutação.",
+        "Aceita filtro opcional de milestone.",
+        "Summary compacto inclui recommendationCode canônico."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] snapshot read-only acelera priorização de correções sem abrir escopo operacional novo.\n[provenance:human] source_task=TASK-BUD-487 reason=ganho de visibilidade local-safe para manutenção em lote"
+    },
+    {
+      "id": "TASK-BUD-495",
+      "description": "Documentar primitive de snapshot de saúde de dependências e orientar uso em waves de manutenção local-safe.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-494"
+      ],
+      "files": [
+        "docs/primitives/board-dependency-health-snapshot.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Doc descreve contrato report-only e recommendationCode.",
+        "README de primitivas indexa a nova entrada.",
+        "Sem instruções de dispatch automático."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] documentação explícita mantém uso consistente da surface durante run longa.\n[provenance:human] source_task=TASK-BUD-487 reason=completar pacote de governança do snapshot"
+    },
+    {
+      "id": "TASK-BUD-496",
+      "description": "Adicionar regressões de snapshot para cenários sem blockers, com blockers e filtro por milestone.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-494"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Cobre cenário saudável (0 blockers).",
+        "Cobre cenário com blockers mistos e contagens corretas.",
+        "Cobre filtro por milestone com output determinístico."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] regressões evitam drift na leitura de saúde de dependências ao longo da run.\n[provenance:human] source_task=TASK-BUD-487 reason=assegurar confiabilidade da nova leitura de saúde"
+    },
+    {
+      "id": "TASK-BUD-497",
+      "description": "Criar score report-only de higiene de dependências do board com dimensões acoplamento/consistência/rastreabilidade.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-494",
+        "TASK-BUD-496"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+        "docs/primitives/board-dependency-hygiene-score.md"
+      ],
+      "acceptance_criteria": [
+        "Score 0..100 com recommendationCode determinístico.",
+        "Dimensões explícitas incluem acoplamento local-safe/protected e consistência de blockers.",
+        "Sem mutação e sem dispatch."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] score único melhora priorização de manutenção sem abrir decisões irreversíveis.\n[provenance:human] source_task=TASK-BUD-487 reason=evoluir de snapshot para priorização orientada por score"
+    },
+    {
+      "id": "TASK-BUD-498",
+      "description": "Adicionar surface/tool para expor score de higiene de dependências e integrar ao conjunto de tools do board.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-497"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool read-only expõe score com summary curto e details completos.",
+        "Registro no surface mantém padrão de contrato existente.",
+        "Smoke cobre registro e execução básica da tool."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] tornar score invocável por tool melhora operação contínua com baixo risco.\n[provenance:human] source_task=TASK-BUD-487 reason=operacionalizar score no board surface"
+    },
+    {
+      "id": "TASK-BUD-499",
+      "description": "Fechar pacote de manutenção com checklist curto de execução em ondas e evidência mínima por wave no handoff.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-488",
+        "TASK-BUD-498"
+      ],
+      "files": [
+        "docs/research/local-safe-maintenance-wave-scope-2026-05-01.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Checklist define gate de entrada/saída por wave e limite de tarefas por rodada.",
+        "Inclui padrão de evidência mínima por wave (testes + marcador + checkpoint).",
+        "Não altera política de autorização/proteção."
+      ],
+      "milestone": "local-safe-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] checklist final reduz risco operacional quando a run for executada em lote.\n[provenance:human] source_task=TASK-BUD-487 reason=encerrar escopo com governança explícita de execução em ondas"
     }
   ]
 }

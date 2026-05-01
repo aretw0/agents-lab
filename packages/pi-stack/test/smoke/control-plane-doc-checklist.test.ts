@@ -41,6 +41,18 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of protectedCanaryAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const waveScopeAnchors = [
+      "escopo recomendado para run de manutenção em ondas",
+      "seed inicial entre 12 e 18",
+      "wave size de 4-6",
+      "no máximo 3 waves",
+      "stop conditions adicionais para waves",
+    ];
+
+    for (const marker of waveScopeAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

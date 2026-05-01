@@ -39,8 +39,19 @@ Tasks local-safe não devem depender diretamente de tasks protected (`protected-
 - `recommendationCode="dependency-update-blocked-protected-coupling"`
 - `protectedDependencyIds` listando os IDs bloqueadores
 
+## Matriz operacional (blocker -> code -> ação)
+
+| Situação | recommendationCode | Ação operacional local-safe |
+| --- | --- | --- |
+| sem blockers | `dependency-update-ready` | aplicar update (`dry_run=false`) e validar gate focal curto |
+| referência ausente (`missing-dependencies`) | `dependency-update-blocked-missing` | criar/reconciliar task faltante antes de reaplicar |
+| ciclo de dependência (`dependency-cycle`) | `dependency-update-blocked-cycle` | decompor fluxo e quebrar ciclo antes do apply |
+| acoplamento local-safe -> protected (`local-safe-depends-on-protected`) | `dependency-update-blocked-protected-coupling` | remover acoplamento no plano local-safe ou levar task para decisão protected explícita |
+| input inválido (`missing-task-id`, `task-not-found`, payload vazio) | `dependency-update-invalid-input` | corrigir parâmetros e repetir em dry-run |
+
 ## Invariantes
 
 - operação dry-first por padrão (`dryRun=true`)
 - sem auto-dispatch
 - falha determinística para missing/cycle/protected-coupling
+- recomendação textual deve ser consistente com `recommendationCode`

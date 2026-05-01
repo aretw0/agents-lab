@@ -267,6 +267,38 @@ describe("project-board-surface", () => {
         milestone: "protected-parked-legacy",
       });
 
+      const missingTaskId = updateProjectTaskDependencies(cwd, {
+        addDependsOn: ["TASK-A"],
+      });
+      expect(missingTaskId).toMatchObject({
+        ok: false,
+        reason: "missing-task-id",
+        recommendationCode: "dependency-update-invalid-input",
+      });
+      expect(missingTaskId.summary).toContain("code=dependency-update-invalid-input");
+
+      const taskNotFound = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-NOT-FOUND",
+        addDependsOn: ["TASK-A"],
+      });
+      expect(taskNotFound).toMatchObject({
+        ok: false,
+        reason: "task-not-found",
+        recommendationCode: "dependency-update-invalid-input",
+      });
+      expect(taskNotFound.summary).toContain("code=dependency-update-invalid-input");
+
+      const missingInputDependencies = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-C",
+        addDependsOn: [],
+      });
+      expect(missingInputDependencies).toMatchObject({
+        ok: false,
+        reason: "missing-dependencies",
+        recommendationCode: "dependency-update-invalid-input",
+      });
+      expect(missingInputDependencies.summary).toContain("code=dependency-update-invalid-input");
+
       const dryRun = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
         addDependsOn: ["TASK-A"],
@@ -276,6 +308,7 @@ describe("project-board-surface", () => {
       expect(dryRun.dryRun).toBe(true);
       expect(dryRun.after).toEqual(["TASK-A"]);
       expect(dryRun.recommendationCode).toBe("dependency-update-ready");
+      expect(dryRun.summary).toContain("code=dependency-update-ready");
 
       const applied = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
@@ -310,17 +343,38 @@ describe("project-board-surface", () => {
       });
       expect(cycle.summary).toContain("code=dependency-update-blocked-cycle");
 
-      expect(updateProjectTaskDependencies(cwd, {
+      const protectedBlocked = updateProjectTaskDependencies(cwd, {
         taskId: "TASK-C",
         replaceDependsOn: ["TASK-PROTECTED"],
         dryRun: false,
-      })).toMatchObject({
+      });
+      expect(protectedBlocked).toMatchObject({
         ok: false,
         applied: false,
         blockers: ["local-safe-depends-on-protected"],
         protectedDependencyIds: ["TASK-PROTECTED"],
         recommendationCode: "dependency-update-blocked-protected-coupling",
       });
+      expect(protectedBlocked.summary).toContain("code=dependency-update-blocked-protected-coupling");
+      expect(protectedBlocked.summary).toContain("protectedDeps=TASK-PROTECTED");
+
+      const cycleAndMissing = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-A",
+        replaceDependsOn: ["TASK-C", "TASK-MISSING"],
+      });
+      expect(cycleAndMissing.blockers).toEqual(expect.arrayContaining(["dependency-cycle", "missing-dependencies"]));
+      expect(cycleAndMissing.recommendationCode).toBe("dependency-update-blocked-cycle");
+      expect(cycleAndMissing.summary).toContain("code=dependency-update-blocked-cycle");
+
+      const protectedCycleMissing = updateProjectTaskDependencies(cwd, {
+        taskId: "TASK-A",
+        replaceDependsOn: ["TASK-PROTECTED", "TASK-C", "TASK-MISSING"],
+      });
+      expect(protectedCycleMissing.blockers).toEqual(
+        expect.arrayContaining(["local-safe-depends-on-protected", "dependency-cycle", "missing-dependencies"]),
+      );
+      expect(protectedCycleMissing.protectedDependencyIds).toEqual(["TASK-PROTECTED"]);
+      expect(protectedCycleMissing.recommendationCode).toBe("dependency-update-blocked-protected-coupling");
 
       createProjectTaskBoard(cwd, {
         id: "TASK-PROTECTED-CHILD",

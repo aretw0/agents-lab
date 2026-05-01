@@ -86,6 +86,29 @@ Evidência mínima por rodada de milestone:
 - contagem de stop reasons canônicos;
 - próximos passos locais-safe ou razão explícita de parada.
 
+### Escopo recomendado para run de manutenção em ondas (local-safe)
+
+Para uma run maior sem perder governança, usar faixa de operação bounded:
+
+- seed inicial entre 12 e 18 tasks `planned` local-safe;
+- wave size de 4-6 tasks concluídas por rodada;
+- no máximo 1 task `in-progress` no board por vez;
+- cada task com blast radius curto (referência: até 4 arquivos e mudança pequena/reversível);
+- no máximo 3 waves antes de checkpoint humano explícito para recalibrar foco.
+
+Gates de avanço entre waves:
+
+1. validação focal verde em todas as tasks da wave;
+2. nenhum blocker de escopo protegido acoplado ao plano local-safe;
+3. checkpoint/handoff atualizado com resumo da wave;
+4. contexto sob controle (sem pressão persistente de janela por diagnóstico volumoso).
+
+Stop conditions adicionais para waves:
+
+- 2 falhas seguidas de validação focal na mesma wave;
+- surgimento de dependência local-safe -> protected durante a wave;
+- drift de escopo (novas tarefas não planejadas sem justificativa bounded).
+
 ### Contrato canário protected (uma fatia)
 
 Quando houver decisão humana para experimentar escopo protected, a execução deve começar em **uma única fatia canário** com contrato explícito e bounded.

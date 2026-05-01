@@ -9762,6 +9762,51 @@
       "method": "board dependency contract hardening + smoke",
       "timestamp": "2026-05-01T21:18:06.718Z",
       "evidence": "Seeded and completed local-safe maintenance slice to harden/clarify board dependency contract. Changes: - `packages/pi-stack/extensions/project-board-surface.ts` - Added canonical dependency recommendation model for `updateProjectTaskDependencies`. - Result now carries `protectedDependencyIds`, `recommendationCode`, and `recommendation`. - Added deterministic mapping for blockers: - missing -> `dependency-update-blocked-missing` - cycle -> `dependency-update-blocked-cycle` - local-safe->protected coupling -> `dependency-update-blocked-protected-coupling` - no blockers -> `dependency-update-ready` - invalid input -> `dependency-update-invalid-input` - Summary now includes `code=...` and `protectedDeps=...` when present. - Tool description updated to mention protected-coupling blocker class. - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added/updated assertions for recommendation codes and summary evidence in ready/missing/cycle/protected-coupling flows. - Docs: - Added `docs/primitives/board-task-dependencies-contract.md`. - Indexed in `docs/primitives/README.md`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 files passed, 62 tests passed. - `safe_marker_check docs/primitives/board-task-dependencies-contract.md` => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-838",
+      "target": "TASK-BUD-488",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doctrine + checklist regression + marker-check",
+      "timestamp": "2026-05-01T21:45:53.738Z",
+      "evidence": "Defined canonical local-safe maintenance wave scope and seeded bounded package. Changes: - `docs/guides/control-plane-operating-doctrine.md` - Added section `Escopo recomendado para run de manutenção em ondas (local-safe)` with deterministic bounds: - seed inicial 12-18 tasks - wave size 4-6 - no máximo 1 in-progress - até 3 waves antes de checkpoint humano - Added explicit wave advancement gates and wave stop conditions. - `docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` - Created scoped run packet with Wave 1/2/3 plan and evidence gates. - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added doctrine anchors for wave-scope section to avoid drift. - Board seeding completed for `TASK-BUD-488`..`TASK-BUD-499` under milestone `local-safe-maintenance-wave-2026-05`. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts` => 2 files passed, 62 tests passed. - `safe_marker_check docs/guides/control-plane-operating-doctrine.md` => matched 5/5 wave anchors. - `safe_marker_check docs/research/local-safe-maintenance-wave-scope-2026-05-01.md` => matched 5/5 wave/task anchors."
+    },
+    {
+      "id": "VER-BUD-839",
+      "target": "TASK-BUD-489",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke regression (dependency invalid-input contract)",
+      "timestamp": "2026-05-01T21:46:43.543Z",
+      "evidence": "Hardened invalid-input contract coverage for `board_task_dependencies`/`updateProjectTaskDependencies`. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added explicit assertions for invalid-input scenarios: - missing task id -> `reason=missing-task-id`, `recommendationCode=dependency-update-invalid-input` - unknown task id -> `reason=task-not-found`, `recommendationCode=dependency-update-invalid-input` - empty dependency payload -> `reason=missing-dependencies`, `recommendationCode=dependency-update-invalid-input` - Added summary assertions for `code=dependency-update-invalid-input`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` => 1 file passed, 60 tests passed."
+    },
+    {
+      "id": "VER-BUD-840",
+      "target": "TASK-BUD-490",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke regression (blocker precedence)",
+      "timestamp": "2026-05-01T21:47:22.008Z",
+      "evidence": "Added deterministic precedence coverage for dependency blocker recommendation codes. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added combined-blocker regression for `updateProjectTaskDependencies`: - `dependency-cycle + missing-dependencies` -> `recommendationCode=dependency-update-blocked-cycle` - `local-safe-depends-on-protected + dependency-cycle + missing-dependencies` -> `recommendationCode=dependency-update-blocked-protected-coupling` - Validates `protectedDependencyIds` remains explicit when protected coupling participates. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` => 1 file passed, 60 tests passed."
+    },
+    {
+      "id": "VER-BUD-841",
+      "target": "TASK-BUD-491",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc contract update + marker-check",
+      "timestamp": "2026-05-01T21:49:00.633Z",
+      "evidence": "Extended board dependency contract documentation with explicit blocker/action matrix for local-safe operations. Changes: - `docs/primitives/board-task-dependencies-contract.md` - Added `Matriz operacional (blocker -> code -> ação)` mapping: - ready -> `dependency-update-ready` - missing -> `dependency-update-blocked-missing` - cycle -> `dependency-update-blocked-cycle` - protected coupling -> `dependency-update-blocked-protected-coupling` - invalid input -> `dependency-update-invalid-input` - Reinforced invariant that textual recommendation must remain consistent with `recommendationCode`. Validation: - `safe_marker_check docs/primitives/board-task-dependencies-contract.md` with matrix/code anchors => matched 5/5."
+    },
+    {
+      "id": "VER-BUD-842",
+      "target": "TASK-BUD-492",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke regression (dependency summary evidence)",
+      "timestamp": "2026-05-01T21:50:38.602Z",
+      "evidence": "Expanded dependency summary evidence coverage in board surface smoke tests. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added summary assertions for ready path (`code=dependency-update-ready`). - Added summary assertions for protected-coupling path: - `code=dependency-update-blocked-protected-coupling` - `protectedDeps=TASK-PROTECTED` - Added summary assertion for mixed cycle+missing path (`code=dependency-update-blocked-cycle`). Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts` => 1 file passed, 60 tests passed."
     }
   ]
 }
