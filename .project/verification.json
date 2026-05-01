@@ -9267,6 +9267,24 @@
       "method": "focused smoke test",
       "timestamp": "2026-05-01T13:23:50.105Z",
       "evidence": "Extended `context_watch_continuation_readiness` details with stable guidance fields: `recommendationCode` and `nextAction`, backed by `resolveContextWatchContinuationRecommendation(...)`. Mapping now distinguishes `continue-local`, `local-stop-no-local-safe-next-step`, `refresh-focus-checkpoint`, and `local-audit-blocked` while preserving read-only contract. Updated `packages/pi-stack/test/smoke/context-watchdog.test.ts` to assert new fields in tool output and direct mapping behavior. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 1 file passed, 50 tests passed."
+    },
+    {
+      "id": "VER-BUD-783",
+      "target": "TASK-BUD-431",
+      "target_type": "task",
+      "status": "passed",
+      "method": "research packet + board seeding",
+      "timestamp": "2026-05-01T13:33:58.347Z",
+      "evidence": "Created `docs/research/control-plane-anti-bloat-lane-2026-05-01.md` with strategic lane packet (10 bounded slices, value/risk/validation/rollback), documented Claude Code brainstorm attempt blocker (`You've hit your limit`) and fallback local strategy, and seeded initial board backlog (`TASK-BUD-432`..`TASK-BUD-435`). Validation: safe_marker_check on packet document matched required markers; i18n_lint_text passed."
+    },
+    {
+      "id": "VER-BUD-784",
+      "target": "TASK-BUD-436",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded research synthesis",
+      "timestamp": "2026-05-01T13:34:07.656Z",
+      "evidence": "Produced bounded research assimilation doc `docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md` reframing Claude ecosystem brainstorm idea into local-first contract (`lane_brainstorm_packet`) with read-only invariants (`dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`), budget-aware constraints, deterministic fallback, and implementation backlog (`TASK-BUD-437`..`TASK-BUD-440`). Validation: safe_marker_check matched 7/7 required markers; i18n_lint_text passed."
     }
   ]
 }

@@ -10422,6 +10422,212 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Consumidores precisam ação estável sem interpretar texto livre; evita loops confusos quando o gate está bloqueado por política/estado.\n2026-05-01: strategy-first anti-bloat slice; removed ambiguity without widening automation scope.",
       "verification": "VER-BUD-782"
+    },
+    {
+      "id": "TASK-BUD-431",
+      "description": "Produzir packet de brainstorming da lane local-first anti-gordura para manter o control-plane ocupado com fatias úteis (fallback local quando Claude Code estiver em limite).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/research/control-plane-anti-bloat-lane-2026-05-01.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Documento define 8-12 fatias locais sem escopo protegido, cada uma com valor, risco e validação focal.",
+        "Registrar tentativa de inspiração via Claude Code e blocker de limite sem bloquear lane local.",
+        "Materializar backlog inicial com tasks locais derivadas do packet."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Lane contínua precisa estratégia explícita para reduzir gordura sem cair em repetição ou protected drift.\n2026-05-01: packet convertido em direção operacional para manter o control-plane ocupado com estratégia anti-gordura, sem protected auto-dispatch.",
+      "verification": "VER-BUD-783"
+    },
+    {
+      "id": "TASK-BUD-432",
+      "description": "Centralizar mensagens/códigos de stop local em helper compartilhado entre autonomy lane e context-watch para reduzir drift semântico.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-431"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Extrair helper de semântica stop-local reutilizável.",
+        "Substituir literais duplicados onde aplicável sem ampliar escopo funcional.",
+        "Smoke tests focais permanecem verdes."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Evita inconsistência de guidance entre surfaces."
+    },
+    {
+      "id": "TASK-BUD-433",
+      "description": "Criar checklist de poda de gordura por fatia (código/teste/docs) e incorporar no handoff operacional.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-431"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/control-plane-glossary.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Checklist curta (<=10 itens) para evitar repetição neurótica.",
+        "Critérios orientam quando refatorar, quando consolidar e quando parar.",
+        "Linkado à doutrina local-first."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Estratégia explícita evita repetição sem direção."
+    },
+    {
+      "id": "TASK-BUD-434",
+      "description": "Adicionar teste de contrato cross-surface para recommendationCode/nextAction (autonomy_lane_status + context_watch_continuation_readiness).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-431"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste cobre cenário local-stop por protected-only backlog.",
+        "Teste garante presença de recommendationCode e nextAction estáveis.",
+        "Sem parsing frágil de texto livre em asserts críticos."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Protege contrato de consumo e reduz regressão silenciosa."
+    },
+    {
+      "id": "TASK-BUD-435",
+      "description": "Definir pacote de maturidade de run local longa (report-only) com métricas mínimas e critérios de go/no-go antes de outros modos.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-431"
+      ],
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Lista curta de métricas observáveis para run longa local (sem scheduler/remote).",
+        "Inclui critérios de abort/checkpoint e evidências obrigatórias.",
+        "Não autoriza automaticamente modos protegidos."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Run longa deve provar maturidade com evidência objetiva."
+    },
+    {
+      "id": "TASK-BUD-436",
+      "description": "Pesquisa bounded: assimilar a ideia de \"brainstorm\" do ecossistema Claude Code para lane de trabalho do control-plane (sem executar modos protegidos).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-431"
+      ],
+      "files": [
+        "docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md",
+        "packages/pi-stack/extensions/claude-code-adapter.ts",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Documento de pesquisa descreve o contrato do brainstorm como insumo de lane (ideias -> priorização -> fatias) sem dispatch automático.",
+        "Incluir limites operacionais locais: request-budget, no scheduler/remote/offload, autorização explícita para protected.",
+        "Propor backlog inicial de implementação local-safe em micro-slices."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Transformar inspiração de ecossistema em contrato local auditável evita dependência de tentativa ad hoc.\n2026-05-01: pesquisa concluída como assimilação de método/ecossistema (não dependência de uma chamada Claude única).",
+      "verification": "VER-BUD-784"
+    },
+    {
+      "id": "TASK-BUD-437",
+      "description": "Especificar schema read-only do `lane_brainstorm_packet` (input/output + invariantes).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-436"
+      ],
+      "files": [
+        "docs/primitives",
+        "packages/pi-stack/extensions",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Schema cobre objetivos, restrições, ideias, slices selecionadas, recommendationCode e nextAction.",
+        "Invariantes explícitos: dispatchAllowed=false, mutationAllowed=false, authorization=none.",
+        "Exemplo de payload válido e bloqueado documentado."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Contrato explícito evita brainstorm solto e facilita testes."
+    },
+    {
+      "id": "TASK-BUD-438",
+      "description": "Implementar scorer local para priorizar ideias de brainstorm por valor/risco/esforço em modo report-only.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-437"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Função determinística de score com pesos simples e explicáveis.",
+        "Sem execução/mutação de tarefas; apenas ranking read-only.",
+        "Smoke test cobre estabilidade de ordenação para casos empatados."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Priorização reduz repetição e melhora qualidade da lane."
+    },
+    {
+      "id": "TASK-BUD-439",
+      "description": "Adicionar surface report-only para emitir `lane_brainstorm_packet` com recommendationCode/nextAction estáveis.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-438"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna packet read-only com ideias + slices + recommendationCode.",
+        "Contrato fail-closed para cenários sem local-safe next step.",
+        "Sem dispatch, sem stage/commit, sem protected auto-selection."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Surface estável permite consumo por control-plane sem parsing frágil."
+    },
+    {
+      "id": "TASK-BUD-440",
+      "description": "Cobrir contrato do brainstorm packet com smoke tests (success + blocked) e garantir invariantes de não-dispatch.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-439"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Smoke test valida payload de sucesso com recommendationCode.",
+        "Smoke test valida payload bloqueado com reason/recommendationCode coerentes.",
+        "Asserts garantem dispatchAllowed=false, mutationAllowed=false, authorization=none."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Teste de contrato evita regressão de governança."
     }
   ]
 }
