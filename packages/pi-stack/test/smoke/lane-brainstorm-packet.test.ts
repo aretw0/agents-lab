@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildLaneBrainstormPacket, rankBrainstormIdeas, scoreBrainstormIdea } from "../../extensions/lane-brainstorm-packet";
+import {
+  buildLaneBrainstormPacket,
+  buildLaneBrainstormSeedPreview,
+  rankBrainstormIdeas,
+  scoreBrainstormIdea,
+} from "../../extensions/lane-brainstorm-packet";
 
 describe("lane brainstorm packet module", () => {
   it("scores and ranks ideas by value/risk/effort", () => {
@@ -90,5 +95,49 @@ describe("lane brainstorm packet module", () => {
 
     expect(packet.selectedSlices).toHaveLength(3);
     expect(packet.selectedSlices[0]?.sourceTaskId).toBe("TASK-1");
+  });
+
+  it("builds visible seeding preview that always requires human confirmation", () => {
+    const packet = buildLaneBrainstormPacket({
+      ideas: [{ id: "idea-a", theme: "dedupe outputs", value: "high", risk: "low", effort: "low" }],
+      maxSlices: 1,
+      selection: {
+        ready: true,
+        recommendationCode: "execute-bounded-slice",
+        recommendation: "execute bounded slice",
+        eligibleTaskIds: ["TASK-1"],
+      },
+    });
+
+    const preview = buildLaneBrainstormSeedPreview({ packet, source: "human" });
+
+    expect(preview.decision).toBe("needs-human-seeding-decision");
+    expect(preview.recommendationCode).toBe("brainstorm-seeding-preview");
+    expect(preview.nextAction).toContain("review proposals");
+    expect(preview.confirmationRequired).toBe(true);
+    expect(preview.dispatchAllowed).toBe(false);
+    expect(preview.mutationAllowed).toBe(false);
+    expect(preview.authorization).toBe("none");
+    expect(preview.mode).toBe("report-only");
+    expect(preview.proposals).toHaveLength(1);
+    expect(preview.source).toBe("human");
+  });
+
+  it("keeps seeding preview blocked when brainstorm packet is blocked", () => {
+    const packet = buildLaneBrainstormPacket({
+      selection: {
+        ready: false,
+        recommendationCode: "local-stop-protected-focus-required",
+        recommendation: "local stop condition",
+        eligibleTaskIds: [],
+      },
+    });
+
+    const preview = buildLaneBrainstormSeedPreview({ packet });
+    expect(preview.decision).toBe("blocked");
+    expect(preview.recommendationCode).toBe("brainstorm-seeding-blocked");
+    expect(preview.nextAction).toBe(packet.nextAction);
+    expect(preview.proposals).toHaveLength(0);
+    expect(preview.confirmationRequired).toBe(true);
   });
 });

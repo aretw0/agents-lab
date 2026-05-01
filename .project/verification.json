@@ -9618,6 +9618,60 @@
       "method": "inspection + marker-check",
       "timestamp": "2026-05-01T16:58:54.277Z",
       "evidence": "Recorded cleanup+research lane rehearsal packet in `docs/research/cleanup-research-longrun-rehearsal-2026-05-01.md` with bounded continuity metrics and GO/STOP interpretation. Packet covers executed slices (`TASK-BUD-467`, `TASK-BUD-470`), validation ids, checkpoint evidence, protected auto-selection count, and low-cost next local steps. Validation: `safe_marker_check` matched 6/6 required anchors (`Métricas mínimas`, `GO local-safe`, `STOP condition`, `protected-parked-legacy`, `recommendationCode`, `nextAction`)."
+    },
+    {
+      "id": "VER-BUD-822",
+      "target": "TASK-BUD-472",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check + board consistency check",
+      "timestamp": "2026-05-01T17:47:55.510Z",
+      "evidence": "Standardized protected parking-note contract and applied it consistently. Changes: (1) documented canonical template in `docs/guides/control-plane-operating-doctrine.md` under `Template de parking-note protegido (v1)` with explicit text `[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.`; (2) applied same template note to all currently parked protected planned tasks in milestone `protected-parked-legacy` (`colony-c1-promotion`, `colony-c2-promotion`, `colony-c-123-promotion`, `colony-c-ret-1-promotion`, `TASK-BUD-134`, `TASK-BUD-136`, `TASK-BUD-162`, `TASK-BUD-468`). Validation: `safe_marker_check` on doctrine matched 3/3 markers; `grep -o \"[parking-template:v1]\" .project/tasks.json | wc -l` => 8; `board_query(status=planned,milestone=protected-parked-legacy)` => 8 parked tasks preserved."
+    },
+    {
+      "id": "VER-BUD-823",
+      "target": "TASK-BUD-474",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection + marker-check",
+      "timestamp": "2026-05-01T17:49:52.508Z",
+      "evidence": "Defined milestone-as-execution contract (without introducing a new batch term) in doctrine/glossary. Updates: - `docs/guides/control-plane-operating-doctrine.md`: new section `Contrato de execução contínua por milestone (sem novo nome)` with start/continue rules, canonical stop reasons (`NO_ELIGIBLE_LOCAL_SAFE`, `PROTECTED_SCOPE_REQUIRED`, `BLOCKING_RELOAD_REQUIRED`, `VALIDATION_FAILED`, `AMBIGUOUS_HUMAN_OBJECTIVE`), and minimum evidence per slice/round. - `docs/guides/control-plane-glossary.md`: milestone definition now explicitly allows milestone as continuous execution unit when contract is explicit; added canonical `Stop reason code` term. Validation: marker checks passed (`doctrine` 4/4 markers; `glossary` 3/3 markers)."
+    },
+    {
+      "id": "VER-BUD-824",
+      "target": "TASK-BUD-475",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests + marker-check",
+      "timestamp": "2026-05-01T17:54:47.668Z",
+      "evidence": "Designed and implemented visible assisted seeding preview for brainstorm flow without auto-materialization. Changes: - `packages/pi-stack/extensions/lane-brainstorm-packet.ts`: added `buildLaneBrainstormSeedPreview(...)` with strict report-only contract (`confirmationRequired=true`, `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`) and explicit source provenance (`brainstorm|human|tangent-approved`). - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`: added new read-only tool `lane_brainstorm_seed_preview` that composes packet + preview and never mutates board/tasks. - tests: - `packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` (ready + blocked preview invariants), - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (surface behavior for ready/blocked preview), - regression suites stayed green. - docs: `docs/primitives/lane-brainstorm-packet.md` now documents preview-only seeding flow and mandatory human confirmation. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/project-intake-primitive.test.ts packages/pi-stack/test/smoke/control-plane-recommendation-contract.test.ts` => 4 files passed, 30 tests passed; marker-check on lane brainstorm primitive doc matched 4/4 anchors."
+    },
+    {
+      "id": "VER-BUD-825",
+      "target": "TASK-BUD-476",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests + marker-check",
+      "timestamp": "2026-05-01T18:00:14.534Z",
+      "evidence": "Implemented emergent tangent capture primitive with explicit provenance in board task creation flow. Changes: - `packages/pi-stack/extensions/project-board-surface.ts`: `createProjectTaskBoard` and `board_task_create` now accept optional provenance payload (`provenance_origin`, `source_task_id`, `source_reason`) and append canonical note `[provenance:<origin>] source_task=<...> reason=<...>` when provided. - `packages/pi-stack/test/smoke/project-board-surface.test.ts`: added direct API and tool-surface regressions validating provenance note persistence for `tangent-approved` origin and source linkage. - docs: added `docs/primitives/emergent-tangent-capture.md` and linked it in `docs/primitives/README.md`. Validation: `cmd.exe /c npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 3 files passed, 80 tests passed; marker-check on emergent tangent primitive doc matched 5/5 anchors."
+    },
+    {
+      "id": "VER-BUD-826",
+      "target": "TASK-BUD-477",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focused smoke tests + marker-check",
+      "timestamp": "2026-05-01T18:44:22.706Z",
+      "evidence": "Implemented report-only board planning clarity score primitive/surface. Changes: - `packages/pi-stack/extensions/project-board-surface.ts`: added `buildBoardPlanningClarityScore(...)` with objective submetrics (`decomposition`, `verification`, `focus`, `rationaleCoverage`), weighted score (0..100), and deterministic recommendation codes (`planning-clarity-strong|planning-clarity-needs-decomposition|planning-clarity-needs-focus`). - Same file: registered new read-only tool `board_planning_clarity_score` returning compact summary + details (no mutation/dispatch). - docs: added `docs/primitives/board-planning-clarity-score.md` and linked from `docs/primitives/README.md`. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 3 files passed, 81 tests passed. - marker-check on planning primitive doc matched 4/4 required anchors."
+    },
+    {
+      "id": "VER-BUD-827",
+      "target": "TASK-BUD-478",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke regressions + marker-check",
+      "timestamp": "2026-05-01T18:44:31.158Z",
+      "evidence": "Added regression pack for planning-clarity scoring and visible seeding/tangent continuity contracts. Changes: - `packages/pi-stack/test/smoke/project-board-surface.test.ts`: added regression for `buildBoardPlanningClarityScore(...)` covering simplista case (macro sem dependências => `planning-clarity-needs-decomposition`) and milestone-filtered output; preserved strong-case checks via tool path. - `packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts` + `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: strengthened visible-seeding assertions to preserve `recommendationCode` + `nextAction` and no-dispatch invariants. - `docs/research/cleanup-research-regression-pack-2026-05-01.md`: compact lane evidence packet with caso bom/simplista/tangente aprovada matrix and invariants. Validation: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 3 files passed, 81 tests passed. - marker-check on regression packet doc matched 5/5 anchors."
     }
   ]
 }

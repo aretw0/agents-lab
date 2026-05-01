@@ -82,6 +82,20 @@ Campos mínimos:
 - `needs-human-focus-protected`
 - `stop-no-local-safe`
 
+## Semeadura visível (preview-only)
+
+Quando houver slices candidatos, a semeadura deve passar por preview explícito (`lane_brainstorm_seed_preview`), sem criar tasks automaticamente.
+
+Saída esperada do preview:
+
+- `decision=needs-human-seeding-decision` ou `blocked`;
+- `recommendationCode=brainstorm-seeding-preview|brainstorm-seeding-blocked`;
+- `confirmationRequired=true` sempre;
+- lista `proposals[]` derivada de `selectedSlices`;
+- invariantes de segurança: `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`, `mode=report-only`.
+
+Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangent-approved`). Materialização de task só ocorre após decisão humana explícita.
+
 ## Exemplo blocked/fail-closed
 
 ```json

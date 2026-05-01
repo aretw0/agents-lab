@@ -343,6 +343,27 @@ function normalizeStringArray(value: unknown, maxItems: number, maxItemLength: n
   return out.length > 0 ? out : undefined;
 }
 
+type BoardTaskProvenanceOrigin = "brainstorm" | "human" | "tangent-approved";
+
+function normalizeTaskProvenanceOrigin(value: unknown): BoardTaskProvenanceOrigin | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "brainstorm" || normalized === "human" || normalized === "tangent-approved") {
+    return normalized;
+  }
+  return undefined;
+}
+
+function buildTaskProvenanceNote(input: {
+  origin: BoardTaskProvenanceOrigin;
+  sourceTaskId?: string;
+  sourceReason?: string;
+}): string {
+  const sourceTask = normalizeBoundedText(input.sourceTaskId, 80) ?? "none";
+  const reason = normalizeBoundedText(input.sourceReason, 180) ?? "unspecified";
+  return `[provenance:${input.origin}] source_task=${sourceTask} reason=${reason}`;
+}
+
 function extractRationaleKindFromText(text: string | undefined): BoardRationaleKind | undefined {
   if (typeof text !== "string" || text.trim().length <= 0) return undefined;
   const matches = [...text.matchAll(/\[rationale:([^\]]+)\]/ig)];
@@ -1120,6 +1141,118 @@ export function buildProjectTaskQualityGate(cwd: string, taskIdInput: string): P
   };
 }
 
+export interface BoardPlanningClarityScoreResult {
+  ok: boolean;
+  score: number;
+  recommendationCode: "planning-clarity-strong" | "planning-clarity-needs-decomposition" | "planning-clarity-needs-focus";
+  recommendation: string;
+  metrics: {
+    openTasks: number;
+    inProgressTasks: number;
+    macroOpenTasks: number;
+    macroWithDependencies: number;
+    inProgressWithVerification: number;
+    rationaleSensitiveWithoutRationale: number;
+  };
+  subScores: {
+    decomposition: number;
+    verification: number;
+    focus: number;
+    rationaleCoverage: number;
+  };
+  summary: string;
+}
+
+function scoreRatio(numerator: number, denominator: number): number {
+  if (denominator <= 0) return 100;
+  return Math.max(0, Math.min(100, Math.round((numerator / denominator) * 100)));
+}
+
+export function buildBoardPlanningClarityScore(
+  cwd: string,
+  options: { milestone?: string } = {},
+): BoardPlanningClarityScoreResult {
+  const read = queryProjectTasks(cwd, {
+    milestone: options.milestone,
+    limit: 200,
+  });
+  const open = read.rows.filter((row) => row.status !== "completed");
+  const block = readTasksBlockCached(cwd).block;
+  const taskById = new Map(block.tasks.map((task) => [task.id, task] as const));
+
+  const openTasks = open.length;
+  const inProgressTasks = open.filter((row) => row.status === "in-progress").length;
+  let macroOpenTasks = 0;
+  let macroWithDependencies = 0;
+  for (const row of open) {
+    const task = taskById.get(row.id);
+    if (!task) continue;
+    const broad = isBroadTaskCandidate(task);
+    if (!broad.macro) continue;
+    macroOpenTasks += 1;
+    if ((task.depends_on?.length ?? 0) > 0) macroWithDependencies += 1;
+  }
+
+  const inProgressWithVerification = open
+    .filter((row) => row.status === "in-progress")
+    .filter((row) => typeof row.verification === "string" && row.verification.trim().length > 0)
+    .length;
+
+  const rationaleSensitiveWithoutRationale = open
+    .filter((row) => row.rationaleRequired === true && row.hasRationale !== true)
+    .length;
+
+  const decomposition = scoreRatio(macroWithDependencies, macroOpenTasks);
+  const verification = scoreRatio(inProgressWithVerification, inProgressTasks);
+  const focus = inProgressTasks <= 1 ? 100 : inProgressTasks <= 2 ? 80 : inProgressTasks <= 3 ? 60 : 30;
+  const rationaleCoverage = scoreRatio(
+    open.filter((row) => row.rationaleRequired === true && row.hasRationale === true).length,
+    open.filter((row) => row.rationaleRequired === true).length,
+  );
+
+  const score = Math.round((decomposition * 0.35) + (verification * 0.25) + (focus * 0.2) + (rationaleCoverage * 0.2));
+
+  let recommendationCode: BoardPlanningClarityScoreResult["recommendationCode"] = "planning-clarity-strong";
+  let recommendation = "planning clarity is strong; continue bounded milestone execution.";
+  if (decomposition < 60) {
+    recommendationCode = "planning-clarity-needs-decomposition";
+    recommendation = "planning clarity degraded by macro tasks without explicit dependencies; decompose before long runs.";
+  } else if (verification < 70 || focus < 60 || rationaleCoverage < 70) {
+    recommendationCode = "planning-clarity-needs-focus";
+    recommendation = "planning clarity needs focus: tighten in-progress scope and link focal verification/rationale evidence.";
+  }
+
+  return {
+    ok: true,
+    score,
+    recommendationCode,
+    recommendation,
+    metrics: {
+      openTasks,
+      inProgressTasks,
+      macroOpenTasks,
+      macroWithDependencies,
+      inProgressWithVerification,
+      rationaleSensitiveWithoutRationale,
+    },
+    subScores: {
+      decomposition,
+      verification,
+      focus,
+      rationaleCoverage,
+    },
+    summary: [
+      "board-planning-score:",
+      "ok=yes",
+      `score=${score}`,
+      `code=${recommendationCode}`,
+      `open=${openTasks}`,
+      `inProgress=${inProgressTasks}`,
+      `macro=${macroOpenTasks}`,
+    ].join(" "),
+  };
+}
+
 function invalidateProjectBlockCaches(cwd: string): void {
   tasksCache.delete(tasksPath(cwd));
   verificationCache.delete(verificationPath(cwd));
@@ -1307,6 +1440,9 @@ export function createProjectTaskBoard(
     acceptanceCriteria?: string[];
     milestone?: string;
     note?: string;
+    provenanceOrigin?: BoardTaskProvenanceOrigin;
+    sourceTaskId?: string;
+    sourceReason?: string;
   },
 ): ProjectTaskCreateResult {
   const id = typeof input.id === "string" ? input.id.trim() : "";
@@ -1320,6 +1456,14 @@ export function createProjectTaskBoard(
   const acceptanceCriteria = normalizeStringArray(input.acceptanceCriteria, 20, 300);
   const milestone = normalizeMilestoneLabel(input.milestone);
   const note = normalizeBoundedText(input.note, 1000);
+  const provenanceOrigin = normalizeTaskProvenanceOrigin(input.provenanceOrigin);
+  const provenanceNote = provenanceOrigin
+    ? buildTaskProvenanceNote({
+      origin: provenanceOrigin,
+      sourceTaskId: input.sourceTaskId,
+      sourceReason: input.sourceReason,
+    })
+    : undefined;
 
   if (!id) return { ok: false, reason: "missing-task-id", summary: buildBoardTaskCreateSummary(false, id, status, "missing-task-id") };
   if (!description) return { ok: false, reason: "missing-task-description", summary: buildBoardTaskCreateSummary(false, id, status, "missing-task-description") };
@@ -1341,6 +1485,7 @@ export function createProjectTaskBoard(
   if (acceptanceCriteria) task.acceptance_criteria = acceptanceCriteria;
   if (milestone && milestone.length > 0) task.milestone = milestone;
   if (note) task.notes = appendTaskNote(undefined, note, 50);
+  if (provenanceNote) task.notes = appendTaskNote(task.notes, provenanceNote, 50);
 
   block.tasks.push(task);
   writeProjectTasksBlock(cwd, block);
@@ -1723,6 +1868,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     acceptance_criteria: Type.Optional(Type.Array(Type.String(), { description: "Optional bounded acceptance criteria." })),
     milestone: Type.Optional(Type.String({ description: "Optional milestone label." })),
     note: Type.Optional(Type.String({ description: "Optional initial note." })),
+    provenance_origin: Type.Optional(Type.String({ description: "Optional provenance origin: brainstorm | human | tangent-approved." })),
+    source_task_id: Type.Optional(Type.String({ description: "Optional source task id for emergent/tangent work." })),
+    source_reason: Type.Optional(Type.String({ description: "Optional bounded reason describing why emergent work was created." })),
   });
 
   const executeTaskCreate = (
@@ -1737,6 +1885,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       acceptance_criteria?: string[];
       milestone?: string;
       note?: string;
+      provenance_origin?: string;
+      source_task_id?: string;
+      source_reason?: string;
     },
     _signal: AbortSignal,
     _onUpdate: (update: unknown) => void,
@@ -1752,6 +1903,9 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       acceptanceCriteria: params?.acceptance_criteria,
       milestone: params?.milestone,
       note: params?.note,
+      provenanceOrigin: params?.provenance_origin as BoardTaskProvenanceOrigin | undefined,
+      sourceTaskId: params?.source_task_id,
+      sourceReason: params?.source_reason,
     });
     return {
       content: [{ type: "text", text: details.summary ?? JSON.stringify(details, null, 2) }],
@@ -1860,6 +2014,33 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       "Read-only gate for loose/simplistic tickets, implicit dependencies, and verification traceability before task closure.",
     parameters: qualityGateParameters,
     execute: executeQualityGate,
+  });
+
+  const planningScoreParameters = Type.Object({
+    milestone: Type.Optional(Type.String({ description: "Optional milestone filter for score calculation." })),
+  });
+
+  const executePlanningScore = (
+    _toolCallId: string,
+    params: { milestone?: string },
+    _signal: AbortSignal,
+    _onUpdate: (update: unknown) => void,
+    ctx: { cwd: string },
+  ) => {
+    const details = buildBoardPlanningClarityScore(ctx.cwd, { milestone: params?.milestone });
+    return {
+      content: [{ type: "text", text: details.summary }],
+      details,
+    };
+  };
+
+  pi.registerTool({
+    name: "board_planning_clarity_score",
+    label: "Board Planning Clarity Score",
+    description:
+      "Report-only planning clarity/direction score for open tasks (decomposition, verification linkage, focus, rationale coverage).",
+    parameters: planningScoreParameters,
+    execute: executePlanningScore,
   });
 
   const verificationAppendParameters = Type.Object({

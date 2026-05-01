@@ -17,7 +17,7 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 | **Macro-task** | Task ampla demais para fechar com uma verificação simples; normalmente envolve múltiplos arquivos, risco, protected scope, long-run, política ou várias capacidades. Deve ter dependências/side quests explícitas antes de fechamento. | Uma desculpa para nunca fechar nada. | epic, broad task, tarefa ampla, guarda-chuva |
 | **Side quest / Subtask** | Task explícita criada quando uma macro-task depende de trabalho menor descoberto antes ou durante execução. Deve ter critérios e verificação própria. | Nota invisível em handoff ou promessa informal. | blocker task, dependency task, prerequisite |
 | **Dependency (`depends_on`)** | Relação explícita de bloqueio entre tasks. Se A depende de B, B precisa existir no board. | Ordem vaga de preferência ou ideia implícita. | prerequisite, blocker, side quest link |
-| **Milestone** | Rótulo de agrupamento semântico para filtrar/organizar trabalho. | Prova de conclusão, prioridade, ou dependência. | phase, lane label, agrupador |
+| **Milestone** | Rótulo de agrupamento semântico para filtrar/organizar trabalho; também pode ser a unidade de execução contínua quando o contrato de rodada estiver explícito. | Prova de conclusão, prioridade, ou dependência. | phase, lane label, agrupador |
 | **Slice / Fatia** | Pequena execução local com escopo reversível, validação focal e commit/checkpoint possível. | Task nova obrigatória; uma fatia pode ser parte de uma task. | micro-slice, local slice, passo |
 | **Verification** | Registro estruturado que diz o que foi validado, como, quando e com qual evidência. | Selo genérico de “passou algo”. | check, test evidence, validação |
 | **Evidence** | Texto bounded dentro da verification que explica o alcance real da validação. Deve deixar claro se prova a task inteira ou só uma fatia. | Narrativa longa ou substituto para dependências faltantes. | proof, log summary, evidência |
@@ -38,6 +38,7 @@ Se um nome novo não muda o contrato operacional, ele é só um alias. Registre 
 | **Surface** | Exposição operacional de uma primitive: tool, command, prompt ou UI. | A lógica em si. | tool surface, runtime surface |
 | **Live validation** | Verificação após reload/runtime real quando uma surface muda. | Smoke test unitário suficiente para garantir runtime carregado. | post-reload validation |
 | **Blocker** | Condição que impede uma transição ou fechamento seguro. Deve ser explícita no board/handoff quando relevante. | Preferência subjetiva para adiar. | impediment, stop reason |
+| **Stop reason code** | Código curto e canônico que explica por que a lane/rodada precisa parar e pedir interação humana (`NO_ELIGIBLE_LOCAL_SAFE`, `PROTECTED_SCOPE_REQUIRED`, etc.). | Texto livre genérico sem ação recomendada. | stop code, reason code |
 
 ## Relações importantes
 

@@ -52,6 +52,25 @@ export interface LaneBrainstormPacket {
   mode: "report-only";
 }
 
+export interface LaneBrainstormSeedPreview {
+  decision: "needs-human-seeding-decision" | "blocked";
+  recommendationCode: "brainstorm-seeding-preview" | "brainstorm-seeding-blocked";
+  nextAction: string;
+  source: "brainstorm" | "human" | "tangent-approved";
+  proposals: Array<{
+    id: string;
+    title: string;
+    acceptance: string[];
+    rollback: string;
+    sourceSliceId: string;
+  }>;
+  confirmationRequired: true;
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  authorization: "none";
+  mode: "report-only";
+}
+
 function normalizeLevel(value: unknown): BrainstormLevel {
   if (value === "high" || value === "medium" || value === "low") return value;
   return "medium";
@@ -196,6 +215,48 @@ export function buildLaneBrainstormPacket(input: {
     ideas: rankedIdeas,
     selectedSlices,
     selection: input.selection,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    mode: "report-only",
+  };
+}
+
+export function buildLaneBrainstormSeedPreview(input: {
+  packet: LaneBrainstormPacket;
+  source?: "brainstorm" | "human" | "tangent-approved";
+}): LaneBrainstormSeedPreview {
+  const source = input.source ?? "brainstorm";
+  if (input.packet.decision !== "ready-for-human-review" || input.packet.selectedSlices.length === 0) {
+    return {
+      decision: "blocked",
+      recommendationCode: "brainstorm-seeding-blocked",
+      nextAction: input.packet.nextAction,
+      source,
+      proposals: [],
+      confirmationRequired: true,
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      authorization: "none",
+      mode: "report-only",
+    };
+  }
+
+  const proposals = input.packet.selectedSlices.map((slice, index) => ({
+    id: `proposal-${index + 1}`,
+    title: slice.title,
+    acceptance: slice.acceptance,
+    rollback: slice.rollback,
+    sourceSliceId: slice.id,
+  }));
+
+  return {
+    decision: "needs-human-seeding-decision",
+    recommendationCode: "brainstorm-seeding-preview",
+    nextAction: "review proposals and confirm which ones should be materialized as board tasks.",
+    source,
+    proposals,
+    confirmationRequired: true,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",

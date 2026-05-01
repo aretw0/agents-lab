@@ -35,6 +35,55 @@ Antes de iniciar ou fechar uma fatia, validar rapidamente:
 
 Se 2+ itens falharem, a ação padrão é **decompor** (nova task/side quest) ou **parar** para foco explícito.
 
+### Template de parking-note protegido (v1)
+
+Quando uma task ficar parked por escopo protegido, usar um texto curto e canônico no board para reduzir variação semântica:
+
+`[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.`
+
+Regras:
+
+1. manter o mesmo texto-base (só variar contexto se realmente necessário);
+2. aplicar milestone de parking consistente (ex.: `protected-parked-legacy`);
+3. não usar parking-note como autorização de execução; é só classificação operacional.
+
+### Contrato de execução contínua por milestone (sem novo nome)
+
+A unidade de execução contínua desta doutrina é o **milestone**. Não introduzir outro termo para “lote”: se a rodada é contínua, ela deve estar vinculada a um milestone explícito.
+
+Condições de início da rodada (milestone):
+
+1. existe `nextTaskId` local-safe elegível no milestone;
+2. validação focal da primeira fatia é conhecida;
+3. rollback da fatia é explícito.
+
+Condições para continuar sem nova interação humana:
+
+1. fatia anterior fechou com validação focal e evidência curta;
+2. próximo `nextTaskId` do mesmo milestone continua local-safe;
+3. nenhum stop reason canônico foi acionado.
+
+Stop reasons canônicos (interação humana obrigatória):
+
+- `NO_ELIGIBLE_LOCAL_SAFE`
+- `PROTECTED_SCOPE_REQUIRED`
+- `BLOCKING_RELOAD_REQUIRED`
+- `VALIDATION_FAILED`
+- `AMBIGUOUS_HUMAN_OBJECTIVE`
+
+Evidência mínima por fatia (baixo custo de token):
+
+- 1 registro de verificação focal no board;
+- 1 nota curta de resultado/decisão na task;
+- checkpoint/handoff curto quando a rodada segue ou pausa.
+
+Evidência mínima por rodada de milestone:
+
+- total de fatias concluídas;
+- taxa de validação focal verde;
+- contagem de stop reasons canônicos;
+- próximos passos locais-safe ou razão explícita de parada.
+
 ## Controle humano, cancelamento e blast radius
 
 Confiabilidade de cancelamento é pré-condição para qualquer modo longo ou unattended mais forte. Um `Esc` que não interrompe de forma previsível deve ser tratado como incidente de controle humano, não como detalhe de UX. Até a causa estar classificada, a operação continua limitada a fatias locais, bounded e supervisionadas.

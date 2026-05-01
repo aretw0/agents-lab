@@ -6,6 +6,7 @@ import projectBoardSurfaceExtension, {
   appendProjectVerificationBoard,
   buildProjectTaskDecisionPacket,
   buildProjectTaskQualityGate,
+  buildBoardPlanningClarityScore,
   completeProjectTaskBoardWithVerification,
   createProjectTaskBoard,
   queryProjectTasks,
@@ -157,6 +158,30 @@ describe("project-board-surface", () => {
     }
   });
 
+  it("captures emergent tangent provenance in task notes", () => {
+    const cwd = seedWorkspace();
+    try {
+      const created = createProjectTaskBoard(cwd, {
+        id: "TASK-TANGENT",
+        description: "Fatia emergente aprovada",
+        provenanceOrigin: "tangent-approved",
+        sourceTaskId: "TASK-A",
+        sourceReason: "desvio necessário para desbloquear validação",
+      });
+
+      expect(created.ok).toBe(true);
+      const tasks = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as {
+        tasks: Array<{ id: string; notes?: string }>;
+      };
+      const tangent = tasks.tasks.find((row) => row.id === "TASK-TANGENT");
+      expect(tangent?.notes).toContain("[provenance:tangent-approved]");
+      expect(tangent?.notes).toContain("source_task=TASK-A");
+      expect(tangent?.notes).toContain("desvio necessário para desbloquear validação");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("createProjectTaskBoard validates required fields and status", () => {
     const cwd = seedWorkspace();
     try {
@@ -289,13 +314,48 @@ describe("project-board-surface", () => {
     }
   });
 
-  it("registers dependency and quality gate tools", async () => {
+  it("builds report-only planning clarity score with decomposition warnings", () => {
+    const cwd = seedWorkspace();
+    try {
+      createProjectTaskBoard(cwd, {
+        id: "TASK-MACRO",
+        description: "Macro pipeline governança multi-modo long-run",
+        status: "planned",
+        milestone: "MS-LONG",
+        files: [
+          "packages/pi-stack/extensions/project-board-surface.ts",
+          "packages/pi-stack/test/smoke/project-board-surface.test.ts",
+          "docs/guides/control-plane-operating-doctrine.md",
+          ".github/workflows/ci.yml",
+          ".project/tasks.json",
+        ],
+        acceptanceCriteria: ["decomposição", "verificação", "evidência"],
+      });
+
+      const scoreAll = buildBoardPlanningClarityScore(cwd);
+      expect(scoreAll.ok).toBe(true);
+      expect(scoreAll.recommendationCode).toBe("planning-clarity-needs-decomposition");
+      expect(scoreAll.metrics.macroOpenTasks).toBeGreaterThan(0);
+      expect(scoreAll.metrics.macroWithDependencies).toBe(0);
+
+      const scoreMilestone = buildBoardPlanningClarityScore(cwd, { milestone: "MS-LONG" });
+      expect(scoreMilestone.ok).toBe(true);
+      expect(scoreMilestone.metrics.openTasks).toBe(1);
+      expect(scoreMilestone.recommendationCode).toBe("planning-clarity-needs-decomposition");
+      expect(scoreMilestone.summary).toContain("board-planning-score:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("registers dependency/quality/clarity tools", async () => {
     const cwd = seedWorkspace();
     try {
       const pi = makeMockPi();
       projectBoardSurfaceExtension(pi);
       const depTool = getTool(pi, "board_task_dependencies");
       const gateTool = getTool(pi, "board_task_quality_gate");
+      const planningTool = getTool(pi, "board_planning_clarity_score");
 
       const depResult = await depTool.execute(
         "tc-deps",
@@ -315,6 +375,17 @@ describe("project-board-surface", () => {
         { cwd },
       );
       expect(gateResult.details?.closeAllowed).toBe(true);
+
+      const planningResult = await planningTool.execute(
+        "tc-planning",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+      expect(planningResult.details?.ok).toBe(true);
+      expect(planningResult.details?.recommendationCode).toBe("planning-clarity-strong");
+      expect(String(planningResult.details?.summary)).toContain("board-planning-score:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -1207,6 +1278,9 @@ describe("project-board-surface", () => {
           files: ["docs/tool.md"],
           acceptance_criteria: ["created through tool"],
           note: "[rationale:risk-control] avoid ad hoc task JSON mutation",
+          provenance_origin: "tangent-approved",
+          source_task_id: "TASK-A",
+          source_reason: "emergent fix approved during execution",
         },
         undefined as unknown as AbortSignal,
         () => {},
@@ -1217,6 +1291,10 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.summary).toBe("board-task-create: ok=yes task=TASK-TOOL status=in-progress");
       expect((result as any)?.content?.[0]?.text).toBe("board-task-create: ok=yes task=TASK-TOOL status=in-progress");
       expect((result.details as any)?.task).toMatchObject({ id: "TASK-TOOL", status: "in-progress" });
+      const tasks = JSON.parse(readFileSync(join(cwd, ".project", "tasks.json"), "utf8")) as { tasks: Array<{ id: string; notes?: string }> };
+      const created = tasks.tasks.find((row) => row.id === "TASK-TOOL");
+      expect(created?.notes).toContain("[provenance:tangent-approved]");
+      expect(created?.notes).toContain("source_task=TASK-A");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

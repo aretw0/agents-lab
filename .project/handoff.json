@@ -1,35 +1,37 @@
 {
-  "timestamp": "2026-05-01T16:49:01.723Z",
-  "context": "Ajuste pontual de higiene de reload concluído: context_watch_checkpoint agora explicita reloadRequired e reloadHint no details, reduzindo amb [snip] ão sem bloquear fatia local por padrão. [truncated:+30 chars]",
+  "timestamp": "2026-05-01T18:45:26.378Z",
+  "context": "Completed cleanup-research planning primitives: visible seeding preview, emergent tangent provenance, and board planning clarity score with r [snip] remaining candidate is protected-scope. [truncated:+103 chars]",
   "next_actions": [
-    "Commit do slice TASK-BUD-465.",
-    "Continuar backlog local-safe após seleção explícita de novo foco."
+    "human focus needed: either authorize protected-scope TASK-BUD-473 research criteria lane or cr [snip] n cleanup-research-longrun [truncated:+28 chars]",
+    "if protected focus is approved, run bounded slice with explicit scope and rollback before continuing"
   ],
   "blockers": [
-    "Nenhum blocker técnico local."
+    "PROTECTED_SCOPE_REQUIRED"
   ],
   "recent_validation": [
-    "cmd.exe /c npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-st [snip] es passed, 55 tests passed [truncated:+69 chars]"
+    "npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-st [snip] onomy-lane-surface.test.ts [truncated:+137 chars]",
+    "safe_marker_check docs/primitives/board-planning-clarity-score.md",
+    "safe_marker_check docs/research/cleanup-research-regression-pack-2026-05-01.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-465",
+    "focus": "TASK-BUD-478",
     "canonical_links": [
-      "task:TASK-BUD-465"
+      "task:TASK-BUD-478",
+      "task:TASK-BUD-473"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T16:49:01.723Z",
-    "level": "ok",
-    "percent": 0,
-    "action": "continue",
-    "recommendation": "commit e seguir com próxima fila local-safe.",
+    "generatedAtIso": "2026-05-01T18:45:26.378Z",
+    "level": "checkpoint",
+    "action": "checkpoint-refresh",
+    "recommendation": "local-stop-protected-focus-required",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T16:49:01.723Z",
+      "atIso": "2026-05-01T18:45:26.378Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
+      "level": "checkpoint",
       "percent": 0,
       "thresholds": {
         "warnPct": 50,
@@ -37,10 +39,10 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit e seguir com próxima fila local-safe."
+      "recommendation": "local-stop-protected-focus-required"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-465"
+    "TASK-BUD-478"
   ]
 }

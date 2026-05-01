@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
 import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
-import { buildLaneBrainstormPacket } from "./lane-brainstorm-packet";
+import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
@@ -221,6 +221,50 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],
         details: packet,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "lane_brainstorm_seed_preview",
+    label: "Lane Brainstorm Seed Preview",
+    description: "Report-only visible seeding preview from brainstorm slices; always requires explicit human decision before task materialization.",
+    parameters: Type.Object({
+      goal: Type.Optional(Type.String({ description: "Short lane objective." })),
+      ideas: Type.Optional(Type.Array(Type.Object({
+        id: Type.String(),
+        theme: Type.String(),
+        value: Type.Optional(Type.String()),
+        risk: Type.Optional(Type.String()),
+        effort: Type.Optional(Type.String()),
+      }))),
+      max_ideas: Type.Optional(Type.Number({ description: "Max ranked ideas (1..50)." })),
+      max_slices: Type.Optional(Type.Number({ description: "Max suggested slices (1..10)." })),
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in protected scopes." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in missing rationale tasks." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String())),
+      use_handoff_focus: Type.Optional(Type.Boolean()),
+      sample_limit: Type.Optional(Type.Number()),
+      source: Type.Optional(Type.String({ description: "brainstorm | human | tangent-approved" })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const selection = resolveTaskSelection(p, ctx.cwd);
+      const packet = buildLaneBrainstormPacket({
+        goal: p.goal,
+        ideas: p.ideas,
+        maxIdeas: p.max_ideas,
+        maxSlices: p.max_slices,
+        selection,
+      });
+      const preview = buildLaneBrainstormSeedPreview({
+        packet,
+        source: p.source === "human" || p.source === "tangent-approved" ? p.source : "brainstorm",
+      });
+      return {
+        content: [{ type: "text", text: JSON.stringify(preview, null, 2) }],
+        details: preview,
       };
     },
   });

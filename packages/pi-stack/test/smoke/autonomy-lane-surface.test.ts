@@ -284,4 +284,58 @@ describe("autonomy lane surface", () => {
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });
+
+  it("emits visible brainstorm seed preview that requires human confirmation", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-LOCAL", description: "[P1] local lane", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const seedTool = tools.find((tool) => tool.name === "lane_brainstorm_seed_preview");
+    const result = seedTool?.execute("call-test", {
+      ideas: [{ id: "idea-a", theme: "dedupe", value: "high", risk: "low", effort: "low" }],
+      source: "tangent-approved",
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("needs-human-seeding-decision");
+    expect(result?.details.recommendationCode).toBe("brainstorm-seeding-preview");
+    expect(String(result?.details.nextAction)).toContain("review proposals");
+    expect(result?.details.confirmationRequired).toBe(true);
+    expect(result?.details.source).toBe("tangent-approved");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.mutationAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("keeps brainstorm seed preview blocked for protected-only lane", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "lane-brainstorm-seed-preview-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const seedTool = tools.find((tool) => tool.name === "lane_brainstorm_seed_preview");
+    const result = seedTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("brainstorm-seeding-blocked");
+    expect(String(result?.details.nextAction).length).toBeGreaterThan(5);
+    expect(result?.details.confirmationRequired).toBe(true);
+    expect(result?.details.dispatchAllowed).toBe(false);
+  });
 });
