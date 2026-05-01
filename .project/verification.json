@@ -8709,6 +8709,15 @@
       "method": "signal-source-boundary-closure",
       "timestamp": "2026-04-30T22:32:52.051Z",
       "evidence": "TASK-BUD-393 completed as bounded upstream/wrapper signal-source investigation and proposal. Evidence: VER-BUD-718 added resolveHumanConfirmationSignalSourcePlan and tests; VER-BUD-719 added docs/primitives/human-confirmation-signal.md. The resulting boundary: use guard-owned audit entry when first-party guard owns ctx.ui.confirm; use wrapper/upstream signal for destructive confirmations that happen before tool_call; do not patch node_modules directly; never consume text-only custom_messages or model-written confirmation as trusted evidence. Focused tests passed: 16 tests; docs sync/check ok. Created TASK-BUD-394 for actual implementation/PR/wrapper channel selection and live validation."
+    },
+    {
+      "id": "VER-BUD-721",
+      "target": "TASK-BUD-394",
+      "target_type": "task",
+      "status": "passed",
+      "method": "implementation-channel-plan-smoke",
+      "timestamp": "2026-05-01T01:42:21.878Z",
+      "evidence": "First bounded slice for TASK-BUD-394 chose/codified the safe initial implementation channel without enabling destructive runtime. Added resolveHumanConfirmationImplementationChannelPlan: guard-owned starts as guard-owned-report-only; wrapper and upstream PR remain design channels until details/acceptance are proven; direct node_modules patch and operational destructive dialog enable requests block. Invariants: dispatchAllowed=false, implementationAllowed=false, runtimeDestructiveDialogEnabled=false, directNodeModulesPatchAllowed=false, authorization=none. Tests: focused vitest suite passed 17 tests; docs sync/check ok. Safe markers passed for helper 4/4, primitive doc 4/4, doctrine 3/3."
     }
   ]
 }

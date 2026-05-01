@@ -7,6 +7,7 @@ import {
   recordTrustedHumanConfirmationUiDecision,
   resolveHumanConfirmationAuditPlan,
   resolveHumanConfirmationEvidenceMatch,
+  resolveHumanConfirmationImplementationChannelPlan,
   resolveHumanConfirmationRuntimeConsumptionPlan,
   resolveHumanConfirmationSignalSourcePlan,
   type PendingHumanConfirmedAction,
@@ -278,5 +279,25 @@ describe("human confirmation audit plan", () => {
     });
     expect(upstream.decision).toBe("propose-upstream-tool-call-signal");
     expect(upstream.recommendedPath).toContain("do not patch node_modules directly");
+  });
+
+  it("chooses an implementation channel without enabling destructive runtime", () => {
+    const guardOwned = resolveHumanConfirmationImplementationChannelPlan({ guardCanOwnDialog: true });
+    expect(guardOwned.channel).toBe("guard-owned-report-only");
+    expect(guardOwned.runtimeDestructiveDialogEnabled).toBe(false);
+    expect(guardOwned.implementationAllowed).toBe(false);
+    expect(guardOwned.dispatchAllowed).toBe(false);
+
+    const wrapper = resolveHumanConfirmationImplementationChannelPlan({ preferredChannel: "wrapper" });
+    expect(wrapper.channel).toBe("wrapper-design");
+    expect(wrapper.directNodeModulesPatchAllowed).toBe(false);
+
+    const blocked = resolveHumanConfirmationImplementationChannelPlan({
+      directNodeModulesPatchRequested: true,
+      destructiveRuntimeEnableRequested: true,
+    });
+    expect(blocked.channel).toBe("blocked");
+    expect(blocked.reasons).toContain("direct-node-modules-patch-prohibited");
+    expect(blocked.reasons).toContain("destructive-runtime-enable-requires-separate-authorization");
   });
 });

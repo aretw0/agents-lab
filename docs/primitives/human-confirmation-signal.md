@@ -50,6 +50,16 @@ Consumers must enforce:
 - `canOverrideMonitorBlock=false`;
 - `authorization=none` until a separate operational executor/override task exists.
 
+## Implementation channel decision
+
+For the local stack, the first implementation channel should be **guard-owned report-only** unless an explicit later task chooses wrapper or upstream PR work. `resolveHumanConfirmationImplementationChannelPlan` encodes this boundary:
+
+- guard-owned channel starts as report-only/dry-run evidence recording;
+- wrapper channel is design-only until it proves structured details survive to the consumer;
+- upstream PR channel is design-only until accepted/released;
+- direct `node_modules` patches are prohibited;
+- enabling an operational destructive dialog requires separate authorization and live validation.
+
 ## Acceptable integration paths
 
 ### 1. Guard-owned dialog

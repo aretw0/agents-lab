@@ -158,7 +158,113 @@ export type HumanConfirmationSignalSourcePlan = {
   summary: string;
 };
 
+export type HumanConfirmationImplementationChannel = "guard-owned-report-only" | "wrapper-design" | "upstream-pr-design" | "blocked";
+
+export type HumanConfirmationImplementationChannelInput = {
+  preferredChannel?: "guard-owned" | "wrapper" | "upstream-pr";
+  guardCanOwnDialog?: boolean;
+  wrapperCanPreserveStructuredDetails?: boolean;
+  upstreamChangeAccepted?: boolean;
+  directNodeModulesPatchRequested?: boolean;
+  destructiveRuntimeEnableRequested?: boolean;
+};
+
+export type HumanConfirmationImplementationChannelPlan = {
+  channel: HumanConfirmationImplementationChannel;
+  authorization: "none";
+  dispatchAllowed: false;
+  implementationAllowed: false;
+  runtimeDestructiveDialogEnabled: false;
+  directNodeModulesPatchAllowed: false;
+  reasons: string[];
+  nextActions: string[];
+  summary: string;
+};
+
 const DEFAULT_CONFIRMATION_TTL_MS = 30_000;
+
+export function resolveHumanConfirmationImplementationChannelPlan(
+  input: HumanConfirmationImplementationChannelInput,
+): HumanConfirmationImplementationChannelPlan {
+  const reasons: string[] = [];
+
+  if (input.directNodeModulesPatchRequested) reasons.push("direct-node-modules-patch-prohibited");
+  if (input.destructiveRuntimeEnableRequested) reasons.push("destructive-runtime-enable-requires-separate-authorization");
+  if (reasons.length > 0) {
+    return {
+      channel: "blocked",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      runtimeDestructiveDialogEnabled: false,
+      directNodeModulesPatchAllowed: false,
+      reasons,
+      nextActions: ["remove-prohibited-request", "continue-with-design-or-report-only-channel"],
+      summary: `human-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.preferredChannel === "guard-owned" || input.guardCanOwnDialog) {
+    reasons.push("guard-owned-channel-selected");
+    reasons.push("start-report-only-before-operational-dialog");
+    return {
+      channel: "guard-owned-report-only",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      runtimeDestructiveDialogEnabled: false,
+      directNodeModulesPatchAllowed: false,
+      reasons,
+      nextActions: ["record-evidence-from-guard-owned-confirm-only", "keep-operational-destructive-dialog-disabled", "validate-envelope-consumption-before-enable"],
+      summary: `human-confirmation-implementation-channel: channel=guard-owned-report-only dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.preferredChannel === "wrapper" || input.wrapperCanPreserveStructuredDetails) {
+    reasons.push("wrapper-channel-selected");
+    reasons.push("structured-details-required");
+    return {
+      channel: "wrapper-design",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      runtimeDestructiveDialogEnabled: false,
+      directNodeModulesPatchAllowed: false,
+      reasons,
+      nextActions: ["design-wrapper-structured-envelope", "prove-consumer-receives-details", "keep-fail-closed"],
+      summary: `human-confirmation-implementation-channel: channel=wrapper-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  if (input.preferredChannel === "upstream-pr" || input.upstreamChangeAccepted) {
+    reasons.push("upstream-pr-channel-selected");
+    reasons.push("no-local-node-modules-patch");
+    return {
+      channel: "upstream-pr-design",
+      authorization: "none",
+      dispatchAllowed: false,
+      implementationAllowed: false,
+      runtimeDestructiveDialogEnabled: false,
+      directNodeModulesPatchAllowed: false,
+      reasons,
+      nextActions: ["draft-upstream-interface", "preserve-local-fail-closed-until-release"],
+      summary: `human-confirmation-implementation-channel: channel=upstream-pr-design dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=${reasons.join("|")} authorization=none`,
+    };
+  }
+
+  reasons.push("no-safe-channel-selected");
+  return {
+    channel: "blocked",
+    authorization: "none",
+    dispatchAllowed: false,
+    implementationAllowed: false,
+    runtimeDestructiveDialogEnabled: false,
+    directNodeModulesPatchAllowed: false,
+    reasons,
+    nextActions: ["choose-guard-owned-wrapper-or-upstream-pr-channel"],
+    summary: "human-confirmation-implementation-channel: channel=blocked dispatch=no implementation=no destructiveDialog=no nodeModulesPatch=no reasons=no-safe-channel-selected authorization=none",
+  };
+}
 
 export function resolveHumanConfirmationSignalSourcePlan(
   input: HumanConfirmationSignalSourcePlanInput,
