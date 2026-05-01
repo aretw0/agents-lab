@@ -1,6 +1,6 @@
 # Doutrina operacional do control-plane unattended
 
-Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito humano, sem perder governança.
+Este guia consolida as opiniões operacionais que devem orientar o agente quando estiver trabalhando em modo local-first, com pouco atrito humano, sem perder governança. Para nomenclatura canônica e aliases, use `docs/guides/control-plane-glossary.md` antes de criar novos termos ou surfaces.
 
 ## Norte
 

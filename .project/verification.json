@@ -8853,6 +8853,15 @@
       "method": "ticket-quality-gate-smoke",
       "timestamp": "2026-05-01T02:47:25.508Z",
       "evidence": "Implemented read-only buildProjectTaskQualityGate and tool registration board_task_quality_gate. Gate flags macro-task-missing-dependencies, missing dependencies, completed-without-passed-verification, completed-with-partial-verification, while allowing small-task-no-dependencies-ok. Focal validation: project-board-surface smoke 57 passed; docs package check ok."
+    },
+    {
+      "id": "VER-BUD-737",
+      "target": "TASK-BUD-404",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs-glossary-marker-check",
+      "timestamp": "2026-05-01T02:51:20.686Z",
+      "evidence": "Created docs/guides/control-plane-glossary.md defining canonical control-plane vocabulary and aliases for task, macro-task, side quest/subtask, dependency, milestone, slice, verification/evidence, gate, nudge-free, surface/primitive, etc. Linked from docs/guides/README.md and control-plane doctrine. Validation: safe_marker_check matched 4/4 key glossary markers; i18n_lint_text pass pt-BR; npm run docs:package:check ok."
     }
   ]
 }

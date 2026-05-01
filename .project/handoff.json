@@ -1,43 +1,43 @@
 {
-  "timestamp": "2026-05-01T02:47:35.854Z",
-  "context": "Implemented local-safe first slice for explicit side quests/ticket quality. Added dependency primitive updateProjectTaskDependencies with fut [snip] local-safe tasks without dependencies. [truncated:+324 chars]",
+  "timestamp": "2026-05-01T02:51:42.192Z",
+  "context": "Criado glossário canônico do control-plane para reduzir aliases/alcunhas e evitar que termos próximos virem capacidades redundantes. O glossá [snip] o antes de criar novos termos/surfaces. [truncated:+343 chars]",
   "current_tasks": [
     "TASK-BUD-153"
   ],
   "next_actions": [
-    "Commit TASK-BUD-396/TASK-BUD-403 first slice.",
-    "Reload required before live-validating new runtime tools board_task_dependencies and board_task_quality_gate.",
-    "After reload, apply dependencies to TASK-BUD-153 with board_task_dependencies, then validate q [snip] lity gate on TASK-BUD-153. [truncated:+2 chars]"
+    "Commit glossary slice.",
+    "Reload still required later for TASK-BUD-396/TASK-BUD-403 runtime tools from prior commit before live validation.",
+    "After reload, validate board_task_dependencies and board_task_quality_gate, then attach dependencies to TASK-BUD-153."
   ],
   "blockers": [
-    "Runtime tool additions require reload before live validation.",
-    "TASK-BUD-153 still blocked by background lifecycle, stale handoff reconciliati [snip] , and local rehearsal. [truncated:+40 chars]"
+    "Strong unattended/loop/scheduler/remote permanece bloqueado.",
+    "TASK-BUD-153 remains blocked until side quests and local rehearsal gates pass."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts => 57 passed",
-    "npm run docs:package:check => ok",
-    "VER-BUD-735 linked to TASK-BUD-396"
+    "TASK-BUD-404 completed with VER-BUD-737.",
+    "safe_marker_check docs/guides/control-plane-glossary.md matched 4/4 key markers.",
+    "i18n_lint_text passed for pt-BR excerpt."
   ],
   "context_watch": {
-    "generatedAtIso": "2026-05-01T02:47:35.854Z",
+    "generatedAtIso": "2026-05-01T02:51:42.192Z",
     "level": "ok",
-    "percent": 31,
+    "percent": 42,
     "action": "continue",
-    "recommendation": "commit-then-reload-validate-board-surfaces"
+    "recommendation": "commit-docs-glossary"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T02:47:35.854Z",
+      "atIso": "2026-05-01T02:51:42.192Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 31,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-then-reload-validate-board-surfaces"
+      "recommendation": "commit-docs-glossary"
     }
   ]
 }

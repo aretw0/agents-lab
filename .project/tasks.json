@@ -9782,6 +9782,29 @@
       "milestone": "local-first-control-plane",
       "notes": "[rationale:risk-control] Steering do operador: progresso vazio precisa ser detectado cedo. O sistema de tickets deve ser rígido o suficiente para impedir tarefas invisíveis/implícitas e fluído o suficiente para permitir decomposição durante o trabalho com rastreio auditável de verificações.\n2026-05-01: implementada primeira fatia do gate read-only: `buildProjectTaskQualityGate` + surface runtime futura `board_task_quality_gate`, distinguindo tarefas pequenas sem dependências de macro-tasks com dependências implícitas, dependências faltantes e verificação parcial usada como fechamento. Live validation requer reload.",
       "verification": "VER-BUD-736"
+    },
+    {
+      "id": "TASK-BUD-404",
+      "description": "Criar glossário canônico do control-plane para reduzir alcunhas redundantes e clarificar task, macro-task, slice, milestone, nudge-free, gate e termos relacionados.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-403"
+      ],
+      "files": [
+        "docs/guides/control-plane-glossary.md",
+        "docs/guides/README.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Glossário define termos canônicos e aliases/alcunhas aceitas sem criar novos conceitos desnecessários.",
+        "Documento diferencia task, macro-task, side quest/subtask, slice/fatia, milestone, verification/evidence, gate e nudge-free.",
+        "Doutrina e índice apontam para o glossário como referência de linguagem operacional.",
+        "O glossário explicita que o objetivo é um relógio de trabalho auditável, não proliferação de nomes."
+      ],
+      "milestone": "local-first-control-plane",
+      "notes": "[rationale:risk-control] Steering do operador: a stack acumulou nomes demais para conceitos próximos; sem glossário, o agente pode duplicar abstrações, fechar progresso vazio ou tratar aliases como capacidades novas.\n2026-05-01: glossário canônico criado para reduzir alcunhas e gordura conceitual; objetivo explícito é um relógio de trabalho digno e auditável, não proliferação de nomes.",
+      "verification": "VER-BUD-737"
     }
   ]
 }
