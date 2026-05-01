@@ -1,7 +1,11 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
-import { evaluateAutonomyLaneTaskSelection, readAutonomyHandoffFocusTaskIds } from "./guardrails-core-autonomy-task-selector";
+import {
+  evaluateAutonomyLaneTaskSelection,
+  evaluateAutonomyProtectedScopeReasonReport,
+  readAutonomyHandoffFocusTaskIds,
+} from "./guardrails-core-autonomy-task-selector";
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
 
@@ -178,6 +182,27 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const result = resolveTaskSelection(p, ctx.cwd);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_protected_scope_report",
+    label: "Autonomy Lane Protected Scope Report",
+    description: "Report-only protected-scope classification evidence for autonomy lane tasks (reason codes + signals).",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      limit: Type.Optional(Type.Number({ description: "Max rows to return (1..20)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const result = evaluateAutonomyProtectedScopeReasonReport(ctx.cwd, {
+        milestone: typeof p.milestone === "string" ? p.milestone : undefined,
+        limit: asNumber(p.limit, 10),
+      });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

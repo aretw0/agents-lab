@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { selectAutonomyLaneTask } from "../../extensions/guardrails-core-autonomy-task-selector";
+import {
+  buildAutonomyProtectedScopeReasonReport,
+  selectAutonomyLaneTask,
+} from "../../extensions/guardrails-core-autonomy-task-selector";
 import type { ProjectTaskItem } from "../../extensions/colony-pilot-task-sync";
 
 function task(partial: Partial<ProjectTaskItem> & { id: string }): ProjectTaskItem {
@@ -198,6 +201,28 @@ describe("autonomy task selector", () => {
     expect(result.ready).toBe(false);
     expect(result.reason).toBe("no-candidate-tasks");
     expect(result.recommendationCode).toBe("add-or-select-task");
+  });
+
+  it("builds protected-scope reason report with canonical codes and evidence", () => {
+    const report = buildAutonomyProtectedScopeReasonReport([
+      task({ id: "TASK-EXT", status: "planned", description: "[P1] avaliar influência externa https://example.com" }),
+      task({ id: "TASK-LOCAL", status: "planned", description: "[P2] pesquisa local-safe: mapear critérios" }),
+    ], { limit: 10 });
+
+    expect(report.totals.candidates).toBe(2);
+    expect(report.totals.protected).toBe(1);
+    expect(report.totals.localSafe).toBe(1);
+
+    const external = report.rows.find((row) => row.id === "TASK-EXT");
+    const local = report.rows.find((row) => row.id === "TASK-LOCAL");
+    expect(external?.protectedScope).toBe(true);
+    expect(external?.primaryReasonCode).toBe("protected-external-url");
+    expect(external?.reasonCodes).toContain("protected-external-url");
+    expect((external?.evidence?.[0] ?? "").length).toBeGreaterThan(10);
+
+    expect(local?.protectedScope).toBe(false);
+    expect(local?.primaryReasonCode).toBe("local-safe");
+    expect(local?.reasonCodes).toHaveLength(0);
   });
 
   it("filters by milestone", () => {

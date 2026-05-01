@@ -63,22 +63,41 @@ export interface AutonomyTaskSelection {
   };
 }
 
-const PROTECTED_SCOPE_PATTERNS = [
-  /^\.pi\/settings\.json$/i,
-  /^\.obsidian(?:\/|$)/i,
-  /^\.github(?:\/|$)/i,
-  /(?:^|\/)workflows(?:\/|$)/i,
-  /\bgithub\s+actions\b/i,
-  /\bgh\s+actions\b/i,
-  /\bremote\s+(?:compute|execution|runner|runners)\b/i,
-  /\bcolony\b.*\b(?:promotion|promote|recovery|recover|materializa[cç][aã]o)\b/i,
-  /\b(?:promotion|promote|recovery|recover)\b.*\bcolony\b/i,
-  /(?:^|\W)[\w-]*-promotion(?:\W|$)/i,
-  /https?:\/\//i,
-  /\b(?:research|pesquisa)\b.*\b(?:extern[ao]|external|web|internet|url|fonte(?:s)?|source|influ[eê]ncia|inspiration|inspira[cç][aã]o|prior\s*art)\b/i,
-  /\b(?:influ[eê]ncia|inspiration|inspira[cç][aã]o)\b.*\b(?:extern[ao]|external|web|internet|fonte(?:s)?|source|prior\s*art)\b/i,
-  /\bpublish\b/i,
-  /\bci\b/i,
+export type AutonomyProtectedScopeReasonCode =
+  | "protected-settings-file"
+  | "protected-obsidian-path"
+  | "protected-github-path"
+  | "protected-workflows-path"
+  | "protected-github-actions"
+  | "protected-remote-execution"
+  | "protected-colony-promotion"
+  | "protected-external-url"
+  | "protected-external-research"
+  | "protected-publish"
+  | "protected-ci-keyword";
+
+interface ProtectedScopeRule {
+  reasonCode: AutonomyProtectedScopeReasonCode;
+  signal: string;
+  pattern: RegExp;
+}
+
+const PROTECTED_SCOPE_RULES: ProtectedScopeRule[] = [
+  { reasonCode: "protected-settings-file", signal: ".pi/settings.json", pattern: /^\.pi\/settings\.json$/i },
+  { reasonCode: "protected-obsidian-path", signal: ".obsidian", pattern: /^\.obsidian(?:\/|$)/i },
+  { reasonCode: "protected-github-path", signal: ".github", pattern: /^\.github(?:\/|$)/i },
+  { reasonCode: "protected-workflows-path", signal: "workflows", pattern: /(?:^|\/)workflows(?:\/|$)/i },
+  { reasonCode: "protected-github-actions", signal: "github actions", pattern: /\bgithub\s+actions\b/i },
+  { reasonCode: "protected-github-actions", signal: "gh actions", pattern: /\bgh\s+actions\b/i },
+  { reasonCode: "protected-remote-execution", signal: "remote execution", pattern: /\bremote\s+(?:compute|execution|runner|runners)\b/i },
+  { reasonCode: "protected-colony-promotion", signal: "colony promotion", pattern: /\bcolony\b.*\b(?:promotion|promote|recovery|recover|materializa[cç][aã]o)\b/i },
+  { reasonCode: "protected-colony-promotion", signal: "promotion colony", pattern: /\b(?:promotion|promote|recovery|recover)\b.*\bcolony\b/i },
+  { reasonCode: "protected-colony-promotion", signal: "*-promotion", pattern: /(?:^|\W)[\w-]*-promotion(?:\W|$)/i },
+  { reasonCode: "protected-external-url", signal: "http-url", pattern: /https?:\/\//i },
+  { reasonCode: "protected-external-research", signal: "external research", pattern: /\b(?:research|pesquisa)\b.*\b(?:extern[ao]|external|web|internet|url|fonte(?:s)?|source|influ[eê]ncia|inspiration|inspira[cç][aã]o|prior\s*art)\b/i },
+  { reasonCode: "protected-external-research", signal: "external influence", pattern: /\b(?:influ[eê]ncia|inspiration|inspira[cç][aã]o)\b.*\b(?:extern[ao]|external|web|internet|fonte(?:s)?|source|prior\s*art)\b/i },
+  { reasonCode: "protected-publish", signal: "publish", pattern: /\bpublish\b/i },
+  { reasonCode: "protected-ci-keyword", signal: "ci", pattern: /\bci\b/i },
 ];
 
 function normalizeText(value: unknown): string | undefined {
@@ -150,16 +169,72 @@ function statusRank(task: ProjectTaskItem): number {
   return 9;
 }
 
-function isProtectedScopeText(text: string): boolean {
+export interface AutonomyProtectedScopeEvidence {
+  reasonCode: AutonomyProtectedScopeReasonCode;
+  signal: string;
+  source: "file" | "description";
+  matchedOn: string;
+}
+
+function classifyProtectedScopeText(text: string): ProtectedScopeRule[] {
   const normalized = text.replace(/\\/g, "/");
-  return PROTECTED_SCOPE_PATTERNS.some((pattern) => pattern.test(normalized));
+  return PROTECTED_SCOPE_RULES.filter((rule) => rule.pattern.test(normalized));
+}
+
+function clipEvidenceText(text: string, max = 120): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, Math.max(16, max - 1))}…`;
+}
+
+export function classifyTaskProtectedScope(task: ProjectTaskItem): {
+  protected: boolean;
+  reasonCodes: AutonomyProtectedScopeReasonCode[];
+  signals: string[];
+  evidence: AutonomyProtectedScopeEvidence[];
+} {
+  const evidence: AutonomyProtectedScopeEvidence[] = [];
+
+  const files = Array.isArray(task.files) ? task.files : [];
+  for (const file of files) {
+    const normalized = normalizeText(file);
+    if (!normalized) continue;
+    const matches = classifyProtectedScopeText(normalized);
+    for (const match of matches) {
+      evidence.push({
+        reasonCode: match.reasonCode,
+        signal: match.signal,
+        source: "file",
+        matchedOn: clipEvidenceText(normalized, 90),
+      });
+    }
+  }
+
+  const description = normalizeText(task.description);
+  if (description) {
+    const matches = classifyProtectedScopeText(description);
+    for (const match of matches) {
+      evidence.push({
+        reasonCode: match.reasonCode,
+        signal: match.signal,
+        source: "description",
+        matchedOn: clipEvidenceText(description, 110),
+      });
+    }
+  }
+
+  const reasonCodes = [...new Set(evidence.map((row) => row.reasonCode))];
+  const signals = [...new Set(evidence.map((row) => row.signal))];
+
+  return {
+    protected: reasonCodes.length > 0,
+    reasonCodes,
+    signals,
+    evidence,
+  };
 }
 
 function taskTouchesProtectedScope(task: ProjectTaskItem): boolean {
-  const files = Array.isArray(task.files) ? task.files : [];
-  if (files.some((file) => typeof file === "string" && isProtectedScopeText(file))) return true;
-  const description = normalizeText(task.description) ?? "";
-  return isProtectedScopeText(description);
+  return classifyTaskProtectedScope(task).protected;
 }
 
 function hasRationaleText(text: unknown): boolean {
@@ -394,6 +469,89 @@ export function selectAutonomyLaneTask(
       skippedFocusMismatch,
     },
   };
+}
+
+export interface AutonomyProtectedScopeReasonRow {
+  id: string;
+  status: "planned" | "in-progress";
+  milestone?: string;
+  protectedScope: boolean;
+  primaryReasonCode: AutonomyProtectedScopeReasonCode | "local-safe";
+  reasonCodes: AutonomyProtectedScopeReasonCode[];
+  signals: string[];
+  evidence: string[];
+}
+
+export interface AutonomyProtectedScopeReasonReport {
+  milestone?: string;
+  rows: AutonomyProtectedScopeReasonRow[];
+  totals: {
+    candidates: number;
+    protected: number;
+    localSafe: number;
+  };
+  summary: string;
+}
+
+export function buildAutonomyProtectedScopeReasonReport(
+  tasks: ProjectTaskItem[],
+  options?: { milestone?: string; limit?: number },
+): AutonomyProtectedScopeReasonReport {
+  const milestone = normalizeMilestone(options?.milestone);
+  const limit = clampSampleLimit(options?.limit);
+
+  const candidates = tasks.filter((task) => {
+    if (!normalizeTaskId(task.id)) return false;
+    if (task.status !== "in-progress" && task.status !== "planned") return false;
+    if (!milestone) return true;
+    return normalizeMilestone(task.milestone) === milestone;
+  }).sort(compareTasks);
+
+  const rows = candidates.slice(0, limit).map((task) => {
+    const classified = classifyTaskProtectedScope(task);
+    const reasonCodes = classified.reasonCodes;
+    const evidence = classified.evidence.map((item) => `${item.source}:${item.signal} (${item.matchedOn})`);
+
+    return {
+      id: normalizeTaskId(task.id) ?? "?",
+      status: task.status,
+      milestone: normalizeMilestone(task.milestone),
+      protectedScope: classified.protected,
+      primaryReasonCode: reasonCodes[0] ?? "local-safe",
+      reasonCodes,
+      signals: classified.signals,
+      evidence,
+    } satisfies AutonomyProtectedScopeReasonRow;
+  });
+
+  const protectedCount = rows.filter((row) => row.protectedScope).length;
+  const localSafeCount = rows.length - protectedCount;
+
+  return {
+    milestone,
+    rows,
+    totals: {
+      candidates: candidates.length,
+      protected: protectedCount,
+      localSafe: localSafeCount,
+    },
+    summary: [
+      "autonomy-protected-scope-report:",
+      "ok=yes",
+      milestone ? `milestone=${milestone}` : undefined,
+      `candidates=${candidates.length}`,
+      `protected=${protectedCount}`,
+      `localSafe=${localSafeCount}`,
+      `rows=${rows.length}`,
+    ].filter(Boolean).join(" "),
+  };
+}
+
+export function evaluateAutonomyProtectedScopeReasonReport(
+  cwd: string,
+  options?: { milestone?: string; limit?: number },
+): AutonomyProtectedScopeReasonReport {
+  return buildAutonomyProtectedScopeReasonReport(readProjectTasksBlock(cwd).tasks, options);
 }
 
 export function evaluateAutonomyLaneTaskSelection(

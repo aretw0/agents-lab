@@ -75,6 +75,35 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
   });
 
+  it("emits report-only protected scope reasons with evidence", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-protected-report-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-EXT", description: "[P1] avaliar influência externa https://example.com", status: "planned" },
+        { id: "TASK-LOCAL", description: "[P2] pesquisa local-safe: mapear critérios", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const reportTool = tools.find((tool) => tool.name === "autonomy_lane_protected_scope_report");
+    const result = reportTool?.execute("call-test", { limit: 10 }, undefined, undefined, { cwd });
+
+    expect(result?.details.summary).toContain("autonomy-protected-scope-report:");
+    expect(result?.details.totals?.protected).toBe(1);
+    const rows = (result?.details.rows as Array<Record<string, unknown>> | undefined) ?? [];
+    const external = rows.find((row) => row.id === "TASK-EXT");
+    const local = rows.find((row) => row.id === "TASK-LOCAL");
+    expect(external?.protectedScope).toBe(true);
+    expect((external?.primaryReasonCode as string | undefined)).toBe("protected-external-url");
+    expect(local?.protectedScope).toBe(false);
+    expect((local?.primaryReasonCode as string | undefined)).toBe("local-safe");
+  });
+
   it("uses handoff focus by default to avoid drifting to unrelated tasks", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-focus-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

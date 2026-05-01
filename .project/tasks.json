@@ -11441,7 +11441,7 @@
     {
       "id": "TASK-BUD-479",
       "description": "Criar leitura report-only de classificação protected-scope no seletor (reason codes + evidência curta) para reduzir surpresa operacional em seleção de lane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-473"
@@ -11458,7 +11458,8 @@
         "Regressões cobrem caso local-safe e caso protected externo."
       ],
       "milestone": "cleanup-research-longrun",
-      "notes": "[rationale:risk-control] tornar o gate explicável evita bloqueios percebidos como aleatórios e melhora throughput com segurança.\n[provenance:human] source_task=none reason=unspecified"
+      "notes": "[rationale:risk-control] tornar o gate explicável evita bloqueios percebidos como aleatórios e melhora throughput com segurança.\n[provenance:human] source_task=none reason=unspecified\n2026-05-01: explainability report para protected-scope adicionado (reason codes + sinais + evidência curta), mantendo surface report-only sem mutação.",
+      "verification": "VER-BUD-829"
     },
     {
       "id": "TASK-BUD-480",

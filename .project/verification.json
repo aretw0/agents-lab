@@ -9681,6 +9681,15 @@
       "method": "selector regression tests + local criteria synthesis",
       "timestamp": "2026-05-01T18:54:57.482Z",
       "evidence": "Mapped and refined protected-scope classification criteria from local selector source to reduce false-positive blocking on local-safe research while keeping fail-closed behavior for external/protected scopes. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts`: tightened research-related protected patterns; removed broad `pesquisa/research` standalone trigger and replaced with external-signal coupling (`URL`, `external/web/internet/source/influence/inspiration/prior art`). - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts`: updated protected-research regression and added explicit test proving local-safe research criteria task remains eligible. - `docs/research/protected-scope-classification-criteria-2026-05-01.md`: short matrix with positive/negative examples and low-risk adjustment rationale. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 2 files passed, 31 tests passed. - marker-check on criteria doc matched 5/5 anchors."
+    },
+    {
+      "id": "VER-BUD-829",
+      "target": "TASK-BUD-479",
+      "target_type": "task",
+      "status": "passed",
+      "method": "selector/surface regressions + marker-check",
+      "timestamp": "2026-05-01T19:17:02.838Z",
+      "evidence": "Implemented report-only protected-scope explainability surface with canonical reason codes and short evidence. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts`: added protected-scope classifier output (`classifyTaskProtectedScope`), canonical `reasonCode` taxonomy, and report builder `buildAutonomyProtectedScopeReasonReport(...)` / `evaluateAutonomyProtectedScopeReasonReport(...)`. - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`: added tool `autonomy_lane_protected_scope_report` (read-only) exposing per-task `primaryReasonCode`, `reasonCodes`, `signals`, and bounded evidence. - tests: `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` and `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` now cover protected external case and local-safe case. - docs: `docs/primitives/autonomy-protected-scope-report.md` + README index entry. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 3 files passed, 35 tests passed. - marker-check on primitive doc matched 5/5 anchors."
     }
   ]
 }
