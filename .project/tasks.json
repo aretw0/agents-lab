@@ -14528,6 +14528,83 @@
       ],
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduzir falso-negativo local melhora confiança no comando canônico de parity."
+    },
+    {
+      "id": "TASK-BUD-624",
+      "description": "[P1] Criar trilha estratégica de longo prazo para Linux primitives em agent engineering (2026+), com radar contínuo e critérios de adoção no agents-lab.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "docs/research/linux-agent-primitives-radar-2026.md",
+        "docs/guides/control-plane-evolution-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Radar cobre explicitamente: BranchFS, branch() syscall, Agent Sandbox (gVisor/Kata), MCP, Simple Semantic Paging, SLIM, Agent Discovery & Identity.",
+        "Define critérios de triagem (valor, risco, maturidade, dependência externa, impacto em governança local-first).",
+        "Define cadência de revisão (mensal/quarterly) e gatilhos de promoção para experimento local-safe."
+      ],
+      "milestone": "long-horizon-linux-primitives",
+      "notes": "[rationale:risk-control] acompanhar primitives de OS/protocolo evita lock-in tático e melhora decisões de arquitetura de longo prazo."
+    },
+    {
+      "id": "TASK-BUD-625",
+      "description": "[P1] Pesquisar viabilidade técnica de isolamento/forking (BranchFS + branch() + Agent Sandbox) para nossa trilha local-first com rollback explícito.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-624"
+      ],
+      "files": [
+        "docs/research/linux-agent-primitives-radar-2026.md",
+        "docs/research/linux-isolation-forking-primitives-study-2026.md"
+      ],
+      "acceptance_criteria": [
+        "Mapear equivalentes práticos hoje vs futuros (simulado, kernel-native, Kubernetes-integrado).",
+        "Listar riscos de segurança/escape, custos operacionais e impacto em CI/local.",
+        "Propor 1 experimento local-safe mínimo (report-only) com gate e rollback claros."
+      ],
+      "milestone": "long-horizon-linux-primitives",
+      "notes": "[rationale:risk-control] entender isolamento/forking cedo reduz risco de adoção tardia e desalinhada com nossos guardrails."
+    },
+    {
+      "id": "TASK-BUD-626",
+      "description": "[P2] Mapear primitives de protocolo/coordenação (MCP, SLIM, Agent Identity/Discovery) para interoperabilidade multiagente sem quebrar soberania local.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-624"
+      ],
+      "files": [
+        "docs/research/linux-agent-primitives-radar-2026.md",
+        "docs/research/agent-protocol-primitives-study-2026.md"
+      ],
+      "acceptance_criteria": [
+        "Comparar contratos e trade-offs entre MCP/SLIM/identidade verificável.",
+        "Definir posição de adoção: observe | experiment | integrate-later por primitive.",
+        "Registrar restrições obrigatórias: no auto-dispatch protegido, autenticação verificável, auditabilidade de handoff."
+      ],
+      "milestone": "long-horizon-linux-primitives",
+      "notes": "[rationale:risk-control] padronização de protocolo sem critério pode aumentar superfície de risco e drift operacional."
+    },
+    {
+      "id": "TASK-BUD-627",
+      "description": "[P2] Investigar abordagem de memória/contexto inspirada em semantic paging para reduzir custo de contexto sem perder continuidade auditável.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-624"
+      ],
+      "files": [
+        "docs/research/linux-agent-primitives-radar-2026.md",
+        "docs/research/semantic-paging-context-strategy-2026.md"
+      ],
+      "acceptance_criteria": [
+        "Relacionar semantic paging com nosso contexto-watch/handoff/checkpoint atual.",
+        "Definir métricas de sucesso (tokens/custo, taxa de retomada correta, regressões de foco).",
+        "Propor experimento local-safe bounded antes de qualquer adoção estrutural."
+      ],
+      "milestone": "long-horizon-linux-primitives",
+      "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas."
     }
   ]
 }
