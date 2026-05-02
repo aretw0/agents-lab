@@ -12873,7 +12873,7 @@
     {
       "id": "TASK-BUD-545",
       "description": "Criar primitive/tool read-only `delegation_lane_capability_snapshot` compondo sinais de frescor, monitor estabilidade e readiness local para decisão de delegação.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-544"
@@ -12889,7 +12889,7 @@
         "Contrato textual/structured com recommendationCode determinístico."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] delegação consistente requer snapshot único e estável para reduzir decisões ad-hoc por chamada isolada.\n[provenance:human] source_task=TASK-BUD-544 reason=primeiro bloco técnico da wave para consolidar sinais antes de delegar"
+      "notes": "[rationale:risk-control] delegação consistente requer snapshot único e estável para reduzir decisões ad-hoc por chamada isolada.\n[provenance:human] source_task=TASK-BUD-544 reason=primeiro bloco técnico da wave para consolidar sinais antes de delegar\nAjuste de continuidade: foco ativo realinhado para lane delegation-evolution antes do overnight local-safe."
     },
     {
       "id": "TASK-BUD-546",
