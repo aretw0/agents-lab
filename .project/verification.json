@@ -10221,6 +10221,15 @@
       "method": "status payload shortcut fields + smoke + marker-check",
       "timestamp": "2026-05-02T03:51:52.426Z",
       "evidence": "Added stable shortcut fields for context freshness in context-watch status payload. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_status` now sets: - `details.dirtySignal` (`clean|dirty|unknown`) - `details.preloadDecision` (`use-pack|fallback-canonical`) - kept existing summary text unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool assertion now checks `dirtySignal=unknown` and `preloadDecision=fallback-canonical` in non-git/no-pack temp workspace. - `docs/guides/openai-context-window-playbook.md` - documented shortcut fields for simpler consumers. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks passed: - `context-watchdog.ts` markers (`dirtySignal`, `preloadDecision`, `context_watch_status`). - playbook markers (`details.dirtySignal`, `details.preloadDecision`)."
+    },
+    {
+      "id": "VER-BUD-889",
+      "target": "TASK-BUD-540",
+      "target_type": "task",
+      "status": "passed",
+      "method": "dedupe helper import + smoke + marker-check",
+      "timestamp": "2026-05-02T03:53:23.358Z",
+      "evidence": "Deduplicated git dirty error normalization between context-watch and git-maintenance surface. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - now imports `buildUnavailableGitDirtySnapshot` from `guardrails-core-git-maintenance-surface`. - `readContextWatchGitDirtySignal` catch-path now reuses shared helper instead of local regex/normalization logic. - external behavior preserved (`error=not-a-git-repo|git-dirty-snapshot-error`, summary unchanged). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker check on context-watchdog helper/import anchors passed (`buildUnavailableGitDirtySnapshot`, `readContextWatchGitDirtySignal`, `error: unavailable.error`)."
     }
   ]
 }

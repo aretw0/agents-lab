@@ -12764,6 +12764,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] reduzir parsing de payload profundo melhora robustez de automações read-only sem ampliar escopo de execução.\n[provenance:human] source_task=TASK-BUD-538 reason=continuidade da ergonomia do pacote de status para consumo determinístico\n2026-05-03: payload de status agora oferece atalhos estáveis para frescor sem parsing profundo.",
       "verification": "VER-BUD-888"
+    },
+    {
+      "id": "TASK-BUD-540",
+      "description": "Deduplicar normalização de erro de git dirty entre context-watch e git-maintenance surface usando helper comum.",
+      "status": "completed",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-539"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context-watchdog` usa helper comum (`buildUnavailableGitDirtySnapshot`) em vez de regex local duplicada.",
+        "Comportamento externo permanece igual (`not-a-git-repo`/`git-dirty-snapshot-error`).",
+        "Smoke context-watchdog permanece verde sem alteração de contrato."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] remover duplicação reduz drift de contrato entre superfícies first-party de erro normalizado.\n[provenance:human] source_task=TASK-BUD-539 reason=hardening incremental após introdução de atalhos/status frescor\n2026-05-03: normalização de fallback git dirty consolidada em helper comum para evitar drift entre superfícies.",
+      "verification": "VER-BUD-889"
     }
   ]
 }

@@ -113,7 +113,7 @@ import {
 	localContinuityAuditReasons,
 	localContinuityProtectedPaths,
 } from "./guardrails-core-unattended-continuation-surface";
-import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 
 export {
 	applyContextWatchBootstrapToSettings,
@@ -885,16 +885,13 @@ function readContextWatchGitDirtySignal(cwd: string): ContextWatchGitDirtySignal
 			summary: snapshot.summary,
 		};
 	} catch (error) {
-		const errorText = error instanceof Error ? error.message : String(error ?? "unknown-error");
-		const normalizedError = /not a git repository/i.test(errorText)
-			? "not-a-git-repo"
-			: "git-dirty-snapshot-error";
+		const unavailable = buildUnavailableGitDirtySnapshot(error);
 		return {
-			available: false,
-			clean: null,
-			rowCount: 0,
-			summary: "git-dirty-snapshot: unavailable",
-			error: normalizedError,
+			available: unavailable.available,
+			clean: unavailable.clean,
+			rowCount: unavailable.rows.length,
+			summary: unavailable.summary,
+			error: unavailable.error,
 		};
 	}
 }
