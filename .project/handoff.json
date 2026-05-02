@@ -1,42 +1,39 @@
 {
-  "timestamp": "2026-05-02T12:36:18.198Z",
-  "context": "TASK-BUD-576 e TASK-BUD-577 concluídas. Continuação AFK agora foca template de handoff material-first com campos mínimos para retomada low-iteration.",
+  "timestamp": "2026-05-02T12:39:50.117Z",
+  "context": "afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=executar TASK-BUD-580 (machine pressure v2 CPU) antes de ampliar long-run.",
   "current_tasks": [
-    "TASK-BUD-578"
+    "TASK-BUD-583"
   ],
   "next_actions": [
-    "Atualizar docs de continuidade para template curto padronizado",
-    "Aplicar checkpoint final usando novo template",
-    "Validar checklist de docs e smoke focal"
+    "Iniciar TASK-BUD-580",
+    "Adicionar sinais CPU read-only ao machine_maintenance_status",
+    "Validar smoke de machine-maintenance"
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-925",
-    "VER-BUD-926",
-    "autonomy-lane-surface + context-watch smokes verdes"
+    "pack focal 30/30 verde (3 arquivos)",
+    "closeout AFK continuity registrado em docs/research/afk-materialization-patterns-2026-05.md"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-578",
+    "focus": "TASK-BUD-579",
     "canonical_links": [
-      "task:TASK-BUD-578",
-      "task:TASK-BUD-576",
-      "task:TASK-BUD-577",
-      "verification:VER-BUD-925"
+      "task:TASK-BUD-579",
+      "task:TASK-BUD-580"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T12:36:18.198Z",
+    "generatedAtIso": "2026-05-02T12:39:50.117Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 40,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T12:36:18.198Z",
+      "atIso": "2026-05-02T12:39:50.117Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -45,5 +42,6 @@
       "action": "checkpoint-refresh",
       "recommendation": "continue-bounded"
     }
-  ]
+  ],
+  "updated_at": "2026-05-02T12:40:06.692Z"
 }

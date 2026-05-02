@@ -436,8 +436,13 @@ Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded pa
 
 Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK.
 
+Quando o packet indicar estoque baixo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) para orientar semeadura explícita sem dispatch automático.
+
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.
+
+No checkpoint/handoff AFK, preferir template curto material-first:
+- `afk-handoff: decision=<continue|seed-backlog|blocked> stock=<validationKnown>/<target> blockers=<lista-curta|none> next=<ação-segura>`.
 
 ### Fila pós-calibração
 

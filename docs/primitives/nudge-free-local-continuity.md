@@ -160,6 +160,18 @@ Template curto de checkpoint pós-rehearsal real (1 task):
 rehearsal-postflight: decision=<go|no-go> task=<id> validation=<pass|fail> rollback=<none|applied> blockers=<lista-curta> next=<ação-segura>
 ```
 
+Template curto de handoff material-first (AFK low-iteration):
+
+```text
+afk-handoff: decision=<continue|seed-backlog|blocked> stock=<validationKnown>/<target> blockers=<lista-curta|none> next=<ação-segura>
+```
+
+Campos mínimos do template material-first:
+- `decision`: saída de prontidão (`continue|seed-backlog|blocked`);
+- `stock`: cobertura de fatias local-safe validadas (`validationKnown/target`);
+- `blockers`: razões de parada objetivas (`none` quando vazio);
+- `next`: próxima ação segura e curta.
+
 Esse template é intencionalmente compacto para reduzir atrito em runs AFK e manter a decisão humana explícita no retorno.
 
 ## Primeiro foco recomendado

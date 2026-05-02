@@ -92,3 +92,25 @@ A trilha AFK produtiva depende mais de **materialização contínua do board** d
 ### Decisão de continuidade
 - go: continuar AFK em batches pequenos quando packet indicar `continue`;
 - no-go: se `seed-backlog|blocked`, interromper continuidade e priorizar materialização do board.
+
+## Fechamento da wave AFK continuity (TASK-BUD-576..579)
+
+### Entregas consolidadas
+- `TASK-BUD-576`: resumo curto de material readiness no `context_watch_continuation_readiness` (`material=<decision>` + `details.materialReadiness`).
+- `TASK-BUD-577`: packet report-only de semeadura `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`).
+- `TASK-BUD-578`: template curto de handoff material-first (`afk-handoff: decision/stock/blockers/next`).
+- `TASK-BUD-579`: regressão focal e closeout operacional da wave.
+
+### Pack focal reproduzível (comando único)
+```bash
+npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts
+```
+Resultado esperado nesta wave: **30 passed (3 files)**.
+
+### Regra operacional explícita (continue vs seed-backlog)
+- continuar (`continue`): estoque validado >= mínimo e foco com validação conhecida.
+- semear (`seed-backlog`/`seed-now`): estoque abaixo do mínimo alvo ou cobertura insuficiente.
+- bloquear (`blocked`): foco inválido, risco/protected/reload-dirty ou gate crítico desconhecido.
+
+### Próximo foco recomendado
+- manter WIP=1 e seguir para hardening de long-run em pressão de máquina (`TASK-BUD-580`: CPU signal no gate de manutenção).

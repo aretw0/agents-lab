@@ -10563,6 +10563,24 @@
       "method": "material-seed packet + smoke",
       "timestamp": "2026-05-02T12:35:49.357Z",
       "evidence": "Implemented AFK seeding recommendation packet in autonomy lane surface (report-only, no-dispatch). Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added `buildAfkMaterialSeedPacket(...)` composing existing material readiness. - Added tool `autonomy_lane_material_seed_packet`. - Decision contract: `seed-now | wait | blocked`. - Includes `humanActionRequired`, `suggestedSeedCount`, bounded `max_seed_slices`, inherited readiness blockers, and invariants: - `dispatchAllowed=false` - `mutationAllowed=false` - `authorization=none`. Tests: - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - Added `seed-now` path when AFK stock is low. - Added `blocked` path when focus is missing. Docs: - `docs/primitives/lane-brainstorm-packet.md` - Added material pipeline reference to `autonomy_lane_material_seed_packet` and packet contract (`seed-now|wait|blocked`, `humanActionRequired`). Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 26 passed (2 files). - marker checks passed for core/test/docs anchors."
+    },
+    {
+      "id": "VER-BUD-927",
+      "target": "TASK-BUD-578",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs template + checkpoint contract",
+      "timestamp": "2026-05-02T12:38:39.506Z",
+      "evidence": "Standardized AFK material-first handoff template and applied it in live checkpoint. Docs: - `docs/primitives/nudge-free-local-continuity.md` - Added `Template curto de handoff material-first (AFK low-iteration)`: - `afk-handoff: decision=<continue|seed-backlog|blocked> stock=<validationKnown>/<target> blockers=<lista-curta|none> next=<ação-segura>` - Added minimal required fields (decision/stock/blockers/next). - `docs/guides/control-plane-operating-doctrine.md` - AFK material-first section now references: - `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) - handoff short template line for AFK checkpoints. Live checkpoint evidence: - `.project/handoff.json` updated with template-style context line: - `afk-handoff: decision=continue stock=2/7 blockers=none next=...` Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - Result: 26 passed (2 files). - marker checks passed for primitives/doctrine/handoff anchors."
+    },
+    {
+      "id": "VER-BUD-928",
+      "target": "TASK-BUD-579",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression + AFK continuity closeout",
+      "timestamp": "2026-05-02T12:40:06.456Z",
+      "evidence": "Closed AFK continuity wave with reproducible focal regression and explicit continue-vs-seed guidance. Closeout docs: - `docs/research/afk-materialization-patterns-2026-05.md` - Added `Fechamento da wave AFK continuity (TASK-BUD-576..579)`. - Consolidated deliveries 576..579. - Registered one-command focal regression pack and expected result. - Added explicit operational rule for `continue | seed-backlog/seed-now | blocked`. - Recorded next recommended focus (`TASK-BUD-580`). Focal pack (single command): - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 30 passed (3 files). Handoff evidence: - `.project/handoff.json` updated with material-first line: - `afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=executar TASK-BUD-580 ...` - next focus explicit for continuation. Safety invariants preserved: - report-only packets remain no-dispatch/no-mutation. - protected scope still explicit human decision only."
     }
   ]
 }

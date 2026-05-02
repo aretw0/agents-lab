@@ -13602,7 +13602,7 @@
     {
       "id": "TASK-BUD-578",
       "description": "AFK continuity: consolidar template operacional de handoff material-first com campos mínimos para retomada de baixa iteração.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-577"
@@ -13618,12 +13618,13 @@
         "checkpoint final usa template atualizado."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] handoff compacto e padronizado reduz ambiguidade no retorno AFK.\nIniciado: template operacional de handoff material-first (decision/estoque/blockers/nextAction) para retomada AFK baixa iteração."
+      "notes": "[rationale:risk-control] handoff compacto e padronizado reduz ambiguidade no retorno AFK.\nIniciado: template operacional de handoff material-first (decision/estoque/blockers/nextAction) para retomada AFK baixa iteração.\n2026-05-02: template de handoff material-first aplicado e padronizado para retomada AFK.",
+      "verification": "VER-BUD-927"
     },
     {
       "id": "TASK-BUD-579",
       "description": "Fechar wave AFK continuity com regressão focal e recomendação explícita de operação contínua low-iteration.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-578"
@@ -13640,7 +13641,8 @@
         "próximo foco fica explícito no handoff."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] fechamento disciplinado evita regressão para paradas sem diagnóstico claro."
+      "notes": "[rationale:risk-control] fechamento disciplinado evita regressão para paradas sem diagnóstico claro.\nIniciado closeout da wave AFK continuity com regressão focal única, critérios continue vs seed-backlog e próximo foco explícito.\n2026-05-02: wave AFK continuity encerrada; próximo foco explícito definido para TASK-BUD-580 (machine pressure v2).",
+      "verification": "VER-BUD-928"
     },
     {
       "id": "TASK-BUD-580",
