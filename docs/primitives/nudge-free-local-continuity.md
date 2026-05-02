@@ -114,6 +114,7 @@ Parar e registrar checkpoint quando ocorrer:
 - task protegida é a próxima opção;
 - `autonomy_lane_next_task` retorna `no-eligible-tasks`;
 - dirty state inesperado aparece;
+- `machine_maintenance_status` sinaliza pressão relevante de memória/disco/CPU (e swap quando disponível);
 - decisão humana real é necessária.
 
 ## Pacote de maturidade para run local longa (report-only)

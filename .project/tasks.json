@@ -13669,7 +13669,7 @@
     {
       "id": "TASK-BUD-581",
       "description": "Machine pressure v2: incluir sinal de swap/memória virtual para distinguir pressão real de RAM vs cache transitório.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-580"
@@ -13685,12 +13685,13 @@
         "smoke cobre caminho com swap indisponível."
       ],
       "milestone": "long-run-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] melhora precisão de throttling em hosts com RAM variável."
+      "notes": "[rationale:risk-control] melhora precisão de throttling em hosts com RAM variável.\nIniciado: sinal swap/virtual memory para distinguir pressão real de RAM em machine maintenance com fallback seguro em plataformas sem suporte.\n2026-05-02: sinal de swap/virtual memory adicionado com fallback seguro para plataformas sem telemetria disponível.",
+      "verification": "VER-BUD-930"
     },
     {
       "id": "TASK-BUD-582",
       "description": "Machine pressure v2: desenhar contrato opcional de telemetria GPU (quando disponível) sem hard dependency de vendor.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-581"
@@ -13706,7 +13707,8 @@
         "decisão de gate agrega GPU apenas quando dado é confiável."
       ],
       "milestone": "long-run-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] prepara a fábrica para cargas heterogêneas sem quebrar portabilidade."
+      "notes": "[rationale:risk-control] prepara a fábrica para cargas heterogêneas sem quebrar portabilidade.\nIniciado: contrato opcional de telemetria GPU report-only, sem dependência hard de vendor (nvidia-smi/ROCm).\n2026-05-02: contrato de telemetria GPU opcional adicionado (opt-in, report-only, sem dependência hard de vendor).",
+      "verification": "VER-BUD-931"
     },
     {
       "id": "TASK-BUD-583",

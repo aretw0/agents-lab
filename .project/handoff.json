@@ -1,38 +1,39 @@
 {
-  "timestamp": "2026-05-02T12:45:03.734Z",
-  "context": "afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=iniciar TASK-BUD-581 para sinal de swap/virtual memory no machine maintenance.",
+  "timestamp": "2026-05-02T12:53:37.899Z",
+  "context": "afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=iniciar TASK-BUD-583 (turn_boundary_decision_packet) para pausar com motivo explícito e ação humana clara.",
   "next_actions": [
-    "Iniciar TASK-BUD-581",
-    "Adicionar sinal swap/virtual memory com fallback unknown controlado",
-    "Executar smoke de machine-maintenance"
+    "Iniciar TASK-BUD-583",
+    "Definir reason codes canônicos de pausa",
+    "Cobrir smoke para pause sem humano e ask-human"
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-929",
-    "machine-maintenance + doc checklist smoke verde"
+    "VER-BUD-930",
+    "VER-BUD-931",
+    "machine-maintenance + docs checklist verdes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-580",
+    "focus": "TASK-BUD-582",
     "canonical_links": [
-      "task:TASK-BUD-580",
-      "task:TASK-BUD-581",
-      "verification:VER-BUD-929"
+      "task:TASK-BUD-582",
+      "task:TASK-BUD-583",
+      "verification:VER-BUD-930"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T12:45:03.734Z",
+    "generatedAtIso": "2026-05-02T12:53:37.899Z",
     "level": "ok",
-    "percent": 43,
+    "percent": 45,
     "action": "continue",
     "recommendation": "continue-bounded",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T12:45:03.734Z",
+      "atIso": "2026-05-02T12:53:37.899Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 43,
+      "percent": 45,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -43,6 +44,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-580"
+    "TASK-BUD-582"
   ]
 }

@@ -32,3 +32,10 @@ Escopo: teste local-safe de continuidade com foco em limpeza + pesquisa.
 - sem scheduler/remote/offload;
 - sem promoção automática de lane protegida;
 - manter `recommendationCode`/`nextAction` quando aplicável.
+
+## Extensão de pressão de máquina (GPU opcional)
+
+Para long-run heterogêneo, o gate de machine maintenance pode consumir telemetria GPU apenas em modo opt-in e report-only:
+- fonte opcional (`PI_GPU_USED_PCT`) sem dependência obrigatória de `nvidia-smi`/ROCm;
+- quando ausência de telemetria, registrar `gpu unavailable` sem quebrar o gate base;
+- só agregar pressão GPU na decisão global quando o sinal for confiável (`reliable=true`).

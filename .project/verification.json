@@ -10590,6 +10590,24 @@
       "method": "machine-maintenance cpu pressure gate + smoke",
       "timestamp": "2026-05-02T12:44:55.901Z",
       "evidence": "Added CPU pressure signal to machine maintenance gate (read-only) with configurable thresholds and canonical blockers. Code: - `packages/pi-stack/extensions/machine-maintenance.ts` - Added CPU thresholds: - `cpuWarnUsedPct` - `cpuPauseUsedPct` - `cpuBlockUsedPct` - Added CPU reading types and logic: - `CpuPressureReading` - `classifyCpuPressure(...)` - `readCpuPressure(...)` - Gate now composes memory + disk + cpu severities. - Added blockers: - `cpu-pressure-warn` - `cpu-pressure-pause` - `cpu-pressure-block` - `cpu-pressure-unknown` - Tool/summary wording updated to memory/disk/cpu. Tests: - `packages/pi-stack/test/smoke/machine-maintenance.test.ts` - Added CPU warning-blocker coverage. - Added invalid CPU metrics -> `unknown` fail-closed coverage. - Updated baseline tests to include CPU sample path. Docs: - `docs/guides/control-plane-operating-doctrine.md` - Added long-run preflight guidance referencing `machine_maintenance_status` with memory/disk/CPU signals. Validation: - `npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 10 passed (2 files). - marker checks passed for core/test/docs anchors."
+    },
+    {
+      "id": "VER-BUD-930",
+      "target": "TASK-BUD-581",
+      "target_type": "task",
+      "status": "passed",
+      "method": "swap signal + smoke",
+      "timestamp": "2026-05-02T12:48:55.836Z",
+      "evidence": "Extended machine maintenance with swap/virtual-memory signal to distinguish RAM pressure from transient cache. Code: - `packages/pi-stack/extensions/machine-maintenance.ts` - Added swap thresholds: - `swapWarnUsedPct` - `swapPauseUsedPct` - `swapBlockUsedPct` - Added swap reading/classification: - `SwapPressureReading` - `classifySwapPressure(...)` - `readSwapPressure(...)` (Linux `/proc/meminfo` parse; safe fallback when unavailable) - Gate now carries `swap` in details. - Swap affects severity only when available, preventing platform breakage on hosts without swap telemetry. - Added optional blockers when swap is available and pressured (`swap-pressure-*`). Tests: - `packages/pi-stack/test/smoke/machine-maintenance.test.ts` - Added coverage for swap unavailable path (`available=false`, unknown controlled, gate remains stable). - Existing gate coverage updated for memory+disk+cpu+swap composition. Docs: - `docs/primitives/nudge-free-local-continuity.md` - Stop condition now references `machine_maintenance_status` with memory/disk/CPU and swap when available. Validation: - `npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 11 passed (2 files). - marker checks passed for swap core/test/docs anchors."
+    },
+    {
+      "id": "VER-BUD-931",
+      "target": "TASK-BUD-582",
+      "target_type": "task",
+      "status": "passed",
+      "method": "optional gpu telemetry contract + smoke",
+      "timestamp": "2026-05-02T12:53:18.404Z",
+      "evidence": "Implemented optional GPU telemetry contract in machine maintenance without vendor hard dependency. Code: - `packages/pi-stack/extensions/machine-maintenance.ts` - Added GPU thresholds (`gpuWarnUsedPct`, `gpuPauseUsedPct`, `gpuBlockUsedPct`). - Added `GpuPressureReading` with `available`, `reliable`, `source`. - Added `classifyGpuPressure(...)` and `readGpuPressure(...)`. - Opt-in telemetry source: environment variable `PI_GPU_USED_PCT`. - No mandatory `nvidia-smi`/ROCm call path. - Gate aggregates GPU severity only when telemetry is reliable (`gpu.reliable === true`). - Fallback path remains bounded (`gpu unavailable`) and does not break base gate operation. Tests: - `packages/pi-stack/test/smoke/machine-maintenance.test.ts` - Added GPU optional/unavailable path coverage. - Added reliable GPU telemetry path with blocker/asserted severity. - Maintained memory/disk/cpu/swap behavior coverage. Docs: - `docs/research/cleanup-research-longrun-rehearsal-2026-05-01.md` - Added GPU optional extension note for long-run pressure governance. Validation: - `npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 13 passed (2 files). - marker checks passed for core/test/docs anchors."
     }
   ]
 }
