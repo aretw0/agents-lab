@@ -13,6 +13,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
 | `autonomy_lane_next_task` | Selecionar conservadoramente uma task local-safe do board. | Read-only; `no-eligible-tasks` é stop condition. |
 | `autonomy_lane_auto_advance_snapshot` | Auditar decisão hard-intent de auto-advance após `focus-complete` (`eligible` vs `blocked`). | Report-only/read-only; fail-closed para protected/risk/reload/validation unknown. |
+| `autonomy_lane_material_readiness_packet` | Medir prontidão de material da lane AFK (`continue|seed-backlog|blocked`) com foco e cobertura de validação. | Report-only/read-only; sem dispatch e com stop explícito para estoque baixo. |
 | Board bounded (`board_query`, `board_task_create`, `board_task_complete`, `board_decision_packet`) | Manter task/evidência/decisão recuperável. | Mutação limitada ao board quando chamada explicitamente. |
 | One-slice contract | Executar uma única fatia local e parar. | Contrato futuro/guardado; não é loop permanente. |
 

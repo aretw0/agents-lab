@@ -1,47 +1,47 @@
 {
-  "timestamp": "2026-05-02T11:38:20.305Z",
-  "context": "AFK materialization avançou: pesquisa (572) e runbook de abastecimento (573) concluídos. Foco atual em packet de material readiness para decidir continue vs seed-backlog.",
-  "current_tasks": [
-    "TASK-BUD-574"
-  ],
+  "timestamp": "2026-05-02T12:07:21.575Z",
+  "context": "Wave AFK materialization concluída (572..575) com regressão verde e indicadores de estoque mínimo formalizados. Não há task in-progress no board neste momento.",
   "next_actions": [
-    "Implementar packet report-only de material readiness no autonomy lane surface",
-    "Cobrir smoke continue/seed-backlog",
-    "Executar regressão focal e fechar wave AFK materialization"
+    "Escolher próximo foco explícito para continuar lane AFK",
+    "Se necessário, semear novo lote local-safe via brainstorm+seed preview"
   ],
   "blockers": [],
   "recent_validation": [
     "VER-BUD-921",
     "VER-BUD-922",
-    "doc-checklist verde"
+    "VER-BUD-923"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-574",
+    "focus": "TASK-BUD-575",
     "canonical_links": [
-      "task:TASK-BUD-574",
+      "task:TASK-BUD-575",
       "verification:VER-BUD-921"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T11:38:20.305Z",
+    "generatedAtIso": "2026-05-02T12:07:21.575Z",
     "level": "ok",
-    "percent": 34,
+    "percent": 28,
     "action": "continue",
-    "recommendation": "continue-bounded"
+    "recommendation": "choose-next-focus",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T11:38:20.305Z",
+      "atIso": "2026-05-02T12:07:21.575Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 34,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-bounded"
+      "recommendation": "choose-next-focus"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-575"
   ]
 }

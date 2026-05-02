@@ -162,3 +162,17 @@ Pack executado (61 testes verdes):
 ### Decisão go/no-go
 - **go para decisão humana de start**: stack pronta para um rehearsal real bounded de 1 task, via packet de start read-only.
 - **no-go para auto-start**: permanece proibido qualquer start automático; protected scope continua exigindo decisão humana explícita.
+
+## Wave AFK materialization (TASK-BUD-572..575)
+
+### Objetivo
+Garantir matéria-prima para runs AFK (baixa iteração humana) antes de ampliar duração/autonomia operacional.
+
+### Resultado
+- pipeline de materialização consolidado (`lane_brainstorm_packet` + `lane_brainstorm_seed_preview` + semeadura humana);
+- contrato de estoque mínimo local-safe (3–7 fatias) formalizado em doutrina/primitives;
+- novo packet read-only `autonomy_lane_material_readiness_packet` para decidir `continue|seed-backlog|blocked`.
+
+### Recomendação final desta trilha
+- tratar materialização contínua como gate permanente de long run AFK;
+- não avançar para ciclos mais longos quando packet retornar `seed-backlog|blocked`.

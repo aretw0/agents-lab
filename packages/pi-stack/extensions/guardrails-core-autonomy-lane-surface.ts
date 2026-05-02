@@ -96,6 +96,131 @@ function resolveAutoAdvanceFailClosedReasons(input: {
   return reasons;
 }
 
+function normalizeDependsOn(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => normalizeTaskId(item))
+    .filter((item): item is string => Boolean(item));
+}
+
+function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string) {
+  const focus = resolveFocusTaskIds(p, cwd);
+  const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
+  const includeProtectedScopes = p.include_protected_scopes === true;
+  const includeMissingRationale = p.include_missing_rationale === true;
+  const sampleLimit = asNumber(p.sample_limit, 10);
+  const minReadySlices = Math.max(1, Math.min(20, Math.floor(asNumber(p.min_ready_slices, 3))));
+  const targetSlices = Math.max(minReadySlices, Math.min(20, Math.floor(asNumber(p.target_slices, 7))));
+
+  const selection = resolveTaskSelection(p, cwd);
+  const tasks = readProjectTasksBlock(cwd).tasks;
+  const completedTaskIds = new Set(
+    tasks
+      .filter((task) => task.status === "completed")
+      .map((task) => normalizeTaskId(task.id))
+      .filter((id): id is string => Boolean(id)),
+  );
+
+  const inScope = tasks.filter((task) => {
+    if (task.status !== "planned" && task.status !== "in-progress") return false;
+    if (!milestone) return true;
+    return (task.milestone ?? "").trim() === milestone;
+  });
+
+  const localSafe = inScope.filter((task) => {
+    if (!includeProtectedScopes && taskHasProtectedSignal(task)) return false;
+    if (taskHasRiskSignal(task)) return false;
+    const deps = normalizeDependsOn(task.depends_on);
+    return deps.every((dep) => completedTaskIds.has(dep));
+  });
+
+  const validationKnown = localSafe.filter((task) => taskValidationGateKnown(task));
+
+  const focusTasks = focus.ids
+    .map((taskId) => findTaskById(tasks, taskId))
+    .filter((task): task is ProjectTaskItem => Boolean(task));
+  const focusKnown = focus.ids.length > 0 && focusTasks.length === focus.ids.length;
+  const focusValidationKnown = focusKnown && focusTasks.every((task) => taskValidationGateKnown(task));
+
+  const blockedReasons: string[] = [];
+  if (focus.ids.length <= 0) blockedReasons.push("focus-missing");
+  else if (!focusKnown) blockedReasons.push("focus-task-not-found");
+  else if (!focusValidationKnown) blockedReasons.push("focus-validation-unknown");
+
+  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+
+  if (validationKnown.length <= 0) blockedReasons.push("no-local-safe-material");
+  if (!selection.ready) blockedReasons.push(`selection-${selection.reason}`);
+  if (!includeMissingRationale && selection.totals.skippedMissingRationale > 0) blockedReasons.push("missing-rationale-slices-present");
+
+  let decision: "continue" | "seed-backlog" | "blocked" = "continue";
+  let recommendationCode = "afk-material-readiness-continue-stock-healthy";
+  let nextAction = "continue bounded AFK batch; material stock and validation coverage are healthy.";
+
+  if (blockedReasons.length > 0) {
+    decision = "blocked";
+    if (blockedReasons.some((reason) => reason.startsWith("focus-"))) {
+      recommendationCode = "afk-material-readiness-blocked-focus";
+      nextAction = "restore a valid single focus with known validation before AFK continuation.";
+    } else if (blockedReasons.includes("reload-required-or-dirty")) {
+      recommendationCode = "afk-material-readiness-blocked-reload-or-dirty";
+      nextAction = "clean workspace/reload before AFK continuation.";
+    } else if (blockedReasons.includes("no-local-safe-material")) {
+      recommendationCode = "afk-material-readiness-blocked-no-material";
+      nextAction = "seed local-safe backlog first (brainstorm packet + seed preview + human decision).";
+    } else {
+      recommendationCode = "afk-material-readiness-blocked-selection";
+      nextAction = "resolve selection blockers before AFK continuation.";
+    }
+  } else if (validationKnown.length < minReadySlices) {
+    decision = "seed-backlog";
+    recommendationCode = "afk-material-readiness-seed-backlog-low-stock";
+    nextAction = `material stock below target (${validationKnown.length}/${minReadySlices}); run brainstorm+seed flow before next AFK batch.`;
+  }
+
+  const validationCoveragePct = localSafe.length > 0
+    ? Math.round((validationKnown.length / localSafe.length) * 100)
+    : 0;
+
+  const summary = [
+    "afk-material-readiness:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `focus=${focus.ids.join(",") || "none"}`,
+    `localSafe=${localSafe.length}`,
+    `validationKnown=${validationKnown.length}`,
+    `minReady=${minReadySlices}`,
+    decision === "blocked" ? `blockers=${blockedReasons.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "report-only",
+    decision,
+    recommendationCode,
+    nextAction,
+    focusTaskIds: focus.ids,
+    focusSource: focus.source,
+    nextTaskId: selection.nextTaskId,
+    selectionReason: selection.reason,
+    eligibleTaskIds: selection.eligibleTaskIds,
+    material: {
+      minReadySlices,
+      targetSlices,
+      localSafeCount: localSafe.length,
+      validationKnownCount: validationKnown.length,
+      validationCoveragePct,
+      localSafeTaskIds: localSafe.map((task) => normalizeTaskId(task.id)).filter((id): id is string => Boolean(id)).slice(0, 20),
+      validationKnownTaskIds: validationKnown.map((task) => normalizeTaskId(task.id)).filter((id): id is string => Boolean(id)).slice(0, 20),
+    },
+    blockedReasons,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary,
+  };
+}
+
 function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
@@ -450,6 +575,30 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_material_readiness_packet",
+    label: "Autonomy Lane Material Readiness Packet",
+    description: "Report-only AFK lane material readiness packet (continue|seed-backlog|blocked) with no dispatch authorization.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum local-safe validated slices to continue AFK run (default 3)." })),
+      target_slices: Type.Optional(Type.Number({ description: "Target local-safe validated slices to keep stocked (default 7)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildAfkMaterialReadinessPacket(p, ctx.cwd);
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: packet,
       };
     },
   });

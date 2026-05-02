@@ -13513,7 +13513,7 @@
     {
       "id": "TASK-BUD-574",
       "description": "Adicionar packet report-only de prontidão de material da lane AFK (quantidade de fatias locais úteis + cobertura de validação) para decidir continuar ou semear backlog.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-573"
@@ -13529,12 +13529,13 @@
         "smoke cobre caminho continue e seed-backlog."
       ],
       "milestone": "afk-materialization-wave-2026-05",
-      "notes": "[rationale:risk-control] medição explícita de material evita long-run sem matéria-prima.\nRunbook de alimentação contínua concluído; iniciada implementação do packet report-only de material readiness da lane AFK."
+      "notes": "[rationale:risk-control] medição explícita de material evita long-run sem matéria-prima.\nRunbook de alimentação contínua concluído; iniciada implementação do packet report-only de material readiness da lane AFK.\n2026-05-02: packet de material readiness AFK entregue para decidir continue/seed-backlog/blocked sem dispatch.",
+      "verification": "VER-BUD-923"
     },
     {
       "id": "TASK-BUD-575",
       "description": "Executar regressão focal e fechar wave AFK materialization com recomendação de operação contínua (produção de baixa iteração).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-574"
@@ -13551,7 +13552,8 @@
         "handoff final aponta próxima ação clara sem ambiguidade."
       ],
       "milestone": "afk-materialization-wave-2026-05",
-      "notes": "[rationale:risk-control] fechamento explícito evita regressão para execução longa sem backlog útil."
+      "notes": "[rationale:risk-control] fechamento explícito evita regressão para execução longa sem backlog útil.\nPacket de material readiness concluído; iniciada regressão/closeout da wave AFK materialization com indicadores de estoque mínimo.\n2026-05-02: wave AFK materialization encerrada com indicadores mínimos de estoque e regressão focal verde.",
+      "verification": "VER-BUD-924"
     }
   ]
 }

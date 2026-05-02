@@ -10527,6 +10527,24 @@
       "method": "runbook materialization docs + marker-check + smoke docs",
       "timestamp": "2026-05-02T11:37:28.760Z",
       "evidence": "Defined continuous backlog-fueling runbook for AFK lane using brainstorm -> seed preview -> local-safe batch. Docs updated: - `docs/primitives/lane-brainstorm-packet.md` - Added `Cadência de abastecimento AFK (material pipeline)`. - Defined operational stock target (3–7 slices). - Added explicit low-stock stop condition: `stop: backlog-material-insuficiente`. - `docs/guides/control-plane-operating-doctrine.md` - Extended `Material-first para long run AFK` with 3–7 stock target and low-stock stop condition. - `docs/primitives/nudge-free-local-continuity.md` - Added minimum AFK fueling rules with brainstorm/seed preview and low-stock stop condition. Validation: - marker checks passed for all three docs. - smoke docs checklist passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed. Outcome: - explicit cadence + stop rule now prevent AFK runs from drifting into execution without useful board material."
+    },
+    {
+      "id": "VER-BUD-923",
+      "target": "TASK-BUD-574",
+      "target_type": "task",
+      "status": "passed",
+      "method": "material readiness packet + smoke",
+      "timestamp": "2026-05-02T12:03:37.153Z",
+      "evidence": "Implemented report-only AFK lane material readiness packet to decide continue vs seed-backlog vs blocked. Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added `buildAfkMaterialReadinessPacket(...)`. - Added tool `autonomy_lane_material_readiness_packet`. - Decision contract: - `continue` - `seed-backlog` - `blocked` - Signals include current focus, local-safe eligible slices, validation-known coverage, and blockers. - No-dispatch invariants preserved (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). Tests: - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - Added continue path test (healthy AFK stock). - Added seed-backlog path test (low stock). Docs: - `docs/primitives/nudge-free-local-continuity.md` - Added packet to primitive table. - `docs/guides/control-plane-operating-doctrine.md` - Added explicit reference to packet in material-first AFK section. Validation: - marker checks passed for core/test/docs anchors. - smoke pack passed: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 38 passed (3 files)."
+    },
+    {
+      "id": "VER-BUD-924",
+      "target": "TASK-BUD-575",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression + wave closeout",
+      "timestamp": "2026-05-02T12:05:31.345Z",
+      "evidence": "Closed AFK materialization wave with focal regression evidence and explicit operational indicators. Code/artifacts completed in wave: - `TASK-BUD-572`: local bounded research synthesis (`docs/research/afk-materialization-patterns-2026-05.md`). - `TASK-BUD-573`: continuous backlog fueling runbook (brainstorm -> seed preview -> local-safe batch) with low-stock stop condition. - `TASK-BUD-574`: report-only packet `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) + smoke coverage. - `TASK-BUD-575`: regression + closeout consolidation. Closeout docs: - `docs/research/afk-materialization-patterns-2026-05.md` - Added section `Fechamento da wave AFK materialization (TASK-BUD-572..575)`. - Added explicit AFK minimum indicators: stock >=3, healthy target 3–7, stop on `backlog-material-insuficiente`. - `docs/research/control-plane-delegation-wave-2026-05.md` - Added `Wave AFK materialization (TASK-BUD-572..575)` and recommendation to treat materialization as permanent AFK long-run gate. Focal regression command: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 63 passed (4 files). Validation: - marker checks passed for AFK closeout anchors and material readiness packet anchors. Operational recommendation: - continue AFK batches only when material readiness packet returns `continue`; otherwise seed backlog first."
     }
   ]
 }

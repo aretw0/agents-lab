@@ -74,3 +74,21 @@ Adaptação local:
 ## Decisão desta síntese
 
 A trilha AFK produtiva depende mais de **materialização contínua do board** do que de “autonomia bruta”. O caminho robusto é combinar brainstorm bounded, semeadura visível e execução local-safe curta com checkpoints frequentes.
+
+## Fechamento da wave AFK materialization (TASK-BUD-572..575)
+
+### Entregas consolidadas
+- `TASK-BUD-572`: síntese bounded de influências (pi/Claude Code/superpowers) para materialização contínua.
+- `TASK-BUD-573`: runbook de alimentação contínua (`brainstorm -> seed preview -> batch local-safe`) com stop por estoque baixo.
+- `TASK-BUD-574`: packet read-only `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`).
+- `TASK-BUD-575`: regressão focal + closeout operacional.
+
+### Indicadores operacionais mínimos (AFK)
+- estoque local-safe com validação conhecida: **>= 3** fatias;
+- alvo saudável para continuidade: **3–7** fatias prontas;
+- abaixo do mínimo: `stop: backlog-material-insuficiente` + semeadura explícita;
+- packet de prontidão deve refletir `seed-backlog` antes de qualquer tentativa de ampliar run.
+
+### Decisão de continuidade
+- go: continuar AFK em batches pequenos quando packet indicar `continue`;
+- no-go: se `seed-backlog|blocked`, interromper continuidade e priorizar materialização do board.

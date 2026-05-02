@@ -434,6 +434,8 @@ Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK long
 
 Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded para criar próximas fatias em vez de forçar continuidade vazia.
 
+Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK.
+
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.
 
