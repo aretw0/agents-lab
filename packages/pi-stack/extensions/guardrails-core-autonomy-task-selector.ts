@@ -594,6 +594,21 @@ export function evaluateAutonomyProtectedScopeReasonReport(
   return buildAutonomyProtectedScopeReasonReport(readProjectTasksBlock(cwd).tasks, options);
 }
 
+export interface AutonomyProtectedFocusOptionPreview {
+  option: "promote" | "skip" | "defer";
+  suitability: "recommended" | "viable" | "blocked";
+  recommendationCode: string;
+  rationale: string;
+  nextAction: string;
+  blockers: string[];
+}
+
+export interface AutonomyProtectedFocusDecisionPreview {
+  recommendedOption: "promote" | "skip" | "defer";
+  options: AutonomyProtectedFocusOptionPreview[];
+  pragmaticRecommendation: string;
+}
+
 export interface AutonomyProtectedFocusDecisionPacket {
   taskId: string;
   decision: "ready-for-human-decision" | "blocked";
@@ -617,12 +632,101 @@ export interface AutonomyProtectedFocusDecisionPacket {
   validationGateKnown: boolean;
   rollbackPlanKnown: boolean;
   blockers: string[];
+  decisionPreview: AutonomyProtectedFocusDecisionPreview;
   reviewMode: "read-only";
   mutationAllowed: false;
   dispatchAllowed: false;
   authorization: "none";
   mode: "report-only";
   summary: string;
+}
+
+function buildProtectedFocusDecisionPreview(input: {
+  decision: "ready-for-human-decision" | "blocked";
+  recommendedOption: "promote" | "skip" | "defer";
+  protectedScope: boolean;
+  riskLevel: "high" | "medium" | "low";
+  valuePotential: "high" | "medium" | "low";
+  blockers: string[];
+}): AutonomyProtectedFocusDecisionPreview {
+  const promoteBlockedReasons = !input.protectedScope
+    ? ["local-safe-task"]
+    : input.blockers.length > 0
+      ? [...input.blockers]
+      : [];
+  const promoteSuitability: "recommended" | "viable" | "blocked" =
+    promoteBlockedReasons.length > 0
+      ? "blocked"
+      : (input.riskLevel === "high" && input.valuePotential !== "high")
+        ? "viable"
+        : input.recommendedOption === "promote"
+          ? "recommended"
+          : "viable";
+
+  const skipSuitability: "recommended" | "viable" | "blocked" =
+    input.recommendedOption === "skip"
+      ? "recommended"
+      : !input.protectedScope
+        ? "recommended"
+        : "viable";
+
+  const deferSuitability: "recommended" | "viable" | "blocked" =
+    input.recommendedOption === "defer" || input.decision === "blocked"
+      ? "recommended"
+      : "viable";
+
+  const options: AutonomyProtectedFocusOptionPreview[] = [
+    {
+      option: "promote",
+      suitability: promoteSuitability,
+      recommendationCode: `protected-focus-option-promote-${promoteSuitability}`,
+      rationale:
+        promoteSuitability === "blocked"
+          ? "promote blocked until protected evidence is explicit."
+          : promoteSuitability === "recommended"
+            ? "promote is pragmatic for one protected canary with rollback."
+            : "promote is possible but requires extra caution/risk acceptance.",
+      nextAction:
+        promoteSuitability === "blocked"
+          ? "add missing declared files/validation/rollback evidence before promote."
+          : "run one protected canary slice with explicit rollback and focal validation.",
+      blockers: promoteBlockedReasons,
+    },
+    {
+      option: "skip",
+      suitability: skipSuitability,
+      recommendationCode: `protected-focus-option-skip-${skipSuitability}`,
+      rationale:
+        skipSuitability === "recommended"
+          ? "skip keeps the lane local-safe and avoids protected promotion now."
+          : "skip is valid but may delay protected value capture.",
+      nextAction: "continue via local-safe lane without protected execution.",
+      blockers: [],
+    },
+    {
+      option: "defer",
+      suitability: deferSuitability,
+      recommendationCode: `protected-focus-option-defer-${deferSuitability}`,
+      rationale:
+        deferSuitability === "recommended"
+          ? "defer is pragmatic while risk/evidence conditions remain constrained."
+          : "defer is viable, but may postpone high-value protected learning.",
+      nextAction: "defer protected execution and revisit once evidence/value is clearer.",
+      blockers: input.blockers,
+    },
+  ];
+
+  const pragmaticRecommendation = input.recommendedOption === "promote"
+    ? "pragmatic recommendation: promote only one protected canary slice with explicit rollback and focal validation."
+    : input.recommendedOption === "skip"
+      ? "pragmatic recommendation: skip protected promotion and keep local-safe throughput."
+      : "pragmatic recommendation: defer now; harden evidence/rollback and reassess on next boundary.";
+
+  return {
+    recommendedOption: input.recommendedOption,
+    options,
+    pragmaticRecommendation,
+  };
 }
 
 export function buildAutonomyProtectedFocusDecisionPacket(
@@ -632,6 +736,15 @@ export function buildAutonomyProtectedFocusDecisionPacket(
   const taskId = normalizeTaskId(taskIdInput) ?? "";
   const task = tasks.find((row) => normalizeTaskId(row.id) === taskId);
   if (!task) {
+    const decisionPreview = buildProtectedFocusDecisionPreview({
+      decision: "blocked",
+      recommendedOption: "defer",
+      protectedScope: false,
+      riskLevel: "low",
+      valuePotential: "low",
+      blockers: ["task-not-found"],
+    });
+    const previewCompact = decisionPreview.options.map((option) => `${option.option}:${option.suitability}`).join(",");
     return {
       taskId,
       decision: "blocked",
@@ -650,12 +763,13 @@ export function buildAutonomyProtectedFocusDecisionPacket(
       validationGateKnown: false,
       rollbackPlanKnown: false,
       blockers: ["task-not-found"],
+      decisionPreview,
       reviewMode: "read-only",
       mutationAllowed: false,
       dispatchAllowed: false,
       authorization: "none",
       mode: "report-only",
-      summary: `autonomy-protected-focus-packet: ok=no task=${taskId || "?"} decision=blocked option=defer code=protected-focus-blocked-task-not-found`,
+      summary: `autonomy-protected-focus-packet: ok=no task=${taskId || "?"} decision=blocked option=defer code=protected-focus-blocked-task-not-found preview=${previewCompact}`,
     };
   }
 
@@ -697,6 +811,16 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     nextAction = "risk is high for current value potential; defer and/or decompose before protected canary execution.";
   }
 
+  const decisionPreview = buildProtectedFocusDecisionPreview({
+    decision,
+    recommendedOption,
+    protectedScope: protectedClassification.protected,
+    riskLevel,
+    valuePotential,
+    blockers,
+  });
+  const previewCompact = decisionPreview.options.map((option) => `${option.option}:${option.suitability}`).join(",");
+
   return {
     taskId,
     decision,
@@ -715,6 +839,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
     validationGateKnown,
     rollbackPlanKnown,
     blockers,
+    decisionPreview,
     reviewMode: "read-only",
     mutationAllowed: false,
     dispatchAllowed: false,
@@ -729,6 +854,7 @@ export function buildAutonomyProtectedFocusDecisionPacket(
       `code=${recommendationCode}`,
       `risk=${riskLevel}`,
       `value=${valuePotential}`,
+      `preview=${previewCompact}`,
       blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
     ].filter(Boolean).join(" "),
   };

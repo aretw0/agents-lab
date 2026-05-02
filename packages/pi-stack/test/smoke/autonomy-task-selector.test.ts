@@ -254,6 +254,13 @@ describe("autonomy task selector", () => {
     expect(packet.authorization).toBe("none");
     expect(packet.blockers).toContain("missing-declared-files");
     expect(packet.blockers).toContain("missing-validation-gate");
+    expect(packet.decisionPreview.recommendedOption).toBe("defer");
+    expect(packet.decisionPreview.options.map((option) => `${option.option}:${option.suitability}`)).toEqual([
+      "promote:blocked",
+      "skip:viable",
+      "defer:recommended",
+    ]);
+    expect(packet.summary).toContain("preview=promote:blocked,skip:viable,defer:recommended");
   });
 
   it("builds protected-focus decision packet and skips for local-safe task", () => {
@@ -265,6 +272,13 @@ describe("autonomy task selector", () => {
     expect(packet.recommendedOption).toBe("skip");
     expect(packet.recommendationCode).toBe("protected-focus-skip-local-safe");
     expect(packet.protectedScope).toBe(false);
+    expect(packet.decisionPreview.recommendedOption).toBe("skip");
+    expect(packet.decisionPreview.options.map((option) => `${option.option}:${option.suitability}`)).toEqual([
+      "promote:blocked",
+      "skip:recommended",
+      "defer:viable",
+    ]);
+    expect(packet.summary).toContain("preview=promote:blocked,skip:recommended,defer:viable");
   });
 
   it("filters by milestone", () => {

@@ -14,6 +14,8 @@ Padronizar decisão humana para uma task de escopo protegido via packet **report
 - `decision`: `ready-for-human-decision | blocked`
 - `recommendedOption`: `promote | skip | defer`
 - `recommendationCode` canônico
+- `decisionPreview.recommendedOption` + `decisionPreview.options[]` (preview pragmático de `promote|skip|defer` com `suitability`, `blockers`, `nextAction`)
+- `decisionPreview.pragmaticRecommendation` (síntese direta para decisão humana)
 - `valuePotential`, `riskLevel`, `effortLevel`
 - `reasonCodes[]`, `signals[]`, `evidence[]`
 - `declaredFilesKnown`, `validationGateKnown`, `rollbackPlanKnown`
@@ -28,3 +30,6 @@ Padronizar decisão humana para uma task de escopo protegido via packet **report
 - `mode=report-only`
 
 Packet verde não autoriza execução protected automática; ele só prepara decisão humana auditável.
+
+Resumo compacto esperado inclui preview das opções, por exemplo:
+- `preview=promote:blocked,skip:viable,defer:recommended`.

@@ -13864,7 +13864,27 @@
         "Rollback aplicado ou pronto para aplicação imediata (`git revert <commit>` + retorno ao caminho local) sem auto-dispatch."
       ],
       "milestone": "high-value-capacity-lane-2026-05",
-      "notes": "[rationale:risk-control] expansão de capacidade protegida deve começar por canário único com rollback comprovado e decisão humana explícita.\n2026-05-02: packet protected-focus pronto (`ready-for-human-decision`, option=promote). Aguardando decisão humana explícita para start do canário."
+      "notes": "[rationale:risk-control] expansão de capacidade protegida deve começar por canário único com rollback comprovado e decisão humana explícita.\n2026-05-02: packet protected-focus pronto (`ready-for-human-decision`, option=promote). Aguardando decisão humana explícita para start do canário.\n2026-05-02: packet agora entrega `decisionPreview` + recomendação pragmática. Snapshot atual: `preview=promote:recommended,skip:viable,defer:viable`. Falta apenas decisão humana explícita (promote|defer)."
+    },
+    {
+      "id": "TASK-BUD-590",
+      "description": "[P1] Adicionar preview pragmático das opções promote|skip|defer no protected-focus packet para apoiar recomendação humana.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/primitives/autonomy-protected-focus-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Packet expõe decisionPreview com options[] (suitability/blockers/nextAction) e pragmaticRecommendation.",
+        "Summary inclui marcador compacto de preview das opções.",
+        "Smoke tests atualizados e verdes para contract/summary."
+      ],
+      "milestone": "high-value-capacity-lane-2026-05",
+      "notes": "[rationale:risk-control] preview explícito reduz ambiguidade na decisão humana de promote/defer em escopo protegido.\n2026-05-02: preview pragmático das decisões disponível no packet e pronto para orientar recomendação promote|defer com menor ambiguidade.",
+      "verification": "VER-BUD-938"
     }
   ]
 }
