@@ -61,6 +61,7 @@ export interface TurnBoundaryGrowthMaturitySnapshot {
   decision?: GrowthMaturityDecision;
   score?: number;
   recommendationCode?: string;
+  freshness?: "fresh" | "stale" | "unknown";
 }
 
 function toSnapshotGrowthMaturityPacket(
@@ -144,6 +145,7 @@ function toSnapshotGrowthMaturityPacket(
 }
 
 export type TurnBoundaryGrowthSource = "explicit" | "handoff";
+export type TurnBoundaryGrowthFreshness = "fresh" | "stale" | "unknown";
 
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
@@ -155,6 +157,7 @@ export interface TurnBoundaryDecisionPacket {
   directionPreview: TurnBoundaryDirectionPreview;
   growthMaturity?: GrowthMaturityScorePacket;
   growthSource?: TurnBoundaryGrowthSource;
+  growthFresh?: TurnBoundaryGrowthFreshness;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -199,6 +202,7 @@ function buildTurnBoundaryDirectionPreview(input: {
   nextAutoStep: string;
   localAuditReasons: string[];
   growthDecision?: GrowthMaturityDecision;
+  growthFresh?: TurnBoundaryGrowthFreshness;
 }): TurnBoundaryDirectionPreview {
   const criticalReasons = input.localAuditReasons.filter((reason) =>
     reason === "protected-scopes:invalid"
@@ -210,7 +214,7 @@ function buildTurnBoundaryDirectionPreview(input: {
   if (input.localAuditReasons.includes("no-local-safe-next-step")) similarBlockers.push("no-local-safe-next-step");
   if (criticalReasons.length > 0) similarBlockers.push(...criticalReasons);
 
-  const growthEncouragesExpansion = input.growthDecision === "go";
+  const growthEncouragesExpansion = input.growthDecision === "go" && input.growthFresh !== "stale";
   const growthConservative = input.growthDecision === "hold" || input.growthDecision === "needs-evidence";
 
   const similarSuitability: "recommended" | "viable" | "blocked" =
@@ -331,6 +335,9 @@ export function buildTurnBoundaryDecisionPacket(input: {
     : growthMaturity
       ? "handoff"
       : undefined;
+  const growthFresh: TurnBoundaryGrowthFreshness | undefined = growthSource === "handoff"
+    ? input.growthMaturitySnapshot?.freshness ?? "unknown"
+    : undefined;
 
   if (growthMaturity?.decision === "needs-evidence") {
     nextAutoStep = `${nextAutoStep} growth maturity guidance=needs-evidence; collect missing score signals before acceleration.`;
@@ -342,6 +349,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     nextAutoStep,
     localAuditReasons: reasons,
     growthDecision: growthMaturity?.decision,
+    growthFresh,
   });
   const directionOptionsCompact = directionPreview.options
     .map((option) => `${option.id}:${option.suitability}`)
@@ -358,6 +366,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     directionPreview,
     growthMaturity,
     growthSource,
+    growthFresh,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
@@ -374,6 +383,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       growthMaturity ? `growthCode=${growthMaturity.recommendationCode}` : undefined,
       growthMaturity ? `growthScore=${growthMaturity.score ?? "na"}` : undefined,
       growthSource ? `growthSource=${growthSource}` : undefined,
+      growthFresh ? `growthFresh=${growthFresh}` : undefined,
       "authorization=none",
     ].filter(Boolean).join(" "),
   };

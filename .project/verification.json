@@ -10806,6 +10806,60 @@
       "method": "growth source/fail-closed docs update + checklist smoke",
       "timestamp": "2026-05-02T16:23:50.836Z",
       "evidence": "Documented growth-source semantics and fail-closed fallback behavior for boundary operations. Updated docs: - `docs/primitives/growth-maturity-score-packet.md` - Added explicit boundary source markers: - `growthSource=explicit` - `growthSource=handoff` - Added fallback fail-closed rule for partial handoff snapshots (`needs-evidence`). - `docs/guides/primitive-growth-sanity-plan.md` - Runbook now asks to verify boundary source marker before acting. - Added explicit rule: partial/ambiguous handoff snapshot must degrade to `needs-evidence`. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-954",
+      "target": "TASK-BUD-605",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doctrine turn-close steering policy + docs checklist",
+      "timestamp": "2026-05-02T16:35:19.440Z",
+      "evidence": "Implemented operator-preference policy for turn-ending behavior in doctrine. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Added section: `Encerramento de turno: padrão sem steering obrigatório`. - Defines default concise/factual closeout with no steering injection by default. - Defines escalation path: 1) soft only on explicit human request or real blocker; 2) hard only on repeated unresolved impasse. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - Preference is now explicit in operational doctrine, preserving governance while reducing end-turn noise."
+    },
+    {
+      "id": "VER-BUD-955",
+      "target": "TASK-BUD-606",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-safe resume routine docs + checklist smoke",
+      "timestamp": "2026-05-02T16:38:01.268Z",
+      "evidence": "Documented a standard local-safe resume routine for no-eligible situations to prevent drift/stall. Updated: - `docs/guides/primitive-growth-sanity-plan.md` - Added section: `Rotina de retomada local-safe (quando não houver próxima fatia elegível)`. - Steps: checkpoint reason, select one new local-safe slice, update focus, re-evaluate readiness/boundary. - `docs/guides/control-plane-operating-doctrine.md` - Added concise doctrine rule: when lane returns `no-eligible-tasks`, do checkpoint + explicit new local-safe focus before continue. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - Resume behavior is now normalized and auditable, reducing idle loops on stale focus."
+    },
+    {
+      "id": "VER-BUD-956",
+      "target": "TASK-BUD-607",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-safe wave seeding + autonomy selection check",
+      "timestamp": "2026-05-02T16:39:41.080Z",
+      "evidence": "Seeded new local-safe maturity wave to recover continuity when queue was protected-only. Created planned local-safe slices: - TASK-BUD-608 - TASK-BUD-609 - TASK-BUD-610 All include: - bounded file scope, - explicit acceptance criteria, - local-safe framing (no protected-scope requirement). Verification: - `autonomy_lane_next_task(include_protected_scopes=false)` now returns ready=true. - Selected next task: `TASK-BUD-607` during seeding window; eligible local-safe queue now includes 607/608/609/610. - This confirms continuity is unblocked without protected promotion. Result: - Material stock for local-safe progression restored and auditable."
+    },
+    {
+      "id": "VER-BUD-957",
+      "target": "TASK-BUD-608",
+      "target_type": "task",
+      "status": "passed",
+      "method": "continuation readiness growthSource marker + smoke",
+      "timestamp": "2026-05-02T16:42:15.486Z",
+      "evidence": "Implemented `growthSource` audit marker in continuation readiness output. Code: - `packages/pi-stack/extensions/context-watchdog.ts` - Extended `HandoffGrowthMaturitySnapshot` with `source: \"handoff\"`. - `resolveHandoffGrowthMaturitySnapshot(...)` now returns source-tagged snapshot. - `context_watch_continuation_readiness` summary now includes `growthSource=handoff` when snapshot exists. Tests: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Updated readiness assertions: - summary includes `growthSource=handoff`. - details include `growthMaturitySnapshot.source = \"handoff\"`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` - 63 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-958",
+      "target": "TASK-BUD-609",
+      "target_type": "task",
+      "status": "passed",
+      "method": "boundary growth freshness marker + conservative stale handling",
+      "timestamp": "2026-05-02T16:46:00.350Z",
+      "evidence": "Added `growthFresh` marker to boundary fallback and enforced conservative direction when fallback snapshot is stale. Code: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - Extended snapshot input with `freshness`. - Added packet field `growthFresh` and summary marker `growthFresh=<fresh|stale|unknown>`. - Direction logic now treats `growthDecision=go` as expansion only when `growthFresh != stale`. - `packages/pi-stack/extensions/context-watchdog.ts` - `turn_boundary_decision_packet` now computes handoff freshness via `resolveHandoffFreshness(...)` and injects it into fallback snapshot. Tests: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Added stale-go unit case: stale fallback keeps conservative direction. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Tool-level assertions for `growthFresh=fresh` (recent handoff fallback). - Tool-level stale handoff case (`timestamp=2020...`) asserts: - `growthFresh=stale` - direction remains conservative (`similar-lane` recommended). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` - 75 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-959",
+      "target": "TASK-BUD-610",
+      "target_type": "task",
+      "status": "passed",
+      "method": "compact-output guard for missing growth snapshot + smoke",
+      "timestamp": "2026-05-02T17:01:58.862Z",
+      "evidence": "Hardened compact output so growth markers appear only when growth snapshot exists. Coverage added: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Continuation readiness test now re-runs with handoff lacking growth snapshot and asserts: - no `growthDecision`, `growthScore`, `growthSource` markers in summary; - `details.growthMaturitySnapshot` is undefined. - Boundary checkpoint (no growth input / no growth snapshot) now asserts summary omits: - `growthDecision`, `growthScore`, `growthSource`, `growthFresh`. Regression context retained: - With snapshot present, growth markers still emitted (existing assertions remain). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - 75 passed / 0 failed."
     }
   ]
 }

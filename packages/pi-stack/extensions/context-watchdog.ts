@@ -975,6 +975,7 @@ export function formatContextWatchContinuationReadinessSummary(input: {
 }
 
 export type HandoffGrowthMaturitySnapshot = {
+	source: "handoff";
 	decision?: "go" | "hold" | "needs-evidence";
 	score?: number;
 	recommendationCode?: string;
@@ -1012,7 +1013,12 @@ function resolveHandoffGrowthMaturitySnapshot(handoff: Record<string, unknown>):
 		? source.recommendationCode.trim()
 		: undefined;
 	if (!decision && score === undefined && !recommendationCode) return undefined;
-	return { decision, score, recommendationCode };
+	return {
+		source: "handoff",
+		decision,
+		score,
+		recommendationCode,
+	};
 }
 
 type AfkMaterialReadinessDecision = "continue" | "seed-backlog" | "blocked";
@@ -2506,6 +2512,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				`material=${materialReadiness.decision}`,
 				growthSnapshot?.decision ? `growthDecision=${growthSnapshot.decision}` : undefined,
 				growthSnapshot?.score !== undefined ? `growthScore=${growthSnapshot.score}` : undefined,
+				growthSnapshot ? `growthSource=${growthSnapshot.source}` : undefined,
 			].filter(Boolean).join(" ");
 			return {
 				content: [{ type: "text", text: summary }],
@@ -2580,9 +2587,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				"critical_blockers",
 			].some((key) => p[key] !== undefined);
 			const handoff = readHandoffJson(ctx.cwd);
-			const fallbackGrowthSnapshot = growthInputProvided
+			const fallbackGrowthSnapshotBase = growthInputProvided
 				? undefined
 				: resolveHandoffGrowthMaturitySnapshot(handoff);
+			const handoffFreshness = resolveHandoffFreshness(
+				typeof handoff.timestamp === "string" ? handoff.timestamp : undefined,
+				Date.now(),
+				config.handoffFreshMaxAgeMs,
+			).label;
+			const fallbackGrowthSnapshot = fallbackGrowthSnapshotBase
+				? {
+					...fallbackGrowthSnapshotBase,
+					freshness: handoffFreshness,
+				}
+				: undefined;
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				handoff,
 				config.handoffFreshMaxAgeMs,

@@ -153,6 +153,7 @@ describe("context-watchdog continuation recommendation", () => {
         decision: "go",
         score: 89,
         recommendationCode: "growth-maturity-go-expand-bounded",
+        freshness: "fresh",
       },
     });
 
@@ -161,9 +162,32 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.growthMaturity?.score).toBe(89);
     expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-go-expand-bounded");
     expect(packet.growthSource).toBe("handoff");
+    expect(packet.growthFresh).toBe("fresh");
     expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
     expect(packet.summary).toContain("growthDecision=go");
     expect(packet.summary).toContain("growthSource=handoff");
+  });
+
+  it("keeps direction conservative when handoff growth is go but snapshot is stale", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-1",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      growthMaturitySnapshot: {
+        decision: "go",
+        score: 88,
+        recommendationCode: "growth-maturity-go-expand-bounded",
+        freshness: "stale",
+      },
+    });
+
+    expect(packet.growthMaturity?.decision).toBe("go");
+    expect(packet.growthSource).toBe("handoff");
+    expect(packet.growthFresh).toBe("stale");
+    expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
+    expect(packet.summary).toContain("growthFresh=stale");
+    expect(packet.summary).toContain("directionOptions=similar-lane:recommended,next-high-value:viable");
   });
 
   it("fails closed to needs-evidence when handoff snapshot lacks a valid decision", () => {
@@ -175,12 +199,14 @@ describe("context-watchdog continuation recommendation", () => {
       growthMaturitySnapshot: {
         score: 92,
         recommendationCode: "growth-maturity-go-expand-bounded",
+        freshness: "stale",
       },
     });
 
     expect(packet.decision).toBe("continue");
     expect(packet.growthMaturity?.decision).toBe("needs-evidence");
     expect(packet.growthSource).toBe("handoff");
+    expect(packet.growthFresh).toBe("stale");
     expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
     expect(packet.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
     expect(packet.summary).toContain("growthDecision=needs-evidence");

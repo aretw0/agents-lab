@@ -1,48 +1,57 @@
 {
-  "timestamp": "2026-05-02T16:25:06.477Z",
-  "context": "afk-handoff: decision=ask-human stock=6/7 blockers=protected-focus-required next=escolher explicitamente promote / defer para próximo canário [snip] local-safe em report-only até decisão. [truncated:+25 chars]",
-  "current_tasks": [
-    "TASK-BUD-134"
-  ],
+  "timestamp": "2026-05-02T17:02:40.464Z",
+  "context": "wave local-safe concluída após reload manual do operador: semear fila local-safe (607-610), alinhar growth source/freshness e compact output sem ruído em readiness/boundary.",
   "next_actions": [
-    "Se promover canal protegido: abrir packet protegido dedicado e executar apenas 1 canário bounded.",
-    "Se defer: continuar semeando fatias local-safe de maturidade/governança."
+    "Se continuar, abrir próxima fatia local-safe de melhoria incremental no context watchdog.",
+    "Manter encerramento de turno conciso sem steering por default (escalar apenas se necessário)."
   ],
-  "blockers": [
-    "protected-focus-required"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "VER-BUD-948",
-    "VER-BUD-949",
-    "VER-BUD-950"
+    "VER-BUD-954",
+    "VER-BUD-956",
+    "VER-BUD-957"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-134",
+    "focus": "TASK-BUD-610",
     "canonical_links": [
-      "task:TASK-BUD-134",
-      "verification:VER-BUD-948"
+      "task:TASK-BUD-610",
+      "verification:VER-BUD-954"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T16:25:06.477Z",
+    "generatedAtIso": "2026-05-02T17:02:40.464Z",
     "level": "checkpoint",
-    "percent": 64,
+    "percent": 63,
     "action": "checkpoint-refresh",
-    "recommendation": "ask-human-decision"
+    "recommendation": "continue-local-safe",
+    "growth_maturity": {
+      "decision": "hold",
+      "score": 78,
+      "recommendationCode": "growth-maturity-hold-maintain"
+    },
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T16:25:06.477Z",
+      "atIso": "2026-05-02T17:02:40.464Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 64,
+      "percent": 63,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "ask-human-decision"
+      "recommendation": "continue-local-safe",
+      "growth_maturity": {
+        "decision": "hold",
+        "score": 78,
+        "recommendationCode": "growth-maturity-hold-maintain"
+      }
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-610"
   ]
 }
