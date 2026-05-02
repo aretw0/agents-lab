@@ -1,208 +1,208 @@
 {
-	"defaultProvider": "openai-codex",
-	"defaultModel": "gpt-5.3-codex",
-	"packages": [
-		"../packages/pi-stack",
-		"../packages/git-skills",
-		"../packages/web-skills",
-		"../packages/pi-skills",
-		"../packages/lab-skills",
-		{
-			"source": "npm:@aretw0/pi-stack",
-			"extensions": [],
-			"skills": [],
-			"themes": []
-		},
-		{
-			"source": "npm:@aretw0/git-skills",
-			"extensions": [],
-			"skills": [],
-			"themes": []
-		},
-		{
-			"source": "npm:@aretw0/web-skills",
-			"extensions": [],
-			"skills": [],
-			"themes": []
-		},
-		{
-			"source": "npm:@aretw0/pi-skills",
-			"extensions": [],
-			"skills": [],
-			"themes": []
-		},
-		{
-			"source": "npm:@aretw0/lab-skills",
-			"extensions": [],
-			"skills": [],
-			"themes": []
-		},
-		{
-			"source": "npm:@ifi/oh-pi-extensions",
-			"extensions": [
-				"!extensions/custom-footer.ts",
-				"!extensions/usage-tracker.ts",
-				"!extensions/usage-tracker-providers.ts",
-				"!extensions/safe-guard.ts",
-				"!extensions/bg-process.ts"
-			],
-			"skills": [],
-			"themes": []
-		}
-	],
-	"piStack": {
-		"monitorProviderPatch": {
-			"classifierThinking": "off",
-			"hedgeWhen": "has_bash",
-			"hedgeIncludeProjectContext": false,
-			"hedgeConversationHistory": false,
-			"classifierModelByProvider": {
-				"openai-codex": "openai-codex/gpt-5.4-mini"
-			}
-		},
-		"colonyPilot": {
-			"preflight": {
-				"enabled": true,
-				"enforceOnAntColonyTool": true,
-				"requiredExecutables": [
-					"node",
-					"git"
-				]
-			},
-			"modelPolicy": {
-				"enabled": true,
-				"allowMixedProviders": false,
-				"allowedProviders": [
-					"openai-codex"
-				],
-				"sparkGateEnabled": true,
-				"sparkAllowedGoalTriggers": [
-					"planning recovery",
-					"scout burst"
-				],
-				"sparkScoutOnlyTrigger": "scout burst"
-			},
-			"budgetPolicy": {
-				"enabled": true,
-				"enforceOnAntColonyTool": true,
-				"requireMaxCost": true,
-				"autoInjectMaxCost": true,
-				"defaultMaxCostUsd": 0.5,
-				"hardCapUsd": 60,
-				"minMaxCostUsd": 0.05,
-				"enforceProviderBudgetBlock": true,
-				"providerBudgetLookbackDays": 30,
-				"allowProviderBudgetOverride": true,
-				"providerBudgetOverrideToken": "budget-override:"
-			},
-			"projectTaskSync": {
-				"enabled": true,
-				"createOnLaunch": false,
-				"trackProgress": false,
-				"markTerminalState": true,
-				"taskIdPrefix": "colony",
-				"requireHumanClose": true,
-				"maxNoteLines": 20
-			},
-			"deliveryPolicy": {
-				"enabled": true,
-				"mode": "report-only",
-				"requireWorkspaceReport": true,
-				"requireTaskSummary": true,
-				"requireFileInventory": true,
-				"requireValidationCommandLog": true,
-				"blockOnMissingEvidence": true
-			},
-			"outputPolicy": {
-				"compactLargeJson": true,
-				"maxInlineJsonChars": 1200
-			},
-			"candidateRetention": {
-				"enabled": true,
-				"maxEntries": 40,
-				"maxAgeDays": 14
-			}
-		},
-		"guardrailsCore": {
-			"providerBudgetGovernor": {
-				"enabled": true,
-				"lookbackDays": 30,
-				"allowOverride": true,
-				"overrideToken": "budget-override:",
-				"recoveryCommands": [
-					"doctor",
-					"quota-visibility",
-					"model",
-					"login"
-				]
-			},
-			"longRunIntentQueue": {
-				"enabled": false,
-				"autoDrainOnIdle": false
-			}
-		},
-		"contextWatchdog": {
-			"enabled": true,
-			"checkpointPct": 60,
-			"compactPct": 65,
-			"cooldownMs": 600000,
-			"notify": true,
-			"modelSteeringFromLevel": "checkpoint",
-			"userNotifyFromLevel": "checkpoint",
-			"status": true,
-			"autoCheckpoint": true,
-			"autoCompact": true,
-			"autoCompactCooldownMs": 1200000,
-			"autoCompactRequireIdle": true,
-			"autoResumeAfterCompact": true,
-			"autoResumeCooldownMs": 30000,
-			"handoffFreshMaxAgeMs": 1800000
-		},
-		"customFooter": {
-			"contextPressure": {
-				"byProviderModel": {
-					"github-copilot/gpt-5.3-codex": {
-						"warningPct": 45,
-						"errorPct": 65
-					}
-				}
-			}
-		},
-		"quotaVisibility": {
-			"defaultDays": 30,
-			"providerBudgets": {
-				"openai-codex": {
-					"owner": "openai-pro",
-					"period": "monthly",
-					"unit": "tokens-cost",
-					"monthlyQuotaTokens": 1200000000,
-					"monthlyQuotaCostUsd": 500,
-					"warnPct": 85,
-					"hardPct": 98
-				}
-			},
-			"routeModelRefs": {
-				"openai-codex": "openai-codex/gpt-5.3-codex"
-			}
-		},
-		"quotaPanel": {
-			"mode": "on"
-		},
-		"colonyPanel": {
-			"mode": "auto",
-			"autoOpenCountThreshold": 4,
-			"maxVisibleColonies": 8
-		},
-		"schedulerGovernance": {
-			"enabled": true,
-			"policy": "observe",
-			"requireTextConfirmation": true
-		},
-		"webSessionGateway": {
-			"mode": "local"
-		},
-		"governanceProfile": {
-			"active": "conservative"
-		}
-	}
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.3-codex",
+  "packages": [
+    "../packages/pi-stack",
+    "../packages/git-skills",
+    "../packages/web-skills",
+    "../packages/pi-skills",
+    "../packages/lab-skills",
+    {
+      "source": "npm:@aretw0/pi-stack",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/git-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/web-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/pi-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@aretw0/lab-skills",
+      "extensions": [],
+      "skills": [],
+      "themes": []
+    },
+    {
+      "source": "npm:@ifi/oh-pi-extensions",
+      "extensions": [
+        "!extensions/custom-footer.ts",
+        "!extensions/usage-tracker.ts",
+        "!extensions/usage-tracker-providers.ts",
+        "!extensions/safe-guard.ts",
+        "!extensions/bg-process.ts"
+      ],
+      "skills": [],
+      "themes": []
+    }
+  ],
+  "piStack": {
+    "monitorProviderPatch": {
+      "classifierThinking": "off",
+      "hedgeWhen": "has_bash",
+      "hedgeIncludeProjectContext": false,
+      "hedgeConversationHistory": false,
+      "classifierModelByProvider": {
+        "openai-codex": "openai-codex/gpt-5.4-mini"
+      }
+    },
+    "colonyPilot": {
+      "preflight": {
+        "enabled": true,
+        "enforceOnAntColonyTool": true,
+        "requiredExecutables": [
+          "node",
+          "git"
+        ]
+      },
+      "modelPolicy": {
+        "enabled": true,
+        "allowMixedProviders": false,
+        "allowedProviders": [
+          "openai-codex"
+        ],
+        "sparkGateEnabled": true,
+        "sparkAllowedGoalTriggers": [
+          "planning recovery",
+          "scout burst"
+        ],
+        "sparkScoutOnlyTrigger": "scout burst"
+      },
+      "budgetPolicy": {
+        "enabled": true,
+        "enforceOnAntColonyTool": true,
+        "requireMaxCost": true,
+        "autoInjectMaxCost": true,
+        "defaultMaxCostUsd": 0.5,
+        "hardCapUsd": 60,
+        "minMaxCostUsd": 0.05,
+        "enforceProviderBudgetBlock": true,
+        "providerBudgetLookbackDays": 30,
+        "allowProviderBudgetOverride": true,
+        "providerBudgetOverrideToken": "budget-override:"
+      },
+      "projectTaskSync": {
+        "enabled": true,
+        "createOnLaunch": false,
+        "trackProgress": false,
+        "markTerminalState": true,
+        "taskIdPrefix": "colony",
+        "requireHumanClose": true,
+        "maxNoteLines": 20
+      },
+      "deliveryPolicy": {
+        "enabled": true,
+        "mode": "report-only",
+        "requireWorkspaceReport": true,
+        "requireTaskSummary": true,
+        "requireFileInventory": true,
+        "requireValidationCommandLog": true,
+        "blockOnMissingEvidence": true
+      },
+      "outputPolicy": {
+        "compactLargeJson": true,
+        "maxInlineJsonChars": 1200
+      },
+      "candidateRetention": {
+        "enabled": true,
+        "maxEntries": 40,
+        "maxAgeDays": 14
+      }
+    },
+    "guardrailsCore": {
+      "providerBudgetGovernor": {
+        "enabled": true,
+        "lookbackDays": 30,
+        "allowOverride": true,
+        "overrideToken": "budget-override:",
+        "recoveryCommands": [
+          "doctor",
+          "quota-visibility",
+          "model",
+          "login"
+        ]
+      },
+      "longRunIntentQueue": {
+        "enabled": false,
+        "autoDrainOnIdle": false
+      }
+    },
+    "contextWatchdog": {
+      "enabled": true,
+      "checkpointPct": 55,
+      "compactPct": 65,
+      "cooldownMs": 600000,
+      "notify": true,
+      "modelSteeringFromLevel": "compact",
+      "userNotifyFromLevel": "compact",
+      "status": true,
+      "autoCheckpoint": true,
+      "autoCompact": true,
+      "autoCompactCooldownMs": 1200000,
+      "autoCompactRequireIdle": true,
+      "autoResumeAfterCompact": true,
+      "autoResumeCooldownMs": 30000,
+      "handoffFreshMaxAgeMs": 1800000
+    },
+    "customFooter": {
+      "contextPressure": {
+        "byProviderModel": {
+          "github-copilot/gpt-5.3-codex": {
+            "warningPct": 45,
+            "errorPct": 65
+          }
+        }
+      }
+    },
+    "quotaVisibility": {
+      "defaultDays": 30,
+      "providerBudgets": {
+        "openai-codex": {
+          "owner": "openai-pro",
+          "period": "monthly",
+          "unit": "tokens-cost",
+          "monthlyQuotaTokens": 1200000000,
+          "monthlyQuotaCostUsd": 500,
+          "warnPct": 85,
+          "hardPct": 98
+        }
+      },
+      "routeModelRefs": {
+        "openai-codex": "openai-codex/gpt-5.3-codex"
+      }
+    },
+    "quotaPanel": {
+      "mode": "on"
+    },
+    "colonyPanel": {
+      "mode": "auto",
+      "autoOpenCountThreshold": 4,
+      "maxVisibleColonies": 8
+    },
+    "schedulerGovernance": {
+      "enabled": true,
+      "policy": "observe",
+      "requireTextConfirmation": true
+    },
+    "webSessionGateway": {
+      "mode": "local"
+    },
+    "governanceProfile": {
+      "active": "conservative"
+    }
+  }
 }
