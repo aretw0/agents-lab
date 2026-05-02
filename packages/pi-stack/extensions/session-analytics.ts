@@ -255,6 +255,49 @@ export interface ContentOutlierEvent {
   excerpt: string;
 }
 
+export type DelegationMixMode = "local" | "manual" | "simple-delegate" | "swarm";
+
+export interface DelegationMixBucket {
+  mode: DelegationMixMode;
+  count: number;
+  sharePct: number;
+  examples: string[];
+}
+
+export type DelegationMixRecommendationCode =
+  | "delegation-mix-ready-diverse"
+  | "delegation-mix-needs-evidence-no-data"
+  | "delegation-mix-needs-evidence-simple-delegate-missing"
+  | "delegation-mix-needs-evidence-swarm-missing"
+  | "delegation-mix-needs-evidence-low-diversity";
+
+export interface DelegationMixScore {
+  mode: "delegation-mix-score";
+  decision: "ready" | "needs-evidence";
+  score: number;
+  recommendationCode: DelegationMixRecommendationCode;
+  recommendation: string;
+  window: {
+    lookbackHours: number;
+    filesScanned: number;
+    totalRecords: number;
+  };
+  totals: {
+    totalEvents: number;
+    local: number;
+    manual: number;
+    simpleDelegate: number;
+    swarm: number;
+    diversityModes: number;
+    delegatedSharePct: number;
+  };
+  buckets: DelegationMixBucket[];
+  dispatchAllowed: false;
+  authorization: "none";
+  mutationAllowed: false;
+  summary: string;
+}
+
 export interface GalvanizationCandidate {
   rank: number;
   patternKey: string;
@@ -293,6 +336,189 @@ function normalizeWorkPatternText(raw: string): string {
 function classifyWorkPatternKind(text: string): "slash-command" | "prompt-pattern" {
   if (text.trim().startsWith("/")) return "slash-command";
   return "prompt-pattern";
+}
+
+function inferDelegationMixModeFromText(textRaw: string): DelegationMixMode | undefined {
+  const text = textRaw.toLowerCase();
+  if (!text.trim()) return undefined;
+
+  if (text.includes("[colony_signal:") || text.includes("ant_colony") || text.includes("swarm")) {
+    return "swarm";
+  }
+  if (
+    text.includes("subagent")
+    || text.includes("delegat")
+    || text.includes("simple delegate")
+    || text.includes("claude_code_execute")
+    || text.includes("agent spawn")
+    || text.includes("agent_spawn")
+  ) {
+    return "simple-delegate";
+  }
+  if (
+    text.includes("local-safe")
+    || text.includes("local safe")
+    || text.includes("local-first")
+    || text.includes("local first")
+    || text.includes("checkpoint")
+    || text.includes("context-watch")
+  ) {
+    return "local";
+  }
+  return "manual";
+}
+
+function inferDelegationMixModeFromTool(toolNameRaw: string): DelegationMixMode | undefined {
+  const toolName = toolNameRaw.toLowerCase();
+  if (!toolName.trim()) return undefined;
+  if (toolName.includes("ant_colony") || toolName.includes("colony")) return "swarm";
+  if (toolName.includes("subagent") || toolName.includes("claude_code_execute") || toolName.includes("agent_spawn")) {
+    return "simple-delegate";
+  }
+  if (toolName.startsWith("context_watch") || toolName.startsWith("git_") || toolName.startsWith("board_")) {
+    return "local";
+  }
+  return undefined;
+}
+
+export function parseDelegationMixScore(
+  records: unknown[],
+  lookbackHours: number,
+  filesScanned: number,
+): DelegationMixScore {
+  const counters: Record<DelegationMixMode, number> = {
+    local: 0,
+    manual: 0,
+    "simple-delegate": 0,
+    swarm: 0,
+  };
+  const examples: Record<DelegationMixMode, string[]> = {
+    local: [],
+    manual: [],
+    "simple-delegate": [],
+    swarm: [],
+  };
+
+  const pushExample = (mode: DelegationMixMode, value: string) => {
+    const text = value.trim();
+    if (!text) return;
+    if (examples[mode].length >= 3) return;
+    examples[mode].push(text.slice(0, 120));
+  };
+
+  for (const rec of records) {
+    if (!rec || typeof rec !== "object") continue;
+    const r = rec as Record<string, unknown>;
+    const type = typeof r["type"] === "string" ? r["type"] : "";
+
+    if (type === "tool_call") {
+      const toolName = typeof r["toolName"] === "string"
+        ? r["toolName"]
+        : typeof (r["tool"] as Record<string, unknown> | undefined)?.["name"] === "string"
+          ? String((r["tool"] as Record<string, unknown>)["name"])
+          : "";
+      const mode = inferDelegationMixModeFromTool(toolName);
+      if (!mode) continue;
+      counters[mode] += 1;
+      pushExample(mode, `tool:${toolName}`);
+      continue;
+    }
+
+    if (type !== "message") continue;
+    const msg = r["message"] as Record<string, unknown> | undefined;
+    if (!msg) continue;
+    const role = typeof msg["role"] === "string" ? msg["role"] : "";
+    const toolName = typeof msg["toolName"] === "string" ? msg["toolName"] : "";
+    const text = extractTextContent(msg["content"]);
+
+    let mode = inferDelegationMixModeFromTool(toolName);
+    if (!mode && (role === "user" || role === "assistant" || role === "toolResult")) {
+      mode = inferDelegationMixModeFromText(text);
+    }
+    if (!mode) continue;
+
+    counters[mode] += 1;
+    pushExample(mode, toolName ? `tool:${toolName}` : text);
+  }
+
+  const totalEvents = Object.values(counters).reduce((sum, value) => sum + value, 0);
+  const diversityModes = Object.values(counters).filter((value) => value > 0).length;
+  const delegatedEvents = counters["simple-delegate"] + counters.swarm;
+  const delegatedSharePct = totalEvents > 0 ? Math.round((delegatedEvents / totalEvents) * 100) : 0;
+
+  const buckets: DelegationMixBucket[] = (["local", "manual", "simple-delegate", "swarm"] as DelegationMixMode[])
+    .map((mode) => ({
+      mode,
+      count: counters[mode],
+      sharePct: totalEvents > 0 ? Math.round((counters[mode] / totalEvents) * 100) : 0,
+      examples: examples[mode],
+    }));
+
+  let decision: DelegationMixScore["decision"] = "ready";
+  let recommendationCode: DelegationMixRecommendationCode = "delegation-mix-ready-diverse";
+  let recommendation = "delegation mix is diverse enough for bounded delegation progression.";
+
+  if (totalEvents <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "delegation-mix-needs-evidence-no-data";
+    recommendation = "no delegation evidence observed yet; collect local session evidence before promoting delegation decisions.";
+  } else if (counters["simple-delegate"] <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "delegation-mix-needs-evidence-simple-delegate-missing";
+    recommendation = "simple-delegate evidence missing; add bounded single-delegate slices before broader delegation.";
+  } else if (counters.swarm <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "delegation-mix-needs-evidence-swarm-missing";
+    recommendation = "swarm evidence missing; keep delegation local/simple and defer swarm promotion.";
+  } else if (diversityModes < 3) {
+    decision = "needs-evidence";
+    recommendationCode = "delegation-mix-needs-evidence-low-diversity";
+    recommendation = "delegation diversity is low; balance local/manual/simple-delegate/swarm evidence before promotion.";
+  }
+
+  const score = totalEvents <= 0
+    ? 0
+    : Math.max(0, Math.min(100, Math.round((diversityModes / 4) * 60 + delegatedSharePct * 0.4)));
+
+  const summary = [
+    "delegation-mix-score:",
+    `decision=${decision}`,
+    `score=${score}`,
+    `events=${totalEvents}`,
+    `local=${counters.local}`,
+    `manual=${counters.manual}`,
+    `simple=${counters["simple-delegate"]}`,
+    `swarm=${counters.swarm}`,
+    `code=${recommendationCode}`,
+    "authorization=none",
+  ].join(" ");
+
+  return {
+    mode: "delegation-mix-score",
+    decision,
+    score,
+    recommendationCode,
+    recommendation,
+    window: {
+      lookbackHours,
+      filesScanned,
+      totalRecords: records.length,
+    },
+    totals: {
+      totalEvents,
+      local: counters.local,
+      manual: counters.manual,
+      simpleDelegate: counters["simple-delegate"],
+      swarm: counters.swarm,
+      diversityModes,
+      delegatedSharePct,
+    },
+    buckets,
+    dispatchAllowed: false,
+    authorization: "none",
+    mutationAllowed: false,
+    summary,
+  };
 }
 
 export function parseGalvanizationCandidates(records: unknown[], limit: number): {
@@ -734,14 +960,11 @@ export interface SessionAnalyticsResult {
   scan: SessionAnalyticsScanSummary;
 }
 
-export function runQuery(
-  cwd: string,
-  queryType: QueryType,
-  lookbackHours: number,
-  signalFilter: string | undefined,
-  limit: number,
-  minChars = 20_000,
-): SessionAnalyticsResult {
+function collectSessionRecords(cwd: string, lookbackHours: number): {
+  files: string[];
+  allRecords: unknown[];
+  scan: SessionAnalyticsScanSummary;
+} {
   const dir = sessionDir(cwd);
   const files = listSessionFiles(dir, lookbackHours);
   const allRecords: unknown[] = [];
@@ -776,6 +999,19 @@ export function runQuery(
     if (read.stats.recordsCapped) scan.recordsCappedFiles += 1;
     if (read.stats.readError) scan.readErrors += 1;
   }
+
+  return { files, allRecords, scan };
+}
+
+export function runQuery(
+  cwd: string,
+  queryType: QueryType,
+  lookbackHours: number,
+  signalFilter: string | undefined,
+  limit: number,
+  minChars = 20_000,
+): SessionAnalyticsResult {
+  const { files, allRecords, scan } = collectSessionRecords(cwd, lookbackHours);
 
   let data: unknown;
 
@@ -850,6 +1086,37 @@ export function runQuery(
 // ---------------------------------------------------------------------------
 
 export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
+  // ---- tool: delegation_mix_score ---------------------------------------
+
+  pi.registerTool({
+    name: "delegation_mix_score",
+    label: "Delegation Mix Score",
+    description:
+      "Report-only delegation diversity score from local session evidence (local/manual/simple-delegate/swarm). Never dispatches execution.",
+    parameters: Type.Object({
+      lookback_hours: Type.Optional(
+        Type.Number({ description: "How many hours back to scan session files. Default: 24." }),
+      ),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const lookbackHoursRaw = Number(p["lookback_hours"]);
+      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+        ? lookbackHoursRaw
+        : 24;
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
+      const collected = collectSessionRecords(cwd, lookbackHours);
+      const score = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
+      return {
+        content: [{ type: "text", text: score.summary }],
+        details: {
+          ...score,
+          scan: collected.scan,
+        },
+      };
+    },
+  });
+
   // ---- tool: session_analytics_query ------------------------------------
 
   pi.registerTool({

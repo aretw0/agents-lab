@@ -10338,6 +10338,15 @@
       "method": "new read-only capability snapshot primitive + smoke",
       "timestamp": "2026-05-02T05:22:35.653Z",
       "evidence": "Implemented delegation capability snapshot primitive/surface with deterministic recommendation codes and no dispatch authorization. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane.ts` - Added `evaluateDelegationLaneCapabilitySnapshot(...)` and related types. - Decision model: `ready | needs-evidence | blocked`. - Deterministic recommendation codes and structured blockers/evidence gaps. - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added tool `delegation_lane_capability_snapshot`. - Composes freshness signals from local runtime (`preloadDecision`, `dirtySignal`) and monitor/subagent inputs. - Enforces read-only/report-only contract (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). - Tests - `packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts`: decision coverage for ready/needs-evidence/blocked. - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: tool registration and read-only envelope contract. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 24 passed. - marker checks passed for core evaluator, surface wiring, and readiness tests."
+    },
+    {
+      "id": "VER-BUD-902",
+      "target": "TASK-BUD-546",
+      "target_type": "task",
+      "status": "passed",
+      "method": "delegation mix primitive + smoke + marker checks",
+      "timestamp": "2026-05-02T05:37:02.841Z",
+      "evidence": "Implemented read-only delegation diversity telemetry primitive `delegation_mix_score` using local session evidence. Changes: - `packages/pi-stack/extensions/session-analytics.ts` - Added parser `parseDelegationMixScore(records, lookbackHours, filesScanned)`. - Added classification buckets: `local | manual | simple-delegate | swarm`. - Added deterministic decision/recommendation codes: - `delegation-mix-ready-diverse` - `delegation-mix-needs-evidence-no-data` - `delegation-mix-needs-evidence-simple-delegate-missing` - `delegation-mix-needs-evidence-swarm-missing` - `delegation-mix-needs-evidence-low-diversity` - Added new tool `delegation_mix_score` (report-only/read-only) with `authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`. - Refactored shared session scan path via `collectSessionRecords(...)`. - `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts` - Added `hasDelegationMixScore` policy signal and wired it into observability calibration. - `packages/pi-stack/test/smoke/session-analytics.test.ts` - Added parser test for diverse mix -> ready decision. - Added tool test for read-only contract and deterministic `needs-evidence-swarm-missing` path. Validation: - `npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` => 31 passed. - marker checks passed for session-analytics/tool-hygiene/test anchors."
     }
   ]
 }

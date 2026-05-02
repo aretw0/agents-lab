@@ -65,6 +65,7 @@ export interface AgentsAsToolsCalibrationScore {
     hasCwdIsolationPath: boolean;
     hasDecisionPackets: boolean;
     hasToolHygieneSurface: boolean;
+    hasDelegationMixScore: boolean;
   };
   summary: string;
 }
@@ -223,6 +224,7 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   const hasCwdIsolationPath = tools.some((tool) => /\bcwd\b|working directory|isolat/i.test(`${tool.name} ${tool.description ?? ""}`));
   const hasDecisionPackets = names.has("board_decision_packet") || Array.from(names).some((name) => name.includes("decision_packet") || name.includes("focus_packet"));
   const hasToolHygieneSurface = names.has("tool_hygiene_scorecard");
+  const hasDelegationMixScore = names.has("delegation_mix_score");
 
   const governance = ratioScore([
     hasBudgetGuard,
@@ -237,7 +239,7 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
   const observability = ratioScore([
     hasDecisionPackets,
     hasToolHygieneSurface,
-    names.has("background_process_lifecycle_plan") || names.has("background_process_plan"),
+    hasDelegationMixScore || names.has("background_process_lifecycle_plan") || names.has("background_process_plan"),
   ]);
   const score = Math.round((governance * 0.45) + (boundedness * 0.35) + (observability * 0.2));
 
@@ -282,6 +284,7 @@ export function buildAgentsAsToolsCalibrationScore(input: { tools: ToolHygieneIn
       hasCwdIsolationPath,
       hasDecisionPackets,
       hasToolHygieneSurface,
+      hasDelegationMixScore,
     },
     summary: [
       "agents-as-tools-calibration:",

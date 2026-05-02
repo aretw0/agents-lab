@@ -10,6 +10,7 @@ import sessionAnalyticsExtension, {
   readJsonlLines,
   runQuery,
   parseGalvanizationCandidates,
+  parseDelegationMixScore,
   normalizeSessionAnalyticsToolParams,
 } from "../../extensions/session-analytics";
 
@@ -323,6 +324,66 @@ describe("session-analytics — galvanization discovery", () => {
     expect(top.pathway.safetyGates.length).toBeGreaterThan(0);
     expect(result.roadmap.baseline.tokens).toBeGreaterThan(0);
     expect(result.roadmap.mitigationPotential.tokensSaved).toBeGreaterThan(0);
+  });
+});
+
+describe("session-analytics — delegation mix score", () => {
+  it("classifica mix local/manual/simple-delegate/swarm e retorna decisão ready quando há diversidade", () => {
+    const records = [
+      { type: "message", timestamp: "2026-05-03T01:00:00Z", message: { role: "user", content: "seguir local-safe e checkpoint" } },
+      { type: "message", timestamp: "2026-05-03T01:01:00Z", message: { role: "user", content: "delegar para subagent com slice pequeno" } },
+      { type: "message", timestamp: "2026-05-03T01:02:00Z", message: { role: "user", content: "vou fazer manualmente a revisão" } },
+      { type: "tool_call", timestamp: "2026-05-03T01:03:00Z", toolName: "ant_colony" },
+      { type: "message", timestamp: "2026-05-03T01:04:00Z", message: { role: "assistant", content: "[COLONY_SIGNAL:COMPLETE]" } },
+    ];
+
+    const score = parseDelegationMixScore(records, 24, 1);
+    expect(score.decision).toBe("ready");
+    expect(score.recommendationCode).toBe("delegation-mix-ready-diverse");
+    expect(score.totals.diversityModes).toBeGreaterThanOrEqual(3);
+    expect(score.totals.simpleDelegate).toBeGreaterThan(0);
+    expect(score.totals.swarm).toBeGreaterThan(0);
+    expect(score.dispatchAllowed).toBe(false);
+    expect(score.authorization).toBe("none");
+  });
+
+  it("expõe tool delegation_mix_score em modo report-only/read-only", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-mix-tool-"));
+    const oldCwd = process.cwd();
+    let tools: Array<{ name?: string; execute?: (...args: any[]) => any }> = [];
+    try {
+      const key = toSessionWorkspaceKey(dir);
+      const sessionsDir = join(dir, ".sandbox", "pi-agent", "sessions", key);
+      mkdirSync(sessionsDir, { recursive: true });
+      writeFileSync(
+        join(sessionsDir, "mix.jsonl"),
+        [
+          JSON.stringify({ type: "message", timestamp: new Date().toISOString(), message: { role: "user", content: "local-safe micro-slice" } }),
+          JSON.stringify({ type: "message", timestamp: new Date().toISOString(), message: { role: "user", content: "delegar para subagent" } }),
+        ].join("\n") + "\n",
+        "utf8",
+      );
+
+      sessionAnalyticsExtension({
+        registerTool(tool: unknown) { tools.push(tool as { name?: string; execute?: (...args: any[]) => any }); },
+        registerCommand() {},
+      } as never);
+      process.chdir(dir);
+
+      const tool = tools.find((tool) => tool.name === "delegation_mix_score");
+      const output = tool?.execute?.("tc-delegation-mix-score", { lookback_hours: 24 }, undefined, undefined, { cwd: dir });
+
+      expect(output?.details?.mode).toBe("delegation-mix-score");
+      expect(output?.details?.decision).toBe("needs-evidence");
+      expect(output?.details?.recommendationCode).toBe("delegation-mix-needs-evidence-swarm-missing");
+      expect(output?.details?.dispatchAllowed).toBe(false);
+      expect(output?.details?.authorization).toBe("none");
+      expect(output?.details?.mutationAllowed).toBe(false);
+      expect(String(output?.content?.[0]?.text ?? "")).toContain("delegation-mix-score:");
+    } finally {
+      process.chdir(oldCwd);
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
