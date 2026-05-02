@@ -14675,6 +14675,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] evita drift acidental que quebraria observabilidade recém-adicionada.\n2026-05-02: smoke adiciona proteção para anchors do workflow de change discovery (job/artifact/PR upsert/full gate).",
       "verification": "VER-BUD-976"
+    },
+    {
+      "id": "TASK-BUD-632",
+      "description": "[P1] Adicionar `impact_label` no change discovery (none/docs-only/ci-only/code/ci+code/unknown) para leitura de 5s no smoke summary e PR comment.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml",
+        "packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`changes` job expõe output `impact_label` com fallback fail-open em base ausente.",
+        "Resumo no smoke inclui `impact_label` e notice para `ci+code`.",
+        "Smoke de workflow ancora presença do output `impact_label`."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] aumenta signal-to-noise de triagem sem alterar política de execução dos gates.\n2026-05-02: `impact_label` adicionado no change discovery + resumo smoke; sem alterar execução full gate.",
+      "verification": "VER-BUD-977"
     }
   ]
 }

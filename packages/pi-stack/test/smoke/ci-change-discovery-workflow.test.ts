@@ -14,6 +14,7 @@ describe("ci workflow change-discovery report-only loop", () => {
     expect(ciWorkflow).toContain("Change Discovery (report-only)");
     expect(ciWorkflow).toContain("name: ci-change-discovery");
     expect(ciWorkflow).toContain("path: .artifacts/ci-change-discovery");
+    expect(ciWorkflow).toContain("impact_label: ${{ steps.detect.outputs.impact_label }}");
     expect(ciWorkflow).toContain("<!-- ci-change-discovery-report -->");
     expect(ciWorkflow).toContain("Upsert comentário de change discovery no PR");
   });

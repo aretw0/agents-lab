@@ -78,6 +78,7 @@ jobs:
       ci_changes: ${{ steps.detect.outputs.ci_changes }}
       code_changes: ${{ steps.detect.outputs.code_changes }}
       docs_only: ${{ steps.detect.outputs.docs_only }}
+      impact_label: ${{ steps.detect.outputs.impact_label }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -119,6 +120,7 @@ jobs:
               echo "- ci_changes: \`true\`"
               echo "- code_changes: \`true\`"
               echo "- docs_only: \`false\`"
+              echo "- impact_label: \`unknown\`"
               echo
               echo "Fallback fail-open para manter gate completo." 
             } > "$SUMMARY_MD"
@@ -129,6 +131,7 @@ jobs:
             echo "ci_changes=true" >> "$GITHUB_OUTPUT"
             echo "code_changes=true" >> "$GITHUB_OUTPUT"
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "impact_label=unknown" >> "$GITHUB_OUTPUT"
 
             cat "$SUMMARY_MD" >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -164,12 +167,26 @@ jobs:
             fi
           fi
 
+          impact_label="mixed"
+          if [ "$CHANGED_COUNT" -eq 0 ]; then
+            impact_label="none"
+          elif [ "$docs_only" = "true" ]; then
+            impact_label="docs-only"
+          elif [ "$ci_changes" = "true" ] && [ "$code_changes" = "true" ]; then
+            impact_label="ci+code"
+          elif [ "$ci_changes" = "true" ]; then
+            impact_label="ci-only"
+          elif [ "$code_changes" = "true" ]; then
+            impact_label="code"
+          fi
+
           echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
           echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
           echo "changed_count=$CHANGED_COUNT" >> "$GITHUB_OUTPUT"
           echo "ci_changes=$ci_changes" >> "$GITHUB_OUTPUT"
           echo "code_changes=$code_changes" >> "$GITHUB_OUTPUT"
           echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+          echo "impact_label=$impact_label" >> "$GITHUB_OUTPUT"
 
           {
             echo "## Change discovery (report-only)"
@@ -180,6 +197,7 @@ jobs:
             echo "- ci_changes: \`$ci_changes\`"
             echo "- code_changes: \`$code_changes\`"
             echo "- docs_only: \`$docs_only\`"
+            echo "- impact_label: \`$impact_label\`"
             echo
             echo "### changed-files"
             if [ "$CHANGED_COUNT" -gt 0 ]; then
@@ -276,9 +294,12 @@ jobs:
 
       - name: Change discovery summary (report-only)
         run: |
-          echo "changes: base=${{ needs.changes.outputs.base_sha }} head=${{ needs.changes.outputs.head_sha }} count=${{ needs.changes.outputs.changed_count }} ci=${{ needs.changes.outputs.ci_changes }} code=${{ needs.changes.outputs.code_changes }} docs_only=${{ needs.changes.outputs.docs_only }}"
+          echo "changes: base=${{ needs.changes.outputs.base_sha }} head=${{ needs.changes.outputs.head_sha }} count=${{ needs.changes.outputs.changed_count }} ci=${{ needs.changes.outputs.ci_changes }} code=${{ needs.changes.outputs.code_changes }} docs_only=${{ needs.changes.outputs.docs_only }} impact=${{ needs.changes.outputs.impact_label }}"
           if [ "${{ needs.changes.outputs.docs_only }}" = "true" ]; then
             echo "::notice::docs-only change set detectado; mantendo full gate por política report-first."
+          fi
+          if [ "${{ needs.changes.outputs.impact_label }}" = "ci+code" ]; then
+            echo "::notice::impacto ci+code detectado: priorizar revisão de workflow + runtime path." 
           fi
 
       - name: Parity gate local↔CI (smoke + sovereignty strict)
