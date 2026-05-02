@@ -12482,6 +12482,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] melhorar throughput sem sacrificar governança exige fallback canônico e staleness gate.\n[provenance:human] source_task=TASK-BUD-525 reason=converter revisão de estratégia em fatia prática mensurável\n2026-05-02: implementado fluxo inicial de consumo fail-closed do warm pack com fingerprint canônico e perfil por lane.\n2026-05-02: fluxo warm-preload agora tem consumo fail-closed com fallback canônico e perfil scout dedicado.",
       "verification": "VER-BUD-875"
+    },
+    {
+      "id": "TASK-BUD-527",
+      "description": "Expor um tool read-only `context_preload_consume` no guardrails-core para consumo de fresh context pack com fallback canônico fail-closed.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-526"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna `decision=use-pack|fallback-canonical` e `staleReasons` sem dispatch.",
+        "Respeita perfis `control-plane-core|agent-worker-lean|swarm-scout-min`.",
+        "Smoke cobre caminho fresh e stale fallback."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] consumo como tool padroniza retomada fresh no runtime com fallback explícito e auditável.\n[provenance:human] source_task=TASK-BUD-526 reason=continuidade da cadência para reduzir releitura após compact e spawn"
     }
   ]
 }
