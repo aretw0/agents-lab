@@ -1025,6 +1025,26 @@ export function formatContextWatchStatusToolSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function formatContextWatchCompactStageStatusSummary(input: {
+	stage: string;
+	level: ContextWatchdogLevel;
+	checkpointPct: number;
+	compactPct: number;
+	reloadGate: string;
+	nextAction: string;
+}): string {
+	return [
+		"context-watch-compact-stage-status:",
+		`stage=${input.stage}`,
+		`level=${input.level}`,
+		`checkpoint=${Math.floor(Number(input.checkpointPct))}`,
+		`compact=${Math.floor(Number(input.compactPct))}`,
+		`reloadGate=${input.reloadGate}`,
+		`next=${input.nextAction.replace(/\s+/g, "_")}`,
+		"authorization=none",
+	].join(" ");
+}
+
 export function resolveContextWatchAdaptiveStatusSummary(input: {
 	level: ContextWatchdogLevel;
 	summary: string;
@@ -2065,6 +2085,55 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			return {
 				content: [{ type: "text", text: adaptiveSummary.summary }],
 				details: payload,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_watch_compact_stage_status",
+		label: "Context Watch Compact Stage Status",
+		description:
+			"Read-only compact-stage status with graceful-vs-force stage, reload gate, and deterministic next action.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const assessment = buildAssessment(ctx, config, thresholdOverrides);
+			lastAssessment = assessment;
+			const compactStage = resolveContextWatchCompactStage(assessment);
+			const reloadRequired = isReloadRequiredForSourceUpdate();
+			const preCompactReloadSignal = resolvePreCompactReloadSignal({
+				assessmentLevel: assessment.level,
+				reloadRequired,
+			});
+			const nextAction = preCompactReloadSignal.active
+				? (preCompactReloadSignal.hint ?? "run /reload and continue from handoff checkpoint")
+				: compactStage.shouldForceCompact
+					? "compact now and continue from checkpoint"
+					: compactStage.shouldGracefulStop
+						? "close current slice and checkpoint before compact threshold"
+						: "continue bounded work";
+			const summary = formatContextWatchCompactStageStatusSummary({
+				stage: compactStage.stage,
+				level: assessment.level,
+				checkpointPct: assessment.thresholds.checkpointPct,
+				compactPct: assessment.thresholds.compactPct,
+				reloadGate: preCompactReloadSignal.reason,
+				nextAction,
+			});
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					level: assessment.level,
+					percent: assessment.percent,
+					thresholds: assessment.thresholds,
+					compactStage,
+					preCompactReloadSignal,
+					nextAction,
+					effect: "none",
+					mode: "read-only-compact-stage",
+					authorization: "none",
+					dispatchAllowed: false,
+				},
 			};
 		},
 	});

@@ -103,6 +103,14 @@ A captura de ideias livres deve produzir proposal antes de task final:
 - governança hard ativa no control-plane (`intent`, `verification`, `no-auto-close`);
 - trilha de expansão: adapters externos (GitHub/Gitea/Markdown/Obsidian/SQLite) sem alterar semântica.
 
+### Superfícies operacionais de continuidade (read-only)
+
+Para continuidade sob pressão de contexto, a stack expõe sinais read-only de estágio e frescor:
+- `context_watch_freshness_status` (preload + dirty);
+- `context_watch_compact_stage_status` (estágio `normal|graceful-stop|force-compact`, reload gate e próximo passo determinístico).
+
+Essas superfícies mantêm `authorization=none` e `dispatchAllowed=false`, servindo como base de decisão humana/operador sem auto-dispatch.
+
 ## Próximos incrementos
 
 1. versionar formalmente o schema do contrato (`task/event/intent/evidence`);

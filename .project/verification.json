@@ -10293,6 +10293,15 @@
       "method": "reload-aware pre-compact gate + smoke + marker checks",
       "timestamp": "2026-05-02T04:54:38.814Z",
       "evidence": "Implemented reload-aware pre-compact signaling before final compact/auto-resume suppression. Changes: - `packages/pi-stack/extensions/context-watchdog-resume.ts` - Added `resolvePreCompactReloadSignal(...)` with deterministic reasons: - `reload-not-required` - `level-not-precompact` - `reload-required-checkpoint` - `reload-required-compact` - Reuses `describeAutoResumeDispatchHint(\"reload-required\")` so pre-compact and suppression hints stay consistent. - `packages/pi-stack/extensions/context-watchdog.ts` - Wired `resolvePreCompactReloadSignal` in runtime (`run`), status tool payload, and `/context-watch` command status line (`reloadGate=...`). - `context_watch_status.details` now includes `preCompactReloadSignal` (read-only visibility at checkpoint/near-compact). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added assertions for pre-compact reload signal behavior (ok/warn/checkpoint/compact). - Extended status tool assertion to include `preCompactReloadSignal`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 57 passed. - marker-checks passed for resume helper, runtime wiring, and smoke anchors."
+    },
+    {
+      "id": "VER-BUD-897",
+      "target": "TASK-BUD-553",
+      "target_type": "task",
+      "status": "passed",
+      "method": "new read-only tool + smoke + docs markers",
+      "timestamp": "2026-05-02T04:58:46.167Z",
+      "evidence": "Added read-only compact-stage status surface for operator visibility. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - Added formatter `formatContextWatchCompactStageStatusSummary(...)`. - Added tool `context_watch_compact_stage_status` returning: - stage (`normal-window|graceful-stop-window|force-compact-window`), - thresholds (`checkpointPct`, `compactPct`), - reload gate (`preCompactReloadSignal`), - deterministic `nextAction`. - Invariants: `authorization=none`, `dispatchAllowed=false`, `mode=read-only-compact-stage`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added tool test for non-git cwd/read-only contract. - Added model-aware threshold profile test (anthropic path). - Added formatter assertion for custom threshold output. - `docs/primitives/continuity-abstraction.md` - Documented `context_watch_compact_stage_status` in continuity read-only operational surfaces. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 59 passed. - marker checks passed for tool wiring, smoke anchors, and continuity doc anchors."
     }
   ]
 }

@@ -17,6 +17,7 @@ import contextWatchdogExtension, {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
+	formatContextWatchCompactStageStatusSummary,
 	resolveContextWatchAdaptiveStatusSummary,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
@@ -1341,6 +1342,80 @@ describe("context-watchdog", () => {
 			cooldownMs: 60_000,
 		});
 		expect(third.mode).toBe("full");
+	});
+
+	it("context_watch_compact_stage_status tool is read-only and reports stage in non-git cwd", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-compact-stage-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_compact_stage_status");
+			const result = await tool.execute(
+				"tc-context-watch-compact-stage-status",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 61 }),
+					model: { id: "gpt-5.3-codex", provider: "github-copilot" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect(result.content?.[0]?.text).toContain("context-watch-compact-stage-status:");
+			expect(result.content?.[0]?.text).toContain("authorization=none");
+			expect(result.details).toMatchObject({
+				mode: "read-only-compact-stage",
+				authorization: "none",
+				dispatchAllowed: false,
+				compactStage: {
+					stage: "graceful-stop-window",
+					shouldGracefulStop: true,
+					shouldForceCompact: false,
+				},
+				preCompactReloadSignal: {
+					active: false,
+					reason: "reload-not-required",
+				},
+			});
+			expect(formatContextWatchCompactStageStatusSummary({
+				stage: "graceful-stop-window",
+				level: "checkpoint",
+				checkpointPct: 60,
+				compactPct: 65,
+				reloadGate: "reload-required-checkpoint",
+				nextAction: "run /reload and continue from handoff checkpoint",
+			})).toContain("checkpoint=60 compact=65");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_compact_stage_status reflects model-aware threshold profile", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-compact-stage-thresholds-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_compact_stage_status");
+			const result = await tool.execute(
+				"tc-context-watch-compact-stage-thresholds",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 80 }),
+					model: { id: "claude-sonnet", provider: "anthropic" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect(result.details?.thresholds).toMatchObject({ checkpointPct: 78, compactPct: 82 });
+			expect(result.details?.compactStage).toMatchObject({ stage: "graceful-stop-window" });
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
 	});
 
 	it("context_watch_status tool emits compact content and structured details", async () => {

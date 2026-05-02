@@ -13041,7 +13041,7 @@
     {
       "id": "TASK-BUD-553",
       "description": "Criar packet/tool read-only `context_watch_compact_stage_status` com estágio atual e próximos gatilhos (graceful vs force).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-551"
@@ -13057,7 +13057,8 @@
         "Smoke cobre cenário não-git e cenário com thresholds customizados."
       ],
       "milestone": "context-graceful-stop-reload-2026-05",
-      "notes": "[rationale:risk-control] visibilidade explícita do estágio evita decisões implícitas sob pressão de contexto.\n[provenance:human] source_task=TASK-BUD-551 reason=terceiro bloco para observabilidade operacional da nova calibração."
+      "notes": "[rationale:risk-control] visibilidade explícita do estágio evita decisões implícitas sob pressão de contexto.\n[provenance:human] source_task=TASK-BUD-551 reason=terceiro bloco para observabilidade operacional da nova calibração.\nIniciado: adicionar tool read-only context_watch_compact_stage_status com estágio, reload gate e nextAction determinístico.\n2026-05-03: tool context_watch_compact_stage_status adicionada para expor estágio/graceful-vs-force + reload gate com contrato read-only.",
+      "verification": "VER-BUD-897"
     },
     {
       "id": "TASK-BUD-554",
