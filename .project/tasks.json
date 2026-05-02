@@ -14451,6 +14451,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] recorrência de cancelamentos por comando longo justifica hardening runtime para reduzir custo e interrupção.\n2026-05-02: iniciando implementação do guard hard-intent para scans shell longos (du amplo sem escopo/timeout), com smoke de regressão.\n2026-05-02: hard-intent implementado para bloquear `du` amplo sem escopo bounded; alternativa orientada por guardrails.",
       "verification": "VER-BUD-968"
+    },
+    {
+      "id": "TASK-BUD-620",
+      "description": "[P1] Expandir hard intent de scans longos: bloquear `find` amplo sem escopo bounded (ex.: root/cwd amplo) com guidance de escopo + limite.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Policy detecta `find` amplo sem escopo bounded e bloqueia com reason dedicada.",
+        "Casos com escopo explícito em diretórios pequenos continuam permitidos.",
+        "Smoke cobre block + allow."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] evita outro padrão recorrente de comando longo e preserva throughput local-safe.\n2026-05-02: hard-intent ampliado para `find` amplo sem limites; guard mantém alternativa bounded.",
+      "verification": "VER-BUD-969"
     }
   ]
 }

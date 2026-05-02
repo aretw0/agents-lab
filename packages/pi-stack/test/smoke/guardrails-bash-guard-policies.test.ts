@@ -4,6 +4,7 @@ import {
   detectHighRiskPiRootRecursiveScan,
   detectHighRiskSessionLogScan,
   detectHighRiskWideDuScan,
+  detectHighRiskWideFindScan,
   detectSourceMapBlastRadiusScan,
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
@@ -17,6 +18,7 @@ describe("guardrails-core bash guard policies", () => {
       "upstream-pi-package-mutation",
       "source-map-blast-radius-scan",
       "wide-du-scan",
+      "wide-find-scan",
       "pi-root-recursive-scan",
       "session-log-scan",
     ]);
@@ -39,6 +41,11 @@ describe("guardrails-core bash guard policies", () => {
     expect(detectHighRiskWideDuScan("du -sh .git .tmp")).toBe(false);
     expect(detectHighRiskWideDuScan("du -h --max-depth=1 .")).toBe(false);
 
+    expect(detectHighRiskWideFindScan("find . -type f")).toBe(true);
+    expect(detectHighRiskWideFindScan("find / -name '*.log'")).toBe(true);
+    expect(detectHighRiskWideFindScan("find .project -type f")).toBe(false);
+    expect(detectHighRiskWideFindScan("find . -maxdepth 2 -type f")).toBe(false);
+
     expect(detectSourceMapBlastRadiusScan('grep -RIn "sourceContent" node_modules')).toBe(true);
     expect(detectSourceMapBlastRadiusScan('grep -RIn --exclude="*.map" "sourceContent" node_modules')).toBe(false);
     expect(detectSourceMapBlastRadiusScan('rg -n "sourceContent" node_modules -g "!*.map"')).toBe(false);
@@ -53,6 +60,8 @@ describe("guardrails-core bash guard policies", () => {
     expect(evaluateBashGuardPolicies('grep -RIn "sourceContent" node_modules')?.id).toBe("source-map-blast-radius-scan");
     expect(evaluateBashGuardPolicies("du -sh .")?.id).toBe("wide-du-scan");
     expect(evaluateBashGuardPolicies("du -sh .git .tmp")).toBeUndefined();
+    expect(evaluateBashGuardPolicies("find . -type f")?.id).toBe("wide-find-scan");
+    expect(evaluateBashGuardPolicies("find .project -type f")).toBeUndefined();
     expect(evaluateBashGuardPolicies("rm -rf node_modules/@mariozechner/pi-coding-agent/dist")?.id).toBe("upstream-pi-package-mutation");
     expect(evaluateBashGuardPolicies("git status")).toBeUndefined();
   });

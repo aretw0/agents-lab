@@ -26,6 +26,8 @@ const SOURCE_MAP_RECURSIVE_SCAN_TOOL_PATTERN =
 const SOURCE_MAP_EXCLUDE_PATTERN = /--exclude(?:=|\s+)["']?\*\.map["']?|(?:--glob|-g)\s+["']?!\*\.map["']?/i;
 const DU_DEPTH_LIMIT_PATTERN = /--max-depth(?:=|\s+)\d+\b|(?:^|\s)-d\s+\d+\b/i;
 const DU_BROAD_TARGET_PATTERN = /^(?:\.|\.\/|\.\.|\.\.\/|\/|~|~\/|\*|\/\*|[a-z]:\/?|\/mnt\/[a-z]\/?)$/i;
+const FIND_DEPTH_LIMIT_PATTERN = /(?:^|\s)-maxdepth\s+\d+\b/i;
+const FIND_BROAD_TARGET_PATTERN = DU_BROAD_TARGET_PATTERN;
 
 export type BashGuardPolicy = {
   id: string;
@@ -123,6 +125,24 @@ function extractDuTargets(segment: string): string[] {
   return targets;
 }
 
+function extractFindTargets(segment: string): string[] {
+  const tokens = tokenizeShellSegment(segment);
+  const findIndex = tokens.findIndex((token) => /(?:^|\/)find$/i.test(token));
+  if (findIndex < 0) return [];
+
+  const targets: string[] = [];
+  for (const token of tokens.slice(findIndex + 1)) {
+    const normalized = token.replace(/^['"]|['"]$/g, "");
+    if (!normalized) continue;
+    if (normalized.startsWith("-")) break;
+    if (normalized === "!" || normalized === "(" || normalized === ")") break;
+    if (normalized === "||" || normalized === "&&" || normalized === "|" || normalized === ";") break;
+    targets.push(normalized);
+  }
+
+  return targets.length > 0 ? targets : ["."];
+}
+
 export function detectHighRiskWideDuScan(command: string): boolean {
   const normalized = command.toLowerCase().replace(/\\/g, "/");
   if (!/\bdu\b/i.test(normalized)) return false;
@@ -143,6 +163,28 @@ export function highRiskWideDuScanReason(): string {
   return [
     "Blocked by guardrails-core (wide_du_scan): broad du scan can run for a long time without adding proportional signal.",
     "Scope paths explicitly (e.g. .git/.tmp), add depth limits (--max-depth or -d), and run bash with an explicit timeout.",
+  ].join(" ");
+}
+
+export function detectHighRiskWideFindScan(command: string): boolean {
+  const normalized = command.toLowerCase().replace(/\\/g, "/");
+  if (!/\bfind\b/i.test(normalized)) return false;
+
+  const segments = normalized.split(/\|\||&&|;|\|/g);
+  for (const segment of segments) {
+    if (!/\bfind\b/i.test(segment)) continue;
+    if (FIND_DEPTH_LIMIT_PATTERN.test(segment)) continue;
+
+    const targets = extractFindTargets(segment);
+    if (targets.some((target) => FIND_BROAD_TARGET_PATTERN.test(target))) return true;
+  }
+  return false;
+}
+
+export function highRiskWideFindScanReason(): string {
+  return [
+    "Blocked by guardrails-core (wide_find_scan): broad find scan can run for a long time with low signal-to-cost.",
+    "Scope the target directory explicitly, prefer bounded roots, and add -maxdepth when possible before re-running.",
   ].join(" ");
 }
 
@@ -174,6 +216,13 @@ export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
     detect: detectHighRiskWideDuScan,
     reason: highRiskWideDuScanReason,
     auditKey: "guardrails-core.wide-du-scan-block",
+  },
+  {
+    id: "wide-find-scan",
+    when: "tool(bash)",
+    detect: detectHighRiskWideFindScan,
+    reason: highRiskWideFindScanReason,
+    auditKey: "guardrails-core.wide-find-scan-block",
   },
   {
     id: "pi-root-recursive-scan",
