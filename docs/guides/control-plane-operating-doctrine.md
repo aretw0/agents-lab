@@ -6,6 +6,18 @@ Este guia consolida as opiniões operacionais que devem orientar o agente quando
 
 O objetivo não é automatizar tudo. O objetivo é manter trabalho contínuo, organizado e auditado, parando apenas quando houver risco real, decisão estratégica ou escopo protegido.
 
+## Taxonomia de warning operacional (sessão vs monitor)
+
+Para reduzir ruído e evitar resposta errada ao steer humano:
+
+- **warning de sessão/conversa**: aparece no runtime da sessão (ex.: `context-watch`, guidance de final-turn, notify de compact/reload). É sinal de experiência operacional imediata e deve ser calibrado por utilidade/ruído.
+- **issue de monitor**: registro persistido em `.project/issues` por classifiers/monitores. É trilha histórica de qualidade/governança, não necessariamente ruído da sessão atual.
+
+Regra prática:
+1. se o steer humano apontar ruído **na conversa**, priorizar ajuste no runtime da sessão (dedupe/cooldown/severidade adequada);
+2. não tratar issue de monitor como prova de ruído da sessão sem evidência runtime;
+3. quando houver confusão entre os dois, registrar nota curta no board para manter a taxonomia explícita.
+
 ## Princípios
 
 1. **Local-first antes de remoto** — provar no PC local antes de GitHub Actions, remote runners, subagentes persistentes ou offload.

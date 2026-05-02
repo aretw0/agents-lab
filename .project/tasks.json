@@ -14835,6 +14835,130 @@
       "milestone": "throughput-decoupling-lane-2026-05",
       "notes": "Objetivo: throughput contínuo com governança, sem transformar autonomia em execução cega.\n2026-05-02: lote local-safe operacionalizado para continuidade com pouca interação, mantendo fail-closed em sinais de risco/escopo protegido.",
       "verification": "VER-BUD-991"
+    },
+    {
+      "id": "TASK-BUD-640",
+      "description": "[P1] Hardening recorrente: impedir path antigo que impede graceful-stop pré auto-compact e reduzir warning noise (alto ruído/baixa utilidade) perto do compact threshold.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-policy.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Quando entrar no final-turn window, manter conclusão da fatia atual sem inundar warning repetido.",
+        "Bloquear o old-path que reanuncia warning sem ação útil no mesmo contexto/turno.",
+        "Adicionar regressão cobrindo recorrência reportada (\"mais uma vez sem graceful-stop\").",
+        "Registrar evidência objetiva utilidade/ruído no handoff após validação."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Origem: steering humano explícito — 'não foi possível parar de forma graciosa' + 'inundamos de warning pra nada'. Escalar para hardening (recurring_failure_hardening_plan=block-old-path).\n2026-05-02: iniciado imediatamente após steer de recorrência; foco em dedupe de warning e fechamento gracioso no final-turn window sem bloquear tool calls.\nEscopo confirmado pelo usuário: tratar warnings exibidos na sessão de conversa (runtime/context-watch/tool guidance), não warnings persistidos por monitores em .project/issues.\nRationale registrado antes do close: foco em utilidade de sinal e redução de ruído operacional durante conversa.\n[rationale:risk-control] Recorrência confirmada por steer humano: warnings de sessão em final-turn estavam gerando ruído sem utilidade proporcional. Hardening reduz spam mantendo guidance fail-closed (uma orientação útil por janela, sem bloquear finalização da fatia atual).\nEscopo confirmado: ruído tratado para warnings de sessão/conversa (runtime context-watch), sem confundir com issues persistidos de monitor.",
+      "verification": "VER-BUD-992"
+    },
+    {
+      "id": "TASK-BUD-641",
+      "description": "[P1] Expor budget de ruído de sinais de sessão no context-watch (announcements/suppressions por janela) para facilitar calibração de warning sem perda de guidance.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-640"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_compact_stage_status` e/ou summary equivalente exibem contadores de sinais na janela (emitidos/suprimidos).",
+        "Inclui indicador explícito para suppress de final-turn por cooldown ativo.",
+        "Smoke/unit cobre payload determinístico desses campos."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Encadeamento pós-640: tornar utilidade/ruído observável em runtime da conversa.\nRationale: tornar utilidade/ruído mensurável para steering contínuo da cadência.\n[rationale:risk-control] Sem observabilidade explícita de ruído/supressão no runtime da conversa, fica difícil calibrar warning behavior e validar se o hardening realmente reduziu spam. O payload signalNoise permite ajuste com evidência, sem ampliar escopo operacional.\nObservabilidade de ruído de sessão adicionada sem alterar dispatch authorization (read-only).",
+      "verification": "VER-BUD-994"
+    },
+    {
+      "id": "TASK-BUD-642",
+      "description": "[P2] Documentar taxonomia operacional de warnings de sessão vs issues de monitor para reduzir ambiguidade durante steering humano.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-640"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/monitor-overrides.md"
+      ],
+      "acceptance_criteria": [
+        "Doctrine inclui seção curta distinguindo warnings runtime de conversa e issues persistidos por monitores.",
+        "Inclui regra de resposta: priorizar correção de ruído de sessão quando steer humano apontar experiência da conversa.",
+        "Marker-check cobre novos marcadores de taxonomia."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Encadeamento de clareza operacional após ajuste técnico do contexto-watch.\nIniciado para consolidar semântica de warning no fluxo de conversa vs monitor.\n[rationale:risk-control] O usuário reportou confusão explícita entre warnings de sessão e registros de monitor. Sem taxonomia documentada, o time corrige o alvo errado e perde cadência. A seção curta reduz ambiguidade operacional durante long-run.\nTaxonomia explícita adicionada para reduzir ruído e manter cadência de correção no runtime correto.",
+      "verification": "VER-BUD-995"
+    },
+    {
+      "id": "TASK-BUD-643",
+      "description": "[P2] Reforçar regressão de final-turn: garantir que guidance forçado não repita no mesmo state/window até cooldown ou mudança de estado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-640"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste cobre sequência com múltiplos `message_end` no mesmo level/action e valida supressão.",
+        "Teste cobre reemissão quando muda checkpoint->compact ou quando cooldown expira.",
+        "Falha reproduz old-path de spam caso lógica seja revertida."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Guarda anti-regressão explícita para recorrência reportada pelo usuário.\nRationale: proteger contrato de utilidade/ruído no boundary final-turn.\n[rationale:risk-control] A recorrência reportada impacta diretamente experiência operacional durante sessão; sem regressão dedicada o old-path de spam pode voltar silenciosamente. Teste dedicado reduz risco de drift em long-run e agentes efêmeros.\nTeste anti-regressão dedicado para o old-path de spam de warnings em final-turn window.",
+      "verification": "VER-BUD-993"
+    },
+    {
+      "id": "TASK-BUD-644",
+      "description": "[P2] Reduzir bloat de handoff por eventos repetidos de context-watch: dedupe de `context_watch_events` idênticos no mesmo window/estado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-640"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-handoff-events.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Eventos `message_end` idênticos não são reanexados sem mudança de estado relevante.",
+        "Handoff continua preservando trilha útil (mudança de nível/ação/razão).",
+        "Teste cobre recorrência de eventos duplicados em janela curta."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Encadeamento para reduzir churn em handoff e melhorar relação sinal/ruído."
+    },
+    {
+      "id": "TASK-BUD-645",
+      "description": "[P2] Expor resumo compacto de budget de warning no comando `/context-watch status` para leitura humana rápida durante sessões longas.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-641"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Comando `/context-watch status` inclui linha curta com `noise=<emitidos>/<max> suppressed=<n>`.",
+        "Não altera dispatch/autorização (somente observabilidade).",
+        "Teste smoke valida presença da linha em modo read-only."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado."
     }
   ]
 }

@@ -277,6 +277,67 @@ function levelMeetsSteeringThreshold(
 	return steeringLevelRank(level) >= steeringLevelRank(threshold);
 }
 
+export type FinalTurnAnnouncementDispatchReason =
+	| "not-final-turn-window"
+	| "first-window-signal"
+	| "state-changed"
+	| "cooldown-elapsed"
+	| "cooldown-active";
+
+export type FinalTurnAnnouncementDispatch = {
+	force: boolean;
+	suppressed: boolean;
+	reason: FinalTurnAnnouncementDispatchReason;
+};
+
+export function resolveFinalTurnAnnouncementDispatch(input: {
+	reason: ContextWatchHandoffReason;
+	finalTurnCloseWindow: boolean;
+	nowMs: number;
+	cooldownMs: number;
+	assessmentLevel: ContextWatchdogLevel;
+	assessmentAction: string;
+	lastSteeringSignal?: {
+		atIso: string;
+		reason: ContextWatchHandoffReason;
+		level: ContextWatchdogLevel;
+		action: string;
+	} | null;
+}): FinalTurnAnnouncementDispatch {
+	if (input.reason !== "message_end" || !input.finalTurnCloseWindow) {
+		return { force: false, suppressed: false, reason: "not-final-turn-window" };
+	}
+
+	const previous = input.lastSteeringSignal;
+	if (!previous) {
+		return { force: true, suppressed: false, reason: "first-window-signal" };
+	}
+	if (
+		previous.reason !== "message_end"
+		|| previous.level !== input.assessmentLevel
+		|| previous.action !== input.assessmentAction
+	) {
+		return { force: true, suppressed: false, reason: "state-changed" };
+	}
+
+	const nowMs = Math.max(0, Math.floor(Number(input.nowMs ?? 0)));
+	const cooldownMs = Math.max(0, Math.floor(Number(input.cooldownMs ?? 0)));
+	if (cooldownMs <= 0) {
+		return { force: false, suppressed: true, reason: "cooldown-active" };
+	}
+
+	const previousAtMs = Date.parse(previous.atIso);
+	if (!Number.isFinite(previousAtMs)) {
+		return { force: true, suppressed: false, reason: "state-changed" };
+	}
+
+	if ((nowMs - previousAtMs) >= cooldownMs) {
+		return { force: true, suppressed: false, reason: "cooldown-elapsed" };
+	}
+
+	return { force: false, suppressed: true, reason: "cooldown-active" };
+}
+
 export function resolveContextWatchSteeringDispatch(input: {
 	notifyEnabled?: boolean;
 	userNotifyEnabled?: boolean;
@@ -1545,6 +1606,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAntiParalysisNotifyAt = 0;
 	let announceWindowStartAt = 0;
 	let announceCountInWindow = 0;
+	let finalTurnSuppressionCountInWindow = 0;
 	let lastDeterministicStopSignalAt = 0;
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
@@ -1563,8 +1625,24 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		if (announceWindowStartAt <= 0 || (nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) {
 			announceWindowStartAt = nowMs;
 			announceCountInWindow = 0;
+			finalTurnSuppressionCountInWindow = 0;
 		}
 		announceCountInWindow += 1;
+	};
+
+	const markFinalTurnSuppression = (nowMs: number): void => {
+		if (announceWindowStartAt <= 0 || (nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) {
+			announceWindowStartAt = nowMs;
+			announceCountInWindow = 0;
+			finalTurnSuppressionCountInWindow = 0;
+		}
+		finalTurnSuppressionCountInWindow += 1;
+	};
+
+	const getFinalTurnSuppressionsInWindow = (nowMs: number): number => {
+		if (announceWindowStartAt <= 0) return 0;
+		if ((nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) return 0;
+		return finalTurnSuppressionCountInWindow;
 	};
 
 	const isReloadRequiredForSourceUpdate = (): boolean => {
@@ -1955,7 +2033,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const compactHeadroomPct = Math.max(0, assessment.thresholds.compactPct - assessment.percent);
 		const finalTurnCloseWindow = assessment.level === "compact"
 			|| (assessment.level === "checkpoint" && compactHeadroomPct <= 2);
-		const forceFinalTurnAnnouncement = reason === "message_end" && finalTurnCloseWindow;
+		const finalTurnDispatch = resolveFinalTurnAnnouncementDispatch({
+			reason,
+			finalTurnCloseWindow,
+			nowMs: now,
+			cooldownMs: config.cooldownMs,
+			assessmentLevel: assessment.level,
+			assessmentAction: assessment.action,
+			lastSteeringSignal,
+		});
+		const forceFinalTurnAnnouncement = finalTurnDispatch.force;
+		if (finalTurnDispatch.suppressed) {
+			markFinalTurnSuppression(now);
+		}
 		const steeringDispatch = resolveContextWatchSteeringDispatch({
 			userNotifyEnabled: config.notify,
 			assessmentLevel: assessment.level,
@@ -2036,10 +2126,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				finalTurnCloseWindow,
 				compactHeadroomPct,
 				forceFinalTurnAnnouncement,
+				finalTurnAnnouncementSuppressed: finalTurnDispatch.suppressed,
+				finalTurnAnnouncementReason: finalTurnDispatch.reason,
 			},
 		);
 		if (steeringDispatch.shouldNotify) {
-			ctx.ui.notify(lines.join("\n"), assessment.severity);
+			const steeringSeverity = forceFinalTurnAnnouncement ? "info" : assessment.severity;
+			ctx.ui.notify(lines.join("\n"), steeringSeverity);
 		}
 	};
 
@@ -2208,6 +2301,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		lastAntiParalysisNotifyAt = 0;
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
+		finalTurnSuppressionCountInWindow = 0;
 		lastDeterministicStopSignalAt = 0;
 		run(ctx, "session_start");
 	});
@@ -2259,6 +2353,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
 			const compactStage = resolveContextWatchCompactStage(assessment);
+			const signalNoise = {
+				windowMs: SIGNAL_NOISE_WINDOW_MS,
+				announcementsInWindow: getAnnouncementsInWindow(nowMs),
+				maxAnnouncementsPerWindow: SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				finalTurnSuppressionsInWindow: getFinalTurnSuppressionsInWindow(nowMs),
+				excessive: resolveContextWatchSignalNoiseExcessive(
+					getAnnouncementsInWindow(nowMs),
+					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				),
+			};
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
@@ -2296,6 +2400,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorAction,
 				operatingCadence,
 				compactStage,
+				signalNoise,
 				preCompactReloadSignal,
 				dirtySignal: freshness.dirtySignal,
 				preloadDecision: freshness.preloadDecision,
@@ -2318,7 +2423,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
+			const nowMs = Date.now();
 			const compactStage = resolveContextWatchCompactStage(assessment);
+			const signalNoise = {
+				windowMs: SIGNAL_NOISE_WINDOW_MS,
+				announcementsInWindow: getAnnouncementsInWindow(nowMs),
+				maxAnnouncementsPerWindow: SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				finalTurnSuppressionsInWindow: getFinalTurnSuppressionsInWindow(nowMs),
+				excessive: resolveContextWatchSignalNoiseExcessive(
+					getAnnouncementsInWindow(nowMs),
+					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+				),
+			};
 			const reloadRequired = isReloadRequiredForSourceUpdate();
 			const preCompactReloadSignal = resolvePreCompactReloadSignal({
 				assessmentLevel: assessment.level,
@@ -2347,6 +2463,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					percent: assessment.percent,
 					thresholds: assessment.thresholds,
 					compactStage,
+					signalNoise,
 					preCompactReloadSignal,
 					nextAction,
 					effect: "none",
@@ -2994,6 +3111,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				lastAntiParalysisNotifyAt = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
+				finalTurnSuppressionCountInWindow = 0;
 				lastDeterministicStopSignalAt = 0;
 				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
 				ctx.ui.setStatus?.("context-watch-operator", "[ctx-op] reset");

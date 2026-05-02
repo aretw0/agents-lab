@@ -54,6 +54,7 @@ import contextWatchdogExtension, {
 	resolveContextWatchSignalNoiseExcessive,
 	shouldEmitDeterministicStopSignal,
 	resolveContextWatchSteeringDispatch,
+	resolveFinalTurnAnnouncementDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
 	resolvePreCompactCalmCloseSignal,
 	resolveProgressPreservationSignal,
@@ -1013,6 +1014,72 @@ describe("context-watchdog", () => {
 		expect(legacyWarnMode.delivery).toBe("fallback-status");
 	});
 
+	it("suppresses repeated forced final-turn announcements within cooldown", () => {
+		const nowMs = Date.parse("2026-05-02T22:58:00.000Z");
+		const repeated = resolveFinalTurnAnnouncementDispatch({
+			reason: "message_end",
+			finalTurnCloseWindow: true,
+			nowMs,
+			cooldownMs: 600_000,
+			assessmentLevel: "checkpoint",
+			assessmentAction: "write-checkpoint",
+			lastSteeringSignal: {
+				atIso: new Date(nowMs - 1_000).toISOString(),
+				reason: "message_end",
+				level: "checkpoint",
+				action: "write-checkpoint",
+			},
+		});
+		expect(repeated.force).toBe(false);
+		expect(repeated.suppressed).toBe(true);
+		expect(repeated.reason).toBe("cooldown-active");
+
+		const repeatedDispatch = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: true,
+			assessmentLevel: "checkpoint",
+			lastAnnouncedLevel: "checkpoint",
+			elapsedMs: 1_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+			forceFinalTurnAnnouncement: repeated.force,
+		});
+		expect(repeatedDispatch.shouldSignal).toBe(false);
+
+		const levelChanged = resolveFinalTurnAnnouncementDispatch({
+			reason: "message_end",
+			finalTurnCloseWindow: true,
+			nowMs,
+			cooldownMs: 600_000,
+			assessmentLevel: "compact",
+			assessmentAction: "compact-now",
+			lastSteeringSignal: {
+				atIso: new Date(nowMs - 1_000).toISOString(),
+				reason: "message_end",
+				level: "checkpoint",
+				action: "write-checkpoint",
+			},
+		});
+		expect(levelChanged.force).toBe(true);
+		expect(levelChanged.reason).toBe("state-changed");
+
+		const cooldownElapsed = resolveFinalTurnAnnouncementDispatch({
+			reason: "message_end",
+			finalTurnCloseWindow: true,
+			nowMs,
+			cooldownMs: 1_000,
+			assessmentLevel: "checkpoint",
+			assessmentAction: "write-checkpoint",
+			lastSteeringSignal: {
+				atIso: new Date(nowMs - 5_000).toISOString(),
+				reason: "message_end",
+				level: "checkpoint",
+				action: "write-checkpoint",
+			},
+		});
+		expect(cooldownElapsed.force).toBe(true);
+		expect(cooldownElapsed.reason).toBe("cooldown-elapsed");
+	});
+
 	it("emits operator signal for manual intervention/reload steering", () => {
 		const none = resolveContextWatchOperatorSignal({
 			reloadRequired: false,
@@ -1418,6 +1485,13 @@ describe("context-watchdog", () => {
 				mode: "read-only-compact-stage",
 				authorization: "none",
 				dispatchAllowed: false,
+				signalNoise: {
+					windowMs: 600_000,
+					announcementsInWindow: 0,
+					maxAnnouncementsPerWindow: 4,
+					finalTurnSuppressionsInWindow: 0,
+					excessive: false,
+				},
 				compactStage: {
 					stage: "graceful-stop-window",
 					shouldGracefulStop: true,
@@ -1499,6 +1573,13 @@ describe("context-watchdog", () => {
 				preCompactReloadSignal: {
 					active: false,
 					reason: "reload-not-required",
+				},
+				signalNoise: {
+					windowMs: 600_000,
+					announcementsInWindow: 0,
+					maxAnnouncementsPerWindow: 4,
+					finalTurnSuppressionsInWindow: 0,
+					excessive: false,
 				},
 				dirtySignal: "unknown",
 				preloadDecision: "fallback-canonical",

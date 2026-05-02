@@ -11148,6 +11148,42 @@
       "method": "inspection",
       "timestamp": "2026-05-02T22:55:44.948Z",
       "evidence": "Runbook de lote local-safe 3–5 fatias adicionado em `docs/research/control-plane-decoupling-lane-2026-05.md` com preflight, ordem recomendada, stop contracts (`protected|risk|reload-required|validation-failed-or-unknown|no-eligible-local-safe-successor`), rollback por fatia e template de checkpoint curto. Doctrine atualizada para referenciar o runbook e reforçar parada imediata em condições hard-intent. Validação: marker-check lane 9/9 e doctrine 3/3."
+    },
+    {
+      "id": "VER-BUD-992",
+      "target": "TASK-BUD-640",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T23:10:12.861Z",
+      "evidence": "Hardening aplicado em `packages/pi-stack/extensions/context-watchdog.ts`: novo `resolveFinalTurnAnnouncementDispatch` bloqueia reanúncio de final-turn no mesmo contexto (`message_end` + mesmo level/action) enquanto cooldown estiver ativo; só reanuncia em mudança de estado ou cooldown vencido. Emissão de steering forçada de final-turn agora usa severidade `info` (reduz warning noise durante conversa) e adiciona telemetria de suppress reason (`finalTurnAnnouncementSuppressed`/`finalTurnAnnouncementReason`). Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` cobrindo recorrência reportada: suppress dentro do cooldown + reanúncio por state-change/cooldown-elapsed. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (64 passed)."
+    },
+    {
+      "id": "VER-BUD-993",
+      "target": "TASK-BUD-643",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T23:11:14.060Z",
+      "evidence": "Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` (`suppresses repeated forced final-turn announcements within cooldown`). Cobre: (1) múltiplos `message_end` com mesmo level/action suprimidos por cooldown (`cooldown-active`), (2) reemissão por mudança de estado (`state-changed` checkpoint->compact), (3) reemissão com cooldown vencido (`cooldown-elapsed`). Também valida integração com `resolveContextWatchSteeringDispatch` para garantir `shouldSignal=false` quando force final-turn está suprimido."
+    },
+    {
+      "id": "VER-BUD-994",
+      "target": "TASK-BUD-641",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T23:18:03.698Z",
+      "evidence": "`context_watch_status` e `context_watch_compact_stage_status` agora expõem `signalNoise` em `details` com: `windowMs`, `announcementsInWindow`, `maxAnnouncementsPerWindow`, `finalTurnSuppressionsInWindow`, `excessive`. Runtime atualiza `finalTurnSuppressionCountInWindow` quando o guidance forçado de final-turn é suprimido por cooldown ativo, mantendo telemetria observável de utilidade/ruído de sessão. Reset/session_start também limpam o contador. Cobertura: smoke atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` validando payload `signalNoise` nos dois tools. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (64 passed)."
+    },
+    {
+      "id": "VER-BUD-995",
+      "target": "TASK-BUD-642",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T23:20:24.667Z",
+      "evidence": "Documentação atualizada para distinguir warnings de sessão e issues de monitor: (1) `docs/guides/control-plane-operating-doctrine.md` ganhou seção `Taxonomia de warning operacional (sessão vs monitor)` com regra de priorização quando steer humano fala da conversa; (2) `docs/guides/monitor-overrides.md` ganhou seção `Taxonomia rápida: warning de sessão vs issue de monitor` para evitar diagnóstico no alvo errado. Validação por marker-check: doctrine 3/3 e monitor-overrides 3/3."
     }
   ]
 }
