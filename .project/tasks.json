@@ -13946,6 +13946,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] medir maturidade evita throughput sem controle.\n2026-05-02: iniciando institucionalização do scorecard de maturidade (safety/calibration/throughput/simplicity) com thresholds go/hold e cadência por turn-boundary/checkpoint.\n2026-05-02: scorecard de maturidade institucionalizado com thresholds go/hold e checkpoint operacional registrado no handoff.",
       "verification": "VER-BUD-942"
+    },
+    {
+      "id": "TASK-BUD-594",
+      "description": "[P1] Operacionalizar scorecard de crescimento com primitive report-only (`growth_maturity_score_packet`) para decisão go/hold por boundary.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-growth-maturity-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts",
+        "docs/primitives/growth-maturity-score-packet.md"
+      ],
+      "acceptance_criteria": [
+        "Surface report-only retorna dimensões safety/calibration/throughput/simplicity + recommendationCode.",
+        "Fail-closed quando faltarem sinais mínimos (decision=needs-evidence).",
+        "Smoke test cobre invariantes read-only/no-dispatch."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] transformar scorecard em primitiva auditável evita decisões subjetivas de escala."
     }
   ]
 }
