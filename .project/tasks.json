@@ -13104,6 +13104,27 @@
       "milestone": "context-graceful-stop-reload-2026-05",
       "notes": "[rationale:risk-control] encerramento explícito evita deriva e garante aprendizado operacional auditável.\n[provenance:human] source_task=TASK-BUD-554 reason=bloco de fechamento para consolidar calibração e próximos passos.\nIniciado fechamento da wave: regressão Copilot 60/65 + runbook operacional final para contexto cheio com reload obrigatório.\n2026-05-03: wave encerrada com regressão Copilot e runbook final de incidente contexto+reload.",
       "verification": "VER-BUD-899"
+    },
+    {
+      "id": "TASK-BUD-556",
+      "description": "Aprimorar inferência de validation gate no local_continuity_audit para considerar arquivos da task (test/smoke/spec), reduzindo falso `validation-unknown` em lanes locais.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-545"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "deriveValidationKind considera description/acceptance_criteria e também `task.files`.",
+        "Tasks com arquivo `*.test.*`/`smoke` passam a mapear para `focal-test`.",
+        "Smoke focal da superfície unattended permanece verde."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] evitar falso negativo de validation gate melhora continuidade local-safe sem abrir escopo protegido.\n[provenance:human] source_task=TASK-BUD-545 reason=ajuste prévio necessário para overnight lane mais autônoma e menos frágil\n2026-05-03: hardening local continuity validation inference para tarefas com gate de teste já declarado em files.",
+      "verification": "VER-BUD-900"
     }
   ]
 }

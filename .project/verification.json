@@ -10320,6 +10320,15 @@
       "method": "copilot regression smoke + runbook closeout docs",
       "timestamp": "2026-05-02T05:06:06.121Z",
       "evidence": "Closed wave with Copilot-focused regression and final operational runbook. Changes: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added regression `keeps Copilot 60/65 calibration in graceful-stop then force-compact order`. - Asserts ordering and safety clamp behavior (`checkpoint=60`, compact final under provider hard-edge guard). - `docs/guides/openai-context-window-playbook.md` - tools list now includes `context_watch_compact_stage_status`. - Added final runbook section for `contexto cheio + reload obrigatório`: - consult stage status, - act by stage (`graceful-stop-window` vs `force-compact-window`), - consult auto-resume preview reload gate, - `/context-watch freshness` sanity check before resume. - Explicit fail-closed rule: reload-required does not auto-authorize auto-resume. - `docs/research/context-graceful-stop-reload-wave-2026-05.md` - Added execution results section summarizing `TASK-BUD-550..555` outcomes and clamp note (`error-1` headroom). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 60 passed. - marker checks passed for regression anchors and runbook/research closeout anchors."
+    },
+    {
+      "id": "VER-BUD-900",
+      "target": "TASK-BUD-556",
+      "target_type": "task",
+      "status": "passed",
+      "method": "validation-kind inference hardening + smoke",
+      "timestamp": "2026-05-02T05:17:14.838Z",
+      "evidence": "Updated local continuity validation inference to reduce false `validation-unknown` for local-safe tasks that already declare test files. Changes: - `packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts` - `deriveValidationKind` now evaluates `description + acceptance_criteria + task.files`. - Added file-pattern sensitivity for `test/smoke/.spec.` to classify as `focal-test`. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` => 10 passed. - marker-check passed for new inference anchors (`...files`, `.spec.`, `focal-test`)."
     }
   ]
 }

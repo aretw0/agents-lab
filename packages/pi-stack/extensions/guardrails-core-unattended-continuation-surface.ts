@@ -113,8 +113,15 @@ function findTask(tasksJson: unknown, taskId?: string): any | undefined {
 }
 
 function deriveValidationKind(task: any): { kind: NudgeFreeLoopValidationKind; focalGate?: string } {
-  const text = [task?.description, ...(Array.isArray(task?.acceptance_criteria) ? task.acceptance_criteria : [])].join("\n").toLowerCase();
-  if (text.includes("smoke") || text.includes("test")) return { kind: "focal-test", focalGate: "npm-run-smoke" };
+  const files = Array.isArray(task?.files) ? task.files.map((file: unknown) => String(file)) : [];
+  const text = [
+    task?.description,
+    ...(Array.isArray(task?.acceptance_criteria) ? task.acceptance_criteria : []),
+    ...files,
+  ].join("\n").toLowerCase();
+  if (text.includes("smoke") || text.includes("test") || text.includes(".spec.")) {
+    return { kind: "focal-test", focalGate: "npm-run-smoke" };
+  }
   if (text.includes("marker")) return { kind: "marker-check" };
   return { kind: "unknown" };
 }
