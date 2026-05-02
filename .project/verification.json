@@ -10707,6 +10707,15 @@
       "method": "maturity scorecard policy + checkpoint evidence",
       "timestamp": "2026-05-02T15:04:51.794Z",
       "evidence": "Institutionalized growth-maturity scorecard policy and cadence for safe scaling. Policy source: - `docs/guides/primitive-growth-sanity-plan.md` Delivered: - Score dimensions and thresholds: - Safety, Calibration, Throughput, Simplicity (0..100) - `>=85` can expand bounded experimentation - `70..84` maintain/optimize current pace - `<70` enforce stabilization hold - Explicit debt-budget hold rule (`growthHold=true` when budget exceeded). - Cadence defined per turn boundary/checkpoint with promote/defer registration. - Stop conditions for accelerated growth when calibration/safety degrade. Operational evidence: - `.project/handoff.json` updated via checkpoint for `TASK-BUD-593` with scorecard snapshot and go/hold next actions. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => passed (2/2)."
+    },
+    {
+      "id": "VER-BUD-943",
+      "target": "TASK-BUD-594",
+      "target_type": "task",
+      "status": "passed",
+      "method": "growth maturity score primitive + surface + smoke",
+      "timestamp": "2026-05-02T15:13:30.974Z",
+      "evidence": "Implemented report-only growth maturity score primitive for go/hold boundaries. Code: - `packages/pi-stack/extensions/guardrails-core-growth-maturity.ts` (new) - Added `evaluateGrowthMaturityScorePacket(...)` with dimensions safety/calibration/throughput/simplicity. - Deterministic decisions: `go | hold | needs-evidence`. - Recommendation codes: - `growth-maturity-go-expand-bounded` - `growth-maturity-hold-maintain` - `growth-maturity-hold-stabilize` - `growth-maturity-needs-evidence` - Fail-closed when any mandatory dimension is missing (`decision=needs-evidence`). - Invariants: `reviewMode=read-only`, `mutationAllowed=false`, `dispatchAllowed=false`, `authorization=none`. Surface wiring: - `packages/pi-stack/extensions/guardrails-core-growth-maturity-surface.ts` (new) - Tool: `growth_maturity_score_packet`. - `packages/pi-stack/extensions/guardrails-core.ts` - Registered `registerGuardrailsGrowthMaturitySurface(pi)`. - `packages/pi-stack/extensions/guardrails-core-exports.ts` - Re-exported `evaluateGrowthMaturityScorePacket`. Tests: - `packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts` (new) - Covers strong-go, fail-closed missing signals, hold on debt/blockers, and no-dispatch surface invariants. Docs: - `docs/primitives/growth-maturity-score-packet.md` (new) - `docs/primitives/README.md` updated with catalog entry. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 6 passed / 0 failed."
     }
   ]
 }

@@ -117,6 +117,7 @@ import { registerGuardrailsUnattendedContinuationSurface } from "./guardrails-co
 import { registerGuardrailsUnattendedRehearsalSurface } from "./guardrails-core-unattended-rehearsal-surface";
 import { registerGuardrailsValidationMethodSurface } from "./guardrails-core-validation-method-surface";
 import { registerGuardrailsToolHygieneSurface } from "./guardrails-core-tool-hygiene-surface";
+import { registerGuardrailsGrowthMaturitySurface } from "./guardrails-core-growth-maturity-surface";
 import { registerGuardrailsAgentSpawnReadinessSurface } from "./guardrails-core-agent-spawn-readiness-surface";
 import { registerGuardrailsOpsCalibrationSurface } from "./guardrails-core-ops-calibration-surface";
 import { registerGuardrailsShellSpoofingScoreSurface } from "./guardrails-core-shell-spoofing-score-surface";
@@ -3122,6 +3123,7 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsUnattendedRehearsalSurface(pi);
   registerGuardrailsValidationMethodSurface(pi);
   registerGuardrailsToolHygieneSurface(pi);
+  registerGuardrailsGrowthMaturitySurface(pi);
   registerGuardrailsAgentSpawnReadinessSurface(pi);
   registerGuardrailsOpsCalibrationSurface(pi);
   registerGuardrailsShellSpoofingScoreSurface(pi);

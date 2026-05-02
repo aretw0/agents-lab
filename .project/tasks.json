@@ -13950,7 +13950,7 @@
     {
       "id": "TASK-BUD-594",
       "description": "[P1] Operacionalizar scorecard de crescimento com primitive report-only (`growth_maturity_score_packet`) para decisão go/hold por boundary.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-growth-maturity-surface.ts",
@@ -13964,7 +13964,26 @@
         "Smoke test cobre invariantes read-only/no-dispatch."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] transformar scorecard em primitiva auditável evita decisões subjetivas de escala."
+      "notes": "[rationale:risk-control] transformar scorecard em primitiva auditável evita decisões subjetivas de escala.\n2026-05-02: primitive `growth_maturity_score_packet` entregue em modo report-only com fail-closed (`needs-evidence`) e pronto para boundaries go/hold auditáveis.",
+      "verification": "VER-BUD-943"
+    },
+    {
+      "id": "TASK-BUD-595",
+      "description": "[P1] Integrar growth maturity score no turn_boundary_decision_packet para emitir recomendação go/hold/needs-evidence no fechamento de turno.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "docs/primitives/growth-maturity-score-packet.md"
+      ],
+      "acceptance_criteria": [
+        "turn_boundary_decision_packet inclui snapshot opcional de growth maturity (score, decision, recommendationCode).",
+        "Quando sinais de score estiverem incompletos, boundary mantém fail-closed com guidance `needs-evidence`.",
+        "Smoke test cobre presença do snapshot e invariantes de no-dispatch."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] acoplar score ao boundary reduz decisões subjetivas de aceleração e preserva governança."
     }
   ]
 }

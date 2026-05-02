@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-05-02T15:06:12.624Z",
-  "context": "afk-handoff: decision=continue stock=5/7 blockers=none next=implementar primitive report-only de scorecard de maturidade (go/hold) para boundaries auditáveis.",
+  "timestamp": "2026-05-02T15:13:56.876Z",
+  "context": "afk-handoff: decision=continue stock=5/7 blockers=none next=wire do growth maturity score no turn_boundary_decision_packet para go/hold auditável por boundary.",
   "current_tasks": [
-    "TASK-BUD-594"
+    "TASK-BUD-595"
   ],
   "next_actions": [
-    "Adicionar surface growth_maturity_score_packet com recommendationCode e fail-closed.",
-    "Cobrir invariantes read-only/no-dispatch em smoke test.",
-    "Documentar contrato em docs/primitives/growth-maturity-score-packet.md."
+    "Integrar snapshot do score packet em turn_boundary_decision_packet.",
+    "Cobrir fail-closed needs-evidence em teste de boundary.",
+    "Manter invariantes read-only/no-dispatch no packet final."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-940",
-    "VER-BUD-941",
-    "VER-BUD-942"
+    "VER-BUD-943",
+    "guardrails-growth-maturity smoke verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-594",
+    "focus": "TASK-BUD-595",
     "canonical_links": [
-      "task:TASK-BUD-594",
-      "verification:VER-BUD-940"
+      "task:TASK-BUD-595",
+      "verification:VER-BUD-943"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T15:06:12.624Z",
+    "generatedAtIso": "2026-05-02T15:13:56.876Z",
     "level": "checkpoint",
-    "percent": 60,
+    "percent": 61,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T15:06:12.624Z",
+      "atIso": "2026-05-02T15:13:56.876Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 60,
+      "percent": 61,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
