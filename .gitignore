@@ -166,4 +166,6 @@ tmp/
 !.pi/agents/*.yaml
 !.project/
 !.project/**/*.json
+# Runtime watch snapshots under .project are local telemetry, not canonical board data.
+.project/runtime/
 packages/web-skills/skills/web-browser/scripts/package-lock.json
