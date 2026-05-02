@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-02T22:57:41.073Z",
+  "timestamp": "2026-05-02T22:58:26.709Z",
   "context": "Lane de desacoplamento foi organizada e executada em sequência local-safe: TASK-BUD-637 (contrato/KPIs), TASK-BUD-638 (relatório de maturidad [snip] de lote 3–5 fatias com stop contracts). [truncated:+39 chars]",
   "next_actions": [
     "Context-watch action: level=checkpoint 63% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
@@ -34,19 +34,6 @@
     "focus_task_status": "completed"
   },
   "context_watch_events": [
-    {
-      "atIso": "2026-05-02T22:56:04.384Z",
-      "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 31,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 68,
-        "compactPct": 72
-      },
-      "action": "checkpoint-refresh",
-      "recommendation": "ask-human"
-    },
     {
       "atIso": "2026-05-02T22:56:04.439Z",
       "reason": "message_end",
@@ -114,6 +101,84 @@
     },
     {
       "atIso": "2026-05-02T22:57:41.073Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:57:43.139Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:58:01.022Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:58:01.230Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:58:08.850Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:58:19.523Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:58:26.709Z",
       "reason": "message_end",
       "level": "checkpoint",
       "percent": 63,
