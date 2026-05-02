@@ -12786,6 +12786,27 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] remover duplicação reduz drift de contrato entre superfícies first-party de erro normalizado.\n[provenance:human] source_task=TASK-BUD-539 reason=hardening incremental após introdução de atalhos/status frescor\n2026-05-03: normalização de fallback git dirty consolidada em helper comum para evitar drift entre superfícies.",
       "verification": "VER-BUD-889"
+    },
+    {
+      "id": "TASK-BUD-541",
+      "description": "Unificar coleta de sinais de frescor (preload + git dirty) em helper compartilhado no context-watch para manter paridade entre status e continuation.",
+      "status": "completed",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-540"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_status` e `context_watch_continuation_readiness` usam helper único para `preload`, `gitDirty`, `dirtySignal`, `preloadDecision`.",
+        "Contrato externo permanece igual (summary estável e campos existentes em details).",
+        "Smoke context-watchdog permanece verde após refactor."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] helper compartilhado reduz drift entre superfícies e evita divergência de diagnóstico de frescor.\n[provenance:human] source_task=TASK-BUD-540 reason=continuação da cadência de hardening após reload e com foco em paridade determinística\n2026-05-03: sinais de frescor agora são coletados por helper único, reduzindo risco de drift entre status e continuation.",
+      "verification": "VER-BUD-890"
     }
   ]
 }

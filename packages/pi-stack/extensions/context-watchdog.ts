@@ -896,6 +896,28 @@ function readContextWatchGitDirtySignal(cwd: string): ContextWatchGitDirtySignal
 	}
 }
 
+type ContextWatchFreshnessSignals = {
+	preload: ReturnType<typeof consumeContextPreloadPack>;
+	preloadDecision: ReturnType<typeof consumeContextPreloadPack>["decision"];
+	gitDirty: ContextWatchGitDirtySignal;
+	dirtySignal: "clean" | "dirty" | "unknown";
+};
+
+function readContextWatchFreshnessSignals(
+	cwd: string,
+	profile: "control-plane-core" | "agent-worker-lean" | "swarm-scout-min" = "control-plane-core",
+): ContextWatchFreshnessSignals {
+	const preload = consumeContextPreloadPack(cwd, { profile });
+	const gitDirty = readContextWatchGitDirtySignal(cwd);
+	const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
+	return {
+		preload,
+		preloadDecision: preload.decision,
+		gitDirty,
+		dirtySignal,
+	};
+}
+
 export function formatContextWatchAutoResumePreviewSummary(input: {
 	focusTasks: string;
 	staleFocusCount: number;
@@ -1979,10 +2001,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
-			const gitDirty = readContextWatchGitDirtySignal(ctx.cwd);
-			const preload = consumeContextPreloadPack(ctx.cwd, {
-				profile: "control-plane-core",
-			});
+			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2002,7 +2021,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			});
 			lastStatusToolLevel = assessment.level;
 			lastStatusToolAt = nowMs;
-			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
 			const payload = {
 				...assessment,
 				summary: adaptiveSummary.summary,
@@ -2019,10 +2037,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStopHint,
 				operatorAction,
 				operatingCadence,
-				dirtySignal,
-				preloadDecision: preload.decision,
-				gitDirty,
-				preload,
+				dirtySignal: freshness.dirtySignal,
+				preloadDecision: freshness.preloadDecision,
+				gitDirty: freshness.gitDirty,
+				preload: freshness.preload,
 			};
 			return {
 				content: [{ type: "text", text: adaptiveSummary.summary }],
@@ -2127,11 +2145,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				staleFocusCount,
 				localAuditReasons,
 			});
-			const preload = consumeContextPreloadPack(ctx.cwd, {
-				profile: "control-plane-core",
-			});
-			const gitDirty = readContextWatchGitDirtySignal(ctx.cwd);
-			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
+			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
@@ -2140,7 +2154,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				protectedPaths,
 				staleFocusCount,
 			});
-			const summary = `${readinessSummary} preload=${preload.decision} dirty=${dirtySignal}`;
+			const summary = `${readinessSummary} preload=${freshness.preloadDecision} dirty=${freshness.dirtySignal}`;
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {
@@ -2155,8 +2169,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					protectedPaths,
 					recommendationCode: recommendation.recommendationCode,
 					nextAction: recommendation.nextAction,
-					preload,
-					gitDirty,
+					preload: freshness.preload,
+					gitDirty: freshness.gitDirty,
 					localContinuity: localAudit,
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",
