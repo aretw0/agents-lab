@@ -4,13 +4,15 @@
   "next_actions": [
     "Reavaliar prioridade pós-lote protegido antes de abrir novo escopo (ex.: TASK-BUD-468/480/521 [snip] rno à lane de throughput). [truncated:+7 chars]",
     "Se seguir em protected lane, manter microfatia bounded + evidência canônica por task.",
-    "Se voltar para throughput, usar sequência limpeza -> pesquisa -> escalabilidade com checkpoint por slice."
+    "Se voltar para throughput, usar sequência limpeza -> pesquisa -> escalabilidade com checkpoint por slice.",
+    "Utilidade/ruído CI: artifact de change discovery está útil (scan de 5s); ruído baixo em push (comentário PR não roda). Validar comentário <!-- ci-change-discovery-report --> no próximo run de pull_request."
   ],
   "blockers": [],
   "recent_validation": [
     "safe_marker_check docs/guides/control-plane-evolution-playbook.md (workload/evidence/release markers ok)",
     "safe_marker_check docs/guides/budget-governance.md (remoteRun + steer markers ok)",
-    "safe_marker_check docs/research/impeccable-style-influence-2026-04.md (10/10 ok)"
+    "safe_marker_check docs/research/impeccable-style-influence-2026-04.md (10/10 ok)",
+    "CI run 25261831074 reviewed: artifact ci-change-discovery published (changed-files.txt + summary.md, impact_label=code), PR comment step skipped as expected for push event"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-162",
