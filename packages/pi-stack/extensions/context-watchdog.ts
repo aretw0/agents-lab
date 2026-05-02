@@ -1339,9 +1339,18 @@ export function writeLocalSliceHandoffCheckpoint(
 			};
 		}
 		const handoffPath = writeHandoffJson(cwd, checkpoint);
+		const growthDecision = input.growthDecision;
+		const growthScore = Number.isFinite(input.growthScore) ? Math.max(0, Math.min(100, Math.round(Number(input.growthScore)))) : undefined;
+		const growthCompact = [
+			growthDecision ? `growthDecision=${growthDecision}` : undefined,
+			growthScore !== undefined ? `growthScore=${growthScore}` : undefined,
+		].filter(Boolean).join(" ");
 		return {
 			ok: true,
-			summary: `context-watch-checkpoint: ok=yes task=${taskId} path=.project/handoff.json`,
+			summary: [
+				`context-watch-checkpoint: ok=yes task=${taskId} path=.project/handoff.json`,
+				growthCompact,
+			].filter(Boolean).join(" "),
 			path: handoffPath,
 			checkpoint,
 			jsonChars: budget.jsonChars,
@@ -2771,6 +2780,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			])),
 			context_percent: Type.Optional(Type.Number()),
 			recommendation: Type.Optional(Type.String()),
+			growth_decision: Type.Optional(Type.Union([
+				Type.Literal("go"),
+				Type.Literal("hold"),
+				Type.Literal("needs-evidence"),
+			])),
+			growth_score: Type.Optional(Type.Number()),
+			growth_code: Type.Optional(Type.String()),
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const p = params as {
@@ -2783,6 +2799,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				context_level?: "ok" | "warn" | "checkpoint" | "compact";
 				context_percent?: number;
 				recommendation?: string;
+				growth_decision?: "go" | "hold" | "needs-evidence";
+				growth_score?: number;
+				growth_code?: string;
 			};
 			const result = writeLocalSliceHandoffCheckpoint(ctx.cwd, {
 				timestampIso: new Date().toISOString(),
@@ -2795,6 +2814,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				contextLevel: p.context_level,
 				contextPercent: p.context_percent,
 				recommendation: p.recommendation,
+				growthDecision: p.growth_decision,
+				growthScore: p.growth_score,
+				growthRecommendationCode: p.growth_code,
 			});
 			const reloadRequired = isReloadRequiredForSourceUpdate();
 			const details = {

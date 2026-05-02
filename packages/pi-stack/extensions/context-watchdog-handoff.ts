@@ -65,6 +65,9 @@ export type LocalSliceHandoffCheckpointInput = {
 	contextLevel?: "ok" | "warn" | "checkpoint" | "compact";
 	contextPercent?: number;
 	recommendation?: string;
+	growthDecision?: "go" | "hold" | "needs-evidence";
+	growthScore?: number;
+	growthRecommendationCode?: string;
 };
 
 export type LocalSliceHandoffBudgetAssessment = {
@@ -129,6 +132,20 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 	const recentCommits = compactHandoffList(input.commits, 2, 80);
 	const nextActions = compactHandoffList(input.nextActions, 3, 120);
 	const blockers = compactHandoffList(input.blockers, 3, 100);
+	const growthDecision = input.growthDecision === "go" || input.growthDecision === "hold" || input.growthDecision === "needs-evidence"
+		? input.growthDecision
+		: undefined;
+	const growthScore = Number.isFinite(input.growthScore) ? Math.max(0, Math.min(100, Math.round(Number(input.growthScore)))) : undefined;
+	const growthRecommendationCode = typeof input.growthRecommendationCode === "string" && input.growthRecommendationCode.trim().length > 0
+		? truncateForPrompt(input.growthRecommendationCode, 80)
+		: undefined;
+	const growthSnapshot = growthDecision || growthScore !== undefined || growthRecommendationCode
+		? {
+			...(growthDecision ? { decision: growthDecision } : {}),
+			...(growthScore !== undefined ? { score: growthScore } : {}),
+			...(growthRecommendationCode ? { recommendationCode: growthRecommendationCode } : {}),
+		}
+		: undefined;
 	const canonicalLinks = buildLocalSliceCanonicalLinks({
 		taskId: input.taskId,
 		context: input.context,
@@ -155,6 +172,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			...(contextPercent !== undefined ? { percent: contextPercent } : {}),
 			action: contextLevel === "ok" || contextLevel === "warn" ? "continue" : "checkpoint-refresh",
 			recommendation: truncateForPrompt(input.recommendation ?? "Progress saved; continue bounded local hardening.", 120),
+			...(growthSnapshot ? { growth_maturity: growthSnapshot } : {}),
 		},
 		context_watch_events: [{
 			atIso: timestamp,
@@ -164,6 +182,7 @@ export function buildLocalSliceHandoffCheckpoint(input: LocalSliceHandoffCheckpo
 			thresholds: DEFAULT_CONTEXT_WATCH_THRESHOLDS,
 			action: "checkpoint-refresh",
 			recommendation: truncateForPrompt(input.recommendation ?? "Local slice checkpoint saved.", 120),
+			...(growthSnapshot ? { growth_maturity: growthSnapshot } : {}),
 		}],
 	};
 	return trimSliceMemoryForBudget(checkpoint);

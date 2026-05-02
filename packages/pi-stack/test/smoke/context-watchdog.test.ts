@@ -1215,6 +1215,28 @@ describe("context-watchdog", () => {
 		]));
 	});
 
+	it("embeds growth maturity snapshot in local slice checkpoint when provided", () => {
+		const checkpoint = buildLocalSliceHandoffCheckpoint({
+			timestampIso: "2026-04-30T00:22:00.000Z",
+			taskId: "TASK-BUD-225",
+			context: "checkpoint with growth maturity snapshot",
+			growthDecision: "hold",
+			growthScore: 78,
+			growthRecommendationCode: "growth-maturity-hold-maintain",
+		}) as any;
+
+		expect(checkpoint.context_watch?.growth_maturity).toMatchObject({
+			decision: "hold",
+			score: 78,
+			recommendationCode: "growth-maturity-hold-maintain",
+		});
+		expect(checkpoint.context_watch_events?.[0]?.growth_maturity).toMatchObject({
+			decision: "hold",
+			score: 78,
+			recommendationCode: "growth-maturity-hold-maintain",
+		});
+	});
+
 	it("keeps compact local slice handoff checkpoints within budget", () => {
 		const noisy = "payload ".repeat(200);
 		const checkpoint = buildLocalSliceHandoffCheckpoint({
@@ -2165,6 +2187,39 @@ describe("context-watchdog", () => {
 			expect(result.details?.reloadRequired).toBe(false);
 			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
 			expect(written.current_tasks).toEqual(["TASK-BUD-234"]);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_checkpoint persists optional growth maturity snapshot and compact summary markers", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-growth-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_checkpoint");
+			const result = await tool.execute(
+				"tc-context-watch-checkpoint-growth",
+				{
+					task_id: "TASK-BUD-299",
+					context: "checkpoint with growth markers",
+					growth_decision: "go",
+					growth_score: 88,
+					growth_code: "growth-maturity-go-expand-bounded",
+				},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+			expect(result.content?.[0]?.text).toContain("context-watch-checkpoint: ok=yes task=TASK-BUD-299 path=.project/handoff.json");
+			expect(result.content?.[0]?.text).toContain("growthDecision=go");
+			expect(result.content?.[0]?.text).toContain("growthScore=88");
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as any;
+			expect(written.context_watch?.growth_maturity).toMatchObject({
+				decision: "go",
+				score: 88,
+				recommendationCode: "growth-maturity-go-expand-bounded",
+			});
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

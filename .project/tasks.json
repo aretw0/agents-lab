@@ -14046,7 +14046,7 @@
     {
       "id": "TASK-BUD-599",
       "description": "[P1] Propagar snapshot de growth maturity para `context_watch_checkpoint` (campo compacto growthDecision/growthScore) para continuidade auditável entre turnos.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -14059,7 +14059,8 @@
         "Smoke test valida persistência e invariantes no-dispatch."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] carregar score de maturidade no handoff reduz perda de contexto e evita aceleração sem evidência ao retomar."
+      "notes": "[rationale:risk-control] carregar score de maturidade no handoff reduz perda de contexto e evita aceleração sem evidência ao retomar.\n2026-05-02: `context_watch_checkpoint` agora carrega growthDecision/growthScore opcional no handoff e no summary compacto para retomada auditável entre turnos.",
+      "verification": "VER-BUD-948"
     }
   ]
 }
