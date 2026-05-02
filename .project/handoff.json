@@ -1,38 +1,38 @@
 {
-  "timestamp": "2026-05-02T14:54:46.133Z",
-  "context": "afk-handoff: decision=checkpoint stock=4/7 blockers=none next=decidir próximo canário protegido (ou voltar lane local-safe) após 1-run exitoso em GitHub Actions.",
+  "timestamp": "2026-05-02T14:58:13.541Z",
+  "context": "afk-handoff: decision=defer stock=4/7 blockers=quality-bar-not-met-v0.8.0 next=priorizar capacidade/qualidade avançada antes de qualquer release.",
   "current_tasks": [
-    "TASK-BUD-134"
+    "TASK-BUD-136"
   ],
   "next_actions": [
-    "Se continuar protected: definir canário #2 explícito (ex.: CI workflow_dispatch) com nova decisão humana.",
-    "Se voltar local-safe: semear próxima fatia não protegida para manter throughput.",
-    "Manter regra: 1 fatia protected por decisão humana, sem auto-dispatch."
+    "Definir barra objetiva de qualidade v0.8.0 (capability matrix + gates).",
+    "Comparar lacunas frente a referências avançadas e priorizar fatias locais.",
+    "Só retomar release task após evidências de prontidão."
   ],
-  "blockers": [],
+  "blockers": [
+    "quality-bar-not-met-v0.8.0"
+  ],
   "recent_validation": [
-    "VER-BUD-939",
-    "run=25254616551 conclusion=success event=workflow_dispatch",
-    "post-canary decision=defer expansion automática"
+    "publish canary run 25254616551 terminou com publish path skipped (sem tag semver)",
+    "diretriz do operador: não publicar v0.8.0 ainda"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-134",
+    "focus": "TASK-BUD-136",
     "canonical_links": [
-      "task:TASK-BUD-134",
-      "verification:VER-BUD-939",
+      "task:TASK-BUD-136",
       "commit:25254616551"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T14:54:46.133Z",
+    "generatedAtIso": "2026-05-02T14:58:13.541Z",
     "level": "checkpoint",
     "percent": 58,
     "action": "checkpoint-refresh",
-    "recommendation": "checkpoint-and-ask-human"
+    "recommendation": "defer-release-focus-quality"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T14:54:46.133Z",
+      "atIso": "2026-05-02T14:58:13.541Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 58,
@@ -42,7 +42,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "checkpoint-and-ask-human"
+      "recommendation": "defer-release-focus-quality"
     }
   ]
 }
