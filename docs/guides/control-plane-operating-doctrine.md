@@ -397,6 +397,33 @@ Quando o foco termina e não há canário remoto autorizado, priorize:
 
 Remote/offload só vem depois de scorecard local verde e intenção explícita do operador.
 
+### Contrato hard-intent para auto-advance da night lane
+
+A continuidade entre tasks local-safe não deve depender de “soft intent” implícito. O contrato runtime da lane noturna é:
+
+1. quando o foco do handoff termina (`focus-complete`), a seleção pode auto-avançar para a próxima task elegível da mesma lane/milestone;
+2. o auto-advance é **fail-closed**;
+3. não há auto-advance quando qualquer bloqueio crítico aparecer.
+
+Bloqueios críticos mínimos:
+- `protected` (task sucessora com sinal de escopo protegido);
+- `risk` (sinal de risco destrutivo/irreversível);
+- `reload-required` ou workspace não limpo;
+- `validation-failed-or-unknown`.
+
+Quando bloqueado, a recomendação deve voltar para escolha explícita de foco humano (`choose-next-focus`) com motivo auditável no texto/recommendationCode.
+
+No uso noturno, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por fatia. Se qualquer blocker hard-intent aparecer, pare no mesmo slice e registre linha curta de stop (`stop: <motivo>`) antes de retomar.
+
+### Gate de promoção para simple-delegate rehearsal
+
+A próxima promoção após estabilizar a lane local-safe deve passar por packet report-only explícito (`simple_delegate_rehearsal_packet`). O gate mínimo:
+- `decision=ready` no packet composto (capability + mix + auto-advance telemetry);
+- blockers vazios;
+- escopo protegido ainda opt-in humano.
+
+Se o packet retornar `needs-evidence|blocked`, a regra é não promover. Continuar em local-safe até o próximo checkpoint com evidência adicional.
+
 ### Fila pós-calibração
 
 Após fechar uma macro-task de calibração, não puxe backlog protegido só para manter movimento. Em 2026-05-01, depois de `TASK-BUD-153`, `TASK-BUD-405` e `TASK-BUD-416`, `autonomy_lane_next_task` sem escopos protegidos retornou `no-eligible-tasks`: 8 candidates, 4 bloqueados por dependência e 4 pulados por escopo protegido. As classes restantes eram promotion/recovery de colony, GitHub Actions/remote/release, research/config inspiration e tarefas dependentes.

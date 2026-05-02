@@ -107,6 +107,53 @@ describe("project-board-surface", () => {
     return cwd;
   }
 
+  function seedFocusAutoAdvanceWorkspace(successorCount: number): string {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-project-board-focus-auto-"));
+    mkdirSync(join(cwd, ".project"), { recursive: true });
+
+    const successors = Array.from({ length: successorCount }, (_, index) => ({
+      id: `TASK-NEXT-${index + 1}`,
+      description: `Próximo slice ${index + 1}`,
+      status: "planned",
+      milestone: "MS-LOCAL-AUTO",
+    }));
+
+    writeFileSync(
+      join(cwd, ".project", "tasks.json"),
+      `${JSON.stringify(
+        {
+          tasks: [
+            {
+              id: "TASK-FOCUS",
+              description: "Task atual",
+              status: "in-progress",
+              milestone: "MS-LOCAL-AUTO",
+              notes: "[rationale:risk-control] foco local-safe",
+            },
+            ...successors,
+          ],
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
+
+    writeFileSync(
+      join(cwd, ".project", "verification.json"),
+      `${JSON.stringify({ verifications: [] }, null, 2)}\n`,
+      "utf8",
+    );
+
+    writeFileSync(
+      join(cwd, ".project", "handoff.json"),
+      `${JSON.stringify({ current_tasks: ["TASK-FOCUS"] }, null, 2)}\n`,
+      "utf8",
+    );
+
+    return cwd;
+  }
+
   it("queryProjectTasks filtra por status/limit e usa cache incremental", () => {
     const cwd = seedWorkspace();
     try {
@@ -733,6 +780,53 @@ describe("project-board-surface", () => {
         evidence: "duplicate [rationale:risk-control]",
       });
       expect(duplicate).toMatchObject({ ok: false, reason: "verification-already-exists" });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("completeProjectTaskBoardWithVerification auto-advances handoff focus when successor is unambiguous", () => {
+    const cwd = seedFocusAutoAdvanceWorkspace(1);
+    try {
+      const completed = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-FOCUS",
+        verificationId: "VER-FOCUS-DONE",
+        method: "test",
+        evidence: "smoke ok [rationale:risk-control]",
+      });
+
+      expect(completed.ok).toBe(true);
+      expect(completed.focusAutoAdvance).toMatchObject({
+        applied: true,
+        reason: "applied",
+        nextFocusTaskIds: ["TASK-NEXT-1"],
+      });
+
+      const handoff = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as { current_tasks?: string[] };
+      expect(handoff.current_tasks).toEqual(["TASK-NEXT-1"]);
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("completeProjectTaskBoardWithVerification keeps handoff unchanged when successor is ambiguous", () => {
+    const cwd = seedFocusAutoAdvanceWorkspace(2);
+    try {
+      const completed = completeProjectTaskBoardWithVerification(cwd, {
+        taskId: "TASK-FOCUS",
+        verificationId: "VER-FOCUS-DONE",
+        method: "test",
+        evidence: "smoke ok [rationale:risk-control]",
+      });
+
+      expect(completed.ok).toBe(true);
+      expect(completed.focusAutoAdvance).toMatchObject({
+        applied: false,
+        reason: "ambiguous-local-safe-successors",
+      });
+
+      const handoff = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as { current_tasks?: string[] };
+      expect(handoff.current_tasks).toEqual(["TASK-FOCUS"]);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

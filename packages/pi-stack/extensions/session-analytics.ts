@@ -298,6 +298,40 @@ export interface DelegationMixScore {
   summary: string;
 }
 
+export type AutoAdvanceHardIntentRecommendationCode =
+  | "auto-advance-telemetry-ready"
+  | "auto-advance-telemetry-needs-evidence-no-data"
+  | "auto-advance-telemetry-needs-evidence-eligible-missing"
+  | "auto-advance-telemetry-needs-hardening-block-rate";
+
+export interface AutoAdvanceHardIntentTelemetry {
+  mode: "auto-advance-hard-intent-telemetry";
+  decision: "ready" | "needs-evidence";
+  score: number;
+  recommendationCode: AutoAdvanceHardIntentRecommendationCode;
+  recommendation: string;
+  window: {
+    lookbackHours: number;
+    filesScanned: number;
+    totalRecords: number;
+  };
+  totals: {
+    totalEvents: number;
+    eligibleEvents: number;
+    blockedEvents: number;
+    blockedRatePct: number;
+  };
+  blockedReasons: Array<{ reason: string; count: number }>;
+  examples: {
+    eligible: string[];
+    blocked: string[];
+  };
+  dispatchAllowed: false;
+  authorization: "none";
+  mutationAllowed: false;
+  summary: string;
+}
+
 export interface GalvanizationCandidate {
   rank: number;
   patternKey: string;
@@ -514,6 +548,128 @@ export function parseDelegationMixScore(
       delegatedSharePct,
     },
     buckets,
+    dispatchAllowed: false,
+    authorization: "none",
+    mutationAllowed: false,
+    summary,
+  };
+}
+
+export function parseAutoAdvanceHardIntentTelemetry(
+  records: unknown[],
+  lookbackHours: number,
+  filesScanned: number,
+): AutoAdvanceHardIntentTelemetry {
+  const blockedReasons = new Map<string, number>();
+  const examples = {
+    eligible: [] as string[],
+    blocked: [] as string[],
+  };
+
+  let eligibleEvents = 0;
+  let blockedEvents = 0;
+
+  const pushExample = (bucket: "eligible" | "blocked", text: string) => {
+    const clean = text.trim();
+    if (!clean || examples[bucket].length >= 3) return;
+    examples[bucket].push(clean.slice(0, 140));
+  };
+
+  const registerBlockedReasons = (rawText: string) => {
+    const match = rawText.match(/fail-closed;[^()]*\(([^)]+)\)/i);
+    const parsed = (match?.[1] ?? "")
+      .split(/[;,]/)
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+    const reasons = parsed.length > 0
+      ? parsed
+      : rawText.toLowerCase().includes("no eligible local-safe successor")
+        ? ["no-eligible-local-safe-successor"]
+        : ["unknown"];
+    for (const reason of reasons) {
+      blockedReasons.set(reason, (blockedReasons.get(reason) ?? 0) + 1);
+    }
+  };
+
+  for (const rec of records) {
+    if (!rec || typeof rec !== "object") continue;
+    const r = rec as Record<string, unknown>;
+    if (r["type"] !== "message") continue;
+    const msg = r["message"] as Record<string, unknown> | undefined;
+    if (!msg) continue;
+    const text = extractTextContent(msg["content"]);
+    const normalized = text.toLowerCase();
+
+    if (normalized.includes("auto-advance hard-intent:")) {
+      eligibleEvents += 1;
+      pushExample("eligible", text || "auto-advance hard-intent");
+      continue;
+    }
+
+    if (normalized.includes("hard-intent auto-advance fail-closed") || normalized.includes("auto-advance-hard-intent-blocked")) {
+      blockedEvents += 1;
+      pushExample("blocked", text || "hard-intent auto-advance fail-closed");
+      registerBlockedReasons(text);
+    }
+  }
+
+  const totalEvents = eligibleEvents + blockedEvents;
+  const blockedRatePct = totalEvents > 0 ? Math.round((blockedEvents / totalEvents) * 100) : 0;
+  const score = totalEvents > 0 ? Math.max(0, Math.min(100, Math.round((eligibleEvents / totalEvents) * 100))) : 0;
+
+  let decision: AutoAdvanceHardIntentTelemetry["decision"] = "ready";
+  let recommendationCode: AutoAdvanceHardIntentRecommendationCode = "auto-advance-telemetry-ready";
+  let recommendation = "hard-intent auto-advance has usable evidence with bounded block-rate.";
+
+  if (totalEvents <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "auto-advance-telemetry-needs-evidence-no-data";
+    recommendation = "no hard-intent auto-advance evidence observed yet; collect local continuity runs first.";
+  } else if (eligibleEvents <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "auto-advance-telemetry-needs-evidence-eligible-missing";
+    recommendation = "only blocked auto-advance events observed; recover eligibility before unattended continuation.";
+  } else if (blockedRatePct >= 50) {
+    decision = "needs-evidence";
+    recommendationCode = "auto-advance-telemetry-needs-hardening-block-rate";
+    recommendation = "blocked auto-advance rate is high; harden gates/validation before widening overnight continuity.";
+  }
+
+  const blockedReasonRows = [...blockedReasons.entries()]
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count || a.reason.localeCompare(b.reason));
+
+  const summary = [
+    "auto-advance-hard-intent-telemetry:",
+    `decision=${decision}`,
+    `score=${score}`,
+    `events=${totalEvents}`,
+    `eligible=${eligibleEvents}`,
+    `blocked=${blockedEvents}`,
+    `blockedRatePct=${blockedRatePct}`,
+    `code=${recommendationCode}`,
+    "authorization=none",
+  ].join(" ");
+
+  return {
+    mode: "auto-advance-hard-intent-telemetry",
+    decision,
+    score,
+    recommendationCode,
+    recommendation,
+    window: {
+      lookbackHours,
+      filesScanned,
+      totalRecords: records.length,
+    },
+    totals: {
+      totalEvents,
+      eligibleEvents,
+      blockedEvents,
+      blockedRatePct,
+    },
+    blockedReasons: blockedReasonRows,
+    examples,
     dispatchAllowed: false,
     authorization: "none",
     mutationAllowed: false,
@@ -1111,6 +1267,37 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         content: [{ type: "text", text: score.summary }],
         details: {
           ...score,
+          scan: collected.scan,
+        },
+      };
+    },
+  });
+
+  // ---- tool: auto_advance_hard_intent_telemetry -------------------------
+
+  pi.registerTool({
+    name: "auto_advance_hard_intent_telemetry",
+    label: "Auto-Advance Hard-Intent Telemetry",
+    description:
+      "Report-only telemetry for hard-intent auto-advance evidence (eligible vs blocked + reason codes). Never dispatches execution.",
+    parameters: Type.Object({
+      lookback_hours: Type.Optional(
+        Type.Number({ description: "How many hours back to scan session files. Default: 24." }),
+      ),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const lookbackHoursRaw = Number(p["lookback_hours"]);
+      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+        ? lookbackHoursRaw
+        : 24;
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
+      const collected = collectSessionRecords(cwd, lookbackHours);
+      const telemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+      return {
+        content: [{ type: "text", text: telemetry.summary }],
+        details: {
+          ...telemetry,
           scan: collected.scan,
         },
       };

@@ -62,3 +62,15 @@ Itens já semeados para continuidade após rehearsal:
 - `TASK-BUD-455` (memória curta por fatia no handoff)
 - `TASK-BUD-456` (expansão regressões single-source docs)
 - `TASK-BUD-457` (contrato de microcopy `(N earlier lines, ctrl+o to expand)`)
+
+## Atualização 2026-05-03 — night lane hard-intent
+
+A trilha pós-rehearsal evoluiu para contrato runtime hard-intent na continuidade noturna:
+- auto-advance de foco com fail-closed (`TASK-BUD-557`),
+- telemetry e snapshot read-only (`TASK-BUD-558`, `TASK-BUD-559`),
+- runbook batch 3–5 com stop/rollback explícitos (`TASK-BUD-560`),
+- auto-advance de handoff no board quando sucessor é unívoco (`TASK-BUD-561`).
+
+Leitura operacional: a maturidade local-safe aumentou sem abrir protected scope automático. Próxima promoção recomendada segue sendo rehearsal bounded de simple-delegate com decisão humana explícita para qualquer salto de escopo.
+
+Atualização adicional (2026-05-03, lote prep): packet/surface/gate de simple-delegate rehearsal foram entregues em modo report-only (`TASK-BUD-563..566`) com regressão focal verde. A stack está pronta para rehearsal real de uma única task bounded, sem auto-dispatch e com fail-closed em blockers de auto-advance/capability.

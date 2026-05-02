@@ -107,7 +107,8 @@ A captura de ideias livres deve produzir proposal antes de task final:
 
 Para continuidade sob pressão de contexto, a stack expõe sinais read-only de estágio e frescor:
 - `context_watch_freshness_status` (preload + dirty);
-- `context_watch_compact_stage_status` (estágio `normal|graceful-stop|force-compact`, reload gate e próximo passo determinístico).
+- `context_watch_compact_stage_status` (estágio `normal|graceful-stop|force-compact`, reload gate e próximo passo determinístico);
+- `auto_advance_hard_intent_telemetry` (evidência agregada de auto-advance `eligible|blocked` + reason codes fail-closed).
 
 Essas superfícies mantêm `authorization=none` e `dispatchAllowed=false`, servindo como base de decisão humana/operador sem auto-dispatch.
 

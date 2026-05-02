@@ -78,3 +78,45 @@ Pack executado (57 testes verdes):
 ### Recomendação de continuidade
 - Manter execução local-safe em fatias bounded.
 - Tratar `TASK-BUD-557` como próxima prioridade de governança para remover dependência de soft intent na continuidade noturna.
+
+## Extensão da wave — hard-intent night lane (TASK-BUD-557..562)
+
+### Entregas concluídas até agora
+- `TASK-BUD-557`: contrato runtime hard-intent para auto-advance (`focus-complete` -> sucessor local-safe), fail-closed em protected/risk/reload/validation.
+- `TASK-BUD-558`: telemetry read-only `auto_advance_hard_intent_telemetry` no session-analytics (eligible vs blocked + reason codes).
+- `TASK-BUD-559`: snapshot report-only `autonomy_lane_auto_advance_snapshot` com decisão determinística `eligible|blocked`.
+- `TASK-BUD-560`: runbook noturno batch 3–5 fatias com stop conditions e rollback explícitos.
+- `TASK-BUD-561`: `board_task_complete` com avanço automático de foco no handoff quando houver sucessor local-safe unívoco; fail-closed em ambiguidade.
+
+### Regressão focal da extensão
+Pack executado (115 testes verdes):
+- `project-board-surface.test.ts`
+- `autonomy-lane-surface.test.ts`
+- `session-analytics.test.ts`
+- `context-watchdog-continuation.test.ts`
+- `control-plane-doc-checklist.test.ts`
+
+### Gap final para encerramento
+- Consolidar fechamento formal no board/research (`TASK-BUD-562`) com recomendação única de próxima promoção.
+
+### Próxima promoção sugerida
+- Avançar para **simple-delegate rehearsal** em modo bounded/local-safe, preservando `authorization=none` por default e decisão humana explícita para qualquer escopo protected.
+
+## Wave simple-delegate rehearsal prep (TASK-BUD-563..567)
+
+### Entregas concluídas
+- `TASK-BUD-563`: packet core composto para readiness de simple-delegate (`ready|needs-evidence|blocked`).
+- `TASK-BUD-564`: surface read-only `simple_delegate_rehearsal_packet` com recommendationCode estável.
+- `TASK-BUD-565`: gate operacional documentado (entrada/saída/rollback/stop conditions).
+- `TASK-BUD-566`: regressão focal da wave executada e verde.
+
+### Regressão focal da wave
+Pack executado (58 testes verdes):
+- `guardrails-ops-calibration.test.ts`
+- `autonomy-lane-surface.test.ts`
+- `session-analytics.test.ts`
+- `control-plane-doc-checklist.test.ts`
+
+### Decisão de fechamento
+- Preparação concluída: a wave deixou o control-plane pronto para rehearsal simple-delegate **ainda em modo report-first/fail-closed**.
+- Próxima ação recomendada: abrir uma fatia explícita de rehearsal real (bounded, 1 task), mantendo escopo protected sob decisão humana.

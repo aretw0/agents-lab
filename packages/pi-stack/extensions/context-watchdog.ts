@@ -2281,6 +2281,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				localAuditReasons,
 			});
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
+			const collectorStatus = (fact: string) => localAudit.collectorResults.find((entry) => entry.fact === fact)?.status;
+			const validationKnown = collectorStatus("validation") === "observed";
+			const protectedScopesClear = collectorStatus("protected-scopes") === "observed" && protectedPaths.length === 0;
+			const reloadRequired = isReloadRequiredForSourceUpdate();
+			const autoAdvanceBlockedReasons = [
+				reloadRequired ? "reload-required" : undefined,
+				freshness.dirtySignal !== "clean" ? "git-not-clean" : undefined,
+				!protectedScopesClear ? "protected-scope" : undefined,
+				!validationKnown ? "validation-failed-or-unknown" : undefined,
+			].filter((reason): reason is string => Boolean(reason));
+			const autoAdvanceDecision = ready && autoAdvanceBlockedReasons.length === 0
+				? "eligible"
+				: "blocked";
 			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
@@ -2289,7 +2302,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				protectedPaths,
 				staleFocusCount,
 			});
-			const summary = `${readinessSummary} preload=${freshness.preloadDecision} dirty=${freshness.dirtySignal}`;
+			const summary = `${readinessSummary} preload=${freshness.preloadDecision} dirty=${freshness.dirtySignal} autoAdvance=${autoAdvanceDecision}`;
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {
@@ -2304,6 +2317,17 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					protectedPaths,
 					recommendationCode: recommendation.recommendationCode,
 					nextAction: recommendation.nextAction,
+					autoAdvanceContract: {
+						enabled: true,
+						intent: "hard-intent",
+						mode: "fail-closed",
+						decision: autoAdvanceDecision,
+						blockedReasons: autoAdvanceBlockedReasons,
+						reloadRequired,
+						validationKnown,
+						protectedScopesClear,
+						gitDirtySignal: freshness.dirtySignal,
+					},
 					preload: freshness.preload,
 					gitDirty: freshness.gitDirty,
 					localContinuity: localAudit,

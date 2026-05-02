@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-05-02T05:52:32.671Z",
-  "context": "Continuidade noturna agora focada em hardening: promover auto-advance entre tasks local-safe para contrato runtime hard-intent/fail-closed, reduzindo dependência de soft intent.",
+  "timestamp": "2026-05-02T06:30:12.153Z",
+  "context": "Lotes anteriores concluídos (hard-intent lane + simple-delegate prep). Novo lote live-rehearsal foi semeado e execução iniciada em TASK-BUD-5 [snip] nded com contrato start/abort/rollback. [truncated:+35 chars]",
   "current_tasks": [
-    "TASK-BUD-557"
+    "TASK-BUD-568"
   ],
   "next_actions": [
-    "Projetar regra runtime explícita de auto-advance por milestone/foco",
-    "Aplicar fail-closed para protected/risk/reload-required/validation-failed",
-    "Adicionar smoke para caminho happy-path e bloqueios"
+    "Consolidar checklist pré-voo de rehearsal real",
+    "Definir critérios go/no-go humanos explícitos",
+    "Mapear abort/rollback curto no playbook/doctrine"
   ],
   "blockers": [],
   "recent_validation": [
-    "TASK-BUD-549 concluída com VER-BUD-905",
-    "delegation-evolution-wave encerrada com regressão verde"
+    "VER-BUD-916 closeout prep wave",
+    "58/58 regressão focal verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-557",
+    "focus": "TASK-BUD-568",
     "canonical_links": [
-      "task:TASK-BUD-557",
-      "task:TASK-BUD-549",
-      "verification:VER-BUD-905"
+      "task:TASK-BUD-568",
+      "verification:VER-BUD-916"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T05:52:32.671Z",
+    "generatedAtIso": "2026-05-02T06:30:12.153Z",
     "level": "ok",
-    "percent": 32,
+    "percent": 39,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T05:52:32.671Z",
+      "atIso": "2026-05-02T06:30:12.153Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 32,
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

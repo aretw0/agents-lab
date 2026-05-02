@@ -10374,6 +10374,105 @@
       "method": "wave regression pack + closeout checklist",
       "timestamp": "2026-05-02T05:51:23.484Z",
       "evidence": "Closed delegation-evolution wave with focused regression pack and documented exit checklist/recommendation. Changes: - Regression pack executed (all green): - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 57 tests passed across 5 files. - Closeout research document updated: - `docs/research/control-plane-delegation-wave-2026-05.md` - Added section `Fechamento da wave (TASK-BUD-549)` with completed deliverables, regression evidence, checked exit checklist, remaining gaps, and continuation recommendation. - Explicit remaining gap logged: - hard-intent auto-advance hardening task seeded as `TASK-BUD-557`. Validation: - marker checks passed for wave-closeout anchors in research doc. - marker checks passed for delegate-or-execute surface anchors."
+    },
+    {
+      "id": "VER-BUD-906",
+      "target": "TASK-BUD-557",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke + marker-check + doctrine update",
+      "timestamp": "2026-05-02T06:03:38.680Z",
+      "evidence": "Implemented hard-intent auto-advance contract for night-lane continuity with fail-closed behavior. Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added runtime auto-advance logic when handoff focus is `focus-complete`. - Added explicit fail-closed guard evaluator (`resolveAutoAdvanceFailClosedReasons`) and successor-task gates: - protected signals, - risk signals, - reload-required-or-dirty (git cleanliness guard), - validation-gate-unknown. - On green guards: returns ready selection with `selectionPolicy` suffixed by `auto-advance-hard-intent`. - On blocked guards: keeps `focus-complete` and returns explicit fail-closed recommendation with reasons. - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_continuation_readiness` now surfaces `autoAdvanceContract` details (`enabled`, `intent=hard-intent`, `mode=fail-closed`, decision, blockedReasons, reloadRequired, validationKnown, protectedScopesClear, gitDirtySignal). - Summary now includes `autoAdvance=eligible|blocked` for operator visibility. Docs: - `docs/guides/control-plane-operating-doctrine.md` - Added section `Contrato hard-intent para auto-advance da night lane` with explicit runtime contract and fail-closed blockers. Validation: - Marker checks passed for autonomy surface, context-watch readiness, and doctrine anchors. - Smoke tests green: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 24 passed (3 files). - Added/validated new smoke cases: - auto-advance from completed handoff focus on green guards, - fail-closed block when successor has unknown validation gate."
+    },
+    {
+      "id": "VER-BUD-907",
+      "target": "TASK-BUD-558",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke + marker-check + telemetry primitive",
+      "timestamp": "2026-05-02T06:08:34.645Z",
+      "evidence": "Implemented hard-intent auto-advance telemetry in session-analytics with read-only contract. Code: - `packages/pi-stack/extensions/session-analytics.ts` - Added parser `parseAutoAdvanceHardIntentTelemetry(records, lookbackHours, filesScanned)`. - Classifies events into `eligible` vs `blocked` from runtime text evidence: - eligible marker: `auto-advance hard-intent:` - blocked markers: `hard-intent auto-advance fail-closed` / `auto-advance-hard-intent-blocked` - Aggregates blocked reason codes and computes score/blockedRate. - Deterministic recommendation codes: - `auto-advance-telemetry-ready` - `auto-advance-telemetry-needs-evidence-no-data` - `auto-advance-telemetry-needs-evidence-eligible-missing` - `auto-advance-telemetry-needs-hardening-block-rate` - Added read-only tool `auto_advance_hard_intent_telemetry` (authorization=none, dispatchAllowed=false, mutationAllowed=false). Tests: - `packages/pi-stack/test/smoke/session-analytics.test.ts` - Added parser coverage for eligible/blocked counts + reason code extraction. - Added tool wiring coverage for `auto_advance_hard_intent_telemetry` report-only contract. Docs: - `docs/primitives/continuity-abstraction.md` - Added telemetry surface to read-only continuity signals list. Validation: - Marker checks passed for parser/tool/tests/docs anchors. - Smoke pack passed: - `npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 49 passed (4 files)."
+    },
+    {
+      "id": "VER-BUD-908",
+      "target": "TASK-BUD-559",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke + marker-check + report-only snapshot",
+      "timestamp": "2026-05-02T06:12:21.603Z",
+      "evidence": "Implemented read-only hard-intent auto-advance snapshot with deterministic decision codes. Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added `buildAutoAdvanceHardIntentSnapshot(...)`. - New tool `autonomy_lane_auto_advance_snapshot` (report-only/read-only). - Snapshot evaluates `focus-complete` handoff transition and returns: - `decision=eligible` + `auto-advance-snapshot-eligible`, or - `decision=blocked` + deterministic blocked codes/reasons. - Explicit fail-closed blockers surfaced in payload: - protected/risk, - reload-required-or-dirty, - validation-gate-unknown, - no eligible successor. - Contract preserved with `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`. Tests: - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - Added snapshot green-path test (`eligible`). - Added snapshot fail-closed test (`blocked` with `validation-gate-unknown`). Docs: - `docs/primitives/nudge-free-local-continuity.md` - Added `autonomy_lane_auto_advance_snapshot` to continuity primitive table. Validation: - Marker checks passed for surface/tool/tests/docs anchors. - Smoke pack passed: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 51 passed (4 files)."
+    },
+    {
+      "id": "VER-BUD-909",
+      "target": "TASK-BUD-560",
+      "target_type": "task",
+      "status": "passed",
+      "method": "documentation runbook + marker-check + smoke docs",
+      "timestamp": "2026-05-02T06:13:36.146Z",
+      "evidence": "Consolidated night-lane hard-intent runbook for local-safe batch execution. Docs updated: - `docs/guides/control-plane-evolution-playbook.md` - Added section `Operação noturna local-safe (batch 3–5 fatias, hard-intent)` under Mode 1 rollout. - Documented no-check-in sequence: 1) `autonomy_lane_next_task` + `autonomy_lane_auto_advance_snapshot` 2) one bounded slice per cycle (commit + checkpoint) 3) auto-advance only when `decision=eligible` 4) stop immediately on `decision=blocked` - Added explicit short stop conditions and rollback contract. - `docs/guides/control-plane-operating-doctrine.md` - Reinforced batch small-run policy (3–5 slices) and short stop-line format (`stop: <motivo>`). - `docs/primitives/nudge-free-local-continuity.md` - Added `autonomy_lane_auto_advance_snapshot` to the primitive table for overnight continuity auditing. Validation: - Marker checks passed for playbook/doctrine anchors. - Smoke tests passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - Result: 22 passed (2 files)."
+    },
+    {
+      "id": "VER-BUD-910",
+      "target": "TASK-BUD-561",
+      "target_type": "task",
+      "status": "passed",
+      "method": "board-surface runtime auto-focus + smoke",
+      "timestamp": "2026-05-02T06:19:08.581Z",
+      "evidence": "Implemented board-surface handoff focus auto-advance after successful task completion, fail-closed on ambiguity. Code: - `packages/pi-stack/extensions/project-board-surface.ts` - Added `tryAutoAdvanceBoardHandoffFocus(...)` invoked after successful `completeProjectTaskBoardWithVerification`. - Auto-advance applies only when all guards pass: - handoff exists, - completed task matches current focus, - milestone is present, - local-safe successor set in same milestone is unambiguous, - protected-like successors are filtered, - dependency-resolved successor. - On ambiguity or missing successor, keeps handoff unchanged (`fail-closed`). - `board_task_complete` details now include `focusAutoAdvance` packet with reason/candidates. - Hardened block-cache matching to `mtime + size` to avoid stale cache false positives on fast rewrites. Tests: - `packages/pi-stack/test/smoke/project-board-surface.test.ts` - Added test for successful unambiguous focus auto-advance. - Added test for ambiguous successor fail-closed no-op. - Existing dependency-health test remains green with cache hardening. Related docs: - `docs/primitives/nudge-free-local-continuity.md` - documents `autonomy_lane_auto_advance_snapshot` in overnight primitive table (consistency with board auto-advance flow). Validation: - Marker checks passed for surface and test anchors. - Smoke pack passed: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 115 passed (5 files)."
+    },
+    {
+      "id": "VER-BUD-911",
+      "target": "TASK-BUD-562",
+      "target_type": "task",
+      "status": "passed",
+      "method": "wave closeout synthesis + regression evidence",
+      "timestamp": "2026-05-02T06:20:24.740Z",
+      "evidence": "Closed hard-intent night-lane wave with consolidated evidence and next-promotion recommendation. Wave coverage consolidated: - `TASK-BUD-557`: hard-intent runtime auto-advance + fail-closed. - `TASK-BUD-558`: session telemetry `auto_advance_hard_intent_telemetry`. - `TASK-BUD-559`: read-only decision snapshot `autonomy_lane_auto_advance_snapshot`. - `TASK-BUD-560`: runbook batch 3–5 with stop/rollback contract. - `TASK-BUD-561`: board completion focus auto-advance when successor is unique/local-safe (fail-closed in ambiguity). Closeout docs: - `docs/research/control-plane-delegation-wave-2026-05.md` - added section `Extensão da wave — hard-intent night lane (TASK-BUD-557..562)` - included delivered primitives, regression status, gap closure, and next promotion recommendation. - `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` - added `Atualização 2026-05-03 — night lane hard-intent` summary. Regression evidence: - focal pack already executed and green: - `npx vitest run packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 115 passed (5 files). - docs checklist revalidated after closeout edits: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed. Recommendation: - next promotion remains `simple-delegate rehearsal` in bounded local-safe mode with explicit human decision for any protected scope."
+    },
+    {
+      "id": "VER-BUD-912",
+      "target": "TASK-BUD-563",
+      "target_type": "task",
+      "status": "passed",
+      "method": "core packet implementation + smoke",
+      "timestamp": "2026-05-02T06:24:04.762Z",
+      "evidence": "Implemented composed readiness packet for simple-delegate rehearsal in ops calibration core. Code: - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts` - Added `buildSimpleDelegateRehearsalDecisionPacket(...)`. - Added deterministic contract: - decision: `ready | needs-evidence | blocked` - recommendation codes: - `simple-delegate-rehearsal-ready` - `simple-delegate-rehearsal-needs-evidence-capability` - `simple-delegate-rehearsal-needs-evidence-mix` - `simple-delegate-rehearsal-needs-evidence-auto-advance` - `simple-delegate-rehearsal-blocked-capability` - `simple-delegate-rehearsal-blocked-auto-advance` - `simple-delegate-rehearsal-blocked-missing-signals` - Composes capability + mix + auto-advance telemetry signals with fail-closed behavior. - Preserves no-dispatch contract (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). Tests: - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Added green-path readiness test. - Added fail-closed blocked test when auto-advance is blocked. Validation: - marker check passed for new packet anchors. - smoke pass: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Result: 10 passed. - broader regression pass: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 125 passed (6 files)."
+    },
+    {
+      "id": "VER-BUD-913",
+      "target": "TASK-BUD-564",
+      "target_type": "task",
+      "status": "passed",
+      "method": "surface tool + smoke + docs",
+      "timestamp": "2026-05-02T06:26:21.376Z",
+      "evidence": "Delivered read-only surface `simple_delegate_rehearsal_packet` on top of composed simple-delegate readiness packet. Code: - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - Added tool `simple_delegate_rehearsal_packet`. - Composes capability snapshot + delegation mix + auto-advance telemetry (`parseAutoAdvanceHardIntentTelemetry`). - Supports bounded overrides while preserving deterministic packet contract. - Returns report-only details with `authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`. - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts` - Added `buildSimpleDelegateRehearsalDecisionPacket(...)` and deterministic recommendation codes. Tests: - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Added packet builder green-path and fail-closed tests. - Added surface wiring test for `simple_delegate_rehearsal_packet` read-only contract. Docs: - `docs/primitives/ops-calibration-decision-packet.md` - Added complementary surface documentation for `simple_delegate_rehearsal_packet` and invariants. Validation: - marker checks passed for new surface/core/test anchors. - smoke: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 13 passed (2 files)."
+    },
+    {
+      "id": "VER-BUD-914",
+      "target": "TASK-BUD-565",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook/doctrine gate update + smoke docs",
+      "timestamp": "2026-05-02T06:27:55.792Z",
+      "evidence": "Formalized operational gate for simple-delegate rehearsal across doctrine/playbook/continuity docs. Docs updated: - `docs/guides/control-plane-evolution-playbook.md` - Added `Gate de entrada — simple-delegate rehearsal bounded` with explicit entry criteria, rollout path, and rollback triggers. - `docs/guides/control-plane-operating-doctrine.md` - Added `Gate de promoção para simple-delegate rehearsal` with fail-closed rule when packet returns `needs-evidence|blocked`. - `docs/primitives/nudge-free-local-continuity.md` - Added explicit transition rule: promotion to delegated rehearsal only via `simple_delegate_rehearsal_packet` and only when `decision=ready`. Validation: - Marker checks passed for all new gate anchors. - Smoke checks passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Result: 13 passed (2 files). Outcome: - gate operacional de entrada/saída/rollback de simple-delegate rehearsal agora está explícito e alinhado com contrato local-safe fail-closed."
+    },
+    {
+      "id": "VER-BUD-915",
+      "target": "TASK-BUD-566",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression pack",
+      "timestamp": "2026-05-02T06:28:15.240Z",
+      "evidence": "Executed and recorded focal regression pack for simple-delegate rehearsal wave. Command: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` Result: - 4 files passed - 58 tests passed - no failures Coverage rationale: - ops calibration packet/surface contracts (`simple_delegate_rehearsal_packet` + recommendation invariants), - autonomy lane hard-intent continuity behavior, - session analytics telemetry invariants, - docs checklist for control-plane guidance consistency. No regressions observed in report-only/no-dispatch contracts."
+    },
+    {
+      "id": "VER-BUD-916",
+      "target": "TASK-BUD-567",
+      "target_type": "task",
+      "status": "passed",
+      "method": "wave closeout synthesis + docs regression",
+      "timestamp": "2026-05-02T06:29:09.681Z",
+      "evidence": "Closed simple-delegate rehearsal prep wave with consolidated outputs and explicit next-step decision. Closeout synthesis: - `docs/research/control-plane-delegation-wave-2026-05.md` - Added section `Wave simple-delegate rehearsal prep (TASK-BUD-563..567)` with delivered packet/surface/gate/regression evidence and closure decision. - `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` - Added follow-up note for prep lot (`TASK-BUD-563..566`) and readiness framing for one-task bounded rehearsal. Wave evidence recap: - core packet: `buildSimpleDelegateRehearsalDecisionPacket`. - surface tool: `simple_delegate_rehearsal_packet`. - doctrine/playbook gate + rollback/stop conditions. - regression pack: 58 tests green (ops calibration + autonomy lane + session analytics + docs checklist). Validation: - marker checks passed for closeout anchors in both research docs. - docs checklist passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed. Final decision: - close prep wave as complete; - keep promotion to real simple-delegate rehearsal as explicit next bounded slice (1 task, report-first, fail-closed, no protected auto-dispatch)."
     }
   ]
 }

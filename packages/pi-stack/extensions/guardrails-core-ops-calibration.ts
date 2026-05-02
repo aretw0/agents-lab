@@ -268,3 +268,174 @@ export function buildDelegateOrExecuteDecisionPacket(
     summary,
   };
 }
+
+export type SimpleDelegateRehearsalDecision = "ready" | "needs-evidence" | "blocked";
+
+export type SimpleDelegateRehearsalRecommendationCode =
+  | "simple-delegate-rehearsal-ready"
+  | "simple-delegate-rehearsal-needs-evidence-capability"
+  | "simple-delegate-rehearsal-needs-evidence-mix"
+  | "simple-delegate-rehearsal-needs-evidence-auto-advance"
+  | "simple-delegate-rehearsal-blocked-capability"
+  | "simple-delegate-rehearsal-blocked-auto-advance"
+  | "simple-delegate-rehearsal-blocked-missing-signals";
+
+export interface SimpleDelegateRehearsalDecisionInput {
+  capabilityDecision?: "ready" | "needs-evidence" | "blocked";
+  capabilityRecommendationCode?: string;
+  capabilityBlockers?: string[];
+  mixDecision?: "ready" | "needs-evidence";
+  mixScore?: number;
+  mixSimpleDelegateEvents?: number;
+  autoAdvanceDecision?: "eligible" | "blocked";
+  autoAdvanceBlockedReasons?: string[];
+  telemetryDecision?: "ready" | "needs-evidence";
+  telemetryScore?: number;
+  telemetryBlockedRatePct?: number;
+}
+
+export interface SimpleDelegateRehearsalDecisionPacket {
+  mode: "simple-delegate-rehearsal-readiness-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  decision: SimpleDelegateRehearsalDecision;
+  recommendationCode: SimpleDelegateRehearsalRecommendationCode;
+  recommendation: string;
+  blockers: string[];
+  evidenceGaps: string[];
+  signals: {
+    capabilityDecision: "ready" | "needs-evidence" | "blocked" | "missing";
+    capabilityRecommendationCode: string;
+    mixDecision: "ready" | "needs-evidence" | "missing";
+    mixScore: number;
+    mixSimpleDelegateEvents: number;
+    autoAdvanceDecision: "eligible" | "blocked" | "missing";
+    autoAdvanceBlockedReasons: string[];
+    telemetryDecision: "ready" | "needs-evidence" | "missing";
+    telemetryScore: number;
+    telemetryBlockedRatePct: number;
+  };
+  summary: string;
+}
+
+function normalizeSimpleDelegateDecision(value: unknown, allowed: string[]): string {
+  return typeof value === "string" && allowed.includes(value) ? value : "missing";
+}
+
+export function buildSimpleDelegateRehearsalDecisionPacket(
+  input: SimpleDelegateRehearsalDecisionInput,
+): SimpleDelegateRehearsalDecisionPacket {
+  const capabilityDecision = normalizeSimpleDelegateDecision(input.capabilityDecision, ["ready", "needs-evidence", "blocked"]) as
+    | "ready"
+    | "needs-evidence"
+    | "blocked"
+    | "missing";
+  const mixDecision = normalizeSimpleDelegateDecision(input.mixDecision, ["ready", "needs-evidence"]) as
+    | "ready"
+    | "needs-evidence"
+    | "missing";
+  const autoAdvanceDecision = normalizeSimpleDelegateDecision(input.autoAdvanceDecision, ["eligible", "blocked"]) as
+    | "eligible"
+    | "blocked"
+    | "missing";
+  const telemetryDecision = normalizeSimpleDelegateDecision(input.telemetryDecision, ["ready", "needs-evidence"]) as
+    | "ready"
+    | "needs-evidence"
+    | "missing";
+
+  const mixScore = Math.max(0, Math.min(100, Math.round(Number(input.mixScore ?? 0) || 0)));
+  const telemetryScore = Math.max(0, Math.min(100, Math.round(Number(input.telemetryScore ?? 0) || 0)));
+  const telemetryBlockedRatePct = Math.max(0, Math.min(100, Math.round(Number(input.telemetryBlockedRatePct ?? 0) || 0)));
+  const mixSimpleDelegateEvents = Math.max(0, Math.floor(Number(input.mixSimpleDelegateEvents ?? 0) || 0));
+
+  const blockers: string[] = [];
+  const evidenceGaps: string[] = [];
+
+  let decision: SimpleDelegateRehearsalDecision = "ready";
+  let recommendationCode: SimpleDelegateRehearsalRecommendationCode = "simple-delegate-rehearsal-ready";
+  let recommendation = "simple-delegate rehearsal readiness looks strong; proceed only as bounded report-first rehearsal.";
+
+  if (capabilityDecision === "missing" || mixDecision === "missing" || autoAdvanceDecision === "missing" || telemetryDecision === "missing") {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-rehearsal-blocked-missing-signals";
+    recommendation = "missing required signals; collect capability/mix/auto-advance telemetry before rehearsal decision.";
+    blockers.push("missing-required-signals");
+  } else if (capabilityDecision === "blocked") {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-rehearsal-blocked-capability";
+    recommendation = "capability is blocked; defer rehearsal until hard blockers are resolved.";
+    blockers.push("capability-blocked", ...(Array.isArray(input.capabilityBlockers) ? input.capabilityBlockers : []));
+  } else if (autoAdvanceDecision === "blocked") {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-rehearsal-blocked-auto-advance";
+    recommendation = "auto-advance remains blocked; keep local-safe hardening before simple-delegate rehearsal.";
+    blockers.push("auto-advance-blocked", ...(Array.isArray(input.autoAdvanceBlockedReasons) ? input.autoAdvanceBlockedReasons : []));
+  } else if (capabilityDecision !== "ready") {
+    decision = "needs-evidence";
+    recommendationCode = "simple-delegate-rehearsal-needs-evidence-capability";
+    recommendation = "capability still needs evidence; keep collecting readiness signals before rehearsal promotion.";
+    evidenceGaps.push("capability-needs-evidence");
+  } else if (mixDecision !== "ready" || mixScore < 70 || mixSimpleDelegateEvents <= 0) {
+    decision = "needs-evidence";
+    recommendationCode = "simple-delegate-rehearsal-needs-evidence-mix";
+    recommendation = "delegation mix evidence is still weak for simple-delegate rehearsal; keep local slices and telemetry collection.";
+    if (mixDecision !== "ready") evidenceGaps.push("mix-needs-evidence");
+    if (mixScore < 70) evidenceGaps.push("mix-score-below-threshold");
+    if (mixSimpleDelegateEvents <= 0) evidenceGaps.push("mix-simple-delegate-missing");
+  } else if (telemetryDecision !== "ready" || telemetryScore < 60 || telemetryBlockedRatePct > 60) {
+    decision = "needs-evidence";
+    recommendationCode = "simple-delegate-rehearsal-needs-evidence-auto-advance";
+    recommendation = "auto-advance telemetry still needs hardening; reduce blocked rate before rehearsal promotion.";
+    if (telemetryDecision !== "ready") evidenceGaps.push("auto-advance-telemetry-needs-evidence");
+    if (telemetryScore < 60) evidenceGaps.push("auto-advance-telemetry-score-below-threshold");
+    if (telemetryBlockedRatePct > 60) evidenceGaps.push("auto-advance-telemetry-block-rate-high");
+  }
+
+  const uniqueBlockers = [...new Set(blockers)];
+  const uniqueEvidenceGaps = [...new Set(evidenceGaps)];
+
+  const summary = [
+    "simple-delegate-rehearsal-packet:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `capability=${capabilityDecision}`,
+    `mix=${mixDecision}`,
+    `mixScore=${mixScore}`,
+    `autoAdvance=${autoAdvanceDecision}`,
+    `telemetry=${telemetryDecision}`,
+    uniqueBlockers.length > 0 ? `blockers=${uniqueBlockers.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "simple-delegate-rehearsal-readiness-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    decision,
+    recommendationCode,
+    recommendation,
+    blockers: uniqueBlockers,
+    evidenceGaps: uniqueEvidenceGaps,
+    signals: {
+      capabilityDecision,
+      capabilityRecommendationCode: typeof input.capabilityRecommendationCode === "string"
+        ? input.capabilityRecommendationCode
+        : "missing",
+      mixDecision,
+      mixScore,
+      mixSimpleDelegateEvents,
+      autoAdvanceDecision,
+      autoAdvanceBlockedReasons: Array.isArray(input.autoAdvanceBlockedReasons)
+        ? [...new Set(input.autoAdvanceBlockedReasons.filter((item): item is string => typeof item === "string" && item.trim().length > 0))]
+        : [],
+      telemetryDecision,
+      telemetryScore,
+      telemetryBlockedRatePct,
+    },
+    summary,
+  };
+}

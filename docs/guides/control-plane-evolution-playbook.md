@@ -118,16 +118,42 @@ Rollout:
 Rollback (voltar para estabilidade local):
 - se houver oscilação de readiness/budget, pausar delegação e voltar para execução direta até 2 ciclos limpos.
 
+#### Operação noturna local-safe (batch 3–5 fatias, hard-intent)
+
+Contrato operacional para rodar sem check-in entre tasks elegíveis:
+1. iniciar com `autonomy_lane_next_task` e `autonomy_lane_auto_advance_snapshot`;
+2. executar uma fatia curta por vez (commit + checkpoint);
+3. permitir auto-advance apenas quando snapshot `decision=eligible`;
+4. manter parada imediata quando snapshot `decision=blocked`.
+
+Stop conditions mínimos (formato curto):
+- `stop: protected`;
+- `stop: risk`;
+- `stop: reload-required`;
+- `stop: validation-failed-or-unknown`;
+- `stop: no-eligible-local-safe-successor`.
+
+Rollback padrão da noite:
+- ação: pausar auto-advance, manter foco explícito e voltar para uma fatia manual bounded;
+- evidência: registrar blocker no board + `context_watch_checkpoint`;
+- saída: retomar auto-advance só após blocker limpo e smoke focal verde.
+
 ### Modo 2 (delegação descartável)
+
+Gate de entrada — simple-delegate rehearsal bounded:
+1. `simple_delegate_rehearsal_packet.decision == ready`;
+2. foco local-safe já estável (batch 3–5 concluído com checkpoint/commit por fatia);
+3. sem blockers hard-intent (`protected`, `risk`, `reload-required`, `validation-failed-or-unknown`);
+4. escopo protegido continua opt-in humano (nenhum auto-dispatch).
 
 Rollout canário:
 1. escolher 1 task curta com critérios claros;
-2. spawn controlado (`ant_colony` com `maxAnts` baixo + `maxCost` curto);
+2. executar rehearsal report-first (sem dispatch automático) e só então avaliar execução delegada bounded;
 3. exigir evidência no parent antes de nova delegação;
 4. encerrar worker após entrega (não manter sessão longa do worker).
 
 Rollback:
-- trigger: `FAILED` recorrente, `BUDGET_EXCEEDED`, ou ausência de evidência canônica;
+- trigger: `FAILED` recorrente, `BUDGET_EXCEEDED`, blocked-rate alto no telemetry, ou ausência de evidência canônica;
 - ação: descer para Modo 1 por 1 janela operacional (sem novas delegações) e corrigir causa raiz.
 
 ### Modo 3 (federação)

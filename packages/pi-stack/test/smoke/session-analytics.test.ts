@@ -11,6 +11,7 @@ import sessionAnalyticsExtension, {
   runQuery,
   parseGalvanizationCandidates,
   parseDelegationMixScore,
+  parseAutoAdvanceHardIntentTelemetry,
   normalizeSessionAnalyticsToolParams,
 } from "../../extensions/session-analytics";
 
@@ -380,6 +381,79 @@ describe("session-analytics — delegation mix score", () => {
       expect(output?.details?.authorization).toBe("none");
       expect(output?.details?.mutationAllowed).toBe(false);
       expect(String(output?.content?.[0]?.text ?? "")).toContain("delegation-mix-score:");
+    } finally {
+      process.chdir(oldCwd);
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("session-analytics — auto-advance hard-intent telemetry", () => {
+  it("classifica eventos eligible e blocked com reason codes", () => {
+    const records = [
+      {
+        type: "message",
+        timestamp: "2026-05-03T03:00:00Z",
+        message: { role: "assistant", content: "auto-advance hard-intent: execute bounded slice for TASK-NEXT" },
+      },
+      {
+        type: "message",
+        timestamp: "2026-05-03T03:01:00Z",
+        message: {
+          role: "assistant",
+          content: "hard-intent auto-advance fail-closed; choose next focus explicitly (reload-required-or-dirty,validation-gate-unknown).",
+        },
+      },
+      {
+        type: "message",
+        timestamp: "2026-05-03T03:02:00Z",
+        message: { role: "assistant", content: "auto-advance hard-intent: execute bounded slice for TASK-ANOTHER" },
+      },
+    ];
+
+    const telemetry = parseAutoAdvanceHardIntentTelemetry(records, 24, 1);
+    expect(telemetry.mode).toBe("auto-advance-hard-intent-telemetry");
+    expect(telemetry.decision).toBe("ready");
+    expect(telemetry.totals.totalEvents).toBe(3);
+    expect(telemetry.totals.eligibleEvents).toBe(2);
+    expect(telemetry.totals.blockedEvents).toBe(1);
+    expect(telemetry.blockedReasons.some((row) => row.reason === "reload-required-or-dirty")).toBe(true);
+    expect(telemetry.dispatchAllowed).toBe(false);
+    expect(telemetry.authorization).toBe("none");
+  });
+
+  it("expõe tool auto_advance_hard_intent_telemetry em modo report-only/read-only", () => {
+    const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-auto-advance-tool-"));
+    const oldCwd = process.cwd();
+    let tools: Array<{ name?: string; execute?: (...args: any[]) => any }> = [];
+    try {
+      const key = toSessionWorkspaceKey(dir);
+      const sessionsDir = join(dir, ".sandbox", "pi-agent", "sessions", key);
+      mkdirSync(sessionsDir, { recursive: true });
+      writeFileSync(
+        join(sessionsDir, "auto-advance.jsonl"),
+        [
+          JSON.stringify({ type: "message", timestamp: new Date().toISOString(), message: { role: "assistant", content: "auto-advance hard-intent: execute bounded slice" } }),
+          JSON.stringify({ type: "message", timestamp: new Date().toISOString(), message: { role: "assistant", content: "hard-intent auto-advance fail-closed; choose next focus explicitly (validation-gate-unknown)." } }),
+        ].join("\n") + "\n",
+        "utf8",
+      );
+
+      sessionAnalyticsExtension({
+        registerTool(tool: unknown) { tools.push(tool as { name?: string; execute?: (...args: any[]) => any }); },
+        registerCommand() {},
+      } as never);
+      process.chdir(dir);
+
+      const tool = tools.find((tool) => tool.name === "auto_advance_hard_intent_telemetry");
+      const output = tool?.execute?.("tc-auto-advance-telemetry", { lookback_hours: 24 }, undefined, undefined, { cwd: dir });
+
+      expect(output?.details?.mode).toBe("auto-advance-hard-intent-telemetry");
+      expect(output?.details?.totals?.totalEvents).toBeGreaterThan(0);
+      expect(output?.details?.dispatchAllowed).toBe(false);
+      expect(output?.details?.authorization).toBe("none");
+      expect(output?.details?.mutationAllowed).toBe(false);
+      expect(String(output?.content?.[0]?.text ?? "")).toContain("auto-advance-hard-intent-telemetry:");
     } finally {
       process.chdir(oldCwd);
       rmSync(dir, { recursive: true, force: true });

@@ -10,6 +10,7 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 ## Surface
 
 - Tool: `ops_calibration_decision_packet`
+- Tool complementar: `simple_delegate_rehearsal_packet`
 - Fontes:
   - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts`
   - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts`
@@ -31,6 +32,8 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 5. chamar `ops_calibration_decision_packet` com `live_reload_completed=true` para decisão consolidada.
 
 O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, respeita overrides explícitos quando fornecidos e mantém `keep-report-only` enquanto o sinal de `background_process_rehearsal_gate` não estiver em `decision=ready`.
+
+Para promoção de `simple-delegate` sem abrir dispatch, use `simple_delegate_rehearsal_packet`: ele compõe capability + mix + auto-advance telemetry em decisão `ready|needs-evidence|blocked`, também com `authorization=none`, `dispatchAllowed=false` e `mutationAllowed=false`.
 
 ## Invariantes
 

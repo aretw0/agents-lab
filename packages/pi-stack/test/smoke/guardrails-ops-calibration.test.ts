@@ -1,5 +1,12 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { buildDelegateOrExecuteDecisionPacket, buildOpsCalibrationDecisionPacket } from "../../extensions/guardrails-core-ops-calibration";
+import {
+  buildDelegateOrExecuteDecisionPacket,
+  buildOpsCalibrationDecisionPacket,
+  buildSimpleDelegateRehearsalDecisionPacket,
+} from "../../extensions/guardrails-core-ops-calibration";
 import { registerGuardrailsOpsCalibrationSurface } from "../../extensions/guardrails-core-ops-calibration-surface";
 
 describe("ops calibration decision packet", () => {
@@ -28,6 +35,47 @@ describe("ops calibration decision packet", () => {
     expect(packet.recommendedOption).toBe("defer");
     expect(packet.recommendationCode).toBe("delegate-execute-defer-missing-signals");
     expect(packet.blockers).toContain("missing-capability-or-mix-signal");
+  });
+
+  it("builds simple-delegate rehearsal packet as ready when composed signals are strong", () => {
+    const packet = buildSimpleDelegateRehearsalDecisionPacket({
+      capabilityDecision: "ready",
+      capabilityRecommendationCode: "delegation-capability-ready",
+      capabilityBlockers: [],
+      mixDecision: "ready",
+      mixScore: 84,
+      mixSimpleDelegateEvents: 3,
+      autoAdvanceDecision: "eligible",
+      telemetryDecision: "ready",
+      telemetryScore: 78,
+      telemetryBlockedRatePct: 20,
+    });
+
+    expect(packet.mode).toBe("simple-delegate-rehearsal-readiness-packet");
+    expect(packet.decision).toBe("ready");
+    expect(packet.recommendationCode).toBe("simple-delegate-rehearsal-ready");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.authorization).toBe("none");
+    expect(packet.mutationAllowed).toBe(false);
+  });
+
+  it("fails closed when auto-advance decision is blocked", () => {
+    const packet = buildSimpleDelegateRehearsalDecisionPacket({
+      capabilityDecision: "ready",
+      mixDecision: "ready",
+      mixScore: 82,
+      mixSimpleDelegateEvents: 2,
+      autoAdvanceDecision: "blocked",
+      autoAdvanceBlockedReasons: ["reload-required-or-dirty", "validation-gate-unknown"],
+      telemetryDecision: "ready",
+      telemetryScore: 70,
+      telemetryBlockedRatePct: 10,
+    });
+
+    expect(packet.decision).toBe("blocked");
+    expect(packet.recommendationCode).toBe("simple-delegate-rehearsal-blocked-auto-advance");
+    expect(packet.blockers).toContain("auto-advance-blocked");
+    expect(packet.blockers).toContain("reload-required-or-dirty");
   });
 
   it("returns ready-for-bounded-rehearsal when both calibrations are strong and reload completed", () => {
@@ -374,6 +422,50 @@ describe("ops calibration decision packet", () => {
     expect(result.details.mutationAllowed).toBe(false);
     expect(result.details.recommendedOption).toBe("simple-delegate");
     expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
+  });
+
+  it("registers simple_delegate_rehearsal_packet as read-only packet tool", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-rehearsal-packet-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+
+      const result = await tool.execute(
+        "tc-simple-delegate-rehearsal",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          auto_advance_decision: "eligible",
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.mode).toBe("simple-delegate-rehearsal-readiness-packet");
+      expect(result.details.dispatchAllowed).toBe(false);
+      expect(result.details.authorization).toBe("none");
+      expect(result.details.mutationAllowed).toBe(false);
+      expect(String(result.details.summary)).toContain("simple-delegate-rehearsal-packet:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 
   it("uses inferred background capability signals and honors explicit overrides", async () => {

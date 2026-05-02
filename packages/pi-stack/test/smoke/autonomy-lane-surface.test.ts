@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -8,6 +9,15 @@ type RegisteredTool = {
   name: string;
   execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown> };
 };
+
+function initCleanGitRepo(cwd: string): void {
+  writeFileSync(path.join(cwd, ".gitkeep"), "seed\n", "utf8");
+  execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+  execFileSync("git", ["config", "user.name", "Pi Smoke"], { cwd, stdio: "ignore" });
+  execFileSync("git", ["config", "user.email", "pi-smoke@example.com"], { cwd, stdio: "ignore" });
+  execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+  execFileSync("git", ["commit", "-m", "seed"], { cwd, stdio: "ignore" });
+}
 
 describe("autonomy lane surface", () => {
   it("registers side-effect-free planning tool with pi execute signature", () => {
@@ -179,6 +189,139 @@ describe("autonomy lane surface", () => {
 
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-FOCUS");
     expect((result?.details.selection as { focusSource?: string } | undefined)?.focusSource).toBe("handoff");
+  });
+
+  it("auto-advances from completed handoff focus when hard-intent guards are green", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-auto-advance-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-FOCUS", description: "[P1] completed", status: "completed" },
+        {
+          id: "TASK-NEXT",
+          description: "[P2] local-safe follow-up",
+          status: "planned",
+          acceptance_criteria: ["run smoke test for next slice"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] validação explícita para auto-advance hard-intent",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const nextTaskTool = tools.find((tool) => tool.name === "autonomy_lane_next_task");
+    const result = nextTaskTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.ready).toBe(true);
+    expect(result?.details.reason).toBe("ready");
+    expect(result?.details.nextTaskId).toBe("TASK-NEXT");
+    expect((result?.details.selectionPolicy as string | undefined)).toContain("auto-advance-hard-intent");
+    expect((result?.details.recommendation as string | undefined)).toContain("auto-advance hard-intent");
+  });
+
+  it("fails closed when completed focus has successor without validation gate", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-auto-advance-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-FOCUS", description: "[P1] completed", status: "completed" },
+        {
+          id: "TASK-NEXT",
+          description: "[P2] local-safe sem gate",
+          status: "planned",
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+          notes: "[rationale:risk-control] task local-safe sem gate ainda deve bloquear auto-advance",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const nextTaskTool = tools.find((tool) => tool.name === "autonomy_lane_next_task");
+    const result = nextTaskTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.ready).toBe(false);
+    expect(result?.details.reason).toBe("focus-complete");
+    expect((result?.details.selectionPolicy as string | undefined)).toContain("auto-advance-hard-intent-blocked");
+    expect((result?.details.recommendation as string | undefined)).toContain("validation-gate-unknown");
+  });
+
+  it("emits eligible auto-advance snapshot when hard-intent guards are green", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-auto-advance-snapshot-ok-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-FOCUS", description: "[P1] completed", status: "completed" },
+        {
+          id: "TASK-NEXT",
+          description: "[P2] local-safe follow-up",
+          status: "planned",
+          acceptance_criteria: ["run smoke test for next slice"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] validação explícita para auto-advance hard-intent",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const snapshotTool = tools.find((tool) => tool.name === "autonomy_lane_auto_advance_snapshot");
+    const result = snapshotTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("eligible");
+    expect(result?.details.recommendationCode).toBe("auto-advance-snapshot-eligible");
+    expect(result?.details.nextTaskId).toBe("TASK-NEXT");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("emits blocked auto-advance snapshot with fail-closed reasons", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-auto-advance-snapshot-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-FOCUS", description: "[P1] completed", status: "completed" },
+        {
+          id: "TASK-NEXT",
+          description: "[P2] local-safe sem gate",
+          status: "planned",
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+          notes: "[rationale:risk-control] task local-safe sem gate deve bloquear auto-advance",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const snapshotTool = tools.find((tool) => tool.name === "autonomy_lane_auto_advance_snapshot");
+    const result = snapshotTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("auto-advance-snapshot-blocked-fail-closed");
+    expect((result?.details.blockedReasons as string[] | undefined) ?? []).toContain("validation-gate-unknown");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
   });
 
   it("registers composed status tool with board selection and lane plan", () => {

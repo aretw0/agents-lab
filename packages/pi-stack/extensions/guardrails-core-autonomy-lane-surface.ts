@@ -11,6 +11,7 @@ import {
   evaluateAutonomyProtectedScopeReasonReport,
   readAutonomyHandoffFocusTaskIds,
 } from "./guardrails-core-autonomy-task-selector";
+import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
@@ -42,16 +43,207 @@ function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { ids: st
   return handoff.length > 0 ? { ids: handoff, source: "handoff" } : { ids: [] };
 }
 
+function normalizeTaskId(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function findTaskById(tasks: ProjectTaskItem[], taskId: string): ProjectTaskItem | undefined {
+  const normalized = normalizeTaskId(taskId);
+  if (!normalized) return undefined;
+  return tasks.find((task) => normalizeTaskId(task.id) === normalized);
+}
+
+function taskHasProtectedSignal(task: ProjectTaskItem): boolean {
+  const haystack = [task.description, ...(task.files ?? [])].join("\n").toLowerCase();
+  return /(\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|https?:\/\/|\bci\b)/i.test(haystack);
+}
+
+function taskHasRiskSignal(task: ProjectTaskItem): boolean {
+  const text = [task.description, task.notes ?? "", ...(task.acceptance_criteria ?? []), ...(task.files ?? [])].join("\n").toLowerCase();
+  if (taskHasProtectedSignal(task)) return true;
+  if ((task.files?.length ?? 0) >= 9) return true;
+  return /\b(delete|destroy|drop\s+table|rm\s+-rf|force\s+push|destructive|irreversible|dangerous)\b/i.test(text);
+}
+
+function taskValidationGateKnown(task: ProjectTaskItem): boolean {
+  const text = [task.description, ...(task.acceptance_criteria ?? []), ...(task.files ?? [])].join("\n").toLowerCase();
+  return /(smoke|test|spec|vitest|marker-check|inspection|lint|typecheck|build)/i.test(text);
+}
+
+function workspaceLooksClean(cwd: string): boolean {
+  try {
+    return readGitDirtySnapshot(cwd).clean;
+  } catch {
+    return false;
+  }
+}
+
+function resolveAutoAdvanceFailClosedReasons(input: {
+  cwd: string;
+  params: Record<string, unknown>;
+  nextTask?: ProjectTaskItem;
+}): string[] {
+  const reasons: string[] = [];
+  if (input.params.include_protected_scopes === true) reasons.push("protected-opt-in");
+  if (!workspaceLooksClean(input.cwd)) reasons.push("reload-required-or-dirty");
+  if (!input.nextTask) {
+    reasons.push("next-task-not-found");
+    return reasons;
+  }
+  if (taskHasProtectedSignal(input.nextTask)) reasons.push("protected-task");
+  if (taskHasRiskSignal(input.nextTask)) reasons.push("risk-signal");
+  if (!taskValidationGateKnown(input.nextTask)) reasons.push("validation-gate-unknown");
+  return reasons;
+}
+
 function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
-  return evaluateAutonomyLaneTaskSelection(cwd, {
-    milestone: typeof p.milestone === "string" ? p.milestone : undefined,
-    includeProtectedScopes: p.include_protected_scopes === true,
-    includeMissingRationale: p.include_missing_rationale === true,
-    sampleLimit: asNumber(p.sample_limit, 5),
+  const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
+  const includeProtectedScopes = p.include_protected_scopes === true;
+  const includeMissingRationale = p.include_missing_rationale === true;
+  const sampleLimit = asNumber(p.sample_limit, 5);
+
+  const selection = evaluateAutonomyLaneTaskSelection(cwd, {
+    milestone,
+    includeProtectedScopes,
+    includeMissingRationale,
+    sampleLimit,
     focusTaskIds: focus.ids,
     focusSource: focus.source,
   });
+
+  const hardIntentEligible = selection.reason === "focus-complete" && focus.source === "handoff";
+  if (!hardIntentEligible) return selection;
+
+  const fallback = evaluateAutonomyLaneTaskSelection(cwd, {
+    milestone,
+    includeProtectedScopes,
+    includeMissingRationale,
+    sampleLimit,
+  });
+
+  if (!fallback.ready || !fallback.nextTaskId) {
+    return {
+      ...selection,
+      selectionPolicy: `${selection.selectionPolicy}+auto-advance-hard-intent-blocked`,
+      recommendation: "hard-intent auto-advance fail-closed; choose next focus explicitly (no eligible local-safe successor).",
+    };
+  }
+
+  const tasks = readProjectTasksBlock(cwd).tasks;
+  const nextTask = findTaskById(tasks, fallback.nextTaskId);
+  const failClosedReasons = resolveAutoAdvanceFailClosedReasons({ cwd, params: p, nextTask });
+  if (failClosedReasons.length > 0) {
+    return {
+      ...selection,
+      selectionPolicy: `${selection.selectionPolicy}+auto-advance-hard-intent-blocked`,
+      recommendation: `hard-intent auto-advance fail-closed; choose next focus explicitly (${failClosedReasons.join(",")}).`,
+    };
+  }
+
+  return {
+    ...fallback,
+    selectionPolicy: `${fallback.selectionPolicy}+auto-advance-hard-intent`,
+    recommendation: `auto-advance hard-intent: ${fallback.recommendation}`,
+  };
+}
+
+function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, cwd: string) {
+  const focus = resolveFocusTaskIds(p, cwd);
+  const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
+  const includeProtectedScopes = p.include_protected_scopes === true;
+  const includeMissingRationale = p.include_missing_rationale === true;
+  const sampleLimit = asNumber(p.sample_limit, 5);
+
+  const selection = evaluateAutonomyLaneTaskSelection(cwd, {
+    milestone,
+    includeProtectedScopes,
+    includeMissingRationale,
+    sampleLimit,
+    focusTaskIds: focus.ids,
+    focusSource: focus.source,
+  });
+
+  const fallback = evaluateAutonomyLaneTaskSelection(cwd, {
+    milestone,
+    includeProtectedScopes,
+    includeMissingRationale,
+    sampleLimit,
+  });
+
+  if (!(selection.reason === "focus-complete" && focus.source === "handoff")) {
+    return {
+      mode: "report-only",
+      decision: "blocked",
+      recommendationCode: "auto-advance-snapshot-blocked-no-focus-complete",
+      nextAction: "auto-advance requires handoff focus-complete before successor evaluation.",
+      focusTaskIds: focus.ids,
+      focusSource: focus.source,
+      blockedReasons: ["focus-not-complete"],
+      eligibleTaskIds: fallback.eligibleTaskIds,
+      nextTaskId: fallback.nextTaskId,
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      authorization: "none",
+      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-focus-complete",
+    };
+  }
+
+  if (!fallback.ready || !fallback.nextTaskId) {
+    return {
+      mode: "report-only",
+      decision: "blocked",
+      recommendationCode: "auto-advance-snapshot-blocked-no-successor",
+      nextAction: "auto-advance blocked until a single local-safe successor is eligible.",
+      focusTaskIds: focus.ids,
+      focusSource: focus.source,
+      blockedReasons: ["no-eligible-local-safe-successor"],
+      eligibleTaskIds: fallback.eligibleTaskIds,
+      nextTaskId: undefined,
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      authorization: "none",
+      summary: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-successor",
+    };
+  }
+
+  const tasks = readProjectTasksBlock(cwd).tasks;
+  const nextTask = findTaskById(tasks, fallback.nextTaskId);
+  const blockedReasons = resolveAutoAdvanceFailClosedReasons({ cwd, params: p, nextTask });
+
+  if (blockedReasons.length > 0) {
+    return {
+      mode: "report-only",
+      decision: "blocked",
+      recommendationCode: "auto-advance-snapshot-blocked-fail-closed",
+      nextAction: "auto-advance fail-closed; keep explicit focus selection until blockers clear.",
+      focusTaskIds: focus.ids,
+      focusSource: focus.source,
+      blockedReasons,
+      eligibleTaskIds: fallback.eligibleTaskIds,
+      nextTaskId: fallback.nextTaskId,
+      dispatchAllowed: false,
+      mutationAllowed: false,
+      authorization: "none",
+      summary: `autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-fail-closed reasons=${blockedReasons.join(",")}`,
+    };
+  }
+
+  return {
+    mode: "report-only",
+    decision: "eligible",
+    recommendationCode: "auto-advance-snapshot-eligible",
+    nextAction: `auto-advance eligible for ${fallback.nextTaskId}; continue bounded local-safe slice.`,
+    focusTaskIds: focus.ids,
+    focusSource: focus.source,
+    blockedReasons: [],
+    eligibleTaskIds: fallback.eligibleTaskIds,
+    nextTaskId: fallback.nextTaskId,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary: `autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=${fallback.nextTaskId}`,
+  };
 }
 
 function readDelegationFreshnessSignals(cwd: string): {
@@ -258,6 +450,28 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_auto_advance_snapshot",
+    label: "Autonomy Lane Auto-Advance Snapshot",
+    description: "Report-only snapshot for hard-intent auto-advance (focus-complete -> successor) with explicit fail-closed blockers.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const snapshot = buildAutoAdvanceHardIntentSnapshot(p, ctx.cwd);
+      return {
+        content: [{ type: "text", text: snapshot.summary }],
+        details: snapshot,
       };
     },
   });

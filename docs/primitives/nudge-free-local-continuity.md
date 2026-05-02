@@ -12,10 +12,13 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | `nudge_free_loop_canary` | Avaliar se uma continuação sem empurrão humano poderia ser segura. | Read-only/advisory; boolean humano não libera `ready`. |
 | `context_watch_checkpoint` | Gravar handoff curto entre fatias e antes de compact/pausa. | Mutação bounded de checkpoint; não despacha execução. |
 | `autonomy_lane_next_task` | Selecionar conservadoramente uma task local-safe do board. | Read-only; `no-eligible-tasks` é stop condition. |
+| `autonomy_lane_auto_advance_snapshot` | Auditar decisão hard-intent de auto-advance após `focus-complete` (`eligible` vs `blocked`). | Report-only/read-only; fail-closed para protected/risk/reload/validation unknown. |
 | Board bounded (`board_query`, `board_task_create`, `board_task_complete`, `board_decision_packet`) | Manter task/evidência/decisão recuperável. | Mutação limitada ao board quando chamada explicitamente. |
 | One-slice contract | Executar uma única fatia local e parar. | Contrato futuro/guardado; não é loop permanente. |
 
 Portanto, “overnight”, “loop maior”, “deixa rodando” e “sem empurrão” devem mapear para o mesmo contrato: **nudge-free/local-continuity em batches pequenos**, não scheduler e não swarm.
+
+Quando houver intenção de testar delegação, a transição é via `simple_delegate_rehearsal_packet` (report-only). Sem `decision=ready`, não há promoção para rehearsal delegado.
 
 ## Objetivo
 

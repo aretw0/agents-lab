@@ -2,10 +2,18 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
-import { buildDelegateOrExecuteDecisionPacket, buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
+import {
+  buildDelegateOrExecuteDecisionPacket,
+  buildOpsCalibrationDecisionPacket,
+  buildSimpleDelegateRehearsalDecisionPacket,
+} from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
-import { collectSessionRecords, parseDelegationMixScore } from "./session-analytics";
+import {
+  collectSessionRecords,
+  parseAutoAdvanceHardIntentTelemetry,
+  parseDelegationMixScore,
+} from "./session-analytics";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -118,6 +126,96 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           ...packet,
           capability,
           mix,
+          scan: collected.scan,
+        },
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "simple_delegate_rehearsal_packet",
+    label: "Simple-Delegate Rehearsal Packet",
+    description: "Report-only readiness packet for bounded simple-delegate rehearsal from capability + mix + auto-advance telemetry signals.",
+    parameters: Type.Object({
+      lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
+      preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
+      dirty_signal: Type.Optional(Type.String({ description: "clean | dirty | unknown" })),
+      monitor_classify_failures: Type.Optional(Type.Number({ description: "Classify-failure count. Default 0." })),
+      subagents_ready: Type.Optional(Type.Boolean({ description: "Subagent readiness signal. Default true." })),
+      capability_decision: Type.Optional(Type.String({ description: "Override capability decision: ready | needs-evidence | blocked" })),
+      capability_recommendation_code: Type.Optional(Type.String({ description: "Optional capability recommendation code override." })),
+      capability_blockers: Type.Optional(Type.Array(Type.String())),
+      mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
+      mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
+      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision: eligible | blocked" })),
+      auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),
+      telemetry_decision: Type.Optional(Type.String({ description: "Override telemetry decision: ready | needs-evidence" })),
+      telemetry_score: Type.Optional(Type.Number({ description: "Override telemetry score (0..100)." })),
+      telemetry_blocked_rate_pct: Type.Optional(Type.Number({ description: "Override telemetry blocked rate pct (0..100)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const lookbackHoursRaw = Number(p.lookback_hours);
+      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+        ? lookbackHoursRaw
+        : 24;
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
+
+      const capability = evaluateDelegationLaneCapabilitySnapshot({
+        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : "fallback-canonical",
+        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : "unknown",
+        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
+        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
+      });
+
+      const collected = collectSessionRecords(cwd, lookbackHours);
+      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
+      const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+
+      const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
+      const derivedAutoAdvanceDecision = autoAdvanceTelemetry.decision === "ready"
+        && autoAdvanceTelemetry.totals.eligibleEvents > 0
+        ? "eligible"
+        : "blocked";
+
+      const packet = buildSimpleDelegateRehearsalDecisionPacket({
+        capabilityDecision: typeof p.capability_decision === "string"
+          ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
+          : capability.decision,
+        capabilityRecommendationCode: typeof p.capability_recommendation_code === "string"
+          ? p.capability_recommendation_code
+          : capability.recommendationCode,
+        capabilityBlockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : capability.blockers,
+        mixDecision: typeof p.mix_decision === "string"
+          ? p.mix_decision as "ready" | "needs-evidence"
+          : mix.decision,
+        mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
+        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
+          ? p.mix_simple_delegate_events
+          : mix.totals.simpleDelegate,
+        autoAdvanceDecision: typeof p.auto_advance_decision === "string"
+          ? p.auto_advance_decision as "eligible" | "blocked"
+          : derivedAutoAdvanceDecision,
+        autoAdvanceBlockedReasons: Array.isArray(p.auto_advance_blocked_reasons)
+          ? p.auto_advance_blocked_reasons as string[]
+          : (telemetryBlockedReasons.length > 0 ? telemetryBlockedReasons : derivedAutoAdvanceDecision === "blocked" ? ["auto-advance-telemetry-not-ready"] : []),
+        telemetryDecision: typeof p.telemetry_decision === "string"
+          ? p.telemetry_decision as "ready" | "needs-evidence"
+          : autoAdvanceTelemetry.decision,
+        telemetryScore: typeof p.telemetry_score === "number" ? p.telemetry_score : autoAdvanceTelemetry.score,
+        telemetryBlockedRatePct: typeof p.telemetry_blocked_rate_pct === "number"
+          ? p.telemetry_blocked_rate_pct
+          : autoAdvanceTelemetry.totals.blockedRatePct,
+      });
+
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: {
+          ...packet,
+          capability,
+          mix,
+          autoAdvanceTelemetry,
           scan: collected.scan,
         },
       };
