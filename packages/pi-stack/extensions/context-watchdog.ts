@@ -1983,6 +1983,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
 			const gitDirty = readContextWatchGitDirtySignal(ctx.cwd);
+			const preload = consumeContextPreloadPack(ctx.cwd, {
+				profile: "control-plane-core",
+			});
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2019,6 +2022,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorAction,
 				operatingCadence,
 				gitDirty,
+				preload,
 			};
 			return {
 				content: [{ type: "text", text: adaptiveSummary.summary }],

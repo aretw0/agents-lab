@@ -12720,6 +12720,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] contratos read-only devem falhar fechado com payload útil, evitando ruído operacional e stacktrace desnecessário.\n[provenance:human] source_task=TASK-BUD-536 reason=continuidade do hardening de ergonomia/observabilidade first-party\n2026-05-03: git_dirty_snapshot não propaga erro cru fora de repo; retorna envelope unavailable normalizado.",
       "verification": "VER-BUD-886"
+    },
+    {
+      "id": "TASK-BUD-538",
+      "description": "Compor decisão de preload (`use-pack|fallback-canonical`) também em `context_watch_status` para diagnóstico rápido de frescor sem chamadas extras.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-537"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_status` details inclui bloco `preload` com decisão e staleReasons.",
+        "Summary principal de status permanece estável (sem quebra de contrato textual existente).",
+        "Smoke cobre presença de `preload` no payload de status em cwd sem pack."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] concentrar sinais de contexto fresh em um status read-only reduz chamadas dispersas e mantém continuidade auditável.\n[provenance:human] source_task=TASK-BUD-537 reason=continuação da cadência de contexto fresh após reload confirmado pelo operador\n2026-05-03: context_watch_status agora já expõe preload decision no details para diagnóstico fresh em chamada única.",
+      "verification": "VER-BUD-887"
     }
   ]
 }

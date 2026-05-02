@@ -1335,6 +1335,12 @@ describe("context-watchdog", () => {
 					summary: "git-dirty-snapshot: unavailable",
 					error: "not-a-git-repo",
 				},
+				preload: {
+					mode: "context-preload-consume",
+					decision: "fallback-canonical",
+					dispatchAllowed: false,
+					authorization: "none",
+				},
 			});
 			expect(result.details?.autoCompact).toBeTruthy();
 			expect(result.details?.operatorAction).toBeTruthy();

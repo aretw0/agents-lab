@@ -10203,6 +10203,15 @@
       "method": "tool fail-closed envelope + smoke + marker-check",
       "timestamp": "2026-05-02T03:44:29.867Z",
       "evidence": "Hardened `git_dirty_snapshot` tool to fail-closed with structured unavailable envelope in non-git cwd. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added types `GitDirtySnapshotUnavailable` and `GitDirtySnapshotEnvelope`. - added helpers `normalizeGitDirtySnapshotError` and `buildUnavailableGitDirtySnapshot`. - `git_dirty_snapshot` tool now catches read errors and returns structured unavailable details (`available=false`, `clean=null`, `error=not-a-git-repo|git-dirty-snapshot-error`) instead of throwing raw error. - `/git-dirty` command fallback now reuses the same unavailable helper. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - added regression ensuring `git_dirty_snapshot` tool returns unavailable envelope in temp non-git cwd. - `docs/guides/control-plane-operating-doctrine.md` - guidance updated: outside git repo, tool fails closed with unavailable envelope. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` => 7 passed. - marker checks passed for unavailable envelope helpers/anchors and doctrine references."
+    },
+    {
+      "id": "VER-BUD-887",
+      "target": "TASK-BUD-538",
+      "target_type": "task",
+      "status": "passed",
+      "method": "status payload composition + smoke + marker-check",
+      "timestamp": "2026-05-02T03:49:36.958Z",
+      "evidence": "Composed preload decision into context-watch status payload (read-only). Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_status` now computes `preload = consumeContextPreloadPack(cwd, { profile: \"control-plane-core\" })`. - includes `preload` inside status `details` payload. - kept main summary text contract unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool test now asserts `details.preload` fallback envelope (`decision=fallback-canonical`, `dispatchAllowed=false`, `authorization=none`) in temp no-pack workspace. - `docs/guides/openai-context-window-playbook.md` - status docs updated to mention `details.preload` alongside `details.gitDirty`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks passed: - `context-watchdog.ts` (`consumeContextPreloadPack`, `preload,`, `context_watch_status`). - playbook (`details.preload`, `use-pack|fallback-canonical`, `details.gitDirty`)."
     }
   ]
 }
