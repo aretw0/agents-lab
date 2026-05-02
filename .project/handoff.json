@@ -1,11 +1,13 @@
 {
-  "timestamp": "2026-05-02T01:05:17.370Z",
+  "timestamp": "2026-05-02T04:13:07.522Z",
   "context": "Cadência retomada com checagem determinística de pendências. Concluídas TASK-BUD-525/526/527: blueprint de fresh context pack, fluxo script c [snip] time read-only context_preload_consume. [truncated:+29 chars]",
   "next_actions": [
+    "Context-watch action: level=compact 64% (compact-now) · Compact now and continue from checkpoint.",
     "Sem task local-safe elegível no momento (autonomy_lane_next_task=no-eligible-tasks).",
     "Para seguir: criar nova task local-safe incremental de contexto fresh ou abrir foco protegido [snip] TASK-BUD-521 sandcastle). [truncated:+15 chars]"
   ],
   "blockers": [
+    "context-watch-compact-required",
     "local-stop-protected-focus-required"
   ],
   "recent_validation": [
@@ -47,6 +49,45 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "pause"
+    },
+    {
+      "atIso": "2026-05-02T04:06:50.835Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 60,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-05-02T04:09:56.068Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 60,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Write handoff checkpoint before the next large slice."
+    },
+    {
+      "atIso": "2026-05-02T04:13:07.522Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 64,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ],
   "completed_tasks": [
