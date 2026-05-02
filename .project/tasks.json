@@ -14377,6 +14377,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] evita repetição e mantém utilidade do fechamento estruturado apenas quando há valor operacional.\n2026-05-02: política de encerramento ajustada para mini-packet condicional (gatilhos + exceções) para reduzir repetição sem perder governança.",
       "verification": "VER-BUD-964"
+    },
+    {
+      "id": "TASK-BUD-616",
+      "description": "[P1] Desbloquear packet de semeadura AFK quando bloqueio for apenas falta de foco/material local-safe (bootstrap), retornando `seed-now` em vez de `blocked`.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_material_seed_packet` retorna `seed-now` para bloqueios bootstrap (`focus-missing`, `selection-no-eligible-tasks`, `no-local-safe-material`).",
+        "Bloqueios operacionais reais (ex.: `reload-required-or-dirty`) continuam `blocked`.",
+        "Smoke atualizado e verde para ambos cenários."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] evitar falso bloqueio no packet de semeadura e permitir recuperação local-safe sem escopo protegido.\n2026-05-02: packet de semeadura AFK agora desbloqueia bootstrap quando o bloqueio é só foco/material; bloqueios operacionais continuam fail-closed.",
+      "verification": "VER-BUD-965"
     }
   ]
 }

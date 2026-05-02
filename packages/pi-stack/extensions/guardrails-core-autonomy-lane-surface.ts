@@ -235,10 +235,27 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   let humanActionRequired = false;
 
   if (readiness.decision === "blocked") {
-    decision = "blocked";
-    recommendationCode = "afk-material-seed-blocked-readiness";
-    nextAction = "resolve readiness blockers before triggering seeding flow.";
-    humanActionRequired = true;
+    const bootstrapBlockers = new Set([
+      "focus-missing",
+      "focus-task-not-found",
+      "focus-validation-unknown",
+      "no-local-safe-material",
+      "selection-no-eligible-tasks",
+    ]);
+    const canBootstrapSeed = readiness.blockedReasons.length > 0
+      && readiness.blockedReasons.every((reason) => bootstrapBlockers.has(reason));
+
+    if (canBootstrapSeed) {
+      decision = "seed-now";
+      recommendationCode = "afk-material-seed-now-bootstrap";
+      nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
+      humanActionRequired = true;
+    } else {
+      decision = "blocked";
+      recommendationCode = "afk-material-seed-blocked-readiness";
+      nextAction = "resolve readiness blockers before triggering seeding flow.";
+      humanActionRequired = true;
+    }
   } else if (readiness.decision === "seed-backlog") {
     decision = "seed-now";
     recommendationCode = "afk-material-seed-now-low-stock";

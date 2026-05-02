@@ -10905,6 +10905,15 @@
       "method": "conditional turn-close policy refinement + doc checklist update",
       "timestamp": "2026-05-02T17:22:59.224Z",
       "evidence": "Refined turn-close contract to avoid repetitive forced formatting in simple interactions. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Turn-close section changed to `mini-packet condicional (quando houver material novo)`. - Added explicit triggers for using mini-packet. - Added explicit exceptions for simple/no-new-material interactions. - Preserved neutral preview rule and soft->hard escalation only for applicable closeouts. - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Updated anchors to protect conditional policy (`quando aplicar`, `quando não aplicar`). Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - End-turn structure remains available when useful, without mandatory repetition for every simple reply."
+    },
+    {
+      "id": "VER-BUD-965",
+      "target": "TASK-BUD-616",
+      "target_type": "task",
+      "status": "passed",
+      "method": "afk material seed bootstrap unblock + smoke",
+      "timestamp": "2026-05-02T17:50:00.738Z",
+      "evidence": "Adjusted AFK seed packet behavior to avoid false blocked state when recovery can proceed via seeding. Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - `buildAfkMaterialSeedPacket(...)` now distinguishes blocker classes when readiness is `blocked`: - bootstrap-only blockers (`focus-missing`, `focus-task-not-found`, `focus-validation-unknown`, `no-local-safe-material`, `selection-no-eligible-tasks`) => `decision=seed-now`, `recommendationCode=afk-material-seed-now-bootstrap`. - operational blockers (e.g., `reload-required-or-dirty`) remain `decision=blocked`, `recommendationCode=afk-material-seed-blocked-readiness`. Tests: - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - updated missing-focus case to assert bootstrap seeding (`seed-now`, `afk-material-seed-now-bootstrap`). - added operational-blocker case (dirty workspace) asserting packet stays blocked. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - 25 passed / 0 failed."
     }
   ]
 }

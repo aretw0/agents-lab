@@ -452,8 +452,8 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
-  it("emits blocked material-seed packet when focus is missing", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-material-seed-blocked-"));
+  it("emits bootstrap seed-now material-seed packet when focus is missing", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-material-seed-bootstrap-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
     writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
       tasks: [
@@ -478,10 +478,44 @@ describe("autonomy lane surface", () => {
     const packetTool = tools.find((tool) => tool.name === "autonomy_lane_material_seed_packet");
     const result = packetTool?.execute("call-test", { min_ready_slices: 3 }, undefined, undefined, { cwd });
 
-    expect(result?.details.decision).toBe("blocked");
-    expect(result?.details.recommendationCode).toBe("afk-material-seed-blocked-readiness");
+    expect(result?.details.decision).toBe("seed-now");
+    expect(result?.details.recommendationCode).toBe("afk-material-seed-now-bootstrap");
     expect(result?.details.humanActionRequired).toBe(true);
     expect((result?.details.blockedReasons as string[])).toContain("focus-missing");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("keeps material-seed blocked when readiness includes operational blockers", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-material-seed-operational-block-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-FOCUS",
+          description: "[P1] focused local slice",
+          status: "in-progress",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] foco afk",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+    writeFileSync(path.join(cwd, "dirty.txt"), "dirty\n", "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_material_seed_packet");
+    const result = packetTool?.execute("call-test", { min_ready_slices: 3 }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("afk-material-seed-blocked-readiness");
+    expect((result?.details.blockedReasons as string[])).toContain("reload-required-or-dirty");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });
