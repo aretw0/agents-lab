@@ -14511,6 +14511,23 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduzir drift operacional entre execução local e Actions com gate canônico reutilizável e correções determinísticas de regressões.\n2026-05-02: alinhamento local↔CI aplicado com comando canônico único e correção dos fails do run 25258429382; inspiração operacional de refarm incorporada.",
       "verification": "VER-BUD-971"
+    },
+    {
+      "id": "TASK-BUD-623",
+      "description": "[P1] Tornar e2e harness de colony/web determinístico em host pressure (sem depender de memória/disco local para assertions de fluxo).",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts",
+        "packages/pi-stack/test/smoke/web-session-gateway-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Testes não falham por `machine-maintenance: warn` do host local.",
+        "Assertions focam contrato do fluxo, com injeção/mocking do gate de manutenção quando necessário.",
+        "Pack smoke continua verde em CI e em host local sob pressão."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduzir falso-negativo local melhora confiança no comando canônico de parity."
     }
   ]
 }
