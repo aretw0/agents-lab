@@ -1,56 +1,47 @@
 {
-  "timestamp": "2026-05-02T17:05:01.424Z",
-  "context": "retomada pós-reload concluída: policy de encerramento conciso documentada, rotina local-safe de retomada registrada, growth source/freshness/ [snip] e readiness e boundary com smoke verde. [truncated:+26 chars]",
+  "timestamp": "2026-05-02T17:17:39.040Z",
+  "context": "contrato de encerramento endurecido pós-feedback do operador: mini-packet obrigatório (status+próximos passos+preview), neutralidade por defa [snip] rd documentados e protegidos por smoke. [truncated:+28 chars]",
   "next_actions": [
-    "Semear nova fatia local-safe de baixa complexidade para manter continuidade sem escopo protegido."
+    "Manter fechamento conciso com mini-packet obrigatório em todos os turnos.",
+    "Semear próxima fatia local-safe quando lane voltar a no-eligible-tasks."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-954",
-    "VER-BUD-956",
-    "VER-BUD-957"
+    "VER-BUD-961",
+    "VER-BUD-962",
+    "control-plane-doc-checklist 2/2"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-611",
+    "focus": "TASK-BUD-613",
     "canonical_links": [
-      "task:TASK-BUD-611",
-      "verification:VER-BUD-954"
+      "task:TASK-BUD-613",
+      "verification:VER-BUD-961"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T17:05:01.424Z",
+    "generatedAtIso": "2026-05-02T17:17:39.040Z",
     "level": "checkpoint",
-    "percent": 62,
+    "percent": 61,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
-    "growth_maturity": {
-      "decision": "hold",
-      "score": 78,
-      "recommendationCode": "growth-maturity-hold-maintain"
-    },
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T17:05:01.424Z",
+      "atIso": "2026-05-02T17:17:39.040Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 62,
+      "percent": 61,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe",
-      "growth_maturity": {
-        "decision": "hold",
-        "score": 78,
-        "recommendationCode": "growth-maturity-hold-maintain"
-      }
+      "recommendation": "continue-local-safe"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-611"
+    "TASK-BUD-613"
   ]
 }
