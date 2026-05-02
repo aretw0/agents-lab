@@ -42,3 +42,63 @@ Se faltar qualquer dimensão obrigatória, a decisão padrão é:
 ## Uso operacional sugerido
 
 Rodar no turn boundary/checkpoint e registrar decisão no board/handoff antes de ampliar escopo.
+
+Integração recomendada:
+
+1. executar `growth_maturity_score_packet`;
+2. propagar o snapshot para `turn_boundary_decision_packet` (campos opcionais `*_score`, `debt_budget_ok`, `critical_blockers`);
+3. usar `summary` compacto para registrar `go|hold|needs-evidence` no checkpoint.
+
+## Exemplos rápidos
+
+### A) Go (expansão bounded)
+
+Entrada:
+
+```json
+{
+  "safety_score": 90,
+  "calibration_score": 88,
+  "throughput_score": 86,
+  "simplicity_score": 87,
+  "debt_budget_ok": true,
+  "critical_blockers": 0
+}
+```
+
+Saída esperada (resumo):
+
+`decision=go code=growth-maturity-go-expand-bounded`
+
+### B) Hold (estabilização)
+
+Entrada:
+
+```json
+{
+  "safety_score": 78,
+  "calibration_score": 75,
+  "throughput_score": 72,
+  "simplicity_score": 74,
+  "debt_budget_ok": true,
+  "critical_blockers": 0
+}
+```
+
+Saída esperada (resumo):
+
+`decision=hold code=growth-maturity-hold-maintain`
+
+### C) Needs-evidence (fail-closed)
+
+Entrada:
+
+```json
+{
+  "safety_score": 90
+}
+```
+
+Saída esperada (resumo):
+
+`decision=needs-evidence code=growth-maturity-needs-evidence`

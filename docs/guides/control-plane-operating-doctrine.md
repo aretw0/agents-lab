@@ -552,9 +552,10 @@ A cadeia compacta validada para o canário local é:
 ```text
 context_watch_continuation_readiness: ready=yes ... authorization=none
 context_watch_one_slice_canary_preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no ... authorization=none
+turn_boundary_decision_packet: ... growthDecision=go|hold|needs-evidence growthCode=... authorization=none
 ```
 
-Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão humana futura. `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
+Leia essa saída como evidência graduada, não como permissão. `ready=yes` diz que os fatos locais observados estão verdes. `prepare=yes` diz que a próxima fatia poderia ser preparada. `packet=ready-for-human-decision` diz que há material suficiente para uma decisão humana futura. `growthDecision=...` explicita se o boundary está em faixa de expansão (`go`) ou estabilização (`hold|needs-evidence`). `dispatch=no` é a fronteira dura: nenhuma execução pode começar por essa preview.
 
 `stop=yes` e `oneSliceOnly=yes` são parte do contrato de segurança. Mesmo um futuro caminho explicitamente autorizado deve parar depois de uma fatia, registrar validação, commit e checkpoint, e só considerar outra iteração com contrato separado de repetição/cooldown/cancelamento.
 

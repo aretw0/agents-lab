@@ -13989,7 +13989,7 @@
     {
       "id": "TASK-BUD-596",
       "description": "[P1] Documentar uso operacional do `growth_maturity_score_packet` no ciclo de turn-boundary/checkpoint (com exemplos de go/hold/needs-evidence).",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/guides/primitive-growth-sanity-plan.md",
@@ -14002,7 +14002,8 @@
         "Doctrine referencia explicitamente a integração com turn_boundary_decision_packet."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] rotina explícita reduz deriva operacional e mantém aceleração sob governança."
+      "notes": "[rationale:risk-control] rotina explícita reduz deriva operacional e mantém aceleração sob governança.\n2026-05-02: runbook de growth maturity por boundary documentado com exemplos go/hold/needs-evidence e referência explícita na doctrine.",
+      "verification": "VER-BUD-946"
     },
     {
       "id": "TASK-BUD-597",

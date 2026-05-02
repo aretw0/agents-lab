@@ -10734,6 +10734,15 @@
       "method": "autonomy priority canonicalization + smoke",
       "timestamp": "2026-05-02T15:27:48.229Z",
       "evidence": "Implemented canonical priority handling for autonomy task selection. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts` - Added `parsePriorityValue(...)`. - `priorityRank(...)` now resolves priority by order: 1) explicit `task.priority` (canonical) 2) bracketed description prefix (`[P1]`, `[P1/backlog]`) 3) generic description fallback (`p1`) 4) default `p9` - Updated policy label to `priority(field>description P0..P9)`. - `packages/pi-stack/extensions/colony-pilot-task-sync.ts` - Added optional `priority?: string` to `ProjectTaskItem`. - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` - Added test for field-vs-description conflict (field is canonical). - Added test for `[P1/backlog]` bracket variant parsing. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` => 24 passed. - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 24 passed."
+    },
+    {
+      "id": "VER-BUD-946",
+      "target": "TASK-BUD-596",
+      "target_type": "task",
+      "status": "passed",
+      "method": "growth maturity boundary runbook docs + checklist smoke",
+      "timestamp": "2026-05-02T15:31:07.568Z",
+      "evidence": "Documented operational use of growth maturity packet in turn-boundary/checkpoint flow. Files updated: - `docs/guides/primitive-growth-sanity-plan.md` - Added boundary runbook for `growth_maturity_score_packet` + `turn_boundary_decision_packet`. - Added explicit go/hold/needs-evidence action policy and sample payload. - `docs/primitives/growth-maturity-score-packet.md` - Added integration guidance with turn-boundary packet. - Added concrete examples for outcomes: go, hold, needs-evidence. - `docs/guides/control-plane-operating-doctrine.md` - Added explicit reference in compact decision chain showing `growthDecision` and `growthCode` in `turn_boundary_decision_packet` summary. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 passed. Result: - Growth-maturity governance is now operationally documented as routine boundary behavior, preserving report-only/no-dispatch posture."
     }
   ]
 }

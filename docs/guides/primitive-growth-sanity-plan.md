@@ -98,6 +98,32 @@ Em cada turn boundary/checkpoint:
 3. decidir `promote|defer` para próximo nível;
 4. registrar decisão/evidência no board.
 
+## Runbook curto (boundary go/hold)
+
+Sequência recomendada por boundary:
+
+1. gerar score explícito com `growth_maturity_score_packet`;
+2. anexar o snapshot no `turn_boundary_decision_packet`;
+3. agir conforme decisão:
+   - `go`: ampliar somente **1 nível bounded**;
+   - `hold`: manter ritmo e estabilizar pontos fracos;
+   - `needs-evidence`: fail-closed, coletar sinais faltantes antes de acelerar.
+
+Exemplo de uso (snapshot completo):
+
+```json
+{
+  "safety_score": 86,
+  "calibration_score": 84,
+  "throughput_score": 79,
+  "simplicity_score": 82,
+  "debt_budget_ok": true,
+  "critical_blockers": 0
+}
+```
+
+Regra prática: sem as 4 dimensões completas, não existe decisão de aceleração.
+
 ## Critério para v0.8.0
 
 A release só acontece quando a barra de maturidade estiver comprovada por evidência, não por urgência de calendário:
