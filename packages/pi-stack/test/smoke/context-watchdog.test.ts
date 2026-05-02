@@ -1933,6 +1933,26 @@ describe("context-watchdog", () => {
 			expect(growthResult.details?.growthMaturity?.recommendationCode).toBe("growth-maturity-needs-evidence");
 			expect(growthResult.details?.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
 			expect(growthResult.content?.[0]?.text).toContain("growthDecision=needs-evidence");
+			expect(growthResult.details?.directionPreview?.recommendedOptionId).toBe("similar-lane");
+
+			const growthGoResult = await tool.execute(
+				"tc-turn-boundary-growth-go",
+				{
+					safety_score: 90,
+					calibration_score: 88,
+					throughput_score: 86,
+					simplicity_score: 87,
+					debt_budget_ok: true,
+					critical_blockers: 0,
+				},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd: cwdCheckpoint },
+			);
+			expect(growthGoResult.details?.growthMaturity?.decision).toBe("go");
+			expect(growthGoResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
+			expect(growthGoResult.content?.[0]?.text).toContain("directionOptions=similar-lane:viable,next-high-value:recommended");
+			expect(growthGoResult.content?.[0]?.text).toContain("growthDecision=go");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}

@@ -8,7 +8,11 @@ import {
   REFRESH_FOCUS_CHECKPOINT_CODE,
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
-import { evaluateGrowthMaturityScorePacket, type GrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
+import {
+  evaluateGrowthMaturityScorePacket,
+  type GrowthMaturityDecision,
+  type GrowthMaturityScorePacket,
+} from "./guardrails-core-growth-maturity";
 
 export type ContextWatchContinuationRecommendationCode =
   | typeof CONTINUE_LOCAL_CODE
@@ -105,6 +109,7 @@ function buildTurnBoundaryDirectionPreview(input: {
   humanActionRequired: boolean;
   nextAutoStep: string;
   localAuditReasons: string[];
+  growthDecision?: GrowthMaturityDecision;
 }): TurnBoundaryDirectionPreview {
   const criticalReasons = input.localAuditReasons.filter((reason) =>
     reason === "protected-scopes:invalid"
@@ -116,19 +121,24 @@ function buildTurnBoundaryDirectionPreview(input: {
   if (input.localAuditReasons.includes("no-local-safe-next-step")) similarBlockers.push("no-local-safe-next-step");
   if (criticalReasons.length > 0) similarBlockers.push(...criticalReasons);
 
+  const growthEncouragesExpansion = input.growthDecision === "go";
+  const growthConservative = input.growthDecision === "hold" || input.growthDecision === "needs-evidence";
+
   const similarSuitability: "recommended" | "viable" | "blocked" =
     similarBlockers.length > 0
       ? "blocked"
-      : (input.decision === "continue" || input.decision === "checkpoint")
-        ? "recommended"
-        : "viable";
+      : growthEncouragesExpansion
+        ? "viable"
+        : (input.decision === "continue" || input.decision === "checkpoint" || growthConservative)
+          ? "recommended"
+          : "viable";
 
   const nextLaneBlockers: string[] = [];
   nextLaneBlockers.push("requires-explicit-human-focus");
   if (criticalReasons.length > 0) nextLaneBlockers.push(...criticalReasons);
 
   const nextLaneSuitability: "recommended" | "viable" | "blocked" =
-    (input.decision === "pause" || input.decision === "ask-human" || input.humanActionRequired)
+    (input.decision === "pause" || input.decision === "ask-human" || input.humanActionRequired || growthEncouragesExpansion)
       ? "recommended"
       : criticalReasons.length > 0
         ? "blocked"
@@ -236,6 +246,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     humanActionRequired,
     nextAutoStep,
     localAuditReasons: reasons,
+    growthDecision: growthMaturity?.decision,
   });
   const directionOptionsCompact = directionPreview.options
     .map((option) => `${option.id}:${option.suitability}`)

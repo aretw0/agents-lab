@@ -682,7 +682,7 @@ Sinais simples não devem acumular ruído nem virar desculpa para manutenção a
 
 “Simples” não significa “automático”. Simples significa que o custo de decisão é baixo, o blast radius é pequeno, o rollback é claro e a validação cabe na fatia. Se qualquer uma dessas condições faltar, a ação deixa de ser correção simples e vira task, decision packet ou pergunta ao operador.
 
-Para manutenção git, a regra é conservadora: diagnosticar, registrar e recomendar são permitidos; executar `git gc`, executar `git prune` ou remover `.git/gc.log` exige autorização explícita. Um aviso de manutenção não deve ser ignorado, mas também não deve virar limpeza destrutiva automática.
+Para manutenção git, a regra é conservadora: diagnosticar, registrar e recomendar são permitidos; executar `git gc`, executar `git prune` ou remover `.git/gc.log` exige autorização explícita. Um aviso de manutenção não deve ser ignorado, mas também não deve virar limpeza destrutiva automática. Referência rápida operacional: `docs/guides/host-disk-recovery.md#manutenção-do-repositório-git` + tool read-only `git_maintenance_status`.
 
 Para limpeza operacional simples (ex.: arquivos temporários de status/listagem), prefira uma remoção agrupada em um único comando bounded em vez de várias remoções unitárias. Isso reduz ruído de confirmação sem promover limpeza destrutiva ampla.
 

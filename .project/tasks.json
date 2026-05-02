@@ -14023,6 +14023,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] prioridade explícita reduz ambiguidade e evita depender de soft-intent textual apenas.\n2026-05-02: prioridade explícita no board agora é canônica para seleção da autonomy lane; descrição virou fallback.",
       "verification": "VER-BUD-945"
+    },
+    {
+      "id": "TASK-BUD-598",
+      "description": "[P1] Tornar direction preview do turn boundary sensível ao growth maturity (`go` favorece next-high-value; `hold|needs-evidence` mantém consolidação).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando growthDecision=go e sem blockers críticos, `directionPreview` recomenda `next-high-value`.",
+        "Quando growthDecision=hold|needs-evidence, preview mantém postura conservadora de consolidação.",
+        "Smokes de context-watchdog continuam verdes com cobertura do novo comportamento."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] usar score de maturidade para orientar direção reduz aceleração subjetiva e preserva fail-closed.\n2026-05-02: quick reference de manutenção Git adicionado no ponto de uso e preview direcional do boundary passou a refletir `growthDecision` (go favorece next-high-value).",
+      "verification": "VER-BUD-947"
     }
   ]
 }

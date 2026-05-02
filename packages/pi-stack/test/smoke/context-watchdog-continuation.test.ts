@@ -116,6 +116,33 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.summary).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
   });
 
+  it("uses growth go signal to recommend next-high-value direction when local blockers are clear", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-1",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      growthMaturity: {
+        safetyScore: 90,
+        calibrationScore: 88,
+        throughputScore: 86,
+        simplicityScore: 87,
+        debtBudgetOk: true,
+        criticalBlockers: 0,
+      },
+    });
+
+    expect(packet.decision).toBe("continue");
+    expect(packet.growthMaturity?.decision).toBe("go");
+    expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
+    expect(packet.directionPreview.options.map((option) => `${option.id}:${option.suitability}`)).toEqual([
+      "similar-lane:viable",
+      "next-high-value:recommended",
+    ]);
+    expect(packet.summary).toContain("directionOptions=similar-lane:viable,next-high-value:recommended");
+    expect(packet.summary).toContain("growthDecision=go");
+  });
+
   it("includes growth maturity snapshot and fail-closed needs-evidence guidance when scores are incomplete", () => {
     const packet = buildTurnBoundaryDecisionPacket({
       ready: true,
@@ -130,6 +157,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.decision).toBe("continue");
     expect(packet.growthMaturity?.decision).toBe("needs-evidence");
     expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-needs-evidence");
+    expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
     expect(packet.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
     expect(packet.summary).toContain("growthDecision=needs-evidence");
     expect(packet.summary).toContain("growthCode=growth-maturity-needs-evidence");

@@ -10743,6 +10743,15 @@
       "method": "growth maturity boundary runbook docs + checklist smoke",
       "timestamp": "2026-05-02T15:31:07.568Z",
       "evidence": "Documented operational use of growth maturity packet in turn-boundary/checkpoint flow. Files updated: - `docs/guides/primitive-growth-sanity-plan.md` - Added boundary runbook for `growth_maturity_score_packet` + `turn_boundary_decision_packet`. - Added explicit go/hold/needs-evidence action policy and sample payload. - `docs/primitives/growth-maturity-score-packet.md` - Added integration guidance with turn-boundary packet. - Added concrete examples for outcomes: go, hold, needs-evidence. - `docs/guides/control-plane-operating-doctrine.md` - Added explicit reference in compact decision chain showing `growthDecision` and `growthCode` in `turn_boundary_decision_packet` summary. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 passed. Result: - Growth-maturity governance is now operationally documented as routine boundary behavior, preserving report-only/no-dispatch posture."
+    },
+    {
+      "id": "VER-BUD-947",
+      "target": "TASK-BUD-598",
+      "target_type": "task",
+      "status": "passed",
+      "method": "turn-boundary direction with growth signal + quick git-maintenance reference",
+      "timestamp": "2026-05-02T15:39:45.932Z",
+      "evidence": "Delivered two requested outcomes: quick git-maintenance reference at point-of-use and resumed maturity lane work. 1) Quick reference (no new skill/material duplication) - Updated `docs/guides/control-plane-operating-doctrine.md` to add direct pointer in the Git maintenance rule: - `docs/guides/host-disk-recovery.md#manutenção-do-repositório-git` - read-only tool reference: `git_maintenance_status` 2) Lane resume: growth-aware direction preview - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - `buildTurnBoundaryDirectionPreview(...)` now accepts optional `growthDecision`. - Behavior: - `growthDecision=go` (and no local blockers) favors `next-high-value` in `directionPreview`. - `growthDecision=hold|needs-evidence` keeps conservative consolidation posture. - Tests updated: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - `packages/pi-stack/test/smoke/context-watchdog.test.ts` Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` - 70 passed / 0 failed."
     }
   ]
 }
