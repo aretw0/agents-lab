@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-05-02T05:37:44.951Z",
-  "context": "Auto-advance ativo na lane delegation-evolution. Foco movido para TASK-BUD-547: implementar delegate_or_execute_decision_packet com blockers [snip] tionCode determinístico (sem dispatch). [truncated:+23 chars]",
+  "timestamp": "2026-05-02T05:44:59.637Z",
+  "context": "Auto-advance ativo na lane delegation-evolution. Foco movido para TASK-BUD-548: documentar runbook staged (local-safe -> simple delegate -> s [snip] ates, rollback e checklist por estágio. [truncated:+21 chars]",
   "current_tasks": [
-    "TASK-BUD-547"
+    "TASK-BUD-548"
   ],
   "next_actions": [
-    "Implementar packet read-only delegate_or_execute_decision_packet",
-    "Cobrir smoke de decisão (execute / delegate / defer) e fail-closed",
-    "Atualizar board verification + commit por task"
+    "Atualizar control-plane-operating-doctrine com runbook de estágio",
+    "Atualizar playbook de contexto com fluxo de delegar vs executar",
+    "Atualizar docs/primitives/README com sequência operacional"
   ],
   "blockers": [],
   "recent_validation": [
-    "TASK-BUD-546 concluída com VER-BUD-902",
-    "smoke session-analytics/tool-hygiene verde"
+    "TASK-BUD-547 concluída com VER-BUD-903",
+    "smoke ops-calibration/session-analytics verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-547",
+    "focus": "TASK-BUD-548",
     "canonical_links": [
+      "task:TASK-BUD-548",
       "task:TASK-BUD-547",
-      "task:TASK-BUD-546",
-      "verification:VER-BUD-902"
+      "verification:VER-BUD-903"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T05:37:44.951Z",
+    "generatedAtIso": "2026-05-02T05:44:59.637Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 34,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T05:37:44.951Z",
+      "atIso": "2026-05-02T05:44:59.637Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

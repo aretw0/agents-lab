@@ -649,6 +649,29 @@ Contrato desta lane:
 - depois formalizar runbook e checklist operacional por estágio;
 - só discutir promoção de estágio com evidência verde e decisão humana explícita para qualquer escopo protected.
 
+Runbook por estágio (delegar mais, executar menos):
+
+1. **Estágio local-safe (base)**
+   - usar `delegation_lane_capability_snapshot` + `delegation_mix_score`;
+   - se `decision=needs-evidence`, manter `local-execute` com fatia curta;
+   - registrar verificação focal + commit pequeno.
+
+2. **Estágio simple-delegate (bounded)**
+   - usar `delegate_or_execute_decision_packet`;
+   - só aceitar recomendação `simple-delegate` quando packet estiver sem blockers;
+   - continuar sem auto-dispatch (decisão humana explícita permanece obrigatória).
+
+3. **Estágio swarm rehearsal (pré-protected)**
+   - só abrir discussão após evidência repetida de estágio 2 estável;
+   - manter checklist de rollback, validação focal e checkpoint fresco;
+   - qualquer sinal de risco/protected volta para estágio anterior.
+
+Checklist de evidência por estágio:
+- snapshot/score/packet com `recommendationCode` explícito;
+- verificação focal verde (smoke/marker/check);
+- board + handoff atualizados com foco único;
+- decisão de avanço/defer registrada em nota curta.
+
 ## Testes de path cross-platform
 
 Testes que validam paths devem ser agnósticos ao host. Quando a regra testada é formato canônico portátil, use fixtures literais com `/` e `\\` como strings de entrada e compare com evidência normalizada, em vez de montar expectativas com `path.join`, `path.resolve` ou separadores do sistema atual. O objetivo é provar que Windows, Linux e macOS chegam ao mesmo sinal medido, não que a suite passou por acidente no host local.

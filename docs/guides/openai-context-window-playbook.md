@@ -155,6 +155,14 @@ Se houver `reload-required`, manter fail-closed para auto-resume (sem dispatch),
 
 Regra de controle: `reload-required` nunca autoriza auto-resume por si só; o bloqueio é intencional (fail-closed) até `/reload`.
 
+### Runbook rápido da lane de delegação (local-safe)
+Quando o foco for evoluir delegação com controle:
+1. `delegation_lane_capability_snapshot` (sinais base de frescor + monitor + subagent);
+2. `delegation_mix_score` (mix local/manual/simple-delegate/swarm na janela);
+3. `delegate_or_execute_decision_packet` (recomendação determinística: `local-execute|simple-delegate|defer`).
+
+Regra: sem blockers no packet para considerar `simple-delegate`; com sinais faltando/stale, cair para `defer` (fail-closed) ou `local-execute` bounded para coletar evidência.
+
 Visibilidade operacional (control-plane):
 - Em escalonamento (`warn/checkpoint/compact`), o watchdog registra trilha canônica em `.project/handoff.json`:
   - `next_actions` recebe linha `Context-watch action: ...`

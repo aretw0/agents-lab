@@ -12940,7 +12940,7 @@
     {
       "id": "TASK-BUD-548",
       "description": "Documentar runbook da lane (delegar mais, executar menos) com gates por estágio: local-safe -> simple delegate -> swarm rehearsal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-547"
@@ -12956,7 +12956,8 @@
         "Checklist de evidência por slice e por promoção de estágio."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] sem runbook, primitives novas tendem a uso inconsistente e perda de controle operacional.\n[provenance:human] source_task=TASK-BUD-547 reason=quarto bloco da wave para consolidar prática operacional"
+      "notes": "[rationale:risk-control] sem runbook, primitives novas tendem a uso inconsistente e perda de controle operacional.\n[provenance:human] source_task=TASK-BUD-547 reason=quarto bloco da wave para consolidar prática operacional\nPromoção automática de foco após conclusão da TASK-BUD-547 para manter auto-advance da night lane.\n2026-05-03: runbook da lane de delegação documentado por estágio com checklist e sequência operacional de primitives.",
+      "verification": "VER-BUD-904"
     },
     {
       "id": "TASK-BUD-549",
