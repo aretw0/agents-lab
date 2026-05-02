@@ -12676,6 +12676,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] evitar bash ad-hoc para dirty-check reduz atrito operacional e mantém fluxo first-party auditável.\n[provenance:human] source_task=TASK-BUD-534 reason=continuar migração para superfícies próprias com menor fricção no loop\n2026-05-02: comando /git-dirty disponível para inspeção rápida sem bash temp-file workflow.",
       "verification": "VER-BUD-884"
+    },
+    {
+      "id": "TASK-BUD-536",
+      "description": "Adicionar sinal `gitDirty` também em `context_watch_status` para inspeção rápida (clean/dirty/unknown) sem mudar contrato de dispatch.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-535"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_status` details inclui `gitDirty` com fallback normalizado fora de repo.",
+        "Summary textual principal permanece estável (sem quebra de contrato existente).",
+        "Smoke cobre presença de `gitDirty` no payload de status."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] expor dirty state no status reduz necessidade de comandos extras e mantém fluxo read-only first-party.\n[provenance:human] source_task=TASK-BUD-535 reason=continuidade da ergonomia local-safe após introdução do /git-dirty e tool git_dirty_snapshot\n2026-05-03: status packet agora já inclui sinal git dirty normalizado, mantendo summary estável.",
+      "verification": "VER-BUD-885"
     }
   ]
 }

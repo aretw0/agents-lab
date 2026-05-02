@@ -867,6 +867,38 @@ function extractAutoResumePromptValue(prompt: string, label: string, fallback: s
 	return line ? line.slice(label.length + 1).trim() : fallback;
 }
 
+type ContextWatchGitDirtySignal = {
+	available: boolean;
+	clean: boolean | null;
+	rowCount: number;
+	summary: string;
+	error?: "not-a-git-repo" | "git-dirty-snapshot-error";
+};
+
+function readContextWatchGitDirtySignal(cwd: string): ContextWatchGitDirtySignal {
+	try {
+		const snapshot = readGitDirtySnapshot(cwd);
+		return {
+			available: true,
+			clean: snapshot.clean,
+			rowCount: snapshot.rows.length,
+			summary: snapshot.summary,
+		};
+	} catch (error) {
+		const errorText = error instanceof Error ? error.message : String(error ?? "unknown-error");
+		const normalizedError = /not a git repository/i.test(errorText)
+			? "not-a-git-repo"
+			: "git-dirty-snapshot-error";
+		return {
+			available: false,
+			clean: null,
+			rowCount: 0,
+			summary: "git-dirty-snapshot: unavailable",
+			error: normalizedError,
+		};
+	}
+}
+
 export function formatContextWatchAutoResumePreviewSummary(input: {
 	focusTasks: string;
 	staleFocusCount: number;
@@ -1950,6 +1982,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
+			const gitDirty = readContextWatchGitDirtySignal(ctx.cwd);
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -1985,6 +2018,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStopHint,
 				operatorAction,
 				operatingCadence,
+				gitDirty,
 			};
 			return {
 				content: [{ type: "text", text: adaptiveSummary.summary }],
@@ -2092,34 +2126,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const preload = consumeContextPreloadPack(ctx.cwd, {
 				profile: "control-plane-core",
 			});
-			let gitDirty: {
-				available: boolean;
-				clean: boolean | null;
-				rowCount: number;
-				summary: string;
-				error?: string;
-			};
-			try {
-				const snapshot = readGitDirtySnapshot(ctx.cwd);
-				gitDirty = {
-					available: true,
-					clean: snapshot.clean,
-					rowCount: snapshot.rows.length,
-					summary: snapshot.summary,
-				};
-			} catch (error) {
-				const errorText = error instanceof Error ? error.message : String(error ?? "unknown-error");
-				const normalizedError = /not a git repository/i.test(errorText)
-					? "not-a-git-repo"
-					: "git-dirty-snapshot-error";
-				gitDirty = {
-					available: false,
-					clean: null,
-					rowCount: 0,
-					summary: "git-dirty-snapshot: unavailable",
-					error: normalizedError,
-				};
-			}
+			const gitDirty = readContextWatchGitDirtySignal(ctx.cwd);
 			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
 			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,

@@ -10185,6 +10185,15 @@
       "method": "command wiring + smoke + marker-check",
       "timestamp": "2026-05-02T03:09:56.816Z",
       "evidence": "Added first-party `/git-dirty` command backed by temp-free dirty snapshot primitive. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added helper formatter for dirty rows. - registered command `git-dirty` that uses `readGitDirtySnapshot` and prints bounded summary + top rows. - fallback in non-repo cwd emits normalized message `git-dirty-snapshot: unavailable (not-a-git-repo)`. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - verifies command registration alongside tools. - verifies fallback behavior in temp non-git directory. - `docs/guides/control-plane-operating-doctrine.md` - guidance updated to include command `/git-dirty` as preferred non-temp-file path. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts` => 2 files passed, 9 tests passed. - marker checks passed for command registration/fallback and doctrine anchors (`/git-dirty`, `git_dirty_snapshot`)."
+    },
+    {
+      "id": "VER-BUD-885",
+      "target": "TASK-BUD-536",
+      "target_type": "task",
+      "status": "passed",
+      "method": "status payload composition + smoke + marker-check",
+      "timestamp": "2026-05-02T03:41:38.355Z",
+      "evidence": "Added git dirty signal into context-watch status payload without changing main summary contract. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - introduced helper `readContextWatchGitDirtySignal(cwd)` for normalized git dirty probe (`not-a-git-repo|git-dirty-snapshot-error`). - `context_watch_status` now includes `details.gitDirty` from helper. - `context_watch_continuation_readiness` now reuses same helper (deduplicated logic). - status summary text remains unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool test now asserts `details.gitDirty` fallback envelope in non-git temp cwd. - `docs/guides/openai-context-window-playbook.md` - documents `context_watch_status` exposure of `details.gitDirty`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker checks passed for helper/status anchors and docs anchors (`context_watch_status`, `details.gitDirty`)."
     }
   ]
 }

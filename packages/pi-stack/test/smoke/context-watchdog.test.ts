@@ -1328,6 +1328,13 @@ describe("context-watchdog", () => {
 				level: "ok",
 				percent: 14,
 				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown",
+				gitDirty: {
+					available: false,
+					clean: null,
+					rowCount: 0,
+					summary: "git-dirty-snapshot: unavailable",
+					error: "not-a-git-repo",
+				},
 			});
 			expect(result.details?.autoCompact).toBeTruthy();
 			expect(result.details?.operatorAction).toBeTruthy();
