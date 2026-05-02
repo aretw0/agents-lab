@@ -10653,6 +10653,15 @@
       "method": "turn-boundary compact direction options preview + edge cases",
       "timestamp": "2026-05-02T13:51:19.467Z",
       "evidence": "Consolidated turn-boundary preview with compact options output and edge-case suitability coverage. Code: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - Added compact summary marker for options: `directionOptions=similar-lane:<...>,next-high-value:<...>`. - Packet now computes `directionOptionsCompact` from `directionPreview.options`. - Keeps report-only/no-dispatch invariants intact. Tests: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Added suitability assertions for checkpoint/pause/ask-human packets. - Added summary assertions for both compact option variants: - `similar-lane:recommended,next-high-value:viable` - `similar-lane:blocked,next-high-value:recommended` - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Integration assertions now verify `directionPreview.options` and compact `directionOptions` marker in tool text. Docs: - `docs/primitives/nudge-free-local-continuity.md` - Registered compact summary marker contract for direction preview. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 70 passed (3 files). - marker checks passed for core/test/docs anchors."
+    },
+    {
+      "id": "VER-BUD-937",
+      "target": "TASK-BUD-588",
+      "target_type": "task",
+      "status": "passed",
+      "method": "protected canary contract docs + packet check",
+      "timestamp": "2026-05-02T14:09:07.490Z",
+      "evidence": "Started recommended high-value lane through protected canary contract consolidation. Board focus: - `TASK-BUD-588` (P1) created/in-progress as protected canary preparation slice derived from `TASK-BUD-134` defer-high-risk signal. Docs updated: - `docs/guides/control-plane-evolution-playbook.md` - Added section: `Canário protegido de capacidade externa (GitHub Actions/offload) — pré-condições`. - Includes required value metric, focal validation, explicit rollback, board envelope fields, and `dispatch=no` until human promote decision. - `docs/guides/budget-governance.md` - Added `Envelope mínimo para canário protegido (capacidade externa)`. - Explicit required fields: `expectedValue`, `rollbackPlan`, `focalValidationGate`, `decision`. - Fail-closed rule: missing fields => default `defer`. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 passed. - marker checks passed for both docs anchors. - protected packet state after slice: - `autonomy_lane_protected_focus_packet(task=TASK-BUD-588)` => `decision=ready-for-human-decision`, `option=promote`, `code=protected-focus-promote-canary`, `risk=high`, `value=high`. Result: - High-value protected lane is now concretely prepared with explicit canary+rollback contract, preserving no-dispatch/human-decision gating."
     }
   ]
 }

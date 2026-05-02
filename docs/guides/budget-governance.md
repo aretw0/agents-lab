@@ -24,6 +24,16 @@ Campos recomendados:
 
 Sem envelope explícito, não há controle operacional real.
 
+### Envelope mínimo para canário protegido (capacidade externa)
+
+Quando a lane for protegida (ex.: GitHub Actions/offload), exigir no envelope:
+- `expectedValue` (ganho esperado mensurável: tempo/custo/throughput);
+- `rollbackPlan` (como voltar ao caminho local sem perda: `git revert <commit>` + desativar rota protegida);
+- `focalValidationGate` (mesmo gate antes/depois para comparação);
+- `decision` (`promote|defer`) sempre com evidência.
+
+Sem esses campos, a decisão padrão é `defer`.
+
 ---
 
 ## Superfícies que se complementam

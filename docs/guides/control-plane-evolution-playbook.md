@@ -146,6 +146,13 @@ Gate de entrada — simple-delegate rehearsal bounded:
 3. sem blockers hard-intent (`protected`, `risk`, `reload-required`, `validation-failed-or-unknown`);
 4. escopo protegido continua opt-in humano (nenhum auto-dispatch).
 
+Canário protegido de capacidade externa (GitHub Actions/offload) — pré-condições:
+1. declarar valor esperado do canário (throughput/custo/tempo) com métrica observável;
+2. declarar validação focal obrigatória antes/depois (mesmo gate local para comparação);
+3. declarar rollback explícito e não-destrutivo (`git revert <commit>` + retorno imediato ao caminho local);
+4. registrar envelope mínimo no board/handoff: `task`, `maxCost`, `owner`, `evidence`, `decision=promote|defer`;
+5. manter `dispatch=no` até decisão humana explícita de promote.
+
 Rollout canário:
 1. escolher 1 task curta com critérios claros;
 2. executar rehearsal report-first (sem dispatch automático) e só então avaliar execução delegada bounded;
