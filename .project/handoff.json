@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-05-02T19:46:37.306Z",
-  "context": "lane operacional seguiu sem abrir frente nova: CI ganhou artifact report-only de change discovery (changed-files + summary.md) para triagem r [snip] ke:gate full e paridade local↔CI verde. [truncated:+31 chars]",
+  "timestamp": "2026-05-02T20:16:15.157Z",
+  "context": "seguimos sem parar: loop de triagem CI foi fechado com comentário automático no PR (upsert marker estável) consumindo summary do change disco [snip] rtura permanece full com gate canônico. [truncated:+10 chars]",
   "next_actions": [
-    "Observar próximos runs de GitHub Actions para confirmar utilidade prática do artifact ci-chang [snip] overy na triagem de drift. [truncated:+6 chars]",
-    "Se necessário, ajustar classificação ci/code/docs com base em falsos positivos/negativos observados nos próximos runs."
+    "Observar próximos 2 PR runs para validar legibilidade/utilidade do novo comentário de change discovery.",
+    "Se aparecer ruído, ajustar taxonomia ci/code/docs e truncation hint no summary."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-974",
+    "VER-BUD-975",
     "npm run ci:local:parity green (115/1083 + sovereignty strict/diff)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-629",
+    "focus": "TASK-BUD-630",
     "canonical_links": [
-      "task:TASK-BUD-629",
-      "verification:VER-BUD-974"
+      "task:TASK-BUD-630",
+      "verification:VER-BUD-975"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T19:46:37.306Z",
+    "generatedAtIso": "2026-05-02T20:16:15.157Z",
     "level": "checkpoint",
-    "percent": 56,
+    "percent": 57,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T19:46:37.306Z",
+      "atIso": "2026-05-02T20:16:15.157Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 56,
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -41,6 +41,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-629"
+    "TASK-BUD-630"
   ]
 }

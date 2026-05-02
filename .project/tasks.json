@@ -14640,6 +14640,23 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] artifact de delta facilita diagnóstico de drift em Actions sem alterar cobertura dos gates.\n2026-05-02: CI publica artifact `ci-change-discovery` (changed-files + summary.md) em modo report-only; gate canônico permanece full.",
       "verification": "VER-BUD-974"
+    },
+    {
+      "id": "TASK-BUD-630",
+      "description": "[P1] Fechar o loop de triagem: publicar comentário automático no PR com resumo de change discovery (report-only), sem alterar execução dos gates.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
+      "acceptance_criteria": [
+        "Workflow faz upsert de comentário no PR com marker estável e conteúdo de `.artifacts/ci-change-discovery/summary.md`.",
+        "Comentário é bounded (truncate seguro) para evitar falha por tamanho.",
+        "Nenhuma mudança em política de execução: `ci:smoke:gate` continua full."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] acelera triagem humana em PR sem reduzir cobertura ou adicionar auto-dispatch.\n2026-05-02: CI agora faz upsert de comentário no PR com summary.md do change discovery (bounded/truncated-safe), mantendo gate full.",
+      "verification": "VER-BUD-975"
     }
   ]
 }
