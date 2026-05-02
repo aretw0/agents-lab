@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-05-02T20:16:15.157Z",
-  "context": "seguimos sem parar: loop de triagem CI foi fechado com comentário automático no PR (upsert marker estável) consumindo summary do change disco [snip] rtura permanece full com gate canônico. [truncated:+10 chars]",
+  "timestamp": "2026-05-02T20:18:24.443Z",
+  "context": "mantivemos ritmo sem pausa: além do PR comment report-only, agora há smoke de regressão para anchors do workflow de change discovery, preservando invariável de gate full.",
   "next_actions": [
-    "Observar próximos 2 PR runs para validar legibilidade/utilidade do novo comentário de change discovery.",
-    "Se aparecer ruído, ajustar taxonomia ci/code/docs e truncation hint no summary."
+    "Rodar 1-2 PRs reais para validar UX do comentário + artifact na triagem.",
+    "Se aprovado, próxima fatia: incluir hints de impacto (ci/code/docs) no início do comentário para leitura em 5s."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-975",
-    "npm run ci:local:parity green (115/1083 + sovereignty strict/diff)"
+    "VER-BUD-976",
+    "npm run test:smoke green (116 files / 1085 tests)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-630",
+    "focus": "TASK-BUD-631",
     "canonical_links": [
-      "task:TASK-BUD-630",
-      "verification:VER-BUD-975"
+      "task:TASK-BUD-631",
+      "verification:VER-BUD-976"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T20:16:15.157Z",
+    "generatedAtIso": "2026-05-02T20:18:24.443Z",
     "level": "checkpoint",
-    "percent": 57,
+    "percent": 58,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T20:16:15.157Z",
+      "atIso": "2026-05-02T20:18:24.443Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 57,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -41,6 +41,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-630"
+    "TASK-BUD-631"
   ]
 }

@@ -14657,6 +14657,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] acelera triagem humana em PR sem reduzir cobertura ou adicionar auto-dispatch.\n2026-05-02: CI agora faz upsert de comentário no PR com summary.md do change discovery (bounded/truncated-safe), mantendo gate full.",
       "verification": "VER-BUD-975"
+    },
+    {
+      "id": "TASK-BUD-631",
+      "description": "[P1] Proteger regressão do loop de triagem CI com smoke test de anchors do workflow (`changes` + artifact + PR comment + full gate).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts",
+        ".github/workflows/ci.yml"
+      ],
+      "acceptance_criteria": [
+        "Novo smoke test valida anchors críticos do workflow de change discovery.",
+        "Teste garante que gate canônico (`npm run ci:smoke:gate`) permanece presente no job smoke.",
+        "Suíte smoke permanece verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] evita drift acidental que quebraria observabilidade recém-adicionada.\n2026-05-02: smoke adiciona proteção para anchors do workflow de change discovery (job/artifact/PR upsert/full gate).",
+      "verification": "VER-BUD-976"
     }
   ]
 }
