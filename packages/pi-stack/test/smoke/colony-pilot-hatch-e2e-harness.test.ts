@@ -42,6 +42,7 @@ function tempCwdWithHatchSettings() {
               enforceOnAntColonyTool: true,
               requiredExecutables: ["node"],
               requireColonyCapabilities: ["colony", "colonyStop"],
+              enforceMachineMaintenance: false,
             },
             budgetPolicy: {
               enabled: true,

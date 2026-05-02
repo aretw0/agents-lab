@@ -23,6 +23,7 @@ function tempCwdWithGatewayConfig(port: number) {
           colonyPilot: {
             preflight: {
               requiredExecutables: ["node"],
+              enforceMachineMaintenance: false,
             },
           },
         },

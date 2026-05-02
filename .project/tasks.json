@@ -14515,7 +14515,7 @@
     {
       "id": "TASK-BUD-623",
       "description": "[P1] Tornar e2e harness de colony/web determinístico em host pressure (sem depender de memória/disco local para assertions de fluxo).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts",
@@ -14527,7 +14527,8 @@
         "Pack smoke continua verde em CI e em host local sob pressão."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] reduzir falso-negativo local melhora confiança no comando canônico de parity."
+      "notes": "[rationale:risk-control] reduzir falso-negativo local melhora confiança no comando canônico de parity.\n2026-05-02: foco ativo retomado — estabilizar harness e2e sob host pressure para fortalecer parity local↔CI e destravar throughput.\n2026-05-02: harness e2e ficou determinístico sob host pressure; paridade local↔CI validada via `ci:smoke:gate`.",
+      "verification": "VER-BUD-972"
     },
     {
       "id": "TASK-BUD-624",
@@ -14544,7 +14545,7 @@
         "Define cadência de revisão (mensal/quarterly) e gatilhos de promoção para experimento local-safe."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] acompanhar primitives de OS/protocolo evita lock-in tático e melhora decisões de arquitetura de longo prazo."
+      "notes": "[rationale:risk-control] acompanhar primitives de OS/protocolo evita lock-in tático e melhora decisões de arquitetura de longo prazo.\n2026-05-02: decisão de foco explícita — manter no backlog estratégico (não iniciar agora) enquanto priorizamos desbloqueio de throughput operacional básico→avançado."
     },
     {
       "id": "TASK-BUD-625",
@@ -14564,7 +14565,7 @@
         "Propor 1 experimento local-safe mínimo (report-only) com gate e rollback claros."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] entender isolamento/forking cedo reduz risco de adoção tardia e desalinhada com nossos guardrails."
+      "notes": "[rationale:risk-control] entender isolamento/forking cedo reduz risco de adoção tardia e desalinhada com nossos guardrails.\n2026-05-02: parked por foco — pesquisa de isolamento/forking fica para fase posterior; prioridade atual é produtividade operacional imediata."
     },
     {
       "id": "TASK-BUD-626",
@@ -14584,7 +14585,7 @@
         "Registrar restrições obrigatórias: no auto-dispatch protegido, autenticação verificável, auditabilidade de handoff."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] padronização de protocolo sem critério pode aumentar superfície de risco e drift operacional."
+      "notes": "[rationale:risk-control] padronização de protocolo sem critério pode aumentar superfície de risco e drift operacional.\n2026-05-02: parked por foco — protocolo/interoperabilidade fica em monitoramento, sem execução ativa nesta fase."
     },
     {
       "id": "TASK-BUD-627",
@@ -14604,7 +14605,7 @@
         "Propor experimento local-safe bounded antes de qualquer adoção estrutural."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas."
+      "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas.\n2026-05-02: parked por foco — estratégia de semantic paging permanece backlog, sem iniciar enquanto consolidamos capacidade de execução."
     }
   ]
 }
