@@ -1,31 +1,33 @@
 {
-  "timestamp": "2026-05-02T00:28:06.804Z",
-  "context": "Concluída wave de freshness local-safe: blueprint de fresh context pack (TASK-BUD-525) + fluxo fail-closed de consumo warm pack (TASK-BUD-526 [snip] já aplicados anteriormente e mantidos. [truncated:+33 chars]",
+  "timestamp": "2026-05-02T01:05:17.370Z",
+  "context": "Cadência retomada com checagem determinística de pendências. Concluídas TASK-BUD-525/526/527: blueprint de fresh context pack, fluxo script c [snip] time read-only context_preload_consume. [truncated:+29 chars]",
   "next_actions": [
-    "Se quiser continuar sem protected lane, criar nova task local-safe de evolução incremental do [snip] a em context-watch tools). [truncated:+35 chars]",
-    "Ou abrir foco protegido explícito para backlog parked (inclui TASK-BUD-521 sandcastle)."
+    "Sem task local-safe elegível no momento (autonomy_lane_next_task=no-eligible-tasks).",
+    "Para seguir: criar nova task local-safe incremental de contexto fresh ou abrir foco protegido [snip] TASK-BUD-521 sandcastle). [truncated:+15 chars]"
   ],
   "blockers": [
-    "autonomy_lane_next_task: no-eligible-tasks (apenas planned protected)."
+    "local-stop-protected-focus-required"
   ],
   "recent_validation": [
+    "npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts",
     "node --test scripts/test/context-preload-consume.test.mjs",
-    "npm run context:preload:write --silent",
-    "npm run context:preload:consume --silent"
+    "safe_marker_check docs/guides/openai-context-window-playbook.md markers context_preload_consum [snip] cout-min/fallback canônico [truncated:+9 chars]"
   ],
   "recent_commits": [
-    "dd598d2"
+    "dd598d2",
+    "014e626"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-526",
+    "focus": "TASK-BUD-527",
     "canonical_links": [
-      "task:TASK-BUD-526",
+      "task:TASK-BUD-527",
       "task:TASK-BUD-525",
+      "task:TASK-BUD-521",
       "commit:dd598d2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T00:28:06.804Z",
+    "generatedAtIso": "2026-05-02T01:05:17.370Z",
     "level": "ok",
     "percent": 16,
     "action": "continue",
@@ -34,7 +36,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T00:28:06.804Z",
+      "atIso": "2026-05-02T01:05:17.370Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 16,
@@ -48,6 +50,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-526"
+    "TASK-BUD-527"
   ]
 }
