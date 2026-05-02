@@ -67,6 +67,8 @@ export const CURATION_FILTER_PATCHES: FilterPatchLike[] = [
       "!extensions/usage-tracker.ts",
       "!extensions/usage-tracker-providers.ts",
       "!extensions/watchdog.ts",
+      "!extensions/safe-guard.ts",
+      "!extensions/bg-process.ts",
     ],
   },
 ];

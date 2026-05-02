@@ -14489,6 +14489,28 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] fecha trio recorrente de scans longos (du/find/ls-recursive) com alternativa bounded.\n2026-05-02: guardrails agora cobrem trio de scans longos amplos (`du`, `find`, `ls -R`) com guidance bounded.",
       "verification": "VER-BUD-970"
+    },
+    {
+      "id": "TASK-BUD-622",
+      "description": "[P1] Alinhar drift local↔GitHub Actions com comando único de parity CI e estabilização dos gates que estavam quebrando no runner.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "package.json",
+        ".github/workflows/ci.yml",
+        "packages/pi-stack/extensions/curation-coverage.ts",
+        "packages/pi-stack/test/smoke/curation-coverage.test.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Workflow CI usa comando único reaproveitável para smoke + sovereignty (single source of truth).",
+        "Falhas observadas no run 25258429382 ficam verdes nos testes direcionados locais.",
+        "Contrato de orçamento do orchestrator mantém ratchet explícito com novo teto documentado no teste."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduzir drift operacional entre execução local e Actions com gate canônico reutilizável e correções determinísticas de regressões.\n2026-05-02: alinhamento local↔CI aplicado com comando canônico único e correção dos fails do run 25258429382; inspiração operacional de refarm incorporada.",
+      "verification": "VER-BUD-971"
     }
   ]
 }

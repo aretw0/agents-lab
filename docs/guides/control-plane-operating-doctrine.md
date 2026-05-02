@@ -703,6 +703,10 @@ Regras de custo:
 - manutenção destrutiva de git continua opt-in com decisão humana explícita.
 - quando possível, deixar o bash guard bloquear padrões amplos e refazer com escopo + depth/timeout explícitos.
 
+Paridade local↔CI (anti-drift):
+- manter um comando canônico único para o gate principal (`npm run ci:smoke:gate`);
+- CI deve chamar o mesmo comando (single source of truth), evitando drift entre pipeline e rotina local.
+
 ### Encerramento de turno: mini-packet condicional (quando houver material novo)
 
 No fechamento de turno, use mini-packet **conciso** com 3 blocos:

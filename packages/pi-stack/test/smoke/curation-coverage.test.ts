@@ -24,7 +24,7 @@ describe("first-party curation coverage", () => {
 
   it("detects installer filters for covered third-party surfaces", () => {
     expect(filterPatchCoversSurface(FILTER_PATCHES, "mitsupi", "pi-extensions/uv.ts")).toBe(true);
-    expect(filterPatchCoversSurface(FILTER_PATCHES, "@ifi/oh-pi-extensions", "extensions/bg-process.ts")).toBe(false);
+    expect(filterPatchCoversSurface(FILTER_PATCHES, "@ifi/oh-pi-extensions", "extensions/bg-process.ts")).toBe(true);
   });
 
   it("surfaces filtered overlaps and decisions without dispatch authority", () => {

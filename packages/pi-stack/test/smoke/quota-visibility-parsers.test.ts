@@ -397,12 +397,24 @@ describe("quota-visibility parsers", () => {
 
   it("buildProviderBudgetStatuses suporta budget por requests (copilot)", () => {
     const now = Date.now();
+    const nowDate = new Date(now);
+    const periodSafeTs = new Date(
+      nowDate.getFullYear(),
+      nowDate.getMonth(),
+      1,
+      12,
+      0,
+      0,
+      0,
+    ).getTime();
+    const eventTs = periodSafeTs <= now ? periodSafeTs : now;
+    const eventDate = new Date(eventTs);
     const events: QuotaUsageEvent[] = [
       {
-        timestampIso: new Date(now - 2 * 24 * 3600_000).toISOString(),
-        timestampMs: now - 2 * 24 * 3600_000,
-        dayLocal: "2026-04-14",
-        hourLocal: 10,
+        timestampIso: eventDate.toISOString(),
+        timestampMs: eventTs,
+        dayLocal: eventDate.toISOString().slice(0, 10),
+        hourLocal: eventDate.getHours(),
         provider: "github-copilot",
         model: "claude-sonnet-4.6",
         tokens: 500,

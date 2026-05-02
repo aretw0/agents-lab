@@ -92,14 +92,8 @@ jobs:
           echo "factory-mode runtime=ci provider=github-actions channel=${CHANNEL}"
           echo "fallback: if governance gates fail, execute locally with /delivery-mode and promote via reviewed PR"
 
-      - name: Rodar smoke tests
-        run: npx vitest run
-
-      - name: Stack sovereignty audit (strict)
-        run: npm run audit:sovereignty
-
-      - name: Stack sovereignty diff gate (strict)
-        run: npm run audit:sovereignty:diff
+      - name: Parity gate local↔CI (smoke + sovereignty strict)
+        run: npm run ci:smoke:gate
 
   sovereignty-report:
     name: Sovereignty Report
