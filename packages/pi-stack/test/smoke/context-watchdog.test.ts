@@ -1853,6 +1853,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("growthDecision=hold");
 			expect(result.content?.[0]?.text).toContain("growthScore=78");
 			expect(result.content?.[0]?.text).toContain("growthSource=handoff");
+			expect(result.content?.[0]?.text).toContain("growthFresh=stale");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-readiness",
@@ -1875,6 +1876,7 @@ describe("context-watchdog", () => {
 					decision: "hold",
 					score: 78,
 					recommendationCode: "growth-maturity-hold-maintain",
+					freshness: "stale",
 				},
 				preload: {
 					mode: "context-preload-consume",
@@ -1903,6 +1905,7 @@ describe("context-watchdog", () => {
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthDecision=");
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthScore=");
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthSource=");
+			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthFresh=");
 			expect(noGrowthResult.details?.growthMaturitySnapshot).toBeUndefined();
 			expect(formatContextWatchContinuationReadinessSummary({
 				ready: false,

@@ -14286,6 +14286,27 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] compacidade controlada reduz bloat e interpretações erradas no fechamento.\n2026-05-02: iniciando hardening de compacidade para garantir ausência de markers de growth quando snapshot não existir.\n2026-05-02: summaries de readiness/boundary ficam limpos sem snapshot; markers de growth só aparecem quando há dado real.",
       "verification": "VER-BUD-959"
+    },
+    {
+      "id": "TASK-BUD-611",
+      "description": "[P1] Alinhar readiness com boundary: expor `growthFresh` também em `context_watch_continuation_readiness` quando houver snapshot de maturidade.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-609"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary de readiness inclui `growthFresh=<fresh|stale|unknown>` quando snapshot existir.",
+        "Details incluem `growthMaturitySnapshot.freshness`.",
+        "Smoke cobre caminho com snapshot e mantém ausência de markers quando snapshot não existe."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] frescor consistente entre readiness e boundary reduz divergência de interpretação em continuidade.\n2026-05-02: readiness agora também expõe `growthFresh`, mantendo alinhamento semântico com boundary fallback.",
+      "verification": "VER-BUD-960"
     }
   ]
 }

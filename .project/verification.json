@@ -10860,6 +10860,15 @@
       "method": "compact-output guard for missing growth snapshot + smoke",
       "timestamp": "2026-05-02T17:01:58.862Z",
       "evidence": "Hardened compact output so growth markers appear only when growth snapshot exists. Coverage added: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Continuation readiness test now re-runs with handoff lacking growth snapshot and asserts: - no `growthDecision`, `growthScore`, `growthSource` markers in summary; - `details.growthMaturitySnapshot` is undefined. - Boundary checkpoint (no growth input / no growth snapshot) now asserts summary omits: - `growthDecision`, `growthScore`, `growthSource`, `growthFresh`. Regression context retained: - With snapshot present, growth markers still emitted (existing assertions remain). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - 75 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-960",
+      "target": "TASK-BUD-611",
+      "target_type": "task",
+      "status": "passed",
+      "method": "readiness growth freshness marker + smoke",
+      "timestamp": "2026-05-02T17:04:40.556Z",
+      "evidence": "Aligned continuation readiness with boundary by exposing growth snapshot freshness. Code: - `packages/pi-stack/extensions/context-watchdog.ts` - `HandoffGrowthMaturitySnapshot` now allows `freshness`. - `context_watch_continuation_readiness` now computes handoff freshness via `resolveHandoffFreshness(...)` and attaches it to growth snapshot when present. - Readiness summary now includes `growthFresh=<fresh|stale|unknown>` when snapshot exists. Tests: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Existing readiness case now asserts `growthFresh=stale` and `details.growthMaturitySnapshot.freshness=\"stale\"`. - No-growth case asserts absence of `growthFresh` marker. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - 75 passed / 0 failed."
     }
   ]
 }

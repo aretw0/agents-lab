@@ -979,6 +979,7 @@ export type HandoffGrowthMaturitySnapshot = {
 	decision?: "go" | "hold" | "needs-evidence";
 	score?: number;
 	recommendationCode?: string;
+	freshness?: "fresh" | "stale" | "unknown";
 };
 
 function resolveHandoffGrowthMaturitySnapshot(handoff: Record<string, unknown>): HandoffGrowthMaturitySnapshot | undefined {
@@ -2458,7 +2459,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const handoff = readHandoffJson(ctx.cwd);
-			const growthSnapshot = resolveHandoffGrowthMaturitySnapshot(handoff);
+			const growthSnapshotBase = resolveHandoffGrowthMaturitySnapshot(handoff);
+			const handoffFreshness = resolveHandoffFreshness(
+				typeof handoff.timestamp === "string" ? handoff.timestamp : undefined,
+				Date.now(),
+				config.handoffFreshMaxAgeMs,
+			).label;
+			const growthSnapshot = growthSnapshotBase
+				? {
+					...growthSnapshotBase,
+					freshness: handoffFreshness,
+				}
+				: undefined;
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				handoff,
 				config.handoffFreshMaxAgeMs,
@@ -2513,6 +2525,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				growthSnapshot?.decision ? `growthDecision=${growthSnapshot.decision}` : undefined,
 				growthSnapshot?.score !== undefined ? `growthScore=${growthSnapshot.score}` : undefined,
 				growthSnapshot ? `growthSource=${growthSnapshot.source}` : undefined,
+				growthSnapshot?.freshness ? `growthFresh=${growthSnapshot.freshness}` : undefined,
 			].filter(Boolean).join(" ");
 			return {
 				content: [{ type: "text", text: summary }],
