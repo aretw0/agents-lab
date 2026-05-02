@@ -11031,6 +11031,15 @@
       "method": "github-actions node24 baseline alignment + workflow smoke guard",
       "timestamp": "2026-05-02T20:37:00.119Z",
       "evidence": "Removed Node20 deprecation drift from CI by aligning workflow runtime baseline and action majors. Changes: - `.github/workflows/ci.yml` - Added top-level env opt-in: - `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: \"true\"` - Updated action majors in CI workflow: - `actions/checkout@v4` -> `actions/checkout@v6` - `actions/setup-node@v4` -> `actions/setup-node@v6` - `actions/upload-artifact@v4` -> `actions/upload-artifact@v7` - `actions/github-script@v7` -> `actions/github-script@v9` - `packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - Added regression assertions for Node24 baseline env + updated action majors. Validation: 1) Targeted workflow smoke: - `npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - result: 1 file / 3 tests passed. 2) Full parity gate: - `npm run ci:local:parity` - result: green (116 files / 1086 tests + sovereignty strict + diff strict). Outcome: - CI workflow is now explicitly aligned with Node24 action runtime baseline and modern action majors, reducing annotation drift noise while preserving full gates."
+    },
+    {
+      "id": "VER-BUD-979",
+      "target": "TASK-BUD-634",
+      "target_type": "task",
+      "status": "passed",
+      "method": "publish workflow node24 baseline + anti-drift smoke for legacy action majors",
+      "timestamp": "2026-05-02T20:41:31.282Z",
+      "evidence": "Extended Node24/runtime alignment beyond CI to prevent adjacent workflow drift. Changes: - `.github/workflows/publish.yml` - Added top-level env: - `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: \"true\"` - Updated actions: - `actions/checkout@v4` -> `actions/checkout@v6` - `actions/setup-node@v4` -> `actions/setup-node@v6` - Added smoke regression test: - `packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts` - Asserts Publish has Node24 baseline + current action majors. - Scans `.github/workflows/*` and fails on legacy anchors: - `actions/checkout@v4` - `actions/setup-node@v4` - `actions/upload-artifact@v4` - `actions/github-script@v7` Validation: 1) Targeted: - `npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts` - result: 2 files / 5 tests passed. 2) Full smoke: - `npm run test:smoke` - result: 117 files / 1088 tests passed. Outcome: - Runtime deprecation drift is now addressed in CI and Publish lanes, with a durable anti-regression guard across workflow files."
     }
   ]
 }

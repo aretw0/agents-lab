@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-05-02T20:37:10.290Z",
-  "context": "reduzimos drift de runtime no CI: workflow agora força baseline Node24 e usa majors atuais das actions críticas (checkout/setup-node/upload-a [snip] /github-script), preservando gate full. [truncated:+7 chars]",
+  "timestamp": "2026-05-02T20:41:40.295Z",
+  "context": "removemos drift de runtime também no publish: workflows principais agora seguem baseline Node24 + majors atuais, e smoke bloqueia reintrodução de actions legadas.",
   "next_actions": [
-    "Push da fatia e acompanhar próximo run com gh run watch para confirmar queda das annotations de Node20.",
-    "Se ainda houver warnings remanescentes, pin por SHA dos actions usados e revisar workflows for [snip] principal (ex.: publish). [truncated:+7 chars]"
+    "Commitar/push desta fatia e observar próximo CI run para confirmar ausência dos warnings Node20 no lane principal.",
+    "Opcional: avaliar pin por SHA dos actions para reduzir drift de tag sem perder clareza de manutenção."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-978",
-    "npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts green (3/3)",
-    "npm run ci:local:parity green (116/1086 + sovereignty strict/diff)"
+    "VER-BUD-979",
+    "targeted vitest (2 files / 5 tests) green",
+    "npm run test:smoke green (117 files / 1088 tests)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-633",
+    "focus": "TASK-BUD-634",
     "canonical_links": [
-      "task:TASK-BUD-633",
-      "verification:VER-BUD-978"
+      "task:TASK-BUD-634",
+      "verification:VER-BUD-979"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T20:37:10.290Z",
+    "generatedAtIso": "2026-05-02T20:41:40.295Z",
     "level": "checkpoint",
-    "percent": 60,
+    "percent": 61,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T20:37:10.290Z",
+      "atIso": "2026-05-02T20:41:40.295Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 60,
+      "percent": 61,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-633"
+    "TASK-BUD-634"
   ]
 }
