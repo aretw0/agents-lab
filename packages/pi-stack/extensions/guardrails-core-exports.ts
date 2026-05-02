@@ -108,6 +108,7 @@ export {
   detectHighRiskSessionLogScan,
   detectHighRiskWideDuScan,
   detectHighRiskWideFindScan,
+  detectHighRiskWideRecursiveLsScan,
   detectSourceMapBlastRadiusScan,
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
@@ -115,6 +116,7 @@ export {
   highRiskSessionLogScanReason,
   highRiskWideDuScanReason,
   highRiskWideFindScanReason,
+  highRiskWideRecursiveLsScanReason,
   sourceMapBlastRadiusScanReason,
   upstreamPiPackageMutationReason,
 } from "./guardrails-core-bash-guard-policies";

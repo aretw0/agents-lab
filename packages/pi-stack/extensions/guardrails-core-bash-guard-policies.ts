@@ -28,6 +28,8 @@ const DU_DEPTH_LIMIT_PATTERN = /--max-depth(?:=|\s+)\d+\b|(?:^|\s)-d\s+\d+\b/i;
 const DU_BROAD_TARGET_PATTERN = /^(?:\.|\.\/|\.\.|\.\.\/|\/|~|~\/|\*|\/\*|[a-z]:\/?|\/mnt\/[a-z]\/?)$/i;
 const FIND_DEPTH_LIMIT_PATTERN = /(?:^|\s)-maxdepth\s+\d+\b/i;
 const FIND_BROAD_TARGET_PATTERN = DU_BROAD_TARGET_PATTERN;
+const LS_RECURSIVE_PATTERN = /\bls\b[\s\S]*\b--recursive\b|\bls\b[\s\S]*\s-[a-z]*r[a-z]*\b/i;
+const LS_BROAD_TARGET_PATTERN = DU_BROAD_TARGET_PATTERN;
 
 export type BashGuardPolicy = {
   id: string;
@@ -188,6 +190,44 @@ export function highRiskWideFindScanReason(): string {
   ].join(" ");
 }
 
+function extractLsTargets(segment: string): string[] {
+  const tokens = tokenizeShellSegment(segment);
+  const lsIndex = tokens.findIndex((token) => /(?:^|\/)ls$/i.test(token));
+  if (lsIndex < 0) return [];
+
+  const targets: string[] = [];
+  for (const token of tokens.slice(lsIndex + 1)) {
+    if (token.startsWith("-")) continue;
+    if (/^[0-9]?>/.test(token)) continue;
+    const normalized = token.replace(/^['"]|['"]$/g, "");
+    if (!normalized) continue;
+    if (normalized === "||" || normalized === "&&" || normalized === "|" || normalized === ";") break;
+    targets.push(normalized);
+  }
+
+  return targets.length > 0 ? targets : ["."];
+}
+
+export function detectHighRiskWideRecursiveLsScan(command: string): boolean {
+  const normalized = command.toLowerCase().replace(/\\/g, "/");
+  if (!LS_RECURSIVE_PATTERN.test(normalized)) return false;
+
+  const segments = normalized.split(/\|\||&&|;|\|/g);
+  for (const segment of segments) {
+    if (!LS_RECURSIVE_PATTERN.test(segment)) continue;
+    const targets = extractLsTargets(segment);
+    if (targets.some((target) => LS_BROAD_TARGET_PATTERN.test(target))) return true;
+  }
+  return false;
+}
+
+export function highRiskWideRecursiveLsScanReason(): string {
+  return [
+    "Blocked by guardrails-core (wide_recursive_ls_scan): broad ls -R/--recursive can generate large output and slow the loop.",
+    "Scope ls to explicit small paths (e.g. .project/.git) and avoid recursive root/cwd scans.",
+  ].join(" ");
+}
+
 export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
   {
     id: "command-sensitive-shell-marker-check",
@@ -223,6 +263,13 @@ export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
     detect: detectHighRiskWideFindScan,
     reason: highRiskWideFindScanReason,
     auditKey: "guardrails-core.wide-find-scan-block",
+  },
+  {
+    id: "wide-recursive-ls-scan",
+    when: "tool(bash)",
+    detect: detectHighRiskWideRecursiveLsScan,
+    reason: highRiskWideRecursiveLsScanReason,
+    auditKey: "guardrails-core.wide-recursive-ls-scan-block",
   },
   {
     id: "pi-root-recursive-scan",

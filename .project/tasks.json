@@ -14470,6 +14470,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] evita outro padrão recorrente de comando longo e preserva throughput local-safe.\n2026-05-02: hard-intent ampliado para `find` amplo sem limites; guard mantém alternativa bounded.",
       "verification": "VER-BUD-969"
+    },
+    {
+      "id": "TASK-BUD-621",
+      "description": "[P1] Completar hard intent de scans longos: bloquear `ls -R/--recursive` amplo sem escopo bounded.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Policy detecta `ls` recursivo amplo em alvo broad/implícito e bloqueia com guidance.",
+        "`ls -R` em escopo explícito estreito permanece permitido.",
+        "Smoke cobre block + allow + policy selection."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] fecha trio recorrente de scans longos (du/find/ls-recursive) com alternativa bounded.\n2026-05-02: guardrails agora cobrem trio de scans longos amplos (`du`, `find`, `ls -R`) com guidance bounded.",
+      "verification": "VER-BUD-970"
     }
   ]
 }

@@ -5,6 +5,7 @@ import {
   detectHighRiskSessionLogScan,
   detectHighRiskWideDuScan,
   detectHighRiskWideFindScan,
+  detectHighRiskWideRecursiveLsScan,
   detectSourceMapBlastRadiusScan,
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
@@ -19,6 +20,7 @@ describe("guardrails-core bash guard policies", () => {
       "source-map-blast-radius-scan",
       "wide-du-scan",
       "wide-find-scan",
+      "wide-recursive-ls-scan",
       "pi-root-recursive-scan",
       "session-log-scan",
     ]);
@@ -46,6 +48,10 @@ describe("guardrails-core bash guard policies", () => {
     expect(detectHighRiskWideFindScan("find .project -type f")).toBe(false);
     expect(detectHighRiskWideFindScan("find . -maxdepth 2 -type f")).toBe(false);
 
+    expect(detectHighRiskWideRecursiveLsScan("ls -R")).toBe(true);
+    expect(detectHighRiskWideRecursiveLsScan("ls -R .")).toBe(true);
+    expect(detectHighRiskWideRecursiveLsScan("ls -R .project")).toBe(false);
+
     expect(detectSourceMapBlastRadiusScan('grep -RIn "sourceContent" node_modules')).toBe(true);
     expect(detectSourceMapBlastRadiusScan('grep -RIn --exclude="*.map" "sourceContent" node_modules')).toBe(false);
     expect(detectSourceMapBlastRadiusScan('rg -n "sourceContent" node_modules -g "!*.map"')).toBe(false);
@@ -62,6 +68,8 @@ describe("guardrails-core bash guard policies", () => {
     expect(evaluateBashGuardPolicies("du -sh .git .tmp")).toBeUndefined();
     expect(evaluateBashGuardPolicies("find . -type f")?.id).toBe("wide-find-scan");
     expect(evaluateBashGuardPolicies("find .project -type f")).toBeUndefined();
+    expect(evaluateBashGuardPolicies("ls -R .")?.id).toBe("wide-recursive-ls-scan");
+    expect(evaluateBashGuardPolicies("ls -R .project")).toBeUndefined();
     expect(evaluateBashGuardPolicies("rm -rf node_modules/@mariozechner/pi-coding-agent/dist")?.id).toBe("upstream-pi-package-mutation");
     expect(evaluateBashGuardPolicies("git status")).toBeUndefined();
   });

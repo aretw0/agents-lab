@@ -698,7 +698,7 @@ Quando a lane travar, aplicar ordem curta e bounded:
 3. **escalar capacidade** (spawn/delegação/colony): só quando houver tarefa elegível e foco válido.
 
 Regras de custo:
-- evitar scans pesados por default (ex.: `du`/`find` amplos sem limite/escopo);
+- evitar scans pesados por default (ex.: `du`/`find`/`ls -R` amplos sem limite/escopo);
 - preferir diagnóstico read-only e comandos bounded;
 - manutenção destrutiva de git continua opt-in com decisão humana explícita.
 - quando possível, deixar o bash guard bloquear padrões amplos e refazer com escopo + depth/timeout explícitos.
