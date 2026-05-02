@@ -1,37 +1,44 @@
 {
-  "timestamp": "2026-05-02T21:01:59.459Z",
-  "context": "hardening de CI/runtime foi consolidado: além dos pins atuais, agora existe smoke policy global para impedir qualquer regressão de uses: externo sem SHA nos workflows.",
+  "timestamp": "2026-05-02T21:56:52.576Z",
+  "context": "TASK-BUD-624 concluída: radar estratégico Linux primitives publicado com critérios e cadência; frente voltou ao eixo de maior retorno (limpez [snip] escalabilidade com controle/auditoria). [truncated:+17 chars]",
+  "current_tasks": [
+    "TASK-BUD-625"
+  ],
   "next_actions": [
-    "Encerrar esta frente de annotations/drift como estabilizada.",
-    "Retomar lane de desbloqueio de produtividade conforme steer: priorizar limpeza relevante -> ga [snip] a -> escala de capacidade. [truncated:+13 chars]"
+    "Iniciar TASK-BUD-625 em microfatia: mapear viabilidade isolamento/forking com equivalentes atuais vs futuros.",
+    "Manter abordagem anti-forcing: experimento report-only + gate/rollback explícitos antes de qualquer integração.",
+    "Depois da síntese de pesquisa, retomar trilha de escalabilidade produtiva com delegação bounded auditável."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-981",
-    "targeted workflow tests green (3 files / 7 tests)",
-    "npm run test:smoke green (118 files / 1090 tests)"
+    "safe_marker_check docs/research/linux-agent-primitives-radar-2026.md (16/16 ok)",
+    "board_task_complete TASK-BUD-624 -> VER-BUD-982"
+  ],
+  "recent_commits": [
+    "02b85c4"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-636",
+    "focus": "TASK-BUD-625",
     "canonical_links": [
-      "task:TASK-BUD-636",
-      "verification:VER-BUD-981"
+      "task:TASK-BUD-625",
+      "task:TASK-BUD-624",
+      "verification:VER-BUD-982",
+      "commit:02b85c4"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T21:01:59.459Z",
-    "level": "checkpoint",
-    "percent": 63,
-    "action": "checkpoint-refresh",
-    "recommendation": "continue-local-safe",
-    "focus_task_status": "completed"
+    "generatedAtIso": "2026-05-02T21:56:52.576Z",
+    "level": "ok",
+    "percent": 18,
+    "action": "continue",
+    "recommendation": "continue-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T21:01:59.459Z",
+      "atIso": "2026-05-02T21:56:52.576Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 63,
+      "level": "ok",
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -40,8 +47,5 @@
       "action": "checkpoint-refresh",
       "recommendation": "continue-local-safe"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-636"
   ]
 }
