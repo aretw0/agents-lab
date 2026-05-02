@@ -161,7 +161,8 @@ No fechamento de boundary, incluir a provocação direcional canônica do packet
 
 Além da pergunta, o packet deve trazer preview explícito das opções:
 - `directionPreview.recommendedOptionId`: recomendação atual (`similar-lane` ou `next-high-value`);
-- `directionPreview.options[]`: suitability (`recommended|viable|blocked`), blockers e próximo passo por opção.
+- `directionPreview.options[]`: suitability (`recommended|viable|blocked`), blockers e próximo passo por opção;
+- marcador compacto no summary: `directionOptions=similar-lane:<...>,next-high-value:<...>`.
 
 Template curto de checkpoint pós-rehearsal real (1 task):
 

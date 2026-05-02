@@ -206,6 +206,9 @@ export function buildTurnBoundaryDecisionPacket(input: {
     nextAutoStep,
     localAuditReasons: reasons,
   });
+  const directionOptionsCompact = directionPreview.options
+    .map((option) => `${option.id}:${option.suitability}`)
+    .join(",");
 
   return {
     mode: "report-only",
@@ -227,6 +230,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       `recommendationCode=${recommendation.recommendationCode}`,
       "directionPrompt=similar-lane-or-next-value",
       `directionRecommended=${directionPreview.recommendedOptionId}`,
+      `directionOptions=${directionOptionsCompact}`,
       "authorization=none",
     ].join(" "),
   };

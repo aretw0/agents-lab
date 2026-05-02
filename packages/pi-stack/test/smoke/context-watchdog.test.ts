@@ -1914,8 +1914,13 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(checkpointResult.details?.directionPromptCanonical).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(checkpointResult.details?.directionPreview?.recommendedOptionId).toBe("similar-lane");
+			expect(checkpointResult.details?.directionPreview?.options?.map((option: { id: string; suitability: string }) => `${option.id}:${option.suitability}`)).toEqual([
+				"similar-lane:recommended",
+				"next-high-value:viable",
+			]);
 			expect(checkpointResult.content?.[0]?.text).toContain("directionPrompt=similar-lane-or-next-value");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionRecommended=similar-lane");
+			expect(checkpointResult.content?.[0]?.text).toContain("directionOptions=similar-lane:recommended,next-high-value:viable");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}
@@ -1951,6 +1956,11 @@ describe("context-watchdog", () => {
 			expect(askResult.details?.humanActionRequired).toBe(true);
 			expect(askResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(askResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
+			expect(askResult.details?.directionPreview?.options?.map((option: { id: string; suitability: string }) => `${option.id}:${option.suitability}`)).toEqual([
+				"similar-lane:blocked",
+				"next-high-value:recommended",
+			]);
+			expect(askResult.content?.[0]?.text).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
 		} finally {
 			rmSync(cwdAskHuman, { recursive: true, force: true });
 		}

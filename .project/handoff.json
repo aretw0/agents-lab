@@ -1,39 +1,38 @@
 {
-  "timestamp": "2026-05-02T13:42:31.827Z",
-  "context": "afk-handoff: decision=blocked stock=3/7 blockers=local-stop-protected-focus-required next=escolher foco explícito (similar-lane local-safe ou [snip] eview do turn_boundary_decision_packet. [truncated:+41 chars]",
+  "timestamp": "2026-05-02T13:52:32.379Z",
+  "context": "afk-handoff: decision=blocked stock=3/7 blockers=local-stop-protected-focus-required next=usar directionPreview para escolher lane de maior valor de longo prazo com foco explícito.",
   "next_actions": [
-    "Solicitar decisão humana de direção com base no preview já entregue.",
-    "Se similar-lane: semear fatia local-safe nova.",
-    "Se next-high-value: abrir packet report-only da lane alvo."
+    "Escolher foco explícito da próxima lane high-value.",
+    "Executar packet report-only da lane escolhida antes de mutação."
   ],
   "blockers": [
     "local-stop-protected-focus-required"
   ],
   "recent_validation": [
-    "VER-BUD-935",
-    "context-watchdog smokes verdes (70/70)"
+    "VER-BUD-936",
+    "context-watchdog smokes 70/70 verdes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-586",
+    "focus": "TASK-BUD-587",
     "canonical_links": [
-      "task:TASK-BUD-586",
-      "verification:VER-BUD-935"
+      "task:TASK-BUD-587",
+      "verification:VER-BUD-936"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T13:42:31.827Z",
+    "generatedAtIso": "2026-05-02T13:52:32.379Z",
     "level": "ok",
-    "percent": 53,
+    "percent": 54,
     "action": "continue",
     "recommendation": "ask-human-focus",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T13:42:31.827Z",
+      "atIso": "2026-05-02T13:52:32.379Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 53,
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -44,6 +43,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-586"
+    "TASK-BUD-587"
   ]
 }
