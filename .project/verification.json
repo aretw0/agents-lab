@@ -11193,6 +11193,15 @@
       "method": "test",
       "timestamp": "2026-05-02T23:30:59.895Z",
       "evidence": "Context-watch ajustado para sane default global: `DEFAULT_CONTEXT_WATCHDOG_CONFIG` agora define `checkpointPct: 55` e `compactPct: 65` (`packages/pi-stack/extensions/context-watchdog-config.ts`). Derivação de thresholds foi reordenada para preservar `warn < checkpoint < compact` mesmo quando warning base do provider é maior, sem forçar tuning por provider. Janela de freio final ampliada para ~10pp com `FINAL_TURN_CLOSE_HEADROOM_PCT = 10` em `packages/pi-stack/extensions/context-watchdog.ts`, mantendo guidance de final-turn mais cedo antes do compact forçado. Preset `control-plane` atualizado para 55/65 em `packages/pi-stack/extensions/context-watchdog-bootstrap.ts`. Regressões/expectativas atualizadas em `packages/pi-stack/test/smoke/context-watchdog.test.ts`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (64 passed) + marker-checks 4/4, 3/3 e 3/3 nos arquivos alterados."
+    },
+    {
+      "id": "VER-BUD-997",
+      "target": "TASK-BUD-645",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T23:47:05.037Z",
+      "evidence": "Comando `/context-watch status` agora inclui resumo compacto de budget de ruído: `noise=<announcements>/<max> suppressed=<n> excessive=<yes|no>` em `packages/pi-stack/extensions/context-watchdog.ts`, sem alterar autorização/dispatch (permanece read-only observability). Também foram adicionados contadores no handler de status (`announcementsInWindow`, `finalTurnSuppressionsInWindow`, `signalNoiseExcessive`). Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: `\"/context-watch status command includes compact noise budget summary\"`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (65 passed)."
     }
   ]
 }

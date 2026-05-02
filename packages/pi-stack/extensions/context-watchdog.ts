@@ -3172,13 +3172,16 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				reloadRequired,
 			});
+			const announcementsInWindow = getAnnouncementsInWindow(nowMs);
+			const finalTurnSuppressionsInWindow = getFinalTurnSuppressionsInWindow(nowMs);
+			const signalNoiseExcessive = resolveContextWatchSignalNoiseExcessive(
+				announcementsInWindow,
+				SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+			);
 			const operatorSignal = resolveContextWatchOperatorSignal({
 				reloadRequired,
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
-				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
-					getAnnouncementsInWindow(nowMs),
-					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				),
+				signalNoiseExcessive,
 				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
 			});
 			const deterministicStop = resolveContextWatchDeterministicStopSignal({
@@ -3210,6 +3213,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					preCompactReloadSignal.active
 						? `reloadGate=${preCompactReloadSignal.reason} hint=${(preCompactReloadSignal.hint ?? "run_/reload").replace(/\s+/g, "_")}`
 						: `reloadGate=${preCompactReloadSignal.reason}`,
+					`noise=${announcementsInWindow}/${SIGNAL_NOISE_MAX_ANNOUNCEMENTS} suppressed=${finalTurnSuppressionsInWindow}${signalNoiseExcessive ? " excessive=yes" : " excessive=no"}`,
 					"details=context_watch_status structured payload",
 				].join("\n"),
 				assessment.severity,

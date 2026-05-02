@@ -14943,7 +14943,7 @@
     {
       "id": "TASK-BUD-645",
       "description": "[P2] Expor resumo compacto de budget de warning no comando `/context-watch status` para leitura humana rápida durante sessões longas.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-641"
@@ -14958,7 +14958,8 @@
         "Teste smoke valida presença da linha em modo read-only."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado.\n[rationale:risk-control] Resumo curto de budget de ruído no comando /context-watch reduz tempo de diagnóstico humano e mantém cadência sem abrir payload grande em sessão."
+      "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado.\n[rationale:risk-control] Resumo curto de budget de ruído no comando /context-watch reduz tempo de diagnóstico humano e mantém cadência sem abrir payload grande em sessão.\nEntrega focada em cadência operacional humana: leitura rápida de ruído no comando de status durante sessão longa.",
+      "verification": "VER-BUD-997"
     },
     {
       "id": "TASK-BUD-646",
@@ -14984,6 +14985,45 @@
       "milestone": "throughput-decoupling-lane-2026-05",
       "notes": "Origem: steer humano pedindo comportamento reliable global para compactação graciosa sem depender de tuning por provider/model.\nIniciando ajuste global de janela para priorizar compactação graciosa confiável em qualquer provider.\n[rationale:risk-control] Thresholds atuais dependentes de provider criam comportamento desigual de freio/compact, dificultando cadência estável da fábrica. Um sane default global (checkpoint antecipado + compact teto) reduz risco de degradação por contexto e simplifica operação antes de tuning fino por …\nAplicado sane default global inspirado em operação confiável (freio antecipado + compact teto), priorizando comportamento consistente entre providers enquanto a fábrica evolui delegação.\nRuntime workspace alinhado em .pi/settings.json para o novo sane default (checkpoint=55, compact=65, steering=compact) para comportamento consistente após /reload.",
       "verification": "VER-BUD-996"
+    },
+    {
+      "id": "TASK-BUD-647",
+      "description": "[P1] Desbloquear telemetria de auto-advance hard-intent para rehearsal de simple-delegate (reduzir bloqueio por no-data).",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`auto_advance_hard_intent_telemetry` deixa de retornar no-data após evidência local mínima de foco completo.",
+        "Pacotes de rehearsal (`simple_delegate_rehearsal_packet` / `start_packet`) deixam de bloquear por `auto-advance-telemetry-not-ready` quando houver sinal local suficiente.",
+        "Smoke cobre cenário mínimo de coleta de telemetria e classificação ready/needs-evidence."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Foco pragmático para destravar controle de agentes com base em evidência hard-intent.\n[rationale:risk-control] Sem telemetria de auto-advance, rehearsal de simple-delegate fica bloqueado por no-data e impede evolução de controle de agentes. A coleta mínima de sinal local é pré-condição para escalar com segurança."
+    },
+    {
+      "id": "TASK-BUD-648",
+      "description": "[P1] Definir e validar canário one-task de simple-delegate com contrato explícito (files, gate, rollback) para iniciar uso de agentes em nós mesmos com segurança.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-647"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/handoff.json",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Canário inclui foco único, arquivos declarados, validação focal e rollback não destrutivo.",
+        "`simple_delegate_rehearsal_start_packet` retorna decisão start/abort coerente com contrato declarado.",
+        "Checkpoint/handoff registra evidência de decisão (start ou blocked) sem auto-dispatch."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Objetivo: acelerar delegação com guardrails claros, evitando drift operacional.\n[rationale:risk-control] Canário one-task com contrato explícito reduz risco de delegação cega e acelera aprendizado operacional antes de ampliar autonomia em produção local."
     }
   ]
 }

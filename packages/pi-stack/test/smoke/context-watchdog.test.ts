@@ -1644,6 +1644,45 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("/context-watch status command includes compact noise budget summary", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-status-command-noise-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const commandCall = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.find(([name]) => name === "context-watch");
+			const command = commandCall?.[1] as {
+				handler: (args: string, ctx: {
+					cwd: string;
+					ui: { notify: (msg: string, level?: string) => void; setStatus?: (k: string, v: string) => void };
+					getContextUsage: () => { percent: number };
+					model: { id: string; provider: string };
+					isIdle: () => boolean;
+					hasPendingMessages: () => boolean;
+				}) => Promise<void> | void;
+			};
+			const notifications: Array<{ msg: string; level?: string }> = [];
+			await command.handler("status", {
+				cwd,
+				ui: {
+					notify(msg: string, level?: string) {
+						notifications.push({ msg, level });
+					},
+					setStatus() {},
+				},
+				getContextUsage: () => ({ percent: 58 }),
+				model: { id: "gpt-5.3-codex", provider: "github-copilot" },
+				isIdle: () => false,
+				hasPendingMessages: () => false,
+			});
+
+			expect(notifications.length).toBe(1);
+			expect(notifications[0]?.msg).toContain("noise=0/4 suppressed=0 excessive=no");
+			expect(notifications[0]?.msg).toContain("details=context_watch_status structured payload");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_freshness_status tool returns preload+dirty in one call", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
 		try {

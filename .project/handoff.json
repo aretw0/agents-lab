@@ -1,39 +1,41 @@
 {
-  "timestamp": "2026-05-02T23:31:27.098Z",
-  "context": "Aplicado sane default global de compactação graciosa no context-watch: checkpoint=55, compact=65 e janela de final-turn com headroom de 10pp [snip] io antecipado antes do compact forçado. [truncated:+8 chars]",
+  "timestamp": "2026-05-02T23:49:52.764Z",
+  "context": "Ajuste pragmático da lane: defaults globais 55/65 já ativos e estabilizados; agora foi concluído TASK-BUD-645 adicionando resumo compacto de [snip] e humana rápida durante sessões longas. [truncated:+54 chars]",
   "next_actions": [
-    "Se quiser, aplicar preset control-plane no runtime atual e validar comportamento live após /reload.",
-    "Executar TASK-BUD-644 (dedupe de eventos repetidos no handoff) para reduzir bloat residual.",
-    "Executar TASK-BUD-645 (resumo de budget de ruído no comando /context-watch status)."
+    "Priorizar TASK-BUD-647 para desbloquear telemetria de auto-advance hard-intent.",
+    "Após 647, executar TASK-BUD-648 (canário one-task de simple-delegate com contrato explícito).",
+    "Manter TASK-BUD-644 em backlog como limpeza de bloat de handoff (não-bloqueante)."
   ],
-  "blockers": [],
+  "blockers": [
+    "simple-delegate-rehearsal-blocked-auto-advance-telemetry-no-data"
+  ],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts",
-    "safe_marker_check packages/pi-stack/extensions/context-watchdog-config.ts (55/65 + ordering markers ok)",
-    "safe_marker_check packages/pi-stack/extensions/context-watchdog.ts (final-turn headroom markers ok)"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts (65 passed)",
+    "board_task_complete TASK-BUD-645 -> VER-BUD-997",
+    "simple_delegate_rehearsal_packet (blocked por auto-advance telemetry no-data)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-646",
+    "focus": "TASK-BUD-645",
     "canonical_links": [
-      "task:TASK-BUD-646",
-      "task:TASK-BUD-644",
-      "verification:VER-BUD-996"
+      "task:TASK-BUD-645",
+      "task:TASK-BUD-647",
+      "verification:VER-BUD-997"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T23:31:27.098Z",
+    "generatedAtIso": "2026-05-02T23:49:52.764Z",
     "level": "checkpoint",
-    "percent": 58,
+    "percent": 59,
     "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T23:31:27.098Z",
+      "atIso": "2026-05-02T23:49:52.764Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 58,
+      "percent": 59,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -44,6 +46,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-646"
+    "TASK-BUD-645"
   ]
 }
