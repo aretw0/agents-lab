@@ -160,8 +160,10 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.growthMaturity?.decision).toBe("go");
     expect(packet.growthMaturity?.score).toBe(89);
     expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-go-expand-bounded");
+    expect(packet.growthSource).toBe("handoff");
     expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
     expect(packet.summary).toContain("growthDecision=go");
+    expect(packet.summary).toContain("growthSource=handoff");
   });
 
   it("includes growth maturity snapshot and fail-closed needs-evidence guidance when scores are incomplete", () => {
@@ -178,6 +180,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.decision).toBe("continue");
     expect(packet.growthMaturity?.decision).toBe("needs-evidence");
     expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-needs-evidence");
+    expect(packet.growthSource).toBe("explicit");
     expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
     expect(packet.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
     expect(packet.summary).toContain("growthDecision=needs-evidence");

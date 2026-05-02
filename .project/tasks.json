@@ -14083,6 +14083,29 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] fallback de maturidade no boundary reduz perda de contexto entre turnos e evita decisões sem evidência.\n2026-05-02: `turn_boundary_decision_packet` agora consome snapshot de growth maturity do handoff como fallback (sem payload explícito), preservando summary compacto e invariantes no-dispatch.",
       "verification": "VER-BUD-949"
+    },
+    {
+      "id": "TASK-BUD-601",
+      "description": "[P1] Expor `growthSource` no turn_boundary_decision_packet (`explicit|handoff|none`) para auditoria de origem do score de maturidade.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-600"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Packet details inclui `growthSource` quando growthMaturity estiver presente.",
+        "Summary inclui marcador compacto `growthSource=<...>` quando aplicável.",
+        "Smoke cobre caminhos explicit payload e handoff fallback."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] origem explícita do score evita interpretação ambígua no boundary e reforça auditabilidade.\n2026-05-02: `growthSource` adicionado ao boundary packet/summary (`explicit|handoff`) para auditoria de origem do score de maturidade.",
+      "verification": "VER-BUD-950"
     }
   ]
 }

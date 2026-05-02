@@ -135,6 +135,8 @@ function toSnapshotGrowthMaturityPacket(
   };
 }
 
+export type TurnBoundaryGrowthSource = "explicit" | "handoff";
+
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
@@ -144,6 +146,7 @@ export interface TurnBoundaryDecisionPacket {
   directionPrompt: string;
   directionPreview: TurnBoundaryDirectionPreview;
   growthMaturity?: GrowthMaturityScorePacket;
+  growthSource?: TurnBoundaryGrowthSource;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -315,6 +318,11 @@ export function buildTurnBoundaryDecisionPacket(input: {
       criticalBlockers: input.growthMaturity.criticalBlockers,
     })
     : toSnapshotGrowthMaturityPacket(input.growthMaturitySnapshot);
+  const growthSource: TurnBoundaryGrowthSource | undefined = input.growthMaturity
+    ? "explicit"
+    : growthMaturity
+      ? "handoff"
+      : undefined;
 
   if (growthMaturity?.decision === "needs-evidence") {
     nextAutoStep = `${nextAutoStep} growth maturity guidance=needs-evidence; collect missing score signals before acceleration.`;
@@ -341,6 +349,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
     directionPreview,
     growthMaturity,
+    growthSource,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
@@ -356,6 +365,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       growthMaturity ? `growthDecision=${growthMaturity.decision}` : undefined,
       growthMaturity ? `growthCode=${growthMaturity.recommendationCode}` : undefined,
       growthMaturity ? `growthScore=${growthMaturity.score ?? "na"}` : undefined,
+      growthSource ? `growthSource=${growthSource}` : undefined,
       "authorization=none",
     ].filter(Boolean).join(" "),
   };

@@ -1972,9 +1972,11 @@ describe("context-watchdog", () => {
 				{ cwd: cwdCheckpoint },
 			);
 			expect(growthGoResult.details?.growthMaturity?.decision).toBe("go");
+			expect(growthGoResult.details?.growthSource).toBe("explicit");
 			expect(growthGoResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
 			expect(growthGoResult.content?.[0]?.text).toContain("directionOptions=similar-lane:viable,next-high-value:recommended");
 			expect(growthGoResult.content?.[0]?.text).toContain("growthDecision=go");
+			expect(growthGoResult.content?.[0]?.text).toContain("growthSource=explicit");
 
 			writeFileSync(join(cwdCheckpoint, ".project", "handoff.json"), JSON.stringify({
 				timestamp: new Date().toISOString(),
@@ -1998,10 +2000,12 @@ describe("context-watchdog", () => {
 			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.decision).toBe("go");
 			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.recommendationCode).toBe("growth-maturity-go-expand-bounded");
 			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.score).toBe(91);
+			expect(fallbackGrowthFromHandoff.details?.growthSource).toBe("handoff");
 			expect(fallbackGrowthFromHandoff.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthDecision=go");
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthCode=growth-maturity-go-expand-bounded");
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthScore=91");
+			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthSource=handoff");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}
