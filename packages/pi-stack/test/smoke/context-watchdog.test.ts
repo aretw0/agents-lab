@@ -1806,6 +1806,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("authorization=none");
 			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
 			expect(result.content?.[0]?.text).toContain("dirty=unknown");
+			expect(result.content?.[0]?.text).toContain("material=");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-readiness",
@@ -1815,6 +1816,13 @@ describe("context-watchdog", () => {
 				staleFocus: "TASK-BUD-320=completed",
 				recommendationCode: "refresh-focus-checkpoint",
 				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
+				materialReadiness: {
+					decision: expect.any(String),
+					recommendationCode: expect.any(String),
+					nextAction: expect.any(String),
+					blockedReasons: expect.any(Array),
+					stock: expect.any(Object),
+				},
 				localContinuitySummary: expect.stringContaining("local-continuity-audit:"),
 				preload: {
 					mode: "context-preload-consume",

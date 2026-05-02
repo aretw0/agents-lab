@@ -1,40 +1,42 @@
 {
-  "timestamp": "2026-05-02T12:09:58.302Z",
-  "context": "Novo lote AFK continuity semeado (TASK-BUD-576..579) para manter produção low-iteration contínua. Execução iniciada em TASK-BUD-576.",
+  "timestamp": "2026-05-02T12:36:18.198Z",
+  "context": "TASK-BUD-576 e TASK-BUD-577 concluídas. Continuação AFK agora foca template de handoff material-first com campos mínimos para retomada low-iteration.",
   "current_tasks": [
-    "TASK-BUD-576"
+    "TASK-BUD-578"
   ],
   "next_actions": [
-    "Adicionar resumo de material readiness AFK no context-watch",
-    "Validar smoke de continuidade",
-    "Promover para TASK-BUD-577 após verificação"
+    "Atualizar docs de continuidade para template curto padronizado",
+    "Aplicar checkpoint final usando novo template",
+    "Validar checklist de docs e smoke focal"
   ],
   "blockers": [],
   "recent_validation": [
-    "Wave AFK materialization fechada com VER-BUD-924",
-    "no-eligible local-safe resolvido por nova semeadura local-safe"
+    "VER-BUD-925",
+    "VER-BUD-926",
+    "autonomy-lane-surface + context-watch smokes verdes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-576",
+    "focus": "TASK-BUD-578",
     "canonical_links": [
+      "task:TASK-BUD-578",
       "task:TASK-BUD-576",
       "task:TASK-BUD-577",
-      "verification:VER-BUD-924"
+      "verification:VER-BUD-925"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T12:09:58.302Z",
+    "generatedAtIso": "2026-05-02T12:36:18.198Z",
     "level": "ok",
-    "percent": 33,
+    "percent": 36,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T12:09:58.302Z",
+      "atIso": "2026-05-02T12:36:18.198Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 33,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

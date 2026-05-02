@@ -13558,7 +13558,7 @@
     {
       "id": "TASK-BUD-576",
       "description": "AFK continuity: adicionar resumo curto de material readiness no context-watch para orientar continuar vs seed-backlog sem abrir dispatch.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-575"
@@ -13574,12 +13574,13 @@
         "smoke da continuidade permanece verde."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] visibilidade curta de material evita long-run vazio e reduz iteração humana para decisões repetidas."
+      "notes": "[rationale:risk-control] visibilidade curta de material evita long-run vazio e reduz iteração humana para decisões repetidas.\n2026-05-02: context-watch agora expõe material readiness AFK curto (continue/seed-backlog/blocked) sem dispatch.",
+      "verification": "VER-BUD-925"
     },
     {
       "id": "TASK-BUD-577",
       "description": "AFK continuity: adicionar packet report-only de semeadura recomendada quando estoque local-safe estiver baixo.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-576"
@@ -13595,12 +13596,13 @@
         "smoke cobre caminho de recomendação positiva e bloqueio."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] semeadura orientada por packet reduz improviso e mantém governança fail-closed."
+      "notes": "[rationale:risk-control] semeadura orientada por packet reduz improviso e mantém governança fail-closed.\nIniciado: packet report-only de semeadura AFK (seed-now|wait|blocked) com base em material_readiness + foco atual.\n2026-05-02: packet de semeadura AFK entregue (seed-now|wait|blocked) com decisão humana explícita quando aplicável.",
+      "verification": "VER-BUD-926"
     },
     {
       "id": "TASK-BUD-578",
       "description": "AFK continuity: consolidar template operacional de handoff material-first com campos mínimos para retomada de baixa iteração.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-577"
@@ -13616,7 +13618,7 @@
         "checkpoint final usa template atualizado."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] handoff compacto e padronizado reduz ambiguidade no retorno AFK."
+      "notes": "[rationale:risk-control] handoff compacto e padronizado reduz ambiguidade no retorno AFK.\nIniciado: template operacional de handoff material-first (decision/estoque/blockers/nextAction) para retomada AFK baixa iteração."
     },
     {
       "id": "TASK-BUD-579",
@@ -13639,6 +13641,90 @@
       ],
       "milestone": "afk-continuity-wave-2026-05",
       "notes": "[rationale:risk-control] fechamento disciplinado evita regressão para paradas sem diagnóstico claro."
+    },
+    {
+      "id": "TASK-BUD-580",
+      "description": "Machine pressure v2: adicionar sinais CPU read-only (load/usage) ao gate de manutenção com classificação warn|pause|block|unknown.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-579"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/machine-maintenance.ts",
+        "packages/pi-stack/test/smoke/machine-maintenance.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "`machine_maintenance_status` inclui leitura CPU com thresholds configuráveis e fallback unknown fail-closed.",
+        "blockers incluem `cpu-pressure-*` quando aplicável.",
+        "smoke cobre cenários ok/warn/unknown sem mutação operacional."
+      ],
+      "milestone": "long-run-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] evita acelerar long-runs quando CPU já está saturada."
+    },
+    {
+      "id": "TASK-BUD-581",
+      "description": "Machine pressure v2: incluir sinal de swap/memória virtual para distinguir pressão real de RAM vs cache transitório.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-580"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/machine-maintenance.ts",
+        "packages/pi-stack/test/smoke/machine-maintenance.test.ts",
+        "docs/primitives/control-plane-overnight-local-loop.md"
+      ],
+      "acceptance_criteria": [
+        "gate expõe swapUsedPct (ou unavailable) com reason code explícito.",
+        "classificação não quebra plataformas sem suporte (unknown controlado).",
+        "smoke cobre caminho com swap indisponível."
+      ],
+      "milestone": "long-run-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] melhora precisão de throttling em hosts com RAM variável."
+    },
+    {
+      "id": "TASK-BUD-582",
+      "description": "Machine pressure v2: desenhar contrato opcional de telemetria GPU (quando disponível) sem hard dependency de vendor.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-581"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/machine-maintenance.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane.ts",
+        "docs/research/cleanup-research-longrun-rehearsal-2026-05-01.md"
+      ],
+      "acceptance_criteria": [
+        "GPU signal fica opt-in e report-only com fallback unknown.",
+        "sem dependência obrigatória de nvidia-smi/ROCm para funcionamento base.",
+        "decisão de gate agrega GPU apenas quando dado é confiável."
+      ],
+      "milestone": "long-run-maintenance-wave-2026-05",
+      "notes": "[rationale:risk-control] prepara a fábrica para cargas heterogêneas sem quebrar portabilidade."
+    },
+    {
+      "id": "TASK-BUD-583",
+      "description": "AFK continuity: criar `turn_boundary_decision_packet` report-only para explicitar motivo de pausa, necessidade humana e próximo passo automático.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-579"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "packet retorna `continue|checkpoint|pause|ask-human` + reasonCode canônico.",
+        "inclui `humanActionRequired` e `nextAutoStep` obrigatórios.",
+        "smoke cobre pausa sem humano e pausa com decisão humana requerida."
+      ],
+      "milestone": "afk-continuity-wave-2026-05",
+      "notes": "[rationale:risk-control] evita pausas ambíguas e reduz atrito de auto-resume."
     }
   ]
 }

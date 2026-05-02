@@ -221,6 +221,59 @@ function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string
   };
 }
 
+function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
+  const readiness = buildAfkMaterialReadinessPacket(p, cwd);
+  const maxSeedSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_seed_slices, 3))));
+  const currentValidated = readiness.material.validationKnownCount;
+  const targetValidated = readiness.material.targetSlices;
+  const seedGap = Math.max(0, targetValidated - currentValidated);
+  const suggestedSeedCount = Math.max(1, Math.min(maxSeedSlices, seedGap || maxSeedSlices));
+
+  let decision: "seed-now" | "wait" | "blocked" = "wait";
+  let recommendationCode = "afk-material-seed-wait-stock-healthy";
+  let nextAction = "defer seeding; continue bounded AFK slice and re-check material packet after checkpoint.";
+  let humanActionRequired = false;
+
+  if (readiness.decision === "blocked") {
+    decision = "blocked";
+    recommendationCode = "afk-material-seed-blocked-readiness";
+    nextAction = "resolve readiness blockers before triggering seeding flow.";
+    humanActionRequired = true;
+  } else if (readiness.decision === "seed-backlog") {
+    decision = "seed-now";
+    recommendationCode = "afk-material-seed-now-low-stock";
+    nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide seeding for up to ${suggestedSeedCount} slices.`;
+    humanActionRequired = true;
+  }
+
+  const summary = [
+    "afk-material-seed:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `readiness=${readiness.decision}`,
+    `focus=${readiness.focusTaskIds.join(",") || "none"}`,
+    `suggestedSeedCount=${suggestedSeedCount}`,
+    `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
+    "authorization=none",
+  ].join(" ");
+
+  return {
+    mode: "report-only",
+    decision,
+    recommendationCode,
+    nextAction,
+    humanActionRequired,
+    suggestedSeedCount,
+    maxSeedSlices,
+    readiness,
+    blockedReasons: readiness.blockedReasons,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary,
+  };
+}
+
 function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
@@ -596,6 +649,31 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAfkMaterialReadinessPacket(p, ctx.cwd);
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: packet,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_material_seed_packet",
+    label: "Autonomy Lane Material Seed Packet",
+    description: "Report-only AFK seeding recommendation packet (seed-now|wait|blocked) with no dispatch authorization.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum local-safe validated slices to continue AFK run (default 3)." })),
+      target_slices: Type.Optional(Type.Number({ description: "Target local-safe validated slices to keep stocked (default 7)." })),
+      max_seed_slices: Type.Optional(Type.Number({ description: "Maximum suggested slices for one explicit seeding decision (1..10, default 3)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildAfkMaterialSeedPacket(p, ctx.cwd);
       return {
         content: [{ type: "text", text: packet.summary }],
         details: packet,

@@ -118,7 +118,13 @@ Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangen
 Regra prática para continuidade:
 - manter estoque de **3 a 7** fatias local-safe prontas no board;
 - quando estoque cair abaixo de 3, priorizar `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` em vez de forçar execução longa;
+- usar `autonomy_lane_material_seed_packet` (read-only) para decidir `seed-now|wait|blocked` antes da semeadura;
 - se o preview bloquear semeadura, registrar stop condition e voltar para limpeza/triagem bounded.
+
+Contrato do packet de semeadura:
+- `decision`: `seed-now|wait|blocked`
+- `humanActionRequired`: `true` quando `seed-now|blocked`
+- `dispatchAllowed=false`, `mutationAllowed=false`, `authorization=none`
 
 Stop condition explícita:
 - `stop: backlog-material-insuficiente`.
