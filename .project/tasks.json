@@ -13731,6 +13731,26 @@
       "milestone": "afk-continuity-wave-2026-05",
       "notes": "[rationale:risk-control] evita pausas ambíguas e reduz atrito de auto-resume.\n2026-05-02: turn boundary packet entregue com motivo explícito de pausa e contrato humano obrigatório quando necessário.",
       "verification": "VER-BUD-932"
+    },
+    {
+      "id": "TASK-BUD-584",
+      "description": "Edge-case hardening: estabilizar cenário stale de consumeContextPreloadPack no smoke de context-watchdog para eliminar flake em regressão completa.",
+      "status": "in-progress",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-583"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste stale de preload pack fica determinístico (sem depender de mtime race).",
+        "Suite `context-watchdog.test.ts` deixa de falhar intermitentemente nesse cenário.",
+        "Contrato report-only continua inalterado."
+      ],
+      "milestone": "turn-boundary-hardening-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir flake em gate crítico de continuidade evita falsos bloqueios e pausas ambíguas."
     }
   ]
 }
