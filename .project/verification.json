@@ -10311,6 +10311,15 @@
       "method": "preview UX refinement + handoff hint helper + smoke",
       "timestamp": "2026-05-02T05:03:32.529Z",
       "evidence": "Refined reload-required suppression UX with concise hint surfaced in auto-resume handoff preview. Changes: - `packages/pi-stack/extensions/context-watchdog-handoff.ts` - Added `formatAutoResumeReloadHintShort()` returning compact reload guidance. - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_auto_resume_preview` now includes reload gate context: - summary includes `reload=required|clear` and optional short hint token. - details include `reloadGate: { reloadRequired, reason, hint }`. - uses shared short hint helper to keep guidance concise and consistent. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - extended preview assertions to validate `reloadGate` visibility in details. - extended formatter assertion to include reload token path (`reload=required`). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 59 passed. - marker checks passed for preview wiring, handoff helper, and smoke anchors."
+    },
+    {
+      "id": "VER-BUD-899",
+      "target": "TASK-BUD-555",
+      "target_type": "task",
+      "status": "passed",
+      "method": "copilot regression smoke + runbook closeout docs",
+      "timestamp": "2026-05-02T05:06:06.121Z",
+      "evidence": "Closed wave with Copilot-focused regression and final operational runbook. Changes: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added regression `keeps Copilot 60/65 calibration in graceful-stop then force-compact order`. - Asserts ordering and safety clamp behavior (`checkpoint=60`, compact final under provider hard-edge guard). - `docs/guides/openai-context-window-playbook.md` - tools list now includes `context_watch_compact_stage_status`. - Added final runbook section for `contexto cheio + reload obrigatório`: - consult stage status, - act by stage (`graceful-stop-window` vs `force-compact-window`), - consult auto-resume preview reload gate, - `/context-watch freshness` sanity check before resume. - Explicit fail-closed rule: reload-required does not auto-authorize auto-resume. - `docs/research/context-graceful-stop-reload-wave-2026-05.md` - Added execution results section summarizing `TASK-BUD-550..555` outcomes and clamp note (`error-1` headroom). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 60 passed. - marker checks passed for regression anchors and runbook/research closeout anchors."
     }
   ]
 }

@@ -42,6 +42,15 @@ Resumo da meta:
 3. **Fail-closed invariants**: auto-resume continua bloqueado quando reload é obrigatório.
 4. **Ruído controlado**: mensagens curtas, sem duplicação excessiva.
 
+## Resultados da execução (TASK-BUD-550..555)
+- `TASK-BUD-551`: primitive de estágio (`normal-window | graceful-stop-window | force-compact-window`).
+- `TASK-BUD-552`: gate reload-aware pré-compact com sinal antecipado (`preCompactReloadSignal`) e hint consistente.
+- `TASK-BUD-553`: tool `context_watch_compact_stage_status` (read-only, `authorization=none`, `dispatchAllowed=false`).
+- `TASK-BUD-554`: preview `context_watch_auto_resume_preview` agora exibe `reload=required|clear` + hint curto no envelope.
+- `TASK-BUD-555`: regressão smoke para calibração Copilot (checkpoint 60 e compact final derivado pelo clamp de segurança) + runbook final.
+
+Observação de contrato: com `warn/error=45/65`, o compact efetivo fica limitado por política para `64` (`error-1`), preservando headroom antes da borda dura do provider.
+
 ## Rollback
 - Reverter para comportamento anterior mantendo:
   - thresholds existentes (60/65),

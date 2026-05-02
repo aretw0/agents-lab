@@ -124,7 +124,7 @@ Override opcional em `.pi/settings.json`:
 ## Context watchdog (advisory, não-bloqueante)
 
 A extensão `context-watchdog` adiciona sinais operacionais para sessões long-run:
-- tools: `context_watch_status`, `context_watch_freshness_status`, `context_watch_bootstrap`
+- tools: `context_watch_status`, `context_watch_freshness_status`, `context_watch_compact_stage_status`, `context_watch_bootstrap`
 - command: `/context-watch [status|freshness|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]`
 - status key: `context-watch`
 
@@ -143,6 +143,17 @@ Para `github-copilot/gpt-5.3-codex` com `checkpoint=60` e `compact=65`, operar c
 2. `compact` (65): se ainda chegou no limite final, compactar automaticamente (fallback).
 
 Se houver `reload-required`, manter fail-closed para auto-resume (sem dispatch), mas reforçar cedo a ação de operador (`/reload`) ainda na janela de checkpoint.
+
+### Runbook final — contexto cheio + reload obrigatório
+1. Consultar `context_watch_compact_stage_status`.
+   - `stage=graceful-stop-window`: fechar slice, salvar checkpoint e **não** abrir escopo novo.
+   - `stage=force-compact-window`: deixar compactação automática finalizar.
+2. Consultar `context_watch_auto_resume_preview`.
+   - se `reload=required`: executar `/reload` e retomar do checkpoint;
+   - se `reload=clear`: seguir pelo foco listado no preview.
+3. Em caso de dúvida operacional rápida: usar `/context-watch freshness` para confirmar `preload` e `dirty` antes de retomar.
+
+Regra de controle: `reload-required` nunca autoriza auto-resume por si só; o bloqueio é intencional (fail-closed) até `/reload`.
 
 Visibilidade operacional (control-plane):
 - Em escalonamento (`warn/checkpoint/compact`), o watchdog registra trilha canônica em `.project/handoff.json`:

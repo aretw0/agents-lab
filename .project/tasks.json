@@ -13085,7 +13085,7 @@
     {
       "id": "TASK-BUD-555",
       "description": "Fechar wave com regressão focada Copilot (checkpoint 60 / compact 65) e runbook final de operação.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-553",
@@ -13102,7 +13102,8 @@
         "Verificação de saída no board com gaps remanescentes e próxima iteração."
       ],
       "milestone": "context-graceful-stop-reload-2026-05",
-      "notes": "[rationale:risk-control] encerramento explícito evita deriva e garante aprendizado operacional auditável.\n[provenance:human] source_task=TASK-BUD-554 reason=bloco de fechamento para consolidar calibração e próximos passos."
+      "notes": "[rationale:risk-control] encerramento explícito evita deriva e garante aprendizado operacional auditável.\n[provenance:human] source_task=TASK-BUD-554 reason=bloco de fechamento para consolidar calibração e próximos passos.\nIniciado fechamento da wave: regressão Copilot 60/65 + runbook operacional final para contexto cheio com reload obrigatório.\n2026-05-03: wave encerrada com regressão Copilot e runbook final de incidente contexto+reload.",
+      "verification": "VER-BUD-899"
     }
   ]
 }

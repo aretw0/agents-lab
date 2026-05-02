@@ -180,6 +180,20 @@ describe("context-watchdog", () => {
 		expect(force.shouldForceCompact).toBe(true);
 	});
 
+	it("keeps Copilot 60/65 calibration in graceful-stop then force-compact order", () => {
+		const cfg = normalizeContextWatchdogConfig({ checkpointPct: 60, compactPct: 65 });
+		const thresholds = deriveContextWatchThresholds(45, 65, cfg);
+		expect(thresholds).toMatchObject({ warnPct: 45, checkpointPct: 60, compactPct: 64 });
+
+		const checkpoint = evaluateContextWatch(60, thresholds);
+		expect(checkpoint.level).toBe("checkpoint");
+		expect(resolveContextWatchCompactStage(checkpoint).stage).toBe("graceful-stop-window");
+
+		const compact = evaluateContextWatch(64, thresholds);
+		expect(compact.level).toBe("compact");
+		expect(resolveContextWatchCompactStage(compact).stage).toBe("force-compact-window");
+	});
+
 	it("formats passive warn steering without soft-stopping work", () => {
 		expect(formatContextWatchSteeringStatus({
 			level: "warn",
