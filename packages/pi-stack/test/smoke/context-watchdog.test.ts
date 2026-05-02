@@ -1428,6 +1428,36 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("/context-watch freshness command reports preload+dirty snapshot", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-command-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const commandCall = (pi.registerCommand as ReturnType<typeof vi.fn>).mock.calls.find(([name]) => name === "context-watch");
+			const command = commandCall?.[1] as {
+				handler: (args: string, ctx: { cwd: string; ui: { notify: (msg: string, level?: string) => void; setStatus?: (k: string, v: string) => void } }) => Promise<void> | void;
+			};
+			const notifications: Array<{ msg: string; level?: string }> = [];
+			await command.handler("freshness", {
+				cwd,
+				ui: {
+					notify(msg: string, level?: string) {
+						notifications.push({ msg, level });
+					},
+					setStatus() {},
+				},
+			});
+
+			expect(notifications.length).toBe(1);
+			expect(notifications[0]?.msg).toContain("context-watch freshness:");
+			expect(notifications[0]?.msg).toContain("preload=fallback-canonical");
+			expect(notifications[0]?.msg).toContain("dirty=unknown");
+			expect(notifications[0]?.msg).toContain("authorization=none");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_auto_resume_preview tool is read-only and filters stale focus", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-auto-resume-preview-"));
 		try {

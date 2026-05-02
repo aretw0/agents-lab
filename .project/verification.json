@@ -10248,6 +10248,15 @@
       "method": "new freshness tool + smoke + marker-check",
       "timestamp": "2026-05-02T04:03:30.848Z",
       "evidence": "Added dedicated read-only freshness tool for one-call preload+dirty diagnostics. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - registered tool `context_watch_freshness_status`. - returns summary `context-watch-freshness-status: preload=<...> dirty=<...> authorization=none`. - details include `preloadDecision`, `dirtySignal`, `preload`, `gitDirty`, `dispatchAllowed=false`, `mode=read-only-freshness`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added regression for tool execution in non-git/no-pack temp cwd (`preload=fallback-canonical`, `dirty=unknown`, normalized git fallback). - `docs/guides/openai-context-window-playbook.md` - tools list now includes `context_watch_freshness_status`. - added guidance to use freshness tool when full status payload is unnecessary. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 55 tests passed. - marker checks passed for tool/docs anchors (`context_watch_freshness_status`, `read-only-freshness`, docs mention)."
+    },
+    {
+      "id": "VER-BUD-892",
+      "target": "TASK-BUD-543",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command subcommand wiring + smoke + marker-check",
+      "timestamp": "2026-05-02T04:06:11.352Z",
+      "evidence": "Added `/context-watch freshness` subcommand for quick operator-facing freshness snapshot. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - updated command usage description to include `freshness`. - added handler branch `sub === \"freshness\"` using shared freshness helper and notifying bounded lines (`preload`, `dirty`, `rows`, `authorization=none`). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added command regression invoking `/context-watch freshness` handler in temp non-git cwd. - asserts output includes `preload=fallback-canonical`, `dirty=unknown`, `authorization=none`. - `docs/guides/openai-context-window-playbook.md` - command usage updated to include `freshness`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 56 tests passed. - marker checks passed for command handler/usage anchors and playbook command string."
     }
   ]
 }

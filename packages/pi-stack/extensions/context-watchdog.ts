@@ -2493,7 +2493,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("context-watch", {
-		description: "Show/reset status, print bootstrap patch, or apply preset. Usage: /context-watch [status|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]",
+		description: "Show/reset status, show freshness, print bootstrap patch, or apply preset. Usage: /context-watch [status|freshness|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]",
 		handler: async (args, ctx) => {
 			const tokens = String(args ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean);
 			const sub = tokens[0] ?? "status";
@@ -2521,6 +2521,21 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
 				ctx.ui.setStatus?.("context-watch-operator", "[ctx-op] reset");
 				ctx.ui.notify("context-watch: state reset", "info");
+				return;
+			}
+
+			if (sub === "freshness") {
+				const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
+				ctx.ui.notify(
+					[
+						"context-watch freshness:",
+						`preload=${freshness.preloadDecision}`,
+						`dirty=${freshness.dirtySignal}`,
+						`rows=${freshness.gitDirty.rowCount}`,
+						`authorization=none`,
+					].join("\n"),
+					"info",
+				);
 				return;
 			}
 

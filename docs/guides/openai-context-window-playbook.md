@@ -125,7 +125,7 @@ Override opcional em `.pi/settings.json`:
 
 A extensão `context-watchdog` adiciona sinais operacionais para sessões long-run:
 - tools: `context_watch_status`, `context_watch_freshness_status`, `context_watch_bootstrap`
-- command: `/context-watch [status|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]`
+- command: `/context-watch [status|freshness|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]`
 - status key: `context-watch`
 
 Defaults derivados (sem override):

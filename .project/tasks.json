@@ -12829,6 +12829,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] ferramenta dedicada simplifica automações read-only sem depender de payload grande do status geral.\n[provenance:human] source_task=TASK-BUD-541 reason=continuidade da cadência local-safe para ergonomia de diagnóstico de frescor\n2026-05-03: ferramenta dedicada de frescor disponível para diagnóstico rápido sem carregar payload completo de status.",
       "verification": "VER-BUD-891"
+    },
+    {
+      "id": "TASK-BUD-543",
+      "description": "Adicionar subcomando `/context-watch freshness` para mostrar snapshot rápido de frescor no terminal (preload+dirty).",
+      "status": "completed",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-542"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Comando suporta `freshness` e emite linhas com `preload=...` e `dirty=...`.",
+        "Uso do comando `/context-watch` atualizado para incluir `freshness`.",
+        "Smoke cobre execução do subcomando e saída básica."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] oferecer leitura rápida por comando reduz necessidade de tool-call manual para operadores em loop.\n[provenance:human] source_task=TASK-BUD-542 reason=continuidade de ergonomia operacional após tool dedicada de frescor\n2026-05-03: /context-watch agora aceita subcomando freshness para leitura rápida de estado fresh sem tool-call explícita.",
+      "verification": "VER-BUD-892"
     }
   ]
 }
