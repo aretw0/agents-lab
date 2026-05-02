@@ -10140,6 +10140,15 @@
       "method": "new script + node test + docs marker-check",
       "timestamp": "2026-05-02T02:03:54.643Z",
       "evidence": "Added local-safe dirty-state snapshot flow without temp files. Changes: - New script `scripts/git-dirty-snapshot.mjs` - reads dirty state via `git -c core.safecrlf=false status --porcelain` - no temp file writes/redirections - outputs deterministic JSON (`clean`, `rows`, `counts`, `summary`) - New tests `scripts/test/git-dirty-snapshot.test.mjs` - parses modified/untracked/rename porcelain rows - validates clean/dirty summary contract - `package.json` - added script `git:dirty:snapshot` - `docs/guides/control-plane-operating-doctrine.md` - guidance updated: use `npm run git:dirty:snapshot` instead of `git diff --name-only > arquivo` + `rm`. Validation: - `node --test scripts/test/git-dirty-snapshot.test.mjs` => 3 passed. - `npm run git:dirty:snapshot --silent` => emits structured dirty snapshot with no temp-file workflow. - `safe_marker_check` on doctrine/script anchors => all matched."
+    },
+    {
+      "id": "VER-BUD-880",
+      "target": "TASK-BUD-531",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime tool wiring + smoke + marker-check",
+      "timestamp": "2026-05-02T02:11:55.135Z",
+      "evidence": "Exposed first-party read-only runtime tool for temp-free dirty snapshot. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added parser contracts: `parseGitStatusPorcelainLine`, `parseGitStatusPorcelainOutput`, `readGitDirtySnapshot`. - added type envelope `GitDirtySnapshot` with `dispatchAllowed=false`, `authorization=none`. - registered tool `git_dirty_snapshot` executing bounded command `git -c core.safecrlf=false status --porcelain`. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - added parse/output regression for porcelain sample. - added read via injectable deps regression. - added registration assertion for `git_dirty_snapshot`. - `docs/guides/control-plane-operating-doctrine.md` - guidance now includes runtime tool `git_dirty_snapshot` alongside script `npm run git:dirty:snapshot`. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts` => 2 files passed, 8 tests passed. - marker checks passed on surface and doctrine anchors."
     }
   ]
 }

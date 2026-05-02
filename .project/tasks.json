@@ -12566,6 +12566,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] remover padrão de arquivos temporários reduz prompts de remoção e ruído operacional de line ending no loop.\n[provenance:human] source_task=TASK-BUD-529 reason=continuidade do hardening pedido pelo operador para reduzir atrito operacional\n2026-05-02: snapshot git sem arquivo temporário incorporado para reduzir atrito de confirmação e ruído operacional.",
       "verification": "VER-BUD-879"
+    },
+    {
+      "id": "TASK-BUD-531",
+      "description": "Expor tool read-only `git_dirty_snapshot` no guardrails-core para inspeção de dirty state sem arquivos temporários e sem limpeza `rm`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-530"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Tool `git_dirty_snapshot` registrada com `dispatchAllowed=false` e comando git bounded.",
+        "Retorna envelope estruturado (`clean`, `rows`, `counts`, `summary`) com parser deterministic de porcelain.",
+        "Smoke cobre registro da tool e leitura via deps injetáveis (sem tocar disco temporário)."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] padronizar inspeção de dirty state no runtime evita padrão `> arquivo`+`rm` e reduz atrito operacional.\n[provenance:human] source_task=TASK-BUD-530 reason=continuar a cadência com superfície first-party reutilizável para status git sem temp files\n2026-05-02: dirty snapshot agora disponível como tool runtime read-only, eliminando necessidade de arquivos temporários para inspeção de git state.",
+      "verification": "VER-BUD-880"
     }
   ]
 }

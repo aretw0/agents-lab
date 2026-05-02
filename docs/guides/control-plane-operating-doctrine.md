@@ -636,7 +636,7 @@ Para manutenção git, a regra é conservadora: diagnosticar, registrar e recome
 
 Para limpeza operacional simples (ex.: arquivos temporários de status/listagem), prefira uma remoção agrupada em um único comando bounded em vez de várias remoções unitárias. Isso reduz ruído de confirmação sem promover limpeza destrutiva ampla.
 
-Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm run git:dirty:snapshot`) em vez de `git diff --name-only > arquivo` seguido de `rm`.
+Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm run git:dirty:snapshot` ou tool read-only `git_dirty_snapshot`) em vez de `git diff --name-only > arquivo` seguido de `rm`.
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
