@@ -115,4 +115,23 @@ describe("context-watchdog continuation recommendation", () => {
     expect(nextLane?.nextStep).toContain("report-only packet");
     expect(packet.summary).toContain("directionOptions=similar-lane:blocked,next-high-value:recommended");
   });
+
+  it("includes growth maturity snapshot and fail-closed needs-evidence guidance when scores are incomplete", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-1",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      growthMaturity: {
+        safetyScore: 90,
+      },
+    });
+
+    expect(packet.decision).toBe("continue");
+    expect(packet.growthMaturity?.decision).toBe("needs-evidence");
+    expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-needs-evidence");
+    expect(packet.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
+    expect(packet.summary).toContain("growthDecision=needs-evidence");
+    expect(packet.summary).toContain("growthCode=growth-maturity-needs-evidence");
+  });
 });

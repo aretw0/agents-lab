@@ -8,6 +8,7 @@ import {
   REFRESH_FOCUS_CHECKPOINT_CODE,
   localStopProtectedFocusNextAction,
 } from "./guardrails-core-local-stop-guidance";
+import { evaluateGrowthMaturityScorePacket, type GrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
 
 export type ContextWatchContinuationRecommendationCode =
   | typeof CONTINUE_LOCAL_CODE
@@ -41,6 +42,17 @@ export interface TurnBoundaryDirectionPreview {
   options: TurnBoundaryDirectionOptionPreview[];
 }
 
+export interface TurnBoundaryGrowthMaturityInput {
+  safetyScore?: number;
+  calibrationScore?: number;
+  throughputScore?: number;
+  simplicityScore?: number;
+  goThreshold?: number;
+  holdThreshold?: number;
+  debtBudgetOk?: boolean;
+  criticalBlockers?: number;
+}
+
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
@@ -49,6 +61,7 @@ export interface TurnBoundaryDecisionPacket {
   nextAutoStep: string;
   directionPrompt: string;
   directionPreview: TurnBoundaryDirectionPreview;
+  growthMaturity?: GrowthMaturityScorePacket;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -165,6 +178,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
   focusTasks: string;
   staleFocusCount: number;
   localAuditReasons?: string[];
+  growthMaturity?: TurnBoundaryGrowthMaturityInput;
 }): TurnBoundaryDecisionPacket {
   const reasons = input.localAuditReasons ?? [];
   const recommendation = resolveContextWatchContinuationRecommendation(input);
@@ -200,6 +214,23 @@ export function buildTurnBoundaryDecisionPacket(input: {
     nextAutoStep = "request explicit human decision for blocked local audit reasons.";
   }
 
+  const growthMaturity = input.growthMaturity
+    ? evaluateGrowthMaturityScorePacket({
+      safetyScore: input.growthMaturity.safetyScore,
+      calibrationScore: input.growthMaturity.calibrationScore,
+      throughputScore: input.growthMaturity.throughputScore,
+      simplicityScore: input.growthMaturity.simplicityScore,
+      goThreshold: input.growthMaturity.goThreshold,
+      holdThreshold: input.growthMaturity.holdThreshold,
+      debtBudgetOk: input.growthMaturity.debtBudgetOk,
+      criticalBlockers: input.growthMaturity.criticalBlockers,
+    })
+    : undefined;
+
+  if (growthMaturity?.decision === "needs-evidence") {
+    nextAutoStep = `${nextAutoStep} growth maturity guidance=needs-evidence; collect missing score signals before acceleration.`;
+  }
+
   const directionPreview = buildTurnBoundaryDirectionPreview({
     decision,
     humanActionRequired,
@@ -219,6 +250,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     recommendationCode: recommendation.recommendationCode,
     directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
     directionPreview,
+    growthMaturity,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
@@ -231,8 +263,11 @@ export function buildTurnBoundaryDecisionPacket(input: {
       "directionPrompt=similar-lane-or-next-value",
       `directionRecommended=${directionPreview.recommendedOptionId}`,
       `directionOptions=${directionOptionsCompact}`,
+      growthMaturity ? `growthDecision=${growthMaturity.decision}` : undefined,
+      growthMaturity ? `growthCode=${growthMaturity.recommendationCode}` : undefined,
+      growthMaturity ? `growthScore=${growthMaturity.score ?? "na"}` : undefined,
       "authorization=none",
-    ].join(" "),
+    ].filter(Boolean).join(" "),
   };
 }
 

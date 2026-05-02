@@ -1921,6 +1921,18 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.content?.[0]?.text).toContain("directionPrompt=similar-lane-or-next-value");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionRecommended=similar-lane");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionOptions=similar-lane:recommended,next-high-value:viable");
+
+			const growthResult = await tool.execute(
+				"tc-turn-boundary-growth-needs-evidence",
+				{ safety_score: 90 },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd: cwdCheckpoint },
+			);
+			expect(growthResult.details?.growthMaturity?.decision).toBe("needs-evidence");
+			expect(growthResult.details?.growthMaturity?.recommendationCode).toBe("growth-maturity-needs-evidence");
+			expect(growthResult.details?.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
+			expect(growthResult.content?.[0]?.text).toContain("growthDecision=needs-evidence");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}

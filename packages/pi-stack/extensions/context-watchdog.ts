@@ -2495,9 +2495,29 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		name: "turn_boundary_decision_packet",
 		label: "Turn Boundary Decision Packet",
 		description:
-			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired, nextAutoStep, directionPrompt, and directionPreview.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired, nextAutoStep, directionPrompt, directionPreview, and optional growth maturity go/hold snapshot.",
+		parameters: Type.Object({
+			safety_score: Type.Optional(Type.Number({ description: "Optional safety maturity score (0..100)." })),
+			calibration_score: Type.Optional(Type.Number({ description: "Optional calibration maturity score (0..100)." })),
+			throughput_score: Type.Optional(Type.Number({ description: "Optional throughput maturity score (0..100)." })),
+			simplicity_score: Type.Optional(Type.Number({ description: "Optional simplicity maturity score (0..100)." })),
+			go_threshold: Type.Optional(Type.Number({ description: "Optional go threshold for growth maturity snapshot." })),
+			hold_threshold: Type.Optional(Type.Number({ description: "Optional hold threshold for growth maturity snapshot." })),
+			debt_budget_ok: Type.Optional(Type.Boolean({ description: "Optional debt-budget signal for growth maturity snapshot." })),
+			critical_blockers: Type.Optional(Type.Number({ description: "Optional critical blocker count for growth maturity snapshot." })),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const growthInputProvided = [
+				"safety_score",
+				"calibration_score",
+				"throughput_score",
+				"simplicity_score",
+				"go_threshold",
+				"hold_threshold",
+				"debt_budget_ok",
+				"critical_blockers",
+			].some((key) => p[key] !== undefined);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 				readHandoffJson(ctx.cwd),
 				config.handoffFreshMaxAgeMs,
@@ -2514,6 +2534,18 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				focusTasks,
 				staleFocusCount,
 				localAuditReasons,
+				growthMaturity: growthInputProvided
+					? {
+						safetyScore: typeof p.safety_score === "number" ? p.safety_score : undefined,
+						calibrationScore: typeof p.calibration_score === "number" ? p.calibration_score : undefined,
+						throughputScore: typeof p.throughput_score === "number" ? p.throughput_score : undefined,
+						simplicityScore: typeof p.simplicity_score === "number" ? p.simplicity_score : undefined,
+						goThreshold: typeof p.go_threshold === "number" ? p.go_threshold : undefined,
+						holdThreshold: typeof p.hold_threshold === "number" ? p.hold_threshold : undefined,
+						debtBudgetOk: typeof p.debt_budget_ok === "boolean" ? p.debt_budget_ok : undefined,
+						criticalBlockers: typeof p.critical_blockers === "number" ? p.critical_blockers : undefined,
+					}
+					: undefined,
 			});
 			return {
 				content: [{ type: "text", text: packet.summary }],

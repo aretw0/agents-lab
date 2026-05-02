@@ -13970,7 +13970,7 @@
     {
       "id": "TASK-BUD-595",
       "description": "[P1] Integrar growth maturity score no turn_boundary_decision_packet para emitir recomendação go/hold/needs-evidence no fechamento de turno.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog-continuation.ts",
@@ -13983,7 +13983,26 @@
         "Smoke test cobre presença do snapshot e invariantes de no-dispatch."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] acoplar score ao boundary reduz decisões subjetivas de aceleração e preserva governança."
+      "notes": "[rationale:risk-control] acoplar score ao boundary reduz decisões subjetivas de aceleração e preserva governança.\n2026-05-02: boundary packet agora inclui snapshot opcional de growth maturity com guidance fail-closed (`needs-evidence`) quando sinais estiverem incompletos.",
+      "verification": "VER-BUD-944"
+    },
+    {
+      "id": "TASK-BUD-596",
+      "description": "[P1] Documentar uso operacional do `growth_maturity_score_packet` no ciclo de turn-boundary/checkpoint (com exemplos de go/hold/needs-evidence).",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "docs/guides/primitive-growth-sanity-plan.md",
+        "docs/primitives/growth-maturity-score-packet.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Guia de crescimento inclui runbook curto de uso do packet por boundary.",
+        "Primitiva inclui exemplos de payload/saída para go/hold/needs-evidence.",
+        "Doctrine referencia explicitamente a integração com turn_boundary_decision_packet."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] rotina explícita reduz deriva operacional e mantém aceleração sob governança."
     }
   ]
 }
