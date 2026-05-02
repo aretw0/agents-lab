@@ -10212,6 +10212,15 @@
       "method": "status payload composition + smoke + marker-check",
       "timestamp": "2026-05-02T03:49:36.958Z",
       "evidence": "Composed preload decision into context-watch status payload (read-only). Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_status` now computes `preload = consumeContextPreloadPack(cwd, { profile: \"control-plane-core\" })`. - includes `preload` inside status `details` payload. - kept main summary text contract unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool test now asserts `details.preload` fallback envelope (`decision=fallback-canonical`, `dispatchAllowed=false`, `authorization=none`) in temp no-pack workspace. - `docs/guides/openai-context-window-playbook.md` - status docs updated to mention `details.preload` alongside `details.gitDirty`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks passed: - `context-watchdog.ts` (`consumeContextPreloadPack`, `preload,`, `context_watch_status`). - playbook (`details.preload`, `use-pack|fallback-canonical`, `details.gitDirty`)."
+    },
+    {
+      "id": "VER-BUD-888",
+      "target": "TASK-BUD-539",
+      "target_type": "task",
+      "status": "passed",
+      "method": "status payload shortcut fields + smoke + marker-check",
+      "timestamp": "2026-05-02T03:51:52.426Z",
+      "evidence": "Added stable shortcut fields for context freshness in context-watch status payload. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_status` now sets: - `details.dirtySignal` (`clean|dirty|unknown`) - `details.preloadDecision` (`use-pack|fallback-canonical`) - kept existing summary text unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool assertion now checks `dirtySignal=unknown` and `preloadDecision=fallback-canonical` in non-git/no-pack temp workspace. - `docs/guides/openai-context-window-playbook.md` - documented shortcut fields for simpler consumers. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks passed: - `context-watchdog.ts` markers (`dirtySignal`, `preloadDecision`, `context_watch_status`). - playbook markers (`details.dirtySignal`, `details.preloadDecision`)."
     }
   ]
 }

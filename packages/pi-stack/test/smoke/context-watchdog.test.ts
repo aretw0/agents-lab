@@ -1328,6 +1328,8 @@ describe("context-watchdog", () => {
 				level: "ok",
 				percent: 14,
 				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown",
+				dirtySignal: "unknown",
+				preloadDecision: "fallback-canonical",
 				gitDirty: {
 					available: false,
 					clean: null,

@@ -12742,6 +12742,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] concentrar sinais de contexto fresh em um status read-only reduz chamadas dispersas e mantém continuidade auditável.\n[provenance:human] source_task=TASK-BUD-537 reason=continuação da cadência de contexto fresh após reload confirmado pelo operador\n2026-05-03: context_watch_status agora já expõe preload decision no details para diagnóstico fresh em chamada única.",
       "verification": "VER-BUD-887"
+    },
+    {
+      "id": "TASK-BUD-539",
+      "description": "Adicionar atalhos estáveis `dirtySignal` e `preloadDecision` em `context_watch_status.details` para consumo automático sem parsing profundo.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-538"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Payload de `context_watch_status` inclui `dirtySignal` (`clean|dirty|unknown`) e `preloadDecision` (`use-pack|fallback-canonical`).",
+        "Summary textual principal permanece inalterado.",
+        "Smoke valida os dois atalhos no details."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir parsing de payload profundo melhora robustez de automações read-only sem ampliar escopo de execução.\n[provenance:human] source_task=TASK-BUD-538 reason=continuidade da ergonomia do pacote de status para consumo determinístico\n2026-05-03: payload de status agora oferece atalhos estáveis para frescor sem parsing profundo.",
+      "verification": "VER-BUD-888"
     }
   ]
 }

@@ -176,6 +176,7 @@ Consumo fail-closed do pack (com fallback canônico quando stale):
 - runtime tool read-only: `context_preload_consume`
 - composição em readiness packet: `context_watch_continuation_readiness` inclui `preload.decision=use-pack|fallback-canonical` e `dirty=clean|dirty|unknown`.
 - `context_watch_status` também expõe `details.gitDirty` (clean/dirty/unknown) e `details.preload` (`use-pack|fallback-canonical`) sem alterar o summary principal.
+- Para consumo simples, use os atalhos `details.dirtySignal` e `details.preloadDecision`.
 
 Saídas sugerem dois perfis de carga:
 - `control-plane-core`: contexto mínimo para coordenação/decisão.

@@ -2005,6 +2005,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			});
 			lastStatusToolLevel = assessment.level;
 			lastStatusToolAt = nowMs;
+			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
 			const payload = {
 				...assessment,
 				summary: adaptiveSummary.summary,
@@ -2021,6 +2022,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStopHint,
 				operatorAction,
 				operatingCadence,
+				dirtySignal,
+				preloadDecision: preload.decision,
 				gitDirty,
 				preload,
 			};
