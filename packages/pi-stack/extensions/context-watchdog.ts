@@ -63,6 +63,7 @@ import {
 	LOCAL_SLICE_HANDOFF_MAX_JSON_CHARS,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
+	formatAutoResumeReloadHintShort,
 	resolveHandoffBoardReconciliation,
 	resolveHandoffFreshness,
 	summarizeAutoResumePromptDiagnostics,
@@ -137,6 +138,7 @@ export {
 	resolveContextWatchCompactStage,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
+	formatAutoResumeReloadHintShort,
 	resolveHandoffBoardReconciliation,
 	summarizeAutoResumePromptDiagnostics,
 	latestContextWatchEvent,
@@ -928,13 +930,17 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 	focusTasks: string;
 	staleFocusCount: number;
 	diagnosticsSummary: string;
+	reloadGate?: "required" | "clear";
+	reloadHint?: string;
 }): string {
 	return [
 		"context-watch-auto-resume-preview:",
 		`focusTasks=${input.focusTasks.replace(/\s+/g, "_")}`,
 		`staleFocus=${input.staleFocusCount}`,
 		`diagnostics=${input.diagnosticsSummary.replace(/\s+/g, ";")}`,
-	].join(" ");
+		input.reloadGate ? `reload=${input.reloadGate}` : undefined,
+		input.reloadHint ? `hint=${input.reloadHint.replace(/\s+/g, "_")}` : undefined,
+	].filter(Boolean).join(" ");
 }
 
 
@@ -2186,10 +2192,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const focusTasks = extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
 			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
 			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
+			const reloadRequired = isReloadRequiredForSourceUpdate();
+			const reloadHint = reloadRequired ? formatAutoResumeReloadHintShort() : undefined;
 			const summary = formatContextWatchAutoResumePreviewSummary({
 				focusTasks,
 				staleFocusCount,
 				diagnosticsSummary,
+				reloadGate: reloadRequired ? "required" : "clear",
+				reloadHint,
 			});
 			return {
 				content: [{ type: "text", text: summary }],
@@ -2200,6 +2210,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					staleFocus,
 					diagnostics: envelope.diagnostics,
 					diagnosticsSummary,
+					reloadGate: {
+						reloadRequired,
+						reason: reloadRequired ? "reload-required" : "clear",
+						hint: reloadHint,
+					},
 					effect: "none",
 					mode: "read-only-preview",
 					authorization: "none",

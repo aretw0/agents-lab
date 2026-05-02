@@ -631,3 +631,7 @@ export function buildAutoResumePromptFromHandoff(
 ): string {
 	return buildAutoResumePromptEnvelopeFromHandoff(handoffInput, maxFreshAgeMs, nowMs, options).prompt;
 }
+
+export function formatAutoResumeReloadHintShort(): string {
+	return "run /reload and continue from handoff checkpoint";
+}

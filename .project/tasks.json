@@ -13063,7 +13063,7 @@
     {
       "id": "TASK-BUD-554",
       "description": "Refinar auto-resume suppression UX para `reload-required` com reforço pre-resume e handoff hint curto.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-552"
@@ -13079,7 +13079,8 @@
         "Smoke cobre suppression reason/hint e ausência de dispatch."
       ],
       "milestone": "context-graceful-stop-reload-2026-05",
-      "notes": "[rationale:risk-control] feedback claro de bloqueio evita loops improdutivos após compactação.\n[provenance:human] source_task=TASK-BUD-552 reason=quarto bloco para resolver percepção de travamento e orientar retomada."
+      "notes": "[rationale:risk-control] feedback claro de bloqueio evita loops improdutivos após compactação.\n[provenance:human] source_task=TASK-BUD-552 reason=quarto bloco para resolver percepção de travamento e orientar retomada.\nIniciado: refinar UX de auto-resume suppression para reload-required com hint curto visível no preview/handoff.\n2026-05-03: preview de auto-resume agora exibe reloadGate/hint curto, reduzindo percepção de travamento pós-compact quando reload é exigido.",
+      "verification": "VER-BUD-898"
     },
     {
       "id": "TASK-BUD-555",

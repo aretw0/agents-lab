@@ -1612,13 +1612,19 @@ describe("context-watchdog", () => {
 				focusTasks: "none-listed",
 				staleFocus: "TASK-BUD-309=completed",
 				diagnosticsSummary: expect.stringContaining("staleFocus=1"),
+				reloadGate: {
+					reloadRequired: false,
+					reason: "clear",
+				},
 			});
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-309");
 			expect(formatContextWatchAutoResumePreviewSummary({
 				focusTasks: "none-listed",
 				staleFocusCount: 1,
 				diagnosticsSummary: "tasks(in=0,listed=0,dedup=0,trunc=0,drop=0) staleFocus=1 global=ok",
-			})).toContain("staleFocus=1");
+				reloadGate: "required",
+				reloadHint: "run /reload and continue from handoff checkpoint",
+			})).toContain("reload=required");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

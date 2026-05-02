@@ -10302,6 +10302,15 @@
       "method": "new read-only tool + smoke + docs markers",
       "timestamp": "2026-05-02T04:58:46.167Z",
       "evidence": "Added read-only compact-stage status surface for operator visibility. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - Added formatter `formatContextWatchCompactStageStatusSummary(...)`. - Added tool `context_watch_compact_stage_status` returning: - stage (`normal-window|graceful-stop-window|force-compact-window`), - thresholds (`checkpointPct`, `compactPct`), - reload gate (`preCompactReloadSignal`), - deterministic `nextAction`. - Invariants: `authorization=none`, `dispatchAllowed=false`, `mode=read-only-compact-stage`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added tool test for non-git cwd/read-only contract. - Added model-aware threshold profile test (anthropic path). - Added formatter assertion for custom threshold output. - `docs/primitives/continuity-abstraction.md` - Documented `context_watch_compact_stage_status` in continuity read-only operational surfaces. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 59 passed. - marker checks passed for tool wiring, smoke anchors, and continuity doc anchors."
+    },
+    {
+      "id": "VER-BUD-898",
+      "target": "TASK-BUD-554",
+      "target_type": "task",
+      "status": "passed",
+      "method": "preview UX refinement + handoff hint helper + smoke",
+      "timestamp": "2026-05-02T05:03:32.529Z",
+      "evidence": "Refined reload-required suppression UX with concise hint surfaced in auto-resume handoff preview. Changes: - `packages/pi-stack/extensions/context-watchdog-handoff.ts` - Added `formatAutoResumeReloadHintShort()` returning compact reload guidance. - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_auto_resume_preview` now includes reload gate context: - summary includes `reload=required|clear` and optional short hint token. - details include `reloadGate: { reloadRequired, reason, hint }`. - uses shared short hint helper to keep guidance concise and consistent. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - extended preview assertions to validate `reloadGate` visibility in details. - extended formatter assertion to include reload token path (`reload=required`). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 59 passed. - marker checks passed for preview wiring, handoff helper, and smoke anchors."
     }
   ]
 }
