@@ -10365,6 +10365,15 @@
       "method": "runbook docs update + marker checks + doc smoke",
       "timestamp": "2026-05-02T05:46:45.440Z",
       "evidence": "Documented staged runbook for delegation lane and aligned operational references. Changes: - `docs/guides/control-plane-operating-doctrine.md` - Added staged runbook for delegation lane: - local-safe - simple-delegate - swarm rehearsal - Added stage evidence checklist and explicit advancement/defer discipline. - `docs/guides/openai-context-window-playbook.md` - Added quick delegation lane runbook with sequence: - `delegation_lane_capability_snapshot` - `delegation_mix_score` - `delegate_or_execute_decision_packet` - Reinforced fail-closed rule for blockers/signal gaps. - `docs/primitives/README.md` - Added runtime primitive catalog entries for delegation capability snapshot, mix score, and delegate-or-execute packet. Validation: - marker checks passed for doctrine/playbook/primitives anchors. - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => 2 passed."
+    },
+    {
+      "id": "VER-BUD-905",
+      "target": "TASK-BUD-549",
+      "target_type": "task",
+      "status": "passed",
+      "method": "wave regression pack + closeout checklist",
+      "timestamp": "2026-05-02T05:51:23.484Z",
+      "evidence": "Closed delegation-evolution wave with focused regression pack and documented exit checklist/recommendation. Changes: - Regression pack executed (all green): - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 57 tests passed across 5 files. - Closeout research document updated: - `docs/research/control-plane-delegation-wave-2026-05.md` - Added section `Fechamento da wave (TASK-BUD-549)` with completed deliverables, regression evidence, checked exit checklist, remaining gaps, and continuation recommendation. - Explicit remaining gap logged: - hard-intent auto-advance hardening task seeded as `TASK-BUD-557`. Validation: - marker checks passed for wave-closeout anchors in research doc. - marker checks passed for delegate-or-execute surface anchors."
     }
   ]
 }

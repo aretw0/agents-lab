@@ -12962,7 +12962,7 @@
     {
       "id": "TASK-BUD-549",
       "description": "Fechar wave com regressão/smoke e checklist de saída para delegação controlada contínua.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-548"
@@ -12978,7 +12978,8 @@
         "Verificação final anexada no board com recommendation explícita."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] saída explícita evita wave infinita e preserva auditabilidade da evolução do control-plane.\n[provenance:human] source_task=TASK-BUD-548 reason=bloco de encerramento para medir resultado e preparar continuidade"
+      "notes": "[rationale:risk-control] saída explícita evita wave infinita e preserva auditabilidade da evolução do control-plane.\n[provenance:human] source_task=TASK-BUD-548 reason=bloco de encerramento para medir resultado e preparar continuidade\nPromoção automática de foco após conclusão da TASK-BUD-548 para manter auto-advance da night lane.\n2026-05-03: wave delegation-evolution encerrada com regressão verde e recomendação explícita para hardening de auto-advance (TASK-BUD-557).",
+      "verification": "VER-BUD-905"
     },
     {
       "id": "TASK-BUD-550",

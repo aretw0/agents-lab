@@ -1,40 +1,43 @@
 {
-  "timestamp": "2026-05-02T05:44:59.637Z",
-  "context": "Auto-advance ativo na lane delegation-evolution. Foco movido para TASK-BUD-548: documentar runbook staged (local-safe -> simple delegate -> s [snip] ates, rollback e checklist por estágio. [truncated:+21 chars]",
+  "timestamp": "2026-05-02T05:48:58.283Z",
+  "context": "Auto-advance ativo na lane delegation-evolution. Foco movido para TASK-BUD-549: fechar wave com regressões focadas, checklist de saída e recomendação explícita para continuidade.",
   "current_tasks": [
-    "TASK-BUD-548"
+    "TASK-BUD-549"
   ],
   "next_actions": [
-    "Atualizar control-plane-operating-doctrine com runbook de estágio",
-    "Atualizar playbook de contexto com fluxo de delegar vs executar",
-    "Atualizar docs/primitives/README com sequência operacional"
+    "Context-watch action: level=checkpoint 60% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Executar pack de smoke focal da wave (autonomy/session-analytics/ops-calibration/docs)",
+    "Atualizar doc de research da wave com ganhos/gaps e recomendação",
+    "Fechar board com verificação final"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required"
+  ],
   "recent_validation": [
-    "TASK-BUD-547 concluída com VER-BUD-903",
-    "smoke ops-calibration/session-analytics verde"
+    "TASK-BUD-548 concluída com VER-BUD-904",
+    "docs e runbook staged atualizados"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-548",
+    "focus": "TASK-BUD-549",
     "canonical_links": [
+      "task:TASK-BUD-549",
       "task:TASK-BUD-548",
-      "task:TASK-BUD-547",
-      "verification:VER-BUD-903"
+      "verification:VER-BUD-904"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T05:44:59.637Z",
+    "generatedAtIso": "2026-05-02T05:48:28.786Z",
     "level": "ok",
-    "percent": 34,
+    "percent": 33,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T05:44:59.637Z",
+      "atIso": "2026-05-02T05:48:28.786Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 34,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +45,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "continue-bounded"
+    },
+    {
+      "atIso": "2026-05-02T05:48:58.283Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 60,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }

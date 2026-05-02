@@ -47,3 +47,34 @@ Evoluir o control-plane para **delegar mais e executar menos**, mantendo:
 - Helpers compartilhados para sinais críticos.
 - Tooling de snapshot/packet com recommendationCode estável.
 - Smoke dedicado por wave + marker anchors de contrato.
+
+## Fechamento da wave (TASK-BUD-549)
+
+### Entregas concluídas
+- `TASK-BUD-545`: `delegation_lane_capability_snapshot` (read-only, decisão `ready|needs-evidence|blocked`).
+- `TASK-BUD-546`: `delegation_mix_score` (mix `local/manual/simple-delegate/swarm` com recommendationCode).
+- `TASK-BUD-547`: `delegate_or_execute_decision_packet` (recomendação `local-execute|simple-delegate|defer`, fail-closed).
+- `TASK-BUD-548`: runbook staged documentado na doutrina e no playbook operacional.
+
+### Regressão focal da wave
+Pack executado (57 testes verdes):
+- `autonomy-lane-readiness.test.ts`
+- `autonomy-lane-surface.test.ts`
+- `session-analytics.test.ts`
+- `guardrails-ops-calibration.test.ts`
+- `control-plane-doc-checklist.test.ts`
+
+### Checklist de saída
+- [x] task ativa única por fatia (WIP=1)
+- [x] validação focal por fatia
+- [x] verificação no board para tasks da wave
+- [x] commit curto por fatia
+- [x] checkpoint/handoff atualizado por avanço de foco
+
+### Gaps remanescentes
+- O auto-advance entre tasks ainda depende de regra operacional (soft) nesta sessão.
+- Hardening planejado: `TASK-BUD-557` para elevar auto-advance para contrato hard-intent runtime/fail-closed.
+
+### Recomendação de continuidade
+- Manter execução local-safe em fatias bounded.
+- Tratar `TASK-BUD-557` como próxima prioridade de governança para remover dependência de soft intent na continuidade noturna.
