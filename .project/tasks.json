@@ -12505,6 +12505,25 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] consumo como tool padroniza retomada fresh no runtime com fallback explícito e auditável.\n[provenance:human] source_task=TASK-BUD-526 reason=continuidade da cadência para reduzir releitura após compact e spawn\n2026-05-02: consumo de fresh-pack agora disponível via tool read-only no runtime, com fallback canônico quando stale.",
       "verification": "VER-BUD-876"
+    },
+    {
+      "id": "TASK-BUD-528",
+      "description": "Remover prompts repetitivos de confirmação para `rm` simples em shell, preservando guardrails de destrutivo alto-risco.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".pi/settings.json",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Config passa a excluir `safe-guard` upstream que força confirmação para `rm -f`.",
+        "Fluxo mantém guardrails first-party ativos (guardrails-core) sem mutação em node_modules.",
+        "Diretriz operacional registrada: agrupar limpezas em um comando único para reduzir interrupções."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] prompts repetitivos em `rm` simples reduzem throughput; ajuste deve preservar fail-closed para escopos realmente destrutivos.\n[provenance:human] source_task=TASK-BUD-527 reason=feedback explícito do operador sobre fricção operacional com confirmações por comando\n2026-05-02: fricção de confirmação em remoção simples reduzida com caminho distribuível (installer filter) + orientação de batch cleanup.",
+      "verification": "VER-BUD-877"
     }
   ]
 }

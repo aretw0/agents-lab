@@ -10113,6 +10113,15 @@
       "method": "runtime tool wiring + smoke + script test + marker-check",
       "timestamp": "2026-05-02T00:39:24.661Z",
       "evidence": "Implemented runtime read-only tool for fresh-pack consumption with fail-closed fallback. Changes: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - added `consumeContextPreloadPack(...)` + types (`ContextPreloadProfile`, `ContextPreloadConsumeReport`). - deterministic canonical fingerprint (`handoff/tasks/verification`) and stale reasons. - decision contract: `use-pack|fallback-canonical`, `dispatchAllowed=false`. - `packages/pi-stack/extensions/context-watchdog.ts` - exports consume helper/types. - registers tool `context_preload_consume` with profile/max_age_hours/pack_path. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - helper-level stale fallback regression. - tool-level read-only envelope regression. - `docs/guides/openai-context-window-playbook.md` - docs updated with runtime tool mention. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - `node --test scripts/test/context-preload-consume.test.mjs` => 2 passed. - `safe_marker_check docs/guides/openai-context-window-playbook.md` markers (`context_preload_consume`, `swarm-scout-min`, `fallback canônico`) => matched 3/3."
+    },
+    {
+      "id": "VER-BUD-877",
+      "target": "TASK-BUD-528",
+      "target_type": "task",
+      "status": "passed",
+      "method": "settings+installer-filter+smoke+doc anchors",
+      "timestamp": "2026-05-02T01:29:43.672Z",
+      "evidence": "Reduced repetitive rm-confirmation friction with distributable curation path. Changes: - Local canonical runtime (`.pi/settings.json`): added `!extensions/safe-guard.ts` under `npm:@ifi/oh-pi-extensions` filters to stop per-command prompts on simple `rm -f`. - Distributable hatch path (`packages/pi-stack/install.mjs`): added `!extensions/safe-guard.ts` to installer `FILTER_PATCHES` for `npm:@ifi/oh-pi-extensions` so curated installs inherit the same behavior. - Added installer regression (`packages/pi-stack/test/smoke/installer-filters.test.ts`) asserting filter merge includes `!extensions/safe-guard.ts`. - Updated curated package docs (`packages/pi-stack/README.md`) to reflect safe-guard is filtered in default curation. - Added doctrine note (`docs/guides/control-plane-operating-doctrine.md`) recommending grouped bounded cleanup commands to reduce confirmation noise. Validation: - `npx vitest run packages/pi-stack/test/smoke/installer-filters.test.ts` => 1 file passed, 5 tests passed. - marker checks: - `packages/pi-stack/install.mjs` markers `!extensions/safe-guard.ts`, `safe-guard` => matched. - `packages/pi-stack/README.md` markers `safe-guard`, `filtrado na curadoria padrão` => matched. - `docs/guides/control-plane-operating-doctrine.md` markers `remoção agrupada`, `comando bounded` => matched."
     }
   ]
 }

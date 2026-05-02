@@ -632,6 +632,8 @@ Sinais simples não devem acumular ruído nem virar desculpa para manutenção a
 
 Para manutenção git, a regra é conservadora: diagnosticar, registrar e recomendar são permitidos; executar `git gc`, executar `git prune` ou remover `.git/gc.log` exige autorização explícita. Um aviso de manutenção não deve ser ignorado, mas também não deve virar limpeza destrutiva automática.
 
+Para limpeza operacional simples (ex.: arquivos temporários de status/listagem), prefira uma remoção agrupada em um único comando bounded em vez de várias remoções unitárias. Isso reduz ruído de confirmação sem promover limpeza destrutiva ampla.
+
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
 ## Testes de path cross-platform

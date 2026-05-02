@@ -104,7 +104,7 @@ Ativar: `/settings` → selecionar `agents-lab`
 | `pi-lens` | LSP, ast-grep, code analysis |
 | `pi-web-access` | Fetch, PDF, YouTube |
 | `@davidorex/pi-project-workflows` | Project blocks, workflows YAML, monitors |
-| `@ifi/oh-pi-extensions` | safe-guard, git-guard, bg-process, e mais |
+| `@ifi/oh-pi-extensions` | git-guard, bg-process, e mais (`safe-guard` filtrado na curadoria padrão) |
 | `@ifi/oh-pi-skills` | debug-helper, quick-setup, e mais |
 | `@ifi/oh-pi-themes` | Temas visuais |
 | `@ifi/oh-pi-prompts` | Prompt templates |

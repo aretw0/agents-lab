@@ -42,7 +42,8 @@
 			"extensions": [
 				"!extensions/custom-footer.ts",
 				"!extensions/usage-tracker.ts",
-				"!extensions/usage-tracker-providers.ts"
+				"!extensions/usage-tracker-providers.ts",
+				"!extensions/safe-guard.ts"
 			],
 			"skills": [],
 			"themes": []

@@ -65,6 +65,23 @@ describe("installer-filters", () => {
 		expect(ext).toHaveLength(1);
 	});
 
+	it("converte entrada de @ifi/oh-pi-extensions com filtros curados (inclui safe-guard off)", () => {
+		const input = { packages: ["npm:@ifi/oh-pi-extensions"] };
+		const { settings, changed } = applyFilterPatchesToSettings(
+			input,
+			FILTER_PATCHES,
+		);
+
+		expect(changed).toBe(true);
+		const entry = settings.packages[0];
+		expect(entry.source).toBe("npm:@ifi/oh-pi-extensions");
+		expect(entry.extensions).toContain("!extensions/custom-footer.ts");
+		expect(entry.extensions).toContain("!extensions/usage-tracker.ts");
+		expect(entry.extensions).toContain("!extensions/usage-tracker-providers.ts");
+		expect(entry.extensions).toContain("!extensions/watchdog.ts");
+		expect(entry.extensions).toContain("!extensions/safe-guard.ts");
+	});
+
 	it("não altera settings sem packages", () => {
 		const input = { theme: "agents-lab" };
 		const { settings, changed } = applyFilterPatchesToSettings(
