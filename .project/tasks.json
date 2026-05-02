@@ -14307,6 +14307,23 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] frescor consistente entre readiness e boundary reduz divergência de interpretação em continuidade.\n2026-05-02: readiness agora também expõe `growthFresh`, mantendo alinhamento semântico com boundary fallback.",
       "verification": "VER-BUD-960"
+    },
+    {
+      "id": "TASK-BUD-612",
+      "description": "[P1] Endurecer contrato de encerramento de turno: mini-packet obrigatório (próximos passos + preview de decisão) sem steering prescritivo por default.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doctrine define mini-packet obrigatório no fechamento (status curto, próximos passos, preview).",
+        "Contrato separa preview neutro de steering prescritivo.",
+        "Escalonamento soft->hard explícito quando houver recorrência de falha no fechamento."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduzir necessidade de lembretes humanos no fim do turno mantendo governança e baixo ruído.\n2026-05-02: fechamento de turno endurecido com mini-packet obrigatório; ausência recorrente passa a falha de contrato (soft->hard).",
+      "verification": "VER-BUD-961"
     }
   ]
 }

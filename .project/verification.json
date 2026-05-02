@@ -10869,6 +10869,15 @@
       "method": "readiness growth freshness marker + smoke",
       "timestamp": "2026-05-02T17:04:40.556Z",
       "evidence": "Aligned continuation readiness with boundary by exposing growth snapshot freshness. Code: - `packages/pi-stack/extensions/context-watchdog.ts` - `HandoffGrowthMaturitySnapshot` now allows `freshness`. - `context_watch_continuation_readiness` now computes handoff freshness via `resolveHandoffFreshness(...)` and attaches it to growth snapshot when present. - Readiness summary now includes `growthFresh=<fresh|stale|unknown>` when snapshot exists. Tests: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Existing readiness case now asserts `growthFresh=stale` and `details.growthMaturitySnapshot.freshness=\"stale\"`. - No-growth case asserts absence of `growthFresh` marker. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - 75 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-961",
+      "target": "TASK-BUD-612",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doctrine hardening for mandatory turn-close mini-packet + docs checklist",
+      "timestamp": "2026-05-02T17:15:21.699Z",
+      "evidence": "Updated doctrine to make end-of-turn mini-packet mandatory while keeping default non-prescriptive tone. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Replaced section with: `Encerramento de turno: mini-packet obrigatório (sem steering prescritivo por default)`. - Mandatory closeout blocks: 1) status curto, 2) próximos passos, 3) preview de decisão. - Clarified neutrality rule: preview required; prescriptive steering only on explicit user request or real blocker. - Added soft->hard escalation rule for repeated misses: repeated reminders become contract failure to fix in-turn. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
     }
   ]
 }

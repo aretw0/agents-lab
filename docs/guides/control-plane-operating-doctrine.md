@@ -690,15 +690,22 @@ Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm r
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
-### Encerramento de turno: padrão sem steering obrigatório
+### Encerramento de turno: mini-packet obrigatório (sem steering prescritivo por default)
 
-No fechamento de turno, o padrão deve ser **conciso e factual**. Não injete steering (`promote|defer`, direção de lane ou opções) por default quando não houver pedido explícito do operador.
+No fechamento de turno, o padrão deve ser **conciso e obrigatório** com mini-packet de 3 blocos:
+1. status curto do que foi concluído/aberto;
+2. próximos passos imediatos;
+3. preview de decisão disponível no estado atual.
 
-Escalonamento recomendado:
-1. **soft**: sugerir próximos passos somente quando houver solicitação humana direta ou bloqueio real no foco atual;
-2. **hard**: usar steering explícito e estruturado apenas quando o mesmo impasse se repetir e o modo soft não resolver.
+Regra de neutralidade:
+- `preview` é obrigatório, mas pode ser neutro;
+- steering prescritivo (`faça X agora`, `promote|defer` recomendado) só entra quando houver pedido explícito do operador ou bloqueio real.
 
-Objetivo: preservar governança sem transformar cada encerramento em negociação de direção.
+Escalonamento de governança:
+1. **soft**: lembrar e corrigir no próximo fechamento quando faltar o mini-packet;
+2. **hard**: se houver recorrência (operador precisando lembrar repetidamente), tratar ausência do mini-packet como falha de contrato e corrigir imediatamente no próprio turno.
+
+Objetivo: eliminar lembretes manuais no encerramento sem inflar ruído operacional.
 
 Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
 
