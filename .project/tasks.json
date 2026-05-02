@@ -14938,7 +14938,7 @@
         "Teste cobre recorrência de eventos duplicados em janela curta."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Encadeamento para reduzir churn em handoff e melhorar relação sinal/ruído."
+      "notes": "Encadeamento para reduzir churn em handoff e melhorar relação sinal/ruído.\n[rationale:risk-control] Eventos repetidos de context-watch no handoff aumentam ruído e custo de contexto sem ganho de decisão. Dedupe preserva auditoria útil e reduz churn durante long-run."
     },
     {
       "id": "TASK-BUD-645",
@@ -14958,7 +14958,7 @@
         "Teste smoke valida presença da linha em modo read-only."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado."
+      "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado.\n[rationale:risk-control] Resumo curto de budget de ruído no comando /context-watch reduz tempo de diagnóstico humano e mantém cadência sem abrir payload grande em sessão."
     }
   ]
 }
