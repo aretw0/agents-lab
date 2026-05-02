@@ -1,48 +1,48 @@
 {
-  "timestamp": "2026-05-02T14:44:38.962Z",
-  "context": "afk-handoff: decision=ask-human stock=3/7 blockers=protected-execution-requires-explicit-promote next=decidir promote / defer para TASK-BUD-5 [snip] ecommended, skip:viable, defer:viable). [truncated:+35 chars]",
+  "timestamp": "2026-05-02T14:54:46.133Z",
+  "context": "afk-handoff: decision=checkpoint stock=4/7 blockers=none next=decidir próximo canário protegido (ou voltar lane local-safe) após 1-run exitoso em GitHub Actions.",
   "current_tasks": [
-    "TASK-BUD-589"
+    "TASK-BUD-134"
   ],
   "next_actions": [
-    "Você escolhe promote ou defer para TASK-BUD-589.",
-    "Se promote: executar 1 canário protegido bounded com rollback explícito.",
-    "Se defer: manter local-safe e semear próxima fatia de valor."
+    "Se continuar protected: definir canário #2 explícito (ex.: CI workflow_dispatch) com nova decisão humana.",
+    "Se voltar local-safe: semear próxima fatia não protegida para manter throughput.",
+    "Manter regra: 1 fatia protected por decisão humana, sem auto-dispatch."
   ],
-  "blockers": [
-    "protected-execution-requires-explicit-promote"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "VER-BUD-938",
-    "autonomy_lane_protected_focus_packet(TASK-BUD-589)=preview: promote:recommended,skip:viable,defer:viable"
+    "VER-BUD-939",
+    "run=25254616551 conclusion=success event=workflow_dispatch",
+    "post-canary decision=defer expansion automática"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-589",
+    "focus": "TASK-BUD-134",
     "canonical_links": [
-      "task:TASK-BUD-589",
-      "verification:VER-BUD-938"
+      "task:TASK-BUD-134",
+      "verification:VER-BUD-939",
+      "commit:25254616551"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T14:44:38.962Z",
+    "generatedAtIso": "2026-05-02T14:54:46.133Z",
     "level": "checkpoint",
-    "percent": 57,
+    "percent": 58,
     "action": "checkpoint-refresh",
-    "recommendation": "ask-human-decision"
+    "recommendation": "checkpoint-and-ask-human"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T14:44:38.962Z",
+      "atIso": "2026-05-02T14:54:46.133Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 57,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "ask-human-decision"
+      "recommendation": "checkpoint-and-ask-human"
     }
   ]
 }
