@@ -397,9 +397,9 @@ Quando o foco termina e não há canário remoto autorizado, priorize:
 
 Remote/offload só vem depois de scorecard local verde e intenção explícita do operador.
 
-### Contrato hard-intent para auto-advance da night lane
+### Contrato hard-intent para auto-advance da lane AFK (low-iteration)
 
-A continuidade entre tasks local-safe não deve depender de “soft intent” implícito. O contrato runtime da lane noturna é:
+A continuidade entre tasks local-safe não deve depender de “soft intent” implícito. Aqui, **AFK** significa produção com baixa iteração humana (away from keyboard), independente de horário. O contrato runtime da lane AFK é:
 
 1. quando o foco do handoff termina (`focus-complete`), a seleção pode auto-avançar para a próxima task elegível da mesma lane/milestone;
 2. o auto-advance é **fail-closed**;
@@ -413,7 +413,7 @@ Bloqueios críticos mínimos:
 
 Quando bloqueado, a recomendação deve voltar para escolha explícita de foco humano (`choose-next-focus`) com motivo auditável no texto/recommendationCode.
 
-No uso noturno, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por fatia. Se qualquer blocker hard-intent aparecer, pare no mesmo slice e registre linha curta de stop (`stop: <motivo>`) antes de retomar.
+No uso AFK, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por fatia. Se qualquer blocker hard-intent aparecer, pare no mesmo slice e registre linha curta de stop (`stop: <motivo>`) antes de retomar.
 
 ### Gate de promoção para simple-delegate rehearsal
 
@@ -423,6 +423,15 @@ A próxima promoção após estabilizar a lane local-safe deve passar por packet
 - escopo protegido ainda opt-in humano.
 
 Se o packet retornar `needs-evidence|blocked`, a regra é não promover. Continuar em local-safe até o próximo checkpoint com evidência adicional.
+
+### Material-first para long run AFK
+
+Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK longo, garantir abastecimento explícito do board:
+- gerar ideias com `lane_brainstorm_packet` (report-only);
+- revisar semeadura com `lane_brainstorm_seed_preview` (decisão humana explícita);
+- materializar um lote local-safe curto e verificável no board.
+
+Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded para criar próximas fatias em vez de forçar continuidade vazia.
 
 ### Fila pós-calibração
 

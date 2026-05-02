@@ -148,6 +148,14 @@ Formato sugerido:
 nudge-free-local-continuity: slices=<n> commits=<n> protectedTouched=no remote=no scheduler=no nextHuman=<decisão> blockers=<lista curta>
 ```
 
+Template curto de checkpoint pós-rehearsal real (1 task):
+
+```text
+rehearsal-postflight: decision=<go|no-go> task=<id> validation=<pass|fail> rollback=<none|applied> blockers=<lista-curta> next=<ação-segura>
+```
+
+Esse template é intencionalmente compacto para reduzir atrito em runs AFK e manter a decisão humana explícita no retorno.
+
 ## Primeiro foco recomendado
 
 Antes de usar colônias, subagentes ou swarms, o primeiro batch local sem empurrão deve exercitar o próprio control-plane com trabalho de baixo risco:

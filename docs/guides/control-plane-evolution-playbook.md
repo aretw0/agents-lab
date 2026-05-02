@@ -133,7 +133,7 @@ Stop conditions mínimos (formato curto):
 - `stop: validation-failed-or-unknown`;
 - `stop: no-eligible-local-safe-successor`.
 
-Rollback padrão da noite:
+Rollback padrão AFK:
 - ação: pausar auto-advance, manter foco explícito e voltar para uma fatia manual bounded;
 - evidência: registrar blocker no board + `context_watch_checkpoint`;
 - saída: retomar auto-advance só após blocker limpo e smoke focal verde.
@@ -155,6 +155,13 @@ Rollout canário:
 Rollback:
 - trigger: `FAILED` recorrente, `BUDGET_EXCEEDED`, blocked-rate alto no telemetry, ou ausência de evidência canônica;
 - ação: descer para Modo 1 por 1 janela operacional (sem novas delegações) e corrigir causa raiz.
+
+Runbook curto — rehearsal real (1 task):
+1. **start**: usar `simple_delegate_rehearsal_start_packet`; só avançar quando `decision=ready-for-human-decision` e houver go humano explícito;
+2. **monitor**: manter execução bounded e parar no primeiro `stop: protected|risk|reload-required|validation-failed-or-unknown`;
+3. **abort**: em blocker, encerrar rehearsal no mesmo slice, sem promover próxima task automaticamente;
+4. **rollback**: aplicar rollback não-destrutivo declarado, registrar evidência no board e checkpoint curto;
+5. **postflight**: registrar decisão `go/no-go` para próxima fatia antes de qualquer novo start.
 
 ### Modo 3 (federação)
 

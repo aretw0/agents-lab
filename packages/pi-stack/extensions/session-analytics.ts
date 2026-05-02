@@ -632,7 +632,7 @@ export function parseAutoAdvanceHardIntentTelemetry(
   } else if (blockedRatePct >= 50) {
     decision = "needs-evidence";
     recommendationCode = "auto-advance-telemetry-needs-hardening-block-rate";
-    recommendation = "blocked auto-advance rate is high; harden gates/validation before widening overnight continuity.";
+    recommendation = "blocked auto-advance rate is high; harden gates/validation before widening AFK (low-iteration) continuity.";
   }
 
   const blockedReasonRows = [...blockedReasons.entries()]

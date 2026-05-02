@@ -10473,6 +10473,51 @@
       "method": "wave closeout synthesis + docs regression",
       "timestamp": "2026-05-02T06:29:09.681Z",
       "evidence": "Closed simple-delegate rehearsal prep wave with consolidated outputs and explicit next-step decision. Closeout synthesis: - `docs/research/control-plane-delegation-wave-2026-05.md` - Added section `Wave simple-delegate rehearsal prep (TASK-BUD-563..567)` with delivered packet/surface/gate/regression evidence and closure decision. - `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` - Added follow-up note for prep lot (`TASK-BUD-563..566`) and readiness framing for one-task bounded rehearsal. Wave evidence recap: - core packet: `buildSimpleDelegateRehearsalDecisionPacket`. - surface tool: `simple_delegate_rehearsal_packet`. - doctrine/playbook gate + rollback/stop conditions. - regression pack: 58 tests green (ops calibration + autonomy lane + session analytics + docs checklist). Validation: - marker checks passed for closeout anchors in both research docs. - docs checklist passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed. Final decision: - close prep wave as complete; - keep promotion to real simple-delegate rehearsal as explicit next bounded slice (1 task, report-first, fail-closed, no protected auto-dispatch)."
+    },
+    {
+      "id": "VER-BUD-917",
+      "target": "TASK-BUD-568",
+      "target_type": "task",
+      "status": "passed",
+      "method": "planning packet + docs update + smoke",
+      "timestamp": "2026-05-02T11:22:21.671Z",
+      "evidence": "Planned bounded live rehearsal with explicit AFK terminology and material-first long-run rule. Changes: - `docs/guides/control-plane-operating-doctrine.md` - Renamed hard-intent section to AFK wording (`lane AFK (low-iteration)`) and clarified AFK meaning (away from keyboard, non-time-based). - Added `Material-first para long run AFK` with explicit board-fueling flow: - `lane_brainstorm_packet` - `lane_brainstorm_seed_preview` - human-approved seeding into local-safe backlog. - `docs/research/control-plane-delegation-wave-2026-05.md` - Renamed extension section to `hard-intent AFK lane`. - Added `Planejamento da próxima fatia (TASK-BUD-568)` with: - preflight checklist, - execution contract (`start/abort/rollback`), - postflight checklist. - `docs/primitives/ops-calibration-decision-packet.md` - Added pragmatic AFK long-run rule: no rehearsal promotion without material in board, fed by brainstorm packet + seed preview. - `packages/pi-stack/extensions/session-analytics.ts` - Updated recommendation wording from `overnight continuity` to `AFK (low-iteration) continuity` for language consistency. Validation: - marker checks passed for doctrine/research/ops-calibration anchors. - smoke tests passed: - `npx vitest run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 27 passed (2 files)."
+    },
+    {
+      "id": "VER-BUD-918",
+      "target": "TASK-BUD-569",
+      "target_type": "task",
+      "status": "passed",
+      "method": "core+surface implementation + smoke",
+      "timestamp": "2026-05-02T11:26:31.565Z",
+      "evidence": "Implemented read-only start/abort decision packet for bounded simple-delegate live rehearsal. Code: - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts` - Added `buildSimpleDelegateRehearsalStartPacket(...)`. - Added deterministic decision contract: - `ready-for-human-decision | blocked` - Added recommendation codes: - `simple-delegate-start-ready-for-human-decision` - `simple-delegate-start-blocked-rehearsal-not-ready` - `simple-delegate-start-blocked-protected-scope` - `simple-delegate-start-blocked-missing-declared-files` - `simple-delegate-start-blocked-missing-validation-gate` - `simple-delegate-start-blocked-missing-rollback-plan` - Enforced no-dispatch invariants (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - Added tool `simple_delegate_rehearsal_start_packet`. - Composes capability + mix + auto-advance telemetry + readiness packet and returns start/abort decision packet without dispatch. Tests: - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Added start packet core tests for ready and blocked paths. - Added surface test for `simple_delegate_rehearsal_start_packet` read-only contract. Validation: - Marker checks passed for core/surface/test anchors. - Smoke pack passed: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 41 passed (3 files)."
+    },
+    {
+      "id": "VER-BUD-919",
+      "target": "TASK-BUD-570",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook+template docs + checklist smoke",
+      "timestamp": "2026-05-02T11:29:05.019Z",
+      "evidence": "Added concise operational runbook for live simple-delegate rehearsal and postflight checkpoint template. Changes: - `docs/guides/control-plane-evolution-playbook.md` - Renamed wording to AFK where applicable. - Added `Runbook curto — rehearsal real (1 task)` with explicit steps: - start via `simple_delegate_rehearsal_start_packet` (`decision=ready-for-human-decision` + human go), - monitor with hard stop reasons, - abort on blocker, - rollback non-destructive, - postflight go/no-go decision before any new start. - `docs/primitives/nudge-free-local-continuity.md` - Added compact postflight checkpoint template: - `rehearsal-postflight: decision=<go|no-go> ...` - Explicitly positioned as low-friction AFK run output. - `.project/handoff.json` - checkpoint updated via `context_watch_checkpoint` with this runbook state and next steps. Validation: - marker checks passed for runbook/template anchors. - smoke passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed."
+    },
+    {
+      "id": "VER-BUD-920",
+      "target": "TASK-BUD-571",
+      "target_type": "task",
+      "status": "passed",
+      "method": "focal regression + closeout go/no-go",
+      "timestamp": "2026-05-02T11:30:43.019Z",
+      "evidence": "Closed live-rehearsal prep wave with focal regression evidence and explicit go/no-go framing. Regression command (reproducible): - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 61 passed (4 files). Closeout docs: - `docs/research/control-plane-delegation-wave-2026-05.md` - Added section `Fechamento da prep live-rehearsal (TASK-BUD-568..571)` with delivered artifacts, regression evidence, and explicit go/no-go. - `docs/research/control-plane-long-run-maturity-packet-2026-05-01.md` - Added live-prep update reflecting AFK language and start/abort contract. Decision packet outcome: - go: ready for explicit **human** start decision for one bounded rehearsal task. - no-go: no automatic start/dispatch; protected scope remains human-explicit. Validation: - marker checks passed for closeout anchors. - follow-up smoke docs+ops checks passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - Result: 16 passed (2 files)."
+    },
+    {
+      "id": "VER-BUD-921",
+      "target": "TASK-BUD-572",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bounded research synthesis + docs validation",
+      "timestamp": "2026-05-02T11:33:02.003Z",
+      "evidence": "Completed bounded local research synthesis for AFK long-run materialization patterns. Artifact created: - `docs/research/afk-materialization-patterns-2026-05.md` Coverage: - Assimilated local influences from: - `docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md` - `docs/superpowers/plans/2026-04-16-quota-panel-tui.md` - `docs/research/control-plane-delegation-wave-2026-05.md` - Produced operational synthesis with: - material-first rule, - diverge->converge->slice->seed pipeline, - checklist-driven long-run structure, - report-first/fail-closed adaptation, - anti-patterns and AFK contract summary. - Terminology aligned to AFK (low-iteration, non-time-based). Validation: - marker check passed for research anchors (`lane_brainstorm_packet`, `lane_brainstorm_seed_preview`, `local-first`, `fail-closed`). - docs smoke passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed."
     }
   ]
 }

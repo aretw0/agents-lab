@@ -13380,7 +13380,7 @@
     {
       "id": "TASK-BUD-568",
       "description": "Planejar rehearsal real de simple-delegate (1 task bounded) com contrato de start/abort, rollback e evidência mínima antes de qualquer execução.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-567"
@@ -13396,12 +13396,13 @@
         "checklist de pré-voo e pós-voo fica curto e operacional."
       ],
       "milestone": "simple-delegate-live-rehearsal-2026-05",
-      "notes": "[rationale:risk-control] rehearsal real precisa contrato explícito para evitar promoção implícita de escopo.\nNovo lote live-rehearsal semeado (TASK-BUD-568..571). Início no plano bounded de rehearsal real com start/abort explícito."
+      "notes": "[rationale:risk-control] rehearsal real precisa contrato explícito para evitar promoção implícita de escopo.\nNovo lote live-rehearsal semeado (TASK-BUD-568..571). Início no plano bounded de rehearsal real com start/abort explícito.\n2026-05-02: linguagem operacional ajustada de night->AFK e plano bounded de rehearsal real formalizado com material-first via brainstorm+seed.",
+      "verification": "VER-BUD-917"
     },
     {
       "id": "TASK-BUD-569",
       "description": "Implementar packet read-only de start/abort para rehearsal real (`simple_delegate_rehearsal_start_packet`) com decisão `ready-for-human-decision|blocked`.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-568"
@@ -13417,12 +13418,13 @@
         "smoke cobre caminho pronto e bloqueado."
       ],
       "milestone": "simple-delegate-live-rehearsal-2026-05",
-      "notes": "[rationale:risk-control] separar packet de start/abort evita acoplamento com execução real."
+      "notes": "[rationale:risk-control] separar packet de start/abort evita acoplamento com execução real.\nApós plano AFK/material-first (TASK-BUD-568), início da implementação do packet read-only de start/abort para rehearsal real.\n2026-05-02: packet read-only de start/abort para rehearsal real entregue com decisão ready-for-human-decision|blocked e bloqueio fail-closed.",
+      "verification": "VER-BUD-918"
     },
     {
       "id": "TASK-BUD-570",
       "description": "Adicionar runbook curto de operação do rehearsal real (start, monitor, abort, rollback) e template de checkpoint pós-rehearsal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-569"
@@ -13438,12 +13440,13 @@
         "sem mixed-language drift e sem abrir protected auto-dispatch."
       ],
       "milestone": "simple-delegate-live-rehearsal-2026-05",
-      "notes": "[rationale:risk-control] ritual operacional curto reduz erro humano durante rehearsal real."
+      "notes": "[rationale:risk-control] ritual operacional curto reduz erro humano durante rehearsal real.\nTASK-BUD-569 concluída. Iniciado runbook curto de start/monitor/abort/rollback + template de checkpoint pós-rehearsal.\n2026-05-02: runbook curto de rehearsal real + template pós-voo adicionados para operação AFK de baixa iteração.",
+      "verification": "VER-BUD-919"
     },
     {
       "id": "TASK-BUD-571",
       "description": "Executar regressão focal + fechar prep da lane live rehearsal com recomendação explícita de go/no-go humano.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-570"
@@ -13459,7 +13462,95 @@
         "handoff final aponta ação humana necessária."
       ],
       "milestone": "simple-delegate-live-rehearsal-2026-05",
-      "notes": "[rationale:risk-control] gate go/no-go humano explícito evita execução acidental do rehearsal real."
+      "notes": "[rationale:risk-control] gate go/no-go humano explícito evita execução acidental do rehearsal real.\nIniciada regressão/closeout final da prep live-rehearsal com decisão go/no-go explícita para start humano.\n2026-05-02: prep da lane live-rehearsal encerrada com comando focal reproduzível e decisão go/no-go humana explícita.",
+      "verification": "VER-BUD-920"
+    },
+    {
+      "id": "TASK-BUD-572",
+      "description": "Pesquisa local bounded de influências para long-run AFK: sintetizar padrões de materialização contínua (pi, Claude Code, superpowers brainstorm) em contrato operacional sem auto-dispatch.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-571"
+      ],
+      "files": [
+        "docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md",
+        "docs/research/control-plane-delegation-wave-2026-05.md",
+        "docs/superpowers/plans/2026-04-16-quota-panel-tui.md",
+        "docs/research/afk-materialization-patterns-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "síntese registra práticas que aumentam material no board antes de long-runs.",
+        "cada prática vem com adaptação local-first/fail-closed.",
+        "resultado evita dependência de horário e adota linguagem AFK low-iteration."
+      ],
+      "milestone": "afk-materialization-wave-2026-05",
+      "notes": "[rationale:risk-control] sem materialização contínua, long-run vira throughput sem direção auditável.\nNovo lote AFK materialization semeado (TASK-BUD-572..575). Início pela pesquisa local bounded de influências e padrões de abastecimento de backlog.\n2026-05-02: pesquisa AFK materialization consolidada com contrato material-first para sustentar long-runs de baixa iteração.",
+      "verification": "VER-BUD-921"
+    },
+    {
+      "id": "TASK-BUD-573",
+      "description": "Definir runbook de alimentação contínua de backlog (brainstorm -> seed preview -> task batch) para manter lane AFK produtiva com baixa iteração humana.",
+      "status": "in-progress",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-572"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/primitives/lane-brainstorm-packet.md",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "runbook define cadência curta de materialização (ex.: 3-7 fatias prontas).",
+        "explicita stop condition quando backlog útil fica abaixo do mínimo.",
+        "mantém semeadura sob decisão humana explícita."
+      ],
+      "milestone": "afk-materialization-wave-2026-05",
+      "notes": "[rationale:risk-control] material pipeline explícito evita vazio operacional em runs AFK longas.\nPesquisa de materialização concluída; iniciado runbook de alimentação contínua (brainstorm -> seed preview -> batch local-safe)."
+    },
+    {
+      "id": "TASK-BUD-574",
+      "description": "Adicionar packet report-only de prontidão de material da lane AFK (quantidade de fatias locais úteis + cobertura de validação) para decidir continuar ou semear backlog.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-573"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "packet retorna decisão `continue|seed-backlog|blocked` sem dispatch/mutação.",
+        "considera foco atual, tasks elegíveis locais e presença de validação conhecida.",
+        "smoke cobre caminho continue e seed-backlog."
+      ],
+      "milestone": "afk-materialization-wave-2026-05",
+      "notes": "[rationale:risk-control] medição explícita de material evita long-run sem matéria-prima."
+    },
+    {
+      "id": "TASK-BUD-575",
+      "description": "Executar regressão focal e fechar wave AFK materialization com recomendação de operação contínua (produção de baixa iteração).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-574"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts",
+        "docs/research/afk-materialization-patterns-2026-05.md",
+        "docs/research/control-plane-delegation-wave-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "pack focal verde com comando único reproduzível.",
+        "closeout registra indicadores de material mínimo para runs AFK.",
+        "handoff final aponta próxima ação clara sem ambiguidade."
+      ],
+      "milestone": "afk-materialization-wave-2026-05",
+      "notes": "[rationale:risk-control] fechamento explícito evita regressão para execução longa sem backlog útil."
     }
   ]
 }

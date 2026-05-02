@@ -439,3 +439,126 @@ export function buildSimpleDelegateRehearsalDecisionPacket(
     summary,
   };
 }
+
+export type SimpleDelegateRehearsalStartDecision = "ready-for-human-decision" | "blocked";
+
+export type SimpleDelegateRehearsalStartRecommendationCode =
+  | "simple-delegate-start-ready-for-human-decision"
+  | "simple-delegate-start-blocked-rehearsal-not-ready"
+  | "simple-delegate-start-blocked-protected-scope"
+  | "simple-delegate-start-blocked-missing-declared-files"
+  | "simple-delegate-start-blocked-missing-validation-gate"
+  | "simple-delegate-start-blocked-missing-rollback-plan";
+
+export interface SimpleDelegateRehearsalStartPacketInput {
+  rehearsalDecision?: "ready" | "needs-evidence" | "blocked";
+  rehearsalRecommendationCode?: string;
+  rehearsalBlockers?: string[];
+  protectedScopeRequested?: boolean;
+  declaredFilesKnown?: boolean;
+  validationGateKnown?: boolean;
+  rollbackPlanKnown?: boolean;
+}
+
+export interface SimpleDelegateRehearsalStartPacket {
+  mode: "simple-delegate-rehearsal-start-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  decision: SimpleDelegateRehearsalStartDecision;
+  recommendationCode: SimpleDelegateRehearsalStartRecommendationCode;
+  recommendation: string;
+  blockers: string[];
+  options: ["start", "abort", "defer"];
+  signals: {
+    rehearsalDecision: "ready" | "needs-evidence" | "blocked" | "missing";
+    rehearsalRecommendationCode: string;
+    protectedScopeRequested: boolean;
+    declaredFilesKnown: boolean;
+    validationGateKnown: boolean;
+    rollbackPlanKnown: boolean;
+  };
+  summary: string;
+}
+
+function normalizeRehearsalStartDecision(value: unknown): "ready" | "needs-evidence" | "blocked" | "missing" {
+  if (value === "ready" || value === "needs-evidence" || value === "blocked") return value;
+  return "missing";
+}
+
+export function buildSimpleDelegateRehearsalStartPacket(
+  input: SimpleDelegateRehearsalStartPacketInput,
+): SimpleDelegateRehearsalStartPacket {
+  const rehearsalDecision = normalizeRehearsalStartDecision(input.rehearsalDecision);
+  const protectedScopeRequested = input.protectedScopeRequested === true;
+  const declaredFilesKnown = input.declaredFilesKnown === true;
+  const validationGateKnown = input.validationGateKnown === true;
+  const rollbackPlanKnown = input.rollbackPlanKnown === true;
+
+  const blockers: string[] = [];
+  let decision: SimpleDelegateRehearsalStartDecision = "ready-for-human-decision";
+  let recommendationCode: SimpleDelegateRehearsalStartRecommendationCode = "simple-delegate-start-ready-for-human-decision";
+  let recommendation = "start can proceed only after explicit human go/no-go confirmation for one bounded rehearsal task.";
+
+  if (rehearsalDecision !== "ready") {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-start-blocked-rehearsal-not-ready";
+    recommendation = "rehearsal readiness is not ready; keep report-only and close blockers/evidence gaps first.";
+    blockers.push("rehearsal-not-ready", ...(Array.isArray(input.rehearsalBlockers) ? input.rehearsalBlockers : []));
+  } else if (protectedScopeRequested) {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-start-blocked-protected-scope";
+    recommendation = "protected scope requested; require explicit human protected-focus decision before start.";
+    blockers.push("protected-scope-requested");
+  } else if (!declaredFilesKnown) {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-start-blocked-missing-declared-files";
+    recommendation = "declared files are missing; define bounded file scope before rehearsal start.";
+    blockers.push("missing-declared-files");
+  } else if (!validationGateKnown) {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-start-blocked-missing-validation-gate";
+    recommendation = "validation gate is unknown; define focal validation before rehearsal start.";
+    blockers.push("missing-validation-gate");
+  } else if (!rollbackPlanKnown) {
+    decision = "blocked";
+    recommendationCode = "simple-delegate-start-blocked-missing-rollback-plan";
+    recommendation = "rollback plan is missing; define non-destructive rollback before rehearsal start.";
+    blockers.push("missing-rollback-plan");
+  }
+
+  const uniqueBlockers = [...new Set(blockers)];
+  const summary = [
+    "simple-delegate-start-packet:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `rehearsal=${rehearsalDecision}`,
+    uniqueBlockers.length > 0 ? `blockers=${uniqueBlockers.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "simple-delegate-rehearsal-start-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    decision,
+    recommendationCode,
+    recommendation,
+    blockers: uniqueBlockers,
+    options: ["start", "abort", "defer"],
+    signals: {
+      rehearsalDecision,
+      rehearsalRecommendationCode: typeof input.rehearsalRecommendationCode === "string"
+        ? input.rehearsalRecommendationCode
+        : "missing",
+      protectedScopeRequested,
+      declaredFilesKnown,
+      validationGateKnown,
+      rollbackPlanKnown,
+    },
+    summary,
+  };
+}

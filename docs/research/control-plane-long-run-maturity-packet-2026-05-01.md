@@ -74,3 +74,5 @@ A trilha pós-rehearsal evoluiu para contrato runtime hard-intent na continuidad
 Leitura operacional: a maturidade local-safe aumentou sem abrir protected scope automático. Próxima promoção recomendada segue sendo rehearsal bounded de simple-delegate com decisão humana explícita para qualquer salto de escopo.
 
 Atualização adicional (2026-05-03, lote prep): packet/surface/gate de simple-delegate rehearsal foram entregues em modo report-only (`TASK-BUD-563..566`) com regressão focal verde. A stack está pronta para rehearsal real de uma única task bounded, sem auto-dispatch e com fail-closed em blockers de auto-advance/capability.
+
+Atualização extra (2026-05-02, live prep): `TASK-BUD-568..571` fechou contrato de start/abort com linguagem AFK (low-iteration), runbook curto e decisão go/no-go humana explícita. Estado final: go para decisão humana de start, no-go para auto-start.

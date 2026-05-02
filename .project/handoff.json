@@ -1,45 +1,40 @@
 {
-  "timestamp": "2026-05-02T06:31:30.435Z",
-  "context": "Estado persistido após lote extenso: tarefas 557..567 concluídas, novo lote live-rehearsal semeado e TASK-BUD-568 em progresso. Contratos har [snip] prep estão materializados e commitados. [truncated:+27 chars]",
+  "timestamp": "2026-05-02T11:33:21.302Z",
+  "context": "Terminologia AFK alinhada e pesquisa material-first concluída (TASK-BUD-572). Próxima fatia: operacionalizar alimentação contínua de backlog [snip] ra manter long-run produtiva sem drift. [truncated:+2 chars]",
   "current_tasks": [
-    "TASK-BUD-568"
+    "TASK-BUD-573"
   ],
   "next_actions": [
-    "Concluir plano operacional de rehearsal real bounded em TASK-BUD-568",
-    "Implementar packet start/abort (TASK-BUD-569)",
-    "Atualizar runbook curto e fechar wave live-rehearsal prep"
+    "Documentar cadência mínima de estoque de fatias (3-7)",
+    "Definir stop condition quando estoque cair",
+    "Conectar runbook com brainstorm packet + seed preview"
   ],
   "blockers": [],
   "recent_validation": [
-    "commit 7ff07bc",
-    "regressões focais verdes (até 125 testes no pack amplo)",
-    "board verifications VER-BUD-906..916 registradas"
-  ],
-  "recent_commits": [
-    "7ff07bc"
+    "VER-BUD-921",
+    "doc checklist verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-568",
+    "focus": "TASK-BUD-573",
     "canonical_links": [
-      "task:TASK-BUD-568",
-      "task:TASK-BUD-569",
-      "verification:VER-BUD-906",
-      "commit:7ff07bc"
+      "task:TASK-BUD-573",
+      "task:TASK-BUD-572",
+      "verification:VER-BUD-921"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T06:31:30.435Z",
+    "generatedAtIso": "2026-05-02T11:33:21.302Z",
     "level": "ok",
-    "percent": 40,
+    "percent": 33,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T06:31:30.435Z",
+      "atIso": "2026-05-02T11:33:21.302Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 40,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

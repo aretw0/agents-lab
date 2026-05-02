@@ -79,13 +79,13 @@ Pack executado (57 testes verdes):
 - Manter execução local-safe em fatias bounded.
 - Tratar `TASK-BUD-557` como próxima prioridade de governança para remover dependência de soft intent na continuidade noturna.
 
-## Extensão da wave — hard-intent night lane (TASK-BUD-557..562)
+## Extensão da wave — hard-intent AFK lane (TASK-BUD-557..562)
 
 ### Entregas concluídas até agora
 - `TASK-BUD-557`: contrato runtime hard-intent para auto-advance (`focus-complete` -> sucessor local-safe), fail-closed em protected/risk/reload/validation.
 - `TASK-BUD-558`: telemetry read-only `auto_advance_hard_intent_telemetry` no session-analytics (eligible vs blocked + reason codes).
 - `TASK-BUD-559`: snapshot report-only `autonomy_lane_auto_advance_snapshot` com decisão determinística `eligible|blocked`.
-- `TASK-BUD-560`: runbook noturno batch 3–5 fatias com stop conditions e rollback explícitos.
+- `TASK-BUD-560`: runbook AFK batch 3–5 fatias com stop conditions e rollback explícitos.
 - `TASK-BUD-561`: `board_task_complete` com avanço automático de foco no handoff quando houver sucessor local-safe unívoco; fail-closed em ambiguidade.
 
 ### Regressão focal da extensão
@@ -104,6 +104,8 @@ Pack executado (115 testes verdes):
 
 ## Wave simple-delegate rehearsal prep (TASK-BUD-563..567)
 
+> Nota de linguagem operacional: nesta trilha, “AFK lane” substitui “night lane”. O objetivo é baixa iteração humana, não janela de horário.
+
 ### Entregas concluídas
 - `TASK-BUD-563`: packet core composto para readiness de simple-delegate (`ready|needs-evidence|blocked`).
 - `TASK-BUD-564`: surface read-only `simple_delegate_rehearsal_packet` com recommendationCode estável.
@@ -120,3 +122,43 @@ Pack executado (58 testes verdes):
 ### Decisão de fechamento
 - Preparação concluída: a wave deixou o control-plane pronto para rehearsal simple-delegate **ainda em modo report-first/fail-closed**.
 - Próxima ação recomendada: abrir uma fatia explícita de rehearsal real (bounded, 1 task), mantendo escopo protected sob decisão humana.
+
+## Planejamento da próxima fatia (TASK-BUD-568)
+
+Objetivo: rehearsal real de simple-delegate em **1 task bounded**, com start/abort/rollback explícitos e sem auto-dispatch.
+
+### Checklist pré-voo (curto)
+1. `simple_delegate_rehearsal_packet.decision == ready-for-human-decision|ready` (sem blockers críticos).
+2. foco único no handoff (`current_tasks` com 1 task local-safe).
+3. validação focal conhecida antes de editar.
+4. rollback não-destrutivo declarado.
+
+### Contrato de execução
+- start continua **humano explícito**;
+- execução bounded em 1 task;
+- abort em qualquer blocker de protected/risk/reload/validation;
+- checkpoint obrigatório ao final (sucesso ou abort).
+
+### Checklist pós-voo (curto)
+- decisão registrada (`go/no-go` para próxima fatia);
+- blockers/evidências no board;
+- handoff atualizado com próximo foco explícito.
+
+## Fechamento da prep live-rehearsal (TASK-BUD-568..571)
+
+### Entregas concluídas
+- `TASK-BUD-568`: plano AFK/material-first para rehearsal real bounded.
+- `TASK-BUD-569`: packet read-only `simple_delegate_rehearsal_start_packet` (`ready-for-human-decision|blocked`).
+- `TASK-BUD-570`: runbook curto (start/monitor/abort/rollback/postflight) + template de checkpoint.
+- `TASK-BUD-571`: regressão focal e decisão go/no-go explícita.
+
+### Regressão focal
+Pack executado (61 testes verdes):
+- `guardrails-ops-calibration.test.ts`
+- `autonomy-lane-surface.test.ts`
+- `session-analytics.test.ts`
+- `control-plane-doc-checklist.test.ts`
+
+### Decisão go/no-go
+- **go para decisão humana de start**: stack pronta para um rehearsal real bounded de 1 task, via packet de start read-only.
+- **no-go para auto-start**: permanece proibido qualquer start automático; protected scope continua exigindo decisão humana explícita.

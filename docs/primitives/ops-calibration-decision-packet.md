@@ -35,6 +35,8 @@ O packet aplica o mesmo padrão de inferência bounded de background capabilitie
 
 Para promoção de `simple-delegate` sem abrir dispatch, use `simple_delegate_rehearsal_packet`: ele compõe capability + mix + auto-advance telemetry em decisão `ready|needs-evidence|blocked`, também com `authorization=none`, `dispatchAllowed=false` e `mutationAllowed=false`.
 
+Regra pragmática de long run AFK: antes de promover rehearsal, garantir **material** no board (via `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` + decisão humana de semeadura). Sem material local-safe suficiente, a recomendação correta é continuar em triagem/limpeza/pesquisa bounded.
+
 ## Invariantes
 
 - `dispatchAllowed=false`

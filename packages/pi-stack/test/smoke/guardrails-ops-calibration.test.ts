@@ -6,6 +6,7 @@ import {
   buildDelegateOrExecuteDecisionPacket,
   buildOpsCalibrationDecisionPacket,
   buildSimpleDelegateRehearsalDecisionPacket,
+  buildSimpleDelegateRehearsalStartPacket,
 } from "../../extensions/guardrails-core-ops-calibration";
 import { registerGuardrailsOpsCalibrationSurface } from "../../extensions/guardrails-core-ops-calibration-surface";
 
@@ -76,6 +77,42 @@ describe("ops calibration decision packet", () => {
     expect(packet.recommendationCode).toBe("simple-delegate-rehearsal-blocked-auto-advance");
     expect(packet.blockers).toContain("auto-advance-blocked");
     expect(packet.blockers).toContain("reload-required-or-dirty");
+  });
+
+  it("builds start packet as ready-for-human-decision when rehearsal and gates are green", () => {
+    const packet = buildSimpleDelegateRehearsalStartPacket({
+      rehearsalDecision: "ready",
+      rehearsalRecommendationCode: "simple-delegate-rehearsal-ready",
+      rehearsalBlockers: [],
+      protectedScopeRequested: false,
+      declaredFilesKnown: true,
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+    });
+
+    expect(packet.mode).toBe("simple-delegate-rehearsal-start-packet");
+    expect(packet.decision).toBe("ready-for-human-decision");
+    expect(packet.recommendationCode).toBe("simple-delegate-start-ready-for-human-decision");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.authorization).toBe("none");
+    expect(packet.options).toEqual(["start", "abort", "defer"]);
+  });
+
+  it("blocks start packet when rehearsal decision is not ready", () => {
+    const packet = buildSimpleDelegateRehearsalStartPacket({
+      rehearsalDecision: "needs-evidence",
+      rehearsalRecommendationCode: "simple-delegate-rehearsal-needs-evidence-mix",
+      rehearsalBlockers: ["mix-needs-evidence"],
+      protectedScopeRequested: false,
+      declaredFilesKnown: true,
+      validationGateKnown: true,
+      rollbackPlanKnown: true,
+    });
+
+    expect(packet.decision).toBe("blocked");
+    expect(packet.recommendationCode).toBe("simple-delegate-start-blocked-rehearsal-not-ready");
+    expect(packet.blockers).toContain("rehearsal-not-ready");
+    expect(packet.blockers).toContain("mix-needs-evidence");
   });
 
   it("returns ready-for-bounded-rehearsal when both calibrations are strong and reload completed", () => {
@@ -463,6 +500,54 @@ describe("ops calibration decision packet", () => {
       expect(result.details.authorization).toBe("none");
       expect(result.details.mutationAllowed).toBe(false);
       expect(String(result.details.summary)).toContain("simple-delegate-rehearsal-packet:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("registers simple_delegate_rehearsal_start_packet as read-only start/abort packet", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-start-packet-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_start_packet");
+
+      const result = await tool.execute(
+        "tc-simple-delegate-start",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          auto_advance_decision: "eligible",
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+          declared_files_known: true,
+          validation_gate_known: true,
+          rollback_plan_known: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.mode).toBe("simple-delegate-rehearsal-start-packet");
+      expect(result.details.dispatchAllowed).toBe(false);
+      expect(result.details.authorization).toBe("none");
+      expect(result.details.mutationAllowed).toBe(false);
+      expect(result.details.decision).toBe("ready-for-human-decision");
+      expect(String(result.details.summary)).toContain("simple-delegate-start-packet:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
