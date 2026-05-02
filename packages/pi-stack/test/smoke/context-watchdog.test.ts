@@ -135,17 +135,20 @@ describe("context-watchdog", () => {
 		expect(cfg.userNotifyFromLevel).toBe("checkpoint");
 	});
 
-	it("derives thresholds from model-aware warning/error with pre-compact headroom", () => {
+	it("derives sane global thresholds with canonical ordering across providers", () => {
 		const cfg = normalizeContextWatchdogConfig({});
+		expect(cfg.checkpointPct).toBe(55);
+		expect(cfg.compactPct).toBe(65);
+
 		const tAnthropic = deriveContextWatchThresholds(65, 85, cfg);
-		expect(tAnthropic.warnPct).toBe(65);
-		expect(tAnthropic.checkpointPct).toBe(78);
-		expect(tAnthropic.compactPct).toBe(82);
+		expect(tAnthropic.warnPct).toBe(54);
+		expect(tAnthropic.checkpointPct).toBe(55);
+		expect(tAnthropic.compactPct).toBe(65);
 
 		const tOpenAi = deriveContextWatchThresholds(50, 75, cfg);
 		expect(tOpenAi.warnPct).toBe(50);
-		expect(tOpenAi.checkpointPct).toBe(68);
-		expect(tOpenAi.compactPct).toBe(72);
+		expect(tOpenAi.checkpointPct).toBe(55);
+		expect(tOpenAi.compactPct).toBe(65);
 	});
 
 	it("respects explicit checkpoint override and clamps compact below error threshold", () => {
@@ -709,7 +712,7 @@ describe("context-watchdog", () => {
 
 		const control = buildContextWatchBootstrapPlan("control-plane");
 		expect(control.preset).toBe("control-plane");
-		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(60);
+		expect((control.patch.piStack as any).contextWatchdog.checkpointPct).toBe(55);
 		expect((control.patch.piStack as any).contextWatchdog.compactPct).toBe(65);
 		expect((control.patch.piStack as any).contextWatchdog.notify).toBe(true);
 		expect((control.patch.piStack as any).contextWatchdog.modelSteeringFromLevel).toBe("compact");
@@ -1534,8 +1537,8 @@ describe("context-watchdog", () => {
 					hasPendingMessages: () => false,
 				} as any,
 			);
-			expect(result.details?.thresholds).toMatchObject({ checkpointPct: 78, compactPct: 82 });
-			expect(result.details?.compactStage).toMatchObject({ stage: "graceful-stop-window" });
+			expect(result.details?.thresholds).toMatchObject({ checkpointPct: 55, compactPct: 65 });
+			expect(result.details?.compactStage).toMatchObject({ stage: "force-compact-window" });
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

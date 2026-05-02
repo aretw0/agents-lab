@@ -1610,6 +1610,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastDeterministicStopSignalAt = 0;
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
+	const FINAL_TURN_CLOSE_HEADROOM_PCT = 10;
 	const CALM_CLOSE_DEFER_THRESHOLD = 3;
 	const ANTI_PARALYSIS_GRACE_WINDOW_MS = 2 * 60 * 1000;
 	const ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS = 5 * 60 * 1000;
@@ -2032,7 +2033,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			consecutiveWarnCount === 2;
 		const compactHeadroomPct = Math.max(0, assessment.thresholds.compactPct - assessment.percent);
 		const finalTurnCloseWindow = assessment.level === "compact"
-			|| (assessment.level === "checkpoint" && compactHeadroomPct <= 2);
+			|| (assessment.level === "checkpoint" && compactHeadroomPct <= FINAL_TURN_CLOSE_HEADROOM_PCT);
 		const finalTurnDispatch = resolveFinalTurnAnnouncementDispatch({
 			reason,
 			finalTurnCloseWindow,
@@ -2126,6 +2127,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				finalTurnCloseWindow,
 				compactHeadroomPct,
 				forceFinalTurnAnnouncement,
+				finalTurnCloseHeadroomPct: FINAL_TURN_CLOSE_HEADROOM_PCT,
 				finalTurnAnnouncementSuppressed: finalTurnDispatch.suppressed,
 				finalTurnAnnouncementReason: finalTurnDispatch.reason,
 			},

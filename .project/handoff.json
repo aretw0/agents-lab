@@ -1,40 +1,39 @@
 {
-  "timestamp": "2026-05-02T23:21:34.555Z",
-  "context": "Hardening de warning noise de sessão concluído em sequência: TASK-BUD-640 (dedupe final-turn + severity info), TASK-BUD-641 (telemetria signa [snip] (taxonomia docs + regressão anti-spam). [truncated:+54 chars]",
+  "timestamp": "2026-05-02T23:31:27.098Z",
+  "context": "Aplicado sane default global de compactação graciosa no context-watch: checkpoint=55, compact=65 e janela de final-turn com headroom de 10pp [snip] io antecipado antes do compact forçado. [truncated:+8 chars]",
   "next_actions": [
-    "Executar TASK-BUD-644 para dedupe de context_watch_events no handoff e reduzir churn em auto-checkpoint.",
-    "Executar TASK-BUD-645 para exibir budget de ruído no comando /context-watch status.",
-    "Manter revisão de utilidade/ruído focada em warnings de sessão (runtime), sem confundir com is [snip] es persistidos de monitor. [truncated:+2 chars]"
+    "Se quiser, aplicar preset control-plane no runtime atual e validar comportamento live após /reload.",
+    "Executar TASK-BUD-644 (dedupe de eventos repetidos no handoff) para reduzir bloat residual.",
+    "Executar TASK-BUD-645 (resumo de budget de ruído no comando /context-watch status)."
   ],
   "blockers": [],
   "recent_validation": [
     "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts",
-    "safe_marker_check packages/pi-stack/extensions/context-watchdog.ts (final-turn dispatch + signalNoise markers ok)",
-    "safe_marker_check packages/pi-stack/test/smoke/context-watchdog.test.ts (suppression regressio [snip] + signalNoise markers ok) [truncated:+1 chars]"
+    "safe_marker_check packages/pi-stack/extensions/context-watchdog-config.ts (55/65 + ordering markers ok)",
+    "safe_marker_check packages/pi-stack/extensions/context-watchdog.ts (final-turn headroom markers ok)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-642",
+    "focus": "TASK-BUD-646",
     "canonical_links": [
-      "task:TASK-BUD-642",
-      "task:TASK-BUD-640",
-      "task:TASK-BUD-641",
-      "verification:VER-BUD-992"
+      "task:TASK-BUD-646",
+      "task:TASK-BUD-644",
+      "verification:VER-BUD-996"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T23:21:34.555Z",
-    "level": "ok",
-    "percent": 33,
-    "action": "continue",
+    "generatedAtIso": "2026-05-02T23:31:27.098Z",
+    "level": "checkpoint",
+    "percent": 58,
+    "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T23:21:34.555Z",
+      "atIso": "2026-05-02T23:31:27.098Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 33,
+      "level": "checkpoint",
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -45,6 +44,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-642"
+    "TASK-BUD-646"
   ]
 }

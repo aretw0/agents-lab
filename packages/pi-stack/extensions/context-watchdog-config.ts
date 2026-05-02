@@ -26,6 +26,8 @@ export type ContextWatchThresholds = {
 
 export const DEFAULT_CONTEXT_WATCHDOG_CONFIG: ContextWatchdogConfig = {
 	enabled: true,
+	checkpointPct: 55,
+	compactPct: 65,
 	cooldownMs: 10 * 60 * 1000,
 	notify: true,
 	modelSteeringFromLevel: "compact",
@@ -90,9 +92,13 @@ export function normalizeContextWatchdogConfig(input: unknown): ContextWatchdogC
 	return {
 		enabled: toBoolean(cfg.enabled, DEFAULT_CONTEXT_WATCHDOG_CONFIG.enabled),
 		checkpointPct:
-			checkpointPct !== undefined ? Math.max(1, Math.min(99, Math.floor(checkpointPct))) : undefined,
+			checkpointPct !== undefined
+				? Math.max(1, Math.min(99, Math.floor(checkpointPct)))
+				: DEFAULT_CONTEXT_WATCHDOG_CONFIG.checkpointPct,
 		compactPct:
-			compactPct !== undefined ? Math.max(2, Math.min(100, Math.floor(compactPct))) : undefined,
+			compactPct !== undefined
+				? Math.max(2, Math.min(100, Math.floor(compactPct)))
+				: DEFAULT_CONTEXT_WATCHDOG_CONFIG.compactPct,
 		cooldownMs:
 			cooldownMs !== undefined ? Math.max(60_000, Math.floor(cooldownMs)) : DEFAULT_CONTEXT_WATCHDOG_CONFIG.cooldownMs,
 		notify: toBoolean(cfg.notify, DEFAULT_CONTEXT_WATCHDOG_CONFIG.notify),
@@ -120,19 +126,22 @@ export function deriveContextWatchThresholds(
 	errorPct: number,
 	cfg: ContextWatchdogConfig,
 ): ContextWatchThresholds {
-	const warn = Math.max(1, Math.min(99, Math.floor(warningPct)));
-	const error = Math.max(warn + 1, Math.min(100, Math.floor(errorPct)));
-	// Default compact target keeps headroom before footer "error" pressure.
-	// OpenAI-like defaults become ~72, Anthropic-like defaults ~82.
-	const compactDefault = Math.max(warn + 4, error - 3);
-	const compactRaw = cfg.compactPct ?? compactDefault;
-	const compactCeiling = Math.max(warn + 2, error - 1);
-	const compact = Math.max(warn + 2, Math.min(compactCeiling, Math.floor(compactRaw)));
+	const warningBase = Math.max(1, Math.min(99, Math.floor(warningPct)));
+	const error = Math.max(warningBase + 1, Math.min(100, Math.floor(errorPct)));
 
-	// Default checkpoint is the pre-compact lane (4pp before compact).
-	const checkpointDefault = Math.max(warn + 1, compact - 4);
+	// Sane global compact ceiling: keep a fixed upper cap unless caller overrides.
+	const compactDefault = Math.max(2, error - 3);
+	const compactRaw = cfg.compactPct ?? compactDefault;
+	const compactCeiling = Math.max(2, error - 1);
+	const compact = Math.max(2, Math.min(compactCeiling, Math.floor(compactRaw)));
+
+	// Default checkpoint is a broader pre-compact lane (10pp before compact).
+	const checkpointDefault = Math.max(1, compact - 10);
 	const checkpointRaw = cfg.checkpointPct ?? checkpointDefault;
-	const checkpoint = Math.max(warn + 1, Math.min(compact - 1, Math.floor(checkpointRaw)));
+	const checkpoint = Math.max(1, Math.min(compact - 1, Math.floor(checkpointRaw)));
+
+	// Preserve canonical order even when provider warning baseline is higher.
+	const warn = Math.max(1, Math.min(warningBase, checkpoint - 1));
 
 	return {
 		warnPct: warn,

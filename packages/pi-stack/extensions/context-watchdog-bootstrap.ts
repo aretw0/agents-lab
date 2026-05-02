@@ -51,7 +51,7 @@ export function buildContextWatchBootstrapPlan(
 			piStack: {
 				contextWatchdog: {
 					enabled: true,
-					checkpointPct: 60,
+					checkpointPct: 55,
 					compactPct: 65,
 					cooldownMs: 10 * 60 * 1000,
 					notify: true,
@@ -69,7 +69,7 @@ export function buildContextWatchBootstrapPlan(
 			},
 		},
 		notes: [
-			"control-plane preset: checkpoint em 60% e teto de compact em 65% para reduzir risco de 400 antecipado em Copilot/Codex.",
+			"control-plane preset: checkpoint em 55% e teto de compact em 65% para ampliar freio gracioso antes do compact forçado.",
 			"auto-compact runs with idle + cooldown guards.",
 		],
 	};

@@ -11184,6 +11184,15 @@
       "method": "inspection",
       "timestamp": "2026-05-02T23:20:24.667Z",
       "evidence": "Documentação atualizada para distinguir warnings de sessão e issues de monitor: (1) `docs/guides/control-plane-operating-doctrine.md` ganhou seção `Taxonomia de warning operacional (sessão vs monitor)` com regra de priorização quando steer humano fala da conversa; (2) `docs/guides/monitor-overrides.md` ganhou seção `Taxonomia rápida: warning de sessão vs issue de monitor` para evitar diagnóstico no alvo errado. Validação por marker-check: doctrine 3/3 e monitor-overrides 3/3."
+    },
+    {
+      "id": "VER-BUD-996",
+      "target": "TASK-BUD-646",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T23:30:59.895Z",
+      "evidence": "Context-watch ajustado para sane default global: `DEFAULT_CONTEXT_WATCHDOG_CONFIG` agora define `checkpointPct: 55` e `compactPct: 65` (`packages/pi-stack/extensions/context-watchdog-config.ts`). Derivação de thresholds foi reordenada para preservar `warn < checkpoint < compact` mesmo quando warning base do provider é maior, sem forçar tuning por provider. Janela de freio final ampliada para ~10pp com `FINAL_TURN_CLOSE_HEADROOM_PCT = 10` em `packages/pi-stack/extensions/context-watchdog.ts`, mantendo guidance de final-turn mais cedo antes do compact forçado. Preset `control-plane` atualizado para 55/65 em `packages/pi-stack/extensions/context-watchdog-bootstrap.ts`. Regressões/expectativas atualizadas em `packages/pi-stack/test/smoke/context-watchdog.test.ts`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (64 passed) + marker-checks 4/4, 3/3 e 3/3 nos arquivos alterados."
     }
   ]
 }

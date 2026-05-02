@@ -14959,6 +14959,31 @@
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
       "notes": "Encadeamento para manter cadência de calibração sem abrir painel pesado.\n[rationale:risk-control] Resumo curto de budget de ruído no comando /context-watch reduz tempo de diagnóstico humano e mantém cadência sem abrir payload grande em sessão."
+    },
+    {
+      "id": "TASK-BUD-646",
+      "description": "[P1] Ajustar context-watch para sane default global de compactação graciosa (checkpoint ~55, compact ~65) com janela de freio mais previsível entre providers/modelos.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-640",
+        "TASK-BUD-641"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-config.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-bootstrap.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Default global do watchdog privilegia checkpoint antecipado (~55) e compact forçado em ~65, sem tuning por provider.",
+        "Derivação de thresholds mantém ordem canônica warn < checkpoint < compact mesmo quando warning base do provider for maior.",
+        "Final-turn window usa headroom de ~10pp para orientar freio gracioso antes do compact forçado.",
+        "Smoke de context-watch passa com expectativas atualizadas."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Origem: steer humano pedindo comportamento reliable global para compactação graciosa sem depender de tuning por provider/model.\nIniciando ajuste global de janela para priorizar compactação graciosa confiável em qualquer provider.\n[rationale:risk-control] Thresholds atuais dependentes de provider criam comportamento desigual de freio/compact, dificultando cadência estável da fábrica. Um sane default global (checkpoint antecipado + compact teto) reduz risco de degradação por contexto e simplifica operação antes de tuning fino por …\nAplicado sane default global inspirado em operação confiável (freio antecipado + compact teto), priorizando comportamento consistente entre providers enquanto a fábrica evolui delegação.",
+      "verification": "VER-BUD-996"
     }
   ]
 }
