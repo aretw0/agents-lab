@@ -87,3 +87,12 @@ imediatamente sem precisar reiniciar.
 
 Para avaliar syntax highlighting de código especificamente, peça ao pi algo que gere
 blocos de código TypeScript ou bash depois de abrir com o comando de nível 1 acima.
+
+## Isolamento + contexto fresh (pós-compact)
+
+Ao testar spawn simples ou swarm, prefira injetar um **fresh context pack** mínimo
+(derivado de `.project/handoff.json`, recorte de tasks foco e última verificação)
+em vez de reler árvore ampla de docs/logs.
+
+Se o pack estiver stale (handoff/task/verification mudou), descarte e regenere antes
+de iniciar o agente isolado. Isso mantém o teste reproduzível e reduz custo de contexto.

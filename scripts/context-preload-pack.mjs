@@ -18,6 +18,7 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -222,7 +223,7 @@ function topEntries(counts, totalReadCalls, maxItems) {
     .slice(0, maxItems);
 }
 
-function buildPreloadPack(top, maxCore = 10, maxLean = 6) {
+function buildPreloadPack(top, maxCore = 10, maxLean = 6, maxScout = 5) {
   const workspaceTop = top.filter((e) => e.class !== "noise" && e.class !== "external");
 
   const controlPlaneCore = workspaceTop
@@ -235,11 +236,46 @@ function buildPreloadPack(top, maxCore = 10, maxLean = 6) {
     .slice(0, maxLean)
     .map((e) => e.file);
 
+  const swarmScoutMin = workspaceTop
+    .filter((e) => ["project", "docs", "workspace"].includes(e.class))
+    .slice(0, maxScout)
+    .map((e) => e.file);
+
   return {
     controlPlaneCore,
     agentWorkerLean,
+    swarmScoutMin,
     skipClasses: ["noise", "external"],
-    freshnessRule: "recompute on each checkpoint/compact or at least every 24h",
+    freshnessRule: "recompute on each checkpoint/compact or when canonical state changes (handoff/tasks/verification)",
+  };
+}
+
+function readCanonicalState(workspace) {
+  const files = [
+    ".project/handoff.json",
+    ".project/tasks.json",
+    ".project/verification.json",
+  ];
+  const entries = files.map((rel) => {
+    const abs = path.join(workspace, rel);
+    if (!existsSync(abs)) {
+      return { path: rel, exists: false, mtimeMs: 0 };
+    }
+    try {
+      const st = statSync(abs);
+      return { path: rel, exists: true, mtimeMs: Math.floor(st.mtimeMs) };
+    } catch {
+      return { path: rel, exists: false, mtimeMs: 0 };
+    }
+  });
+
+  const fingerprint = createHash("sha1")
+    .update(entries.map((e) => `${e.path}:${e.exists ? 1 : 0}:${e.mtimeMs}`).join("|"))
+    .digest("hex");
+
+  return {
+    fingerprint,
+    files: entries,
   };
 }
 
@@ -268,8 +304,13 @@ function printHuman(report) {
   for (const p of report.preloadPack.agentWorkerLean) lines.push(`- ${p}`);
   if (report.preloadPack.agentWorkerLean.length === 0) lines.push("- (empty)");
 
+  lines.push("### swarm-scout-min");
+  for (const p of report.preloadPack.swarmScoutMin) lines.push(`- ${p}`);
+  if (report.preloadPack.swarmScoutMin.length === 0) lines.push("- (empty)");
+
   lines.push("");
   lines.push(`freshness: ${report.preloadPack.freshnessRule}`);
+  lines.push(`canonical-fingerprint: ${report.canonicalState.fingerprint}`);
   return lines.join("\n");
 }
 
@@ -280,6 +321,7 @@ function main() {
   const telemetry = collectReadTelemetry(sessionFiles, workspace);
   const topReads = topEntries(telemetry.counts, telemetry.totalReadCalls, args.top);
   const preloadPack = buildPreloadPack(topReads);
+  const canonicalState = readCanonicalState(workspace);
 
   const report = {
     generatedAtIso: new Date().toISOString(),
@@ -297,6 +339,7 @@ function main() {
     },
     topReads,
     preloadPack,
+    canonicalState,
   };
 
   const outPath = args.out || path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");

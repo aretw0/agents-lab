@@ -169,6 +169,11 @@ Para reduzir re-leitura repetitiva pós-compactação, gere um warm pack por tel
 - `npm run context:preload` (inspeção humana)
 - `npm run context:preload:write` (gera JSON em `.sandbox/pi-agent/preload/context-preload-pack.json`)
 
+Consumo fail-closed do pack (com fallback canônico quando stale):
+- `npm run context:preload:consume` (`control-plane-core`)
+- `npm run context:preload:consume:worker` (`agent-worker-lean`)
+- `npm run context:preload:consume:scout` (`swarm-scout-min`)
+
 Saídas sugerem dois perfis de carga:
 - `control-plane-core`: contexto mínimo para coordenação/decisão.
 - `agent-worker-lean`: contexto mínimo para execução delegada.
@@ -194,5 +199,42 @@ Config opcional em `.pi/settings.json` (conservador para evitar 400 em provedore
 
 Observação: `warnPct`/`errorPct` são herdados do threshold model-aware do `custom-footer` (`contextPressure`).
 Para `github-copilot/gpt-5.3-codex`, o baseline recomendado é mais conservador (`errorPct=65`) para reduzir risco de `400 input exceeds context window`.
+
+## Blueprint — Fresh Context Pack (pós-compact e spawn)
+
+Objetivo: manter agentes fresh com **contexto mínimo canônico**, sem releitura ampla, e com fallback seguro.
+
+### Fontes mínimas canônicas (ordem fixa)
+1. `.project/handoff.json` (foco atual, próximos passos, blockers, `context_watch_events` recentes)
+2. `.project/tasks.json` (status/deps apenas para IDs em foco)
+3. `.project/verification.json` (última evidência ligada ao foco)
+
+Regra: carregar **somente** os recortes ligados ao foco ativo (WIP=1), nunca snapshot completo por padrão.
+
+### Perfis por lane
+- `control-plane-core`
+  - inclui: foco atual, decisão pendente, blockers, último checkpoint.
+  - uso: coordenação e continuidade de sessão principal.
+- `agent-worker-lean`
+  - inclui: objetivo do slice, arquivos declarados, gate de validação e rollback.
+  - uso: spawn simples (single-agent, bounded).
+- `swarm-scout-min`
+  - inclui: objetivo, restrições, critérios de evidência e limite de pesquisa.
+  - uso: scouts; workers recebem payload derivado do scout, não releitura global.
+
+### Staleness/invalidação (fail-closed)
+Invalidar o pack e regenerar quando qualquer condição ocorrer:
+1. `handoff.updated_at` mudou após geração do pack.
+2. task foco mudou (`current_tasks`) ou status/deps do foco mudaram.
+3. nova verificação relevante foi anexada ao foco.
+4. janela de frescor estourou (`handoffFreshMaxAgeMs`).
+
+Se inválido/ausente: cair automaticamente para caminho canônico seguro (`handoff -> tasks -> verification`), sem heurística opaca.
+
+### Contrato operacional curto
+- compactou -> gerar/atualizar pack mínimo;
+- retomou -> validar staleness antes de usar pack;
+- spawnou agente -> anexar apenas o perfil da lane correspondente;
+- detectou drift -> descartar pack e regenerar.
 
 Esse playbook complementa o pipeline canônico: `docs/guides/project-canonical-pipeline.md`.

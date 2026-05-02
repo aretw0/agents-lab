@@ -12440,6 +12440,48 @@
       "milestone": "bg-agents-calibration-wave-2026-05f",
       "notes": "[rationale:risk-control] erro 400 observado com ~68%; reduzir teto para 65% aumenta margem de parada/checkpoint antes de overflow.\n[provenance:human] source_task=TASK-BUD-520 reason=ajuste urgente solicitado pelo operador após 400 em janela menor do que o baseline anterior\n2026-05-01: teto operacional ajustado para 65% com checkpoint antecipado (60%) após incidente 400 em ~68%.",
       "verification": "VER-BUD-872"
+    },
+    {
+      "id": "TASK-BUD-525",
+      "description": "Revisar estratégia de compactação ótima para manter agentes fresh sem releitura desnecessária (control-plane + simple/swarm spawn).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/guides/testing-isolation.md",
+        "docs/primitives/control-plane-overnight-local-loop.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Definir blueprint de 'fresh context pack' pós-compact com fontes mínimas canônicas (handoff/tasks/verification).",
+        "Definir variação por lane: control-plane, simple agent spawn e swarm scout/worker.",
+        "Definir critérios de staleness e quando invalidar/regerar pack para evitar releitura ampla."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] compactar cedo reduz 400, mas exige estratégia explícita de recarga mínima para evitar drift/releitura cara.\n[provenance:human] source_task=TASK-BUD-524 reason=pedido explícito do operador para agentes sempre fresh após compactação e em spawn/swarm\n2026-05-02: iniciando slice de blueprint para compactação ótima + fresh context pack por lane (control-plane/simple/swarm).\n2026-05-02: blueprint de fresh context pack fechado para control-plane/simple/swarm com staleness fail-closed.",
+      "verification": "VER-BUD-874"
+    },
+    {
+      "id": "TASK-BUD-526",
+      "description": "Implementar prova local-safe de warm preload para retomada pós-compact e spawn simples (report-only) com evidência de redução de releitura.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-525"
+      ],
+      "files": [
+        "scripts/",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "docs/research/"
+      ],
+      "acceptance_criteria": [
+        "Adicionar fluxo de geração/consumo de pack mínimo reutilizável em retomada local-safe.",
+        "Registrar métricas simples (arquivos/lotes evitados ou tempo de preparação) em pesquisa.",
+        "Manter fail-closed: quando pack estiver stale/inválido, cair para caminho canônico seguro."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] melhorar throughput sem sacrificar governança exige fallback canônico e staleness gate.\n[provenance:human] source_task=TASK-BUD-525 reason=converter revisão de estratégia em fatia prática mensurável\n2026-05-02: implementado fluxo inicial de consumo fail-closed do warm pack com fingerprint canônico e perfil por lane.\n2026-05-02: fluxo warm-preload agora tem consumo fail-closed com fallback canônico e perfil scout dedicado.",
+      "verification": "VER-BUD-875"
     }
   ]
 }

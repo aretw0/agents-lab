@@ -10086,6 +10086,24 @@
       "method": "surface+packet composition + smoke",
       "timestamp": "2026-05-01T23:55:27.185Z",
       "evidence": "Composed background rehearsal signal into ops calibration packet. Changes: - `packages/pi-stack/extensions/guardrails-core-ops-calibration.ts` - added `backgroundRehearsal` input/output support - new recommendation code: `ops-calibration-keep-report-only-background-rehearsal` - fail-closed blocker `background-rehearsal-not-ready` when rehearsal signal is missing/non-ready - summary now includes `rehearsal=<decision>` - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` - imports `evaluateBackgroundProcessRehearsal` - adds rehearsal parameters (`lifecycle_classified`, `rollback_plan_known`, `unresolved_blockers`, `destructive_restart_requested`, `protected_scope_requested`) - evaluates rehearsal and passes result into `buildOpsCalibrationDecisionPacket` - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` - updated ready path to include `backgroundRehearsal: ready` - added regression for non-ready rehearsal -> keep-report-only with rehearsal blocker/code - `docs/primitives/ops-calibration-decision-packet.md` - documents that packet remains report-only until rehearsal gate is `ready` Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts` => 3 files passed, 17 tests passed."
+    },
+    {
+      "id": "VER-BUD-874",
+      "target": "TASK-BUD-525",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc blueprint + marker-check",
+      "timestamp": "2026-05-02T00:08:26.825Z",
+      "evidence": "Defined compactação/fresh-context blueprint in `docs/guides/openai-context-window-playbook.md` with deterministic contract: - Fontes mínimas canônicas e ordem fixa (`handoff -> tasks foco -> verification foco`). - Perfis por lane: `control-plane-core`, `agent-worker-lean`, `swarm-scout-min`. - Regras de staleness/invalidação fail-closed e fallback canônico seguro. - Contrato operacional curto para pós-compact, retomada e spawn. Also added practical isolation note in `docs/guides/testing-isolation.md` linking isolated tests to fresh-pack usage and stale discard behavior. Validation: - `safe_marker_check docs/guides/openai-context-window-playbook.md` markers (`Fresh Context Pack`, `Fontes mínimas canônicas`, `Staleness/invalidação`, `control-plane-core`, `agent-worker-lean`, `swarm-scout-min`) => matched 6/6."
+    },
+    {
+      "id": "VER-BUD-875",
+      "target": "TASK-BUD-526",
+      "target_type": "task",
+      "status": "passed",
+      "method": "script + test + live run + marker-check",
+      "timestamp": "2026-05-02T00:14:56.456Z",
+      "evidence": "Implemented local-safe generation/consumption flow for warm preload with fail-closed staleness behavior. Changes: - `scripts/context-preload-pack.mjs` - adds `swarmScoutMin` profile in preload pack. - adds canonical state snapshot (`.project/handoff.json`, `.project/tasks.json`, `.project/verification.json`) with fingerprint. - freshness rule now includes canonical-state change invalidation. - `scripts/context-preload-consume.mjs` (new) - deterministic read-only consumer for profiles (`control-plane-core`, `agent-worker-lean`, `swarm-scout-min`). - returns `decision=use-pack|fallback-canonical`, `staleReasons`, `selectedPaths`. - fail-closed fallback to canonical trio when pack missing/invalid/stale. - `package.json` - adds scripts: `context:preload:consume`, `context:preload:consume:worker`, `context:preload:consume:scout`. - docs updated (`docs/guides/openai-context-window-playbook.md`, `docs/guides/testing-isolation.md`) with consume commands and stale/fallback orientation. - tests added: `scripts/test/context-preload-consume.test.mjs`. Validation: - `node --test scripts/test/context-preload-consume.test.mjs` => pass 2/2. - `npm run context:preload:write --silent` => pack generated with canonical fingerprint and 3 profiles. - `npm run context:preload:consume --silent` => `decision=use-pack`, `staleReasons=[]`. - `safe_marker_check docs/guides/openai-context-window-playbook.md` markers (`context:preload:consume`, `context:preload:consume:worker`, `context:preload:consume:scout`, `swarm-scout-min`) => matched 4/4."
     }
   ]
 }
