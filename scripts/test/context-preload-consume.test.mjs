@@ -94,10 +94,23 @@ test("falls back to canonical when canonical state changes after pack generation
     };
     writeFileSync(packPath, JSON.stringify(pack, null, 2));
 
-    writeFileSync(
-      path.join(workspace, ".project", "tasks.json"),
-      JSON.stringify({ tasks: [{ id: "TASK-1", status: "in-progress" }] }, null, 2),
-    );
+    const tasksPath = path.join(workspace, ".project", "tasks.json");
+    const fingerprintBeforeMutation = canonicalFingerprint(workspace);
+    let fingerprintAfterMutation = fingerprintBeforeMutation;
+    for (let attempt = 0; attempt < 4 && fingerprintAfterMutation === fingerprintBeforeMutation; attempt += 1) {
+      writeFileSync(
+        tasksPath,
+        JSON.stringify({ tasks: [{ id: "TASK-1", status: "in-progress", attempt }] }, null, 2),
+      );
+      fingerprintAfterMutation = canonicalFingerprint(workspace);
+      if (fingerprintAfterMutation === fingerprintBeforeMutation) {
+        const waitUntil = Date.now() + 5;
+        while (Date.now() < waitUntil) {
+          // stabilize low-resolution filesystem mtime edges for deterministic stale assertion.
+        }
+      }
+    }
+    assert.notEqual(fingerprintAfterMutation, fingerprintBeforeMutation);
 
     const report = runConsume({ workspace, packPath });
     assert.equal(report.decision, "fallback-canonical");

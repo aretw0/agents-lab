@@ -1,47 +1,49 @@
 {
-  "timestamp": "2026-05-02T13:09:56.353Z",
-  "context": "afk-handoff: decision=continue stock=3/7 blockers=none next=hardening do teste stale de preload pack (TASK-BUD-584) para remover flake crítico de continuidade.",
-  "current_tasks": [
-    "TASK-BUD-584"
-  ],
+  "timestamp": "2026-05-02T13:17:57.191Z",
+  "context": "afk-handoff: decision=blocked stock=3/7 blockers=local-stop-protected-focus-required next=request foco humano explícito para lane protegida ou abrir nova fatia local-safe.",
   "next_actions": [
-    "Reproduzir flake stale preload com fixture determinístico",
-    "Aplicar fix no teste (ou helper) sem mudar contrato report-only",
-    "Rodar smoke focal de context-watchdog"
+    "Escolher foco protegido explícito (packet/report-only) OU semear nova task local-safe.",
+    "Se seguir protegido, manter no-dispatch até decisão humana."
   ],
-  "blockers": [],
+  "blockers": [
+    "local-stop-protected-focus-required"
+  ],
   "recent_validation": [
-    "VER-BUD-932",
-    "commit ae9889e"
+    "VER-BUD-933",
+    "smoke context-watchdog/context-watchdog-continuation verdes",
+    "scripts/test/context-preload-consume.test.mjs verde"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-584",
     "canonical_links": [
       "task:TASK-BUD-584",
-      "verification:VER-BUD-932",
-      "commit:ae9889e"
+      "verification:VER-BUD-933"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T13:09:56.353Z",
+    "generatedAtIso": "2026-05-02T13:17:57.191Z",
     "level": "ok",
-    "percent": 49,
+    "percent": 50,
     "action": "continue",
-    "recommendation": "continue-bounded"
+    "recommendation": "ask-human-focus",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T13:09:56.353Z",
+      "atIso": "2026-05-02T13:17:57.191Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 49,
+      "percent": 50,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-bounded"
+      "recommendation": "ask-human-focus"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-584"
   ]
 }

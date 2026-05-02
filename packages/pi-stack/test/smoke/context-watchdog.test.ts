@@ -1702,7 +1702,20 @@ describe("context-watchdog", () => {
 			expect(fresh.decision).toBe("use-pack");
 			expect(fresh.selectedPaths).toEqual([".project/handoff.json"]);
 
-			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-BUD-1", status: "in-progress" }] }));
+			const tasksPath = join(cwd, ".project", "tasks.json");
+			const fingerprintBeforeMutation = consumeContextPreloadPack(cwd, { profile: "control-plane-core" }).currentCanonicalState.fingerprint;
+			let fingerprintAfterMutation = fingerprintBeforeMutation;
+			for (let attempt = 0; attempt < 4 && fingerprintAfterMutation === fingerprintBeforeMutation; attempt += 1) {
+				writeFileSync(tasksPath, JSON.stringify({ tasks: [{ id: "TASK-BUD-1", status: "in-progress", attempt }] }));
+				fingerprintAfterMutation = consumeContextPreloadPack(cwd, { profile: "control-plane-core" }).currentCanonicalState.fingerprint;
+				if (fingerprintAfterMutation === fingerprintBeforeMutation) {
+					const waitUntil = Date.now() + 5;
+					while (Date.now() < waitUntil) {
+						// stabilize low-resolution filesystem mtime edges for deterministic stale assertion.
+					}
+				}
+			}
+			expect(fingerprintAfterMutation).not.toBe(fingerprintBeforeMutation);
 			const stale = consumeContextPreloadPack(cwd, { profile: "control-plane-core" });
 			expect(stale.decision).toBe("fallback-canonical");
 			expect(stale.staleReasons).toContain("canonical-state-changed");

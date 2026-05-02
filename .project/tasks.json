@@ -13735,7 +13735,7 @@
     {
       "id": "TASK-BUD-584",
       "description": "Edge-case hardening: estabilizar cenário stale de consumeContextPreloadPack no smoke de context-watchdog para eliminar flake em regressão completa.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-583"
@@ -13750,7 +13750,8 @@
         "Contrato report-only continua inalterado."
       ],
       "milestone": "turn-boundary-hardening-wave-2026-05",
-      "notes": "[rationale:risk-control] reduzir flake em gate crítico de continuidade evita falsos bloqueios e pausas ambíguas."
+      "notes": "[rationale:risk-control] reduzir flake em gate crítico de continuidade evita falsos bloqueios e pausas ambíguas.\n2026-05-02: edge-case stale preload hardening aplicado para remover flake por resolução de mtime.",
+      "verification": "VER-BUD-933"
     }
   ]
 }
