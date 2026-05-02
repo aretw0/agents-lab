@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-05-02T20:41:40.295Z",
-  "context": "removemos drift de runtime também no publish: workflows principais agora seguem baseline Node24 + majors atuais, e smoke bloqueia reintrodução de actions legadas.",
+  "timestamp": "2026-05-02T20:54:42.834Z",
+  "context": "hardening de runtime avançou: CI e Publish agora usam actions críticas pinadas por SHA (com versão comentada), com smoke bloqueando regressão para tags flutuantes.",
   "next_actions": [
-    "Commitar/push desta fatia e observar próximo CI run para confirmar ausência dos warnings Node20 no lane principal.",
-    "Opcional: avaliar pin por SHA dos actions para reduzir drift de tag sem perder clareza de manutenção."
+    "Commit/push desta fatia e acompanhar run no GitHub Actions para confirmar estabilidade pós-pin.",
+    "Se mantiver verde, próxima melhoria opcional: revisar outros workflows/reusable actions para padrão SHA pin completo."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-979",
-    "targeted vitest (2 files / 5 tests) green",
-    "npm run test:smoke green (117 files / 1088 tests)"
+    "VER-BUD-980",
+    "targeted vitest workflow tests green (2 files / 6 tests)",
+    "npm run ci:local:parity green (117/1089 + sovereignty strict/diff)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-634",
+    "focus": "TASK-BUD-635",
     "canonical_links": [
-      "task:TASK-BUD-634",
-      "verification:VER-BUD-979"
+      "task:TASK-BUD-635",
+      "verification:VER-BUD-980"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T20:41:40.295Z",
+    "generatedAtIso": "2026-05-02T20:54:42.834Z",
     "level": "checkpoint",
-    "percent": 61,
+    "percent": 62,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T20:41:40.295Z",
+      "atIso": "2026-05-02T20:54:42.834Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 61,
+      "percent": 62,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-634"
+    "TASK-BUD-635"
   ]
 }

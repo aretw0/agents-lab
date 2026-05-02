@@ -14729,6 +14729,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] remove ruído de depreciação em workflows adjacentes e previne reintrodução de drift.\n2026-05-02: Publish também alinhado a Node24 + smoke anti-regressão para actions legadas nos workflows.",
       "verification": "VER-BUD-979"
+    },
+    {
+      "id": "TASK-BUD-635",
+      "description": "[P1] Pin actions por SHA nos workflows CI/Publish (com comentário de versão) para reduzir drift de tag e fortalecer reprodutibilidade.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish.yml",
+        "packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts"
+      ],
+      "acceptance_criteria": [
+        "CI/Publish usam `uses:` com SHA pin + comentário da versão para checkout/setup-node/upload-artifact/github-script.",
+        "Smoke de baseline valida presença de SHA pin para actions críticas.",
+        "Paridade local (`ci:local:parity`) permanece verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduz risco de drift silencioso por atualização de tag em runtime de CI.\n2026-05-02: CI/Publish actions críticas fixadas por SHA (com comentário de versão) + smoke anti-regressão para evitar retorno de tags flutuantes.",
+      "verification": "VER-BUD-980"
     }
   ]
 }
