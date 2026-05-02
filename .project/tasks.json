@@ -13127,6 +13127,28 @@
       "milestone": "delegation-evolution-wave-2026-05",
       "notes": "[rationale:risk-control] evitar falso negativo de validation gate melhora continuidade local-safe sem abrir escopo protegido.\n[provenance:human] source_task=TASK-BUD-545 reason=ajuste prévio necessário para overnight lane mais autônoma e menos frágil\n2026-05-03: hardening local continuity validation inference para tarefas com gate de teste já declarado em files.",
       "verification": "VER-BUD-900"
+    },
+    {
+      "id": "TASK-BUD-557",
+      "description": "Promover contrato de auto-advance da night lane de soft-intent para hard-intent (regra runtime explícita, fail-closed, sem check-in entre tasks elegíveis).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-547"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Regra runtime explícita para auto-advance local-safe entre tasks elegíveis da mesma milestone/foco.",
+        "Fail-closed em protected/risk/reload-required/falha de validação.",
+        "Smoke cobre auto-advance sem check-in e bloqueios corretos."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir dependência de soft intent para continuidade noturna exige contrato hard runtime auditável.\n[provenance:human] source_task=TASK-BUD-546 reason=pedido do operador para não depender de soft intent na direção de execução em lote"
     }
   ]
 }
