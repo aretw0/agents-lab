@@ -1,47 +1,46 @@
 {
-  "timestamp": "2026-05-02T17:17:39.040Z",
-  "context": "contrato de encerramento endurecido pós-feedback do operador: mini-packet obrigatório (status+próximos passos+preview), neutralidade por defa [snip] rd documentados e protegidos por smoke. [truncated:+28 chars]",
+  "timestamp": "2026-05-02T17:56:24.723Z",
+  "context": "triagem da lane principal consolidada: limpar leve e monitorar foi suficiente; pesquisa/escalada seguem condicionadas a material elegível. ha [snip] s foi aberto em backlog (TASK-BUD-619). [truncated:+35 chars]",
+  "current_tasks": [
+    "TASK-BUD-619"
+  ],
   "next_actions": [
-    "Manter fechamento conciso com mini-packet obrigatório em todos os turnos.",
-    "Semear próxima fatia local-safe quando lane voltar a no-eligible-tasks."
+    "Escolher se TASK-BUD-619 entra agora na próxima fatia local-safe.",
+    "Se sim: implementar guard pattern para du amplo sem escopo/timeout + smoke."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-961",
-    "VER-BUD-962",
-    "control-plane-doc-checklist 2/2"
+    "VER-BUD-965",
+    "VER-BUD-966",
+    "VER-BUD-967"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-613",
+    "focus": "TASK-BUD-619",
     "canonical_links": [
-      "task:TASK-BUD-613",
-      "verification:VER-BUD-961"
+      "task:TASK-BUD-619",
+      "verification:VER-BUD-965"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T17:17:39.040Z",
+    "generatedAtIso": "2026-05-02T17:56:24.723Z",
     "level": "checkpoint",
-    "percent": 61,
+    "percent": 60,
     "action": "checkpoint-refresh",
-    "recommendation": "continue-local-safe",
-    "focus_task_status": "completed"
+    "recommendation": "ask-human-decision"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T17:17:39.040Z",
+      "atIso": "2026-05-02T17:56:24.723Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 61,
+      "percent": 60,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe"
+      "recommendation": "ask-human-decision"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-613"
   ]
 }

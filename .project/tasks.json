@@ -14432,6 +14432,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduzir regressão silenciosa do protocolo de triagem operacional.\n2026-05-02: smoke agora protege contrato de triagem de capacidade para evitar regressão silenciosa.",
       "verification": "VER-BUD-967"
+    },
+    {
+      "id": "TASK-BUD-619",
+      "description": "[P1] Hard intent para comandos shell longos: detectar padrões de alto custo (ex.: `du` amplo sem escopo/timeout) e falhar fechado com guidance bounded.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Policy bloqueia padrões de scan pesado sem limite/escopo (começando por `du` amplo).",
+        "Mensagem orienta alternativa bounded (escopo reduzido + timeout explícito).",
+        "Smoke cobre block + caminho permitido com escopo bounded."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] recorrência de cancelamentos por comando longo justifica hardening runtime para reduzir custo e interrupção."
     }
   ]
 }
