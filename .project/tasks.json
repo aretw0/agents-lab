@@ -12895,7 +12895,7 @@
     {
       "id": "TASK-BUD-546",
       "description": "Criar primitive de telemetria `delegation_mix_score` (read-only) para medir diversidade de delegação vs execução local por janela.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-545"
@@ -12911,7 +12911,7 @@
         "Mantém authorization=none e dispatchAllowed=false."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] diversidade de delegação precisa métrica explícita para evitar regressão para execução manual centralizada.\n[provenance:human] source_task=TASK-BUD-545 reason=segundo bloco da wave para tornar evolução de delegação mensurável"
+      "notes": "[rationale:risk-control] diversidade de delegação precisa métrica explícita para evitar regressão para execução manual centralizada.\n[provenance:human] source_task=TASK-BUD-545 reason=segundo bloco da wave para tornar evolução de delegação mensurável\nPromoção automática de foco após conclusão da TASK-BUD-545 para manter continuidade da lane delegation-evolution."
     },
     {
       "id": "TASK-BUD-547",
