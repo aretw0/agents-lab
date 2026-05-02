@@ -10239,6 +10239,15 @@
       "method": "freshness helper refactor + smoke + marker-check",
       "timestamp": "2026-05-02T04:01:19.090Z",
       "evidence": "Unified freshness signal collection in context-watchdog. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - added `readContextWatchFreshnessSignals(...)` shared helper returning `preload`, `preloadDecision`, `gitDirty`, `dirtySignal`. - `context_watch_status` now uses shared helper instead of duplicating preload+dirty calculations. - `context_watch_continuation_readiness` now uses same shared helper for parity. - External contract preserved: - status summary unchanged. - existing details fields retained (`dirtySignal`, `preloadDecision`, `gitDirty`, `preload`). Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker check on context-watchdog helper/usage anchors matched (`readContextWatchFreshnessSignals`, `preloadDecision: preload.decision`, `freshness.preloadDecision`, `freshness.dirtySignal`)."
+    },
+    {
+      "id": "VER-BUD-891",
+      "target": "TASK-BUD-542",
+      "target_type": "task",
+      "status": "passed",
+      "method": "new freshness tool + smoke + marker-check",
+      "timestamp": "2026-05-02T04:03:30.848Z",
+      "evidence": "Added dedicated read-only freshness tool for one-call preload+dirty diagnostics. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - registered tool `context_watch_freshness_status`. - returns summary `context-watch-freshness-status: preload=<...> dirty=<...> authorization=none`. - details include `preloadDecision`, `dirtySignal`, `preload`, `gitDirty`, `dispatchAllowed=false`, `mode=read-only-freshness`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added regression for tool execution in non-git/no-pack temp cwd (`preload=fallback-canonical`, `dirty=unknown`, normalized git fallback). - `docs/guides/openai-context-window-playbook.md` - tools list now includes `context_watch_freshness_status`. - added guidance to use freshness tool when full status payload is unnecessary. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 55 tests passed. - marker checks passed for tool/docs anchors (`context_watch_freshness_status`, `read-only-freshness`, docs mention)."
     }
   ]
 }

@@ -1388,6 +1388,46 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_freshness_status tool returns preload+dirty in one call", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_freshness_status");
+			const result = await tool.execute(
+				"tc-context-watch-freshness-status",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+
+			expect(result.content?.[0]?.text).toContain("context-watch-freshness-status:");
+			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
+			expect(result.content?.[0]?.text).toContain("dirty=unknown");
+			expect(result.details).toMatchObject({
+				authorization: "none",
+				dispatchAllowed: false,
+				mode: "read-only-freshness",
+				preloadDecision: "fallback-canonical",
+				dirtySignal: "unknown",
+				preload: {
+					mode: "context-preload-consume",
+					decision: "fallback-canonical",
+				},
+				gitDirty: {
+					available: false,
+					clean: null,
+					rowCount: 0,
+					summary: "git-dirty-snapshot: unavailable",
+					error: "not-a-git-repo",
+				},
+			});
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_auto_resume_preview tool is read-only and filters stale focus", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-auto-resume-preview-"));
 		try {

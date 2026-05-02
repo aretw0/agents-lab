@@ -124,7 +124,7 @@ Override opcional em `.pi/settings.json`:
 ## Context watchdog (advisory, não-bloqueante)
 
 A extensão `context-watchdog` adiciona sinais operacionais para sessões long-run:
-- tools: `context_watch_status`, `context_watch_bootstrap`
+- tools: `context_watch_status`, `context_watch_freshness_status`, `context_watch_bootstrap`
 - command: `/context-watch [status|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]`
 - status key: `context-watch`
 
@@ -177,6 +177,7 @@ Consumo fail-closed do pack (com fallback canônico quando stale):
 - composição em readiness packet: `context_watch_continuation_readiness` inclui `preload.decision=use-pack|fallback-canonical` e `dirty=clean|dirty|unknown`.
 - `context_watch_status` também expõe `details.gitDirty` (clean/dirty/unknown) e `details.preload` (`use-pack|fallback-canonical`) sem alterar o summary principal.
 - Para consumo simples, use os atalhos `details.dirtySignal` e `details.preloadDecision`.
+- Se quiser só frescor (sem payload do status completo), use `context_watch_freshness_status`.
 
 Saídas sugerem dois perfis de carga:
 - `control-plane-core`: contexto mínimo para coordenação/decisão.

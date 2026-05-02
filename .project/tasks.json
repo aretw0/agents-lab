@@ -12807,6 +12807,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] helper compartilhado reduz drift entre superfícies e evita divergência de diagnóstico de frescor.\n[provenance:human] source_task=TASK-BUD-540 reason=continuação da cadência de hardening após reload e com foco em paridade determinística\n2026-05-03: sinais de frescor agora são coletados por helper único, reduzindo risco de drift entre status e continuation.",
       "verification": "VER-BUD-890"
+    },
+    {
+      "id": "TASK-BUD-542",
+      "description": "Adicionar tool read-only `context_watch_freshness_status` para snapshot direto de frescor (preload + dirty) em uma chamada.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-541"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna summary curto e details com `preloadDecision`, `dirtySignal`, `gitDirty`, `preload`.",
+        "Contrato fail-closed em cwd sem repo/pack permanece (`dirty=unknown`, `preload=fallback-canonical`).",
+        "Smoke cobre registro e execução da tool."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] ferramenta dedicada simplifica automações read-only sem depender de payload grande do status geral.\n[provenance:human] source_task=TASK-BUD-541 reason=continuidade da cadência local-safe para ergonomia de diagnóstico de frescor\n2026-05-03: ferramenta dedicada de frescor disponível para diagnóstico rápido sem carregar payload completo de status.",
+      "verification": "VER-BUD-891"
     }
   ]
 }

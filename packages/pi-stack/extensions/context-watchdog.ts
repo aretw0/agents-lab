@@ -2050,6 +2050,37 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	});
 
 	pi.registerTool({
+		name: "context_watch_freshness_status",
+		label: "Context Watch Freshness Status",
+		description:
+			"Read-only freshness snapshot with preload decision and git dirty signal in one call.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
+			const summary = [
+				"context-watch-freshness-status:",
+				`preload=${freshness.preloadDecision}`,
+				`dirty=${freshness.dirtySignal}`,
+				"authorization=none",
+			].join(" ");
+			return {
+				content: [{ type: "text", text: summary }],
+				details: {
+					summary,
+					preloadDecision: freshness.preloadDecision,
+					dirtySignal: freshness.dirtySignal,
+					preload: freshness.preload,
+					gitDirty: freshness.gitDirty,
+					effect: "none",
+					mode: "read-only-freshness",
+					authorization: "none",
+					dispatchAllowed: false,
+				},
+			};
+		},
+	});
+
+	pi.registerTool({
 		name: "context_watch_auto_resume_preview",
 		label: "Context Watch Auto-Resume Preview",
 		description:
