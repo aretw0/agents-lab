@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-05-02T19:27:36.740Z",
-  "context": "foco em capacidade operacional mantido: CI agora tem change-discovery report-only (base/head + classificação ci/code/docs) e smoke continua e [snip] o gate canônico completo sem auto-skip. [truncated:+8 chars]",
+  "timestamp": "2026-05-02T19:46:37.306Z",
+  "context": "lane operacional seguiu sem abrir frente nova: CI ganhou artifact report-only de change discovery (changed-files + summary.md) para triagem r [snip] ke:gate full e paridade local↔CI verde. [truncated:+31 chars]",
   "next_actions": [
-    "Observar próximos runs de CI para validar qualidade do diagnóstico de delta.",
-    "Se útil, próxima fatia: anexar artifact de changed-files e resumo em markdown para triagem rápida."
+    "Observar próximos runs de GitHub Actions para confirmar utilidade prática do artifact ci-chang [snip] overy na triagem de drift. [truncated:+6 chars]",
+    "Se necessário, ajustar classificação ci/code/docs com base em falsos positivos/negativos observados nos próximos runs."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-973",
-    "workflow ci.yml atualizado com job changes + smoke needs changes"
+    "VER-BUD-974",
+    "npm run ci:local:parity green (115/1083 + sovereignty strict/diff)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-628",
+    "focus": "TASK-BUD-629",
     "canonical_links": [
-      "task:TASK-BUD-628",
-      "verification:VER-BUD-973"
+      "task:TASK-BUD-629",
+      "verification:VER-BUD-974"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T19:27:36.740Z",
+    "generatedAtIso": "2026-05-02T19:46:37.306Z",
     "level": "checkpoint",
-    "percent": 55,
+    "percent": 56,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T19:27:36.740Z",
+      "atIso": "2026-05-02T19:46:37.306Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 55,
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -41,6 +41,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-628"
+    "TASK-BUD-629"
   ]
 }

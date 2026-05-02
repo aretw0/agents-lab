@@ -89,6 +89,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          ARTIFACT_DIR=".artifacts/ci-change-discovery"
+          CHANGED_FILE="$ARTIFACT_DIR/changed-files.txt"
+          SUMMARY_MD="$ARTIFACT_DIR/summary.md"
+          mkdir -p "$ARTIFACT_DIR"
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_SHA="${{ github.event.pull_request.base.sha }}"
             HEAD_SHA="${{ github.event.pull_request.head.sha }}"
@@ -102,21 +107,39 @@ jobs:
 
           if [ -z "${BASE_SHA:-}" ]; then
             echo "::warning::Change discovery fallback: base SHA indisponível; mantendo execução full gate."
+
+            echo "(base indisponível)" > "$CHANGED_FILE"
+
+            {
+              echo "## Change discovery (report-only)"
+              echo
+              echo "- base: \`(indisponível)\`"
+              echo "- head: \`${HEAD_SHA:-}\`"
+              echo "- changed_count: \`unknown\`"
+              echo "- ci_changes: \`true\`"
+              echo "- code_changes: \`true\`"
+              echo "- docs_only: \`false\`"
+              echo
+              echo "Fallback fail-open para manter gate completo." 
+            } > "$SUMMARY_MD"
+
             echo "base_sha=" >> "$GITHUB_OUTPUT"
             echo "head_sha=${HEAD_SHA:-}" >> "$GITHUB_OUTPUT"
             echo "changed_count=unknown" >> "$GITHUB_OUTPUT"
             echo "ci_changes=true" >> "$GITHUB_OUTPUT"
             echo "code_changes=true" >> "$GITHUB_OUTPUT"
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+
+            cat "$SUMMARY_MD" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/agents-lab-changed-files.txt
-          CHANGED_COUNT="$(grep -c . /tmp/agents-lab-changed-files.txt || true)"
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$CHANGED_FILE"
+          CHANGED_COUNT="$(grep -c . "$CHANGED_FILE" || true)"
 
           has_match() {
             local pattern="$1"
-            grep -Eq "$pattern" /tmp/agents-lab-changed-files.txt
+            grep -Eq "$pattern" "$CHANGED_FILE"
           }
 
           ci_changes=false
@@ -133,7 +156,7 @@ jobs:
             fi
 
             if [ "$ci_changes" = "false" ] && [ "$code_changes" = "false" ]; then
-              if grep -Eqv '^(docs/|README\.md$|\.changeset/)' /tmp/agents-lab-changed-files.txt; then
+              if grep -Eqv '^(docs/|README\.md$|\.changeset/)' "$CHANGED_FILE"; then
                 docs_only=false
               else
                 docs_only=true
@@ -151,13 +174,31 @@ jobs:
           {
             echo "## Change discovery (report-only)"
             echo
-            echo "- base: \\`$BASE_SHA\\`"
-            echo "- head: \\`$HEAD_SHA\\`"
-            echo "- changed_count: \\`$CHANGED_COUNT\\`"
-            echo "- ci_changes: \\`$ci_changes\\`"
-            echo "- code_changes: \\`$code_changes\\`"
-            echo "- docs_only: \\`$docs_only\\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+            echo "- base: \`$BASE_SHA\`"
+            echo "- head: \`$HEAD_SHA\`"
+            echo "- changed_count: \`$CHANGED_COUNT\`"
+            echo "- ci_changes: \`$ci_changes\`"
+            echo "- code_changes: \`$code_changes\`"
+            echo "- docs_only: \`$docs_only\`"
+            echo
+            echo "### changed-files"
+            if [ "$CHANGED_COUNT" -gt 0 ]; then
+              sed 's/^/- /' "$CHANGED_FILE"
+            else
+              echo "- (none)"
+            fi
+          } > "$SUMMARY_MD"
+
+          cat "$SUMMARY_MD" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload change discovery artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-change-discovery
+          path: .artifacts/ci-change-discovery
+          retention-days: 14
+          if-no-files-found: error
 
   smoke:
     name: Smoke Tests

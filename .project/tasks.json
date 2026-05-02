@@ -14623,6 +14623,23 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] melhora organização e diagnóstico de drift sem reduzir cobertura prematuramente.\n2026-05-02: CI ganhou job `changes` report-only com classificação de delta (ci/code/docs) sem alterar cobertura do gate canônico.",
       "verification": "VER-BUD-973"
+    },
+    {
+      "id": "TASK-BUD-629",
+      "description": "[P1] Publicar artifact de change discovery no CI para triagem rápida de drift (changed-files + resumo markdown), mantendo modo report-only.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
+      "acceptance_criteria": [
+        "Job `changes` gera arquivo de changed-files e resumo markdown em `.artifacts/ci-change-discovery/`.",
+        "Workflow publica artifact `ci-change-discovery` com esses arquivos.",
+        "Smoke gate permanece full (sem auto-skip) após o relatório."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] artifact de delta facilita diagnóstico de drift em Actions sem alterar cobertura dos gates.\n2026-05-02: CI publica artifact `ci-change-discovery` (changed-files + summary.md) em modo report-only; gate canônico permanece full.",
+      "verification": "VER-BUD-974"
     }
   ]
 }

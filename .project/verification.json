@@ -10986,6 +10986,15 @@
       "method": "ci workflow change-discovery report-only wiring",
       "timestamp": "2026-05-02T19:26:09.816Z",
       "evidence": "Implemented report-first change discovery in CI (inspired by refarm organization) without reducing coverage. Changes: - `.github/workflows/ci.yml` - Added new job `changes` (report-only) with outputs: - `base_sha`, `head_sha`, `changed_count`, `ci_changes`, `code_changes`, `docs_only`. - Detection logic: - resolves base/head for PR and push, - handles missing/zero base SHA with full-gate fallback, - classifies changed files into CI/code/docs-only buckets, - writes summary to `GITHUB_STEP_SUMMARY`. - `smoke` job now depends on `changes` and prints discovery summary before running gate. - Policy preserved: full canonical gate still runs (`npm run ci:smoke:gate`) even for docs-only changes. Outcome: - Better observability and organization for local↔Actions drift triage. - No auto-skip behavior introduced in this phase (report-first)."
+    },
+    {
+      "id": "VER-BUD-974",
+      "target": "TASK-BUD-629",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ci change-discovery artifact wiring + parity gate regression",
+      "timestamp": "2026-05-02T19:46:24.180Z",
+      "evidence": "Expanded CI change-discovery to publish triage artifacts while keeping report-first policy. Changes: - `.github/workflows/ci.yml` - `changes` job now materializes `.artifacts/ci-change-discovery/` with: - `changed-files.txt` (git diff name-only between base/head) - `summary.md` (base/head/count + ci/code/docs classification + changed-files list) - Added fallback artifact content when base SHA is unavailable (`changed_count=unknown`, fail-open classification) to keep observability deterministic. - Added `Upload change discovery artifact` step (`actions/upload-artifact@v4`, name `ci-change-discovery`, retention 14 days). - Kept smoke as full-gate execution (`npm run ci:smoke:gate`) with no skip behavior. Validation: - `npm run ci:local:parity` passed end-to-end: - smoke suite green (115 files / 1083 tests) - `audit:sovereignty --strict` green - `audit:sovereignty:diff --strict` green Outcome: - Faster CI drift triage via downloadable delta artifact, without reducing coverage or introducing auto-skip paths."
     }
   ]
 }
