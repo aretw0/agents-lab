@@ -104,7 +104,7 @@ Sequência recomendada por boundary:
 
 1. gerar score explícito com `growth_maturity_score_packet`;
 2. anexar o snapshot no `turn_boundary_decision_packet`;
-3. agir conforme decisão:
+3. verificar origem no boundary (`growthSource=explicit|handoff`) e agir conforme decisão:
    - `go`: ampliar somente **1 nível bounded**;
    - `hold`: manter ritmo e estabilizar pontos fracos;
    - `needs-evidence`: fail-closed, coletar sinais faltantes antes de acelerar.
@@ -123,6 +123,7 @@ Exemplo de uso (snapshot completo):
 ```
 
 Regra prática: sem as 4 dimensões completas, não existe decisão de aceleração.
+No fallback por handoff, snapshot parcial/ambíguo deve cair em `needs-evidence` (fail-closed).
 
 ## Critério para v0.8.0
 

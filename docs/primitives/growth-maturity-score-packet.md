@@ -49,6 +49,13 @@ Integração recomendada:
 2. propagar o snapshot para `turn_boundary_decision_packet` (campos opcionais `*_score`, `debt_budget_ok`, `critical_blockers`);
 3. usar `summary` compacto para registrar `go|hold|needs-evidence` no checkpoint.
 
+Marcação de origem no boundary:
+- `growthSource=explicit` quando o snapshot veio de parâmetros da chamada;
+- `growthSource=handoff` quando veio do fallback `context_watch.growth_maturity`.
+
+Regra fail-closed no fallback:
+- se o handoff trouxer snapshot parcial (ex.: `score/code` sem `decision` válida), o boundary normaliza para `growthDecision=needs-evidence`.
+
 ## Exemplos rápidos
 
 ### A) Go (expansão bounded)

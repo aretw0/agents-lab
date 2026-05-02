@@ -14149,6 +14149,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] fail-closed explícito evita aceleração sem decisão de maturidade válida no handoff.\n2026-05-02: fallback de growth snapshot endurecido para fail-closed (`needs-evidence`) quando handoff vier sem decision válida.",
       "verification": "VER-BUD-952"
+    },
+    {
+      "id": "TASK-BUD-604",
+      "description": "[P1] Documentar semântica de `growthSource` e fallback fail-closed do handoff no uso operacional do turn boundary.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/primitives/growth-maturity-score-packet.md",
+        "docs/guides/primitive-growth-sanity-plan.md"
+      ],
+      "acceptance_criteria": [
+        "Docs explicam `growthSource=explicit|handoff` no turn boundary.",
+        "Docs registram fallback fail-closed (`needs-evidence`) para snapshot parcial do handoff.",
+        "Checklist de docs permanece verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] contrato documental explícito evita leitura ambígua da origem do score no boundary.\n2026-05-02: contrato documental atualizado com `growthSource` e fallback fail-closed do handoff no boundary.",
+      "verification": "VER-BUD-953"
     }
   ]
 }

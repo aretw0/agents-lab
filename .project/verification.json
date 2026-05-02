@@ -10797,6 +10797,15 @@
       "method": "growth snapshot fallback fail-closed hardening + smoke",
       "timestamp": "2026-05-02T16:20:32.823Z",
       "evidence": "Hardened handoff growth fallback to fail-closed when decision is missing/invalid. Change: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - `toSnapshotGrowthMaturityPacket(...)` now treats partial handoff snapshots (score/code without valid decision) as `decision=needs-evidence` instead of ignoring them. - Preserves `growthSource=handoff` and keeps direction conservative in this scenario. Tests: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Added unit test for partial/invalid handoff snapshot -> `growthDecision=needs-evidence`, conservative direction, guidance appended. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added tool-level fallback case with handoff growth snapshot lacking decision; verifies fail-closed behavior and summary markers. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` - 74 passed / 0 failed. Result: - Boundary no longer drops ambiguous handoff growth signals silently; it now fails closed deterministically."
+    },
+    {
+      "id": "VER-BUD-953",
+      "target": "TASK-BUD-604",
+      "target_type": "task",
+      "status": "passed",
+      "method": "growth source/fail-closed docs update + checklist smoke",
+      "timestamp": "2026-05-02T16:23:50.836Z",
+      "evidence": "Documented growth-source semantics and fail-closed fallback behavior for boundary operations. Updated docs: - `docs/primitives/growth-maturity-score-packet.md` - Added explicit boundary source markers: - `growthSource=explicit` - `growthSource=handoff` - Added fallback fail-closed rule for partial handoff snapshots (`needs-evidence`). - `docs/guides/primitive-growth-sanity-plan.md` - Runbook now asks to verify boundary source marker before acting. - Added explicit rule: partial/ambiguous handoff snapshot must degrade to `needs-evidence`. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
     }
   ]
 }
