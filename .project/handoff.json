@@ -1,43 +1,41 @@
 {
-  "timestamp": "2026-05-02T14:09:57.604Z",
-  "context": "afk-handoff: decision=ask-human stock=3/7 blockers=protected-execution-requires-explicit-promote next=decidir promote / defer para canário pr [snip] slice bounded com rollback explícito). [truncated:+32 chars]",
+  "timestamp": "2026-05-02T14:11:26.105Z",
+  "context": "afk-handoff: decision=ask-human stock=3/7 blockers=protected-execution-requires-explicit-promote next=decidir promote / defer para iniciar 1 [snip] (TASK-BUD-589) com rollback explícito. [truncated:+17 chars]",
   "current_tasks": [
-    "TASK-BUD-134"
+    "TASK-BUD-589"
   ],
   "next_actions": [
-    "Confirmar decisão humana: promote ou defer.",
-    "Se promote: executar apenas 1 canário protegido bounded com evidência e rollback pronto.",
-    "Se defer: manter lane local-safe e semear próxima fatia de valor."
+    "Confirmar decisão humana para TASK-BUD-589: promote ou defer.",
+    "Se promote: executar somente 1 canário bounded e registrar evidência board-first.",
+    "Se defer: manter lane local-safe e revisar critérios de valor/risco."
   ],
   "blockers": [
     "protected-execution-requires-explicit-promote"
   ],
   "recent_validation": [
     "VER-BUD-937",
-    "control-plane-doc-checklist verde",
-    "autonomy_lane_protected_focus_packet(TASK-BUD-588)=ready-for-human-decision option=promote"
+    "autonomy_lane_protected_focus_packet(TASK-BUD-589)=ready-for-human-decision option=promote cod [snip] ected-focus-promote-canary [truncated:+6 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-134",
+    "focus": "TASK-BUD-589",
     "canonical_links": [
-      "task:TASK-BUD-134",
-      "task:TASK-BUD-588",
+      "task:TASK-BUD-589",
       "verification:VER-BUD-937"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T14:09:57.604Z",
+    "generatedAtIso": "2026-05-02T14:11:26.105Z",
     "level": "checkpoint",
-    "percent": 55,
+    "percent": 56,
     "action": "checkpoint-refresh",
     "recommendation": "ask-human-decision"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T14:09:57.604Z",
+      "atIso": "2026-05-02T14:11:26.105Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 55,
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

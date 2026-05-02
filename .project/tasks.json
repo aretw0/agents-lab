@@ -3319,7 +3319,7 @@
     {
       "id": "TASK-BUD-134",
       "description": "[P2] Introduzir execução remota por GitHub Actions como acelerador de capacidade (compute offload) para desenvolvimento/validação.",
-      "status": "in-progress",
+      "status": "planned",
       "depends_on": [
         "TASK-BUD-133"
       ],
@@ -3336,7 +3336,7 @@
         "Há trilha de evidência de execução remota no board/handoff (job id, resultado, artefatos) sem quebrar governança de budget/qualidade.",
         "Modelo operacional inclui steer/intervenção humana clara (cancelar/retry/override) mantendo objetivo set-and-forget seguro."
       ],
-      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica.\n2026-05-01: [parking:protected] GitHub Actions/offload permanece fora de execução automática; requer decisão humana explícita.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02: rollback plan explícito para canário protected de offload GitHub Actions — manter execução local como default; se canário degradar custo/qualidade/controle, reverter alterações via `git revert <commit>` e remover/pausar rota remota até nova decisão humana.\n2026-05-02: `autonomy_lane_protected_focus_packet` => decision=ready-for-human-decision, recommendedOption=defer (`protected-focus-defer-high-risk`, risk=high, value=medium). Próxima ação: decompor em canário protegido com valor explícito, gates de validação e rollback antes de qualquer promoção.\n2026-05-02: após TASK-BUD-588 (VER-BUD-937), lane protegida está com contrato de canário/rollback consolidado. Próximo gate: decisão humana explícita promote|defer para executar 1 canário bounded em GitHub Actions/offload.",
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica.\n2026-05-01: [parking:protected] GitHub Actions/offload permanece fora de execução automática; requer decisão humana explícita.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02: rollback plan explícito para canário protected de offload GitHub Actions — manter execução local como default; se canário degradar custo/qualidade/controle, reverter alterações via `git revert <commit>` e remover/pausar rota remota até nova decisão humana.\n2026-05-02: `autonomy_lane_protected_focus_packet` => decision=ready-for-human-decision, recommendedOption=defer (`protected-focus-defer-high-risk`, risk=high, value=medium). Próxima ação: decompor em canário protegido com valor explícito, gates de validação e rollback antes de qualquer promoção.\n2026-05-02: após TASK-BUD-588 (VER-BUD-937), lane protegida está com contrato de canário/rollback consolidado. Próximo gate: decisão humana explícita promote|defer para executar 1 canário bounded em GitHub Actions/offload.\n2026-05-02: execução protegida operacional de canário fatiada em TASK-BUD-589 para decisão humana promote|defer com blast radius 1-run.",
       "milestone": "protected-parked-legacy"
     },
     {
@@ -13844,6 +13844,27 @@
       "milestone": "high-value-capacity-lane-2026-05",
       "notes": "[rationale:risk-control] reduzir risco antes de promoção protegida aumenta escalabilidade sem romper governança local-first.\n2026-05-02: lane recomendada iniciada via canário protegido P1 com contrato de valor/rollback explícito e packet já em estado promote-ready-for-human-decision.",
       "verification": "VER-BUD-937"
+    },
+    {
+      "id": "TASK-BUD-589",
+      "description": "[P1] Executar 1 canário protegido de GitHub Actions/offload com rollback explícito e evidência board-first antes de qualquer expansão.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-588"
+      ],
+      "files": [
+        ".github/workflows",
+        "docs/guides/control-plane-evolution-playbook.md",
+        "docs/guides/budget-governance.md"
+      ],
+      "acceptance_criteria": [
+        "Canário limitado a 1 execução com orçamento explícito e gate de validação focal conhecido.",
+        "Evidência mínima registrada no board/handoff (job id, resultado, custo, decisão promote|defer).",
+        "Rollback aplicado ou pronto para aplicação imediata (`git revert <commit>` + retorno ao caminho local) sem auto-dispatch."
+      ],
+      "milestone": "high-value-capacity-lane-2026-05",
+      "notes": "[rationale:risk-control] expansão de capacidade protegida deve começar por canário único com rollback comprovado e decisão humana explícita.\n2026-05-02: packet protected-focus pronto (`ready-for-human-decision`, option=promote). Aguardando decisão humana explícita para start do canário."
     }
   ]
 }
