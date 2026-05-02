@@ -814,6 +814,29 @@ Quando o mesmo problema operacional se repetir, use `recurring_failure_hardening
 
 O objetivo é evitar soft guidance repetida: se o agente continua esbarrando no mesmo problema, a stack deve tornar o caminho seguro mais fácil ou o caminho antigo menos disponível.
 
+## Lane ativa de desacoplamento (maio/2026)
+
+Para manter self-improvement contínuo com pouca intervenção humana, usar a lane em:
+
+- `docs/research/control-plane-decoupling-lane-2026-05.md`
+
+Contrato dessa lane:
+- progressão em três fases (`stabilize -> delegate -> decouple`);
+- avanço só com KPI + gate explícito;
+- rollback imediato quando houver violação de governança/foco.
+
+Relatório operacional da lane (report-only):
+
+```bash
+npm run decoupling:maturity
+npm run decoupling:maturity:json
+```
+
+Batch local-safe de 3–5 fatias:
+- seguir preflight + stop contracts do runbook em `docs/research/control-plane-decoupling-lane-2026-05.md`;
+- parar imediatamente em `protected|risk|reload-required|validation-failed-or-unknown|no-successor`;
+- registrar checkpoint curto por fatia para continuidade sem ambiguidade.
+
 ## Critério de qualidade crescente
 
 A qualidade está aumentando quando:

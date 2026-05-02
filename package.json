@@ -108,7 +108,9 @@
     "benchmark:context": "node scripts/benchmarks/run-context-economy-ab.mjs",
     "project:verification:check": "node scripts/project/backfill-task-verification.mjs --strict",
     "project:verification:backfill": "node scripts/project/backfill-task-verification.mjs --apply",
-    "release:deprecate": "node scripts/deprecate-release.mjs"
+    "release:deprecate": "node scripts/deprecate-release.mjs",
+    "decoupling:maturity": "node scripts/decoupling-maturity-report.mjs --days 7",
+    "decoupling:maturity:json": "node scripts/decoupling-maturity-report.mjs --days 7 --json"
   },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",

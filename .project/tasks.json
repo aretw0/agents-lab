@@ -1250,7 +1250,7 @@
       "id": "colony-c-ret-1",
       "description": "[COLONY:ant_colony] Ajustar governança\\n[COLONY_SIGNAL:COMPLETE] [c-ret-1]\",\u001b[39m",
       "status": "blocked",
-      "notes": "[2026-04-30T10:16:35.682Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:35.857Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.955Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.132Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:57.956Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.209Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:58.411Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.678Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.506Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.708Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.874Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:16.085Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:37:45.985Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.204Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:37:46.320Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.523Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:38:34.407Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.603Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:38:34.744Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:35.000Z] promotion queued automatically: colony-c-ret-1-promotion"
+      "notes": "[2026-04-30T10:16:35.857Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-04-30T10:16:35.955Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-04-30T10:16:36.132Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:57.956Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.209Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:14:58.411Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:14:58.678Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.506Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:15.708Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T02:19:15.874Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T02:19:16.085Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:37:45.985Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.204Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:37:46.320Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:37:46.523Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:38:34.407Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:34.603Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-01T04:38:34.744Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: file inventory; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)\n[2026-05-01T04:38:35.000Z] promotion queued automatically: colony-c-ret-1-promotion\n[2026-05-02T22:51:34.122Z] delivery-policy blocked completion: delivery evidence missing: workspace report; delivery evidence missing: task summary; delivery evidence missing: validation command log (expected section 'Validation command log' with command lines in backticks)"
     },
     {
       "id": "colony-c-ret-1-promotion",
@@ -14773,6 +14773,68 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] consolida hardening anti-drift e evita reintrodução silenciosa de references mutáveis.\n2026-05-02: policy smoke novo garante pin SHA para actions externas em todos workflows.",
       "verification": "VER-BUD-981"
+    },
+    {
+      "id": "TASK-BUD-637",
+      "description": "[P1] Definir lane de desacoplamento progressivo do control-plane (local-safe) com KPIs, gates e ordem de execução para reduzir dependência de intervenção contínua.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/research/control-plane-decoupling-lane-2026-05.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documento define sequência operacional em 3 fases: estabilizar, delegar, desacoplar.",
+        "Inclui KPIs objetivos (mix de delegação, taxa de bloqueio, taxa de retomada correta, custo/token por slice).",
+        "Inclui gates de avanço e rollback explícitos entre fases, sem auto-dispatch protegido."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Origem: steer humano para manter self-improvement contínuo com equilíbrio (limpeza -> pesquisa -> escalabilidade) e menor dependência de intervenção manual.\n2026-05-02: lane local-safe sem forcing inaugurada para reduzir dependência de intervenção manual mantendo governança canônica.",
+      "verification": "VER-BUD-989"
+    },
+    {
+      "id": "TASK-BUD-638",
+      "description": "[P1] Implementar relatório local report-only de maturidade de autonomia/delegação para acompanhar evolução semanal da lane de desacoplamento.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-637"
+      ],
+      "files": [
+        "scripts/decoupling-maturity-report.mjs",
+        "package.json",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Script gera resumo local com métricas de delegação/autonomia usando evidência de sessão já disponível.",
+        "Saída classifica estágio (stabilize|delegate|decouple) com recommendationCode e próximos passos.",
+        "Execução é report-only (sem dispatch) e tem comando npm dedicado."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Foco em observabilidade acionável para decidir quando escalar delegação sem forçar arquitetura.\n2026-05-02: telemetria local da lane de desacoplamento publicada sem dispatch automático, permitindo evolução semanal orientada por evidência.",
+      "verification": "VER-BUD-990"
+    },
+    {
+      "id": "TASK-BUD-639",
+      "description": "[P1] Preparar runbook de lote local-safe 3–5 fatias com stop contracts, para manter progresso contínuo sem check-ins frequentes.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-638"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/research/control-plane-decoupling-lane-2026-05.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Runbook define preflight, ordem de fatias, critérios de parada e rollback por slice.",
+        "Contrato deixa explícito quando continuar automático vs quando pedir humano (hard-intent/protected).",
+        "Inclui template de checkpoint curto para transição limpa entre fatias."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Objetivo: throughput contínuo com governança, sem transformar autonomia em execução cega.\n2026-05-02: lote local-safe operacionalizado para continuidade com pouca interação, mantendo fail-closed em sinais de risco/escopo protegido.",
+      "verification": "VER-BUD-991"
     }
   ]
 }

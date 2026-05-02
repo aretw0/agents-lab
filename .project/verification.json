@@ -11121,6 +11121,33 @@
       "method": "inspection",
       "timestamp": "2026-05-02T22:29:50.353Z",
       "evidence": "Criado `docs/research/impeccable-style-influence-2026-04.md` com triagem bounded de influência e classificação explícita (adotar agora, cultivar como primitiva, manter como inspiração, rejeitar por desalinhamento), além de proposta concreta `clarity-pass-boundary-v1` com métricas de benefício/ruído. Posicionamento lado a lado com Squeez/MDT incorporado em `docs/guides/project-canonical-pipeline.md` e `packages/lab-skills/skills/control-plane-ops/SKILL.md`, preservando foco local-first/simple-first."
+    },
+    {
+      "id": "VER-BUD-989",
+      "target": "TASK-BUD-637",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:51:22.586Z",
+      "evidence": "Criada a lane `docs/research/control-plane-decoupling-lane-2026-05.md` com 3 fases (`stabilize`, `delegate`, `decouple`), KPIs objetivos (retomada, blocked-rate, mix de delegação, custo/token), gates de avanço e rollback explícito. Doctrine atualizada com seção `Lane ativa de desacoplamento (maio/2026)` apontando para o contrato da lane. Validação por marker-check: 8/8 no documento da lane e 3/3 na doctrine."
+    },
+    {
+      "id": "VER-BUD-990",
+      "target": "TASK-BUD-638",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T22:53:21.268Z",
+      "evidence": "Implementado `scripts/decoupling-maturity-report.mjs` (report-only) com classificação de estágio `bootstrap|stabilize|delegate|decouple`, `recommendationCode` e `nextAction`, consumindo evidência local de sessão via `scripts/session-triage.mjs --json` e estado canônico `.project/tasks.json`. Comandos adicionados em `package.json`: `decoupling:maturity` e `decoupling:maturity:json`. Doctrine atualizada com uso operacional dos comandos. Validação: `npm run decoupling:maturity:json` + marker-checks (script 8/8, doctrine 2/2, lane doc 3/3)."
+    },
+    {
+      "id": "VER-BUD-991",
+      "target": "TASK-BUD-639",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:55:44.948Z",
+      "evidence": "Runbook de lote local-safe 3–5 fatias adicionado em `docs/research/control-plane-decoupling-lane-2026-05.md` com preflight, ordem recomendada, stop contracts (`protected|risk|reload-required|validation-failed-or-unknown|no-eligible-local-safe-successor`), rollback por fatia e template de checkpoint curto. Doctrine atualizada para referenciar o runbook e reforçar parada imediata em condições hard-intent. Validação: marker-check lane 9/9 e doctrine 3/3."
     }
   ]
 }

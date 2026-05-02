@@ -1,41 +1,44 @@
 {
-  "timestamp": "2026-05-02T22:30:05.392Z",
-  "context": "Lote protegido autorizado foi executado e concluído: TASK-BUD-134 (offload governance/evidence), TASK-BUD-136 (release draft structure + read [snip] lícito para próximos passos protegidos. [truncated:+132 chars]",
+  "timestamp": "2026-05-02T22:57:41.073Z",
+  "context": "Lane de desacoplamento foi organizada e executada em sequência local-safe: TASK-BUD-637 (contrato/KPIs), TASK-BUD-638 (relatório de maturidad [snip] de lote 3–5 fatias com stop contracts). [truncated:+39 chars]",
   "next_actions": [
-    "Reavaliar prioridade pós-lote protegido antes de abrir novo escopo (ex.: TASK-BUD-468/480/521 [snip] rno à lane de throughput). [truncated:+7 chars]",
-    "Se seguir em protected lane, manter microfatia bounded + evidência canônica por task.",
-    "Se voltar para throughput, usar sequência limpeza -> pesquisa -> escalabilidade com checkpoint por slice.",
-    "Utilidade/ruído CI: artifact de change discovery está útil (scan de 5s); ruído baixo em push (comentário PR não roda). Validar comentário <!-- ci-change-discovery-report --> no próximo run de pull_request."
+    "Context-watch action: level=checkpoint 63% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Escolher próximo bloco de execução: throughput lane nova local-safe ou retorno para backlog pr [snip] 0/521) com foco explícito. [truncated:+15 chars]",
+    "Se objetivo for manter baixa interação, materializar mais 2-3 tasks locais com mesmo contrato [snip] k) antes de nova escalada. [truncated:+17 chars]",
+    "Manter watch de loose objects e revisão objetiva de CI change-discovery em runs de pull_request."
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-checkpoint-required",
+    "no-candidate-tasks-throughput-decoupling-lane"
+  ],
   "recent_validation": [
-    "safe_marker_check docs/guides/control-plane-evolution-playbook.md (workload/evidence/release markers ok)",
-    "safe_marker_check docs/guides/budget-governance.md (remoteRun + steer markers ok)",
-    "safe_marker_check docs/research/impeccable-style-influence-2026-04.md (10/10 ok)",
-    "CI run 25261831074 reviewed: artifact ci-change-discovery published (changed-files.txt + summary.md, impact_label=code), PR comment step skipped as expected for push event"
+    "safe_marker_check docs/research/control-plane-decoupling-lane-2026-05.md (runbook markers 9/9)",
+    "safe_marker_check docs/guides/control-plane-operating-doctrine.md (lane/runbook markers 3/3)",
+    "npm run decoupling:maturity:json"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-162",
+    "focus": "TASK-BUD-639",
     "canonical_links": [
-      "task:TASK-BUD-162",
-      "task:TASK-BUD-134",
-      "task:TASK-BUD-136"
+      "task:TASK-BUD-639",
+      "task:TASK-BUD-637",
+      "task:TASK-BUD-638",
+      "verification:VER-BUD-989"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T22:30:05.392Z",
+    "generatedAtIso": "2026-05-02T22:56:04.384Z",
     "level": "ok",
-    "percent": 35,
+    "percent": 31,
     "action": "continue",
     "recommendation": "ask-human",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T22:30:05.392Z",
+      "atIso": "2026-05-02T22:56:04.384Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 35,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -43,9 +46,87 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "ask-human"
+    },
+    {
+      "atIso": "2026-05-02T22:56:04.439Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:56:12.394Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:56:13.085Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:56:21.908Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:56:24.392Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-02T22:57:41.073Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 63,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 60,
+        "compactPct": 64
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-162"
+    "TASK-BUD-639"
   ]
 }

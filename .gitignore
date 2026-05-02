@@ -156,6 +156,7 @@ vite.config.ts.timestamp-*
 
 # Workspace-local isolated agent runtime (pi-isolated)
 .sandbox/
+.tmp/
 tmp/
 
 # Pi versioned configuration + single-board clock
