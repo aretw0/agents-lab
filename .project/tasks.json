@@ -12698,6 +12698,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] expor dirty state no status reduz necessidade de comandos extras e mantém fluxo read-only first-party.\n[provenance:human] source_task=TASK-BUD-535 reason=continuidade da ergonomia local-safe após introdução do /git-dirty e tool git_dirty_snapshot\n2026-05-03: status packet agora já inclui sinal git dirty normalizado, mantendo summary estável.",
       "verification": "VER-BUD-885"
+    },
+    {
+      "id": "TASK-BUD-537",
+      "description": "Fazer `git_dirty_snapshot` tool falhar fechado com envelope estruturado fora de repositório git (sem erro cru).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-536"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Tool `git_dirty_snapshot` retorna details estruturado com `available=false` e reason normalizada em cwd sem repo.",
+        "Não lança erro cru para camada chamadora; mantém `dispatchAllowed=false` e `authorization=none`.",
+        "Smoke cobre execução da tool em diretório sem `.git`."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] contratos read-only devem falhar fechado com payload útil, evitando ruído operacional e stacktrace desnecessário.\n[provenance:human] source_task=TASK-BUD-536 reason=continuidade do hardening de ergonomia/observabilidade first-party\n2026-05-03: git_dirty_snapshot não propaga erro cru fora de repo; retorna envelope unavailable normalizado.",
+      "verification": "VER-BUD-886"
     }
   ]
 }

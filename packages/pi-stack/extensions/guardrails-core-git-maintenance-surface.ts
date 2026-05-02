@@ -44,6 +44,26 @@ export interface GitDirtySnapshot {
   summary: string;
 }
 
+export interface GitDirtySnapshotUnavailable {
+  mode: "git-dirty-snapshot";
+  command: "git -c core.safecrlf=false status --porcelain";
+  available: false;
+  clean: null;
+  rows: [];
+  counts: {
+    tracked: 0;
+    untracked: 0;
+    renamed: 0;
+    deleted: 0;
+  };
+  dispatchAllowed: false;
+  authorization: "none";
+  summary: "git-dirty-snapshot: unavailable";
+  error: "not-a-git-repo" | "git-dirty-snapshot-error";
+}
+
+export type GitDirtySnapshotEnvelope = GitDirtySnapshot | GitDirtySnapshotUnavailable;
+
 function parseSizeMiB(value: string, unit: string): number {
   const amount = Number(value);
   if (!Number.isFinite(amount) || amount <= 0) return 0;
@@ -142,6 +162,31 @@ export function readGitDirtySnapshot(cwd: string, deps: GitMaintenanceReadDeps =
   return parseGitStatusPorcelainOutput(output);
 }
 
+export function normalizeGitDirtySnapshotError(error: unknown): GitDirtySnapshotUnavailable["error"] {
+  const raw = error instanceof Error ? error.message : String(error ?? "unknown-error");
+  return /not a git repository/i.test(raw) ? "not-a-git-repo" : "git-dirty-snapshot-error";
+}
+
+export function buildUnavailableGitDirtySnapshot(error: unknown): GitDirtySnapshotUnavailable {
+  return {
+    mode: "git-dirty-snapshot",
+    command: "git -c core.safecrlf=false status --porcelain",
+    available: false,
+    clean: null,
+    rows: [],
+    counts: {
+      tracked: 0,
+      untracked: 0,
+      renamed: 0,
+      deleted: 0,
+    },
+    dispatchAllowed: false,
+    authorization: "none",
+    summary: "git-dirty-snapshot: unavailable",
+    error: normalizeGitDirtySnapshotError(error),
+  };
+}
+
 function formatGitDirtyRow(row: GitDirtyRow): string {
   const status = `${row.x}${row.y}`;
   if (row.from) return `- [${status}] ${row.from} -> ${row.path}`;
@@ -183,7 +228,12 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
     description: "Read-only git dirty snapshot from porcelain output; no temp files and no cleanup commands.",
     parameters: Type.Object({}),
     execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-      const snapshot = readGitDirtySnapshot(ctx.cwd);
+      let snapshot: GitDirtySnapshotEnvelope;
+      try {
+        snapshot = readGitDirtySnapshot(ctx.cwd);
+      } catch (error) {
+        snapshot = buildUnavailableGitDirtySnapshot(error);
+      }
       return {
         content: [{ type: "text", text: JSON.stringify(snapshot, null, 2) }],
         details: snapshot,
@@ -203,9 +253,8 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
         ].filter((line): line is string => Boolean(line));
         ctx.ui.notify(lines.join("\n"), snapshot.clean ? "info" : "warning");
       } catch (error) {
-        const raw = error instanceof Error ? error.message : String(error ?? "unknown-error");
-        const reason = /not a git repository/i.test(raw) ? "not-a-git-repo" : "git-dirty-snapshot-error";
-        ctx.ui.notify(`git-dirty-snapshot: unavailable (${reason})`, "warning");
+        const unavailable = buildUnavailableGitDirtySnapshot(error);
+        ctx.ui.notify(`${unavailable.summary} (${unavailable.error})`, "warning");
       }
     },
   });

@@ -10194,6 +10194,15 @@
       "method": "status payload composition + smoke + marker-check",
       "timestamp": "2026-05-02T03:41:38.355Z",
       "evidence": "Added git dirty signal into context-watch status payload without changing main summary contract. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - introduced helper `readContextWatchGitDirtySignal(cwd)` for normalized git dirty probe (`not-a-git-repo|git-dirty-snapshot-error`). - `context_watch_status` now includes `details.gitDirty` from helper. - `context_watch_continuation_readiness` now reuses same helper (deduplicated logic). - status summary text remains unchanged. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - status tool test now asserts `details.gitDirty` fallback envelope in non-git temp cwd. - `docs/guides/openai-context-window-playbook.md` - documents `context_watch_status` exposure of `details.gitDirty`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker checks passed for helper/status anchors and docs anchors (`context_watch_status`, `details.gitDirty`)."
+    },
+    {
+      "id": "VER-BUD-886",
+      "target": "TASK-BUD-537",
+      "target_type": "task",
+      "status": "passed",
+      "method": "tool fail-closed envelope + smoke + marker-check",
+      "timestamp": "2026-05-02T03:44:29.867Z",
+      "evidence": "Hardened `git_dirty_snapshot` tool to fail-closed with structured unavailable envelope in non-git cwd. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added types `GitDirtySnapshotUnavailable` and `GitDirtySnapshotEnvelope`. - added helpers `normalizeGitDirtySnapshotError` and `buildUnavailableGitDirtySnapshot`. - `git_dirty_snapshot` tool now catches read errors and returns structured unavailable details (`available=false`, `clean=null`, `error=not-a-git-repo|git-dirty-snapshot-error`) instead of throwing raw error. - `/git-dirty` command fallback now reuses the same unavailable helper. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - added regression ensuring `git_dirty_snapshot` tool returns unavailable envelope in temp non-git cwd. - `docs/guides/control-plane-operating-doctrine.md` - guidance updated: outside git repo, tool fails closed with unavailable envelope. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` => 7 passed. - marker checks passed for unavailable envelope helpers/anchors and doctrine references."
     }
   ]
 }

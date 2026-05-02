@@ -102,6 +102,32 @@ describe("guardrails git maintenance surface", () => {
     expect(typeof dirtyCommand?.handler).toBe("function");
   });
 
+  it("git_dirty_snapshot tool returns unavailable envelope outside git repo", () => {
+    const tools: RegisteredTool[] = [];
+    const commands: RegisteredCommand[] = [];
+    registerGuardrailsGitMaintenanceSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      registerCommand(name: string, command: unknown) { commands.push({ name, ...(command as Omit<RegisteredCommand, "name">) }); },
+    } as never);
+
+    const dirtyTool = tools.find((item) => item.name === "git_dirty_snapshot");
+    const cwd = mkdtempSync(join(tmpdir(), "git-dirty-tool-"));
+    try {
+      const result = dirtyTool?.execute("tc-git-dirty", {}, undefined, undefined, { cwd });
+      expect(result?.details).toMatchObject({
+        mode: "git-dirty-snapshot",
+        available: false,
+        clean: null,
+        summary: "git-dirty-snapshot: unavailable",
+        error: "not-a-git-repo",
+        dispatchAllowed: false,
+        authorization: "none",
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("git-dirty command handler reports unavailable outside git repo", async () => {
     const tools: RegisteredTool[] = [];
     const commands: RegisteredCommand[] = [];
