@@ -10518,6 +10518,15 @@
       "method": "bounded research synthesis + docs validation",
       "timestamp": "2026-05-02T11:33:02.003Z",
       "evidence": "Completed bounded local research synthesis for AFK long-run materialization patterns. Artifact created: - `docs/research/afk-materialization-patterns-2026-05.md` Coverage: - Assimilated local influences from: - `docs/research/claude-code-brainstorm-ecosystem-assimilation-2026-05-01.md` - `docs/superpowers/plans/2026-04-16-quota-panel-tui.md` - `docs/research/control-plane-delegation-wave-2026-05.md` - Produced operational synthesis with: - material-first rule, - diverge->converge->slice->seed pipeline, - checklist-driven long-run structure, - report-first/fail-closed adaptation, - anti-patterns and AFK contract summary. - Terminology aligned to AFK (low-iteration, non-time-based). Validation: - marker check passed for research anchors (`lane_brainstorm_packet`, `lane_brainstorm_seed_preview`, `local-first`, `fail-closed`). - docs smoke passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed."
+    },
+    {
+      "id": "VER-BUD-922",
+      "target": "TASK-BUD-573",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runbook materialization docs + marker-check + smoke docs",
+      "timestamp": "2026-05-02T11:37:28.760Z",
+      "evidence": "Defined continuous backlog-fueling runbook for AFK lane using brainstorm -> seed preview -> local-safe batch. Docs updated: - `docs/primitives/lane-brainstorm-packet.md` - Added `Cadência de abastecimento AFK (material pipeline)`. - Defined operational stock target (3–7 slices). - Added explicit low-stock stop condition: `stop: backlog-material-insuficiente`. - `docs/guides/control-plane-operating-doctrine.md` - Extended `Material-first para long run AFK` with 3–7 stock target and low-stock stop condition. - `docs/primitives/nudge-free-local-continuity.md` - Added minimum AFK fueling rules with brainstorm/seed preview and low-stock stop condition. Validation: - marker checks passed for all three docs. - smoke docs checklist passed: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 2 passed. Outcome: - explicit cadence + stop rule now prevent AFK runs from drifting into execution without useful board material."
     }
   ]
 }

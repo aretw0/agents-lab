@@ -20,6 +20,11 @@ Portanto, “overnight”, “loop maior”, “deixa rodando” e “sem empurr
 
 Quando houver intenção de testar delegação, a transição é via `simple_delegate_rehearsal_packet` (report-only). Sem `decision=ready`, não há promoção para rehearsal delegado.
 
+Abastecimento mínimo para runs AFK:
+- manter 3–7 fatias local-safe prontas no board;
+- semeadura via `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` com decisão humana explícita;
+- quando ficar abaixo do mínimo, emitir `stop: backlog-material-insuficiente` e priorizar materialização antes de continuar.
+
 ## Objetivo
 
 O perfil local de continuidade deve adiantar trabalho que o control-plane já sabe fazer com segurança:

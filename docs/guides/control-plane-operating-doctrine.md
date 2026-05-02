@@ -429,9 +429,13 @@ Se o packet retornar `needs-evidence|blocked`, a regra é não promover. Continu
 Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK longo, garantir abastecimento explícito do board:
 - gerar ideias com `lane_brainstorm_packet` (report-only);
 - revisar semeadura com `lane_brainstorm_seed_preview` (decisão humana explícita);
-- materializar um lote local-safe curto e verificável no board.
+- materializar um lote local-safe curto e verificável no board;
+- manter estoque operacional de **3–7 fatias** local-safe prontas.
 
 Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded para criar próximas fatias em vez de forçar continuidade vazia.
+
+Stop condition para estoque baixo:
+- `stop: backlog-material-insuficiente`.
 
 ### Fila pós-calibração
 

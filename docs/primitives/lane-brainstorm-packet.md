@@ -4,6 +4,8 @@ Status: proposta local-first para `TASK-BUD-437`.
 
 Objetivo: transformar brainstorming em insumo operacional de lane, com priorização e fatias sugeridas, sem executar mudanças.
 
+No contexto AFK (produção de baixa iteração humana), este packet é a principal fonte de material para evitar long-run sem backlog útil.
+
 ## Invariantes
 
 - `dispatchAllowed=false`
@@ -110,6 +112,16 @@ Origem da proposta deve ser visível no preview (`source=brainstorm|human|tangen
   "mode": "report-only"
 }
 ```
+
+## Cadência de abastecimento AFK (material pipeline)
+
+Regra prática para continuidade:
+- manter estoque de **3 a 7** fatias local-safe prontas no board;
+- quando estoque cair abaixo de 3, priorizar `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` em vez de forçar execução longa;
+- se o preview bloquear semeadura, registrar stop condition e voltar para limpeza/triagem bounded.
+
+Stop condition explícita:
+- `stop: backlog-material-insuficiente`.
 
 ## Critérios de qualidade
 

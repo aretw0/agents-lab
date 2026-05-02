@@ -13491,7 +13491,7 @@
     {
       "id": "TASK-BUD-573",
       "description": "Definir runbook de alimentação contínua de backlog (brainstorm -> seed preview -> task batch) para manter lane AFK produtiva com baixa iteração humana.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-572"
@@ -13507,12 +13507,13 @@
         "mantém semeadura sob decisão humana explícita."
       ],
       "milestone": "afk-materialization-wave-2026-05",
-      "notes": "[rationale:risk-control] material pipeline explícito evita vazio operacional em runs AFK longas.\nPesquisa de materialização concluída; iniciado runbook de alimentação contínua (brainstorm -> seed preview -> batch local-safe)."
+      "notes": "[rationale:risk-control] material pipeline explícito evita vazio operacional em runs AFK longas.\nPesquisa de materialização concluída; iniciado runbook de alimentação contínua (brainstorm -> seed preview -> batch local-safe).\n2026-05-02: pipeline de alimentação contínua do board formalizado (3–7 fatias, stop por material insuficiente).",
+      "verification": "VER-BUD-922"
     },
     {
       "id": "TASK-BUD-574",
       "description": "Adicionar packet report-only de prontidão de material da lane AFK (quantidade de fatias locais úteis + cobertura de validação) para decidir continuar ou semear backlog.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-573"
@@ -13528,7 +13529,7 @@
         "smoke cobre caminho continue e seed-backlog."
       ],
       "milestone": "afk-materialization-wave-2026-05",
-      "notes": "[rationale:risk-control] medição explícita de material evita long-run sem matéria-prima."
+      "notes": "[rationale:risk-control] medição explícita de material evita long-run sem matéria-prima.\nRunbook de alimentação contínua concluído; iniciada implementação do packet report-only de material readiness da lane AFK."
     },
     {
       "id": "TASK-BUD-575",
