@@ -707,6 +707,11 @@ Escalonamento de governança:
 
 Objetivo: eliminar lembretes manuais no encerramento sem inflar ruído operacional.
 
+Template mínimo recomendado (copiar/colar):
+- **Status:** <feito + aberto em 1-2 linhas>
+- **Próximos passos:** <até 3 itens imediatos>
+- **Preview de decisão:** <opções disponíveis agora, neutras quando possível>
+
 Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
 
 ## Lane de delegação (wave 2026-05)

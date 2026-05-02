@@ -10887,6 +10887,15 @@
       "method": "doc checklist hardening for turn-close mini-packet contract",
       "timestamp": "2026-05-02T17:16:56.470Z",
       "evidence": "Added regression anchors in doc checklist smoke to protect turn-close contract. Updated: - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added `turnCloseContractAnchors` assertions for doctrine markers: - mini-packet obrigatório - status curto / próximos passos / preview de decisão - regra de neutralidade - escalonamento de governança soft->hard - falha de contrato Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - Missing/accidental removal of end-turn contract text now fails smoke promptly."
+    },
+    {
+      "id": "VER-BUD-963",
+      "target": "TASK-BUD-614",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doctrine mini-packet template addition + docs checklist smoke",
+      "timestamp": "2026-05-02T17:20:26.798Z",
+      "evidence": "Added explicit copy/paste mini-packet template to doctrine for consistent turn closing. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Under turn-close contract, added minimal template: - Status - Próximos passos - Preview de decisão - Keeps neutral preview guidance and concise structure. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
     }
   ]
 }

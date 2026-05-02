@@ -14342,6 +14342,23 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduz regressão silenciosa do contrato de encerramento e evita novos lembretes manuais.\n2026-05-02: smoke de docs agora protege explicitamente o contrato de encerramento (mini-packet + soft->hard).",
       "verification": "VER-BUD-962"
+    },
+    {
+      "id": "TASK-BUD-614",
+      "description": "[P2] Adicionar template explícito de mini-packet de encerramento no doctrine para reduzir variação de formato.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doctrine inclui exemplo curto com os 3 blocos obrigatórios.",
+        "Template reforça preview neutro e baixo ruído.",
+        "Checklist de docs continua verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] template explícito reduz esquecimento de formato no encerramento.\n2026-05-02: template explícito de mini-packet adicionado para reduzir variação e lembretes no fechamento.",
+      "verification": "VER-BUD-963"
     }
   ]
 }
