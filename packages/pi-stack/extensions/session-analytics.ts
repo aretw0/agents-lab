@@ -960,7 +960,7 @@ export interface SessionAnalyticsResult {
   scan: SessionAnalyticsScanSummary;
 }
 
-function collectSessionRecords(cwd: string, lookbackHours: number): {
+export function collectSessionRecords(cwd: string, lookbackHours: number): {
   files: string[];
   allRecords: unknown[];
   scan: SessionAnalyticsScanSummary;

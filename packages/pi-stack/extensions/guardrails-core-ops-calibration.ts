@@ -128,3 +128,143 @@ export function buildOpsCalibrationDecisionPacket(input: OpsCalibrationDecisionI
     ].filter(Boolean).join(" "),
   };
 }
+
+export type DelegateOrExecuteOption = "local-execute" | "simple-delegate" | "defer";
+
+export type DelegateOrExecuteRecommendationCode =
+  | "delegate-execute-simple-delegate"
+  | "delegate-execute-local-execute"
+  | "delegate-execute-defer-missing-signals"
+  | "delegate-execute-defer-blocked";
+
+export interface DelegateOrExecuteDecisionInput {
+  capabilityDecision?: "ready" | "needs-evidence" | "blocked";
+  capabilityRecommendationCode?: string;
+  capabilityBlockers?: string[];
+  capabilityEvidenceGaps?: string[];
+  mixDecision?: "ready" | "needs-evidence";
+  mixScore?: number;
+  mixRecommendationCode?: string;
+  mixSimpleDelegateEvents?: number;
+  mixSwarmEvents?: number;
+}
+
+export interface DelegateOrExecuteDecisionPacket {
+  mode: "delegate-or-execute-decision-packet";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  recommendedOption: DelegateOrExecuteOption;
+  recommendationCode: DelegateOrExecuteRecommendationCode;
+  recommendation: string;
+  blockers: string[];
+  evidenceGaps: string[];
+  signals: {
+    capabilityDecision: "ready" | "needs-evidence" | "blocked" | "missing";
+    capabilityRecommendationCode: string;
+    mixDecision: "ready" | "needs-evidence" | "missing";
+    mixScore: number;
+    mixRecommendationCode: string;
+    mixSimpleDelegateEvents: number;
+    mixSwarmEvents: number;
+  };
+  summary: string;
+}
+
+function normalizeDecision(value: unknown, allowed: string[]): string {
+  return typeof value === "string" && allowed.includes(value) ? value : "missing";
+}
+
+export function buildDelegateOrExecuteDecisionPacket(
+  input: DelegateOrExecuteDecisionInput,
+): DelegateOrExecuteDecisionPacket {
+  const capabilityDecision = normalizeDecision(input.capabilityDecision, ["ready", "needs-evidence", "blocked"]) as
+    | "ready"
+    | "needs-evidence"
+    | "blocked"
+    | "missing";
+  const mixDecision = normalizeDecision(input.mixDecision, ["ready", "needs-evidence"]) as
+    | "ready"
+    | "needs-evidence"
+    | "missing";
+
+  const mixScoreRaw = Number(input.mixScore);
+  const mixScore = Number.isFinite(mixScoreRaw) ? Math.max(0, Math.min(100, Math.round(mixScoreRaw))) : 0;
+  const mixSimpleDelegateEvents = Math.max(0, Math.floor(Number(input.mixSimpleDelegateEvents ?? 0)));
+  const mixSwarmEvents = Math.max(0, Math.floor(Number(input.mixSwarmEvents ?? 0)));
+
+  const blockers: string[] = [];
+  const evidenceGaps = [
+    ...(Array.isArray(input.capabilityEvidenceGaps) ? input.capabilityEvidenceGaps : []),
+  ];
+
+  let recommendedOption: DelegateOrExecuteOption = "defer";
+  let recommendationCode: DelegateOrExecuteRecommendationCode = "delegate-execute-defer-missing-signals";
+  let recommendation = "insufficient signals; defer delegation decision until capability and mix signals are available.";
+
+  if (capabilityDecision === "missing" || mixDecision === "missing") {
+    blockers.push("missing-capability-or-mix-signal");
+  } else if (capabilityDecision === "blocked") {
+    blockers.push("capability-blocked");
+    blockers.push(...(Array.isArray(input.capabilityBlockers) ? input.capabilityBlockers : []));
+    recommendationCode = "delegate-execute-defer-blocked";
+    recommendation = "capability is blocked; defer and close hard blockers before executing/delegating.";
+  } else if (capabilityDecision === "ready" && mixDecision === "ready" && mixScore >= 70 && mixSimpleDelegateEvents > 0 && mixSwarmEvents > 0) {
+    recommendedOption = "simple-delegate";
+    recommendationCode = "delegate-execute-simple-delegate";
+    recommendation = "signals are strong; prefer bounded simple-delegate as next step (still no auto-dispatch).";
+  } else {
+    recommendedOption = "local-execute";
+    recommendationCode = "delegate-execute-local-execute";
+    recommendation = "signals are partial; prefer local execution slice to gather evidence before stronger delegation.";
+    if (mixDecision !== "ready") evidenceGaps.push("mix-needs-evidence");
+    if (mixSimpleDelegateEvents <= 0) evidenceGaps.push("mix-simple-delegate-missing");
+    if (mixSwarmEvents <= 0) evidenceGaps.push("mix-swarm-missing");
+  }
+
+  if (blockers.length > 0) {
+    recommendedOption = "defer";
+    recommendationCode = blockers.includes("capability-blocked")
+      ? "delegate-execute-defer-blocked"
+      : "delegate-execute-defer-missing-signals";
+  }
+
+  const summary = [
+    "delegate-or-execute-packet:",
+    `option=${recommendedOption}`,
+    `code=${recommendationCode}`,
+    `capability=${capabilityDecision}`,
+    `mix=${mixDecision}`,
+    `mixScore=${mixScore}`,
+    blockers.length > 0 ? `blockers=${[...new Set(blockers)].join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "delegate-or-execute-decision-packet",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    recommendedOption,
+    recommendationCode,
+    recommendation,
+    blockers: [...new Set(blockers)],
+    evidenceGaps: [...new Set(evidenceGaps)],
+    signals: {
+      capabilityDecision,
+      capabilityRecommendationCode: typeof input.capabilityRecommendationCode === "string"
+        ? input.capabilityRecommendationCode
+        : "missing",
+      mixDecision,
+      mixScore,
+      mixRecommendationCode: typeof input.mixRecommendationCode === "string"
+        ? input.mixRecommendationCode
+        : "missing",
+      mixSimpleDelegateEvents,
+      mixSwarmEvents,
+    },
+    summary,
+  };
+}

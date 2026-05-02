@@ -2,8 +2,10 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
-import { buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
+import { buildDelegateOrExecuteDecisionPacket, buildOpsCalibrationDecisionPacket } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
+import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
+import { collectSessionRecords, parseDelegationMixScore } from "./session-analytics";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -48,6 +50,80 @@ function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
 }
 
 export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void {
+  pi.registerTool({
+    name: "delegate_or_execute_decision_packet",
+    label: "Delegate or Execute Decision Packet",
+    description: "Report-only packet recommending local-execute vs simple-delegate vs defer from delegation capability + mix signals. Never dispatches execution.",
+    parameters: Type.Object({
+      lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence for mix score. Default: 24." })),
+      preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
+      dirty_signal: Type.Optional(Type.String({ description: "clean | dirty | unknown" })),
+      monitor_classify_failures: Type.Optional(Type.Number({ description: "Classify-failure count. Default 0." })),
+      subagents_ready: Type.Optional(Type.Boolean({ description: "Subagent readiness signal. Default true." })),
+      capability_decision: Type.Optional(Type.String({ description: "Override capability decision: ready | needs-evidence | blocked" })),
+      capability_recommendation_code: Type.Optional(Type.String({ description: "Optional capability recommendation code override." })),
+      capability_blockers: Type.Optional(Type.Array(Type.String())),
+      capability_evidence_gaps: Type.Optional(Type.Array(Type.String())),
+      mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
+      mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
+      mix_recommendation_code: Type.Optional(Type.String({ description: "Optional mix recommendation code override." })),
+      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_swarm_events: Type.Optional(Type.Number({ description: "Override swarm event count." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const lookbackHoursRaw = Number(p.lookback_hours);
+      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+        ? lookbackHoursRaw
+        : 24;
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
+
+      const capability = evaluateDelegationLaneCapabilitySnapshot({
+        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : "fallback-canonical",
+        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : "unknown",
+        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
+        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
+      });
+
+      const collected = collectSessionRecords(cwd, lookbackHours);
+      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
+
+      const packet = buildDelegateOrExecuteDecisionPacket({
+        capabilityDecision: typeof p.capability_decision === "string"
+          ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
+          : capability.decision,
+        capabilityRecommendationCode: typeof p.capability_recommendation_code === "string"
+          ? p.capability_recommendation_code
+          : capability.recommendationCode,
+        capabilityBlockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : capability.blockers,
+        capabilityEvidenceGaps: Array.isArray(p.capability_evidence_gaps) ? p.capability_evidence_gaps as string[] : capability.evidenceGaps,
+        mixDecision: typeof p.mix_decision === "string"
+          ? p.mix_decision as "ready" | "needs-evidence"
+          : mix.decision,
+        mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
+        mixRecommendationCode: typeof p.mix_recommendation_code === "string"
+          ? p.mix_recommendation_code
+          : mix.recommendationCode,
+        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
+          ? p.mix_simple_delegate_events
+          : mix.totals.simpleDelegate,
+        mixSwarmEvents: typeof p.mix_swarm_events === "number"
+          ? p.mix_swarm_events
+          : mix.totals.swarm,
+      });
+
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: {
+          ...packet,
+          capability,
+          mix,
+          scan: collected.scan,
+        },
+      };
+    },
+  });
+
   pi.registerTool({
     name: "ops_calibration_decision_packet",
     label: "Ops Calibration Decision Packet",

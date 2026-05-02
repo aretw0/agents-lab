@@ -1,8 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildOpsCalibrationDecisionPacket } from "../../extensions/guardrails-core-ops-calibration";
+import { buildDelegateOrExecuteDecisionPacket, buildOpsCalibrationDecisionPacket } from "../../extensions/guardrails-core-ops-calibration";
 import { registerGuardrailsOpsCalibrationSurface } from "../../extensions/guardrails-core-ops-calibration-surface";
 
 describe("ops calibration decision packet", () => {
+  it("recommends simple-delegate when capability/mix signals are strong", () => {
+    const packet = buildDelegateOrExecuteDecisionPacket({
+      capabilityDecision: "ready",
+      capabilityRecommendationCode: "delegation-capability-ready",
+      capabilityBlockers: [],
+      capabilityEvidenceGaps: [],
+      mixDecision: "ready",
+      mixScore: 82,
+      mixRecommendationCode: "delegation-mix-ready-diverse",
+      mixSimpleDelegateEvents: 3,
+      mixSwarmEvents: 2,
+    });
+
+    expect(packet.recommendedOption).toBe("simple-delegate");
+    expect(packet.recommendationCode).toBe("delegate-execute-simple-delegate");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.authorization).toBe("none");
+    expect(packet.mutationAllowed).toBe(false);
+  });
+
+  it("fails closed to defer when capability/mix signals are missing", () => {
+    const packet = buildDelegateOrExecuteDecisionPacket({});
+    expect(packet.recommendedOption).toBe("defer");
+    expect(packet.recommendationCode).toBe("delegate-execute-defer-missing-signals");
+    expect(packet.blockers).toContain("missing-capability-or-mix-signal");
+  });
+
   it("returns ready-for-bounded-rehearsal when both calibrations are strong and reload completed", () => {
     const packet = buildOpsCalibrationDecisionPacket({
       background: {
@@ -310,6 +337,43 @@ describe("ops calibration decision packet", () => {
     expect(result.details.dispatchAllowed).toBe(false);
     expect(result.details.authorization).toBe("none");
     expect(String(result.details.summary)).toContain("ops-calibration-packet:");
+  });
+
+  it("registers delegate_or_execute_decision_packet as read-only packet tool", async () => {
+    const tools: any[] = [
+      { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+      { name: "delegation_mix_score", description: "read-only mix score" },
+    ];
+
+    const pi = {
+      registerTool: vi.fn((tool) => tools.push(tool)),
+      getAllTools: vi.fn(() => tools),
+    } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+    registerGuardrailsOpsCalibrationSurface(pi);
+    const tool = tools.find((row) => row?.name === "delegate_or_execute_decision_packet");
+
+    const result = await tool.execute(
+      "tc-delegate-or-execute",
+      {
+        capability_decision: "ready",
+        capability_recommendation_code: "delegation-capability-ready",
+        mix_decision: "ready",
+        mix_score: 81,
+        mix_simple_delegate_events: 2,
+        mix_swarm_events: 1,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details.mode).toBe("delegate-or-execute-decision-packet");
+    expect(result.details.dispatchAllowed).toBe(false);
+    expect(result.details.authorization).toBe("none");
+    expect(result.details.mutationAllowed).toBe(false);
+    expect(result.details.recommendedOption).toBe("simple-delegate");
+    expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
   });
 
   it("uses inferred background capability signals and honors explicit overrides", async () => {
