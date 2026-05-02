@@ -80,6 +80,7 @@ Todos obrigatórios:
 
 - `TASK-BUD-624`: radar estratégico e critérios de adoção (este documento).
 - `TASK-BUD-625`: isolamento/forking (BranchFS + `branch()` + sandbox) com experimento local-safe.
+  - estudo v1: `docs/research/linux-isolation-forking-primitives-study-2026.md`
 - `TASK-BUD-626`: protocolos (MCP/SLIM/identity) com posição de adoção por primitive.
 - `TASK-BUD-627`: memória/contexto (semantic paging) com continuidade auditável.
 

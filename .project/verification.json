@@ -11067,6 +11067,15 @@
       "method": "inspection",
       "timestamp": "2026-05-02T21:55:40.287Z",
       "evidence": "Criado `docs/research/linux-agent-primitives-radar-2026.md` com radar obrigatório (BranchFS, branch() syscall, Agent Sandbox gVisor/Kata, MCP, Simple Semantic Paging, SLIM, Agent Discovery & Identity), matriz de triagem (valor/risco/maturidade/dependência/governança), cadência mensal+quarterly e gatilhos de promoção local-safe. Atualizado `docs/guides/control-plane-evolution-playbook.md` com referência explícita ao radar e fluxo limpeza->pesquisa->escalabilidade. Validação: `safe_marker_check` ok (16/16 marcadores)."
+    },
+    {
+      "id": "VER-BUD-983",
+      "target": "TASK-BUD-625",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T21:59:17.465Z",
+      "evidence": "Criado `docs/research/linux-isolation-forking-primitives-study-2026.md` com: equivalentes práticos hoje vs futuros (simulado, kernel-native, Kubernetes-integrado), tabela de riscos/custos/impacto CI-local e experimento local-safe mínimo `isolation-forking-report-only-canary-v1` com gate e rollback explícitos. Atualizado radar `docs/research/linux-agent-primitives-radar-2026.md` com link para estudo v1. Validação: `safe_marker_check` ok (11/11) no estudo."
     }
   ]
 }

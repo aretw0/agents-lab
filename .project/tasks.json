@@ -14551,7 +14551,7 @@
     {
       "id": "TASK-BUD-625",
       "description": "[P1] Pesquisar viabilidade técnica de isolamento/forking (BranchFS + branch() + Agent Sandbox) para nossa trilha local-first com rollback explícito.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-624"
@@ -14566,7 +14566,8 @@
         "Propor 1 experimento local-safe mínimo (report-only) com gate e rollback claros."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] entender isolamento/forking cedo reduz risco de adoção tardia e desalinhada com nossos guardrails.\n2026-05-02: parked por foco — pesquisa de isolamento/forking fica para fase posterior; prioridade atual é produtividade operacional imediata."
+      "notes": "[rationale:risk-control] entender isolamento/forking cedo reduz risco de adoção tardia e desalinhada com nossos guardrails.\n2026-05-02: parked por foco — pesquisa de isolamento/forking fica para fase posterior; prioridade atual é produtividade operacional imediata.\n2026-05-02: pesquisa de isolamento/forking concluída em modo anti-forcing (report-only first), preservando governança local-first e trilha auditável.",
+      "verification": "VER-BUD-983"
     },
     {
       "id": "TASK-BUD-626",
