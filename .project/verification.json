@@ -11094,6 +11094,33 @@
       "method": "inspection",
       "timestamp": "2026-05-02T22:04:44.551Z",
       "evidence": "Criado `docs/research/semantic-paging-context-strategy-2026.md` relacionando semantic paging com contexto atual (`context-watch`, `handoff`, `checkpoint`), definindo métricas de sucesso (tokens/custo, taxa de retomada correta, regressões de foco) e propondo experimento local-safe bounded `semantic-paging-report-only-v1` com gate e rollback explícitos. Radar atualizado com link para estudo v1 em `docs/research/linux-agent-primitives-radar-2026.md`. Validação: `safe_marker_check` ok (10/10)."
+    },
+    {
+      "id": "VER-BUD-986",
+      "target": "TASK-BUD-134",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:29:23.589Z",
+      "evidence": "Playbook e governança de budget agora definem matriz local vs remoto para offload protegido, trilha mínima de evidência (`workflow`, `runId`, `result`, `artifacts`) e steer humano explícito (`cancel`, `retry`, `override`). Artefato operacional adicionado: `scripts/offload-evidence-template.mjs` + script `npm run offload:evidence:template` para registrar pacote canônico de evidência em modo report-only/anti-forcing."
+    },
+    {
+      "id": "VER-BUD-987",
+      "target": "TASK-BUD-136",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-02T22:29:36.501Z",
+      "evidence": "Estrutura de release formalizada: novo workflow manual `.github/workflows/release-draft.yml` (SHA-pinned actions + Node24 baseline) para preparar/upsert draft release; publish permanece gateado em `publish.yml`. Automação mínima de readiness adicionada em `scripts/release-readiness-report.mjs` + script `npm run release:readiness:v0.8.0` (gera checklist canônico em `.artifacts/release-readiness/`). Validação executada: `npx vitest run packages/pi-stack/test/smoke/release-draft-workflow.test.ts packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts` e `npm run test:smoke` verdes."
+    },
+    {
+      "id": "VER-BUD-988",
+      "target": "TASK-BUD-162",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:29:50.353Z",
+      "evidence": "Criado `docs/research/impeccable-style-influence-2026-04.md` com triagem bounded de influência e classificação explícita (adotar agora, cultivar como primitiva, manter como inspiração, rejeitar por desalinhamento), além de proposta concreta `clarity-pass-boundary-v1` com métricas de benefício/ruído. Posicionamento lado a lado com Squeez/MDT incorporado em `docs/guides/project-canonical-pipeline.md` e `packages/lab-skills/skills/control-plane-ops/SKILL.md`, preservando foco local-first/simple-first."
     }
   ]
 }

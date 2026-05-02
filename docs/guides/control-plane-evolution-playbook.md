@@ -38,6 +38,65 @@ Radar estratégico relacionado: `docs/research/linux-agent-primitives-radar-2026
   - telemetria mínima comum (status/readiness/budget/health);
   - runbook de contenção para isolar instância degradada sem parar o ecossistema.
 
+## Workload matrix — local vs remoto (GitHub Actions/offload protegido)
+
+Objetivo: usar runners remotos como acelerador, sem substituir governança local-first.
+
+### Fica local por default
+- triagem de task, decisão de prioridade e fechamento canônico no board;
+- microfatias de implementação com blast radius pequeno;
+- qualquer alteração de escopo protegido sem autorização explícita.
+
+### Elegível para runner remoto (canário bounded)
+- testes pesados ou longos que saturam host local;
+- validações paralelas de baixa ambiguidade (mesmo gate local, mesma métrica);
+- jobs de preparo/reporte com artefato auditável (sem auto-promote).
+
+### Não elegível para offload automático
+- publish/release final;
+- mutações de settings/governança sem decisão humana;
+- ações destrutivas/irreversíveis.
+
+## Trilha de evidência para offload (board/handoff)
+
+Cada run remota deve registrar, no mínimo:
+- `task`, `owner`, `decision(promote|defer)`;
+- `workflow`, `runId`, `result`, `artifacts`;
+- `expectedValue`, `focalValidationGate`, `rollbackPlan`.
+
+Template prático local:
+
+```bash
+npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
+```
+
+## Steer/intervenção humana (cancel/retry/override)
+
+- **cancel**: parar run quando custo/qualidade/governança saírem do envelope.
+- **retry**: repetir apenas com motivo curto + gate focal explícito.
+- **override**: exceção auditável e temporária, com rollback já definido.
+
+Sem esse trio de controles, a recomendação padrão é `defer`.
+
+## Release lane (v0.8.0) — draft primeiro, publish gateado
+
+Fluxo end-to-end recomendado:
+1. preparar versão (`changeset version`) e validar alinhamento de versões nos pacotes;
+2. gerar notas/checklist de readiness (local artifact);
+3. criar **draft release** manual para revisão humana;
+4. publicar somente após gates canônicos + decisão explícita.
+
+Automação mínima existente:
+- `publish.yml` mantém publish gateado por tag semver + smoke/test/verify/audits;
+- `release-draft.yml` prepara draft release manual com artefato de notas;
+- `npm run release:readiness:v0.8.0` gera checklist local canônico em `.artifacts/release-readiness/`.
+
+Checklist de readiness v0.8.0 (board/handoff):
+- versões de pacotes alinhadas;
+- CI/publish/release-draft prontos e auditáveis;
+- decisão humana explícita de `draft` -> `publish`;
+- rollback documentado para falha pós-corte.
+
 ## Inspirado por `tuts-agentic-ai-examples`
 
 Referência: <https://github.com/nilayparikh/tuts-agentic-ai-examples>

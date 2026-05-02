@@ -30,9 +30,21 @@ Quando a lane for protegida (ex.: GitHub Actions/offload), exigir no envelope:
 - `expectedValue` (ganho esperado mensurável: tempo/custo/throughput);
 - `rollbackPlan` (como voltar ao caminho local sem perda: `git revert <commit>` + desativar rota protegida);
 - `focalValidationGate` (mesmo gate antes/depois para comparação);
-- `decision` (`promote|defer`) sempre com evidência.
+- `decision` (`promote|defer`) sempre com evidência;
+- `remoteRun` com `workflow`, `runId`, `result` e `artifacts`.
 
 Sem esses campos, a decisão padrão é `defer`.
+
+Template operacional (report-only) para registrar pacote de evidência:
+
+```bash
+npm run offload:evidence:template -- --task TASK-BUD-134 --decision defer
+```
+
+Controles humanos mínimos na lane protegida (sempre explícitos):
+- `cancel`: interromper execução remota quando custo/qualidade/governança desviarem;
+- `retry`: repetir somente com motivo curto + gate focal definido;
+- `override`: exceção auditável, com validade curta e rollback já declarado.
 
 ---
 

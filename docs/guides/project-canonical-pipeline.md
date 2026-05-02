@@ -246,6 +246,15 @@ No hot path do executor, evitar chamar pacotes de status por hábito. `context_w
 
 A adoção eventual de `mdt` fica separada: é trilha de **doc-drift/single-source docs** (`check` primeiro, `update` depois), não pipeline de ideias/backlog.
 
+### Mapa de influências (Squeez + MDT + Impeccable)
+
+- **Squeez**: economia de contexto (output shaping/dedupe) sem perder contrato canônico.
+- **MDT**: consistência documental single-source com check-first.
+- **Impeccable-style**: clareza/qualidade de boundary (decisão + evidência + next step + rollback) com baixo ruído.
+
+Regra prática: influência externa só entra quando vira primitive/checklist pequena, mensurável e reversível.
+Referência de síntese bounded: `docs/research/impeccable-style-influence-2026-04.md`.
+
 ### Governança de updates de dependências pi/extensões
 
 Atualizações de `pi`, extensões e skills devem seguir trilha determinística antes de entrar no baseline local-first:

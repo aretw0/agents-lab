@@ -3319,7 +3319,7 @@
     {
       "id": "TASK-BUD-134",
       "description": "[P2] Introduzir execução remota por GitHub Actions como acelerador de capacidade (compute offload) para desenvolvimento/validação.",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-133"
       ],
@@ -3336,8 +3336,9 @@
         "Há trilha de evidência de execução remota no board/handoff (job id, resultado, artefatos) sem quebrar governança de budget/qualidade.",
         "Modelo operacional inclui steer/intervenção humana clara (cancelar/retry/override) mantendo objetivo set-and-forget seguro."
       ],
-      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica.\n2026-05-01: [parking:protected] GitHub Actions/offload permanece fora de execução automática; requer decisão humana explícita.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02: rollback plan explícito para canário protected de offload GitHub Actions — manter execução local como default; se canário degradar custo/qualidade/controle, reverter alterações via `git revert <commit>` e remover/pausar rota remota até nova decisão humana.\n2026-05-02: `autonomy_lane_protected_focus_packet` => decision=ready-for-human-decision, recommendedOption=defer (`protected-focus-defer-high-risk`, risk=high, value=medium). Próxima ação: decompor em canário protegido com valor explícito, gates de validação e rollback antes de qualquer promoção.\n2026-05-02: após TASK-BUD-588 (VER-BUD-937), lane protegida está com contrato de canário/rollback consolidado. Próximo gate: decisão humana explícita promote|defer para executar 1 canário bounded em GitHub Actions/offload.\n2026-05-02: execução protegida operacional de canário fatiada em TASK-BUD-589 para decisão humana promote|defer com blast radius 1-run.\n2026-05-02: canário protegido executado em GitHub Actions (Publish workflow_dispatch run=25254616551, conclusão=success, publish path skipped por ausência de tag semver). Evidência registrada em VER-BUD-939 via TASK-BUD-589. Próxima decisão: manter defer de expansão automática e escolher próximo canário de validação (ex.: CI workflow_dispatch dedicado) sob nova autorização humana.\n2026-05-02 (ajuste semântico): `promote` neste contexto foi promoção de canário protegido 1-run, NÃO promoção de release. Publicação real permaneceu inativa (sem tag semver, passos de publish skipados).\n2026-05-02: decisão humana explícita = `defer` (opção C). Manter escopo protegido em espera; sem nova promoção protegida automática até foco humano explícito.",
-      "milestone": "protected-parked-legacy"
+      "notes": "Backlog aberto por brainstorming humano (2026-04-24): usar minutos de processamento do GitHub Actions para reduzir limite de hardware local e ampliar throughput da fábrica.\n2026-05-01: [parking:protected] GitHub Actions/offload permanece fora de execução automática; requer decisão humana explícita.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02: rollback plan explícito para canário protected de offload GitHub Actions — manter execução local como default; se canário degradar custo/qualidade/controle, reverter alterações via `git revert <commit>` e remover/pausar rota remota até nova decisão humana.\n2026-05-02: `autonomy_lane_protected_focus_packet` => decision=ready-for-human-decision, recommendedOption=defer (`protected-focus-defer-high-risk`, risk=high, value=medium). Próxima ação: decompor em canário protegido com valor explícito, gates de validação e rollback antes de qualquer promoção.\n2026-05-02: após TASK-BUD-588 (VER-BUD-937), lane protegida está com contrato de canário/rollback consolidado. Próximo gate: decisão humana explícita promote|defer para executar 1 canário bounded em GitHub Actions/offload.\n2026-05-02: execução protegida operacional de canário fatiada em TASK-BUD-589 para decisão humana promote|defer com blast radius 1-run.\n2026-05-02: canário protegido executado em GitHub Actions (Publish workflow_dispatch run=25254616551, conclusão=success, publish path skipped por ausência de tag semver). Evidência registrada em VER-BUD-939 via TASK-BUD-589. Próxima decisão: manter defer de expansão automática e escolher próximo canário de validação (ex.: CI workflow_dispatch dedicado) sob nova autorização humana.\n2026-05-02 (ajuste semântico): `promote` neste contexto foi promoção de canário protegido 1-run, NÃO promoção de release. Publicação real permaneceu inativa (sem tag semver, passos de publish skipados).\n2026-05-02: decisão humana explícita = `defer` (opção C). Manter escopo protegido em espera; sem nova promoção protegida automática até foco humano explícito.\n2026-05-02: lote protegido autorizado; offload lane promovida para contrato operacional explícito (sem auto-dispatch), com evidência padronizada e intervenção humana clara.",
+      "milestone": "protected-parked-legacy",
+      "verification": "VER-BUD-986"
     },
     {
       "id": "TASK-BUD-135",
@@ -3362,7 +3363,7 @@
     {
       "id": "TASK-BUD-136",
       "description": "[P2] Preparar estrutura de releases no GitHub para formalizar publicação da v0.8.0 (pipeline, notas e governança de versão).",
-      "status": "planned",
+      "status": "completed",
       "depends_on": [
         "TASK-BUD-135"
       ],
@@ -3377,8 +3378,9 @@
         "Existe automação mínima validada para criar/preparar release (draft ou publish gateado), sem quebrar governança atual.",
         "Checklist de readiness para v0.8.0 fica explícito no board, com itens obrigatórios e evidência canônica."
       ],
-      "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta.\n2026-05-01: [parking:protected] release/publish permanece fora da seleção local-safe; avançar só com foco humano explícito.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02 (diretriz do operador): NÃO publicar v0.8.0 ainda. Manter release pipeline em espera até atingir barra de qualidade comparável às referências avançadas (ex.: Hermes) com evidência técnica suficiente.",
-      "milestone": "protected-parked-legacy"
+      "notes": "Backlog aberto por diretriz humana (2026-04-24): resolver antecipadamente a infraestrutura/processo de release no GitHub para chegar em 0.8.0 com formalização pronta.\n2026-05-01: [parking:protected] release/publish permanece fora da seleção local-safe; avançar só com foco humano explícito.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02 (diretriz do operador): NÃO publicar v0.8.0 ainda. Manter release pipeline em espera até atingir barra de qualidade comparável às referências avançadas (ex.: Hermes) com evidência técnica suficiente.\n2026-05-02: política de release mantém draft-first + publish gateado; v0.8.0 readiness checklist passou a ter automação local auditável antes de corte.",
+      "milestone": "protected-parked-legacy",
+      "verification": "VER-BUD-987"
     },
     {
       "id": "TASK-BUD-137",
@@ -3925,7 +3927,7 @@
     {
       "id": "TASK-BUD-162",
       "description": "[P2/médio prazo] Avaliar e assimilar influências boas de impeccable.style como primitivas de estilo/clareza/qualidade operacional, sem desviar do foco local-first atual.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-161"
@@ -3941,8 +3943,8 @@
         "Traduzir boas práticas em pelo menos uma proposta concreta de primitive/runbook/checklist com métrica de benefício e baixo ruído.",
         "Posicionar impeccable.style ao lado de Squeez/mdt no mapa de influências, preservando foco no trabalho principal e evitando pesquisa ampla oportunista durante checkpoint/compact."
       ],
-      "verification": "",
-      "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual.\n2026-05-01: [parking:protected] pesquisa externa ampla mantida fora de auto-seleção; usar trilha bounded local quando explicitamente focada.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.",
+      "verification": "VER-BUD-988",
+      "notes": "Backlog criado por steering humano (2026-04-29): queremos capturar boas influências de impeccable.style como fonte de primitivas futuras, sem interromper a lane principal atual. [rationale:risk-control] Registrar a influência evita perder aprendizado operacional, mas mantém a pesquisa como trabalho médio prazo bounded para não poluir o loop atual.\n2026-05-01: [parking:protected] pesquisa externa ampla mantida fora de auto-seleção; usar trilha bounded local quando explicitamente focada.\n[parking-template:v1] parked por escopo protegido; fora da seleção local-safe; requer foco humano explícito.\n2026-05-02: influência impecável assimilada sem desvio de lane principal; regra operacional reforçada = só promover práticas pequenas, mensuráveis e reversíveis.",
       "milestone": "protected-parked-legacy"
     },
     {

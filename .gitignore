@@ -152,6 +152,7 @@ vite.config.ts.timestamp-*
 .pi/deferred-intents.json
 .pi/long-run-loop-state.json
 .pi/guardrails-loop-evidence.json
+.artifacts/
 
 # Workspace-local isolated agent runtime (pi-isolated)
 .sandbox/

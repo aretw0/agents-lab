@@ -47,6 +47,14 @@ Use esta skill como superfície de descoberta. O guide canônico continua sendo 
 - Não iniciar servers/processos em background automaticamente até existir primitiva com owner/workspace/session, port lock, tail bounded e cleanup.
 - Leitura bounded de `SKILL.md` confiável fora do projeto pode ser permitida; execução/instalação/scan recursivo continuam protegidos.
 
+## Influências operacionais (sem desvio de foco)
+
+- **Squeez**: reduzir ruído/contexto mantendo contrato de decisão.
+- **MDT**: manter docs/superfícies coerentes com check-first.
+- **Impeccable-style**: reforçar clareza de fechamento em boundary (`decisão + evidência + próximo passo + rollback`) com baixo ruído.
+
+Aplicar influências apenas como micro-primitivas mensuráveis e reversíveis.
+
 ## Checklist de execução bounded
 
 ```text
