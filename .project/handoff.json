@@ -1,63 +1,52 @@
 {
-  "timestamp": "2026-05-01T23:46:41.502Z",
-  "context": "Completed bg-agents-calibration-wave-2026-05e (TASK-BUD-517..520): added runtime rehearsal gate tool for background, refined background capab [snip] wave-e with keep-report-only decision. [truncated:+157 chars]",
+  "timestamp": "2026-05-01T23:59:15.563Z",
+  "context": "Applied urgent Copilot/Codex context headroom hardening after 400 at ~68%. Added runtime simple spawn gate tool and tightened ops packet with [snip] sandcastle parked in protected backlog. [truncated:+64 chars]",
   "next_actions": [
-    "Context-watch action: level=checkpoint 65% (write-checkpoint) · Write handoff checkpoint before the next large slice.",
-    "/reload to activate latest wave-e runtime changes before next live readings",
-    "re-run readiness + rehearsal gate + agents calibration + ops packet to measure post-merge drift",
-    "seed next local-safe wave targeting concrete background evidence gaps (lifecycle classificatio [snip] overage, rehearsal slices) [truncated:+15 chars]"
+    "/reload para aplicar novas configurações/context thresholds em runtime.",
+    "Rodar leitura live: context_watch_status e confirmar checkpoint>=60/compact=65 em sessão ativa.",
+    "Manter pausa curta para idle e permitir auto-compact controlado."
   ],
   "blockers": [
-    "context-watch-checkpoint-required"
+    "Sem blocker técnico; parada preventiva solicitada para evitar novo 400."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi- [snip] rails-tool-hygiene.test.ts [truncated:+303 chars]",
-    "safe_marker_check docs/primitives/background-process-control.md",
-    "safe_marker_check docs/primitives/ops-calibration-decision-packet.md"
+    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] ooter-registration.test.ts [truncated:+146 chars]"
+  ],
+  "recent_commits": [
+    "eb5ce93"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-520",
+    "focus": "TASK-BUD-524",
     "canonical_links": [
-      "task:TASK-BUD-520",
-      "task:TASK-BUD-517"
+      "task:TASK-BUD-524",
+      "task:TASK-BUD-521",
+      "commit:eb5ce93"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T23:14:14.220Z",
+    "generatedAtIso": "2026-05-01T23:59:15.563Z",
     "level": "checkpoint",
+    "percent": 66,
     "action": "checkpoint-refresh",
-    "recommendation": "add-or-select-task",
+    "recommendation": "pause",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T23:14:14.220Z",
+      "atIso": "2026-05-01T23:59:15.563Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 0,
+      "percent": 66,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "add-or-select-task"
-    },
-    {
-      "atIso": "2026-05-01T23:46:41.502Z",
-      "reason": "message_end",
-      "level": "checkpoint",
-      "percent": 65,
-      "thresholds": {
-        "warnPct": 48,
-        "checkpointPct": 65,
-        "compactPct": 69
-      },
-      "action": "write-checkpoint",
-      "recommendation": "Write handoff checkpoint before the next large slice."
+      "recommendation": "pause"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-520"
+    "TASK-BUD-524"
   ]
 }
