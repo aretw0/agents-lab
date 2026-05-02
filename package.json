@@ -61,6 +61,7 @@
     "context:preload:consume": "node scripts/context-preload-consume.mjs --profile control-plane-core --json",
     "context:preload:consume:worker": "node scripts/context-preload-consume.mjs --profile agent-worker-lean --json",
     "context:preload:consume:scout": "node scripts/context-preload-consume.mjs --profile swarm-scout-min --json",
+    "git:dirty:snapshot": "node scripts/git-dirty-snapshot.mjs --json",
     "pi-stack:user-surface": "node scripts/pi-stack-user-surface-audit.mjs",
     "pi:artifact:audit": "node scripts/pi-runtime-artifact-audit.mjs",
     "pi:artifact:audit:strict": "node scripts/pi-runtime-artifact-audit.mjs --strict",

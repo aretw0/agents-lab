@@ -10131,6 +10131,15 @@
       "method": "installer curation + smoke + marker-check",
       "timestamp": "2026-05-02T01:56:03.260Z",
       "evidence": "Shifted curation from third-party bg-process UI toward first-party background primitives (distributable + local canonical). Changes: - `.pi/settings.json`: added `!extensions/bg-process.ts` under `npm:@ifi/oh-pi-extensions` filters. - `packages/pi-stack/install.mjs`: added distributable filter patch `!extensions/bg-process.ts` (with rationale comment) so hatch/profile installs inherit behavior. - `packages/pi-stack/test/smoke/installer-filters.test.ts`: extended filter regression to assert `!extensions/bg-process.ts` is present. - `packages/pi-stack/README.md`: updated curation description to indicate `safe-guard`, `bg-process`, `watchdog` are filtered in default curation. - `docs/guides/recommended-pi-stack.md`: third-party table updated accordingly. - `docs/guides/control-plane-operating-doctrine.md`: documented explicit decision to use first-party `background_process_*` report-only primitives and filter third-party bg-process UI. Validation: - `npx vitest run packages/pi-stack/test/smoke/installer-filters.test.ts` => 1 file passed, 5 tests passed. - marker checks passed for install/README/doctrine/recommended-stack anchors (bg-process filter + first-party primitive references)."
+    },
+    {
+      "id": "VER-BUD-879",
+      "target": "TASK-BUD-530",
+      "target_type": "task",
+      "status": "passed",
+      "method": "new script + node test + docs marker-check",
+      "timestamp": "2026-05-02T02:03:54.643Z",
+      "evidence": "Added local-safe dirty-state snapshot flow without temp files. Changes: - New script `scripts/git-dirty-snapshot.mjs` - reads dirty state via `git -c core.safecrlf=false status --porcelain` - no temp file writes/redirections - outputs deterministic JSON (`clean`, `rows`, `counts`, `summary`) - New tests `scripts/test/git-dirty-snapshot.test.mjs` - parses modified/untracked/rename porcelain rows - validates clean/dirty summary contract - `package.json` - added script `git:dirty:snapshot` - `docs/guides/control-plane-operating-doctrine.md` - guidance updated: use `npm run git:dirty:snapshot` instead of `git diff --name-only > arquivo` + `rm`. Validation: - `node --test scripts/test/git-dirty-snapshot.test.mjs` => 3 passed. - `npm run git:dirty:snapshot --silent` => emits structured dirty snapshot with no temp-file workflow. - `safe_marker_check` on doctrine/script anchors => all matched."
     }
   ]
 }

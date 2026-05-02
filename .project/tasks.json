@@ -12546,6 +12546,26 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] reduzir dependência de extensão third-party para lifecycle UI e evitar ruído operacional `[undefined]`/confirm prompts.\n[provenance:human] source_task=TASK-BUD-528 reason=pedido explícito do operador para usar primitiva first-party em vez de bg-process extension\n2026-05-02: curadoria distribuível agora filtra bg-process third-party; fluxo recomendado migra para primitives background_process_* first-party.",
       "verification": "VER-BUD-878"
+    },
+    {
+      "id": "TASK-BUD-530",
+      "description": "Adicionar snapshot git local-safe sem arquivos temporários para evitar ruído de EOL e confirmações de limpeza (`rm`) no loop.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "scripts/git-dirty-snapshot.mjs",
+        "scripts/test/git-dirty-snapshot.test.mjs",
+        "package.json",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Script gera snapshot de dirty state via `git status --porcelain` sem redirecionar para arquivo temporário.",
+        "Teste cobre parsing de linhas porcelain (modified/untracked/rename) e contrato clean/dirty.",
+        "Doutrina registra uso do snapshot em vez de `git diff --name-only > arquivo` + `rm`."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] remover padrão de arquivos temporários reduz prompts de remoção e ruído operacional de line ending no loop.\n[provenance:human] source_task=TASK-BUD-529 reason=continuidade do hardening pedido pelo operador para reduzir atrito operacional\n2026-05-02: snapshot git sem arquivo temporário incorporado para reduzir atrito de confirmação e ruído operacional.",
+      "verification": "VER-BUD-879"
     }
   ]
 }
