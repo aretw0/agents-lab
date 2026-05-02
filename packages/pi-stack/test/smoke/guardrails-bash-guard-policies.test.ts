@@ -40,6 +40,9 @@ describe("guardrails-core bash guard policies", () => {
     expect(detectHighRiskWideDuScan("du -sh")).toBe(true);
     expect(detectHighRiskWideDuScan("du -sh .")).toBe(true);
     expect(detectHighRiskWideDuScan("du -sh / 2>/dev/null")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh node_modules")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh ./node_modules")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh node_modules/@types")).toBe(false);
     expect(detectHighRiskWideDuScan("du -sh .git .tmp")).toBe(false);
     expect(detectHighRiskWideDuScan("du -h --max-depth=1 .")).toBe(false);
 
@@ -65,6 +68,8 @@ describe("guardrails-core bash guard policies", () => {
     expect(evaluateBashGuardPolicies('grep -RIn "quota" .pi')?.id).toBe("pi-root-recursive-scan");
     expect(evaluateBashGuardPolicies('grep -RIn "sourceContent" node_modules')?.id).toBe("source-map-blast-radius-scan");
     expect(evaluateBashGuardPolicies("du -sh .")?.id).toBe("wide-du-scan");
+    expect(evaluateBashGuardPolicies("du -sh node_modules")?.id).toBe("wide-du-scan");
+    expect(evaluateBashGuardPolicies("du -sh node_modules/@types")).toBeUndefined();
     expect(evaluateBashGuardPolicies("du -sh .git .tmp")).toBeUndefined();
     expect(evaluateBashGuardPolicies("find . -type f")?.id).toBe("wide-find-scan");
     expect(evaluateBashGuardPolicies("find .project -type f")).toBeUndefined();

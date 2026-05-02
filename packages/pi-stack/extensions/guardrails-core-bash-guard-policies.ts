@@ -26,6 +26,7 @@ const SOURCE_MAP_RECURSIVE_SCAN_TOOL_PATTERN =
 const SOURCE_MAP_EXCLUDE_PATTERN = /--exclude(?:=|\s+)["']?\*\.map["']?|(?:--glob|-g)\s+["']?!\*\.map["']?/i;
 const DU_DEPTH_LIMIT_PATTERN = /--max-depth(?:=|\s+)\d+\b|(?:^|\s)-d\s+\d+\b/i;
 const DU_BROAD_TARGET_PATTERN = /^(?:\.|\.\/|\.\.|\.\.\/|\/|~|~\/|\*|\/\*|[a-z]:\/?|\/mnt\/[a-z]\/?)$/i;
+const DU_HEAVY_VENDOR_TARGET_PATTERN = /(?:^|\/)node_modules(?:\/(?:\*)?)?$/i;
 const FIND_DEPTH_LIMIT_PATTERN = /(?:^|\s)-maxdepth\s+\d+\b/i;
 const FIND_BROAD_TARGET_PATTERN = DU_BROAD_TARGET_PATTERN;
 const LS_RECURSIVE_PATTERN = /\bls\b[\s\S]*\b--recursive\b|\bls\b[\s\S]*\s-[a-z]*r[a-z]*\b/i;
@@ -157,6 +158,7 @@ export function detectHighRiskWideDuScan(command: string): boolean {
     const targets = extractDuTargets(segment);
     if (targets.length <= 0) return true;
     if (targets.some((target) => DU_BROAD_TARGET_PATTERN.test(target))) return true;
+    if (targets.some((target) => DU_HEAVY_VENDOR_TARGET_PATTERN.test(target))) return true;
   }
   return false;
 }
@@ -164,7 +166,8 @@ export function detectHighRiskWideDuScan(command: string): boolean {
 export function highRiskWideDuScanReason(): string {
   return [
     "Blocked by guardrails-core (wide_du_scan): broad du scan can run for a long time without adding proportional signal.",
-    "Scope paths explicitly (e.g. .git/.tmp), add depth limits (--max-depth or -d), and run bash with an explicit timeout.",
+    "`node_modules` root scans are also blocked by default; scope to explicit subpaths (e.g. node_modules/<pkg>) and add depth limits (--max-depth or -d).",
+    "Prefer small known directories (e.g. .git/.tmp/.project) and run bash with an explicit timeout.",
   ].join(" ");
 }
 

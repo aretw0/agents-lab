@@ -962,6 +962,18 @@ describe("context-watchdog", () => {
 		expect(checkpointDefault.shouldSignal).toBe(false);
 		expect(checkpointDefault.shouldNotify).toBe(false);
 
+		const finalTurnCloseWindow = resolveContextWatchSteeringDispatch({
+			userNotifyEnabled: true,
+			assessmentLevel: "checkpoint",
+			lastAnnouncedLevel: "checkpoint",
+			elapsedMs: 1_000,
+			cooldownMs: 600_000,
+			forceWarnCadenceAnnouncement: false,
+			forceFinalTurnAnnouncement: true,
+		});
+		expect(finalTurnCloseWindow.shouldSignal).toBe(true);
+		expect(finalTurnCloseWindow.shouldNotify).toBe(true);
+
 		const compactNotify = resolveContextWatchSteeringDispatch({
 			userNotifyEnabled: true,
 			assessmentLevel: "compact",

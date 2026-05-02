@@ -287,6 +287,7 @@ export function resolveContextWatchSteeringDispatch(input: {
 	elapsedMs: number;
 	cooldownMs: number;
 	forceWarnCadenceAnnouncement: boolean;
+	forceFinalTurnAnnouncement?: boolean;
 }): ContextWatchSteeringDispatch {
 	const announce = shouldAnnounceContextWatch(
 		input.lastAnnouncedLevel,
@@ -297,11 +298,14 @@ export function resolveContextWatchSteeringDispatch(input: {
 	const modelSteeringFromLevel = input.modelSteeringFromLevel ?? "compact";
 	const userNotifyFromLevel = input.userNotifyFromLevel ?? "compact";
 	const userNotifyEnabled = input.userNotifyEnabled ?? input.notifyEnabled ?? true;
+	const forceFinalTurnAnnouncement = input.forceFinalTurnAnnouncement === true;
 	const levelEligibleForSteering = levelMeetsSteeringThreshold(
 		input.assessmentLevel,
 		modelSteeringFromLevel,
 	);
-	const shouldSignal = (announce || input.forceWarnCadenceAnnouncement) && levelEligibleForSteering;
+	const shouldSignal =
+		(announce || input.forceWarnCadenceAnnouncement || forceFinalTurnAnnouncement)
+		&& (levelEligibleForSteering || forceFinalTurnAnnouncement);
 	if (!shouldSignal) {
 		return {
 			shouldSignal: false,
@@ -311,10 +315,8 @@ export function resolveContextWatchSteeringDispatch(input: {
 		};
 	}
 
-	const shouldNotify = userNotifyEnabled && levelMeetsSteeringThreshold(
-		input.assessmentLevel,
-		userNotifyFromLevel,
-	);
+	const shouldNotify = userNotifyEnabled
+		&& (levelMeetsSteeringThreshold(input.assessmentLevel, userNotifyFromLevel) || forceFinalTurnAnnouncement);
 	return {
 		shouldSignal: true,
 		shouldPersist: true,
@@ -1950,6 +1952,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			assessment.level === "warn" &&
 			assessment.action === "write-checkpoint" &&
 			consecutiveWarnCount === 2;
+		const compactHeadroomPct = Math.max(0, assessment.thresholds.compactPct - assessment.percent);
+		const finalTurnCloseWindow = assessment.level === "compact"
+			|| (assessment.level === "checkpoint" && compactHeadroomPct <= 2);
+		const forceFinalTurnAnnouncement = reason === "message_end" && finalTurnCloseWindow;
 		const steeringDispatch = resolveContextWatchSteeringDispatch({
 			userNotifyEnabled: config.notify,
 			assessmentLevel: assessment.level,
@@ -1959,6 +1965,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			elapsedMs: elapsed,
 			cooldownMs: config.cooldownMs,
 			forceWarnCadenceAnnouncement,
+			forceFinalTurnAnnouncement,
 		});
 		lastAnnouncedLevel = assessment.level;
 		if (!steeringDispatch.shouldSignal) return;
@@ -1970,6 +1977,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			: handoffPath;
 		const persistedRelPath = persistedPath ? path.relative(ctx.cwd, persistedPath).replace(/\\/g, "/") : undefined;
 		const inlineCompactCheckpointStop = deterministicStop.required && deterministicStop.reason === "compact-checkpoint-required";
+		const finalTurnCloseLine = forceFinalTurnAnnouncement
+			? "context-watch-final-turn: use this turn only to close the current slice (checkpoint curto) and then stay idle for auto-compact."
+			: undefined;
 		const lines = [
 			formatContextWatchCommandStatusSummary({
 				level: assessment.level,
@@ -1992,6 +2002,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorActionKind: operatorAction.kind,
 				handoffPath: persistedRelPath,
 			}),
+			finalTurnCloseLine,
 		].filter(Boolean);
 		const signalAtIso = new Date(now).toISOString();
 		lastSteeringSignal = {
@@ -2022,6 +2033,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorActionBlocking: operatorAction.blocking,
 				operatorActionSummary: operatorAction.summary,
 				operatorActionCommandHint: operatorAction.commandHint,
+				finalTurnCloseWindow,
+				compactHeadroomPct,
+				forceFinalTurnAnnouncement,
 			},
 		);
 		if (steeringDispatch.shouldNotify) {
