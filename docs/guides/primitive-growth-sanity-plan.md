@@ -125,6 +125,17 @@ Exemplo de uso (snapshot completo):
 Regra prática: sem as 4 dimensões completas, não existe decisão de aceleração.
 No fallback por handoff, snapshot parcial/ambíguo deve cair em `needs-evidence` (fail-closed).
 
+## Rotina de retomada local-safe (quando não houver próxima fatia elegível)
+
+Quando a seleção local retornar `no-eligible-tasks`, usar rotina curta:
+
+1. registrar checkpoint/handoff com motivo (`no-eligible` + blockers);
+2. escolher **1** nova fatia local-safe explícita (escopo pequeno e reversível);
+3. atualizar foco para a nova fatia no checkpoint;
+4. reavaliar readiness/boundary e só então continuar.
+
+Meta da rotina: evitar drift e evitar ficar preso em foco antigo sem próxima ação concreta.
+
 ## Critério para v0.8.0
 
 A release só acontece quando a barra de maturidade estiver comprovada por evidência, não por urgência de calendário:

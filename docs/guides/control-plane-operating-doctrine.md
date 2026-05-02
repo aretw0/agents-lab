@@ -690,6 +690,18 @@ Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm r
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
+### Encerramento de turno: padrão sem steering obrigatório
+
+No fechamento de turno, o padrão deve ser **conciso e factual**. Não injete steering (`promote|defer`, direção de lane ou opções) por default quando não houver pedido explícito do operador.
+
+Escalonamento recomendado:
+1. **soft**: sugerir próximos passos somente quando houver solicitação humana direta ou bloqueio real no foco atual;
+2. **hard**: usar steering explícito e estruturado apenas quando o mesmo impasse se repetir e o modo soft não resolver.
+
+Objetivo: preservar governança sem transformar cada encerramento em negociação de direção.
+
+Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
+
 ## Lane de delegação (wave 2026-05)
 
 A evolução “delegar mais e executar menos” segue wave local-safe explícita, sem pular para automação protegida. O charter ativo da wave fica em `docs/research/control-plane-delegation-wave-2026-05.md` e define objetivos, métricas, limites hard e sequência de primitivas (`TASK-BUD-544..549`).
