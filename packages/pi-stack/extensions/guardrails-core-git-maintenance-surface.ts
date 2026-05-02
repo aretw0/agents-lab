@@ -142,6 +142,12 @@ export function readGitDirtySnapshot(cwd: string, deps: GitMaintenanceReadDeps =
   return parseGitStatusPorcelainOutput(output);
 }
 
+function formatGitDirtyRow(row: GitDirtyRow): string {
+  const status = `${row.x}${row.y}`;
+  if (row.from) return `- [${status}] ${row.from} -> ${row.path}`;
+  return `- [${status}] ${row.path}`;
+}
+
 export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "git_maintenance_status",
@@ -182,6 +188,25 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
         content: [{ type: "text", text: JSON.stringify(snapshot, null, 2) }],
         details: snapshot,
       };
+    },
+  });
+
+  pi.registerCommand("git-dirty", {
+    description: "Show a read-only git dirty snapshot without temp files.",
+    async handler(_args, ctx) {
+      try {
+        const snapshot = readGitDirtySnapshot(ctx.cwd);
+        const lines = [
+          snapshot.summary,
+          ...snapshot.rows.slice(0, 8).map(formatGitDirtyRow),
+          snapshot.rows.length > 8 ? `- ... +${snapshot.rows.length - 8} more` : undefined,
+        ].filter((line): line is string => Boolean(line));
+        ctx.ui.notify(lines.join("\n"), snapshot.clean ? "info" : "warning");
+      } catch (error) {
+        const raw = error instanceof Error ? error.message : String(error ?? "unknown-error");
+        const reason = /not a git repository/i.test(raw) ? "not-a-git-repo" : "git-dirty-snapshot-error";
+        ctx.ui.notify(`git-dirty-snapshot: unavailable (${reason})`, "warning");
+      }
     },
   });
 }

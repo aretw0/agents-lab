@@ -12654,6 +12654,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] reduzir ruído operacional melhora legibilidade e evita confusão de erro em loops saudáveis.\n[provenance:human] source_task=TASK-BUD-533 reason=observado ruído `fatal: not a git repository` durante smoke após composição do dirty snapshot\n2026-05-02: fallback git errors agora são normalizados (sem texto fatal cru) e execs capturam stderr de forma bounded.",
       "verification": "VER-BUD-883"
+    },
+    {
+      "id": "TASK-BUD-535",
+      "description": "Adicionar comando `/git-dirty` first-party (read-only) para snapshot rápido sem bash/temp file.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-534"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Comando `/git-dirty` registra e mostra resumo bounded (top rows) usando `readGitDirtySnapshot`.",
+        "Fallback em cwd sem repo mostra mensagem curta normalizada sem erro cru.",
+        "Smoke cobre registro do comando e comportamento handler básico."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] evitar bash ad-hoc para dirty-check reduz atrito operacional e mantém fluxo first-party auditável.\n[provenance:human] source_task=TASK-BUD-534 reason=continuar migração para superfícies próprias com menor fricção no loop\n2026-05-02: comando /git-dirty disponível para inspeção rápida sem bash temp-file workflow.",
+      "verification": "VER-BUD-884"
     }
   ]
 }

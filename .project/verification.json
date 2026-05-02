@@ -10176,6 +10176,15 @@
       "method": "stderr hardening + fallback normalization + smoke",
       "timestamp": "2026-05-02T03:05:16.427Z",
       "evidence": "Hardened git dirty snapshot path to reduce noisy fatal output in non-repo cwd. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - git exec defaults now explicitly use `stdio: \"pipe\"` for both maintenance and dirty snapshot reads. - `scripts/git-dirty-snapshot.mjs` - spawn now explicitly uses `stdio: \"pipe\"`. - `packages/pi-stack/extensions/context-watchdog.ts` - continuation readiness fallback now normalizes git error to bounded code (`not-a-git-repo` or `git-dirty-snapshot-error`) instead of raw message. - summary remains `git-dirty-snapshot: unavailable` with `dirty=unknown` semantics. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - asserts normalized fallback error `not-a-git-repo` in readiness details. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` => 5 passed. - `node --test scripts/test/git-dirty-snapshot.test.mjs` => 3 passed. - marker checks passed for normalized fallback and `stdio: \"pipe\"` anchors."
+    },
+    {
+      "id": "VER-BUD-884",
+      "target": "TASK-BUD-535",
+      "target_type": "task",
+      "status": "passed",
+      "method": "command wiring + smoke + marker-check",
+      "timestamp": "2026-05-02T03:09:56.816Z",
+      "evidence": "Added first-party `/git-dirty` command backed by temp-free dirty snapshot primitive. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added helper formatter for dirty rows. - registered command `git-dirty` that uses `readGitDirtySnapshot` and prints bounded summary + top rows. - fallback in non-repo cwd emits normalized message `git-dirty-snapshot: unavailable (not-a-git-repo)`. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - verifies command registration alongside tools. - verifies fallback behavior in temp non-git directory. - `docs/guides/control-plane-operating-doctrine.md` - guidance updated to include command `/git-dirty` as preferred non-temp-file path. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts` => 2 files passed, 9 tests passed. - marker checks passed for command registration/fallback and doctrine anchors (`/git-dirty`, `git_dirty_snapshot`)."
     }
   ]
 }

@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   parseGitCountObjectsOutput,
@@ -10,6 +13,11 @@ import {
 type RegisteredTool = {
   name: string;
   execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown> };
+};
+
+type RegisteredCommand = {
+  name: string;
+  handler: (args: string, ctx: { cwd: string; ui: { notify: (msg: string, level?: string) => void } }) => Promise<void> | void;
 };
 
 const COUNT_OBJECTS_SAMPLE = `count: 6089
@@ -80,13 +88,46 @@ describe("guardrails git maintenance surface", () => {
 
   it("registers read-only git maintenance status and dirty snapshot tools", () => {
     const tools: RegisteredTool[] = [];
+    const commands: RegisteredCommand[] = [];
     registerGuardrailsGitMaintenanceSurface({
       registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      registerCommand(name: string, command: unknown) { commands.push({ name, ...(command as Omit<RegisteredCommand, "name">) }); },
     } as never);
 
     const maintenanceTool = tools.find((item) => item.name === "git_maintenance_status");
     const dirtyTool = tools.find((item) => item.name === "git_dirty_snapshot");
+    const dirtyCommand = commands.find((item) => item.name === "git-dirty");
     expect(maintenanceTool?.name).toBe("git_maintenance_status");
     expect(dirtyTool?.name).toBe("git_dirty_snapshot");
+    expect(typeof dirtyCommand?.handler).toBe("function");
+  });
+
+  it("git-dirty command handler reports unavailable outside git repo", async () => {
+    const tools: RegisteredTool[] = [];
+    const commands: RegisteredCommand[] = [];
+    registerGuardrailsGitMaintenanceSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+      registerCommand(name: string, command: unknown) { commands.push({ name, ...(command as Omit<RegisteredCommand, "name">) }); },
+    } as never);
+
+    const dirtyCommand = commands.find((item) => item.name === "git-dirty");
+    const notifications: Array<{ msg: string; level?: string }> = [];
+    const cwd = mkdtempSync(join(tmpdir(), "git-dirty-command-"));
+    try {
+      await dirtyCommand?.handler("", {
+        cwd,
+        ui: {
+          notify(msg: string, level?: string) {
+            notifications.push({ msg, level });
+          },
+        },
+      });
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+
+    expect(notifications.length).toBeGreaterThan(0);
+    expect(notifications[0]?.msg).toContain("git-dirty-snapshot: unavailable");
+    expect(notifications[0]?.msg).toContain("not-a-git-repo");
   });
 });
