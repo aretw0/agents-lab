@@ -1,37 +1,38 @@
 {
-  "timestamp": "2026-05-02T15:57:44.962Z",
-  "context": "afk-handoff: decision=continue stock=6/7 blockers=none next=wire fallback de growth_maturity do handoff no turn_boundary_decision_packet quando parâmetros não vierem no tool call.",
+  "timestamp": "2026-05-02T16:25:06.477Z",
+  "context": "afk-handoff: decision=ask-human stock=6/7 blockers=protected-focus-required next=escolher explicitamente promote / defer para próximo canário [snip] local-safe em report-only até decisão. [truncated:+25 chars]",
   "current_tasks": [
-    "TASK-BUD-600"
+    "TASK-BUD-134"
   ],
   "next_actions": [
-    "Ler context_watch.growth_maturity do handoff no tool turn_boundary.",
-    "Propagar snapshot fallback para details/summary sem quebrar fail-closed.",
-    "Adicionar smoke cobrindo fallback do handoff."
+    "Se promover canal protegido: abrir packet protegido dedicado e executar apenas 1 canário bounded.",
+    "Se defer: continuar semeando fatias local-safe de maturidade/governança."
   ],
-  "blockers": [],
+  "blockers": [
+    "protected-focus-required"
+  ],
   "recent_validation": [
     "VER-BUD-948",
-    "context-watchdog.test.ts verde (63/63)",
-    "context-watchdog-continuation.test.ts verde (9/9)"
+    "VER-BUD-949",
+    "VER-BUD-950"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-600",
+    "focus": "TASK-BUD-134",
     "canonical_links": [
-      "task:TASK-BUD-600",
+      "task:TASK-BUD-134",
       "verification:VER-BUD-948"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T15:57:44.962Z",
+    "generatedAtIso": "2026-05-02T16:25:06.477Z",
     "level": "checkpoint",
     "percent": 64,
     "action": "checkpoint-refresh",
-    "recommendation": "continue-local-safe"
+    "recommendation": "ask-human-decision"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T15:57:44.962Z",
+      "atIso": "2026-05-02T16:25:06.477Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 64,
@@ -41,7 +42,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-local-safe"
+      "recommendation": "ask-human-decision"
     }
   ]
 }
