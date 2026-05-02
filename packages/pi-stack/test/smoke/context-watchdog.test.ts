@@ -1822,6 +1822,13 @@ describe("context-watchdog", () => {
 				next_actions: ["continue essential lane with board-task-selection after TASK-BUD-320"],
 				context: "TASK-BUD-320 completed; choose one primary task.",
 				blockers: [],
+				context_watch: {
+					growth_maturity: {
+						decision: "hold",
+						score: 78,
+						recommendationCode: "growth-maturity-hold-maintain",
+					},
+				},
 			}));
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
 				{ id: "TASK-BUD-320", status: "completed" },
@@ -1843,6 +1850,8 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
 			expect(result.content?.[0]?.text).toContain("dirty=unknown");
 			expect(result.content?.[0]?.text).toContain("material=");
+			expect(result.content?.[0]?.text).toContain("growthDecision=hold");
+			expect(result.content?.[0]?.text).toContain("growthScore=78");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-readiness",
@@ -1860,6 +1869,11 @@ describe("context-watchdog", () => {
 					stock: expect.any(Object),
 				},
 				localContinuitySummary: expect.stringContaining("local-continuity-audit:"),
+				growthMaturitySnapshot: {
+					decision: "hold",
+					score: 78,
+					recommendationCode: "growth-maturity-hold-maintain",
+				},
 				preload: {
 					mode: "context-preload-consume",
 					decision: "fallback-canonical",

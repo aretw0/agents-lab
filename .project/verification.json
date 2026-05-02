@@ -10779,6 +10779,15 @@
       "method": "boundary growth source audit marker + smoke",
       "timestamp": "2026-05-02T16:13:42.294Z",
       "evidence": "Added explicit growth snapshot origin marker (`growthSource`) to turn-boundary packet for auditability. Code: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - Added `TurnBoundaryGrowthSource = \"explicit\" | \"handoff\"`. - `buildTurnBoundaryDecisionPacket(...)` now sets: - `growthSource=\"explicit\"` when score input is passed in tool params. - `growthSource=\"handoff\"` when packet uses fallback snapshot from handoff. - Summary now includes compact marker `growthSource=<...>` when growth snapshot is present. Tests: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Asserts `growthSource=handoff` for snapshot fallback. - Asserts `growthSource=explicit` for explicit score input. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Tool-level asserts for both explicit and handoff fallback flows. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` - 73 passed / 0 failed. Result: - Turn-boundary output now clearly communicates where growth guidance came from, reducing boundary ambiguity and improving continuity audit trails."
+    },
+    {
+      "id": "VER-BUD-951",
+      "target": "TASK-BUD-602",
+      "target_type": "task",
+      "status": "passed",
+      "method": "continuation-readiness growth snapshot exposure + smoke",
+      "timestamp": "2026-05-02T16:18:22.101Z",
+      "evidence": "Exposed handoff growth maturity snapshot in continuation readiness to keep boundary/readiness continuity aligned. Code: - `packages/pi-stack/extensions/context-watchdog.ts` - Added `resolveHandoffGrowthMaturitySnapshot(...)` helper (shared extractor). - `context_watch_continuation_readiness` now: - reads snapshot from handoff (`context_watch.growth_maturity` or latest event fallback); - appends compact markers to summary when available: - `growthDecision=<...>` - `growthScore=<...>`; - exposes `growthMaturitySnapshot` in details. - `turn_boundary_decision_packet` switched to shared helper for fallback extraction (dedup cleanup). Tests: - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Continuation readiness scenario now seeds handoff growth snapshot and asserts: - summary includes growth markers; - details include `growthMaturitySnapshot`. - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Regression suite remains green with growth-source behavior. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - 73 passed / 0 failed."
     }
   ]
 }

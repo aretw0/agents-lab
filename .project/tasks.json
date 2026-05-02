@@ -14106,6 +14106,27 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] origem explícita do score evita interpretação ambígua no boundary e reforça auditabilidade.\n2026-05-02: `growthSource` adicionado ao boundary packet/summary (`explicit|handoff`) para auditoria de origem do score de maturidade.",
       "verification": "VER-BUD-950"
+    },
+    {
+      "id": "TASK-BUD-602",
+      "description": "[P1] Expor snapshot de growth maturity também em context_watch_continuation_readiness para manter continuidade de decisão entre boundary e readiness.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-600"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Readiness usa snapshot do handoff e expõe em details quando disponível.",
+        "Summary da tool inclui marcador compacto growthDecision/growthScore quando houver snapshot.",
+        "Smoke cobre caminho com growth snapshot no handoff."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] compartilhar snapshot no readiness reduz drift entre decisões de boundary e continuidade.\n2026-05-02: readiness packet agora também carrega growth snapshot do handoff (summary + details), reduzindo drift entre boundary e continuidade.",
+      "verification": "VER-BUD-951"
     }
   ]
 }
