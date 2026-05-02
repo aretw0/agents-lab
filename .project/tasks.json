@@ -13776,6 +13776,30 @@
       "milestone": "turn-boundary-hardening-wave-2026-05",
       "notes": "[rationale:risk-control] provocações consistentes reduzem drift de direção e evitam pausas ambíguas no retorno humano.\n2026-05-02: especialização turn-boundary virou contrato técnico com directionPrompt canônico e cobertura crítica.",
       "verification": "VER-BUD-934"
+    },
+    {
+      "id": "TASK-BUD-586",
+      "description": "Turn-boundary preview specialization: adicionar directionPreview com opções comparáveis (similar-lane vs next-high-value) e recomendação explícita.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-585"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "packet inclui `directionPreview.recommendedOptionId` e `options[]` com suitability/blockers/nextStep.",
+        "summary inclui marcador compacto de recomendação (`directionRecommended=<...>`).",
+        "smokes críticos de continuation/context-watchdog permanecem verdes."
+      ],
+      "milestone": "turn-boundary-hardening-wave-2026-05",
+      "notes": "[rationale:risk-control] reduz ambiguidade de direção no boundary com preview auditável de opções.\n2026-05-02: turn-boundary agora entrega preview concreto de opções (similar-lane vs next-high-value) além da provocação.",
+      "verification": "VER-BUD-935"
     }
   ]
 }

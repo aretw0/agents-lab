@@ -1913,7 +1913,9 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.details?.humanActionRequired).toBe(false);
 			expect(checkpointResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 			expect(checkpointResult.details?.directionPromptCanonical).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+			expect(checkpointResult.details?.directionPreview?.recommendedOptionId).toBe("similar-lane");
 			expect(checkpointResult.content?.[0]?.text).toContain("directionPrompt=similar-lane-or-next-value");
+			expect(checkpointResult.content?.[0]?.text).toContain("directionRecommended=similar-lane");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}
@@ -1948,6 +1950,7 @@ describe("context-watchdog", () => {
 			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-human-decision-required");
 			expect(askResult.details?.humanActionRequired).toBe(true);
 			expect(askResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+			expect(askResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
 		} finally {
 			rmSync(cwdAskHuman, { recursive: true, force: true });
 		}

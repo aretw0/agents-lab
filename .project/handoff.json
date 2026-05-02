@@ -1,38 +1,39 @@
 {
-  "timestamp": "2026-05-02T13:35:26.398Z",
-  "context": "afk-handoff: decision=blocked stock=3/7 blockers=local-stop-protected-focus-required next=solicitar foco humano explícito (protegido) ou abri [snip] nova task local-safe para continuidade. [truncated:+2 chars]",
+  "timestamp": "2026-05-02T13:42:31.827Z",
+  "context": "afk-handoff: decision=blocked stock=3/7 blockers=local-stop-protected-focus-required next=escolher foco explícito (similar-lane local-safe ou [snip] eview do turn_boundary_decision_packet. [truncated:+41 chars]",
   "next_actions": [
-    "Escolher entre lane parecida para consolidação local-safe ou próxima lane de maior valor de lo [snip] razo (com foco explícito). [truncated:+5 chars]",
-    "Se protegido, iniciar packet report-only e manter no-dispatch."
+    "Solicitar decisão humana de direção com base no preview já entregue.",
+    "Se similar-lane: semear fatia local-safe nova.",
+    "Se next-high-value: abrir packet report-only da lane alvo."
   ],
   "blockers": [
     "local-stop-protected-focus-required"
   ],
   "recent_validation": [
-    "VER-BUD-934",
-    "turn_boundary_decision_packet com directionPrompt canônico ativo"
+    "VER-BUD-935",
+    "context-watchdog smokes verdes (70/70)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-585",
+    "focus": "TASK-BUD-586",
     "canonical_links": [
-      "task:TASK-BUD-585",
-      "verification:VER-BUD-934"
+      "task:TASK-BUD-586",
+      "verification:VER-BUD-935"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T13:35:26.398Z",
+    "generatedAtIso": "2026-05-02T13:42:31.827Z",
     "level": "ok",
-    "percent": 52,
+    "percent": 53,
     "action": "continue",
     "recommendation": "ask-human-focus",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T13:35:26.398Z",
+      "atIso": "2026-05-02T13:42:31.827Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 52,
+      "percent": 53,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -43,6 +44,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-585"
+    "TASK-BUD-586"
   ]
 }

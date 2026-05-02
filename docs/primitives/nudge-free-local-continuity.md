@@ -14,7 +14,7 @@ A decisão canônica é **não criar uma família nova de loops**. O control-pla
 | `autonomy_lane_next_task` | Selecionar conservadoramente uma task local-safe do board. | Read-only; `no-eligible-tasks` é stop condition. |
 | `autonomy_lane_auto_advance_snapshot` | Auditar decisão hard-intent de auto-advance após `focus-complete` (`eligible` vs `blocked`). | Report-only/read-only; fail-closed para protected/risk/reload/validation unknown. |
 | `autonomy_lane_material_readiness_packet` | Medir prontidão de material da lane AFK (`continue|seed-backlog|blocked`) com foco e cobertura de validação. | Report-only/read-only; sem dispatch e com stop explícito para estoque baixo. |
-| `turn_boundary_decision_packet` | Explicar parada/continuação no boundary do turno (`continue|checkpoint|pause|ask-human`) com `humanActionRequired` e `nextAutoStep`. | Report-only/read-only; sem dispatch e com motivo canônico auditável. |
+| `turn_boundary_decision_packet` | Explicar parada/continuação no boundary do turno (`continue|checkpoint|pause|ask-human`) com `humanActionRequired`, `nextAutoStep` e preview direcional (`similar-lane` vs `next-high-value`). | Report-only/read-only; sem dispatch e com motivo canônico auditável. |
 | Board bounded (`board_query`, `board_task_create`, `board_task_complete`, `board_decision_packet`) | Manter task/evidência/decisão recuperável. | Mutação limitada ao board quando chamada explicitamente. |
 | One-slice contract | Executar uma única fatia local e parar. | Contrato futuro/guardado; não é loop permanente. |
 
@@ -158,6 +158,10 @@ nudge-free-local-continuity: slices=<n> commits=<n> protectedTouched=no remote=n
 
 No fechamento de boundary, incluir a provocação direcional canônica do packet `turn_boundary_decision_packet`:
 - "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?"
+
+Além da pergunta, o packet deve trazer preview explícito das opções:
+- `directionPreview.recommendedOptionId`: recomendação atual (`similar-lane` ou `next-high-value`);
+- `directionPreview.options[]`: suitability (`recommended|viable|blocked`), blockers e próximo passo por opção.
 
 Template curto de checkpoint pós-rehearsal real (1 task):
 

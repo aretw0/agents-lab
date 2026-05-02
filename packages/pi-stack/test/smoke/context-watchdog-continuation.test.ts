@@ -65,7 +65,10 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.humanActionRequired).toBe(false);
     expect(packet.nextAutoStep).toContain("checkpoint");
     expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+    expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
+    expect(packet.directionPreview.options.map((option) => option.id)).toEqual(["similar-lane", "next-high-value"]);
     expect(packet.summary).toContain("directionPrompt=similar-lane-or-next-value");
+    expect(packet.summary).toContain("directionRecommended=similar-lane");
   });
 
   it("builds pause packet without human action when local-safe next step is missing", () => {
@@ -80,6 +83,7 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.reasonCode).toBe("turn-boundary-pause-local-stop");
     expect(packet.humanActionRequired).toBe(false);
     expect(packet.nextAutoStep).toContain("local stop condition");
+    expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
   });
 
   it("builds ask-human packet when protected/validation blockers are present", () => {
@@ -95,5 +99,8 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.humanActionRequired).toBe(true);
     expect(packet.nextAutoStep).toContain("human decision");
     expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+    expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
+    const nextLane = packet.directionPreview.options.find((option) => option.id === "next-high-value");
+    expect(nextLane?.nextStep).toContain("report-only packet");
   });
 });

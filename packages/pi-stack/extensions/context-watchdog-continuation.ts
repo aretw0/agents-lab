@@ -25,6 +25,22 @@ export type TurnBoundaryReasonCode =
 
 export const TURN_BOUNDARY_DIRECTION_PROMPT = "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?";
 
+export type TurnBoundaryDirectionOptionId = "similar-lane" | "next-high-value";
+
+export interface TurnBoundaryDirectionOptionPreview {
+  id: TurnBoundaryDirectionOptionId;
+  label: string;
+  suitability: "recommended" | "viable" | "blocked";
+  recommendationCode: string;
+  nextStep: string;
+  blockers: string[];
+}
+
+export interface TurnBoundaryDirectionPreview {
+  recommendedOptionId: TurnBoundaryDirectionOptionId;
+  options: TurnBoundaryDirectionOptionPreview[];
+}
+
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
@@ -32,6 +48,7 @@ export interface TurnBoundaryDecisionPacket {
   humanActionRequired: boolean;
   nextAutoStep: string;
   directionPrompt: string;
+  directionPreview: TurnBoundaryDirectionPreview;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -67,6 +84,79 @@ export function resolveContextWatchContinuationRecommendation(input: {
   return {
     recommendationCode: LOCAL_AUDIT_BLOCKED_CODE,
     nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
+  };
+}
+
+function buildTurnBoundaryDirectionPreview(input: {
+  decision: TurnBoundaryDecision;
+  humanActionRequired: boolean;
+  nextAutoStep: string;
+  localAuditReasons: string[];
+}): TurnBoundaryDirectionPreview {
+  const criticalReasons = input.localAuditReasons.filter((reason) =>
+    reason === "protected-scopes:invalid"
+    || reason === "validation:invalid"
+    || reason === "stop-conditions:invalid",
+  );
+
+  const similarBlockers: string[] = [];
+  if (input.localAuditReasons.includes("no-local-safe-next-step")) similarBlockers.push("no-local-safe-next-step");
+  if (criticalReasons.length > 0) similarBlockers.push(...criticalReasons);
+
+  const similarSuitability: "recommended" | "viable" | "blocked" =
+    similarBlockers.length > 0
+      ? "blocked"
+      : (input.decision === "continue" || input.decision === "checkpoint")
+        ? "recommended"
+        : "viable";
+
+  const nextLaneBlockers: string[] = [];
+  nextLaneBlockers.push("requires-explicit-human-focus");
+  if (criticalReasons.length > 0) nextLaneBlockers.push(...criticalReasons);
+
+  const nextLaneSuitability: "recommended" | "viable" | "blocked" =
+    (input.decision === "pause" || input.decision === "ask-human" || input.humanActionRequired)
+      ? "recommended"
+      : criticalReasons.length > 0
+        ? "blocked"
+        : "viable";
+
+  const options: TurnBoundaryDirectionOptionPreview[] = [
+    {
+      id: "similar-lane",
+      label: "continue in a similar lane to consolidate",
+      suitability: similarSuitability,
+      recommendationCode:
+        similarSuitability === "recommended"
+          ? "direction-similar-lane-consolidate"
+          : similarSuitability === "viable"
+            ? "direction-similar-lane-viable"
+            : "direction-similar-lane-blocked",
+      nextStep: input.nextAutoStep,
+      blockers: similarBlockers,
+    },
+    {
+      id: "next-high-value",
+      label: "switch to the next lane with higher long-term value",
+      suitability: nextLaneSuitability,
+      recommendationCode:
+        nextLaneSuitability === "recommended"
+          ? "direction-next-high-value-shift"
+          : nextLaneSuitability === "viable"
+            ? "direction-next-high-value-viable"
+            : "direction-next-high-value-blocked",
+      nextStep: "choose one explicit next-lane focus task and run report-only packet before execution.",
+      blockers: nextLaneBlockers,
+    },
+  ];
+
+  const recommendedOption = options.find((option) => option.suitability === "recommended")
+    ?? options.find((option) => option.suitability === "viable")
+    ?? options[0];
+
+  return {
+    recommendedOptionId: recommendedOption.id,
+    options,
   };
 }
 
@@ -110,6 +200,13 @@ export function buildTurnBoundaryDecisionPacket(input: {
     nextAutoStep = "request explicit human decision for blocked local audit reasons.";
   }
 
+  const directionPreview = buildTurnBoundaryDirectionPreview({
+    decision,
+    humanActionRequired,
+    nextAutoStep,
+    localAuditReasons: reasons,
+  });
+
   return {
     mode: "report-only",
     decision,
@@ -118,6 +215,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     nextAutoStep,
     recommendationCode: recommendation.recommendationCode,
     directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
+    directionPreview,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
@@ -128,6 +226,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
       `recommendationCode=${recommendation.recommendationCode}`,
       "directionPrompt=similar-lane-or-next-value",
+      `directionRecommended=${directionPreview.recommendedOptionId}`,
       "authorization=none",
     ].join(" "),
   };
