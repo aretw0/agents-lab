@@ -15,6 +15,27 @@ export type ContextWatchContinuationRecommendationCode =
   | typeof REFRESH_FOCUS_CHECKPOINT_CODE
   | typeof LOCAL_AUDIT_BLOCKED_CODE;
 
+export type TurnBoundaryDecision = "continue" | "checkpoint" | "pause" | "ask-human";
+
+export type TurnBoundaryReasonCode =
+  | "turn-boundary-continue-local"
+  | "turn-boundary-checkpoint-refresh-focus"
+  | "turn-boundary-pause-local-stop"
+  | "turn-boundary-ask-human-decision-required";
+
+export interface TurnBoundaryDecisionPacket {
+  mode: "report-only";
+  decision: TurnBoundaryDecision;
+  reasonCode: TurnBoundaryReasonCode;
+  humanActionRequired: boolean;
+  nextAutoStep: string;
+  recommendationCode: ContextWatchContinuationRecommendationCode;
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  authorization: "none";
+  summary: string;
+}
+
 export function resolveContextWatchContinuationRecommendation(input: {
   ready: boolean;
   focusTasks: string;
@@ -43,6 +64,67 @@ export function resolveContextWatchContinuationRecommendation(input: {
   return {
     recommendationCode: LOCAL_AUDIT_BLOCKED_CODE,
     nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
+  };
+}
+
+export function buildTurnBoundaryDecisionPacket(input: {
+  ready: boolean;
+  focusTasks: string;
+  staleFocusCount: number;
+  localAuditReasons?: string[];
+}): TurnBoundaryDecisionPacket {
+  const reasons = input.localAuditReasons ?? [];
+  const recommendation = resolveContextWatchContinuationRecommendation(input);
+
+  let decision: TurnBoundaryDecision = "pause";
+  let reasonCode: TurnBoundaryReasonCode = "turn-boundary-pause-local-stop";
+  let humanActionRequired = false;
+  let nextAutoStep = recommendation.nextAction;
+
+  if (input.ready) {
+    decision = "continue";
+    reasonCode = "turn-boundary-continue-local";
+    humanActionRequired = false;
+  } else if (reasons.includes("protected-scopes:invalid") || reasons.includes("stop-conditions:invalid") || reasons.includes("validation:invalid")) {
+    decision = "ask-human";
+    reasonCode = "turn-boundary-ask-human-decision-required";
+    humanActionRequired = true;
+    nextAutoStep = "request explicit human decision before continuing this lane.";
+  } else if (reasons.includes("no-local-safe-next-step")) {
+    decision = "pause";
+    reasonCode = "turn-boundary-pause-local-stop";
+    humanActionRequired = false;
+    nextAutoStep = localStopProtectedFocusNextAction();
+  } else if (input.focusTasks === "none-listed" || input.staleFocusCount > 0 || reasons.includes("candidate:invalid")) {
+    decision = "checkpoint";
+    reasonCode = "turn-boundary-checkpoint-refresh-focus";
+    humanActionRequired = false;
+    nextAutoStep = "write checkpoint with explicit focus and resume bounded local-safe slice.";
+  } else {
+    decision = "ask-human";
+    reasonCode = "turn-boundary-ask-human-decision-required";
+    humanActionRequired = true;
+    nextAutoStep = "request explicit human decision for blocked local audit reasons.";
+  }
+
+  return {
+    mode: "report-only",
+    decision,
+    reasonCode,
+    humanActionRequired,
+    nextAutoStep,
+    recommendationCode: recommendation.recommendationCode,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary: [
+      "turn-boundary-decision:",
+      `decision=${decision}`,
+      `reasonCode=${reasonCode}`,
+      `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
+      `recommendationCode=${recommendation.recommendationCode}`,
+      "authorization=none",
+    ].join(" "),
   };
 }
 

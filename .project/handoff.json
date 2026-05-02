@@ -1,49 +1,49 @@
 {
-  "timestamp": "2026-05-02T12:53:37.899Z",
-  "context": "afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=iniciar TASK-BUD-583 (turn_boundary_decision_packet) para pausar com motivo explícito e ação humana clara.",
+  "timestamp": "2026-05-02T13:08:32.600Z",
+  "context": "afk-handoff: decision=blocked stock=2/7 blockers=local-stop-protected-focus-required next=request foco humano explícito para lane protegida ou semear nova task local-safe.",
   "next_actions": [
-    "Iniciar TASK-BUD-583",
-    "Definir reason codes canônicos de pausa",
-    "Cobrir smoke para pause sem humano e ask-human"
+    "Solicitar decisão humana para próximo foco protegido OU criar nova fatia local-safe.",
+    "Se optar por protegido, abrir packet de decisão e manter no-dispatch até aprovação."
   ],
-  "blockers": [],
+  "blockers": [
+    "local-stop-protected-focus-required"
+  ],
   "recent_validation": [
+    "VER-BUD-929",
     "VER-BUD-930",
-    "VER-BUD-931",
-    "machine-maintenance + docs checklist verdes"
+    "VER-BUD-931"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-582",
+    "focus": "TASK-BUD-583",
     "canonical_links": [
-      "task:TASK-BUD-582",
       "task:TASK-BUD-583",
-      "verification:VER-BUD-930"
+      "verification:VER-BUD-929"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T12:53:37.899Z",
+    "generatedAtIso": "2026-05-02T13:08:32.600Z",
     "level": "ok",
-    "percent": 45,
+    "percent": 47,
     "action": "continue",
-    "recommendation": "continue-bounded",
+    "recommendation": "ask-human-focus",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T12:53:37.899Z",
+      "atIso": "2026-05-02T13:08:32.600Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 45,
+      "percent": 47,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-bounded"
+      "recommendation": "ask-human-focus"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-582"
+    "TASK-BUD-583"
   ]
 }

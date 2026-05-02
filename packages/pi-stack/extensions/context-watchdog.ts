@@ -73,13 +73,21 @@ import {
 	type HandoffRefreshMode,
 	type LocalSliceHandoffCheckpointInput,
 } from "./context-watchdog-handoff";
-import { consumeContextPreloadPack, resolveContextWatchContinuationRecommendation } from "./context-watchdog-continuation";
+import {
+	buildTurnBoundaryDecisionPacket,
+	consumeContextPreloadPack,
+	resolveContextWatchContinuationRecommendation,
+} from "./context-watchdog-continuation";
 export {
+	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
 	type ContextPreloadProfile,
 	type ContextPreloadConsumeReport,
 	type ContextWatchContinuationRecommendationCode,
+	type TurnBoundaryDecision,
+	type TurnBoundaryDecisionPacket,
+	type TurnBoundaryReasonCode,
 } from "./context-watchdog-continuation";
 import {
 	describeAutoResumeDispatchReason,
@@ -2476,6 +2484,47 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					effect: "none",
 					mode: "read-only-readiness",
 					authorization: "none",
+				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "turn_boundary_decision_packet",
+		label: "Turn Boundary Decision Packet",
+		description:
+			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired and nextAutoStep.",
+		parameters: Type.Object({}),
+		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
+			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
+				readHandoffJson(ctx.cwd),
+				config.handoffFreshMaxAgeMs,
+				Date.now(),
+				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+			);
+			const focusTasks = extractAutoResumePromptValue(resumeEnvelope.prompt, "focusTasks", "none-listed");
+			const staleFocusCount = resumeEnvelope.diagnostics.staleFocusTasks?.length ?? 0;
+			const localAudit = buildLocalContinuityAudit(ctx.cwd);
+			const localAuditReasons = localContinuityAuditReasons(localAudit);
+			const ready = focusTasks !== "none-listed" && localAudit.envelope.eligibleForAuditedRuntimeSurface;
+			const packet = buildTurnBoundaryDecisionPacket({
+				ready,
+				focusTasks,
+				staleFocusCount,
+				localAuditReasons,
+			});
+			return {
+				content: [{ type: "text", text: packet.summary }],
+				details: {
+					...packet,
+					focusTasks,
+					staleFocusCount,
+					localAuditReasons,
+					mode: "report-only",
+					effect: "none",
+					authorization: "none",
+					dispatchAllowed: false,
+					mutationAllowed: false,
 				},
 			};
 		},

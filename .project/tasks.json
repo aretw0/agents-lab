@@ -13713,7 +13713,7 @@
     {
       "id": "TASK-BUD-583",
       "description": "AFK continuity: criar `turn_boundary_decision_packet` report-only para explicitar motivo de pausa, necessidade humana e próximo passo automático.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-579"
@@ -13729,7 +13729,8 @@
         "smoke cobre pausa sem humano e pausa com decisão humana requerida."
       ],
       "milestone": "afk-continuity-wave-2026-05",
-      "notes": "[rationale:risk-control] evita pausas ambíguas e reduz atrito de auto-resume."
+      "notes": "[rationale:risk-control] evita pausas ambíguas e reduz atrito de auto-resume.\n2026-05-02: turn boundary packet entregue com motivo explícito de pausa e contrato humano obrigatório quando necessário.",
+      "verification": "VER-BUD-932"
     }
   ]
 }

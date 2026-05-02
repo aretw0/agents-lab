@@ -1871,6 +1871,70 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("turn_boundary_decision_packet returns continue for local-safe focus and ask-human for protected scope", async () => {
+		const cwdCheckpoint = mkdtempSync(join(tmpdir(), "ctx-turn-boundary-checkpoint-"));
+		try {
+			execFileSync("git", ["init"], { cwd: cwdCheckpoint, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: cwdCheckpoint, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd: cwdCheckpoint, stdio: "ignore" });
+			mkdirSync(join(cwdCheckpoint, ".project"), { recursive: true });
+			writeFileSync(join(cwdCheckpoint, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-CHK"],
+				blockers: [],
+			}));
+			writeFileSync(join(cwdCheckpoint, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-CHK", status: "completed", description: "checkpoint smoke test done", acceptance_criteria: ["run smoke test"] },
+				{ id: "TASK-BUD-NEXT", status: "planned", description: "next local-safe slice", acceptance_criteria: ["run smoke test"], files: ["docs/guides/control-plane-operating-doctrine.md"] },
+			] }));
+			execFileSync("git", ["add", "."], { cwd: cwdCheckpoint, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdCheckpoint, stdio: "ignore" });
+			const piCheckpoint = makeMockPi();
+			contextWatchdogExtension(piCheckpoint);
+			const tool = getTool(piCheckpoint, "turn_boundary_decision_packet");
+			const checkpointResult = await tool.execute("tc-turn-boundary-checkpoint", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdCheckpoint });
+			expect(checkpointResult.content?.[0]?.text).toContain("turn-boundary-decision:");
+			expect(checkpointResult.details?.decision).toBe("continue");
+			expect(checkpointResult.details?.reasonCode).toBe("turn-boundary-continue-local");
+			expect(checkpointResult.details?.humanActionRequired).toBe(false);
+		} finally {
+			rmSync(cwdCheckpoint, { recursive: true, force: true });
+		}
+
+		const cwdAskHuman = mkdtempSync(join(tmpdir(), "ctx-turn-boundary-ask-human-"));
+		try {
+			execFileSync("git", ["init"], { cwd: cwdAskHuman, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd: cwdAskHuman, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd: cwdAskHuman, stdio: "ignore" });
+			mkdirSync(join(cwdAskHuman, ".project"), { recursive: true });
+			writeFileSync(join(cwdAskHuman, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-PROTECTED"],
+				blockers: [],
+			}));
+			writeFileSync(join(cwdAskHuman, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{
+					id: "TASK-BUD-PROTECTED",
+					status: "in-progress",
+					description: "protected review",
+					files: [".github/workflows/ci.yml"],
+					acceptance_criteria: ["run smoke test"],
+				},
+			] }));
+			execFileSync("git", ["add", "."], { cwd: cwdAskHuman, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd: cwdAskHuman, stdio: "ignore" });
+			const piAskHuman = makeMockPi();
+			contextWatchdogExtension(piAskHuman);
+			const tool = getTool(piAskHuman, "turn_boundary_decision_packet");
+			const askResult = await tool.execute("tc-turn-boundary-ask", {}, undefined as unknown as AbortSignal, () => {}, { cwd: cwdAskHuman });
+			expect(askResult.details?.decision).toBe("ask-human");
+			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-human-decision-required");
+			expect(askResult.details?.humanActionRequired).toBe(true);
+		} finally {
+			rmSync(cwdAskHuman, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_one_slice_canary_preview composes readiness without activation", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-one-slice-preview-"));
 		try {
