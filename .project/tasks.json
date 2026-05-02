@@ -14042,6 +14042,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] usar score de maturidade para orientar direção reduz aceleração subjetiva e preserva fail-closed.\n2026-05-02: quick reference de manutenção Git adicionado no ponto de uso e preview direcional do boundary passou a refletir `growthDecision` (go favorece next-high-value).",
       "verification": "VER-BUD-947"
+    },
+    {
+      "id": "TASK-BUD-599",
+      "description": "[P1] Propagar snapshot de growth maturity para `context_watch_checkpoint` (campo compacto growthDecision/growthScore) para continuidade auditável entre turnos.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Checkpoint aceita opcionalmente snapshot de growth maturity sem quebrar compatibilidade.",
+        "Summary compacto do checkpoint inclui growthDecision/growthScore quando fornecidos.",
+        "Smoke test valida persistência e invariantes no-dispatch."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] carregar score de maturidade no handoff reduz perda de contexto e evita aceleração sem evidência ao retomar."
     }
   ]
 }
