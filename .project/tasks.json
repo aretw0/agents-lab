@@ -14127,6 +14127,28 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] compartilhar snapshot no readiness reduz drift entre decisões de boundary e continuidade.\n2026-05-02: readiness packet agora também carrega growth snapshot do handoff (summary + details), reduzindo drift entre boundary e continuidade.",
       "verification": "VER-BUD-951"
+    },
+    {
+      "id": "TASK-BUD-603",
+      "description": "[P1] Fail-closed no fallback de growth snapshot: quando handoff tiver score/code sem decision válida, boundary deve cair para `needs-evidence` em vez de ignorar snapshot.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-600"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Fallback incompleto do handoff não é descartado silenciosamente; vira `growthDecision=needs-evidence`.",
+        "Direction preview permanece conservador nesse caso.",
+        "Smoke cobre caso com snapshot parcial inválido."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] fail-closed explícito evita aceleração sem decisão de maturidade válida no handoff.\n2026-05-02: fallback de growth snapshot endurecido para fail-closed (`needs-evidence`) quando handoff vier sem decision válida.",
+      "verification": "VER-BUD-952"
     }
   ]
 }

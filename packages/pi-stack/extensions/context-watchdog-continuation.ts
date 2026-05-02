@@ -66,8 +66,16 @@ export interface TurnBoundaryGrowthMaturitySnapshot {
 function toSnapshotGrowthMaturityPacket(
   snapshot: TurnBoundaryGrowthMaturitySnapshot | undefined,
 ): GrowthMaturityScorePacket | undefined {
-  const decision = snapshot?.decision;
-  if (decision !== "go" && decision !== "hold" && decision !== "needs-evidence") return undefined;
+  const rawDecision = snapshot?.decision;
+  const hasScore = Number.isFinite(snapshot?.score);
+  const hasCode = typeof snapshot?.recommendationCode === "string" && snapshot.recommendationCode.trim().length > 0;
+  const decision: GrowthMaturityDecision | undefined =
+    rawDecision === "go" || rawDecision === "hold" || rawDecision === "needs-evidence"
+      ? rawDecision
+      : (hasScore || hasCode)
+        ? "needs-evidence"
+        : undefined;
+  if (!decision) return undefined;
 
   const rawCode = typeof snapshot?.recommendationCode === "string" ? snapshot.recommendationCode.trim() : "";
   const recommendationCode: GrowthMaturityScorePacket["recommendationCode"] =

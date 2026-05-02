@@ -2020,6 +2020,30 @@ describe("context-watchdog", () => {
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthCode=growth-maturity-go-expand-bounded");
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthScore=91");
 			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthSource=handoff");
+
+			writeFileSync(join(cwdCheckpoint, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-CHK"],
+				blockers: [],
+				context_watch: {
+					growth_maturity: {
+						score: 92,
+						recommendationCode: "growth-maturity-go-expand-bounded",
+					},
+				},
+			}));
+			const fallbackInvalidDecision = await tool.execute(
+				"tc-turn-boundary-growth-handoff-fail-closed",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd: cwdCheckpoint },
+			);
+			expect(fallbackInvalidDecision.details?.growthMaturity?.decision).toBe("needs-evidence");
+			expect(fallbackInvalidDecision.details?.growthSource).toBe("handoff");
+			expect(fallbackInvalidDecision.details?.directionPreview?.recommendedOptionId).toBe("similar-lane");
+			expect(fallbackInvalidDecision.details?.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
+			expect(fallbackInvalidDecision.content?.[0]?.text).toContain("growthDecision=needs-evidence");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}

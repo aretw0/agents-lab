@@ -166,6 +166,26 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.summary).toContain("growthSource=handoff");
   });
 
+  it("fails closed to needs-evidence when handoff snapshot lacks a valid decision", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-1",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      growthMaturitySnapshot: {
+        score: 92,
+        recommendationCode: "growth-maturity-go-expand-bounded",
+      },
+    });
+
+    expect(packet.decision).toBe("continue");
+    expect(packet.growthMaturity?.decision).toBe("needs-evidence");
+    expect(packet.growthSource).toBe("handoff");
+    expect(packet.directionPreview.recommendedOptionId).toBe("similar-lane");
+    expect(packet.nextAutoStep).toContain("growth maturity guidance=needs-evidence");
+    expect(packet.summary).toContain("growthDecision=needs-evidence");
+  });
+
   it("includes growth maturity snapshot and fail-closed needs-evidence guidance when scores are incomplete", () => {
     const packet = buildTurnBoundaryDecisionPacket({
       ready: true,
