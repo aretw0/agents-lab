@@ -1,40 +1,40 @@
 {
-  "timestamp": "2026-05-02T05:24:07.328Z",
-  "context": "Foco movido para TASK-BUD-546 após concluir TASK-BUD-545. Próxima fatia: implementar delegation_mix_score (read-only) com recommendationCode [snip] e evidência local de mix de delegação. [truncated:+14 chars]",
+  "timestamp": "2026-05-02T05:37:44.951Z",
+  "context": "Auto-advance ativo na lane delegation-evolution. Foco movido para TASK-BUD-547: implementar delegate_or_execute_decision_packet com blockers [snip] tionCode determinístico (sem dispatch). [truncated:+23 chars]",
   "current_tasks": [
-    "TASK-BUD-546"
+    "TASK-BUD-547"
   ],
   "next_actions": [
-    "Implementar primitive delegation_mix_score em session-analytics/tool-hygiene surface",
-    "Cobrir smoke do score (mix local/manual/simple-delegate/swarm)",
+    "Implementar packet read-only delegate_or_execute_decision_packet",
+    "Cobrir smoke de decisão (execute / delegate / defer) e fail-closed",
     "Atualizar board verification + commit por task"
   ],
   "blockers": [],
   "recent_validation": [
-    "TASK-BUD-545 concluída com VER-BUD-901",
-    "git-dirty-snapshot clean"
+    "TASK-BUD-546 concluída com VER-BUD-902",
+    "smoke session-analytics/tool-hygiene verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-546",
+    "focus": "TASK-BUD-547",
     "canonical_links": [
+      "task:TASK-BUD-547",
       "task:TASK-BUD-546",
-      "task:TASK-BUD-545",
-      "verification:VER-BUD-901"
+      "verification:VER-BUD-902"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T05:24:07.328Z",
+    "generatedAtIso": "2026-05-02T05:37:44.951Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 35,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T05:24:07.328Z",
+      "atIso": "2026-05-02T05:37:44.951Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 35,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

@@ -12917,7 +12917,7 @@
     {
       "id": "TASK-BUD-547",
       "description": "Criar packet read-only `delegate_or_execute_decision_packet` para recomendar local execute vs simple delegate vs defer com base em sinais/métrica.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-545",
@@ -12934,7 +12934,7 @@
         "Caminho fail-closed quando sinais críticos estão missing/stale."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] promover delegação com qualidade pede packet explícito de decisão para evitar saltos implícitos.\n[provenance:human] source_task=TASK-BUD-546 reason=terceiro bloco da wave para orientar escolha delegar/executar sem automação cega"
+      "notes": "[rationale:risk-control] promover delegação com qualidade pede packet explícito de decisão para evitar saltos implícitos.\n[provenance:human] source_task=TASK-BUD-546 reason=terceiro bloco da wave para orientar escolha delegar/executar sem automação cega\nPromoção automática de foco após conclusão da TASK-BUD-546 para manter auto-advance da night lane."
     },
     {
       "id": "TASK-BUD-548",
