@@ -14003,6 +14003,25 @@
       ],
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] rotina explícita reduz deriva operacional e mantém aceleração sob governança."
+    },
+    {
+      "id": "TASK-BUD-597",
+      "description": "[P1] Tornar prioridade explícita (`task.priority`) canônica no seletor da autonomy lane, com fallback robusto para markers na descrição.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts",
+        "packages/pi-stack/extensions/colony-pilot-task-sync.ts",
+        "packages/pi-stack/test/smoke/autonomy-task-selector.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`priorityRank` prioriza `task.priority` quando presente.",
+        "Fallback parse continua funcionando para descrição (`[P1]`, `[P1/backlog]`).",
+        "Smoke tests cobrem conflito field vs description e continuam verdes."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] prioridade explícita reduz ambiguidade e evita depender de soft-intent textual apenas.\n2026-05-02: prioridade explícita no board agora é canônica para seleção da autonomy lane; descrição virou fallback.",
+      "verification": "VER-BUD-945"
     }
   ]
 }

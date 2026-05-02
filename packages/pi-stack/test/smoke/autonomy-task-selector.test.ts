@@ -14,6 +14,7 @@ function task(partial: Partial<ProjectTaskItem> & { id: string }): ProjectTaskIt
     depends_on: partial.depends_on,
     files: partial.files,
     milestone: partial.milestone,
+    priority: partial.priority,
   };
 }
 
@@ -28,6 +29,27 @@ describe("autonomy task selector", () => {
     expect(result.ready).toBe(true);
     expect(result.nextTaskId).toBe("TASK-P0-INPROG");
     expect(result.selectionPolicy).toContain("status(in-progress>planned)");
+  });
+
+  it("uses explicit priority field as canonical value when description marker conflicts", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-CONFLICT", description: "[P0] legacy marker", priority: "p3", status: "planned" }),
+      task({ id: "TASK-DESC-P2", description: "[P2] fallback", status: "planned" }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-DESC-P2");
+    expect(result.selectionPolicy).toContain("priority(field>description P0..P9)");
+  });
+
+  it("parses bracket variants like [P1/backlog] in description as fallback priority", () => {
+    const result = selectAutonomyLaneTask([
+      task({ id: "TASK-BRACKET", description: "[P1/backlog] item", status: "planned" }),
+      task({ id: "TASK-P2", description: "[P2] item", status: "planned" }),
+    ]);
+
+    expect(result.ready).toBe(true);
+    expect(result.nextTaskId).toBe("TASK-BRACKET");
   });
 
   it("requires dependencies to be completed", () => {

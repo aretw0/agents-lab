@@ -28,6 +28,7 @@ export interface ProjectTaskItem {
 	verification?: string;
 	notes?: string;
 	milestone?: string;
+	priority?: string;
 }
 
 export interface ProjectTasksBlock {

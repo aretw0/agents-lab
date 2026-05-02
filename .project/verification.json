@@ -10725,6 +10725,15 @@
       "method": "turn boundary growth maturity integration + smoke",
       "timestamp": "2026-05-02T15:17:51.319Z",
       "evidence": "Integrated growth maturity snapshot into turn boundary decision packet. Code: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - `buildTurnBoundaryDecisionPacket(...)` now accepts optional `growthMaturity` input. - Adds optional `growthMaturity` payload to packet details. - Adds fail-closed guidance when growth snapshot returns `decision=needs-evidence`. - Summary now includes compact growth markers when provided: - `growthDecision=<...>` - `growthCode=<...>` - `growthScore=<...>` - `packages/pi-stack/extensions/context-watchdog.ts` - `turn_boundary_decision_packet` tool now accepts optional growth score params. - Params are composed into optional snapshot input only when provided. Tests: - `packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts` - Added scenario for incomplete growth signals -> `growthMaturity.decision=needs-evidence` + guidance in next step/summary. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added tool-level assertion for optional growth params and fail-closed guidance. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts` - 73 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-945",
+      "target": "TASK-BUD-597",
+      "target_type": "task",
+      "status": "passed",
+      "method": "autonomy priority canonicalization + smoke",
+      "timestamp": "2026-05-02T15:27:48.229Z",
+      "evidence": "Implemented canonical priority handling for autonomy task selection. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-task-selector.ts` - Added `parsePriorityValue(...)`. - `priorityRank(...)` now resolves priority by order: 1) explicit `task.priority` (canonical) 2) bracketed description prefix (`[P1]`, `[P1/backlog]`) 3) generic description fallback (`p1`) 4) default `p9` - Updated policy label to `priority(field>description P0..P9)`. - `packages/pi-stack/extensions/colony-pilot-task-sync.ts` - Added optional `priority?: string` to `ProjectTaskItem`. - `packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` - Added test for field-vs-description conflict (field is canonical). - Added test for `[P1/backlog]` bracket variant parsing. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` => 24 passed. - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 24 passed."
     }
   ]
 }

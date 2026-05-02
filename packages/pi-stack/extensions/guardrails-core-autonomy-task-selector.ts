@@ -156,12 +156,30 @@ function normalizeDependsOn(value: unknown): string[] {
     .filter((item): item is string => Boolean(item));
 }
 
+function parsePriorityValue(value: unknown): number | undefined {
+  const text = normalizeText(value);
+  if (!text) return undefined;
+  const match = text.match(/p\s*([0-9])/i);
+  if (!match?.[1]) return undefined;
+  const numeric = Number(match[1]);
+  return Number.isFinite(numeric) ? Math.max(0, Math.min(9, Math.floor(numeric))) : undefined;
+}
+
 function priorityRank(task: ProjectTaskItem): number {
+  const explicitPriority = parsePriorityValue(task.priority);
+  if (explicitPriority !== undefined) return explicitPriority;
+
   const description = normalizeText(task.description) ?? "";
-  const match = description.match(/\[(P\d+)\]/i);
-  if (!match?.[1]) return 9;
-  const numeric = Number(match[1].slice(1));
-  return Number.isFinite(numeric) ? Math.max(0, Math.min(9, Math.floor(numeric))) : 9;
+  const bracketedPriority = description.match(/^\s*\[\s*p\s*([0-9])/i);
+  if (bracketedPriority?.[1]) {
+    const numeric = Number(bracketedPriority[1]);
+    if (Number.isFinite(numeric)) return Math.max(0, Math.min(9, Math.floor(numeric)));
+  }
+
+  const descriptionPriority = parsePriorityValue(description);
+  if (descriptionPriority !== undefined) return descriptionPriority;
+
+  return 9;
 }
 
 function statusRank(task: ProjectTaskItem): number {
@@ -425,7 +443,7 @@ export function selectAutonomyLaneTask(
   const selectionPolicy = [
     "status(in-progress>planned)",
     "deps-completed",
-    "priority(P0..P9)",
+    "priority(field>description P0..P9)",
     "id",
     includeProtectedScopes
       ? "protected-scopes-included"
