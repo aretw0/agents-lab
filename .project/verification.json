@@ -11049,6 +11049,15 @@
       "method": "action sha pinning for ci/publish + anti-drift smoke + parity gate",
       "timestamp": "2026-05-02T20:53:58.202Z",
       "evidence": "Pinned critical GitHub Actions by immutable commit SHA (with version comments) across CI and Publish to reduce mutable-tag drift. Changes: - `.github/workflows/ci.yml` - `actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2` - `actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0` - `actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1` - `actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0` - `.github/workflows/publish.yml` - checkout/setup-node now pinned to same immutable SHAs. - Smoke updates: - `packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - baseline assertion updated to pinned SHA anchors. - `packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts` - validates publish pinned anchors, - validates critical actions are pinned by SHA, - blocks floating major tags (`@vN`) for checkout/setup-node/upload-artifact/github-script in CI/Publish. Validation: 1) Targeted workflow tests: - `npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts` - Result: 2 files / 6 tests passed. 2) Full parity gate: - `npm run ci:local:parity` - Result: green (117 files / 1089 tests + sovereignty strict + diff strict). Outcome: - Workflow runtime is now pinned and reproducible; mutable-tag drift risk reduced without changing canonical gate behavior."
+    },
+    {
+      "id": "VER-BUD-981",
+      "target": "TASK-BUD-636",
+      "target_type": "task",
+      "status": "passed",
+      "method": "workflow-wide external action SHA-pinning policy smoke + full smoke regression",
+      "timestamp": "2026-05-02T21:01:48.796Z",
+      "evidence": "Added a workflow-wide anti-drift policy test enforcing immutable SHA pins for external GitHub Actions references. Changes: - New smoke test: - `packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts` - Scans `.github/workflows/*` for `uses:` entries. - Allows local actions (`./...`) and `docker://...` references. - Fails if third-party `uses:` is missing `@<ref>` or ref is not a 40-char SHA. Validation: 1) Targeted workflow tests: - `npx vitest run packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - result: 3 files / 7 tests passed. 2) Full smoke regression: - `npm run test:smoke` - result: 118 files / 1090 tests passed. Outcome: - SHA pinning rule is now codified as a durable smoke guard, preventing future reintroduction of floating action refs across workflows."
     }
   ]
 }

@@ -14748,6 +14748,25 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduz risco de drift silencioso por atualização de tag em runtime de CI.\n2026-05-02: CI/Publish actions críticas fixadas por SHA (com comentário de versão) + smoke anti-regressão para evitar retorno de tags flutuantes.",
       "verification": "VER-BUD-980"
+    },
+    {
+      "id": "TASK-BUD-636",
+      "description": "[P1] Adicionar smoke policy para pin obrigatório por SHA em actions externas de todos workflows (`.github/workflows/*`), prevenindo regressão de tags flutuantes.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts",
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish.yml"
+      ],
+      "acceptance_criteria": [
+        "Novo smoke varre workflows e falha se `uses:` externo não estiver em SHA de 40 chars.",
+        "Permite ações locais (`./`) e `docker://` sem bloquear.",
+        "Suíte smoke continua verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] consolida hardening anti-drift e evita reintrodução silenciosa de references mutáveis.\n2026-05-02: policy smoke novo garante pin SHA para actions externas em todos workflows.",
+      "verification": "VER-BUD-981"
     }
   ]
 }
