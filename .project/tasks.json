@@ -14065,7 +14065,7 @@
     {
       "id": "TASK-BUD-600",
       "description": "[P1] Consumir snapshot de growth maturity do handoff como fallback no `turn_boundary_decision_packet` quando parâmetros não forem passados.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-599"
@@ -14081,7 +14081,8 @@
         "Smoke cobre fallback do handoff e mantém invariantes read-only/no-dispatch."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] fallback de maturidade no boundary reduz perda de contexto entre turnos e evita decisões sem evidência."
+      "notes": "[rationale:risk-control] fallback de maturidade no boundary reduz perda de contexto entre turnos e evita decisões sem evidência.\n2026-05-02: `turn_boundary_decision_packet` agora consome snapshot de growth maturity do handoff como fallback (sem payload explícito), preservando summary compacto e invariantes no-dispatch.",
+      "verification": "VER-BUD-949"
     }
   ]
 }

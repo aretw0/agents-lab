@@ -1975,6 +1975,33 @@ describe("context-watchdog", () => {
 			expect(growthGoResult.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
 			expect(growthGoResult.content?.[0]?.text).toContain("directionOptions=similar-lane:viable,next-high-value:recommended");
 			expect(growthGoResult.content?.[0]?.text).toContain("growthDecision=go");
+
+			writeFileSync(join(cwdCheckpoint, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-CHK"],
+				blockers: [],
+				context_watch: {
+					growth_maturity: {
+						decision: "go",
+						score: 91,
+						recommendationCode: "growth-maturity-go-expand-bounded",
+					},
+				},
+			}));
+			const fallbackGrowthFromHandoff = await tool.execute(
+				"tc-turn-boundary-growth-handoff-fallback",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd: cwdCheckpoint },
+			);
+			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.decision).toBe("go");
+			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.recommendationCode).toBe("growth-maturity-go-expand-bounded");
+			expect(fallbackGrowthFromHandoff.details?.growthMaturity?.score).toBe(91);
+			expect(fallbackGrowthFromHandoff.details?.directionPreview?.recommendedOptionId).toBe("next-high-value");
+			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthDecision=go");
+			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthCode=growth-maturity-go-expand-bounded");
+			expect(fallbackGrowthFromHandoff.content?.[0]?.text).toContain("growthScore=91");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}

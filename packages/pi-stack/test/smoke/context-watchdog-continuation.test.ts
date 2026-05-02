@@ -143,6 +143,27 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.summary).toContain("growthDecision=go");
   });
 
+  it("uses handoff-style growth snapshot fallback when explicit score input is absent", () => {
+    const packet = buildTurnBoundaryDecisionPacket({
+      ready: true,
+      focusTasks: "TASK-1",
+      staleFocusCount: 0,
+      localAuditReasons: [],
+      growthMaturitySnapshot: {
+        decision: "go",
+        score: 89,
+        recommendationCode: "growth-maturity-go-expand-bounded",
+      },
+    });
+
+    expect(packet.decision).toBe("continue");
+    expect(packet.growthMaturity?.decision).toBe("go");
+    expect(packet.growthMaturity?.score).toBe(89);
+    expect(packet.growthMaturity?.recommendationCode).toBe("growth-maturity-go-expand-bounded");
+    expect(packet.directionPreview.recommendedOptionId).toBe("next-high-value");
+    expect(packet.summary).toContain("growthDecision=go");
+  });
+
   it("includes growth maturity snapshot and fail-closed needs-evidence guidance when scores are incomplete", () => {
     const packet = buildTurnBoundaryDecisionPacket({
       ready: true,

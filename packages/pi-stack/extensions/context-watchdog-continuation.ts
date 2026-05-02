@@ -57,6 +57,84 @@ export interface TurnBoundaryGrowthMaturityInput {
   criticalBlockers?: number;
 }
 
+export interface TurnBoundaryGrowthMaturitySnapshot {
+  decision?: GrowthMaturityDecision;
+  score?: number;
+  recommendationCode?: string;
+}
+
+function toSnapshotGrowthMaturityPacket(
+  snapshot: TurnBoundaryGrowthMaturitySnapshot | undefined,
+): GrowthMaturityScorePacket | undefined {
+  const decision = snapshot?.decision;
+  if (decision !== "go" && decision !== "hold" && decision !== "needs-evidence") return undefined;
+
+  const rawCode = typeof snapshot?.recommendationCode === "string" ? snapshot.recommendationCode.trim() : "";
+  const recommendationCode: GrowthMaturityScorePacket["recommendationCode"] =
+    rawCode === "growth-maturity-go-expand-bounded"
+      ? "growth-maturity-go-expand-bounded"
+      : rawCode === "growth-maturity-hold-maintain"
+        ? "growth-maturity-hold-maintain"
+        : rawCode === "growth-maturity-hold-stabilize"
+          ? "growth-maturity-hold-stabilize"
+          : rawCode === "growth-maturity-needs-evidence"
+            ? "growth-maturity-needs-evidence"
+            : decision === "go"
+              ? "growth-maturity-go-expand-bounded"
+              : decision === "hold"
+                ? "growth-maturity-hold-maintain"
+                : "growth-maturity-needs-evidence";
+  const score = Number.isFinite(snapshot?.score) ? Math.max(0, Math.min(100, Math.round(Number(snapshot?.score)))) : null;
+  const recommendation = decision === "go"
+    ? "handoff growth snapshot indicates go; expand one bounded level while preserving rollback/checkpoint discipline."
+    : decision === "hold"
+      ? "handoff growth snapshot indicates hold; keep pace and stabilize before expansion."
+      : "handoff growth snapshot indicates needs-evidence; fail-closed until missing maturity evidence is refreshed.";
+  const nextAction = decision === "go"
+    ? "promote one bounded slice and re-check growth maturity on the next boundary."
+    : decision === "hold"
+      ? "continue local-safe stabilization slices and refresh growth maturity snapshot on next boundary."
+      : "collect full safety/calibration/throughput/simplicity scores before acceleration.";
+
+  return {
+    mode: "growth-maturity-score-packet",
+    reviewMode: "read-only",
+    activation: "none",
+    authorization: "none",
+    mutationAllowed: false,
+    dispatchAllowed: false,
+    decision,
+    recommendationCode,
+    recommendation,
+    nextAction,
+    score,
+    thresholds: {
+      go: 85,
+      hold: 70,
+    },
+    dimensions: {
+      safety: { score: null, missing: true },
+      calibration: { score: null, missing: true },
+      throughput: { score: null, missing: true },
+      simplicity: { score: null, missing: true },
+    },
+    signals: {
+      debtBudgetOk: null,
+      criticalBlockers: null,
+    },
+    blockers: decision === "hold" ? ["handoff-growth-hold"] : [],
+    missingSignals: ["handoff-growth-snapshot-used"],
+    summary: [
+      "growth-maturity-score:",
+      `decision=${decision}`,
+      `code=${recommendationCode}`,
+      `score=${score ?? "na"}`,
+      "source=handoff-snapshot",
+      "dispatch=no",
+    ].join(" "),
+  };
+}
+
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
@@ -189,6 +267,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
   staleFocusCount: number;
   localAuditReasons?: string[];
   growthMaturity?: TurnBoundaryGrowthMaturityInput;
+  growthMaturitySnapshot?: TurnBoundaryGrowthMaturitySnapshot;
 }): TurnBoundaryDecisionPacket {
   const reasons = input.localAuditReasons ?? [];
   const recommendation = resolveContextWatchContinuationRecommendation(input);
@@ -235,7 +314,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       debtBudgetOk: input.growthMaturity.debtBudgetOk,
       criticalBlockers: input.growthMaturity.criticalBlockers,
     })
-    : undefined;
+    : toSnapshotGrowthMaturityPacket(input.growthMaturitySnapshot);
 
   if (growthMaturity?.decision === "needs-evidence") {
     nextAutoStep = `${nextAutoStep} growth maturity guidance=needs-evidence; collect missing score signals before acceleration.`;

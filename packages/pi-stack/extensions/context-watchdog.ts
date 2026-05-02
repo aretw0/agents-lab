@@ -2527,8 +2527,48 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				"debt_budget_ok",
 				"critical_blockers",
 			].some((key) => p[key] !== undefined);
+			const handoff = readHandoffJson(ctx.cwd);
+			const resolveFallbackGrowthSnapshot = (): { decision?: "go" | "hold" | "needs-evidence"; score?: number; recommendationCode?: string } | undefined => {
+				if (growthInputProvided) return undefined;
+				const contextWatch = handoff.context_watch && typeof handoff.context_watch === "object"
+					? handoff.context_watch as Record<string, unknown>
+					: undefined;
+				const direct = contextWatch?.growth_maturity && typeof contextWatch.growth_maturity === "object"
+					? contextWatch.growth_maturity as Record<string, unknown>
+					: undefined;
+				const events = Array.isArray(handoff.context_watch_events)
+					? handoff.context_watch_events
+					: [];
+				const eventSnapshot = events
+					.slice()
+					.reverse()
+					.find((entry) => entry && typeof entry === "object" && typeof (entry as Record<string, unknown>).growth_maturity === "object");
+				const eventGrowth = eventSnapshot && typeof eventSnapshot === "object"
+					? (eventSnapshot as Record<string, unknown>).growth_maturity as Record<string, unknown>
+					: undefined;
+				const source = direct ?? eventGrowth;
+				if (!source) return undefined;
+				const decisionRaw = source.decision;
+				const decision = decisionRaw === "go" || decisionRaw === "hold" || decisionRaw === "needs-evidence"
+					? decisionRaw
+					: undefined;
+				const scoreRaw = source.score;
+				const score = typeof scoreRaw === "number" && Number.isFinite(scoreRaw)
+					? Math.max(0, Math.min(100, Math.round(scoreRaw)))
+					: undefined;
+				const recommendationCode = typeof source.recommendationCode === "string" && source.recommendationCode.trim().length > 0
+					? source.recommendationCode.trim()
+					: undefined;
+				if (!decision && score === undefined && !recommendationCode) return undefined;
+				return {
+					decision,
+					score,
+					recommendationCode,
+				};
+			};
+			const fallbackGrowthSnapshot = resolveFallbackGrowthSnapshot();
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
-				readHandoffJson(ctx.cwd),
+				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
 				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
@@ -2555,6 +2595,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						criticalBlockers: typeof p.critical_blockers === "number" ? p.critical_blockers : undefined,
 					}
 					: undefined,
+				growthMaturitySnapshot: fallbackGrowthSnapshot,
 			});
 			return {
 				content: [{ type: "text", text: packet.summary }],
