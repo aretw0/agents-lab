@@ -3,6 +3,7 @@ import {
   BASH_GUARD_POLICIES,
   detectHighRiskPiRootRecursiveScan,
   detectHighRiskSessionLogScan,
+  detectHighRiskWideDuScan,
   detectSourceMapBlastRadiusScan,
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
@@ -15,6 +16,7 @@ describe("guardrails-core bash guard policies", () => {
       "command-sensitive-shell-marker-check",
       "upstream-pi-package-mutation",
       "source-map-blast-radius-scan",
+      "wide-du-scan",
       "pi-root-recursive-scan",
       "session-log-scan",
     ]);
@@ -31,6 +33,12 @@ describe("guardrails-core bash guard policies", () => {
     expect(isUpstreamPiPackagePath("node_modules/@mariozechner/pi-coding-agent/dist/cli.js", "/repo")).toBe(true);
     expect(isUpstreamPiPackagePath("node_modules/@davidorex/pi-project-workflows/index.js", "/repo")).toBe(false);
 
+    expect(detectHighRiskWideDuScan("du -sh")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh .")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh / 2>/dev/null")).toBe(true);
+    expect(detectHighRiskWideDuScan("du -sh .git .tmp")).toBe(false);
+    expect(detectHighRiskWideDuScan("du -h --max-depth=1 .")).toBe(false);
+
     expect(detectSourceMapBlastRadiusScan('grep -RIn "sourceContent" node_modules')).toBe(true);
     expect(detectSourceMapBlastRadiusScan('grep -RIn --exclude="*.map" "sourceContent" node_modules')).toBe(false);
     expect(detectSourceMapBlastRadiusScan('rg -n "sourceContent" node_modules -g "!*.map"')).toBe(false);
@@ -43,6 +51,8 @@ describe("guardrails-core bash guard policies", () => {
     expect(evaluateBashGuardPolicies('grep -RIn "quota" ~/.pi/agent/sessions')?.id).toBe("session-log-scan");
     expect(evaluateBashGuardPolicies('grep -RIn "quota" .pi')?.id).toBe("pi-root-recursive-scan");
     expect(evaluateBashGuardPolicies('grep -RIn "sourceContent" node_modules')?.id).toBe("source-map-blast-radius-scan");
+    expect(evaluateBashGuardPolicies("du -sh .")?.id).toBe("wide-du-scan");
+    expect(evaluateBashGuardPolicies("du -sh .git .tmp")).toBeUndefined();
     expect(evaluateBashGuardPolicies("rm -rf node_modules/@mariozechner/pi-coding-agent/dist")?.id).toBe("upstream-pi-package-mutation");
     expect(evaluateBashGuardPolicies("git status")).toBeUndefined();
   });

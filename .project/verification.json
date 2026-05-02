@@ -10932,6 +10932,15 @@
       "method": "doc-checklist anchor hardening for capacity triage",
       "timestamp": "2026-05-02T17:53:24.543Z",
       "evidence": "Protected new capacity-triage doctrine contract with smoke anchors. Updated: - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added `capacityTriageAnchors` assertions for doctrine markers: - triagem de capacidade (limpar vs pesquisar vs escalar) - limpar leve/diagnosticar - escalar capacidade - evitar scans pesados por default - manutenção destrutiva de git continua opt-in Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-968",
+      "target": "TASK-BUD-619",
+      "target_type": "task",
+      "status": "passed",
+      "method": "bash guard hard-intent for wide du scans + smoke/docs",
+      "timestamp": "2026-05-02T18:11:16.144Z",
+      "evidence": "Implemented hard-intent guardrail for long-running broad `du` scans with bounded alternatives. Code: - `packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts` - Added `detectHighRiskWideDuScan(command)`. - blocks `du` when scope is broad/implicit (no targets, `.`/`..`/`/`/`~`/wild broad roots), - allows bounded depth cases (`--max-depth`, `-d`). - Added reason helper `highRiskWideDuScanReason()` with guidance: - scope explicit paths, - add depth limits, - run bash with explicit timeout. - Registered new policy in `BASH_GUARD_POLICIES`: - `id=wide-du-scan` - `auditKey=guardrails-core.wide-du-scan-block`. - `packages/pi-stack/extensions/guardrails-core-exports.ts` - Exported new detect/reason helpers. Tests: - `packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts` - policy order includes `wide-du-scan`. - detector cases: - blocked: `du -sh`, `du -sh .`, `du -sh / ...`; - allowed: `du -sh .git .tmp`, `du -h --max-depth=1 .`. - `evaluateBashGuardPolicies` returns `wide-du-scan` for broad command and undefined for bounded scoped command. - `packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` - remained green (re-export integrity). Docs: - `docs/guides/control-plane-operating-doctrine.md` - triage section now explicitly points to bash guard blocking broad patterns and retrying with scope+depth/timeout. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` - 4 passed / 0 failed."
     }
   ]
 }

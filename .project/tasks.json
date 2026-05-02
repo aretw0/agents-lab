@@ -14436,7 +14436,7 @@
     {
       "id": "TASK-BUD-619",
       "description": "[P1] Hard intent para comandos shell longos: detectar padrões de alto custo (ex.: `du` amplo sem escopo/timeout) e falhar fechado com guidance bounded.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-bash-guard-policies.ts",
@@ -14449,7 +14449,8 @@
         "Smoke cobre block + caminho permitido com escopo bounded."
       ],
       "milestone": "maturity-sane-growth-2026-05",
-      "notes": "[rationale:risk-control] recorrência de cancelamentos por comando longo justifica hardening runtime para reduzir custo e interrupção."
+      "notes": "[rationale:risk-control] recorrência de cancelamentos por comando longo justifica hardening runtime para reduzir custo e interrupção.\n2026-05-02: iniciando implementação do guard hard-intent para scans shell longos (du amplo sem escopo/timeout), com smoke de regressão.\n2026-05-02: hard-intent implementado para bloquear `du` amplo sem escopo bounded; alternativa orientada por guardrails.",
+      "verification": "VER-BUD-968"
     }
   ]
 }

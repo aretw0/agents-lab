@@ -701,6 +701,7 @@ Regras de custo:
 - evitar scans pesados por default (ex.: `du` amplo sem limite/escopo);
 - preferir diagnóstico read-only e comandos bounded;
 - manutenção destrutiva de git continua opt-in com decisão humana explícita.
+- quando possível, deixar o bash guard bloquear padrões amplos e refazer com escopo + depth/timeout explícitos.
 
 ### Encerramento de turno: mini-packet condicional (quando houver material novo)
 

@@ -24,6 +24,8 @@ const SOURCE_MAP_RECURSIVE_SCAN_ROOT_PATTERN = /(?:^|[\s"'])(?:\.\/)?(?:node_mod
 const SOURCE_MAP_RECURSIVE_SCAN_TOOL_PATTERN =
   /\brg\b|\bgrep\b[\s\S]*\b--recursive\b|\bgrep\b[\s\S]*\s-[a-z]*r[a-z]*\b|\bfindstr\b[\s\S]*\s\/s\b/i;
 const SOURCE_MAP_EXCLUDE_PATTERN = /--exclude(?:=|\s+)["']?\*\.map["']?|(?:--glob|-g)\s+["']?!\*\.map["']?/i;
+const DU_DEPTH_LIMIT_PATTERN = /--max-depth(?:=|\s+)\d+\b|(?:^|\s)-d\s+\d+\b/i;
+const DU_BROAD_TARGET_PATTERN = /^(?:\.|\.\/|\.\.|\.\.\/|\/|~|~\/|\*|\/\*|[a-z]:\/?|\/mnt\/[a-z]\/?)$/i;
 
 export type BashGuardPolicy = {
   id: string;
@@ -96,6 +98,54 @@ export function sourceMapBlastRadiusScanReason(): string {
   ].join(" ");
 }
 
+function tokenizeShellSegment(segment: string): string[] {
+  return segment
+    .trim()
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+}
+
+function extractDuTargets(segment: string): string[] {
+  const tokens = tokenizeShellSegment(segment);
+  const duIndex = tokens.findIndex((token) => /(?:^|\/)du$/i.test(token));
+  if (duIndex < 0) return [];
+
+  const targets: string[] = [];
+  for (const token of tokens.slice(duIndex + 1)) {
+    if (token.startsWith("-")) continue;
+    if (/^[0-9]?>/.test(token)) continue;
+    const normalized = token.replace(/^['"]|['"]$/g, "");
+    if (!normalized) continue;
+    if (normalized === "||" || normalized === "&&" || normalized === "|" || normalized === ";") break;
+    targets.push(normalized);
+  }
+  return targets;
+}
+
+export function detectHighRiskWideDuScan(command: string): boolean {
+  const normalized = command.toLowerCase().replace(/\\/g, "/");
+  if (!/\bdu\b/i.test(normalized)) return false;
+
+  const segments = normalized.split(/\|\||&&|;|\|/g);
+  for (const segment of segments) {
+    if (!/\bdu\b/i.test(segment)) continue;
+    if (DU_DEPTH_LIMIT_PATTERN.test(segment)) continue;
+
+    const targets = extractDuTargets(segment);
+    if (targets.length <= 0) return true;
+    if (targets.some((target) => DU_BROAD_TARGET_PATTERN.test(target))) return true;
+  }
+  return false;
+}
+
+export function highRiskWideDuScanReason(): string {
+  return [
+    "Blocked by guardrails-core (wide_du_scan): broad du scan can run for a long time without adding proportional signal.",
+    "Scope paths explicitly (e.g. .git/.tmp), add depth limits (--max-depth or -d), and run bash with an explicit timeout.",
+  ].join(" ");
+}
+
 export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
   {
     id: "command-sensitive-shell-marker-check",
@@ -117,6 +167,13 @@ export const BASH_GUARD_POLICIES: BashGuardPolicy[] = [
     detect: detectSourceMapBlastRadiusScan,
     reason: sourceMapBlastRadiusScanReason,
     auditKey: "guardrails-core.source-map-blast-radius-scan-block",
+  },
+  {
+    id: "wide-du-scan",
+    when: "tool(bash)",
+    detect: detectHighRiskWideDuScan,
+    reason: highRiskWideDuScanReason,
+    auditKey: "guardrails-core.wide-du-scan-block",
   },
   {
     id: "pi-root-recursive-scan",

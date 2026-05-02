@@ -106,11 +106,13 @@ export {
   BASH_GUARD_POLICIES,
   detectHighRiskPiRootRecursiveScan,
   detectHighRiskSessionLogScan,
+  detectHighRiskWideDuScan,
   detectSourceMapBlastRadiusScan,
   detectUpstreamPiPackageMutation,
   evaluateBashGuardPolicies,
   highRiskPiRootRecursiveScanReason,
   highRiskSessionLogScanReason,
+  highRiskWideDuScanReason,
   sourceMapBlastRadiusScanReason,
   upstreamPiPackageMutationReason,
 } from "./guardrails-core-bash-guard-policies";
