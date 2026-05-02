@@ -13134,7 +13134,7 @@
     {
       "id": "TASK-BUD-557",
       "description": "Promover contrato de auto-advance da night lane de soft-intent para hard-intent (regra runtime explícita, fail-closed, sem check-in entre tasks elegíveis).",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-547"
@@ -13151,7 +13151,7 @@
         "Smoke cobre auto-advance sem check-in e bloqueios corretos."
       ],
       "milestone": "delegation-evolution-wave-2026-05",
-      "notes": "[rationale:risk-control] reduzir dependência de soft intent para continuidade noturna exige contrato hard runtime auditável.\n[provenance:human] source_task=TASK-BUD-546 reason=pedido do operador para não depender de soft intent na direção de execução em lote"
+      "notes": "[rationale:risk-control] reduzir dependência de soft intent para continuidade noturna exige contrato hard runtime auditável.\n[provenance:human] source_task=TASK-BUD-546 reason=pedido do operador para não depender de soft intent na direção de execução em lote\nPromoção automática de foco após fechamento da wave para iniciar hardening hard-intent do auto-advance."
     }
   ]
 }
