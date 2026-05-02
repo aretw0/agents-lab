@@ -80,6 +80,7 @@ describe("installer-filters", () => {
 		expect(entry.extensions).toContain("!extensions/usage-tracker-providers.ts");
 		expect(entry.extensions).toContain("!extensions/watchdog.ts");
 		expect(entry.extensions).toContain("!extensions/safe-guard.ts");
+		expect(entry.extensions).toContain("!extensions/bg-process.ts");
 	});
 
 	it("não altera settings sem packages", () => {

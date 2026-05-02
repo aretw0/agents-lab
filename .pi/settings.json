@@ -43,7 +43,8 @@
 				"!extensions/custom-footer.ts",
 				"!extensions/usage-tracker.ts",
 				"!extensions/usage-tracker-providers.ts",
-				"!extensions/safe-guard.ts"
+				"!extensions/safe-guard.ts",
+				"!extensions/bg-process.ts"
 			],
 			"skills": [],
 			"themes": []

@@ -256,6 +256,8 @@ A primeira superfície dessa direção é `background_process_plan`, uma primiti
 
 Enquanto a primitiva operacional completa não existir, não iniciar servers/background longos automaticamente; preferir comandos curtos, status bounded e parada manual explícita.
 
+Curadoria atual (decisão explícita): remover `@ifi/oh-pi-extensions/extensions/bg-process.ts` da instalação padrão e operar com primitivas first-party (`background_process_plan`, `background_process_lifecycle_plan`, `background_process_readiness_score`, `background_process_rehearsal_gate`) para evidência report-only sem UI ruidosa.
+
 ## Higiene de tools antes de loops grandes
 
 Antes de qualquer loop grande, a stack deve tratar tools expostas como superfície de risco. A primitiva `tool_hygiene_scorecard` é read-only e classifica tools como `advisory`, `measured`, `operational`, `protected` ou `development`, sinalizando flags como mutação, scheduler, remote/CI, settings/profile, subprocesso e override manual. O resultado mantém `authorization=none` e `dispatchAllowed=false`.

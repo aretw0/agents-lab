@@ -106,7 +106,7 @@ Curados e incluídos no meta-pacote enquanto equivalentes first-party não estã
 |---|---|
 | `pi-lens` | LSP, ast-grep, linting, análise de código |
 | `@davidorex/pi-project-workflows` | Project blocks, workflows YAML, monitors comportamentais |
-| `@ifi/oh-pi-extensions` | safe-guard, git-guard, bg-process, auto-session-name e outros |
+| `@ifi/oh-pi-extensions` | git-guard, auto-session-name e outros (`safe-guard`, `bg-process`, `watchdog` filtrados na curadoria padrão) |
 | `@ifi/oh-pi-skills` | debug-helper, claymorphism, quick-setup e outros |
 | `@ifi/oh-pi-themes` | Temas visuais para o TUI |
 | `@ifi/oh-pi-prompts` | Prompt templates curados |

@@ -10122,6 +10122,15 @@
       "method": "settings+installer-filter+smoke+doc anchors",
       "timestamp": "2026-05-02T01:29:43.672Z",
       "evidence": "Reduced repetitive rm-confirmation friction with distributable curation path. Changes: - Local canonical runtime (`.pi/settings.json`): added `!extensions/safe-guard.ts` under `npm:@ifi/oh-pi-extensions` filters to stop per-command prompts on simple `rm -f`. - Distributable hatch path (`packages/pi-stack/install.mjs`): added `!extensions/safe-guard.ts` to installer `FILTER_PATCHES` for `npm:@ifi/oh-pi-extensions` so curated installs inherit the same behavior. - Added installer regression (`packages/pi-stack/test/smoke/installer-filters.test.ts`) asserting filter merge includes `!extensions/safe-guard.ts`. - Updated curated package docs (`packages/pi-stack/README.md`) to reflect safe-guard is filtered in default curation. - Added doctrine note (`docs/guides/control-plane-operating-doctrine.md`) recommending grouped bounded cleanup commands to reduce confirmation noise. Validation: - `npx vitest run packages/pi-stack/test/smoke/installer-filters.test.ts` => 1 file passed, 5 tests passed. - marker checks: - `packages/pi-stack/install.mjs` markers `!extensions/safe-guard.ts`, `safe-guard` => matched. - `packages/pi-stack/README.md` markers `safe-guard`, `filtrado na curadoria padrão` => matched. - `docs/guides/control-plane-operating-doctrine.md` markers `remoção agrupada`, `comando bounded` => matched."
+    },
+    {
+      "id": "VER-BUD-878",
+      "target": "TASK-BUD-529",
+      "target_type": "task",
+      "status": "passed",
+      "method": "installer curation + smoke + marker-check",
+      "timestamp": "2026-05-02T01:56:03.260Z",
+      "evidence": "Shifted curation from third-party bg-process UI toward first-party background primitives (distributable + local canonical). Changes: - `.pi/settings.json`: added `!extensions/bg-process.ts` under `npm:@ifi/oh-pi-extensions` filters. - `packages/pi-stack/install.mjs`: added distributable filter patch `!extensions/bg-process.ts` (with rationale comment) so hatch/profile installs inherit behavior. - `packages/pi-stack/test/smoke/installer-filters.test.ts`: extended filter regression to assert `!extensions/bg-process.ts` is present. - `packages/pi-stack/README.md`: updated curation description to indicate `safe-guard`, `bg-process`, `watchdog` are filtered in default curation. - `docs/guides/recommended-pi-stack.md`: third-party table updated accordingly. - `docs/guides/control-plane-operating-doctrine.md`: documented explicit decision to use first-party `background_process_*` report-only primitives and filter third-party bg-process UI. Validation: - `npx vitest run packages/pi-stack/test/smoke/installer-filters.test.ts` => 1 file passed, 5 tests passed. - marker checks passed for install/README/doctrine/recommended-stack anchors (bg-process filter + first-party primitive references)."
     }
   ]
 }

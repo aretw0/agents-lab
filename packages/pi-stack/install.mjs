@@ -87,6 +87,7 @@ export const FILTER_PATCHES = [
     // usage-tracker/usage-tracker-providers — replaced by quota-visibility budget status line
     // watchdog — replaced by first-party context-watch stack (context-watchdog + auto-compact/resume)
     // safe-guard — prompts on simple `rm -f`; local guardrails-core policy covers our bounded lane
+    // bg-process — third-party lifecycle UI can emit noisy/undefined headers; use first-party background_process_* primitives
     // (usage-tracker showed "Google Subscription quota: 100%" for unlimited plans — misleading)
     source: "npm:@ifi/oh-pi-extensions",
     extensions: [
@@ -95,6 +96,7 @@ export const FILTER_PATCHES = [
       "!extensions/usage-tracker-providers.ts",
       "!extensions/watchdog.ts",
       "!extensions/safe-guard.ts",
+      "!extensions/bg-process.ts",
     ],
   },
 ];

@@ -12524,6 +12524,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] prompts repetitivos em `rm` simples reduzem throughput; ajuste deve preservar fail-closed para escopos realmente destrutivos.\n[provenance:human] source_task=TASK-BUD-527 reason=feedback explícito do operador sobre fricção operacional com confirmações por comando\n2026-05-02: fricção de confirmação em remoção simples reduzida com caminho distribuível (installer filter) + orientação de batch cleanup.",
       "verification": "VER-BUD-877"
+    },
+    {
+      "id": "TASK-BUD-529",
+      "description": "Trocar dependência operacional de `oh-pi` bg-process por caminho curado first-party (distribuível) e reduzir ruído `[undefined]`/prompts de bloco de background.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/install.mjs",
+        "packages/pi-stack/test/smoke/installer-filters.test.ts",
+        "packages/pi-stack/README.md",
+        "docs/guides/recommended-pi-stack.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".pi/settings.json"
+      ],
+      "acceptance_criteria": [
+        "Filtro distribuível adiciona `!extensions/bg-process.ts` em `@ifi/oh-pi-extensions`.",
+        "Docs deixam explícito que o fluxo recomendado usa primitives first-party `background_process_*`.",
+        "Smoke de installer filters cobre `bg-process` filtrado."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir dependência de extensão third-party para lifecycle UI e evitar ruído operacional `[undefined]`/confirm prompts.\n[provenance:human] source_task=TASK-BUD-528 reason=pedido explícito do operador para usar primitiva first-party em vez de bg-process extension\n2026-05-02: curadoria distribuível agora filtra bg-process third-party; fluxo recomendado migra para primitives background_process_* first-party.",
+      "verification": "VER-BUD-878"
     }
   ]
 }
