@@ -1,36 +1,38 @@
 {
-  "timestamp": "2026-05-02T18:12:13.320Z",
-  "context": "hardening pragmático de capacidade concluído: bash guard agora bloqueia du amplo sem escopo bounded e orienta alternativa com escopo explícit [snip] comandos longos sem ganho proporcional. [truncated:+38 chars]",
+  "timestamp": "2026-05-02T18:16:38.719Z",
+  "context": "wave de capacidade pragmática avançada: guardrails de bash agora bloqueiam scans amplos de du e find sem limites explícitos, reduzindo comand [snip] sinal e forçando alternativas bounded. [truncated:+18 chars]",
   "next_actions": [
-    "Se quiser ampliar a proteção, adicionar padrão análogo para scans amplos de find sem escopo.",
-    "Manter triagem de capacidade na ordem limpar->pesquisar->escalar com comandos bounded."
+    "Opcional: adicionar regra análoga para ls -R amplo em roots grandes.",
+    "Manter operação em triagem limpar->pesquisar->escalar com checks bounded.",
+    "Se quiser throughput imediato, semear 1-3 tasks local-safe para voltar autonomy_lane_next_task=ready."
   ],
   "blockers": [],
   "recent_validation": [
     "VER-BUD-968",
-    "vitest guardrails-bash-guard-policies/control-plane-doc-checklist/guardrails-core-hardening-reexport verdes"
+    "VER-BUD-969",
+    "vitest guardrails-bash-guard-policies/control-plane-doc-checklist/guardrails-core-hardening-reexport 4/4"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-619",
+    "focus": "TASK-BUD-620",
     "canonical_links": [
-      "task:TASK-BUD-619",
+      "task:TASK-BUD-620",
       "verification:VER-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T18:12:13.320Z",
+    "generatedAtIso": "2026-05-02T18:16:38.719Z",
     "level": "checkpoint",
-    "percent": 59,
+    "percent": 58,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T18:12:13.320Z",
+      "atIso": "2026-05-02T18:16:38.719Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 59,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -41,6 +43,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-619"
+    "TASK-BUD-620"
   ]
 }
