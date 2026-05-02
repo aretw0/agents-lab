@@ -67,10 +67,12 @@ describe("control-plane anti-bloat docs checklist", () => {
     }
 
     const turnCloseContractAnchors = [
-      "encerramento de turno: mini-packet obrigatório",
+      "encerramento de turno: mini-packet condicional",
       "status curto do que foi concluído/aberto",
       "próximos passos imediatos",
       "preview de decisão disponível",
+      "quando aplicar (gatilhos)",
+      "quando **não** aplicar",
       "regra de neutralidade",
       "escalonamento de governança",
       "soft",

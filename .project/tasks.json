@@ -14359,6 +14359,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] template explícito reduz esquecimento de formato no encerramento.\n2026-05-02: template explícito de mini-packet adicionado para reduzir variação e lembretes no fechamento.",
       "verification": "VER-BUD-963"
+    },
+    {
+      "id": "TASK-BUD-615",
+      "description": "[P1] Refinar contrato de encerramento: mini-packet condicional (somente quando houver material novo de turno) para evitar repetição desnecessária.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Doctrine define gatilhos claros para usar mini-packet no fim do turno.",
+        "Doctrine define exceções para interações simples sem material novo.",
+        "Smoke de docs protege a política condicional (sem exigir formato em toda resposta)."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] evita repetição e mantém utilidade do fechamento estruturado apenas quando há valor operacional.\n2026-05-02: política de encerramento ajustada para mini-packet condicional (gatilhos + exceções) para reduzir repetição sem perder governança.",
+      "verification": "VER-BUD-964"
     }
   ]
 }

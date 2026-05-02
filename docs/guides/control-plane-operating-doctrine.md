@@ -690,22 +690,32 @@ Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm r
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
-### Encerramento de turno: mini-packet obrigatório (sem steering prescritivo por default)
+### Encerramento de turno: mini-packet condicional (quando houver material novo)
 
-No fechamento de turno, o padrão deve ser **conciso e obrigatório** com mini-packet de 3 blocos:
+No fechamento de turno, use mini-packet **conciso** com 3 blocos:
 1. status curto do que foi concluído/aberto;
 2. próximos passos imediatos;
 3. preview de decisão disponível no estado atual.
 
+Quando aplicar (gatilhos):
+- houve alteração relevante (código/docs/board/checkpoint);
+- existe bloqueio, decisão pendente ou mudança de direção;
+- o operador pediu explicitamente próximos passos/preview.
+
+Quando **não** aplicar (evitar repetição):
+- interação simples (ack, confirmação rápida, resposta pontual);
+- não há material novo desde o último fechamento;
+- já houve mini-packet recente e o estado permanece igual.
+
 Regra de neutralidade:
-- `preview` é obrigatório, mas pode ser neutro;
+- `preview` pode ser neutro;
 - steering prescritivo (`faça X agora`, `promote|defer` recomendado) só entra quando houver pedido explícito do operador ou bloqueio real.
 
 Escalonamento de governança:
-1. **soft**: lembrar e corrigir no próximo fechamento quando faltar o mini-packet;
-2. **hard**: se houver recorrência (operador precisando lembrar repetidamente), tratar ausência do mini-packet como falha de contrato e corrigir imediatamente no próprio turno.
+1. **soft**: lembrar e corrigir no próximo fechamento aplicável quando faltar o mini-packet;
+2. **hard**: se houver recorrência (operador precisando lembrar repetidamente), tratar ausência do mini-packet em fechamento aplicável como falha de contrato e corrigir imediatamente no próprio turno.
 
-Objetivo: eliminar lembretes manuais no encerramento sem inflar ruído operacional.
+Objetivo: eliminar lembretes manuais sem inflar ruído operacional.
 
 Template mínimo recomendado (copiar/colar):
 - **Status:** <feito + aberto em 1-2 linhas>

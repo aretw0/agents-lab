@@ -10896,6 +10896,15 @@
       "method": "doctrine mini-packet template addition + docs checklist smoke",
       "timestamp": "2026-05-02T17:20:26.798Z",
       "evidence": "Added explicit copy/paste mini-packet template to doctrine for consistent turn closing. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Under turn-close contract, added minimal template: - Status - Próximos passos - Preview de decisão - Keeps neutral preview guidance and concise structure. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-964",
+      "target": "TASK-BUD-615",
+      "target_type": "task",
+      "status": "passed",
+      "method": "conditional turn-close policy refinement + doc checklist update",
+      "timestamp": "2026-05-02T17:22:59.224Z",
+      "evidence": "Refined turn-close contract to avoid repetitive forced formatting in simple interactions. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Turn-close section changed to `mini-packet condicional (quando houver material novo)`. - Added explicit triggers for using mini-packet. - Added explicit exceptions for simple/no-new-material interactions. - Preserved neutral preview rule and soft->hard escalation only for applicable closeouts. - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Updated anchors to protect conditional policy (`quando aplicar`, `quando não aplicar`). Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - End-turn structure remains available when useful, without mandatory repetition for every simple reply."
     }
   ]
 }
