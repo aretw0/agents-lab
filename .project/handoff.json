@@ -1,42 +1,43 @@
 {
-  "timestamp": "2026-05-01T23:59:15.563Z",
-  "context": "Applied urgent Copilot/Codex context headroom hardening after 400 at ~68%. Added runtime simple spawn gate tool and tightened ops packet with [snip] sandcastle parked in protected backlog. [truncated:+64 chars]",
+  "timestamp": "2026-05-02T00:28:06.804Z",
+  "context": "Concluída wave de freshness local-safe: blueprint de fresh context pack (TASK-BUD-525) + fluxo fail-closed de consumo warm pack (TASK-BUD-526 [snip] já aplicados anteriormente e mantidos. [truncated:+33 chars]",
   "next_actions": [
-    "/reload para aplicar novas configurações/context thresholds em runtime.",
-    "Rodar leitura live: context_watch_status e confirmar checkpoint>=60/compact=65 em sessão ativa.",
-    "Manter pausa curta para idle e permitir auto-compact controlado."
+    "Se quiser continuar sem protected lane, criar nova task local-safe de evolução incremental do [snip] a em context-watch tools). [truncated:+35 chars]",
+    "Ou abrir foco protegido explícito para backlog parked (inclui TASK-BUD-521 sandcastle)."
   ],
   "blockers": [
-    "Sem blocker técnico; parada preventiva solicitada para evitar novo 400."
+    "autonomy_lane_next_task: no-eligible-tasks (apenas planned protected)."
   ],
   "recent_validation": [
-    "npx vitest run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-sta [snip] ooter-registration.test.ts [truncated:+146 chars]"
+    "node --test scripts/test/context-preload-consume.test.mjs",
+    "npm run context:preload:write --silent",
+    "npm run context:preload:consume --silent"
   ],
   "recent_commits": [
-    "eb5ce93"
+    "dd598d2"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-524",
+    "focus": "TASK-BUD-526",
     "canonical_links": [
-      "task:TASK-BUD-524",
-      "task:TASK-BUD-521",
-      "commit:eb5ce93"
+      "task:TASK-BUD-526",
+      "task:TASK-BUD-525",
+      "commit:dd598d2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-01T23:59:15.563Z",
-    "level": "checkpoint",
-    "percent": 66,
-    "action": "checkpoint-refresh",
+    "generatedAtIso": "2026-05-02T00:28:06.804Z",
+    "level": "ok",
+    "percent": 16,
+    "action": "continue",
     "recommendation": "pause",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-01T23:59:15.563Z",
+      "atIso": "2026-05-02T00:28:06.804Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 66,
+      "level": "ok",
+      "percent": 16,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -47,6 +48,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-524"
+    "TASK-BUD-526"
   ]
 }
