@@ -82,7 +82,9 @@ Todos obrigatórios:
 - `TASK-BUD-625`: isolamento/forking (BranchFS + `branch()` + sandbox) com experimento local-safe.
   - estudo v1: `docs/research/linux-isolation-forking-primitives-study-2026.md`
 - `TASK-BUD-626`: protocolos (MCP/SLIM/identity) com posição de adoção por primitive.
+  - estudo v1: `docs/research/agent-protocol-primitives-study-2026.md`
 - `TASK-BUD-627`: memória/contexto (semantic paging) com continuidade auditável.
+  - estudo v1: `docs/research/semantic-paging-context-strategy-2026.md`
 
 ## Contrato de execução (anti-forcing)
 

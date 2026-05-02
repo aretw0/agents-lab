@@ -11076,6 +11076,24 @@
       "method": "inspection",
       "timestamp": "2026-05-02T21:59:17.465Z",
       "evidence": "Criado `docs/research/linux-isolation-forking-primitives-study-2026.md` com: equivalentes práticos hoje vs futuros (simulado, kernel-native, Kubernetes-integrado), tabela de riscos/custos/impacto CI-local e experimento local-safe mínimo `isolation-forking-report-only-canary-v1` com gate e rollback explícitos. Atualizado radar `docs/research/linux-agent-primitives-radar-2026.md` com link para estudo v1. Validação: `safe_marker_check` ok (11/11) no estudo."
+    },
+    {
+      "id": "VER-BUD-984",
+      "target": "TASK-BUD-626",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:04:04.909Z",
+      "evidence": "Criado `docs/research/agent-protocol-primitives-study-2026.md` comparando contratos/trade-offs de MCP, SLIM e Agent Identity/Discovery; definida posição de adoção por primitive (`observe | experiment | integrate-later`); e registradas restrições obrigatórias de soberania local (`no auto-dispatch protegido`, `autenticação verificável`, `auditabilidade de handoff`). Radar atualizado com link para estudo v1 em `docs/research/linux-agent-primitives-radar-2026.md`. Validação: `safe_marker_check` ok (8/8)."
+    },
+    {
+      "id": "VER-BUD-985",
+      "target": "TASK-BUD-627",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T22:04:44.551Z",
+      "evidence": "Criado `docs/research/semantic-paging-context-strategy-2026.md` relacionando semantic paging com contexto atual (`context-watch`, `handoff`, `checkpoint`), definindo métricas de sucesso (tokens/custo, taxa de retomada correta, regressões de foco) e propondo experimento local-safe bounded `semantic-paging-report-only-v1` com gate e rollback explícitos. Radar atualizado com link para estudo v1 em `docs/research/linux-agent-primitives-radar-2026.md`. Validação: `safe_marker_check` ok (10/10)."
     }
   ]
 }

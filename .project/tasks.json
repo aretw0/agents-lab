@@ -14572,7 +14572,7 @@
     {
       "id": "TASK-BUD-626",
       "description": "[P2] Mapear primitives de protocolo/coordenação (MCP, SLIM, Agent Identity/Discovery) para interoperabilidade multiagente sem quebrar soberania local.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-624"
@@ -14587,12 +14587,13 @@
         "Registrar restrições obrigatórias: no auto-dispatch protegido, autenticação verificável, auditabilidade de handoff."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] padronização de protocolo sem critério pode aumentar superfície de risco e drift operacional.\n2026-05-02: parked por foco — protocolo/interoperabilidade fica em monitoramento, sem execução ativa nesta fase."
+      "notes": "[rationale:risk-control] padronização de protocolo sem critério pode aumentar superfície de risco e drift operacional.\n2026-05-02: parked por foco — protocolo/interoperabilidade fica em monitoramento, sem execução ativa nesta fase.\n2026-05-02: protocolo/interoperabilidade retomados sem forcing — experimento só report-only e com restrições soberanas explícitas.",
+      "verification": "VER-BUD-984"
     },
     {
       "id": "TASK-BUD-627",
       "description": "[P2] Investigar abordagem de memória/contexto inspirada em semantic paging para reduzir custo de contexto sem perder continuidade auditável.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-624"
@@ -14607,7 +14608,8 @@
         "Propor experimento local-safe bounded antes de qualquer adoção estrutural."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas.\n2026-05-02: parked por foco — estratégia de semantic paging permanece backlog, sem iniciar enquanto consolidamos capacidade de execução."
+      "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas.\n2026-05-02: parked por foco — estratégia de semantic paging permanece backlog, sem iniciar enquanto consolidamos capacidade de execução.\n2026-05-02: estratégia de semantic paging posicionada em anti-forcing (report-only primeiro), preservando continuidade auditável e governança local-first.",
+      "verification": "VER-BUD-985"
     },
     {
       "id": "TASK-BUD-628",
