@@ -20,6 +20,7 @@ import contextWatchdogExtension, {
 	resolveContextWatchAdaptiveStatusSummary,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
+	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
 	formatContextWatchOneSliceCanaryPreviewSummary,
 	formatContextWatchOneSliceOperatorPacketPreviewSummary,
@@ -1443,6 +1444,87 @@ describe("context-watchdog", () => {
 			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-316");
 			expect(result.details?.prompt).not.toContain("TASK-BUD-296");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("consumeContextPreloadPack aplica fallback canônico quando pack está stale", () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-preload-consume-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			mkdirSync(join(cwd, ".sandbox", "pi-agent", "preload"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-BUD-1"] }));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-BUD-1", status: "planned" }] }));
+			writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }));
+
+			const fingerprint = consumeContextPreloadPack(cwd, { packPath: "missing-pack.json" }).currentCanonicalState.fingerprint;
+			const packPath = join(cwd, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+			writeFileSync(packPath, JSON.stringify({
+				generatedAtIso: new Date().toISOString(),
+				preloadPack: {
+					controlPlaneCore: [".project/handoff.json", ".project/tasks.json"],
+					agentWorkerLean: [".project/handoff.json"],
+					swarmScoutMin: [".project/handoff.json"],
+				},
+				canonicalState: { fingerprint },
+			}));
+
+			const fresh = consumeContextPreloadPack(cwd, { profile: "agent-worker-lean" });
+			expect(fresh.decision).toBe("use-pack");
+			expect(fresh.selectedPaths).toEqual([".project/handoff.json"]);
+
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-BUD-1", status: "in-progress" }] }));
+			const stale = consumeContextPreloadPack(cwd, { profile: "control-plane-core" });
+			expect(stale.decision).toBe("fallback-canonical");
+			expect(stale.staleReasons).toContain("canonical-state-changed");
+			expect(stale.selectedPaths).toEqual([
+				".project/handoff.json",
+				".project/tasks.json",
+				".project/verification.json",
+			]);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_preload_consume tool returns read-only decision envelope", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-preload-tool-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			mkdirSync(join(cwd, ".sandbox", "pi-agent", "preload"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-BUD-2"] }));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-BUD-2", status: "planned" }] }));
+			writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }));
+			const fingerprint = consumeContextPreloadPack(cwd, { packPath: "missing-pack.json" }).currentCanonicalState.fingerprint;
+			writeFileSync(join(cwd, ".sandbox", "pi-agent", "preload", "context-preload-pack.json"), JSON.stringify({
+				generatedAtIso: new Date().toISOString(),
+				preloadPack: {
+					controlPlaneCore: [".project/handoff.json"],
+					agentWorkerLean: [".project/handoff.json"],
+					swarmScoutMin: [".project/handoff.json"],
+				},
+				canonicalState: { fingerprint },
+			}));
+
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_preload_consume");
+			const result = await tool.execute(
+				"tc-context-preload-consume",
+				{ profile: "control-plane-core" },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd } as any,
+			);
+
+			expect(result.content?.[0]?.text).toContain("context-preload-consume:");
+			expect(result.details).toMatchObject({
+				mode: "context-preload-consume",
+				dispatchAllowed: false,
+				decision: "use-pack",
+				profileResolved: "control-plane-core",
+			});
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

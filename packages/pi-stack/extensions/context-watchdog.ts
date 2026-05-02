@@ -71,9 +71,12 @@ import {
 	type HandoffRefreshMode,
 	type LocalSliceHandoffCheckpointInput,
 } from "./context-watchdog-handoff";
-import { resolveContextWatchContinuationRecommendation } from "./context-watchdog-continuation";
+import { consumeContextPreloadPack, resolveContextWatchContinuationRecommendation } from "./context-watchdog-continuation";
 export {
+	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
+	type ContextPreloadProfile,
+	type ContextPreloadConsumeReport,
 	type ContextWatchContinuationRecommendationCode,
 } from "./context-watchdog-continuation";
 import {
@@ -2024,6 +2027,34 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					mode: "read-only-preview",
 					authorization: "none",
 				},
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "context_preload_consume",
+		label: "Context Preload Consume",
+		description:
+			"Read-only fresh-context pack consumer with fail-closed fallback to canonical handoff/tasks/verification when stale.",
+		parameters: Type.Object({
+			profile: Type.Optional(Type.Union([
+				Type.Literal("control-plane-core"),
+				Type.Literal("agent-worker-lean"),
+				Type.Literal("swarm-scout-min"),
+			])),
+			max_age_hours: Type.Optional(Type.Number()),
+			pack_path: Type.Optional(Type.String()),
+		}),
+		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as { profile?: string; max_age_hours?: number; pack_path?: string };
+			const report = consumeContextPreloadPack(ctx.cwd, {
+				profile: p.profile,
+				maxAgeHours: p.max_age_hours,
+				packPath: p.pack_path,
+			});
+			return {
+				content: [{ type: "text", text: report.summary }],
+				details: report,
 			};
 		},
 	});

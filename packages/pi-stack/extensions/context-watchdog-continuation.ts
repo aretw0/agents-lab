@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
 import {
   CONTINUE_LOCAL_CODE,
   LOCAL_AUDIT_BLOCKED_CODE,
@@ -40,5 +43,166 @@ export function resolveContextWatchContinuationRecommendation(input: {
   return {
     recommendationCode: LOCAL_AUDIT_BLOCKED_CODE,
     nextAction: "continuation blocked by local audit; resolve blocking reasons then refresh checkpoint.",
+  };
+}
+
+export type ContextPreloadProfile = "control-plane-core" | "agent-worker-lean" | "swarm-scout-min";
+
+export interface ContextPreloadConsumeReport {
+  mode: "context-preload-consume";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  workspace: string;
+  packPath: string;
+  profileRequested: ContextPreloadProfile;
+  profileResolved: ContextPreloadProfile;
+  decision: "use-pack" | "fallback-canonical";
+  selectedPaths: string[];
+  fallbackPaths: string[];
+  staleReasons: string[];
+  currentCanonicalState: {
+    fingerprint: string;
+    files: Array<{ path: string; exists: boolean; mtimeMs: number }>;
+  };
+  summary: string;
+}
+
+const CANONICAL_PATHS = [
+  ".project/handoff.json",
+  ".project/tasks.json",
+  ".project/verification.json",
+] as const;
+
+function readCanonicalState(cwd: string): ContextPreloadConsumeReport["currentCanonicalState"] {
+  const files = [...CANONICAL_PATHS].map((rel) => {
+    const abs = path.join(cwd, rel);
+    if (!existsSync(abs)) return { path: rel, exists: false, mtimeMs: 0 };
+    try {
+      const st = statSync(abs);
+      return { path: rel, exists: true, mtimeMs: Math.floor(st.mtimeMs) };
+    } catch {
+      return { path: rel, exists: false, mtimeMs: 0 };
+    }
+  });
+
+  const fingerprint = createHash("sha1")
+    .update(files.map((entry) => `${entry.path}:${entry.exists ? 1 : 0}:${entry.mtimeMs}`).join("|"))
+    .digest("hex");
+
+  return { fingerprint, files };
+}
+
+function resolveRequestedProfile(value: unknown): ContextPreloadProfile {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (raw === "agent-worker-lean") return "agent-worker-lean";
+  if (raw === "swarm-scout-min") return "swarm-scout-min";
+  return "control-plane-core";
+}
+
+function readPackJson(packPath: string): Record<string, unknown> | undefined {
+  if (!existsSync(packPath)) return undefined;
+  try {
+    const raw = readFileSync(packPath, "utf8");
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function resolvePackProfilePaths(pack: Record<string, unknown> | undefined, profile: ContextPreloadProfile): {
+  profileResolved: ContextPreloadProfile;
+  paths: string[];
+} {
+  const preloadPack = (pack?.preloadPack && typeof pack.preloadPack === "object")
+    ? (pack.preloadPack as Record<string, unknown>)
+    : {};
+  const map: Record<ContextPreloadProfile, string[]> = {
+    "control-plane-core": Array.isArray(preloadPack.controlPlaneCore)
+      ? preloadPack.controlPlaneCore.filter((entry): entry is string => typeof entry === "string")
+      : [],
+    "agent-worker-lean": Array.isArray(preloadPack.agentWorkerLean)
+      ? preloadPack.agentWorkerLean.filter((entry): entry is string => typeof entry === "string")
+      : [],
+    "swarm-scout-min": Array.isArray(preloadPack.swarmScoutMin)
+      ? preloadPack.swarmScoutMin.filter((entry): entry is string => typeof entry === "string")
+      : [],
+  };
+  if (map[profile].length > 0) {
+    return { profileResolved: profile, paths: map[profile] };
+  }
+  return { profileResolved: "control-plane-core", paths: map["control-plane-core"] };
+}
+
+export function consumeContextPreloadPack(cwd: string, input?: {
+  profile?: unknown;
+  maxAgeHours?: unknown;
+  packPath?: unknown;
+}): ContextPreloadConsumeReport {
+  const workspace = path.resolve(cwd);
+  const profileRequested = resolveRequestedProfile(input?.profile);
+  const maxAgeHours = Number(input?.maxAgeHours);
+  const maxAgeMs = Number.isFinite(maxAgeHours) && maxAgeHours > 0
+    ? Math.floor(maxAgeHours * 60 * 60 * 1000)
+    : 24 * 60 * 60 * 1000;
+  const packPath = typeof input?.packPath === "string" && input.packPath.trim().length > 0
+    ? path.resolve(workspace, input.packPath)
+    : path.join(workspace, ".sandbox", "pi-agent", "preload", "context-preload-pack.json");
+
+  const fallbackPaths = [...CANONICAL_PATHS];
+  const currentCanonicalState = readCanonicalState(workspace);
+  const staleReasons: string[] = [];
+
+  const pack = readPackJson(packPath);
+  if (!pack) {
+    staleReasons.push("pack-missing-or-invalid");
+  }
+
+  if (pack) {
+    const generatedAtMs = Date.parse(String(pack.generatedAtIso ?? ""));
+    if (!Number.isFinite(generatedAtMs)) {
+      staleReasons.push("pack-generated-at-missing");
+    } else if (Date.now() - generatedAtMs > maxAgeMs) {
+      staleReasons.push("pack-too-old");
+    }
+
+    const packFingerprint = String((pack.canonicalState as Record<string, unknown> | undefined)?.fingerprint ?? "").trim();
+    if (!packFingerprint) {
+      staleReasons.push("canonical-fingerprint-missing");
+    } else if (packFingerprint !== currentCanonicalState.fingerprint) {
+      staleReasons.push("canonical-state-changed");
+    }
+  }
+
+  const resolved = resolvePackProfilePaths(pack, profileRequested);
+  if (pack && resolved.paths.length === 0) {
+    staleReasons.push("profile-pack-empty");
+  }
+
+  const decision = staleReasons.length > 0 ? "fallback-canonical" : "use-pack";
+  const selectedPaths = decision === "use-pack" ? resolved.paths : fallbackPaths;
+
+  return {
+    mode: "context-preload-consume",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    workspace,
+    packPath,
+    profileRequested,
+    profileResolved: resolved.profileResolved,
+    decision,
+    selectedPaths,
+    fallbackPaths,
+    staleReasons,
+    currentCanonicalState,
+    summary: [
+      "context-preload-consume:",
+      `decision=${decision}`,
+      `profile=${resolved.profileResolved}`,
+      `selected=${selectedPaths.length}`,
+      staleReasons.length > 0 ? `stale=${staleReasons.join("|")}` : "stale=none",
+    ].join(" "),
   };
 }

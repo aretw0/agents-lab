@@ -10104,6 +10104,15 @@
       "method": "script + test + live run + marker-check",
       "timestamp": "2026-05-02T00:14:56.456Z",
       "evidence": "Implemented local-safe generation/consumption flow for warm preload with fail-closed staleness behavior. Changes: - `scripts/context-preload-pack.mjs` - adds `swarmScoutMin` profile in preload pack. - adds canonical state snapshot (`.project/handoff.json`, `.project/tasks.json`, `.project/verification.json`) with fingerprint. - freshness rule now includes canonical-state change invalidation. - `scripts/context-preload-consume.mjs` (new) - deterministic read-only consumer for profiles (`control-plane-core`, `agent-worker-lean`, `swarm-scout-min`). - returns `decision=use-pack|fallback-canonical`, `staleReasons`, `selectedPaths`. - fail-closed fallback to canonical trio when pack missing/invalid/stale. - `package.json` - adds scripts: `context:preload:consume`, `context:preload:consume:worker`, `context:preload:consume:scout`. - docs updated (`docs/guides/openai-context-window-playbook.md`, `docs/guides/testing-isolation.md`) with consume commands and stale/fallback orientation. - tests added: `scripts/test/context-preload-consume.test.mjs`. Validation: - `node --test scripts/test/context-preload-consume.test.mjs` => pass 2/2. - `npm run context:preload:write --silent` => pack generated with canonical fingerprint and 3 profiles. - `npm run context:preload:consume --silent` => `decision=use-pack`, `staleReasons=[]`. - `safe_marker_check docs/guides/openai-context-window-playbook.md` markers (`context:preload:consume`, `context:preload:consume:worker`, `context:preload:consume:scout`, `swarm-scout-min`) => matched 4/4."
+    },
+    {
+      "id": "VER-BUD-876",
+      "target": "TASK-BUD-527",
+      "target_type": "task",
+      "status": "passed",
+      "method": "runtime tool wiring + smoke + script test + marker-check",
+      "timestamp": "2026-05-02T00:39:24.661Z",
+      "evidence": "Implemented runtime read-only tool for fresh-pack consumption with fail-closed fallback. Changes: - `packages/pi-stack/extensions/context-watchdog-continuation.ts` - added `consumeContextPreloadPack(...)` + types (`ContextPreloadProfile`, `ContextPreloadConsumeReport`). - deterministic canonical fingerprint (`handoff/tasks/verification`) and stale reasons. - decision contract: `use-pack|fallback-canonical`, `dispatchAllowed=false`. - `packages/pi-stack/extensions/context-watchdog.ts` - exports consume helper/types. - registers tool `context_preload_consume` with profile/max_age_hours/pack_path. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - helper-level stale fallback regression. - tool-level read-only envelope regression. - `docs/guides/openai-context-window-playbook.md` - docs updated with runtime tool mention. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - `node --test scripts/test/context-preload-consume.test.mjs` => 2 passed. - `safe_marker_check docs/guides/openai-context-window-playbook.md` markers (`context_preload_consume`, `swarm-scout-min`, `fallback canônico`) => matched 3/3."
     }
   ]
 }
