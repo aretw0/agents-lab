@@ -1,44 +1,46 @@
 {
-  "timestamp": "2026-05-02T21:56:52.576Z",
-  "context": "TASK-BUD-624 concluída: radar estratégico Linux primitives publicado com critérios e cadência; frente voltou ao eixo de maior retorno (limpez [snip] escalabilidade com controle/auditoria). [truncated:+17 chars]",
+  "timestamp": "2026-05-02T22:00:06.130Z",
+  "context": "Retomada da lane de maior retorno concluída em duas fatias: TASK-BUD-624 (radar estratégico) + TASK-BUD-625 (viabilidade isolamento/forking). [snip] tes anti-forcing e evidência auditável. [truncated:+63 chars]",
   "current_tasks": [
-    "TASK-BUD-625"
+    "TASK-BUD-626"
   ],
   "next_actions": [
-    "Iniciar TASK-BUD-625 em microfatia: mapear viabilidade isolamento/forking com equivalentes atuais vs futuros.",
-    "Manter abordagem anti-forcing: experimento report-only + gate/rollback explícitos antes de qualquer integração.",
-    "Depois da síntese de pesquisa, retomar trilha de escalabilidade produtiva com delegação bounded auditável."
+    "Executar TASK-BUD-626: mapear MCP/SLIM/Identity com posição observe / experiment / integrate-l [snip] er e restrições soberanas. [truncated:+2 chars]",
+    "Fechar TASK-BUD-627 em seguida com proposta de semantic paging auditável e gatilhos de adoção.",
+    "Após pesquisa 626/627, voltar à trilha de escalabilidade produtiva com delegação bounded e métricas de governança."
   ],
   "blockers": [],
   "recent_validation": [
     "safe_marker_check docs/research/linux-agent-primitives-radar-2026.md (16/16 ok)",
+    "safe_marker_check docs/research/linux-isolation-forking-primitives-study-2026.md (11/11 ok)",
     "board_task_complete TASK-BUD-624 -> VER-BUD-982"
   ],
   "recent_commits": [
-    "02b85c4"
+    "02b85c4",
+    "719887f"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-625",
+    "focus": "TASK-BUD-626",
     "canonical_links": [
-      "task:TASK-BUD-625",
+      "task:TASK-BUD-626",
       "task:TASK-BUD-624",
-      "verification:VER-BUD-982",
-      "commit:02b85c4"
+      "task:TASK-BUD-625",
+      "verification:VER-BUD-982"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T21:56:52.576Z",
+    "generatedAtIso": "2026-05-02T22:00:06.130Z",
     "level": "ok",
-    "percent": 18,
+    "percent": 24,
     "action": "continue",
     "recommendation": "continue-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T21:56:52.576Z",
+      "atIso": "2026-05-02T22:00:06.130Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 18,
+      "percent": 24,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
