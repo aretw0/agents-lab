@@ -10680,6 +10680,33 @@
       "method": "github-actions protected canary (single run) + board evidence",
       "timestamp": "2026-05-02T14:54:28.005Z",
       "evidence": "Human decision: `promote` received and executed as one protected canary. Canary envelope (pre-run): - owner: aretw0 - scope: github-actions/publish-workflow - ref: main - maxCostUsd: 2 - expectedValue: validate protected/offload path with auditable run id + terminal conclusion. - focalValidationGate: `gh run view <id>` terminal result. - rollbackPlan: stop at one run; keep no-auto-dispatch; if degraded, record `defer` and return to local-safe lane. Execution (exactly 1 run): - command: `gh workflow run Publish --ref main` - run url: https://github.com/aretw0/agents-lab/actions/runs/25254616551 - run id: 25254616551 - event: workflow_dispatch - status/conclusion: completed/success - timestamps: createdAt=2026-05-02T14:53:29Z updatedAt=2026-05-02T14:53:46Z (~0.28 min) - job id: 74051885583 (`Publish to npm`) - guard signal: log contains `No semver tag found ...; skipping publish.` - publish steps remained skipped (`Verificar tag...`, `Instalar dependências`, `Revalidar gates...`, `Publicar pacotes`). Decision evidence (post-canary): - decision promote executed for single canary. - decision for expansion: defer (no automatic expansion after first protected canary; keep bounded/manual). - cost evidence: budget envelope maxCostUsd=2 respected; observed direct publish cost path not entered (steps skipped), effective run cost treated as near-zero for this canary. Result: - Acceptance criteria met: single bounded protected run, explicit budget/gate, board-level job/result/cost/decision evidence, rollback readiness preserved without auto-dispatch."
+    },
+    {
+      "id": "VER-BUD-940",
+      "target": "TASK-BUD-591",
+      "target_type": "task",
+      "status": "passed",
+      "method": "docs growth plan + checklist smoke",
+      "timestamp": "2026-05-02T15:04:01.321Z",
+      "evidence": "Implemented primitive-first growth governance guide focused on scaling with safety/calibration. Files: - `docs/guides/primitive-growth-sanity-plan.md` (new) - `docs/guides/README.md` (index entry) Delivered content: - Non-negotiable principles: primitive-first, evidence-first, fail-closed, local-safe-first. - Maturity ladder L0..L4: local-safe primitive -> protected canary -> delegated throughput -> factory baseline -> factory-of-factories. - Anti-fat/anti-duplication policy with explicit hold signals. - Technical debt budget model (`duplicationBudget`, `contractDriftBudget`, `flakyBudget`, `hotfixBudget`). - Operational scorecard and go/hold thresholds. - Explicit v0.8.0 criterion: release by evidence/maturity, not calendar pressure. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => passed (2/2)."
+    },
+    {
+      "id": "VER-BUD-941",
+      "target": "TASK-BUD-592",
+      "target_type": "task",
+      "status": "passed",
+      "method": "primitive proposal template docs + checklist smoke",
+      "timestamp": "2026-05-02T15:04:12.141Z",
+      "evidence": "Created canonical primitive proposal template to control abstraction growth and technical debt. Files: - `docs/primitives/primitive-proposal-template.md` (new) - `docs/primitives/README.md` (catalog entry) Delivered content: - Requires recurring-problem evidence before creating a primitive. - Defines minimum contract fields (inputs, outputs, invariants, stop conditions). - Forces reuse/consolidation declaration to reduce duplication. - Requires explicit security/rollback and fail-closed conditions. - Standardizes validation/observability and a GO/NO-GO checklist. - Introduces decision vocabulary `promote|defer|reject` for primitive proposals. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => passed (2/2)."
+    },
+    {
+      "id": "VER-BUD-942",
+      "target": "TASK-BUD-593",
+      "target_type": "task",
+      "status": "passed",
+      "method": "maturity scorecard policy + checkpoint evidence",
+      "timestamp": "2026-05-02T15:04:51.794Z",
+      "evidence": "Institutionalized growth-maturity scorecard policy and cadence for safe scaling. Policy source: - `docs/guides/primitive-growth-sanity-plan.md` Delivered: - Score dimensions and thresholds: - Safety, Calibration, Throughput, Simplicity (0..100) - `>=85` can expand bounded experimentation - `70..84` maintain/optimize current pace - `<70` enforce stabilization hold - Explicit debt-budget hold rule (`growthHold=true` when budget exceeded). - Cadence defined per turn boundary/checkpoint with promote/defer registration. - Stop conditions for accelerated growth when calibration/safety degrade. Operational evidence: - `.project/handoff.json` updated via checkpoint for `TASK-BUD-593` with scorecard snapshot and go/hold next actions. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` => passed (2/2)."
     }
   ]
 }

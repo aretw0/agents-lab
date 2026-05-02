@@ -54,6 +54,7 @@ Como medir e garantir a qualidade de agentes.
 
 | Primitiva | Categoria | Descrição | Status |
 |-----------|-----------|-----------|--------|
+| [primitive-proposal-template.md](./primitive-proposal-template.md) | Governança / Qualidade / Manutenção | Template canônico para propor nova primitiva com recorrência, contrato mínimo, testes, rollback e critérios `promote|defer|reject` | Inicial |
 | [budget-envelope.md](./budget-envelope.md) | Avaliação / Coordenação / Planejamento | Contrato de custo por execução (goal + maxCost + evidência + revisão humana) | Em evolução |
 | [continuity-abstraction.md](./continuity-abstraction.md) | Memória / Coordenação / Governança | Continuidade desacoplada de backend/runner com contrato canônico de estado/eventos/gates | Em evolução |
 | [conversation-event-canonical-schema.md](./conversation-event-canonical-schema.md) | Memória / Coordenação / Observabilidade | Schema canônico provider-agnostic para ingestão/triagem de conversas e threads | Em evolução |

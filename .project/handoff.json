@@ -1,48 +1,47 @@
 {
-  "timestamp": "2026-05-02T14:58:13.541Z",
-  "context": "afk-handoff: decision=defer stock=4/7 blockers=quality-bar-not-met-v0.8.0 next=priorizar capacidade/qualidade avançada antes de qualquer release.",
+  "timestamp": "2026-05-02T15:04:30.897Z",
+  "context": "afk-handoff: decision=checkpoint stock=4/7 blockers=none next=operar scorecard de maturidade por boundary para manter crescimento com seguran [snip] city:80 overall:81 (maintain+optimize). [truncated:+59 chars]",
   "current_tasks": [
-    "TASK-BUD-136"
+    "TASK-BUD-593"
   ],
   "next_actions": [
-    "Definir barra objetiva de qualidade v0.8.0 (capability matrix + gates).",
-    "Comparar lacunas frente a referências avançadas e priorizar fatias locais.",
-    "Só retomar release task após evidências de prontidão."
+    "Aplicar scorecard curto em cada turn-boundary/checkpoint.",
+    "Se qualquer dimensão <70: growthHold=true e foco em estabilização.",
+    "Promover nível de experimentação apenas com overall >=85 e sem blockers hard-intent."
   ],
-  "blockers": [
-    "quality-bar-not-met-v0.8.0"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "publish canary run 25254616551 terminou com publish path skipped (sem tag semver)",
-    "diretriz do operador: não publicar v0.8.0 ainda"
+    "VER-BUD-940",
+    "VER-BUD-941",
+    "control-plane-doc-checklist verde"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-136",
+    "focus": "TASK-BUD-593",
     "canonical_links": [
-      "task:TASK-BUD-136",
-      "commit:25254616551"
+      "task:TASK-BUD-593",
+      "verification:VER-BUD-940"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T14:58:13.541Z",
+    "generatedAtIso": "2026-05-02T15:04:30.897Z",
     "level": "checkpoint",
-    "percent": 58,
+    "percent": 59,
     "action": "checkpoint-refresh",
-    "recommendation": "defer-release-focus-quality"
+    "recommendation": "continue-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T14:58:13.541Z",
+      "atIso": "2026-05-02T15:04:30.897Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 58,
+      "percent": 59,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "defer-release-focus-quality"
+      "recommendation": "continue-local-safe"
     }
   ]
 }

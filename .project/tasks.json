@@ -13886,6 +13886,66 @@
       "milestone": "high-value-capacity-lane-2026-05",
       "notes": "[rationale:risk-control] preview explícito reduz ambiguidade na decisão humana de promote/defer em escopo protegido.\n2026-05-02: preview pragmático das decisões disponível no packet e pronto para orientar recomendação promote|defer com menor ambiguidade.",
       "verification": "VER-BUD-938"
+    },
+    {
+      "id": "TASK-BUD-591",
+      "description": "[P1] Definir plano de crescimento com sanidade: governança primitive-first, anti-gordura e promoção segura para escalar produtividade sem caos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/primitive-growth-sanity-plan.md",
+        "docs/guides/README.md"
+      ],
+      "acceptance_criteria": [
+        "Guia novo define princípios de crescimento seguro (primitive-first, evidence-first, fail-closed).",
+        "Inclui ladder de promoção (local-safe -> protected canary -> delegated throughput) com gates explícitos.",
+        "Inclui política anti-duplicação/débito técnico com métricas operacionais e stop conditions."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] escalar sem contrato de primitives aumenta repetição e débito técnico.\n2026-05-02: plano de crescimento com sanidade documentado (primitive-first + ladder de promoção + orçamento de dívida).",
+      "verification": "VER-BUD-940"
+    },
+    {
+      "id": "TASK-BUD-592",
+      "description": "[P1] Criar template de proposta de nova primitiva com critérios de extração, reuso e rollback de adoção.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-591"
+      ],
+      "files": [
+        "docs/primitives/primitive-proposal-template.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Template exige problema recorrente, contrato mínimo, testes e observabilidade.",
+        "Inclui critérios de no-go para evitar primitiva prematura.",
+        "README de primitives referencia o template para uso padrão."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] formalizar extração reduz proliferação de abstrações frágeis.\n2026-05-02: template canônico para propor primitiva adicionado ao catálogo para reduzir abstrações prematuras.",
+      "verification": "VER-BUD-941"
+    },
+    {
+      "id": "TASK-BUD-593",
+      "description": "[P1] Instituir scorecard de maturidade de crescimento (segurança, calibração, throughput, dívida) para orientar evolução contínua da fábrica de agentes.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-591"
+      ],
+      "files": [
+        "docs/guides/primitive-growth-sanity-plan.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "Scorecard com métricas mínimas e thresholds de go/hold.",
+        "Cadência de revisão explícita (turn-boundary/checkpoint).",
+        "Stop conditions de crescimento acelerado definidos quando segurança/calibração degradarem."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] medir maturidade evita throughput sem controle.\n2026-05-02: iniciando institucionalização do scorecard de maturidade (safety/calibration/throughput/simplicity) com thresholds go/hold e cadência por turn-boundary/checkpoint.\n2026-05-02: scorecard de maturidade institucionalizado com thresholds go/hold e checkpoint operacional registrado no handoff.",
+      "verification": "VER-BUD-942"
     }
   ]
 }

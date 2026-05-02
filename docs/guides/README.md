@@ -31,6 +31,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [web-session-gateway.md](./web-session-gateway.md) | Gateway web first-party para observabilidade local da sessão (health/state/prompt) |
 | [control-plane-ux-curation.md](./control-plane-ux-curation.md) | Padrão de UX do control-plane (TUI+WEB): densidade adaptativa, anti-clutter e checklist de resize |
 | [control-plane-evolution-playbook.md](./control-plane-evolution-playbook.md) | Playbook de evolução em fases: single control-plane -> delegação descartável -> federação multi-control-plane |
+| [primitive-growth-sanity-plan.md](./primitive-growth-sanity-plan.md) | Plano de crescimento com sanidade: primitive-first, anti-gordura, orçamento de dívida e ladder de promoção segura |
 | [control-plane-operating-doctrine.md](./control-plane-operating-doctrine.md) | Doutrina operacional do control-plane unattended: quando continuar, parar, reduzir gordura e escalar canários |
 | [control-plane-glossary.md](./control-plane-glossary.md) | Glossário canônico do control-plane para reduzir alcunhas, aliases e progresso vazio |
 | [unified-dogfood-isolation.md](./unified-dogfood-isolation.md) | Runbook para dogfood em ambiente isolado com TUI + WEB unificados |
