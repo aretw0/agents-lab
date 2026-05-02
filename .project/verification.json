@@ -10977,6 +10977,15 @@
       "method": "deterministic host-pressure harness stabilization + parity gate",
       "timestamp": "2026-05-02T18:52:43.668Z",
       "evidence": "Stabilized colony/web e2e harnesses against host machine-maintenance pressure to remove false negatives in local CI-parity runs. Changes: - `packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts` - In test settings fixture, set `piStack.colonyPilot.preflight.enforceMachineMaintenance=false`. - Prevents `hatch check` readiness from flipping due to host memory/disk warn. - `packages/pi-stack/test/smoke/web-session-gateway-e2e-harness.test.ts` - In test settings fixture, set `piStack.colonyPilot.preflight.enforceMachineMaintenance=false`. - Ensures `/colony-pilot run` flow assertion (`/session-web start`) is deterministic and not blocked by host pressure. Validation: 1) Targeted harness tests: - `npx vitest run packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/web-session-gateway-e2e-harness.test.ts` - Result: 2 files passed, 7 tests passed. 2) Canonical parity gate: - `npm run ci:smoke:gate` - Result: full smoke green (115 files / 1083 tests), sovereignty strict + diff gate green. Outcome: - Local host-pressure no longer causes spurious failures in these e2e harness contracts, improving confidence in local↔CI parity command."
+    },
+    {
+      "id": "VER-BUD-973",
+      "target": "TASK-BUD-628",
+      "target_type": "task",
+      "status": "passed",
+      "method": "ci workflow change-discovery report-only wiring",
+      "timestamp": "2026-05-02T19:26:09.816Z",
+      "evidence": "Implemented report-first change discovery in CI (inspired by refarm organization) without reducing coverage. Changes: - `.github/workflows/ci.yml` - Added new job `changes` (report-only) with outputs: - `base_sha`, `head_sha`, `changed_count`, `ci_changes`, `code_changes`, `docs_only`. - Detection logic: - resolves base/head for PR and push, - handles missing/zero base SHA with full-gate fallback, - classifies changed files into CI/code/docs-only buckets, - writes summary to `GITHUB_STEP_SUMMARY`. - `smoke` job now depends on `changes` and prints discovery summary before running gate. - Policy preserved: full canonical gate still runs (`npm run ci:smoke:gate`) even for docs-only changes. Outcome: - Better observability and organization for local↔Actions drift triage. - No auto-skip behavior introduced in this phase (report-first)."
     }
   ]
 }

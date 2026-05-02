@@ -14606,6 +14606,23 @@
       ],
       "milestone": "long-horizon-linux-primitives",
       "notes": "[rationale:risk-control] evolução de memória/contexto precisa preservar governança e evitar regressões silenciosas.\n2026-05-02: parked por foco — estratégia de semantic paging permanece backlog, sem iniciar enquanto consolidamos capacidade de execução."
+    },
+    {
+      "id": "TASK-BUD-628",
+      "description": "[P1] Adicionar change discovery report-only no CI (inspirado no refarm) para organizar drift local↔Actions sem alterar gates ainda.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
+      "acceptance_criteria": [
+        "Workflow CI inclui job `changes` com base/head e classificação (ci_changes, code_changes, docs_only) em modo report-only.",
+        "Job Smoke consome e exibe resumo de mudanças, mas mantém execução completa do gate canônico.",
+        "Runbook permanece sem auto-skip de gates nesta fase (observabilidade primeiro)."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] melhora organização e diagnóstico de drift sem reduzir cobertura prematuramente.\n2026-05-02: CI ganhou job `changes` report-only com classificação de delta (ci/code/docs) sem alterar cobertura do gate canônico.",
+      "verification": "VER-BUD-973"
     }
   ]
 }

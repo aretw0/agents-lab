@@ -68,9 +68,101 @@ jobs:
             echo "✅ $CHANGESETS changeset(s) encontrado(s)"
           fi
 
+  changes:
+    name: Change Discovery (report-only)
+    runs-on: ubuntu-latest
+    outputs:
+      base_sha: ${{ steps.detect.outputs.base_sha }}
+      head_sha: ${{ steps.detect.outputs.head_sha }}
+      changed_count: ${{ steps.detect.outputs.changed_count }}
+      ci_changes: ${{ steps.detect.outputs.ci_changes }}
+      code_changes: ${{ steps.detect.outputs.code_changes }}
+      docs_only: ${{ steps.detect.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed areas (report-only)
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA="$(git rev-parse HEAD^ 2>/dev/null || true)"
+            fi
+          fi
+
+          if [ -z "${BASE_SHA:-}" ]; then
+            echo "::warning::Change discovery fallback: base SHA indisponível; mantendo execução full gate."
+            echo "base_sha=" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${HEAD_SHA:-}" >> "$GITHUB_OUTPUT"
+            echo "changed_count=unknown" >> "$GITHUB_OUTPUT"
+            echo "ci_changes=true" >> "$GITHUB_OUTPUT"
+            echo "code_changes=true" >> "$GITHUB_OUTPUT"
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/agents-lab-changed-files.txt
+          CHANGED_COUNT="$(grep -c . /tmp/agents-lab-changed-files.txt || true)"
+
+          has_match() {
+            local pattern="$1"
+            grep -Eq "$pattern" /tmp/agents-lab-changed-files.txt
+          }
+
+          ci_changes=false
+          code_changes=false
+          docs_only=false
+
+          if [ "$CHANGED_COUNT" -gt 0 ]; then
+            if has_match '^(\.github/workflows/|\.github/actions/)'; then
+              ci_changes=true
+            fi
+
+            if has_match '^(packages/|scripts/|package\.json$|package-lock\.json$|turbo\.json$)'; then
+              code_changes=true
+            fi
+
+            if [ "$ci_changes" = "false" ] && [ "$code_changes" = "false" ]; then
+              if grep -Eqv '^(docs/|README\.md$|\.changeset/)' /tmp/agents-lab-changed-files.txt; then
+                docs_only=false
+              else
+                docs_only=true
+              fi
+            fi
+          fi
+
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          echo "changed_count=$CHANGED_COUNT" >> "$GITHUB_OUTPUT"
+          echo "ci_changes=$ci_changes" >> "$GITHUB_OUTPUT"
+          echo "code_changes=$code_changes" >> "$GITHUB_OUTPUT"
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Change discovery (report-only)"
+            echo
+            echo "- base: \\`$BASE_SHA\\`"
+            echo "- head: \\`$HEAD_SHA\\`"
+            echo "- changed_count: \\`$CHANGED_COUNT\\`"
+            echo "- ci_changes: \\`$ci_changes\\`"
+            echo "- code_changes: \\`$code_changes\\`"
+            echo "- docs_only: \\`$docs_only\\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   smoke:
     name: Smoke Tests
     runs-on: ubuntu-latest
+    needs: [changes]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,6 +183,13 @@ jobs:
           fi
           echo "factory-mode runtime=ci provider=github-actions channel=${CHANNEL}"
           echo "fallback: if governance gates fail, execute locally with /delivery-mode and promote via reviewed PR"
+
+      - name: Change discovery summary (report-only)
+        run: |
+          echo "changes: base=${{ needs.changes.outputs.base_sha }} head=${{ needs.changes.outputs.head_sha }} count=${{ needs.changes.outputs.changed_count }} ci=${{ needs.changes.outputs.ci_changes }} code=${{ needs.changes.outputs.code_changes }} docs_only=${{ needs.changes.outputs.docs_only }}"
+          if [ "${{ needs.changes.outputs.docs_only }}" = "true" ]; then
+            echo "::notice::docs-only change set detectado; mantendo full gate por política report-first."
+          fi
 
       - name: Parity gate local↔CI (smoke + sovereignty strict)
         run: npm run ci:smoke:gate

@@ -1,25 +1,24 @@
 {
-  "timestamp": "2026-05-02T18:53:28.614Z",
-  "context": "foco pragmático mantido: desbloqueio de capacidade local↔CI avançou com estabilização dos harness e2e (colony/web) sob host pressure, mantend [snip] nico ci:smoke:gate verde ponta a ponta. [truncated:+11 chars]",
+  "timestamp": "2026-05-02T19:27:36.740Z",
+  "context": "foco em capacidade operacional mantido: CI agora tem change-discovery report-only (base/head + classificação ci/code/docs) e smoke continua e [snip] o gate canônico completo sem auto-skip. [truncated:+8 chars]",
   "next_actions": [
-    "Monitorar 1-2 runs de GitHub Actions para confirmar queda de drift operacional.",
-    "Se continuar foco em produtividade, implementar changes-detection leve (inspirado em refarm) em modo report-first."
+    "Observar próximos runs de CI para validar qualidade do diagnóstico de delta.",
+    "Se útil, próxima fatia: anexar artifact de changed-files e resumo em markdown para triagem rápida."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-972",
-    "npx vitest (harness ciblados) 7/7",
-    "npm run ci:smoke:gate green (smoke+sovereignty)"
+    "VER-BUD-973",
+    "workflow ci.yml atualizado com job changes + smoke needs changes"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-623",
+    "focus": "TASK-BUD-628",
     "canonical_links": [
-      "task:TASK-BUD-623",
-      "verification:VER-BUD-972"
+      "task:TASK-BUD-628",
+      "verification:VER-BUD-973"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T18:53:28.614Z",
+    "generatedAtIso": "2026-05-02T19:27:36.740Z",
     "level": "checkpoint",
     "percent": 55,
     "action": "checkpoint-refresh",
@@ -28,7 +27,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T18:53:28.614Z",
+      "atIso": "2026-05-02T19:27:36.740Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 55,
@@ -42,6 +41,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-623"
+    "TASK-BUD-628"
   ]
 }
