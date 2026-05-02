@@ -10878,6 +10878,15 @@
       "method": "doctrine hardening for mandatory turn-close mini-packet + docs checklist",
       "timestamp": "2026-05-02T17:15:21.699Z",
       "evidence": "Updated doctrine to make end-of-turn mini-packet mandatory while keeping default non-prescriptive tone. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Replaced section with: `Encerramento de turno: mini-packet obrigatório (sem steering prescritivo por default)`. - Mandatory closeout blocks: 1) status curto, 2) próximos passos, 3) preview de decisão. - Clarified neutrality rule: preview required; prescriptive steering only on explicit user request or real blocker. - Added soft->hard escalation rule for repeated misses: repeated reminders become contract failure to fix in-turn. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-962",
+      "target": "TASK-BUD-613",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc checklist hardening for turn-close mini-packet contract",
+      "timestamp": "2026-05-02T17:16:56.470Z",
+      "evidence": "Added regression anchors in doc checklist smoke to protect turn-close contract. Updated: - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added `turnCloseContractAnchors` assertions for doctrine markers: - mini-packet obrigatório - status curto / próximos passos / preview de decisão - regra de neutralidade - escalonamento de governança soft->hard - falha de contrato Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed. Outcome: - Missing/accidental removal of end-turn contract text now fails smoke promptly."
     }
   ]
 }

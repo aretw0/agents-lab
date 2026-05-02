@@ -65,6 +65,22 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of substrateCalibrationAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const turnCloseContractAnchors = [
+      "encerramento de turno: mini-packet obrigatório",
+      "status curto do que foi concluído/aberto",
+      "próximos passos imediatos",
+      "preview de decisão disponível",
+      "regra de neutralidade",
+      "escalonamento de governança",
+      "soft",
+      "hard",
+      "falha de contrato",
+    ];
+
+    for (const marker of turnCloseContractAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

@@ -14324,6 +14324,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] reduzir necessidade de lembretes humanos no fim do turno mantendo governança e baixo ruído.\n2026-05-02: fechamento de turno endurecido com mini-packet obrigatório; ausência recorrente passa a falha de contrato (soft->hard).",
       "verification": "VER-BUD-961"
+    },
+    {
+      "id": "TASK-BUD-613",
+      "description": "[P1] Blindar contrato de encerramento de turno com smoke de documentação (mini-packet obrigatório e escalonamento soft->hard).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida âncoras do mini-packet obrigatório no doctrine.",
+        "Smoke valida âncoras de neutralidade + escalonamento soft->hard.",
+        "Suite de doc checklist permanece verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduz regressão silenciosa do contrato de encerramento e evita novos lembretes manuais.\n2026-05-02: smoke de docs agora protege explicitamente o contrato de encerramento (mini-packet + soft->hard).",
+      "verification": "VER-BUD-962"
     }
   ]
 }
