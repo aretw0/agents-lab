@@ -44,6 +44,7 @@ import contextWatchdogExtension, {
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
 	resolveContextWatchOperatingCadence,
+	resolveContextWatchCompactStage,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
 	describeContextWatchDeterministicStopHint,
@@ -157,6 +158,24 @@ describe("context-watchdog", () => {
 		expect(evaluateContextWatch(60, thresholds).level).toBe("warn");
 		expect(evaluateContextWatch(68, thresholds).level).toBe("checkpoint");
 		expect(evaluateContextWatch(72, thresholds).level).toBe("compact");
+	});
+
+	it("resolves compact stages as graceful-stop before force-compact", () => {
+		const thresholds = { warnPct: 50, checkpointPct: 60, compactPct: 65 };
+		const normal = resolveContextWatchCompactStage(evaluateContextWatch(55, thresholds));
+		expect(normal.stage).toBe("normal-window");
+		expect(normal.shouldGracefulStop).toBe(false);
+		expect(normal.shouldForceCompact).toBe(false);
+
+		const graceful = resolveContextWatchCompactStage(evaluateContextWatch(60, thresholds));
+		expect(graceful.stage).toBe("graceful-stop-window");
+		expect(graceful.shouldGracefulStop).toBe(true);
+		expect(graceful.shouldForceCompact).toBe(false);
+		expect(evaluateContextWatch(60, thresholds).recommendation).toContain("Graceful-stop window");
+
+		const force = resolveContextWatchCompactStage(evaluateContextWatch(65, thresholds));
+		expect(force.stage).toBe("force-compact-window");
+		expect(force.shouldForceCompact).toBe(true);
 	});
 
 	it("formats passive warn steering without soft-stopping work", () => {
@@ -1328,6 +1347,11 @@ describe("context-watchdog", () => {
 				level: "ok",
 				percent: 14,
 				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown",
+				compactStage: {
+					stage: "normal-window",
+					shouldGracefulStop: false,
+					shouldForceCompact: false,
+				},
 				dirtySignal: "unknown",
 				preloadDecision: "fallback-canonical",
 				gitDirty: {

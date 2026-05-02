@@ -640,6 +640,15 @@ Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm r
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
+## Lane de delegação (wave 2026-05)
+
+A evolução “delegar mais e executar menos” segue wave local-safe explícita, sem pular para automação protegida. O charter ativo da wave fica em `docs/research/control-plane-delegation-wave-2026-05.md` e define objetivos, métricas, limites hard e sequência de primitivas (`TASK-BUD-544..549`).
+
+Contrato desta lane:
+- primeiro consolidar snapshot/score/packet read-only com recommendationCode estável;
+- depois formalizar runbook e checklist operacional por estágio;
+- só discutir promoção de estágio com evidência verde e decisão humana explícita para qualquer escopo protected.
+
 ## Testes de path cross-platform
 
 Testes que validam paths devem ser agnósticos ao host. Quando a regra testada é formato canônico portátil, use fixtures literais com `/` e `\\` como strings de entrada e compare com evidência normalizada, em vez de montar expectativas com `path.join`, `path.resolve` ou separadores do sistema atual. O objetivo é provar que Windows, Linux e macOS chegam ao mesmo sinal medido, não que a suite passou por acidente no host local.

@@ -51,6 +51,7 @@ import {
 	contextWatchActionForLevel,
 	evaluateContextWatch,
 	formatContextWatchStatus,
+	resolveContextWatchCompactStage,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
 } from "./context-watchdog-policy";
@@ -131,6 +132,7 @@ export {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatus,
+	resolveContextWatchCompactStage,
 	handoffFreshnessAdvice,
 	handoffRefreshMode,
 	resolveHandoffBoardReconciliation,
@@ -2001,6 +2003,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				assessmentLevel: assessment.level,
 				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
 			});
+			const compactStage = resolveContextWatchCompactStage(assessment);
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
@@ -2037,6 +2040,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStopHint,
 				operatorAction,
 				operatingCadence,
+				compactStage,
 				dirtySignal: freshness.dirtySignal,
 				preloadDecision: freshness.preloadDecision,
 				gitDirty: freshness.gitDirty,

@@ -10257,6 +10257,33 @@
       "method": "command subcommand wiring + smoke + marker-check",
       "timestamp": "2026-05-02T04:06:11.352Z",
       "evidence": "Added `/context-watch freshness` subcommand for quick operator-facing freshness snapshot. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - updated command usage description to include `freshness`. - added handler branch `sub === \"freshness\"` using shared freshness helper and notifying bounded lines (`preload`, `dirty`, `rows`, `authorization=none`). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added command regression invoking `/context-watch freshness` handler in temp non-git cwd. - asserts output includes `preload=fallback-canonical`, `dirty=unknown`, `authorization=none`. - `docs/guides/openai-context-window-playbook.md` - command usage updated to include `freshness`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 56 tests passed. - marker checks passed for command handler/usage anchors and playbook command string."
+    },
+    {
+      "id": "VER-BUD-893",
+      "target": "TASK-BUD-544",
+      "target_type": "task",
+      "status": "passed",
+      "method": "charter doc + doctrine anchor + marker-check",
+      "timestamp": "2026-05-02T04:12:46.098Z",
+      "evidence": "Defined delegation wave charter and linked it into operating doctrine. Changes: - New charter doc: `docs/research/control-plane-delegation-wave-2026-05.md` - objective, local-safe hard boundaries, success metrics, primitive sequence (`TASK-BUD-544..549`), stage-promotion contract, per-slice checklist, risks/mitigations. - Doctrine update: `docs/guides/control-plane-operating-doctrine.md` - new section `Lane de delegação (wave 2026-05)` with explicit reference to the charter and staged contract. Validation: - marker-check (charter): matched `Objetivo`, `Escopo local-safe`, `Métricas de sucesso`, `TASK-BUD-544..549`, `Contrato de promoção por estágio`. - marker-check (doctrine): matched `Lane de delegação (wave 2026-05)`, `control-plane-delegation-wave-2026-05.md`, `TASK-BUD-544..549`."
+    },
+    {
+      "id": "VER-BUD-894",
+      "target": "TASK-BUD-550",
+      "target_type": "task",
+      "status": "passed",
+      "method": "charter+playbook update with marker evidence",
+      "timestamp": "2026-05-02T04:30:36.188Z",
+      "evidence": "Wave `context-graceful-stop-reload-2026-05` initialized with explicit local-safe contract. Changes: - Added charter doc `docs/research/context-graceful-stop-reload-wave-2026-05.md`: - objective, observed problem, local-safe boundary, 2-stage strategy (graceful-stop at checkpoint / force-compact at compact), task sequence `TASK-BUD-550..555`, success metrics and rollback. - Updated `docs/guides/openai-context-window-playbook.md` context-watch section: - checkpoint now framed as graceful-stop window; - compact as final fallback trigger; - explicit Copilot calibration note for 60/65 and reload-required fail-closed behavior. Validation: - marker-check charter: matched `Objetivo`, `Estratégia em 2 estágios`, `TASK-BUD-550`, `TASK-BUD-555`, `fail-closed`. - marker-check playbook: matched `janela de parada graciosa`, `gatilho final`, `Calibração graceful-stop + reload`, `checkpoint=60`, `compact=65`."
+    },
+    {
+      "id": "VER-BUD-895",
+      "target": "TASK-BUD-551",
+      "target_type": "task",
+      "status": "passed",
+      "method": "policy primitive + status payload + smoke/marker checks",
+      "timestamp": "2026-05-02T04:34:15.599Z",
+      "evidence": "Implemented deterministic compact-stage primitive and surfaced it in context status. Changes: - `packages/pi-stack/extensions/context-watchdog-policy.ts` - added `ContextWatchCompactStage` + `ContextWatchCompactStageSignal`. - added `resolveContextWatchCompactStage(...)` with explicit stages: - `normal-window` - `graceful-stop-window` (checkpoint) - `force-compact-window` (compact) - updated checkpoint recommendation text to emphasize graceful close before compact threshold. - `packages/pi-stack/extensions/context-watchdog.ts` - imported/exported `resolveContextWatchCompactStage`. - `context_watch_status` now includes `details.compactStage` for structured operator visibility. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added stage-transition test (`graceful-stop` before `force-compact`). - extended status-tool assertion to include `compactStage` shape. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 57 tests passed. - marker checks passed for new stage primitive, status payload wiring, and smoke anchors."
     }
   ]
 }

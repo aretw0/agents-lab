@@ -134,8 +134,15 @@ Defaults derivados (sem override):
 
 Níveis:
 - `warn` → operar em micro-slices
-- `checkpoint` → registrar handoff antes do próximo slice grande
-- `compact` → compactar e retomar do checkpoint
+- `checkpoint` → **janela de parada graciosa**: fechar slice atual e registrar handoff antes do próximo bloco grande
+- `compact` → **gatilho final**: compactar e retomar do checkpoint
+
+### Calibração graceful-stop + reload (wave 2026-05)
+Para `github-copilot/gpt-5.3-codex` com `checkpoint=60` e `compact=65`, operar com política de dois estágios:
+1. `checkpoint` (60): parar de abrir escopo, fechar com checkpoint curto, preparar retomada.
+2. `compact` (65): se ainda chegou no limite final, compactar automaticamente (fallback).
+
+Se houver `reload-required`, manter fail-closed para auto-resume (sem dispatch), mas reforçar cedo a ação de operador (`/reload`) ainda na janela de checkpoint.
 
 Visibilidade operacional (control-plane):
 - Em escalonamento (`warn/checkpoint/compact`), o watchdog registra trilha canônica em `.project/handoff.json`:

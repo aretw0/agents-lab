@@ -15,6 +15,42 @@ export type ContextWatchAssessment = {
 	severity: "info" | "warning";
 };
 
+export type ContextWatchCompactStage = "normal-window" | "graceful-stop-window" | "force-compact-window";
+
+export type ContextWatchCompactStageSignal = {
+	stage: ContextWatchCompactStage;
+	shouldGracefulStop: boolean;
+	shouldForceCompact: boolean;
+	recommendation: string;
+};
+
+export function resolveContextWatchCompactStage(
+	assessment: Pick<ContextWatchAssessment, "level" | "thresholds" | "percent">,
+): ContextWatchCompactStageSignal {
+	if (assessment.level === "compact") {
+		return {
+			stage: "force-compact-window",
+			shouldGracefulStop: true,
+			shouldForceCompact: true,
+			recommendation: `force-compact-window: compact now (threshold=${assessment.thresholds.compactPct}%).`,
+		};
+	}
+	if (assessment.level === "checkpoint") {
+		return {
+			stage: "graceful-stop-window",
+			shouldGracefulStop: true,
+			shouldForceCompact: false,
+			recommendation: `graceful-stop-window: close current slice and checkpoint before compact threshold (${assessment.thresholds.compactPct}%).`,
+		};
+	}
+	return {
+		stage: "normal-window",
+		shouldGracefulStop: false,
+		shouldForceCompact: false,
+		recommendation: "normal-window: continue bounded work.",
+	};
+}
+
 export function contextWatchActionForLevel(level: ContextWatchdogLevel): string {
 	switch (level) {
 		case "compact":
@@ -49,7 +85,7 @@ export function evaluateContextWatch(
 			percent,
 			level: "checkpoint",
 			thresholds,
-			recommendation: "Write handoff checkpoint before the next large slice.",
+			recommendation: "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
 			action: contextWatchActionForLevel("checkpoint"),
 			severity: "warning",
 		};

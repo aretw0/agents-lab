@@ -12851,6 +12851,255 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] oferecer leitura rápida por comando reduz necessidade de tool-call manual para operadores em loop.\n[provenance:human] source_task=TASK-BUD-542 reason=continuidade de ergonomia operacional após tool dedicada de frescor\n2026-05-03: /context-watch agora aceita subcomando freshness para leitura rápida de estado fresh sem tool-call explícita.",
       "verification": "VER-BUD-892"
+    },
+    {
+      "id": "TASK-BUD-544",
+      "description": "Definir charter da wave `delegation-evolution-wave-2026-05` com critérios locais para control-plane delegar mais e executar menos (sem perder controle).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/research/control-plane-delegation-wave-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Charter descreve objetivo, limites local-safe, e métricas de sucesso (delegation ratio, qualidade, rollback).",
+        "Escopo exclui protected auto-dispatch e mantém authorization=none.",
+        "Sequência de primitivas da wave registrada com checkpoints."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] aumentar delegação sem perder governança exige contrato explícito de qualidade/controle antes de ampliar automação.\n[provenance:human] source_task=TASK-BUD-543 reason=pedido do operador para montar lane/wave local-safe contínua orientada a delegação com qualidade e controle\n2026-05-03: wave de delegação local-safe formalizada com contrato staged e métricas explícitas.",
+      "verification": "VER-BUD-893"
+    },
+    {
+      "id": "TASK-BUD-545",
+      "description": "Criar primitive/tool read-only `delegation_lane_capability_snapshot` compondo sinais de frescor, monitor estabilidade e readiness local para decisão de delegação.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-544"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna snapshot consolidado (`ready|needs-evidence|blocked`) sem dispatch.",
+        "Inclui sinais mínimos: preloadDecision, dirtySignal, monitor classify-failure readiness, subagent readiness.",
+        "Contrato textual/structured com recommendationCode determinístico."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] delegação consistente requer snapshot único e estável para reduzir decisões ad-hoc por chamada isolada.\n[provenance:human] source_task=TASK-BUD-544 reason=primeiro bloco técnico da wave para consolidar sinais antes de delegar"
+    },
+    {
+      "id": "TASK-BUD-546",
+      "description": "Criar primitive de telemetria `delegation_mix_score` (read-only) para medir diversidade de delegação vs execução local por janela.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-545"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Score reporta mix (local/manual/simple-delegate/swarm) com recommendationCode.",
+        "Usa evidência local da sessão (sem remote).",
+        "Mantém authorization=none e dispatchAllowed=false."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] diversidade de delegação precisa métrica explícita para evitar regressão para execução manual centralizada.\n[provenance:human] source_task=TASK-BUD-545 reason=segundo bloco da wave para tornar evolução de delegação mensurável"
+    },
+    {
+      "id": "TASK-BUD-547",
+      "description": "Criar packet read-only `delegate_or_execute_decision_packet` para recomendar local execute vs simple delegate vs defer com base em sinais/métrica.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-545",
+        "TASK-BUD-546"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Packet retorna decisão determinística com blockers e recommendationCode.",
+        "Nunca autoriza dispatch automático; mantém authorization=none.",
+        "Caminho fail-closed quando sinais críticos estão missing/stale."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] promover delegação com qualidade pede packet explícito de decisão para evitar saltos implícitos.\n[provenance:human] source_task=TASK-BUD-546 reason=terceiro bloco da wave para orientar escolha delegar/executar sem automação cega"
+    },
+    {
+      "id": "TASK-BUD-548",
+      "description": "Documentar runbook da lane (delegar mais, executar menos) com gates por estágio: local-safe -> simple delegate -> swarm rehearsal.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-547"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/primitives/README.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook descreve gates, rollback, e sinais de stop para cada estágio.",
+        "Inclui comandos/tooling recomendados para operação diária.",
+        "Checklist de evidência por slice e por promoção de estágio."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] sem runbook, primitives novas tendem a uso inconsistente e perda de controle operacional.\n[provenance:human] source_task=TASK-BUD-547 reason=quarto bloco da wave para consolidar prática operacional"
+    },
+    {
+      "id": "TASK-BUD-549",
+      "description": "Fechar wave com regressão/smoke e checklist de saída para delegação controlada contínua.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-548"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/",
+        "docs/research/control-plane-delegation-wave-2026-05.md",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "Pacote de smoke focado da wave verde.",
+        "Checklist de saída registra ganhos, gaps restantes e próxima wave.",
+        "Verificação final anexada no board com recommendation explícita."
+      ],
+      "milestone": "delegation-evolution-wave-2026-05",
+      "notes": "[rationale:risk-control] saída explícita evita wave infinita e preserva auditabilidade da evolução do control-plane.\n[provenance:human] source_task=TASK-BUD-548 reason=bloco de encerramento para medir resultado e preparar continuidade"
+    },
+    {
+      "id": "TASK-BUD-550",
+      "description": "Definir charter da wave `context-graceful-stop-reload-2026-05` para compactação graciosa + reload-aware resume.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/research/context-graceful-stop-reload-wave-2026-05.md",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Charter explicita estratégia em dois estágios: graceful-stop (checkpoint) e force-compact (compact).",
+        "Contrato mantém fail-closed para reload-required e não habilita auto-dispatch protegido.",
+        "Sequência de tasks local-safe da wave registrada com métricas e rollback."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] evitar travamentos pós-compact exige contrato explícito de parada graciosa e fallback determinístico.\n[provenance:human] source_task=TASK-BUD-543 reason=pedido direto do operador para calibrar compactação graciosa e comportamento de reload/auto-resume.\n2026-05-03: charter da wave graceful-stop/reload criado e ancorado no playbook do context window.",
+      "verification": "VER-BUD-894"
+    },
+    {
+      "id": "TASK-BUD-551",
+      "description": "Implementar primitive de estágio de compactação graciosa (checkpoint=graceful-stop, compact=force-compact) com sinais determinísticos.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-550"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-policy.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Novo sinal distingue `graceful-stop-window` de `force-compact-window`.",
+        "Mensagem de checkpoint orienta fechamento gracioso antes de threshold final.",
+        "Smoke cobre transição checkpoint->compact com recommendation textual."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] sinal intermediário reduz risco de bater no limite duro sem checkpoint válido.\n[provenance:human] source_task=TASK-BUD-550 reason=primeiro bloco técnico para endereçar parada graciosa antes do compact final.\nIniciado: implementar sinal explícito de estágio checkpoint(graceful-stop) vs compact(force-compact) no context-watchdog.\n2026-05-03: primitive de estágio de compactação adicionada (checkpoint=graceful-stop, compact=force-compact) com payload estruturado no status.",
+      "verification": "VER-BUD-895"
+    },
+    {
+      "id": "TASK-BUD-552",
+      "description": "Adicionar gate reload-aware pré-compact com hint antecipado (`/reload`) antes do auto-resume suprimido.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-551"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando reloadRequired=true, sinal antecipado aparece ainda em checkpoint/near-compact.",
+        "Auto-resume suppression continua fail-closed e inclui hint consistente.",
+        "Contrato mantém `authorization=none` e sem dispatch automático adicional."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] antecipar reload reduz sensação de travamento pós-compact e melhora previsibilidade operacional.\n[provenance:human] source_task=TASK-BUD-551 reason=segundo bloco para atacar diretamente o problema reportado de reload obrigatório pós-compact."
+    },
+    {
+      "id": "TASK-BUD-553",
+      "description": "Criar packet/tool read-only `context_watch_compact_stage_status` com estágio atual e próximos gatilhos (graceful vs force).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-551"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/continuity-abstraction.md"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna estágio, thresholds, reload gate e nextAction determinístico.",
+        "Sem mutação/dispatch; envelope report-only.",
+        "Smoke cobre cenário não-git e cenário com thresholds customizados."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] visibilidade explícita do estágio evita decisões implícitas sob pressão de contexto.\n[provenance:human] source_task=TASK-BUD-551 reason=terceiro bloco para observabilidade operacional da nova calibração."
+    },
+    {
+      "id": "TASK-BUD-554",
+      "description": "Refinar auto-resume suppression UX para `reload-required` com reforço pre-resume e handoff hint curto.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-552"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Evento/hint de bloqueio reload fica visível no handoff preview.",
+        "Mensagem compacta e sem ruído redundante.",
+        "Smoke cobre suppression reason/hint e ausência de dispatch."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] feedback claro de bloqueio evita loops improdutivos após compactação.\n[provenance:human] source_task=TASK-BUD-552 reason=quarto bloco para resolver percepção de travamento e orientar retomada."
+    },
+    {
+      "id": "TASK-BUD-555",
+      "description": "Fechar wave com regressão focada Copilot (checkpoint 60 / compact 65) e runbook final de operação.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-553",
+        "TASK-BUD-554"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/research/context-graceful-stop-reload-wave-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Pacote de smoke da wave verde.",
+        "Runbook final descreve resposta operacional para contexto cheio + reload obrigatório.",
+        "Verificação de saída no board com gaps remanescentes e próxima iteração."
+      ],
+      "milestone": "context-graceful-stop-reload-2026-05",
+      "notes": "[rationale:risk-control] encerramento explícito evita deriva e garante aprendizado operacional auditável.\n[provenance:human] source_task=TASK-BUD-554 reason=bloco de fechamento para consolidar calibração e próximos passos."
     }
   ]
 }
