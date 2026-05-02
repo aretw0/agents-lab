@@ -1,39 +1,45 @@
 {
-  "timestamp": "2026-05-02T06:30:12.153Z",
-  "context": "Lotes anteriores concluídos (hard-intent lane + simple-delegate prep). Novo lote live-rehearsal foi semeado e execução iniciada em TASK-BUD-5 [snip] nded com contrato start/abort/rollback. [truncated:+35 chars]",
+  "timestamp": "2026-05-02T06:31:30.435Z",
+  "context": "Estado persistido após lote extenso: tarefas 557..567 concluídas, novo lote live-rehearsal semeado e TASK-BUD-568 em progresso. Contratos har [snip] prep estão materializados e commitados. [truncated:+27 chars]",
   "current_tasks": [
     "TASK-BUD-568"
   ],
   "next_actions": [
-    "Consolidar checklist pré-voo de rehearsal real",
-    "Definir critérios go/no-go humanos explícitos",
-    "Mapear abort/rollback curto no playbook/doctrine"
+    "Concluir plano operacional de rehearsal real bounded em TASK-BUD-568",
+    "Implementar packet start/abort (TASK-BUD-569)",
+    "Atualizar runbook curto e fechar wave live-rehearsal prep"
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-916 closeout prep wave",
-    "58/58 regressão focal verde"
+    "commit 7ff07bc",
+    "regressões focais verdes (até 125 testes no pack amplo)",
+    "board verifications VER-BUD-906..916 registradas"
+  ],
+  "recent_commits": [
+    "7ff07bc"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-568",
     "canonical_links": [
       "task:TASK-BUD-568",
-      "verification:VER-BUD-916"
+      "task:TASK-BUD-569",
+      "verification:VER-BUD-906",
+      "commit:7ff07bc"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T06:30:12.153Z",
+    "generatedAtIso": "2026-05-02T06:31:30.435Z",
     "level": "ok",
-    "percent": 39,
+    "percent": 40,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T06:30:12.153Z",
+      "atIso": "2026-05-02T06:31:30.435Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 39,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
