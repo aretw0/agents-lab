@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import machineMaintenanceExtension, {
+  classifyCpuPressure,
   classifyDiskPressure,
   classifyMemoryPressure,
   evaluateMachineMaintenanceGate,
@@ -34,7 +35,8 @@ describe("machine-maintenance gate", () => {
   it("allows healthy resource readings", () => {
     const memory = classifyMemoryPressure({ freeMb: 8192, totalMb: 16384, thresholds });
     const disk = classifyDiskPressure({ freeMb: 50 * 1024, totalMb: 100 * 1024, thresholds });
-    const gate = evaluateMachineMaintenanceGate({ memory, disk, thresholds, nowIso: "2026-04-28T00:00:00.000Z" });
+    const cpu = classifyCpuPressure({ loadAvg1m: 1.2, coreCount: 8, thresholds });
+    const gate = evaluateMachineMaintenanceGate({ memory, disk, cpu, thresholds, nowIso: "2026-04-28T00:00:00.000Z" });
 
     expect(gate.severity).toBe("ok");
     expect(gate.action).toBe("continue");
@@ -54,7 +56,8 @@ describe("machine-maintenance gate", () => {
   it("pauses long-runs before hard block", () => {
     const memory = classifyMemoryPressure({ freeMb: thresholds.memoryPauseFreeMb, totalMb: 16384, thresholds });
     const disk = classifyDiskPressure({ freeMb: 50 * 1024, totalMb: 100 * 1024, thresholds });
-    const gate = evaluateMachineMaintenanceGate({ memory, disk, thresholds });
+    const cpu = classifyCpuPressure({ loadAvg1m: 1.2, coreCount: 8, thresholds });
+    const gate = evaluateMachineMaintenanceGate({ memory, disk, cpu, thresholds });
 
     expect(gate.severity).toBe("pause");
     expect(gate.action).toBe("pause-long-runs");
@@ -67,7 +70,8 @@ describe("machine-maintenance gate", () => {
   it("requires checkpoint-and-stop on block pressure", () => {
     const memory = classifyMemoryPressure({ freeMb: 8192, totalMb: 16384, thresholds });
     const disk = classifyDiskPressure({ freeMb: thresholds.diskBlockFreeMb, totalMb: 100 * 1024, thresholds });
-    const gate = evaluateMachineMaintenanceGate({ memory, disk, thresholds });
+    const cpu = classifyCpuPressure({ loadAvg1m: 1.2, coreCount: 8, thresholds });
+    const gate = evaluateMachineMaintenanceGate({ memory, disk, cpu, thresholds });
 
     expect(gate.severity).toBe("block");
     expect(gate.action).toBe("checkpoint-and-stop");
@@ -76,14 +80,34 @@ describe("machine-maintenance gate", () => {
     expect(gate.blockers).toContain("disk-pressure-block");
   });
 
+  it("adds cpu blockers when load pressure crosses thresholds", () => {
+    const memory = classifyMemoryPressure({ freeMb: 8192, totalMb: 16384, thresholds });
+    const disk = classifyDiskPressure({ freeMb: 50 * 1024, totalMb: 100 * 1024, thresholds });
+    const cpu = classifyCpuPressure({ loadAvg1m: 6, coreCount: 8, thresholds });
+    const gate = evaluateMachineMaintenanceGate({ memory, disk, cpu, thresholds });
+
+    expect(cpu.severity).toBe("warn");
+    expect(gate.severity).toBe("warn");
+    expect(gate.blockers).toContain("cpu-pressure-warn");
+  });
+
+  it("keeps cpu unknown fail-closed when metrics are invalid", () => {
+    const cpu = classifyCpuPressure({ loadAvg1m: Number.NaN, coreCount: 0, thresholds });
+
+    expect(cpu.severity).toBe("unknown");
+    expect(cpu.reason).toContain("cpu unavailable");
+  });
+
   it("formats compact operator guidance", () => {
     const memory = classifyMemoryPressure({ freeMb: 8192, totalMb: 16384, thresholds });
     const disk = classifyDiskPressure({ freeMb: 50 * 1024, totalMb: 100 * 1024, thresholds });
-    const gate = evaluateMachineMaintenanceGate({ memory, disk, thresholds });
+    const cpu = classifyCpuPressure({ loadAvg1m: 1.2, coreCount: 8, thresholds });
+    const gate = evaluateMachineMaintenanceGate({ memory, disk, cpu, thresholds });
 
     expect(formatMachineMaintenanceGate(gate)).toContain("machine-maintenance");
     expect(formatMachineMaintenanceGate(gate)).toContain("longRun=allow");
     expect(formatMachineMaintenanceGate(gate)).toContain("monitors=allow");
+    expect(formatMachineMaintenanceGate(gate)).toContain("cpu load1=");
   });
 
   it("registers a pi tool with the canonical execute signature", async () => {
@@ -102,5 +126,6 @@ describe("machine-maintenance gate", () => {
     expect(result.content?.[0]?.text).toContain("machine-maintenance");
     expect(result.details?.severity).toBeDefined();
     expect(result.details?.persistedHandoff).toBe(false);
+    expect(result.details?.cpu).toBeDefined();
   });
 });

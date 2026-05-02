@@ -10581,6 +10581,15 @@
       "method": "focal regression + AFK continuity closeout",
       "timestamp": "2026-05-02T12:40:06.456Z",
       "evidence": "Closed AFK continuity wave with reproducible focal regression and explicit continue-vs-seed guidance. Closeout docs: - `docs/research/afk-materialization-patterns-2026-05.md` - Added `Fechamento da wave AFK continuity (TASK-BUD-576..579)`. - Consolidated deliveries 576..579. - Registered one-command focal regression pack and expected result. - Added explicit operational rule for `continue | seed-backlog/seed-now | blocked`. - Recorded next recommended focus (`TASK-BUD-580`). Focal pack (single command): - `npx vitest run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 30 passed (3 files). Handoff evidence: - `.project/handoff.json` updated with material-first line: - `afk-handoff: decision=seed-backlog stock=2/7 blockers=none next=executar TASK-BUD-580 ...` - next focus explicit for continuation. Safety invariants preserved: - report-only packets remain no-dispatch/no-mutation. - protected scope still explicit human decision only."
+    },
+    {
+      "id": "VER-BUD-929",
+      "target": "TASK-BUD-580",
+      "target_type": "task",
+      "status": "passed",
+      "method": "machine-maintenance cpu pressure gate + smoke",
+      "timestamp": "2026-05-02T12:44:55.901Z",
+      "evidence": "Added CPU pressure signal to machine maintenance gate (read-only) with configurable thresholds and canonical blockers. Code: - `packages/pi-stack/extensions/machine-maintenance.ts` - Added CPU thresholds: - `cpuWarnUsedPct` - `cpuPauseUsedPct` - `cpuBlockUsedPct` - Added CPU reading types and logic: - `CpuPressureReading` - `classifyCpuPressure(...)` - `readCpuPressure(...)` - Gate now composes memory + disk + cpu severities. - Added blockers: - `cpu-pressure-warn` - `cpu-pressure-pause` - `cpu-pressure-block` - `cpu-pressure-unknown` - Tool/summary wording updated to memory/disk/cpu. Tests: - `packages/pi-stack/test/smoke/machine-maintenance.test.ts` - Added CPU warning-blocker coverage. - Added invalid CPU metrics -> `unknown` fail-closed coverage. - Updated baseline tests to include CPU sample path. Docs: - `docs/guides/control-plane-operating-doctrine.md` - Added long-run preflight guidance referencing `machine_maintenance_status` with memory/disk/CPU signals. Validation: - `npx vitest run packages/pi-stack/test/smoke/machine-maintenance.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Result: 10 passed (2 files). - marker checks passed for core/test/docs anchors."
     }
   ]
 }

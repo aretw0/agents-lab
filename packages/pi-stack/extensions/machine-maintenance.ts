@@ -1,7 +1,7 @@
 /**
  * machine-maintenance — deterministic host resource gate for long-runs.
  *
- * Goal: protect the workstation itself. If memory/disk pressure is too high,
+ * Goal: protect the workstation itself. If memory/disk/cpu pressure is too high,
  * long-runs should pause/cancel gracefully with checkpoint instead of repeatedly
  * hitting the wall.
  *
@@ -10,7 +10,7 @@
  * filesystem free space.
  */
 import { statfsSync } from "node:fs";
-import { freemem, totalmem } from "node:os";
+import { cpus, freemem, loadavg, totalmem } from "node:os";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { readSettingsJson, writeHandoffJson } from "./context-watchdog-storage";
@@ -35,6 +35,9 @@ export interface MachineMaintenanceThresholds {
 	diskWarnFreeMb: number;
 	diskPauseFreeMb: number;
 	diskBlockFreeMb: number;
+	cpuWarnUsedPct: number;
+	cpuPauseUsedPct: number;
+	cpuBlockUsedPct: number;
 }
 
 export interface ResourcePressureReading {
@@ -42,6 +45,14 @@ export interface ResourcePressureReading {
 	freeMb: number;
 	totalMb: number;
 	usedPct: number;
+	reason: string;
+}
+
+export interface CpuPressureReading {
+	severity: MachineMaintenanceSeverity;
+	usedPct: number;
+	loadAvg1m: number;
+	coreCount: number;
 	reason: string;
 }
 
@@ -55,6 +66,7 @@ export interface MachineMaintenanceGate {
 	shouldStop: boolean;
 	memory: ResourcePressureReading;
 	disk: ResourcePressureReading;
+	cpu: CpuPressureReading;
 	thresholds: MachineMaintenanceThresholds;
 	blockers: string[];
 	recommendation: string;
@@ -74,6 +86,10 @@ const DEFAULT_THRESHOLDS: MachineMaintenanceThresholds = {
 	diskWarnFreeMb: 5 * 1024,
 	diskPauseFreeMb: 2 * 1024,
 	diskBlockFreeMb: 1024,
+	// CPU pressure uses normalized 1m load percentage (loadavg1m / cores * 100).
+	cpuWarnUsedPct: 70,
+	cpuPauseUsedPct: 90,
+	cpuBlockUsedPct: 98,
 };
 
 function toMb(bytes: number): number {
@@ -109,6 +125,9 @@ export function resolveMachineMaintenanceThresholds(settings: Record<string, unk
 		diskWarnFreeMb: safeNumber(cfg.diskWarnFreeMb, DEFAULT_THRESHOLDS.diskWarnFreeMb, 512),
 		diskPauseFreeMb: safeNumber(cfg.diskPauseFreeMb, DEFAULT_THRESHOLDS.diskPauseFreeMb, 256),
 		diskBlockFreeMb: safeNumber(cfg.diskBlockFreeMb, DEFAULT_THRESHOLDS.diskBlockFreeMb, 128),
+		cpuWarnUsedPct: safeNumber(cfg.cpuWarnUsedPct, DEFAULT_THRESHOLDS.cpuWarnUsedPct, 1),
+		cpuPauseUsedPct: safeNumber(cfg.cpuPauseUsedPct, DEFAULT_THRESHOLDS.cpuPauseUsedPct, 1),
+		cpuBlockUsedPct: safeNumber(cfg.cpuBlockUsedPct, DEFAULT_THRESHOLDS.cpuBlockUsedPct, 1),
 	};
 }
 
@@ -184,6 +203,55 @@ export function readWorkspaceDiskPressure(cwd: string, thresholds: MachineMainte
 	}
 }
 
+export function classifyCpuPressure(input: {
+	loadAvg1m: number;
+	coreCount: number;
+	thresholds: MachineMaintenanceThresholds;
+}): CpuPressureReading {
+	if (!Number.isFinite(input.loadAvg1m) || !Number.isFinite(input.coreCount) || input.coreCount <= 0) {
+		return {
+			severity: "unknown",
+			usedPct: 0,
+			loadAvg1m: Number.isFinite(input.loadAvg1m) ? input.loadAvg1m : 0,
+			coreCount: Number.isFinite(input.coreCount) ? Math.max(0, Math.floor(input.coreCount)) : 0,
+			reason: "cpu unavailable: invalid load/core metrics",
+		};
+	}
+	const loadPerCore = Math.max(0, input.loadAvg1m / input.coreCount);
+	const usedPct = Math.round(loadPerCore * 10_000) / 100;
+	const t = input.thresholds;
+	let severity: MachineMaintenanceSeverity = "ok";
+	if (usedPct >= t.cpuBlockUsedPct) severity = "block";
+	else if (usedPct >= t.cpuPauseUsedPct) severity = "pause";
+	else if (usedPct >= t.cpuWarnUsedPct) severity = "warn";
+	return {
+		severity,
+		usedPct,
+		loadAvg1m: Math.round(input.loadAvg1m * 100) / 100,
+		coreCount: Math.max(1, Math.floor(input.coreCount)),
+		reason: `cpu load1=${Math.round(input.loadAvg1m * 100) / 100} cores=${Math.max(1, Math.floor(input.coreCount))} used=${usedPct}%`,
+	};
+}
+
+export function readCpuPressure(thresholds: MachineMaintenanceThresholds): CpuPressureReading {
+	try {
+		const avg = loadavg();
+		return classifyCpuPressure({
+			loadAvg1m: Number(avg?.[0]),
+			coreCount: cpus().length,
+			thresholds,
+		});
+	} catch (error) {
+		return {
+			severity: "unknown",
+			usedPct: 0,
+			loadAvg1m: 0,
+			coreCount: 0,
+			reason: `cpu unavailable: ${String((error as Error)?.message ?? error)}`,
+		};
+	}
+}
+
 function actionForSeverity(severity: MachineMaintenanceSeverity): MachineMaintenanceAction {
 	if (severity === "block") return "checkpoint-and-stop";
 	if (severity === "pause") return "pause-long-runs";
@@ -201,10 +269,18 @@ function recommendationForAction(action: MachineMaintenanceAction): string {
 export function evaluateMachineMaintenanceGate(input: {
 	memory: ResourcePressureReading;
 	disk: ResourcePressureReading;
+	cpu?: CpuPressureReading;
 	thresholds: MachineMaintenanceThresholds;
 	nowIso?: string;
 }): MachineMaintenanceGate {
-	const severity = maxSeverity(input.memory.severity, input.disk.severity);
+	const cpu = input.cpu ?? {
+		severity: "ok" as const,
+		usedPct: 0,
+		loadAvg1m: 0,
+		coreCount: 0,
+		reason: "cpu not-sampled",
+	};
+	const severity = maxSeverity(maxSeverity(input.memory.severity, input.disk.severity), cpu.severity);
 	const action = actionForSeverity(severity);
 	const blockers: string[] = [];
 	if (input.memory.severity === "warn") blockers.push("memory-pressure-warn");
@@ -213,8 +289,12 @@ export function evaluateMachineMaintenanceGate(input: {
 	if (input.disk.severity === "warn") blockers.push("disk-pressure-warn");
 	if (input.disk.severity === "pause") blockers.push("disk-pressure-pause");
 	if (input.disk.severity === "block") blockers.push("disk-pressure-block");
+	if (cpu.severity === "warn") blockers.push("cpu-pressure-warn");
+	if (cpu.severity === "pause") blockers.push("cpu-pressure-pause");
+	if (cpu.severity === "block") blockers.push("cpu-pressure-block");
 	if (input.memory.severity === "unknown") blockers.push("memory-pressure-unknown");
 	if (input.disk.severity === "unknown") blockers.push("disk-pressure-unknown");
+	if (cpu.severity === "unknown") blockers.push("cpu-pressure-unknown");
 
 	return {
 		generatedAtIso: input.nowIso ?? new Date().toISOString(),
@@ -226,6 +306,7 @@ export function evaluateMachineMaintenanceGate(input: {
 		shouldStop: action === "checkpoint-and-stop",
 		memory: input.memory,
 		disk: input.disk,
+		cpu,
 		thresholds: input.thresholds,
 		blockers,
 		recommendation: recommendationForAction(action),
@@ -237,6 +318,7 @@ export function readMachineMaintenanceGate(cwd: string): MachineMaintenanceGate 
 	return evaluateMachineMaintenanceGate({
 		memory: readMemoryPressure(thresholds),
 		disk: readWorkspaceDiskPressure(cwd, thresholds),
+		cpu: readCpuPressure(thresholds),
 		thresholds,
 	});
 }
@@ -250,6 +332,7 @@ export function formatMachineMaintenanceGate(gate: MachineMaintenanceGate): stri
 		`monitors=${gate.canEvaluateMonitors ? "allow" : "hold"}`,
 		gate.memory.reason,
 		gate.disk.reason,
+		gate.cpu.reason,
 		`recommendation=${gate.recommendation}`,
 	].join(" · ");
 }
@@ -260,7 +343,7 @@ function resolveContextCwd(ctx: Pick<ExtensionContext, "cwd"> | undefined): stri
 
 function persistGateToHandoff(ctx: ExtensionContext, gate: MachineMaintenanceGate): void {
 	const nextActions = gate.shouldStop
-		? ["Machine maintenance: checkpoint-and-stop until memory/disk pressure recovers."]
+		? ["Machine maintenance: checkpoint-and-stop until memory/disk/cpu pressure recovers."]
 		: gate.shouldCheckpoint
 			? ["Machine maintenance: pause long-runs; continue only recovery/cleanup slices."]
 			: ["Machine maintenance: continue bounded work; avoid heavy loops if warn/unknown persists."];
@@ -311,7 +394,7 @@ export default function machineMaintenanceExtension(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "machine_maintenance_status",
 		label: "Machine Maintenance Status",
-		description: "Deterministic host memory/disk pressure gate for graceful long-run pause/cancel.",
+		description: "Deterministic host memory/disk/cpu pressure gate for graceful long-run pause/cancel.",
 		parameters: Type.Object({
 			persistHandoff: Type.Optional(Type.Boolean({ default: false })),
 		}),

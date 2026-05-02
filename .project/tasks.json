@@ -13647,7 +13647,7 @@
     {
       "id": "TASK-BUD-580",
       "description": "Machine pressure v2: adicionar sinais CPU read-only (load/usage) ao gate de manutenção com classificação warn|pause|block|unknown.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-579"
@@ -13663,7 +13663,8 @@
         "smoke cobre cenários ok/warn/unknown sem mutação operacional."
       ],
       "milestone": "long-run-maintenance-wave-2026-05",
-      "notes": "[rationale:risk-control] evita acelerar long-runs quando CPU já está saturada."
+      "notes": "[rationale:risk-control] evita acelerar long-runs quando CPU já está saturada.\nImplementados sinais CPU read-only no machine maintenance gate com blockers cpu-pressure-* e smoke de ok/warn/unknown.\n2026-05-02: gate de machine pressure agora inclui CPU read-only para evitar aceleração acima da capacidade do host.",
+      "verification": "VER-BUD-929"
     },
     {
       "id": "TASK-BUD-581",

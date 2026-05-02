@@ -444,6 +444,8 @@ Stop condition para estoque baixo:
 No checkpoint/handoff AFK, preferir template curto material-first:
 - `afk-handoff: decision=<continue|seed-backlog|blocked> stock=<validationKnown>/<target> blockers=<lista-curta|none> next=<ação-segura>`.
 
+Préflight de capacidade da máquina para long-run deve consultar `machine_maintenance_status` com sinais de memória/disco/CPU. Em `warn|pause|block`, reduzir para fatias bounded e evitar acelerar batches até recuperar headroom.
+
 ### Fila pós-calibração
 
 Após fechar uma macro-task de calibração, não puxe backlog protegido só para manter movimento. Em 2026-05-01, depois de `TASK-BUD-153`, `TASK-BUD-405` e `TASK-BUD-416`, `autonomy_lane_next_task` sem escopos protegidos retornou `no-eligible-tasks`: 8 candidates, 4 bloqueados por dependência e 4 pulados por escopo protegido. As classes restantes eram promotion/recovery de colony, GitHub Actions/remote/release, research/config inspiration e tarefas dependentes.
