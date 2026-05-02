@@ -10149,6 +10149,15 @@
       "method": "runtime tool wiring + smoke + marker-check",
       "timestamp": "2026-05-02T02:11:55.135Z",
       "evidence": "Exposed first-party read-only runtime tool for temp-free dirty snapshot. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - added parser contracts: `parseGitStatusPorcelainLine`, `parseGitStatusPorcelainOutput`, `readGitDirtySnapshot`. - added type envelope `GitDirtySnapshot` with `dispatchAllowed=false`, `authorization=none`. - registered tool `git_dirty_snapshot` executing bounded command `git -c core.safecrlf=false status --porcelain`. - `packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` - added parse/output regression for porcelain sample. - added read via injectable deps regression. - added registration assertion for `git_dirty_snapshot`. - `docs/guides/control-plane-operating-doctrine.md` - guidance now includes runtime tool `git_dirty_snapshot` alongside script `npm run git:dirty:snapshot`. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts` => 2 files passed, 8 tests passed. - marker checks passed on surface and doctrine anchors."
+    },
+    {
+      "id": "VER-BUD-881",
+      "target": "TASK-BUD-532",
+      "target_type": "task",
+      "status": "passed",
+      "method": "readiness composition + smoke + marker-check",
+      "timestamp": "2026-05-02T02:17:07.831Z",
+      "evidence": "Composed fresh-pack decision into continuation readiness packet. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_continuation_readiness` now calls `consumeContextPreloadPack(cwd, { profile: \"control-plane-core\" })`. - summary appends `preload=<use-pack|fallback-canonical>`. - details now include full `preload` envelope (`mode`, `decision`, `staleReasons`, `dispatchAllowed=false`, `authorization=none`). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - updated continuation readiness assertions to verify preload fallback path in no-pack scenario. - `docs/guides/openai-context-window-playbook.md` - documented composition with `context_watch_continuation_readiness` and `preload.decision` contract. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks: - `context-watchdog.ts` markers (`consumeContextPreloadPack`, `preload=`, `context-watch-continuation-readiness`) matched. - playbook markers (`context_watch_continuation_readiness`, `preload.decision=use-pack|fallback-canonical`) matched."
     }
   ]
 }

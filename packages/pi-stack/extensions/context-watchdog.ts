@@ -2088,7 +2088,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				staleFocusCount,
 				localAuditReasons,
 			});
-			const summary = formatContextWatchContinuationReadinessSummary({
+			const preload = consumeContextPreloadPack(ctx.cwd, {
+				profile: "control-plane-core",
+			});
+			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
 				localAuditDecision,
@@ -2096,6 +2099,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				protectedPaths,
 				staleFocusCount,
 			});
+			const summary = `${readinessSummary} preload=${preload.decision}`;
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {
@@ -2110,6 +2114,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					protectedPaths,
 					recommendationCode: recommendation.recommendationCode,
 					nextAction: recommendation.nextAction,
+					preload,
 					localContinuity: localAudit,
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",

@@ -12588,6 +12588,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] padronizar inspeção de dirty state no runtime evita padrão `> arquivo`+`rm` e reduz atrito operacional.\n[provenance:human] source_task=TASK-BUD-530 reason=continuar a cadência com superfície first-party reutilizável para status git sem temp files\n2026-05-02: dirty snapshot agora disponível como tool runtime read-only, eliminando necessidade de arquivos temporários para inspeção de git state.",
       "verification": "VER-BUD-880"
+    },
+    {
+      "id": "TASK-BUD-532",
+      "description": "Compor `context_preload_consume` dentro de `context_watch_continuation_readiness` para expor decisão fresh-pack (use-pack/fallback) no packet de continuidade.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-531"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_continuation_readiness` retorna `preload` em details com decisão e stale reasons.",
+        "Smoke cobre caminho sem pack (`fallback-canonical`) sem alterar autorização/dispatch.",
+        "Doc registra composição entre readiness packet e `context_preload_consume`."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] continuidade fica mais determinística ao expor no mesmo packet se o contexto pode usar pack fresco ou deve cair no canônico.\n[provenance:human] source_task=TASK-BUD-531 reason=evolução natural da wave de freshness para reduzir releitura e manter retomada auditável\n2026-05-02: readiness packet agora já informa se o contexto pode usar fresh-pack ou deve cair no caminho canônico.",
+      "verification": "VER-BUD-881"
     }
   ]
 }

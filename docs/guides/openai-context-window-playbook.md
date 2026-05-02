@@ -174,6 +174,7 @@ Consumo fail-closed do pack (com fallback canônico quando stale):
 - `npm run context:preload:consume:worker` (`agent-worker-lean`)
 - `npm run context:preload:consume:scout` (`swarm-scout-min`)
 - runtime tool read-only: `context_preload_consume`
+- composição em readiness packet: `context_watch_continuation_readiness` inclui `preload.decision=use-pack|fallback-canonical`
 
 Saídas sugerem dois perfis de carga:
 - `control-plane-core`: contexto mínimo para coordenação/decisão.

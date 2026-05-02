@@ -1576,6 +1576,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("focus=TASK-BUD-321");
 			expect(result.content?.[0]?.text).toContain("reasons=");
 			expect(result.content?.[0]?.text).toContain("authorization=none");
+			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-readiness",
@@ -1586,6 +1587,12 @@ describe("context-watchdog", () => {
 				recommendationCode: "refresh-focus-checkpoint",
 				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
 				localContinuitySummary: expect.stringContaining("local-continuity-audit:"),
+				preload: {
+					mode: "context-preload-consume",
+					decision: "fallback-canonical",
+					dispatchAllowed: false,
+					authorization: "none",
+				},
 			});
 			expect(result.details?.autoResumePrompt).not.toContain("focusTasks: board-task-selection");
 			expect(formatContextWatchContinuationReadinessSummary({
