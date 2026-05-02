@@ -1,38 +1,37 @@
 {
-  "timestamp": "2026-05-02T18:16:38.719Z",
-  "context": "wave de capacidade pragmática avançada: guardrails de bash agora bloqueiam scans amplos de du e find sem limites explícitos, reduzindo comand [snip] sinal e forçando alternativas bounded. [truncated:+18 chars]",
+  "timestamp": "2026-05-02T18:21:51.618Z",
+  "context": "adiantamento de capacidade concluído com qualidade: guardrails de bash agora bloqueiam scans amplos recorrentes (du, find, ls -R) e orientam [snip] com comandos longos e cancels manuais. [truncated:+46 chars]",
   "next_actions": [
-    "Opcional: adicionar regra análoga para ls -R amplo em roots grandes.",
-    "Manter operação em triagem limpar->pesquisar->escalar com checks bounded.",
-    "Se quiser throughput imediato, semear 1-3 tasks local-safe para voltar autonomy_lane_next_task=ready."
+    "Opcional: estender heurística para tree/fd amplos se incidência aparecer.",
+    "Se foco voltar a throughput, semear nova task local-safe elegível para destravar autonomy_lane_next_task."
   ],
   "blockers": [],
   "recent_validation": [
     "VER-BUD-968",
     "VER-BUD-969",
-    "vitest guardrails-bash-guard-policies/control-plane-doc-checklist/guardrails-core-hardening-reexport 4/4"
+    "VER-BUD-970"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-620",
+    "focus": "TASK-BUD-621",
     "canonical_links": [
-      "task:TASK-BUD-620",
+      "task:TASK-BUD-621",
       "verification:VER-BUD-968"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T18:16:38.719Z",
+    "generatedAtIso": "2026-05-02T18:21:51.618Z",
     "level": "checkpoint",
-    "percent": 58,
+    "percent": 57,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T18:16:38.719Z",
+      "atIso": "2026-05-02T18:21:51.618Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 58,
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -43,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-620"
+    "TASK-BUD-621"
   ]
 }
