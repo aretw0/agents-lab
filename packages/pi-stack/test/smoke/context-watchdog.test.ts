@@ -43,6 +43,7 @@ import contextWatchdogExtension, {
 	shouldNotifyAutoResumeSuppression,
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
+	resolvePreCompactReloadSignal,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchCompactStage,
 	resolveContextWatchOperatorSignal,
@@ -412,6 +413,25 @@ describe("context-watchdog", () => {
 		expect(shouldNotifyAutoResumeSuppression("checkpoint-evidence-missing")).toBe(true);
 		expect(shouldNotifyAutoResumeSuppression("board-handoff-divergence")).toBe(true);
 		expect(shouldNotifyAutoResumeSuppression("reload-required")).toBe(true);
+		expect(resolvePreCompactReloadSignal({ assessmentLevel: "ok", reloadRequired: false })).toMatchObject({
+			active: false,
+			reason: "reload-not-required",
+		});
+		expect(resolvePreCompactReloadSignal({ assessmentLevel: "warn", reloadRequired: true })).toMatchObject({
+			active: false,
+			reason: "level-not-precompact",
+			hint: expect.stringContaining("/reload"),
+		});
+		expect(resolvePreCompactReloadSignal({ assessmentLevel: "checkpoint", reloadRequired: true })).toMatchObject({
+			active: true,
+			reason: "reload-required-checkpoint",
+			hint: expect.stringContaining("/reload"),
+		});
+		expect(resolvePreCompactReloadSignal({ assessmentLevel: "compact", reloadRequired: true })).toMatchObject({
+			active: true,
+			reason: "reload-required-compact",
+			hint: expect.stringContaining("/reload"),
+		});
 		expect(resolveAutoResumeDispatchDecision({
 			autoResumeReady: true,
 			hasPendingMessages: true,
@@ -1351,6 +1371,10 @@ describe("context-watchdog", () => {
 					stage: "normal-window",
 					shouldGracefulStop: false,
 					shouldForceCompact: false,
+				},
+				preCompactReloadSignal: {
+					active: false,
+					reason: "reload-not-required",
 				},
 				dirtySignal: "unknown",
 				preloadDecision: "fallback-canonical",

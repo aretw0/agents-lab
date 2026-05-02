@@ -13019,7 +13019,7 @@
     {
       "id": "TASK-BUD-552",
       "description": "Adicionar gate reload-aware pré-compact com hint antecipado (`/reload`) antes do auto-resume suprimido.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-551"
@@ -13035,7 +13035,8 @@
         "Contrato mantém `authorization=none` e sem dispatch automático adicional."
       ],
       "milestone": "context-graceful-stop-reload-2026-05",
-      "notes": "[rationale:risk-control] antecipar reload reduz sensação de travamento pós-compact e melhora previsibilidade operacional.\n[provenance:human] source_task=TASK-BUD-551 reason=segundo bloco para atacar diretamente o problema reportado de reload obrigatório pós-compact."
+      "notes": "[rationale:risk-control] antecipar reload reduz sensação de travamento pós-compact e melhora previsibilidade operacional.\n[provenance:human] source_task=TASK-BUD-551 reason=segundo bloco para atacar diretamente o problema reportado de reload obrigatório pós-compact.\n2026-05-03: gate reload-aware pré-compact adicionado; sinal antecipado aparece em checkpoint/compact com hint consistente de /reload.",
+      "verification": "VER-BUD-896"
     },
     {
       "id": "TASK-BUD-553",

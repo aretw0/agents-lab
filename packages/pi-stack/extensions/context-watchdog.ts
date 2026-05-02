@@ -86,10 +86,12 @@ import {
 	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
+	resolvePreCompactReloadSignal,
 	shouldEmitAutoResumeAfterCompact,
 	shouldRefreshHandoffBeforeAutoCompact,
 	type AutoResumeDispatchReason,
 	type HandoffPrepReason,
+	type PreCompactReloadSignal,
 } from "./context-watchdog-resume";
 import {
 	applyContextWatchToHandoff,
@@ -148,6 +150,7 @@ export {
 	describeAutoResumeDispatchHint,
 	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
+	resolvePreCompactReloadSignal,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
 	shouldAnnounceContextWatch,
@@ -174,6 +177,7 @@ export type {
 	HandoffFreshnessLabel,
 	HandoffPrepReason,
 	HandoffRefreshMode,
+	PreCompactReloadSignal,
 };
 
 export type ContextWatchdogLevel = "ok" | "warn" | "checkpoint" | "compact";
@@ -1451,8 +1455,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffTsForSignal = typeof handoffForCalmClose.timestamp === "string" ? handoffForCalmClose.timestamp : undefined;
 		const handoffFreshnessForSignal = resolveHandoffFreshness(handoffTsForSignal, now, config.handoffFreshMaxAgeMs);
 		const handoffRefreshModeForSignal = handoffRefreshMode(handoffFreshnessForSignal.label, config.autoResumeAfterCompact);
+		const reloadRequired = isReloadRequiredForSourceUpdate();
+		const preCompactReloadSignal = resolvePreCompactReloadSignal({
+			assessmentLevel: assessment.level,
+			reloadRequired,
+		});
 		const operatorSignal = resolveContextWatchOperatorSignal({
-			reloadRequired: isReloadRequiredForSourceUpdate(),
+			reloadRequired,
 			handoffManualRefreshRequired: handoffRefreshModeForSignal === "manual",
 			signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
 				getAnnouncementsInWindow(now),
@@ -1486,6 +1495,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					stopHint: deterministicStopHint,
 					operatorAction,
 					operatorReasons: operatorSignal.reasons,
+					preCompactReloadSignal,
 				},
 			);
 			if (config.notify && deterministicStop.reason !== "compact-checkpoint-required") {
@@ -1983,8 +1993,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
 			const nowMs = Date.now();
+			const reloadRequired = isReloadRequiredForSourceUpdate();
+			const preCompactReloadSignal = resolvePreCompactReloadSignal({
+				assessmentLevel: assessment.level,
+				reloadRequired,
+			});
 			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired: isReloadRequiredForSourceUpdate(),
+				reloadRequired,
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
 				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
 					getAnnouncementsInWindow(nowMs),
@@ -2041,6 +2056,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorAction,
 				operatingCadence,
 				compactStage,
+				preCompactReloadSignal,
 				dirtySignal: freshness.dirtySignal,
 				preloadDecision: freshness.preloadDecision,
 				gitDirty: freshness.gitDirty,
@@ -2574,8 +2590,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			lastAssessment = assessment;
 			const autoCompact = currentAutoCompactState(ctx, assessment);
 			const nowMs = Date.now();
+			const reloadRequired = isReloadRequiredForSourceUpdate();
+			const preCompactReloadSignal = resolvePreCompactReloadSignal({
+				assessmentLevel: assessment.level,
+				reloadRequired,
+			});
 			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired: isReloadRequiredForSourceUpdate(),
+				reloadRequired,
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
 				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
 					getAnnouncementsInWindow(nowMs),
@@ -2609,6 +2630,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						handoffFreshness: autoCompact.handoffFreshness.label,
 					}),
 					`recommendation=${assessment.recommendation}`,
+					preCompactReloadSignal.active
+						? `reloadGate=${preCompactReloadSignal.reason} hint=${(preCompactReloadSignal.hint ?? "run_/reload").replace(/\s+/g, "_")}`
+						: `reloadGate=${preCompactReloadSignal.reason}`,
 					"details=context_watch_status structured payload",
 				].join("\n"),
 				assessment.severity,

@@ -23,6 +23,20 @@ export type AutoResumeDispatchReason =
 	| "lane-queue-pending"
 	| "send";
 
+export type PreCompactReloadSignalReason =
+	| "reload-not-required"
+	| "level-not-precompact"
+	| "reload-required-checkpoint"
+	| "reload-required-compact";
+
+export type PreCompactReloadSignal = {
+	active: boolean;
+	reason: PreCompactReloadSignalReason;
+	level: ContextWatchdogLevel;
+	hint?: string;
+	summary: string;
+};
+
 export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReason): string {
 	switch (reason) {
 		case "send":
@@ -69,6 +83,42 @@ export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason)
 
 export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReason): boolean {
 	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence";
+}
+
+export function resolvePreCompactReloadSignal(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	reloadRequired?: boolean;
+}): PreCompactReloadSignal {
+	const level = input.assessmentLevel;
+	const reloadRequired = input.reloadRequired === true;
+	if (!reloadRequired) {
+		return {
+			active: false,
+			reason: "reload-not-required",
+			level,
+			summary: "pre-compact-reload: clear",
+		};
+	}
+	if (level !== "checkpoint" && level !== "compact") {
+		return {
+			active: false,
+			reason: "level-not-precompact",
+			level,
+			hint: describeAutoResumeDispatchHint("reload-required"),
+			summary: `pre-compact-reload: deferred level=${level}`,
+		};
+	}
+	const reason: PreCompactReloadSignalReason = level === "checkpoint"
+		? "reload-required-checkpoint"
+		: "reload-required-compact";
+	const hint = describeAutoResumeDispatchHint("reload-required");
+	return {
+		active: true,
+		reason,
+		level,
+		hint,
+		summary: `pre-compact-reload: active level=${level}`,
+	};
 }
 
 export function shouldEmitAutoResumeAfterCompact(

@@ -10284,6 +10284,15 @@
       "method": "policy primitive + status payload + smoke/marker checks",
       "timestamp": "2026-05-02T04:34:15.599Z",
       "evidence": "Implemented deterministic compact-stage primitive and surfaced it in context status. Changes: - `packages/pi-stack/extensions/context-watchdog-policy.ts` - added `ContextWatchCompactStage` + `ContextWatchCompactStageSignal`. - added `resolveContextWatchCompactStage(...)` with explicit stages: - `normal-window` - `graceful-stop-window` (checkpoint) - `force-compact-window` (compact) - updated checkpoint recommendation text to emphasize graceful close before compact threshold. - `packages/pi-stack/extensions/context-watchdog.ts` - imported/exported `resolveContextWatchCompactStage`. - `context_watch_status` now includes `details.compactStage` for structured operator visibility. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - added stage-transition test (`graceful-stop` before `force-compact`). - extended status-tool assertion to include `compactStage` shape. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 57 tests passed. - marker checks passed for new stage primitive, status payload wiring, and smoke anchors."
+    },
+    {
+      "id": "VER-BUD-896",
+      "target": "TASK-BUD-552",
+      "target_type": "task",
+      "status": "passed",
+      "method": "reload-aware pre-compact gate + smoke + marker checks",
+      "timestamp": "2026-05-02T04:54:38.814Z",
+      "evidence": "Implemented reload-aware pre-compact signaling before final compact/auto-resume suppression. Changes: - `packages/pi-stack/extensions/context-watchdog-resume.ts` - Added `resolvePreCompactReloadSignal(...)` with deterministic reasons: - `reload-not-required` - `level-not-precompact` - `reload-required-checkpoint` - `reload-required-compact` - Reuses `describeAutoResumeDispatchHint(\"reload-required\")` so pre-compact and suppression hints stay consistent. - `packages/pi-stack/extensions/context-watchdog.ts` - Wired `resolvePreCompactReloadSignal` in runtime (`run`), status tool payload, and `/context-watch` command status line (`reloadGate=...`). - `context_watch_status.details` now includes `preCompactReloadSignal` (read-only visibility at checkpoint/near-compact). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - Added assertions for pre-compact reload signal behavior (ok/warn/checkpoint/compact). - Extended status tool assertion to include `preCompactReloadSignal`. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 57 passed. - marker-checks passed for resume helper, runtime wiring, and smoke anchors."
     }
   ]
 }
