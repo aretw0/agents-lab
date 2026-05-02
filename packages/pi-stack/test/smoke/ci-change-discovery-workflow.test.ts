@@ -26,4 +26,14 @@ describe("ci workflow change-discovery report-only loop", () => {
     expect(ciWorkflow).toContain("needs: [changes]");
     expect(ciWorkflow).toContain("run: npm run ci:smoke:gate");
   });
+
+  it("keeps actions runtime baseline on Node24 with current majors", () => {
+    const ciWorkflow = readRepoFile(".github/workflows/ci.yml");
+
+    expect(ciWorkflow).toContain('FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"');
+    expect(ciWorkflow).toContain("uses: actions/checkout@v6");
+    expect(ciWorkflow).toContain("uses: actions/setup-node@v6");
+    expect(ciWorkflow).toContain("uses: actions/upload-artifact@v7");
+    expect(ciWorkflow).toContain("uses: actions/github-script@v9");
+  });
 });

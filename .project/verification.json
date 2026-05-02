@@ -11022,6 +11022,15 @@
       "method": "workflow impact-label classification + targeted smoke guard",
       "timestamp": "2026-05-02T20:20:49.144Z",
       "evidence": "Improved CI change-discovery signal density with an explicit impact label for faster triage. Changes: - `.github/workflows/ci.yml` - Added `impact_label` output in `changes` job. - Fallback path (missing base SHA) now emits `impact_label=unknown` and includes it in summary markdown. - Normal path computes deterministic labels: - `none`, `docs-only`, `ci-only`, `code`, `ci+code`, fallback `mixed`. - Smoke summary line now includes `impact=<impact_label>`. - Added advisory notice when `impact_label=ci+code` to prioritize workflow + runtime review. - `packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - Added anchor assertion for `impact_label` output wiring. Validation: - `npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - 1 file / 2 tests passed. Outcome: - PR and job summaries are quicker to scan (5-second impact hint) while preserving full-gate policy."
+    },
+    {
+      "id": "VER-BUD-978",
+      "target": "TASK-BUD-633",
+      "target_type": "task",
+      "status": "passed",
+      "method": "github-actions node24 baseline alignment + workflow smoke guard",
+      "timestamp": "2026-05-02T20:37:00.119Z",
+      "evidence": "Removed Node20 deprecation drift from CI by aligning workflow runtime baseline and action majors. Changes: - `.github/workflows/ci.yml` - Added top-level env opt-in: - `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: \"true\"` - Updated action majors in CI workflow: - `actions/checkout@v4` -> `actions/checkout@v6` - `actions/setup-node@v4` -> `actions/setup-node@v6` - `actions/upload-artifact@v4` -> `actions/upload-artifact@v7` - `actions/github-script@v7` -> `actions/github-script@v9` - `packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - Added regression assertions for Node24 baseline env + updated action majors. Validation: 1) Targeted workflow smoke: - `npx vitest run packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - result: 1 file / 3 tests passed. 2) Full parity gate: - `npm run ci:local:parity` - result: green (116 files / 1086 tests + sovereignty strict + diff strict). Outcome: - CI workflow is now explicitly aligned with Node24 action runtime baseline and modern action majors, reducing annotation drift noise while preserving full gates."
     }
   ]
 }

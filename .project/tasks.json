@@ -14693,6 +14693,24 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] aumenta signal-to-noise de triagem sem alterar política de execução dos gates.\n2026-05-02: `impact_label` adicionado no change discovery + resumo smoke; sem alterar execução full gate.",
       "verification": "VER-BUD-977"
+    },
+    {
+      "id": "TASK-BUD-633",
+      "description": "[P1] Remover annotations de depreciação Node20 no workflow CI alinhando actions para baseline Node24 (opt-in + versões atuais).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml",
+        "packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Workflow define `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` no topo.",
+        "CI usa majors atuais (checkout v6, setup-node v6, upload-artifact v7, github-script v9).",
+        "Smoke workflow test cobre anchors de baseline Node24 e versions."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduz drift/ruído operacional de runner sem alterar gate funcional.\n2026-05-02: CI alinhado a Node24 (env + action majors atuais) com smoke guard dedicado.",
+      "verification": "VER-BUD-978"
     }
   ]
 }

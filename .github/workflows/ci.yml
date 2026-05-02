@@ -16,12 +16,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Opt-in antecipado para baseline Node24 nos GitHub Actions (reduz drift de runtime).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   commit-lint:
     name: Conventional Commits
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -56,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     if: "!startsWith(github.event.head_commit.message, 'chore: release')"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Verificar changeset presente
         run: |
@@ -80,7 +84,7 @@ jobs:
       docs_only: ${{ steps.detect.outputs.docs_only }}
       impact_label: ${{ steps.detect.outputs.impact_label }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -211,7 +215,7 @@ jobs:
 
       - name: Upload change discovery artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ci-change-discovery
           path: .artifacts/ci-change-discovery
@@ -220,7 +224,7 @@ jobs:
 
       - name: Upsert comentário de change discovery no PR
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -272,11 +276,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
 
@@ -309,11 +313,11 @@ jobs:
     name: Sovereignty Report
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
 
@@ -324,7 +328,7 @@ jobs:
         run: node scripts/stack-sovereignty-audit.mjs --no-strict
 
       - name: Publicar artifact do relatório
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stack-sovereignty-audit
           path: docs/architecture/stack-sovereignty-audit-latest.md
@@ -332,7 +336,7 @@ jobs:
 
       - name: Upsert comentário no PR com relatório
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
