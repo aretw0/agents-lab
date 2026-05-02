@@ -13554,6 +13554,91 @@
       "milestone": "afk-materialization-wave-2026-05",
       "notes": "[rationale:risk-control] fechamento explícito evita regressão para execução longa sem backlog útil.\nPacket de material readiness concluído; iniciada regressão/closeout da wave AFK materialization com indicadores de estoque mínimo.\n2026-05-02: wave AFK materialization encerrada com indicadores mínimos de estoque e regressão focal verde.",
       "verification": "VER-BUD-924"
+    },
+    {
+      "id": "TASK-BUD-576",
+      "description": "AFK continuity: adicionar resumo curto de material readiness no context-watch para orientar continuar vs seed-backlog sem abrir dispatch.",
+      "status": "in-progress",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-575"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "summary/readiness expõe sinal material readiness AFK em modo read-only.",
+        "recommendationCode curto diferencia continue vs seed-backlog.",
+        "smoke da continuidade permanece verde."
+      ],
+      "milestone": "afk-continuity-wave-2026-05",
+      "notes": "[rationale:risk-control] visibilidade curta de material evita long-run vazio e reduz iteração humana para decisões repetidas."
+    },
+    {
+      "id": "TASK-BUD-577",
+      "description": "AFK continuity: adicionar packet report-only de semeadura recomendada quando estoque local-safe estiver baixo.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-576"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/primitives/lane-brainstorm-packet.md"
+      ],
+      "acceptance_criteria": [
+        "packet retorna decisão seed-now|wait com blockers e sem dispatch.",
+        "considera material_readiness + foco atual + limites de semeadura.",
+        "smoke cobre caminho de recomendação positiva e bloqueio."
+      ],
+      "milestone": "afk-continuity-wave-2026-05",
+      "notes": "[rationale:risk-control] semeadura orientada por packet reduz improviso e mantém governança fail-closed."
+    },
+    {
+      "id": "TASK-BUD-578",
+      "description": "AFK continuity: consolidar template operacional de handoff material-first com campos mínimos para retomada de baixa iteração.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-577"
+      ],
+      "files": [
+        "docs/primitives/nudge-free-local-continuity.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/handoff.json"
+      ],
+      "acceptance_criteria": [
+        "template curto inclui decision, estoque, blockers e próxima ação.",
+        "linguagem AFK consistente (sem acoplamento a horário).",
+        "checkpoint final usa template atualizado."
+      ],
+      "milestone": "afk-continuity-wave-2026-05",
+      "notes": "[rationale:risk-control] handoff compacto e padronizado reduz ambiguidade no retorno AFK."
+    },
+    {
+      "id": "TASK-BUD-579",
+      "description": "Fechar wave AFK continuity com regressão focal e recomendação explícita de operação contínua low-iteration.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-578"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts",
+        "docs/research/afk-materialization-patterns-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "pack focal verde com comando único reproduzível.",
+        "closeout registra quando continuar e quando semear backlog.",
+        "próximo foco fica explícito no handoff."
+      ],
+      "milestone": "afk-continuity-wave-2026-05",
+      "notes": "[rationale:risk-control] fechamento disciplinado evita regressão para paradas sem diagnóstico claro."
     }
   ]
 }

@@ -1,47 +1,47 @@
 {
-  "timestamp": "2026-05-02T12:07:21.575Z",
-  "context": "Wave AFK materialization concluída (572..575) com regressão verde e indicadores de estoque mínimo formalizados. Não há task in-progress no board neste momento.",
+  "timestamp": "2026-05-02T12:09:58.302Z",
+  "context": "Novo lote AFK continuity semeado (TASK-BUD-576..579) para manter produção low-iteration contínua. Execução iniciada em TASK-BUD-576.",
+  "current_tasks": [
+    "TASK-BUD-576"
+  ],
   "next_actions": [
-    "Escolher próximo foco explícito para continuar lane AFK",
-    "Se necessário, semear novo lote local-safe via brainstorm+seed preview"
+    "Adicionar resumo de material readiness AFK no context-watch",
+    "Validar smoke de continuidade",
+    "Promover para TASK-BUD-577 após verificação"
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-921",
-    "VER-BUD-922",
-    "VER-BUD-923"
+    "Wave AFK materialization fechada com VER-BUD-924",
+    "no-eligible local-safe resolvido por nova semeadura local-safe"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-575",
+    "focus": "TASK-BUD-576",
     "canonical_links": [
-      "task:TASK-BUD-575",
-      "verification:VER-BUD-921"
+      "task:TASK-BUD-576",
+      "task:TASK-BUD-577",
+      "verification:VER-BUD-924"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T12:07:21.575Z",
+    "generatedAtIso": "2026-05-02T12:09:58.302Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 33,
     "action": "continue",
-    "recommendation": "choose-next-focus",
-    "focus_task_status": "completed"
+    "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T12:07:21.575Z",
+      "atIso": "2026-05-02T12:09:58.302Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "choose-next-focus"
+      "recommendation": "continue-bounded"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-575"
   ]
 }
