@@ -46,8 +46,100 @@ export interface AutonomyLaneReadinessResult {
   nextAction: string;
 }
 
+export type DelegationLaneCapabilityDecision = "ready" | "needs-evidence" | "blocked";
+
+export interface DelegationLaneCapabilityInput {
+  preloadDecision?: "use-pack" | "fallback-canonical" | string;
+  dirtySignal?: "clean" | "dirty" | "unknown" | string;
+  monitorClassifyFailures?: number;
+  subagentsReady?: boolean;
+}
+
+export interface DelegationLaneCapabilitySnapshot {
+  decision: DelegationLaneCapabilityDecision;
+  recommendationCode: string;
+  recommendation: string;
+  signals: {
+    preloadDecision: "use-pack" | "fallback-canonical";
+    dirtySignal: "clean" | "dirty" | "unknown";
+    monitorClassifyFailures: number;
+    subagentsReady: boolean;
+  };
+  blockers: string[];
+  evidenceGaps: string[];
+}
+
 function pushIf(out: string[], condition: boolean, value: string): void {
   if (condition) out.push(value);
+}
+
+function normalizePreloadDecision(value: unknown): "use-pack" | "fallback-canonical" {
+  return value === "use-pack" ? "use-pack" : "fallback-canonical";
+}
+
+function normalizeDirtySignal(value: unknown): "clean" | "dirty" | "unknown" {
+  return value === "clean" || value === "dirty" || value === "unknown" ? value : "unknown";
+}
+
+export function evaluateDelegationLaneCapabilitySnapshot(input: DelegationLaneCapabilityInput): DelegationLaneCapabilitySnapshot {
+  const signals = {
+    preloadDecision: normalizePreloadDecision(input.preloadDecision),
+    dirtySignal: normalizeDirtySignal(input.dirtySignal),
+    monitorClassifyFailures: Math.max(0, Math.floor(Number(input.monitorClassifyFailures ?? 0))),
+    subagentsReady: input.subagentsReady !== false,
+  };
+
+  const blockers: string[] = [];
+  const evidenceGaps: string[] = [];
+
+  if (!signals.subagentsReady) blockers.push("subagents-not-ready");
+  if (signals.monitorClassifyFailures >= 4) blockers.push("monitor-classify-failures-block");
+
+  if (signals.preloadDecision !== "use-pack") evidenceGaps.push("preload-fallback-canonical");
+  if (signals.dirtySignal === "dirty") evidenceGaps.push("workspace-dirty");
+  if (signals.dirtySignal === "unknown") evidenceGaps.push("workspace-dirty-unknown");
+  if (signals.monitorClassifyFailures > 0 && signals.monitorClassifyFailures < 4) {
+    evidenceGaps.push("monitor-classify-failures-warn");
+  }
+
+  if (blockers.length > 0) {
+    const recommendationCode = blockers.includes("subagents-not-ready")
+      ? "delegation-capability-blocked-subagents"
+      : "delegation-capability-blocked-monitor-classify";
+    return {
+      decision: "blocked",
+      recommendationCode,
+      recommendation: "delegation capability blocked; fix hard blockers before preparing delegated slice.",
+      signals,
+      blockers,
+      evidenceGaps,
+    };
+  }
+
+  if (evidenceGaps.length > 0) {
+    const recommendationCode = evidenceGaps.includes("workspace-dirty")
+      ? "delegation-capability-needs-evidence-dirty"
+      : evidenceGaps.includes("preload-fallback-canonical")
+        ? "delegation-capability-needs-evidence-preload"
+        : "delegation-capability-needs-evidence";
+    return {
+      decision: "needs-evidence",
+      recommendationCode,
+      recommendation: "delegation capability needs evidence hardening before reliable delegated execution.",
+      signals,
+      blockers,
+      evidenceGaps,
+    };
+  }
+
+  return {
+    decision: "ready",
+    recommendationCode: "delegation-capability-ready",
+    recommendation: "delegation capability signals are ready for bounded delegated planning.",
+    signals,
+    blockers,
+    evidenceGaps,
+  };
 }
 
 export function evaluateAutonomyLaneReadiness(input: AutonomyLaneReadinessInput): AutonomyLaneReadinessResult {

@@ -31,6 +31,32 @@ describe("autonomy lane surface", () => {
     expect(result?.details.allowedWork).toBe("bounded-only");
   });
 
+  it("registers delegation capability snapshot tool with read-only contract", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-delegation-snapshot-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-LOCAL"] }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{ id: "TASK-LOCAL", status: "planned" }] }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const snapshotTool = tools.find((tool) => tool.name === "delegation_lane_capability_snapshot");
+    const result = snapshotTool?.execute("call-test", {
+      monitor_classify_failures: 0,
+      subagents_ready: true,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("needs-evidence");
+    expect(result?.details.recommendationCode).toBe("delegation-capability-needs-evidence-preload");
+    expect((result?.details.signals as { preloadDecision?: string; dirtySignal?: string } | undefined)?.preloadDecision).toBe("fallback-canonical");
+    expect((result?.details.signals as { preloadDecision?: string; dirtySignal?: string } | undefined)?.dirtySignal).toBe("unknown");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+    expect(result?.details.mode).toBe("report-only");
+  });
+
   it("registers read-only next-task selector tool", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-surface-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

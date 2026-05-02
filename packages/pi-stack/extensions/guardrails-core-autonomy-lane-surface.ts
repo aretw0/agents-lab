@@ -1,6 +1,10 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { evaluateAutonomyLaneReadiness, type AutonomyContextLevel } from "./guardrails-core-autonomy-lane";
+import {
+  evaluateAutonomyLaneReadiness,
+  evaluateDelegationLaneCapabilitySnapshot,
+  type AutonomyContextLevel,
+} from "./guardrails-core-autonomy-lane";
 import {
   evaluateAutonomyLaneTaskSelection,
   evaluateAutonomyProtectedFocusDecisionPacket,
@@ -9,6 +13,8 @@ import {
 } from "./guardrails-core-autonomy-task-selector";
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
+import { consumeContextPreloadPack } from "./context-watchdog-continuation";
+import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -46,6 +52,25 @@ function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
     focusTaskIds: focus.ids,
     focusSource: focus.source,
   });
+}
+
+function readDelegationFreshnessSignals(cwd: string): {
+  preloadDecision: "use-pack" | "fallback-canonical";
+  dirtySignal: "clean" | "dirty" | "unknown";
+} {
+  const preload = consumeContextPreloadPack(cwd, { profile: "control-plane-core" });
+  let dirtySignal: "clean" | "dirty" | "unknown" = "unknown";
+  try {
+    const snapshot = readGitDirtySnapshot(cwd);
+    dirtySignal = snapshot.clean ? "clean" : "dirty";
+  } catch (error) {
+    const unavailable = buildUnavailableGitDirtySnapshot(error);
+    dirtySignal = unavailable.available ? (unavailable.clean ? "clean" : "dirty") : "unknown";
+  }
+  return {
+    preloadDecision: preload.decision,
+    dirtySignal,
+  };
 }
 
 function buildReadinessInput(
@@ -164,6 +189,53 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "delegation_lane_capability_snapshot",
+    label: "Delegation Lane Capability Snapshot",
+    description: "Read-only delegation capability snapshot composed from freshness + monitor/subagent readiness signals. No dispatch authorization.",
+    parameters: Type.Object({
+      preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
+      dirty_signal: Type.Optional(Type.String({ description: "clean | dirty | unknown" })),
+      monitor_classify_failures: Type.Optional(Type.Number({ description: "Classify-failure count (default 0)." })),
+      subagents_ready: Type.Optional(Type.Boolean({ description: "Subagent readiness signal (default true)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const freshness = readDelegationFreshnessSignals(ctx.cwd);
+      const snapshot = evaluateDelegationLaneCapabilitySnapshot({
+        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : freshness.preloadDecision,
+        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : freshness.dirtySignal,
+        monitorClassifyFailures: asNumber(p.monitor_classify_failures, 0),
+        subagentsReady: asBool(p.subagents_ready, true),
+      });
+      const result = {
+        ...snapshot,
+        effect: "none",
+        mode: "report-only",
+        authorization: "none",
+        dispatchAllowed: false,
+        mutationAllowed: false,
+      };
+      const summary = [
+        "delegation-lane-capability:",
+        `decision=${snapshot.decision}`,
+        `preload=${snapshot.signals.preloadDecision}`,
+        `dirty=${snapshot.signals.dirtySignal}`,
+        `monitorClassifyFailures=${snapshot.signals.monitorClassifyFailures}`,
+        `subagentsReady=${snapshot.signals.subagentsReady ? "yes" : "no"}`,
+        `code=${snapshot.recommendationCode}`,
+        "authorization=none",
+      ].join(" ");
+      return {
+        content: [{ type: "text", text: summary }],
+        details: {
+          summary,
+          ...result,
+        },
       };
     },
   });

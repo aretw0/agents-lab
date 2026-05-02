@@ -10329,6 +10329,15 @@
       "method": "validation-kind inference hardening + smoke",
       "timestamp": "2026-05-02T05:17:14.838Z",
       "evidence": "Updated local continuity validation inference to reduce false `validation-unknown` for local-safe tasks that already declare test files. Changes: - `packages/pi-stack/extensions/guardrails-core-unattended-continuation-surface.ts` - `deriveValidationKind` now evaluates `description + acceptance_criteria + task.files`. - Added file-pattern sensitivity for `test/smoke/.spec.` to classify as `focal-test`. Validation: - `npx vitest run packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts` => 10 passed. - marker-check passed for new inference anchors (`...files`, `.spec.`, `focal-test`)."
+    },
+    {
+      "id": "VER-BUD-901",
+      "target": "TASK-BUD-545",
+      "target_type": "task",
+      "status": "passed",
+      "method": "new read-only capability snapshot primitive + smoke",
+      "timestamp": "2026-05-02T05:22:35.653Z",
+      "evidence": "Implemented delegation capability snapshot primitive/surface with deterministic recommendation codes and no dispatch authorization. Changes: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane.ts` - Added `evaluateDelegationLaneCapabilitySnapshot(...)` and related types. - Decision model: `ready | needs-evidence | blocked`. - Deterministic recommendation codes and structured blockers/evidence gaps. - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - Added tool `delegation_lane_capability_snapshot`. - Composes freshness signals from local runtime (`preloadDecision`, `dirtySignal`) and monitor/subagent inputs. - Enforces read-only/report-only contract (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). - Tests - `packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts`: decision coverage for ready/needs-evidence/blocked. - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: tool registration and read-only envelope contract. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` => 24 passed. - marker checks passed for core evaluator, surface wiring, and readiness tests."
     }
   ]
 }

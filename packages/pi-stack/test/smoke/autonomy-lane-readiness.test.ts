@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { evaluateAutonomyLaneReadiness, type AutonomyLaneReadinessInput } from "../../extensions/guardrails-core-autonomy-lane";
+import {
+  evaluateAutonomyLaneReadiness,
+  evaluateDelegationLaneCapabilitySnapshot,
+  type AutonomyLaneReadinessInput,
+} from "../../extensions/guardrails-core-autonomy-lane";
 
 function baseInput(overrides: Partial<AutonomyLaneReadinessInput> = {}): AutonomyLaneReadinessInput {
   return {
@@ -66,5 +70,48 @@ describe("autonomy lane readiness", () => {
     expect(result.ready).toBe(false);
     expect(result.decision).toBe("blocked");
     expect(result.stopReasons).toContain("board-not-ready");
+  });
+
+  it("marks delegation capability ready when freshness/monitor/subagent signals are clean", () => {
+    const snapshot = evaluateDelegationLaneCapabilitySnapshot({
+      preloadDecision: "use-pack",
+      dirtySignal: "clean",
+      monitorClassifyFailures: 0,
+      subagentsReady: true,
+    });
+    expect(snapshot.decision).toBe("ready");
+    expect(snapshot.recommendationCode).toBe("delegation-capability-ready");
+    expect(snapshot.blockers).toEqual([]);
+    expect(snapshot.evidenceGaps).toEqual([]);
+  });
+
+  it("marks delegation capability needs-evidence on fallback preload or dirty workspace", () => {
+    const snapshot = evaluateDelegationLaneCapabilitySnapshot({
+      preloadDecision: "fallback-canonical",
+      dirtySignal: "dirty",
+      monitorClassifyFailures: 1,
+      subagentsReady: true,
+    });
+    expect(snapshot.decision).toBe("needs-evidence");
+    expect(snapshot.recommendationCode).toBe("delegation-capability-needs-evidence-dirty");
+    expect(snapshot.evidenceGaps).toEqual(expect.arrayContaining([
+      "preload-fallback-canonical",
+      "workspace-dirty",
+      "monitor-classify-failures-warn",
+    ]));
+  });
+
+  it("blocks delegation capability on hard blockers", () => {
+    const snapshot = evaluateDelegationLaneCapabilitySnapshot({
+      preloadDecision: "use-pack",
+      dirtySignal: "clean",
+      monitorClassifyFailures: 5,
+      subagentsReady: false,
+    });
+    expect(snapshot.decision).toBe("blocked");
+    expect(snapshot.blockers).toEqual(expect.arrayContaining([
+      "subagents-not-ready",
+      "monitor-classify-failures-block",
+    ]));
   });
 });
