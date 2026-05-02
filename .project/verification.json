@@ -10167,6 +10167,15 @@
       "method": "continuation packet composition + smoke + marker-check",
       "timestamp": "2026-05-02T02:53:51.325Z",
       "evidence": "Composed git dirty snapshot signal into continuation readiness packet. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_continuation_readiness` now reads git dirty snapshot via `readGitDirtySnapshot`. - adds bounded fallback (`git-dirty-snapshot: unavailable`) when cwd is not a git repo. - summary now includes `dirty=clean|dirty|unknown`. - details now include `gitDirty` object: `available`, `clean|null`, `rowCount`, `summary`, optional `error`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - continuation readiness regression now asserts `dirty=unknown` and `gitDirty` fallback envelope in non-git temp workspace. - `docs/guides/openai-context-window-playbook.md` - documents composition field `dirty=clean|dirty|unknown` in readiness packet. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker checks passed for context-watchdog and playbook anchors (`dirty=...`, `readGitDirtySnapshot`, fallback marker)."
+    },
+    {
+      "id": "VER-BUD-883",
+      "target": "TASK-BUD-534",
+      "target_type": "task",
+      "status": "passed",
+      "method": "stderr hardening + fallback normalization + smoke",
+      "timestamp": "2026-05-02T03:05:16.427Z",
+      "evidence": "Hardened git dirty snapshot path to reduce noisy fatal output in non-repo cwd. Changes: - `packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts` - git exec defaults now explicitly use `stdio: \"pipe\"` for both maintenance and dirty snapshot reads. - `scripts/git-dirty-snapshot.mjs` - spawn now explicitly uses `stdio: \"pipe\"`. - `packages/pi-stack/extensions/context-watchdog.ts` - continuation readiness fallback now normalizes git error to bounded code (`not-a-git-repo` or `git-dirty-snapshot-error`) instead of raw message. - summary remains `git-dirty-snapshot: unavailable` with `dirty=unknown` semantics. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - asserts normalized fallback error `not-a-git-repo` in readiness details. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - `npx vitest run packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts` => 5 passed. - `node --test scripts/test/git-dirty-snapshot.test.mjs` => 3 passed. - marker checks passed for normalized fallback and `stdio: \"pipe\"` anchors."
     }
   ]
 }

@@ -66,6 +66,7 @@ export function runGitDirtySnapshot(cwd = process.cwd()) {
     {
       cwd,
       encoding: "utf8",
+      stdio: "pipe",
     },
   );
 

@@ -75,7 +75,7 @@ export function parseGitCountObjectsOutput(output: string, gcLogPresent: boolean
 }
 
 export function readGitMaintenanceDiagnostics(cwd: string, deps: GitMaintenanceReadDeps = {}): GitMaintenanceDiagnostics {
-  const runGit = deps.runGit ?? ((args: string[], repoCwd: string) => execFileSync("git", args, { cwd: repoCwd, encoding: "utf8" }));
+  const runGit = deps.runGit ?? ((args: string[], repoCwd: string) => execFileSync("git", args, { cwd: repoCwd, encoding: "utf8", stdio: "pipe" }));
   const exists = deps.exists ?? existsSync;
   const output = runGit(["count-objects", "-vH"], cwd);
   return parseGitCountObjectsOutput(output, exists(join(cwd, ".git", "gc.log")));
@@ -137,7 +137,7 @@ export function parseGitStatusPorcelainOutput(output: string): GitDirtySnapshot 
 }
 
 export function readGitDirtySnapshot(cwd: string, deps: GitMaintenanceReadDeps = {}): GitDirtySnapshot {
-  const runGit = deps.runGit ?? ((args: string[], repoCwd: string) => execFileSync("git", args, { cwd: repoCwd, encoding: "utf8" }));
+  const runGit = deps.runGit ?? ((args: string[], repoCwd: string) => execFileSync("git", args, { cwd: repoCwd, encoding: "utf8", stdio: "pipe" }));
   const output = runGit(["-c", "core.safecrlf=false", "status", "--porcelain"], cwd);
   return parseGitStatusPorcelainOutput(output);
 }

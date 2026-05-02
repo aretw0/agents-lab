@@ -12632,6 +12632,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] manter visibilidade de dirty state no próprio packet evita uso manual de comandos com redirecionamento/cleanup.\n[provenance:human] source_task=TASK-BUD-532 reason=continuar evolução de continuidade fresh com sinais locais mínimos e auditáveis\n2026-05-02: continuidade agora expõe sinal dirty no mesmo packet, evitando inspeção manual fora do fluxo first-party.",
       "verification": "VER-BUD-882"
+    },
+    {
+      "id": "TASK-BUD-534",
+      "description": "Reduzir ruído de stderr git em cwd sem repo ao coletar dirty snapshot para evitar mensagens `fatal:` no output de smoke.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-533"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "scripts/git-dirty-snapshot.mjs",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Execuções git na primitiva usam stdio capturado (pipe) sem emitir fatal cru no terminal.",
+        "Fallback de readiness mantém `dirty=unknown` sem propagar mensagem raw no summary.",
+        "Smoke context-watchdog continua verde sem regressão de contrato."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] reduzir ruído operacional melhora legibilidade e evita confusão de erro em loops saudáveis.\n[provenance:human] source_task=TASK-BUD-533 reason=observado ruído `fatal: not a git repository` durante smoke após composição do dirty snapshot\n2026-05-02: fallback git errors agora são normalizados (sem texto fatal cru) e execs capturam stderr de forma bounded.",
+      "verification": "VER-BUD-883"
     }
   ]
 }

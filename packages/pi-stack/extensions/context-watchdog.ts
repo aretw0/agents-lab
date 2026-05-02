@@ -2109,12 +2109,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				};
 			} catch (error) {
 				const errorText = error instanceof Error ? error.message : String(error ?? "unknown-error");
+				const normalizedError = /not a git repository/i.test(errorText)
+					? "not-a-git-repo"
+					: "git-dirty-snapshot-error";
 				gitDirty = {
 					available: false,
 					clean: null,
 					rowCount: 0,
 					summary: "git-dirty-snapshot: unavailable",
-					error: errorText.slice(0, 200),
+					error: normalizedError,
 				};
 			}
 			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";

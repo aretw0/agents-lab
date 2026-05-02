@@ -1599,6 +1599,7 @@ describe("context-watchdog", () => {
 					clean: null,
 					rowCount: 0,
 					summary: "git-dirty-snapshot: unavailable",
+					error: "not-a-git-repo",
 				},
 			});
 			expect(result.details?.autoResumePrompt).not.toContain("focusTasks: board-task-selection");
