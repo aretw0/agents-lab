@@ -113,6 +113,7 @@ import {
 	localContinuityAuditReasons,
 	localContinuityProtectedPaths,
 } from "./guardrails-core-unattended-continuation-surface";
+import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 
 export {
 	applyContextWatchBootstrapToSettings,
@@ -2091,6 +2092,32 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const preload = consumeContextPreloadPack(ctx.cwd, {
 				profile: "control-plane-core",
 			});
+			let gitDirty: {
+				available: boolean;
+				clean: boolean | null;
+				rowCount: number;
+				summary: string;
+				error?: string;
+			};
+			try {
+				const snapshot = readGitDirtySnapshot(ctx.cwd);
+				gitDirty = {
+					available: true,
+					clean: snapshot.clean,
+					rowCount: snapshot.rows.length,
+					summary: snapshot.summary,
+				};
+			} catch (error) {
+				const errorText = error instanceof Error ? error.message : String(error ?? "unknown-error");
+				gitDirty = {
+					available: false,
+					clean: null,
+					rowCount: 0,
+					summary: "git-dirty-snapshot: unavailable",
+					error: errorText.slice(0, 200),
+				};
+			}
+			const dirtySignal = !gitDirty.available ? "unknown" : gitDirty.clean ? "clean" : "dirty";
 			const readinessSummary = formatContextWatchContinuationReadinessSummary({
 				ready,
 				focusTasks,
@@ -2099,7 +2126,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				protectedPaths,
 				staleFocusCount,
 			});
-			const summary = `${readinessSummary} preload=${preload.decision}`;
+			const summary = `${readinessSummary} preload=${preload.decision} dirty=${dirtySignal}`;
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {
@@ -2115,6 +2142,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					recommendationCode: recommendation.recommendationCode,
 					nextAction: recommendation.nextAction,
 					preload,
+					gitDirty,
 					localContinuity: localAudit,
 					autoResumePrompt: resumeEnvelope.prompt,
 					effect: "none",

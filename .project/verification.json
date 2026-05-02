@@ -10158,6 +10158,15 @@
       "method": "readiness composition + smoke + marker-check",
       "timestamp": "2026-05-02T02:17:07.831Z",
       "evidence": "Composed fresh-pack decision into continuation readiness packet. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_continuation_readiness` now calls `consumeContextPreloadPack(cwd, { profile: \"control-plane-core\" })`. - summary appends `preload=<use-pack|fallback-canonical>`. - details now include full `preload` envelope (`mode`, `decision`, `staleReasons`, `dispatchAllowed=false`, `authorization=none`). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - updated continuation readiness assertions to verify preload fallback path in no-pack scenario. - `docs/guides/openai-context-window-playbook.md` - documented composition with `context_watch_continuation_readiness` and `preload.decision` contract. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 tests passed. - marker checks: - `context-watchdog.ts` markers (`consumeContextPreloadPack`, `preload=`, `context-watch-continuation-readiness`) matched. - playbook markers (`context_watch_continuation_readiness`, `preload.decision=use-pack|fallback-canonical`) matched."
+    },
+    {
+      "id": "VER-BUD-882",
+      "target": "TASK-BUD-533",
+      "target_type": "task",
+      "status": "passed",
+      "method": "continuation packet composition + smoke + marker-check",
+      "timestamp": "2026-05-02T02:53:51.325Z",
+      "evidence": "Composed git dirty snapshot signal into continuation readiness packet. Changes: - `packages/pi-stack/extensions/context-watchdog.ts` - `context_watch_continuation_readiness` now reads git dirty snapshot via `readGitDirtySnapshot`. - adds bounded fallback (`git-dirty-snapshot: unavailable`) when cwd is not a git repo. - summary now includes `dirty=clean|dirty|unknown`. - details now include `gitDirty` object: `available`, `clean|null`, `rowCount`, `summary`, optional `error`. - `packages/pi-stack/test/smoke/context-watchdog.test.ts` - continuation readiness regression now asserts `dirty=unknown` and `gitDirty` fallback envelope in non-git temp workspace. - `docs/guides/openai-context-window-playbook.md` - documents composition field `dirty=clean|dirty|unknown` in readiness packet. Validation: - `npx vitest run packages/pi-stack/test/smoke/context-watchdog.test.ts` => 54 passed. - marker checks passed for context-watchdog and playbook anchors (`dirty=...`, `readGitDirtySnapshot`, fallback marker)."
     }
   ]
 }

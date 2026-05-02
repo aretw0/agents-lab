@@ -1577,6 +1577,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("reasons=");
 			expect(result.content?.[0]?.text).toContain("authorization=none");
 			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
+			expect(result.content?.[0]?.text).toContain("dirty=unknown");
 			expect(result.details).toMatchObject({
 				effect: "none",
 				mode: "read-only-readiness",
@@ -1592,6 +1593,12 @@ describe("context-watchdog", () => {
 					decision: "fallback-canonical",
 					dispatchAllowed: false,
 					authorization: "none",
+				},
+				gitDirty: {
+					available: false,
+					clean: null,
+					rowCount: 0,
+					summary: "git-dirty-snapshot: unavailable",
 				},
 			});
 			expect(result.details?.autoResumePrompt).not.toContain("focusTasks: board-task-selection");

@@ -12610,6 +12610,28 @@
       "milestone": "context-freshness-wave-2026-05",
       "notes": "[rationale:risk-control] continuidade fica mais determinística ao expor no mesmo packet se o contexto pode usar pack fresco ou deve cair no canônico.\n[provenance:human] source_task=TASK-BUD-531 reason=evolução natural da wave de freshness para reduzir releitura e manter retomada auditável\n2026-05-02: readiness packet agora já informa se o contexto pode usar fresh-pack ou deve cair no caminho canônico.",
       "verification": "VER-BUD-881"
+    },
+    {
+      "id": "TASK-BUD-533",
+      "description": "Compor snapshot git dirty no `context_watch_continuation_readiness` para expor estado clean/dirty sem comandos temporários.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-532"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/guides/openai-context-window-playbook.md"
+      ],
+      "acceptance_criteria": [
+        "Packet inclui bloco `gitDirty` com `available`, `clean`, `rowCount`, `summary` (ou fallback unknown).",
+        "Summary textual do readiness inclui `dirty=clean|dirty|unknown` sem alterar authorization/dispatch.",
+        "Smoke cobre cenário fora de repo git (fallback unknown) e mantém contrato read-only."
+      ],
+      "milestone": "context-freshness-wave-2026-05",
+      "notes": "[rationale:risk-control] manter visibilidade de dirty state no próprio packet evita uso manual de comandos com redirecionamento/cleanup.\n[provenance:human] source_task=TASK-BUD-532 reason=continuar evolução de continuidade fresh com sinais locais mínimos e auditáveis\n2026-05-02: continuidade agora expõe sinal dirty no mesmo packet, evitando inspeção manual fora do fluxo first-party.",
+      "verification": "VER-BUD-882"
     }
   ]
 }
