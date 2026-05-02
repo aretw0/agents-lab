@@ -68,6 +68,7 @@ import contextWatchdogExtension, {
 	summarizeContextWatchEvent,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
+	TURN_BOUNDARY_DIRECTION_PROMPT,
 	shouldEmitAutoResumeAfterCompact,
 	shouldRefreshHandoffBeforeAutoCompact,
 	shouldScheduleAutoCompactRetry,
@@ -1910,6 +1911,9 @@ describe("context-watchdog", () => {
 			expect(checkpointResult.details?.decision).toBe("continue");
 			expect(checkpointResult.details?.reasonCode).toBe("turn-boundary-continue-local");
 			expect(checkpointResult.details?.humanActionRequired).toBe(false);
+			expect(checkpointResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+			expect(checkpointResult.details?.directionPromptCanonical).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+			expect(checkpointResult.content?.[0]?.text).toContain("directionPrompt=similar-lane-or-next-value");
 		} finally {
 			rmSync(cwdCheckpoint, { recursive: true, force: true });
 		}
@@ -1943,6 +1947,7 @@ describe("context-watchdog", () => {
 			expect(askResult.details?.decision).toBe("ask-human");
 			expect(askResult.details?.reasonCode).toBe("turn-boundary-ask-human-decision-required");
 			expect(askResult.details?.humanActionRequired).toBe(true);
+			expect(askResult.details?.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
 		} finally {
 			rmSync(cwdAskHuman, { recursive: true, force: true });
 		}

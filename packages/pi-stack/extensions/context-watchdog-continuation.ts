@@ -23,12 +23,15 @@ export type TurnBoundaryReasonCode =
   | "turn-boundary-pause-local-stop"
   | "turn-boundary-ask-human-decision-required";
 
+export const TURN_BOUNDARY_DIRECTION_PROMPT = "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?";
+
 export interface TurnBoundaryDecisionPacket {
   mode: "report-only";
   decision: TurnBoundaryDecision;
   reasonCode: TurnBoundaryReasonCode;
   humanActionRequired: boolean;
   nextAutoStep: string;
+  directionPrompt: string;
   recommendationCode: ContextWatchContinuationRecommendationCode;
   dispatchAllowed: false;
   mutationAllowed: false;
@@ -114,6 +117,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
     humanActionRequired,
     nextAutoStep,
     recommendationCode: recommendation.recommendationCode,
+    directionPrompt: TURN_BOUNDARY_DIRECTION_PROMPT,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
@@ -123,6 +127,7 @@ export function buildTurnBoundaryDecisionPacket(input: {
       `reasonCode=${reasonCode}`,
       `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
       `recommendationCode=${recommendation.recommendationCode}`,
+      "directionPrompt=similar-lane-or-next-value",
       "authorization=none",
     ].join(" "),
   };

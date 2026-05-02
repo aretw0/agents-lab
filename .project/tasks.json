@@ -13752,6 +13752,30 @@
       "milestone": "turn-boundary-hardening-wave-2026-05",
       "notes": "[rationale:risk-control] reduzir flake em gate crítico de continuidade evita falsos bloqueios e pausas ambíguas.\n2026-05-02: edge-case stale preload hardening aplicado para remover flake por resolução de mtime.",
       "verification": "VER-BUD-933"
+    },
+    {
+      "id": "TASK-BUD-585",
+      "description": "Turn-boundary specialization: incluir provocação fixa de direção (consolidar lane atual vs próxima lane de maior valor) no packet report-only com cobertura de teste e docs.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-584"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "docs/primitives/nudge-free-local-continuity.md"
+      ],
+      "acceptance_criteria": [
+        "packet inclui `directionPrompt` canônico e auditável.",
+        "testes críticos cobrem presença e conteúdo de `directionPrompt` em unitário e integração.",
+        "docs registram a provocação final como contrato de fechamento de boundary."
+      ],
+      "milestone": "turn-boundary-hardening-wave-2026-05",
+      "notes": "[rationale:risk-control] provocações consistentes reduzem drift de direção e evitam pausas ambíguas no retorno humano.\n2026-05-02: especialização turn-boundary virou contrato técnico com directionPrompt canônico e cobertura crítica.",
+      "verification": "VER-BUD-934"
     }
   ]
 }

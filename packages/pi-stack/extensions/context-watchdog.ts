@@ -77,11 +77,13 @@ import {
 	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
+	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
 export {
 	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
 	resolveContextWatchContinuationRecommendation,
+	TURN_BOUNDARY_DIRECTION_PROMPT,
 	type ContextPreloadProfile,
 	type ContextPreloadConsumeReport,
 	type ContextWatchContinuationRecommendationCode,
@@ -2493,7 +2495,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		name: "turn_boundary_decision_packet",
 		label: "Turn Boundary Decision Packet",
 		description:
-			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired and nextAutoStep.",
+			"Report-only packet for turn boundary continuation decisions (continue|checkpoint|pause|ask-human) with explicit humanActionRequired, nextAutoStep, and directionPrompt.",
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
@@ -2520,6 +2522,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					focusTasks,
 					staleFocusCount,
 					localAuditReasons,
+					directionPromptCanonical: TURN_BOUNDARY_DIRECTION_PROMPT,
 					mode: "report-only",
 					effect: "none",
 					authorization: "none",

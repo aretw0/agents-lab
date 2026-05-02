@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTurnBoundaryDecisionPacket,
   resolveContextWatchContinuationRecommendation,
+  TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "../../extensions/context-watchdog-continuation";
 
 describe("context-watchdog continuation recommendation", () => {
@@ -63,6 +64,8 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.reasonCode).toBe("turn-boundary-checkpoint-refresh-focus");
     expect(packet.humanActionRequired).toBe(false);
     expect(packet.nextAutoStep).toContain("checkpoint");
+    expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
+    expect(packet.summary).toContain("directionPrompt=similar-lane-or-next-value");
   });
 
   it("builds pause packet without human action when local-safe next step is missing", () => {
@@ -91,5 +94,6 @@ describe("context-watchdog continuation recommendation", () => {
     expect(packet.reasonCode).toBe("turn-boundary-ask-human-decision-required");
     expect(packet.humanActionRequired).toBe(true);
     expect(packet.nextAutoStep).toContain("human decision");
+    expect(packet.directionPrompt).toBe(TURN_BOUNDARY_DIRECTION_PROMPT);
   });
 });

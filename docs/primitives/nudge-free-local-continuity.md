@@ -156,6 +156,9 @@ Formato sugerido:
 nudge-free-local-continuity: slices=<n> commits=<n> protectedTouched=no remote=no scheduler=no nextHuman=<decisão> blockers=<lista curta>
 ```
 
+No fechamento de boundary, incluir a provocação direcional canônica do packet `turn_boundary_decision_packet`:
+- "continue in a similar lane to consolidate, or switch to the next lane with higher long-term value?"
+
 Template curto de checkpoint pós-rehearsal real (1 task):
 
 ```text
