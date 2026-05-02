@@ -65,7 +65,7 @@ export interface AgentsAsToolsCalibrationScore {
     hasCwdIsolationPath: boolean;
     hasDecisionPackets: boolean;
     hasToolHygieneSurface: boolean;
-    hasDelegationMixScore: boolean;
+    hasDelegationMixScore?: boolean;
   };
   summary: string;
 }
