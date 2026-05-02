@@ -690,6 +690,18 @@ Para inspeção de dirty state, prefira snapshot sem arquivo temporário (`npm r
 
 Essa escada é parte da autonomia cultivada: reduzir hesitação e ruído, não aumentar gordura operacional. A resposta certa para um sinal pequeno deve ser curta e auditável; a resposta certa para um sinal estrutural deve virar tarefa estreita, não frente difusa.
 
+### Triagem de capacidade (limpar vs pesquisar vs escalar)
+
+Quando a lane travar, aplicar ordem curta e bounded:
+1. **limpar leve/diagnosticar**: checar sinais locais (`machine_maintenance_status`, `git_maintenance_status`) e remover apenas ruído operacional pequeno;
+2. **pesquisar**: só se existir gap técnico real que bloqueie a próxima fatia local-safe;
+3. **escalar capacidade** (spawn/delegação/colony): só quando houver tarefa elegível e foco válido.
+
+Regras de custo:
+- evitar scans pesados por default (ex.: `du` amplo sem limite/escopo);
+- preferir diagnóstico read-only e comandos bounded;
+- manutenção destrutiva de git continua opt-in com decisão humana explícita.
+
 ### Encerramento de turno: mini-packet condicional (quando houver material novo)
 
 No fechamento de turno, use mini-packet **conciso** com 3 blocos:

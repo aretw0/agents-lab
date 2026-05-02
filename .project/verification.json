@@ -10914,6 +10914,24 @@
       "method": "afk material seed bootstrap unblock + smoke",
       "timestamp": "2026-05-02T17:50:00.738Z",
       "evidence": "Adjusted AFK seed packet behavior to avoid false blocked state when recovery can proceed via seeding. Code: - `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` - `buildAfkMaterialSeedPacket(...)` now distinguishes blocker classes when readiness is `blocked`: - bootstrap-only blockers (`focus-missing`, `focus-task-not-found`, `focus-validation-unknown`, `no-local-safe-material`, `selection-no-eligible-tasks`) => `decision=seed-now`, `recommendationCode=afk-material-seed-now-bootstrap`. - operational blockers (e.g., `reload-required-or-dirty`) remain `decision=blocked`, `recommendationCode=afk-material-seed-blocked-readiness`. Tests: - `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - updated missing-focus case to assert bootstrap seeding (`seed-now`, `afk-material-seed-now-bootstrap`). - added operational-blocker case (dirty workspace) asserting packet stays blocked. Validation: - `npx vitest run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` - 25 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-966",
+      "target": "TASK-BUD-617",
+      "target_type": "task",
+      "status": "passed",
+      "method": "capacity triage runbook update (clean/research/scale)",
+      "timestamp": "2026-05-02T17:53:15.756Z",
+      "evidence": "Documented bounded capacity triage order for lane recovery. Updated: - `docs/guides/control-plane-operating-doctrine.md` - Added section `Triagem de capacidade (limpar vs pesquisar vs escalar)` with ordered policy: 1) limpar leve/diagnosticar, 2) pesquisar só com gap técnico real, 3) escalar capacidade só com task elegível. - Added cost rules: avoid heavy wide scans by default, prefer bounded read-only checks, keep destructive git maintenance opt-in. - `docs/guides/host-disk-recovery.md` - Added principle to avoid heavy scans (e.g., broad `du`) without bounded scope. - Added short triage order subsection before escalation decisions. Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
+    },
+    {
+      "id": "VER-BUD-967",
+      "target": "TASK-BUD-618",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc-checklist anchor hardening for capacity triage",
+      "timestamp": "2026-05-02T17:53:24.543Z",
+      "evidence": "Protected new capacity-triage doctrine contract with smoke anchors. Updated: - `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - Added `capacityTriageAnchors` assertions for doctrine markers: - triagem de capacidade (limpar vs pesquisar vs escalar) - limpar leve/diagnosticar - escalar capacidade - evitar scans pesados por default - manutenção destrutiva de git continua opt-in Validation: - `npx vitest run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` - 2 passed / 0 failed."
     }
   ]
 }

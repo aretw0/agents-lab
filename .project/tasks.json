@@ -14395,6 +14395,43 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] evitar falso bloqueio no packet de semeadura e permitir recuperação local-safe sem escopo protegido.\n2026-05-02: packet de semeadura AFK agora desbloqueia bootstrap quando o bloqueio é só foco/material; bloqueios operacionais continuam fail-closed.",
       "verification": "VER-BUD-965"
+    },
+    {
+      "id": "TASK-BUD-617",
+      "description": "[P1] Documentar triagem de capacidade (limpar vs pesquisar vs escalar) com ordem operacional bounded e sem scans pesados por default.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "docs/guides/host-disk-recovery.md"
+      ],
+      "acceptance_criteria": [
+        "Runbook define ordem: 1) limpar leve/diagnosticar, 2) pesquisar só se gap técnico real, 3) escalar só se houver material elegível.",
+        "Inclui regra de evitar comandos pesados (ex.: `du` amplo) sem limite/necessidade.",
+        "Mantém política de manutenção git opt-in (sem gc/prune automáticos)."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] decisão de capacidade precisa ser útil e bounded para não virar custo operacional extra.\n2026-05-02: triagem de capacidade formalizada com ordem limpar->pesquisar->escalar e regra anti-scan pesado por default.",
+      "verification": "VER-BUD-966"
+    },
+    {
+      "id": "TASK-BUD-618",
+      "description": "[P1] Proteger em smoke os novos anchors de triagem de capacidade para evitar regressão do runbook.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-617"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Checklist valida âncoras de triagem limpar/pesquisar/escalar no doctrine.",
+        "Suite de docs permanece verde."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] reduzir regressão silenciosa do protocolo de triagem operacional.\n2026-05-02: smoke agora protege contrato de triagem de capacidade para evitar regressão silenciosa.",
+      "verification": "VER-BUD-967"
     }
   ]
 }

@@ -83,6 +83,18 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of turnCloseContractAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const capacityTriageAnchors = [
+      "triagem de capacidade (limpar vs pesquisar vs escalar)",
+      "limpar leve/diagnosticar",
+      "escalar capacidade",
+      "evitar scans pesados por default",
+      "manutenção destrutiva de git continua opt-in",
+    ];
+
+    for (const marker of capacityTriageAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

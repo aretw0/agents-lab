@@ -14,6 +14,7 @@ Guia curto para recuperar espaço sem perder continuidade do trabalho.
 2. **Sessões (`.sandbox/pi-agent/sessions`) são protegidas por padrão**.
 3. Só habilitar remoção de sessões quando necessário e mantendo recentes.
 4. Aplicar limpeza em lotes pequenos com cap de remoção.
+5. Evitar scan pesado por default (ex.: `du` amplo sem limite) — prefira checks bounded primeiro.
 
 ## Comandos
 
@@ -50,6 +51,13 @@ npm run ops:disk:cleanup:with-sessions
 3. Confirmar margem de espaço livre aceitável.
 4. Rodar validação focal pendente (smokes curtos).
 5. Atualizar `.project/handoff.json` com evidência da retomada.
+
+### Ordem curta de triagem de capacidade
+
+Antes de abrir pesquisa ou escalar compute, seguir esta ordem:
+1. **limpar leve/diagnosticar** (`ops:disk:check`, `git_maintenance_status`, `machine_maintenance_status`);
+2. **pesquisar** apenas se houver bloqueio técnico real sem resposta local;
+3. **escalar** só com task local-safe elegível (senão vira custo sem throughput).
 
 ## Manutenção do repositório Git
 
