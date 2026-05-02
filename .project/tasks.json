@@ -14533,7 +14533,7 @@
     {
       "id": "TASK-BUD-624",
       "description": "[P1] Criar trilha estratégica de longo prazo para Linux primitives em agent engineering (2026+), com radar contínuo e critérios de adoção no agents-lab.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "docs/research/linux-agent-primitives-radar-2026.md",
@@ -14545,7 +14545,8 @@
         "Define cadência de revisão (mensal/quarterly) e gatilhos de promoção para experimento local-safe."
       ],
       "milestone": "long-horizon-linux-primitives",
-      "notes": "[rationale:risk-control] acompanhar primitives de OS/protocolo evita lock-in tático e melhora decisões de arquitetura de longo prazo.\n2026-05-02: decisão de foco explícita — manter no backlog estratégico (não iniciar agora) enquanto priorizamos desbloqueio de throughput operacional básico→avançado."
+      "notes": "[rationale:risk-control] acompanhar primitives de OS/protocolo evita lock-in tático e melhora decisões de arquitetura de longo prazo.\n2026-05-02: decisão de foco explícita — manter no backlog estratégico (não iniciar agora) enquanto priorizamos desbloqueio de throughput operacional básico→avançado.\n2026-05-02: frente estratégica retomada conforme steer (limpeza -> pesquisa -> escalabilidade com controle/auditoria) e radar 2026 publicado como gate de priorização sem forcing.",
+      "verification": "VER-BUD-982"
     },
     {
       "id": "TASK-BUD-625",

@@ -11058,6 +11058,15 @@
       "method": "workflow-wide external action SHA-pinning policy smoke + full smoke regression",
       "timestamp": "2026-05-02T21:01:48.796Z",
       "evidence": "Added a workflow-wide anti-drift policy test enforcing immutable SHA pins for external GitHub Actions references. Changes: - New smoke test: - `packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts` - Scans `.github/workflows/*` for `uses:` entries. - Allows local actions (`./...`) and `docker://...` references. - Fails if third-party `uses:` is missing `@<ref>` or ref is not a 40-char SHA. Validation: 1) Targeted workflow tests: - `npx vitest run packages/pi-stack/test/smoke/workflow-actions-pinning-policy.test.ts packages/pi-stack/test/smoke/workflow-actions-runtime-baseline.test.ts packages/pi-stack/test/smoke/ci-change-discovery-workflow.test.ts` - result: 3 files / 7 tests passed. 2) Full smoke regression: - `npm run test:smoke` - result: 118 files / 1090 tests passed. Outcome: - SHA pinning rule is now codified as a durable smoke guard, preventing future reintroduction of floating action refs across workflows."
+    },
+    {
+      "id": "VER-BUD-982",
+      "target": "TASK-BUD-624",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-02T21:55:40.287Z",
+      "evidence": "Criado `docs/research/linux-agent-primitives-radar-2026.md` com radar obrigatório (BranchFS, branch() syscall, Agent Sandbox gVisor/Kata, MCP, Simple Semantic Paging, SLIM, Agent Discovery & Identity), matriz de triagem (valor/risco/maturidade/dependência/governança), cadência mensal+quarterly e gatilhos de promoção local-safe. Atualizado `docs/guides/control-plane-evolution-playbook.md` com referência explícita ao radar e fluxo limpeza->pesquisa->escalabilidade. Validação: `safe_marker_check` ok (16/16 marcadores)."
     }
   ]
 }

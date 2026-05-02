@@ -4,6 +4,8 @@ Objetivo: evoluir de forma segura do control-plane local para delegação e, só
 
 Distribuição operacional: o núcleo deste playbook também viaja como skill versionada em `packages/lab-skills/skills/control-plane-ops/SKILL.md` para reduzir drift entre documentação local e comportamento dos agentes.
 
+Radar estratégico relacionado: `docs/research/linux-agent-primitives-radar-2026.md` (limpeza -> pesquisa -> escalabilidade com gates de promoção local-safe).
+
 ## Princípios
 
 1. **Playbook-first**: consolidar contrato operacional antes de ampliar arquitetura.
