@@ -1,39 +1,40 @@
 {
-  "timestamp": "2026-05-02T15:40:57.831Z",
-  "context": "afk-handoff: decision=continue stock=6/7 blockers=none next=wire growthDecision/growthScore no context_watch_checkpoint para manter maturidade explícita entre turnos.",
+  "timestamp": "2026-05-02T15:57:44.962Z",
+  "context": "afk-handoff: decision=continue stock=6/7 blockers=none next=wire fallback de growth_maturity do handoff no turn_boundary_decision_packet quando parâmetros não vierem no tool call.",
   "current_tasks": [
-    "TASK-BUD-599"
+    "TASK-BUD-600"
   ],
   "next_actions": [
-    "Adicionar campos opcionais de growth maturity no checkpoint writer.",
-    "Cobrir summary compacto e compatibilidade em smoke.",
-    "Registrar evidência no board e manter no-dispatch."
+    "Ler context_watch.growth_maturity do handoff no tool turn_boundary.",
+    "Propagar snapshot fallback para details/summary sem quebrar fail-closed.",
+    "Adicionar smoke cobrindo fallback do handoff."
   ],
   "blockers": [],
   "recent_validation": [
-    "VER-BUD-947",
-    "context-watchdog tests verdes"
+    "VER-BUD-948",
+    "context-watchdog.test.ts verde (63/63)",
+    "context-watchdog-continuation.test.ts verde (9/9)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-599",
+    "focus": "TASK-BUD-600",
     "canonical_links": [
-      "task:TASK-BUD-599",
-      "verification:VER-BUD-947"
+      "task:TASK-BUD-600",
+      "verification:VER-BUD-948"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-02T15:40:57.831Z",
+    "generatedAtIso": "2026-05-02T15:57:44.962Z",
     "level": "checkpoint",
-    "percent": 63,
+    "percent": 64,
     "action": "checkpoint-refresh",
     "recommendation": "continue-local-safe"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-02T15:40:57.831Z",
+      "atIso": "2026-05-02T15:57:44.962Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 63,
+      "percent": 64,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

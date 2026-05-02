@@ -14061,6 +14061,27 @@
       "milestone": "maturity-sane-growth-2026-05",
       "notes": "[rationale:risk-control] carregar score de maturidade no handoff reduz perda de contexto e evita aceleração sem evidência ao retomar.\n2026-05-02: `context_watch_checkpoint` agora carrega growthDecision/growthScore opcional no handoff e no summary compacto para retomada auditável entre turnos.",
       "verification": "VER-BUD-948"
+    },
+    {
+      "id": "TASK-BUD-600",
+      "description": "[P1] Consumir snapshot de growth maturity do handoff como fallback no `turn_boundary_decision_packet` quando parâmetros não forem passados.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-599"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool usa `context_watch.growth_maturity` do handoff como snapshot fallback quando não houver payload explícito.",
+        "Resumo/details do boundary refletem growthDecision/growthCode/growthScore vindos do handoff sem perder fail-closed.",
+        "Smoke cobre fallback do handoff e mantém invariantes read-only/no-dispatch."
+      ],
+      "milestone": "maturity-sane-growth-2026-05",
+      "notes": "[rationale:risk-control] fallback de maturidade no boundary reduz perda de contexto entre turnos e evita decisões sem evidência."
     }
   ]
 }
