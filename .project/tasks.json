@@ -15499,6 +15499,43 @@
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
       "notes": "[rationale:risk-control] successor is needed to validate live auto-advance eligibility after completed focus without protected scope."
+    },
+    {
+      "id": "TASK-BUD-674",
+      "description": "Criar contrato hard-intent para mensagens de pausa/decisão ao operador: motivo da pausa, ID+mnemônico humano, opções com impacto e recomendação objetiva.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando houver gate humano, resposta inclui bloco curto obrigatório: `por-que-parei`, `onde-estamos(id+mnemônico)`, `opções-com-impacto`, `recomendação`.",
+        "Evitar apenas IDs crus: cada task/canary citada deve trazer rótulo humano curto (mnemônico) sem virar textão.",
+        "Formato deve ser econômico (bounded) e reutilizável entre sessões para reduzir perda de contexto do operador."
+      ],
+      "milestone": "delegation-operator-clarity-2026-05",
+      "notes": "[rationale:risk-control] Evita regressão de comunicação operador-agente e reduz risco operacional por decisões com baixo contexto em pausas críticas.\n[provenance:human] source_task=none reason=Operador relatou perda de contexto em retomadas e pediu hardening em backlog para não depender de memória de sessão."
+    },
+    {
+      "id": "TASK-BUD-675",
+      "description": "Adicionar cobertura de regressão para o contrato de pausa ao operador (mnemônico+impacto+recomendação), garantindo persistência entre sessões.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-674"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke falha se mensagens de gate humano não incluírem os campos obrigatórios de contextualização.",
+        "Smoke valida presença de mnemônico humano junto da ID em pelo menos um fluxo de decisão.",
+        "Cobertura mantém formato curto e bounded (sem expansão para textão)."
+      ],
+      "milestone": "delegation-operator-clarity-2026-05",
+      "notes": "[rationale:risk-control] Sem teste, a melhoria de comunicação tende a regredir em novas ondas de refactor.\n[provenance:human] source_task=TASK-BUD-674 reason=Transformar a necessidade operacional do operador em contrato verificável e durável."
     }
   ]
 }
