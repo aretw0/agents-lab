@@ -484,7 +484,7 @@ Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded pa
 
 Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK.
 
-Quando o packet indicar estoque baixo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) para orientar semeadura explícita sem dispatch automático.
+Quando o packet indicar estoque baixo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) para orientar semeadura explícita sem dispatch automático. Ao reseedar, registrar `seedWhy`/`reseedJustification` do packet no fechamento curto para manter motivo auditável.
 
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.

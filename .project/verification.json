@@ -11661,6 +11661,33 @@
       "method": "test",
       "timestamp": "2026-05-03T22:41:25.657Z",
       "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md`: `iterationReminder` deve priorizar `refresh-handoff` quando stale. Sem alteração de policy/autorização. Doc checklist permaneceu green no gate combinado (34 passed)."
+    },
+    {
+      "id": "VER-BUD-1049",
+      "target": "TASK-BUD-697",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:54:06.437Z",
+      "evidence": "`autonomy_lane_material_seed_packet` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora inclui `reseedJustification` (`required`, `reasonCode`, `reason`, `evidenceSummary`) e summary curto com `seedWhy=<reasonCode>`. Motivo de reseed fica explícito/auditável sem mudar o contrato report-only."
+    },
+    {
+      "id": "VER-BUD-1050",
+      "target": "TASK-BUD-698",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:54:18.191Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` atualizada para validar `reseedJustification.reasonCode` nos cenários `seed-now-low-stock` (`stock-below-target`), `seed-now-bootstrap` (`bootstrap-focus-missing`) e `blocked-readiness` (`readiness-blocked`). Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (34 passed)."
+    },
+    {
+      "id": "VER-BUD-1051",
+      "target": "TASK-BUD-699",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:54:37.479Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` sincronizado com orientação curta: ao reseedar, registrar `seedWhy/reseedJustification` do packet no fechamento curto. Doc checklist manteve green no mesmo gate combinado (34 passed)."
     }
   ]
 }

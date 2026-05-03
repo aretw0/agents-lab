@@ -15925,6 +15925,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] alinha leitura operacional com gate real de frescura.\nRegra operacional alinhada com comportamento runtime para evitar surpresas entre iterações.",
       "verification": "VER-BUD-1048"
+    },
+    {
+      "id": "TASK-BUD-697",
+      "description": "Adicionar justificativa explícita de reseed no autonomy_lane_material_seed_packet (reasonCode + evidência compacta).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Packet inclui `reseedJustification` com `required`, `reasonCode`, `reason`, `evidenceSummary`.",
+        "Summary textual inclui `seedWhy=<reasonCode>` para auditoria rápida.",
+        "Sem alterar autorização/dispatch (report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reseed precisa sempre vir com motivo explícito e auditável para evitar semeadura arbitrária.\nIniciando melhoria prioritária de longo prazo: reseed com justificativa explícita e evidência compacta no packet.\nSemeadura agora exige justificativa explícita no payload, alinhando com steer do operador.",
+      "verification": "VER-BUD-1049"
+    },
+    {
+      "id": "TASK-BUD-698",
+      "description": "Adicionar smoke de regressão para justificativa de reseed no autonomy_lane_material_seed_packet.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-697"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida reasonCode correto para `seed-now-low-stock` e `seed-now-bootstrap`.",
+        "Smoke valida cenário bloqueado com reasonCode `readiness-blocked`.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege contrato de motivo explícito para semeadura contínua.\nRegressão coberta para motivo explícito de reseed.",
+      "verification": "VER-BUD-1050"
+    },
+    {
+      "id": "TASK-BUD-699",
+      "description": "Sincronizar doutrina curta: quando houver reseed, registrar seedWhy/reseedJustification do packet.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-697"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc orienta registrar `seedWhy` no fechamento/hand-off de seeding.",
+        "Texto curto anti-bloat, sem nova política de autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça disciplina de semeadura com motivo explícito em toda iteração.\nDoutrina reforça disciplina de motivo explícito sem aumentar bloat.",
+      "verification": "VER-BUD-1051"
     }
   ]
 }

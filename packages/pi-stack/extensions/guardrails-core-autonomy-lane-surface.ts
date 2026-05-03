@@ -519,6 +519,60 @@ function buildBootstrapSeedTemplates(input: { suggestedSeedCount: number; maxSee
   return templates.slice(0, count).map((row) => ({ ...row, filesHint: [...row.filesHint] }));
 }
 
+function buildReseedJustification(input: {
+  decision: "seed-now" | "wait" | "blocked";
+  recommendationCode: string;
+  readiness: ReturnType<typeof buildAfkMaterialReadinessPacket>;
+  blockedReasons: string[];
+  suggestedSeedCount: number;
+}): {
+  required: boolean;
+  reasonCode: "bootstrap-focus-missing" | "stock-below-target" | "readiness-blocked" | "not-needed";
+  reason: string;
+  evidenceSummary: string;
+} {
+  const evidenceSummary = [
+    `stock=${input.readiness.material.validationKnownCount}/${input.readiness.material.targetSlices}`,
+    `coverage=${input.readiness.material.validationCoveragePct}%`,
+    input.blockedReasons.length > 0 ? `blockers=${input.blockedReasons.join("|")}` : "blockers=none",
+    `suggested=${input.suggestedSeedCount}`,
+  ].join(" ");
+
+  if (input.decision === "seed-now" && input.recommendationCode === "afk-material-seed-now-bootstrap") {
+    return {
+      required: true,
+      reasonCode: "bootstrap-focus-missing",
+      reason: "bootstrap reseed required because focus/readiness blockers prevent normal queue continuation.",
+      evidenceSummary,
+    };
+  }
+
+  if (input.decision === "seed-now") {
+    return {
+      required: true,
+      reasonCode: "stock-below-target",
+      reason: "reseed required because validated local-safe stock is below target.",
+      evidenceSummary,
+    };
+  }
+
+  if (input.decision === "blocked") {
+    return {
+      required: false,
+      reasonCode: "readiness-blocked",
+      reason: "reseed blocked until operational/readiness blockers are resolved.",
+      evidenceSummary,
+    };
+  }
+
+  return {
+    required: false,
+    reasonCode: "not-needed",
+    reason: "reseed not required while stock remains healthy.",
+    evidenceSummary,
+  };
+}
+
 function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   const readiness = buildAfkMaterialReadinessPacket(p, cwd);
   const maxSeedSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_seed_slices, 3))));
@@ -563,6 +617,14 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     humanActionRequired = true;
   }
 
+  const reseedJustification = buildReseedJustification({
+    decision,
+    recommendationCode,
+    readiness,
+    blockedReasons: readiness.blockedReasons,
+    suggestedSeedCount,
+  });
+
   const summary = [
     "afk-material-seed:",
     `decision=${decision}`,
@@ -570,6 +632,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     `readiness=${readiness.decision}`,
     `focus=${readiness.focusTaskIds.join(",") || "none"}`,
     `suggestedSeedCount=${suggestedSeedCount}`,
+    `seedWhy=${reseedJustification.reasonCode}`,
     `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
     "authorization=none",
   ].join(" ");
@@ -585,6 +648,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     readiness,
     blockedReasons: readiness.blockedReasons,
     seedTemplates,
+    reseedJustification,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
