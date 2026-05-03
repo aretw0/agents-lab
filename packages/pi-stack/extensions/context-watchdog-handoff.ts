@@ -242,6 +242,7 @@ export type AutoResumePromptDiagnostics = {
 	tasks: AutoResumePromptCollectionDiagnostics;
 	blockers: AutoResumePromptCollectionDiagnostics;
 	nextActions: AutoResumePromptCollectionDiagnostics;
+	focusTasksListed?: string[];
 	staleFocusTasks?: string[];
 	globalTruncated: boolean;
 	globalTruncatedChars: number;
@@ -635,6 +636,7 @@ export function buildAutoResumePromptEnvelopeFromHandoff(
 			tasks: tasksPrepared.diagnostics,
 			blockers: blockersPrepared.diagnostics,
 			nextActions: nextPrepared.diagnostics,
+			focusTasksListed: tasksPrepared.values,
 			...(filteredCurrentTasks.stale.length > 0 ? { staleFocusTasks: filteredCurrentTasks.stale } : {}),
 			globalTruncated,
 			globalTruncatedChars,

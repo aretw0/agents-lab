@@ -15540,6 +15540,51 @@
       "milestone": "delegation-operator-clarity-2026-05",
       "notes": "[rationale:risk-control] Sem teste, a melhoria de comunicação tende a regredir em novas ondas de refactor.\n[provenance:human] source_task=TASK-BUD-674 reason=Transformar a necessidade operacional do operador em contrato verificável e durável.\nSemântico de pausa contextual passou a ter teste para evitar regressão entre sessões/refactors.",
       "verification": "VER-BUD-1028"
+    },
+    {
+      "id": "TASK-BUD-676",
+      "description": "Influência externa parked: avaliar futuramente https://github.com/aretw0/claude-mem como referência de memória/sessão para continuidade com governança local-first.",
+      "status": "planned",
+      "priority": "p3",
+      "milestone": "protected-parked-legacy",
+      "notes": "[rationale:risk-control] Pesquisa externa fica parked/protected para não contaminar execução local-safe contínua sem decisão explícita do operador.\n[provenance:human] source_task=none reason=Pedido explícito do operador para adicionar claude-mem no backlog de influências para estudo futuro."
+    },
+    {
+      "id": "TASK-BUD-677",
+      "description": "Usar foco estruturado no context_watch_auto_resume_preview para evitar IDs truncadas/ambíguas ao resumir contexto.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-handoff.ts"
+      ],
+      "acceptance_criteria": [
+        "Preview usa lista estruturada de foco (não parsing frágil da linha do prompt).",
+        "`focusTasks` preserva IDs completas e bounded no summary/details.",
+        "Sem mudança de autorização/dispatch (read-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz ambiguidade operacional em retomadas quando prompt sofre truncation.\nImplementando foco estruturado no auto-resume preview via diagnostics.focusTasksListed para evitar parsing truncado da linha do prompt.\nContexto de foco no preview agora vem de dado estruturado e preserva IDs completas de forma bounded.",
+      "verification": "VER-BUD-1029"
+    },
+    {
+      "id": "TASK-BUD-678",
+      "description": "Adicionar smoke para garantir que context_watch_auto_resume_preview mantém IDs completas no foco e não regressa para parsing truncado.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-677"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `focusTasks` com múltiplas IDs sem truncar para prefixos ambíguos.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege contexto do operador entre sessões e checkpoints.\nProteção contra regressão para não voltar a depender de parsing truncável da linha `focusTasks:`.",
+      "verification": "VER-BUD-1030"
     }
   ]
 }

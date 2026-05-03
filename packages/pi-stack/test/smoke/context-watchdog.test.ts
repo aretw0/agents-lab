@@ -1933,6 +1933,7 @@ describe("context-watchdog", () => {
 					reason: "clear",
 				},
 			});
+			expect(result.details?.diagnostics?.focusTasksListed).toEqual([]);
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-309");
 			expect(formatContextWatchAutoResumePreviewSummary({
 				focusTasks: "none-listed",
@@ -1971,6 +1972,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("staleFocus=1");
 			expect(result.details?.focusTasks).toBe("TASK-BUD-317");
 			expect(result.details?.staleFocus).toBe("TASK-BUD-316=completed");
+			expect(result.details?.diagnostics?.focusTasksListed).toEqual(["TASK-BUD-317"]);
 			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");
 			expect(result.details?.prompt).not.toContain("focusTasks: TASK-BUD-316");
 			expect(result.details?.prompt).not.toContain("TASK-BUD-296");

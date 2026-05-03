@@ -1,51 +1,48 @@
 {
-  "timestamp": "2026-05-03T15:36:02.679Z",
-  "context": "Canary start executado conforme decisão humana (start): TASK-BUD-660 concluída (VER-BUD-1025) e fatia bounded local-safe aplicada via TASK-BU [snip] s-calibration/context-watchdog + smoke. [truncated:+147 chars]",
+  "timestamp": "2026-05-03T15:52:06.189Z",
+  "context": "Pedido do operador aplicado: influência claude-mem adicionada ao backlog protected (TASK-BUD-676). Continuação local-safe executada com foco [snip] e preview (sem parsing textual frágil). [truncated:+93 chars]",
   "next_actions": [
-    "Se quiser continuar agora: escolher explicitamente um foco protected (ou autorizar include_pro [snip] scopes) para próxima onda. [truncated:+7 chars]",
-    "Alternativa: sem protected, abrir 1-2 novas tasks local-safe de continuidade e seguir chaining normal."
+    "Se continuar sem protected: semear próximo pacote local-safe de throughput.",
+    "Se quiser estudar influências: abrir foco explícito protected no TASK-BUD-676 (claude-mem)."
   ],
-  "blockers": [
-    "no-eligible-local-safe-tasks-only-protected-remaining"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "simple_delegate_rehearsal_packet ficou ready com source=live-board-fallback + telemetrySource= [snip] nt em validação pós-reload [truncated:+22 chars]",
-    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] rface.test.ts (115 passed) [truncated:+91 chars]",
-    "autonomy_lane_status atual: no local-safe eligible; somente lanes protected restantes"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts (68 passed)",
+    "context_watch_auto_resume_preview agora usa diagnostics.focusTasksListed",
+    "smoke valida focusTasksListed vazio/com foco ativo"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-675",
+    "focus": "TASK-BUD-678",
     "canonical_links": [
-      "task:TASK-BUD-675",
-      "task:TASK-BUD-660",
-      "task:TASK-BUD-673",
-      "verification:VER-BUD-1025"
+      "task:TASK-BUD-678",
+      "task:TASK-BUD-676",
+      "task:TASK-BUD-677"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T15:36:02.679Z",
+    "generatedAtIso": "2026-05-03T15:52:06.189Z",
     "level": "checkpoint",
-    "percent": 37,
+    "percent": 33,
     "action": "checkpoint-refresh",
-    "recommendation": "ask-human",
+    "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T15:36:02.679Z",
+      "atIso": "2026-05-03T15:52:06.189Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 37,
+      "percent": 33,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "ask-human"
+      "recommendation": "continue"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-675"
+    "TASK-BUD-678"
   ]
 }

@@ -11481,6 +11481,24 @@
       "method": "test",
       "timestamp": "2026-05-03T15:34:54.639Z",
       "evidence": "Cobertura de regressão adicionada: - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` valida `operatorPauseBrief` no start packet (motivo, foco+mnemônico, opções, recomendação, summary enriquecido). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` valida `operatorBrief` no `context_watch_status` com foco+mnemônico e opções/recomendação. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (115 passed)."
+    },
+    {
+      "id": "VER-BUD-1029",
+      "target": "TASK-BUD-677",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T15:51:04.021Z",
+      "evidence": "`packages/pi-stack/extensions/context-watchdog-handoff.ts` agora publica `diagnostics.focusTasksListed` no envelope de auto-resume; `context_watch_auto_resume_preview` em `packages/pi-stack/extensions/context-watchdog.ts` passou a usar essa lista estruturada (fallback para parsing antigo apenas quando ausente). Isso evita dependência de parsing textual fragilizado para `focusTasks` no preview."
+    },
+    {
+      "id": "VER-BUD-1030",
+      "target": "TASK-BUD-678",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T15:51:35.645Z",
+      "evidence": "Smoke atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` para validar `diagnostics.focusTasksListed` no `context_watch_auto_resume_preview` (caso sem foco ativo => `[]`; caso com foco ativo => `['TASK-BUD-317']`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (68 passed)."
     }
   ]
 }

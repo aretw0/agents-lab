@@ -2851,7 +2851,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
-			const focusTasks = extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
+			const focusTasks = (Array.isArray(envelope.diagnostics.focusTasksListed) && envelope.diagnostics.focusTasksListed.length > 0)
+				? envelope.diagnostics.focusTasksListed.join(", ")
+				: extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
 			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
 			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
 			const reloadRequired = isReloadRequiredForSourceUpdate();
