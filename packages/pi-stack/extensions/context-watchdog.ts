@@ -248,6 +248,16 @@ export type ContextWatchOperatingCadenceSignal = {
 		| "recalibrated-from-compact";
 };
 
+export type ContextWatchAutoCompactTriggerOrigin = "none" | "checkpoint-window" | "hard-compact";
+
+export function resolveContextWatchAutoCompactTriggerOrigin(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	autoCompactTrigger: boolean;
+}): ContextWatchAutoCompactTriggerOrigin {
+	if (!input.autoCompactTrigger) return "none";
+	return input.assessmentLevel === "checkpoint" ? "checkpoint-window" : "hard-compact";
+}
+
 export function formatContextWatchSteeringStatus(
 	assessment: Pick<ContextWatchAssessment, "level" | "action" | "recommendation">,
 ): string {
@@ -1353,6 +1363,7 @@ export function formatContextWatchCommandStatusSummary(input: {
 	action?: string;
 	autoCompactDecision?: string;
 	autoCompactTrigger?: boolean;
+	autoCompactTriggerOrigin?: ContextWatchAutoCompactTriggerOrigin;
 	retryScheduled?: boolean;
 	calmCloseReady?: boolean;
 	checkpointEvidenceReady?: boolean;
@@ -1369,6 +1380,7 @@ export function formatContextWatchCommandStatusSummary(input: {
 		input.action ? `action=${input.action}` : undefined,
 		input.autoCompactDecision ? `autoCompact=${input.autoCompactDecision}` : undefined,
 		input.autoCompactTrigger !== undefined ? `trigger=${input.autoCompactTrigger ? "yes" : "no"}` : undefined,
+		input.autoCompactTriggerOrigin && input.autoCompactTriggerOrigin !== "none" ? `triggerOrigin=${input.autoCompactTriggerOrigin}` : undefined,
 		input.retryScheduled !== undefined ? `retry=${input.retryScheduled ? "yes" : "no"}` : undefined,
 		input.calmCloseReady !== undefined ? `calm=${input.calmCloseReady ? "ready" : "no"}` : undefined,
 		input.checkpointEvidenceReady !== undefined ? `checkpoint=${input.checkpointEvidenceReady ? "ready" : "missing"}` : undefined,
@@ -2147,14 +2159,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		deferCount = compactDeferCount,
 	) => {
 		const nowMs = Date.now();
-		const state = buildAutoCompactDiagnostics(assessment, config, {
-			nowMs,
-			lastAutoCompactAt,
-			inFlight: autoCompactInFlight,
-			isIdle: ctx.isIdle(),
-			hasPendingMessages: ctx.hasPendingMessages(),
-		}, AUTO_COMPACT_RETRY_DELAY_MS);
-		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		const handoff = readHandoffJson(ctx.cwd);
 		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
 		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
@@ -2176,12 +2180,25 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			handoffLastEventAgeMs,
 			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 		});
+		const state = buildAutoCompactDiagnostics(assessment, config, {
+			nowMs,
+			lastAutoCompactAt,
+			inFlight: autoCompactInFlight,
+			isIdle: ctx.isIdle(),
+			hasPendingMessages: ctx.hasPendingMessages(),
+			checkpointEvidenceReady,
+		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		const calmClose = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
 			decisionReason: state.decision.reason,
 			checkpointEvidenceReady,
 			deferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
+		});
+		const autoCompactTriggerOrigin = resolveContextWatchAutoCompactTriggerOrigin({
+			assessmentLevel: assessment.level,
+			autoCompactTrigger: state.decision.trigger,
 		});
 		const progressPreservation = resolveProgressPreservationSignal({
 			assessmentLevel: assessment.level,
@@ -2251,6 +2268,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			contextEconomySummary: summarizeContextEconomySignal(contextEconomy),
 			calmCloseReady: calmClose.calmCloseReady,
 			checkpointEvidenceReady: calmClose.checkpointEvidenceReady,
+			autoCompactTriggerOrigin,
+			autoCompactCheckpointWindowEligible: assessment.level === "checkpoint",
+			autoCompactCandidateOrigin: assessment.level === "checkpoint"
+				? "checkpoint-window"
+				: assessment.level === "compact"
+					? "hard-compact"
+					: "none",
 			deferCount: calmClose.deferCount,
 			deferThreshold: calmClose.deferThreshold,
 			antiParalysisTriggered: calmClose.antiParalysisTriggered,
@@ -2429,6 +2453,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			const assessment = buildAssessment(ctx, config, thresholdOverrides);
 			lastAssessment = assessment;
 			const nowMs = Date.now();
+			const autoCompact = currentAutoCompactState(ctx, assessment);
 			const compactStage = resolveContextWatchCompactStage(assessment);
 			const signalNoise = {
 				windowMs: SIGNAL_NOISE_WINDOW_MS,
@@ -2468,6 +2493,14 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					percent: assessment.percent,
 					thresholds: assessment.thresholds,
 					compactStage,
+					autoCompactTelemetry: {
+						decision: autoCompact.decision.reason,
+						trigger: autoCompact.decision.trigger,
+						triggerOrigin: autoCompact.autoCompactTriggerOrigin,
+						candidateOrigin: autoCompact.autoCompactCandidateOrigin,
+						checkpointWindowEligible: autoCompact.autoCompactCheckpointWindowEligible,
+						checkpointEvidenceReady: autoCompact.checkpointEvidenceReady,
+					},
 					signalNoise,
 					preCompactReloadSignal,
 					nextAction,
@@ -3206,6 +3239,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						action: assessment.action,
 						autoCompactDecision: autoCompact.decision.reason,
 						autoCompactTrigger: autoCompact.decision.trigger,
+						autoCompactTriggerOrigin: autoCompact.autoCompactTriggerOrigin,
 						retryScheduled: autoCompact.retryScheduled,
 						calmCloseReady: autoCompact.calmCloseReady,
 						checkpointEvidenceReady: autoCompact.checkpointEvidenceReady,

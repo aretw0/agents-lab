@@ -77,6 +77,12 @@ Condições para continuar sem nova interação humana:
 
 Para perfil de baixa interação humana, encadear múltiplas fatias local-safe no mesmo milestone até stop condition real ou boundary de compactação, sem criar nomenclatura paralela.
 
+Playbook curto para esse modo:
+
+1. fechar a fatia com validação focal e evidência curta no board;
+2. avançar para a próxima task local-safe elegível sem pedir novo nudge por task;
+3. parar ao atingir stop condition canônica (especialmente `CONTEXT_COMPACT_REQUIRED`) e retomar após checkpoint/compact.
+
 Regra de desacoplamento de planejamento: task local-safe não deve depender diretamente de task `protected-parked-*`; quando isso acontecer, replanejar dependências para pré-condição local-safe ou manter a task no fluxo protected.
 
 Stop reasons canônicos (interação humana obrigatória):

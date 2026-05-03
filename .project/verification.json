@@ -11274,6 +11274,42 @@
       "method": "test",
       "timestamp": "2026-05-03T01:37:40.096Z",
       "evidence": "Cobertura de regressão para a política de encadeamento + transição graceful checkpoint->compact validada nas smokes: `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` agora cobre `chaining active` (continuidade sem nudge por task) e `chaining blocked` por handoff stale; `packages/pi-stack/test/smoke/context-watchdog.test.ts` mantém gate de compactação em checkpoint+idle com evidência de checkpoint e fallback fail-closed. Execução conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (93 passed)."
+    },
+    {
+      "id": "VER-BUD-1006",
+      "target": "TASK-BUD-653",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:09:39.434Z",
+      "evidence": "`autonomy_lane_status` agora publica preview explícito de fila pronta (`readyQueue.taskIds`) via `buildReadyQueuePreview` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`, mantendo boundedness por `sample_limit`. Cobertura adicionada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (assert de `readyQueue.taskIds=[\"TASK-NEXT\"]` no status composto). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (28 passed)."
+    },
+    {
+      "id": "VER-BUD-1007",
+      "target": "TASK-BUD-654",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:10:12.006Z",
+      "evidence": "`autonomy_lane_next_task` agora retorna payload auto-suficiente para continuidade com `chaining` (active|blocked + recommendationCode + blockedReasons) e `readyQueue`, sem mutação/dispatch. Implementado em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`. Smoke nova: `includes chaining summary in next-task payload for continuous execution loops` em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`, validando `chaining.decision=active` e `autonomy-chaining-active`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (28 passed)."
+    },
+    {
+      "id": "VER-BUD-1008",
+      "target": "TASK-BUD-655",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:10:29.015Z",
+      "evidence": "Observabilidade da transição checkpoint->compact reforçada em `packages/pi-stack/extensions/context-watchdog.ts`: novo `resolveContextWatchAutoCompactTriggerOrigin` (`checkpoint-window|hard-compact|none`), fields em estado/status (`autoCompactTriggerOrigin`, `autoCompactCandidateOrigin`, `autoCompactCheckpointWindowEligible`) e `autoCompactTelemetry` no `context_watch_compact_stage_status`; `/context-watch status` inclui `triggerOrigin` quando aplicável. `currentAutoCompactState` também passou a avaliar `checkpointEvidenceReady` ao resolver decisão, alinhando telemetria com gate real. Cobertura: `packages/pi-stack/test/smoke/context-watchdog.test.ts` (novo assert de trigger-origin + telemetry no compact-stage). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` e suíte conjunta com autonomy-lane (94 passed)."
+    },
+    {
+      "id": "VER-BUD-1009",
+      "target": "TASK-BUD-656",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T02:10:47.288Z",
+      "evidence": "Doutrina atualizada de forma enxuta e sem nomenclatura paralela em `docs/guides/control-plane-operating-doctrine.md`: adicionado `Playbook curto para esse modo` com 3 passos (validar/evidenciar, avançar sem nudge por task, parar em stop condition canônica com destaque `CONTEXT_COMPACT_REQUIRED`). Sem duplicação de termos/primitivas. Verificação por marcador: presença de `Playbook curto para esse modo`, `sem pedir novo nudge por task` e `CONTEXT_COMPACT_REQUIRED` (3/3)."
     }
   ]
 }

@@ -399,6 +399,27 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   };
 }
 
+function buildReadyQueuePreview(selection: {
+  nextTaskId?: string;
+  eligibleTaskIds?: string[];
+}, sampleLimitInput: unknown): {
+  taskIds: string[];
+  nextTaskId?: string;
+  previewCount: number;
+  bounded: true;
+} {
+  const sampleLimit = Math.max(1, Math.min(20, Math.floor(asNumber(sampleLimitInput, 5))));
+  const taskIds = Array.isArray(selection.eligibleTaskIds)
+    ? selection.eligibleTaskIds.filter((id): id is string => typeof id === "string" && id.trim().length > 0).slice(0, sampleLimit)
+    : [];
+  return {
+    taskIds,
+    nextTaskId: typeof selection.nextTaskId === "string" ? selection.nextTaskId : undefined,
+    previewCount: taskIds.length,
+    bounded: true,
+  };
+}
+
 function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
@@ -683,10 +704,12 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskId: selection.nextTaskId,
         handoffFreshness: handoffFreshness.label,
       });
+      const readyQueue = buildReadyQueuePreview(selection, p.sample_limit);
       const result = {
         ready: plan.ready && selection.ready,
         plan,
         selection,
+        readyQueue,
         chaining: {
           ...chaining,
           handoffAgeMs: handoffFreshness.ageMs,
@@ -765,7 +788,29 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
-      const result = resolveTaskSelection(p, ctx.cwd);
+      const selection = resolveTaskSelection(p, ctx.cwd);
+      const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
+        ready: true,
+        nextTaskId: selection.nextTaskId,
+      }));
+      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
+      const chaining = resolveLocalSafeChainingDecision({
+        contextLevel: normalizeContextLevel(p.context_level),
+        planReady: plan.ready,
+        selectionReady: selection.ready,
+        selectionReason: selection.reason,
+        nextTaskId: selection.nextTaskId,
+        handoffFreshness: handoffFreshness.label,
+      });
+      const result = {
+        ...selection,
+        readyQueue: buildReadyQueuePreview(selection, p.sample_limit),
+        chaining: {
+          ...chaining,
+          handoffAgeMs: handoffFreshness.ageMs,
+          handoffFreshMaxAgeMs: handoffFreshness.maxAgeMs,
+        },
+      };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,

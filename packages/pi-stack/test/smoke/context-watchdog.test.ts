@@ -47,6 +47,7 @@ import contextWatchdogExtension, {
 	resolvePreCompactReloadSignal,
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchCompactStage,
+	resolveContextWatchAutoCompactTriggerOrigin,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
 	describeContextWatchDeterministicStopHint,
@@ -297,6 +298,18 @@ describe("context-watchdog", () => {
 			handoffPath: ".project/handoff.json",
 			checkpointEvidenceReady: false,
 		})).toEqual({ proceed: true, reason: "checkpoint-written" });
+		expect(resolveContextWatchAutoCompactTriggerOrigin({
+			assessmentLevel: "checkpoint",
+			autoCompactTrigger: true,
+		})).toBe("checkpoint-window");
+		expect(resolveContextWatchAutoCompactTriggerOrigin({
+			assessmentLevel: "compact",
+			autoCompactTrigger: true,
+		})).toBe("hard-compact");
+		expect(resolveContextWatchAutoCompactTriggerOrigin({
+			assessmentLevel: "checkpoint",
+			autoCompactTrigger: false,
+		})).toBe("none");
 		expect(resolveAutoCompactCheckpointGate({
 			checkpointEvidenceReady: true,
 		})).toEqual({ proceed: true, reason: "checkpoint-ready" });
@@ -1506,6 +1519,12 @@ describe("context-watchdog", () => {
 				mode: "read-only-compact-stage",
 				authorization: "none",
 				dispatchAllowed: false,
+				autoCompactTelemetry: {
+					candidateOrigin: "checkpoint-window",
+					triggerOrigin: "none",
+					checkpointWindowEligible: true,
+					checkpointEvidenceReady: false,
+				},
 				signalNoise: {
 					windowMs: 600_000,
 					announcementsInWindow: 0,

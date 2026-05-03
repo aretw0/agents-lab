@@ -89,6 +89,34 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
   });
 
+  it("includes chaining summary in next-task payload for continuous execution loops", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-next-task-chaining-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-LOCAL", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: new Date().toISOString(),
+      current_tasks: ["TASK-LOCAL"],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const nextTaskTool = tools.find((tool) => tool.name === "autonomy_lane_next_task");
+    const result = nextTaskTool?.execute("call-test", {}, undefined, undefined, { cwd });
+    const chaining = (result?.details.chaining as { decision?: string; recommendationCode?: string } | undefined);
+
+    expect(result?.details.ready).toBe(true);
+    expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
+    expect(chaining?.decision).toBe("active");
+    expect(chaining?.recommendationCode).toBe("autonomy-chaining-active");
+  });
+
   it("returns stable recommendationCode when no local-safe eligible task exists", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-surface-protected-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
@@ -539,6 +567,7 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.ready).toBe(true);
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-NEXT");
+    expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-NEXT"]);
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
     expect(result?.details.recommendationCode).toBe("execute-bounded-slice");
     expect(result?.details.nextAction).toContain("next=TASK-NEXT");
