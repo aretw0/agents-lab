@@ -15108,6 +15108,73 @@
       "milestone": "throughput-multipack-lane-2026-05",
       "notes": "[provenance:human] source_task=TASK-BUD-651 reason=Ensure long-run stability and prevent drift back to one-task-only cadence.\nRegressão garante continuidade local-safe em ondas e preserva fail-closed na janela de compactação.",
       "verification": "VER-BUD-1005"
+    },
+    {
+      "id": "TASK-BUD-653",
+      "description": "Add ready-queue preview (top local-safe task ids) to autonomy_lane_status for multi-slice chaining visibility.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "autonomy_lane_status details include a bounded queue preview beyond nextTaskId.",
+        "Queue preview remains read-only and respects protected/rationale filters.",
+        "Smoke test validates queue preview shape and ordering."
+      ],
+      "milestone": "throughput-ready-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Operator requested multiple ready slices to reduce interaction and keep continuous execution between compactions."
+    },
+    {
+      "id": "TASK-BUD-654",
+      "description": "Expose chaining signal in autonomy_lane_next_task so loops can consume active|blocked state without extra status call.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "autonomy_lane_next_task includes chaining decision summary (active|blocked + recommendationCode).",
+        "No dispatch/mutation authorization is introduced.",
+        "Smoke coverage asserts chaining payload exists and is deterministic."
+      ],
+      "milestone": "throughput-ready-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Reduce per-slice interaction by making next-task response self-sufficient for chaining."
+    },
+    {
+      "id": "TASK-BUD-655",
+      "description": "Harden checkpoint-window compact transition observability with explicit checkpoint-trigger telemetry fields in context-watch status surfaces.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Status details distinguish compact trigger originating from checkpoint window vs hard compact level.",
+        "No change to fail-closed compact/checkpoint guardrails.",
+        "Smoke test validates checkpoint-window trigger observability."
+      ],
+      "milestone": "throughput-ready-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Keep graceful transition debuggable while operating in low-interaction multi-slice mode."
+    },
+    {
+      "id": "TASK-BUD-656",
+      "description": "Document concise operator playbook for 'run many local-safe slices until compact' in existing doctrine section without new naming.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Playbook stays within existing doctrine terminology (no parallel naming).",
+        "Includes explicit stop conditions and compact boundary reminder.",
+        "Text remains short and non-redundant with existing sections."
+      ],
+      "milestone": "throughput-ready-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Capture low-interaction preference as minimal reusable guidance without creating documentation bloat."
     }
   ]
 }
