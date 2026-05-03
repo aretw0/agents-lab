@@ -14922,7 +14922,7 @@
     {
       "id": "TASK-BUD-644",
       "description": "[P2] Reduzir bloat de handoff por eventos repetidos de context-watch: dedupe de `context_watch_events` idênticos no mesmo window/estado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-640"
@@ -14938,7 +14938,8 @@
         "Teste cobre recorrência de eventos duplicados em janela curta."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Encadeamento para reduzir churn em handoff e melhorar relação sinal/ruído.\n[rationale:risk-control] Eventos repetidos de context-watch no handoff aumentam ruído e custo de contexto sem ganho de decisão. Dedupe preserva auditoria útil e reduz churn durante long-run."
+      "notes": "Encadeamento para reduzir churn em handoff e melhorar relação sinal/ruído.\n[rationale:risk-control] Eventos repetidos de context-watch no handoff aumentam ruído e custo de contexto sem ganho de decisão. Dedupe preserva auditoria útil e reduz churn durante long-run.\nBloat de `context_watch_events` por repetição no mesmo estado/janela foi reduzido mantendo trilha útil de mudança real.",
+      "verification": "VER-BUD-1001"
     },
     {
       "id": "TASK-BUD-645",

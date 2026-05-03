@@ -11229,6 +11229,15 @@
       "method": "test",
       "timestamp": "2026-05-03T00:20:21.161Z",
       "evidence": "`packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` agora infere defaults reais de capability quando `preload_decision`/`dirty_signal` não são fornecidos: usa `consumeContextPreloadPack(..., profile=control-plane-core)` + snapshot de git dirty (`readGitDirtySnapshot`, fallback `buildUnavailableGitDirtySnapshot`). Aplicado nos 3 tools: `delegate_or_execute_decision_packet`, `simple_delegate_rehearsal_packet` e `simple_delegate_rehearsal_start_packet`. Details agora incluem `inferredCapabilityDefaults` para auditoria. Regressões: `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` ganhou caso `infers capability defaults from workspace preload pack when params are omitted`; `packages/pi-stack/test/smoke/session-analytics.test.ts` cobre parsing de snapshot para auto-advance telemetry. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (41 passed)."
+    },
+    {
+      "id": "VER-BUD-1001",
+      "target": "TASK-BUD-644",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T00:27:29.631Z",
+      "evidence": "Implementado dedupe de eventos repetidos em `packages/pi-stack/extensions/context-watchdog-handoff-events.ts`: `applyContextWatchToHandoff` agora detecta evento idêntico consecutivo (reason/level/percent/action/recommendation/thresholds) e substitui o último registro ao invés de anexar duplicado, reduzindo bloat/churn no handoff sem perder timestamp mais recente. Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` (`dedupes repeated identical context-watch events in handoff trail`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (107 passed)."
     }
   ]
 }

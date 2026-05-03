@@ -2653,6 +2653,30 @@ describe("context-watchdog", () => {
 		expect(latestContextWatchEvent({})?.reason).toBeUndefined();
 	});
 
+	it("dedupes repeated identical context-watch events in handoff trail", () => {
+		const assessment = evaluateContextWatch(69, {
+			warnPct: 50,
+			checkpointPct: 68,
+			compactPct: 72,
+		});
+		const first = applyContextWatchToHandoff(
+			{ context: "ongoing", context_watch_events: [] },
+			assessment,
+			"message_end",
+			"2026-04-21T21:30:00.000Z",
+		) as any;
+		const second = applyContextWatchToHandoff(
+			first,
+			assessment,
+			"message_end",
+			"2026-04-21T21:31:00.000Z",
+		) as any;
+
+		expect(Array.isArray(second.context_watch_events)).toBe(true);
+		expect(second.context_watch_events).toHaveLength(1);
+		expect(second.context_watch_events[0]?.atIso).toBe("2026-04-21T21:31:00.000Z");
+	});
+
 	it("treats bounded manual checkpoints as valid compact/resume evidence", () => {
 		const checkpoint = buildLocalSliceHandoffCheckpoint({
 			timestampIso: "2026-04-21T21:33:00.000Z",

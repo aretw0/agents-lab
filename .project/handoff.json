@@ -1,46 +1,47 @@
 {
-  "timestamp": "2026-05-03T00:22:33.865Z",
-  "context": "Lane de desbloqueio de delegação avançou: TASK-BUD-647 (telemetria auto-advance sem no-data), TASK-BUD-648 (canário one-task documentado e va [snip] rkspace no surface de ops-calibration). [truncated:+75 chars]",
+  "timestamp": "2026-05-03T00:29:29.486Z",
+  "context": "Lane throughput-decoupling foi concluída nesta onda (TASK-BUD-640..649): ruído de sessão reduzido, budget de noise visível, defaults globais [snip] bloat de context_watch_events dedupado. [truncated:+115 chars]",
   "next_actions": [
-    "Executar TASK-BUD-644 para dedupe de context_watch_events no handoff e reduzir bloat residual.",
-    "Após /reload, revalidar simple_delegate_rehearsal_packet sem overrides para confirmar capabili [snip] defaults no runtime live. [truncated:+21 chars]",
-    "Se packet ficar ready, preparar decisão humana explícita de canário start/abort/defer com foco único e files declarados."
+    "Fazer /reload para validar live os novos defaults inferidos de capability nos packets de simple-delegate.",
+    "Após reload, rodar simple_delegate_rehearsal_packet e simple_delegate_rehearsal_start_packet c [snip] canário start/abort/defer. [truncated:+35 chars]",
+    "Escolher próxima milestone: (A) delegação canário local-safe, (B) novo bloco de self-improveme [snip] lote protegido explícito. [truncated:+21 chars]"
   ],
   "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack [snip] ls-ops-calibration.test.ts [truncated:+20 chars]",
-    "auto_advance_hard_intent_telemetry (decision=ready, sem no-data)",
-    "simple_delegate_rehearsal_packet (não bloqueia mais por auto-advance/telemetry no-data)"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] ytics.test.ts (107 passed) [truncated:+87 chars]",
+    "board_task_complete TASK-BUD-644 -> VER-BUD-1001",
+    "board_task_complete TASK-BUD-647 -> VER-BUD-998"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-649",
     "canonical_links": [
       "task:TASK-BUD-649",
-      "task:TASK-BUD-647",
-      "task:TASK-BUD-648"
+      "task:TASK-BUD-640",
+      "task:TASK-BUD-644",
+      "verification:VER-BUD-1001"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T00:22:33.865Z",
+    "generatedAtIso": "2026-05-03T00:29:29.486Z",
     "level": "checkpoint",
-    "percent": 60,
+    "percent": 61,
     "action": "checkpoint-refresh",
-    "recommendation": "continue",
+    "recommendation": "ask-human",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T00:22:33.865Z",
+      "atIso": "2026-05-03T00:29:29.486Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 60,
+      "percent": 61,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "ask-human"
     }
   ],
   "completed_tasks": [

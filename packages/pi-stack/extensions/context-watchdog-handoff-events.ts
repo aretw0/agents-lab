@@ -112,6 +112,21 @@ function contextWatchActionLine(assessment: ContextWatchAssessmentLike): string 
 	return `${CONTEXT_WATCH_ACTION_PREFIX} level=${assessment.level} ${assessment.percent}% (${assessment.action}) · ${assessment.recommendation}`;
 }
 
+function isDuplicateContextWatchEvent(
+	previous: ContextWatchHandoffEvent | undefined,
+	next: ContextWatchHandoffEvent,
+): boolean {
+	if (!previous) return false;
+	return previous.reason === next.reason
+		&& previous.level === next.level
+		&& previous.percent === next.percent
+		&& previous.action === next.action
+		&& previous.recommendation === next.recommendation
+		&& previous.thresholds.warnPct === next.thresholds.warnPct
+		&& previous.thresholds.checkpointPct === next.thresholds.checkpointPct
+		&& previous.thresholds.compactPct === next.thresholds.compactPct;
+}
+
 function contextWatchBlockersForLevel(level: ContextWatchdogLevel): string[] {
 	if (level === "compact") return ["context-watch-compact-required"];
 	if (level === "checkpoint") return ["context-watch-checkpoint-required"];
@@ -192,7 +207,12 @@ export function applyContextWatchToHandoff(
 		recommendation: assessment.recommendation,
 	};
 	const events = normalizeContextWatchEventList(base[CONTEXT_WATCH_EVENTS_KEY]);
-	events.push(event);
+	const previous = events.at(-1);
+	if (isDuplicateContextWatchEvent(previous, event)) {
+		events[events.length - 1] = event;
+	} else {
+		events.push(event);
+	}
 	base[CONTEXT_WATCH_EVENTS_KEY] = events.slice(-CONTEXT_WATCH_EVENTS_MAX);
 
 	base.timestamp = atIso;
