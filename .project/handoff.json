@@ -1,37 +1,38 @@
 {
-  "timestamp": "2026-05-03T17:08:01.712Z",
-  "context": "Hardening de surpresa de compactação aplicado: timeout-pressure agora é sinal explícito no context-watch (reason determinístico + operator ac [snip] vel mesmo sob pressão de timeout/retry. [truncated:+96 chars]",
+  "timestamp": "2026-05-03T17:13:04.759Z",
+  "context": "Wave de hardening de surpresa/timeout concluída: TASK-BUD-685/686/687 finalizadas. Context-watch agora detecta timeout-pressure, emite reason [snip] ia guard path com reasonCode explícito. [truncated:+155 chars]",
   "next_actions": [
-    "Monitorar recorrência real; se repetir >=3 no mesmo padrão, executar TASK-BUD-687 para bloquea [snip] gado sob timeout-pressure. [truncated:+12 chars]",
-    "Retomar backlog local-safe de throughput após esta estabilização."
+    "Retomar backlog que libera potencial (próximo local-safe elegível: TASK-BUD-684).",
+    "Continuar monitorando ocorrências reais de timeout para calibrar janela/threshold sem bloat."
   ],
   "blockers": [],
   "recent_validation": [
     "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] urface.test.ts (96 passed) [truncated:+26 chars]",
-    "context-watchdog.ts com reason timeout-pressure + composeAutoResumeSuppressionHint",
-    "smoke cobre emit-timeout-pressure + operator signal/stop/action + hint composto"
+    "reason timeout-pressure em operator signal + deterministic stop + operator action",
+    "guard path resolveAutoCompactTimeoutPressureGuard com reasonCode=guarded-precompact-timeout-pressure"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-686",
+    "focus": "TASK-BUD-687",
     "canonical_links": [
-      "task:TASK-BUD-686",
-      "task:TASK-BUD-687"
+      "task:TASK-BUD-687",
+      "task:TASK-BUD-685",
+      "task:TASK-BUD-684"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T17:08:01.712Z",
+    "generatedAtIso": "2026-05-03T17:13:04.759Z",
     "level": "checkpoint",
-    "percent": 52,
+    "percent": 58,
     "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T17:08:01.712Z",
+      "atIso": "2026-05-03T17:13:04.759Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 52,
+      "percent": 58,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +43,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-686"
+    "TASK-BUD-687"
   ]
 }

@@ -15736,7 +15736,7 @@
     {
       "id": "TASK-BUD-687",
       "description": "Block legacy compact path under timeout pressure; force guarded pre-compact path with explicit operator pause brief.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-685"
@@ -15751,7 +15751,8 @@
         "Change is fail-closed and read-only with no dispatch side effects."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] recorrência >=3 sugere bloquear caminho antigo segundo hardening plan (block-old-path)."
+      "notes": "[rationale:risk-control] recorrência >=3 sugere bloquear caminho antigo segundo hardening plan (block-old-path).\nAplicando bloqueio do caminho legado de compact quando timeout-pressure está ativo: trigger direto passa por guard path com reasonCode determinístico.\nFail-closed ativo para evitar compact direta silenciosa durante pressão de timeout.",
+      "verification": "VER-BUD-1038"
     }
   ]
 }

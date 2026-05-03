@@ -250,6 +250,41 @@ export type ContextWatchOperatingCadenceSignal = {
 
 export type ContextWatchAutoCompactTriggerOrigin = "none" | "checkpoint-window" | "hard-compact";
 
+export type AutoCompactTimeoutPressureGuardReason =
+	| "not-triggered"
+	| "level-not-precompact"
+	| "no-timeout-pressure"
+	| "guarded-timeout-pressure";
+
+export type AutoCompactTimeoutPressureGuardDecision = {
+	blocked: boolean;
+	reason: AutoCompactTimeoutPressureGuardReason;
+	reasonCode?: "guarded-precompact-timeout-pressure";
+	recommendation?: string;
+};
+
+export function resolveAutoCompactTimeoutPressureGuard(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	autoCompactTrigger: boolean;
+	timeoutPressureActive: boolean;
+}): AutoCompactTimeoutPressureGuardDecision {
+	if (!input.autoCompactTrigger) {
+		return { blocked: false, reason: "not-triggered" };
+	}
+	if (input.assessmentLevel !== "checkpoint" && input.assessmentLevel !== "compact") {
+		return { blocked: false, reason: "level-not-precompact" };
+	}
+	if (!input.timeoutPressureActive) {
+		return { blocked: false, reason: "no-timeout-pressure" };
+	}
+	return {
+		blocked: true,
+		reason: "guarded-timeout-pressure",
+		reasonCode: "guarded-precompact-timeout-pressure",
+		recommendation: "timeout-pressure guard active: block direct compact trigger, keep idle, and retry through guarded path.",
+	};
+}
+
 export function resolveContextWatchAutoCompactTriggerOrigin(input: {
 	assessmentLevel: ContextWatchdogLevel;
 	autoCompactTrigger: boolean;
@@ -2262,7 +2297,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			);
 			ctx.ui.notify(calmCloseSignal.recommendation, "warning");
 		}
-		if (autoCompactState.decision.trigger) {
+		const timeoutPressureGuard = resolveAutoCompactTimeoutPressureGuard({
+			assessmentLevel: assessment.level,
+			autoCompactTrigger: autoCompactState.decision.trigger,
+			timeoutPressureActive: timeoutPressure.active,
+		});
+		if (autoCompactState.decision.trigger && !timeoutPressureGuard.blocked) {
 			const handoffForPrep = readHandoffJson(ctx.cwd);
 			const handoffTsForPrep = typeof handoffForPrep.timestamp === "string" ? handoffForPrep.timestamp : undefined;
 			const handoffFreshnessForPrep = resolveHandoffFreshness(handoffTsForPrep, now, config.handoffFreshMaxAgeMs);
@@ -2497,6 +2537,25 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify(`context-watch: auto compact failed (${message})`, "warning");
 				},
 			});
+		} else if (autoCompactCandidateLevel && timeoutPressureGuard.blocked) {
+			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+				"context-watchdog.auto-compact-guarded-timeout-pressure",
+				{
+					atIso: new Date(now).toISOString(),
+					reasonCode: timeoutPressureGuard.reasonCode,
+					reason: timeoutPressureGuard.reason,
+					recommendation: timeoutPressureGuard.recommendation,
+					timeoutPressure,
+				},
+			);
+			if (config.notify) {
+				ctx.ui.notify(
+					timeoutPressureGuard.recommendation
+						?? "context-watch: timeout-pressure guard active; keep idle and retry guarded compact path.",
+					"warning",
+				);
+			}
+			scheduleAutoCompactRetry(ctx, AUTO_COMPACT_RETRY_DELAY_MS);
 		} else if (autoCompactCandidateLevel && autoCompactState.retryDelayMs !== undefined) {
 			scheduleAutoCompactRetry(ctx, autoCompactState.retryDelayMs);
 		} else {
@@ -2651,6 +2710,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			checkpointEvidenceReady,
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		const timeoutPressure = readTimeoutPressureState(nowMs);
+		const timeoutPressureGuard = resolveAutoCompactTimeoutPressureGuard({
+			assessmentLevel: assessment.level,
+			autoCompactTrigger: state.decision.trigger,
+			timeoutPressureActive: timeoutPressure.active,
+		});
 		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		const calmClose = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
@@ -2750,6 +2814,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
 			compactCheckpointPersistReason: compactCheckpointPersistence.reason,
 			timeoutPressure,
+			timeoutPressureGuard,
 		};
 	};
 

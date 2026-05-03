@@ -11562,6 +11562,15 @@
       "method": "test",
       "timestamp": "2026-05-03T17:07:48.794Z",
       "evidence": "Smoke/regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: valida `emit-timeout-pressure` no pre-compact idle prep, `timeout-pressure` em operator signal/deterministic stop/operator action, e hint composto de auto-resume suppression com timeout-pressure. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (96 passed)."
+    },
+    {
+      "id": "VER-BUD-1038",
+      "target": "TASK-BUD-687",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T17:12:52.189Z",
+      "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora aplica guard path explícito sob timeout-pressure via `resolveAutoCompactTimeoutPressureGuard`: quando há trigger de compact em checkpoint/compact + timeout-pressure ativo, bloqueia caminho legado de compact direto, emite `context-watchdog.auto-compact-guarded-timeout-pressure` com `reasonCode=guarded-precompact-timeout-pressure` e agenda retry guardado. Cobertura adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` para o guard helper + reason code. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (96 passed)."
     }
   ]
 }

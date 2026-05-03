@@ -50,6 +50,7 @@ import contextWatchdogExtension, {
 	resolveContextWatchOperatingCadence,
 	resolveContextWatchCompactStage,
 	resolveContextWatchAutoCompactTriggerOrigin,
+	resolveAutoCompactTimeoutPressureGuard,
 	resolveContextWatchOperatorSignal,
 	resolveContextWatchDeterministicStopSignal,
 	describeContextWatchDeterministicStopHint,
@@ -314,6 +315,24 @@ describe("context-watchdog", () => {
 			assessmentLevel: "checkpoint",
 			autoCompactTrigger: false,
 		})).toBe("none");
+		expect(resolveAutoCompactTimeoutPressureGuard({
+			assessmentLevel: "checkpoint",
+			autoCompactTrigger: true,
+			timeoutPressureActive: true,
+		})).toEqual({
+			blocked: true,
+			reason: "guarded-timeout-pressure",
+			reasonCode: "guarded-precompact-timeout-pressure",
+			recommendation: "timeout-pressure guard active: block direct compact trigger, keep idle, and retry through guarded path.",
+		});
+		expect(resolveAutoCompactTimeoutPressureGuard({
+			assessmentLevel: "checkpoint",
+			autoCompactTrigger: true,
+			timeoutPressureActive: false,
+		})).toEqual({
+			blocked: false,
+			reason: "no-timeout-pressure",
+		});
 		expect(resolveAutoCompactCheckpointGate({
 			checkpointEvidenceReady: true,
 		})).toEqual({ proceed: true, reason: "checkpoint-ready" });
