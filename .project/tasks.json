@@ -15070,7 +15070,7 @@
     {
       "id": "TASK-BUD-651",
       "description": "Implement runtime lane policy to prefer chained local-safe slices (no per-task nudge) while below compact and with fresh checkpoint evidence.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-650"
@@ -15085,12 +15085,13 @@
         "Status/packet surface exposes when chaining is active vs blocked."
       ],
       "milestone": "throughput-multipack-lane-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-650 reason=Operationalize the primitive as default execution behavior for this operator profile.\nIniciando implementação runtime para privilegiar encadeamento de fatias local-safe sem nudge por tarefa, preservando gates protegidos/checkpoint/rollback."
+      "notes": "[provenance:human] source_task=TASK-BUD-650 reason=Operationalize the primitive as default execution behavior for this operator profile.\nIniciando implementação runtime para privilegiar encadeamento de fatias local-safe sem nudge por tarefa, preservando gates protegidos/checkpoint/rollback.\n[rationale:risk-control] Encadear fatias local-safe reduz nudge operacional sem relaxar guardrails: permanece fail-closed para compact, seleção sem elegível e handoff sem frescor.\nStatus surface agora distingue continuidade encadeada ativa vs bloqueada com motivo canônico e mantém guardrails existentes.",
+      "verification": "VER-BUD-1004"
     },
     {
       "id": "TASK-BUD-652",
       "description": "Add regression smoke coverage for multi-task packing policy and checkpoint-to-compact graceful transition behavior.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-651"
@@ -15105,7 +15106,8 @@
         "No regressions in existing autonomy/context-watch smoke suites."
       ],
       "milestone": "throughput-multipack-lane-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-651 reason=Ensure long-run stability and prevent drift back to one-task-only cadence."
+      "notes": "[provenance:human] source_task=TASK-BUD-651 reason=Ensure long-run stability and prevent drift back to one-task-only cadence.\nRegressão garante continuidade local-safe em ondas e preserva fail-closed na janela de compactação.",
+      "verification": "VER-BUD-1005"
     }
   ]
 }

@@ -11256,6 +11256,24 @@
       "method": "inspection",
       "timestamp": "2026-05-03T01:08:42.691Z",
       "evidence": "Consolidação anti-gordura aplicada: removido artefato/primitiva duplicada; mantido apenas ajuste enxuto na doutrina (`docs/guides/control-plane-operating-doctrine.md`) reforçando encadeamento de fatias local-safe até stop condition/compact boundary sem nova nomenclatura paralela."
+    },
+    {
+      "id": "VER-BUD-1004",
+      "target": "TASK-BUD-651",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T01:37:04.065Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora expõe política explícita de encadeamento local-safe em `autonomy_lane_status`: cálculo `chaining` (active|blocked), bloqueios fail-closed (`context-compact`, `selection-*`, `plan-*`, `handoff-stale|unknown`) e `nextAction` de continuidade sem nudge por task quando ativo (`continue chained local-safe slices until compact boundary`). Frescor de handoff é avaliado via `.project/handoff.json` + `resolveHandoffFreshness`, respeitando `piStack.contextWatchdog.handoffFreshMaxAgeMs` (fallback 30m). Regressão adicionada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` cobrindo `chaining active` e `chaining blocked (handoff stale)`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (27 passed)."
+    },
+    {
+      "id": "VER-BUD-1005",
+      "target": "TASK-BUD-652",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T01:37:40.096Z",
+      "evidence": "Cobertura de regressão para a política de encadeamento + transição graceful checkpoint->compact validada nas smokes: `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` agora cobre `chaining active` (continuidade sem nudge por task) e `chaining blocked` por handoff stale; `packages/pi-stack/test/smoke/context-watchdog.test.ts` mantém gate de compactação em checkpoint+idle com evidência de checkpoint e fallback fail-closed. Execução conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (93 passed)."
     }
   ]
 }

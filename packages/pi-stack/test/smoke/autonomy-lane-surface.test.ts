@@ -544,6 +544,61 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextAction).toContain("next=TASK-NEXT");
   });
 
+  it("marks chaining active when selection is ready and handoff freshness is green", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-chaining-active-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: new Date().toISOString(),
+      current_tasks: ["TASK-NEXT"],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+
+    const chaining = (result?.details.chaining as { decision?: string; active?: boolean; blockedReasons?: string[] } | undefined);
+    expect(chaining?.decision).toBe("active");
+    expect(chaining?.active).toBe(true);
+    expect(chaining?.blockedReasons ?? []).toEqual([]);
+    expect(String(result?.details.nextAction)).toContain("continue chained local-safe slices");
+  });
+
+  it("marks chaining blocked when handoff freshness is stale", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-chaining-stale-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: "2020-01-01T00:00:00.000Z",
+      current_tasks: ["TASK-NEXT"],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
+
+    const chaining = (result?.details.chaining as { decision?: string; blockedReasons?: string[]; recommendationCode?: string } | undefined);
+    expect(chaining?.decision).toBe("blocked");
+    expect(chaining?.recommendationCode).toBe("autonomy-chaining-blocked-handoff-freshness");
+    expect(chaining?.blockedReasons ?? []).toContain("handoff-stale");
+  });
+
   it("keeps plan non-blocked when board is readable but selection has no eligible local-safe task", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-protected-only-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

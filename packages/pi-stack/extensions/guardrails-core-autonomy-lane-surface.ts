@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
@@ -15,6 +17,7 @@ import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
+import { resolveHandoffFreshness, type HandoffFreshnessLabel } from "./context-watchdog-handoff";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
@@ -33,6 +36,111 @@ function asNumber(value: unknown, fallback: number): number {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+}
+
+const DEFAULT_HANDOFF_FRESH_MAX_AGE_MS = 30 * 60 * 1000;
+
+type LocalSafeChainingDecision = {
+  active: boolean;
+  decision: "active" | "blocked";
+  recommendationCode:
+    | "autonomy-chaining-active"
+    | "autonomy-chaining-blocked-compact"
+    | "autonomy-chaining-blocked-selection"
+    | "autonomy-chaining-blocked-plan"
+    | "autonomy-chaining-blocked-handoff-freshness";
+  blockedReasons: string[];
+  handoffFreshness: HandoffFreshnessLabel;
+  nextAction: string;
+  nextTaskId?: string;
+};
+
+function readJsonRecord(filePath: string): Record<string, unknown> | undefined {
+  if (!existsSync(filePath)) return undefined;
+  try {
+    const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+    return parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function readContextWatchHandoffFreshMaxAgeMs(cwd: string): number {
+  const settings = readJsonRecord(path.join(cwd, ".pi", "settings.json"));
+  const piStack = settings?.piStack;
+  const contextWatchdog = piStack && typeof piStack === "object"
+    ? (piStack as Record<string, unknown>).contextWatchdog
+    : undefined;
+  const raw = contextWatchdog && typeof contextWatchdog === "object"
+    ? Number((contextWatchdog as Record<string, unknown>).handoffFreshMaxAgeMs)
+    : Number.NaN;
+  if (!Number.isFinite(raw)) return DEFAULT_HANDOFF_FRESH_MAX_AGE_MS;
+  return Math.max(60_000, Math.floor(raw));
+}
+
+function readHandoffFreshnessSignal(cwd: string): { label: HandoffFreshnessLabel; ageMs?: number; maxAgeMs: number } {
+  const handoff = readJsonRecord(path.join(cwd, ".project", "handoff.json"));
+  const timestampIso = typeof handoff?.timestamp === "string" ? handoff.timestamp : undefined;
+  const maxAgeMs = readContextWatchHandoffFreshMaxAgeMs(cwd);
+  const freshness = resolveHandoffFreshness(timestampIso, Date.now(), maxAgeMs);
+  return {
+    label: freshness.label,
+    ageMs: freshness.ageMs,
+    maxAgeMs,
+  };
+}
+
+function resolveLocalSafeChainingDecision(input: {
+  contextLevel: AutonomyContextLevel;
+  planReady: boolean;
+  selectionReady: boolean;
+  selectionReason: string;
+  nextTaskId?: string;
+  handoffFreshness: HandoffFreshnessLabel;
+}): LocalSafeChainingDecision {
+  const blockedReasons: string[] = [];
+  if (input.contextLevel === "compact") blockedReasons.push("context-compact");
+  if (!input.planReady) blockedReasons.push("plan-not-ready");
+  if (!input.selectionReady) blockedReasons.push(`selection-${input.selectionReason || "not-ready"}`);
+  if (input.handoffFreshness !== "fresh") blockedReasons.push(`handoff-${input.handoffFreshness}`);
+
+  if (blockedReasons.length === 0) {
+    return {
+      active: true,
+      decision: "active",
+      recommendationCode: "autonomy-chaining-active",
+      blockedReasons,
+      handoffFreshness: input.handoffFreshness,
+      nextTaskId: input.nextTaskId,
+      nextAction: `continue chained local-safe slices until compact boundary; next=${input.nextTaskId ?? "none"}.`,
+    };
+  }
+
+  const recommendationCode = blockedReasons.includes("context-compact")
+    ? "autonomy-chaining-blocked-compact"
+    : blockedReasons.some((reason) => reason.startsWith("selection-"))
+      ? "autonomy-chaining-blocked-selection"
+      : blockedReasons.some((reason) => reason.startsWith("plan-"))
+        ? "autonomy-chaining-blocked-plan"
+        : "autonomy-chaining-blocked-handoff-freshness";
+
+  const nextAction = blockedReasons.includes("context-compact")
+    ? "stop starting new slices and let compact/auto-resume finish before continuing chain."
+    : blockedReasons.some((reason) => reason.startsWith("handoff-"))
+      ? "refresh handoff checkpoint evidence, then continue chained local-safe slices."
+      : blockedReasons.some((reason) => reason.startsWith("selection-"))
+        ? "resolve local-safe task selection before continuing chain."
+        : "resolve runtime lane blockers before continuing chain.";
+
+  return {
+    active: false,
+    decision: "blocked",
+    recommendationCode,
+    blockedReasons,
+    handoffFreshness: input.handoffFreshness,
+    nextTaskId: input.nextTaskId,
+    nextAction,
+  };
 }
 
 function resolveFocusTaskIds(p: Record<string, unknown>, cwd: string): { ids: string[]; source?: "explicit" | "handoff" } {
@@ -566,12 +674,28 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         ready: true,
         nextTaskId: selection.nextTaskId,
       }));
+      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
+      const chaining = resolveLocalSafeChainingDecision({
+        contextLevel: normalizeContextLevel(p.context_level),
+        planReady: plan.ready,
+        selectionReady: selection.ready,
+        selectionReason: selection.reason,
+        nextTaskId: selection.nextTaskId,
+        handoffFreshness: handoffFreshness.label,
+      });
       const result = {
         ready: plan.ready && selection.ready,
         plan,
         selection,
+        chaining: {
+          ...chaining,
+          handoffAgeMs: handoffFreshness.ageMs,
+          handoffFreshMaxAgeMs: handoffFreshness.maxAgeMs,
+        },
         recommendationCode: selection.recommendationCode,
-        nextAction: selection.ready ? plan.nextAction : selection.recommendation,
+        nextAction: chaining.active
+          ? chaining.nextAction
+          : (selection.ready ? plan.nextAction : selection.recommendation),
       };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
