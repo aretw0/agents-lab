@@ -1694,6 +1694,14 @@ describe("context-watchdog", () => {
 			expect(result.details?.operatorAction).toBeTruthy();
 			expect(formatContextWatchStatusToolSummary({ level: "ok", percent: 14, action: "continue" }))
 				.toBe("context-watch-status: level=ok percent=14 action=continue");
+			expect(formatContextWatchStatusToolSummary({
+				level: "warn",
+				percent: 58,
+				action: "continue-bounded",
+				handoffFreshness: "stale",
+				handoffAgeSec: 120,
+				handoffFreshThresholdSec: 90,
+			})).toContain("handoffAgeSec=120/90");
 			expect(formatContextWatchCommandStatusSummary({
 				level: "compact",
 				percent: 91,
@@ -1729,6 +1737,38 @@ describe("context-watchdog", () => {
 				handoffPath: ".project/handoff.json",
 			}))
 				.toBe("context-watch-stop: required=yes reason=compact-checkpoint-required action=persist-checkpoint-and-compact operator=checkpoint-compact handoff=.project/handoff.json");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_status surfaces handoff age and threshold metrics when timestamp is present", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-status-handoff-age-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date(Date.now() - 120_000).toISOString(),
+				current_tasks: ["TASK-FOCUS"],
+			}, null, 2), "utf8");
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_status");
+			const result = await tool.execute(
+				"tc-context-watch-status-handoff-age",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 18 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect(Number(result.details?.handoffAgeSec)).toBeGreaterThanOrEqual(1);
+			expect(Number(result.details?.handoffFreshThresholdSec)).toBeGreaterThanOrEqual(60);
+			expect(String(result.content?.[0]?.text ?? "")).toContain("handoffAgeSec=");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

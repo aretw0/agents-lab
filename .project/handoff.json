@@ -1,41 +1,41 @@
 {
-  "timestamp": "2026-05-03T12:36:40.896Z",
-  "context": "Incidente observado: auto-compact ocorreu sem percepção clara de preparo e auto-resume foi suprimido por divergência handoff↔board. Reconcili [snip] de delegation lane com handoff fresco. [truncated:+49 chars]",
-  "current_tasks": [
-    "TASK-BUD-659"
-  ],
+  "timestamp": "2026-05-03T13:36:36.646Z",
+  "context": "Post-reload continuation wave: incident hardening entregue (idle-prep before compact + auto-resume focus reconciliation), telemetry-equivalen [snip] d + sucessor local-safe (TASK-BUD-673). [truncated:+112 chars]",
   "next_actions": [
-    "Reconciliar foco/handoff e remover blockers obsoletos de reload.",
-    "Implementar hardening para aviso explícito pré-compact + preparação de idle.",
-    "Executar smoke focal e registrar verificação das correções."
+    "Commitar mudanças desta onda.",
+    "Executar /reload para carregar runtime atualizado.",
+    "Revalidar live: simple_delegate_rehearsal_packet + start_packet; se ready, concluir TASK-BUD-6 [snip] ASK-BUD-660 (start/defer). [truncated:+27 chars]"
   ],
   "blockers": [
-    "incident-auto-compact-prep-gap",
-    "incident-auto-resume-board-handoff-divergence"
+    "reload-required-for-live-validation-TASK-BUD-659"
   ],
   "recent_validation": [
-    "context_watch_auto_resume_preview mostrou staleFocus=1 e suppress por divergência",
-    "context_watch_continuation_readiness bloqueado por checkpoint-not-fresh + dirty"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] ation.test.ts (115 passed) [truncated:+91 chars]",
+    "simple_delegate_rehearsal_packet agora expõe effectiveTelemetrySignals + telemetrySource no summary",
+    "context_watch_status agora expõe handoffAgeSec/handoffFreshThresholdSec"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-659",
+    "focus": "TASK-BUD-666",
     "canonical_links": [
+      "task:TASK-BUD-666",
+      "task:TASK-BUD-673",
       "task:TASK-BUD-659"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T12:36:40.896Z",
+    "generatedAtIso": "2026-05-03T13:36:36.646Z",
     "level": "checkpoint",
-    "percent": 26,
+    "percent": 34,
     "action": "checkpoint-refresh",
-    "recommendation": "continue"
+    "recommendation": "continue",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T12:36:40.896Z",
+      "atIso": "2026-05-03T13:36:36.646Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 26,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -44,5 +44,8 @@
       "action": "checkpoint-refresh",
       "recommendation": "continue"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-666"
   ]
 }

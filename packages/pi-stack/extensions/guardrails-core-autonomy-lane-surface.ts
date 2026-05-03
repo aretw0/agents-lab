@@ -289,6 +289,10 @@ function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string
   const validationCoveragePct = localSafe.length > 0
     ? Math.round((validationKnown.length / localSafe.length) * 100)
     : 0;
+  const stockGap = Math.max(0, targetSlices - validationKnown.length);
+  const recommendedSeedCount = stockGap > 0
+    ? Math.max(1, Math.min(6, stockGap))
+    : 0;
 
   const summary = [
     "afk-material-readiness:",
@@ -298,6 +302,9 @@ function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string
     `localSafe=${localSafe.length}`,
     `validationKnown=${validationKnown.length}`,
     `minReady=${minReadySlices}`,
+    `target=${targetSlices}`,
+    `stockGap=${stockGap}`,
+    `recommendedSeedCount=${recommendedSeedCount}`,
     decision === "blocked" ? `blockers=${blockedReasons.join("|")}` : undefined,
     "authorization=none",
   ].filter(Boolean).join(" ");
@@ -315,6 +322,8 @@ function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string
     material: {
       minReadySlices,
       targetSlices,
+      stockGap,
+      recommendedSeedCount,
       localSafeCount: localSafe.length,
       validationKnownCount: validationKnown.length,
       validationCoveragePct,

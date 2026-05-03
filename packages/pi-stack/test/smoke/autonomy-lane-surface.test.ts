@@ -403,6 +403,8 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.decision).toBe("continue");
     expect(result?.details.recommendationCode).toBe("afk-material-readiness-continue-stock-healthy");
+    expect(result?.details.material.stockGap).toBe(4);
+    expect(result?.details.material.recommendedSeedCount).toBe(4);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });
@@ -443,6 +445,8 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.decision).toBe("seed-backlog");
     expect(result?.details.recommendationCode).toBe("afk-material-readiness-seed-backlog-low-stock");
+    expect(result?.details.material.stockGap).toBe(5);
+    expect(result?.details.material.recommendedSeedCount).toBe(5);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });

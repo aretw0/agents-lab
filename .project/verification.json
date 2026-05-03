@@ -11382,6 +11382,60 @@
       "method": "test",
       "timestamp": "2026-05-03T12:49:04.501Z",
       "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora reconcilia foco do handoff antes de decidir auto-resume pós-compact via `reconcileAutoResumeHandoffFocus` + evento `context-watchdog.auto-resume-handoff-reconciled`. Se houver `completed/missing/divergent` no foco, tenta filtrar para tasks ativas ou fallback para preferred tasks e reavalia reconciliação antes de suprimir. Cobertura adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` (novo caso: reconciliação + pre-compact prep). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (67 passed)."
+    },
+    {
+      "id": "VER-BUD-1018",
+      "target": "TASK-BUD-665",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:14:24.990Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` agora normaliza telemetria efetiva com `resolveEffectiveTelemetrySignals`: quando `autoAdvanceResolutionSource=live-board-fallback` e live snapshot é `eligible`, o packet trata telemetry como equivalente pronta (`decision=ready`, `score>=60`, `blockedRate<=60`) sem override manual. Preserva fail-closed fora desse cenário e expõe `details.effectiveTelemetrySignals` (source/normalized/decision/score/blockedRatePct)."
+    },
+    {
+      "id": "VER-BUD-1019",
+      "target": "TASK-BUD-666",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:14:44.461Z",
+      "evidence": "Cobertura smoke expandida em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts`: (1) fallback elegível sem telemetry override resulta `decision=ready`, `effectiveTelemetrySignals.source=live-fallback-equivalent` e summary com `telemetrySource=live-fallback-equivalent`; (2) start packet no mesmo cenário retorna `ready-for-human-decision` com readiness `ready`; (3) cenário com live fallback não elegível permanece bloqueado (`autoAdvanceResolutionSource=telemetry+live`, blockers incluem `focus-missing`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (114 passed)."
+    },
+    {
+      "id": "VER-BUD-1020",
+      "target": "TASK-BUD-667",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:19:24.654Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` (AFK material readiness) agora publica guidance explícita contra `target_slices`: `material.stockGap` e `material.recommendedSeedCount` (bounded 0..6). Summary inclui `target`, `stockGap`, `recommendedSeedCount` para triagem low-nudge."
+    },
+    {
+      "id": "VER-BUD-1021",
+      "target": "TASK-BUD-668",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:20:13.178Z",
+      "evidence": "Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: cenário `continue` valida `material.stockGap=4` e `recommendedSeedCount=4`; cenário `seed-backlog` valida `stockGap=5` e `recommendedSeedCount=5`. Regressão conjunta com delegation lane: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (47 passed)."
+    },
+    {
+      "id": "VER-BUD-1022",
+      "target": "TASK-BUD-669",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:25:33.324Z",
+      "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora inclui métricas explícitas de handoff freshness no `context_watch_status`: `handoffAgeSec` e `handoffFreshThresholdSec` em details + resumo com sufixo `handoffAgeSec=<age>/<threshold>` quando timestamp está disponível. Isso melhora diagnóstico de stale-handoff sem mudar dispatch/authorization."
+    },
+    {
+      "id": "VER-BUD-1023",
+      "target": "TASK-BUD-670",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T13:26:07.526Z",
+      "evidence": "Smoke adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: novo caso valida presença de `handoffAgeSec` e `handoffFreshThresholdSec` no payload e no summary quando `handoff.timestamp` existe. Validação regressiva conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (115 passed)."
     }
   ]
 }

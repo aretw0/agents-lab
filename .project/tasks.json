@@ -15220,7 +15220,7 @@
     {
       "id": "TASK-BUD-659",
       "description": "Operationally validate delegation rehearsal readiness on real workspace after fallback hardening and preload refresh.",
-      "status": "in-progress",
+      "status": "blocked",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-658"
@@ -15235,7 +15235,7 @@
         "Checkpoint records evidence and next human decision."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final.\nReload confirmado; retomando validação live pós-fallback com workspace clean/preload use-pack."
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final.\nReload confirmado; retomando validação live pós-fallback com workspace clean/preload use-pack.\nPost-reload live packet still blocked in real workspace: autoAdvance=blocked (focus-not-complete) plus stale telemetry blocker (`reload-required-or-dirty`) despite clean git/use-pack. Moving to TASK-BUD-665 hardening to normalize live-board fallback as telemetry-equivalent before re-validating readiness.\nNova validação pós-hardening: com foco em task completed (`TASK-BUD-666`) + sucessor local-safe (`TASK-BUD-673`), live snapshot já fica `eligible` (`source=live-board-fallback`, `liveNext=TASK-BUD-673`). Contudo o runtime da sessão ainda reflete versão anterior do packet (`telemetry=needs-evidence`) após mudanças locais recentes em ops-calibration/context-watch; requer /reload pós-commit para confirmação live final."
     },
     {
       "id": "TASK-BUD-660",
@@ -15335,10 +15335,10 @@
     {
       "id": "TASK-BUD-665",
       "description": "Promote live-board fallback to telemetry-equivalent readiness in simple_delegate_rehearsal_packet when telemetry is stale but live auto-advance is eligible.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
-        "TASK-BUD-659"
+        "TASK-BUD-658"
       ],
       "files": [
         "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts"
@@ -15349,12 +15349,13 @@
         "Details expose effective telemetry normalization used for readiness."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=none reason=Lane 1 objective: unblock delegation activation with low-nudge operation under stale telemetry windows."
+      "notes": "[provenance:human] source_task=none reason=Lane 1 objective: unblock delegation activation with low-nudge operation under stale telemetry windows.\nStarting implementation: effective telemetry normalization when source=live-board-fallback and live auto-advance is eligible, preserving fail-closed when live is blocked.\nElimina dependência de override manual de telemetry em fallback elegível e mantém bloqueio quando live estiver blocked.",
+      "verification": "VER-BUD-1018"
     },
     {
       "id": "TASK-BUD-666",
       "description": "Add smoke coverage for live-fallback telemetry-equivalent readiness path in simple_delegate_rehearsal_packet/start_packet.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-665"
@@ -15368,12 +15369,13 @@
         "Suite stays green."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-665 reason=Protect delegation activation regression in low-nudge mode."
+      "notes": "[provenance:human] source_task=TASK-BUD-665 reason=Protect delegation activation regression in low-nudge mode.\nRegressão evita falso bloqueio por telemetria stale quando live snapshot já fornece elegibilidade real.",
+      "verification": "VER-BUD-1019"
     },
     {
       "id": "TASK-BUD-667",
       "description": "Expose ready-stock target guidance in autonomy_lane_material_readiness_packet (gap-to-target + recommended seed count).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
@@ -15384,12 +15386,13 @@
         "Guidance aligns with ultra-low-nudge wave sizing."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[provenance:human] source_task=none reason=Lane 2 objective: keep local-safe material stocked with minimal interaction."
+      "notes": "[provenance:human] source_task=none reason=Lane 2 objective: keep local-safe material stocked with minimal interaction.\nImplementando stock-gap e recommendedSeedCount em AFK material readiness packet para guidance low-nudge contra target_slices.\nReadiness passa a indicar gap de estoque diretamente, sem exigir cálculo manual entre validationKnown e target.",
+      "verification": "VER-BUD-1020"
     },
     {
       "id": "TASK-BUD-668",
       "description": "Add smoke tests for readiness stock-gap guidance fields in autonomy lane material packets.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-667"
@@ -15403,12 +15406,13 @@
         "Suite remains green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-667 reason=Keep throughput stock guidance stable over future refactors."
+      "notes": "[provenance:human] source_task=TASK-BUD-667 reason=Keep throughput stock guidance stable over future refactors.\nContrato de guidance de estoque ficou estável para continue/seed-backlog.",
+      "verification": "VER-BUD-1021"
     },
     {
       "id": "TASK-BUD-669",
       "description": "Harden context-watch stale-handoff operability by adding explicit age/threshold metrics to status summary surfaces.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts"
@@ -15419,12 +15423,13 @@
         "No change to authorization/dispatch behavior."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[provenance:human] source_task=none reason=Lane 3 objective: runtime hardening for low-nudge troubleshooting of stale handoff blockers."
+      "notes": "[provenance:human] source_task=none reason=Lane 3 objective: runtime hardening for low-nudge troubleshooting of stale handoff blockers.\nOperabilidade stale-handoff ficou legível em uma linha no status tool.",
+      "verification": "VER-BUD-1022"
     },
     {
       "id": "TASK-BUD-670",
       "description": "Add smoke coverage for stale-handoff age/threshold metrics in context_watch_status payload.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-669"
@@ -15438,7 +15443,8 @@
         "Suite remains green."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-669 reason=Preserve runtime-hardening observability under compact pressure."
+      "notes": "[provenance:human] source_task=TASK-BUD-669 reason=Preserve runtime-hardening observability under compact pressure.\nCobertura evita regressão silenciosa nas métricas de stale-handoff do status surface.",
+      "verification": "VER-BUD-1023"
     },
     {
       "id": "TASK-BUD-671",
@@ -15477,6 +15483,21 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[provenance:human] source_task=TASK-BUD-671 reason=Incident: auto resume suppressed by board-handoff divergence and stopped lane continuity.\nReduz suppress por board-handoff-divergence quando divergência é reconciliável localmente.",
       "verification": "VER-BUD-1017"
+    },
+    {
+      "id": "TASK-BUD-673",
+      "description": "Prepare one bounded local-safe successor slice to keep hard-intent auto-advance eligible during delegation readiness validation.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Task is local-safe, bounded, and has explicit validation gate.",
+        "Task remains report-only until selected by normal lane flow (no auto-dispatch)."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[rationale:risk-control] successor is needed to validate live auto-advance eligibility after completed focus without protected scope."
     }
   ]
 }

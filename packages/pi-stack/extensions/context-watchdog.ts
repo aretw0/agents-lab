@@ -1381,7 +1381,15 @@ export function formatContextWatchStatusToolSummary(input: {
 	operatorActionKind?: string;
 	operatingCadence?: string;
 	handoffFreshness?: HandoffFreshnessLabel;
+	handoffAgeSec?: number;
+	handoffFreshThresholdSec?: number;
 }): string {
+	const handoffAgeSec = Number.isFinite(Number(input.handoffAgeSec))
+		? Math.max(0, Math.floor(Number(input.handoffAgeSec)))
+		: undefined;
+	const handoffFreshThresholdSec = Number.isFinite(Number(input.handoffFreshThresholdSec))
+		? Math.max(0, Math.floor(Number(input.handoffFreshThresholdSec)))
+		: undefined;
 	return [
 		"context-watch-status:",
 		`level=${input.level}`,
@@ -1391,6 +1399,9 @@ export function formatContextWatchStatusToolSummary(input: {
 		input.operatorActionKind ? `operator=${input.operatorActionKind}` : undefined,
 		input.operatingCadence ? `cadence=${input.operatingCadence}` : undefined,
 		input.handoffFreshness ? `handoff=${input.handoffFreshness}` : undefined,
+		handoffAgeSec !== undefined && handoffFreshThresholdSec !== undefined
+			? `handoffAgeSec=${handoffAgeSec}/${handoffFreshThresholdSec}`
+			: undefined,
 	].filter(Boolean).join(" ");
 }
 
@@ -2558,6 +2569,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				),
 			};
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
+			const handoffFreshThresholdSec = Math.max(60, Math.floor(autoCompact.handoffFreshMaxAgeMs / 1000));
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2566,6 +2578,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				operatorActionKind: operatorAction.kind,
 				operatingCadence: operatingCadence.operatingCadence,
 				handoffFreshness: autoCompact.handoffFreshness.label,
+				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
+				handoffFreshThresholdSec,
 			});
 			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
 				level: assessment.level,
@@ -2581,6 +2595,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				...assessment,
 				summary: adaptiveSummary.summary,
 				fullSummary,
+				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
+				handoffFreshThresholdSec,
 				outputShape: {
 					mode: adaptiveSummary.mode,
 					cooldownMs: config.cooldownMs,

@@ -162,17 +162,74 @@ function normalizeAutoAdvanceBlockedReasons(reasons: string[]): string[] {
   return normalized;
 }
 
+type EffectiveTelemetrySignals = {
+  decision: "ready" | "needs-evidence";
+  score: number;
+  blockedRatePct: number;
+  source: "override" | "telemetry" | "live-fallback-equivalent";
+  normalized: boolean;
+};
+
+function clampUnitIntervalPercent(value: unknown, fallback = 0): number {
+  const raw = Number(value);
+  if (!Number.isFinite(raw)) return Math.max(0, Math.min(100, Math.round(fallback)));
+  return Math.max(0, Math.min(100, Math.round(raw)));
+}
+
+function resolveEffectiveTelemetrySignals(input: {
+  telemetryDecisionOverride?: unknown;
+  telemetryScoreOverride?: unknown;
+  telemetryBlockedRatePctOverride?: unknown;
+  telemetryDecisionRaw: "ready" | "needs-evidence";
+  telemetryScoreRaw: number;
+  telemetryBlockedRatePctRaw: number;
+  autoAdvanceComposite: AutoAdvanceCompositeDecision;
+}): EffectiveTelemetrySignals {
+  const baseScore = clampUnitIntervalPercent(input.telemetryScoreRaw, 0);
+  const baseBlockedRatePct = clampUnitIntervalPercent(input.telemetryBlockedRatePctRaw, 100);
+
+  if (typeof input.telemetryDecisionOverride === "string") {
+    return {
+      decision: input.telemetryDecisionOverride === "ready" ? "ready" : "needs-evidence",
+      score: clampUnitIntervalPercent(input.telemetryScoreOverride, baseScore),
+      blockedRatePct: clampUnitIntervalPercent(input.telemetryBlockedRatePctOverride, baseBlockedRatePct),
+      source: "override",
+      normalized: false,
+    };
+  }
+
+  if (input.autoAdvanceComposite.source === "live-board-fallback" && input.autoAdvanceComposite.decision === "eligible") {
+    return {
+      decision: "ready",
+      score: Math.max(60, baseScore),
+      blockedRatePct: Math.min(60, baseBlockedRatePct),
+      source: "live-fallback-equivalent",
+      normalized: true,
+    };
+  }
+
+  return {
+    decision: input.telemetryDecisionRaw,
+    score: baseScore,
+    blockedRatePct: baseBlockedRatePct,
+    source: "telemetry",
+    normalized: false,
+  };
+}
+
 function buildSimpleDelegateResolutionSummary(input: {
   baseSummary: string;
   source: AutoAdvanceCompositeDecision["source"];
   liveDecision: "eligible" | "blocked";
   liveNextTaskId?: string;
+  telemetrySource?: EffectiveTelemetrySignals["source"];
 }): string {
   return [
     input.baseSummary,
     `source=${input.source}`,
     `liveAutoAdvance=${input.liveDecision}`,
     input.liveNextTaskId ? `liveNext=${input.liveNextTaskId}` : undefined,
+    input.telemetrySource ? `telemetrySource=${input.telemetrySource}` : undefined,
   ].filter(Boolean).join(" ");
 }
 
@@ -352,6 +409,16 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         liveSnapshot: liveAutoAdvanceSnapshot,
       });
 
+      const effectiveTelemetry = resolveEffectiveTelemetrySignals({
+        telemetryDecisionOverride: p.telemetry_decision,
+        telemetryScoreOverride: p.telemetry_score,
+        telemetryBlockedRatePctOverride: p.telemetry_blocked_rate_pct,
+        telemetryDecisionRaw: autoAdvanceTelemetry.decision,
+        telemetryScoreRaw: autoAdvanceTelemetry.score,
+        telemetryBlockedRatePctRaw: autoAdvanceTelemetry.totals.blockedRatePct,
+        autoAdvanceComposite,
+      });
+
       const packet = buildSimpleDelegateRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
           ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
@@ -369,13 +436,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           : mix.totals.simpleDelegate,
         autoAdvanceDecision: autoAdvanceComposite.decision,
         autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
-        telemetryDecision: typeof p.telemetry_decision === "string"
-          ? p.telemetry_decision as "ready" | "needs-evidence"
-          : autoAdvanceTelemetry.decision,
-        telemetryScore: typeof p.telemetry_score === "number" ? p.telemetry_score : autoAdvanceTelemetry.score,
-        telemetryBlockedRatePct: typeof p.telemetry_blocked_rate_pct === "number"
-          ? p.telemetry_blocked_rate_pct
-          : autoAdvanceTelemetry.totals.blockedRatePct,
+        telemetryDecision: effectiveTelemetry.decision,
+        telemetryScore: effectiveTelemetry.score,
+        telemetryBlockedRatePct: effectiveTelemetry.blockedRatePct,
       });
 
       const summary = buildSimpleDelegateResolutionSummary({
@@ -383,6 +446,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         source: autoAdvanceComposite.source,
         liveDecision: liveAutoAdvanceSnapshot.decision,
         liveNextTaskId: liveAutoAdvanceSnapshot.nextTaskId,
+        telemetrySource: effectiveTelemetry.source,
       });
 
       return {
@@ -394,6 +458,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
+          effectiveTelemetrySignals: effectiveTelemetry,
           autoAdvanceLiveSnapshot: liveAutoAdvanceSnapshot,
           autoAdvanceResolutionSource: autoAdvanceComposite.source,
           scan: collected.scan,
@@ -463,6 +528,16 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         liveSnapshot: liveAutoAdvanceSnapshot,
       });
 
+      const effectiveTelemetry = resolveEffectiveTelemetrySignals({
+        telemetryDecisionOverride: p.telemetry_decision,
+        telemetryScoreOverride: p.telemetry_score,
+        telemetryBlockedRatePctOverride: p.telemetry_blocked_rate_pct,
+        telemetryDecisionRaw: autoAdvanceTelemetry.decision,
+        telemetryScoreRaw: autoAdvanceTelemetry.score,
+        telemetryBlockedRatePctRaw: autoAdvanceTelemetry.totals.blockedRatePct,
+        autoAdvanceComposite,
+      });
+
       const readiness = buildSimpleDelegateRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
           ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
@@ -480,13 +555,9 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           : mix.totals.simpleDelegate,
         autoAdvanceDecision: autoAdvanceComposite.decision,
         autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
-        telemetryDecision: typeof p.telemetry_decision === "string"
-          ? p.telemetry_decision as "ready" | "needs-evidence"
-          : autoAdvanceTelemetry.decision,
-        telemetryScore: typeof p.telemetry_score === "number" ? p.telemetry_score : autoAdvanceTelemetry.score,
-        telemetryBlockedRatePct: typeof p.telemetry_blocked_rate_pct === "number"
-          ? p.telemetry_blocked_rate_pct
-          : autoAdvanceTelemetry.totals.blockedRatePct,
+        telemetryDecision: effectiveTelemetry.decision,
+        telemetryScore: effectiveTelemetry.score,
+        telemetryBlockedRatePct: effectiveTelemetry.blockedRatePct,
       });
 
       const startPacket = buildSimpleDelegateRehearsalStartPacket({
@@ -508,6 +579,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
+          effectiveTelemetrySignals: effectiveTelemetry,
           autoAdvanceLiveSnapshot: liveAutoAdvanceSnapshot,
           autoAdvanceResolutionSource: autoAdvanceComposite.source,
           scan: collected.scan,

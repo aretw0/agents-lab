@@ -549,9 +549,6 @@ describe("ops calibration decision packet", () => {
           mix_decision: "ready",
           mix_score: 80,
           mix_simple_delegate_events: 2,
-          telemetry_decision: "ready",
-          telemetry_score: 70,
-          telemetry_blocked_rate_pct: 20,
         },
         undefined as unknown as AbortSignal,
         () => {},
@@ -563,9 +560,76 @@ describe("ops calibration decision packet", () => {
       expect(result.details.autoAdvanceResolutionSource).toBe("live-board-fallback");
       expect(result.details.autoAdvanceLiveSnapshot.decision).toBe("eligible");
       expect(result.details.autoAdvanceLiveSnapshot.nextTaskId).toBe("TASK-NEXT");
+      expect(result.details.effectiveTelemetrySignals.source).toBe("live-fallback-equivalent");
+      expect(result.details.signals.telemetryDecision).toBe("ready");
+      expect(Number(result.details.signals.telemetryScore)).toBeGreaterThanOrEqual(60);
+      expect(Number(result.details.signals.telemetryBlockedRatePct)).toBeLessThanOrEqual(60);
       expect(String(result.details.summary)).toContain("source=live-board-fallback");
       expect(String(result.details.summary)).toContain("liveAutoAdvance=eligible");
       expect(String(result.details.summary)).toContain("liveNext=TASK-NEXT");
+      expect(String(result.details.summary)).toContain("telemetrySource=live-fallback-equivalent");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("applies telemetry-equivalent normalization to start packet when live fallback is eligible", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-start-live-auto-advance-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+        tasks: [
+          { id: "TASK-FOCUS", description: "[P1] foco encerrado", status: "completed" },
+          {
+            id: "TASK-NEXT",
+            description: "[P1] follow-up local-safe",
+            status: "planned",
+            acceptance_criteria: ["run smoke test for next slice"],
+            files: ["packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"],
+            notes: "[rationale:risk-control] next local-safe slice with explicit validation gate",
+          },
+        ],
+      }, null, 2));
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: new Date().toISOString(),
+        current_tasks: ["TASK-FOCUS"],
+      }, null, 2));
+
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_start_packet");
+      const result = await tool.execute(
+        "tc-simple-delegate-start-live-auto-advance",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          declared_files_known: true,
+          validation_gate_known: true,
+          rollback_plan_known: true,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.decision).toBe("ready-for-human-decision");
+      expect(result.details.readiness.decision).toBe("ready");
+      expect(result.details.autoAdvanceResolutionSource).toBe("live-board-fallback");
+      expect(result.details.effectiveTelemetrySignals.source).toBe("live-fallback-equivalent");
+      expect(result.details.effectiveTelemetrySignals.decision).toBe("ready");
+      expect(result.details.readiness.signals.telemetryDecision).toBe("ready");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -610,6 +674,48 @@ describe("ops calibration decision packet", () => {
       expect(result.details.blockers).toContain("focus-not-complete");
       expect(result.details.blockers).not.toContain("unknown");
       expect(String(result.details.summary)).not.toContain("unknown");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps blocked result when live fallback is not eligible", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-live-blocked-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+
+      const result = await tool.execute(
+        "tc-simple-delegate-live-blocked",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.decision).toBe("blocked");
+      expect(result.details.recommendationCode).toBe("simple-delegate-rehearsal-blocked-auto-advance");
+      expect(result.details.autoAdvanceResolutionSource).toBe("telemetry+live");
+      expect(result.details.blockers).toContain("auto-advance-blocked");
+      expect(result.details.blockers).toContain("focus-missing");
+      expect(result.details.effectiveTelemetrySignals.source).toBe("telemetry");
+      expect(result.details.effectiveTelemetrySignals.decision).toBe("needs-evidence");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
