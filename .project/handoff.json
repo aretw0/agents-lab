@@ -1,42 +1,43 @@
 {
-  "timestamp": "2026-05-03T02:37:51.416Z",
-  "context": "Lane delegation-activation-local-safe avançou: TASK-BUD-657/658 concluídas (fallback live-board + smoke). Operacionalmente, auto-advance snap [snip] rque runtime ainda não foi recarregado. [truncated:+122 chars]",
+  "timestamp": "2026-05-03T02:55:33.457Z",
+  "context": "Entrevista aplicada (primary=mixed, canary=case-by-case) e lanes adicionais executadas: TASK-BUD-661..664 concluídas com seed bootstrap templ [snip] para validação live final do fallback. [truncated:+120 chars]",
   "current_tasks": [
     "TASK-BUD-659"
   ],
   "next_actions": [
-    "Executar /reload para ativar runtime atualizado de guardrails-core-ops-calibration-surface.",
-    "Após reload, revalidar simple_delegate_rehearsal_packet e simple_delegate_rehearsal_start_packet sem overrides.",
-    "Se packet/start estiverem ready, registrar VER final e fechar TASK-BUD-659 com decisão humana start / defer do canário."
+    "Executar /reload para carregar runtime pós-commit d49510c e revalidar TASK-BUD-659.",
+    "Após reload: rodar simple_delegate_rehearsal_packet + simple_delegate_rehearsal_start_packet; [snip] y, completar TASK-BUD-659. [truncated:+7 chars]",
+    "Com TASK-BUD-659 concluída, seguir para TASK-BUD-660 (decisão humana case-by-case start/defer)."
   ],
   "blockers": [
-    "reload-required-for-live-runtime-validation"
+    "reload-required-for-live-validation-TASK-BUD-659"
   ],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] urface.test.ts (44 passed) [truncated:+36 chars]",
-    "autonomy_lane_auto_advance_snapshot -> decision=eligible code=auto-advance-snapshot-eligible next=TASK-BUD-659",
-    "simple_delegate_rehearsal_packet -> blocked auto-advance (sessão sem /reload do fallback novo)"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] ration.test.ts (45 passed) [truncated:+36 chars]",
+    "simple_delegate_rehearsal_packet summary agora inclui source/liveAutoAdvance/liveNext",
+    "autonomy_lane_material_seed_packet bootstrap agora inclui seedTemplates bounded"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-659",
     "canonical_links": [
       "task:TASK-BUD-659",
-      "task:TASK-BUD-657"
+      "task:TASK-BUD-661",
+      "commit:d49510c"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T02:37:51.416Z",
+    "generatedAtIso": "2026-05-03T02:55:33.457Z",
     "level": "checkpoint",
-    "percent": 41,
+    "percent": 44,
     "action": "checkpoint-refresh",
     "recommendation": "ask-human"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T02:37:51.416Z",
+      "atIso": "2026-05-03T02:55:33.457Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 41,
+      "percent": 44,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
