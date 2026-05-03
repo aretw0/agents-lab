@@ -1711,16 +1711,26 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			lastAutoCheckpointAt = now;
 		}
 
+		const handoffForCalmClose = readHandoffJson(ctx.cwd);
+		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
+		const handoffEventAgeForCalmClose = contextWatchEventAgeMs(handoffEventForCalmClose, now);
+		const checkpointEvidenceReadyForAutoCompact = resolveCheckpointEvidenceReadyForCalmClose({
+			handoffLastEventLevel: handoffEventForCalmClose?.level,
+			handoffLastEventAgeMs: handoffEventAgeForCalmClose,
+			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+		});
+		const autoCompactCandidateLevel = assessment.level === "compact" || assessment.level === "checkpoint";
 		const autoCompactState = buildAutoCompactDiagnostics(assessment, config, {
 			nowMs: now,
 			lastAutoCompactAt,
 			inFlight: autoCompactInFlight,
 			isIdle: ctx.isIdle(),
 			hasPendingMessages: ctx.hasPendingMessages(),
+			checkpointEvidenceReady: checkpointEvidenceReadyForAutoCompact,
 			reason,
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
 		if (
-			assessment.level === "compact"
+			autoCompactCandidateLevel
 			&& !autoCompactState.decision.trigger
 			&& isAutoCompactDeferralReason(autoCompactState.decision.reason)
 		) {
@@ -1735,9 +1745,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			antiParalysisNotifyCountInWindow = 0;
 			lastAntiParalysisNotifyAt = 0;
 		}
-		const handoffForCalmClose = readHandoffJson(ctx.cwd);
-		const handoffEventForCalmClose = latestContextWatchEvent(handoffForCalmClose);
-		const handoffEventAgeForCalmClose = contextWatchEventAgeMs(handoffEventForCalmClose, now);
 		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
 			enabled: config.autoResumeAfterCompact,
 			assessmentLevel: assessment.level,
@@ -1820,11 +1827,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const calmCloseSignal = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
 			decisionReason: autoCompactState.decision.reason,
-			checkpointEvidenceReady: resolveCheckpointEvidenceReadyForCalmClose({
-				handoffLastEventLevel: handoffEventForCalmClose?.level,
-				handoffLastEventAgeMs: handoffEventAgeForCalmClose,
-				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
-			}),
+			checkpointEvidenceReady: checkpointEvidenceReadyForAutoCompact,
 			deferCount: compactDeferCount,
 			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
 		});
@@ -2020,7 +2023,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify(`context-watch: auto compact failed (${message})`, "warning");
 				},
 			});
-		} else if (assessment.level === "compact" && autoCompactState.retryDelayMs !== undefined) {
+		} else if (autoCompactCandidateLevel && autoCompactState.retryDelayMs !== undefined) {
 			scheduleAutoCompactRetry(ctx, autoCompactState.retryDelayMs);
 		} else {
 			clearAutoCompactRetryTimer();

@@ -139,6 +139,10 @@ export function buildAutoCompactDiagnostics(
 	};
 }
 
+function isAutoCompactCandidateLevel(level: ContextWatchdogLevel): boolean {
+	return level === "compact" || level === "checkpoint";
+}
+
 export function shouldTriggerAutoCompact(
 	assessment: AutoCompactAssessmentLike,
 	config: AutoCompactConfigLike,
@@ -151,7 +155,7 @@ export function shouldTriggerAutoCompact(
 		checkpointEvidenceReady?: boolean;
 	},
 ): ContextWatchAutoCompactDecision {
-	if (assessment.level !== "compact") return { trigger: false, reason: "level-not-compact" };
+	if (!isAutoCompactCandidateLevel(assessment.level)) return { trigger: false, reason: "level-not-compact" };
 	if (!config.autoCompact) return { trigger: false, reason: "feature-disabled" };
 	if (state.inFlight) return { trigger: false, reason: "in-flight" };
 	if ((state.nowMs - state.lastAutoCompactAt) < config.autoCompactCooldownMs) {
