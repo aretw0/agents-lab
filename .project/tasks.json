@@ -15236,6 +15236,26 @@
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
       "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado."
+    },
+    {
+      "id": "TASK-BUD-660",
+      "description": "Record canary start|defer human decision after delegation rehearsal reaches ready (inspection evidence).",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-659"
+      ],
+      "files": [
+        ".project/handoff.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Decision is explicit (`start` or `defer`) with bounded reason.",
+        "Evidence references packet summaries used in the decision.",
+        "No protected-scope dispatch is auto-triggered."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes."
     }
   ]
 }
