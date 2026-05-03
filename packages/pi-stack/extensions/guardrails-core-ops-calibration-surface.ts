@@ -10,6 +10,8 @@ import {
 } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
+import { consumeContextPreloadPack } from "./context-watchdog-continuation";
+import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import {
   collectSessionRecords,
   parseAutoAdvanceHardIntentTelemetry,
@@ -18,6 +20,25 @@ import {
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
+}
+
+function inferDelegationCapabilityDefaults(cwd: string): {
+  preloadDecision: "use-pack" | "fallback-canonical";
+  dirtySignal: "clean" | "dirty" | "unknown";
+} {
+  const preload = consumeContextPreloadPack(cwd, { profile: "control-plane-core" });
+  let dirtySignal: "clean" | "dirty" | "unknown" = "unknown";
+  try {
+    const snapshot = readGitDirtySnapshot(cwd);
+    dirtySignal = snapshot.clean ? "clean" : "dirty";
+  } catch (error) {
+    const unavailable = buildUnavailableGitDirtySnapshot(error);
+    dirtySignal = unavailable.available ? (unavailable.clean ? "clean" : "dirty") : "unknown";
+  }
+  return {
+    preloadDecision: preload.decision,
+    dirtySignal,
+  };
 }
 
 function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
@@ -87,9 +108,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         : 24;
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
+      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
       const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : "fallback-canonical",
-        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : "unknown",
+        preloadDecision: typeof p.preload_decision === "string"
+          ? p.preload_decision
+          : inferredCapabilityDefaults.preloadDecision,
+        dirtySignal: typeof p.dirty_signal === "string"
+          ? p.dirty_signal
+          : inferredCapabilityDefaults.dirtySignal,
         monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
         subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
       });
@@ -126,6 +152,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         details: {
           ...packet,
           capability,
+          inferredCapabilityDefaults,
           mix,
           scan: collected.scan,
         },
@@ -163,9 +190,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         : 24;
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
+      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
       const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : "fallback-canonical",
-        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : "unknown",
+        preloadDecision: typeof p.preload_decision === "string"
+          ? p.preload_decision
+          : inferredCapabilityDefaults.preloadDecision,
+        dirtySignal: typeof p.dirty_signal === "string"
+          ? p.dirty_signal
+          : inferredCapabilityDefaults.dirtySignal,
         monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
         subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
       });
@@ -215,6 +247,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         details: {
           ...packet,
           capability,
+          inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
           scan: collected.scan,
@@ -257,9 +290,14 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         : 24;
       const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
 
+      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
       const capability = evaluateDelegationLaneCapabilitySnapshot({
-        preloadDecision: typeof p.preload_decision === "string" ? p.preload_decision : "fallback-canonical",
-        dirtySignal: typeof p.dirty_signal === "string" ? p.dirty_signal : "unknown",
+        preloadDecision: typeof p.preload_decision === "string"
+          ? p.preload_decision
+          : inferredCapabilityDefaults.preloadDecision,
+        dirtySignal: typeof p.dirty_signal === "string"
+          ? p.dirty_signal
+          : inferredCapabilityDefaults.dirtySignal,
         monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
         subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
       });
@@ -320,6 +358,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           ...startPacket,
           readiness,
           capability,
+          inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
           scan: collected.scan,

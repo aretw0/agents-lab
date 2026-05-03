@@ -11220,6 +11220,15 @@
       "method": "inspection",
       "timestamp": "2026-05-03T00:08:00.774Z",
       "evidence": "Canário one-task de simple-delegate formalizado e validado em modo report-only. Documentação atualizada em `docs/guides/control-plane-operating-doctrine.md` na seção do gate de promoção, com contrato explícito (`declared_files_known`, `validation_gate_known`, `rollback_plan_known`) e interpretação operacional de `blocked` vs `ready-for-human-decision`. Runtime validado via `simple_delegate_rehearsal_start_packet` em dois cenários coerentes: (1) sem rehearsal pronto => `decision=blocked code=simple-delegate-start-blocked-rehearsal-not-ready`; (2) com sinais/gates explícitos => `decision=ready-for-human-decision code=simple-delegate-start-ready-for-human-decision`. Sem auto-dispatch em ambos (`authorization=none`)."
+    },
+    {
+      "id": "VER-BUD-1000",
+      "target": "TASK-BUD-649",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T00:20:21.161Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` agora infere defaults reais de capability quando `preload_decision`/`dirty_signal` não são fornecidos: usa `consumeContextPreloadPack(..., profile=control-plane-core)` + snapshot de git dirty (`readGitDirtySnapshot`, fallback `buildUnavailableGitDirtySnapshot`). Aplicado nos 3 tools: `delegate_or_execute_decision_packet`, `simple_delegate_rehearsal_packet` e `simple_delegate_rehearsal_start_packet`. Details agora incluem `inferredCapabilityDefaults` para auditoria. Regressões: `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` ganhou caso `infers capability defaults from workspace preload pack when params are omitted`; `packages/pi-stack/test/smoke/session-analytics.test.ts` cobre parsing de snapshot para auto-advance telemetry. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (41 passed)."
     }
   ]
 }

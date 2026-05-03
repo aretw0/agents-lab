@@ -1,4 +1,5 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -501,6 +502,78 @@ describe("ops calibration decision packet", () => {
       expect(result.details.authorization).toBe("none");
       expect(result.details.mutationAllowed).toBe(false);
       expect(String(result.details.summary)).toContain("simple-delegate-rehearsal-packet:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("infers capability defaults from workspace preload pack when params are omitted", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-infer-capability-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({ timestamp: new Date().toISOString(), context: "seed" }, null, 2));
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [] }, null, 2));
+      writeFileSync(join(cwd, ".project", "verification.json"), JSON.stringify({ verification: [] }, null, 2));
+
+      const canonicalFiles = [
+        ".project/handoff.json",
+        ".project/tasks.json",
+        ".project/verification.json",
+      ].map((rel) => {
+        const st = statSync(join(cwd, rel));
+        return { path: rel, exists: true, mtimeMs: Math.floor(st.mtimeMs) };
+      });
+      const fingerprint = createHash("sha1")
+        .update(canonicalFiles.map((entry) => `${entry.path}:1:${entry.mtimeMs}`).join("|"))
+        .digest("hex");
+
+      mkdirSync(join(cwd, ".sandbox", "pi-agent", "preload"), { recursive: true });
+      writeFileSync(
+        join(cwd, ".sandbox", "pi-agent", "preload", "context-preload-pack.json"),
+        JSON.stringify({
+          generatedAtIso: new Date().toISOString(),
+          canonicalState: { fingerprint },
+          preloadPack: {
+            controlPlaneCore: [".project/tasks.json"],
+            agentWorkerLean: [".project/tasks.json"],
+            swarmScoutMin: [".project/tasks.json"],
+          },
+        }, null, 2),
+      );
+
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const result = await tool.execute(
+        "tc-simple-delegate-infer-capability",
+        {
+          dirty_signal: "clean",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          auto_advance_decision: "eligible",
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.inferredCapabilityDefaults.preloadDecision).toBe("use-pack");
+      expect(result.details.capability.signals.preloadDecision).toBe("use-pack");
+      expect(result.details.capability.decision).toBe("ready");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

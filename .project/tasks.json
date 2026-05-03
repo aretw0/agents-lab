@@ -15026,6 +15026,27 @@
       "milestone": "throughput-decoupling-lane-2026-05",
       "notes": "Objetivo: acelerar delegação com guardrails claros, evitando drift operacional.\n[rationale:risk-control] Canário one-task com contrato explícito reduz risco de delegação cega e acelera aprendizado operacional antes de ampliar autonomia em produção local.\n2026-05-03: canário one-task de simple-delegate em execução report-only; registrando contrato explícito (files/validation/rollback) e decisão start_packet blocked vs ready-for-human-decision.\nCanário definido para uso seguro: decisão humana explícita permanece obrigatória em start/abort/defer.",
       "verification": "VER-BUD-999"
+    },
+    {
+      "id": "TASK-BUD-649",
+      "description": "[P1] Fazer tools de decisão de delegação inferirem sinais de capability (preload/dirty) por default a partir do workspace, evitando fallback artificial para needs-evidence.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-647"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`delegate_or_execute_decision_packet`, `simple_delegate_rehearsal_packet` e `simple_delegate_rehearsal_start_packet` usam sinais reais de preload/dirty quando params não são fornecidos.",
+        "Com workspace clean + preload pack disponível, capability padrão pode chegar em ready sem override manual.",
+        "Smoke cobre inferência default e evita regressão para `fallback-canonical/unknown` artificial."
+      ],
+      "milestone": "throughput-decoupling-lane-2026-05",
+      "notes": "Desbloqueio pragmático para acelerar uso de agentes: reduzir needs-evidence artificial por default cego no surface de delegação.\nIniciado para destravar pacote de rehearsal com sinais reais de capability.\n[rationale:risk-control] Defaults cegos (fallback-canonical/unknown) geram needs-evidence artificial e atrasam delegação mesmo com workspace pronto. Inferência local read-only reduz falso bloqueio sem abrir autorização automática.\nRemovido needs-evidence artificial por defaults cegos; decisão de capability passa a refletir sinais locais reais por padrão.",
+      "verification": "VER-BUD-1000"
     }
   ]
 }
