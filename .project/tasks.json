@@ -15220,7 +15220,7 @@
     {
       "id": "TASK-BUD-659",
       "description": "Operationally validate delegation rehearsal readiness on real workspace after fallback hardening and preload refresh.",
-      "status": "in-progress",
+      "status": "blocked",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-658"
@@ -15235,7 +15235,7 @@
         "Checkpoint records evidence and next human decision."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado."
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final."
     },
     {
       "id": "TASK-BUD-660",
@@ -15256,6 +15256,81 @@
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
       "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes."
+    },
+    {
+      "id": "TASK-BUD-661",
+      "description": "Add bootstrap local-safe slice templates to autonomy_lane_material_seed_packet when selection has no eligible local-safe tasks.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "When decision=seed-now-bootstrap, details include bounded `seedTemplates` (3-5 local-safe slice suggestions).",
+        "Templates remain report-only guidance (no mutation/dispatch).",
+        "Templates avoid protected scope by default."
+      ],
+      "milestone": "throughput-bootstrap-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Mixed objective with ultra-low-nudge needs fast lane seeding without manual brainstorming turns.\nBootstrap seed path agora oferece sugestões acionáveis sem exigir brainstorm extra por turno.",
+      "verification": "VER-BUD-1012"
+    },
+    {
+      "id": "TASK-BUD-662",
+      "description": "Add smoke coverage for bootstrap seed templates in autonomy_lane_material_seed_packet.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-661"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke asserts seed-now-bootstrap includes non-empty bounded seedTemplates.",
+        "Smoke verifies packet remains report-only with dispatchAllowed=false.",
+        "Autonomy lane surface suite remains green."
+      ],
+      "milestone": "throughput-bootstrap-stock-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-661 reason=Prevent regression in low-nudge bootstrap seeding path.\nRegressão evita perda de templates no caminho bootstrap e mantém contrato report-only.",
+      "verification": "VER-BUD-1013"
+    },
+    {
+      "id": "TASK-BUD-663",
+      "description": "Expose auto-advance resolution source and live snapshot synopsis directly in simple_delegate_rehearsal_packet summary for low-nudge triage.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary includes source telemetry|live-board-fallback|override and live auto-advance decision.",
+        "Blocked summaries include concise canonical reasons without `unknown` placeholder noise when explicit reasons exist.",
+        "Report-only authorization contract remains unchanged."
+      ],
+      "milestone": "delegation-operator-clarity-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Reduce interaction overhead by making delegation readiness state self-explanatory in one line.\nResumo do packet ficou autoexplicativo em uma linha para triagem low-nudge.",
+      "verification": "VER-BUD-1014"
+    },
+    {
+      "id": "TASK-BUD-664",
+      "description": "Add smoke tests for simple_delegate_rehearsal_packet summary clarity fields (resolution source + live decision).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-663"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke verifies summary includes auto-advance resolution source.",
+        "Smoke verifies live snapshot decision appears when fallback is used.",
+        "Ops calibration smoke suite remains green."
+      ],
+      "milestone": "delegation-operator-clarity-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-663 reason=Guarantee low-nudge triage string remains stable and auditable.\nCobertura protege clareza de summary e evita ruído de reason placeholder.",
+      "verification": "VER-BUD-1015"
     }
   ]
 }

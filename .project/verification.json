@@ -11328,6 +11328,42 @@
       "method": "test",
       "timestamp": "2026-05-03T02:28:34.378Z",
       "evidence": "Smoke adicionada em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts`: `falls back to live board auto-advance snapshot when telemetry lacks eligible events`, validando `decision=ready`, `recommendationCode=simple-delegate-rehearsal-ready`, `autoAdvanceResolutionSource=live-board-fallback` e `autoAdvanceLiveSnapshot.nextTaskId=TASK-NEXT`. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (44 passed)."
+    },
+    {
+      "id": "VER-BUD-1012",
+      "target": "TASK-BUD-661",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:53:49.900Z",
+      "evidence": "`autonomy_lane_material_seed_packet` agora inclui `seedTemplates` quando `decision=seed-now` por bootstrap (`afk-material-seed-now-bootstrap`) em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`. Templates são bounded (3–5, limitados por `suggestedSeedCount`/`maxSeedSlices`), report-only, e explicitamente local-safe (smoke/status/observability/doc-sync/handoff-noise trim) sem dispatch/mutação."
+    },
+    {
+      "id": "VER-BUD-1013",
+      "target": "TASK-BUD-662",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:54:00.881Z",
+      "evidence": "Cobertura smoke adicionada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts`: caso `emits bootstrap seed-now material-seed packet when focus is missing` agora valida `seedTemplates` não vazio e bounded; caso `seed-now low-stock` valida `seedTemplates` vazio fora do bootstrap. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (45 passed)."
+    },
+    {
+      "id": "VER-BUD-1014",
+      "target": "TASK-BUD-663",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:54:11.386Z",
+      "evidence": "`simple_delegate_rehearsal_packet` agora publica summary de baixa interação com contexto de resolução: `source=<override|telemetry|live-board-fallback|telemetry+live>`, `liveAutoAdvance=<eligible|blocked>` e `liveNext=<taskId>` via `buildSimpleDelegateResolutionSummary` em `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts`. Também houve hardening de ruído: `normalizeAutoAdvanceBlockedReasons` remove placeholder `unknown` quando existem razões explícitas."
+    },
+    {
+      "id": "VER-BUD-1015",
+      "target": "TASK-BUD-664",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:54:21.533Z",
+      "evidence": "Smoke de ops calibration expandida em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts`: (1) fallback live-board verifica summary com `source=live-board-fallback`, `liveAutoAdvance=eligible`, `liveNext=TASK-NEXT`; (2) novo teste garante remoção de `unknown` quando blockers explícitos existem (`focus-not-complete`). Validação conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (45 passed)."
     }
   ]
 }

@@ -107,8 +107,8 @@ function resolveAutoAdvanceCompositeDecision(input: {
   if (typeof input.autoAdvanceDecisionOverride === "string") {
     const decision = input.autoAdvanceDecisionOverride === "eligible" ? "eligible" : "blocked";
     const blockedReasons = Array.isArray(input.autoAdvanceBlockedReasonsOverride)
-      ? (input.autoAdvanceBlockedReasonsOverride as unknown[])
-        .filter((row): row is string => typeof row === "string" && row.trim().length > 0)
+      ? normalizeAutoAdvanceBlockedReasons((input.autoAdvanceBlockedReasonsOverride as unknown[])
+        .filter((row): row is string => typeof row === "string" && row.trim().length > 0))
       : [];
     return {
       decision,
@@ -145,13 +145,35 @@ function resolveAutoAdvanceCompositeDecision(input: {
     };
   }
 
-  const blockedReasons = Array.from(new Set([...telemetryReasons, ...input.liveSnapshot.blockedReasons]));
+  const blockedReasons = normalizeAutoAdvanceBlockedReasons(Array.from(new Set([...telemetryReasons, ...input.liveSnapshot.blockedReasons])));
   return {
     decision: "blocked",
     blockedReasons: blockedReasons.length > 0 ? blockedReasons : ["auto-advance-telemetry-not-ready"],
     source: "telemetry+live",
     liveSnapshot: input.liveSnapshot,
   };
+}
+
+function normalizeAutoAdvanceBlockedReasons(reasons: string[]): string[] {
+  const normalized = [...new Set(reasons.filter((row): row is string => typeof row === "string" && row.trim().length > 0))];
+  if (normalized.length > 1) {
+    return normalized.filter((row) => row !== "unknown");
+  }
+  return normalized;
+}
+
+function buildSimpleDelegateResolutionSummary(input: {
+  baseSummary: string;
+  source: AutoAdvanceCompositeDecision["source"];
+  liveDecision: "eligible" | "blocked";
+  liveNextTaskId?: string;
+}): string {
+  return [
+    input.baseSummary,
+    `source=${input.source}`,
+    `liveAutoAdvance=${input.liveDecision}`,
+    input.liveNextTaskId ? `liveNext=${input.liveNextTaskId}` : undefined,
+  ].filter(Boolean).join(" ");
 }
 
 function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
@@ -356,10 +378,18 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           : autoAdvanceTelemetry.totals.blockedRatePct,
       });
 
+      const summary = buildSimpleDelegateResolutionSummary({
+        baseSummary: packet.summary,
+        source: autoAdvanceComposite.source,
+        liveDecision: liveAutoAdvanceSnapshot.decision,
+        liveNextTaskId: liveAutoAdvanceSnapshot.nextTaskId,
+      });
+
       return {
-        content: [{ type: "text", text: packet.summary }],
+        content: [{ type: "text", text: summary }],
         details: {
           ...packet,
+          summary,
           capability,
           inferredCapabilityDefaults,
           mix,

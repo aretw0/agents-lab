@@ -476,6 +476,7 @@ describe("autonomy lane surface", () => {
     expect(result?.details.decision).toBe("seed-now");
     expect(result?.details.recommendationCode).toBe("afk-material-seed-now-low-stock");
     expect(result?.details.humanActionRequired).toBe(true);
+    expect((result?.details.seedTemplates as Array<unknown>) ?? []).toHaveLength(0);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });
@@ -510,6 +511,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("afk-material-seed-now-bootstrap");
     expect(result?.details.humanActionRequired).toBe(true);
     expect((result?.details.blockedReasons as string[])).toContain("focus-missing");
+    expect(Array.isArray(result?.details.seedTemplates)).toBe(true);
+    expect((result?.details.seedTemplates as Array<unknown>).length).toBeGreaterThan(0);
+    expect((result?.details.seedTemplates as Array<unknown>).length).toBeLessThanOrEqual(3);
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
   });

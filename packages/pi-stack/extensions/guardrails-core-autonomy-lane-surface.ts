@@ -329,6 +329,55 @@ function buildAfkMaterialReadinessPacket(p: Record<string, unknown>, cwd: string
   };
 }
 
+function buildBootstrapSeedTemplates(input: { suggestedSeedCount: number; maxSeedSlices: number }): Array<{
+  id: string;
+  description: string;
+  validationGate: string;
+  rollback: string;
+  filesHint: string[];
+}> {
+  const templates = [
+    {
+      id: "seed-local-safe-smoke-guard",
+      description: "Adicionar/ajustar um smoke test local-safe para reduzir regressão de surface crítica.",
+      validationGate: "npm run test:smoke -- <suite-focal>",
+      rollback: "git restore -- <arquivo(s)>",
+      filesHint: ["packages/pi-stack/test/smoke/<suite>.test.ts"],
+    },
+    {
+      id: "seed-status-summary-clarity",
+      description: "Melhorar resumo/status report-only para reduzir nudge operacional sem mudar autorização.",
+      validationGate: "marker-check + smoke focal",
+      rollback: "git checkout -- <arquivo(s)>",
+      filesHint: ["packages/pi-stack/extensions/<surface>.ts", "packages/pi-stack/test/smoke/<surface>.test.ts"],
+    },
+    {
+      id: "seed-readonly-observability",
+      description: "Adicionar campo de observabilidade read-only para diagnóstico de bloqueio/decisão.",
+      validationGate: "smoke de payload details",
+      rollback: "git restore --source=HEAD -- <arquivo(s)>",
+      filesHint: ["packages/pi-stack/extensions/<surface>.ts", "packages/pi-stack/test/smoke/<surface>.test.ts"],
+    },
+    {
+      id: "seed-doc-sync-short",
+      description: "Sincronizar doutrina/runbook com mudança já entregue em runtime, de forma curta e sem nomenclatura nova.",
+      validationGate: "safe_marker_check em docs + smoke focal inalterado",
+      rollback: "git restore -- <doc(s)>",
+      filesHint: ["docs/guides/control-plane-operating-doctrine.md"],
+    },
+    {
+      id: "seed-handoff-noise-trim",
+      description: "Reduzir ruído de handoff/status mantendo evidência canônica e fail-closed.",
+      validationGate: "smoke + inspeção de summary/status",
+      rollback: "git revert local da fatia",
+      filesHint: ["packages/pi-stack/extensions/context-watchdog.ts", "packages/pi-stack/test/smoke/context-watchdog.test.ts"],
+    },
+  ] as const;
+
+  const count = Math.max(1, Math.min(Math.floor(input.maxSeedSlices), Math.floor(input.suggestedSeedCount), templates.length));
+  return templates.slice(0, count).map((row) => ({ ...row, filesHint: [...row.filesHint] }));
+}
+
 function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   const readiness = buildAfkMaterialReadinessPacket(p, cwd);
   const maxSeedSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_seed_slices, 3))));
@@ -341,6 +390,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   let recommendationCode = "afk-material-seed-wait-stock-healthy";
   let nextAction = "defer seeding; continue bounded AFK slice and re-check material packet after checkpoint.";
   let humanActionRequired = false;
+  let seedTemplates: ReturnType<typeof buildBootstrapSeedTemplates> = [];
 
   if (readiness.decision === "blocked") {
     const bootstrapBlockers = new Set([
@@ -358,6 +408,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
       recommendationCode = "afk-material-seed-now-bootstrap";
       nextAction = `run lane_brainstorm_packet + lane_brainstorm_seed_preview and decide bootstrap seeding for up to ${suggestedSeedCount} slices.`;
       humanActionRequired = true;
+      seedTemplates = buildBootstrapSeedTemplates({ suggestedSeedCount, maxSeedSlices });
     } else {
       decision = "blocked";
       recommendationCode = "afk-material-seed-blocked-readiness";
@@ -392,6 +443,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     maxSeedSlices,
     readiness,
     blockedReasons: readiness.blockedReasons,
+    seedTemplates,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",

@@ -563,6 +563,53 @@ describe("ops calibration decision packet", () => {
       expect(result.details.autoAdvanceResolutionSource).toBe("live-board-fallback");
       expect(result.details.autoAdvanceLiveSnapshot.decision).toBe("eligible");
       expect(result.details.autoAdvanceLiveSnapshot.nextTaskId).toBe("TASK-NEXT");
+      expect(String(result.details.summary)).toContain("source=live-board-fallback");
+      expect(String(result.details.summary)).toContain("liveAutoAdvance=eligible");
+      expect(String(result.details.summary)).toContain("liveNext=TASK-NEXT");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("drops unknown placeholder from blocked auto-advance reasons when explicit reasons exist", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-filter-unknown-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+
+      const result = await tool.execute(
+        "tc-simple-delegate-filter-unknown",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          auto_advance_decision: "blocked",
+          auto_advance_blocked_reasons: ["unknown", "focus-not-complete"],
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.decision).toBe("blocked");
+      expect(result.details.blockers).toContain("focus-not-complete");
+      expect(result.details.blockers).not.toContain("unknown");
+      expect(String(result.details.summary)).not.toContain("unknown");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
