@@ -15235,7 +15235,7 @@
         "Checkpoint records evidence and next human decision."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe."
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado."
     }
   ]
 }
