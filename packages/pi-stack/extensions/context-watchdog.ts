@@ -207,7 +207,8 @@ export type ContextWatchOperatorSignalReason =
 	| "reload-required"
 	| "handoff-refresh-required"
 	| "signal-noise-excessive"
-	| "compact-checkpoint-required";
+	| "compact-checkpoint-required"
+	| "timeout-pressure";
 
 export type ContextWatchOperatorSignal = {
 	reloadRequired: boolean;
@@ -216,7 +217,7 @@ export type ContextWatchOperatorSignal = {
 	noiseExcessive: boolean;
 };
 
-export type ContextWatchDeterministicStopReason = "none" | "reload-required" | "compact-checkpoint-required" | "compact-final-warning";
+export type ContextWatchDeterministicStopReason = "none" | "reload-required" | "compact-checkpoint-required" | "compact-final-warning" | "timeout-pressure";
 
 export type ContextWatchDeterministicStopSignal = {
 	required: boolean;
@@ -224,8 +225,7 @@ export type ContextWatchDeterministicStopSignal = {
 	action: "none" | "reload-and-resume" | "persist-checkpoint-and-compact" | "stop-and-let-auto-compact";
 };
 
-export type ContextWatchOperatorActionKind = "none" | "reload" | "checkpoint-compact" | "compact-final-warning" | "handoff-refresh";
-
+export type ContextWatchOperatorActionKind = "none" | "reload" | "checkpoint-compact" | "compact-final-warning" | "handoff-refresh" | "timeout-pressure";
 export type ContextWatchOperatorActionPlan = {
 	blocking: boolean;
 	kind: ContextWatchOperatorActionKind;
@@ -424,16 +424,19 @@ export function resolveContextWatchOperatorSignal(input: {
 	handoffManualRefreshRequired?: boolean;
 	signalNoiseExcessive?: boolean;
 	compactCheckpointPersistRequired?: boolean;
+	timeoutPressureActive?: boolean;
 }): ContextWatchOperatorSignal {
 	const reloadRequired = input.reloadRequired === true;
 	const handoffManualRefreshRequired = input.handoffManualRefreshRequired === true;
 	const signalNoiseExcessive = input.signalNoiseExcessive === true;
 	const compactCheckpointPersistRequired = input.compactCheckpointPersistRequired === true;
+	const timeoutPressureActive = input.timeoutPressureActive === true;
 	const reasons: ContextWatchOperatorSignalReason[] = [];
 	if (reloadRequired) reasons.push("reload-required");
 	if (handoffManualRefreshRequired) reasons.push("handoff-refresh-required");
 	if (signalNoiseExcessive) reasons.push("signal-noise-excessive");
 	if (compactCheckpointPersistRequired) reasons.push("compact-checkpoint-required");
+	if (timeoutPressureActive) reasons.push("timeout-pressure");
 	return {
 		reloadRequired,
 		humanActionRequired: reasons.length > 0,
@@ -460,6 +463,13 @@ export function resolveContextWatchDeterministicStopSignal(input: {
 			action: "persist-checkpoint-and-compact",
 		};
 	}
+	if ((input.assessmentLevel === "checkpoint" || input.assessmentLevel === "compact") && reasons.includes("timeout-pressure")) {
+		return {
+			required: true,
+			reason: "timeout-pressure",
+			action: "stop-and-let-auto-compact",
+		};
+	}
 	if (input.assessmentLevel === "compact" && input.autoCompactDecision !== "trigger") {
 		return {
 			required: true,
@@ -482,6 +492,9 @@ export function describeContextWatchDeterministicStopHint(
 	}
 	if (signal.reason === "compact-final-warning") {
 		return "stop the current slice; do not start another run until checkpoint evidence and auto-compact complete.";
+	}
+	if (signal.reason === "timeout-pressure") {
+		return "provider timeout pressure detected near compact boundary; stop new work, keep session idle, and retry after provider stabilizes.";
 	}
 	return undefined;
 }
@@ -510,6 +523,13 @@ export function resolveContextWatchOperatorActionPlan(input: {
 			blocking: true,
 			kind: "compact-final-warning",
 			summary: "stop current slice and let auto-compact complete before next run",
+		};
+	}
+	if (input.deterministicStop.reason === "timeout-pressure") {
+		return {
+			blocking: true,
+			kind: "timeout-pressure",
+			summary: "provider timeout pressure near compact boundary; pause new slices and retry when stable",
 		};
 	}
 	if ((input.operatorSignal.reasons ?? []).includes("handoff-refresh-required")) {
@@ -892,7 +912,8 @@ export type PreCompactIdlePrepDispatchReason =
 	| "trigger-ready"
 	| "not-deferral"
 	| "cooldown"
-	| "emit";
+	| "emit"
+	| "emit-timeout-pressure";
 
 export type PreCompactIdlePrepDispatch = {
 	shouldNotify: boolean;
@@ -906,26 +927,35 @@ export function resolvePreCompactIdlePrepDispatch(input: {
 	nowMs: number;
 	lastNotifyAtMs: number;
 	cooldownMs?: number;
+	timeoutPressureActive?: boolean;
 }): PreCompactIdlePrepDispatch {
 	const level = input.assessmentLevel;
 	const precompactLevel = level === "checkpoint" || level === "compact";
 	if (!precompactLevel) return { shouldNotify: false, reason: "not-precompact" };
 	if (input.decisionReason === "trigger") return { shouldNotify: false, reason: "trigger-ready" };
-	if (!isAutoCompactDeferralReason(input.decisionReason)) {
+
+	const nowMs = Math.max(0, Math.floor(Number(input.nowMs ?? 0)));
+	const timeoutPressureActive = input.timeoutPressureActive === true;
+	if (!timeoutPressureActive && !isAutoCompactDeferralReason(input.decisionReason)) {
 		return { shouldNotify: false, reason: "not-deferral" };
 	}
 
-	const nowMs = Math.max(0, Math.floor(Number(input.nowMs ?? 0)));
 	const lastNotifyAtMs = Math.max(0, Math.floor(Number(input.lastNotifyAtMs ?? 0)));
 	const cooldownMs = Math.max(1_000, Math.floor(Number(input.cooldownMs ?? 60_000)));
 	if (lastNotifyAtMs > 0 && (nowMs - lastNotifyAtMs) < cooldownMs) {
 		return { shouldNotify: false, reason: "cooldown" };
 	}
 
-	const recommendation = level === "compact"
-		? "pre-compact: close this micro-slice and keep the session idle so auto-compact can run."
-		: "checkpoint-close: finish this slice and keep the session idle so graceful auto-compact can run before hard compact.";
-	return { shouldNotify: true, reason: "emit", recommendation };
+	const recommendation = timeoutPressureActive
+		? "timeout-pressure: provider instability detected near compact boundary; stop starting new work, keep session idle, and let guarded compact/retry path recover."
+		: level === "compact"
+			? "pre-compact: close this micro-slice and keep the session idle so auto-compact can run."
+			: "checkpoint-close: finish this slice and keep the session idle so graceful auto-compact can run before hard compact.";
+	return {
+		shouldNotify: true,
+		reason: timeoutPressureActive ? "emit-timeout-pressure" : "emit",
+		recommendation,
+	};
 }
 
 export type AutoResumeHandoffFocusReconcileResult = {
@@ -1066,18 +1096,46 @@ function resolvePrimaryHandoffTaskId(handoff: Record<string, unknown>): string |
 	return first ? first.trim() : undefined;
 }
 
+export function isProviderRequestTimeoutError(message: string): boolean {
+	const normalized = String(message ?? "").toLowerCase();
+	return normalized.includes("request timed out") || normalized.includes("request timeout") || normalized.includes("timed out");
+}
+
+export function composeAutoResumeSuppressionHint(input: {
+	reason: AutoResumeDispatchReason;
+	timeoutPressureActive?: boolean;
+	timeoutPressureCount?: number;
+	timeoutPressureThreshold?: number;
+}): string | undefined {
+	const baseHint = describeAutoResumeDispatchHint(input.reason);
+	if (input.timeoutPressureActive !== true) return baseHint;
+	const count = Math.max(0, Math.floor(Number(input.timeoutPressureCount ?? 0)));
+	const threshold = Math.max(1, Math.floor(Number(input.timeoutPressureThreshold ?? 2)));
+	const timeoutHint = `provider timeout pressure observed (${count}/${threshold})`;
+	return baseHint ? `${baseHint}; ${timeoutHint}` : timeoutHint;
+}
+
 function buildContextWatchOperatorBrief(input: {
 	cwd: string;
 	handoff: Record<string, unknown>;
 	operatorActionKind: ContextWatchOperatorActionKind;
 	deterministicStopReason: ContextWatchDeterministicStopReason;
+	timeoutPressureActive?: boolean;
+	timeoutPressureCount?: number;
+	timeoutPressureThreshold?: number;
 }): ContextWatchOperatorBrief {
 	const focusTaskId = resolvePrimaryHandoffTaskId(input.handoff);
 	const focusMnemonic = toOperatorTaskMnemonic(focusTaskId, readProjectTaskDescriptionById(input.cwd, focusTaskId));
 
+	const timeoutPressureActive = input.timeoutPressureActive === true;
+	const timeoutPressureCount = Math.max(0, Math.floor(Number(input.timeoutPressureCount ?? 0)));
+	const timeoutPressureThreshold = Math.max(1, Math.floor(Number(input.timeoutPressureThreshold ?? 2)));
+
 	if (input.operatorActionKind === "reload") {
 		return {
-			whyPaused: "Runtime reload is required before safe continuation.",
+			whyPaused: timeoutPressureActive
+				? `Runtime reload is required and provider timeout pressure was observed (${timeoutPressureCount}/${timeoutPressureThreshold}).`
+				: "Runtime reload is required before safe continuation.",
 			focusTaskId,
 			focusMnemonic,
 			options: [
@@ -1089,8 +1147,11 @@ function buildContextWatchOperatorBrief(input: {
 	}
 
 	if (input.operatorActionKind === "checkpoint-compact" || input.operatorActionKind === "compact-final-warning") {
+		const timeoutSuffix = timeoutPressureActive
+			? ` Timeout pressure observed (${timeoutPressureCount}/${timeoutPressureThreshold}); prefer idle guarded compact path.`
+			: "";
 		return {
-			whyPaused: "Compact boundary reached; checkpoint/compact action is required before next slice.",
+			whyPaused: `Compact boundary reached; checkpoint/compact action is required before next slice.${timeoutSuffix}`,
 			focusTaskId,
 			focusMnemonic,
 			options: [
@@ -1100,6 +1161,20 @@ function buildContextWatchOperatorBrief(input: {
 			recommendation: "checkpoint-compact",
 		};
 	}
+
+	if (input.operatorActionKind === "timeout-pressure" || input.deterministicStopReason === "timeout-pressure") {
+		return {
+			whyPaused: `Provider timeout pressure detected near compact boundary (${timeoutPressureCount}/${timeoutPressureThreshold}).`,
+			focusTaskId,
+			focusMnemonic,
+			options: [
+				{ option: "keep-idle", impact: "Allow guarded compact/retry path to stabilize without new work." },
+				{ option: "checkpoint", impact: "Persist concise handoff evidence before any manual retry." },
+			],
+			recommendation: "keep-idle",
+		};
+	}
+
 
 	if (input.operatorActionKind === "handoff-refresh" || input.deterministicStopReason === "compact-checkpoint-required") {
 		return {
@@ -1819,12 +1894,19 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoResumeDecision: {
 		atIso: string;
 		reason: AutoResumeDispatchReason;
+		hint?: string;
 		dispatched: boolean;
 		reloadRequired: boolean;
 		checkpointEvidenceReady: boolean;
+		handoffBoardReconciled: boolean;
+		handoffBoardReconciliationSummary: string;
 		hasPendingMessages: boolean;
 		hasRecentSteerInput: boolean;
 		queuedLaneIntents: number;
+		timeoutPressureActive?: boolean;
+		timeoutPressureCount?: number;
+		timeoutPressureThreshold?: number;
+		timeoutPressureHint?: string;
 		promptDiagnostics?: AutoResumePromptDiagnostics;
 	} | null = null;
 	let lastSteeringSignal: {
@@ -1850,6 +1932,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let announceCountInWindow = 0;
 	let finalTurnSuppressionCountInWindow = 0;
 	let lastDeterministicStopSignalAt = 0;
+	let timeoutPressureWindowStartedAt = 0;
+	let timeoutPressureCount = 0;
+	let timeoutPressureLastSeenAt = 0;
+	let timeoutPressureLastMessage = "";
 	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
 	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
 	const FINAL_TURN_CLOSE_HEADROOM_PCT = 10;
@@ -1857,6 +1943,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	const ANTI_PARALYSIS_GRACE_WINDOW_MS = 2 * 60 * 1000;
 	const ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS = 5 * 60 * 1000;
 	const ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW = 1;
+	const TIMEOUT_PRESSURE_WINDOW_MS = 10 * 60 * 1000;
+	const TIMEOUT_PRESSURE_THRESHOLD = 2;
 
 	const getAnnouncementsInWindow = (nowMs: number): number => {
 		if (announceWindowStartAt <= 0) return 0;
@@ -1917,6 +2005,45 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}, safeDelayMs);
 	};
 
+	const decayTimeoutPressureWindow = (nowMs: number) => {
+		if (timeoutPressureWindowStartedAt <= 0) return;
+		if ((nowMs - timeoutPressureWindowStartedAt) <= TIMEOUT_PRESSURE_WINDOW_MS) return;
+		timeoutPressureWindowStartedAt = 0;
+		timeoutPressureCount = 0;
+	};
+
+	const readTimeoutPressureState = (nowMs: number) => {
+		decayTimeoutPressureWindow(nowMs);
+		const active = timeoutPressureCount >= TIMEOUT_PRESSURE_THRESHOLD;
+		const ageMs = timeoutPressureLastSeenAt > 0
+			? Math.max(0, nowMs - timeoutPressureLastSeenAt)
+			: undefined;
+		return {
+			active,
+			count: timeoutPressureCount,
+			threshold: TIMEOUT_PRESSURE_THRESHOLD,
+			windowMs: TIMEOUT_PRESSURE_WINDOW_MS,
+			windowStartedAtMs: timeoutPressureWindowStartedAt,
+			lastSeenAtMs: timeoutPressureLastSeenAt,
+			ageMs,
+			lastMessage: timeoutPressureLastMessage,
+		};
+	};
+
+	const recordTimeoutPressure = (message: string, nowMs: number) => {
+		if (!isProviderRequestTimeoutError(message)) {
+			return { matched: false, state: readTimeoutPressureState(nowMs) };
+		}
+		if (timeoutPressureWindowStartedAt <= 0 || (nowMs - timeoutPressureWindowStartedAt) > TIMEOUT_PRESSURE_WINDOW_MS) {
+			timeoutPressureWindowStartedAt = nowMs;
+			timeoutPressureCount = 0;
+		}
+		timeoutPressureCount += 1;
+		timeoutPressureLastSeenAt = nowMs;
+		timeoutPressureLastMessage = String(message ?? "").slice(0, 240);
+		return { matched: true, state: readTimeoutPressureState(nowMs) };
+	};
+
 	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
 		if (!config.enabled) {
 			ctx.ui.setStatus?.("context-watch", "[ctx] disabled");
@@ -1934,6 +2061,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const assessment = applyWarnCadenceEscalation(baseAssessment, consecutiveWarnCount);
 		lastAssessment = assessment;
 		const now = Date.now();
+		const timeoutPressure = readTimeoutPressureState(now);
 		let handoffPath: string | undefined;
 
 		if (config.status) {
@@ -1994,10 +2122,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			nowMs: now,
 			lastNotifyAtMs: lastPreCompactPrepNotifyAt,
 			cooldownMs: config.cooldownMs,
+			timeoutPressureActive: timeoutPressure.active,
 		});
-		if (config.notify && preCompactIdlePrep.shouldNotify) {
+		if (preCompactIdlePrep.shouldNotify) {
 			lastPreCompactPrepNotifyAt = now;
-			ctx.ui.notify(preCompactIdlePrep.recommendation ?? "context-watch: keep session idle so auto-compact can proceed.", "info");
+		}
+		if (preCompactIdlePrep.shouldNotify || timeoutPressure.active) {
 			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 				"context-watchdog.pre-compact-idle-prep",
 				{
@@ -2007,8 +2137,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					dispatchReason: preCompactIdlePrep.reason,
 					recommendation: preCompactIdlePrep.recommendation,
 					compactDeferCount,
+					timeoutPressure,
 				},
 			);
+		}
+		if (config.notify && preCompactIdlePrep.shouldNotify) {
+			ctx.ui.notify(preCompactIdlePrep.recommendation ?? "context-watch: keep session idle so auto-compact can proceed.", "info");
 		}
 		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
 			enabled: config.autoResumeAfterCompact,
@@ -2047,6 +2181,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 			),
 			compactCheckpointPersistRequired: compactCheckpointPersistence.shouldPersist,
+			timeoutPressureActive: timeoutPressure.active && autoCompactCandidateLevel,
 		});
 		const deterministicStop = resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: assessment.level,
@@ -2075,6 +2210,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					operatorAction,
 					operatorReasons: operatorSignal.reasons,
 					preCompactReloadSignal,
+					timeoutPressure,
 				},
 			);
 			if (config.notify && deterministicStop.reason !== "compact-checkpoint-required") {
@@ -2225,6 +2361,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							}
 						}
 					}
+					const timeoutPressureAfterCompact = readTimeoutPressureState(nowAfterCompact);
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
 					const reloadRequired = isReloadRequiredForSourceUpdate();
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
@@ -2248,11 +2385,20 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						hasPendingMessages: boolean;
 						hasRecentSteerInput: boolean;
 						queuedLaneIntents: number;
+						timeoutPressureActive: boolean;
+						timeoutPressureCount: number;
+						timeoutPressureThreshold: number;
+						timeoutPressureHint?: string;
 						promptDiagnostics?: AutoResumePromptDiagnostics;
 					} = {
 						atIso: new Date(nowAfterCompact).toISOString(),
 						reason: autoResumeDecision.reason,
-						hint: describeAutoResumeDispatchHint(autoResumeDecision.reason),
+						hint: composeAutoResumeSuppressionHint({
+							reason: autoResumeDecision.reason,
+							timeoutPressureActive: timeoutPressureAfterCompact.active,
+							timeoutPressureCount: timeoutPressureAfterCompact.count,
+							timeoutPressureThreshold: timeoutPressureAfterCompact.threshold,
+						}),
 						dispatched: autoResumeDecision.shouldDispatch,
 						reloadRequired,
 						checkpointEvidenceReady,
@@ -2261,6 +2407,12 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						hasPendingMessages,
 						hasRecentSteerInput,
 						queuedLaneIntents,
+						timeoutPressureActive: timeoutPressureAfterCompact.active,
+						timeoutPressureCount: timeoutPressureAfterCompact.count,
+						timeoutPressureThreshold: timeoutPressureAfterCompact.threshold,
+						timeoutPressureHint: timeoutPressureAfterCompact.active
+							? `provider timeout pressure observed (${timeoutPressureAfterCompact.count}/${timeoutPressureAfterCompact.threshold})`
+							: undefined,
 					};
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
@@ -2296,6 +2448,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
 								handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
 								handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
+								timeoutPressureActive: autoResumeSnapshot.timeoutPressureActive,
+								timeoutPressureCount: autoResumeSnapshot.timeoutPressureCount,
+								timeoutPressureThreshold: autoResumeSnapshot.timeoutPressureThreshold,
+								timeoutPressureHint: autoResumeSnapshot.timeoutPressureHint,
 							},
 						);
 						if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
@@ -2309,13 +2465,25 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				},
 				onError: (error) => {
 					autoCompactInFlight = false;
+					const nowOnError = Date.now();
 					const message = String(error?.message ?? "unknown-error");
+					const timeoutPressureEvent = recordTimeoutPressure(message, nowOnError);
+					if (timeoutPressureEvent.matched) {
+						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+							"context-watchdog.timeout-pressure",
+							{
+								atIso: new Date(nowOnError).toISOString(),
+								message,
+								timeoutPressure: timeoutPressureEvent.state,
+							},
+						);
+					}
 					if (isContextWindowOverflowErrorMessage(message)) {
 						config = applyEmergencyContextWindowFallbackConfig(config);
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 							"context-watchdog.context-window-overflow-fallback",
 							{
-								atIso: new Date(Date.now()).toISOString(),
+								atIso: new Date(nowOnError).toISOString(),
 								message,
 								fallbackCheckpointPct: config.checkpointPct,
 								fallbackCompactPct: config.compactPct,
@@ -2482,6 +2650,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			hasPendingMessages: ctx.hasPendingMessages(),
 			checkpointEvidenceReady,
 		}, AUTO_COMPACT_RETRY_DELAY_MS);
+		const timeoutPressure = readTimeoutPressureState(nowMs);
 		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
 		const calmClose = resolvePreCompactCalmCloseSignal({
 			assessmentLevel: assessment.level,
@@ -2580,6 +2749,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			calmCloseRecommendation: calmClose.recommendation,
 			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
 			compactCheckpointPersistReason: compactCheckpointPersistence.reason,
+			timeoutPressure,
 		};
 	};
 
@@ -2627,6 +2797,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		announceCountInWindow = 0;
 		finalTurnSuppressionCountInWindow = 0;
 		lastDeterministicStopSignalAt = 0;
+		timeoutPressureWindowStartedAt = 0;
+		timeoutPressureCount = 0;
+		timeoutPressureLastSeenAt = 0;
+		timeoutPressureLastMessage = "";
 		run(ctx, "session_start");
 	});
 
@@ -2664,6 +2838,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
 				),
 				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
+				timeoutPressureActive: autoCompact.timeoutPressure?.active === true
+					&& (assessment.level === "checkpoint" || assessment.level === "compact"),
 			});
 			const deterministicStop = resolveContextWatchDeterministicStopSignal({
 				assessmentLevel: assessment.level,
@@ -2695,6 +2871,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoff: handoffForOperatorBrief,
 				operatorActionKind: operatorAction.kind,
 				deterministicStopReason: deterministicStop.reason,
+				timeoutPressureActive: autoCompact.timeoutPressure?.active === true,
+				timeoutPressureCount: autoCompact.timeoutPressure?.count,
+				timeoutPressureThreshold: autoCompact.timeoutPressure?.threshold,
 			});
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
@@ -3472,6 +3651,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				announceCountInWindow = 0;
 				finalTurnSuppressionCountInWindow = 0;
 				lastDeterministicStopSignalAt = 0;
+				timeoutPressureWindowStartedAt = 0;
+				timeoutPressureCount = 0;
+				timeoutPressureLastSeenAt = 0;
+				timeoutPressureLastMessage = "";
 				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
 				ctx.ui.setStatus?.("context-watch-operator", "[ctx-op] reset");
 				ctx.ui.notify("context-watch: state reset", "info");
@@ -3540,6 +3723,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
 				signalNoiseExcessive,
 				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
+				timeoutPressureActive: autoCompact.timeoutPressure?.active === true
+					&& (assessment.level === "checkpoint" || assessment.level === "compact"),
 			});
 			const deterministicStop = resolveContextWatchDeterministicStopSignal({
 				assessmentLevel: assessment.level,

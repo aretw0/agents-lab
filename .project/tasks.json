@@ -15698,7 +15698,7 @@
     {
       "id": "TASK-BUD-685",
       "description": "Harden pre-compact graceful-stop when provider timeouts happen (idle prep must still run or fail-closed with explicit operator reason).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -15710,12 +15710,13 @@
         "Auto-resume suppression after forced compact includes explicit `reload-required` + timeout-pressure hint in operator brief."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] recorrência real reportada pelo operador: compactação forçada sem parada graciosa e auto-resume suprimido após reload pendente."
+      "notes": "[rationale:risk-control] recorrência real reportada pelo operador: compactação forçada sem parada graciosa e auto-resume suprimido após reload pendente.\nIniciando hardening de graceful-stop sob timeout pressure: reason code determinístico + observabilidade pre-compact + hint contextual no auto-resume suprimido.\nParada pré-compact deixa de ficar silenciosa sob instabilidade de provedor; reason explícito e observável.",
+      "verification": "VER-BUD-1036"
     },
     {
       "id": "TASK-BUD-686",
       "description": "Add timeout-pressure regression smoke for context-watch graceful stop and auto-resume suppression messaging.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-685"
@@ -15729,7 +15730,8 @@
         "No protected-scope auto-dispatch introduced."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] evita regressão da mesma falha observada em produção/local run."
+      "notes": "[rationale:risk-control] evita regressão da mesma falha observada em produção/local run.\nCobertura evita regressão do incidente de compactação forçada + suppress por reload sem contexto.",
+      "verification": "VER-BUD-1037"
     },
     {
       "id": "TASK-BUD-687",

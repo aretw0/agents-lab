@@ -41,6 +41,8 @@ import contextWatchdogExtension, {
 	resolveAutoCompactRetryDelayMs,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	composeAutoResumeSuppressionHint,
+	isProviderRequestTimeoutError,
 	shouldNotifyAutoResumeSuppression,
 	summarizeAutoResumePromptDiagnostics,
 	resolveAutoResumeDispatchDecision,
@@ -604,6 +606,18 @@ describe("context-watchdog", () => {
 		});
 		expect(prepCooldown.shouldNotify).toBe(false);
 		expect(prepCooldown.reason).toBe("cooldown");
+
+		const timeoutPrep = resolvePreCompactIdlePrepDispatch({
+			assessmentLevel: "checkpoint",
+			decisionReason: "checkpoint-evidence-missing",
+			nowMs: 20_000,
+			lastNotifyAtMs: 0,
+			cooldownMs: 2_000,
+			timeoutPressureActive: true,
+		});
+		expect(timeoutPrep.shouldNotify).toBe(true);
+		expect(timeoutPrep.reason).toBe("emit-timeout-pressure");
+		expect(timeoutPrep.recommendation).toContain("timeout-pressure");
 	});
 
 	it("exposes calm-close readiness and anti-paralysis signal deterministically", () => {
@@ -1210,6 +1224,14 @@ describe("context-watchdog", () => {
 		expect(compactCheckpoint.humanActionRequired).toBe(true);
 		expect(compactCheckpoint.reasons).toContain("compact-checkpoint-required");
 
+		const timeoutPressure = resolveContextWatchOperatorSignal({
+			reloadRequired: false,
+			handoffManualRefreshRequired: false,
+			timeoutPressureActive: true,
+		});
+		expect(timeoutPressure.humanActionRequired).toBe(true);
+		expect(timeoutPressure.reasons).toContain("timeout-pressure");
+
 		expect(resolveContextWatchDeterministicStopSignal({
 			assessmentLevel: "ok",
 			operatorSignal: { reasons: [] },
@@ -1251,6 +1273,15 @@ describe("context-watchdog", () => {
 			operatorSignal: { reasons: [] },
 			autoCompactDecision: "trigger",
 		})).toEqual({ required: false, reason: "none", action: "none" });
+		expect(resolveContextWatchDeterministicStopSignal({
+			assessmentLevel: "checkpoint",
+			operatorSignal: { reasons: ["timeout-pressure"] },
+			autoCompactDecision: "cooldown",
+		})).toEqual({
+			required: true,
+			reason: "timeout-pressure",
+			action: "stop-and-let-auto-compact",
+		});
 		expect(describeContextWatchDeterministicStopHint({
 			required: true,
 			reason: "compact-final-warning",
@@ -1261,6 +1292,11 @@ describe("context-watchdog", () => {
 			reason: "none",
 			action: "none",
 		})).toBeUndefined();
+		expect(describeContextWatchDeterministicStopHint({
+			required: true,
+			reason: "timeout-pressure",
+			action: "stop-and-let-auto-compact",
+		})).toContain("timeout pressure");
 		expect(resolveContextWatchOperatorActionPlan({
 			deterministicStop: { required: false, reason: "none", action: "none" },
 			operatorSignal: { reasons: [] },
@@ -1295,6 +1331,14 @@ describe("context-watchdog", () => {
 			summary: "stop current slice and let auto-compact complete before next run",
 		});
 		expect(resolveContextWatchOperatorActionPlan({
+			deterministicStop: { required: true, reason: "timeout-pressure", action: "stop-and-let-auto-compact" },
+			operatorSignal: { reasons: [] },
+		})).toEqual({
+			blocking: true,
+			kind: "timeout-pressure",
+			summary: "provider timeout pressure near compact boundary; pause new slices and retry when stable",
+		});
+		expect(resolveContextWatchOperatorActionPlan({
 			deterministicStop: { required: false, reason: "none", action: "none" },
 			operatorSignal: { reasons: ["handoff-refresh-required"] },
 		})).toEqual({
@@ -1305,6 +1349,14 @@ describe("context-watchdog", () => {
 		expect(shouldEmitDeterministicStopSignal(false, 120_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 30_000, 0, 60_000)).toBe(false);
 		expect(shouldEmitDeterministicStopSignal(true, 120_000, 0, 60_000)).toBe(true);
+		expect(isProviderRequestTimeoutError("Error: Request timed out.")).toBe(true);
+		expect(isProviderRequestTimeoutError("network unavailable")).toBe(false);
+		expect(composeAutoResumeSuppressionHint({
+			reason: "reload-required",
+			timeoutPressureActive: true,
+			timeoutPressureCount: 3,
+			timeoutPressureThreshold: 2,
+		})).toContain("provider timeout pressure observed (3/2)");
 	});
 
 	it("resolves operating cadence with post-resume recalibration signal", () => {

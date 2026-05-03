@@ -1,42 +1,37 @@
 {
-  "timestamp": "2026-05-03T16:47:44.244Z",
-  "context": "Incidente recorrente registrado: parada graciosa pré-compact não ocorreu; compactação forçada suprimiu auto-resume por reload pendente; houve [snip] orPauseBrief) e mnemônico de next task. [truncated:+187 chars]",
-  "current_tasks": [
-    "TASK-BUD-685"
-  ],
+  "timestamp": "2026-05-03T17:08:01.712Z",
+  "context": "Hardening de surpresa de compactação aplicado: timeout-pressure agora é sinal explícito no context-watch (reason determinístico + operator ac [snip] vel mesmo sob pressão de timeout/retry. [truncated:+96 chars]",
   "next_actions": [
-    "Executar TASK-BUD-685 (runtime hardening de graceful-stop sob timeout pressure).",
-    "Executar TASK-BUD-686 (smoke de regressão timeout-pressure).",
-    "Se recorrência persistir, aplicar TASK-BUD-687 para bloquear caminho legado sob pressão."
+    "Monitorar recorrência real; se repetir >=3 no mesmo padrão, executar TASK-BUD-687 para bloquea [snip] gado sob timeout-pressure. [truncated:+12 chars]",
+    "Retomar backlog local-safe de throughput após esta estabilização."
   ],
-  "blockers": [
-    "Instabilidade intermitente de provedor com Request timed out pode mascarar cad [snip] a de idle/pre-compact. [truncated:+4 chars]"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts (28 passed)",
-    "operatorPauseBrief ativo no autonomy_lane_status",
-    "nextTaskMnemonic ativo no autonomy_lane_status"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] urface.test.ts (96 passed) [truncated:+26 chars]",
+    "context-watchdog.ts com reason timeout-pressure + composeAutoResumeSuppressionHint",
+    "smoke cobre emit-timeout-pressure + operator signal/stop/action + hint composto"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-685",
+    "focus": "TASK-BUD-686",
     "canonical_links": [
-      "task:TASK-BUD-685",
-      "task:TASK-BUD-686"
+      "task:TASK-BUD-686",
+      "task:TASK-BUD-687"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T16:47:44.244Z",
+    "generatedAtIso": "2026-05-03T17:08:01.712Z",
     "level": "checkpoint",
-    "percent": 45,
+    "percent": 52,
     "action": "checkpoint-refresh",
-    "recommendation": "continue"
+    "recommendation": "continue",
+    "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T16:47:44.244Z",
+      "atIso": "2026-05-03T17:08:01.712Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 45,
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -45,5 +40,8 @@
       "action": "checkpoint-refresh",
       "recommendation": "continue"
     }
+  ],
+  "completed_tasks": [
+    "TASK-BUD-686"
   ]
 }
