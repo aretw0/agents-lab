@@ -17,6 +17,7 @@ import contextWatchdogExtension, {
 	deriveContextWatchThresholds,
 	evaluateContextWatch,
 	formatContextWatchStatusToolSummary,
+	formatTimeoutPressureSummary,
 	formatContextWatchCompactStageStatusSummary,
 	resolveContextWatchAdaptiveStatusSummary,
 	formatContextWatchAutoResumePreviewSummary,
@@ -1724,11 +1725,12 @@ describe("context-watchdog", () => {
 					hasPendingMessages: () => false,
 				} as any,
 			);
-			expect(result.content?.[0]?.text).toBe("context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown");
+			expect(result.content?.[0]?.text).toBe("context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown timeoutPressure=none");
 			expect(result.details).toMatchObject({
 				level: "ok",
 				percent: 14,
-				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown",
+				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown timeoutPressure=none",
+				timeoutPressureSummary: "none",
 				compactStage: {
 					stage: "normal-window",
 					shouldGracefulStop: false,
@@ -1772,7 +1774,16 @@ describe("context-watchdog", () => {
 				handoffFreshness: "stale",
 				handoffAgeSec: 120,
 				handoffFreshThresholdSec: 90,
+				timeoutPressureSummary: "2/2@600s",
 			})).toContain("handoffAgeSec=120/90");
+			expect(formatContextWatchStatusToolSummary({
+				level: "warn",
+				percent: 58,
+				action: "continue-bounded",
+				timeoutPressureSummary: "2/2@600s",
+			})).toContain("timeoutPressure=2/2@600s");
+			expect(formatTimeoutPressureSummary(undefined)).toBe("none");
+			expect(formatTimeoutPressureSummary({ active: true, count: 3, threshold: 2, windowMs: 600_000 })).toBe("3/2@600s");
 			expect(formatContextWatchCommandStatusSummary({
 				level: "compact",
 				percent: 91,

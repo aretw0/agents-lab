@@ -1602,6 +1602,19 @@ export function formatContextWatchOneSliceOperatorPacketPreviewSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function formatTimeoutPressureSummary(input: {
+	active?: boolean;
+	count?: number;
+	threshold?: number;
+	windowMs?: number;
+} | undefined): string {
+	if (!input || input.active !== true) return "none";
+	const count = Math.max(0, Math.floor(Number(input.count ?? 0)));
+	const threshold = Math.max(1, Math.floor(Number(input.threshold ?? 2)));
+	const windowSec = Math.max(1, Math.floor(Number(input.windowMs ?? 600_000) / 1000));
+	return `${count}/${threshold}@${windowSec}s`;
+}
+
 export function formatContextWatchStatusToolSummary(input: {
 	level: ContextWatchdogLevel;
 	percent?: number;
@@ -1612,6 +1625,7 @@ export function formatContextWatchStatusToolSummary(input: {
 	handoffFreshness?: HandoffFreshnessLabel;
 	handoffAgeSec?: number;
 	handoffFreshThresholdSec?: number;
+	timeoutPressureSummary?: string;
 }): string {
 	const handoffAgeSec = Number.isFinite(Number(input.handoffAgeSec))
 		? Math.max(0, Math.floor(Number(input.handoffAgeSec)))
@@ -1631,6 +1645,7 @@ export function formatContextWatchStatusToolSummary(input: {
 		handoffAgeSec !== undefined && handoffFreshThresholdSec !== undefined
 			? `handoffAgeSec=${handoffAgeSec}/${handoffFreshThresholdSec}`
 			: undefined,
+		input.timeoutPressureSummary ? `timeoutPressure=${input.timeoutPressureSummary}` : undefined,
 	].filter(Boolean).join(" ");
 }
 
@@ -2940,6 +2955,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				timeoutPressureCount: autoCompact.timeoutPressure?.count,
 				timeoutPressureThreshold: autoCompact.timeoutPressure?.threshold,
 			});
+			const timeoutPressureSummary = formatTimeoutPressureSummary(autoCompact.timeoutPressure);
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2950,6 +2966,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffFreshness: autoCompact.handoffFreshness.label,
 				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
 				handoffFreshThresholdSec,
+				timeoutPressureSummary,
 			});
 			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
 				level: assessment.level,
@@ -2967,6 +2984,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				fullSummary,
 				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
 				handoffFreshThresholdSec,
+				timeoutPressureSummary,
 				outputShape: {
 					mode: adaptiveSummary.mode,
 					cooldownMs: config.cooldownMs,

@@ -15815,7 +15815,7 @@
     {
       "id": "TASK-BUD-691",
       "description": "Expor `timeoutPressureSummary` curto no context_watch_status para leitura rápida de instabilidade (count/threshold/window) sem abrir details completos.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts"
@@ -15826,12 +15826,13 @@
         "Sem alterar autorização/dispatch; report-only."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] reduz surpresa operacional em pausas sob timeout intermitente.\nFila local-safe reseeded para evitar nova pausa seca; iniciando visibilidade curta `timeoutPressureSummary` no context_watch_status."
+      "notes": "[rationale:risk-control] reduz surpresa operacional em pausas sob timeout intermitente.\nFila local-safe reseeded para evitar nova pausa seca; iniciando visibilidade curta `timeoutPressureSummary` no context_watch_status.\nResumo rápido de instabilidade ficou visível sem abrir payload completo.",
+      "verification": "VER-BUD-1043"
     },
     {
       "id": "TASK-BUD-692",
       "description": "Adicionar smoke para `timeoutPressureSummary` no context_watch_status.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-691"
@@ -15845,12 +15846,13 @@
         "Suite focal permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] evita regressão da visibilidade operacional do novo sinal."
+      "notes": "[rationale:risk-control] evita regressão da visibilidade operacional do novo sinal.\nRegressão coberta para summary curto de timeout-pressure.",
+      "verification": "VER-BUD-1044"
     },
     {
       "id": "TASK-BUD-693",
       "description": "Sincronizar nota curta na doutrina sobre leitura de timeoutPressureSummary no fechamento operacional.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-691"
@@ -15864,7 +15866,8 @@
         "Doc checklist permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] padroniza leitura rápida do sinal sem depender de memória tácita."
+      "notes": "[rationale:risk-control] padroniza leitura rápida do sinal sem depender de memória tácita.\nPadronização anti-bloat para interpretar instabilidade sem perder foco de lane.",
+      "verification": "VER-BUD-1045"
     }
   ]
 }
