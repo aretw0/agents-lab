@@ -55,6 +55,19 @@ type LocalSafeChainingDecision = {
   nextTaskId?: string;
 };
 
+type AutonomyOperatorPauseOption = {
+  option: string;
+  impact: string;
+};
+
+type AutonomyOperatorPauseBrief = {
+  whyPaused: string;
+  nextTaskId?: string;
+  nextTaskMnemonic?: string;
+  options: AutonomyOperatorPauseOption[];
+  recommendation: string;
+};
+
 function readJsonRecord(filePath: string): Record<string, unknown> | undefined {
   if (!existsSync(filePath)) return undefined;
   try {
@@ -173,6 +186,50 @@ function toTaskMnemonic(task: ProjectTaskItem | undefined): string | undefined {
     ? cleanedDescription.split(/[.;]/)[0].trim().slice(0, 72)
     : "";
   return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
+}
+
+function buildAutonomyOperatorPauseBrief(input: {
+  selectionReady: boolean;
+  selectionReason: string;
+  selectionRecommendation: string;
+  includeProtectedScopes: boolean;
+  nextTaskId?: string;
+  nextTaskMnemonic?: string;
+}): AutonomyOperatorPauseBrief {
+  if (input.selectionReady) {
+    return {
+      whyPaused: "No pause gate: bounded local-safe task is ready.",
+      nextTaskId: input.nextTaskId,
+      nextTaskMnemonic: input.nextTaskMnemonic,
+      options: [
+        { option: "continue", impact: "Execute next bounded local-safe slice now." },
+        { option: "checkpoint", impact: "Persist short checkpoint before starting the slice." },
+      ],
+      recommendation: "continue",
+    };
+  }
+
+  if (input.selectionReason === "no-eligible-tasks" && input.includeProtectedScopes !== true) {
+    return {
+      whyPaused: "No eligible local-safe tasks remain in current selection policy.",
+      options: [
+        { option: "seed-local-safe", impact: "Create 1-3 bounded local-safe tasks and resume chaining." },
+        { option: "choose-protected-focus", impact: "Explicitly opt-in protected scope for the next slice." },
+      ],
+      recommendation: "seed-local-safe",
+    };
+  }
+
+  return {
+    whyPaused: input.selectionRecommendation,
+    nextTaskId: input.nextTaskId,
+    nextTaskMnemonic: input.nextTaskMnemonic,
+    options: [
+      { option: "resolve-blockers", impact: "Address current selection blockers and retry status." },
+      { option: "checkpoint", impact: "Persist context and re-evaluate after checkpoint." },
+    ],
+    recommendation: "resolve-blockers",
+  };
 }
 
 function taskHasProtectedSignal(task: ProjectTaskItem): boolean {
@@ -765,9 +822,18 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
+      const includeProtectedScopes = p.include_protected_scopes === true;
       const tasks = readProjectTasksBlock(ctx.cwd).tasks;
       const nextTask = selection.nextTaskId ? findTaskById(tasks, selection.nextTaskId) : undefined;
       const nextTaskMnemonic = toTaskMnemonic(nextTask);
+      const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
+        selectionReady: selection.ready,
+        selectionReason: selection.reason,
+        selectionRecommendation: selection.recommendation,
+        includeProtectedScopes,
+        nextTaskId: selection.nextTaskId,
+        nextTaskMnemonic,
+      });
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
@@ -795,6 +861,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         },
         recommendationCode: selection.recommendationCode,
         nextTaskMnemonic,
+        operatorPauseBrief,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : selection.recommendation),

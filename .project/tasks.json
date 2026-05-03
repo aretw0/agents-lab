@@ -15640,6 +15640,116 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] melhora decisões rápidas do operador sem abrir explicações longas.\nImplementando nextTaskMnemonic em autonomy_lane_status para reduzir leitura por ID cru em pausas de seleção.\nLeitura operacional do próximo passo fica humana sem perder economia de tokens.",
       "verification": "VER-BUD-1033"
+    },
+    {
+      "id": "TASK-BUD-682",
+      "description": "Adicionar operatorPauseBrief no autonomy_lane_status para pausas de seleção (motivo, opções com impacto e recomendação curta).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando seleção estiver bloqueada, status expõe `operatorPauseBrief` com `whyPaused`, `options[]` (impacto), `recommendation`.",
+        "Quando seleção estiver ready, brief indica `continue` com impacto bounded.",
+        "Sem alterar policy/dispatch; payload segue read-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] mantém alinhamento humano em iterações sem depender de memória implícita da sessão.\nIniciando operatorPauseBrief em autonomy_lane_status para pausas de seleção com opções+impacto+recomendação.\nContrato de pausa contextual agora também cobre status de seleção de lane (não só start_packet).",
+      "verification": "VER-BUD-1034"
+    },
+    {
+      "id": "TASK-BUD-683",
+      "description": "Adicionar smoke de regressão para operatorPauseBrief no autonomy_lane_status.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-682"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida brief com recomendação `continue` quando há nextTask local-safe.",
+        "Smoke valida brief com recomendação de ação humana quando seleção bloqueada por falta de local-safe.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] previne regressão da camada de contextualização humana em pausas de seleção.\nRegressão coberta para contexto humano de pausa em autonomy_lane_status.",
+      "verification": "VER-BUD-1035"
+    },
+    {
+      "id": "TASK-BUD-684",
+      "description": "Definir critério report-only para sugerir quando assimilar influências externas no fluxo (janela ideal vs adiar).",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Critério curto considera estoque local-safe, blockers críticos e maturidade de validação.",
+        "Sem auto-dispatch para influência externa; apenas recomendação report-only.",
+        "Mantém protected scope explícito para influências externas."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita assimilação prematura de influência enquanto throughput local-safe ainda está frágil."
+    },
+    {
+      "id": "TASK-BUD-685",
+      "description": "Harden pre-compact graceful-stop when provider timeouts happen (idle prep must still run or fail-closed with explicit operator reason).",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts"
+      ],
+      "acceptance_criteria": [
+        "When repeated `Error: Request timed out.` occurs near compact boundary, runtime emits deterministic reason code instead of silent stretch.",
+        "Pre-compact idle prep event is observable even in timeout/retry pressure path.",
+        "Auto-resume suppression after forced compact includes explicit `reload-required` + timeout-pressure hint in operator brief."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] recorrência real reportada pelo operador: compactação forçada sem parada graciosa e auto-resume suprimido após reload pendente."
+    },
+    {
+      "id": "TASK-BUD-686",
+      "description": "Add timeout-pressure regression smoke for context-watch graceful stop and auto-resume suppression messaging.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-685"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke simulates timeout-pressure path and asserts stable reason code/event footprint.",
+        "Smoke asserts operator-facing suppression brief keeps why/focus/options/recommendation bounded.",
+        "No protected-scope auto-dispatch introduced."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] evita regressão da mesma falha observada em produção/local run."
+    },
+    {
+      "id": "TASK-BUD-687",
+      "description": "Block legacy compact path under timeout pressure; force guarded pre-compact path with explicit operator pause brief.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-685"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts"
+      ],
+      "acceptance_criteria": [
+        "Legacy path not silently used when timeout-pressure signal is active.",
+        "Runtime emits one deterministic reason code for forced-compact guard path.",
+        "Change is fail-closed and read-only with no dispatch side effects."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] recorrência >=3 sugere bloquear caminho antigo segundo hardening plan (block-old-path)."
     }
   ]
 }

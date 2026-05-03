@@ -579,6 +579,7 @@ describe("autonomy lane surface", () => {
     expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-NEXT"]);
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
     expect(result?.details.recommendationCode).toBe("execute-bounded-slice");
+    expect((result?.details.operatorPauseBrief as { recommendation?: string } | undefined)?.recommendation).toBe("continue");
     expect(result?.details.nextAction).toContain("next=TASK-NEXT");
   });
 
@@ -662,6 +663,9 @@ describe("autonomy lane surface", () => {
     expect(selection?.reason).toBe("no-eligible-tasks");
     expect(selection?.recommendationCode).toBe("local-stop-protected-focus-required");
     expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
+    const pauseBrief = (result?.details.operatorPauseBrief as { recommendation?: string; options?: Array<{ option?: string }> } | undefined);
+    expect(pauseBrief?.recommendation).toBe("seed-local-safe");
+    expect((pauseBrief?.options ?? []).map((row) => row.option)).toContain("choose-protected-focus");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 

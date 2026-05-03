@@ -11526,6 +11526,24 @@
       "method": "test",
       "timestamp": "2026-05-03T16:29:08.417Z",
       "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora expõe `nextTaskMnemonic` quando há `nextTaskId`, usando descrição curta saneada (`ID:descrição-curta`). Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` validando `nextTaskMnemonic=TASK-NEXT:local`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (96 passed)."
+    },
+    {
+      "id": "VER-BUD-1034",
+      "target": "TASK-BUD-682",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T16:47:16.423Z",
+      "evidence": "`autonomy_lane_status` agora expõe `operatorPauseBrief` com `whyPaused`, `options[]` (impacto) e `recommendation`, mantendo modo report-only sem dispatch. Implementado em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` com paths distintos para `selection.ready` e `no-eligible-tasks` local-safe."
+    },
+    {
+      "id": "VER-BUD-1035",
+      "target": "TASK-BUD-683",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T16:47:31.010Z",
+      "evidence": "Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` para validar `operatorPauseBrief.recommendation=continue` quando há next local-safe e `seed-local-safe` + opção `choose-protected-focus` quando não há tarefa local-safe elegível. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (28 passed)."
     }
   ]
 }
