@@ -11310,6 +11310,24 @@
       "method": "inspection",
       "timestamp": "2026-05-03T02:10:47.288Z",
       "evidence": "Doutrina atualizada de forma enxuta e sem nomenclatura paralela em `docs/guides/control-plane-operating-doctrine.md`: adicionado `Playbook curto para esse modo` com 3 passos (validar/evidenciar, avançar sem nudge por task, parar em stop condition canônica com destaque `CONTEXT_COMPACT_REQUIRED`). Sem duplicação de termos/primitivas. Verificação por marcador: presença de `Playbook curto para esse modo`, `sem pedir novo nudge por task` e `CONTEXT_COMPACT_REQUIRED` (3/3)."
+    },
+    {
+      "id": "VER-BUD-1010",
+      "target": "TASK-BUD-657",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:28:24.554Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` agora compõe auto-advance com fallback live-board: adicionados `inferLiveAutoAdvanceSnapshot` + `resolveAutoAdvanceCompositeDecision` e integração em `simple_delegate_rehearsal_packet`/`simple_delegate_rehearsal_start_packet`. Quando override não existe, telemetria continua preferida; se telemetria bloqueia e snapshot live está elegível, decisão passa para `eligible` com `source=live-board-fallback`; quando não elegível, blockers combinam telemetria+live de forma determinística (sem perder fail-closed). Payload inclui `autoAdvanceLiveSnapshot` e `autoAdvanceResolutionSource` para auditoria."
+    },
+    {
+      "id": "VER-BUD-1011",
+      "target": "TASK-BUD-658",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T02:28:34.378Z",
+      "evidence": "Smoke adicionada em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts`: `falls back to live board auto-advance snapshot when telemetry lacks eligible events`, validando `decision=ready`, `recommendationCode=simple-delegate-rehearsal-ready`, `autoAdvanceResolutionSource=live-board-fallback` e `autoAdvanceLiveSnapshot.nextTaskId=TASK-NEXT`. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (44 passed)."
     }
   ]
 }

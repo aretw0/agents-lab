@@ -507,6 +507,67 @@ describe("ops calibration decision packet", () => {
     }
   });
 
+  it("falls back to live board auto-advance snapshot when telemetry lacks eligible events", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-live-auto-advance-"));
+    try {
+      mkdirSync(join(cwd, ".project"), { recursive: true });
+      writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+        tasks: [
+          { id: "TASK-FOCUS", description: "[P1] foco encerrado", status: "completed" },
+          {
+            id: "TASK-NEXT",
+            description: "[P1] follow-up local-safe",
+            status: "planned",
+            acceptance_criteria: ["run smoke test for next slice"],
+            files: ["packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"],
+            notes: "[rationale:risk-control] next local-safe slice with explicit validation gate",
+          },
+        ],
+      }, null, 2));
+      writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+        timestamp: new Date().toISOString(),
+        current_tasks: ["TASK-FOCUS"],
+      }, null, 2));
+
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "simple_delegate_rehearsal_packet");
+      const result = await tool.execute(
+        "tc-simple-delegate-live-auto-advance",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.decision).toBe("ready");
+      expect(result.details.recommendationCode).toBe("simple-delegate-rehearsal-ready");
+      expect(result.details.autoAdvanceResolutionSource).toBe("live-board-fallback");
+      expect(result.details.autoAdvanceLiveSnapshot.decision).toBe("eligible");
+      expect(result.details.autoAdvanceLiveSnapshot.nextTaskId).toBe("TASK-NEXT");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("infers capability defaults from workspace preload pack when params are omitted", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-infer-capability-"));
     try {

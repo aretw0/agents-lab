@@ -10,6 +10,10 @@ import {
 } from "./guardrails-core-ops-calibration";
 import { buildAgentsAsToolsCalibrationScore, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
 import { evaluateDelegationLaneCapabilitySnapshot } from "./guardrails-core-autonomy-lane";
+import {
+  evaluateAutonomyLaneTaskSelection,
+  readAutonomyHandoffFocusTaskIds,
+} from "./guardrails-core-autonomy-task-selector";
 import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
 import {
@@ -38,6 +42,115 @@ function inferDelegationCapabilityDefaults(cwd: string): {
   return {
     preloadDecision: preload.decision,
     dirtySignal,
+  };
+}
+
+type AutoAdvanceCompositeDecision = {
+  decision: "eligible" | "blocked";
+  blockedReasons: string[];
+  source: "override" | "telemetry" | "telemetry+live" | "live-board-fallback";
+  liveSnapshot: {
+    decision: "eligible" | "blocked";
+    blockedReasons: string[];
+    focusTaskIds: string[];
+    nextTaskId?: string;
+    focusSelectionReason: string;
+  };
+};
+
+function inferLiveAutoAdvanceSnapshot(cwd: string): AutoAdvanceCompositeDecision["liveSnapshot"] {
+  const focusTaskIds = readAutonomyHandoffFocusTaskIds(cwd);
+  const focusSelection = evaluateAutonomyLaneTaskSelection(cwd, {
+    sampleLimit: 5,
+    focusTaskIds,
+    focusSource: focusTaskIds.length > 0 ? "handoff" : undefined,
+  });
+  const fallbackSelection = evaluateAutonomyLaneTaskSelection(cwd, { sampleLimit: 5 });
+
+  if (!(focusSelection.reason === "focus-complete" && focusTaskIds.length > 0)) {
+    return {
+      decision: "blocked",
+      blockedReasons: [focusTaskIds.length > 0 ? "focus-not-complete" : "focus-missing"],
+      focusTaskIds,
+      nextTaskId: fallbackSelection.nextTaskId,
+      focusSelectionReason: focusSelection.reason,
+    };
+  }
+
+  if (!fallbackSelection.ready || !fallbackSelection.nextTaskId) {
+    return {
+      decision: "blocked",
+      blockedReasons: ["no-eligible-local-safe-successor"],
+      focusTaskIds,
+      nextTaskId: fallbackSelection.nextTaskId,
+      focusSelectionReason: focusSelection.reason,
+    };
+  }
+
+  return {
+    decision: "eligible",
+    blockedReasons: [],
+    focusTaskIds,
+    nextTaskId: fallbackSelection.nextTaskId,
+    focusSelectionReason: focusSelection.reason,
+  };
+}
+
+function resolveAutoAdvanceCompositeDecision(input: {
+  autoAdvanceDecisionOverride?: unknown;
+  autoAdvanceBlockedReasonsOverride?: unknown;
+  telemetryDecision: "ready" | "needs-evidence";
+  telemetryBlockedReasons: string[];
+  telemetryEligibleEvents: number;
+  liveSnapshot: AutoAdvanceCompositeDecision["liveSnapshot"];
+}): AutoAdvanceCompositeDecision {
+  if (typeof input.autoAdvanceDecisionOverride === "string") {
+    const decision = input.autoAdvanceDecisionOverride === "eligible" ? "eligible" : "blocked";
+    const blockedReasons = Array.isArray(input.autoAdvanceBlockedReasonsOverride)
+      ? (input.autoAdvanceBlockedReasonsOverride as unknown[])
+        .filter((row): row is string => typeof row === "string" && row.trim().length > 0)
+      : [];
+    return {
+      decision,
+      blockedReasons: decision === "blocked" ? (blockedReasons.length > 0 ? blockedReasons : ["override-blocked"]) : [],
+      source: "override",
+      liveSnapshot: input.liveSnapshot,
+    };
+  }
+
+  const telemetryDecision = input.telemetryDecision === "ready" && input.telemetryEligibleEvents > 0
+    ? "eligible"
+    : "blocked";
+  const telemetryReasons = input.telemetryBlockedReasons.length > 0
+    ? input.telemetryBlockedReasons
+    : telemetryDecision === "blocked"
+      ? ["auto-advance-telemetry-not-ready"]
+      : [];
+
+  if (telemetryDecision === "eligible") {
+    return {
+      decision: "eligible",
+      blockedReasons: [],
+      source: "telemetry",
+      liveSnapshot: input.liveSnapshot,
+    };
+  }
+
+  if (input.liveSnapshot.decision === "eligible") {
+    return {
+      decision: "eligible",
+      blockedReasons: [],
+      source: "live-board-fallback",
+      liveSnapshot: input.liveSnapshot,
+    };
+  }
+
+  const blockedReasons = Array.from(new Set([...telemetryReasons, ...input.liveSnapshot.blockedReasons]));
+  return {
+    decision: "blocked",
+    blockedReasons: blockedReasons.length > 0 ? blockedReasons : ["auto-advance-telemetry-not-ready"],
+    source: "telemetry+live",
+    liveSnapshot: input.liveSnapshot,
   };
 }
 
@@ -207,10 +320,15 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
 
       const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
-      const derivedAutoAdvanceDecision = autoAdvanceTelemetry.decision === "ready"
-        && autoAdvanceTelemetry.totals.eligibleEvents > 0
-        ? "eligible"
-        : "blocked";
+      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
+        autoAdvanceDecisionOverride: p.auto_advance_decision,
+        autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
+        telemetryDecision: autoAdvanceTelemetry.decision,
+        telemetryBlockedReasons,
+        telemetryEligibleEvents: autoAdvanceTelemetry.totals.eligibleEvents,
+        liveSnapshot: liveAutoAdvanceSnapshot,
+      });
 
       const packet = buildSimpleDelegateRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
@@ -227,12 +345,8 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
           ? p.mix_simple_delegate_events
           : mix.totals.simpleDelegate,
-        autoAdvanceDecision: typeof p.auto_advance_decision === "string"
-          ? p.auto_advance_decision as "eligible" | "blocked"
-          : derivedAutoAdvanceDecision,
-        autoAdvanceBlockedReasons: Array.isArray(p.auto_advance_blocked_reasons)
-          ? p.auto_advance_blocked_reasons as string[]
-          : (telemetryBlockedReasons.length > 0 ? telemetryBlockedReasons : derivedAutoAdvanceDecision === "blocked" ? ["auto-advance-telemetry-not-ready"] : []),
+        autoAdvanceDecision: autoAdvanceComposite.decision,
+        autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
         telemetryDecision: typeof p.telemetry_decision === "string"
           ? p.telemetry_decision as "ready" | "needs-evidence"
           : autoAdvanceTelemetry.decision,
@@ -250,6 +364,8 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
+          autoAdvanceLiveSnapshot: liveAutoAdvanceSnapshot,
+          autoAdvanceResolutionSource: autoAdvanceComposite.source,
           scan: collected.scan,
         },
       };
@@ -307,10 +423,15 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
 
       const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
-      const derivedAutoAdvanceDecision = autoAdvanceTelemetry.decision === "ready"
-        && autoAdvanceTelemetry.totals.eligibleEvents > 0
-        ? "eligible"
-        : "blocked";
+      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
+        autoAdvanceDecisionOverride: p.auto_advance_decision,
+        autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
+        telemetryDecision: autoAdvanceTelemetry.decision,
+        telemetryBlockedReasons,
+        telemetryEligibleEvents: autoAdvanceTelemetry.totals.eligibleEvents,
+        liveSnapshot: liveAutoAdvanceSnapshot,
+      });
 
       const readiness = buildSimpleDelegateRehearsalDecisionPacket({
         capabilityDecision: typeof p.capability_decision === "string"
@@ -327,12 +448,8 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
           ? p.mix_simple_delegate_events
           : mix.totals.simpleDelegate,
-        autoAdvanceDecision: typeof p.auto_advance_decision === "string"
-          ? p.auto_advance_decision as "eligible" | "blocked"
-          : derivedAutoAdvanceDecision,
-        autoAdvanceBlockedReasons: Array.isArray(p.auto_advance_blocked_reasons)
-          ? p.auto_advance_blocked_reasons as string[]
-          : (telemetryBlockedReasons.length > 0 ? telemetryBlockedReasons : derivedAutoAdvanceDecision === "blocked" ? ["auto-advance-telemetry-not-ready"] : []),
+        autoAdvanceDecision: autoAdvanceComposite.decision,
+        autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
         telemetryDecision: typeof p.telemetry_decision === "string"
           ? p.telemetry_decision as "ready" | "needs-evidence"
           : autoAdvanceTelemetry.decision,
@@ -361,6 +478,8 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           inferredCapabilityDefaults,
           mix,
           autoAdvanceTelemetry,
+          autoAdvanceLiveSnapshot: liveAutoAdvanceSnapshot,
+          autoAdvanceResolutionSource: autoAdvanceComposite.source,
           scan: collected.scan,
         },
       };

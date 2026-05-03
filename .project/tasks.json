@@ -15179,6 +15179,63 @@
       "milestone": "throughput-ready-stock-2026-05",
       "notes": "[provenance:human] source_task=none reason=Capture low-interaction preference as minimal reusable guidance without creating documentation bloat.\n[rationale:risk-control] Playbook curto e sem nomenclatura nova preserva anti-gordura e melhora reuso operacional para execução contínua local-safe.\nGuia operacional ficou curto/reutilizável e alinhado ao steer anti-gordura.",
       "verification": "VER-BUD-1009"
+    },
+    {
+      "id": "TASK-BUD-657",
+      "description": "Fallback simple-delegate auto-advance decision to live board snapshot when telemetry is stale/no-eligible.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "simple_delegate_rehearsal_packet derives autoAdvanceDecision via telemetry+live-board composition when override is absent.",
+        "When telemetry blocks but live snapshot is eligible, packet uses eligible decision.",
+        "Payload surfaces source and live snapshot details for auditability."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Unblock delegation rehearsal when telemetry lags behind current board state.\n[rationale:risk-control] Fallback live-board remove bloqueio por telemetria stale sem liberar dispatch automático; mantém fail-closed quando foco/sucessor não existem.\nHardening foca em stale telemetry sem reduzir segurança de foco/sucessor local-safe.",
+      "verification": "VER-BUD-1010"
+    },
+    {
+      "id": "TASK-BUD-658",
+      "description": "Add smoke coverage for live-board fallback path in simple-delegate rehearsal packet.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-657"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Test proves decision becomes ready when telemetry has no eligible events but handoff focus-complete + local successor exists.",
+        "Test asserts `autoAdvanceResolutionSource=live-board-fallback` and nextTaskId evidence.",
+        "Smoke suite remains green."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-657 reason=Protect regression and keep fallback deterministic.\n[rationale:risk-control] Cobertura smoke garante que fallback live-board não regrede e não volte estado unknown sem evidência prática.\nCobertura protege fallback live-board e reduz dependência de histórico de sessão para readiness atual.",
+      "verification": "VER-BUD-1011"
+    },
+    {
+      "id": "TASK-BUD-659",
+      "description": "Operationally validate delegation rehearsal readiness on real workspace after fallback hardening and preload refresh.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-658"
+      ],
+      "files": [
+        ".project/handoff.json",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "After code+tests+clean state, simple_delegate_rehearsal_packet reports non-unknown auto-advance blockers.",
+        "If handoff focus-complete + successor exists, packet reaches ready and start packet reaches ready-for-human-decision.",
+        "Checkpoint records evidence and next human decision."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem."
     }
   ]
 }
