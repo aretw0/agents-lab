@@ -15048,6 +15048,64 @@
       "milestone": "throughput-decoupling-lane-2026-05",
       "notes": "Desbloqueio pragmático para acelerar uso de agentes: reduzir needs-evidence artificial por default cego no surface de delegação.\nIniciado para destravar pacote de rehearsal com sinais reais de capability.\n[rationale:risk-control] Defaults cegos (fallback-canonical/unknown) geram needs-evidence artificial e atrasam delegação mesmo com workspace pronto. Inferência local read-only reduz falso bloqueio sem abrir autorização automática.\nRemovido needs-evidence artificial por defaults cegos; decisão de capability passa a refletir sinais locais reais por padrão.",
       "verification": "VER-BUD-1000"
+    },
+    {
+      "id": "TASK-BUD-650",
+      "description": "Define local-safe multi-task packing operator primitive (run-many-until-compact) and document deterministic stop/rollback contract.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "docs/primitives/control-plane-overnight-local-loop.md",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Primitive packet specifies: continue chaining local-safe tasks until checkpoint/compact boundary.",
+        "Contract is fail-closed: protected scope still requires explicit human focus.",
+        "Includes explicit stop conditions: compact threshold reached, blocker, validation failure, or human steer."
+      ],
+      "milestone": "throughput-multipack-lane-2026-05",
+      "notes": "[provenance:human] source_task=none reason=User requested lower-interaction mode that packs multiple tasks between compactions.\nIniciando primitive para modo de baixa interação: encadear múltiplas fatias local-safe até boundary de compact/checkpoint, sem nudge por tarefa.\nPrimitiva criada para reduzir nudge por task e permitir throughput local-safe em ondas até stop condition real.\nConsolidado após steer humano anti-gordura: manter comportamento no fluxo/doutrina existente, sem criar primitiva paralela com nome novo.",
+      "verification": "VER-BUD-1003"
+    },
+    {
+      "id": "TASK-BUD-651",
+      "description": "Implement runtime lane policy to prefer chained local-safe slices (no per-task nudge) while below compact and with fresh checkpoint evidence.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-650"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Selection path keeps executing eligible local-safe tasks without manual re-prompt between slices.",
+        "Policy preserves existing guardrails (protected scopes, rationale gates, checkpoint freshness).",
+        "Status/packet surface exposes when chaining is active vs blocked."
+      ],
+      "milestone": "throughput-multipack-lane-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-650 reason=Operationalize the primitive as default execution behavior for this operator profile.\nIniciando implementação runtime para privilegiar encadeamento de fatias local-safe sem nudge por tarefa, preservando gates protegidos/checkpoint/rollback."
+    },
+    {
+      "id": "TASK-BUD-652",
+      "description": "Add regression smoke coverage for multi-task packing policy and checkpoint-to-compact graceful transition behavior.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-651"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tests verify chaining continues across multiple local-safe slices when eligibility exists.",
+        "Tests verify checkpoint+idle can compact and auto-resume preconditions remain fail-closed.",
+        "No regressions in existing autonomy/context-watch smoke suites."
+      ],
+      "milestone": "throughput-multipack-lane-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-651 reason=Ensure long-run stability and prevent drift back to one-task-only cadence."
     }
   ]
 }

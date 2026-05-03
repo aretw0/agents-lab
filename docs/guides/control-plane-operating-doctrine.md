@@ -75,6 +75,8 @@ Condições para continuar sem nova interação humana:
 2. próximo `nextTaskId` do mesmo milestone continua local-safe;
 3. nenhum stop reason canônico foi acionado.
 
+Para perfil de baixa interação humana, encadear múltiplas fatias local-safe no mesmo milestone até stop condition real ou boundary de compactação, sem criar nomenclatura paralela.
+
 Regra de desacoplamento de planejamento: task local-safe não deve depender diretamente de task `protected-parked-*`; quando isso acontecer, replanejar dependências para pré-condição local-safe ou manter a task no fluxo protected.
 
 Stop reasons canônicos (interação humana obrigatória):

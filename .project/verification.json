@@ -11238,6 +11238,24 @@
       "method": "test",
       "timestamp": "2026-05-03T00:27:29.631Z",
       "evidence": "Implementado dedupe de eventos repetidos em `packages/pi-stack/extensions/context-watchdog-handoff-events.ts`: `applyContextWatchToHandoff` agora detecta evento idêntico consecutivo (reason/level/percent/action/recommendation/thresholds) e substitui o último registro ao invés de anexar duplicado, reduzindo bloat/churn no handoff sem perder timestamp mais recente. Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` (`dedupes repeated identical context-watch events in handoff trail`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts` (107 passed)."
+    },
+    {
+      "id": "VER-BUD-1002",
+      "target": "TASK-BUD-650",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T01:06:29.251Z",
+      "evidence": "Nova primitiva documentada em `docs/primitives/multi-task-pack-between-compacts.md` com contrato `mode=pack-between-compacts`, gates, stop conditions canônicas e regra de compact grace (checkpoint+idle com evidência fresca). Doutrina atualizada em `docs/guides/control-plane-operating-doctrine.md` para referenciar o modo de baixa interação e encadeamento de fatias por milestone. Catálogo atualizado em `docs/primitives/README.md` com entrada da nova primitiva. Verificação por marker checks: todos os marcadores presentes (3/3, 2/2, 3/3)."
+    },
+    {
+      "id": "VER-BUD-1003",
+      "target": "TASK-BUD-650",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T01:08:42.691Z",
+      "evidence": "Consolidação anti-gordura aplicada: removido artefato/primitiva duplicada; mantido apenas ajuste enxuto na doutrina (`docs/guides/control-plane-operating-doctrine.md`) reforçando encadeamento de fatias local-safe até stop condition/compact boundary sem nova nomenclatura paralela."
     }
   ]
 }
