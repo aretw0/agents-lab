@@ -529,11 +529,17 @@ export function buildSimpleDelegateRehearsalStartPacket(
   }
 
   const uniqueBlockers = [...new Set(blockers)];
+  const contractState = [
+    declaredFilesKnown ? "files=ok" : "files=missing",
+    validationGateKnown ? "validation=ok" : "validation=missing",
+    rollbackPlanKnown ? "rollback=ok" : "rollback=missing",
+  ].join(",");
   const summary = [
     "simple-delegate-start-packet:",
     `decision=${decision}`,
     `code=${recommendationCode}`,
     `rehearsal=${rehearsalDecision}`,
+    `contract=${contractState}`,
     uniqueBlockers.length > 0 ? `blockers=${uniqueBlockers.join("|")}` : undefined,
     "authorization=none",
   ].filter(Boolean).join(" ");

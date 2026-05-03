@@ -422,6 +422,43 @@ describe("session-analytics — auto-advance hard-intent telemetry", () => {
     expect(telemetry.authorization).toBe("none");
   });
 
+  it("classifica snapshots autonomy-lane como evidência de auto-advance (sem no-data)", () => {
+    const records = [
+      {
+        type: "message",
+        timestamp: "2026-05-03T04:00:00Z",
+        message: {
+          role: "assistant",
+          content: "autonomy-lane-auto-advance-snapshot: decision=blocked code=auto-advance-snapshot-blocked-no-focus-complete",
+        },
+      },
+      {
+        type: "message",
+        timestamp: "2026-05-03T04:01:00Z",
+        message: {
+          role: "assistant",
+          content: "autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=TASK-BUD-999",
+        },
+      },
+      {
+        type: "message",
+        timestamp: "2026-05-03T04:02:00Z",
+        message: {
+          role: "assistant",
+          content: "autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=TASK-BUD-1000",
+        },
+      },
+    ];
+
+    const telemetry = parseAutoAdvanceHardIntentTelemetry(records, 24, 1);
+    expect(telemetry.decision).toBe("ready");
+    expect(telemetry.totals.totalEvents).toBe(3);
+    expect(telemetry.totals.eligibleEvents).toBe(2);
+    expect(telemetry.totals.blockedEvents).toBe(1);
+    expect(telemetry.blockedReasons.some((row) => row.reason === "focus-not-complete")).toBe(true);
+    expect(telemetry.recommendationCode).toBe("auto-advance-telemetry-ready");
+  });
+
   it("expõe tool auto_advance_hard_intent_telemetry em modo report-only/read-only", () => {
     const dir = mkdtempSync(join(tmpdir(), "pi-session-analytics-auto-advance-tool-"));
     const oldCwd = process.cwd();

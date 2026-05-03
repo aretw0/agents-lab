@@ -606,6 +606,38 @@ export function parseAutoAdvanceHardIntentTelemetry(
       continue;
     }
 
+    if (normalized.includes("autonomy-lane-auto-advance-snapshot:")) {
+      if (normalized.includes("decision=eligible")) {
+        eligibleEvents += 1;
+        pushExample("eligible", text || "auto-advance snapshot eligible");
+        continue;
+      }
+
+      if (normalized.includes("decision=blocked")) {
+        blockedEvents += 1;
+        pushExample("blocked", text || "auto-advance snapshot blocked");
+        const reasonMatch = normalized.match(/reasons=([^\s]+)/i);
+        if (reasonMatch?.[1]) {
+          for (const reason of reasonMatch[1]
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)) {
+            blockedReasons.set(reason, (blockedReasons.get(reason) ?? 0) + 1);
+          }
+        } else if (normalized.includes("auto-advance-snapshot-blocked-no-focus-complete")) {
+          blockedReasons.set("focus-not-complete", (blockedReasons.get("focus-not-complete") ?? 0) + 1);
+        } else if (normalized.includes("auto-advance-snapshot-blocked-no-successor")) {
+          blockedReasons.set(
+            "no-eligible-local-safe-successor",
+            (blockedReasons.get("no-eligible-local-safe-successor") ?? 0) + 1,
+          );
+        } else {
+          blockedReasons.set("unknown", (blockedReasons.get("unknown") ?? 0) + 1);
+        }
+        continue;
+      }
+    }
+
     if (normalized.includes("hard-intent auto-advance fail-closed") || normalized.includes("auto-advance-hard-intent-blocked")) {
       blockedEvents += 1;
       pushExample("blocked", text || "hard-intent auto-advance fail-closed");

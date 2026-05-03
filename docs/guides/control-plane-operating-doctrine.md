@@ -436,6 +436,26 @@ A próxima promoção após estabilizar a lane local-safe deve passar por packet
 
 Se o packet retornar `needs-evidence|blocked`, a regra é não promover. Continuar em local-safe até o próximo checkpoint com evidência adicional.
 
+Canário one-task (simple-delegate) — contrato mínimo explícito:
+- foco único de task;
+- `declared_files_known=true`;
+- `validation_gate_known=true`;
+- `rollback_plan_known=true`.
+
+Exemplo de packet (report-only):
+
+```text
+simple_delegate_rehearsal_start_packet {
+  declared_files_known: true,
+  validation_gate_known: true,
+  rollback_plan_known: true
+}
+```
+
+Interpretação operacional:
+- `decision=blocked`: manter lane local-safe e fechar gaps de rehearsal/capability;
+- `decision=ready-for-human-decision`: canário apto para decisão humana explícita (`start|abort|defer`), sem auto-dispatch.
+
 ### Material-first para long run AFK
 
 Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK longo, garantir abastecimento explícito do board:

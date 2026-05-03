@@ -96,6 +96,7 @@ describe("ops calibration decision packet", () => {
     expect(packet.dispatchAllowed).toBe(false);
     expect(packet.authorization).toBe("none");
     expect(packet.options).toEqual(["start", "abort", "defer"]);
+    expect(packet.summary).toContain("contract=files=ok,validation=ok,rollback=ok");
   });
 
   it("blocks start packet when rehearsal decision is not ready", () => {
@@ -548,6 +549,7 @@ describe("ops calibration decision packet", () => {
       expect(result.details.mutationAllowed).toBe(false);
       expect(result.details.decision).toBe("ready-for-human-decision");
       expect(String(result.details.summary)).toContain("simple-delegate-start-packet:");
+      expect(String(result.details.summary)).toContain("contract=files=ok,validation=ok,rollback=ok");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

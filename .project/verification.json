@@ -11202,6 +11202,24 @@
       "method": "test",
       "timestamp": "2026-05-02T23:47:05.037Z",
       "evidence": "Comando `/context-watch status` agora inclui resumo compacto de budget de ruído: `noise=<announcements>/<max> suppressed=<n> excessive=<yes|no>` em `packages/pi-stack/extensions/context-watchdog.ts`, sem alterar autorização/dispatch (permanece read-only observability). Também foram adicionados contadores no handler de status (`announcementsInWindow`, `finalTurnSuppressionsInWindow`, `signalNoiseExcessive`). Regressão adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: `\"/context-watch status command includes compact noise budget summary\"`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (65 passed)."
+    },
+    {
+      "id": "VER-BUD-998",
+      "target": "TASK-BUD-647",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T00:04:15.390Z",
+      "evidence": "Atualizado `parseAutoAdvanceHardIntentTelemetry` em `packages/pi-stack/extensions/session-analytics.ts` para considerar evidência de snapshots `autonomy-lane-auto-advance-snapshot` (decision=eligible/blocked + reason codes) além dos textos hard-intent antigos. Isso elimina `no-data` quando já existe telemetria local mínima de auto-advance no runtime. Regressão adicionada em `packages/pi-stack/test/smoke/session-analytics.test.ts` (`classifica snapshots autonomy-lane como evidência de auto-advance`) e suite de calibração mantida verde. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (40 passed). Evidência live: `auto_advance_hard_intent_telemetry` => decision=ready code=auto-advance-telemetry-ready (não mais no-data) e `simple_delegate_rehearsal_packet` deixou de bloquear por auto-advance/telemetry, ficando em needs-evidence-capability."
+    },
+    {
+      "id": "VER-BUD-999",
+      "target": "TASK-BUD-648",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T00:08:00.774Z",
+      "evidence": "Canário one-task de simple-delegate formalizado e validado em modo report-only. Documentação atualizada em `docs/guides/control-plane-operating-doctrine.md` na seção do gate de promoção, com contrato explícito (`declared_files_known`, `validation_gate_known`, `rollback_plan_known`) e interpretação operacional de `blocked` vs `ready-for-human-decision`. Runtime validado via `simple_delegate_rehearsal_start_packet` em dois cenários coerentes: (1) sem rehearsal pronto => `decision=blocked code=simple-delegate-start-blocked-rehearsal-not-ready`; (2) com sinais/gates explícitos => `decision=ready-for-human-decision code=simple-delegate-start-ready-for-human-decision`. Sem auto-dispatch em ambos (`authorization=none`)."
     }
   ]
 }

@@ -14989,7 +14989,7 @@
     {
       "id": "TASK-BUD-647",
       "description": "[P1] Desbloquear telemetria de auto-advance hard-intent para rehearsal de simple-delegate (reduzir bloqueio por no-data).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -15002,12 +15002,13 @@
         "Smoke cobre cenário mínimo de coleta de telemetria e classificação ready/needs-evidence."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Foco pragmático para destravar controle de agentes com base em evidência hard-intent.\n[rationale:risk-control] Sem telemetria de auto-advance, rehearsal de simple-delegate fica bloqueado por no-data e impede evolução de controle de agentes. A coleta mínima de sinal local é pré-condição para escalar com segurança."
+      "notes": "Foco pragmático para destravar controle de agentes com base em evidência hard-intent.\n[rationale:risk-control] Sem telemetria de auto-advance, rehearsal de simple-delegate fica bloqueado por no-data e impede evolução de controle de agentes. A coleta mínima de sinal local é pré-condição para escalar com segurança.\n2026-05-03: iniciado para destravar no-data de auto-advance telemetry e liberar rehearsal packet de simple-delegate.\nDesbloqueio pragmático concluído: telemetria de auto-advance agora reflete sinais locais reais de snapshot e reduz bloqueio artificial de rehearsal.",
+      "verification": "VER-BUD-998"
     },
     {
       "id": "TASK-BUD-648",
       "description": "[P1] Definir e validar canário one-task de simple-delegate com contrato explícito (files, gate, rollback) para iniciar uso de agentes em nós mesmos com segurança.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-647"
@@ -15023,7 +15024,8 @@
         "Checkpoint/handoff registra evidência de decisão (start ou blocked) sem auto-dispatch."
       ],
       "milestone": "throughput-decoupling-lane-2026-05",
-      "notes": "Objetivo: acelerar delegação com guardrails claros, evitando drift operacional.\n[rationale:risk-control] Canário one-task com contrato explícito reduz risco de delegação cega e acelera aprendizado operacional antes de ampliar autonomia em produção local."
+      "notes": "Objetivo: acelerar delegação com guardrails claros, evitando drift operacional.\n[rationale:risk-control] Canário one-task com contrato explícito reduz risco de delegação cega e acelera aprendizado operacional antes de ampliar autonomia em produção local.\n2026-05-03: canário one-task de simple-delegate em execução report-only; registrando contrato explícito (files/validation/rollback) e decisão start_packet blocked vs ready-for-human-decision.\nCanário definido para uso seguro: decisão humana explícita permanece obrigatória em start/abort/defer.",
+      "verification": "VER-BUD-999"
     }
   ]
 }
