@@ -1960,7 +1960,7 @@ describe("context-watchdog", () => {
 			}));
 			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
 				{ id: "TASK-BUD-316", status: "completed" },
-				{ id: "TASK-BUD-317", status: "in-progress", files: ["packages/pi-stack/extensions/context-watchdog.ts"] },
+				{ id: "TASK-BUD-317", description: "[P1] resumir foco de forma humana", status: "in-progress", files: ["packages/pi-stack/extensions/context-watchdog.ts"] },
 				{ id: "TASK-BUD-296", status: "planned", files: ["packages/pi-stack/extensions/context-watchdog-handoff.ts"] },
 			] }));
 			const pi = makeMockPi();
@@ -1969,8 +1969,10 @@ describe("context-watchdog", () => {
 			const result = await tool.execute("tc-auto-resume-active-focus", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
 			expect(result.content?.[0]?.text).toContain("focusTasks=TASK-BUD-317");
+			expect(result.content?.[0]?.text).toContain("focusMnemonics=TASK-BUD-317:resumir_foco_de_forma_humana");
 			expect(result.content?.[0]?.text).toContain("staleFocus=1");
 			expect(result.details?.focusTasks).toBe("TASK-BUD-317");
+			expect(result.details?.focusMnemonics).toContain("TASK-BUD-317:resumir foco de forma humana");
 			expect(result.details?.staleFocus).toBe("TASK-BUD-316=completed");
 			expect(result.details?.diagnostics?.focusTasksListed).toEqual(["TASK-BUD-317"]);
 			expect(result.details?.prompt).not.toContain("focusTasks: board-task-selection");

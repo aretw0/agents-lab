@@ -11499,6 +11499,24 @@
       "method": "test",
       "timestamp": "2026-05-03T15:51:35.645Z",
       "evidence": "Smoke atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` para validar `diagnostics.focusTasksListed` no `context_watch_auto_resume_preview` (caso sem foco ativo => `[]`; caso com foco ativo => `['TASK-BUD-317']`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (68 passed)."
+    },
+    {
+      "id": "VER-BUD-1031",
+      "target": "TASK-BUD-679",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T16:21:30.161Z",
+      "evidence": "`context_watch_auto_resume_preview` agora publica `focusMnemonics` (ID + rótulo humano curto) em `summary` e `details`, baseado em `diagnostics.focusTasksListed` + descrição do board quando disponível (`packages/pi-stack/extensions/context-watchdog.ts`). O resumo continua bounded e mantém `focusTasks` como fonte principal."
+    },
+    {
+      "id": "VER-BUD-1032",
+      "target": "TASK-BUD-680",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T16:22:21.254Z",
+      "evidence": "Smoke de preview atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: cenário com foco ativo agora valida `focusMnemonics=TASK-BUD-317:resumir foco de forma humana` em details/summary; cenário stale mantém fallback seguro. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (68 passed)."
     }
   ]
 }

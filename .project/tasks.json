@@ -15585,6 +15585,60 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] protege contexto do operador entre sessões e checkpoints.\nProteção contra regressão para não voltar a depender de parsing truncável da linha `focusTasks:`.",
       "verification": "VER-BUD-1030"
+    },
+    {
+      "id": "TASK-BUD-679",
+      "description": "Adicionar mnemônicos de foco no context_watch_auto_resume_preview (ID + rótulo humano curto) para retomadas mais legíveis sem textão.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Preview expõe `focusMnemonics` baseado em IDs de foco e descrições do board quando disponíveis.",
+        "Summary permanece bounded e mantém `focusTasks` atual; mnemônico entra como complemento curto.",
+        "Sem mudança de autorização/dispatch (read-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz ambiguidade de IDs em retomadas e melhora iteração humana contínua.\nIniciando fatia local-safe: complementar auto_resume_preview com focusMnemonics para legibilidade humana bounded.\nMelhora legibilidade de retomada sem textão e sem depender de parsing frágil de linha.",
+      "verification": "VER-BUD-1031"
+    },
+    {
+      "id": "TASK-BUD-680",
+      "description": "Adicionar smoke de regressão para focusMnemonics no context_watch_auto_resume_preview.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-679"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida presença de `focusMnemonics` quando existe descrição para task focada.",
+        "Smoke garante fallback seguro quando não houver descrição (mantendo ID).",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão da contextualização humana entre sessões.\nProtege contrato de mnemônico humano no preview entre sessões/refactors.",
+      "verification": "VER-BUD-1032"
+    },
+    {
+      "id": "TASK-BUD-681",
+      "description": "Expor mnemônico do nextTask em autonomy_lane_status para reduzir leitura por ID cru nas pausas de seleção.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` inclui `nextTaskMnemonic` quando `nextTaskId` estiver presente.",
+        "Summary permanece curto e bounded.",
+        "Sem alteração de policy/dispatch."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] melhora decisões rápidas do operador sem abrir explicações longas."
     }
   ]
 }

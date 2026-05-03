@@ -1161,6 +1161,19 @@ function extractAutoResumePromptValue(prompt: string, label: string, fallback: s
 	return line ? line.slice(label.length + 1).trim() : fallback;
 }
 
+function summarizeFocusMnemonicsForPreview(values: string[]): string {
+	if (!Array.isArray(values) || values.length <= 0) return "none";
+	const maxItems = 2;
+	const compact = values
+		.slice(0, maxItems)
+		.map((value) => value.trim())
+		.filter(Boolean)
+		.map((value) => value.length > 64 ? `${value.slice(0, 61)}...` : value);
+	if (compact.length <= 0) return "none";
+	const extra = Math.max(0, values.length - compact.length);
+	return extra > 0 ? `${compact.join(", ")} (+${extra} more)` : compact.join(", ");
+}
+
 type ContextWatchGitDirtySignal = {
 	available: boolean;
 	clean: boolean | null;
@@ -1214,6 +1227,7 @@ function readContextWatchFreshnessSignals(
 
 export function formatContextWatchAutoResumePreviewSummary(input: {
 	focusTasks: string;
+	focusMnemonics?: string;
 	staleFocusCount: number;
 	diagnosticsSummary: string;
 	reloadGate?: "required" | "clear";
@@ -1222,6 +1236,7 @@ export function formatContextWatchAutoResumePreviewSummary(input: {
 	return [
 		"context-watch-auto-resume-preview:",
 		`focusTasks=${input.focusTasks.replace(/\s+/g, "_")}`,
+		input.focusMnemonics ? `focusMnemonics=${input.focusMnemonics.replace(/\s+/g, "_")}` : undefined,
 		`staleFocus=${input.staleFocusCount}`,
 		`diagnostics=${input.diagnosticsSummary.replace(/\s+/g, ";")}`,
 		input.reloadGate ? `reload=${input.reloadGate}` : undefined,
@@ -2851,15 +2866,24 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
 			);
 			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
-			const focusTasks = (Array.isArray(envelope.diagnostics.focusTasksListed) && envelope.diagnostics.focusTasksListed.length > 0)
-				? envelope.diagnostics.focusTasksListed.join(", ")
+			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)
+				? envelope.diagnostics.focusTasksListed
+				: [];
+			const focusTasks = focusTaskIds.length > 0
+				? focusTaskIds.join(", ")
 				: extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
+			const focusMnemonics = summarizeFocusMnemonicsForPreview(
+				focusTaskIds.map((taskId) => (
+					toOperatorTaskMnemonic(taskId, readProjectTaskDescriptionById(ctx.cwd, taskId)) ?? taskId
+				)),
+			);
 			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
 			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
 			const reloadRequired = isReloadRequiredForSourceUpdate();
 			const reloadHint = reloadRequired ? formatAutoResumeReloadHintShort() : undefined;
 			const summary = formatContextWatchAutoResumePreviewSummary({
 				focusTasks,
+				focusMnemonics,
 				staleFocusCount,
 				diagnosticsSummary,
 				reloadGate: reloadRequired ? "required" : "clear",
@@ -2871,6 +2895,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					summary,
 					prompt: envelope.prompt,
 					focusTasks,
+					focusMnemonics,
 					staleFocus,
 					diagnostics: envelope.diagnostics,
 					diagnosticsSummary,
