@@ -1725,11 +1725,12 @@ describe("context-watchdog", () => {
 					hasPendingMessages: () => false,
 				} as any,
 			);
-			expect(result.content?.[0]?.text).toBe("context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown timeoutPressure=none");
+			expect(result.content?.[0]?.text).toBe("context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown reloadGate=reload-not-required timeoutPressure=none");
 			expect(result.details).toMatchObject({
 				level: "ok",
 				percent: 14,
-				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown timeoutPressure=none",
+				summary: "context-watch-status: level=ok percent=14 action=continue autoCompact=level-not-compact operator=none cadence=standard-slices handoff=unknown reloadGate=reload-not-required timeoutPressure=none",
+				reloadGate: "reload-not-required",
 				timeoutPressureSummary: "none",
 				compactStage: {
 					stage: "normal-window",

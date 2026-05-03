@@ -11688,6 +11688,33 @@
       "method": "test",
       "timestamp": "2026-05-03T22:54:37.479Z",
       "evidence": "`docs/guides/control-plane-operating-doctrine.md` sincronizado com orientação curta: ao reseedar, registrar `seedWhy/reseedJustification` do packet no fechamento curto. Doc checklist manteve green no mesmo gate combinado (34 passed)."
+    },
+    {
+      "id": "VER-BUD-1052",
+      "target": "TASK-BUD-700",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T23:00:06.006Z",
+      "evidence": "`context_watch_status` em `packages/pi-stack/extensions/context-watchdog.ts` agora publica `reloadGate` dedicado em details e no summary (`reloadGate=<reason>`), com origem em `preCompactReloadSignal.reason`. Mantém contrato report-only sem dispatch."
+    },
+    {
+      "id": "VER-BUD-1053",
+      "target": "TASK-BUD-701",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T23:00:18.522Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/context-watchdog.test.ts` atualizada para validar summary com `reloadGate=reload-not-required` no caso base e `details.reloadGate` presente. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (70 passed)."
+    },
+    {
+      "id": "VER-BUD-1054",
+      "target": "TASK-BUD-702",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T23:00:33.243Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: fechamento operacional deve ler `reloadGate` junto com `timeoutPressureSummary` no `context_watch_status`. Texto anti-bloat; sem mudança de policy/autorização. Doc checklist green no mesmo gate (70 passed)."
     }
   ]
 }

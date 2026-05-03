@@ -15982,6 +15982,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça disciplina de semeadura com motivo explícito em toda iteração.\nDoutrina reforça disciplina de motivo explícito sem aumentar bloat.",
       "verification": "VER-BUD-1051"
+    },
+    {
+      "id": "TASK-BUD-700",
+      "description": "Adicionar `reloadGate` curto no context_watch_status summary/details para deixar explícito quando /reload é pré-condição de continuidade.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary de `context_watch_status` inclui `reloadGate=<reason>` (ex.: reload-not-required, reload-required-checkpoint).",
+        "Details incluem `reloadGate` curto dedicado para leitura rápida.",
+        "Sem alteração de autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita perder warning de reload no fechamento curto e reduz retomada com runtime desatualizado.\nIniciando sinal explícito de reloadGate no context_watch_status para evitar perder precondição de /reload no fechamento curto.\nPrecondição de reload agora aparece explicitamente no resumo curto do status.",
+      "verification": "VER-BUD-1052"
+    },
+    {
+      "id": "TASK-BUD-701",
+      "description": "Adicionar smoke para `reloadGate` em context_watch_status summary/details.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-700"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `reloadGate=reload-not-required` no caso base.",
+        "Smoke valida presença de campo `details.reloadGate`.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege visibilidade de precondição de reload entre iterações.\nRegressão coberta para visibilidade de reload no fechamento rápido.",
+      "verification": "VER-BUD-1053"
+    },
+    {
+      "id": "TASK-BUD-702",
+      "description": "Sincronizar nota curta na doutrina: sempre ler reloadGate no fechamento com context_watch_status.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-700"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar orientação anti-bloat sobre leitura do reloadGate.",
+        "Sem nova política de autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça hábito operacional de não ignorar precondição de reload.\nRitual operacional agora destaca explicitamente quando /reload é precondição.",
+      "verification": "VER-BUD-1054"
     }
   ]
 }

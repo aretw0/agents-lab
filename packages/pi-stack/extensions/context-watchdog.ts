@@ -1625,6 +1625,7 @@ export function formatContextWatchStatusToolSummary(input: {
 	handoffFreshness?: HandoffFreshnessLabel;
 	handoffAgeSec?: number;
 	handoffFreshThresholdSec?: number;
+	reloadGate?: string;
 	timeoutPressureSummary?: string;
 }): string {
 	const handoffAgeSec = Number.isFinite(Number(input.handoffAgeSec))
@@ -1645,6 +1646,7 @@ export function formatContextWatchStatusToolSummary(input: {
 		handoffAgeSec !== undefined && handoffFreshThresholdSec !== undefined
 			? `handoffAgeSec=${handoffAgeSec}/${handoffFreshThresholdSec}`
 			: undefined,
+		input.reloadGate ? `reloadGate=${input.reloadGate}` : undefined,
 		input.timeoutPressureSummary ? `timeoutPressure=${input.timeoutPressureSummary}` : undefined,
 	].filter(Boolean).join(" ");
 }
@@ -2956,6 +2958,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				timeoutPressureThreshold: autoCompact.timeoutPressure?.threshold,
 			});
 			const timeoutPressureSummary = formatTimeoutPressureSummary(autoCompact.timeoutPressure);
+			const reloadGate = preCompactReloadSignal.reason;
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2966,6 +2969,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffFreshness: autoCompact.handoffFreshness.label,
 				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
 				handoffFreshThresholdSec,
+				reloadGate,
 				timeoutPressureSummary,
 			});
 			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
@@ -2984,6 +2988,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				fullSummary,
 				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
 				handoffFreshThresholdSec,
+				reloadGate,
 				timeoutPressureSummary,
 				outputShape: {
 					mode: adaptiveSummary.mode,

@@ -789,7 +789,7 @@ Template mínimo recomendado (copiar/colar):
 
 Para reduzir perda de contexto entre compact/pause, o `autonomy_lane_status` deve expor `iterationReminder` curto (até 2 itens) com base em `handoff.next_actions` (fallback `none`). Quando o handoff estiver stale, o reminder deve priorizar `refresh-handoff` antes de sugerir continuidade. Esse lembrete é report-only e não altera autorização.
 
-No fechamento operacional, ler também `timeoutPressureSummary` do `context_watch_status`: `none` quando estável, ou `count/threshold@window` sob instabilidade intermitente. É sinal de contexto rápido, não autorização.
+No fechamento operacional, ler também `reloadGate` e `timeoutPressureSummary` do `context_watch_status`: `reloadGate` mostra se `/reload` é pré-condição local naquele momento; `timeoutPressureSummary` fica em `none` quando estável, ou `count/threshold@window` sob instabilidade intermitente. São sinais de contexto rápido, não autorização.
 
 Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
 
