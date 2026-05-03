@@ -684,7 +684,38 @@ describe("autonomy lane surface", () => {
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
     expect(result?.details.recommendationCode).toBe("execute-bounded-slice");
     expect((result?.details.operatorPauseBrief as { recommendation?: string } | undefined)?.recommendation).toBe("continue");
+    expect((result?.details.iterationReminder as { summary?: string } | undefined)?.summary).toBe("none");
     expect(result?.details.nextAction).toContain("next=TASK-NEXT");
+  });
+
+  it("includes iterationReminder from handoff next_actions when available", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned", notes: "[rationale:risk-control] keep flow" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      current_tasks: ["TASK-NEXT"],
+      next_actions: [
+        "finalizar slice atual e validar smoke focal",
+        "atualizar handoff curto antes de novo ciclo",
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+    const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
+
+    expect(reminder?.source).toBe("handoff-next-actions");
+    expect(reminder?.items?.length).toBe(2);
+    expect(reminder?.summary).toContain("finalizar slice atual");
   });
 
   it("marks chaining active when selection is ready and handoff freshness is green", () => {

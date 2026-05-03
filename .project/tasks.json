@@ -15754,6 +15754,63 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] recorrência >=3 sugere bloquear caminho antigo segundo hardening plan (block-old-path).\nAplicando bloqueio do caminho legado de compact quando timeout-pressure está ativo: trigger direto passa por guard path com reasonCode determinístico.\nFail-closed ativo para evitar compact direta silenciosa durante pressão de timeout.",
       "verification": "VER-BUD-1038"
+    },
+    {
+      "id": "TASK-BUD-688",
+      "description": "Adicionar `iterationReminder` em autonomy_lane_status com itens curtos de continuidade (extraídos de handoff next_actions/current_tasks) para evitar perda de contexto entre pausas.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` expõe `iterationReminder` bounded (até 2 itens) com foco/ação imediata.",
+        "Quando não houver material de handoff, fallback explícito `none` sem ruído.",
+        "Sem mudança de autorização/dispatch (report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz falha recorrente de esquecer objetivo na retomada após compact/pause.\nImplementando `iterationReminder` no autonomy_lane_status para manter contexto de próxima iteração entre pausas/compacts.\nPausa de lane agora mantém lembrete curto da próxima iteração para reduzir perda de contexto.",
+      "verification": "VER-BUD-1040"
+    },
+    {
+      "id": "TASK-BUD-689",
+      "description": "Adicionar smoke para `iterationReminder` no autonomy_lane_status (presença + fallback).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-688"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `iterationReminder` com handoff preenchido.",
+        "Smoke valida fallback `none` quando handoff não traz next_actions.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão da memória operacional curta entre iterações.\nCobertura protege continuidade curta entre iterações após pause/compact.",
+      "verification": "VER-BUD-1041"
+    },
+    {
+      "id": "TASK-BUD-690",
+      "description": "Sincronizar doutrina curta sobre ritual de pausa: sempre emitir reminder de próxima iteração no status local-safe.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-688"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Documento cita `iterationReminder` como sinal de continuidade curta.",
+        "Texto curto anti-bloat (sem seção longa nova).",
+        "Sem alteração de política protected/autorização."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça comportamento esperado para evitar surpresa de pausa sem contexto.\nSincronizando doutrina curta para lembrar ritual de pausa com `iterationReminder` no status local-safe.\nRitual de pausa agora inclui lembrete explícito de próxima iteração sem inflar output.",
+      "verification": "VER-BUD-1042"
     }
   ]
 }

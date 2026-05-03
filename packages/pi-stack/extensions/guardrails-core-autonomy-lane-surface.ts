@@ -68,6 +68,12 @@ type AutonomyOperatorPauseBrief = {
   recommendation: string;
 };
 
+type AutonomyIterationReminder = {
+  source: "handoff-next-actions" | "handoff-current-tasks" | "none";
+  items: string[];
+  summary: string;
+};
+
 function readJsonRecord(filePath: string): Record<string, unknown> | undefined {
   if (!existsSync(filePath)) return undefined;
   try {
@@ -76,6 +82,53 @@ function readJsonRecord(filePath: string): Record<string, unknown> | undefined {
   } catch {
     return undefined;
   }
+}
+
+function normalizeIterationReminderItem(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (!compact) return undefined;
+  return compact.length > 96 ? `${compact.slice(0, 93)}...` : compact;
+}
+
+function buildIterationReminder(cwd: string): AutonomyIterationReminder {
+  const handoff = readJsonRecord(path.join(cwd, ".project", "handoff.json"));
+  const fromNextActions = Array.isArray(handoff?.next_actions)
+    ? handoff.next_actions
+      .map((item) => normalizeIterationReminderItem(item))
+      .filter((item): item is string => Boolean(item))
+    : [];
+
+  if (fromNextActions.length > 0) {
+    const items = fromNextActions.slice(0, 2);
+    return {
+      source: "handoff-next-actions",
+      items,
+      summary: items.join(" | "),
+    };
+  }
+
+  const fromCurrentTasks = Array.isArray(handoff?.current_tasks)
+    ? handoff.current_tasks
+      .map((item) => normalizeIterationReminderItem(item))
+      .filter((item): item is string => Boolean(item))
+      .map((taskId) => `focus ${taskId}`)
+    : [];
+
+  if (fromCurrentTasks.length > 0) {
+    const items = fromCurrentTasks.slice(0, 2);
+    return {
+      source: "handoff-current-tasks",
+      items,
+      summary: items.join(" | "),
+    };
+  }
+
+  return {
+    source: "none",
+    items: [],
+    summary: "none",
+  };
 }
 
 function readContextWatchHandoffFreshMaxAgeMs(cwd: string): number {
@@ -921,6 +974,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskId: selection.nextTaskId,
         nextTaskMnemonic,
       });
+      const iterationReminder = buildIterationReminder(ctx.cwd);
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
@@ -949,6 +1003,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         recommendationCode: selection.recommendationCode,
         nextTaskMnemonic,
         operatorPauseBrief,
+        iterationReminder,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : selection.recommendation),

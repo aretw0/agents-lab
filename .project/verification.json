@@ -11580,6 +11580,33 @@
       "method": "test",
       "timestamp": "2026-05-03T17:30:40.269Z",
       "evidence": "Critério report-only de assimilação de influências externas implementado em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` via tool `autonomy_lane_influence_assimilation_packet` (decision=`ready-window|defer|blocked`) considerando: estoque local-safe validado (`min_ready_slices`), maturidade de validação (`min_validation_coverage_pct`) e blockers operacionais (`reload-required-or-dirty`/readiness). Sem dispatch automático (`dispatchAllowed=false`, `authorization=none`). Doutrina sincronizada em `docs/guides/control-plane-operating-doctrine.md` com janela mínima e uso do packet."
+    },
+    {
+      "id": "VER-BUD-1040",
+      "target": "TASK-BUD-688",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T17:35:58.105Z",
+      "evidence": "`packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora expõe `iterationReminder` em `autonomy_lane_status`, derivado de `.project/handoff.json` (`next_actions` prioritário, fallback `current_tasks`, bounded até 2 itens, `summary=none` quando vazio). Contrato permanece report-only (`authorization=none`, sem dispatch)."
+    },
+    {
+      "id": "VER-BUD-1041",
+      "target": "TASK-BUD-689",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T17:36:12.704Z",
+      "evidence": "Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` para validar `iterationReminder` com fallback `summary=none` sem handoff e preenchimento a partir de `handoff.next_actions` quando disponível. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (31 passed)."
+    },
+    {
+      "id": "VER-BUD-1042",
+      "target": "TASK-BUD-690",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T17:38:13.190Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` atualizado com regra curta anti-bloat: `autonomy_lane_status` deve expor `iterationReminder` (até 2 itens, fallback `none`) para continuidade após pause/compact, mantendo report-only. Gate doc + runtime validado em `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (33 passed)."
     }
   ]
 }
