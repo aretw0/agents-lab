@@ -11436,6 +11436,15 @@
       "method": "test",
       "timestamp": "2026-05-03T13:26:07.526Z",
       "evidence": "Smoke adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: novo caso valida presença de `handoffAgeSec` e `handoffFreshThresholdSec` no payload e no summary quando `handoff.timestamp` existe. Validação regressiva conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (115 passed)."
+    },
+    {
+      "id": "VER-BUD-1024",
+      "target": "TASK-BUD-659",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T14:57:58.426Z",
+      "evidence": "Validação live pós-reload concluída com workspace clean + preload use-pack. Resultados atuais: `simple_delegate_rehearsal_packet` => `decision=ready code=simple-delegate-rehearsal-ready capability=ready mix=ready autoAdvance=eligible telemetry=ready source=live-board-fallback liveNext=TASK-BUD-673 telemetrySource=live-fallback-equivalent`; `simple_delegate_rehearsal_start_packet` => `decision=ready-for-human-decision contract=files=ok,validation=ok,rollback=ok`."
     }
   ]
 }

@@ -15220,7 +15220,7 @@
     {
       "id": "TASK-BUD-659",
       "description": "Operationally validate delegation rehearsal readiness on real workspace after fallback hardening and preload refresh.",
-      "status": "blocked",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-658"
@@ -15235,12 +15235,13 @@
         "Checkpoint records evidence and next human decision."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final.\nReload confirmado; retomando validação live pós-fallback com workspace clean/preload use-pack.\nPost-reload live packet still blocked in real workspace: autoAdvance=blocked (focus-not-complete) plus stale telemetry blocker (`reload-required-or-dirty`) despite clean git/use-pack. Moving to TASK-BUD-665 hardening to normalize live-board fallback as telemetry-equivalent before re-validating readiness.\nNova validação pós-hardening: com foco em task completed (`TASK-BUD-666`) + sucessor local-safe (`TASK-BUD-673`), live snapshot já fica `eligible` (`source=live-board-fallback`, `liveNext=TASK-BUD-673`). Contudo o runtime da sessão ainda reflete versão anterior do packet (`telemetry=needs-evidence`) após mudanças locais recentes em ops-calibration/context-watch; requer /reload pós-commit para confirmação live final.\nApós commit limpo + preload use-pack + foco completed (TASK-BUD-666) + sucessor local-safe (TASK-BUD-673), packet live agora mostra: capability=ready, autoAdvance=eligible (source=live-board-fallback, liveNext=TASK-BUD-673). Único gap restante no runtime atual: telemetry ainda `needs-evidence` (sessão sem reload pós-commit 8e6894a/af934ca); revalidar após /reload para fechar TASK-BUD-659."
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final.\nReload confirmado; retomando validação live pós-fallback com workspace clean/preload use-pack.\nPost-reload live packet still blocked in real workspace: autoAdvance=blocked (focus-not-complete) plus stale telemetry blocker (`reload-required-or-dirty`) despite clean git/use-pack. Moving to TASK-BUD-665 hardening to normalize live-board fallback as telemetry-equivalent before re-validating readiness.\nNova validação pós-hardening: com foco em task completed (`TASK-BUD-666`) + sucessor local-safe (`TASK-BUD-673`), live snapshot já fica `eligible` (`source=live-board-fallback`, `liveNext=TASK-BUD-673`). Contudo o runtime da sessão ainda reflete versão anterior do packet (`telemetry=needs-evidence`) após mudanças locais recentes em ops-calibration/context-watch; requer /reload pós-commit para confirmação live final.\nApós commit limpo + preload use-pack + foco completed (TASK-BUD-666) + sucessor local-safe (TASK-BUD-673), packet live agora mostra: capability=ready, autoAdvance=eligible (source=live-board-fallback, liveNext=TASK-BUD-673). Único gap restante no runtime atual: telemetry ainda `needs-evidence` (sessão sem reload pós-commit 8e6894a/af934ca); revalidar após /reload para fechar TASK-BUD-659.\nGate operacional de readiness foi fechado; próximo passo é decisão humana explícita do canário (TASK-BUD-660: start|defer).",
+      "verification": "VER-BUD-1024"
     },
     {
       "id": "TASK-BUD-660",
       "description": "Record canary start|defer human decision after delegation rehearsal reaches ready (inspection evidence).",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-659"
@@ -15255,7 +15256,7 @@
         "No protected-scope dispatch is auto-triggered."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes."
+      "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes.\nReadiness prerequisite atendido via VER-BUD-1024 (TASK-BUD-659): rehearsal=ready e start-packet=ready-for-human-decision com contrato files/validation/rollback=ok. Aguardando decisão humana explícita do canário: start ou defer."
     },
     {
       "id": "TASK-BUD-661",

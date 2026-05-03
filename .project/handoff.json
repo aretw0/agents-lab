@@ -1,54 +1,49 @@
 {
-  "timestamp": "2026-05-03T13:36:36.646Z",
-  "context": "Post-reload continuation wave: incident hardening entregue (idle-prep before compact + auto-resume focus reconciliation), telemetry-equivalen [snip] d + sucessor local-safe (TASK-BUD-673). [truncated:+112 chars]",
+  "timestamp": "2026-05-03T14:59:19.841Z",
+  "context": "TASK-BUD-659 concluída (VER-BUD-1024) após reload: packet de rehearsal ficou ready e start-packet ficou ready-for-human-decision. Delegation [snip] decisão humana explícita para canário. [truncated:+26 chars]",
+  "current_tasks": [
+    "TASK-BUD-660"
+  ],
   "next_actions": [
-    "Commitar mudanças desta onda.",
-    "Executar /reload para carregar runtime atualizado.",
-    "Revalidar live: simple_delegate_rehearsal_packet + start_packet; se ready, concluir TASK-BUD-6 [snip] ASK-BUD-660 (start/defer). [truncated:+27 chars]"
+    "Registrar decisão humana em TASK-BUD-660: start ou defer.",
+    "Se start: executar uma fatia única bounded e registrar verificação do resultado.",
+    "Se defer: manter lane local-safe e reavaliar no próximo checkpoint."
   ],
-  "blockers": [
-    "reload-required-for-live-validation-TASK-BUD-659"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] ation.test.ts (115 passed) [truncated:+91 chars]",
-    "simple_delegate_rehearsal_packet agora expõe effectiveTelemetrySignals + telemetrySource no summary",
-    "context_watch_status agora expõe handoffAgeSec/handoffFreshThresholdSec"
+    "simple_delegate_rehearsal_packet: decision=ready source=live-board-fallback liveNext=TASK-BUD- [snip] e=live-fallback-equivalent [truncated:+18 chars]",
+    "simple_delegate_rehearsal_start_packet: decision=ready-for-human-decision contract=files=ok,validation=ok,rollback=ok",
+    "board_task_complete TASK-BUD-659 com VER-BUD-1024"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-666",
+    "focus": "TASK-BUD-660",
     "canonical_links": [
-      "task:TASK-BUD-666",
+      "task:TASK-BUD-660",
+      "task:TASK-BUD-659",
       "task:TASK-BUD-673",
-      "task:TASK-BUD-659"
+      "verification:VER-BUD-1024"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T13:36:36.646Z",
+    "generatedAtIso": "2026-05-03T14:59:19.841Z",
     "level": "checkpoint",
-    "percent": 34,
+    "percent": 31,
     "action": "checkpoint-refresh",
-    "recommendation": "continue",
-    "focus_task_status": "completed"
+    "recommendation": "ask-human"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T13:36:36.646Z",
+      "atIso": "2026-05-03T14:59:19.841Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 34,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "ask-human"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-666"
-  ],
-  "current_tasks": [
-    "TASK-BUD-666"
   ]
 }
