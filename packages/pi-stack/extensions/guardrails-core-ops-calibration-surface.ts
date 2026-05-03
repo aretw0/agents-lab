@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore } from "./guardrails-core-background-process";
@@ -230,6 +232,110 @@ function buildSimpleDelegateResolutionSummary(input: {
     `liveAutoAdvance=${input.liveDecision}`,
     input.liveNextTaskId ? `liveNext=${input.liveNextTaskId}` : undefined,
     input.telemetrySource ? `telemetrySource=${input.telemetrySource}` : undefined,
+  ].filter(Boolean).join(" ");
+}
+
+type OperatorPauseOption = {
+  option: "start" | "defer" | "abort";
+  impact: string;
+};
+
+type SimpleDelegateOperatorPauseBrief = {
+  whyPaused: string;
+  gate: "human-canary-decision" | "blocked-rehearsal-gate";
+  focusTaskId?: string;
+  focusMnemonic?: string;
+  nextTaskId?: string;
+  nextTaskMnemonic?: string;
+  options: OperatorPauseOption[];
+  recommendation: "start" | "defer" | "abort";
+};
+
+function readTaskDescriptionById(cwd: string, taskId?: string): string | undefined {
+  if (!taskId) return undefined;
+  const filePath = path.join(cwd, ".project", "tasks.json");
+  if (!existsSync(filePath)) return undefined;
+  try {
+    const parsed = JSON.parse(readFileSync(filePath, "utf8"));
+    const tasks = Array.isArray(parsed)
+      ? parsed
+      : (parsed as { tasks?: unknown[] } | undefined)?.tasks;
+    if (!Array.isArray(tasks)) return undefined;
+    const match = tasks.find((task) => {
+      const id = (task as { id?: unknown }).id;
+      return typeof id === "string" && id.toUpperCase() === taskId.toUpperCase();
+    }) as { description?: unknown } | undefined;
+    return typeof match?.description === "string" ? match.description.trim() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function toTaskMnemonic(taskId?: string, description?: string): string | undefined {
+  if (!taskId) return undefined;
+  const cleanedDescription = typeof description === "string"
+    ? description
+      .replace(/\[[^\]]+\]\s*/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+    : "";
+  const shortDescription = cleanedDescription.length > 0
+    ? cleanedDescription.split(/[.;]/)[0].trim().slice(0, 72)
+    : "";
+  return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
+}
+
+function buildSimpleDelegateOperatorPauseBrief(input: {
+  cwd: string;
+  startDecision: "ready-for-human-decision" | "blocked";
+  blockers: string[];
+  focusTaskId?: string;
+  nextTaskId?: string;
+}): SimpleDelegateOperatorPauseBrief {
+  const focusTaskId = input.focusTaskId;
+  const nextTaskId = input.nextTaskId;
+  const focusTaskMnemonic = toTaskMnemonic(focusTaskId, readTaskDescriptionById(input.cwd, focusTaskId));
+  const nextTaskMnemonic = toTaskMnemonic(nextTaskId, readTaskDescriptionById(input.cwd, nextTaskId));
+
+  if (input.startDecision === "ready-for-human-decision") {
+    return {
+      whyPaused: "Canary gate reached: explicit human start/defer decision is required.",
+      gate: "human-canary-decision",
+      focusTaskId,
+      focusMnemonic: focusTaskMnemonic,
+      nextTaskId,
+      nextTaskMnemonic,
+      options: [
+        { option: "start", impact: "Executes one bounded local-safe canary slice now." },
+        { option: "defer", impact: "Keeps canary pending and continues local-safe throughput." },
+        { option: "abort", impact: "Cancels this canary attempt and returns to backlog-only flow." },
+      ],
+      recommendation: "start",
+    };
+  }
+
+  return {
+    whyPaused: `Canary start remains blocked: ${(input.blockers.slice(0, 3).join("|") || "unknown-blocker")}.`,
+    gate: "blocked-rehearsal-gate",
+    focusTaskId,
+    focusMnemonic: focusTaskMnemonic,
+    nextTaskId,
+    nextTaskMnemonic,
+    options: [
+      { option: "start", impact: "Not recommended while blockers are active." },
+      { option: "defer", impact: "Wait for blockers to clear and retry at next checkpoint." },
+      { option: "abort", impact: "Drop canary lane and keep only non-canary local-safe work." },
+    ],
+    recommendation: "defer",
+  };
+}
+
+function formatSimpleDelegateOperatorPauseBriefSummary(brief: SimpleDelegateOperatorPauseBrief): string {
+  return [
+    `why=${brief.gate}`,
+    brief.focusMnemonic ? `focus=${brief.focusMnemonic}` : undefined,
+    brief.nextTaskMnemonic ? `next=${brief.nextTaskMnemonic}` : undefined,
+    `recommend=${brief.recommendation}`,
   ].filter(Boolean).join(" ");
 }
 
@@ -570,10 +676,25 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         rollbackPlanKnown: p.rollback_plan_known === true,
       });
 
+      const handoffFocusTaskId = readAutonomyHandoffFocusTaskIds(cwd)[0];
+      const operatorPauseBrief = buildSimpleDelegateOperatorPauseBrief({
+        cwd,
+        startDecision: startPacket.decision,
+        blockers: startPacket.blockers,
+        focusTaskId: handoffFocusTaskId,
+        nextTaskId: liveAutoAdvanceSnapshot.nextTaskId,
+      });
+      const enrichedSummary = [
+        startPacket.summary,
+        formatSimpleDelegateOperatorPauseBriefSummary(operatorPauseBrief),
+      ].join(" ");
+
       return {
-        content: [{ type: "text", text: startPacket.summary }],
+        content: [{ type: "text", text: enrichedSummary }],
         details: {
           ...startPacket,
+          summary: enrichedSummary,
+          operatorPauseBrief,
           readiness,
           capability,
           inferredCapabilityDefaults,

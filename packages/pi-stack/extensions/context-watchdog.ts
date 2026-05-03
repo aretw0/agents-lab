@@ -1022,6 +1022,110 @@ function readProjectTaskStatusById(cwd: string): Record<string, string | undefin
 	return statuses;
 }
 
+type ContextWatchOperatorBriefOption = {
+	option: string;
+	impact: string;
+};
+
+type ContextWatchOperatorBrief = {
+	whyPaused: string;
+	focusTaskId?: string;
+	focusMnemonic?: string;
+	options: ContextWatchOperatorBriefOption[];
+	recommendation: string;
+};
+
+function readProjectTaskDescriptionById(cwd: string, taskId?: string): string | undefined {
+	if (!taskId) return undefined;
+	for (const task of readProjectTasksArray(cwd)) {
+		const id = (task as { id?: unknown }).id;
+		if (typeof id !== "string" || id.toUpperCase() !== taskId.toUpperCase()) continue;
+		const description = (task as { description?: unknown }).description;
+		return typeof description === "string" ? description.trim() : undefined;
+	}
+	return undefined;
+}
+
+function toOperatorTaskMnemonic(taskId?: string, description?: string): string | undefined {
+	if (!taskId) return undefined;
+	const cleaned = typeof description === "string"
+		? description
+			.replace(/\[[^\]]+\]\s*/g, "")
+			.replace(/\s+/g, " ")
+			.trim()
+		: "";
+	const shortDescription = cleaned.length > 0
+		? cleaned.split(/[.;]/)[0].trim().slice(0, 72)
+		: "";
+	return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
+}
+
+function resolvePrimaryHandoffTaskId(handoff: Record<string, unknown>): string | undefined {
+	if (!Array.isArray(handoff.current_tasks)) return undefined;
+	const first = handoff.current_tasks.find((row): row is string => typeof row === "string" && row.trim().length > 0);
+	return first ? first.trim() : undefined;
+}
+
+function buildContextWatchOperatorBrief(input: {
+	cwd: string;
+	handoff: Record<string, unknown>;
+	operatorActionKind: ContextWatchOperatorActionKind;
+	deterministicStopReason: ContextWatchDeterministicStopReason;
+}): ContextWatchOperatorBrief {
+	const focusTaskId = resolvePrimaryHandoffTaskId(input.handoff);
+	const focusMnemonic = toOperatorTaskMnemonic(focusTaskId, readProjectTaskDescriptionById(input.cwd, focusTaskId));
+
+	if (input.operatorActionKind === "reload") {
+		return {
+			whyPaused: "Runtime reload is required before safe continuation.",
+			focusTaskId,
+			focusMnemonic,
+			options: [
+				{ option: "reload", impact: "Load latest runtime and reopen continuation gates." },
+				{ option: "defer", impact: "Stay paused; continuation may use stale behavior." },
+			],
+			recommendation: "reload",
+		};
+	}
+
+	if (input.operatorActionKind === "checkpoint-compact" || input.operatorActionKind === "compact-final-warning") {
+		return {
+			whyPaused: "Compact boundary reached; checkpoint/compact action is required before next slice.",
+			focusTaskId,
+			focusMnemonic,
+			options: [
+				{ option: "checkpoint-compact", impact: "Persist progress and clear context pressure safely." },
+				{ option: "defer", impact: "Delay compaction and increase context-window risk." },
+			],
+			recommendation: "checkpoint-compact",
+		};
+	}
+
+	if (input.operatorActionKind === "handoff-refresh" || input.deterministicStopReason === "compact-checkpoint-required") {
+		return {
+			whyPaused: "Handoff freshness/consistency requires refresh before resume.",
+			focusTaskId,
+			focusMnemonic,
+			options: [
+				{ option: "refresh-handoff", impact: "Reconcile focus with board and restore deterministic resume." },
+				{ option: "defer", impact: "Keep lane paused with stale handoff risk." },
+			],
+			recommendation: "refresh-handoff",
+		};
+	}
+
+	return {
+		whyPaused: "No blocking operator gate right now.",
+		focusTaskId,
+		focusMnemonic,
+		options: [
+			{ option: "continue", impact: "Proceed with bounded local-safe slice." },
+			{ option: "checkpoint", impact: "Persist a concise checkpoint before continuing." },
+		],
+		recommendation: "continue",
+	};
+}
+
 function isProtectedAutoResumeTaskPath(value: unknown): boolean {
 	const normalized = String(value ?? "").replace(/\\/g, "/").replace(/^\.\//, "").toLowerCase();
 	return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
@@ -2570,6 +2674,13 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			};
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const handoffFreshThresholdSec = Math.max(60, Math.floor(autoCompact.handoffFreshMaxAgeMs / 1000));
+			const handoffForOperatorBrief = readHandoffJson(ctx.cwd);
+			const operatorBrief = buildContextWatchOperatorBrief({
+				cwd: ctx.cwd,
+				handoff: handoffForOperatorBrief,
+				operatorActionKind: operatorAction.kind,
+				deterministicStopReason: deterministicStop.reason,
+			});
 			const fullSummary = formatContextWatchStatusToolSummary({
 				level: assessment.level,
 				percent: assessment.percent,
@@ -2608,6 +2719,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				deterministicStop,
 				deterministicStopHint,
 				operatorAction,
+				operatorBrief,
 				operatingCadence,
 				compactStage,
 				signalNoise,

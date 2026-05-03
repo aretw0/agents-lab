@@ -630,6 +630,12 @@ describe("ops calibration decision packet", () => {
       expect(result.details.effectiveTelemetrySignals.source).toBe("live-fallback-equivalent");
       expect(result.details.effectiveTelemetrySignals.decision).toBe("ready");
       expect(result.details.readiness.signals.telemetryDecision).toBe("ready");
+      expect(result.details.operatorPauseBrief.whyPaused).toContain("explicit human");
+      expect(result.details.operatorPauseBrief.focusTaskId).toBe("TASK-FOCUS");
+      expect(String(result.details.operatorPauseBrief.focusMnemonic)).toContain("TASK-FOCUS");
+      expect(result.details.operatorPauseBrief.recommendation).toBe("start");
+      expect(Array.isArray(result.details.operatorPauseBrief.options)).toBe(true);
+      expect(String(result.details.summary)).toContain("why=human-canary-decision");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -837,6 +843,9 @@ describe("ops calibration decision packet", () => {
       expect(result.details.decision).toBe("ready-for-human-decision");
       expect(String(result.details.summary)).toContain("simple-delegate-start-packet:");
       expect(String(result.details.summary)).toContain("contract=files=ok,validation=ok,rollback=ok");
+      expect(result.details.operatorPauseBrief.whyPaused).toContain("explicit human");
+      expect(result.details.operatorPauseBrief.recommendation).toBe("start");
+      expect(result.details.operatorPauseBrief.options.map((row: any) => row.option)).toEqual(["start", "defer", "abort"]);
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

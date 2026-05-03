@@ -1746,6 +1746,15 @@ describe("context-watchdog", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-status-handoff-age-"));
 		try {
 			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+				tasks: [
+					{
+						id: "TASK-FOCUS",
+						description: "[P1] canary pause context contract",
+						status: "planned",
+					},
+				],
+			}, null, 2), "utf8");
 			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
 				timestamp: new Date(Date.now() - 120_000).toISOString(),
 				current_tasks: ["TASK-FOCUS"],
@@ -1769,6 +1778,11 @@ describe("context-watchdog", () => {
 			expect(Number(result.details?.handoffAgeSec)).toBeGreaterThanOrEqual(1);
 			expect(Number(result.details?.handoffFreshThresholdSec)).toBeGreaterThanOrEqual(60);
 			expect(String(result.content?.[0]?.text ?? "")).toContain("handoffAgeSec=");
+			expect(result.details?.operatorBrief?.whyPaused).toBeTruthy();
+			expect(result.details?.operatorBrief?.focusTaskId).toBe("TASK-FOCUS");
+			expect(String(result.details?.operatorBrief?.focusMnemonic ?? "")).toContain("TASK-FOCUS");
+			expect(Array.isArray(result.details?.operatorBrief?.options)).toBe(true);
+			expect(typeof result.details?.operatorBrief?.recommendation).toBe("string");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}

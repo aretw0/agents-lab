@@ -11445,6 +11445,42 @@
       "method": "inspection",
       "timestamp": "2026-05-03T14:57:58.426Z",
       "evidence": "Validação live pós-reload concluída com workspace clean + preload use-pack. Resultados atuais: `simple_delegate_rehearsal_packet` => `decision=ready code=simple-delegate-rehearsal-ready capability=ready mix=ready autoAdvance=eligible telemetry=ready source=live-board-fallback liveNext=TASK-BUD-673 telemetrySource=live-fallback-equivalent`; `simple_delegate_rehearsal_start_packet` => `decision=ready-for-human-decision contract=files=ok,validation=ok,rollback=ok`."
+    },
+    {
+      "id": "VER-BUD-1025",
+      "target": "TASK-BUD-660",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T15:18:53.253Z",
+      "evidence": "Decisão humana explícita registrada: `start` (operador). Contexto do gate: TASK-BUD-659 já estava concluída com readiness live (`rehearsal=ready`, `start-packet=ready-for-human-decision`, contrato files/validation/rollback=ok). Decisão aplicada: iniciar canário bounded de uma fatia local-safe."
+    },
+    {
+      "id": "VER-BUD-1026",
+      "target": "TASK-BUD-673",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-03T15:20:40.299Z",
+      "evidence": "Fatia canário bounded preparada e selecionada com foco local-safe: `autonomy_lane_status` reportou `nextTaskId=TASK-BUD-673` e `chaining=active`, mantendo escopo reversível sem protected scope. Gate de qualidade do task (`board_task_quality_gate`) retornou `closeAllowed=yes` (small-task-no-dependencies-ok), com validação focal explícita já definida no próprio task."
+    },
+    {
+      "id": "VER-BUD-1027",
+      "target": "TASK-BUD-674",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T15:33:56.348Z",
+      "evidence": "Contrato de pausa ao operador endurecido em runtime surfaces: - `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` agora expõe `operatorPauseBrief` no `simple_delegate_rehearsal_start_packet` com `whyPaused`, `focusTaskId/focusMnemonic`, `nextTaskId/nextTaskMnemonic`, `options` com impacto e `recommendation`. - summary do start packet foi enriquecido com bloco curto (`why=... focus=... next=... recommend=...`) para não depender de ID cru. - `packages/pi-stack/extensions/context-watchdog.ts` agora expõe `operatorBrief` no `context_watch_status` com o mesmo padrão econômico (motivo, foco+mnemônico, opções, recomendação)."
+    },
+    {
+      "id": "VER-BUD-1028",
+      "target": "TASK-BUD-675",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T15:34:54.639Z",
+      "evidence": "Cobertura de regressão adicionada: - `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` valida `operatorPauseBrief` no start packet (motivo, foco+mnemônico, opções, recomendação, summary enriquecido). - `packages/pi-stack/test/smoke/context-watchdog.test.ts` valida `operatorBrief` no `context_watch_status` com foco+mnemônico e opções/recomendação. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (115 passed)."
     }
   ]
 }

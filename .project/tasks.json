@@ -15241,7 +15241,7 @@
     {
       "id": "TASK-BUD-660",
       "description": "Record canary start|defer human decision after delegation rehearsal reaches ready (inspection evidence).",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-659"
@@ -15256,7 +15256,8 @@
         "No protected-scope dispatch is auto-triggered."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes.\nReadiness prerequisite atendido via VER-BUD-1024 (TASK-BUD-659): rehearsal=ready e start-packet=ready-for-human-decision com contrato files/validation/rollback=ok. Aguardando decisão humana explícita do canário: start ou defer."
+      "notes": "[rationale:risk-control] keeps canary activation explicit and auditable after readiness.\n[provenance:human] source_task=TASK-BUD-659 reason=Maintain successor task so hard-intent auto-advance can remain eligible once TASK-BUD-659 completes.\nReadiness prerequisite atendido via VER-BUD-1024 (TASK-BUD-659): rehearsal=ready e start-packet=ready-for-human-decision com contrato files/validation/rollback=ok. Aguardando decisão humana explícita do canário: start ou defer.\n[human-decision] canary=start · próxima fatia bounded local-safe segue para TASK-BUD-673.",
+      "verification": "VER-BUD-1025"
     },
     {
       "id": "TASK-BUD-661",
@@ -15488,7 +15489,7 @@
     {
       "id": "TASK-BUD-673",
       "description": "Prepare one bounded local-safe successor slice to keep hard-intent auto-advance eligible during delegation readiness validation.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
@@ -15498,12 +15499,13 @@
         "Task remains report-only until selected by normal lane flow (no auto-dispatch)."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[rationale:risk-control] successor is needed to validate live auto-advance eligibility after completed focus without protected scope."
+      "notes": "[rationale:risk-control] successor is needed to validate live auto-advance eligibility after completed focus without protected scope.\nExecução do `start` aplicada com uma fatia local-safe única para manter auto-advance elegível após decisão humana.",
+      "verification": "VER-BUD-1026"
     },
     {
       "id": "TASK-BUD-674",
       "description": "Criar contrato hard-intent para mensagens de pausa/decisão ao operador: motivo da pausa, ID+mnemônico humano, opções com impacto e recomendação objetiva.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -15515,12 +15517,13 @@
         "Formato deve ser econômico (bounded) e reutilizável entre sessões para reduzir perda de contexto do operador."
       ],
       "milestone": "delegation-operator-clarity-2026-05",
-      "notes": "[rationale:risk-control] Evita regressão de comunicação operador-agente e reduz risco operacional por decisões com baixo contexto em pausas críticas.\n[provenance:human] source_task=none reason=Operador relatou perda de contexto em retomadas e pediu hardening em backlog para não depender de memória de sessão."
+      "notes": "[rationale:risk-control] Evita regressão de comunicação operador-agente e reduz risco operacional por decisões com baixo contexto em pausas críticas.\n[provenance:human] source_task=none reason=Operador relatou perda de contexto em retomadas e pediu hardening em backlog para não depender de memória de sessão.\nHard-intent de contextualização humana ficou persistido em código/runtime, não só em instrução de sessão.",
+      "verification": "VER-BUD-1027"
     },
     {
       "id": "TASK-BUD-675",
       "description": "Adicionar cobertura de regressão para o contrato de pausa ao operador (mnemônico+impacto+recomendação), garantindo persistência entre sessões.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-674"
@@ -15535,7 +15538,8 @@
         "Cobertura mantém formato curto e bounded (sem expansão para textão)."
       ],
       "milestone": "delegation-operator-clarity-2026-05",
-      "notes": "[rationale:risk-control] Sem teste, a melhoria de comunicação tende a regredir em novas ondas de refactor.\n[provenance:human] source_task=TASK-BUD-674 reason=Transformar a necessidade operacional do operador em contrato verificável e durável."
+      "notes": "[rationale:risk-control] Sem teste, a melhoria de comunicação tende a regredir em novas ondas de refactor.\n[provenance:human] source_task=TASK-BUD-674 reason=Transformar a necessidade operacional do operador em contrato verificável e durável.\nSemântico de pausa contextual passou a ter teste para evitar regressão entre sessões/refactors.",
+      "verification": "VER-BUD-1028"
     }
   ]
 }
