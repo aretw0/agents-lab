@@ -575,6 +575,7 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.ready).toBe(true);
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-NEXT");
+    expect(result?.details.nextTaskMnemonic).toBe("TASK-NEXT:local");
     expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-NEXT"]);
     expect((result?.details.plan as { decision?: string } | undefined)?.decision).toBe("bounded");
     expect(result?.details.recommendationCode).toBe("execute-bounded-slice");

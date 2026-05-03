@@ -11517,6 +11517,15 @@
       "method": "test",
       "timestamp": "2026-05-03T16:22:21.254Z",
       "evidence": "Smoke de preview atualizada em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: cenário com foco ativo agora valida `focusMnemonics=TASK-BUD-317:resumir foco de forma humana` em details/summary; cenário stale mantém fallback seguro. Validação executada: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (68 passed)."
+    },
+    {
+      "id": "VER-BUD-1033",
+      "target": "TASK-BUD-681",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T16:29:08.417Z",
+      "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora expõe `nextTaskMnemonic` quando há `nextTaskId`, usando descrição curta saneada (`ID:descrição-curta`). Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` validando `nextTaskMnemonic=TASK-NEXT:local`. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts` (96 passed)."
     }
   ]
 }

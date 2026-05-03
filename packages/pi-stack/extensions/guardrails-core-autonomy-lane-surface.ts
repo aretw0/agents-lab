@@ -161,6 +161,20 @@ function findTaskById(tasks: ProjectTaskItem[], taskId: string): ProjectTaskItem
   return tasks.find((task) => normalizeTaskId(task.id) === normalized);
 }
 
+function toTaskMnemonic(task: ProjectTaskItem | undefined): string | undefined {
+  if (!task) return undefined;
+  const taskId = normalizeTaskId(task.id);
+  if (!taskId) return undefined;
+  const cleanedDescription = String(task.description ?? "")
+    .replace(/\[[^\]]+\]\s*/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const shortDescription = cleanedDescription.length > 0
+    ? cleanedDescription.split(/[.;]/)[0].trim().slice(0, 72)
+    : "";
+  return shortDescription.length > 0 ? `${taskId}:${shortDescription}` : taskId;
+}
+
 function taskHasProtectedSignal(task: ProjectTaskItem): boolean {
   const haystack = [task.description, ...(task.files ?? [])].join("\n").toLowerCase();
   return /(\.github\/|\.obsidian\/|\.pi\/settings\.json|\bgithub actions\b|\bremote\b|\bpublish\b|https?:\/\/|\bci\b)/i.test(haystack);
@@ -751,6 +765,9 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
+      const tasks = readProjectTasksBlock(ctx.cwd).tasks;
+      const nextTask = selection.nextTaskId ? findTaskById(tasks, selection.nextTaskId) : undefined;
+      const nextTaskMnemonic = toTaskMnemonic(nextTask);
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
@@ -777,6 +794,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           handoffFreshMaxAgeMs: handoffFreshness.maxAgeMs,
         },
         recommendationCode: selection.recommendationCode,
+        nextTaskMnemonic,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : selection.recommendation),

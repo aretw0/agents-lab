@@ -15626,7 +15626,7 @@
     {
       "id": "TASK-BUD-681",
       "description": "Expor mnemônico do nextTask em autonomy_lane_status para reduzir leitura por ID cru nas pausas de seleção.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -15638,7 +15638,8 @@
         "Sem alteração de policy/dispatch."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] melhora decisões rápidas do operador sem abrir explicações longas."
+      "notes": "[rationale:risk-control] melhora decisões rápidas do operador sem abrir explicações longas.\nImplementando nextTaskMnemonic em autonomy_lane_status para reduzir leitura por ID cru em pausas de seleção.\nLeitura operacional do próximo passo fica humana sem perder economia de tokens.",
+      "verification": "VER-BUD-1033"
     }
   ]
 }
