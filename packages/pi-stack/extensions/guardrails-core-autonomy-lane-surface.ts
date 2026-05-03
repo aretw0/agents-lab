@@ -531,6 +531,93 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   };
 }
 
+function buildInfluenceAssimilationWindowPacket(p: Record<string, unknown>, cwd: string) {
+  const minReadySlices = Math.max(1, Math.min(20, Math.floor(asNumber(p.min_ready_slices, 3))));
+  const targetSlices = Math.max(minReadySlices, Math.min(20, Math.floor(asNumber(p.target_slices, 7))));
+  const minValidationCoveragePct = Math.max(10, Math.min(100, Math.floor(asNumber(p.min_validation_coverage_pct, 80))));
+
+  const readiness = buildAfkMaterialReadinessPacket({
+    ...p,
+    include_protected_scopes: false,
+    min_ready_slices: minReadySlices,
+    target_slices: targetSlices,
+  }, cwd);
+
+  const blockedReasons: string[] = [];
+  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+  if (readiness.decision === "blocked") blockedReasons.push("local-safe-readiness-blocked");
+  if (readiness.material.validationKnownCount < minReadySlices) blockedReasons.push("local-safe-stock-low");
+  if (readiness.material.validationCoveragePct < minValidationCoveragePct) blockedReasons.push("validation-coverage-low");
+
+  let decision: "ready-window" | "defer" | "blocked" = "ready-window";
+  let window: "open" | "hold" | "closed" = "open";
+  let recommendationCode = "influence-assimilation-ready-window-open";
+  let recommendation = "open-protected-focus";
+  let nextAction = "window open: prepare protected decision packet and request explicit human focus before external influence assimilation.";
+
+  if (blockedReasons.includes("reload-required-or-dirty") || blockedReasons.includes("local-safe-readiness-blocked")) {
+    decision = "blocked";
+    window = "closed";
+    recommendationCode = "influence-assimilation-blocked-operational";
+    recommendation = "stabilize-local-runtime";
+    nextAction = "stabilize local runtime/readiness first (reload/dirty/focus), then re-evaluate influence window.";
+  } else if (blockedReasons.length > 0) {
+    decision = "defer";
+    window = "hold";
+    recommendationCode = "influence-assimilation-defer-local-safe-stock";
+    recommendation = "continue-local-safe";
+    nextAction = "defer influence assimilation until local-safe stock and validation maturity are healthy.";
+  }
+
+  const options = decision === "ready-window"
+    ? [
+      { option: "open-protected-focus", impact: "Start one protected decision slice with explicit human choice." },
+      { option: "continue-local-safe", impact: "Keep throughput and revisit the influence window later." },
+    ]
+    : decision === "defer"
+      ? [
+        { option: "continue-local-safe", impact: "Grow validated local-safe stock before assimilation." },
+        { option: "checkpoint", impact: "Persist concise handoff and re-check the packet next boundary." },
+      ]
+      : [
+        { option: "stabilize-local-runtime", impact: "Resolve reload/dirty/readiness blockers before any assimilation decision." },
+        { option: "checkpoint", impact: "Preserve context and avoid accidental protected drift." },
+      ];
+
+  const summary = [
+    "influence-assimilation:",
+    `decision=${decision}`,
+    `window=${window}`,
+    `code=${recommendationCode}`,
+    `stock=${readiness.material.validationKnownCount}/${minReadySlices}`,
+    `coverage=${readiness.material.validationCoveragePct}/${minValidationCoveragePct}`,
+    blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
+    `recommend=${recommendation}`,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "report-only",
+    decision,
+    window,
+    recommendationCode,
+    recommendation,
+    nextAction,
+    options,
+    blockedReasons,
+    readiness,
+    thresholds: {
+      minReadySlices,
+      targetSlices,
+      minValidationCoveragePct,
+    },
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary,
+  };
+}
+
 function buildReadyQueuePreview(selection: {
   nextTaskId?: string;
   eligibleTaskIds?: string[];
@@ -1006,6 +1093,30 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAfkMaterialSeedPacket(p, ctx.cwd);
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: packet,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_influence_assimilation_packet",
+    label: "Autonomy Lane Influence Assimilation Packet",
+    description: "Report-only packet recommending when to assimilate external influences (ready-window|defer|blocked) without dispatch authorization.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
+      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum validated local-safe stock before considering external influence assimilation (default 3)." })),
+      target_slices: Type.Optional(Type.Number({ description: "Target validated local-safe stock to preserve after assimilation decision (default 7)." })),
+      min_validation_coverage_pct: Type.Optional(Type.Number({ description: "Minimum local-safe validation maturity percentage before assimilation window opens (default 80)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildInfluenceAssimilationWindowPacket(p, ctx.cwd);
       return {
         content: [{ type: "text", text: packet.summary }],
         details: packet,

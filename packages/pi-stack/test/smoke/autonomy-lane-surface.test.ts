@@ -556,6 +556,110 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
+  it("emits defer influence-assimilation packet when validation maturity is below threshold", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-influence-assimilation-defer-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-FOCUS",
+          description: "[P1] focused local slice",
+          status: "in-progress",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-1",
+          description: "[P2] local maintenance doc update",
+          status: "planned",
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-2",
+          description: "[P2] local review notes",
+          status: "planned",
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_influence_assimilation_packet");
+    const result = packetTool?.execute("call-test", {
+      min_ready_slices: 1,
+      min_validation_coverage_pct: 80,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("defer");
+    expect(result?.details.window).toBe("hold");
+    expect(result?.details.recommendationCode).toBe("influence-assimilation-defer-local-safe-stock");
+    expect((result?.details.blockedReasons as string[])).toContain("validation-coverage-low");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("emits ready-window influence-assimilation packet when local-safe stock is healthy", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-influence-assimilation-ready-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-FOCUS",
+          description: "[P1] focused local slice",
+          status: "in-progress",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-1",
+          description: "[P2] local slice 1",
+          status: "planned",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-2",
+          description: "[P2] local slice 2",
+          status: "planned",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_influence_assimilation_packet");
+    const result = packetTool?.execute("call-test", {
+      min_ready_slices: 3,
+      min_validation_coverage_pct: 80,
+    }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("ready-window");
+    expect(result?.details.window).toBe("open");
+    expect(result?.details.recommendationCode).toBe("influence-assimilation-ready-window-open");
+    expect(result?.details.recommendation).toBe("open-protected-focus");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
   it("registers composed status tool with board selection and lane plan", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

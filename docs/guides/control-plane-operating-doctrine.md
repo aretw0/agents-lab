@@ -209,6 +209,14 @@ Pesquisa remota bounded deve usar helper versionado, não receitas frágeis com 
 
 Antes de promover nova pesquisa externa para foco protected, preencher intake local-safe curto (`docs/primitives/external-influence-intake-template.md`) com hipótese, valor/risco/esforço, canário e rollback. Esse intake prepara a decisão; não autoriza execução externa automática.
 
+Janela mínima para assimilar influência externa (report-only, sem dispatch):
+
+- **estoque local-safe validado** em nível saudável (mínimo configurado por run, default 3);
+- **maturidade de validação** acima do piso (default 80% de cobertura em tasks local-safe);
+- **sem bloqueio operacional crítico** (workspace sujo/reload pendente/readiness local bloqueada).
+
+Quando o critério não fecha, a decisão padrão é `defer` (continuar throughput local-safe). Use `autonomy_lane_influence_assimilation_packet` para obter packet determinístico `ready-window|defer|blocked` com `authorization=none`. Mesmo em `ready-window`, a assimilação permanece protected e exige foco/decisão humana explícita.
+
 Bloqueios de stale-read (`File modified since read`) em ambientes de usuário devem virar incidente de triage, não desligamento de proteção. A política é falhar fechado para mutações com modelo mental defasado, mas oferecer recuperação mínima: re-read bounded do arquivo exato e re-aplicar a edição com anchors frescos. Se o bloqueio vier de superfície first-party/recomendada e for falso bloqueio com auto-format, criar teste/regra sem aceitar texto livre como prova de conteúdo atual. Ver `docs/primitives/stale-read-guard-incidents.md`.
 
 Fallback operacional enquanto `Esc` estiver incerto:

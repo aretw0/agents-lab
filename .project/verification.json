@@ -11571,6 +11571,15 @@
       "method": "test",
       "timestamp": "2026-05-03T17:12:52.189Z",
       "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora aplica guard path explícito sob timeout-pressure via `resolveAutoCompactTimeoutPressureGuard`: quando há trigger de compact em checkpoint/compact + timeout-pressure ativo, bloqueia caminho legado de compact direto, emite `context-watchdog.auto-compact-guarded-timeout-pressure` com `reasonCode=guarded-precompact-timeout-pressure` e agenda retry guardado. Cobertura adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` para o guard helper + reason code. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (96 passed)."
+    },
+    {
+      "id": "VER-BUD-1039",
+      "target": "TASK-BUD-684",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T17:30:40.269Z",
+      "evidence": "Critério report-only de assimilação de influências externas implementado em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` via tool `autonomy_lane_influence_assimilation_packet` (decision=`ready-window|defer|blocked`) considerando: estoque local-safe validado (`min_ready_slices`), maturidade de validação (`min_validation_coverage_pct`) e blockers operacionais (`reload-required-or-dirty`/readiness). Sem dispatch automático (`dispatchAllowed=false`, `authorization=none`). Doutrina sincronizada em `docs/guides/control-plane-operating-doctrine.md` com janela mínima e uso do packet."
     }
   ]
 }

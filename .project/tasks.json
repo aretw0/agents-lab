@@ -15681,7 +15681,7 @@
     {
       "id": "TASK-BUD-684",
       "description": "Definir critério report-only para sugerir quando assimilar influências externas no fluxo (janela ideal vs adiar).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/guides/control-plane-operating-doctrine.md",
@@ -15693,7 +15693,8 @@
         "Mantém protected scope explícito para influências externas."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] evita assimilação prematura de influência enquanto throughput local-safe ainda está frágil."
+      "notes": "[rationale:risk-control] evita assimilação prematura de influência enquanto throughput local-safe ainda está frágil.\nRetomado imediatamente após steer do operador: implementando packet report-only para janela de assimilação de influências externas (ready-window|defer|blocked) com critérios de estoque local-safe, maturidade de validação e blockers operacionais.\nFluxo de assimilação externa agora tem janela explícita e adia por padrão quando throughput local-safe ainda não está maduro.",
+      "verification": "VER-BUD-1039"
     },
     {
       "id": "TASK-BUD-685",
