@@ -1,40 +1,42 @@
 {
-  "timestamp": "2026-05-03T02:12:32.434Z",
-  "context": "Execução contínua concluída na milestone throughput-ready-stock-2026-05: TASK-BUD-653..656 finalizadas em sequência, com status/next-task pre [snip] laybook enxuto consolidado na doutrina. [truncated:+90 chars]",
+  "timestamp": "2026-05-03T02:37:51.416Z",
+  "context": "Lane delegation-activation-local-safe avançou: TASK-BUD-657/658 concluídas (fallback live-board + smoke). Operacionalmente, auto-advance snap [snip] rque runtime ainda não foi recarregado. [truncated:+122 chars]",
+  "current_tasks": [
+    "TASK-BUD-659"
+  ],
   "next_actions": [
-    "Se desejar manter execução contínua sem pausa, semear novo lote local-safe planned (4-6 tasks) fora de escopo protegido.",
-    "Opcional: acionar decisão humana do canário simple-delegate (start/defer), já com rehearsal/st [snip] ready-for-human-decision. [truncated:+13 chars]",
-    "Revisar estratégia de push dos commits locais (branch está ahead)."
+    "Executar /reload para ativar runtime atualizado de guardrails-core-ops-calibration-surface.",
+    "Após reload, revalidar simple_delegate_rehearsal_packet e simple_delegate_rehearsal_start_packet sem overrides.",
+    "Se packet/start estiverem ready, registrar VER final e fechar TASK-BUD-659 com decisão humana start / defer do canário."
   ],
   "blockers": [
-    "no-candidate-tasks-for-throughput-ready-stock"
+    "reload-required-for-live-runtime-validation"
   ],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] tchdog.test.ts (94 passed) [truncated:+26 chars]",
-    "safe_marker_check guardrails-core-autonomy-lane-surface.ts (readyQueue/chaining markers 4/4)",
-    "safe_marker_check context-watchdog.ts (trigger-origin telemetry markers 4/4)"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] urface.test.ts (44 passed) [truncated:+36 chars]",
+    "autonomy_lane_auto_advance_snapshot -> decision=eligible code=auto-advance-snapshot-eligible next=TASK-BUD-659",
+    "simple_delegate_rehearsal_packet -> blocked auto-advance (sessão sem /reload do fallback novo)"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-656",
+    "focus": "TASK-BUD-659",
     "canonical_links": [
-      "task:TASK-BUD-656",
-      "task:TASK-BUD-653"
+      "task:TASK-BUD-659",
+      "task:TASK-BUD-657"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-03T02:12:32.434Z",
+    "generatedAtIso": "2026-05-03T02:37:51.416Z",
     "level": "checkpoint",
-    "percent": 38,
+    "percent": 41,
     "action": "checkpoint-refresh",
-    "recommendation": "ask-human",
-    "focus_task_status": "completed"
+    "recommendation": "ask-human"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-03T02:12:32.434Z",
+      "atIso": "2026-05-03T02:37:51.416Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 38,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -43,11 +45,5 @@
       "action": "checkpoint-refresh",
       "recommendation": "ask-human"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-656"
-  ],
-  "current_tasks": [
-    "TASK-BUD-658"
   ]
 }
