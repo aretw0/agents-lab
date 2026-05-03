@@ -69,7 +69,7 @@ type AutonomyOperatorPauseBrief = {
 };
 
 type AutonomyIterationReminder = {
-  source: "handoff-next-actions" | "handoff-current-tasks" | "none";
+  source: "handoff-stale" | "handoff-next-actions" | "handoff-current-tasks" | "none";
   items: string[];
   summary: string;
 };
@@ -91,7 +91,15 @@ function normalizeIterationReminderItem(value: unknown): string | undefined {
   return compact.length > 96 ? `${compact.slice(0, 93)}...` : compact;
 }
 
-function buildIterationReminder(cwd: string): AutonomyIterationReminder {
+function buildIterationReminder(cwd: string, handoffFreshnessLabel?: HandoffFreshnessLabel): AutonomyIterationReminder {
+  if (handoffFreshnessLabel === "stale") {
+    return {
+      source: "handoff-stale",
+      items: ["refresh-handoff checkpoint evidence before next slice"],
+      summary: "refresh-handoff checkpoint evidence before next slice",
+    };
+  }
+
   const handoff = readJsonRecord(path.join(cwd, ".project", "handoff.json"));
   const fromNextActions = Array.isArray(handoff?.next_actions)
     ? handoff.next_actions
@@ -974,13 +982,13 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskId: selection.nextTaskId,
         nextTaskMnemonic,
       });
-      const iterationReminder = buildIterationReminder(ctx.cwd);
+      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
+      const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label);
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
         nextTaskId: selection.nextTaskId,
       }));
-      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
       const chaining = resolveLocalSafeChainingDecision({
         contextLevel: normalizeContextLevel(p.context_level),
         planReady: plan.ready,

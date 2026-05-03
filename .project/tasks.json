@@ -15868,6 +15868,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] padroniza leitura rápida do sinal sem depender de memória tácita.\nPadronização anti-bloat para interpretar instabilidade sem perder foco de lane.",
       "verification": "VER-BUD-1045"
+    },
+    {
+      "id": "TASK-BUD-694",
+      "description": "Tornar `iterationReminder` sensível à frescura do handoff: quando stale, incluir lembrete curto de refresh antes da próxima fatia.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Se handoff estiver stale, `iterationReminder` inclui item curto `refresh-handoff` em prioridade.",
+        "Se handoff estiver fresh, comportamento atual permanece (next_actions/current_tasks).",
+        "Sem mudar autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita retomada cega quando o próprio gate indica handoff stale.\nImplementando stale-aware iterationReminder: quando handoff stale, priorizar item curto de refresh antes de continuar.\nContinuidade deixa de sugerir avanço cego com handoff velho.",
+      "verification": "VER-BUD-1046"
+    },
+    {
+      "id": "TASK-BUD-695",
+      "description": "Adicionar smoke para `iterationReminder` com handoff stale no autonomy_lane_status.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-694"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida que stale handoff injeta reminder de refresh.",
+        "Smoke mantém caso fresh/fallback existente.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege o lembrete de continuidade contra regressão em cenário real de pausa longa.\nCobertura garante prioridade de refresh em pausa longa/stale.",
+      "verification": "VER-BUD-1047"
+    },
+    {
+      "id": "TASK-BUD-696",
+      "description": "Sincronizar doutrina curta: iterationReminder deve priorizar refresh quando handoff stale.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-694"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Adicionar orientação curta anti-bloat sobre stale=>refresh no reminder.",
+        "Sem mudança de policy protected/autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] alinha leitura operacional com gate real de frescura.\nRegra operacional alinhada com comportamento runtime para evitar surpresas entre iterações.",
+      "verification": "VER-BUD-1048"
     }
   ]
 }

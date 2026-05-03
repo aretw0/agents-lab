@@ -787,7 +787,7 @@ Template mínimo recomendado (copiar/colar):
 - **Próximos passos:** <até 3 itens imediatos>
 - **Preview de decisão:** <opções disponíveis agora, neutras quando possível>
 
-Para reduzir perda de contexto entre compact/pause, o `autonomy_lane_status` deve expor `iterationReminder` curto (até 2 itens) com base em `handoff.next_actions` (fallback `none`). Esse lembrete é report-only e não altera autorização.
+Para reduzir perda de contexto entre compact/pause, o `autonomy_lane_status` deve expor `iterationReminder` curto (até 2 itens) com base em `handoff.next_actions` (fallback `none`). Quando o handoff estiver stale, o reminder deve priorizar `refresh-handoff` antes de sugerir continuidade. Esse lembrete é report-only e não altera autorização.
 
 No fechamento operacional, ler também `timeoutPressureSummary` do `context_watch_status`: `none` quando estável, ou `count/threshold@window` sob instabilidade intermitente. É sinal de contexto rápido, não autorização.
 

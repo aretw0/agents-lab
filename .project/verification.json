@@ -11634,6 +11634,33 @@
       "method": "test",
       "timestamp": "2026-05-03T22:33:27.465Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md` com orientação de leitura rápida do `timeoutPressureSummary` no fechamento operacional (sinal de contexto, não autorização). Gate doc+runtime: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (70 passed)."
+    },
+    {
+      "id": "VER-BUD-1046",
+      "target": "TASK-BUD-694",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:40:50.778Z",
+      "evidence": "`iterationReminder` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora é freshness-aware: quando `handoffFreshness=stale`, prioriza `source=handoff-stale` com item curto de `refresh-handoff checkpoint evidence before next slice`, antes de next_actions/current_tasks. Mantém contrato report-only."
+    },
+    {
+      "id": "VER-BUD-1047",
+      "target": "TASK-BUD-695",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:41:09.575Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` adicionada para handoff stale: `autonomy_lane_status` retorna `iterationReminder.source=handoff-stale` e summary contendo `refresh-handoff`. Gate validado em `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (34 passed)."
+    },
+    {
+      "id": "VER-BUD-1048",
+      "target": "TASK-BUD-696",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T22:41:25.657Z",
+      "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md`: `iterationReminder` deve priorizar `refresh-handoff` quando stale. Sem alteração de policy/autorização. Doc checklist permaneceu green no gate combinado (34 passed)."
     }
   ]
 }
