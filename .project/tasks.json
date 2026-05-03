@@ -15811,6 +15811,60 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça comportamento esperado para evitar surpresa de pausa sem contexto.\nSincronizando doutrina curta para lembrar ritual de pausa com `iterationReminder` no status local-safe.\nRitual de pausa agora inclui lembrete explícito de próxima iteração sem inflar output.",
       "verification": "VER-BUD-1042"
+    },
+    {
+      "id": "TASK-BUD-691",
+      "description": "Expor `timeoutPressureSummary` curto no context_watch_status para leitura rápida de instabilidade (count/threshold/window) sem abrir details completos.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_status` inclui `timeoutPressureSummary` bounded.",
+        "Quando não houver pressão, valor explícito `none`.",
+        "Sem alterar autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz surpresa operacional em pausas sob timeout intermitente.\nFila local-safe reseeded para evitar nova pausa seca; iniciando visibilidade curta `timeoutPressureSummary` no context_watch_status."
+    },
+    {
+      "id": "TASK-BUD-692",
+      "description": "Adicionar smoke para `timeoutPressureSummary` no context_watch_status.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-691"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida summary preenchido quando timeout-pressure ativo em estado simulado.",
+        "Smoke valida fallback `none` sem pressão.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão da visibilidade operacional do novo sinal."
+    },
+    {
+      "id": "TASK-BUD-693",
+      "description": "Sincronizar nota curta na doutrina sobre leitura de timeoutPressureSummary no fechamento operacional.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-691"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Menção curta anti-bloat ao summary de timeout-pressure.",
+        "Sem criar nova política de autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] padroniza leitura rápida do sinal sem depender de memória tácita."
     }
   ]
 }
