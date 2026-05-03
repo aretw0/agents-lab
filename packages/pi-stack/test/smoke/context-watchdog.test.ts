@@ -57,6 +57,8 @@ import contextWatchdogExtension, {
 	resolveContextWatchSteeringDispatch,
 	resolveFinalTurnAnnouncementDispatch,
 	resolveCheckpointEvidenceReadyForCalmClose,
+	resolvePreCompactIdlePrepDispatch,
+	reconcileAutoResumeHandoffFocus,
 	resolvePreCompactCalmCloseSignal,
 	resolveProgressPreservationSignal,
 	summarizeProgressPreservationSignal,
@@ -551,6 +553,57 @@ describe("context-watchdog", () => {
 		expect(divergent.ok).toBe(false);
 		expect(divergent.blockers).toEqual(["missing-task", "completed-focus", "board-handoff-divergence"]);
 		expect(divergent.summary).toContain("blockers=missing-task|completed-focus|board-handoff-divergence");
+	});
+
+	it("reconciles stale handoff focus and emits pre-compact idle-prep hints deterministically", () => {
+		const reconcile = reconcileAutoResumeHandoffFocus({
+			handoff: { current_tasks: ["TASK-DONE", "TASK-MISSING", "TASK-RUN"] },
+			taskStatusById: {
+				"TASK-DONE": "completed",
+				"TASK-RUN": "in-progress",
+				"TASK-NEXT": "planned",
+			},
+			preferredTaskIds: ["TASK-NEXT"],
+			maxTasks: 3,
+		});
+		expect(reconcile.changed).toBe(true);
+		expect(reconcile.reason).toBe("filtered-focus");
+		expect(reconcile.nextFocus).toEqual(["TASK-RUN"]);
+		expect(reconcile.droppedFocus).toEqual(["TASK-DONE", "TASK-MISSING"]);
+
+		const fallback = reconcileAutoResumeHandoffFocus({
+			handoff: { current_tasks: ["TASK-DONE"] },
+			taskStatusById: {
+				"TASK-DONE": "completed",
+				"TASK-NEXT": "planned",
+			},
+			preferredTaskIds: ["TASK-NEXT"],
+			maxTasks: 3,
+		});
+		expect(fallback.changed).toBe(true);
+		expect(fallback.reason).toBe("preferred-fallback");
+		expect(fallback.nextFocus).toEqual(["TASK-NEXT"]);
+
+		const prep = resolvePreCompactIdlePrepDispatch({
+			assessmentLevel: "checkpoint",
+			decisionReason: "not-idle",
+			nowMs: 10_000,
+			lastNotifyAtMs: 0,
+			cooldownMs: 2_000,
+		});
+		expect(prep.shouldNotify).toBe(true);
+		expect(prep.reason).toBe("emit");
+		expect(prep.recommendation).toContain("idle");
+
+		const prepCooldown = resolvePreCompactIdlePrepDispatch({
+			assessmentLevel: "checkpoint",
+			decisionReason: "pending-messages",
+			nowMs: 11_000,
+			lastNotifyAtMs: 10_500,
+			cooldownMs: 2_000,
+		});
+		expect(prepCooldown.shouldNotify).toBe(false);
+		expect(prepCooldown.reason).toBe("cooldown");
 	});
 
 	it("exposes calm-close readiness and anti-paralysis signal deterministically", () => {

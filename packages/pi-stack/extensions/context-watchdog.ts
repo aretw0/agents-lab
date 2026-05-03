@@ -887,6 +887,105 @@ export function resolveAntiParalysisDispatch(input: {
 	return { shouldNotify: true, reason: "emit" };
 }
 
+export type PreCompactIdlePrepDispatchReason =
+	| "not-precompact"
+	| "trigger-ready"
+	| "not-deferral"
+	| "cooldown"
+	| "emit";
+
+export type PreCompactIdlePrepDispatch = {
+	shouldNotify: boolean;
+	reason: PreCompactIdlePrepDispatchReason;
+	recommendation?: string;
+};
+
+export function resolvePreCompactIdlePrepDispatch(input: {
+	assessmentLevel: ContextWatchdogLevel;
+	decisionReason: ContextWatchAutoCompactDecision["reason"];
+	nowMs: number;
+	lastNotifyAtMs: number;
+	cooldownMs?: number;
+}): PreCompactIdlePrepDispatch {
+	const level = input.assessmentLevel;
+	const precompactLevel = level === "checkpoint" || level === "compact";
+	if (!precompactLevel) return { shouldNotify: false, reason: "not-precompact" };
+	if (input.decisionReason === "trigger") return { shouldNotify: false, reason: "trigger-ready" };
+	if (!isAutoCompactDeferralReason(input.decisionReason)) {
+		return { shouldNotify: false, reason: "not-deferral" };
+	}
+
+	const nowMs = Math.max(0, Math.floor(Number(input.nowMs ?? 0)));
+	const lastNotifyAtMs = Math.max(0, Math.floor(Number(input.lastNotifyAtMs ?? 0)));
+	const cooldownMs = Math.max(1_000, Math.floor(Number(input.cooldownMs ?? 60_000)));
+	if (lastNotifyAtMs > 0 && (nowMs - lastNotifyAtMs) < cooldownMs) {
+		return { shouldNotify: false, reason: "cooldown" };
+	}
+
+	const recommendation = level === "compact"
+		? "pre-compact: close this micro-slice and keep the session idle so auto-compact can run."
+		: "checkpoint-close: finish this slice and keep the session idle so graceful auto-compact can run before hard compact.";
+	return { shouldNotify: true, reason: "emit", recommendation };
+}
+
+export type AutoResumeHandoffFocusReconcileResult = {
+	changed: boolean;
+	reason: "unchanged" | "filtered-focus" | "preferred-fallback" | "cleared";
+	previousFocus: string[];
+	nextFocus: string[];
+	droppedFocus: string[];
+};
+
+function normalizeTaskFocusList(value: unknown): string[] {
+	if (!Array.isArray(value)) return [];
+	return value
+		.filter((row): row is string => typeof row === "string")
+		.map((row) => row.trim())
+		.filter(Boolean);
+}
+
+function isActiveBoardStatus(status: string | undefined): boolean {
+	return status === "in-progress" || status === "planned";
+}
+
+export function reconcileAutoResumeHandoffFocus(input: {
+	handoff: Record<string, unknown>;
+	taskStatusById: Record<string, string | undefined>;
+	preferredTaskIds?: string[];
+	maxTasks?: number;
+}): AutoResumeHandoffFocusReconcileResult {
+	const maxTasks = Math.max(1, Math.floor(Number(input.maxTasks ?? 3)));
+	const previousFocus = normalizeTaskFocusList(input.handoff.current_tasks);
+	const activeFocus = previousFocus.filter((taskId) => isActiveBoardStatus(input.taskStatusById[taskId]));
+	const droppedFocus = previousFocus.filter((taskId) => !activeFocus.includes(taskId));
+	if (activeFocus.length > 0 && droppedFocus.length === 0) {
+		return {
+			changed: false,
+			reason: "unchanged",
+			previousFocus,
+			nextFocus: previousFocus.slice(0, maxTasks),
+			droppedFocus,
+		};
+	}
+
+	const preferred = normalizeTaskFocusList(input.preferredTaskIds)
+		.filter((taskId) => isActiveBoardStatus(input.taskStatusById[taskId]));
+	const nextFocus = (activeFocus.length > 0 ? activeFocus : preferred).slice(0, maxTasks);
+	const reason: AutoResumeHandoffFocusReconcileResult["reason"] =
+		nextFocus.length > 0
+			? (activeFocus.length > 0 ? "filtered-focus" : "preferred-fallback")
+			: "cleared";
+	const changed = nextFocus.length !== previousFocus.length
+		|| nextFocus.some((taskId, index) => previousFocus[index] !== taskId);
+	return {
+		changed,
+		reason,
+		previousFocus,
+		nextFocus,
+		droppedFocus,
+	};
+}
+
 const CONTEXT_WATCHDOG_SOURCE_PATH = fileURLToPath(import.meta.url);
 
 function readContextWatchdogSourceMtimeMs(): number | undefined {
@@ -1616,6 +1715,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let compactDeferWindowStartedAt = 0;
 	let antiParalysisNotifyCountInWindow = 0;
 	let lastAntiParalysisNotifyAt = 0;
+	let lastPreCompactPrepNotifyAt = 0;
 	let announceWindowStartAt = 0;
 	let announceCountInWindow = 0;
 	let finalTurnSuppressionCountInWindow = 0;
@@ -1756,6 +1856,29 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			compactDeferWindowStartedAt = 0;
 			antiParalysisNotifyCountInWindow = 0;
 			lastAntiParalysisNotifyAt = 0;
+			lastPreCompactPrepNotifyAt = 0;
+		}
+		const preCompactIdlePrep = resolvePreCompactIdlePrepDispatch({
+			assessmentLevel: assessment.level,
+			decisionReason: autoCompactState.decision.reason,
+			nowMs: now,
+			lastNotifyAtMs: lastPreCompactPrepNotifyAt,
+			cooldownMs: config.cooldownMs,
+		});
+		if (config.notify && preCompactIdlePrep.shouldNotify) {
+			lastPreCompactPrepNotifyAt = now;
+			ctx.ui.notify(preCompactIdlePrep.recommendation ?? "context-watch: keep session idle so auto-compact can proceed.", "info");
+			(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+				"context-watchdog.pre-compact-idle-prep",
+				{
+					atIso: new Date(now).toISOString(),
+					assessmentLevel: assessment.level,
+					decisionReason: autoCompactState.decision.reason,
+					dispatchReason: preCompactIdlePrep.reason,
+					recommendation: preCompactIdlePrep.recommendation,
+					compactDeferCount,
+				},
+			);
 		}
 		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
 			enabled: config.autoResumeAfterCompact,
@@ -1917,7 +2040,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					const hasPendingMessages = ctx.hasPendingMessages();
 					const hasRecentSteerInput = lastInputAt > lastAutoCompactTriggerAt;
 					const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
-					const handoffAfterCompact = readHandoffJson(ctx.cwd);
+					let handoffAfterCompact = readHandoffJson(ctx.cwd);
 					const handoffEventAfterCompact = latestContextWatchEvent(handoffAfterCompact);
 					const handoffEventAgeAfterCompact = contextWatchEventAgeMs(handoffEventAfterCompact, nowAfterCompact);
 					const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
@@ -1925,12 +2048,53 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						handoffLastEventAgeMs: handoffEventAgeAfterCompact,
 						maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
 					});
-					const handoffBoardReconciliation = resolveHandoffBoardReconciliation({
+					const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+					const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
+					let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
 						handoff: handoffAfterCompact,
-						taskStatusById: readProjectTaskStatusById(ctx.cwd),
+						taskStatusById,
 						nowMs: nowAfterCompact,
 						maxFreshAgeMs: config.handoffFreshMaxAgeMs,
 					});
+					if (!handoffBoardReconciliation.ok) {
+						const reconcile = reconcileAutoResumeHandoffFocus({
+							handoff: handoffAfterCompact,
+							taskStatusById,
+							preferredTaskIds,
+							maxTasks: 3,
+						});
+						if (reconcile.changed) {
+							handoffAfterCompact = {
+								...handoffAfterCompact,
+								timestamp: new Date(nowAfterCompact).toISOString(),
+								current_tasks: reconcile.nextFocus,
+							};
+							writeHandoffJson(ctx.cwd, handoffAfterCompact);
+							handoffBoardReconciliation = resolveHandoffBoardReconciliation({
+								handoff: handoffAfterCompact,
+								taskStatusById,
+								nowMs: nowAfterCompact,
+								maxFreshAgeMs: config.handoffFreshMaxAgeMs,
+							});
+							(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+								"context-watchdog.auto-resume-handoff-reconciled",
+								{
+									atIso: new Date(nowAfterCompact).toISOString(),
+									reason: reconcile.reason,
+									previousFocus: reconcile.previousFocus,
+									nextFocus: reconcile.nextFocus,
+									droppedFocus: reconcile.droppedFocus,
+									handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
+								},
+							);
+							if (config.notify) {
+								ctx.ui.notify(
+									`context-watch: handoff focus reconciled before auto-resume (${reconcile.reason})`,
+									"info",
+								);
+							}
+						}
+					}
 					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
 					const reloadRequired = isReloadRequiredForSourceUpdate();
 					const autoResumeDecision = resolveAutoResumeDispatchDecision({
@@ -1971,10 +2135,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
 						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
-							readHandoffJson(ctx.cwd),
+							handoffAfterCompact,
 							config.handoffFreshMaxAgeMs,
 							Date.now(),
-							{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
+							{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1) },
 						);
 						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
@@ -2328,6 +2492,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		compactDeferWindowStartedAt = 0;
 		antiParalysisNotifyCountInWindow = 0;
 		lastAntiParalysisNotifyAt = 0;
+		lastPreCompactPrepNotifyAt = 0;
 		announceWindowStartAt = 0;
 		announceCountInWindow = 0;
 		finalTurnSuppressionCountInWindow = 0;
@@ -3147,6 +3312,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				compactDeferWindowStartedAt = 0;
 				antiParalysisNotifyCountInWindow = 0;
 				lastAntiParalysisNotifyAt = 0;
+				lastPreCompactPrepNotifyAt = 0;
 				announceWindowStartAt = 0;
 				announceCountInWindow = 0;
 				finalTurnSuppressionCountInWindow = 0;

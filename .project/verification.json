@@ -11364,6 +11364,24 @@
       "method": "test",
       "timestamp": "2026-05-03T02:54:21.533Z",
       "evidence": "Smoke de ops calibration expandida em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts`: (1) fallback live-board verifica summary com `source=live-board-fallback`, `liveAutoAdvance=eligible`, `liveNext=TASK-NEXT`; (2) novo teste garante remoção de `unknown` quando blockers explícitos existem (`focus-not-complete`). Validação conjunta: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (45 passed)."
+    },
+    {
+      "id": "VER-BUD-1016",
+      "target": "TASK-BUD-671",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T12:48:54.745Z",
+      "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora inclui `resolvePreCompactIdlePrepDispatch` + runtime hook `context-watchdog.pre-compact-idle-prep`. Quando compactação está em checkpoint/compact e defere por `not-idle|pending-messages|in-flight`, watchdog emite orientação explícita de fechar slice e manter idle, com cooldown (`config.cooldownMs`) para evitar spam."
+    },
+    {
+      "id": "VER-BUD-1017",
+      "target": "TASK-BUD-672",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-03T12:49:04.501Z",
+      "evidence": "`packages/pi-stack/extensions/context-watchdog.ts` agora reconcilia foco do handoff antes de decidir auto-resume pós-compact via `reconcileAutoResumeHandoffFocus` + evento `context-watchdog.auto-resume-handoff-reconciled`. Se houver `completed/missing/divergent` no foco, tenta filtrar para tasks ativas ou fallback para preferred tasks e reavalia reconciliação antes de suprimir. Cobertura adicionada em `packages/pi-stack/test/smoke/context-watchdog.test.ts` (novo caso: reconciliação + pre-compact prep). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts` (67 passed)."
     }
   ]
 }

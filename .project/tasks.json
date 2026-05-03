@@ -15220,7 +15220,7 @@
     {
       "id": "TASK-BUD-659",
       "description": "Operationally validate delegation rehearsal readiness on real workspace after fallback hardening and preload refresh.",
-      "status": "blocked",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-658"
@@ -15235,7 +15235,7 @@
         "Checkpoint records evidence and next human decision."
       ],
       "milestone": "delegation-activation-local-safe-2026-05",
-      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final."
+      "notes": "[provenance:human] source_task=TASK-BUD-658 reason=Convert hardening into practical delegation activation evidence.\n[rationale:risk-control] Validação operacional confirma ganho real no workspace (não só fixture), garantindo blockers explícitos e packet pronto para decisão humana quando foco/sucessor existem.\nPreparado foco para validação live pós-reload: handoff current_tasks aponta para TASK-BUD-658 (completed) para exercitar fallback live-board para sucessor local-safe.\nValidação operacional parcial: `autonomy_lane_auto_advance_snapshot` já está `eligible next=TASK-BUD-659`, enquanto `simple_delegate_rehearsal_packet` ainda bloqueia por telemetry stale (`unknown|focus-not-complete`) na sessão atual — comportamento esperado antes de /reload para carregar fallback live-board recém-implementado.\nBloqueada temporariamente por runtime gate: validar fallback live no packet exige /reload após commits 668d017+; retomar logo após reload para concluir evidência final.\nReload confirmado; retomando validação live pós-fallback com workspace clean/preload use-pack."
     },
     {
       "id": "TASK-BUD-660",
@@ -15331,6 +15331,152 @@
       "milestone": "delegation-operator-clarity-2026-05",
       "notes": "[provenance:human] source_task=TASK-BUD-663 reason=Guarantee low-nudge triage string remains stable and auditable.\nCobertura protege clareza de summary e evita ruído de reason placeholder.",
       "verification": "VER-BUD-1015"
+    },
+    {
+      "id": "TASK-BUD-665",
+      "description": "Promote live-board fallback to telemetry-equivalent readiness in simple_delegate_rehearsal_packet when telemetry is stale but live auto-advance is eligible.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-659"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "When autoAdvanceResolutionSource=live-board-fallback and capability/mix are ready, rehearsal packet can reach decision=ready without manual telemetry override.",
+        "Packet still preserves fail-closed behavior when live snapshot is blocked.",
+        "Details expose effective telemetry normalization used for readiness."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Lane 1 objective: unblock delegation activation with low-nudge operation under stale telemetry windows."
+    },
+    {
+      "id": "TASK-BUD-666",
+      "description": "Add smoke coverage for live-fallback telemetry-equivalent readiness path in simple_delegate_rehearsal_packet/start_packet.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-665"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke proves packet/start become ready with live-board-fallback eligible and stale telemetry inputs.",
+        "Smoke keeps blocked behavior when live snapshot is blocked.",
+        "Suite stays green."
+      ],
+      "milestone": "delegation-activation-local-safe-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-665 reason=Protect delegation activation regression in low-nudge mode."
+    },
+    {
+      "id": "TASK-BUD-667",
+      "description": "Expose ready-stock target guidance in autonomy_lane_material_readiness_packet (gap-to-target + recommended seed count).",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Readiness packet reports `stockGap` and `recommendedSeedCount` against target_slices.",
+        "Contract remains report-only and bounded.",
+        "Guidance aligns with ultra-low-nudge wave sizing."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Lane 2 objective: keep local-safe material stocked with minimal interaction."
+    },
+    {
+      "id": "TASK-BUD-668",
+      "description": "Add smoke tests for readiness stock-gap guidance fields in autonomy lane material packets.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-667"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke validates stockGap/recommendedSeedCount shape for continue/seed-backlog states.",
+        "No regressions in existing material seed/readiness tests.",
+        "Suite remains green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-667 reason=Keep throughput stock guidance stable over future refactors."
+    },
+    {
+      "id": "TASK-BUD-669",
+      "description": "Harden context-watch stale-handoff operability by adding explicit age/threshold metrics to status summary surfaces.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "context_watch_status/details include concise handoff age seconds and freshness threshold seconds.",
+        "Summary remains compact and avoids extra warning noise.",
+        "No change to authorization/dispatch behavior."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Lane 3 objective: runtime hardening for low-nudge troubleshooting of stale handoff blockers."
+    },
+    {
+      "id": "TASK-BUD-670",
+      "description": "Add smoke coverage for stale-handoff age/threshold metrics in context_watch_status payload.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-669"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke asserts age/threshold metrics are present and bounded in details payload.",
+        "No regression in existing context-watch status summaries.",
+        "Suite remains green."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-669 reason=Preserve runtime-hardening observability under compact pressure."
+    },
+    {
+      "id": "TASK-BUD-671",
+      "description": "Emit explicit pre-compact idle-prep notification during checkpoint/compact deferral windows so operator sees stop-and-idle guidance before auto compact.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "When auto compact is deferred by not-idle/pending-messages/in-flight in checkpoint/compact levels, watchdog can emit bounded prep guidance.",
+        "Notifications are cooldown-bounded to avoid noise spam.",
+        "Behavior remains fail-closed (no dispatch changes)."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[provenance:human] source_task=none reason=Incident: auto compact happened without visible preparation guidance.\nMitiga falta de aviso/preparo antes do auto-compact observado no incidente.",
+      "verification": "VER-BUD-1016"
+    },
+    {
+      "id": "TASK-BUD-672",
+      "description": "Auto-reconcile stale/divergent handoff focus with board-active tasks before auto-resume decision after compact.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-671"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "If handoff focus has completed/missing/divergent tasks, watchdog attempts bounded reconciliation using active/preferred tasks before deciding suppression.",
+        "Auto-resume suppression remains when reconciliation cannot produce valid focus.",
+        "Smoke coverage validates reconciliation helper and pre-compact prep dispatch behavior."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[provenance:human] source_task=TASK-BUD-671 reason=Incident: auto resume suppressed by board-handoff divergence and stopped lane continuity.\nReduz suppress por board-handoff-divergence quando divergência é reconciliável localmente.",
+      "verification": "VER-BUD-1017"
     }
   ]
 }
