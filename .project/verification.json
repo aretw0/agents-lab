@@ -12228,6 +12228,15 @@
       "method": "inspection+test",
       "timestamp": "2026-05-04T11:14:54.079Z",
       "evidence": "Decisão explícita registrada (manter-simplificado): `lane-queue` permanece contrato mínimo para deferimento entre turns e board-first continuity; steering/follow-up nativos continuam caminho padrão para ação imediata. Fronteira/migração segura documentadas em `docs/guides/control-plane-operating-doctrine.md` (nova seção 'Fronteira pragmática: lane-queue vs steering/follow-up nativos'). UX/help alinhado em `packages/pi-stack/extensions/guardrails-core-lane-queue.ts` com escopo e natureza operacional de `list/clear/pause/resume`. Continuidade local-safe preservada (sem remoção de comandos). Smoke green: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (129 passed)."
+    },
+    {
+      "id": "VER-BUD-1112",
+      "target": "TASK-BUD-760",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-04T17:32:59.898Z",
+      "evidence": "`scripts/pi-isolated.mjs` agora explicita no modo `--dev` com `--resume` que a sessão do pi é retomada, mas o loop de fábrica continua pausado até `npm run pi:loop:resume`. Help atualizado com `npm run pi:dev:resume`. Cobertura adicionada em `scripts/test/pi-isolated-resume-intent.test.mjs` para detecção de `--resume`. Validação: `node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs` (5 passed)."
     }
   ]
 }

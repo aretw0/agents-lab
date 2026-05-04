@@ -17081,6 +17081,26 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] resolver confusão de produto/UX antes da release 0.8.0.\nDecisão evita confusão de produto sem quebrar fluxo atual; deprecação agressiva adiada para fase posterior com telemetria.",
       "verification": "VER-BUD-1111"
+    },
+    {
+      "id": "TASK-BUD-760",
+      "description": "Alinhar UX de `npm run pi:dev:resume`: explicitar que `--resume` retoma sessão do pi sem retomar loop de fábrica automaticamente.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-759"
+      ],
+      "files": [
+        "scripts/pi-isolated.mjs",
+        "scripts/test/pi-isolated-resume-intent.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "Mensagem de startup deixa claro separação entre session resume e loop resume.",
+        "Cobertura mínima para detecção de `--resume` no launcher."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir confusão operacional e evitar controles desalinhados no modo dev/resume.\n[provenance:human] source_task=TASK-BUD-759 reason=alinhamento explícito solicitado pelo operador durante retomada de sessão\nAlinhamento operacional explicitado para evitar confusão entre session resume e auto-dispatch loop.",
+      "verification": "VER-BUD-1112"
     }
   ]
 }
