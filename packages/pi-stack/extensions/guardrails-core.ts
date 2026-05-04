@@ -97,6 +97,18 @@ import {
   type DispatchFailureClass,
   type LongRunProviderTransientRetryConfig,
 } from "./guardrails-core-provider-retry";
+import {
+  computeLoopEvidenceReadiness,
+  readLoopActivationEvidence,
+  shouldRefreshLoopEvidenceFromRuntimeSnapshot,
+  writeLoopActivationEvidence,
+  type LoopActivationEvidenceState,
+  type LoopEvidenceReadiness,
+} from "./guardrails-core-lane-queue-evidence";
+import {
+  registerGuardrailsLaneQueueSurface,
+  type GuardrailsLaneQueueSurfaceRuntimeSnapshot,
+} from "./guardrails-core-lane-queue-surface";
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
 import { buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeGuardrailsIntent, parseGuardrailsIntent, summarizeGuardrailsIntent } from "./guardrails-core-intent-bus";
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
@@ -133,6 +145,12 @@ import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies
 import { recordTrustedHumanConfirmationUiDecision, type HumanConfirmationActionFingerprint } from "./guardrails-core-human-confirmation";
 import { CDP_SCRIPT_HINT, DISALLOWED_BASH_PATTERNS, INTERACTIVE_TERMS, SENSITIVE_DOMAINS, SENSITIVE_HINTS } from "./guardrails-core-web-routing-config";
 export * from "./guardrails-core-exports";
+export {
+  computeLoopEvidenceReadiness,
+  shouldRefreshLoopEvidenceFromRuntimeSnapshot,
+  type LoopActivationEvidenceState,
+  type LoopEvidenceReadiness,
+} from "./guardrails-core-lane-queue-evidence";
 
 // =============================================================================
 // Read / Path Guard
@@ -1375,91 +1393,6 @@ function updateLongRunLaneStatus(
     "guardrails-core-lane",
     `[lane] ${lane} queued=${queued} loop=${state.mode}/${state.health}`,
   );
-}
-
-export interface LoopActivationEvidenceState {
-  version: 1;
-  updatedAtIso: string;
-  lastLoopReady?: {
-    atIso: string;
-    markersLabel: string;
-    runtimeCodeState: RuntimeCodeActivationState;
-    boardAutoAdvanceGate: BoardAutoAdvanceGateReason;
-    nextTaskId?: string;
-    milestone?: string;
-  };
-  lastBoardAutoAdvance?: {
-    atIso: string;
-    taskId: string;
-    milestone?: string;
-    runtimeCodeState: RuntimeCodeActivationState;
-    markersLabel: string;
-    emLoop: boolean;
-  };
-}
-
-export interface LoopEvidenceReadiness { readyForLoopEvidence: boolean; readyForTaskBud125: boolean; criteria: string[]; }
-
-export function computeLoopEvidenceReadiness(
-  evidence: LoopActivationEvidenceState,
-): LoopEvidenceReadiness {
-  const loopReady = evidence.lastLoopReady;
-  const boardAuto = evidence.lastBoardAutoAdvance;
-  const boardRuntimeActive = Boolean(boardAuto && boardAuto.runtimeCodeState === "active");
-  const boardEmLoop = Boolean(boardAuto && boardAuto.emLoop);
-  const loopRuntimeActive = Boolean(loopReady && loopReady.runtimeCodeState === "active");
-  const criteria = [
-    `boardAuto.runtime=active:${boardAuto ? (boardRuntimeActive ? "yes" : "no") : "n/a"}`,
-    `boardAuto.emLoop=yes:${boardAuto ? (boardEmLoop ? "yes" : "no") : "n/a"}`,
-    `loopReady.runtime=active:${loopReady ? (loopRuntimeActive ? "yes" : "no") : "n/a"}`,
-  ];
-  const readyForLoopEvidence = boardRuntimeActive && boardEmLoop && loopRuntimeActive;
-  return { readyForLoopEvidence, readyForTaskBud125: readyForLoopEvidence, criteria };
-}
-
-export function shouldRefreshLoopEvidenceFromRuntimeSnapshot(
-  runtime: Pick<LongRunLoopRuntimeState, "mode" | "health" | "stopCondition" | "leaseExpiresAtIso">,
-  nowMs = Date.now(),
-): boolean {
-  if (runtime.mode !== "running" || runtime.health !== "healthy" || runtime.stopCondition !== "none") {
-    return false;
-  }
-  return !isLongRunLoopLeaseExpired(runtime, nowMs);
-}
-
-function loopActivationEvidencePath(cwd: string): string {
-  return join(cwd, ".pi", "guardrails-loop-evidence.json");
-}
-
-function readLoopActivationEvidence(cwd: string): LoopActivationEvidenceState {
-  const p = loopActivationEvidencePath(cwd);
-  if (!existsSync(p)) {
-    return {
-      version: 1,
-      updatedAtIso: new Date(0).toISOString(),
-    };
-  }
-  try {
-    const raw = JSON.parse(readFileSync(p, "utf8")) as Partial<LoopActivationEvidenceState>;
-    return {
-      version: 1,
-      updatedAtIso: typeof raw.updatedAtIso === "string" ? raw.updatedAtIso : new Date(0).toISOString(),
-      lastLoopReady: raw.lastLoopReady,
-      lastBoardAutoAdvance: raw.lastBoardAutoAdvance,
-    };
-  } catch {
-    return {
-      version: 1,
-      updatedAtIso: new Date(0).toISOString(),
-    };
-  }
-}
-
-function writeLoopActivationEvidence(cwd: string, state: LoopActivationEvidenceState): string {
-  mkdirSync(join(cwd, ".pi"), { recursive: true });
-  const p = loopActivationEvidencePath(cwd);
-  writeFileSync(p, `${JSON.stringify(state, null, 2)}\n`, "utf8");
-  return p;
 }
 
 export function shouldAnnounceStrictInteractiveMode(
@@ -3130,440 +3063,38 @@ export default function (pi: ExtensionAPI) {
   registerGuardrailsI18nLintSurface(pi);
   registerGuardrailsBackgroundProcessSurface(pi);
   registerGuardrailsHumanConfirmationSurface(pi);
-  pi.registerCommand("lane-queue", {
-    description: "Manage deferred intents that should not interrupt the current long-run lane. Usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]",
-    handler: async (args, ctx) => {
-      const rawArgs = String(args ?? "").trim();
-      const sub = rawArgs.toLowerCase().split(/\s+/)[0] || "status";
-      const knownSubcommands = new Set(["status", "help", "list", "add", "board-next", "pop", "clear", "pause", "resume", "evidence"]);
-
-      if (sub === "help") {
-        ctx.ui.notify(buildLaneQueueHelpLines().join("\n"), "info");
-        return;
-      }
-
-      if (rawArgs.length > 0 && !knownSubcommands.has(sub)) {
-        ctx.ui.notify(
-          [`lane-queue: unknown subcommand '${sub}'.`, ...buildLaneQueueHelpLines()].join("\n"),
-          "warning",
-        );
-        return;
-      }
-
-      if (sub === "clear") {
-        const cleared = clearDeferredIntentQueue(ctx.cwd);
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-        ctx.ui.notify(`lane-queue: cleared ${cleared.cleared} item(s).`, "info");
-        return;
-      }
-
-      if (sub === "pause") {
-        clearAutoDrainTimer();
-        setLoopMode(ctx, "paused", "manual-pause");
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-        appendAuditEntry(ctx, "guardrails-core.long-run-loop-mode", {
-          atIso: new Date().toISOString(),
-          mode: longRunLoopRuntimeState.mode,
-          health: longRunLoopRuntimeState.health,
-          reason: longRunLoopRuntimeState.lastTransitionReason,
-        });
-        ctx.ui.notify("lane-queue: long-run loop paused (auto-drain off until resume)", "info");
-        return;
-      }
-
-      if (sub === "resume") {
-        setLoopMode(ctx, "running", "manual-resume");
-        markLoopHealthy(ctx, "manual-resume");
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-        appendAuditEntry(ctx, "guardrails-core.long-run-loop-mode", {
-          atIso: new Date().toISOString(),
-          mode: longRunLoopRuntimeState.mode,
-          health: longRunLoopRuntimeState.health,
-          reason: longRunLoopRuntimeState.lastTransitionReason,
-        });
-        scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
-        ctx.ui.notify("lane-queue: long-run loop resumed", "info");
-        return;
-      }
-
-      if (sub === "add") {
-        const text = parseLaneQueueAddText(rawArgs);
-        if (!text) {
-          ctx.ui.notify("lane-queue: usage /lane-queue add <text> (tip: /lane-queue help)", "warning");
-          return;
-        }
-
-        const queued = enqueueDeferredIntent(
-          ctx.cwd,
-          text,
-          "interactive-command",
-          longRunIntentQueueConfig.maxItems,
-        );
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-queued", {
-          atIso: new Date().toISOString(),
-          itemId: queued.itemId,
-          queuedCount: queued.queuedCount,
-          queuePath: queued.queuePath,
-          activeLongRun: !ctx.isIdle() || ctx.hasPendingMessages(),
-          manual: true,
-        });
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-        ctx.ui.notify(`lane-queue: queued ${queued.itemId} (total=${queued.queuedCount})`, "info");
-        return;
-      }
-
-      if (sub === "board-next") {
-        const parsedBoardNext = parseLaneQueueMilestoneScope(rawArgs);
-        if (parsedBoardNext.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueBoardNextUsage()}`, "warning"); return; }
-        const boardNextSelection = resolveLaneQueueBoardNextMilestoneSelection(parsedBoardNext, longRunIntentQueueConfig.defaultBoardMilestone);
-        const boardNextMilestone = boardNextSelection.milestone;
-        const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 5, milestone: boardNextMilestone });
-        if (!boardReadiness.ready || !boardReadiness.nextTaskId) {
-          appendAuditEntry(ctx, "guardrails-core.board-intent-blocked", {
-            atIso: new Date().toISOString(),
-            reason: boardReadiness.reason,
-            recommendation: boardReadiness.recommendation,
-            blockedByDependencies: boardReadiness.blockedByDependencies,
-            planned: boardReadiness.totals.planned,
-            milestone: boardNextMilestone,
-            milestoneSource: boardNextSelection.source,
-          });
-          ctx.ui.notify([
-            `lane-queue: board-next blocked (${boardReadiness.reason}${boardNextMilestone ? `; milestone=${boardNextMilestone}` : ""})`,
-            `boardHint: ${boardReadiness.recommendation}`,
-          ].join("\n"), "warning");
-          return;
-        }
-        const nextTaskId = boardReadiness.nextTaskId;
-        const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-        if (activeLongRun) {
-          const queuedIntent = buildBoardExecuteNextIntent(boardNextMilestone);
-          const queuedText = encodeGuardrailsIntent(queuedIntent);
-          const queuedSummary = summarizeGuardrailsIntent(queuedIntent);
-          const queued = enqueueDeferredIntent(
-            ctx.cwd,
-            queuedText,
-            "board-first-intent",
-            longRunIntentQueueConfig.maxItems,
-            {
-              dedupeKey: queuedText,
-              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-            },
-          );
-          appendAuditEntry(ctx, "guardrails-core.board-intent-queued", {
-            atIso: new Date().toISOString(),
-            itemId: queued.itemId,
-            taskId: nextTaskId,
-            queuePath: queued.queuePath,
-            queuedCount: queued.queuedCount,
-            selectionPolicy: boardReadiness.selectionPolicy,
-            milestone: boardNextMilestone,
-            milestoneSource: boardNextSelection.source,
-            intentType: queuedIntent.type,
-            intentVersion: queuedIntent.version,
-            intentSummary: queuedSummary,
-            deduped: queued.deduped,
-          });
-          updateLongRunLaneStatus(ctx, activeLongRun, longRunLoopRuntimeState);
-          ctx.ui.notify(queued.deduped
-            ? `lane-queue: board-next intent já estava na fila (next=${nextTaskId}; total=${queued.queuedCount})`
-            : `lane-queue: board-next queued next=${nextTaskId} (total=${queued.queuedCount})`, "info");
-          return;
-        }
-        const intent = buildBoardExecuteNextIntent(boardNextMilestone); const intentText = encodeGuardrailsIntent(intent); const intentSummary = summarizeGuardrailsIntent(intent);
-        appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch", {
-          atIso: new Date().toISOString(),
-          taskId: nextTaskId,
-          selectionPolicy: boardReadiness.selectionPolicy,
-          milestone: boardNextMilestone,
-          milestoneSource: boardNextSelection.source,
-          deliverAs: "followUp",
-          intentType: intent.type,
-          intentVersion: intent.version,
-          intentSummary,
-        });
-        ctx.ui.notify(`lane-queue: board-next dispatch ${nextTaskId}`, "info");
-        try {
-          pi.sendUserMessage(intentText, { deliverAs: "followUp" });
-          markLoopDispatch(ctx, `board-${nextTaskId}`);
-          scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error ?? "unknown-error");
-          const fallbackIntent = buildBoardExecuteNextIntent(boardNextMilestone);
-          const fallbackText = encodeGuardrailsIntent(fallbackIntent);
-          const fallbackSummary = summarizeGuardrailsIntent(fallbackIntent);
-          const queued = enqueueDeferredIntent(
-            ctx.cwd,
-            fallbackText,
-            "board-first-intent-fallback",
-            longRunIntentQueueConfig.maxItems,
-            {
-              dedupeKey: fallbackText,
-              dedupeWindowMs: longRunIntentQueueConfig.dedupeWindowMs,
-            },
-          );
-          markLoopDegraded(ctx, "board-intent-dispatch-failed", message);
-          const failureTrack = trackClassifiedDispatchFailure(ctx, "board-intent-dispatch-failed", message);
-          const errorClass = failureTrack.errorClass;
-          appendAuditEntry(ctx, "guardrails-core.board-intent-dispatch-failed", {
-            atIso: new Date().toISOString(),
-            taskId: nextTaskId,
-            error: message,
-            errorClass,
-            errorFingerprint: failureTrack.fingerprint,
-            identicalFailureStreak: failureTrack.streak,
-            pauseAfterUsed: failureTrack.pauseAfterUsed,
-            windowMsUsed: failureTrack.windowMsUsed,
-            pauseTriggered: failureTrack.pauseTriggered,
-            fallbackQueued: true,
-            queuedCount: queued.queuedCount,
-            deduped: queued.deduped,
-            selectionPolicy: boardReadiness.selectionPolicy,
-            milestone: boardNextMilestone,
-            milestoneSource: boardNextSelection.source,
-            intentType: fallbackIntent.type,
-            intentVersion: fallbackIntent.version,
-            intentSummary: fallbackSummary,
-          });
-          ctx.ui.notify(
-            queued.deduped
-              ? `lane-queue: board-next dispatch failed (${message}). fallback já estava em fila para next=${nextTaskId} (total=${queued.queuedCount})`
-              : `lane-queue: board-next dispatch failed (${message}). fallback queued next=${nextTaskId} (total=${queued.queuedCount})`,
-            "warning",
-          );
-        }
-        return;
-      }
-      if (sub === "list") {
-        const items = listDeferredIntents(ctx.cwd);
-        if (items.length === 0) {
-          ctx.ui.notify("lane-queue: empty", "info");
-          return;
-        }
-        const lines = [
-          `lane-queue: ${items.length} pending`,
-          ...items.slice(-10).map((item) => `- ${item.id} ${item.atIso} :: ${item.text.slice(0, 120)}`),
-        ];
-        ctx.ui.notify(lines.join("\n"), "info");
-        return;
-      }
-      if (sub === "evidence") {
-        const evidenceMilestoneParsed = parseLaneQueueMilestoneScope(rawArgs);
-        if (evidenceMilestoneParsed.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueEvidenceUsage()}`, "warning"); return; }
-        const evidenceMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(evidenceMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: evidenceMilestoneSelection.milestone });
-        const evidence = readLoopActivationEvidence(ctx.cwd);
-        const loopReady = evidence.lastLoopReady; const boardAuto = evidence.lastBoardAutoAdvance;
-        const readiness = computeLoopEvidenceReadiness(evidence); const milestoneParity = evaluateLaneEvidenceMilestoneParity(evidenceMilestoneSelection.milestone, boardAuto?.milestone, loopReady?.milestone);
-        const lines = [
-          "lane-queue: loop evidence",
-          `updatedAt: ${evidence.updatedAtIso}`,
-          `statusMilestone: ${evidenceMilestoneSelection.milestone ?? "n/a"}@${evidenceMilestoneSelection.source}`,
-          `boardReadiness: ${buildBoardReadinessStatusLabel(boardReadiness)}`,
-          `readyForLoopEvidence: ${readiness.readyForLoopEvidence ? "yes" : "no"}`,
-          `readyForTaskBud125(deprecated): ${readiness.readyForTaskBud125 ? "yes" : "no"}`,
-          `scopeParity: expected=${milestoneParity.expectedMilestone ?? "n/a"} boardAuto=${milestoneParity.boardAutoMilestone ?? "n/a"} loopReady=${milestoneParity.loopReadyMilestone ?? "n/a"} matches=${milestoneParity.matches ? "yes" : "no"} reason=${milestoneParity.reason}`,
-          boardAuto
-            ? `boardAuto: task=${boardAuto.taskId}${boardAuto.milestone ? ` milestone=${boardAuto.milestone}` : ""} at=${boardAuto.atIso} runtime=${boardAuto.runtimeCodeState} emLoop=${boardAuto.emLoop ? "yes" : "no"}`
-            : "boardAuto: n/a",
-          loopReady
-            ? `loopReady: at=${loopReady.atIso}${loopReady.milestone ? ` milestone=${loopReady.milestone}` : ""} runtime=${loopReady.runtimeCodeState} gate=${loopReady.boardAutoAdvanceGate} next=${loopReady.nextTaskId ?? "n/a"}`
-            : "loopReady: n/a",
-          `criteria: ${readiness.criteria.join(" | ")}`,
-          ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
-        ];
-        appendAuditEntry(ctx, "guardrails-core.loop-evidence-status", {
-          atIso: new Date().toISOString(),
-          readyForLoopEvidence: readiness.readyForLoopEvidence,
-          readyForTaskBud125: readiness.readyForTaskBud125,
-          statusMilestone: evidenceMilestoneSelection.milestone,
-          statusMilestoneSource: evidenceMilestoneSelection.source,
-          boardReadiness,
-          milestoneParity,
-          boardAuto,
-          loopReady,
-          criteria: readiness.criteria,
-        });
-        ctx.ui.notify(lines.join("\n"), shouldWarnLaneEvidence(readiness.readyForLoopEvidence, milestoneParity) ? "warning" : "info");
-        return;
-      }
-
-      if (sub === "pop") {
-        const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-        if (activeLongRun) {
-          ctx.ui.notify("lane-queue: long-run still active; pop blocked to avoid focus drift.", "warning");
-          return;
-        }
-        const popped = dequeueDeferredIntent(ctx.cwd);
-        updateLongRunLaneStatus(ctx, false, longRunLoopRuntimeState);
-        if (!popped.item) {
-          ctx.ui.notify("lane-queue: empty", "info");
-          return;
-        }
-        appendAuditEntry(ctx, "guardrails-core.long-run-intent-pop", {
-          atIso: new Date().toISOString(),
-          itemId: popped.item.id,
-          queuedCount: popped.queuedCount,
-        });
-        ctx.ui.notify(`lane-queue: dispatching ${popped.item.id}`, "info");
-        pi.sendUserMessage(popped.item.text, { deliverAs: "followUp" });
-        markLoopDispatch(ctx, popped.item.id);
-        scheduleAutoDrainDeferredIntent(ctx, "lane_pop");
-        return;
-      }
-
-      const activeLongRun = !ctx.isIdle() || ctx.hasPendingMessages();
-      if (activeLongRun) {
-        refreshLoopLeaseOnActivity(ctx, "lane-status-lease-heartbeat", 10_000);
-      }
-      const items = listDeferredIntents(ctx.cwd);
-      const queued = items.length;
-      const nowMs = Date.now();
-      const idleSinceMs = Math.max(0, nowMs - lastLongRunBusyAt);
-      const dispatchFailureBlockAfter = resolveDispatchFailureBlockAfter(
-        longRunLoopRuntimeState,
-        longRunIntentQueueConfig.dispatchFailureBlockAfter,
-        longRunProviderRetryConfig,
-      );
-      const stopBoundary = resolveLongRunLoopStopBoundary(
-        longRunLoopRuntimeState,
-        dispatchFailureBlockAfter,
-      );
-      const dispatchFailureGate = resolveDispatchFailureRuntimeGate(
-        longRunLoopRuntimeState,
-        dispatchFailureBlockAfter,
-      );
-      const runtimeGate = resolveAutoDrainRuntimeGateReason(
-        resolveAutoDrainGateReason(
-          activeLongRun,
-          queued,
-          nowMs,
-          lastAutoDrainAt,
-          idleSinceMs,
-          longRunIntentQueueConfig,
-        ),
-        longRunLoopRuntimeState,
-        nowMs,
-      );
-      const gate: AutoDrainGateReason =
-        dispatchFailureGate === "dispatch-failure-blocking"
-          ? "dispatch-failure-blocking"
-          : runtimeGate;
-      const providerRetryExhausted =
-        gate === "dispatch-failure-blocking" &&
-        isProviderTransientRetryExhausted(
-          longRunLoopRuntimeState,
-          dispatchFailureBlockAfter,
-          longRunProviderRetryConfig,
-        );
-      const waitMs = estimateAutoDrainWaitMs(
-        activeLongRun,
-        queued,
-        nowMs,
+  registerGuardrailsLaneQueueSurface({
+    pi,
+    appendAuditEntry,
+    runtime: {
+      getLongRunIntentQueueConfig: () => longRunIntentQueueConfig,
+      getLongRunProviderRetryConfig: () => longRunProviderRetryConfig,
+      getLongRunLoopRuntimeState: () => longRunLoopRuntimeState,
+      getDiagnosticsSnapshot: (): GuardrailsLaneQueueSurfaceRuntimeSnapshot => ({
         lastAutoDrainAt,
-        idleSinceMs,
-        longRunIntentQueueConfig,
-      );
-      const oldestAgeMs = oldestDeferredIntentAgeMs(items, nowMs);
-      const nextDrain = gate === "lease-expired"
-        ? "stopped:lease-expired"
-        : gate === "dispatch-failure-blocking"
-          ? providerRetryExhausted
-            ? "stopped:retry-exhausted"
-            : "stopped:dispatch-failure"
-          : activeLongRun
-          ? "after-idle"
-          : waitMs === undefined
-            ? "n/a"
-            : waitMs === 0
-              ? "now"
-              : `${Math.ceil(waitMs / 1000)}s`;
-      const oldest = oldestAgeMs === undefined ? "n/a" : `${Math.ceil(oldestAgeMs / 1000)}s`;
-      const loopError = longRunLoopRuntimeState.lastError
-        ? ` lastError=${longRunLoopRuntimeState.lastError.slice(0, 120)}`
-        : "";
-      const providerRetryPolicy = longRunProviderRetryConfig.enabled
-        ? `${longRunProviderRetryConfig.maxAttempts}x@${Math.ceil(longRunProviderRetryConfig.baseDelayMs / 1000)}s→${Math.ceil(longRunProviderRetryConfig.maxDelayMs / 1000)}s`
-        : "off";
-      const statusMilestoneParsed = parseLaneQueueMilestoneScope(rawArgs);
-      if (statusMilestoneParsed.error) { ctx.ui.notify(`lane-queue: usage ${buildLaneQueueStatusUsage()}`, "warning"); return; }
-      const statusMilestoneSelection = resolveLaneQueueBoardNextMilestoneSelection(statusMilestoneParsed, longRunIntentQueueConfig.defaultBoardMilestone); const boardReadiness = evaluateBoardLongRunReadiness(ctx.cwd, { sampleLimit: 3, milestone: statusMilestoneSelection.milestone });
-      const boardReadinessLabel = buildBoardReadinessStatusLabel(boardReadiness);
-      const autoAdvanceDedupeMs = Math.max(30_000, longRunIntentQueueConfig.autoDrainIdleStableMs * 4);
-      const boardAutoGate = resolveBoardAutoAdvanceGateReason({
-        activeLongRun,
-        queuedCount: queued,
-        loopMode: longRunLoopRuntimeState.mode,
-        loopHealth: longRunLoopRuntimeState.health,
-        stopCondition: longRunLoopRuntimeState.stopCondition,
-        boardReady: boardReadiness.ready,
-        nextTaskId: boardReadiness.nextTaskId,
-        nowMs,
-        lastTaskId: lastBoardAutoAdvanceTaskId,
-        lastTaskAtMs: lastBoardAutoAdvanceAt,
-        dedupeWindowMs: autoAdvanceDedupeMs,
-      });
-      const boardAutoLast = lastBoardAutoAdvanceTaskId
-        ? `${lastBoardAutoAdvanceTaskId}@${Math.max(0, Math.ceil((nowMs - lastBoardAutoAdvanceAt) / 1000))}s`
-        : "n/a";
-      const laneNowLast = lastForceNowAt > 0
-        ? `${Math.max(0, Math.ceil((nowMs - lastForceNowAt) / 1000))}s${lastForceNowTextPreview ? ` text='${lastForceNowTextPreview}'` : ""}`
-        : "n/a";
-      const runtimeCodeState: RuntimeCodeActivationState = currentRuntimeCodeState();
-      const loopEvidence = readLoopActivationEvidence(ctx.cwd);
-      const loopMarkers = resolveLoopActivationMarkers({
-        activeLongRun,
-        queuedCount: queued,
-        loopMode: longRunLoopRuntimeState.mode,
-        loopHealth: longRunLoopRuntimeState.health,
-        stopCondition: longRunLoopRuntimeState.stopCondition,
-        boardReady: boardReadiness.ready,
-        nextTaskId: boardReadiness.nextTaskId,
-        boardAutoGate,
-        runtimeCodeState,
-      });
-      const loopMarkersLabel = buildLoopActivationMarkersLabel(loopMarkers);
-      const loopBlockerHint = buildLoopActivationBlockerHint(loopMarkers);
-      const loopReadyLast = lastLoopActivationReadyAt > 0
-        ? `${Math.max(0, Math.ceil((nowMs - lastLoopActivationReadyAt) / 1000))}s`
-        : "n/a";
-      const evidenceBoardAuto = loopEvidence.lastBoardAutoAdvance;
-      const evidenceBoardAutoAge = evidenceBoardAuto
-        ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceBoardAuto.atIso)) / 1000))}s`
-        : "n/a";
-      const evidenceBoardAutoSummary = evidenceBoardAuto
-        ? `${evidenceBoardAuto.taskId}${evidenceBoardAuto.milestone ? `[${evidenceBoardAuto.milestone}]` : ""}@${evidenceBoardAutoAge} runtime=${evidenceBoardAuto.runtimeCodeState} emLoop=${evidenceBoardAuto.emLoop ? "yes" : "no"}`
-        : "n/a";
-      const evidenceLoopReady = loopEvidence.lastLoopReady;
-      const evidenceLoopReadyAge = evidenceLoopReady
-        ? `${Math.max(0, Math.ceil((nowMs - Date.parse(evidenceLoopReady.atIso)) / 1000))}s`
-        : "n/a";
-      const evidenceLoopReadySummary = evidenceLoopReady
-        ? `${evidenceLoopReadyAge}${evidenceLoopReady.milestone ? ` milestone=${evidenceLoopReady.milestone}` : ""} runtime=${evidenceLoopReady.runtimeCodeState} gate=${evidenceLoopReady.boardAutoAdvanceGate}`
-        : "n/a";
-      const failSignature = !lastDispatchFailureFingerprint ? "n/a" : lastDispatchFailureFingerprint.length > 72 ? `${lastDispatchFailureFingerprint.slice(0, 72)}…` : lastDispatchFailureFingerprint;
-      const failClass = lastDispatchFailureFingerprint ? lastDispatchFailureClass : "n/a";
-      const failPolicy = lastDispatchFailureFingerprint && lastDispatchFailurePauseAfterUsed > 0 && lastDispatchFailureWindowMsUsed > 0
-        ? `${lastDispatchFailurePauseAfterUsed}@${lastDispatchFailureWindowMsUsed}ms`
-        : "n/a";
-
-      ctx.ui.notify(
-        [
-          `lane-queue: ${activeLongRun ? "active" : "idle"} queued=${queued} oldest=${oldest} autoDrain=${longRunIntentQueueConfig.autoDrainOnIdle ? "on" : "off"} batch=${longRunIntentQueueConfig.autoDrainBatchSize} cooldownMs=${longRunIntentQueueConfig.autoDrainCooldownMs} idleStableMs=${longRunIntentQueueConfig.autoDrainIdleStableMs} rapidWindowMs=${longRunIntentQueueConfig.rapidRedispatchWindowMs} dedupeWindowMs=${longRunIntentQueueConfig.dedupeWindowMs} defaultMilestone=${longRunIntentQueueConfig.defaultBoardMilestone ?? "n/a"} statusMilestone=${statusMilestoneSelection.milestone ?? "n/a"}@${statusMilestoneSelection.source} gate=${gate} nextDrain=${nextDrain} stop=${longRunLoopRuntimeState.stopCondition}/${stopBoundary} failStreak=${longRunLoopRuntimeState.consecutiveDispatchFailures}/${dispatchFailureBlockAfter} identicalFail=${identicalDispatchFailureStreak}/${longRunIntentQueueConfig.identicalFailurePauseAfter}@${longRunIntentQueueConfig.identicalFailureWindowMs}ms orphanPauseAfter=${longRunIntentQueueConfig.orphanFailurePauseAfter}@${longRunIntentQueueConfig.orphanFailureWindowMs}ms failClass=${failClass} failPolicy=${failPolicy} failSig=${failSignature} providerRetry=${providerRetryPolicy} runtimeCode=${runtimeCodeState} ${boardReadinessLabel} boardAutoGate=${boardAutoGate} boardAutoLast=${boardAutoLast} laneNowLast=${laneNowLast} loopReadyLast=${loopReadyLast} evidenceBoardAuto=${evidenceBoardAutoSummary} evidenceLoopReady=${evidenceLoopReadySummary} ${loopMarkersLabel} loop=${longRunLoopRuntimeState.mode}/${longRunLoopRuntimeState.health} transition=${longRunLoopRuntimeState.lastTransitionReason}${loopError}`,
-          ...(boardReadiness.ready ? [] : [`boardHint: ${boardReadiness.recommendation}`]),
-          ...(boardReadiness.ready && boardReadiness.eligibleTaskIds.length > 0
-            ? [`boardNext: ${boardReadiness.eligibleTaskIds.join(", ")}`]
-            : []),
-          ...(providerRetryExhausted ? buildProviderRetryExhaustedActionLines() : []),
-          ...(lastDispatchFailureClass === "tool-output-orphan" ? buildToolOutputOrphanRecoveryActionLines() : []),
-          ...(runtimeCodeState === "reload-required"
-            ? ["runtimeCodeHint: local guardrails-core mudou após session_start; faça reload para ativar tudo aqui no control plane."]
-            : []),
-          ...(loopBlockerHint ? [loopBlockerHint] : []),
-          ...(lastLoopActivationReadyLabel ? [`loopReadyLabel: ${lastLoopActivationReadyLabel}`] : []),
-          ...buildLaneQueueStatusTips(queued),
-        ].join("\n"),
-        "info",
-      );
+        lastLongRunBusyAt,
+        lastBoardAutoAdvanceTaskId,
+        lastBoardAutoAdvanceAt,
+        lastForceNowAt,
+        lastForceNowTextPreview,
+        lastLoopActivationReadyAt,
+        lastLoopActivationReadyLabel,
+        lastDispatchFailureFingerprint,
+        lastDispatchFailureClass,
+        lastDispatchFailurePauseAfterUsed,
+        lastDispatchFailureWindowMsUsed,
+        identicalDispatchFailureStreak,
+      }),
+      updateLongRunLaneStatus,
+      clearAutoDrainTimer,
+      setLoopMode,
+      markLoopHealthy,
+      scheduleAutoDrainDeferredIntent,
+      markLoopDispatch,
+      markLoopDegraded,
+      trackClassifiedDispatchFailure,
+      refreshLoopLeaseOnActivity,
+      currentRuntimeCodeState,
     },
   });
 
