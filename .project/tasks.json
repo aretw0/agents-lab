@@ -17063,7 +17063,7 @@
     {
       "id": "TASK-BUD-759",
       "description": "Revisão pragmática de `lane-queue` vs steering/follow-up: decisão de simplificar escopo, deprecar comandos redundantes ou manter com contrato mínimo.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-757"
@@ -17079,7 +17079,8 @@
         "Sem perder continuidade local-safe em long-run."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] resolver confusão de produto/UX antes da release 0.8.0."
+      "notes": "[rationale:risk-control] resolver confusão de produto/UX antes da release 0.8.0.\nDecisão evita confusão de produto sem quebrar fluxo atual; deprecação agressiva adiada para fase posterior com telemetria.",
+      "verification": "VER-BUD-1111"
     }
   ]
 }
