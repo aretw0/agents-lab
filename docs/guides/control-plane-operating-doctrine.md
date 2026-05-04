@@ -129,6 +129,30 @@ Stop conditions adicionais para waves:
 - surgimento de dependência local-safe -> protected durante a wave;
 - drift de escopo (novas tarefas não planejadas sem justificativa bounded).
 
+### Housekeeping anti-gordura para arquivos gigantes
+
+Objetivo: manter o laboratório sustentável sem refactor cosmético. A regra é **coesão + contrato**, não “arrumadinho”.
+
+Critério de entrada em wave de organização:
+
+- arquivo com >1200 linhas **ou** manutenção recorrente com alto acoplamento;
+- sinais de confusão operacional (ex.: mesma decisão espalhada em múltiplas surfaces);
+- custo de leitura/revisão maior que o ganho da mudança funcional.
+
+Contrato da wave (sem mudança comportamental):
+
+1. extrair por domínio coeso (ex.: preview/readiness, auto-resume pós-reload, wiring de fila), nunca por recorte arbitrário;
+2. preservar API/shape das tools e comandos existentes;
+3. validar com smoke focal do domínio extraído;
+4. manter rollback simples (commit pequeno, fácil de reverter).
+
+Checklist pragmático por fatia de housekeeping:
+
+- 1 extração pequena por vez (sem “big bang”);
+- mesma suite de contratos verde antes/depois;
+- dif semântica mínima (renome/realocação + cola de import);
+- nota curta explicando por que a extração reduz acoplamento real.
+
 ### Calibração de substrato operacional (background + agents-as-tools)
 
 Quando o control-plane estiver estável, o foco pode migrar para calibração do substrato operacional sem abandonar governança.
