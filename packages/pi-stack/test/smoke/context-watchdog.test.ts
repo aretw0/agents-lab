@@ -1913,6 +1913,62 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_status exposes deferred post-reload auto-resume intent in autoCompact details", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-status-post-reload-intent-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-04T06:30:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-742", "TASK-BUD-743"],
+					},
+				},
+			}, null, 2), "utf8");
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_status");
+			const result = await tool.execute(
+				"tc-context-watch-status-post-reload-intent",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 14 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect((result.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(true);
+			expect((result.details as { autoCompact?: { autoResumeAfterReloadIntent?: { reason?: string } } } | undefined)?.autoCompact?.autoResumeAfterReloadIntent?.reason)
+				.toBe("reload-required-after-compact");
+
+			const clearedHandoff = clearAutoResumeAfterReloadIntent(JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")));
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify(clearedHandoff, null, 2), "utf8");
+			const clearedResult = await tool.execute(
+				"tc-context-watch-status-post-reload-intent-cleared",
+				{},
+				undefined as unknown as AbortSignal,
+				() => {},
+				{
+					cwd,
+					getContextUsage: () => ({ percent: 14 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => false,
+				} as any,
+			);
+			expect((clearedResult.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_freshness_status tool returns preload+dirty in one call", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
 		try {
@@ -2877,14 +2933,25 @@ describe("context-watchdog", () => {
 			pending: true,
 			createdAtIso: "2026-05-04T04:01:00.000Z",
 			reason: "reload-required-after-compact",
-			focusTasks: ["TASK-BUD-739"],
+			focusTasks: ["TASK-BUD-739", "TASK-BUD-740", "TASK-BUD-741", "TASK-BUD-742", "TASK-BUD-743"],
 		});
 		expect(readAutoResumeAfterReloadIntent(withIntent)).toMatchObject({
 			pending: true,
 			createdAtIso: "2026-05-04T04:01:00.000Z",
 			reason: "reload-required-after-compact",
-			focusTasks: ["TASK-BUD-739"],
+			focusTasks: ["TASK-BUD-739", "TASK-BUD-740", "TASK-BUD-741"],
 		});
+		const normalizedInvalidReason = readAutoResumeAfterReloadIntent({
+			context_watch: {
+				auto_resume_after_reload: {
+					pending: true,
+					createdAtIso: "2026-05-04T04:01:00.000Z",
+					reason: "unexpected-reason",
+					focusTasks: ["TASK-BUD-739"],
+				},
+			},
+		} as Record<string, unknown>);
+		expect(normalizedInvalidReason?.reason).toBe("reload-required-after-compact");
 		const cleared = clearAutoResumeAfterReloadIntent(withIntent);
 		expect(readAutoResumeAfterReloadIntent(cleared)).toBeUndefined();
 		expect((cleared.context_watch as Record<string, unknown> | undefined)?.level).toBe("checkpoint");
