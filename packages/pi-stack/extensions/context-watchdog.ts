@@ -76,12 +76,20 @@ import {
 import {
 	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
+	formatContextWatchAutoResumePreviewSummary,
+	formatContextWatchContinuationReadinessSummary,
+	formatContextWatchOneSliceCanaryPreviewSummary,
+	formatContextWatchOneSliceOperatorPacketPreviewSummary,
 	resolveContextWatchContinuationRecommendation,
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 } from "./context-watchdog-continuation";
 export {
 	buildTurnBoundaryDecisionPacket,
 	consumeContextPreloadPack,
+	formatContextWatchAutoResumePreviewSummary,
+	formatContextWatchContinuationReadinessSummary,
+	formatContextWatchOneSliceCanaryPreviewSummary,
+	formatContextWatchOneSliceOperatorPacketPreviewSummary,
 	resolveContextWatchContinuationRecommendation,
 	TURN_BOUNDARY_DIRECTION_PROMPT,
 	type ContextPreloadProfile,
@@ -1335,46 +1343,6 @@ function readContextWatchFreshnessSignals(
 	};
 }
 
-export function formatContextWatchAutoResumePreviewSummary(input: {
-	focusTasks: string;
-	focusMnemonics?: string;
-	staleFocusCount: number;
-	diagnosticsSummary: string;
-	reloadGate?: "required" | "clear";
-	reloadHint?: string;
-}): string {
-	return [
-		"context-watch-auto-resume-preview:",
-		`focusTasks=${input.focusTasks.replace(/\s+/g, "_")}`,
-		input.focusMnemonics ? `focusMnemonics=${input.focusMnemonics.replace(/\s+/g, "_")}` : undefined,
-		`staleFocus=${input.staleFocusCount}`,
-		`diagnostics=${input.diagnosticsSummary.replace(/\s+/g, ";")}`,
-		input.reloadGate ? `reload=${input.reloadGate}` : undefined,
-		input.reloadHint ? `hint=${input.reloadHint.replace(/\s+/g, "_")}` : undefined,
-	].filter(Boolean).join(" ");
-}
-
-
-export function formatContextWatchContinuationReadinessSummary(input: {
-	ready: boolean;
-	focusTasks: string;
-	localAuditDecision: string;
-	staleFocusCount: number;
-	localAuditReasons?: string[];
-	protectedPaths?: string[];
-}): string {
-	return [
-		"context-watch-continuation-readiness:",
-		`ready=${input.ready ? "yes" : "no"}`,
-		`focus=${input.focusTasks.replace(/\s+/g, "_")}`,
-		`audit=${input.localAuditDecision}`,
-		input.localAuditReasons && input.localAuditReasons.length > 0 ? `reasons=${input.localAuditReasons.slice(0, 3).join("|")}` : undefined,
-		input.protectedPaths && input.protectedPaths.length > 0 ? `protected=${input.protectedPaths.slice(0, 3).join("|")}` : undefined,
-		`staleFocus=${input.staleFocusCount}`,
-		"authorization=none",
-	].filter(Boolean).join(" ");
-}
-
 export type HandoffGrowthMaturitySnapshot = {
 	source: "handoff";
 	decision?: "go" | "hold" | "needs-evidence";
@@ -1631,52 +1599,6 @@ function buildAfkMaterialReadinessSnapshot(cwd: string, focusTasks: string, minR
 			validationKnownCount: validationKnown.length,
 		},
 	};
-}
-
-export function formatContextWatchOneSliceCanaryPreviewSummary(input: {
-	decision: string;
-	canPrepareSlice: boolean;
-	mustStopAfterSlice: boolean;
-	oneSliceOnly: boolean;
-	reasons: string[];
-	decisionPacketDecision?: string;
-	dispatchAllowed?: boolean;
-	decisionPacketReasons?: string[];
-}): string {
-	return [
-		"context-watch-one-slice-canary-preview:",
-		`decision=${input.decision}`,
-		`prepare=${input.canPrepareSlice ? "yes" : "no"}`,
-		`stop=${input.mustStopAfterSlice ? "yes" : "no"}`,
-		`oneSliceOnly=${input.oneSliceOnly ? "yes" : "no"}`,
-		input.decisionPacketDecision ? `packet=${input.decisionPacketDecision}` : undefined,
-		input.dispatchAllowed !== undefined ? `dispatch=${input.dispatchAllowed ? "yes" : "no"}` : undefined,
-		input.reasons.length > 0 ? `reasons=${input.reasons.slice(0, 3).join("|")}` : undefined,
-		input.decisionPacketDecision === "blocked" && input.decisionPacketReasons && input.decisionPacketReasons.length > 0 ? `packetReasons=${input.decisionPacketReasons.slice(0, 3).join("|")}` : undefined,
-		"authorization=none",
-	].filter(Boolean).join(" ");
-}
-
-export function formatContextWatchOneSliceOperatorPacketPreviewSummary(input: {
-	readinessReady: boolean;
-	previewDecision: string;
-	packetDecision: string;
-	contractDecision: string;
-	dispatchAllowed: boolean;
-	executorApproved: boolean;
-	contractReasons: string[];
-}): string {
-	return [
-		"context-watch-one-slice-operator-packet:",
-		`readiness=${input.readinessReady ? "yes" : "no"}`,
-		`preview=${input.previewDecision}`,
-		`packet=${input.packetDecision}`,
-		`contract=${input.contractDecision}`,
-		`dispatch=${input.dispatchAllowed ? "yes" : "no"}`,
-		`executor=${input.executorApproved ? "yes" : "no"}`,
-		input.contractReasons.length > 0 ? `reasons=${input.contractReasons.slice(0, 4).join("|")}` : undefined,
-		"authorization=none",
-	].filter(Boolean).join(" ");
 }
 
 export function formatTimeoutPressureSummary(input: {
