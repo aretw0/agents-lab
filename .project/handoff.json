@@ -1,50 +1,53 @@
 {
-  "timestamp": "2026-05-04T07:56:32.339Z",
-  "context": "Wave local-safe concluída: cue postReloadResume agora cobre status, continuation readiness e one-slice canary preview, com smoke de retenção/dispatch bloqueado.",
+  "timestamp": "2026-05-04T11:56:54.499Z",
+  "context": "Concluídas três fatias locais-safe em sequência: extração de wiring lane-queue/long-run para surface dedicada, split inicial da suíte context [snip] low-up com migração segura documentada. [truncated:+85 chars]",
   "next_actions": [
-    "rodar /reload para carregar surfaces de runtime recém-commitadas",
-    "seed 3 local-safe tasks (seedWhy=bootstrap-focus-missing, seedPriority=continuity-bootstrap)",
-    "re-run autonomy_lane_status e seguir loop local-safe"
+    "reavaliar foco local-safe com autonomy_lane_status (hard-intent auto-advance bloqueado por focus-complete)",
+    "se não houver fila local-safe elegível, seed explícito de novas fatias bounded antes de abrir protected lane",
+    "manter gate humano explícito para qualquer tarefa protected"
   ],
-  "blockers": [],
+  "blockers": [
+    "no-eligible-local-safe-successor",
+    "handoff-stale-before-checkpoint-refresh"
+  ],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] cklist.test.ts (76 passed) [truncated:+32 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts pa [snip] klist.test.ts (129 passed) [truncated:+168 chars]"
   ],
   "recent_commits": [
-    "60be43b4",
-    "a70612c6"
+    "7a662f8b refactor(guardrails-core): extract lane-queue wiring surface",
+    "89125224 chore(board): close lane-queue wiring extraction wave"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-753",
+    "focus": "TASK-BUD-759",
     "canonical_links": [
-      "task:TASK-BUD-753",
-      "commit:60be43b4"
+      "task:TASK-BUD-759",
+      "commit:7a662f8b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T07:56:32.339Z",
-    "level": "warn",
-    "percent": 46,
-    "action": "continue",
-    "recommendation": "Continuar bounded; abrir protected apenas quando influenceWindow=ready-window e protectedReady=ready.",
+    "generatedAtIso": "2026-05-04T11:56:54.499Z",
+    "level": "checkpoint",
+    "percent": 55,
+    "action": "checkpoint-refresh",
+    "recommendation": "Progress saved; continue bounded local hardening.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T07:56:32.339Z",
+      "atIso": "2026-05-04T11:56:54.499Z",
       "reason": "manual_checkpoint",
-      "level": "warn",
-      "percent": 46,
+      "level": "checkpoint",
+      "percent": 55,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar bounded; abrir protected apenas quando influenceWindow=ready-window e protectedReady=ready."
+      "recommendation": "Local slice checkpoint saved."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-753"
+    "TASK-BUD-759"
   ]
 }
