@@ -16667,7 +16667,7 @@
     {
       "id": "TASK-BUD-736",
       "description": "Adicionar `decisionCue` no `autonomy_lane_status` para indicar quando há decisão humana pendente (seed ou protected).",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
@@ -16678,12 +16678,13 @@
         "Sem alterar autorização/dispatch; report-only."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] reduz necessidade de leitura manual de múltiplos campos e mantém interação humana apenas quando realmente necessária.\nIniciando decisionCue para consolidar gatilho de intervenção humana mínima (seed vs protected)."
+      "notes": "[rationale:risk-control] reduz necessidade de leitura manual de múltiplos campos e mantém interação humana apenas quando realmente necessária.\nIniciando decisionCue para consolidar gatilho de intervenção humana mínima (seed vs protected).\nDecisionCue consolidado no status principal para reduzir intervenção manual contínua.",
+      "verification": "VER-BUD-1091"
     },
     {
       "id": "TASK-BUD-737",
       "description": "Adicionar smoke para `decisionCue` em `autonomy_lane_status` (seed-required e protected-ready).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-736"
@@ -16697,12 +16698,13 @@
         "Suite focal permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] garante confiabilidade do gatilho único de intervenção humana mínima."
+      "notes": "[rationale:risk-control] garante confiabilidade do gatilho único de intervenção humana mínima.\nCobertura garante confiabilidade do gatilho único de decisão humana mínima.",
+      "verification": "VER-BUD-1092"
     },
     {
       "id": "TASK-BUD-738",
       "description": "Sincronizar doutrina curta com `decisionCue` como leitura primária de intervenção humana.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-736"
@@ -16716,7 +16718,8 @@
         "Doc checklist permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] consolida operação quase ininterrupta com ponto único de decisão humana quando necessário."
+      "notes": "[rationale:risk-control] consolida operação quase ininterrupta com ponto único de decisão humana quando necessário.\nRunbook alinhado com modo quase-ininterrupto e intervenção apenas quando cue exigir.",
+      "verification": "VER-BUD-1093"
     }
   ]
 }

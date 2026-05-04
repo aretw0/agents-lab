@@ -12039,6 +12039,33 @@
       "method": "test",
       "timestamp": "2026-05-04T04:19:28.342Z",
       "evidence": "Doutrina curta em `docs/guides/control-plane-operating-doctrine.md` sincronizada para uso de `influenceWindowCue` + `protectedReadyCue` e `decisionCue` como leitura primária de quando há decisão humana pendente (seed ou abertura protected), mantendo gate humano explícito. Doc checklist green no mesmo gate (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1091",
+      "target": "TASK-BUD-736",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T04:45:33.255Z",
+      "evidence": "`autonomy_lane_status` já expõe `decisionCue` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` com `humanDecisionNeeded`, `reasonCode`, `recommendedAction`, `nextCandidateTaskId`, consolidando gatilho de decisão humana mínima para seed/protected."
+    },
+    {
+      "id": "VER-BUD-1092",
+      "target": "TASK-BUD-737",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T04:46:06.510Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` cobre `decisionCue` nos dois estados críticos: `seed-local-safe-required` (no-eligible bootstrap) e `protected-focus-ready` (ready-window com candidato protected). Gate validado: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1093",
+      "target": "TASK-BUD-738",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T04:46:32.782Z",
+      "evidence": "Doutrina curta em `docs/guides/control-plane-operating-doctrine.md` atualizada para usar `decisionCue` como leitura primária de intervenção humana (seed/protected), mantendo gate humano explícito para protected e fluxo anti-bloat. Doc checklist green no gate combinado (40 passed)."
     }
   ]
 }
