@@ -1704,6 +1704,7 @@ export function formatContextWatchStatusToolSummary(input: {
 	handoffFreshThresholdSec?: number;
 	reloadGate?: string;
 	timeoutPressureSummary?: string;
+	postReloadResume?: "pending";
 }): string {
 	const handoffAgeSec = Number.isFinite(Number(input.handoffAgeSec))
 		? Math.max(0, Math.floor(Number(input.handoffAgeSec)))
@@ -1725,6 +1726,7 @@ export function formatContextWatchStatusToolSummary(input: {
 			: undefined,
 		input.reloadGate ? `reloadGate=${input.reloadGate}` : undefined,
 		input.timeoutPressureSummary ? `timeoutPressure=${input.timeoutPressureSummary}` : undefined,
+		input.postReloadResume ? `postReloadResume=${input.postReloadResume}` : undefined,
 	].filter(Boolean).join(" ");
 }
 
@@ -3200,6 +3202,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				handoffFreshThresholdSec,
 				reloadGate,
 				timeoutPressureSummary,
+				postReloadResume: autoCompact.autoResumeAfterReloadPending ? "pending" : undefined,
 			});
 			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
 				level: assessment.level,

@@ -1944,6 +1944,7 @@ describe("context-watchdog", () => {
 					hasPendingMessages: () => false,
 				} as any,
 			);
+			expect(result.content?.[0]?.text).toContain("postReloadResume=pending");
 			expect((result.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(true);
 			expect((result.details as { autoCompact?: { autoResumeAfterReloadIntent?: { reason?: string } } } | undefined)?.autoCompact?.autoResumeAfterReloadIntent?.reason)
 				.toBe("reload-required-after-compact");
@@ -1964,6 +1965,73 @@ describe("context-watchdog", () => {
 				} as any,
 			);
 			expect((clearedResult.details as { autoCompact?: { autoResumeAfterReloadPending?: boolean } } | undefined)?.autoCompact?.autoResumeAfterReloadPending).toBe(false);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("dispatches deferred post-reload auto-resume on session_start when gates are green", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-post-reload-dispatch-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+				tasks: [
+					{ id: "TASK-BUD-745", status: "planned", description: "post-reload follow-up" },
+				],
+			}, null, 2), "utf8");
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-745"],
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-04T06:50:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-745"],
+					},
+				},
+				context_watch_events: [
+					{
+						atIso: new Date().toISOString(),
+						reason: "manual_checkpoint",
+						level: "checkpoint",
+						percent: 52,
+						thresholds: { warnPct: 45, checkpointPct: 55, compactPct: 64 },
+						action: "checkpoint-refresh",
+						recommendation: "ready for resume",
+					},
+				],
+			}, null, 2), "utf8");
+			const handlers = new Map<string, (...args: unknown[]) => unknown>();
+			const pi = {
+				on: vi.fn((event: string, handler: (...args: unknown[]) => unknown) => {
+					handlers.set(event, handler);
+				}),
+				registerTool: vi.fn(),
+				registerCommand: vi.fn(),
+				sendUserMessage: vi.fn(),
+				appendEntry: vi.fn(),
+			} as unknown as Parameters<typeof contextWatchdogExtension>[0];
+			contextWatchdogExtension(pi);
+			const sessionStart = handlers.get("session_start");
+			expect(typeof sessionStart).toBe("function");
+			await (sessionStart as (event: unknown, ctx: unknown) => Promise<void> | void)({}, {
+				cwd,
+				ui: {
+					notify() {},
+					setStatus() {},
+				},
+				getContextUsage: () => ({ percent: 12 }),
+				model: { id: "test-model", provider: "test" },
+				isIdle: () => true,
+				hasPendingMessages: () => false,
+				compact() {},
+			} as any);
+			expect((pi.sendUserMessage as ReturnType<typeof vi.fn>).mock.calls.length).toBe(1);
+			expect((pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.some(([type]) => type === "context-watchdog.auto-resume-post-reload-dispatch"))
+				.toBe(true);
+			const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as Record<string, unknown>;
+			expect(readAutoResumeAfterReloadIntent(written)).toBeUndefined();
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
