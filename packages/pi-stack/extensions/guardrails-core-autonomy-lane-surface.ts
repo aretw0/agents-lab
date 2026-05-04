@@ -91,6 +91,10 @@ function normalizeIterationReminderItem(value: unknown): string | undefined {
   return compact.length > 96 ? `${compact.slice(0, 93)}...` : compact;
 }
 
+function isCompletedReloadReminderItem(item: string): boolean {
+  return /(?:^|\s)(?:rodar|run|apply|aplicar)?\s*\/?reload\b/i.test(item);
+}
+
 function buildIterationReminder(
   cwd: string,
   handoffFreshnessLabel?: HandoffFreshnessLabel,
@@ -127,6 +131,7 @@ function buildIterationReminder(
     ? handoff.next_actions
       .map((item) => normalizeIterationReminderItem(item))
       .filter((item): item is string => Boolean(item))
+      .filter((item) => !isCompletedReloadReminderItem(item))
     : [];
 
   if (fromNextActions.length > 0) {

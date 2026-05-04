@@ -16321,6 +16321,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: melhorar auditoria rápida para continuidade local-safe.\nSincronizando doutrina com cue curto de summary no autonomy_lane_status (code/next/queue + seedWhy/seedPriority).\nObservabilidade de decisão agora fica acessível tanto no payload estruturado quanto no summary curto.",
       "verification": "VER-BUD-1069"
+    },
+    {
+      "id": "TASK-BUD-718",
+      "description": "Filtrar itens de `handoff.next_actions` já cumpridos de reload em `iterationReminder` para evitar nudge stale após reload concluído.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`iterationReminder` ignora itens com intenção de reload já cumprida (ex.: \"Rodar /reload\") quando handoff está fresh.",
+        "Se após filtro não houver itens, fallback continua normal (`handoff-current-tasks` ou `none`).",
+        "Contrato segue report-only sem alterar autorização/dispatch."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Limpar reminder stale reduz erro operacional e acelera continuidade local-safe.\nIniciando filtro de next_actions stale de reload em iterationReminder para handoff fresh.\nRemovido nudge stale de reload para melhorar continuidade imediata da próxima ação local-safe.",
+      "verification": "VER-BUD-1070"
+    },
+    {
+      "id": "TASK-BUD-719",
+      "description": "Adicionar smoke para filtro de next_actions stale de reload no `iterationReminder`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-718"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida que `iterationReminder` não replica instrução de `/reload` quando handoff está fresh.",
+        "Smoke valida que item não-reload em `next_actions` continua aparecendo.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão de reminders stale que competem com ação de seeding/execução real.\nCobertura garante que reminder priorize ação útil e não instrução já cumprida.",
+      "verification": "VER-BUD-1071"
+    },
+    {
+      "id": "TASK-BUD-720",
+      "description": "Sincronizar doutrina curta: `iterationReminder` deve suprimir instrução de reload já cumprida e priorizar próxima ação útil.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-718"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc menciona supressão de reminder de reload já cumprido em handoff fresh.",
+        "Mantém regra stale-first e seed-guidance já existentes.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça continuidade anti-ruído entre checkpoints sem aumentar bloat.\nRegra operacional anti-ruído documentada sem aumentar bloat.",
+      "verification": "VER-BUD-1072"
     }
   ]
 }

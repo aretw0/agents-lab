@@ -11850,6 +11850,33 @@
       "method": "test",
       "timestamp": "2026-05-04T01:39:02.007Z",
       "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md` para incluir cue de `summary` do `autonomy_lane_status` (`code/next/queue` + `seedWhy/seedPriority` quando houver), alinhando com observabilidade read-only recém-exposta. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (37 passed)."
+    },
+    {
+      "id": "VER-BUD-1070",
+      "target": "TASK-BUD-718",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:53:03.671Z",
+      "evidence": "`buildIterationReminder` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora filtra itens de `handoff.next_actions` que representam `/reload` já cumprido (handoff fresh), preservando fallback para `handoff-current-tasks`/`none` quando necessário. Contrato permanece report-only."
+    },
+    {
+      "id": "VER-BUD-1071",
+      "target": "TASK-BUD-719",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:53:26.844Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` adicionada para validar: (1) filtro de `/reload` em `handoff-next-actions` fresh, mantendo item útil; (2) fallback para `handoff-current-tasks` quando só há ação de reload. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (37 passed)."
+    },
+    {
+      "id": "VER-BUD-1072",
+      "target": "TASK-BUD-720",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:54:13.678Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em handoff fresh, `iterationReminder` suprime instrução `/reload` já cumprida, mantendo prioridades existentes de seed-guidance e stale-first. Gate combinado: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
     }
   ]
 }

@@ -760,6 +760,67 @@ describe("autonomy lane surface", () => {
     expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
   });
 
+  it("filters completed reload reminder from handoff next_actions when fresh", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-filter-reload-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned", notes: "[rationale:risk-control] keep flow" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: new Date().toISOString(),
+      current_tasks: ["TASK-NEXT"],
+      next_actions: [
+        "Rodar /reload para atualizar runtime",
+        "executar smoke focal",
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+    const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
+
+    expect(reminder?.source).toBe("handoff-next-actions");
+    expect(reminder?.items).toEqual(["executar smoke focal"]);
+    expect(reminder?.summary).toContain("executar smoke focal");
+    expect(reminder?.summary).not.toContain("/reload");
+  });
+
+  it("falls back to current_tasks when next_actions only contains completed reload reminder", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-filter-reload-fallback-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned", notes: "[rationale:risk-control] keep flow" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: new Date().toISOString(),
+      current_tasks: ["TASK-NEXT"],
+      next_actions: [
+        "Rodar /reload para atualizar runtime",
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+    const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
+
+    expect(reminder?.source).toBe("handoff-current-tasks");
+    expect(reminder?.items).toEqual(["focus TASK-NEXT"]);
+  });
+
   it("prioritizes refresh reminder when handoff freshness is stale", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-stale-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
