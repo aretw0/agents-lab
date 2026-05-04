@@ -105,7 +105,13 @@ import {
   type LoopActivationEvidenceState,
   type LoopEvidenceReadiness,
 } from "./guardrails-core-lane-queue-evidence";
-import { refreshLoopEvidenceHeartbeatFromSnapshot as refreshLoopEvidenceHeartbeatFromSnapshotHelper } from "./guardrails-core-lane-queue-heartbeat";
+import {
+  recordBoardAutoAdvanceEvidence as recordBoardAutoAdvanceEvidenceHelper,
+  recordLoopReadyEvidence as recordLoopReadyEvidenceHelper,
+  refreshLoopEvidenceHeartbeat as refreshLoopEvidenceHeartbeatHelper,
+  refreshLoopEvidenceHeartbeatFromSnapshot as refreshLoopEvidenceHeartbeatFromSnapshotHelper,
+  refreshLoopLeaseOnActivity as refreshLoopLeaseOnActivityHelper,
+} from "./guardrails-core-lane-queue-heartbeat";
 import {
   registerGuardrailsLaneQueueSurface,
   type GuardrailsLaneQueueSurfaceRuntimeSnapshot,
@@ -1525,17 +1531,16 @@ export default function (pi: ExtensionAPI) {
   }
 
   function recordLoopReadyEvidence(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void {
-    const evidence = readLoopActivationEvidence(ctx.cwd);
-    evidence.updatedAtIso = new Date().toISOString();
-    evidence.lastLoopReady = {
-      atIso: evidence.updatedAtIso,
+    recordLoopReadyEvidenceHelper({
+      cwd: ctx.cwd,
       markersLabel,
       runtimeCodeState,
       boardAutoAdvanceGate,
       nextTaskId,
       milestone,
-    };
-    writeLoopActivationEvidence(ctx.cwd, evidence);
+      readEvidence: readLoopActivationEvidence,
+      writeEvidence: writeLoopActivationEvidence,
+    });
   }
 
   function recordBoardAutoAdvanceEvidence(
@@ -1546,46 +1551,37 @@ export default function (pi: ExtensionAPI) {
     markersLabel: string,
     emLoop: boolean,
   ): void {
-    const evidence = readLoopActivationEvidence(ctx.cwd);
-    evidence.updatedAtIso = new Date().toISOString();
-    evidence.lastBoardAutoAdvance = {
-      atIso: evidence.updatedAtIso,
+    recordBoardAutoAdvanceEvidenceHelper({
+      cwd: ctx.cwd,
       taskId,
       milestone,
       runtimeCodeState,
       markersLabel,
       emLoop,
-    };
-    writeLoopActivationEvidence(ctx.cwd, evidence);
+      readEvidence: readLoopActivationEvidence,
+      writeEvidence: writeLoopActivationEvidence,
+    });
   }
 
   function refreshLoopEvidenceHeartbeat(ctx: ExtensionContext, markersLabel: string, runtimeCodeState: RuntimeCodeActivationState, boardAutoAdvanceGate: BoardAutoAdvanceGateReason, nextTaskId?: string, milestone?: string): void {
     const nowMs = Date.now();
-    if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
-    const evidence = readLoopActivationEvidence(ctx.cwd);
-    const readiness = computeLoopEvidenceReadiness(evidence);
-    if (!readiness.readyForLoopEvidence || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
-
-    const atIso = new Date(nowMs).toISOString();
-    evidence.updatedAtIso = atIso;
-    evidence.lastLoopReady = {
-      atIso,
+    const refresh = refreshLoopEvidenceHeartbeatHelper({
+      cwd: ctx.cwd,
+      nowMs,
+      lastHeartbeatAt: lastLoopEvidenceHeartbeatAt,
+      heartbeatIntervalMs: 5 * 60_000,
       markersLabel,
       runtimeCodeState,
       boardAutoAdvanceGate,
       nextTaskId,
       milestone,
-    };
-    writeLoopActivationEvidence(ctx.cwd, evidence);
-    lastLoopEvidenceHeartbeatAt = nowMs;
-    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", {
-      atIso,
-      markersLabel,
-      runtimeCodeState,
-      boardAutoAdvanceGate,
-      nextTaskId,
-      milestone,
+      readEvidence: readLoopActivationEvidence,
+      computeReadiness: computeLoopEvidenceReadiness,
+      writeEvidence: writeLoopActivationEvidence,
     });
+    if (!refresh.updated || !refresh.auditPayload) return;
+    lastLoopEvidenceHeartbeatAt = refresh.nextLastHeartbeatAt;
+    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", refresh.auditPayload);
   }
 
   function refreshLoopEvidenceHeartbeatFromSnapshot(ctx: ExtensionContext): void {
@@ -1750,12 +1746,18 @@ export default function (pi: ExtensionAPI) {
     reason: string,
     minIntervalMs = 10_000,
   ): void {
-    if (longRunLoopRuntimeState.mode !== "running") return;
-    const nowMs = Date.now();
-    if (nowMs - lastLoopLeaseRefreshAt < Math.max(1_000, minIntervalMs)) return;
-    const next = setLongRunLoopRuntimeMode(ctx.cwd, longRunLoopRuntimeState.mode, reason);
-    longRunLoopRuntimeState = next.state;
-    lastLoopLeaseRefreshAt = nowMs;
+    const refresh = refreshLoopLeaseOnActivityHelper({
+      cwd: ctx.cwd,
+      nowMs: Date.now(),
+      lastLeaseRefreshAt: lastLoopLeaseRefreshAt,
+      minIntervalMs,
+      mode: longRunLoopRuntimeState.mode,
+      reason,
+      setRuntimeMode: setLongRunLoopRuntimeMode,
+    });
+    if (!refresh.updated || !refresh.nextState) return;
+    longRunLoopRuntimeState = refresh.nextState;
+    lastLoopLeaseRefreshAt = refresh.nextLastLeaseRefreshAt;
   }
 
   function tryAutoDrainDeferredIntent(ctx: ExtensionContext, reason: "agent_end" | "lane_pop" | "idle_timer"): boolean {
