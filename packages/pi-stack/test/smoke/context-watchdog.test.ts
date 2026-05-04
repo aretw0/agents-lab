@@ -73,6 +73,9 @@ import contextWatchdogExtension, {
 	resolveHandoffBoardReconciliation,
 	resolveHandoffFreshness,
 	resolveHandoffPrepDecision,
+	readAutoResumeAfterReloadIntent,
+	withAutoResumeAfterReloadIntent,
+	clearAutoResumeAfterReloadIntent,
 	summarizeContextWatchEvent,
 	shouldAnnounceContextWatch,
 	shouldAutoCheckpoint,
@@ -2216,6 +2219,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("preload=fallback-canonical");
 			expect(result.content?.[0]?.text).toContain("dirty=unknown");
 			expect(result.content?.[0]?.text).toContain("material=");
+			expect(result.content?.[0]?.text).toContain("decisionCue=seed-local-safe-required");
 			expect(result.content?.[0]?.text).toContain("growthDecision=hold");
 			expect(result.content?.[0]?.text).toContain("growthScore=78");
 			expect(result.content?.[0]?.text).toContain("growthSource=handoff");
@@ -2229,6 +2233,11 @@ describe("context-watchdog", () => {
 				staleFocus: "TASK-BUD-320=completed",
 				recommendationCode: "refresh-focus-checkpoint",
 				nextAction: expect.stringContaining("refresh handoff focus/checkpoint"),
+				decisionCue: {
+					humanDecisionNeeded: true,
+					reasonCode: "seed-local-safe-required",
+					recommendedAction: "seed-local-safe",
+				},
 				materialReadiness: {
 					decision: expect.any(String),
 					recommendationCode: expect.any(String),
@@ -2300,6 +2309,40 @@ describe("context-watchdog", () => {
 				staleFocusCount: 0,
 				localAuditReasons: ["no-local-safe-next-step"],
 			})).toMatchObject({ recommendationCode: "local-stop-no-local-safe-next-step" });
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_continuation_readiness emits decisionCue=none when material stock is healthy", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-continuation-readiness-decision-none-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-FOCUS"],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-FOCUS", status: "in-progress", description: "focused local slice", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-1", status: "planned", description: "local slice 1", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-2", status: "planned", description: "local slice 2", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-3", status: "planned", description: "local slice 3", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-4", status: "planned", description: "local slice 4", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-5", status: "planned", description: "local slice 5", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+				{ id: "TASK-LOCAL-6", status: "planned", description: "local slice 6", acceptance_criteria: ["run smoke test"], files: ["packages/pi-stack/test/smoke/context-watchdog.test.ts"] },
+			] }));
+			execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_continuation_readiness");
+			const result = await tool.execute("tc-continuation-readiness-decision-none", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			expect(result.content?.[0]?.text).toContain("decisionCue=none");
+			expect((result.details as { decisionCue?: { reasonCode?: string; humanDecisionNeeded?: boolean } } | undefined)?.decisionCue?.reasonCode).toBe("none");
+			expect((result.details as { decisionCue?: { reasonCode?: string; humanDecisionNeeded?: boolean } } | undefined)?.decisionCue?.humanDecisionNeeded).toBe(false);
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
@@ -2821,6 +2864,30 @@ describe("context-watchdog", () => {
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
+	});
+
+	it("persists and clears deferred auto-resume intent for reload handoff continuity", () => {
+		const base = {
+			timestamp: "2026-05-04T04:00:00.000Z",
+			context_watch: {
+				level: "checkpoint",
+			},
+		};
+		const withIntent = withAutoResumeAfterReloadIntent(base, {
+			pending: true,
+			createdAtIso: "2026-05-04T04:01:00.000Z",
+			reason: "reload-required-after-compact",
+			focusTasks: ["TASK-BUD-739"],
+		});
+		expect(readAutoResumeAfterReloadIntent(withIntent)).toMatchObject({
+			pending: true,
+			createdAtIso: "2026-05-04T04:01:00.000Z",
+			reason: "reload-required-after-compact",
+			focusTasks: ["TASK-BUD-739"],
+		});
+		const cleared = clearAutoResumeAfterReloadIntent(withIntent);
+		expect(readAutoResumeAfterReloadIntent(cleared)).toBeUndefined();
+		expect((cleared.context_watch as Record<string, unknown> | undefined)?.level).toBe("checkpoint");
 	});
 
 	it("computes handoff freshness deterministically", () => {

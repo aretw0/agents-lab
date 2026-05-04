@@ -1383,6 +1383,83 @@ export type HandoffGrowthMaturitySnapshot = {
 	freshness?: "fresh" | "stale" | "unknown";
 };
 
+export type AutoResumeAfterReloadIntentReason = "reload-required-after-compact";
+
+export type AutoResumeAfterReloadIntent = {
+	pending: true;
+	createdAtIso: string;
+	reason: AutoResumeAfterReloadIntentReason;
+	focusTasks: string[];
+};
+
+export function readAutoResumeAfterReloadIntent(
+	handoffInput: Record<string, unknown> | undefined,
+): AutoResumeAfterReloadIntent | undefined {
+	const handoff = handoffInput && typeof handoffInput === "object" ? handoffInput : {};
+	const contextWatch = handoff.context_watch && typeof handoff.context_watch === "object"
+		? handoff.context_watch as Record<string, unknown>
+		: undefined;
+	const intent = contextWatch?.auto_resume_after_reload && typeof contextWatch.auto_resume_after_reload === "object"
+		? contextWatch.auto_resume_after_reload as Record<string, unknown>
+		: undefined;
+	if (!intent || intent.pending !== true) return undefined;
+	const createdAtIso = typeof intent.createdAtIso === "string" && intent.createdAtIso.trim().length > 0
+		? intent.createdAtIso
+		: new Date(0).toISOString();
+	const reason = intent.reason === "reload-required-after-compact"
+		? intent.reason
+		: "reload-required-after-compact";
+	const focusTasks = Array.isArray(intent.focusTasks)
+		? intent.focusTasks
+			.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+			.slice(0, 3)
+		: [];
+	return {
+		pending: true,
+		createdAtIso,
+		reason,
+		focusTasks,
+	};
+}
+
+export function withAutoResumeAfterReloadIntent(
+	handoffInput: Record<string, unknown> | undefined,
+	intent: AutoResumeAfterReloadIntent,
+): Record<string, unknown> {
+	const next = handoffInput && typeof handoffInput === "object"
+		? { ...handoffInput }
+		: {};
+	const contextWatch = next.context_watch && typeof next.context_watch === "object"
+		? { ...(next.context_watch as Record<string, unknown>) }
+		: {};
+	contextWatch.auto_resume_after_reload = {
+		pending: true,
+		createdAtIso: intent.createdAtIso,
+		reason: intent.reason,
+		...(intent.focusTasks.length > 0 ? { focusTasks: intent.focusTasks.slice(0, 3) } : {}),
+	};
+	next.context_watch = contextWatch;
+	return next;
+}
+
+export function clearAutoResumeAfterReloadIntent(
+	handoffInput: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+	const next = handoffInput && typeof handoffInput === "object"
+		? { ...handoffInput }
+		: {};
+	if (!next.context_watch || typeof next.context_watch !== "object") return next;
+	const contextWatch = { ...(next.context_watch as Record<string, unknown>) };
+	if (!("auto_resume_after_reload" in contextWatch)) return next;
+	delete contextWatch.auto_resume_after_reload;
+	if (Object.keys(contextWatch).length > 0) {
+		next.context_watch = contextWatch;
+	} else {
+		delete next.context_watch;
+	}
+	return next;
+}
+
 function resolveHandoffGrowthMaturitySnapshot(handoff: Record<string, unknown>): HandoffGrowthMaturitySnapshot | undefined {
 	const contextWatch = handoff.context_watch && typeof handoff.context_watch === "object"
 		? handoff.context_watch as Record<string, unknown>
@@ -2115,6 +2192,130 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const now = Date.now();
 		const timeoutPressure = readTimeoutPressureState(now);
 		let handoffPath: string | undefined;
+		const reloadRequiredAtRunStart = isReloadRequiredForSourceUpdate();
+		const handoffForPostReloadResume = readHandoffJson(ctx.cwd);
+		const pendingAutoResumeAfterReload = readAutoResumeAfterReloadIntent(handoffForPostReloadResume);
+		if (pendingAutoResumeAfterReload && !reloadRequiredAtRunStart) {
+			const hasPendingMessages = ctx.hasPendingMessages();
+			const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
+			let handoffForDispatch = handoffForPostReloadResume;
+			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
+			let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
+				handoff: handoffForDispatch,
+				taskStatusById,
+				nowMs: now,
+				maxFreshAgeMs: config.handoffFreshMaxAgeMs,
+			});
+			if (!handoffBoardReconciliation.ok) {
+				const reconcile = reconcileAutoResumeHandoffFocus({
+					handoff: handoffForDispatch,
+					taskStatusById,
+					preferredTaskIds,
+					maxTasks: 3,
+				});
+				if (reconcile.changed) {
+					handoffForDispatch = {
+						...handoffForDispatch,
+						timestamp: new Date(now).toISOString(),
+						current_tasks: reconcile.nextFocus,
+					};
+					writeHandoffJson(ctx.cwd, handoffForDispatch);
+					handoffBoardReconciliation = resolveHandoffBoardReconciliation({
+						handoff: handoffForDispatch,
+						taskStatusById,
+						nowMs: now,
+						maxFreshAgeMs: config.handoffFreshMaxAgeMs,
+					});
+				}
+			}
+			const handoffEvent = latestContextWatchEvent(handoffForDispatch);
+			const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
+				handoffLastEventLevel: handoffEvent?.level,
+				handoffLastEventAgeMs: contextWatchEventAgeMs(handoffEvent, now),
+				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+			});
+			const autoResumeDecision = resolveAutoResumeDispatchDecision({
+				autoResumeReady: true,
+				reloadRequired: false,
+				checkpointEvidenceReady,
+				handoffBoardReconciled: handoffBoardReconciliation.ok,
+				hasPendingMessages,
+				hasRecentSteerInput: false,
+				queuedLaneIntents,
+			});
+			const autoResumeSnapshot = {
+				atIso: new Date(now).toISOString(),
+				reason: autoResumeDecision.reason,
+				hint: composeAutoResumeSuppressionHint({
+					reason: autoResumeDecision.reason,
+					timeoutPressureActive: timeoutPressure.active,
+					timeoutPressureCount: timeoutPressure.count,
+					timeoutPressureThreshold: timeoutPressure.threshold,
+				}),
+				dispatched: autoResumeDecision.shouldDispatch,
+				reloadRequired: false,
+				checkpointEvidenceReady,
+				handoffBoardReconciled: handoffBoardReconciliation.ok,
+				handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
+				hasPendingMessages,
+				hasRecentSteerInput: false,
+				queuedLaneIntents,
+				timeoutPressureActive: timeoutPressure.active,
+				timeoutPressureCount: timeoutPressure.count,
+				timeoutPressureThreshold: timeoutPressure.threshold,
+				timeoutPressureHint: timeoutPressure.active
+					? `provider timeout pressure observed (${timeoutPressure.count}/${timeoutPressure.threshold})`
+					: undefined,
+			} satisfies NonNullable<typeof lastAutoResumeDecision>;
+			if (autoResumeDecision.shouldDispatch) {
+				lastAutoResumeAt = now;
+				const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
+					handoffForDispatch,
+					config.handoffFreshMaxAgeMs,
+					now,
+					{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1) },
+				);
+				autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
+				const clearedHandoff = clearAutoResumeAfterReloadIntent(handoffForDispatch);
+				writeHandoffJson(ctx.cwd, clearedHandoff);
+				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+					"context-watchdog.auto-resume-post-reload-dispatch",
+					{
+						atIso: autoResumeSnapshot.atIso,
+						reason: pendingAutoResumeAfterReload.reason,
+						focusTasks: pendingAutoResumeAfterReload.focusTasks,
+						diagnosticsSummary: summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics),
+						preview: resumeEnvelope.prompt.slice(0, 240),
+					},
+				);
+				pi.sendUserMessage(resumeEnvelope.prompt, { deliverAs: "followUp" });
+				if (config.notify) {
+					ctx.ui.notify("context-watch: post-reload auto resume queued", "info");
+				}
+			} else {
+				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+					"context-watchdog.auto-resume-post-reload-pending",
+					{
+						atIso: autoResumeSnapshot.atIso,
+						reason: autoResumeSnapshot.reason,
+						hint: autoResumeSnapshot.hint,
+						hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
+						queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
+						checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
+						handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
+						handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
+					},
+				);
+				if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
+					ctx.ui.notify(
+						`context-watch: post-reload auto resume pending (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
+						"warning",
+					);
+				}
+			}
+			lastAutoResumeDecision = autoResumeSnapshot;
+		}
 
 		if (config.status) {
 			ctx.ui.setStatus?.("context-watch", formatContextWatchStatus(assessment));
@@ -2220,7 +2421,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffTsForSignal = typeof handoffForCalmClose.timestamp === "string" ? handoffForCalmClose.timestamp : undefined;
 		const handoffFreshnessForSignal = resolveHandoffFreshness(handoffTsForSignal, now, config.handoffFreshMaxAgeMs);
 		const handoffRefreshModeForSignal = handoffRefreshMode(handoffFreshnessForSignal.label, config.autoResumeAfterCompact);
-		const reloadRequired = isReloadRequiredForSourceUpdate();
+		const reloadRequired = reloadRequiredAtRunStart;
 		const preCompactReloadSignal = resolvePreCompactReloadSignal({
 			assessmentLevel: assessment.level,
 			reloadRequired,
@@ -2473,6 +2674,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					};
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
+						handoffAfterCompact = clearAutoResumeAfterReloadIntent(handoffAfterCompact);
+						writeHandoffJson(ctx.cwd, handoffAfterCompact);
 						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 							handoffAfterCompact,
 							config.handoffFreshMaxAgeMs,
@@ -2492,6 +2695,29 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						pi.sendUserMessage(resumeEnvelope.prompt, { deliverAs: "followUp" });
 						ctx.ui.notify("context-watch: auto resume queued", "info");
 					} else {
+						if (autoResumeSnapshot.reason === "reload-required") {
+							const focusTasks = Array.isArray(handoffAfterCompact.current_tasks)
+								? handoffAfterCompact.current_tasks
+									.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
+									.slice(0, 3)
+								: [];
+							handoffAfterCompact = withAutoResumeAfterReloadIntent(handoffAfterCompact, {
+								pending: true,
+								createdAtIso: autoResumeSnapshot.atIso,
+								reason: "reload-required-after-compact",
+								focusTasks,
+							});
+							writeHandoffJson(ctx.cwd, handoffAfterCompact);
+							(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+								"context-watchdog.auto-resume-deferred-reload",
+								{
+									atIso: autoResumeSnapshot.atIso,
+									reason: "reload-required-after-compact",
+									focusTasks,
+									nextAction: "run /reload to dispatch deferred auto-resume from handoff",
+								},
+							);
+						}
 						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 							"context-watchdog.auto-resume-suppressed",
 							{
@@ -2699,6 +2925,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const nowMs = Date.now();
 		const handoff = readHandoffJson(ctx.cwd);
 		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
+		const autoResumeAfterReloadIntent = readAutoResumeAfterReloadIntent(handoff);
 		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
 		const handoffFreshnessAgeSec = toAgeSec(handoffFreshness.ageMs);
 		const handoffLastEvent = latestContextWatchEvent(handoff);
@@ -2775,6 +3002,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoResumeEnabled: config.autoResumeAfterCompact,
 			autoResumeCooldownMs: config.autoResumeCooldownMs,
 			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
+			autoResumeAfterReloadPending: Boolean(autoResumeAfterReloadIntent),
+			autoResumeAfterReloadIntent,
 			autoResumeLastDecision: lastAutoResumeDecision,
 			autoResumeLastDecisionReason: lastAutoResumeDecision?.reason ?? "none",
 			autoResumeLastDecisionSummary: lastAutoResumeDecision
@@ -3250,6 +3479,17 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				localAuditReasons,
 			});
 			const materialReadiness = buildAfkMaterialReadinessSnapshot(ctx.cwd, focusTasks);
+			const decisionCue = materialReadiness.decision === "continue"
+				? {
+					humanDecisionNeeded: false,
+					reasonCode: "none",
+					recommendedAction: ready ? "continue-local-safe" : "stabilize-local-safe",
+				}
+				: {
+					humanDecisionNeeded: true,
+					reasonCode: "seed-local-safe-required",
+					recommendedAction: "seed-local-safe",
+				};
 			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
 			const collectorStatus = (fact: string) => localAudit.collectorResults.find((entry) => entry.fact === fact)?.status;
 			const validationKnown = collectorStatus("validation") === "observed";
@@ -3278,6 +3518,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				`dirty=${freshness.dirtySignal}`,
 				`autoAdvance=${autoAdvanceDecision}`,
 				`material=${materialReadiness.decision}`,
+				`decisionCue=${decisionCue.reasonCode}`,
 				growthSnapshot?.decision ? `growthDecision=${growthSnapshot.decision}` : undefined,
 				growthSnapshot?.score !== undefined ? `growthScore=${growthSnapshot.score}` : undefined,
 				growthSnapshot ? `growthSource=${growthSnapshot.source}` : undefined,
@@ -3304,6 +3545,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						blockedReasons: materialReadiness.blockedReasons,
 						stock: materialReadiness.stock,
 					},
+					decisionCue,
 					growthMaturitySnapshot: growthSnapshot,
 					autoAdvanceContract: {
 						enabled: true,
