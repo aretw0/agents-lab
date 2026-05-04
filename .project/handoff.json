@@ -1,50 +1,50 @@
 {
-  "timestamp": "2026-05-04T07:18:04.040Z",
-  "context": "Wave pós-reload concluída: defer de auto-resume agora persiste intent no handoff e reavalia dispatch após /reload; smoke/documentação sincronizados.",
+  "timestamp": "2026-05-04T07:47:52.071Z",
+  "context": "Wave local-safe concluída: readiness agora espelha cue postReloadResume e retenção do intent pós-reload foi validada para pending-messages/lane-queue.",
   "next_actions": [
+    "rodar /reload para refletir commits recentes de runtime",
     "seed 3 local-safe tasks (seedWhy=bootstrap-focus-missing, seedPriority=continuity-bootstrap)",
-    "re-run autonomy_lane_status",
-    "manter protected lane em gate humano explícito"
+    "re-run autonomy_lane_status"
   ],
   "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] cklist.test.ts (73 passed) [truncated:+32 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] cklist.test.ts (75 passed) [truncated:+32 chars]"
   ],
   "recent_commits": [
-    "3826b4ff",
-    "e41d9c7c"
+    "76eef826",
+    "779c994e"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-744",
+    "focus": "TASK-BUD-750",
     "canonical_links": [
-      "task:TASK-BUD-744",
-      "commit:3826b4ff"
+      "task:TASK-BUD-750",
+      "commit:76eef826"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T07:18:04.040Z",
+    "generatedAtIso": "2026-05-04T07:47:52.071Z",
     "level": "ok",
-    "percent": 27,
+    "percent": 41,
     "action": "continue",
-    "recommendation": "Checkpoint fresco salvo; continuar loop local-safe com reseed explícito.",
+    "recommendation": "Continuar loop local-safe; protected permanece em gate humano explícito.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T07:18:04.040Z",
+      "atIso": "2026-05-04T07:47:52.071Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 27,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Checkpoint fresco salvo; continuar loop local-safe com reseed explícito."
+      "recommendation": "Continuar loop local-safe; protected permanece em gate humano explícito."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-744"
+    "TASK-BUD-750"
   ]
 }
