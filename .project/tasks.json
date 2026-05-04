@@ -16998,7 +16998,7 @@
     {
       "id": "TASK-BUD-756",
       "description": "Wave 1 de distribuição em `context-watchdog.ts`: extrair bloco de previews/readiness para módulo dedicado mantendo API estável.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-755"
@@ -17014,7 +17014,8 @@
         "Smoke focal permanece green."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] atacar maior arquivo primeiro com extrações de baixo risco."
+      "notes": "[rationale:risk-control] atacar maior arquivo primeiro com extrações de baixo risco.\nExtração coesa concluída sem alteração de contrato das tools.",
+      "verification": "VER-BUD-1108"
     },
     {
       "id": "TASK-BUD-757",

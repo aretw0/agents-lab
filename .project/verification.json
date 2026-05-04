@@ -12192,6 +12192,15 @@
       "method": "test",
       "timestamp": "2026-05-04T08:06:59.101Z",
       "evidence": "`docs/guides/control-plane-operating-doctrine.md` ganhou seção explícita de housekeeping anti-gordura para arquivos gigantes: critérios de entrada (>1200 linhas/alto acoplamento), contrato sem mudança comportamental e checklist pragmático por fatia. Checklist de docs validado (`control-plane-doc-checklist.test.ts` green)."
+    },
+    {
+      "id": "VER-BUD-1108",
+      "target": "TASK-BUD-756",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T08:13:10.651Z",
+      "evidence": "Wave 1 de distribuição aplicada: formatters de preview/readiness foram extraídos de `packages/pi-stack/extensions/context-watchdog.ts` para `packages/pi-stack/extensions/context-watchdog-continuation.ts`, mantendo API estável via import+re-export no módulo principal. `context-watchdog.ts` reduziu de ~4110 para 4032 linhas. Smoke focal green: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (76 passed)."
     }
   ]
 }
