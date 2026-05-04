@@ -17239,7 +17239,7 @@
     {
       "id": "TASK-BUD-767",
       "description": "Runway de escala: adicionar cue curto de readiness de delegação/background em surface de autonomia (status/details) com nextAction explícito para desbloqueio local-safe.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-765",
@@ -17255,7 +17255,8 @@
         "Smoke cobre caminho blocked e ready sem protected scope."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] reduzir polling manual para decidir quando sair de local-execute rumo a simple-delegate/background."
+      "notes": "[rationale:risk-control] reduzir polling manual para decidir quando sair de local-execute rumo a simple-delegate/background.\nCue reduz polling manual ao trazer decisão de runway + nextAction sem abrir dispatch automático.",
+      "verification": "VER-BUD-1119"
     },
     {
       "id": "TASK-BUD-768",

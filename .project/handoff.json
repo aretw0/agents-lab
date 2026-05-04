@@ -1,48 +1,43 @@
 {
-  "timestamp": "2026-05-04T20:06:53.982Z",
-  "context": "Fechadas as fatias de fortalecimento do control-plane em delegação e heartbeat: TASK-BUD-764 concluída com extração de lease/evidence heartbe [snip] egue para runway de background process. [truncated:+148 chars]",
+  "timestamp": "2026-05-04T21:09:59.361Z",
+  "context": "Reload concluído e fatia local-safe de TASK-BUD-767 finalizada: autonomy_lane_status agora expõe cue curto de runway (delegação/background) c [snip] dar packet único de runway operacional. [truncated:+93 chars]",
   "current_tasks": [
-    "TASK-BUD-766"
+    "TASK-BUD-768"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 64% (compact-now) · Compact now and continue from checkpoint.",
-    "executar TASK-BUD-766 (runway de background process readiness com blockers explícitos)",
-    "manter delegação em local-execute/simple-delegate report-only até readiness subir",
-    "reavaliar simple_delegate_rehearsal_packet e ops_calibration_decision_packet após melhorias de background process"
+    "executar TASK-BUD-768 (packet unificado delegação+background com recommendationCode estável)",
+    "manter lane em report-only/fail-closed sem auto-dispatch",
+    "rodar smoke focal após a próxima fatia e atualizar board"
   ],
-  "blockers": [
-    "context-watch-compact-required"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] cklist.test.ts (80 passed) [truncated:+254 chars]",
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] klist.test.ts (137 passed) [truncated:+437 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts (40 passed)",
+    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] ocess.test.ts (102 passed) [truncated:+225 chars]"
   ],
   "recent_commits": [
-    "b29fb14f refactor(guardrails-core): extract lease/evidence heartbeat helpers",
-    "7f307660 feat(delegation): add unified readiness status packet"
+    "0b908849 feat(autonomy-lane): add delegation/background runway cue"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-766",
+    "focus": "TASK-BUD-768",
     "canonical_links": [
-      "task:TASK-BUD-766",
-      "task:TASK-BUD-764",
-      "task:TASK-BUD-765",
-      "commit:b29fb14f"
+      "task:TASK-BUD-768",
+      "task:TASK-BUD-767",
+      "commit:0b908849"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T20:06:05.826Z",
+    "generatedAtIso": "2026-05-04T21:09:59.361Z",
     "level": "checkpoint",
-    "percent": 41,
+    "percent": 46,
     "action": "checkpoint-refresh",
     "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T20:06:05.826Z",
+      "atIso": "2026-05-04T21:09:59.361Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 41,
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -50,19 +45,6 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "Local slice checkpoint saved."
-    },
-    {
-      "atIso": "2026-05-04T20:06:53.982Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 64,
-      "thresholds": {
-        "warnPct": 45,
-        "checkpointPct": 55,
-        "compactPct": 64
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
