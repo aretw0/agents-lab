@@ -16621,8 +16621,8 @@
         "Sem alterar gate humano para protected; report-only."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] habilita operação quase-ininterrupta com gatilho explícito e seguro para abrir quest protected apenas quando janela estiver pronta.\nImplementando cue explícito de prontidão protected no status principal para transição confiável e pouco interativa.\nStatus principal agora mostra prontidão de transição local-safe -> protected com sinal compacto e auditável.",
-      "verification": "VER-BUD-1085"
+      "notes": "[rationale:risk-control] habilita operação quase-ininterrupta com gatilho explícito e seguro para abrir quest protected apenas quando janela estiver pronta.\nImplementando cue explícito de prontidão protected no status principal para transição confiável e pouco interativa.\nStatus principal agora mostra prontidão de transição local-safe -> protected com sinal compacto e auditável.\nProntidão para transição protected ficou explícita no status principal, sem liberar auto-dispatch.",
+      "verification": "VER-BUD-1088"
     },
     {
       "id": "TASK-BUD-734",
@@ -16641,8 +16641,8 @@
         "Suite focal permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] garante confiabilidade do gatilho de transição antes de abrir protected com pouca interação humana.\nCobertura garante confiabilidade do gatilho de abertura protected com mínima intervenção.",
-      "verification": "VER-BUD-1086"
+      "notes": "[rationale:risk-control] garante confiabilidade do gatilho de transição antes de abrir protected com pouca interação humana.\nCobertura garante confiabilidade do gatilho de abertura protected com mínima intervenção.\nCobertura valida gatilho de transição com baixo ruído e decisão humana mínima.",
+      "verification": "VER-BUD-1089"
     },
     {
       "id": "TASK-BUD-735",
@@ -16661,8 +16661,62 @@
         "Doc checklist permanece green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] reduz iteração manual contínua sem abrir mão da autorização humana para protected.\nRunbook alinhado com operação quase-ininterrupta e transição protected calibrada.",
-      "verification": "VER-BUD-1087"
+      "notes": "[rationale:risk-control] reduz iteração manual contínua sem abrir mão da autorização humana para protected.\nRunbook alinhado com operação quase-ininterrupta e transição protected calibrada.\nRunbook alinhado com operação quase-ininterrupta e intervenção humana somente quando cue pedir.",
+      "verification": "VER-BUD-1090"
+    },
+    {
+      "id": "TASK-BUD-736",
+      "description": "Adicionar `decisionCue` no `autonomy_lane_status` para indicar quando há decisão humana pendente (seed ou protected).",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`decisionCue` inclui `humanDecisionNeeded`, `reasonCode`, `recommendedAction` e `nextCandidateTaskId` opcional.",
+        "`decisionCue` retorna `seed-local-safe-required` quando `no-eligible` + `seed-now`; retorna `protected-focus-ready` quando `influenceWindowCue=ready-window` + `protectedReadyCue=ready`.",
+        "Sem alterar autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz necessidade de leitura manual de múltiplos campos e mantém interação humana apenas quando realmente necessária.\nIniciando decisionCue para consolidar gatilho de intervenção humana mínima (seed vs protected)."
+    },
+    {
+      "id": "TASK-BUD-737",
+      "description": "Adicionar smoke para `decisionCue` em `autonomy_lane_status` (seed-required e protected-ready).",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-736"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `decisionCue.reasonCode=seed-local-safe-required` no cenário no-eligible bootstrap.",
+        "Smoke valida `decisionCue.reasonCode=protected-focus-ready` e `nextCandidateTaskId` no cenário ready-window protegido.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] garante confiabilidade do gatilho único de intervenção humana mínima."
+    },
+    {
+      "id": "TASK-BUD-738",
+      "description": "Sincronizar doutrina curta com `decisionCue` como leitura primária de intervenção humana.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-736"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc orienta usar `decisionCue` para saber se deve seed ou abrir protected.",
+        "Mantém gate humano explícito para protected e texto anti-bloat.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] consolida operação quase ininterrupta com ponto único de decisão humana quando necessário."
     }
   ]
 }

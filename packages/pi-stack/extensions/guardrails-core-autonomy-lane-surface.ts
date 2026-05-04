@@ -1219,6 +1219,26 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         eligibleProtectedCount: protectedSelection?.eligibleTaskIds.length ?? 0,
         nextProtectedTaskId: protectedSelection?.nextTaskId,
       };
+      const decisionCue = !selection.ready && seedingGuidance?.decision === "seed-now"
+        ? {
+          humanDecisionNeeded: true,
+          reasonCode: "seed-local-safe-required",
+          recommendedAction: "seed-local-safe",
+          nextCandidateTaskId: undefined as string | undefined,
+        }
+        : influenceWindowCue.decision === "ready-window" && protectedReadyCue.decision === "ready"
+          ? {
+            humanDecisionNeeded: true,
+            reasonCode: "protected-focus-ready",
+            recommendedAction: "open-protected-focus",
+            nextCandidateTaskId: protectedReadyCue.nextProtectedTaskId,
+          }
+          : {
+            humanDecisionNeeded: false,
+            reasonCode: "none",
+            recommendedAction: selection.ready ? "continue-local-safe" : "stabilize-local-safe",
+            nextCandidateTaskId: selection.nextTaskId,
+          };
       const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
         selectionReady: selection.ready,
         selectionReason: selection.reason,
@@ -1244,6 +1264,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         influenceWindowCue?.decision ? `influenceWindow=${influenceWindowCue.decision}` : undefined,
         `protectedReady=${protectedReadyCue.decision}`,
         `protectedEligible=${protectedReadyCue.eligibleProtectedCount}`,
+        `decisionCue=${decisionCue.reasonCode}`,
         "authorization=none",
       ].filter(Boolean).join(" ");
       const seededNextAction = !selection.ready && seedingGuidance?.decision === "seed-now"
@@ -1272,6 +1293,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         seedingGuidance,
         influenceWindowCue,
         protectedReadyCue,
+        decisionCue,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : (seededNextAction ?? selection.recommendation)),

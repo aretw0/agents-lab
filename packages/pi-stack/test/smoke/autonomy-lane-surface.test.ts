@@ -721,15 +721,21 @@ describe("autonomy lane surface", () => {
 
     const influenceCue = (result?.details.influenceWindowCue as { decision?: string; window?: string; recommendationCode?: string } | undefined);
     const protectedReadyCue = (result?.details.protectedReadyCue as { decision?: string; eligibleProtectedCount?: number; nextProtectedTaskId?: string } | undefined);
+    const decisionCue = (result?.details.decisionCue as { humanDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
     expect(influenceCue?.decision).toBe("ready-window");
     expect(influenceCue?.window).toBe("open");
     expect(influenceCue?.recommendationCode).toBe("influence-assimilation-ready-window-open");
     expect(protectedReadyCue?.decision).toBe("ready");
     expect(protectedReadyCue?.eligibleProtectedCount).toBe(1);
     expect(protectedReadyCue?.nextProtectedTaskId).toBe("TASK-PROTECTED-1");
+    expect(decisionCue?.humanDecisionNeeded).toBe(true);
+    expect(decisionCue?.reasonCode).toBe("protected-focus-ready");
+    expect(decisionCue?.recommendedAction).toBe("open-protected-focus");
+    expect(decisionCue?.nextCandidateTaskId).toBe("TASK-PROTECTED-1");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=ready-window");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedReady=ready");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedEligible=1");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("decisionCue=protected-focus-ready");
   });
 
   it("registers composed status tool with board selection and lane plan", () => {
@@ -814,11 +820,17 @@ describe("autonomy lane surface", () => {
     const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
     const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
     const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string } | undefined);
+    const decisionCue = (result?.details.decisionCue as { humanDecisionNeeded?: boolean; reasonCode?: string; recommendedAction?: string; nextCandidateTaskId?: string } | undefined);
 
     expect(seedingGuidance?.decision).toBe("seed-now");
     expect(reminder?.source).toBe("seed-guidance");
     expect(reminder?.summary).toContain("seedWhy=bootstrap-focus-missing");
     expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
+    expect(decisionCue?.humanDecisionNeeded).toBe(true);
+    expect(decisionCue?.reasonCode).toBe("seed-local-safe-required");
+    expect(decisionCue?.recommendedAction).toBe("seed-local-safe");
+    expect(decisionCue?.nextCandidateTaskId).toBeUndefined();
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("decisionCue=seed-local-safe-required");
     expect(String(result?.details.nextAction ?? "")).toContain("seed 3 local-safe tasks");
     expect(String(result?.details.nextAction ?? "")).toContain("seedWhy=bootstrap-focus-missing");
     expect(String(result?.details.nextAction ?? "")).toContain("seedPriority=continuity-bootstrap");
@@ -1015,17 +1027,28 @@ describe("autonomy lane surface", () => {
       eligibleProtectedCount?: number;
       nextProtectedTaskId?: string;
     } | undefined);
+    const decisionCue = (result?.details.decisionCue as {
+      humanDecisionNeeded?: boolean;
+      reasonCode?: string;
+      recommendedAction?: string;
+      nextCandidateTaskId?: string;
+    } | undefined);
     expect(influenceCue?.decision).toBe("blocked");
     expect(influenceCue?.recommendationCode).toBe("influence-assimilation-blocked-operational");
     expect(protectedReadyCue?.decision).toBe("hold");
     expect(protectedReadyCue?.recommendationCode).toBe("protected-ready-hold-local-safe-first");
     expect(protectedReadyCue?.eligibleProtectedCount).toBe(0);
     expect(protectedReadyCue?.nextProtectedTaskId).toBeUndefined();
+    expect(decisionCue?.humanDecisionNeeded).toBe(false);
+    expect(decisionCue?.reasonCode).toBe("none");
+    expect(decisionCue?.recommendedAction).toBe("stabilize-local-safe");
+    expect(decisionCue?.nextCandidateTaskId).toBeUndefined();
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedCount=3");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedWhy=readiness-blocked");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=blocked");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedReady=hold");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedEligible=0");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("decisionCue=none");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
