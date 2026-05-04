@@ -12174,6 +12174,24 @@
       "method": "test",
       "timestamp": "2026-05-04T07:54:41.514Z",
       "evidence": "Doutrina curta atualizada para incluir leitura do cue `postReloadResume=pending` também no `context_watch_one_slice_canary_preview` (além de status/readiness). Checklist de docs e smoke context-watchdog seguem green (76 passed)."
+    },
+    {
+      "id": "VER-BUD-1106",
+      "target": "TASK-BUD-754",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-04T08:04:06.975Z",
+      "evidence": "Diagnóstico de gordura executado com inventário objetivo de linhas (top arquivos em `packages/pi-stack/extensions` e `packages/pi-stack/test/smoke`). Resultado usado para semear waves de organização pragmática: TASK-BUD-755/756/757/758/759, incluindo revisão explícita de lane-queue vs steering/follow-up."
+    },
+    {
+      "id": "VER-BUD-1107",
+      "target": "TASK-BUD-755",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T08:06:59.101Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` ganhou seção explícita de housekeeping anti-gordura para arquivos gigantes: critérios de entrada (>1200 linhas/alto acoplamento), contrato sem mudança comportamental e checklist pragmático por fatia. Checklist de docs validado (`control-plane-doc-checklist.test.ts` green)."
     }
   ]
 }

@@ -16954,6 +16954,129 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reduzir lacuna entre status/readiness e camada de decisão humana canary.\nFluxo de decisão canary/operator agora documentado com o mesmo sinal de continuidade pós-reload.",
       "verification": "VER-BUD-1105"
+    },
+    {
+      "id": "TASK-BUD-754",
+      "description": "Revisar primitiva `lane-queue` vs steering/follow-up nativos para reduzir gordura e manter apenas valor real.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Mapear claramente sobreposição/limite entre lane-queue, steering e follow-up.",
+        "Definir decisão explícita: manter (com contrato simplificado) ou deprecar/desligar caminhos confusos.",
+        "Se mantiver, reduzir surface para fluxo mínimo e adicionar guideline anti-confusão no doc."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] evitar primitivas 'arrumadinhas' sem propósito e reduzir confusão operacional recorrente.\nInventário inicial de tamanho (linhas): context-watchdog.ts=4110, guardrails-core.ts=3585, context-watchdog.test.ts=3319, project-board-surface.ts=2906, quota-visibility.ts=2677, colony-pilot.ts=2127, guardrails-core-autonomy-lane-surface.ts=1644, guardrails-core-unattended-continuation.ts=1630, guardrails-core-lane-queue.ts=1248.\nConclusão da triagem: housekeeping deve seguir por waves de coesão e contratos, sem refactor cosmético.",
+      "verification": "VER-BUD-1106"
+    },
+    {
+      "id": "TASK-BUD-755",
+      "description": "Definir contrato de housekeeping anti-gordura para arquivos gigantes (limites, fatias, rollback e gate de smoke).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-754"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        ".project/tasks.json"
+      ],
+      "acceptance_criteria": [
+        "Contrato explícito de refactor sem mudança comportamental: small slices, smoke focal obrigatório e rollback simples.",
+        "Limites pragmáticos por arquivo/superfície definidos (ex.: >1200 linhas entra em wave de extração).",
+        "Checklist operacional para escolher extrações por coesão (não por estética)."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir gordura com pragmatismo sem quebrar contratos existentes.\nContrato de organização da casa definido para waves futuras com coesão e rollback simples.",
+      "verification": "VER-BUD-1107"
+    },
+    {
+      "id": "TASK-BUD-756",
+      "description": "Wave 1 de distribuição em `context-watchdog.ts`: extrair bloco de previews/readiness para módulo dedicado mantendo API estável.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-755"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context-watchdog.ts` reduz tamanho com extração coesa de lógica de preview/readiness.",
+        "Sem mudança de contrato nas tools existentes.",
+        "Smoke focal permanece green."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] atacar maior arquivo primeiro com extrações de baixo risco."
+    },
+    {
+      "id": "TASK-BUD-757",
+      "description": "Wave 1 de distribuição em `guardrails-core.ts`: separar wiring de lane-queue/long-run loop em módulo de composição.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-755"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`guardrails-core.ts` reduz acoplamento concentrando registry/wiring em função explícita.",
+        "Sem regressão de comandos/tools lane-queue.",
+        "Smokes da fila/loop continuam green."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] diminuir confusão entre infra de fila e fluxo nativo de steering/follow-up."
+    },
+    {
+      "id": "TASK-BUD-758",
+      "description": "Wave 1 de organização de testes: dividir `context-watchdog.test.ts` por domínio (status, resume/reload, previews, checkpoint).",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-756"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog/*.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Suite atual é repartida em múltiplos arquivos sem perda de cobertura.",
+        "Tempo/legibilidade melhoram sem alterar contratos testados.",
+        "`test:smoke` focal permanece green."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] manter manutenção viável enquanto funcionalidades crescem."
+    },
+    {
+      "id": "TASK-BUD-759",
+      "description": "Revisão pragmática de `lane-queue` vs steering/follow-up: decisão de simplificar escopo, deprecar comandos redundantes ou manter com contrato mínimo.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-757"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Mapa de sobreposição e fronteira operacional entre lane-queue e nativo documentado.",
+        "Decisão explícita (manter-simplificado ou deprecar partes) com migração segura.",
+        "Sem perder continuidade local-safe em long-run."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] resolver confusão de produto/UX antes da release 0.8.0."
     }
   ]
 }
