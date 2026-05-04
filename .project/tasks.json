@@ -16720,6 +16720,64 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] consolida operação quase ininterrupta com ponto único de decisão humana quando necessário.\nRunbook alinhado com modo quase-ininterrupto e intervenção apenas quando cue exigir.",
       "verification": "VER-BUD-1093"
+    },
+    {
+      "id": "TASK-BUD-742",
+      "description": "Adicionar smoke para `context_watch_status` cobrindo `autoResumeAfterReloadPending` quando handoff contém intent pós-reload.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context_watch_status` expõe em details `autoCompact.autoResumeAfterReloadPending=true` quando `context_watch.auto_resume_after_reload.pending=true` no handoff.",
+        "Cobrir também que o intent some (`false`) após clear helper.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] valida que a retomada deferida por reload fica visível e auditável no status runtime.\nCobertura runtime garante visibilidade auditável do defer pós-reload no status tool.",
+      "verification": "VER-BUD-1094"
+    },
+    {
+      "id": "TASK-BUD-743",
+      "description": "Adicionar smoke de contrato para helper de defer pós-reload mantendo foco truncado (max 3) e reason canônico.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-742"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Helper `withAutoResumeAfterReloadIntent` limita `focusTasks` a 3 itens.",
+        "`readAutoResumeAfterReloadIntent` normaliza reason para `reload-required-after-compact`.",
+        "Sem regressão nos demais helpers de handoff."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] endurece contrato determinístico para evitar drift/sujeira no handoff durante ondas longas.\nContrato do handoff endurecido para evitar drift durante long-runs com compact/reload.",
+      "verification": "VER-BUD-1095"
+    },
+    {
+      "id": "TASK-BUD-744",
+      "description": "Sincronizar doutrina curta com fluxo `deferred auto-resume pós-reload` no contexto de compactação.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-742"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc registra que `reload-required` no pós-compact persiste intent e retoma após `/reload` quando gates liberarem.",
+        "Mantém gate humano explícito para protected e anti-bloat.",
+        "Checklist de docs continua green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita interpretação errada de suppress definitivo e reduz intervenção manual.\nDoutrina sincronizada para evitar leitura errada de suppress definitivo durante throughput wave.",
+      "verification": "VER-BUD-1096"
     }
   ]
 }

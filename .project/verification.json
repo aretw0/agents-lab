@@ -12066,6 +12066,33 @@
       "method": "test",
       "timestamp": "2026-05-04T04:46:32.782Z",
       "evidence": "Doutrina curta em `docs/guides/control-plane-operating-doctrine.md` atualizada para usar `decisionCue` como leitura primária de intervenção humana (seed/protected), mantendo gate humano explícito para protected e fluxo anti-bloat. Doc checklist green no gate combinado (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1094",
+      "target": "TASK-BUD-742",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:14:36.758Z",
+      "evidence": "Smoke adicionado em `packages/pi-stack/test/smoke/context-watchdog.test.ts` valida que `context_watch_status` expõe `details.autoCompact.autoResumeAfterReloadPending=true` quando handoff contém `context_watch.auto_resume_after_reload.pending=true`, e retorna `false` após clear do intent."
+    },
+    {
+      "id": "VER-BUD-1095",
+      "target": "TASK-BUD-743",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:14:55.776Z",
+      "evidence": "Teste de helper expandido em `packages/pi-stack/test/smoke/context-watchdog.test.ts`: `withAutoResumeAfterReloadIntent` agora validado com truncamento `focusTasks` para 3; `readAutoResumeAfterReloadIntent` normaliza `reason` inválido para `reload-required-after-compact` de forma determinística."
+    },
+    {
+      "id": "VER-BUD-1096",
+      "target": "TASK-BUD-744",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:16:38.642Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` atualizado com regra curta: em compact com `reload-required`, auto-resume suprimido vira defer temporário com intent no handoff e reavaliação após `/reload`, mantendo gates fail-closed. Checklist de docs validado junto ao smoke de context-watchdog (73 passed)."
     }
   ]
 }
