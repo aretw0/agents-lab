@@ -16492,6 +16492,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reduz latência operacional na virada no-eligible -> seed-local-safe.\nRunbook mantém anti-bloat com cue mínimo e acionável no pause brief.",
       "verification": "VER-BUD-1078"
+    },
+    {
+      "id": "TASK-BUD-727",
+      "description": "Enriquecer `nextAction` em `autonomy_lane_status` com diretiva de seeding quando `seedingGuidance.decision=seed-now`.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Em `no-eligible-tasks` com `seedingGuidance`, `nextAction` inclui `seed <count> local-safe` + `seedWhy` + `seedPriority`.",
+        "Mensagem mantém fallback atual quando não houver seedingGuidance.",
+        "Sem mudança de autorização/dispatch (report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] transforma stop genérico em próximo passo acionável com rationale explícito, reduzindo latência operacional.\nExecutando melhoria de ação imediata: nextAction com seedCount/seedWhy/seedPriority quando seedingGuidance=seed-now.\nStop local genérico virou diretiva imediata de seeding com rationale explícito.",
+      "verification": "VER-BUD-1079"
+    },
+    {
+      "id": "TASK-BUD-728",
+      "description": "Adicionar smoke para `nextAction` orientado por seeding em `autonomy_lane_status` no cenário `no-eligible-tasks`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-727"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida que `nextAction` contém `seed 3 local-safe` + `seedWhy` + `seedPriority` no cenário bootstrap.",
+        "Smoke mantém comportamento de `nextAction` de cadeia ativa quando seleção está ready.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] previne regressão para recomendação vaga em estado sem tarefas elegíveis.\nCobertura evita regressão para nextAction vaga em no-eligible com seed-now.",
+      "verification": "VER-BUD-1080"
+    },
+    {
+      "id": "TASK-BUD-729",
+      "description": "Sincronizar doutrina curta para uso de `nextAction` enriquecido por seedingGuidance no fechamento de decisão.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-727"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc menciona que `nextAction` pode trazer diretiva `seed <n>` com `seedWhy/seedPriority`.",
+        "Mantém texto anti-bloat e policy inalterada.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] alinhamento runtime-doc reduz ambiguidades na passagem no-eligible -> seed.\nRunbook mantém anti-bloat com ação direta de seeding no texto de continuidade.",
+      "verification": "VER-BUD-1081"
     }
   ]
 }

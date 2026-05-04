@@ -1213,6 +1213,14 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
         "authorization=none",
       ].filter(Boolean).join(" ");
+      const seededNextAction = !selection.ready && seedingGuidance?.decision === "seed-now"
+        ? [
+          `seed ${Math.max(1, Math.floor(Number(seedingGuidance.suggestedSeedCount ?? 1)))} local-safe tasks`,
+          `seedWhy=${seedingGuidance.seedWhy ?? "unknown"}`,
+          `seedPriority=${seedingGuidance.seedPriority ?? "unknown"}`,
+          "then re-run autonomy_lane_status",
+        ].join("; ")
+        : undefined;
       const result = {
         ready: plan.ready && selection.ready,
         summary: statusSummary,
@@ -1231,7 +1239,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         seedingGuidance,
         nextAction: chaining.active
           ? chaining.nextAction
-          : (selection.ready ? plan.nextAction : selection.recommendation),
+          : (selection.ready ? plan.nextAction : (seededNextAction ?? selection.recommendation)),
       };
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

@@ -758,6 +758,9 @@ describe("autonomy lane surface", () => {
     expect(reminder?.source).toBe("seed-guidance");
     expect(reminder?.summary).toContain("seedWhy=bootstrap-focus-missing");
     expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
+    expect(String(result?.details.nextAction ?? "")).toContain("seed 3 local-safe tasks");
+    expect(String(result?.details.nextAction ?? "")).toContain("seedWhy=bootstrap-focus-missing");
+    expect(String(result?.details.nextAction ?? "")).toContain("seedPriority=continuity-bootstrap");
   });
 
   it("filters completed reload reminder from handoff next_actions when fresh", () => {

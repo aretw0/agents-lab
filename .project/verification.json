@@ -11931,6 +11931,33 @@
       "method": "test",
       "timestamp": "2026-05-04T02:36:03.147Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, `operatorPauseBrief` deve carregar `seedingCue (seedCount/seedWhy/seedPriority)` para decisão rápida; em stale mantém precedência de `refresh-handoff`. Gate combinado: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1079",
+      "target": "TASK-BUD-727",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:45:54.863Z",
+      "evidence": "`autonomy_lane_status` agora enriquece `nextAction` quando `seedingGuidance.decision=seed-now` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`: `seed <n> local-safe tasks; seedWhy=...; seedPriority=...; then re-run autonomy_lane_status`. Fallback antigo permanece para os demais estados."
+    },
+    {
+      "id": "VER-BUD-1080",
+      "target": "TASK-BUD-728",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:46:18.486Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` atualizada para validar `nextAction` enriquecido no cenário bootstrap (`seed 3 local-safe`, `seedWhy=bootstrap-focus-missing`, `seedPriority=continuity-bootstrap`) e manter cadeia ativa inalterada quando seleção está ready. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1081",
+      "target": "TASK-BUD-729",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:46:39.165Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, além de summary, `nextAction` pode carregar diretiva direta `seed <n> local-safe ...` baseada em `seedingGuidance` (`seedWhy/seedPriority`). Doc checklist green no mesmo gate (39 passed)."
     }
   ]
 }
