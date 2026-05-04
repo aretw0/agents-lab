@@ -3675,8 +3675,10 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
+			const handoff = readHandoffJson(ctx.cwd);
+			const postReloadResumeIntent = readAutoResumeAfterReloadIntent(handoff);
 			const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
-				readHandoffJson(ctx.cwd),
+				handoff,
 				config.handoffFreshMaxAgeMs,
 				Date.now(),
 				{ taskStatusById, preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
@@ -3720,12 +3722,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				checkpointPlanned: checkpointFresh && handoffBudgetOk,
 				stopContractKnown: plan.mustStopAfterSlice && plan.oneSliceOnly,
 			});
-			const summary = formatContextWatchOneSliceCanaryPreviewSummary({
-				...plan,
-				decisionPacketDecision: decisionPacket.decision,
-				dispatchAllowed: decisionPacket.dispatchAllowed,
-				decisionPacketReasons: decisionPacket.reasons,
-			});
+			const summary = [
+				formatContextWatchOneSliceCanaryPreviewSummary({
+					...plan,
+					decisionPacketDecision: decisionPacket.decision,
+					dispatchAllowed: decisionPacket.dispatchAllowed,
+					decisionPacketReasons: decisionPacket.reasons,
+				}),
+				postReloadResumeIntent ? "postReloadResume=pending" : undefined,
+			].filter(Boolean).join(" ");
 			return {
 				content: [{ type: "text", text: summary }],
 				details: {
@@ -3735,6 +3740,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					focusTasks,
 					focusStatus,
 					diagnosticsSummary,
+					postReloadResumePending: Boolean(postReloadResumeIntent),
+					postReloadResumeReason: postReloadResumeIntent?.reason,
 					localContinuitySummary,
 					localContinuityReasons: localAuditReasons,
 					protectedPaths,

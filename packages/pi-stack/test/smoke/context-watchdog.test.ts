@@ -2813,6 +2813,7 @@ describe("context-watchdog", () => {
 			const operatorResult = await operatorTool.execute("tc-one-slice-operator-packet", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 
 			expect(result.content?.[0]?.text).toBe("context-watch-one-slice-canary-preview: decision=prepare-one-slice prepare=yes stop=yes oneSliceOnly=yes packet=ready-for-human-decision dispatch=no reasons=readiness-green|one-slice-only authorization=none");
+			expect(result.content?.[0]?.text).not.toContain("postReloadResume=");
 			expect(result.content?.[0]?.text).not.toContain("packetReasons=");
 			expect(result.details).toMatchObject({
 				effect: "none",
@@ -2892,6 +2893,46 @@ describe("context-watchdog", () => {
 				executorApproved: false,
 				contractReasons: ["human-confirmation-missing"],
 			})).toBe("context-watch-one-slice-operator-packet: readiness=yes preview=prepare-one-slice packet=ready-for-human-decision contract=blocked dispatch=no executor=no reasons=human-confirmation-missing authorization=none");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
+	it("context_watch_one_slice_canary_preview includes postReloadResume cue when defer intent is pending", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-one-slice-preview-post-reload-"));
+		try {
+			execFileSync("git", ["init"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.email", "test@example.com"], { cwd, stdio: "ignore" });
+			execFileSync("git", ["config", "user.name", "Test User"], { cwd, stdio: "ignore" });
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [{
+				id: "TASK-BUD-751",
+				status: "in-progress",
+				description: "One-slice preview with deferred post-reload intent",
+				files: [".project/tasks.json"],
+				acceptance_criteria: ["Smoke principal permanece verde."],
+			}] }));
+			execFileSync("git", ["add", "."], { cwd, stdio: "ignore" });
+			execFileSync("git", ["commit", "-m", "init"], { cwd, stdio: "ignore" });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-751"],
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-04T07:10:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-751"],
+					},
+				},
+			}));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_one_slice_canary_preview");
+			const result = await tool.execute("tc-one-slice-preview-post-reload", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+			expect(result.content?.[0]?.text).toContain("postReloadResume=pending");
+			expect((result.details as { postReloadResumePending?: boolean; postReloadResumeReason?: string } | undefined)?.postReloadResumePending).toBe(true);
+			expect((result.details as { postReloadResumePending?: boolean; postReloadResumeReason?: string } | undefined)?.postReloadResumeReason).toBe("reload-required-after-compact");
 		} finally {
 			rmSync(cwd, { recursive: true, force: true });
 		}
