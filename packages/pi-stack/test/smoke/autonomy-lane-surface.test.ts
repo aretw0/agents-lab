@@ -839,6 +839,33 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
+  it("prioritizes refresh-handoff in pause brief when no eligible task and handoff is stale", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-protected-only-stale-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: "2020-01-01T00:00:00.000Z",
+      current_tasks: ["TASK-COLONY-PROMOTION"],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
+    const pauseBrief = (result?.details.operatorPauseBrief as { recommendation?: string; options?: Array<{ option?: string }> } | undefined);
+
+    expect((result?.details.chaining as { blockedReasons?: string[] } | undefined)?.blockedReasons).toContain("handoff-stale");
+    expect(pauseBrief?.recommendation).toBe("refresh-handoff");
+    expect((pauseBrief?.options ?? []).map((row) => row.option)).toContain("seed-local-safe");
+  });
+
   it("emits report-only project_intake_plan for lightweight project", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsAutonomyLaneSurface({

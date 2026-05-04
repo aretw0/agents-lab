@@ -254,6 +254,7 @@ function buildAutonomyOperatorPauseBrief(input: {
   selectionReason: string;
   selectionRecommendation: string;
   includeProtectedScopes: boolean;
+  handoffFreshness: HandoffFreshnessLabel;
   nextTaskId?: string;
   nextTaskMnemonic?: string;
 }): AutonomyOperatorPauseBrief {
@@ -271,6 +272,17 @@ function buildAutonomyOperatorPauseBrief(input: {
   }
 
   if (input.selectionReason === "no-eligible-tasks" && input.includeProtectedScopes !== true) {
+    if (input.handoffFreshness === "stale") {
+      return {
+        whyPaused: "No eligible local-safe tasks remain and handoff is stale.",
+        options: [
+          { option: "refresh-handoff", impact: "Write fresh checkpoint evidence before reseeding/continuing." },
+          { option: "seed-local-safe", impact: "Create 1-3 bounded local-safe tasks after handoff refresh." },
+        ],
+        recommendation: "refresh-handoff",
+      };
+    }
+
     return {
       whyPaused: "No eligible local-safe tasks remain in current selection policy.",
       options: [
@@ -1038,15 +1050,16 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       const tasks = readProjectTasksBlock(ctx.cwd).tasks;
       const nextTask = selection.nextTaskId ? findTaskById(tasks, selection.nextTaskId) : undefined;
       const nextTaskMnemonic = toTaskMnemonic(nextTask);
+      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
       const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
         selectionReady: selection.ready,
         selectionReason: selection.reason,
         selectionRecommendation: selection.recommendation,
         includeProtectedScopes,
+        handoffFreshness: handoffFreshness.label,
         nextTaskId: selection.nextTaskId,
         nextTaskMnemonic,
       });
-      const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
       const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label);
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.

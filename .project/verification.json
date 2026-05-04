@@ -11715,6 +11715,33 @@
       "method": "test",
       "timestamp": "2026-05-03T23:00:33.243Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: fechamento operacional deve ler `reloadGate` junto com `timeoutPressureSummary` no `context_watch_status`. Texto anti-bloat; sem mudança de policy/autorização. Doc checklist green no mesmo gate (70 passed)."
+    },
+    {
+      "id": "VER-BUD-1055",
+      "target": "TASK-BUD-703",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:14:51.846Z",
+      "evidence": "`buildAutonomyOperatorPauseBrief` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora recebe `handoffFreshness` e, em `no-eligible-tasks` + `handoff=stale`, prioriza recommendation `refresh-handoff` com opção `seed-local-safe` em seguida. Contrato segue report-only (sem dispatch/autorização)."
+    },
+    {
+      "id": "VER-BUD-1056",
+      "target": "TASK-BUD-704",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:15:04.531Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` adicionada: quando há `no-eligible-tasks` e handoff stale, `operatorPauseBrief.recommendation` é `refresh-handoff` e opções incluem `seed-local-safe`. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1057",
+      "target": "TASK-BUD-705",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:15:25.040Z",
+      "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks` + handoff stale, `operatorPauseBrief` deve recomendar `refresh-handoff` antes de `seed-local-safe`. Texto anti-bloat, sem alterar autorização/policy. Doc checklist green no mesmo gate (35 passed)."
     }
   ]
 }

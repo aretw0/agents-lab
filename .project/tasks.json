@@ -16039,6 +16039,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça hábito operacional de não ignorar precondição de reload.\nRitual operacional agora destaca explicitamente quando /reload é precondição.",
       "verification": "VER-BUD-1054"
+    },
+    {
+      "id": "TASK-BUD-703",
+      "description": "Priorizar `refresh-handoff` no operatorPauseBrief quando autonomy_lane_status estiver sem tarefas elegíveis e handoff stale.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando `selectionReason=no-eligible-tasks` + `handoffFreshness=stale`, recommendation vira `refresh-handoff` antes de seeding.",
+        "Options incluem `refresh-handoff` e `seed-local-safe` com impacto curto.",
+        "Sem alterar policy protected/autorização (report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy atual=bootstrap-focus-missing; com handoff stale precisamos evitar semeadura cega sem refresh primeiro.\nContinuando após reload em lane prioritária: implementando stale-first (`refresh-handoff`) no operatorPauseBrief para no-eligible-tasks.\nStale-first aplicado para evitar semeadura cega com contexto vencido.",
+      "verification": "VER-BUD-1055"
+    },
+    {
+      "id": "TASK-BUD-704",
+      "description": "Adicionar smoke para operatorPauseBrief stale-first em autonomy_lane_status.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-703"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida recommendation `refresh-handoff` quando no-eligible + handoff stale.",
+        "Smoke valida manutenção de `seed-local-safe` no caso equivalente com handoff fresh/ausente.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege prioridade de refresh antes de semeadura em pausa longa.\nCobertura garante ordem refresh->seed em cenário stale.",
+      "verification": "VER-BUD-1056"
+    },
+    {
+      "id": "TASK-BUD-705",
+      "description": "Sincronizar doutrina curta: em no-eligible + handoff stale, fazer refresh-handoff antes de seed-local-safe.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-703"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc explicita ordem `refresh-handoff -> seed-local-safe` em cenário stale.",
+        "Texto anti-bloat e sem nova política de autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] alinha decisão humana com gate de frescura para evitar retrabalho.\nOrdem operacional stale-first alinhada entre runtime e doutrina.",
+      "verification": "VER-BUD-1057"
     }
   ]
 }
