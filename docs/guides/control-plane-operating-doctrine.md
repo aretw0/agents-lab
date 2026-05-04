@@ -484,7 +484,7 @@ Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded pa
 
 Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK.
 
-Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`). Ao reseedar, registrar `seedWhy`/`reseedJustification` e `seedPriority` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
+Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedWhy/seedPriority` quando houver) para reduzir nudge operacional. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`). Ao reseedar, registrar `seedWhy`/`reseedJustification` e `seedPriority` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
 
 Stop condition para estoque baixo:
 - `stop: backlog-material-insuficiente`.

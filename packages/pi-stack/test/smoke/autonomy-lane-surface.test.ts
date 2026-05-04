@@ -876,6 +876,7 @@ describe("autonomy lane surface", () => {
     expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
     expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
     expect(seedingGuidance?.humanActionRequired).toBe(true);
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedWhy=readiness-blocked");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
@@ -940,6 +941,8 @@ describe("autonomy lane surface", () => {
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-LOCAL-A");
     expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-LOCAL-A", "TASK-LOCAL-B"]);
     expect((result?.details.seedingGuidance as unknown) ?? undefined).toBeUndefined();
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("code=execute-bounded-slice");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("next=TASK-LOCAL-A");
   });
 
   it("emits report-only project_intake_plan for lightweight project", () => {

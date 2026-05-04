@@ -11832,6 +11832,24 @@
       "method": "test",
       "timestamp": "2026-05-04T01:32:26.157Z",
       "evidence": "Adicionada smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` garantindo que, com fila local-safe já pronta, `autonomy_lane_status` seleciona o próximo task (`TASK-LOCAL-A`), mantém readyQueue estável e não emite `seedingGuidance`. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1068",
+      "target": "TASK-BUD-716",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:37:04.475Z",
+      "evidence": "`autonomy_lane_status` agora publica `summary` curto em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` com `code`, `next`, `queue` e (quando aplicável) `seedWhy`/`seedPriority`. Smoke atualizada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` para validar summary tanto em fila local-safe pronta quanto em no-eligible com guidance bloqueado. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1069",
+      "target": "TASK-BUD-717",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:39:02.007Z",
+      "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md` para incluir cue de `summary` do `autonomy_lane_status` (`code/next/queue` + `seedWhy/seedPriority` quando houver), alinhando com observabilidade read-only recém-exposta. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (37 passed)."
     }
   ]
 }

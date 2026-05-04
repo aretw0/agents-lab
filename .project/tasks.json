@@ -16288,7 +16288,7 @@
     {
       "id": "TASK-BUD-716",
       "description": "[seed-status-summary-clarity] Melhorar resumo/status report-only para reduzir nudge operacional sem mexer em autorização.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -16300,12 +16300,13 @@
         "Smoke focal cobre o novo sinal no payload/sumário."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: reduzir fricção de decisão entre slices."
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: reduzir fricção de decisão entre slices.\nContinuando cadeia local-safe: adicionando sinal curto de status para reduzir nudge operacional no autonomy_lane_status.\nStatus ganhou sinal compacto para reduzir nudge operacional e leitura de payload grande.",
+      "verification": "VER-BUD-1068"
     },
     {
       "id": "TASK-BUD-717",
       "description": "[seed-readonly-observability] Adicionar campo read-only de observabilidade para diagnóstico de bloqueio/decisão na lane.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -16318,7 +16319,8 @@
         "Smoke + checklist de doc permanecem green."
       ],
       "milestone": "throughput-local-safe-stock-2026-05",
-      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: melhorar auditoria rápida para continuidade local-safe."
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: melhorar auditoria rápida para continuidade local-safe.\nSincronizando doutrina com cue curto de summary no autonomy_lane_status (code/next/queue + seedWhy/seedPriority).\nObservabilidade de decisão agora fica acessível tanto no payload estruturado quanto no summary curto.",
+      "verification": "VER-BUD-1069"
     }
   ]
 }

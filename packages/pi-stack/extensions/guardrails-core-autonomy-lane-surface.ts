@@ -1173,8 +1173,19 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         })()
         : undefined;
       const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label, seedingGuidance);
+      const statusSummary = [
+        "autonomy-lane-status:",
+        `ready=${plan.ready && selection.ready ? "yes" : "no"}`,
+        `code=${selection.recommendationCode}`,
+        selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
+        `queue=${readyQueue.previewCount}`,
+        seedingGuidance?.seedWhy ? `seedWhy=${seedingGuidance.seedWhy}` : undefined,
+        seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
+        "authorization=none",
+      ].filter(Boolean).join(" ");
       const result = {
         ready: plan.ready && selection.ready,
+        summary: statusSummary,
         plan,
         selection,
         readyQueue,
