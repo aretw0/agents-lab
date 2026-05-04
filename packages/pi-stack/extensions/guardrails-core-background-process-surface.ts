@@ -50,6 +50,86 @@ function normalizeStopSource(value: unknown): BackgroundProcessStopSource | unde
   return value === "human" || value === "agent" || value === "timeout" || value === "unknown" ? value : undefined;
 }
 
+function buildBackgroundProcessReadinessPacket(input: {
+  plan: ReturnType<typeof resolveBackgroundProcessControlPlan>;
+  readiness: ReturnType<typeof buildBackgroundProcessReadinessScore>;
+  rehearsal: ReturnType<typeof evaluateBackgroundProcessRehearsal>;
+}): {
+  decision: "ready-window" | "needs-evidence" | "blocked";
+  recommendationCode:
+    | "background-process-readiness-packet-ready"
+    | "background-process-readiness-packet-needs-evidence"
+    | "background-process-readiness-packet-blocked";
+  recommendation: string;
+  nextAction: string;
+  blockers: string[];
+  summary: string;
+} {
+  const blockers = [...new Set([
+    ...(Array.isArray(input.plan.blockers) ? input.plan.blockers : []),
+    ...(Array.isArray(input.rehearsal.blockers) ? input.rehearsal.blockers : []),
+  ])];
+
+  if (input.plan.decision === "blocked" || input.rehearsal.decision === "blocked") {
+    const summary = [
+      "background-process-readiness-packet:",
+      "decision=blocked",
+      "code=background-process-readiness-packet-blocked",
+      `plan=${input.plan.decision}`,
+      `readiness=${input.readiness.recommendationCode}`,
+      `rehearsal=${input.rehearsal.decision}`,
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      "authorization=none",
+    ].filter(Boolean).join(" ");
+    return {
+      decision: "blocked",
+      recommendationCode: "background-process-readiness-packet-blocked",
+      recommendation: "background-process runway blocked; keep report-only and close hard blockers before operational rehearsal.",
+      nextAction: "resolve plan/rehearsal blockers, then rerun background_process_readiness_packet.",
+      blockers,
+      summary,
+    };
+  }
+
+  if (input.plan.decision !== "ready-for-design" || input.rehearsal.decision !== "ready") {
+    const summary = [
+      "background-process-readiness-packet:",
+      "decision=needs-evidence",
+      "code=background-process-readiness-packet-needs-evidence",
+      `plan=${input.plan.decision}`,
+      `readiness=${input.readiness.recommendationCode}`,
+      `rehearsal=${input.rehearsal.decision}`,
+      "authorization=none",
+    ].join(" ");
+    return {
+      decision: "needs-evidence",
+      recommendationCode: "background-process-readiness-packet-needs-evidence",
+      recommendation: "background-process runway still needs maturity evidence; stay report-only while improving capabilities/lifecycle coverage.",
+      nextAction: "increase readiness score and rehearsal evidence (stopSource coverage, lifecycle classification, rollback, slices).",
+      blockers,
+      summary,
+    };
+  }
+
+  const summary = [
+    "background-process-readiness-packet:",
+    "decision=ready-window",
+    "code=background-process-readiness-packet-ready",
+    `plan=${input.plan.decision}`,
+    `readiness=${input.readiness.recommendationCode}`,
+    `rehearsal=${input.rehearsal.decision}`,
+    "authorization=none",
+  ].join(" ");
+  return {
+    decision: "ready-window",
+    recommendationCode: "background-process-readiness-packet-ready",
+    recommendation: "background-process runway is ready for bounded local rehearsal planning (still no process start from this packet).",
+    nextAction: "run one bounded rehearsal slice with explicit rollback and lifecycle evidence capture.",
+    blockers,
+    summary,
+  };
+}
+
 export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "background_process_plan",
@@ -162,6 +242,108 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "background_process_readiness_packet",
+    label: "Background Process Readiness Packet",
+    description: "Report-only unified packet combining plan + readiness + rehearsal with explicit nextAction. Never launches or stops processes.",
+    parameters: Type.Object({
+      kind: Type.Optional(Type.String({ description: "frontend | backend | test-server | worker | generic" })),
+      requested_mode: Type.Optional(Type.String({ description: "auto | shared-service | isolated-worker" })),
+      needs_server: Type.Optional(Type.Boolean({ description: "Whether the work needs a long-lived server/process. Default true." })),
+      requested_port: Type.Optional(Type.Number({ description: "Desired port. Evidence only; the tool does not reserve it." })),
+      parallel_agents: Type.Optional(Type.Number({ description: "Expected agents needing server/process resources on this machine. Default 1." })),
+      existing_service_reusable: Type.Optional(Type.Boolean({ description: "Whether an existing workspace service can be reused. Default false." })),
+      destructive_restart: Type.Optional(Type.Boolean({ description: "Whether the plan would restart/kill an existing process. Blocks by default." })),
+      log_tail_max_lines: Type.Optional(Type.Number({ description: "Bounded log tail size. Clamped 20..1000; default 200." })),
+      stacktrace_capture: Type.Optional(Type.Boolean({ description: "Whether structured stacktrace capture is desired. Default true." })),
+      healthcheck_known: Type.Optional(Type.Boolean({ description: "Whether a bounded healthcheck is known. Default false." })),
+      has_process_registry: Type.Optional(Type.Boolean({ description: "Whether process registry capability exists." })),
+      has_port_lease_lock: Type.Optional(Type.Boolean({ description: "Whether port lease/lock capability exists." })),
+      has_bounded_log_tail: Type.Optional(Type.Boolean({ description: "Whether bounded stdout/stderr tail capability exists." })),
+      has_structured_stacktrace_capture: Type.Optional(Type.Boolean({ description: "Whether structured stacktrace capture exists." })),
+      has_healthcheck_probe: Type.Optional(Type.Boolean({ description: "Whether bounded healthcheck probe exists." })),
+      has_graceful_stop_then_kill: Type.Optional(Type.Boolean({ description: "Whether graceful-stop-then-kill contract exists." })),
+      has_reload_handoff_cleanup: Type.Optional(Type.Boolean({ description: "Whether reload/compact/handoff cleanup exists." })),
+      rehearsal_slices: Type.Optional(Type.Number({ description: "Count of rehearsal slices with evidence." })),
+      stop_source_coverage_pct: Type.Optional(Type.Number({ description: "Percent of lifecycle events with explicit stopSource evidence (0..100)." })),
+      lifecycle_classified: Type.Optional(Type.Boolean({ description: "Whether lifecycle evidence is classified." })),
+      rollback_plan_known: Type.Optional(Type.Boolean({ description: "Whether rollback plan is known." })),
+      unresolved_blockers: Type.Optional(Type.Number({ description: "Count of unresolved blockers." })),
+      protected_scope_requested: Type.Optional(Type.Boolean({ description: "Whether protected scope was requested." })),
+    }),
+    execute(_toolCallId, params) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const plan = resolveBackgroundProcessControlPlan({
+        kind: normalizeKind(p.kind),
+        requestedMode: normalizeMode(p.requested_mode),
+        needsServer: typeof p.needs_server === "boolean" ? p.needs_server : undefined,
+        requestedPort: typeof p.requested_port === "number" ? p.requested_port : undefined,
+        parallelAgents: typeof p.parallel_agents === "number" ? p.parallel_agents : undefined,
+        existingServiceReusable: typeof p.existing_service_reusable === "boolean" ? p.existing_service_reusable : undefined,
+        destructiveRestart: typeof p.destructive_restart === "boolean" ? p.destructive_restart : undefined,
+        logTailMaxLines: typeof p.log_tail_max_lines === "number" ? p.log_tail_max_lines : undefined,
+        stacktraceCapture: typeof p.stacktrace_capture === "boolean" ? p.stacktrace_capture : undefined,
+        healthcheckKnown: typeof p.healthcheck_known === "boolean" ? p.healthcheck_known : undefined,
+      });
+
+      const allToolNames = new Set(
+        pi.getAllTools()
+          .map((tool) => tool?.name)
+          .filter((name): name is string => typeof name === "string"),
+      );
+      const inferred = inferBackgroundCapabilitySignals(allToolNames);
+      const readiness = buildBackgroundProcessReadinessScore({
+        hasProcessRegistry: asOptionalBoolean(p.has_process_registry) ?? inferred.hasProcessRegistry,
+        hasPortLeaseLock: asOptionalBoolean(p.has_port_lease_lock) ?? inferred.hasPortLeaseLock,
+        hasBoundedLogTail: asOptionalBoolean(p.has_bounded_log_tail) ?? inferred.hasBoundedLogTail,
+        hasStructuredStacktraceCapture: asOptionalBoolean(p.has_structured_stacktrace_capture) ?? inferred.hasStructuredStacktraceCapture,
+        hasHealthcheckProbe: asOptionalBoolean(p.has_healthcheck_probe) ?? inferred.hasHealthcheckProbe,
+        hasGracefulStopThenKill: asOptionalBoolean(p.has_graceful_stop_then_kill) ?? inferred.hasGracefulStopThenKill,
+        hasReloadHandoffCleanup: asOptionalBoolean(p.has_reload_handoff_cleanup) ?? inferred.hasReloadHandoffCleanup,
+        hasPlanSurface: allToolNames.has("background_process_plan"),
+        hasLifecycleSurface: allToolNames.has("background_process_lifecycle_plan"),
+        rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
+        stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
+      });
+
+      const rehearsal = evaluateBackgroundProcessRehearsal({
+        readinessScore: readiness.score,
+        readinessRecommendationCode: readiness.recommendationCode,
+        lifecycleClassified: asOptionalBoolean(p.lifecycle_classified),
+        stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
+        rollbackPlanKnown: asOptionalBoolean(p.rollback_plan_known),
+        rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
+        unresolvedBlockers: typeof p.unresolved_blockers === "number" ? p.unresolved_blockers : undefined,
+        destructiveRestartRequested: asOptionalBoolean(p.destructive_restart),
+        protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
+      });
+
+      const packet = buildBackgroundProcessReadinessPacket({
+        plan,
+        readiness,
+        rehearsal,
+      });
+
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: {
+          mode: "background-process-readiness-packet",
+          activation: "none",
+          authorization: "none",
+          dispatchAllowed: false,
+          processStartAllowed: false,
+          processStopAllowed: false,
+          mutationAllowed: false,
+          ...packet,
+          plan,
+          readiness,
+          rehearsal,
+          inferred,
+        },
       };
     },
   });

@@ -239,6 +239,67 @@ describe("background process control plan", () => {
     expect(override.details?.checks?.hasGracefulStopThenKill).toBe(false);
   });
 
+  it("background_process_readiness_packet exposes unified blocked/ready-window guidance", async () => {
+    const pi = makeMockPi([{ name: "bg_status", description: "background process status/log/stop" }]);
+    guardrailsCore(pi);
+    const packetTool = getTool(pi, "background_process_readiness_packet");
+
+    const blocked = await packetTool.execute(
+      "tc-bg-readiness-packet-blocked",
+      {
+        kind: "backend",
+        requested_mode: "shared-service",
+        needs_server: true,
+        requested_port: 3000,
+        destructive_restart: true,
+        lifecycle_classified: false,
+        rollback_plan_known: false,
+        rehearsal_slices: 0,
+        stop_source_coverage_pct: 0,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(blocked.details?.mode).toBe("background-process-readiness-packet");
+    expect(blocked.details?.decision).toBe("blocked");
+    expect(blocked.details?.recommendationCode).toBe("background-process-readiness-packet-blocked");
+    expect(String(blocked.details?.summary)).toContain("background-process-readiness-packet:");
+    expect(String(blocked.details?.summary)).toContain("authorization=none");
+
+    const ready = await packetTool.execute(
+      "tc-bg-readiness-packet-ready",
+      {
+        kind: "backend",
+        requested_mode: "shared-service",
+        needs_server: true,
+        requested_port: 3000,
+        existing_service_reusable: true,
+        healthcheck_known: true,
+        has_process_registry: true,
+        has_port_lease_lock: true,
+        has_bounded_log_tail: true,
+        has_structured_stacktrace_capture: true,
+        has_healthcheck_probe: true,
+        has_graceful_stop_then_kill: true,
+        has_reload_handoff_cleanup: true,
+        lifecycle_classified: true,
+        rollback_plan_known: true,
+        rehearsal_slices: 2,
+        stop_source_coverage_pct: 90,
+        unresolved_blockers: 0,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(ready.details?.decision).toBe("ready-window");
+    expect(ready.details?.recommendationCode).toBe("background-process-readiness-packet-ready");
+    expect(String(ready.details?.nextAction)).toContain("rehearsal slice");
+  });
+
   it("exposes readiness/rehearsal/lifecycle classifiers as read-only tools", async () => {
     const pi = makeMockPi();
     guardrailsCore(pi);

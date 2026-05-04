@@ -12,7 +12,8 @@ Ferramentas read-only atuais desta family:
 
 - `background_process_plan` — plano de governança antes de implementação operacional;
 - `background_process_readiness_score` — score de prontidão (capabilities/surface/evidence);
-- `background_process_rehearsal_gate` — gate de rehearsal com decisão `ready|needs-evidence|blocked`.
+- `background_process_rehearsal_gate` — gate de rehearsal com decisão `ready|needs-evidence|blocked`;
+- `background_process_readiness_packet` — packet unificado (plan + readiness + rehearsal) com `nextAction` explícito (`ready-window|needs-evidence|blocked`).
 
 Invariantes:
 
