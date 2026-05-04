@@ -533,6 +533,12 @@ function run() {
 			"parse-error": "⚠  erro ao ler loop state — verifique .pi/long-run-loop-state.json",
 		};
 		console.log(`pi-isolated: ${devNotes[devPauseResult] ?? devPauseResult}`);
+		const factoryState = (devPauseResult === "paused" || devPauseResult === "already-paused")
+			? "paused"
+			: "unknown";
+		const sessionState = sessionResumeRequested ? "resume" : "new";
+		const nextAction = factoryState === "paused" ? "npm run pi:loop:resume" : "npm run pi:loop:status";
+		console.log(`pi-isolated: startup-hint session=${sessionState} factory=${factoryState} next=${nextAction}`);
 		if (devPauseResult === "paused" || devPauseResult === "already-paused") {
 			console.log("pi-isolated: para retomar a fábrica depois: npm run pi:loop:resume");
 		}

@@ -18,6 +18,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 const REPO_ROOT = path.resolve(process.cwd());
 const LOOP_STATE_PATH = path.join(REPO_ROOT, ".pi", "long-run-loop-state.json");
@@ -35,11 +36,21 @@ function writeLoopState(state) {
 	writeFileSync(LOOP_STATE_PATH, JSON.stringify(state, null, 2) + "\n", "utf8");
 }
 
-function applyPause(state, stopCondition) {
+export function applyLoopControlToState(state, action) {
+	const nowIso = new Date().toISOString();
+	const mode = action === "resume" ? "running" : "paused";
+	const nextStopCondition = action === "resume"
+		? (state?.health === "degraded" ? "dispatch-failure" : "none")
+		: "manual-pause";
+	const nextStopReason = nextStopCondition === "none" ? "running" : nextStopCondition;
 	return {
 		...state,
-		stopCondition,
-		updatedAtIso: new Date().toISOString(),
+		mode,
+		stopCondition: nextStopCondition,
+		stopReason: nextStopReason,
+		updatedAtIso: nowIso,
+		lastTransitionIso: nowIso,
+		lastTransitionReason: action === "resume" ? "manual-resume" : "manual-pause",
 	};
 }
 
@@ -75,20 +86,22 @@ function run() {
 	}
 
 	if (isResume) {
-		const next = applyPause(state, "none");
+		const next = applyLoopControlToState(state, "resume");
 		writeLoopState(next);
-		console.log("pi:loop:resume  stopCondition → none  ▶ loop retomado");
+		console.log(`pi:loop:resume  mode=${next.mode} stopCondition=${next.stopCondition}  ▶ loop retomado`);
 		console.log(`  path: ${LOOP_STATE_PATH}`);
 		return;
 	}
 
 	// default: pause
-	const next = applyPause(state, "manual-pause");
+	const next = applyLoopControlToState(state, "pause");
 	writeLoopState(next);
-	console.log("pi:loop:pause   stopCondition → manual-pause  ⏸ loop pausado");
+	console.log(`pi:loop:pause   mode=${next.mode} stopCondition=${next.stopCondition}  ⏸ loop pausado`);
 	console.log("  pi pode ser iniciado — auto-dispatch de board desativado");
 	console.log(`  para retomar: npm run pi:loop:resume`);
 	console.log(`  path: ${LOOP_STATE_PATH}`);
 }
 
-run();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+	run();
+}
