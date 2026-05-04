@@ -12147,6 +12147,33 @@
       "method": "test",
       "timestamp": "2026-05-04T07:45:29.046Z",
       "evidence": "Doutrina em `docs/guides/control-plane-operating-doctrine.md` sincronizada: cue `postReloadResume=pending` agora explicitamente coberto em `context_watch_status` e `context_watch_continuation_readiness`, com fallback de detalhe no handoff. Checklist de docs + smoke context-watchdog green (75 passed)."
+    },
+    {
+      "id": "VER-BUD-1103",
+      "target": "TASK-BUD-751",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:53:12.835Z",
+      "evidence": "`context_watch_one_slice_canary_preview` agora propaga cue de defer pós-reload: summary inclui `postReloadResume=pending` quando intent existe e details expõem `postReloadResumePending` + `postReloadResumeReason`."
+    },
+    {
+      "id": "VER-BUD-1104",
+      "target": "TASK-BUD-752",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:53:41.428Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/context-watchdog.test.ts` cobre ambos cenários do canary preview: sem intent (`postReloadResume` ausente) e com intent pendente (`postReloadResume=pending` + details reason). Suite focal green (74 passed)."
+    },
+    {
+      "id": "VER-BUD-1105",
+      "target": "TASK-BUD-753",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:54:41.514Z",
+      "evidence": "Doutrina curta atualizada para incluir leitura do cue `postReloadResume=pending` também no `context_watch_one_slice_canary_preview` (além de status/readiness). Checklist de docs e smoke context-watchdog seguem green (76 passed)."
     }
   ]
 }

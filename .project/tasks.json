@@ -16896,6 +16896,64 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reduzir ambiguidade operacional entre superfícies de continuidade.\nRunbook reduz ambiguidade entre superfícies de continuidade pós-reload.",
       "verification": "VER-BUD-1102"
+    },
+    {
+      "id": "TASK-BUD-751",
+      "description": "Propagar cue `postReloadResume` para `context_watch_one_slice_canary_preview` quando houver intent pendente no handoff.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary do canary preview inclui `postReloadResume=pending` quando aplicável.",
+        "Details do canary preview expõem `postReloadResumePending`/`postReloadResumeReason`.",
+        "Sem alterar dispatch/autorização (continua report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] manter continuidade visível também na superfície de canary antes de decisões humanas.\nParidade de observabilidade estendida para camada canary sem alterar autorização/dispatch.",
+      "verification": "VER-BUD-1103"
+    },
+    {
+      "id": "TASK-BUD-752",
+      "description": "Adicionar smoke para `context_watch_one_slice_canary_preview` cobrindo intent pós-reload pendente.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-751"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste valida cue no summary e details com intent pendente.",
+        "Teste valida ausência do cue quando intent não existe.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evitar regressão de visibilidade ao subir para canary/operator packet.\nCobertura garante regressão zero no cue da superfície de preview.",
+      "verification": "VER-BUD-1104"
+    },
+    {
+      "id": "TASK-BUD-753",
+      "description": "Sincronizar doutrina curta com leitura de `postReloadResume` no fluxo de canary/operator preview.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-751"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc explicita que cue pendente deve ser checado também em previews de continuidade/canary.",
+        "Mantém anti-bloat e gate protected explícito.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduzir lacuna entre status/readiness e camada de decisão humana canary.\nFluxo de decisão canary/operator agora documentado com o mesmo sinal de continuidade pós-reload.",
+      "verification": "VER-BUD-1105"
     }
   ]
 }
