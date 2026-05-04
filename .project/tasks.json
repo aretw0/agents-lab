@@ -17170,7 +17170,7 @@
     {
       "id": "TASK-BUD-764",
       "description": "Wave 2 anti-bloat em `guardrails-core.ts`: extrair heartbeat/lease/evidence loop helpers para módulo dedicado e manter wiring enxuto no entrypoint.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-757"
@@ -17187,12 +17187,13 @@
         "Sem regressão de status/command lane-queue."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] reduzir gordura no entrypoint e deixar semântica de loop mais auditável.\n[provenance:brainstorm] source_task=TASK-BUD-757 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/guardrails\nSlice 1 concluída: helper de heartbeat/evidence snapshot extraído para `packages/pi-stack/extensions/guardrails-core-lane-queue-heartbeat.ts` (`refreshLoopEvidenceHeartbeatFromSnapshot`), com `guardrails-core.ts` usando wrapper de composição e mantendo auditoria intacta. Smokes de lane-queue/reexport green (53 passed) + pack focal (133 passed)."
+      "notes": "[rationale:risk-control] reduzir gordura no entrypoint e deixar semântica de loop mais auditável.\n[provenance:brainstorm] source_task=TASK-BUD-757 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/guardrails\nSlice 1 concluída: helper de heartbeat/evidence snapshot extraído para `packages/pi-stack/extensions/guardrails-core-lane-queue-heartbeat.ts` (`refreshLoopEvidenceHeartbeatFromSnapshot`), com `guardrails-core.ts` usando wrapper de composição e mantendo auditoria intacta. Smokes de lane-queue/reexport green (53 passed) + pack focal (133 passed).\nExtração reforça base para runway de delegação/background sem alterar comportamento operacional.",
+      "verification": "VER-BUD-1116"
     },
     {
       "id": "TASK-BUD-765",
       "description": "Runway de delegação simples: consolidar em um surface/status único os bloqueios reais de `simple-delegate` (capability+mix+auto-advance+telemetry), com recomendação acionável para liberar delegação sem ambiguidade.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-764"
@@ -17209,7 +17210,8 @@
         "Smoke focal cobre caminho ready e blocked sem auto-dispatch."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] preparar escala de delegação com critérios explícitos antes de abrir caminho para colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de fortalecer delegação com governança e sem gordura"
+      "notes": "[rationale:risk-control] preparar escala de delegação com critérios explícitos antes de abrir caminho para colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de fortalecer delegação com governança e sem gordura\nStatus unificado reduz ambiguidade operacional entre local-execute e simple-delegate com nextAction explícito.",
+      "verification": "VER-BUD-1117"
     },
     {
       "id": "TASK-BUD-766",

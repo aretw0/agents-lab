@@ -1,43 +1,45 @@
 {
-  "timestamp": "2026-05-04T19:45:24.708Z",
-  "context": "Loop grande retomado com continuidade local-safe: concluídas as waves TASK-BUD-762/763 (extração pós-reload do context-watchdog + split de te [snip] rtbeat de evidência do guardrails-core. [truncated:+72 chars]",
+  "timestamp": "2026-05-04T20:06:05.826Z",
+  "context": "Fechadas as fatias de fortalecimento do control-plane em delegação e heartbeat: TASK-BUD-764 concluída com extração de lease/evidence heartbe [snip] egue para runway de background process. [truncated:+148 chars]",
   "current_tasks": [
-    "TASK-BUD-764"
+    "TASK-BUD-766"
   ],
   "next_actions": [
-    "continuar TASK-BUD-764 (extrair próximo bloco lease/heartbeat orchestration de guardrails-core)",
-    "após TASK-BUD-764, executar TASK-BUD-765 (runway delegação simples)",
-    "em seguida TASK-BUD-766 (runway background process readiness)"
+    "executar TASK-BUD-766 (runway de background process readiness com blockers explícitos)",
+    "manter delegação em local-execute/simple-delegate report-only até readiness subir",
+    "reavaliar simple_delegate_rehearsal_packet e ops_calibration_decision_packet após melhorias de background process"
   ],
   "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] klist.test.ts (133 passed) [truncated:+367 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] cklist.test.ts (80 passed) [truncated:+254 chars]",
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] klist.test.ts (137 passed) [truncated:+437 chars]"
   ],
   "recent_commits": [
-    "3ed9dc9e refactor(context-watchdog): split post-reload flow and snapshot helpers",
-    "b6ba84ad refactor(guardrails-core): extract loop heartbeat refresh helper"
+    "b29fb14f refactor(guardrails-core): extract lease/evidence heartbeat helpers",
+    "7f307660 feat(delegation): add unified readiness status packet"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-764",
+    "focus": "TASK-BUD-766",
     "canonical_links": [
+      "task:TASK-BUD-766",
       "task:TASK-BUD-764",
-      "task:TASK-BUD-762",
-      "commit:3ed9dc9e"
+      "task:TASK-BUD-765",
+      "commit:b29fb14f"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T19:45:24.708Z",
+    "generatedAtIso": "2026-05-04T20:06:05.826Z",
     "level": "checkpoint",
-    "percent": 36,
+    "percent": 41,
     "action": "checkpoint-refresh",
     "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T19:45:24.708Z",
+      "atIso": "2026-05-04T20:06:05.826Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 36,
+      "percent": 41,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

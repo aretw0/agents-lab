@@ -12264,6 +12264,24 @@
       "method": "test",
       "timestamp": "2026-05-04T19:39:33.431Z",
       "evidence": "Wave 2 de split da suíte concluída: domínio de continuidade pós-reload extraído de `packages/pi-stack/test/smoke/context-watchdog.test.ts` para `packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts` (4 testes), preservando cobertura total da suíte context-watchdog (78 testes no total combinando arquivos). `context-watchdog.test.ts` reduzido para 2739 linhas e organização por domínio reforçada (`checkpoint`, `post-reload`, `resume helpers`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts` (78 passed)."
+    },
+    {
+      "id": "VER-BUD-1116",
+      "target": "TASK-BUD-764",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T20:00:11.210Z",
+      "evidence": "Wave 2 anti-bloat concluída em `guardrails-core.ts`: extraídos helpers de heartbeat/lease/evidence para módulo dedicado `packages/pi-stack/extensions/guardrails-core-lane-queue-heartbeat.ts` (`recordLoopReadyEvidence`, `recordBoardAutoAdvanceEvidence`, `refreshLoopEvidenceHeartbeat`, `refreshLoopEvidenceHeartbeatFromSnapshot`, `refreshLoopLeaseOnActivity`). `guardrails-core.ts` mantém apenas wiring/composição e auditoria. Contratos de lane-queue sem regressão. Smokes green: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (137 passed)."
+    },
+    {
+      "id": "VER-BUD-1117",
+      "target": "TASK-BUD-765",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-04T20:05:11.562Z",
+      "evidence": "Runway de delegação simples consolidado com status unificado report-only: novo tool `delegation_readiness_status_packet` em `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` compõe capability+mix+auto-advance+telemetry e separa explicitamente cenários `ready-simple-delegate` vs `local-execute-first` vs `defer`, incluindo `nextAction` curto e blockers consistentes. Governança sem auto-dispatch preservada (`authorization=none`, `dispatchAllowed=false`). Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (paths ready/blocked). Doctrine atualizada em `docs/guides/control-plane-operating-doctrine.md` para usar status unificado antes da promoção simple-delegate. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (80 passed)."
     }
   ]
 }
