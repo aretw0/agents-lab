@@ -16267,6 +16267,58 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça continuidade prática e reduz ambiguidade operacional pós-reload.\nDiretriz operacional anti-bloat alinhada com comportamento novo do status.",
       "verification": "VER-BUD-1066"
+    },
+    {
+      "id": "TASK-BUD-715",
+      "description": "[seed-local-safe-smoke-guard] Adicionar/ajustar smoke local-safe para evitar regressão de surfaces de autonomia/seeding.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Cobrir cenário de seleção local-safe recém-semeada sem depender de foco protected.",
+        "Validar invariantes report-only (`dispatchAllowed=false`, `authorization=none`).",
+        "Suite focal smoke permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: restaurar estoque local-safe validado para continuidade AFK.\nSelecionada automaticamente como próxima fatia local-safe após reseed bootstrap; adicionando smoke de guarda para fila local-safe pronta sem seedingGuidance.\nGuard rail de seeding evita regressão onde status manteria guidance de bootstrap mesmo com estoque local-safe já disponível.",
+      "verification": "VER-BUD-1067"
+    },
+    {
+      "id": "TASK-BUD-716",
+      "description": "[seed-status-summary-clarity] Melhorar resumo/status report-only para reduzir nudge operacional sem mexer em autorização.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary/status inclui sinal curto útil para decisão local-safe imediata.",
+        "Sem alterar policy protected/autorização/dispatch.",
+        "Smoke focal cobre o novo sinal no payload/sumário."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: reduzir fricção de decisão entre slices."
+    },
+    {
+      "id": "TASK-BUD-717",
+      "description": "[seed-readonly-observability] Adicionar campo read-only de observabilidade para diagnóstico de bloqueio/decisão na lane.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Campo novo é read-only e aparece no status com semântica curta.",
+        "Sem mudança de autorização/dispatch.",
+        "Smoke + checklist de doc permanecem green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing; seedPriority=continuity-bootstrap. Objetivo: melhorar auditoria rápida para continuidade local-safe."
     }
   ]
 }

@@ -906,6 +906,42 @@ describe("autonomy lane surface", () => {
     expect((pauseBrief?.options ?? []).map((row) => row.option)).toContain("seed-local-safe");
   });
 
+  it("keeps seedingGuidance undefined when local-safe queue is already ready", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-local-seed-ready-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-LOCAL-A",
+          description: "[P1] local smoke guard",
+          status: "planned",
+          notes: "[rationale:risk-control] keep local-safe stock",
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+        },
+        {
+          id: "TASK-LOCAL-B",
+          description: "[P2] local summary clarity",
+          status: "planned",
+          notes: "[rationale:risk-control] keep local-safe stock",
+          files: ["packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"],
+        },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.ready).toBe(true);
+    expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-LOCAL-A");
+    expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-LOCAL-A", "TASK-LOCAL-B"]);
+    expect((result?.details.seedingGuidance as unknown) ?? undefined).toBeUndefined();
+  });
+
   it("emits report-only project_intake_plan for lightweight project", () => {
     const tools: RegisteredTool[] = [];
     registerGuardrailsAutonomyLaneSurface({

@@ -11823,6 +11823,15 @@
       "method": "test",
       "timestamp": "2026-05-04T01:27:43.482Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: `iterationReminder` deve priorizar instrução de seeding com `seedWhy+seedPriority` quando `seedingGuidance.decision=seed-now`; mantém stale-first para `refresh-handoff`. Doc checklist green no mesmo gate (36 passed)."
+    },
+    {
+      "id": "VER-BUD-1067",
+      "target": "TASK-BUD-715",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:32:26.157Z",
+      "evidence": "Adicionada smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` garantindo que, com fila local-safe já pronta, `autonomy_lane_status` seleciona o próximo task (`TASK-LOCAL-A`), mantém readyQueue estável e não emite `seedingGuidance`. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (35 passed)."
     }
   ]
 }
