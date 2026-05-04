@@ -1,43 +1,43 @@
 {
-  "timestamp": "2026-05-04T17:46:12.369Z",
-  "context": "Reseed local-safe concluído após retomada: fila operacional restaurada com três fatias anti-bloat (context-watchdog post-reload extraction, s [snip] dos no contrato de loop e startup-hint. [truncated:+104 chars]",
+  "timestamp": "2026-05-04T19:45:24.708Z",
+  "context": "Loop grande retomado com continuidade local-safe: concluídas as waves TASK-BUD-762/763 (extração pós-reload do context-watchdog + split de te [snip] rtbeat de evidência do guardrails-core. [truncated:+72 chars]",
   "current_tasks": [
-    "TASK-BUD-762"
+    "TASK-BUD-764"
   ],
   "next_actions": [
-    "executar TASK-BUD-762 (extração post-reload auto-resume orchestration em context-watchdog)",
-    "validar smoke focal context-watchdog após extração",
-    "seguir chain para TASK-BUD-763 e TASK-BUD-764"
+    "continuar TASK-BUD-764 (extrair próximo bloco lease/heartbeat orchestration de guardrails-core)",
+    "após TASK-BUD-764, executar TASK-BUD-765 (runway delegação simples)",
+    "em seguida TASK-BUD-766 (runway background process readiness)"
   ],
   "blockers": [],
   "recent_validation": [
-    "node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resu [snip] ntract.test.mjs (8 passed) [truncated:+54 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] klist.test.ts (133 passed) [truncated:+367 chars]"
   ],
   "recent_commits": [
-    "0d7fda9b feat(pi-isolated): clarify --dev --resume behavior",
-    "86516cb0 chore(board): track pi dev-resume alignment clarification"
+    "3ed9dc9e refactor(context-watchdog): split post-reload flow and snapshot helpers",
+    "b6ba84ad refactor(guardrails-core): extract loop heartbeat refresh helper"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-762",
+    "focus": "TASK-BUD-764",
     "canonical_links": [
+      "task:TASK-BUD-764",
       "task:TASK-BUD-762",
-      "task:TASK-BUD-763",
-      "commit:0d7fda9b"
+      "commit:3ed9dc9e"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T17:46:12.369Z",
+    "generatedAtIso": "2026-05-04T19:45:24.708Z",
     "level": "checkpoint",
-    "percent": 34,
+    "percent": 36,
     "action": "checkpoint-refresh",
     "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T17:46:12.369Z",
+      "atIso": "2026-05-04T19:45:24.708Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 34,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
