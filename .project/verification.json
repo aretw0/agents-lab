@@ -12093,6 +12093,33 @@
       "method": "test",
       "timestamp": "2026-05-04T07:16:38.642Z",
       "evidence": "`docs/guides/control-plane-operating-doctrine.md` atualizado com regra curta: em compact com `reload-required`, auto-resume suprimido vira defer temporário com intent no handoff e reavaliação após `/reload`, mantendo gates fail-closed. Checklist de docs validado junto ao smoke de context-watchdog (73 passed)."
+    },
+    {
+      "id": "VER-BUD-1097",
+      "target": "TASK-BUD-745",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:24:28.526Z",
+      "evidence": "Smoke novo em `packages/pi-stack/test/smoke/context-watchdog.test.ts` simula `session_start` com handoff contendo `auto_resume_after_reload.pending=true` + checkpoint fresco. Valida dispatch de follow-up (`sendUserMessage` chamado), evento de auditoria `context-watchdog.auto-resume-post-reload-dispatch` e limpeza do intent no handoff após sucesso."
+    },
+    {
+      "id": "VER-BUD-1098",
+      "target": "TASK-BUD-746",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:28:48.100Z",
+      "evidence": "`formatContextWatchStatusToolSummary` e `context_watch_status` agora incluem cue compacto `postReloadResume=pending` quando `autoResumeAfterReloadPending` estiver ativo. Smoke cobre cenário com intent pendente no handoff e valida cue no summary + details."
+    },
+    {
+      "id": "VER-BUD-1099",
+      "target": "TASK-BUD-747",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:29:08.286Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` atualizado para incluir leitura operacional de `postReloadResume=pending` no `context_watch_status` como cue curto de defer pós-reload. Checklist de docs e smoke context-watchdog seguem green (74 passed)."
     }
   ]
 }
