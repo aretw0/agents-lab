@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-05-04T03:28:20.899Z",
-  "context": "Wave local-safe concluída: TASK-BUD-730/731/732. autonomy_lane_status agora inclui influenceWindowCue (decision/window/recommendationCode) e [snip] -window protected sem polling separado. [truncated:+90 chars]",
+  "timestamp": "2026-05-04T03:49:50.463Z",
+  "context": "Wave local-safe concluída: TASK-BUD-733/734/735. autonomy_lane_status agora inclui protectedReadyCue (decision/recommendationCode/eligiblePro [snip] -> protected com gate humano explícito. [truncated:+154 chars]",
   "next_actions": [
-    "Rodar /reload para runtime carregar influenceWindowCue no autonomy_lane_status.",
-    "Após reload, seguir loop local-safe até influenceWindowCue.decision=ready-window; então abrir [snip] ted por decisão explícita. [truncated:+16 chars]"
+    "Rodar /reload para runtime carregar protectedReadyCue recém-commitado no autonomy_lane_status.",
+    "Após reload, seguir loop local-safe; quando influenceWindowCue=ready-window e protectedReadyCu [snip] ted por decisão explícita. [truncated:+29 chars]"
   ],
   "blockers": [
-    "Sem /reload, runtime da sessão pode não expor influenceWindowCue recém-commitado."
+    "Sem /reload, o runtime da sessão pode não exibir protectedReadyCue e summary a [snip] ady/protectedEligible. [truncated:+25 chars]"
   ],
   "recent_validation": [
     "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] cklist.test.ts (40 passed) [truncated:+37 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-732",
+    "focus": "TASK-BUD-735",
     "canonical_links": [
-      "task:TASK-BUD-732",
-      "task:TASK-BUD-730"
+      "task:TASK-BUD-735",
+      "task:TASK-BUD-733"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T03:28:20.899Z",
+    "generatedAtIso": "2026-05-04T03:49:50.463Z",
     "level": "checkpoint",
-    "percent": 86,
+    "percent": 88,
     "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T03:28:20.899Z",
+      "atIso": "2026-05-04T03:49:50.463Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 86,
+      "percent": 88,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-732"
+    "TASK-BUD-735"
   ]
 }
