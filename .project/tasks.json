@@ -17123,6 +17123,69 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] reduzir drift entre controles de launcher e runtime para evitar comportamento ingênuo/desalinhado.\n[provenance:human] source_task=none reason=pedido explícito de alinhamento forte/sadio e crítica de ingenuidade no controle atual\nCrítica de ingenuidade tratada com contrato explícito e semântica consistente entre caminhos de controle.",
       "verification": "VER-BUD-1113"
+    },
+    {
+      "id": "TASK-BUD-762",
+      "description": "Wave 2 anti-bloat em `context-watchdog.ts`: extrair orquestração de post-reload auto-resume (pending/dispatch/dedupe warning) para módulo coeso sem mudar contrato das tools.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-756"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-resume.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context-watchdog.ts` reduz acoplamento removendo bloco de post-reload para helper/módulo dedicado.",
+        "Sem regressão dos cues `postReloadResume=pending` e do dedupe de warning.",
+        "Smoke focal permanece green (`context-watchdog*.test.ts`)."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir risco de regressão em fluxo crítico de continuidade pós-compact/reload.\n[provenance:brainstorm] source_task=TASK-BUD-759 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/context-watchdog\nSlice 1 concluída: lógica de dedupe/emit de warning post-reload extraída para `context-watchdog-resume.ts` (`resolvePostReloadPendingNotifyDecision` + `PostReloadPendingNotifyMemory`), removendo estado/heurística local duplicada em `context-watchdog.ts`. Smoke focal green (78 passed)."
+    },
+    {
+      "id": "TASK-BUD-763",
+      "description": "Wave 2 de organização da suíte `context-watchdog`: dividir `context-watchdog.test.ts` por domínio de continuidade (auto-resume/reload/previews), mantendo cobertura e contratos.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-758"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-*.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`context-watchdog.test.ts` reduz tamanho com extração de um domínio coeso adicional.",
+        "Nenhum teste perdido (contagem total da suite preservada).",
+        "Smoke focal green (`context-watchdog*.test.ts` + doc checklist)."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] manter manutenção da suíte viável com crescimento contínuo de funcionalidades.\n[provenance:brainstorm] source_task=TASK-BUD-758 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/tests"
+    },
+    {
+      "id": "TASK-BUD-764",
+      "description": "Wave 2 anti-bloat em `guardrails-core.ts`: extrair heartbeat/lease/evidence loop helpers para módulo dedicado e manter wiring enxuto no entrypoint.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-757"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue-evidence.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "`guardrails-core.ts` reduz tamanho removendo bloco de heartbeat/lease helpers para módulo dedicado.",
+        "Comportamento de loop (`pause/resume/lease/evidence`) permanece inalterado em smoke.",
+        "Sem regressão de status/command lane-queue."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir gordura no entrypoint e deixar semântica de loop mais auditável.\n[provenance:brainstorm] source_task=TASK-BUD-757 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/guardrails"
     }
   ]
 }

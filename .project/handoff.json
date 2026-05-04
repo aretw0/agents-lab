@@ -1,43 +1,43 @@
 {
-  "timestamp": "2026-05-04T11:56:54.499Z",
-  "context": "Concluídas três fatias locais-safe em sequência: extração de wiring lane-queue/long-run para surface dedicada, split inicial da suíte context [snip] low-up com migração segura documentada. [truncated:+85 chars]",
+  "timestamp": "2026-05-04T17:46:12.369Z",
+  "context": "Reseed local-safe concluído após retomada: fila operacional restaurada com três fatias anti-bloat (context-watchdog post-reload extraction, s [snip] dos no contrato de loop e startup-hint. [truncated:+104 chars]",
+  "current_tasks": [
+    "TASK-BUD-762"
+  ],
   "next_actions": [
-    "reavaliar foco local-safe com autonomy_lane_status (hard-intent auto-advance bloqueado por focus-complete)",
-    "se não houver fila local-safe elegível, seed explícito de novas fatias bounded antes de abrir protected lane",
-    "manter gate humano explícito para qualquer tarefa protected"
+    "executar TASK-BUD-762 (extração post-reload auto-resume orchestration em context-watchdog)",
+    "validar smoke focal context-watchdog após extração",
+    "seguir chain para TASK-BUD-763 e TASK-BUD-764"
   ],
-  "blockers": [
-    "no-eligible-local-safe-successor",
-    "handoff-stale-before-checkpoint-refresh"
-  ],
+  "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts pa [snip] klist.test.ts (129 passed) [truncated:+168 chars]"
+    "node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resu [snip] ntract.test.mjs (8 passed) [truncated:+54 chars]"
   ],
   "recent_commits": [
-    "7a662f8b refactor(guardrails-core): extract lane-queue wiring surface",
-    "89125224 chore(board): close lane-queue wiring extraction wave"
+    "0d7fda9b feat(pi-isolated): clarify --dev --resume behavior",
+    "86516cb0 chore(board): track pi dev-resume alignment clarification"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-759",
+    "focus": "TASK-BUD-762",
     "canonical_links": [
-      "task:TASK-BUD-759",
-      "commit:7a662f8b"
+      "task:TASK-BUD-762",
+      "task:TASK-BUD-763",
+      "commit:0d7fda9b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T11:56:54.499Z",
+    "generatedAtIso": "2026-05-04T17:46:12.369Z",
     "level": "checkpoint",
-    "percent": 55,
+    "percent": 34,
     "action": "checkpoint-refresh",
-    "recommendation": "Progress saved; continue bounded local hardening.",
-    "focus_task_status": "completed"
+    "recommendation": "Progress saved; continue bounded local hardening."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T11:56:54.499Z",
+      "atIso": "2026-05-04T17:46:12.369Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 55,
+      "percent": 34,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -46,8 +46,5 @@
       "action": "checkpoint-refresh",
       "recommendation": "Local slice checkpoint saved."
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-759"
   ]
 }
