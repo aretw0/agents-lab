@@ -463,6 +463,101 @@ describe("ops calibration decision packet", () => {
     expect(String(result.details.summary)).toContain("delegate-or-execute-packet:");
   });
 
+  it("registers delegation_readiness_status_packet as unified read-only readiness tool", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-readiness-status-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "delegation_readiness_status_packet");
+
+      const result = await tool.execute(
+        "tc-delegation-readiness-status",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 81,
+          mix_simple_delegate_events: 2,
+          mix_swarm_events: 1,
+          auto_advance_decision: "eligible",
+          telemetry_decision: "ready",
+          telemetry_score: 70,
+          telemetry_blocked_rate_pct: 20,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.mode).toBe("delegation-readiness-status-packet");
+      expect(result.details.dispatchAllowed).toBe(false);
+      expect(result.details.authorization).toBe("none");
+      expect(result.details.mutationAllowed).toBe(false);
+      expect(result.details.decision).toBe("ready-simple-delegate");
+      expect(result.details.recommendationCode).toBe("delegation-readiness-ready-simple-delegate");
+      expect(String(result.details.nextAction)).toContain("simple_delegate_rehearsal_start_packet");
+      expect(String(result.details.summary)).toContain("delegation-readiness-status:");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("delegation_readiness_status_packet fails closed to defer when capability is blocked", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-readiness-blocked-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "delegation_readiness_status_packet");
+
+      const result = await tool.execute(
+        "tc-delegation-readiness-blocked",
+        {
+          capability_decision: "blocked",
+          capability_blockers: ["subagents-not-ready"],
+          mix_decision: "ready",
+          mix_score: 80,
+          mix_simple_delegate_events: 2,
+          auto_advance_decision: "blocked",
+          auto_advance_blocked_reasons: ["focus-not-complete"],
+          telemetry_decision: "needs-evidence",
+          telemetry_score: 10,
+          telemetry_blocked_rate_pct: 90,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.decision).toBe("defer");
+      expect(result.details.recommendationCode).toBe("delegation-readiness-defer-blocked");
+      expect(result.details.blockers).toContain("capability-blocked");
+      expect(result.details.blockers).toContain("subagents-not-ready");
+      expect(String(result.details.summary)).toContain("decision=defer");
+      expect(String(result.details.summary)).toContain("authorization=none");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("registers simple_delegate_rehearsal_packet as read-only packet tool", async () => {
     const cwd = mkdtempSync(join(tmpdir(), "pi-simple-delegate-rehearsal-packet-"));
     try {

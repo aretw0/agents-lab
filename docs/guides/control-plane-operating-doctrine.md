@@ -469,8 +469,8 @@ No uso AFK, opere em batch pequeno (3–5 fatias) com `commit + checkpoint` por 
 
 ### Gate de promoção para simple-delegate rehearsal
 
-A próxima promoção após estabilizar a lane local-safe deve passar por packet report-only explícito (`simple_delegate_rehearsal_packet`). O gate mínimo:
-- `decision=ready` no packet composto (capability + mix + auto-advance telemetry);
+A próxima promoção após estabilizar a lane local-safe deve passar por packet report-only explícito (`simple_delegate_rehearsal_packet`). Para reduzir ambiguidade de leitura, primeiro consulte `delegation_readiness_status_packet` (resumo unificado local-execute vs simple-delegate) e depois confirme no packet de rehearsal. O gate mínimo:
+- `decision=ready-simple-delegate` no status unificado **e** `decision=ready` no packet composto (capability + mix + auto-advance telemetry);
 - blockers vazios;
 - escopo protegido ainda opt-in humano.
 
@@ -850,8 +850,8 @@ Runbook por estágio (delegar mais, executar menos):
    - registrar verificação focal + commit pequeno.
 
 2. **Estágio simple-delegate (bounded)**
-   - usar `delegate_or_execute_decision_packet`;
-   - só aceitar recomendação `simple-delegate` quando packet estiver sem blockers;
+   - usar `delegate_or_execute_decision_packet` + `delegation_readiness_status_packet`;
+   - só aceitar recomendação `simple-delegate` quando status unificado estiver `decision=ready-simple-delegate` e sem blockers;
    - continuar sem auto-dispatch (decisão humana explícita permanece obrigatória).
 
 3. **Estágio swarm rehearsal (pré-protected)**

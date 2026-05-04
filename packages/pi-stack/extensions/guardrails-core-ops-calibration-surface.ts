@@ -235,6 +235,90 @@ function buildSimpleDelegateResolutionSummary(input: {
   ].filter(Boolean).join(" ");
 }
 
+type DelegationReadinessDecision = "ready-simple-delegate" | "local-execute-first" | "defer";
+type DelegationReadinessCode =
+  | "delegation-readiness-ready-simple-delegate"
+  | "delegation-readiness-local-execute-first"
+  | "delegation-readiness-defer-blocked";
+
+function buildDelegationReadinessStatus(input: {
+  delegatePacket: ReturnType<typeof buildDelegateOrExecuteDecisionPacket>;
+  rehearsalPacket: ReturnType<typeof buildSimpleDelegateRehearsalDecisionPacket>;
+}): {
+  decision: DelegationReadinessDecision;
+  recommendationCode: DelegationReadinessCode;
+  recommendation: string;
+  nextAction: string;
+  blockers: string[];
+  summary: string;
+} {
+  const blockers = [...new Set([
+    ...input.delegatePacket.blockers,
+    ...input.rehearsalPacket.blockers,
+  ])];
+
+  if (input.delegatePacket.recommendedOption === "simple-delegate" && input.rehearsalPacket.decision === "ready") {
+    const summary = [
+      "delegation-readiness-status:",
+      "decision=ready-simple-delegate",
+      "code=delegation-readiness-ready-simple-delegate",
+      `execute=${input.delegatePacket.recommendedOption}`,
+      `rehearsal=${input.rehearsalPacket.decision}`,
+      "next=simple_delegate_rehearsal_start_packet",
+      "authorization=none",
+    ].join(" ");
+    return {
+      decision: "ready-simple-delegate",
+      recommendationCode: "delegation-readiness-ready-simple-delegate",
+      recommendation: "simple-delegate runway looks ready; keep one-task canary with explicit human start/defer decision.",
+      nextAction: "run simple_delegate_rehearsal_start_packet and apply explicit human start/defer decision.",
+      blockers,
+      summary,
+    };
+  }
+
+  if (input.delegatePacket.recommendedOption === "local-execute" || input.rehearsalPacket.decision === "needs-evidence") {
+    const summary = [
+      "delegation-readiness-status:",
+      "decision=local-execute-first",
+      "code=delegation-readiness-local-execute-first",
+      `execute=${input.delegatePacket.recommendedOption}`,
+      `rehearsal=${input.rehearsalPacket.decision}`,
+      "next=collect-bounded-evidence",
+      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+      "authorization=none",
+    ].filter(Boolean).join(" ");
+    return {
+      decision: "local-execute-first",
+      recommendationCode: "delegation-readiness-local-execute-first",
+      recommendation: "continue local execution slices while collecting delegation evidence (mix + auto-advance telemetry).",
+      nextAction: "execute one bounded local-safe slice and refresh delegation/simple-delegate packets.",
+      blockers,
+      summary,
+    };
+  }
+
+  const summary = [
+    "delegation-readiness-status:",
+    "decision=defer",
+    "code=delegation-readiness-defer-blocked",
+    `execute=${input.delegatePacket.recommendedOption}`,
+    `rehearsal=${input.rehearsalPacket.decision}`,
+    "next=resolve-blockers",
+    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    decision: "defer",
+    recommendationCode: "delegation-readiness-defer-blocked",
+    recommendation: "delegation remains blocked; resolve hard blockers before attempting simple-delegate canary.",
+    nextAction: "resolve blockers and rerun readiness packets before delegation attempt.",
+    blockers,
+    summary,
+  };
+}
+
 type OperatorPauseOption = {
   option: "start" | "defer" | "abort";
   impact: string;
@@ -560,6 +644,156 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         details: {
           ...packet,
           summary,
+          capability,
+          inferredCapabilityDefaults,
+          mix,
+          autoAdvanceTelemetry,
+          effectiveTelemetrySignals: effectiveTelemetry,
+          autoAdvanceLiveSnapshot: liveAutoAdvanceSnapshot,
+          autoAdvanceResolutionSource: autoAdvanceComposite.source,
+          scan: collected.scan,
+        },
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "delegation_readiness_status_packet",
+    label: "Delegation Readiness Status Packet",
+    description: "Report-only unified status for local-execute vs simple-delegate readiness (capability + mix + auto-advance + telemetry). Never dispatches execution.",
+    parameters: Type.Object({
+      lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
+      preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
+      dirty_signal: Type.Optional(Type.String({ description: "clean | dirty | unknown" })),
+      monitor_classify_failures: Type.Optional(Type.Number({ description: "Classify-failure count. Default 0." })),
+      subagents_ready: Type.Optional(Type.Boolean({ description: "Subagent readiness signal. Default true." })),
+      capability_decision: Type.Optional(Type.String({ description: "Override capability decision: ready | needs-evidence | blocked" })),
+      capability_recommendation_code: Type.Optional(Type.String({ description: "Optional capability recommendation code override." })),
+      capability_blockers: Type.Optional(Type.Array(Type.String())),
+      capability_evidence_gaps: Type.Optional(Type.Array(Type.String())),
+      mix_decision: Type.Optional(Type.String({ description: "Override mix decision: ready | needs-evidence" })),
+      mix_score: Type.Optional(Type.Number({ description: "Override mix score (0..100)." })),
+      mix_recommendation_code: Type.Optional(Type.String({ description: "Optional mix recommendation code override." })),
+      mix_simple_delegate_events: Type.Optional(Type.Number({ description: "Override simple-delegate event count." })),
+      mix_swarm_events: Type.Optional(Type.Number({ description: "Override swarm event count." })),
+      auto_advance_decision: Type.Optional(Type.String({ description: "Override auto-advance decision: eligible | blocked" })),
+      auto_advance_blocked_reasons: Type.Optional(Type.Array(Type.String())),
+      telemetry_decision: Type.Optional(Type.String({ description: "Override telemetry decision: ready | needs-evidence" })),
+      telemetry_score: Type.Optional(Type.Number({ description: "Override telemetry score (0..100)." })),
+      telemetry_blocked_rate_pct: Type.Optional(Type.Number({ description: "Override telemetry blocked rate pct (0..100)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const lookbackHoursRaw = Number(p.lookback_hours);
+      const lookbackHours = Number.isFinite(lookbackHoursRaw) && lookbackHoursRaw > 0
+        ? lookbackHoursRaw
+        : 24;
+      const cwd = typeof ctx?.cwd === "string" ? ctx.cwd : process.cwd();
+
+      const inferredCapabilityDefaults = inferDelegationCapabilityDefaults(cwd);
+      const capability = evaluateDelegationLaneCapabilitySnapshot({
+        preloadDecision: typeof p.preload_decision === "string"
+          ? p.preload_decision
+          : inferredCapabilityDefaults.preloadDecision,
+        dirtySignal: typeof p.dirty_signal === "string"
+          ? p.dirty_signal
+          : inferredCapabilityDefaults.dirtySignal,
+        monitorClassifyFailures: typeof p.monitor_classify_failures === "number" ? p.monitor_classify_failures : 0,
+        subagentsReady: typeof p.subagents_ready === "boolean" ? p.subagents_ready : true,
+      });
+
+      const collected = collectSessionRecords(cwd, lookbackHours);
+      const mix = parseDelegationMixScore(collected.allRecords, lookbackHours, collected.files.length);
+      const autoAdvanceTelemetry = parseAutoAdvanceHardIntentTelemetry(collected.allRecords, lookbackHours, collected.files.length);
+
+      const telemetryBlockedReasons = autoAdvanceTelemetry.blockedReasons.map((row) => row.reason);
+      const liveAutoAdvanceSnapshot = inferLiveAutoAdvanceSnapshot(cwd);
+      const autoAdvanceComposite = resolveAutoAdvanceCompositeDecision({
+        autoAdvanceDecisionOverride: p.auto_advance_decision,
+        autoAdvanceBlockedReasonsOverride: p.auto_advance_blocked_reasons,
+        telemetryDecision: autoAdvanceTelemetry.decision,
+        telemetryBlockedReasons,
+        telemetryEligibleEvents: autoAdvanceTelemetry.totals.eligibleEvents,
+        liveSnapshot: liveAutoAdvanceSnapshot,
+      });
+
+      const effectiveTelemetry = resolveEffectiveTelemetrySignals({
+        telemetryDecisionOverride: p.telemetry_decision,
+        telemetryScoreOverride: p.telemetry_score,
+        telemetryBlockedRatePctOverride: p.telemetry_blocked_rate_pct,
+        telemetryDecisionRaw: autoAdvanceTelemetry.decision,
+        telemetryScoreRaw: autoAdvanceTelemetry.score,
+        telemetryBlockedRatePctRaw: autoAdvanceTelemetry.totals.blockedRatePct,
+        autoAdvanceComposite,
+      });
+
+      const delegatePacket = buildDelegateOrExecuteDecisionPacket({
+        capabilityDecision: typeof p.capability_decision === "string"
+          ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
+          : capability.decision,
+        capabilityRecommendationCode: typeof p.capability_recommendation_code === "string"
+          ? p.capability_recommendation_code
+          : capability.recommendationCode,
+        capabilityBlockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : capability.blockers,
+        capabilityEvidenceGaps: Array.isArray(p.capability_evidence_gaps) ? p.capability_evidence_gaps as string[] : capability.evidenceGaps,
+        mixDecision: typeof p.mix_decision === "string"
+          ? p.mix_decision as "ready" | "needs-evidence"
+          : mix.decision,
+        mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
+        mixRecommendationCode: typeof p.mix_recommendation_code === "string"
+          ? p.mix_recommendation_code
+          : mix.recommendationCode,
+        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
+          ? p.mix_simple_delegate_events
+          : mix.totals.simpleDelegate,
+        mixSwarmEvents: typeof p.mix_swarm_events === "number"
+          ? p.mix_swarm_events
+          : mix.totals.swarm,
+      });
+
+      const rehearsalPacket = buildSimpleDelegateRehearsalDecisionPacket({
+        capabilityDecision: typeof p.capability_decision === "string"
+          ? p.capability_decision as "ready" | "needs-evidence" | "blocked"
+          : capability.decision,
+        capabilityRecommendationCode: typeof p.capability_recommendation_code === "string"
+          ? p.capability_recommendation_code
+          : capability.recommendationCode,
+        capabilityBlockers: Array.isArray(p.capability_blockers) ? p.capability_blockers as string[] : capability.blockers,
+        mixDecision: typeof p.mix_decision === "string"
+          ? p.mix_decision as "ready" | "needs-evidence"
+          : mix.decision,
+        mixScore: typeof p.mix_score === "number" ? p.mix_score : mix.score,
+        mixSimpleDelegateEvents: typeof p.mix_simple_delegate_events === "number"
+          ? p.mix_simple_delegate_events
+          : mix.totals.simpleDelegate,
+        autoAdvanceDecision: autoAdvanceComposite.decision,
+        autoAdvanceBlockedReasons: autoAdvanceComposite.blockedReasons,
+        telemetryDecision: effectiveTelemetry.decision,
+        telemetryScore: effectiveTelemetry.score,
+        telemetryBlockedRatePct: effectiveTelemetry.blockedRatePct,
+      });
+
+      const status = buildDelegationReadinessStatus({
+        delegatePacket,
+        rehearsalPacket,
+      });
+
+      return {
+        content: [{ type: "text", text: status.summary }],
+        details: {
+          mode: "delegation-readiness-status-packet",
+          activation: "none",
+          authorization: "none",
+          dispatchAllowed: false,
+          mutationAllowed: false,
+          decision: status.decision,
+          recommendationCode: status.recommendationCode,
+          recommendation: status.recommendation,
+          nextAction: status.nextAction,
+          blockers: status.blockers,
+          summary: status.summary,
+          delegatePacket,
+          rehearsalPacket,
           capability,
           inferredCapabilityDefaults,
           mix,
