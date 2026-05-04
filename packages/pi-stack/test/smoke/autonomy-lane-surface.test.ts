@@ -481,7 +481,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("afk-material-seed-now-low-stock");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.reasonCode).toBe("stock-below-target");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.required).toBe(true);
+    expect((result?.details.reseedPriority as { code?: string } | undefined)?.code).toBe("stock-health");
     expect(String(result?.details.summary ?? "")).toContain("seedWhy=stock-below-target");
+    expect(String(result?.details.summary ?? "")).toContain("seedPriority=stock-health");
     expect(result?.details.humanActionRequired).toBe(true);
     expect((result?.details.seedTemplates as Array<unknown>) ?? []).toHaveLength(0);
     expect(result?.details.dispatchAllowed).toBe(false);
@@ -518,6 +520,7 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("afk-material-seed-now-bootstrap");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.reasonCode).toBe("bootstrap-focus-missing");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.required).toBe(true);
+    expect((result?.details.reseedPriority as { code?: string } | undefined)?.code).toBe("continuity-bootstrap");
     expect(result?.details.humanActionRequired).toBe(true);
     expect((result?.details.blockedReasons as string[])).toContain("focus-missing");
     expect(Array.isArray(result?.details.seedTemplates)).toBe(true);
@@ -558,6 +561,7 @@ describe("autonomy lane surface", () => {
     expect(result?.details.recommendationCode).toBe("afk-material-seed-blocked-readiness");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.reasonCode).toBe("readiness-blocked");
     expect((result?.details.reseedJustification as { reasonCode?: string; required?: boolean } | undefined)?.required).toBe(false);
+    expect((result?.details.reseedPriority as { code?: string } | undefined)?.code).toBe("blocked-readiness");
     expect((result?.details.blockedReasons as string[])).toContain("reload-required-or-dirty");
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");

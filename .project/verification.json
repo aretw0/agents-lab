@@ -11742,6 +11742,33 @@
       "method": "test",
       "timestamp": "2026-05-04T00:15:25.040Z",
       "evidence": "Doutrina curta atualizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks` + handoff stale, `operatorPauseBrief` deve recomendar `refresh-handoff` antes de `seed-local-safe`. Texto anti-bloat, sem alterar autorização/policy. Doc checklist green no mesmo gate (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1058",
+      "target": "TASK-BUD-706",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:24:54.198Z",
+      "evidence": "`autonomy_lane_material_seed_packet` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora publica `reseedPriority` (`code`, `reason`, `evidenceSummary`) e inclui `seedPriority=<code>` no summary. Contrato permanece report-only (sem dispatch)."
+    },
+    {
+      "id": "VER-BUD-1059",
+      "target": "TASK-BUD-707",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:25:09.211Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` valida `reseedPriority.code` para cenários-chave: `stock-health` (low-stock), `continuity-bootstrap` (bootstrap), `blocked-readiness` (blocked). Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1060",
+      "target": "TASK-BUD-708",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T00:25:24.144Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: ao reseedar, registrar `seedWhy/reseedJustification` e `seedPriority` no fechamento curto. Texto anti-bloat, sem alterar autorização/policy. Doc checklist green no mesmo gate (35 passed)."
     }
   ]
 }

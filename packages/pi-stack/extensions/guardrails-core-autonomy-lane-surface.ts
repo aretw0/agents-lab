@@ -585,6 +585,55 @@ function buildReseedJustification(input: {
   };
 }
 
+function buildReseedPriority(input: {
+  decision: "seed-now" | "wait" | "blocked";
+  recommendationCode: string;
+  readiness: ReturnType<typeof buildAfkMaterialReadinessPacket>;
+  blockedReasons: string[];
+  suggestedSeedCount: number;
+}): {
+  code: "continuity-bootstrap" | "stock-health" | "blocked-readiness" | "none";
+  reason: string;
+  evidenceSummary: string;
+} {
+  const evidenceSummary = [
+    `localSafe=${input.readiness.material.localSafeCount}`,
+    `validated=${input.readiness.material.validationKnownCount}/${input.readiness.material.targetSlices}`,
+    input.blockedReasons.length > 0 ? `blockers=${input.blockedReasons.join("|")}` : "blockers=none",
+    `suggested=${input.suggestedSeedCount}`,
+  ].join(" ");
+
+  if (input.decision === "seed-now" && input.recommendationCode === "afk-material-seed-now-bootstrap") {
+    return {
+      code: "continuity-bootstrap",
+      reason: "bootstrap reseed preserves continuity when focus/readiness gaps prevent local-safe continuation.",
+      evidenceSummary,
+    };
+  }
+
+  if (input.decision === "seed-now") {
+    return {
+      code: "stock-health",
+      reason: "reseed restores validated local-safe stock to sustain long-run throughput.",
+      evidenceSummary,
+    };
+  }
+
+  if (input.decision === "blocked") {
+    return {
+      code: "blocked-readiness",
+      reason: "reseed stays blocked until operational readiness is restored.",
+      evidenceSummary,
+    };
+  }
+
+  return {
+    code: "none",
+    reason: "stock is healthy; no reseed priority action is required.",
+    evidenceSummary,
+  };
+}
+
 function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
   const readiness = buildAfkMaterialReadinessPacket(p, cwd);
   const maxSeedSlices = Math.max(1, Math.min(10, Math.floor(asNumber(p.max_seed_slices, 3))));
@@ -636,6 +685,13 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     blockedReasons: readiness.blockedReasons,
     suggestedSeedCount,
   });
+  const reseedPriority = buildReseedPriority({
+    decision,
+    recommendationCode,
+    readiness,
+    blockedReasons: readiness.blockedReasons,
+    suggestedSeedCount,
+  });
 
   const summary = [
     "afk-material-seed:",
@@ -645,6 +701,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     `focus=${readiness.focusTaskIds.join(",") || "none"}`,
     `suggestedSeedCount=${suggestedSeedCount}`,
     `seedWhy=${reseedJustification.reasonCode}`,
+    `seedPriority=${reseedPriority.code}`,
     `humanActionRequired=${humanActionRequired ? "yes" : "no"}`,
     "authorization=none",
   ].join(" ");
@@ -661,6 +718,7 @@ function buildAfkMaterialSeedPacket(p: Record<string, unknown>, cwd: string) {
     blockedReasons: readiness.blockedReasons,
     seedTemplates,
     reseedJustification,
+    reseedPriority,
     dispatchAllowed: false,
     mutationAllowed: false,
     authorization: "none",
