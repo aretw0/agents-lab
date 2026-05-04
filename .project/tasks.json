@@ -17101,6 +17101,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] reduzir confusão operacional e evitar controles desalinhados no modo dev/resume.\n[provenance:human] source_task=TASK-BUD-759 reason=alinhamento explícito solicitado pelo operador durante retomada de sessão\nAlinhamento operacional explicitado para evitar confusão entre session resume e auto-dispatch loop.",
       "verification": "VER-BUD-1112"
+    },
+    {
+      "id": "TASK-BUD-761",
+      "description": "Endurecer alinhamento entre launcher (`pi:loop:*`) e runtime (`/lane-queue pause|resume`) com contrato consistente de estado (`mode` + `stopCondition`) e dica operacional de startup.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-760"
+      ],
+      "files": [
+        "scripts/pi-loop-pause.mjs",
+        "scripts/pi-isolated.mjs",
+        "scripts/test/pi-loop-pause-state-contract.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "`pi:loop:pause/resume` atualiza `mode` e `stopCondition` de forma consistente com runtime gate.",
+        "`pi:dev --resume` exibe hint curto de session/factory/next.",
+        "Teste cobre contrato de transição pause/resume no script."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir drift entre controles de launcher e runtime para evitar comportamento ingênuo/desalinhado.\n[provenance:human] source_task=none reason=pedido explícito de alinhamento forte/sadio e crítica de ingenuidade no controle atual\nCrítica de ingenuidade tratada com contrato explícito e semântica consistente entre caminhos de controle.",
+      "verification": "VER-BUD-1113"
     }
   ]
 }

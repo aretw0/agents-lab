@@ -12237,6 +12237,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-04T17:32:59.898Z",
       "evidence": "`scripts/pi-isolated.mjs` agora explicita no modo `--dev` com `--resume` que a sessão do pi é retomada, mas o loop de fábrica continua pausado até `npm run pi:loop:resume`. Help atualizado com `npm run pi:dev:resume`. Cobertura adicionada em `scripts/test/pi-isolated-resume-intent.test.mjs` para detecção de `--resume`. Validação: `node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs` (5 passed)."
+    },
+    {
+      "id": "VER-BUD-1113",
+      "target": "TASK-BUD-761",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-04T17:40:30.939Z",
+      "evidence": "Alinhamento launcher↔runtime endurecido: `scripts/pi-loop-pause.mjs` agora aplica transições consistentes (`mode` + `stopCondition` + `stopReason` + transição) em pause/resume, evitando estado parcial baseado só em stopCondition. `scripts/pi-isolated.mjs` passou a emitir `startup-hint` curto (session/factory/next) em `--dev` para reduzir ambiguidade operacional com `--resume`. Cobertura nova: `scripts/test/pi-loop-pause-state-contract.test.mjs`. Validação: `node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs` (8 passed)."
     }
   ]
 }
