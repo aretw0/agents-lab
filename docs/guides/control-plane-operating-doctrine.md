@@ -815,6 +815,22 @@ Para reduzir perda de contexto entre compact/pause, o `autonomy_lane_status` dev
 
 No fechamento operacional, ler também `reloadGate` e `timeoutPressureSummary` do `context_watch_status`: `reloadGate` mostra se `/reload` é pré-condição local naquele momento; `timeoutPressureSummary` fica em `none` quando estável, ou `count/threshold@window` sob instabilidade intermitente. São sinais de contexto rápido, não autorização.
 
+### Fronteira pragmática: `lane-queue` vs `steering`/`follow-up` nativos (decisão 2026-05)
+
+Decisão atual: **manter `lane-queue` com contrato mínimo**, sem promover para primitiva geral de direção.
+
+Mapa operacional:
+- **`follow-up` nativo / steering nativo**: caminho padrão para ação imediata no mesmo turno.
+- **`lane-queue`**: backlog deferred entre turns (`add/pop`) e continuidade board-first (`board-next/evidence`) quando long-run está ativo.
+- **`list/clear/pause/resume`**: controles operacionais da fila/loop (não substituem steering de produto).
+
+Migração segura (sem quebra de continuidade local-safe):
+1. se a intenção é executar **agora**, preferir `follow-up` nativo (ou override `lane-now:`);
+2. se a intenção deve esperar o fim da fatia ativa, usar `lane-queue add`;
+3. para continuidade orientada a board, usar `lane-queue board-next` (com milestone explícito quando necessário).
+
+Regra anti-confusão: evitar usar `lane-queue` para micro-direção conversacional; usar apenas quando houver necessidade explícita de fila/deferimento.
+
 Quando a lane local retornar `no-eligible-tasks`, não forçar continuidade no foco antigo. Faça checkpoint curto, selecione uma nova fatia local-safe explícita e retome a partir desse foco.
 
 ## Lane de delegação (wave 2026-05)

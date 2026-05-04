@@ -366,6 +366,8 @@ export function buildLaneQueueHelpLines(): string[] {
   return [
     "lane-queue: deferred intents for long-run continuity.",
     `usage: /lane-queue [status [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|help|list|add <text>|board-next [--milestone <label>|-m <label>|-m=<label>|--no-milestone]|pop|clear|pause|resume|evidence [--milestone <label>|-m <label>|-m=<label>|--no-milestone]]`,
+    "scope: lane-queue mantém backlog entre turns (deferred intents + board-next); follow-up/steering nativos seguem caminho padrão para ação imediata no mesmo turno.",
+    "decision(2026-05): manter contrato mínimo; list/clear/pause/resume ficam como controles operacionais de fila (não como primitiva de steering).",
     "instant override: use 'lane-now:<mensagem>' to bypass queue and send immediate follow-up.",
     "examples: /lane-queue status --no-milestone · /lane-queue list · /lane-queue board-next -m \"MS-LOCAL\" · /lane-queue board-next --no-milestone · /lane-queue evidence -m=MS-LOCAL",
   ];
