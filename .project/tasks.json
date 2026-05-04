@@ -17216,7 +17216,7 @@
     {
       "id": "TASK-BUD-766",
       "description": "Runway de background process: elevar maturidade local-safe (registry/port-lease/healthcheck/stop-source evidence) com checklist executável e smoke de contrato para liberar uso progressivo em loops longos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-764"
@@ -17233,7 +17233,50 @@
         "Smoke cobre blockers principais (port-lease, lifecycle evidence, stop-source coverage)."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] escalar simples para background process com gate forte antes de ampliar delegação/colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de maturidade operacional para escalar além do control plane manual"
+      "notes": "[rationale:risk-control] escalar simples para background process com gate forte antes de ampliar delegação/colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de maturidade operacional para escalar além do control plane manual\nPacket unificado reduz ambiguidade de readiness e orienta próxima ação sem abrir execução operacional.",
+      "verification": "VER-BUD-1118"
+    },
+    {
+      "id": "TASK-BUD-767",
+      "description": "Runway de escala: adicionar cue curto de readiness de delegação/background em surface de autonomia (status/details) com nextAction explícito para desbloqueio local-safe.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-765",
+        "TASK-BUD-766"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Status/details mostram cue resumido de readiness de delegação/background.",
+        "Cue não autoriza dispatch (report-only, fail-closed).",
+        "Smoke cobre caminho blocked e ready sem protected scope."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir polling manual para decidir quando sair de local-execute rumo a simple-delegate/background."
+    },
+    {
+      "id": "TASK-BUD-768",
+      "description": "Consolidar packet de runway operacional (delegação + background-process) em surface única report-only para recomendação `local-execute|simple-delegate|defer` com blockers normalizados.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-765",
+        "TASK-BUD-766"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Packet unificado compõe sinais de delegação e background sem auto-dispatch.",
+        "RecommendationCode e blockers estáveis para automação de leitura.",
+        "Smoke cobre decisões local-execute, ready-simple-delegate e defer."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] preparar decisão de escala sem ambiguidade antes de qualquer promoção para colony."
     }
   ]
 }

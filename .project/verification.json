@@ -12282,6 +12282,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-04T20:05:11.562Z",
       "evidence": "Runway de delegação simples consolidado com status unificado report-only: novo tool `delegation_readiness_status_packet` em `packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts` compõe capability+mix+auto-advance+telemetry e separa explicitamente cenários `ready-simple-delegate` vs `local-execute-first` vs `defer`, incluindo `nextAction` curto e blockers consistentes. Governança sem auto-dispatch preservada (`authorization=none`, `dispatchAllowed=false`). Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (paths ready/blocked). Doctrine atualizada em `docs/guides/control-plane-operating-doctrine.md` para usar status unificado antes da promoção simple-delegate. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (80 passed)."
+    },
+    {
+      "id": "VER-BUD-1118",
+      "target": "TASK-BUD-766",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-04T20:09:50.833Z",
+      "evidence": "Runway de background process elevado com packet unificado report-only: novo tool `background_process_readiness_packet` em `packages/pi-stack/extensions/guardrails-core-background-process-surface.ts` combina `background_process_plan` + `background_process_readiness_score` + `background_process_rehearsal_gate` e entrega decisão explícita (`ready-window|needs-evidence|blocked`), blockers e `nextAction` operacional. Contrato report-only reforçado (`authorization=none`, `dispatchAllowed=false`, `processStartAllowed=false`, `processStopAllowed=false`). Documentação atualizada em `docs/primitives/background-process-control.md`. Cobertura adicionada em `packages/pi-stack/test/smoke/guardrails-background-process.test.ts` para cenários blocked/ready-window. Validação focal: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (89 passed)."
     }
   ]
 }

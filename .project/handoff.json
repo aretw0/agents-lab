@@ -1,15 +1,18 @@
 {
-  "timestamp": "2026-05-04T20:06:05.826Z",
+  "timestamp": "2026-05-04T20:06:53.982Z",
   "context": "Fechadas as fatias de fortalecimento do control-plane em delegação e heartbeat: TASK-BUD-764 concluída com extração de lease/evidence heartbe [snip] egue para runway de background process. [truncated:+148 chars]",
   "current_tasks": [
     "TASK-BUD-766"
   ],
   "next_actions": [
+    "Context-watch action: level=compact 64% (compact-now) · Compact now and continue from checkpoint.",
     "executar TASK-BUD-766 (runway de background process readiness com blockers explícitos)",
     "manter delegação em local-execute/simple-delegate report-only até readiness subir",
     "reavaliar simple_delegate_rehearsal_packet e ops_calibration_decision_packet após melhorias de background process"
   ],
-  "blockers": [],
+  "blockers": [
+    "context-watch-compact-required"
+  ],
   "recent_validation": [
     "npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages [snip] cklist.test.ts (80 passed) [truncated:+254 chars]",
     "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] klist.test.ts (137 passed) [truncated:+437 chars]"
@@ -47,6 +50,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "Local slice checkpoint saved."
+    },
+    {
+      "atIso": "2026-05-04T20:06:53.982Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 64,
+      "thresholds": {
+        "warnPct": 45,
+        "checkpointPct": 55,
+        "compactPct": 64
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }
