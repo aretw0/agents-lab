@@ -1184,6 +1184,9 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         `code=${selection.recommendationCode}`,
         selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
         `queue=${readyQueue.previewCount}`,
+        Number.isFinite(seedingGuidance?.suggestedSeedCount)
+          ? `seedCount=${Math.max(1, Math.floor(Number(seedingGuidance?.suggestedSeedCount)))}`
+          : undefined,
         seedingGuidance?.seedWhy ? `seedWhy=${seedingGuidance.seedWhy}` : undefined,
         seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
         "authorization=none",

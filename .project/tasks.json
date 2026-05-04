@@ -16378,6 +16378,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça continuidade anti-ruído entre checkpoints sem aumentar bloat.\nRegra operacional anti-ruído documentada sem aumentar bloat.",
       "verification": "VER-BUD-1072"
+    },
+    {
+      "id": "TASK-BUD-721",
+      "description": "Incluir `seedCount` no summary curto de `autonomy_lane_status` quando houver `seedingGuidance`.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Summary inclui `seedCount=<n>` quando `seedingGuidance` existir.",
+        "Resumo mantém formato compacto (`code/next/queue/seedWhy/seedPriority`).",
+        "Contrato segue report-only sem alterar autorização/dispatch."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing + seedPriority=continuity-bootstrap; seedCount explícito acelera decisão de seeding sem abrir payload completo.\nExecutando fatia: adicionar seedCount no summary compacto do autonomy_lane_status quando houver seedingGuidance.\nCue compacto de quantidade de seed ficou explícito para decisão rápida sem abrir payload completo.",
+      "verification": "VER-BUD-1073"
+    },
+    {
+      "id": "TASK-BUD-722",
+      "description": "Adicionar smoke para `seedCount` no summary de `autonomy_lane_status` em cenário no-eligible.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-721"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `summary` contendo `seedCount=3` em `no-eligible-tasks` com `seed-now-bootstrap`.",
+        "Smoke mantém cenário ready sem `seedCount` indevido.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão de observabilidade compacta para seeding bootstrap.\nRegressão protegida para seedCount somente quando guidance de seeding estiver presente.",
+      "verification": "VER-BUD-1074"
+    },
+    {
+      "id": "TASK-BUD-723",
+      "description": "Sincronizar doutrina curta: summary de `autonomy_lane_status` deve expor `seedCount` junto de `seedWhy/seedPriority`.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-721"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc menciona cue compacto com `seedCount` para decisão rápida.",
+        "Sem nova policy/autorização; texto anti-bloat.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça leitura operacional mínima antes de semeadura local-safe.\nDoutrina mantém leitura anti-bloat com quantidade de seed explícita.",
+      "verification": "VER-BUD-1075"
     }
   ]
 }

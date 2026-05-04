@@ -11877,6 +11877,33 @@
       "method": "test",
       "timestamp": "2026-05-04T01:54:13.678Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em handoff fresh, `iterationReminder` suprime instrução `/reload` já cumprida, mantendo prioridades existentes de seed-guidance e stale-first. Gate combinado: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1073",
+      "target": "TASK-BUD-721",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:21:00.280Z",
+      "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora inclui `seedCount=<n>` no `summary` quando `seedingGuidance` existe. Mantém formato compacto (`code/next/queue/seedCount/seedWhy/seedPriority`) e contrato report-only."
+    },
+    {
+      "id": "VER-BUD-1074",
+      "target": "TASK-BUD-722",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:21:29.590Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` cobre `summary` com `seedCount=3` no cenário `no-eligible` e valida ausência de `seedCount` quando a fila local-safe já está pronta. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1075",
+      "target": "TASK-BUD-723",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:21:54.532Z",
+      "evidence": "`docs/guides/control-plane-operating-doctrine.md` sincronizado: cue compacto do summary agora inclui `seedCount` junto de `seedWhy/seedPriority`, e fechamento de seeding registra os três sinais. Doc checklist permaneceu green no mesmo gate (39 passed)."
     }
   ]
 }
