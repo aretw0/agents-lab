@@ -69,7 +69,7 @@ type AutonomyOperatorPauseBrief = {
 };
 
 type AutonomyIterationReminder = {
-  source: "handoff-stale" | "handoff-next-actions" | "handoff-current-tasks" | "none";
+  source: "seed-guidance" | "handoff-stale" | "handoff-next-actions" | "handoff-current-tasks" | "none";
   items: string[];
   summary: string;
 };
@@ -91,12 +91,34 @@ function normalizeIterationReminderItem(value: unknown): string | undefined {
   return compact.length > 96 ? `${compact.slice(0, 93)}...` : compact;
 }
 
-function buildIterationReminder(cwd: string, handoffFreshnessLabel?: HandoffFreshnessLabel): AutonomyIterationReminder {
+function buildIterationReminder(
+  cwd: string,
+  handoffFreshnessLabel?: HandoffFreshnessLabel,
+  seedingGuidance?: {
+    decision?: string;
+    seedWhy?: string;
+    seedPriority?: string;
+    suggestedSeedCount?: number;
+    humanActionRequired?: boolean;
+  },
+): AutonomyIterationReminder {
   if (handoffFreshnessLabel === "stale") {
     return {
       source: "handoff-stale",
       items: ["refresh-handoff checkpoint evidence before next slice"],
       summary: "refresh-handoff checkpoint evidence before next slice",
+    };
+  }
+
+  if (seedingGuidance?.decision === "seed-now") {
+    const suggested = Number.isFinite(seedingGuidance.suggestedSeedCount)
+      ? Math.max(1, Math.floor(Number(seedingGuidance.suggestedSeedCount)))
+      : 1;
+    const item = `seed local-safe (${suggested}) seedWhy=${seedingGuidance.seedWhy ?? "unknown"} seedPriority=${seedingGuidance.seedPriority ?? "unknown"}`;
+    return {
+      source: "seed-guidance",
+      items: [item],
+      summary: item,
     };
   }
 
@@ -1118,7 +1140,6 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskId: selection.nextTaskId,
         nextTaskMnemonic,
       });
-      const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label);
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
@@ -1151,6 +1172,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           };
         })()
         : undefined;
+      const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label, seedingGuidance);
       const result = {
         ready: plan.ready && selection.ready,
         plan,

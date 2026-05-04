@@ -729,6 +729,37 @@ describe("autonomy lane surface", () => {
     expect(reminder?.summary).toContain("finalizar slice atual");
   });
 
+  it("prioritizes seed-guidance reminder when no eligible task and seed-now is available", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-seed-guidance-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-COLONY-PROMOTION", description: "[P0] revisar colony promotion candidate", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({
+      timestamp: new Date().toISOString(),
+      current_tasks: [],
+      next_actions: ["Rodar /reload para atualizar runtime"],
+    }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "ok", provider_ready: 1 }, undefined, undefined, { cwd });
+    const reminder = (result?.details.iterationReminder as { source?: string; items?: string[]; summary?: string } | undefined);
+    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string } | undefined);
+
+    expect(seedingGuidance?.decision).toBe("seed-now");
+    expect(reminder?.source).toBe("seed-guidance");
+    expect(reminder?.summary).toContain("seedWhy=bootstrap-focus-missing");
+    expect(reminder?.summary).toContain("seedPriority=continuity-bootstrap");
+  });
+
   it("prioritizes refresh reminder when handoff freshness is stale", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-stale-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

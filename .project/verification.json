@@ -11796,6 +11796,33 @@
       "method": "test",
       "timestamp": "2026-05-04T01:13:51.125Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, consultar `seedingGuidance` de `autonomy_lane_status` (seedWhy + seedPriority) e usar `autonomy_lane_material_seed_packet` para detalhe completo quando necessário. Doc checklist green no mesmo gate (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1064",
+      "target": "TASK-BUD-712",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:27:05.500Z",
+      "evidence": "`buildIterationReminder` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora prioriza source `seed-guidance` quando `seedingGuidance.decision=seed-now`, emitindo item curto com `seedWhy` e `seedPriority`. Isso evita reminder preso em next_actions stale (ex.: /reload já cumprido) e mantém contrato report-only."
+    },
+    {
+      "id": "VER-BUD-1065",
+      "target": "TASK-BUD-713",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:27:23.642Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` adicionada para cenário `no-eligible-tasks` com `seed-now`: valida `iterationReminder.source=seed-guidance` e summary contendo `seedWhy=bootstrap-focus-missing` + `seedPriority=continuity-bootstrap`. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (36 passed)."
+    },
+    {
+      "id": "VER-BUD-1066",
+      "target": "TASK-BUD-714",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:27:43.482Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: `iterationReminder` deve priorizar instrução de seeding com `seedWhy+seedPriority` quando `seedingGuidance.decision=seed-now`; mantém stale-first para `refresh-handoff`. Doc checklist green no mesmo gate (36 passed)."
     }
   ]
 }

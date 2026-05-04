@@ -16210,6 +16210,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reduz erro operacional ao centralizar motivo/prioridade de seeding no status principal.\nFluxo operacional de seeding ficou mais direto e anti-bloat.",
       "verification": "VER-BUD-1063"
+    },
+    {
+      "id": "TASK-BUD-712",
+      "description": "Priorizar lembrete de seeding em `iterationReminder` quando `seedingGuidance.decision=seed-now` para evitar instrução de /reload já cumprida.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` troca reminder de `handoff-next-actions` por reminder de seed quando houver `seedingGuidance.decision=seed-now`.",
+        "Reminder inclui `seedWhy` e `seedPriority` em formato curto auditável.",
+        "Sem alterar autorização/dispatch (report-only)."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita continuidade presa em next_actions stale e reforça ação de longo prazo (seed bootstrap) com racional explícito.\nImplementando reminder de seed-guidance para cortar next_actions stale e empurrar ação local-safe com seedWhy+seedPriority.\nReminder agora aponta ação local-safe de semeadura quando ela já é a recomendação ativa.",
+      "verification": "VER-BUD-1064"
+    },
+    {
+      "id": "TASK-BUD-713",
+      "description": "Adicionar smoke para `iterationReminder` orientado por seedingGuidance em cenário no-eligible.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-712"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida source `seed-guidance` com item contendo `seedWhy` e `seedPriority` quando `seed-now`.",
+        "Smoke mantém comportamento `handoff-next-actions` no cenário comum sem seed-now.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] protege contrato de lembrete ativo para semeadura e evita regressão para mensagens stale.\nCobertura protege a prioridade de reminder de seeding contra regressão para next_actions legado.",
+      "verification": "VER-BUD-1065"
+    },
+    {
+      "id": "TASK-BUD-714",
+      "description": "Sincronizar doutrina curta: em no-eligible com seed-now, iterationReminder deve apontar ação de seeding (não /reload legado).",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-712"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc menciona preferência por reminder de seeding com seedWhy+seedPriority.",
+        "Texto anti-bloat e sem nova policy de autorização.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reforça continuidade prática e reduz ambiguidade operacional pós-reload.\nDiretriz operacional anti-bloat alinhada com comportamento novo do status.",
+      "verification": "VER-BUD-1066"
     }
   ]
 }
