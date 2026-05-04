@@ -131,6 +131,7 @@ function printHelp() {
 		"Uso:",
 		"  npm run pi:isolated",
 		"  npm run pi:dev                  ← modo dev: pausa loop antes de iniciar",
+		"  npm run pi:dev:resume           ← retoma sessão do pi, mantendo loop pausado",
 		"  npm run pi:isolated:resume",
 		"  npm run pi:isolated:status",
 		"  npm run pi:isolated:adopt-latest",
@@ -439,6 +440,11 @@ function printStatus() {
 	}
 }
 
+export function detectSessionResumeIntent(piArgs) {
+	if (!Array.isArray(piArgs)) return false;
+	return piArgs.some((arg) => typeof arg === "string" && arg.trim() === "--resume");
+}
+
 function run() {
 	const opts = parseArgs(process.argv);
 
@@ -495,6 +501,7 @@ function run() {
 	const launchArgs = [LOCAL_PI_CLI, ...opts.piArgs];
 
 	const devPauseResult = opts.dev ? pauseLoopForDevSession(opts.dryRun) : "skipped";
+	const sessionResumeRequested = detectSessionResumeIntent(opts.piArgs);
 
 	if (opts.dryRun) {
 		console.log("pi isolated dry-run");
@@ -528,6 +535,9 @@ function run() {
 		console.log(`pi-isolated: ${devNotes[devPauseResult] ?? devPauseResult}`);
 		if (devPauseResult === "paused" || devPauseResult === "already-paused") {
 			console.log("pi-isolated: para retomar a fábrica depois: npm run pi:loop:resume");
+		}
+		if (sessionResumeRequested) {
+			console.log("pi-isolated: --resume retoma a sessão do pi; loop de fábrica continua pausado até npm run pi:loop:resume");
 		}
 	}
 
