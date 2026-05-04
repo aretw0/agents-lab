@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-05-04T02:48:23.183Z",
-  "context": "Wave local-safe concluída: TASK-BUD-727/728/729. autonomy_lane_status agora enriquece nextAction com diretiva de seed (seed <n> local-safe; s [snip] ed-now; smoke e doutrina sincronizadas. [truncated:+47 chars]",
+  "timestamp": "2026-05-04T03:28:20.899Z",
+  "context": "Wave local-safe concluída: TASK-BUD-730/731/732. autonomy_lane_status agora inclui influenceWindowCue (decision/window/recommendationCode) e [snip] -window protected sem polling separado. [truncated:+90 chars]",
   "next_actions": [
-    "Rodar /reload para runtime carregar nextAction enriquecido por seedingGuidance recém-commitado.",
-    "Após reload, consultar autonomy_lane_status; executar seed local-safe (1–3) seguindo nextAction + seedingCue."
+    "Rodar /reload para runtime carregar influenceWindowCue no autonomy_lane_status.",
+    "Após reload, seguir loop local-safe até influenceWindowCue.decision=ready-window; então abrir [snip] ted por decisão explícita. [truncated:+16 chars]"
   ],
   "blockers": [
-    "Sem /reload, autonomy_lane_status.nextAction pode continuar no texto genérico anterior nesta sessão."
+    "Sem /reload, runtime da sessão pode não expor influenceWindowCue recém-commitado."
   ],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] cklist.test.ts (39 passed) [truncated:+37 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] cklist.test.ts (40 passed) [truncated:+37 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-729",
+    "focus": "TASK-BUD-732",
     "canonical_links": [
-      "task:TASK-BUD-729",
-      "task:TASK-BUD-727"
+      "task:TASK-BUD-732",
+      "task:TASK-BUD-730"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T02:48:23.183Z",
+    "generatedAtIso": "2026-05-04T03:28:20.899Z",
     "level": "checkpoint",
-    "percent": 84,
+    "percent": 86,
     "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T02:48:23.183Z",
+      "atIso": "2026-05-04T03:28:20.899Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 84,
+      "percent": 86,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-729"
+    "TASK-BUD-732"
   ]
 }
