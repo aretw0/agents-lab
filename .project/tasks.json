@@ -17127,7 +17127,7 @@
     {
       "id": "TASK-BUD-762",
       "description": "Wave 2 anti-bloat em `context-watchdog.ts`: extrair orquestração de post-reload auto-resume (pending/dispatch/dedupe warning) para módulo coeso sem mudar contrato das tools.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-756"
@@ -17143,12 +17143,13 @@
         "Smoke focal permanece green (`context-watchdog*.test.ts`)."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] reduzir risco de regressão em fluxo crítico de continuidade pós-compact/reload.\n[provenance:brainstorm] source_task=TASK-BUD-759 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/context-watchdog\nSlice 1 concluída: lógica de dedupe/emit de warning post-reload extraída para `context-watchdog-resume.ts` (`resolvePostReloadPendingNotifyDecision` + `PostReloadPendingNotifyMemory`), removendo estado/heurística local duplicada em `context-watchdog.ts`. Smoke focal green (78 passed)."
+      "notes": "[rationale:risk-control] reduzir risco de regressão em fluxo crítico de continuidade pós-compact/reload.\n[provenance:brainstorm] source_task=TASK-BUD-759 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/context-watchdog\nSlice 1 concluída: lógica de dedupe/emit de warning post-reload extraída para `context-watchdog-resume.ts` (`resolvePostReloadPendingNotifyDecision` + `PostReloadPendingNotifyMemory`), removendo estado/heurística local duplicada em `context-watchdog.ts`. Smoke focal green (78 passed).\nExtração focada em pós-reload auto-resume sem mudança de payload das tools.",
+      "verification": "VER-BUD-1114"
     },
     {
       "id": "TASK-BUD-763",
       "description": "Wave 2 de organização da suíte `context-watchdog`: dividir `context-watchdog.test.ts` por domínio de continuidade (auto-resume/reload/previews), mantendo cobertura e contratos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-758"
@@ -17163,12 +17164,13 @@
         "Smoke focal green (`context-watchdog*.test.ts` + doc checklist)."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] manter manutenção da suíte viável com crescimento contínuo de funcionalidades.\n[provenance:brainstorm] source_task=TASK-BUD-758 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/tests"
+      "notes": "[rationale:risk-control] manter manutenção da suíte viável com crescimento contínuo de funcionalidades.\n[provenance:brainstorm] source_task=TASK-BUD-758 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/tests\nSplit mantém contratos e melhora manutenção da trilha continuidade/reload.",
+      "verification": "VER-BUD-1115"
     },
     {
       "id": "TASK-BUD-764",
       "description": "Wave 2 anti-bloat em `guardrails-core.ts`: extrair heartbeat/lease/evidence loop helpers para módulo dedicado e manter wiring enxuto no entrypoint.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-757"
@@ -17185,7 +17187,51 @@
         "Sem regressão de status/command lane-queue."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] reduzir gordura no entrypoint e deixar semântica de loop mais auditável.\n[provenance:brainstorm] source_task=TASK-BUD-757 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/guardrails"
+      "notes": "[rationale:risk-control] reduzir gordura no entrypoint e deixar semântica de loop mais auditável.\n[provenance:brainstorm] source_task=TASK-BUD-757 reason=seedWhy=bootstrap-focus-missing; continuidade da trilha anti-bloat/guardrails\nSlice 1 concluída: helper de heartbeat/evidence snapshot extraído para `packages/pi-stack/extensions/guardrails-core-lane-queue-heartbeat.ts` (`refreshLoopEvidenceHeartbeatFromSnapshot`), com `guardrails-core.ts` usando wrapper de composição e mantendo auditoria intacta. Smokes de lane-queue/reexport green (53 passed) + pack focal (133 passed)."
+    },
+    {
+      "id": "TASK-BUD-765",
+      "description": "Runway de delegação simples: consolidar em um surface/status único os bloqueios reais de `simple-delegate` (capability+mix+auto-advance+telemetry), com recomendação acionável para liberar delegação sem ambiguidade.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-764"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Packet/status expõe blockers de delegação em formato curto e consistente.",
+        "Mensagem separa claramente `local-execute` vs `simple-delegate` e próximo passo para desbloqueio.",
+        "Smoke focal cobre caminho ready e blocked sem auto-dispatch."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] preparar escala de delegação com critérios explícitos antes de abrir caminho para colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de fortalecer delegação com governança e sem gordura"
+    },
+    {
+      "id": "TASK-BUD-766",
+      "description": "Runway de background process: elevar maturidade local-safe (registry/port-lease/healthcheck/stop-source evidence) com checklist executável e smoke de contrato para liberar uso progressivo em loops longos.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-764"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "docs/primitives/background-process-control.md"
+      ],
+      "acceptance_criteria": [
+        "Checklist/score explica gaps de readiness com nextAction objetivo.",
+        "Contrato deixa explícito quando background process ainda fica report-only.",
+        "Smoke cobre blockers principais (port-lease, lifecycle evidence, stop-source coverage)."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] escalar simples para background process com gate forte antes de ampliar delegação/colony.\n[provenance:brainstorm] source_task=none reason=pedido explícito de maturidade operacional para escalar além do control plane manual"
     }
   ]
 }

@@ -12246,6 +12246,24 @@
       "method": "test+inspection",
       "timestamp": "2026-05-04T17:40:30.939Z",
       "evidence": "Alinhamento launcher↔runtime endurecido: `scripts/pi-loop-pause.mjs` agora aplica transições consistentes (`mode` + `stopCondition` + `stopReason` + transição) em pause/resume, evitando estado parcial baseado só em stopCondition. `scripts/pi-isolated.mjs` passou a emitir `startup-hint` curto (session/factory/next) em `--dev` para reduzir ambiguidade operacional com `--resume`. Cobertura nova: `scripts/test/pi-loop-pause-state-contract.test.mjs`. Validação: `node --test scripts/test/pi-isolated-canonical-settings.test.mjs scripts/test/pi-isolated-resume-intent.test.mjs scripts/test/pi-loop-pause-state-contract.test.mjs` (8 passed)."
+    },
+    {
+      "id": "VER-BUD-1114",
+      "target": "TASK-BUD-762",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T19:39:23.033Z",
+      "evidence": "Wave 2 concluída para fluxo pós-reload em context-watchdog: extração da decisão de pending-notify e snapshot de auto-resume para `packages/pi-stack/extensions/context-watchdog-resume.ts` (`resolvePostReloadPendingNotifyDecision`, `composeAutoResumeSuppressionHint`, `buildAutoResumeDecisionSnapshot`, `PostReloadPendingNotifyMemory`, `AutoResumeDecisionSnapshot`), com redução de orquestração inline em `packages/pi-stack/extensions/context-watchdog.ts`. Cues/contrato preservados (`postReloadResume=pending`) e dedupe mantido via smoke dedicado. Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts` (78 passed)."
+    },
+    {
+      "id": "VER-BUD-1115",
+      "target": "TASK-BUD-763",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T19:39:33.431Z",
+      "evidence": "Wave 2 de split da suíte concluída: domínio de continuidade pós-reload extraído de `packages/pi-stack/test/smoke/context-watchdog.test.ts` para `packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts` (4 testes), preservando cobertura total da suíte context-watchdog (78 testes no total combinando arquivos). `context-watchdog.test.ts` reduzido para 2739 linhas e organização por domínio reforçada (`checkpoint`, `post-reload`, `resume helpers`). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts` (78 passed)."
     }
   ]
 }
