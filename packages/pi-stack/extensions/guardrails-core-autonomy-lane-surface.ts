@@ -1189,6 +1189,16 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           };
         })()
         : undefined;
+      const influenceWindowPacket = buildInfluenceAssimilationWindowPacket({
+        ...p,
+        include_protected_scopes: false,
+        include_missing_rationale: false,
+      }, ctx.cwd);
+      const influenceWindowCue = {
+        decision: influenceWindowPacket.decision,
+        window: influenceWindowPacket.window,
+        recommendationCode: influenceWindowPacket.recommendationCode,
+      };
       const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
         selectionReady: selection.ready,
         selectionReason: selection.reason,
@@ -1211,6 +1221,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           : undefined,
         seedingGuidance?.seedWhy ? `seedWhy=${seedingGuidance.seedWhy}` : undefined,
         seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
+        influenceWindowCue?.decision ? `influenceWindow=${influenceWindowCue.decision}` : undefined,
         "authorization=none",
       ].filter(Boolean).join(" ");
       const seededNextAction = !selection.ready && seedingGuidance?.decision === "seed-now"
@@ -1237,6 +1248,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         operatorPauseBrief,
         iterationReminder,
         seedingGuidance,
+        influenceWindowCue,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : (seededNextAction ?? selection.recommendation)),

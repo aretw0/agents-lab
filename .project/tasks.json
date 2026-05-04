@@ -16549,6 +16549,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] alinhamento runtime-doc reduz ambiguidades na passagem no-eligible -> seed.\nRunbook mantém anti-bloat com ação direta de seeding no texto de continuidade.",
       "verification": "VER-BUD-1081"
+    },
+    {
+      "id": "TASK-BUD-730",
+      "description": "Expor `influenceWindowCue` no `autonomy_lane_status` para sinalizar quando ready-window protected ficar elegível (decision/window/code).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` inclui `influenceWindowCue` com `decision`, `window`, `recommendationCode`.",
+        "Summary curto inclui `influenceWindow=<decision>` quando cue disponível.",
+        "Sem alterar autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz necessidade de intervenção contínua ao mostrar transição confiável para ready-window protected no status principal.\nSlice local-safe iniciada: adicionar influenceWindowCue no status para detectar janela protected com mínima intervenção humana.\nStatus principal passa a sinalizar transição para ready-window protected sem chamada extra.",
+      "verification": "VER-BUD-1082"
+    },
+    {
+      "id": "TASK-BUD-731",
+      "description": "Adicionar smoke para `influenceWindowCue` no `autonomy_lane_status` (blocked e ready-window).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-730"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `influenceWindowCue.decision=blocked` em cenário sem estoque local-safe.",
+        "Smoke valida `influenceWindowCue` presente e consistente no cenário saudável (ready/defer conforme dados).",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] garante confiabilidade do sinal de transição antes de abrir quests protected.\nCobertura garante confiabilidade do sinal de transição protected no status único.",
+      "verification": "VER-BUD-1083"
+    },
+    {
+      "id": "TASK-BUD-732",
+      "description": "Sincronizar doutrina curta: usar `influenceWindowCue` do status para decidir abertura de quests protected.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-730"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc orienta leitura do cue no status antes de opt-in protected.",
+        "Mantém anti-bloat e policy de gate humano explícito.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] alinha modo quase-ininterrupto com gatilho explícito e seguro para protected.\nContrato de quase-ininterrupto agora tem gatilho explícito para transição local-safe -> protected.",
+      "verification": "VER-BUD-1084"
     }
   ]
 }

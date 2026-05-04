@@ -11958,6 +11958,33 @@
       "method": "test",
       "timestamp": "2026-05-04T02:46:39.165Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, além de summary, `nextAction` pode carregar diretiva direta `seed <n> local-safe ...` baseada em `seedingGuidance` (`seedWhy/seedPriority`). Doc checklist green no mesmo gate (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1082",
+      "target": "TASK-BUD-730",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:21:50.869Z",
+      "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora publica `influenceWindowCue` (`decision`, `window`, `recommendationCode`) e inclui `influenceWindow=<decision>` no summary curto. Mantém contrato report-only sem dispatch."
+    },
+    {
+      "id": "VER-BUD-1083",
+      "target": "TASK-BUD-731",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:22:10.203Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` adicionada para `influenceWindowCue`: valida cenário `ready-window/open` em estoque local-safe saudável e cenário `blocked` no no-eligible; também valida summary com `influenceWindow=<decision>`. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1084",
+      "target": "TASK-BUD-732",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:22:56.663Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: orienta acompanhar `influenceWindowCue` no `autonomy_lane_status` para detectar abertura de janela protected (`ready-window`) sem polling manual de packet separado, mantendo gate humano explícito. Doc checklist green no mesmo gate (40 passed)."
     }
   ]
 }

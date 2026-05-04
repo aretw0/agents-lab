@@ -671,6 +671,55 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
+  it("exposes ready-window influence cue on autonomy_lane_status when local-safe stock is healthy", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-influence-ready-window-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-FOCUS",
+          description: "[P1] focused local slice",
+          status: "in-progress",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-1",
+          description: "[P2] local slice 1",
+          status: "planned",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+        {
+          id: "TASK-LOCAL-2",
+          description: "[P2] local slice 2",
+          status: "planned",
+          acceptance_criteria: ["run smoke test"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+          notes: "[rationale:risk-control] keep local-safe flow",
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    const influenceCue = (result?.details.influenceWindowCue as { decision?: string; window?: string; recommendationCode?: string } | undefined);
+    expect(influenceCue?.decision).toBe("ready-window");
+    expect(influenceCue?.window).toBe("open");
+    expect(influenceCue?.recommendationCode).toBe("influence-assimilation-ready-window-open");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=ready-window");
+  });
+
   it("registers composed status tool with board selection and lane plan", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
@@ -947,8 +996,12 @@ describe("autonomy lane surface", () => {
     expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
     expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
     expect(seedingGuidance?.humanActionRequired).toBe(true);
+    const influenceCue = (result?.details.influenceWindowCue as { decision?: string; recommendationCode?: string } | undefined);
+    expect(influenceCue?.decision).toBe("blocked");
+    expect(influenceCue?.recommendationCode).toBe("influence-assimilation-blocked-operational");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedCount=3");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedWhy=readiness-blocked");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=blocked");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
