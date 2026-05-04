@@ -17278,6 +17278,89 @@
       ],
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] preparar decisão de escala sem ambiguidade antes de qualquer promoção para colony."
+    },
+    {
+      "id": "TASK-BUD-769",
+      "description": "Anti-bloat Wave 3: extrair a composição de `runwayReadinessCue` de `guardrails-core-autonomy-lane-surface.ts` para módulo dedicado, preservando contrato/summary atuais.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-768"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-runway.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Lógica de runway (delegação+background) vive em módulo dedicado com tipos explícitos.",
+        "`autonomy_lane_status` mantém invariantes report-only/fail-closed e tokens de summary (`runway`, `delegationReady`, `backgroundReady`).",
+        "Smoke focal de autonomia permanece verde sem regressão de payload."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] reduzir acoplamento no surface principal para acelerar ondas longas de manutenção boring com rollback simples."
+    },
+    {
+      "id": "TASK-BUD-770",
+      "description": "Adicionar `unlockChecklist` normalizado no `delegation_readiness_status_packet` e no `background_process_readiness_packet`, priorizando blockers acionáveis para reduzir polling manual.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-768"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Cada packet expõe lista curta/estável de desbloqueio (top blockers + próxima ação).",
+        "Sem mudança de autorização: `authorization=none`, `dispatchAllowed=false` preservados.",
+        "Smokes cobrem caminhos blocked, needs-evidence e ready com checklist consistente."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] melhorar throughput operacional sem abrir promoções automáticas."
+    },
+    {
+      "id": "TASK-BUD-771",
+      "description": "Criar `autonomy_lane_batch_preview` (report-only) para listar 3-7 slices local-safe elegíveis com validação/rollback resumidos para execução contínua de várias horas.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-769"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Tool retorna fila bounded de slices local-safe (sem protected por padrão).",
+        "Cada slice inclui gate mínimo de validação e rollback curto para execução boring contínua.",
+        "Contrato fail-closed mantido: sem dispatch/autorização implícita."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] criar material pronto para long-runs locais com baixa necessidade de intervenção humana."
+    },
+    {
+      "id": "TASK-BUD-772",
+      "description": "Documentar e validar contrato hard/soft intent para execução em lote (batch lane): quando continuar sozinho, quando checkpointar e quando pausar para decisão estratégica.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-771"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Doutrina descreve claramente hard intent (gates bloqueantes) vs soft intent (preferências).",
+        "Checklist de docs valida presença dos novos marcadores de batch lane.",
+        "Guia orienta retorno ao usuário apenas em blocker/protected/decisão irreversível."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] alinhar autonomia prolongada com governança explícita e previsível."
     }
   ]
 }
