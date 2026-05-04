@@ -1962,6 +1962,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		timeoutPressureHint?: string;
 		promptDiagnostics?: AutoResumePromptDiagnostics;
 	} | null = null;
+	let lastPostReloadPendingReason: AutoResumeDispatchReason | null = null;
+	let lastPostReloadPendingIntentCreatedAtIso: string | null = null;
+	let lastPostReloadPendingNotifyAt = 0;
 	let lastSteeringSignal: {
 		atIso: string;
 		reason: ContextWatchHandoffReason;
@@ -1998,6 +2001,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	const ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW = 1;
 	const TIMEOUT_PRESSURE_WINDOW_MS = 10 * 60 * 1000;
 	const TIMEOUT_PRESSURE_THRESHOLD = 2;
+	const POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS = 5 * 60 * 1000;
 
 	const getAnnouncementsInWindow = (nowMs: number): number => {
 		if (announceWindowStartAt <= 0) return 0;
@@ -2097,6 +2101,22 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		return { matched: true, state: readTimeoutPressureState(nowMs) };
 	};
 
+	const shouldEmitPostReloadPendingSignal = (input: {
+		nowMs: number;
+		intentCreatedAtIso: string;
+		reason: AutoResumeDispatchReason;
+	}): boolean => {
+		const intentChanged = input.intentCreatedAtIso !== lastPostReloadPendingIntentCreatedAtIso;
+		const reasonChanged = input.reason !== lastPostReloadPendingReason;
+		if (intentChanged || reasonChanged) return true;
+		const notifyCooldownMs = Math.max(
+			POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
+			Math.max(1_000, Math.floor(Number(config.cooldownMs ?? 60_000))),
+		);
+		if (lastPostReloadPendingNotifyAt <= 0) return true;
+		return (input.nowMs - lastPostReloadPendingNotifyAt) >= notifyCooldownMs;
+	};
+
 	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
 		if (!config.enabled) {
 			ctx.ui.setStatus?.("context-watch", "[ctx] disabled");
@@ -2119,6 +2139,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const reloadRequiredAtRunStart = isReloadRequiredForSourceUpdate();
 		const handoffForPostReloadResume = readHandoffJson(ctx.cwd);
 		const pendingAutoResumeAfterReload = readAutoResumeAfterReloadIntent(handoffForPostReloadResume);
+		if (!pendingAutoResumeAfterReload) {
+			lastPostReloadPendingReason = null;
+			lastPostReloadPendingIntentCreatedAtIso = null;
+			lastPostReloadPendingNotifyAt = 0;
+		}
 		if (pendingAutoResumeAfterReload && !reloadRequiredAtRunStart) {
 			const hasPendingMessages = ctx.hasPendingMessages();
 			const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
@@ -2194,6 +2219,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			} satisfies NonNullable<typeof lastAutoResumeDecision>;
 			if (autoResumeDecision.shouldDispatch) {
 				lastAutoResumeAt = now;
+				lastPostReloadPendingReason = null;
+				lastPostReloadPendingIntentCreatedAtIso = null;
+				lastPostReloadPendingNotifyAt = 0;
 				const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 					handoffForDispatch,
 					config.handoffFreshMaxAgeMs,
@@ -2218,24 +2246,34 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify("context-watch: post-reload auto resume queued", "info");
 				}
 			} else {
-				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-					"context-watchdog.auto-resume-post-reload-pending",
-					{
-						atIso: autoResumeSnapshot.atIso,
-						reason: autoResumeSnapshot.reason,
-						hint: autoResumeSnapshot.hint,
-						hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
-						queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
-						checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
-						handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
-						handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
-					},
-				);
-				if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
-					ctx.ui.notify(
-						`context-watch: post-reload auto resume pending (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
-						"warning",
+				const shouldEmitPendingSignal = shouldEmitPostReloadPendingSignal({
+					nowMs: now,
+					intentCreatedAtIso: pendingAutoResumeAfterReload.createdAtIso,
+					reason: autoResumeSnapshot.reason,
+				});
+				if (shouldEmitPendingSignal) {
+					(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
+						"context-watchdog.auto-resume-post-reload-pending",
+						{
+							atIso: autoResumeSnapshot.atIso,
+							reason: autoResumeSnapshot.reason,
+							hint: autoResumeSnapshot.hint,
+							hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
+							queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
+							checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
+							handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
+							handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
+						},
 					);
+					if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
+						ctx.ui.notify(
+							`context-watch: post-reload auto resume pending (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
+							"warning",
+						);
+					}
+					lastPostReloadPendingReason = autoResumeSnapshot.reason;
+					lastPostReloadPendingIntentCreatedAtIso = pendingAutoResumeAfterReload.createdAtIso;
+					lastPostReloadPendingNotifyAt = now;
 				}
 			}
 			lastAutoResumeDecision = autoResumeSnapshot;

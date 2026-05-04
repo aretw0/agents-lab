@@ -2116,6 +2116,70 @@ describe("context-watchdog", () => {
 		await runCase({ id: "lane-queue", hasPendingMessages: false, queuedLaneIntents: true });
 	});
 
+	it("dedupes repeated post-reload pending warnings for unchanged checkpoint evidence gaps", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-post-reload-warning-dedupe-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+				tasks: [
+					{ id: "TASK-BUD-749", status: "planned", description: "post-reload checkpoint evidence missing" },
+				],
+			}, null, 2), "utf8");
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: new Date().toISOString(),
+				current_tasks: ["TASK-BUD-749"],
+				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-04T08:00:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-749"],
+					},
+				},
+			}, null, 2), "utf8");
+			const notifications: string[] = [];
+			const handlers = new Map<string, (...args: unknown[]) => unknown>();
+			const pi = {
+				on: vi.fn((event: string, handler: (...args: unknown[]) => unknown) => {
+					handlers.set(event, handler);
+				}),
+				registerTool: vi.fn(),
+				registerCommand: vi.fn(),
+				sendUserMessage: vi.fn(),
+				appendEntry: vi.fn(),
+			} as unknown as Parameters<typeof contextWatchdogExtension>[0];
+			contextWatchdogExtension(pi);
+			const sessionStart = handlers.get("session_start");
+			expect(typeof sessionStart).toBe("function");
+			const runSessionStart = () => (sessionStart as (event: unknown, ctx: unknown) => Promise<void> | void)({}, {
+				cwd,
+				ui: {
+					notify(msg: string) {
+						notifications.push(msg);
+					},
+					setStatus() {},
+				},
+				getContextUsage: () => ({ percent: 10 }),
+				model: { id: "test-model", provider: "test" },
+				isIdle: () => true,
+				hasPendingMessages: () => false,
+				compact() {},
+			} as any);
+
+			await runSessionStart();
+			await runSessionStart();
+
+			const pendingWarnings = notifications.filter((msg) =>
+				msg.includes("context-watch: post-reload auto resume pending (checkpoint-evidence-missing)"),
+			);
+			expect(pendingWarnings).toHaveLength(1);
+			expect((pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.filter(([type]) => type === "context-watchdog.auto-resume-post-reload-pending"))
+				.toHaveLength(1);
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_freshness_status tool returns preload+dirty in one call", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
 		try {
