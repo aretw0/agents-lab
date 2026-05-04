@@ -17020,7 +17020,7 @@
     {
       "id": "TASK-BUD-757",
       "description": "Wave 1 de distribuição em `guardrails-core.ts`: separar wiring de lane-queue/long-run loop em módulo de composição.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-755"
@@ -17036,7 +17036,8 @@
         "Smokes da fila/loop continuam green."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] diminuir confusão entre infra de fila e fluxo nativo de steering/follow-up."
+      "notes": "[rationale:risk-control] diminuir confusão entre infra de fila e fluxo nativo de steering/follow-up.\nSem regressão funcional observada para status/list/add/board-next/pop/evidence do lane-queue; contrato exportado mantido via reexport.",
+      "verification": "VER-BUD-1109"
     },
     {
       "id": "TASK-BUD-758",

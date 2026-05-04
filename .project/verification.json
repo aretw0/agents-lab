@@ -12201,6 +12201,15 @@
       "method": "test",
       "timestamp": "2026-05-04T08:13:10.651Z",
       "evidence": "Wave 1 de distribuição aplicada: formatters de preview/readiness foram extraídos de `packages/pi-stack/extensions/context-watchdog.ts` para `packages/pi-stack/extensions/context-watchdog-continuation.ts`, mantendo API estável via import+re-export no módulo principal. `context-watchdog.ts` reduziu de ~4110 para 4032 linhas. Smoke focal green: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (76 passed)."
+    },
+    {
+      "id": "VER-BUD-1109",
+      "target": "TASK-BUD-757",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T10:57:16.445Z",
+      "evidence": "Wave 1 concluída: wiring do comando `/lane-queue` extraído de `packages/pi-stack/extensions/guardrails-core.ts` para módulo explícito de composição `packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts`, com estado/runtime injetado por deps. Evidência/IO de loop separada em `packages/pi-stack/extensions/guardrails-core-lane-queue-evidence.ts` e reexport preservado em `guardrails-core.ts`. Redução de acoplamento/tamanho: `guardrails-core.ts` 3585 -> 3116 linhas. Smokes green: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` (53 passed)."
     }
   ]
 }
