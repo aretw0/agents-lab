@@ -1,50 +1,50 @@
 {
-  "timestamp": "2026-05-04T07:47:52.071Z",
-  "context": "Wave local-safe concluída: readiness agora espelha cue postReloadResume e retenção do intent pós-reload foi validada para pending-messages/lane-queue.",
+  "timestamp": "2026-05-04T07:56:32.339Z",
+  "context": "Wave local-safe concluída: cue postReloadResume agora cobre status, continuation readiness e one-slice canary preview, com smoke de retenção/dispatch bloqueado.",
   "next_actions": [
-    "rodar /reload para refletir commits recentes de runtime",
+    "rodar /reload para carregar surfaces de runtime recém-commitadas",
     "seed 3 local-safe tasks (seedWhy=bootstrap-focus-missing, seedPriority=continuity-bootstrap)",
-    "re-run autonomy_lane_status"
+    "re-run autonomy_lane_status e seguir loop local-safe"
   ],
   "blockers": [],
   "recent_validation": [
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] cklist.test.ts (75 passed) [truncated:+32 chars]"
+    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/ [snip] cklist.test.ts (76 passed) [truncated:+32 chars]"
   ],
   "recent_commits": [
-    "76eef826",
-    "779c994e"
+    "60be43b4",
+    "a70612c6"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-750",
+    "focus": "TASK-BUD-753",
     "canonical_links": [
-      "task:TASK-BUD-750",
-      "commit:76eef826"
+      "task:TASK-BUD-753",
+      "commit:60be43b4"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T07:47:52.071Z",
-    "level": "ok",
-    "percent": 41,
+    "generatedAtIso": "2026-05-04T07:56:32.339Z",
+    "level": "warn",
+    "percent": 46,
     "action": "continue",
-    "recommendation": "Continuar loop local-safe; protected permanece em gate humano explícito.",
+    "recommendation": "Continuar bounded; abrir protected apenas quando influenceWindow=ready-window e protectedReady=ready.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T07:47:52.071Z",
+      "atIso": "2026-05-04T07:56:32.339Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 41,
+      "level": "warn",
+      "percent": 46,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar loop local-safe; protected permanece em gate humano explícito."
+      "recommendation": "Continuar bounded; abrir protected apenas quando influenceWindow=ready-window e protectedReady=ready."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-750"
+    "TASK-BUD-753"
   ]
 }
