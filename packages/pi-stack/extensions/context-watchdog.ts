@@ -100,8 +100,10 @@ export {
 	type TurnBoundaryReasonCode,
 } from "./context-watchdog-continuation";
 import {
+	buildAutoResumeDecisionSnapshot,
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	composeAutoResumeSuppressionHint as composeAutoResumeSuppressionHintFromResume,
 	resolvePostReloadPendingNotifyDecision,
 	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
@@ -109,6 +111,7 @@ import {
 	resolvePreCompactReloadSignal,
 	shouldEmitAutoResumeAfterCompact,
 	shouldRefreshHandoffBeforeAutoCompact,
+	type AutoResumeDecisionSnapshot,
 	type AutoResumeDispatchReason,
 	type HandoffPrepReason,
 	type PostReloadPendingNotifyMemory,
@@ -1152,12 +1155,7 @@ export function composeAutoResumeSuppressionHint(input: {
 	timeoutPressureCount?: number;
 	timeoutPressureThreshold?: number;
 }): string | undefined {
-	const baseHint = describeAutoResumeDispatchHint(input.reason);
-	if (input.timeoutPressureActive !== true) return baseHint;
-	const count = Math.max(0, Math.floor(Number(input.timeoutPressureCount ?? 0)));
-	const threshold = Math.max(1, Math.floor(Number(input.timeoutPressureThreshold ?? 2)));
-	const timeoutHint = `provider timeout pressure observed (${count}/${threshold})`;
-	return baseHint ? `${baseHint}; ${timeoutHint}` : timeoutHint;
+	return composeAutoResumeSuppressionHintFromResume(input);
 }
 
 function buildContextWatchOperatorBrief(input: {
@@ -1946,24 +1944,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let lastAutoCheckpointAt = 0;
 	let lastAutoCompactAt = 0;
 	let lastAutoResumeAt = 0;
-	let lastAutoResumeDecision: {
-		atIso: string;
-		reason: AutoResumeDispatchReason;
-		hint?: string;
-		dispatched: boolean;
-		reloadRequired: boolean;
-		checkpointEvidenceReady: boolean;
-		handoffBoardReconciled: boolean;
-		handoffBoardReconciliationSummary: string;
-		hasPendingMessages: boolean;
-		hasRecentSteerInput: boolean;
-		queuedLaneIntents: number;
-		timeoutPressureActive?: boolean;
-		timeoutPressureCount?: number;
-		timeoutPressureThreshold?: number;
-		timeoutPressureHint?: string;
+	let lastAutoResumeDecision: (AutoResumeDecisionSnapshot & {
 		promptDiagnostics?: AutoResumePromptDiagnostics;
-	} | null = null;
+	}) | null = null;
 	let postReloadPendingNotifyMemory: PostReloadPendingNotifyMemory = {};
 	let lastSteeringSignal: {
 		atIso: string;
@@ -2175,16 +2158,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				hasRecentSteerInput: false,
 				queuedLaneIntents,
 			});
-			const autoResumeSnapshot = {
-				atIso: new Date(now).toISOString(),
-				reason: autoResumeDecision.reason,
-				hint: composeAutoResumeSuppressionHint({
-					reason: autoResumeDecision.reason,
-					timeoutPressureActive: timeoutPressure.active,
-					timeoutPressureCount: timeoutPressure.count,
-					timeoutPressureThreshold: timeoutPressure.threshold,
-				}),
-				dispatched: autoResumeDecision.shouldDispatch,
+			const autoResumeSnapshot = buildAutoResumeDecisionSnapshot({
+				nowMs: now,
+				decision: autoResumeDecision,
 				reloadRequired: false,
 				checkpointEvidenceReady,
 				handoffBoardReconciled: handoffBoardReconciliation.ok,
@@ -2195,10 +2171,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				timeoutPressureActive: timeoutPressure.active,
 				timeoutPressureCount: timeoutPressure.count,
 				timeoutPressureThreshold: timeoutPressure.threshold,
-				timeoutPressureHint: timeoutPressure.active
-					? `provider timeout pressure observed (${timeoutPressure.count}/${timeoutPressure.threshold})`
-					: undefined,
-			} satisfies NonNullable<typeof lastAutoResumeDecision>;
+			});
 			if (autoResumeDecision.shouldDispatch) {
 				lastAutoResumeAt = now;
 				postReloadPendingNotifyMemory = {};
@@ -2574,33 +2547,11 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						hasRecentSteerInput,
 						queuedLaneIntents,
 					});
-					const autoResumeSnapshot: {
-						atIso: string;
-						reason: AutoResumeDispatchReason;
-						hint?: string;
-						dispatched: boolean;
-						reloadRequired: boolean;
-						checkpointEvidenceReady: boolean;
-						handoffBoardReconciled: boolean;
-						handoffBoardReconciliationSummary: string;
-						hasPendingMessages: boolean;
-						hasRecentSteerInput: boolean;
-						queuedLaneIntents: number;
-						timeoutPressureActive: boolean;
-						timeoutPressureCount: number;
-						timeoutPressureThreshold: number;
-						timeoutPressureHint?: string;
+					const autoResumeSnapshot: AutoResumeDecisionSnapshot & {
 						promptDiagnostics?: AutoResumePromptDiagnostics;
-					} = {
-						atIso: new Date(nowAfterCompact).toISOString(),
-						reason: autoResumeDecision.reason,
-						hint: composeAutoResumeSuppressionHint({
-							reason: autoResumeDecision.reason,
-							timeoutPressureActive: timeoutPressureAfterCompact.active,
-							timeoutPressureCount: timeoutPressureAfterCompact.count,
-							timeoutPressureThreshold: timeoutPressureAfterCompact.threshold,
-						}),
-						dispatched: autoResumeDecision.shouldDispatch,
+					} = buildAutoResumeDecisionSnapshot({
+						nowMs: nowAfterCompact,
+						decision: autoResumeDecision,
 						reloadRequired,
 						checkpointEvidenceReady,
 						handoffBoardReconciled: handoffBoardReconciliation.ok,
@@ -2611,10 +2562,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 						timeoutPressureActive: timeoutPressureAfterCompact.active,
 						timeoutPressureCount: timeoutPressureAfterCompact.count,
 						timeoutPressureThreshold: timeoutPressureAfterCompact.threshold,
-						timeoutPressureHint: timeoutPressureAfterCompact.active
-							? `provider timeout pressure observed (${timeoutPressureAfterCompact.count}/${timeoutPressureAfterCompact.threshold})`
-							: undefined,
-					};
+					});
 					if (autoResumeDecision.shouldDispatch) {
 						lastAutoResumeAt = nowAfterCompact;
 						handoffAfterCompact = clearAutoResumeAfterReloadIntent(handoffAfterCompact);

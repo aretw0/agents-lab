@@ -85,6 +85,81 @@ export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReas
 	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence";
 }
 
+export function composeAutoResumeSuppressionHint(input: {
+	reason: AutoResumeDispatchReason;
+	timeoutPressureActive?: boolean;
+	timeoutPressureCount?: number;
+	timeoutPressureThreshold?: number;
+}): string | undefined {
+	const baseHint = describeAutoResumeDispatchHint(input.reason);
+	if (input.timeoutPressureActive !== true) return baseHint;
+	const count = Math.max(0, Math.floor(Number(input.timeoutPressureCount ?? 0)));
+	const threshold = Math.max(1, Math.floor(Number(input.timeoutPressureThreshold ?? 2)));
+	const timeoutHint = `provider timeout pressure observed (${count}/${threshold})`;
+	return baseHint ? `${baseHint}; ${timeoutHint}` : timeoutHint;
+}
+
+export type AutoResumeDecisionSnapshot = {
+	atIso: string;
+	reason: AutoResumeDispatchReason;
+	hint?: string;
+	dispatched: boolean;
+	reloadRequired: boolean;
+	checkpointEvidenceReady: boolean;
+	handoffBoardReconciled: boolean;
+	handoffBoardReconciliationSummary: string;
+	hasPendingMessages: boolean;
+	hasRecentSteerInput: boolean;
+	queuedLaneIntents: number;
+	timeoutPressureActive: boolean;
+	timeoutPressureCount: number;
+	timeoutPressureThreshold: number;
+	timeoutPressureHint?: string;
+};
+
+export function buildAutoResumeDecisionSnapshot(input: {
+	nowMs: number;
+	decision: { shouldDispatch: boolean; reason: AutoResumeDispatchReason };
+	reloadRequired: boolean;
+	checkpointEvidenceReady: boolean;
+	handoffBoardReconciled: boolean;
+	handoffBoardReconciliationSummary: string;
+	hasPendingMessages: boolean;
+	hasRecentSteerInput: boolean;
+	queuedLaneIntents: number;
+	timeoutPressureActive?: boolean;
+	timeoutPressureCount?: number;
+	timeoutPressureThreshold?: number;
+}): AutoResumeDecisionSnapshot {
+	const timeoutPressureActive = input.timeoutPressureActive === true;
+	const timeoutPressureCount = Math.max(0, Math.floor(Number(input.timeoutPressureCount ?? 0)));
+	const timeoutPressureThreshold = Math.max(1, Math.floor(Number(input.timeoutPressureThreshold ?? 2)));
+	return {
+		atIso: new Date(input.nowMs).toISOString(),
+		reason: input.decision.reason,
+		hint: composeAutoResumeSuppressionHint({
+			reason: input.decision.reason,
+			timeoutPressureActive,
+			timeoutPressureCount,
+			timeoutPressureThreshold,
+		}),
+		dispatched: input.decision.shouldDispatch,
+		reloadRequired: input.reloadRequired,
+		checkpointEvidenceReady: input.checkpointEvidenceReady,
+		handoffBoardReconciled: input.handoffBoardReconciled,
+		handoffBoardReconciliationSummary: input.handoffBoardReconciliationSummary,
+		hasPendingMessages: input.hasPendingMessages,
+		hasRecentSteerInput: input.hasRecentSteerInput,
+		queuedLaneIntents: input.queuedLaneIntents,
+		timeoutPressureActive,
+		timeoutPressureCount,
+		timeoutPressureThreshold,
+		timeoutPressureHint: timeoutPressureActive
+			? `provider timeout pressure observed (${timeoutPressureCount}/${timeoutPressureThreshold})`
+			: undefined,
+	};
+}
+
 export type PostReloadPendingNotifyMemory = {
 	reason?: AutoResumeDispatchReason;
 	intentCreatedAtIso?: string;
