@@ -929,9 +929,16 @@ describe("autonomy lane surface", () => {
     expect(selection?.reason).toBe("no-eligible-tasks");
     expect(selection?.recommendationCode).toBe("local-stop-protected-focus-required");
     expect(result?.details.recommendationCode).toBe("local-stop-protected-focus-required");
-    const pauseBrief = (result?.details.operatorPauseBrief as { recommendation?: string; options?: Array<{ option?: string }> } | undefined);
+    const pauseBrief = (result?.details.operatorPauseBrief as {
+      recommendation?: string;
+      options?: Array<{ option?: string }>;
+      seedingCue?: { seedCount?: number; seedWhy?: string; seedPriority?: string };
+    } | undefined);
     expect(pauseBrief?.recommendation).toBe("seed-local-safe");
     expect((pauseBrief?.options ?? []).map((row) => row.option)).toContain("choose-protected-focus");
+    expect(pauseBrief?.seedingCue?.seedCount).toBe(3);
+    expect(pauseBrief?.seedingCue?.seedWhy).toBe("readiness-blocked");
+    expect(pauseBrief?.seedingCue?.seedPriority).toBe("blocked-readiness");
     const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string; humanActionRequired?: boolean } | undefined);
     expect(seedingGuidance?.decision).toBe("blocked");
     expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
@@ -1003,6 +1010,7 @@ describe("autonomy lane surface", () => {
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-LOCAL-A");
     expect((result?.details.readyQueue as { taskIds?: string[] } | undefined)?.taskIds).toEqual(["TASK-LOCAL-A", "TASK-LOCAL-B"]);
     expect((result?.details.seedingGuidance as unknown) ?? undefined).toBeUndefined();
+    expect(((result?.details.operatorPauseBrief as { seedingCue?: unknown } | undefined)?.seedingCue) ?? undefined).toBeUndefined();
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("code=execute-bounded-slice");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("next=TASK-LOCAL-A");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).not.toContain("seedCount=");

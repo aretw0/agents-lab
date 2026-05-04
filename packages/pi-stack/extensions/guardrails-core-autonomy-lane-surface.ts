@@ -64,6 +64,11 @@ type AutonomyOperatorPauseBrief = {
   whyPaused: string;
   nextTaskId?: string;
   nextTaskMnemonic?: string;
+  seedingCue?: {
+    seedCount: number;
+    seedWhy: string;
+    seedPriority: string;
+  };
   options: AutonomyOperatorPauseOption[];
   recommendation: string;
 };
@@ -282,9 +287,23 @@ function buildAutonomyOperatorPauseBrief(input: {
   selectionRecommendation: string;
   includeProtectedScopes: boolean;
   handoffFreshness: HandoffFreshnessLabel;
+  seedingGuidance?: {
+    suggestedSeedCount?: number;
+    seedWhy?: string;
+    seedPriority?: string;
+  };
   nextTaskId?: string;
   nextTaskMnemonic?: string;
 }): AutonomyOperatorPauseBrief {
+  const seedingCue = input.seedingGuidance
+    ? {
+      seedCount: Number.isFinite(input.seedingGuidance.suggestedSeedCount)
+        ? Math.max(1, Math.floor(Number(input.seedingGuidance.suggestedSeedCount)))
+        : 1,
+      seedWhy: input.seedingGuidance.seedWhy ?? "unknown",
+      seedPriority: input.seedingGuidance.seedPriority ?? "unknown",
+    }
+    : undefined;
   if (input.selectionReady) {
     return {
       whyPaused: "No pause gate: bounded local-safe task is ready.",
@@ -302,6 +321,7 @@ function buildAutonomyOperatorPauseBrief(input: {
     if (input.handoffFreshness === "stale") {
       return {
         whyPaused: "No eligible local-safe tasks remain and handoff is stale.",
+        seedingCue,
         options: [
           { option: "refresh-handoff", impact: "Write fresh checkpoint evidence before reseeding/continuing." },
           { option: "seed-local-safe", impact: "Create 1-3 bounded local-safe tasks after handoff refresh." },
@@ -312,6 +332,7 @@ function buildAutonomyOperatorPauseBrief(input: {
 
     return {
       whyPaused: "No eligible local-safe tasks remain in current selection policy.",
+      seedingCue,
       options: [
         { option: "seed-local-safe", impact: "Create 1-3 bounded local-safe tasks and resume chaining." },
         { option: "choose-protected-focus", impact: "Explicitly opt-in protected scope for the next slice." },
@@ -1136,15 +1157,6 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       const nextTask = selection.nextTaskId ? findTaskById(tasks, selection.nextTaskId) : undefined;
       const nextTaskMnemonic = toTaskMnemonic(nextTask);
       const handoffFreshness = readHandoffFreshnessSignal(ctx.cwd);
-      const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
-        selectionReady: selection.ready,
-        selectionReason: selection.reason,
-        selectionRecommendation: selection.recommendation,
-        includeProtectedScopes,
-        handoffFreshness: handoffFreshness.label,
-        nextTaskId: selection.nextTaskId,
-        nextTaskMnemonic,
-      });
       const plan = evaluateAutonomyLaneReadiness(buildReadinessInput(p, {
         // Board surface is readable here; selection.ready=false means lane policy stop, not board failure.
         ready: true,
@@ -1177,6 +1189,16 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           };
         })()
         : undefined;
+      const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
+        selectionReady: selection.ready,
+        selectionReason: selection.reason,
+        selectionRecommendation: selection.recommendation,
+        includeProtectedScopes,
+        handoffFreshness: handoffFreshness.label,
+        seedingGuidance,
+        nextTaskId: selection.nextTaskId,
+        nextTaskMnemonic,
+      });
       const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label, seedingGuidance);
       const statusSummary = [
         "autonomy-lane-status:",

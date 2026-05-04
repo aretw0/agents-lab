@@ -16435,6 +16435,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reforça leitura operacional mínima antes de semeadura local-safe.\nDoutrina mantém leitura anti-bloat com quantidade de seed explícita.",
       "verification": "VER-BUD-1075"
+    },
+    {
+      "id": "TASK-BUD-724",
+      "description": "Adicionar cue de seeding no `operatorPauseBrief` em `no-eligible-tasks` (seedCount/seedWhy/seedPriority) para decisão imediata.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`operatorPauseBrief` inclui `seedingCue` quando `seedingGuidance` existir no status.",
+        "`seedingCue` traz `seedCount`, `seedWhy`, `seedPriority` em formato curto e estável.",
+        "Sem alterar autorização/dispatch; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seed bootstrap precisa de motivo/prioridade/quantidade visíveis também no brief de pausa para reduzir erro de decisão.\nBrief de pausa ganhou cue direto de seeding para decisão imediata com contexto completo.",
+      "verification": "VER-BUD-1076"
+    },
+    {
+      "id": "TASK-BUD-725",
+      "description": "Adicionar smoke para `operatorPauseBrief.seedingCue` no cenário `no-eligible-tasks` com `seed-now`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-724"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida presença de `seedingCue` com `seedCount=3`, `seedWhy=bootstrap-focus-missing`, `seedPriority=continuity-bootstrap`.",
+        "Smoke valida ausência de `seedingCue` quando queue local-safe já está pronta.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] cobertura evita regressão do brief de pausa para estado genérico sem contexto de seeding.\nCobertura protege o pause brief contextual sem vazar cue de seeding em estado ready.",
+      "verification": "VER-BUD-1077"
+    },
+    {
+      "id": "TASK-BUD-726",
+      "description": "Sincronizar doutrina curta: usar `operatorPauseBrief.seedingCue` para decidir seed local-safe sem abrir payload completo.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-724"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc menciona cue curto no pause brief (`seedCount/seedWhy/seedPriority`).",
+        "Mantém texto anti-bloat e policy de autorização inalterada.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz latência operacional na virada no-eligible -> seed-local-safe.\nRunbook mantém anti-bloat com cue mínimo e acionável no pause brief.",
+      "verification": "VER-BUD-1078"
     }
   ]
 }

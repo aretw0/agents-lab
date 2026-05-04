@@ -11904,6 +11904,33 @@
       "method": "test",
       "timestamp": "2026-05-04T02:21:54.532Z",
       "evidence": "`docs/guides/control-plane-operating-doctrine.md` sincronizado: cue compacto do summary agora inclui `seedCount` junto de `seedWhy/seedPriority`, e fechamento de seeding registra os três sinais. Doc checklist permaneceu green no mesmo gate (39 passed)."
+    },
+    {
+      "id": "VER-BUD-1076",
+      "target": "TASK-BUD-724",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:35:29.593Z",
+      "evidence": "`operatorPauseBrief` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora inclui `seedingCue` (`seedCount`, `seedWhy`, `seedPriority`) no caminho `no-eligible-tasks`, reutilizando sinais de `seedingGuidance` sem alterar contratos de autorização/dispatch."
+    },
+    {
+      "id": "VER-BUD-1077",
+      "target": "TASK-BUD-725",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:35:46.434Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` validada: `operatorPauseBrief.seedingCue` presente no cenário `no-eligible` (`seedCount=3`, `seedWhy=readiness-blocked`, `seedPriority=blocked-readiness`) e ausente quando fila local-safe já está pronta. Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (37 passed)."
+    },
+    {
+      "id": "VER-BUD-1078",
+      "target": "TASK-BUD-726",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T02:36:03.147Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, `operatorPauseBrief` deve carregar `seedingCue (seedCount/seedWhy/seedPriority)` para decisão rápida; em stale mantém precedência de `refresh-handoff`. Gate combinado: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (39 passed)."
     }
   ]
 }
