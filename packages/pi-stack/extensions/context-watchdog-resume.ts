@@ -85,6 +85,57 @@ export function shouldNotifyAutoResumeSuppression(reason: AutoResumeDispatchReas
 	return reason === "reload-required" || reason === "checkpoint-evidence-missing" || reason === "board-handoff-divergence";
 }
 
+export type PostReloadPendingNotifyMemory = {
+	reason?: AutoResumeDispatchReason;
+	intentCreatedAtIso?: string;
+	lastNotifyAtMs?: number;
+};
+
+export function resolvePostReloadPendingNotifyDecision(input: {
+	nowMs: number;
+	intentCreatedAtIso: string;
+	reason: AutoResumeDispatchReason;
+	previous?: PostReloadPendingNotifyMemory;
+	cooldownMs: number;
+	minCooldownMs?: number;
+}): {
+	shouldEmit: boolean;
+	notifyCooldownMs: number;
+	reasonChanged: boolean;
+	intentChanged: boolean;
+	next: PostReloadPendingNotifyMemory;
+} {
+	const previousReason = input.previous?.reason;
+	const previousIntentCreatedAtIso = input.previous?.intentCreatedAtIso;
+	const previousNotifyAt = Math.max(0, Math.floor(Number(input.previous?.lastNotifyAtMs ?? 0)));
+	const intentChanged = input.intentCreatedAtIso !== previousIntentCreatedAtIso;
+	const reasonChanged = input.reason !== previousReason;
+	const notifyCooldownMs = Math.max(
+		Math.max(1_000, Math.floor(Number(input.cooldownMs ?? 60_000))),
+		Math.max(1_000, Math.floor(Number(input.minCooldownMs ?? 0))),
+	);
+	const cooldownElapsed = previousNotifyAt <= 0 || (Math.floor(Number(input.nowMs ?? 0)) - previousNotifyAt) >= notifyCooldownMs;
+	const shouldEmit = intentChanged || reasonChanged || cooldownElapsed;
+	const next: PostReloadPendingNotifyMemory = shouldEmit
+		? {
+			reason: input.reason,
+			intentCreatedAtIso: input.intentCreatedAtIso,
+			lastNotifyAtMs: Math.floor(Number(input.nowMs ?? 0)),
+		}
+		: {
+			reason: previousReason ?? input.reason,
+			intentCreatedAtIso: previousIntentCreatedAtIso ?? input.intentCreatedAtIso,
+			lastNotifyAtMs: previousNotifyAt,
+		};
+	return {
+		shouldEmit,
+		notifyCooldownMs,
+		reasonChanged,
+		intentChanged,
+		next,
+	};
+}
+
 export function resolvePreCompactReloadSignal(input: {
 	assessmentLevel: ContextWatchdogLevel;
 	reloadRequired?: boolean;

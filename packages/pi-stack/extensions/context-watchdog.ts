@@ -102,6 +102,7 @@ export {
 import {
 	describeAutoResumeDispatchReason,
 	describeAutoResumeDispatchHint,
+	resolvePostReloadPendingNotifyDecision,
 	shouldNotifyAutoResumeSuppression,
 	resolveAutoResumeDispatchDecision,
 	resolveHandoffPrepDecision,
@@ -110,6 +111,7 @@ import {
 	shouldRefreshHandoffBeforeAutoCompact,
 	type AutoResumeDispatchReason,
 	type HandoffPrepReason,
+	type PostReloadPendingNotifyMemory,
 	type PreCompactReloadSignal,
 } from "./context-watchdog-resume";
 import {
@@ -1962,9 +1964,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		timeoutPressureHint?: string;
 		promptDiagnostics?: AutoResumePromptDiagnostics;
 	} | null = null;
-	let lastPostReloadPendingReason: AutoResumeDispatchReason | null = null;
-	let lastPostReloadPendingIntentCreatedAtIso: string | null = null;
-	let lastPostReloadPendingNotifyAt = 0;
+	let postReloadPendingNotifyMemory: PostReloadPendingNotifyMemory = {};
 	let lastSteeringSignal: {
 		atIso: string;
 		reason: ContextWatchHandoffReason;
@@ -2101,22 +2101,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		return { matched: true, state: readTimeoutPressureState(nowMs) };
 	};
 
-	const shouldEmitPostReloadPendingSignal = (input: {
-		nowMs: number;
-		intentCreatedAtIso: string;
-		reason: AutoResumeDispatchReason;
-	}): boolean => {
-		const intentChanged = input.intentCreatedAtIso !== lastPostReloadPendingIntentCreatedAtIso;
-		const reasonChanged = input.reason !== lastPostReloadPendingReason;
-		if (intentChanged || reasonChanged) return true;
-		const notifyCooldownMs = Math.max(
-			POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
-			Math.max(1_000, Math.floor(Number(config.cooldownMs ?? 60_000))),
-		);
-		if (lastPostReloadPendingNotifyAt <= 0) return true;
-		return (input.nowMs - lastPostReloadPendingNotifyAt) >= notifyCooldownMs;
-	};
-
 	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
 		if (!config.enabled) {
 			ctx.ui.setStatus?.("context-watch", "[ctx] disabled");
@@ -2140,9 +2124,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const handoffForPostReloadResume = readHandoffJson(ctx.cwd);
 		const pendingAutoResumeAfterReload = readAutoResumeAfterReloadIntent(handoffForPostReloadResume);
 		if (!pendingAutoResumeAfterReload) {
-			lastPostReloadPendingReason = null;
-			lastPostReloadPendingIntentCreatedAtIso = null;
-			lastPostReloadPendingNotifyAt = 0;
+			postReloadPendingNotifyMemory = {};
 		}
 		if (pendingAutoResumeAfterReload && !reloadRequiredAtRunStart) {
 			const hasPendingMessages = ctx.hasPendingMessages();
@@ -2219,9 +2201,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			} satisfies NonNullable<typeof lastAutoResumeDecision>;
 			if (autoResumeDecision.shouldDispatch) {
 				lastAutoResumeAt = now;
-				lastPostReloadPendingReason = null;
-				lastPostReloadPendingIntentCreatedAtIso = null;
-				lastPostReloadPendingNotifyAt = 0;
+				postReloadPendingNotifyMemory = {};
 				const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
 					handoffForDispatch,
 					config.handoffFreshMaxAgeMs,
@@ -2246,12 +2226,15 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					ctx.ui.notify("context-watch: post-reload auto resume queued", "info");
 				}
 			} else {
-				const shouldEmitPendingSignal = shouldEmitPostReloadPendingSignal({
+				const pendingNotifyDecision = resolvePostReloadPendingNotifyDecision({
 					nowMs: now,
 					intentCreatedAtIso: pendingAutoResumeAfterReload.createdAtIso,
 					reason: autoResumeSnapshot.reason,
+					previous: postReloadPendingNotifyMemory,
+					cooldownMs: config.cooldownMs,
+					minCooldownMs: POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
 				});
-				if (shouldEmitPendingSignal) {
+				if (pendingNotifyDecision.shouldEmit) {
 					(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
 						"context-watchdog.auto-resume-post-reload-pending",
 						{
@@ -2271,9 +2254,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							"warning",
 						);
 					}
-					lastPostReloadPendingReason = autoResumeSnapshot.reason;
-					lastPostReloadPendingIntentCreatedAtIso = pendingAutoResumeAfterReload.createdAtIso;
-					lastPostReloadPendingNotifyAt = now;
+					postReloadPendingNotifyMemory = pendingNotifyDecision.next;
 				}
 			}
 			lastAutoResumeDecision = autoResumeSnapshot;
