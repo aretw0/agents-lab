@@ -33,7 +33,7 @@ Compor os resultados de calibração de background process e agents-as-tools em 
 
 O packet aplica o mesmo padrão de inferência bounded de background capabilities quando `has_*` não é informado, respeita overrides explícitos quando fornecidos e mantém `keep-report-only` enquanto o sinal de `background_process_rehearsal_gate` não estiver em `decision=ready`.
 
-Para promoção de `simple-delegate` sem abrir dispatch, use `simple_delegate_rehearsal_packet`: ele compõe capability + mix + auto-advance telemetry em decisão `ready|needs-evidence|blocked`, também com `authorization=none`, `dispatchAllowed=false` e `mutationAllowed=false`.
+Para promoção de `simple-delegate` sem abrir dispatch, use `delegation_readiness_status_packet` como cue primário: o packet agora expõe `operationalRunway` (delegação + background) com recomendação `local-execute|simple-delegate|defer` e blockers normalizados. Em seguida confirme no `simple_delegate_rehearsal_packet`, que compõe capability + mix + auto-advance telemetry em decisão `ready|needs-evidence|blocked`, também com `authorization=none`, `dispatchAllowed=false` e `mutationAllowed=false`.
 
 Regra pragmática de long run AFK: antes de promover rehearsal, garantir **material** no board (via `lane_brainstorm_packet` + `lane_brainstorm_seed_preview` + decisão humana de semeadura). Sem material local-safe suficiente, a recomendação correta é continuar em triagem/limpeza/pesquisa bounded.
 

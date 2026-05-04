@@ -506,6 +506,69 @@ describe("ops calibration decision packet", () => {
       expect(result.details.recommendationCode).toBe("delegation-readiness-ready-simple-delegate");
       expect(String(result.details.nextAction)).toContain("simple_delegate_rehearsal_start_packet");
       expect(String(result.details.summary)).toContain("delegation-readiness-status:");
+      expect(result.details.operationalRunway.recommendedOption).toBe("local-execute");
+      expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-local-execute");
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("delegation_readiness_status_packet promotes operational runway to simple-delegate when background evidence is ready", async () => {
+    const cwd = mkdtempSync(join(tmpdir(), "pi-delegation-readiness-runway-ready-"));
+    try {
+      const tools: any[] = [
+        { name: "delegation_lane_capability_snapshot", description: "read-only capability" },
+        { name: "delegation_mix_score", description: "read-only mix score" },
+        { name: "auto_advance_hard_intent_telemetry", description: "read-only telemetry" },
+        { name: "background_process_plan", description: "read-only plan" },
+        { name: "background_process_lifecycle_plan", description: "read-only lifecycle" },
+      ];
+
+      const pi = {
+        registerTool: vi.fn((tool) => tools.push(tool)),
+        getAllTools: vi.fn(() => tools),
+      } as unknown as Parameters<typeof registerGuardrailsOpsCalibrationSurface>[0];
+
+      registerGuardrailsOpsCalibrationSurface(pi);
+      const tool = tools.find((row) => row?.name === "delegation_readiness_status_packet");
+
+      const result = await tool.execute(
+        "tc-delegation-readiness-runway-ready",
+        {
+          capability_decision: "ready",
+          mix_decision: "ready",
+          mix_score: 85,
+          mix_simple_delegate_events: 3,
+          mix_swarm_events: 2,
+          auto_advance_decision: "eligible",
+          telemetry_decision: "ready",
+          telemetry_score: 80,
+          telemetry_blocked_rate_pct: 10,
+          background_requested_port: 4455,
+          background_healthcheck_known: true,
+          background_has_process_registry: true,
+          background_has_port_lease_lock: true,
+          background_has_bounded_log_tail: true,
+          background_has_structured_stacktrace_capture: true,
+          background_has_healthcheck_probe: true,
+          background_has_graceful_stop_then_kill: true,
+          background_has_reload_handoff_cleanup: true,
+          background_has_plan_surface: true,
+          background_has_lifecycle_surface: true,
+          background_rehearsal_slices: 3,
+          background_stop_source_coverage_pct: 100,
+          background_lifecycle_classified: true,
+          background_rollback_plan_known: true,
+          background_unresolved_blockers: 0,
+        },
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details.operationalRunway.recommendedOption).toBe("simple-delegate");
+      expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-simple-delegate");
+      expect(result.details.operationalRunway.decision.background).toBe("ready-window");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -553,6 +616,8 @@ describe("ops calibration decision packet", () => {
       expect(result.details.blockers).toContain("subagents-not-ready");
       expect(String(result.details.summary)).toContain("decision=defer");
       expect(String(result.details.summary)).toContain("authorization=none");
+      expect(result.details.operationalRunway.recommendedOption).toBe("defer");
+      expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-defer-blocked");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

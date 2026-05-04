@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildBackgroundProcessReadinessScore } from "./guardrails-core-background-process";
+import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
 import {
   buildDelegateOrExecuteDecisionPacket,
@@ -316,6 +316,131 @@ function buildDelegationReadinessStatus(input: {
     nextAction: "resolve blockers and rerun readiness packets before delegation attempt.",
     blockers,
     summary,
+  };
+}
+
+type OperationalRunwayRecommendedOption = "local-execute" | "simple-delegate" | "defer";
+type OperationalRunwayRecommendationCode =
+  | "operational-runway-simple-delegate"
+  | "operational-runway-local-execute"
+  | "operational-runway-defer-blocked";
+type OperationalBackgroundDecision = "ready-window" | "needs-evidence" | "blocked";
+
+function resolveOperationalBackgroundDecision(input: {
+  planDecision: string;
+  rehearsalDecision: "ready" | "needs-evidence" | "blocked";
+}): OperationalBackgroundDecision {
+  if (input.planDecision === "blocked" || input.rehearsalDecision === "blocked") return "blocked";
+  if (input.planDecision === "ready-for-design" && input.rehearsalDecision === "ready") return "ready-window";
+  return "needs-evidence";
+}
+
+function buildOperationalRunwayPacket(input: {
+  delegation: {
+    decision: DelegationReadinessDecision;
+    recommendationCode: DelegationReadinessCode;
+    blockers: string[];
+  };
+  background: {
+    planDecision: string;
+    rehearsalDecision: "ready" | "needs-evidence" | "blocked";
+    planBlockers: string[];
+    rehearsalBlockers: string[];
+  };
+}): {
+  recommendedOption: OperationalRunwayRecommendedOption;
+  recommendationCode: OperationalRunwayRecommendationCode;
+  recommendation: string;
+  nextAction: string;
+  blockers: string[];
+  normalizedBlockers: string[];
+  summary: string;
+  decision: {
+    delegation: DelegationReadinessDecision;
+    background: OperationalBackgroundDecision;
+  };
+} {
+  const backgroundDecision = resolveOperationalBackgroundDecision({
+    planDecision: input.background.planDecision,
+    rehearsalDecision: input.background.rehearsalDecision,
+  });
+
+  const normalizedBlockers = [...new Set([
+    ...input.delegation.blockers,
+    ...input.background.planBlockers,
+    ...input.background.rehearsalBlockers,
+  ].filter((row) => typeof row === "string" && row.trim().length > 0))];
+
+  if (input.delegation.decision === "defer" || backgroundDecision === "blocked") {
+    const summary = [
+      "operational-runway-packet:",
+      "option=defer",
+      "code=operational-runway-defer-blocked",
+      `delegation=${input.delegation.decision}`,
+      `background=${backgroundDecision}`,
+      normalizedBlockers.length > 0 ? `blockers=${normalizedBlockers.join("|")}` : undefined,
+      "authorization=none",
+    ].filter(Boolean).join(" ");
+    return {
+      recommendedOption: "defer",
+      recommendationCode: "operational-runway-defer-blocked",
+      recommendation: "runway blocked; resolve hard blockers before attempting scale promotion.",
+      nextAction: "resolve normalized blockers and rerun delegation/background packets.",
+      blockers: normalizedBlockers,
+      normalizedBlockers,
+      summary,
+      decision: {
+        delegation: input.delegation.decision,
+        background: backgroundDecision,
+      },
+    };
+  }
+
+  if (input.delegation.decision === "ready-simple-delegate" && backgroundDecision === "ready-window") {
+    const summary = [
+      "operational-runway-packet:",
+      "option=simple-delegate",
+      "code=operational-runway-simple-delegate",
+      `delegation=${input.delegation.decision}`,
+      `background=${backgroundDecision}`,
+      "authorization=none",
+    ].join(" ");
+    return {
+      recommendedOption: "simple-delegate",
+      recommendationCode: "operational-runway-simple-delegate",
+      recommendation: "delegation and background runway are mature; run bounded simple-delegate canary under explicit human start/defer decision.",
+      nextAction: "run simple_delegate_rehearsal_start_packet, then choose explicit start/defer; keep background packet as corroborating evidence.",
+      blockers: normalizedBlockers,
+      normalizedBlockers,
+      summary,
+      decision: {
+        delegation: input.delegation.decision,
+        background: backgroundDecision,
+      },
+    };
+  }
+
+  const summary = [
+    "operational-runway-packet:",
+    "option=local-execute",
+    "code=operational-runway-local-execute",
+    `delegation=${input.delegation.decision}`,
+    `background=${backgroundDecision}`,
+    normalizedBlockers.length > 0 ? `blockers=${normalizedBlockers.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+  return {
+    recommendedOption: "local-execute",
+    recommendationCode: "operational-runway-local-execute",
+    recommendation: "runway still needs evidence; continue local execution slices while collecting delegation/background readiness signals.",
+    nextAction: "execute one bounded local-safe slice, then refresh delegation_readiness_status_packet and background_process_readiness_packet.",
+    blockers: normalizedBlockers,
+    normalizedBlockers,
+    summary,
+    decision: {
+      delegation: input.delegation.decision,
+      background: backgroundDecision,
+    },
   };
 }
 
@@ -660,7 +785,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
   pi.registerTool({
     name: "delegation_readiness_status_packet",
     label: "Delegation Readiness Status Packet",
-    description: "Report-only unified status for local-execute vs simple-delegate readiness (capability + mix + auto-advance + telemetry). Never dispatches execution.",
+    description: "Report-only unified runway status composing delegation + background readiness with explicit options local-execute | simple-delegate | defer. Never dispatches execution.",
     parameters: Type.Object({
       lookback_hours: Type.Optional(Type.Number({ description: "How many hours back to scan local session evidence. Default: 24." })),
       preload_decision: Type.Optional(Type.String({ description: "use-pack | fallback-canonical" })),
@@ -681,6 +806,32 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
       telemetry_decision: Type.Optional(Type.String({ description: "Override telemetry decision: ready | needs-evidence" })),
       telemetry_score: Type.Optional(Type.Number({ description: "Override telemetry score (0..100)." })),
       telemetry_blocked_rate_pct: Type.Optional(Type.Number({ description: "Override telemetry blocked rate pct (0..100)." })),
+      background_kind: Type.Optional(Type.String({ description: "Override background kind (frontend | backend | test-server | worker | generic)." })),
+      background_requested_mode: Type.Optional(Type.String({ description: "Override background mode (auto | shared-service | isolated-worker)." })),
+      background_needs_server: Type.Optional(Type.Boolean({ description: "Override background server requirement." })),
+      background_requested_port: Type.Optional(Type.Number({ description: "Override desired background port." })),
+      background_parallel_agents: Type.Optional(Type.Number({ description: "Override expected parallel agents for background runway cue." })),
+      background_existing_service_reusable: Type.Optional(Type.Boolean({ description: "Override existing-service-reusable signal for background runway cue." })),
+      background_destructive_restart: Type.Optional(Type.Boolean({ description: "Override destructive restart signal for background runway cue." })),
+      background_log_tail_max_lines: Type.Optional(Type.Number({ description: "Override log tail max lines for background runway cue." })),
+      background_stacktrace_capture: Type.Optional(Type.Boolean({ description: "Override stacktrace capture signal for background runway cue." })),
+      background_healthcheck_known: Type.Optional(Type.Boolean({ description: "Override healthcheck-known signal for background runway cue." })),
+      background_has_process_registry: Type.Optional(Type.Boolean({ description: "Override process registry capability signal." })),
+      background_has_port_lease_lock: Type.Optional(Type.Boolean({ description: "Override port lease/lock capability signal." })),
+      background_has_bounded_log_tail: Type.Optional(Type.Boolean({ description: "Override bounded log tail capability signal." })),
+      background_has_structured_stacktrace_capture: Type.Optional(Type.Boolean({ description: "Override structured stacktrace capability signal." })),
+      background_has_healthcheck_probe: Type.Optional(Type.Boolean({ description: "Override healthcheck probe capability signal." })),
+      background_has_graceful_stop_then_kill: Type.Optional(Type.Boolean({ description: "Override graceful-stop capability signal." })),
+      background_has_reload_handoff_cleanup: Type.Optional(Type.Boolean({ description: "Override reload/handoff cleanup capability signal." })),
+      background_has_plan_surface: Type.Optional(Type.Boolean({ description: "Override background plan-surface availability signal." })),
+      background_has_lifecycle_surface: Type.Optional(Type.Boolean({ description: "Override background lifecycle-surface availability signal." })),
+      background_rehearsal_slices: Type.Optional(Type.Number({ description: "Override rehearsal slices evidence for background runway cue." })),
+      background_stop_source_coverage_pct: Type.Optional(Type.Number({ description: "Override stopSource coverage pct for background runway cue." })),
+      background_lifecycle_classified: Type.Optional(Type.Boolean({ description: "Override lifecycle-classified signal for background runway cue." })),
+      background_rollback_plan_known: Type.Optional(Type.Boolean({ description: "Override rollback-known signal for background runway cue." })),
+      background_unresolved_blockers: Type.Optional(Type.Number({ description: "Override unresolved blockers count for background runway cue." })),
+      background_destructive_restart_requested: Type.Optional(Type.Boolean({ description: "Override destructive-restart-requested gate for background runway cue." })),
+      background_protected_scope_requested: Type.Optional(Type.Boolean({ description: "Override protected-scope-requested gate for background runway cue." })),
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -778,8 +929,61 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         rehearsalPacket,
       });
 
+      const allToolNames = new Set(pi.getAllTools().map((tool) => tool.name));
+      const inferredBackgroundSignals = inferBackgroundCapabilitySignals(allToolNames);
+      const backgroundPlan = resolveBackgroundProcessControlPlan({
+        kind: typeof p.background_kind === "string" ? p.background_kind : undefined,
+        requestedMode: typeof p.background_requested_mode === "string" ? p.background_requested_mode : undefined,
+        needsServer: asOptionalBoolean(p.background_needs_server),
+        requestedPort: typeof p.background_requested_port === "number" ? p.background_requested_port : undefined,
+        parallelAgents: typeof p.background_parallel_agents === "number" ? p.background_parallel_agents : undefined,
+        existingServiceReusable: asOptionalBoolean(p.background_existing_service_reusable),
+        destructiveRestart: asOptionalBoolean(p.background_destructive_restart),
+        logTailMaxLines: typeof p.background_log_tail_max_lines === "number" ? p.background_log_tail_max_lines : undefined,
+        stacktraceCapture: asOptionalBoolean(p.background_stacktrace_capture),
+        healthcheckKnown: asOptionalBoolean(p.background_healthcheck_known),
+      });
+      const backgroundReadiness = buildBackgroundProcessReadinessScore({
+        hasProcessRegistry: asOptionalBoolean(p.background_has_process_registry) ?? inferredBackgroundSignals.hasProcessRegistry,
+        hasPortLeaseLock: asOptionalBoolean(p.background_has_port_lease_lock) ?? inferredBackgroundSignals.hasPortLeaseLock,
+        hasBoundedLogTail: asOptionalBoolean(p.background_has_bounded_log_tail) ?? inferredBackgroundSignals.hasBoundedLogTail,
+        hasStructuredStacktraceCapture: asOptionalBoolean(p.background_has_structured_stacktrace_capture) ?? inferredBackgroundSignals.hasStructuredStacktraceCapture,
+        hasHealthcheckProbe: asOptionalBoolean(p.background_has_healthcheck_probe) ?? inferredBackgroundSignals.hasHealthcheckProbe,
+        hasGracefulStopThenKill: asOptionalBoolean(p.background_has_graceful_stop_then_kill) ?? inferredBackgroundSignals.hasGracefulStopThenKill,
+        hasReloadHandoffCleanup: asOptionalBoolean(p.background_has_reload_handoff_cleanup) ?? inferredBackgroundSignals.hasReloadHandoffCleanup,
+        hasPlanSurface: asOptionalBoolean(p.background_has_plan_surface) ?? allToolNames.has("background_process_plan"),
+        hasLifecycleSurface: asOptionalBoolean(p.background_has_lifecycle_surface) ?? allToolNames.has("background_process_lifecycle_plan"),
+        rehearsalSlices: typeof p.background_rehearsal_slices === "number" ? p.background_rehearsal_slices : undefined,
+        stopSourceCoveragePct: typeof p.background_stop_source_coverage_pct === "number" ? p.background_stop_source_coverage_pct : undefined,
+      });
+      const backgroundRehearsal = evaluateBackgroundProcessRehearsal({
+        readinessScore: backgroundReadiness.score,
+        readinessRecommendationCode: backgroundReadiness.recommendationCode,
+        lifecycleClassified: asOptionalBoolean(p.background_lifecycle_classified),
+        stopSourceCoveragePct: typeof p.background_stop_source_coverage_pct === "number" ? p.background_stop_source_coverage_pct : undefined,
+        rollbackPlanKnown: asOptionalBoolean(p.background_rollback_plan_known),
+        rehearsalSlices: typeof p.background_rehearsal_slices === "number" ? p.background_rehearsal_slices : undefined,
+        unresolvedBlockers: typeof p.background_unresolved_blockers === "number" ? p.background_unresolved_blockers : undefined,
+        destructiveRestartRequested: asOptionalBoolean(p.background_destructive_restart_requested),
+        protectedScopeRequested: asOptionalBoolean(p.background_protected_scope_requested),
+      });
+      const operationalRunway = buildOperationalRunwayPacket({
+        delegation: {
+          decision: status.decision,
+          recommendationCode: status.recommendationCode,
+          blockers: status.blockers,
+        },
+        background: {
+          planDecision: backgroundPlan.decision,
+          rehearsalDecision: backgroundRehearsal.decision,
+          planBlockers: backgroundPlan.blockers,
+          rehearsalBlockers: backgroundRehearsal.blockers,
+        },
+      });
+      const summary = `${status.summary} ${operationalRunway.summary}`;
+
       return {
-        content: [{ type: "text", text: status.summary }],
+        content: [{ type: "text", text: summary }],
         details: {
           mode: "delegation-readiness-status-packet",
           activation: "none",
@@ -791,11 +995,16 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           recommendation: status.recommendation,
           nextAction: status.nextAction,
           blockers: status.blockers,
-          summary: status.summary,
+          summary,
           delegatePacket,
           rehearsalPacket,
+          operationalRunway,
+          backgroundPlan,
+          backgroundReadiness,
+          backgroundRehearsal,
           capability,
           inferredCapabilityDefaults,
+          inferredBackgroundSignals,
           mix,
           autoAdvanceTelemetry,
           effectiveTelemetrySignals: effectiveTelemetry,
