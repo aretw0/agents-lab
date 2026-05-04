@@ -105,6 +105,7 @@ import {
   type LoopActivationEvidenceState,
   type LoopEvidenceReadiness,
 } from "./guardrails-core-lane-queue-evidence";
+import { refreshLoopEvidenceHeartbeatFromSnapshot as refreshLoopEvidenceHeartbeatFromSnapshotHelper } from "./guardrails-core-lane-queue-heartbeat";
 import {
   registerGuardrailsLaneQueueSurface,
   type GuardrailsLaneQueueSurfaceRuntimeSnapshot,
@@ -1589,29 +1590,20 @@ export default function (pi: ExtensionAPI) {
 
   function refreshLoopEvidenceHeartbeatFromSnapshot(ctx: ExtensionContext): void {
     const nowMs = Date.now();
-    if (nowMs - lastLoopEvidenceHeartbeatAt < 5 * 60_000) return;
-
-    const runtime = readLongRunLoopRuntimeState(ctx.cwd);
-    if (!shouldRefreshLoopEvidenceFromRuntimeSnapshot(runtime, nowMs)) return;
-
-    const evidence = readLoopActivationEvidence(ctx.cwd);
-    const readiness = computeLoopEvidenceReadiness(evidence);
-    if (!readiness.readyForLoopEvidence || !evidence.lastLoopReady || !evidence.lastBoardAutoAdvance) return;
-
-    const atIso = new Date(nowMs).toISOString();
-    evidence.updatedAtIso = atIso;
-    evidence.lastLoopReady = { ...evidence.lastLoopReady, atIso };
-    writeLoopActivationEvidence(ctx.cwd, evidence);
-    lastLoopEvidenceHeartbeatAt = nowMs;
-    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", {
-      atIso,
-      markersLabel: evidence.lastLoopReady.markersLabel,
-      runtimeCodeState: evidence.lastLoopReady.runtimeCodeState,
-      boardAutoAdvanceGate: evidence.lastLoopReady.boardAutoAdvanceGate,
-      nextTaskId: evidence.lastLoopReady.nextTaskId,
-      milestone: evidence.lastLoopReady.milestone,
-      source: "snapshot-refresh",
+    const refresh = refreshLoopEvidenceHeartbeatFromSnapshotHelper({
+      cwd: ctx.cwd,
+      nowMs,
+      lastHeartbeatAt: lastLoopEvidenceHeartbeatAt,
+      heartbeatIntervalMs: 5 * 60_000,
+      readRuntime: readLongRunLoopRuntimeState,
+      shouldRefreshRuntime: shouldRefreshLoopEvidenceFromRuntimeSnapshot,
+      readEvidence: readLoopActivationEvidence,
+      computeReadiness: computeLoopEvidenceReadiness,
+      writeEvidence: writeLoopActivationEvidence,
     });
+    if (!refresh.updated || !refresh.auditPayload) return;
+    lastLoopEvidenceHeartbeatAt = refresh.nextLastHeartbeatAt;
+    appendAuditEntry(ctx, "guardrails-core.loop-evidence-heartbeat", refresh.auditPayload);
   }
 
   function clearLoopEvidenceHeartbeatTimer(): void {
