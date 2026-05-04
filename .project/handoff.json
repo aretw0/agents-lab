@@ -1,37 +1,37 @@
 {
-  "timestamp": "2026-05-04T00:16:45.641Z",
-  "context": "Wave stale-first concluída: TASK-BUD-703/704/705 entregues. autonomy_lane_status agora recomenda refresh-handoff antes de seed-local-safe em [snip] stale; smoke e doutrina sincronizadas. [truncated:+27 chars]",
+  "timestamp": "2026-05-04T00:26:28.443Z",
+  "context": "Wave de seeding com prioridade de longo prazo concluída: TASK-BUD-706/707/708. autonomy_lane_material_seed_packet agora expõe reseedPriority [snip] ipsis]; smoke e doutrina sincronizadas. [truncated:+27 chars]",
   "next_actions": [
-    "Rodar /reload para carregar runtime com a nova lógica stale-first no operatorPauseBrief.",
-    "Após reload, consultar autonomy_lane_status e executar seed local-safe (1–3) com motivo explíc [snip] edWhy/reseedJustification. [truncated:+6 chars]"
+    "Rodar /reload para runtime carregar reseedPriority/seedPriority recém-commitados.",
+    "Após reload, consultar autonomy_lane_material_seed_packet e semear 1–3 tasks locais usando see [snip] y como racional explícito. [truncated:+18 chars]"
   ],
   "blockers": [
-    "Sem /reload, o runtime pode continuar exibindo recommendation antiga (seed-loc [snip] afe) em handoff stale. [truncated:+4 chars]"
+    "Sem /reload, o runtime ainda não expõe seedPriority no packet ao vivo desta sessão."
   ],
   "recent_validation": [
     "npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-s [snip] cklist.test.ts (35 passed) [truncated:+37 chars]"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-705",
+    "focus": "TASK-BUD-708",
     "canonical_links": [
-      "task:TASK-BUD-705",
-      "task:TASK-BUD-703"
+      "task:TASK-BUD-708",
+      "task:TASK-BUD-706"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-04T00:16:45.641Z",
+    "generatedAtIso": "2026-05-04T00:26:28.443Z",
     "level": "checkpoint",
-    "percent": 58,
+    "percent": 62,
     "action": "checkpoint-refresh",
     "recommendation": "continue",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-04T00:16:45.641Z",
+      "atIso": "2026-05-04T00:26:28.443Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
-      "percent": 58,
+      "percent": 62,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
@@ -42,6 +42,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-705"
+    "TASK-BUD-708"
   ]
 }
