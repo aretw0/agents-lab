@@ -11985,6 +11985,33 @@
       "method": "test",
       "timestamp": "2026-05-04T03:22:56.663Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: orienta acompanhar `influenceWindowCue` no `autonomy_lane_status` para detectar abertura de janela protected (`ready-window`) sem polling manual de packet separado, mantendo gate humano explícito. Doc checklist green no mesmo gate (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1085",
+      "target": "TASK-BUD-733",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:46:19.396Z",
+      "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora expõe `protectedReadyCue` (`decision`, `recommendationCode`, `eligibleProtectedCount`, `nextProtectedTaskId`) e adiciona `protectedReady/protectedEligible` no summary curto. Mantém contrato report-only e gate humano para protected."
+    },
+    {
+      "id": "VER-BUD-1086",
+      "target": "TASK-BUD-734",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:46:37.897Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` cobre `protectedReadyCue` nos dois lados: `hold` em no-eligible/blocked e `ready` quando `influenceWindow=ready-window` com candidato protected elegível; summary também validada (`influenceWindow`, `protectedReady`, `protectedEligible`). Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (40 passed)."
+    },
+    {
+      "id": "VER-BUD-1087",
+      "target": "TASK-BUD-735",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T03:47:10.524Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: acompanhar `influenceWindowCue` + `protectedReadyCue` no `autonomy_lane_status` antes de abrir quest protected, mantendo gate humano explícito e fluxo anti-bloat. Doc checklist green no mesmo gate (40 passed)."
     }
   ]
 }

@@ -16606,6 +16606,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] alinha modo quase-ininterrupto com gatilho explícito e seguro para protected.\nContrato de quase-ininterrupto agora tem gatilho explícito para transição local-safe -> protected.",
       "verification": "VER-BUD-1084"
+    },
+    {
+      "id": "TASK-BUD-733",
+      "description": "Expor `protectedReadyCue` no `autonomy_lane_status` para transição confiável local-safe -> protected (ready|hold + nextProtectedTaskId).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "Status inclui `protectedReadyCue` com `decision`, `recommendationCode`, `eligibleProtectedCount`, `nextProtectedTaskId`.",
+        "Summary curto inclui `protectedReady=<ready|hold>` e `protectedEligible=<n>`.",
+        "Sem alterar gate humano para protected; report-only."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] habilita operação quase-ininterrupta com gatilho explícito e seguro para abrir quest protected apenas quando janela estiver pronta.\nImplementando cue explícito de prontidão protected no status principal para transição confiável e pouco interativa.\nStatus principal agora mostra prontidão de transição local-safe -> protected com sinal compacto e auditável.",
+      "verification": "VER-BUD-1085"
+    },
+    {
+      "id": "TASK-BUD-734",
+      "description": "Adicionar smoke para `protectedReadyCue` no `autonomy_lane_status` (hold e ready).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-733"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida `protectedReadyCue.decision=hold` quando influenceWindow não está pronto.",
+        "Smoke valida `protectedReadyCue.decision=ready` com janela `ready-window` e candidato protected elegível.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] garante confiabilidade do gatilho de transição antes de abrir protected com pouca interação humana.\nCobertura garante confiabilidade do gatilho de abertura protected com mínima intervenção.",
+      "verification": "VER-BUD-1086"
+    },
+    {
+      "id": "TASK-BUD-735",
+      "description": "Sincronizar doutrina curta: acompanhar `protectedReadyCue` no status para saber quando abrir quest protected com decisão explícita.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-733"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc orienta leitura de `protectedReadyCue` (`ready|hold`) no status principal.",
+        "Mantém política de gate humano para protected e texto anti-bloat.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz iteração manual contínua sem abrir mão da autorização humana para protected.\nRunbook alinhado com operação quase-ininterrupta e transição protected calibrada.",
+      "verification": "VER-BUD-1087"
     }
   ]
 }

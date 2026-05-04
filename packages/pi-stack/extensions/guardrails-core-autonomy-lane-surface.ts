@@ -1199,6 +1199,26 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         window: influenceWindowPacket.window,
         recommendationCode: influenceWindowPacket.recommendationCode,
       };
+      const protectedFocusTaskIds = tasks
+        .map((task) => ({ task, id: normalizeTaskId(task.id), status: String(task.status ?? "").toLowerCase() }))
+        .filter(({ task, id, status }) => Boolean(id) && taskHasProtectedSignal(task) && (status === "planned" || status === "in-progress"))
+        .map(({ id }) => id);
+      const protectedSelection = protectedFocusTaskIds.length > 0
+        ? resolveTaskSelection({
+          ...p,
+          include_protected_scopes: true,
+          focus_task_ids: protectedFocusTaskIds,
+          use_handoff_focus: false,
+        }, ctx.cwd)
+        : undefined;
+      const protectedReadyCue = {
+        decision: influenceWindowCue.decision === "ready-window" && protectedSelection?.ready ? "ready" : "hold",
+        recommendationCode: influenceWindowCue.decision === "ready-window" && protectedSelection?.ready
+          ? "protected-ready-explicit-focus-required"
+          : "protected-ready-hold-local-safe-first",
+        eligibleProtectedCount: protectedSelection?.eligibleTaskIds.length ?? 0,
+        nextProtectedTaskId: protectedSelection?.nextTaskId,
+      };
       const operatorPauseBrief = buildAutonomyOperatorPauseBrief({
         selectionReady: selection.ready,
         selectionReason: selection.reason,
@@ -1222,6 +1242,8 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         seedingGuidance?.seedWhy ? `seedWhy=${seedingGuidance.seedWhy}` : undefined,
         seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
         influenceWindowCue?.decision ? `influenceWindow=${influenceWindowCue.decision}` : undefined,
+        `protectedReady=${protectedReadyCue.decision}`,
+        `protectedEligible=${protectedReadyCue.eligibleProtectedCount}`,
         "authorization=none",
       ].filter(Boolean).join(" ");
       const seededNextAction = !selection.ready && seedingGuidance?.decision === "seed-now"
@@ -1249,6 +1271,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         iterationReminder,
         seedingGuidance,
         influenceWindowCue,
+        protectedReadyCue,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : (seededNextAction ?? selection.recommendation)),

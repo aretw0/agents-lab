@@ -700,6 +700,12 @@ describe("autonomy lane surface", () => {
           files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
           notes: "[rationale:risk-control] keep local-safe flow",
         },
+        {
+          id: "TASK-PROTECTED-1",
+          description: "Pesquisa externa: analisar https://example.com/reference",
+          status: "planned",
+          notes: "[rationale:risk-control] protected candidate",
+        },
       ],
     }), "utf8");
     writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-FOCUS"] }), "utf8");
@@ -714,10 +720,16 @@ describe("autonomy lane surface", () => {
     const result = statusTool?.execute("call-test", {}, undefined, undefined, { cwd });
 
     const influenceCue = (result?.details.influenceWindowCue as { decision?: string; window?: string; recommendationCode?: string } | undefined);
+    const protectedReadyCue = (result?.details.protectedReadyCue as { decision?: string; eligibleProtectedCount?: number; nextProtectedTaskId?: string } | undefined);
     expect(influenceCue?.decision).toBe("ready-window");
     expect(influenceCue?.window).toBe("open");
     expect(influenceCue?.recommendationCode).toBe("influence-assimilation-ready-window-open");
+    expect(protectedReadyCue?.decision).toBe("ready");
+    expect(protectedReadyCue?.eligibleProtectedCount).toBe(1);
+    expect(protectedReadyCue?.nextProtectedTaskId).toBe("TASK-PROTECTED-1");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=ready-window");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedReady=ready");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedEligible=1");
   });
 
   it("registers composed status tool with board selection and lane plan", () => {
@@ -997,11 +1009,23 @@ describe("autonomy lane surface", () => {
     expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
     expect(seedingGuidance?.humanActionRequired).toBe(true);
     const influenceCue = (result?.details.influenceWindowCue as { decision?: string; recommendationCode?: string } | undefined);
+    const protectedReadyCue = (result?.details.protectedReadyCue as {
+      decision?: string;
+      recommendationCode?: string;
+      eligibleProtectedCount?: number;
+      nextProtectedTaskId?: string;
+    } | undefined);
     expect(influenceCue?.decision).toBe("blocked");
     expect(influenceCue?.recommendationCode).toBe("influence-assimilation-blocked-operational");
+    expect(protectedReadyCue?.decision).toBe("hold");
+    expect(protectedReadyCue?.recommendationCode).toBe("protected-ready-hold-local-safe-first");
+    expect(protectedReadyCue?.eligibleProtectedCount).toBe(0);
+    expect(protectedReadyCue?.nextProtectedTaskId).toBeUndefined();
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedCount=3");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("seedWhy=readiness-blocked");
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("influenceWindow=blocked");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedReady=hold");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("protectedEligible=0");
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
