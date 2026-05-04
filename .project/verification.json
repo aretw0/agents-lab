@@ -12120,6 +12120,33 @@
       "method": "test",
       "timestamp": "2026-05-04T07:29:08.286Z",
       "evidence": "`docs/guides/control-plane-operating-doctrine.md` atualizado para incluir leitura operacional de `postReloadResume=pending` no `context_watch_status` como cue curto de defer pós-reload. Checklist de docs e smoke context-watchdog seguem green (74 passed)."
+    },
+    {
+      "id": "VER-BUD-1100",
+      "target": "TASK-BUD-748",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:41:59.274Z",
+      "evidence": "`context_watch_continuation_readiness` agora lê intent `auto_resume_after_reload` e expõe cue em summary/details: `postReloadResume=pending`, `postReloadResumePending`, `postReloadResumeReason`. Coberto por smoke em `packages/pi-stack/test/smoke/context-watchdog.test.ts` incluindo cenário pendente e cenário sem intent."
+    },
+    {
+      "id": "VER-BUD-1101",
+      "target": "TASK-BUD-749",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:43:40.043Z",
+      "evidence": "Smoke novo cobre retenção do intent pós-reload quando dispatch bloqueia em `pending-messages` e `lane-queue-pending` (via `.pi/deferred-intents.json`). Valida ausência de `sendUserMessage`, presença de audit `context-watchdog.auto-resume-post-reload-pending` e manutenção do `auto_resume_after_reload` no handoff."
+    },
+    {
+      "id": "VER-BUD-1102",
+      "target": "TASK-BUD-750",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T07:45:29.046Z",
+      "evidence": "Doutrina em `docs/guides/control-plane-operating-doctrine.md` sincronizada: cue `postReloadResume=pending` agora explicitamente coberto em `context_watch_status` e `context_watch_continuation_readiness`, com fallback de detalhe no handoff. Checklist de docs + smoke context-watchdog green (75 passed)."
     }
   ]
 }

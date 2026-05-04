@@ -16837,6 +16837,65 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] reduz ambiguidade operacional em sessões longas com compact/reload.\nRunbook anti-bloat alinhado com novo cue de continuidade pós-reload.",
       "verification": "VER-BUD-1099"
+    },
+    {
+      "id": "TASK-BUD-748",
+      "description": "Expor `postReloadResume` no `context_watch_continuation_readiness` (summary/details) para reduzir leitura cruzada com `context_watch_status`.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando houver intent `auto_resume_after_reload.pending=true`, summary do readiness inclui `postReloadResume=pending`.",
+        "Details do readiness incluem cue estruturado (`postReloadResumePending` + `postReloadResumeReason` quando aplicável).",
+        "Fluxo permanece read-only e sem dispatch."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] aumentar observabilidade pós-compact/reload com mínima interação humana.\nReadiness ficou alinhado ao status para reduzir leitura cruzada manual em pós-compact/reload.",
+      "verification": "VER-BUD-1100"
+    },
+    {
+      "id": "TASK-BUD-749",
+      "description": "Adicionar smoke para retenção do intent pós-reload quando dispatch não puder ocorrer (pending messages ou lane queue).",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-748"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "Teste valida que `auto_resume_after_reload` permanece no handoff quando `resolveAutoResumeDispatchDecision` bloqueia em `pending-messages` ou `lane-queue-pending`.",
+        "Teste valida ausência de `sendUserMessage` no caminho bloqueado.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita perda silenciosa do defer pós-reload em cenários de bloqueio transitório.\nFail-closed reforçado para bloqueios transitórios sem perder retomada deferida.",
+      "verification": "VER-BUD-1101"
+    },
+    {
+      "id": "TASK-BUD-750",
+      "description": "Sincronizar doutrina curta com leitura de `postReloadResume` também no readiness e com fallback em status/handoff.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-748"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doutrina orienta leitura rápida: `context_watch_continuation_readiness` e `context_watch_status` com `postReloadResume=pending`.",
+        "Mantém anti-bloat e protected com gate humano explícito.",
+        "Doc checklist permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduzir ambiguidade operacional entre superfícies de continuidade.\nRunbook reduz ambiguidade entre superfícies de continuidade pós-reload.",
+      "verification": "VER-BUD-1102"
     }
   ]
 }
