@@ -3447,6 +3447,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const handoff = readHandoffJson(ctx.cwd);
+			const postReloadResumeIntent = readAutoResumeAfterReloadIntent(handoff);
 			const growthSnapshotBase = resolveHandoffGrowthMaturitySnapshot(handoff);
 			const handoffFreshness = resolveHandoffFreshness(
 				typeof handoff.timestamp === "string" ? handoff.timestamp : undefined,
@@ -3522,6 +3523,7 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 				`autoAdvance=${autoAdvanceDecision}`,
 				`material=${materialReadiness.decision}`,
 				`decisionCue=${decisionCue.reasonCode}`,
+				postReloadResumeIntent ? "postReloadResume=pending" : undefined,
 				growthSnapshot?.decision ? `growthDecision=${growthSnapshot.decision}` : undefined,
 				growthSnapshot?.score !== undefined ? `growthScore=${growthSnapshot.score}` : undefined,
 				growthSnapshot ? `growthSource=${growthSnapshot.source}` : undefined,
@@ -3536,6 +3538,8 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 					staleFocus,
 					staleFocusCount,
 					diagnosticsSummary,
+					postReloadResumePending: Boolean(postReloadResumeIntent),
+					postReloadResumeReason: postReloadResumeIntent?.reason,
 					localContinuitySummary,
 					localContinuityReasons: localAuditReasons,
 					protectedPaths,

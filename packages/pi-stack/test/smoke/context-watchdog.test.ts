@@ -2037,6 +2037,85 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("keeps deferred post-reload intent when dispatch is blocked by pending messages or lane queue", async () => {
+		const runCase = async (opts: { id: string; hasPendingMessages: boolean; queuedLaneIntents: boolean }) => {
+			const cwd = mkdtempSync(join(tmpdir(), `ctx-post-reload-pending-${opts.id}-`));
+			try {
+				mkdirSync(join(cwd, ".project"), { recursive: true });
+				writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({
+					tasks: [
+						{ id: "TASK-BUD-749", status: "planned", description: "post-reload pending path" },
+					],
+				}, null, 2), "utf8");
+				writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+					timestamp: new Date().toISOString(),
+					current_tasks: ["TASK-BUD-749"],
+					context_watch: {
+						auto_resume_after_reload: {
+							pending: true,
+							createdAtIso: "2026-05-04T06:55:00.000Z",
+							reason: "reload-required-after-compact",
+							focusTasks: ["TASK-BUD-749"],
+						},
+					},
+					context_watch_events: [
+						{
+							atIso: new Date().toISOString(),
+							reason: "manual_checkpoint",
+							level: "checkpoint",
+							percent: 53,
+							thresholds: { warnPct: 45, checkpointPct: 55, compactPct: 64 },
+							action: "checkpoint-refresh",
+							recommendation: "ready for resume",
+						},
+					],
+				}, null, 2), "utf8");
+				if (opts.queuedLaneIntents) {
+					mkdirSync(join(cwd, ".pi"), { recursive: true });
+					writeFileSync(join(cwd, ".pi", "deferred-intents.json"), JSON.stringify({
+						version: 1,
+						items: [{ text: "deferred task" }],
+					}, null, 2), "utf8");
+				}
+				const handlers = new Map<string, (...args: unknown[]) => unknown>();
+				const pi = {
+					on: vi.fn((event: string, handler: (...args: unknown[]) => unknown) => {
+						handlers.set(event, handler);
+					}),
+					registerTool: vi.fn(),
+					registerCommand: vi.fn(),
+					sendUserMessage: vi.fn(),
+					appendEntry: vi.fn(),
+				} as unknown as Parameters<typeof contextWatchdogExtension>[0];
+				contextWatchdogExtension(pi);
+				const sessionStart = handlers.get("session_start");
+				expect(typeof sessionStart).toBe("function");
+				await (sessionStart as (event: unknown, ctx: unknown) => Promise<void> | void)({}, {
+					cwd,
+					ui: {
+						notify() {},
+						setStatus() {},
+					},
+					getContextUsage: () => ({ percent: 10 }),
+					model: { id: "test-model", provider: "test" },
+					isIdle: () => true,
+					hasPendingMessages: () => opts.hasPendingMessages,
+					compact() {},
+				} as any);
+				expect((pi.sendUserMessage as ReturnType<typeof vi.fn>).mock.calls.length).toBe(0);
+				expect((pi.appendEntry as ReturnType<typeof vi.fn>).mock.calls.some(([type]) => type === "context-watchdog.auto-resume-post-reload-pending"))
+					.toBe(true);
+				const written = JSON.parse(readFileSync(join(cwd, ".project", "handoff.json"), "utf8")) as Record<string, unknown>;
+				expect(readAutoResumeAfterReloadIntent(written)).toBeTruthy();
+			} finally {
+				rmSync(cwd, { recursive: true, force: true });
+			}
+		};
+
+		await runCase({ id: "pending-messages", hasPendingMessages: true, queuedLaneIntents: false });
+		await runCase({ id: "lane-queue", hasPendingMessages: false, queuedLaneIntents: true });
+	});
+
 	it("context_watch_freshness_status tool returns preload+dirty in one call", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-freshness-status-"));
 		try {
@@ -2316,6 +2395,12 @@ describe("context-watchdog", () => {
 				context: "TASK-BUD-320 completed; choose one primary task.",
 				blockers: [],
 				context_watch: {
+					auto_resume_after_reload: {
+						pending: true,
+						createdAtIso: "2026-05-04T06:40:00.000Z",
+						reason: "reload-required-after-compact",
+						focusTasks: ["TASK-BUD-321"],
+					},
 					growth_maturity: {
 						decision: "hold",
 						score: 78,
@@ -2344,6 +2429,7 @@ describe("context-watchdog", () => {
 			expect(result.content?.[0]?.text).toContain("dirty=unknown");
 			expect(result.content?.[0]?.text).toContain("material=");
 			expect(result.content?.[0]?.text).toContain("decisionCue=seed-local-safe-required");
+			expect(result.content?.[0]?.text).toContain("postReloadResume=pending");
 			expect(result.content?.[0]?.text).toContain("growthDecision=hold");
 			expect(result.content?.[0]?.text).toContain("growthScore=78");
 			expect(result.content?.[0]?.text).toContain("growthSource=handoff");
@@ -2362,6 +2448,8 @@ describe("context-watchdog", () => {
 					reasonCode: "seed-local-safe-required",
 					recommendedAction: "seed-local-safe",
 				},
+				postReloadResumePending: true,
+				postReloadResumeReason: "reload-required-after-compact",
 				materialReadiness: {
 					decision: expect.any(String),
 					recommendationCode: expect.any(String),
@@ -2402,10 +2490,12 @@ describe("context-watchdog", () => {
 			}));
 			const noGrowthResult = await tool.execute("tc-continuation-readiness-no-growth", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthDecision=");
+			expect(noGrowthResult.content?.[0]?.text).not.toContain("postReloadResume=");
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthScore=");
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthSource=");
 			expect(noGrowthResult.content?.[0]?.text).not.toContain("growthFresh=");
 			expect(noGrowthResult.details?.growthMaturitySnapshot).toBeUndefined();
+			expect((noGrowthResult.details as { postReloadResumePending?: boolean } | undefined)?.postReloadResumePending).toBe(false);
 			expect(formatContextWatchContinuationReadinessSummary({
 				ready: false,
 				focusTasks: "TASK-BUD-321",
