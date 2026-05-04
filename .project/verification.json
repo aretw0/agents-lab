@@ -12210,6 +12210,15 @@
       "method": "test",
       "timestamp": "2026-05-04T10:57:16.445Z",
       "evidence": "Wave 1 concluída: wiring do comando `/lane-queue` extraído de `packages/pi-stack/extensions/guardrails-core.ts` para módulo explícito de composição `packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts`, com estado/runtime injetado por deps. Evidência/IO de loop separada em `packages/pi-stack/extensions/guardrails-core-lane-queue-evidence.ts` e reexport preservado em `guardrails-core.ts`. Redução de acoplamento/tamanho: `guardrails-core.ts` 3585 -> 3116 linhas. Smokes green: `npm run test:smoke -- packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts` (53 passed)."
+    },
+    {
+      "id": "VER-BUD-1110",
+      "target": "TASK-BUD-758",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T11:02:11.299Z",
+      "evidence": "Wave 1 de split da suíte concluída: extração do domínio checkpoint/handoff para `packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts` (13 testes), mantendo `context-watchdog.test.ts` com os demais domínios (62 testes). Estrutura por domínio aplicada sem alteração de contratos. Smoke focal green: `npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (77 passed)."
     }
   ]
 }

@@ -17042,7 +17042,7 @@
     {
       "id": "TASK-BUD-758",
       "description": "Wave 1 de organização de testes: dividir `context-watchdog.test.ts` por domínio (status, resume/reload, previews, checkpoint).",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-756"
@@ -17057,7 +17057,8 @@
         "`test:smoke` focal permanece green."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] manter manutenção viável enquanto funcionalidades crescem."
+      "notes": "[rationale:risk-control] manter manutenção viável enquanto funcionalidades crescem.\nSplit inicial mantém cobertura total e melhora legibilidade da suíte principal.",
+      "verification": "VER-BUD-1110"
     },
     {
       "id": "TASK-BUD-759",
