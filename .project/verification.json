@@ -11769,6 +11769,33 @@
       "method": "test",
       "timestamp": "2026-05-04T00:25:24.144Z",
       "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: ao reseedar, registrar `seedWhy/reseedJustification` e `seedPriority` no fechamento curto. Texto anti-bloat, sem alterar autorização/policy. Doc checklist green no mesmo gate (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1061",
+      "target": "TASK-BUD-709",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:13:16.543Z",
+      "evidence": "`autonomy_lane_status` em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts` agora publica `seedingGuidance` quando `selection.reason=no-eligible-tasks` sem protected scope. Campo inclui `decision`, `recommendationCode`, `suggestedSeedCount`, `seedWhy`, `seedPriority`, `humanActionRequired` e `summary`, mantendo contrato report-only."
+    },
+    {
+      "id": "VER-BUD-1062",
+      "target": "TASK-BUD-710",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:13:27.753Z",
+      "evidence": "Smoke em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` valida `seedingGuidance` no cenário `no-eligible-tasks` (decision `blocked`, `seedWhy=readiness-blocked`, `seedPriority=blocked-readiness`, `humanActionRequired=true`). Gate: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (35 passed)."
+    },
+    {
+      "id": "VER-BUD-1063",
+      "target": "TASK-BUD-711",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T01:13:51.125Z",
+      "evidence": "Doutrina curta sincronizada em `docs/guides/control-plane-operating-doctrine.md`: em `no-eligible-tasks`, consultar `seedingGuidance` de `autonomy_lane_status` (seedWhy + seedPriority) e usar `autonomy_lane_material_seed_packet` para detalhe completo quando necessário. Doc checklist green no mesmo gate (35 passed)."
     }
   ]
 }

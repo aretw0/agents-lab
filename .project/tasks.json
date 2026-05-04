@@ -16153,6 +16153,63 @@
       "milestone": "throughput-local-safe-stock-2026-05",
       "notes": "[rationale:risk-control] padroniza accountability de longo prazo no ritual de seeding.\nRitual de seeding agora inclui motivo + prioridade de longo prazo.",
       "verification": "VER-BUD-1060"
+    },
+    {
+      "id": "TASK-BUD-709",
+      "description": "Expor `seedingGuidance` no `autonomy_lane_status` quando não houver tarefa local-safe elegível (incluindo `seedWhy` e `seedPriority`).",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"
+      ],
+      "acceptance_criteria": [
+        "`autonomy_lane_status` inclui `seedingGuidance` em cenário `no-eligible-tasks` sem protected scope.",
+        "`seedingGuidance` traz `decision`, `recommendationCode`, `suggestedSeedCount`, `seedWhy`, `seedPriority`, `humanActionRequired`.",
+        "Contrato segue report-only sem dispatch."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] seedWhy=bootstrap-focus-missing e seedPriority=continuity-bootstrap devem ficar visíveis no status principal para semeadura com prioridade explícita de longo prazo.\nExecutando seed bootstrap com prioridade explícita: status principal passará a expor seedingGuidance (seedWhy+seedPriority).\nStatus principal agora carrega motivo e prioridade de reseed sem segunda chamada obrigatória.",
+      "verification": "VER-BUD-1061"
+    },
+    {
+      "id": "TASK-BUD-710",
+      "description": "Adicionar smoke para `seedingGuidance` no `autonomy_lane_status` em `no-eligible-tasks`.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-709"
+      ],
+      "files": [
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Smoke valida presença de `seedingGuidance.seedWhy` e `seedingGuidance.seedPriority` no cenário bootstrap.",
+        "Smoke valida `seedingGuidance.humanActionRequired=true` quando `seed-now`.",
+        "Suite focal permanece green."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] evita regressão onde decisão de reseed volta a depender de segunda chamada e perde contexto de prioridade.\nCobertura protege presença de sinal de seeding no status principal.",
+      "verification": "VER-BUD-1062"
+    },
+    {
+      "id": "TASK-BUD-711",
+      "description": "Sincronizar doutrina curta: usar `seedingGuidance` de `autonomy_lane_status` para decidir seed local-safe com `seedWhy+seedPriority`.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-709"
+      ],
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Doc descreve leitura de `seedingGuidance` em `no-eligible-tasks`.",
+        "Reforça registro de `seedWhy` + `seedPriority` no fechamento curto.",
+        "Doc checklist permanece green e texto anti-bloat."
+      ],
+      "milestone": "throughput-local-safe-stock-2026-05",
+      "notes": "[rationale:risk-control] reduz erro operacional ao centralizar motivo/prioridade de seeding no status principal.\nFluxo operacional de seeding ficou mais direto e anti-bloat.",
+      "verification": "VER-BUD-1063"
     }
   ]
 }

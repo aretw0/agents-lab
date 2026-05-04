@@ -1133,6 +1133,24 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         handoffFreshness: handoffFreshness.label,
       });
       const readyQueue = buildReadyQueuePreview(selection, p.sample_limit);
+      const seedingGuidance = !selection.ready && selection.reason === "no-eligible-tasks" && includeProtectedScopes !== true
+        ? (() => {
+          const packet = buildAfkMaterialSeedPacket({
+            ...p,
+            include_protected_scopes: false,
+            include_missing_rationale: false,
+          }, ctx.cwd);
+          return {
+            decision: packet.decision,
+            recommendationCode: packet.recommendationCode,
+            suggestedSeedCount: packet.suggestedSeedCount,
+            seedWhy: packet.reseedJustification.reasonCode,
+            seedPriority: packet.reseedPriority.code,
+            humanActionRequired: packet.humanActionRequired,
+            summary: packet.summary,
+          };
+        })()
+        : undefined;
       const result = {
         ready: plan.ready && selection.ready,
         plan,
@@ -1147,6 +1165,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskMnemonic,
         operatorPauseBrief,
         iterationReminder,
+        seedingGuidance,
         nextAction: chaining.active
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : selection.recommendation),

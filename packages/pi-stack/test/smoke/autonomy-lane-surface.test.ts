@@ -840,6 +840,11 @@ describe("autonomy lane surface", () => {
     const pauseBrief = (result?.details.operatorPauseBrief as { recommendation?: string; options?: Array<{ option?: string }> } | undefined);
     expect(pauseBrief?.recommendation).toBe("seed-local-safe");
     expect((pauseBrief?.options ?? []).map((row) => row.option)).toContain("choose-protected-focus");
+    const seedingGuidance = (result?.details.seedingGuidance as { decision?: string; seedWhy?: string; seedPriority?: string; humanActionRequired?: boolean } | undefined);
+    expect(seedingGuidance?.decision).toBe("blocked");
+    expect(seedingGuidance?.seedWhy).toBe("readiness-blocked");
+    expect(seedingGuidance?.seedPriority).toBe("blocked-readiness");
+    expect(seedingGuidance?.humanActionRequired).toBe(true);
     expect(result?.details.nextAction).toContain("local stop condition");
   });
 
