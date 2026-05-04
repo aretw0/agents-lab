@@ -1,7 +1,7 @@
 name: work-quality-classifier
 role: sensor
 description: Classifies work quality issues in agent output
-model: openai-codex/gpt-5.4-mini
+model: github-copilot/gpt-5.4-mini
 thinking: "off"
 output:
   format: json
