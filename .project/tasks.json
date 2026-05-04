@@ -17261,7 +17261,7 @@
     {
       "id": "TASK-BUD-768",
       "description": "Consolidar packet de runway operacional (delegação + background-process) em surface única report-only para recomendação `local-execute|simple-delegate|defer` com blockers normalizados.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-765",
@@ -17277,7 +17277,8 @@
         "Smoke cobre decisões local-execute, ready-simple-delegate e defer."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] preparar decisão de escala sem ambiguidade antes de qualquer promoção para colony."
+      "notes": "[rationale:risk-control] preparar decisão de escala sem ambiguidade antes de qualquer promoção para colony.\nSlice concluído: TASK-BUD-768 entrega packet unificado operacional em surface report-only, preservando authorization=none/dispatchAllowed=false.",
+      "verification": "VER-BUD-1120"
     },
     {
       "id": "TASK-BUD-769",

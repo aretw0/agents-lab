@@ -12300,6 +12300,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-04T21:09:23.656Z",
       "evidence": "Autonomy lane status agora expõe cue curto de runway (delegação + background) com decisão e nextAction explícitos em `runwayReadinessCue`, mantendo contrato report-only/fail-closed. Alterações em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`: composição deterministicamente local de sinais de delegação/background, resumo compacto no `summary` (`runway`, `delegationReady`, `backgroundReady`) e detalhes com blockers/nextAction por domínio. Cobertura adicionada em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` para caminhos `blocked` (background protected scope requested) e `ready-window` (sinais fortes via overrides bounded). Validação: `npm run test:smoke -- packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts` (102 passed)."
+    },
+    {
+      "id": "VER-BUD-1120",
+      "target": "TASK-BUD-768",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-04T23:44:49.514Z",
+      "evidence": "Consolidado `delegation_readiness_status_packet` com `operationalRunway` (delegação+background), recomendação `local-execute|simple-delegate|defer` e blockers normalizados. Smoke focal verde: `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (22 passed), `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` (81 passed), `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (2 passed)."
     }
   ]
 }
