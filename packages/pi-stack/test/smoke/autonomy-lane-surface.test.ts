@@ -766,6 +766,102 @@ describe("autonomy lane surface", () => {
     expect(result?.details.nextAction).toContain("next=TASK-NEXT");
   });
 
+  it("exposes blocked runway readiness cue when background protected-scope gate is requested", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-runway-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {
+      context_level: "warn",
+      provider_ready: 1,
+      background_protected_scope_requested: true,
+    }, undefined, undefined, { cwd });
+
+    const runwayCue = (result?.details.runwayReadinessCue as {
+      decision?: string;
+      recommendationCode?: string;
+      nextAction?: string;
+      delegation?: { decision?: string };
+      background?: { decision?: string };
+    } | undefined);
+
+    expect(runwayCue?.decision).toBe("blocked");
+    expect(runwayCue?.recommendationCode).toBe("runway-readiness-blocked");
+    expect(runwayCue?.delegation?.decision).toBe("local-execute-first");
+    expect(runwayCue?.background?.decision).toBe("blocked");
+    expect(String(runwayCue?.nextAction ?? "")).toContain("background_process_readiness_packet");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=blocked");
+  });
+
+  it("exposes ready-window runway readiness cue when delegation/background signals are strong", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-runway-ready-window-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", {
+      context_level: "warn",
+      provider_ready: 1,
+      delegation_preload_decision: "use-pack",
+      delegation_dirty_signal: "clean",
+      delegation_mix_decision: "ready",
+      delegation_mix_score: 82,
+      delegation_mix_simple_delegate_events: 1,
+      delegation_mix_swarm_events: 1,
+      delegation_auto_advance_decision: "eligible",
+      delegation_telemetry_decision: "ready",
+      delegation_telemetry_score: 78,
+      delegation_telemetry_blocked_rate_pct: 10,
+      background_needs_server: false,
+      background_has_process_registry: true,
+      background_has_port_lease_lock: true,
+      background_has_bounded_log_tail: true,
+      background_has_structured_stacktrace_capture: true,
+      background_has_healthcheck_probe: true,
+      background_has_graceful_stop_then_kill: true,
+      background_has_reload_handoff_cleanup: true,
+      background_has_plan_surface: true,
+      background_has_lifecycle_surface: true,
+      background_rehearsal_slices: 2,
+      background_stop_source_coverage_pct: 92,
+      background_lifecycle_classified: true,
+      background_rollback_plan_known: true,
+      background_unresolved_blockers: 0,
+    }, undefined, undefined, { cwd });
+
+    const runwayCue = (result?.details.runwayReadinessCue as {
+      decision?: string;
+      recommendationCode?: string;
+      delegation?: { decision?: string; nextAction?: string };
+      background?: { decision?: string; nextAction?: string };
+    } | undefined);
+
+    expect(runwayCue?.decision).toBe("ready-window");
+    expect(runwayCue?.recommendationCode).toBe("runway-readiness-ready-window");
+    expect(runwayCue?.delegation?.decision).toBe("ready-simple-delegate");
+    expect(runwayCue?.background?.decision).toBe("ready-window");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=ready-window");
+  });
+
   it("includes iterationReminder from handoff next_actions when available", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });
