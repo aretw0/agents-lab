@@ -65,6 +65,19 @@ describe("monitor runtime contract repair", () => {
     expect(second.content).toBe(first.content);
   });
 
+  it("allows common first-party read-only diagnostics through the deterministic bypass", () => {
+    const result = repairClassifyContractContent(runtimeFixture());
+
+    expect(result.content).toContain('"git_dirty_snapshot"');
+    expect(result.content).toContain('"safe_marker_check"');
+    expect(result.content).toContain('"context_watch_auto_resume_preview"');
+    expect(result.content).toContain('"autonomy_lane_next_task"');
+    expect(result.content).toContain('"board_query"');
+    expect(result.content).toContain('"board_decision_packet"');
+    expect(result.content).not.toContain('"board_update"');
+    expect(result.content).not.toContain('"context_watch_checkpoint"');
+  });
+
   it("keeps destructive-looking shell commands out of the deterministic bypass", () => {
     const result = repairClassifyContractContent(runtimeFixture());
 

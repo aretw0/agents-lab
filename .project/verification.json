@@ -12957,6 +12957,15 @@
       "method": "inspect",
       "timestamp": "2026-05-05T20:25:41.595Z",
       "evidence": "Post-reload monitor calibration validation: context_watch_status reports reloadGate=reload-not-required, monitors_compact_status reports classifyFail=0, safe_marker_check confirms fragility/work-quality runtime monitor write templates include schema-compatible issue fields, and rg found no fragility-fragility-mosyracc entry in .project/issues.json. [rationale:communicable] Reload validation closes the immediate runtime-adoption risk without auto-selecting protected scope; TASK-BUD-841 remains open for smaller follow-up monitor-runtime-contract calibration if needed."
+    },
+    {
+      "id": "VER-BUD-1193",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:29:34.334Z",
+      "evidence": "Monitor runtime read-only bypass recalibration: expanded deterministic unauthorized-action bypass for first-party read-only/report-only diagnostics used in long-running loops (git_dirty_snapshot, safe_marker_check, context_watch previews, autonomy lane read-only selectors, board read-only queries/packets) while keeping mutation surfaces such as board_update and context_watch_checkpoint out of the bypass. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 5 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed. [rationale:communicable] This reduces L3 pre-execution noise for bounded diagnostics without weakening protected-scope or mutation authorization gates."
     }
   ]
 }

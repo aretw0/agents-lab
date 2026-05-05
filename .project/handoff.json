@@ -1,45 +1,46 @@
 {
-  "timestamp": "2026-05-05T20:25:58.872Z",
-  "context": "Após /reload, validei que a calibração versionada de monitor-provider-patch foi adotada sem nova sujeira operacional: reloadGate=reload-not-r [snip] ontract/read-only bypass se necessário. [truncated:+335 chars]",
+  "timestamp": "2026-05-05T20:30:11.763Z",
+  "context": "Fatia monitor-runtime-contract concluída: ampliei o bypass determinístico de unauthorized-action apenas para diagnósticos/read-only/report-on [snip] nal do batch para validar runtime vivo. [truncated:+357 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Commitar verificação pós-reload + note/handoff limpos.",
-    "Continuar TASK-BUD-841 com uma fatia pequena: investigar monitor-runtime-contract read-only by [snip] sem tocar protected scope. [truncated:+21 chars]",
-    "Se nenhum novo falso positivo aparecer, preparar decision packet para fechamento parcial da lane."
+    "Commitar alteração monitor-runtime-contract + teste + board/handoff.",
+    "Rodar /reload para validar adoção runtime da nova lista read-only.",
+    "Após reload, verificar git limpo, classifyFail=0 e ausência de nova issue inválida em .project [snip] urgir novo falso positivo. [truncated:+109 chars]"
   ],
-  "blockers": [],
+  "blockers": [
+    "/reload necessário para validar runtime vivo da nova calibração monitor-runtime-contract."
+  ],
   "recent_validation": [
-    "context_watch_status -> level=ok percent=13 reloadGate=reload-not-required",
-    "monitors_compact_status -> classifyFail=0",
-    "safe_marker_check .pi/monitors/fragility.monitor.json -> schema fields present"
+    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 5 passed",
+    "node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed",
+    "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed"
   ],
   "recent_commits": [
-    "865ed1c2 fix(monitors): normalize issue write templates",
-    "11b8af60 chore(handoff): checkpoint monitor calibration batch"
+    "0b0983f4 chore(board): record post-reload monitor validation"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "verification:VER-BUD-1192",
-      "commit:865ed1c2"
+      "verification:VER-BUD-1193",
+      "commit:0b0983f4"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:25:58.872Z",
+    "generatedAtIso": "2026-05-05T20:30:11.763Z",
     "level": "ok",
-    "percent": 13,
+    "percent": 23,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:25:58.872Z",
+      "atIso": "2026-05-05T20:30:11.763Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 13,
+      "percent": 23,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
