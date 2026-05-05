@@ -49,6 +49,7 @@ Guias práticos para trabalhar com o ecossistema de agentes deste laboratório.
 | [lab-user-surface-parity.md](./lab-user-surface-parity.md) | Higiene de paridade entre superfícies do laboratório e distribuídas para usuários |
 | [github-repo-presence.md](./github-repo-presence.md) | Checklist de presença pública do repositório no GitHub: metadata, README e drift de docs/MDT |
 | [dependency-upstream-governance.md](./dependency-upstream-governance.md) | Governança para atribuir mudanças entre stack local, upstream Pi e dependências antes de decidir `assimilate|hold|reject` |
+| [agents-lab-editorial-pipeline.md](./agents-lab-editorial-pipeline.md) | Pipeline/template editorial para release notes e posts separando nossa stack, upstream Pi, deps e curadoria |
 | [i18n-intents.md](./i18n-intents.md) | Runbook de intents soft/hard de internacionalização para comunicação e artefatos |
 | [skill-guide-parity.md](./skill-guide-parity.md) | Protocolo de paridade guide-skill para discoverability e controle de drift documental |
 

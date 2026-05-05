@@ -18187,7 +18187,7 @@
     {
       "id": "TASK-BUD-812",
       "description": "Planejar pipeline de notas de release/blog do agents-lab: gerar material editorial sobre novidades do nosso ecossistema e do que usamos, a partir da trilha de mudanças local vs upstream.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-811"
@@ -18204,7 +18204,8 @@
         "produzir primeiro template de post ou release note interna"
       ],
       "milestone": "agents-lab-blog",
-      "notes": "[rationale:docs] Usuário conectou a trilha de updates/deps ao futuro blog do agents-lab para posts sobre o que há de novo no ecossistema próprio e nas ferramentas usadas.\n[provenance:human] source_task=none reason=Future agents-lab blog/release notes should reuse dependency-governance evidence."
+      "notes": "[rationale:docs] Usuário conectou a trilha de updates/deps ao futuro blog do agents-lab para posts sobre o que há de novo no ecossistema próprio e nas ferramentas usadas.\n[provenance:human] source_task=none reason=Future agents-lab blog/release notes should reuse dependency-governance evidence.\n[rationale:docs] Iniciando fatia local-safe: guia/template editorial que reutiliza a atribuição local-stack vs upstream/deps de TASK-BUD-811, sem publicar nem pesquisar externo automaticamente.\nClosed via VER-BUD-1164: created agents-lab editorial pipeline/template linked from guides index. [rationale:docs] Separates nossa-stack/upstream/deps/curadoria, requires evidence per item, and holds unsupported upstream claims.",
+      "verification": "VER-BUD-1164"
     }
   ]
 }

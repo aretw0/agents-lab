@@ -12696,6 +12696,15 @@
       "method": "inspection",
       "timestamp": "2026-05-05T11:00:00.843Z",
       "evidence": "Implemented dependency/upstream governance docs. Added docs/guides/dependency-upstream-governance.md with report/checklist covering package/lock diff, installed versions, source attribution (local-stack|upstream-pi|third-party-package|lockfile-resolution|mixed|unknown), external changelog/release evidence when available, local files changed, runtime risk, validation, rollback, and decision assimilate|hold|reject. Linked it from docs/guides/README.md and control-plane doctrine. Validation: safe_marker_check passed for guide, README and doctrine; i18n_lint_text pt-BR passed; git diff --check clean. [rationale:governance] Keeps dependency/upstream assimilation report-only by default and explicitly forbids auto-update and node_modules mutation."
+    },
+    {
+      "id": "VER-BUD-1164",
+      "target": "TASK-BUD-812",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-05T11:02:29.397Z",
+      "evidence": "Added docs/guides/agents-lab-editorial-pipeline.md with editorial categories separating nossa-stack, upstream-pi, deps-terceiros, curadoria, and misto; source-evidence requirements for each item; explicit rule not to assert upstream changes without verifiable evidence; and first internal release note/post template with sections for Nossa stack, Pi upstream, Dependências e terceiros, Curadoria, Itens em hold, safety notes, and pre-publication checklist. Linked from docs/guides/README.md. Validation: safe_marker_check passed for guide and README (backtick markers intentionally allowed for literal category names); i18n_lint_text pt-BR passed; git diff --check clean. [rationale:docs] Reuses TASK-BUD-811 attribution evidence so editorial output separates local work from upstream/dependency changes."
     }
   ]
 }
