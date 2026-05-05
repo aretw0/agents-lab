@@ -12579,6 +12579,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:26:09.415Z",
       "evidence": "Extracted provider budget snapshot resolution/cache helper into guardrails-core-provider-budget-governor.ts; guardrails-core.ts now uses a thin wrapper and dropped below critical line threshold. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 88 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2010 to 1984 lines while preserving cache/analyzeQuota behavior."
+    },
+    {
+      "id": "VER-BUD-1151",
+      "target": "TASK-BUD-798",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:28:38.307Z",
+      "evidence": "Extracted board query/filter/row mapping from project-board-surface.ts into project-board-query.ts and preserved public queryProjectTasks/queryProjectVerification exports and query result types. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 2157 to 1908 lines while preserving board_query behavior."
     }
   ]
 }

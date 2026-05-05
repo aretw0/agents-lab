@@ -17904,7 +17904,7 @@
     {
       "id": "TASK-BUD-798",
       "description": "Extrair query/filter/row mapping de project-board-surface para project-board-query, preservando board_query e smoke completo do board.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/project-board-surface.ts",
@@ -17917,7 +17917,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts por extração de leitura/query; sem tocar escopo protegido.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície ainda crítica do board."
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts por extração de leitura/query; sem tocar escopo protegido.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície ainda crítica do board.\nStarted after guardrails-core dropped below critical in AFK anti-bloat chain. [rationale:refactor] Move to project-board-surface extraction with full board smoke gate.\nClosed via VER-BUD-1151: board query/read mapping extracted to project-board-query.ts; board smoke passed (64 tests). [rationale:refactor] Public query contracts preserved.",
+      "verification": "VER-BUD-1151"
     },
     {
       "id": "TASK-BUD-799",
