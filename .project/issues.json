@@ -832,6 +832,18 @@
       "package": "pi-stack",
       "source": "monitor",
       "resolved_by": "false-positive-current-turn"
+    },
+    {
+      "id": "fragility-fragility-mot6fjxg",
+      "title": "Silent no-op: agent received action-oriented user request (\"prossiga\") but provided no substantive response, leaving the task unresolved without acknowledging the blockage or clarifying what action was expected.",
+      "body": "Monitor feedback reviewed in current turn: false positive. The previous turn responded substantively to \"prossiga\" by creating and completing TASK-BUD-846 with tests, commits, and handoff evidence. Resolved while retaining audit record.",
+      "location": ".pi/monitors/fragility.monitor.json",
+      "status": "resolved",
+      "category": "issue",
+      "priority": "high",
+      "package": "pi-stack",
+      "source": "monitor",
+      "resolved_by": "false-positive-current-turn"
     }
   ]
 }

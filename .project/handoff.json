@@ -1,12 +1,14 @@
 {
-  "timestamp": "2026-05-05T22:04:15.015Z",
+  "timestamp": "2026-05-05T22:05:06.178Z",
   "context": "Continued after TASK-BUD-828 without starting external TASK-BUD-842. Seeded and completed local-safe TASK-BUD-846: monitor_classify_failure_r [snip] ls. /mstatus full raw opt-in unchanged. [truncated:+116 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Commit this handoff checkpoint if dirty.",
     "Continue only bounded local-safe UI-cohesion follow-ups; do not auto-start TASK-BUD-842 extern [snip] ch without explicit focus. [truncated:+9 chars]",
     "Candidate next local-safe slice: migrate another small watch surface from inventory to summary [snip] serving details and tests. [truncated:+19 chars]"
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "TASK-BUD-842 remains external-influence research parked until explicit focus.",
     "Reload may be useful later to adopt changed extension sources in live pi; no l [snip] e regression observed. [truncated:+2 chars]"
   ],
@@ -46,6 +48,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "continue-bounded-or-compact"
+    },
+    {
+      "atIso": "2026-05-05T22:05:06.178Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
