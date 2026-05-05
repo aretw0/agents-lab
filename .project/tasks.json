@@ -19169,7 +19169,7 @@
     {
       "id": "TASK-BUD-857",
       "description": "Inventariar e planejar redução das surfaces TS acima de 1000 linhas sem extração de alto risco.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/research/pi-stack-line-budget-watch-2026-05.md"
@@ -19181,7 +19181,8 @@
         "não executar extrações nesta task"
       ],
       "milestone": "architecture-hygiene",
-      "notes": "[rationale:architecture] Seed local-safe sem entrevista: line-budget report mostrou recommendation=watch, 3 arquivos acima de 1000 e nenhum critical/extract.\n[provenance:human] source_task=none reason=Usuário sinalizou disposição para semanas de limpeza/alinhamento antes de evolução arquitetural forte."
+      "notes": "[rationale:architecture] Seed local-safe sem entrevista: line-budget report mostrou recommendation=watch, 3 arquivos acima de 1000 e nenhum critical/extract.\n[provenance:human] source_task=none reason=Usuário sinalizou disposição para semanas de limpeza/alinhamento antes de evolução arquitetural forte.\n[slice-start] Inventariando line-budget watch sem executar extrações: snapshot mostra 3 arquivos acima de 1000 linhas, 0 acima de extract/critical, e 17 surfaces restantes com JSON cru em content.\n[slice-complete] Line-budget watch inventory documented without code extraction. Rollback: remove docs/research/pi-stack-line-budget-watch-2026-05.md and this verification.",
+      "verification": "VER-BUD-1222"
     },
     {
       "id": "TASK-BUD-858",

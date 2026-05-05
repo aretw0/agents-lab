@@ -13218,6 +13218,15 @@
       "method": "test",
       "timestamp": "2026-05-05T22:55:39.715Z",
       "evidence": "Migrated structured_interview_plan in packages/pi-stack/extensions/guardrails-core-structured-interview-surface.ts to buildOperatorVisibleToolResponse using result.evidence as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts to assert the tool surface returns summary-first content and no raw JSON decision field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts -> 2 files passed, 8 tests passed."
+    },
+    {
+      "id": "VER-BUD-1222",
+      "target": "TASK-BUD-857",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+i18n-lint",
+      "timestamp": "2026-05-05T22:57:13.291Z",
+      "evidence": "Created docs/research/pi-stack-line-budget-watch-2026-05.md with line-budget inventory for packages/pi-stack/extensions/*.ts. It lists 3 files above 1000 lines, 0 above extract/critical thresholds, near-limit files, recommended small slices, validation/rollback cues, and non-goals. Validation: safe_marker_check matched 4/4 markers; i18n_lint_text expected pt-BR passed with 0 issues."
     }
   ]
 }
