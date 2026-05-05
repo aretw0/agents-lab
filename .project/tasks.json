@@ -19378,6 +19378,68 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:risk-control] Alguns outputs restantes envolvem board/provider/handoff; primeiro classificar para manter governança e evitar protected-scope implícito. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed local/protected-looking surfaces.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed project/provider/handoff surfaces requiring classification before migration.\n[auto-resume] Starting local-safe audit/migration slice. Protected model/provider/API implementation remains parked under TASK-BUD-849; this slice only audits/migrates operator-visible report formatting where local-safe.\n[slice-complete] Mixed board/stack/provider output audit complete. Local-safe read-only/report surfaces migrated; handoff_advisor remains protected-deferred because execute=true can call pi.setModel. Rollback: revert project-board-surface.ts, stack-sovereignty.ts, provider-readiness.ts, focal smoke tests, and docs/research/task-bud-866-mixed-output-audit-2026-05.md.",
       "verification": "VER-BUD-1231"
+    },
+    {
+      "id": "TASK-BUD-867",
+      "description": "Migrar guardrails-core-autonomy-lane report-only surfaces restantes para output summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-866"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content operador-visível não deve ser JSON bruto nas ferramentas report-only migradas",
+        "details deve preservar payload completo",
+        "não alterar seleção de tasks, protected-scope policy ou dispatch authorization"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:risk-control] Próximo grupo local-safe de JSON bruto após TASK-BUD-866; ferramentas são report-only e devem preservar semântica de governança.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=TASK-BUD-866 audit left raw JSON content in autonomy-lane report-only surfaces."
+    },
+    {
+      "id": "TASK-BUD-868",
+      "description": "Migrar ops_calibration_decision_packet para output summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p4",
+      "depends_on": [
+        "TASK-BUD-867"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "summary deve expor decisão/código/score sem JSON bruto",
+        "details deve preservar packet completo",
+        "não lançar, parar ou reiniciar processos"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:risk-control] Report-only ops calibration ainda usa JSON bruto em content; migração deve manter superfície sem autoridade operacional.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found remaining report-only ops calibration surface."
+    },
+    {
+      "id": "TASK-BUD-869",
+      "description": "Auditar quota-alerts, safe-boot e claude-code-adapter outputs remanescentes, separando migração local-safe de caminhos protegidos/executáveis.",
+      "status": "planned",
+      "priority": "p4",
+      "depends_on": [
+        "TASK-BUD-868"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-alerts.ts",
+        "packages/pi-stack/extensions/safe-boot.ts",
+        "packages/pi-stack/extensions/claude-code-adapter.ts",
+        "docs/research"
+      ],
+      "acceptance_criteria": [
+        "documentar classificação local-safe vs protected antes de migrar",
+        "não alterar safe-boot/settings, provider quotas ou subprocess execution semantics",
+        "migrar somente outputs classificados local-safe e cobertos por teste focal"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:risk-control] Esses outputs misturam alertas report-only com settings/subprocess/protected behavior; exigir classificação antes de qualquer migração.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found mixed remaining surfaces requiring classification."
     }
   ]
 }
