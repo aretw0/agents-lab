@@ -13011,6 +13011,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:51:33.268Z",
       "evidence": "Third contextual authorization hardening slice: unauthorized-action monitor calibration now explicitly treats authorized anti-bloat/refactor micro-extractions as local-safe when they preserve public contracts and declared file scope, while keeping backlog/policy tangents as separate focus. Existing stale prompts are upgraded, and instructions receive the same durable line. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts -> 100 passed. [rationale:communicable] This addresses the actual L3 authorization false-positive path without allowing protected scope, destructive actions, or unrelated policy/backlog drift."
+    },
+    {
+      "id": "VER-BUD-1199",
+      "target": "TASK-BUD-840",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-05T20:57:03.005Z",
+      "evidence": "Post-reload/runtime validation for authorized anti-bloat/refactor calibration: .pi/monitors/unauthorized-action/classify.md and .pi/monitors/unauthorized-action.instructions.json both contain the marker 'Explicitly authorized anti-bloat/refactor micro-extractions are local-safe when they preserve public contracts and stay within declared files; backlog/policy tangents still require separate focus.' Runtime gates: context_watch_status reloadGate=reload-not-required; monitors_compact_status classifyFail=0. Dependency metadata corrected with structured_io_json: TASK-BUD-840 no longer depends on TASK-BUD-837 because TASK-BUD-840 was created from TASK-BUD-837 friction and is intended to unblock that later anti-bloat work, not wait for it. [rationale:communicable] This closes the live/runtime validation blocker while preserving separation between guardrail hardening and the paused context-watchdog anti-bloat task."
     }
   ]
 }
