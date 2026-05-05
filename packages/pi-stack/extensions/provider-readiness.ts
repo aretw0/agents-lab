@@ -25,6 +25,7 @@ import {
   parseRouteModelRefs,
   safeNum,
 } from "./quota-visibility";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface ProviderReadinessEntry {
   provider: string;
@@ -269,10 +270,18 @@ export default function providerReadinessExtension(pi: ExtensionAPI) {
       const filtered = params?.providers?.length
         ? { ...matrix, entries: matrix.entries.filter((e) => params.providers!.includes(e.provider)) }
         : matrix;
-      return {
-        content: [{ type: "text", text: JSON.stringify(filtered, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "provider_readiness_matrix",
+        summary: [
+          "provider-readiness-matrix:",
+          `ready=${filtered.summary.ready}`,
+          `degraded=${filtered.summary.degraded}`,
+          `blocked=${filtered.summary.blocked}`,
+          `unconfigured=${filtered.summary.unconfigured}`,
+          `entries=${filtered.entries.length}`,
+        ].join(" "),
         details: filtered,
-      };
+      });
     },
   });
 

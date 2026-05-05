@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { buildSchedulerOwnershipSnapshot, resolveSchedulerGovernanceConfig } from "./scheduler-governance";
 import { evaluateCurationCoverage, readCurationCoverageRegistry } from "./curation-coverage";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type CapabilityCriticality = "high" | "medium" | "low";
 export type CapabilityStatus = "owned" | "coexisting" | "owner-missing" | "inactive";
@@ -208,10 +209,19 @@ export default function stackSovereigntyExtension(pi: ExtensionAPI) {
         },
       };
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "stack_sovereignty_status",
+        summary: [
+          "stack-sovereignty:",
+          `highRisk=${summary.highRisk}`,
+          `ownerMissing=${summary.ownerMissing}`,
+          `coexisting=${summary.coexisting}`,
+          `curationMissing=${curationCoverage.summary.missingFilter}`,
+          `activeForeignOwner=${schedSnapshot.activeForeignOwner ? "yes" : "no"}`,
+          `foreignTasks=${schedSnapshot.foreignTaskCount}`,
+        ].join(" "),
         details: payload,
-      };
+      });
     },
   });
 

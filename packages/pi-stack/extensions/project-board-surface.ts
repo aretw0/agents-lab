@@ -135,6 +135,7 @@ import {
   compactTaskCompleteToolResult,
   compactVerificationAppendToolResult,
 } from "./project-board-tool-formatting";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export {
   queryProjectTasks,
@@ -247,10 +248,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
         reason: "missing-or-invalid-entity",
         allowed: ["tasks", "verification"],
       };
-      return {
-        content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "board_query",
+        summary: `board-query: ok=no reason=${out.reason} allowed=${out.allowed.join("|")}`,
         details: out,
-      };
+      });
     }
 
     const status = typeof params?.status === "string" ? params.status : undefined;
@@ -269,10 +271,13 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
       entity === "tasks"
         ? queryProjectTasks(cwd, { status, search, milestone, needsRationale, rationaleRequired, rationaleConsistency, limit })
         : queryProjectVerification(cwd, { target, status, search, milestone, needsRationale, rationaleRequired, rationaleConsistency, limit });
-    return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+    const rowCount = Array.isArray(details.rows) ? details.rows.length : 0;
+    const cacheState = details.meta?.cacheHit ? "hit" : "miss";
+    return buildOperatorVisibleToolResponse({
+      label: "board_query",
+      summary: `board-query: entity=${entity} filtered=${details.filtered}/${details.total} rows=${rowCount} cache=${cacheState}`,
       details,
-    };
+    });
   };
 
   pi.registerTool({
@@ -360,10 +365,11 @@ export default function projectBoardSurfaceExtension(pi: ExtensionAPI) {
     ctx: { cwd: string },
   ) => {
     const details = buildProjectTaskDecisionPacket(ctx.cwd, String(params?.task_id ?? ""));
-    return {
-      content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+    return buildOperatorVisibleToolResponse({
+      label: "board_decision_packet",
+      summary: details.summary,
       details,
-    };
+    });
   };
 
   pi.registerTool({

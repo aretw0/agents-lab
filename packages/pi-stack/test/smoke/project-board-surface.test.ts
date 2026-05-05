@@ -1553,6 +1553,9 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.rows?.[0]?.id).toBe("TASK-A");
       expect((result.details as any)?.meta?.path).toContain("tasks.json");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("board-query: entity=tasks");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).not.toContain('\"rows\"');
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -1577,6 +1580,9 @@ describe("project-board-surface", () => {
       expect((result.details as any)?.readyForHumanDecision).toBe(true);
       expect((result.details as any)?.options).toEqual(["close", "keep-open", "defer"]);
       expect((result.details as any)?.evidence?.[0]?.verificationId).toBe("VER-1");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("decision-packet:");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).not.toContain('\"noAutoClose\"');
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -1969,6 +1975,9 @@ describe("project-board-surface", () => {
 
       expect((result.details as any)?.ok).toBe(false);
       expect((result.details as any)?.reason).toBe("missing-or-invalid-entity");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("board-query: ok=no reason=missing-or-invalid-entity");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String((result as any)?.content?.[0]?.text ?? "")).not.toContain('\"allowed\"');
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

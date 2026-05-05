@@ -1,14 +1,38 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildProviderReadinessMatrix } from "../../extensions/provider-readiness";
+import providerReadinessExtension, { buildProviderReadinessMatrix } from "../../extensions/provider-readiness";
 
 function makeWorkspace(settings: Record<string, unknown>): string {
   const dir = mkdtempSync(join(tmpdir(), "pi-provider-readiness-"));
   mkdirSync(join(dir, ".pi"), { recursive: true });
   writeFileSync(join(dir, ".pi", "settings.json"), JSON.stringify(settings));
   return dir;
+}
+
+function makeMockPi() {
+  return {
+    on: vi.fn(),
+    registerTool: vi.fn(),
+    registerCommand: vi.fn(),
+  } as unknown as Parameters<typeof providerReadinessExtension>[0];
+}
+
+function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+  const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([tool]) => tool?.name === name,
+  );
+  if (!call) throw new Error(`tool not found: ${name}`);
+  return call[0] as {
+    execute: (
+      toolCallId: string,
+      params: Record<string, unknown>,
+      signal: AbortSignal,
+      onUpdate: (update: unknown) => void,
+      ctx: { cwd: string },
+    ) => Promise<{ content?: Array<{ text?: string }>; details?: Record<string, unknown> }>;
+  };
 }
 
 describe("provider-readiness matrix", () => {
@@ -68,6 +92,37 @@ describe("provider-readiness matrix", () => {
       expect(entry).toBeDefined();
       expect(entry!.readiness).toBe("unconfigured");
       expect(entry!.modelRef).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("provider_readiness_matrix emits summary-first content with details preserved", async () => {
+    const dir = makeWorkspace({
+      piStack: {
+        quotaVisibility: {
+          routeModelRefs: {
+            "github-copilot": "github-copilot/claude-sonnet-4.6",
+          },
+        },
+      },
+    });
+    try {
+      const pi = makeMockPi();
+      providerReadinessExtension(pi);
+      const tool = getTool(pi, "provider_readiness_matrix");
+      const result = await tool.execute(
+        "tc-provider-readiness-matrix",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd: dir },
+      );
+
+      expect((result.details as any)?.summary?.ready).toBe(1);
+      expect(String(result.content?.[0]?.text ?? "")).toContain("provider-readiness-matrix: ready=1");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String(result.content?.[0]?.text ?? "")).not.toContain('\"entries\"');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

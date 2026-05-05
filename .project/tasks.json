@@ -19358,7 +19358,7 @@
     {
       "id": "TASK-BUD-866",
       "description": "Auditar project-board-surface e stack-sovereignty/provider-advisory outputs restantes, classificando local-safe vs protected antes de qualquer migração de content JSON bruto.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-863"
@@ -19376,7 +19376,8 @@
         "se houver migração, limitar a surfaces classificadas local-safe com testes focais"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:risk-control] Alguns outputs restantes envolvem board/provider/handoff; primeiro classificar para manter governança e evitar protected-scope implícito. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed local/protected-looking surfaces.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed project/provider/handoff surfaces requiring classification before migration."
+      "notes": "[rationale:risk-control] Alguns outputs restantes envolvem board/provider/handoff; primeiro classificar para manter governança e evitar protected-scope implícito. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed local/protected-looking surfaces.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed project/provider/handoff surfaces requiring classification before migration.\n[auto-resume] Starting local-safe audit/migration slice. Protected model/provider/API implementation remains parked under TASK-BUD-849; this slice only audits/migrates operator-visible report formatting where local-safe.\n[slice-complete] Mixed board/stack/provider output audit complete. Local-safe read-only/report surfaces migrated; handoff_advisor remains protected-deferred because execute=true can call pi.setModel. Rollback: revert project-board-surface.ts, stack-sovereignty.ts, provider-readiness.ts, focal smoke tests, and docs/research/task-bud-866-mixed-output-audit-2026-05.md.",
+      "verification": "VER-BUD-1231"
     }
   ]
 }

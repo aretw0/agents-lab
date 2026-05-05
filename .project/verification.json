@@ -13299,6 +13299,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:25:53.194Z",
       "evidence": "Migrated local status/diagnostic surfaces to summary-first operator-visible output: environment_doctor_status in environment-doctor.ts, scheduler_governance_status in scheduler-governance.ts, and context_watch_bootstrap in context-watchdog-checkpoint-bootstrap-surface.ts. context_watch_checkpoint already emitted compact summary and was left intact. Added/updated smoke tests for environment doctor, scheduler governance, and context bootstrap summary-first content with details preservation. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/environment-doctor-surface.test.ts packages/pi-stack/test/smoke/scheduler-governance.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts -> 4 files passed, 26 tests passed."
+    },
+    {
+      "id": "VER-BUD-1231",
+      "target": "TASK-BUD-866",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:34:57.758Z",
+      "evidence": "Audited mixed project-board/stack-sovereignty/provider-advisory raw JSON content surfaces and documented classification in docs/research/task-bud-866-mixed-output-audit-2026-05.md. Migrated local-safe report/read-only outputs only: board_query and board_decision_packet in project-board-surface.ts, stack_sovereignty_status in stack-sovereignty.ts, and provider_readiness_matrix in provider-readiness.ts now use summary-first operator-visible content with full details preserved. Explicitly deferred handoff_advisor because it contains protected execute=true provider switch path; no provider routing/cost/handoff behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/stack-sovereignty-surface.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 4 files passed, 74 tests passed."
     }
   ]
 }
