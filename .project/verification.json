@@ -12876,6 +12876,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:24:38.681Z",
       "evidence": "Reduzidos remanescentes watch-level sem executar pilot/remote/protected scope: project-board-surface.ts extraiu mutações para packages/pi-stack/extensions/project-board-mutations.ts (1075 -> 808 linhas); colony-pilot.ts extraiu API pública para packages/pi-stack/extensions/colony-pilot-public-api.ts e compactou imports runtime (1087 -> 887 linhas). Validação: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts => 2 files/146 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=8 recommendation=watch; git diff --check focal clean."
+    },
+    {
+      "id": "VER-BUD-1184",
+      "target": "TASK-BUD-838",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:31:24.839Z",
+      "evidence": "Reduzidas quota-visibility surfaces watch-level: quota-visibility.ts 1209 -> 931 por extração de session reader/billing; quota-visibility-model.ts 1287 -> 977 por extração de types/hard-pathway/output-policy. Novos módulos: quota-visibility-session-reader.ts, quota-visibility-billing.ts, quota-visibility-types.ts, quota-visibility-hard-pathway.ts, quota-visibility-output-policy.ts. Validação: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts => 3 files/76 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=6 recommendation=watch; git diff --check focal clean."
     }
   ]
 }

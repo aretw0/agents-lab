@@ -18749,7 +18749,7 @@
     {
       "id": "TASK-BUD-838",
       "description": "Reduzir quota-visibility surfaces acima de watch por extração de formatting/model helpers.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18767,7 +18767,8 @@
         "preservar comportamento read-only/sem auto-switch"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] quota visibility tem superfícies em watch (1209/1287) e contratos report-only; boa sequência local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] quota visibility tem superfícies em watch (1209/1287) e contratos report-only; boa sequência local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado por foco auto-resume; alvo local-safe: reduzir quota-visibility surfaces watch-level por extração coesa sem alterar budgets reais.\nConcluído: quota-visibility.ts e quota-visibility-model.ts agora <1000 linhas; aboveWatch caiu para 6.",
+      "verification": "VER-BUD-1184"
     },
     {
       "id": "TASK-BUD-839",

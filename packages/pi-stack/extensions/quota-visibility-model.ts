@@ -1,311 +1,43 @@
 import { homedir } from "node:os";
 import path from "node:path";
-
-export type ProviderModel = string;
-export type ProviderWindowHours = Record<string, number>;
-
-export interface UsageBreakdown {
-	input: number;
-	output: number;
-	cacheRead: number;
-	cacheWrite: number;
-	totalTokens: number;
-	costTotalUsd: number;
-}
-
-export interface SessionSample {
-	filePath: string;
-	startedAtIso: string;
-	userMessages: number;
-	assistantMessages: number;
-	toolResultMessages: number;
-	usage: UsageBreakdown;
-	byModel: Record<
-		ProviderModel,
-		UsageBreakdown & { assistantMessages: number }
-	>;
-}
-
-export interface ParsedSessionData {
-	session: SessionSample;
-	usageEvents: QuotaUsageEvent[];
-}
-
-export interface DailyAggregate {
-	day: string;
-	sessions: number;
-	assistantMessages: number;
-	tokens: number;
-	costUsd: number;
-}
-
-export interface ModelAggregate extends UsageBreakdown {
-	assistantMessages: number;
-}
-
-export interface QuotaUsageEvent {
-	timestampIso: string;
-	timestampMs: number;
-	dayLocal: string;
-	hourLocal: number;
-	provider: string;
-	account?: string;
-	providerAccountKey?: string;
-	model: string;
-	tokens: number;
-	costUsd: number;
-	requests: number;
-	sessionFile: string;
-}
-
-export interface RollingWindowSnapshot {
-	startIso: string;
-	endIso: string;
-	tokens: number;
-	costUsd: number;
-}
-
-export interface ProviderWindowInsight {
-	provider: string;
-	windowHours: number;
-	observedMessages: number;
-	observedTokens: number;
-	observedCostUsd: number;
-	recentWindow: RollingWindowSnapshot;
-	maxWindowInRange?: RollingWindowSnapshot;
-	peakHoursLocal: number[];
-	highestDemandWindowStartsLocal: number[];
-	lowestDemandWindowStartsLocal: number[];
-	suggestedStartHoursBeforePeakLocal: number[];
-	hourlyAvgTokens: number[];
-	notes: string[];
-}
-
-export interface ProviderBudgetConfig {
-	owner?: string;
-	period?: "weekly" | "monthly";
-	unit?: "tokens-cost" | "requests";
-	requestSharePolicy?: "fixed" | "remaining";
-	weeklyQuotaTokens?: number;
-	weeklyQuotaCostUsd?: number;
-	weeklyQuotaRequests?: number;
-	monthlyQuotaTokens?: number;
-	monthlyQuotaCostUsd?: number;
-	monthlyQuotaRequests?: number;
-	shareTokensPct?: number;
-	shareCostPct?: number;
-	shareRequestsPct?: number;
-	shareMonthlyTokensPct?: number;
-	shareMonthlyCostPct?: number;
-	shareMonthlyRequestsPct?: number;
-	warnPct?: number;
-	hardPct?: number;
-}
-
-export type ProviderBudgetMap = Record<string, ProviderBudgetConfig>;
-
-export interface ProviderBudgetStatus {
-	provider: string;
-	account?: string;
-	providerAccountKey?: string;
-	owner?: string;
-	period: "weekly" | "monthly";
-	unit: "tokens-cost" | "requests";
-	requestSharePolicy?: "fixed" | "remaining";
-	periodDays: number;
-	periodStartIso: string;
-	periodEndIso: string;
-	observedMessages: number;
-	observedTokens: number;
-	observedCostUsd: number;
-	observedRequests: number;
-	projectedTokensEndOfPeriod: number;
-	projectedCostUsdEndOfPeriod: number;
-	projectedRequestsEndOfPeriod: number;
-	periodTokensCap?: number;
-	periodCostUsdCap?: number;
-	periodRequestsCap?: number;
-	usedPctTokens?: number;
-	usedPctCost?: number;
-	usedPctRequests?: number;
-	projectedPctTokens?: number;
-	projectedPctCost?: number;
-	projectedPctRequests?: number;
-	warnPct: number;
-	hardPct: number;
-	state: "ok" | "warning" | "blocked";
-	notes: string[];
-}
-
-export type RoutingProfile = "cheap" | "balanced" | "reliable";
-
-export interface RouteAdvisory {
-	profile: RoutingProfile;
-	generatedAtIso: string;
-	recommendedProvider?: string;
-	state: "ok" | "warning" | "blocked";
-	reason: string;
-	blockedProviders: string[];
-	consideredProviders: Array<{
-		provider: string;
-		state: "ok" | "warning" | "blocked";
-		unit: "tokens-cost" | "requests";
-		projectedPressurePct: number;
-	}>;
-	noAutoSwitch: true;
-}
-
-export interface QuotaStatus {
-	source: {
-		sessionsRoot: string;
-		scannedFiles: number;
-		parsedSessions: number;
-		parsedEvents: number;
-		externalBillingEvents?: number;
-		externalBillingSource?: string;
-		windowDays: number;
-		generatedAtIso: string;
-	};
-	totals: {
-		sessions: number;
-		userMessages: number;
-		assistantMessages: number;
-		toolResultMessages: number;
-		tokens: number;
-		costUsd: number;
-	};
-	burn: {
-		activeDays: number;
-		avgTokensPerActiveDay: number;
-		avgTokensPerCalendarDay: number;
-		projectedTokensNext7d: number;
-		avgCostPerCalendarDay: number;
-		projectedCostNext7dUsd: number;
-	};
-	quota: {
-		weeklyTokens?: number;
-		weeklyCostUsd?: number;
-		usedPctTokens?: number;
-		projectedPctTokens?: number;
-		usedPctCost?: number;
-		projectedPctCost?: number;
-	};
-	providerBudgetPolicy: {
-		configuredProviders: number;
-		allocationWarnings: string[];
-	};
-	providerBudgets: ProviderBudgetStatus[];
-	daily: DailyAggregate[];
-	models: Array<{ model: string } & ModelAggregate>;
-	providerWindows: ProviderWindowInsight[];
-	topSessionsByTokens: SessionSample[];
-	topSessionsByCost: SessionSample[];
-}
-
-export interface HardPathwayMitigationProjection {
-	baseline: {
-		tokens: number;
-		costUsd: number;
-		requests: number;
-	};
-	projectedAfterHardPathway: {
-		tokens: number;
-		costUsd: number;
-		requests: number;
-	};
-	delta: {
-		tokensSaved: number;
-		costUsdSaved: number;
-		requestsSaved: number;
-		tokensSavedPct: number;
-		costUsdSavedPct: number;
-		requestsSavedPct: number;
-	};
-	assumptions: {
-		automationCoveragePct: number;
-		residualLlmPct: number;
-		riskBufferPct: number;
-	};
-}
-
-export function clampPct01(v: unknown, fallback: number): number {
-	const n = Number(v);
-	if (!Number.isFinite(n)) return fallback;
-	return Math.max(0, Math.min(1, n));
-}
-
-export function estimateHardPathwayMitigation(params: {
-	baselineTokens: number;
-	baselineCostUsd: number;
-	baselineRequests: number;
-	automationCoveragePct?: number;
-	residualLlmPct?: number;
-	riskBufferPct?: number;
-}): HardPathwayMitigationProjection {
-	const baselineTokens = Math.max(0, safeNum(params.baselineTokens));
-	const baselineCostUsd = Math.max(0, safeNum(params.baselineCostUsd));
-	const baselineRequests = Math.max(0, safeNum(params.baselineRequests));
-	const automationCoverage = clampPct01(params.automationCoveragePct, 0.8);
-	const residualLlm = clampPct01(params.residualLlmPct, 0.1);
-	const riskBuffer = clampPct01(params.riskBufferPct, 0.05);
-	const effectiveReduction = Math.max(
-		0,
-		Math.min(1, automationCoverage * Math.max(0, 1 - residualLlm - riskBuffer)),
-	);
-
-	const projectedTokens = baselineTokens * (1 - effectiveReduction);
-	const projectedCostUsd = baselineCostUsd * (1 - effectiveReduction);
-	const projectedRequests = baselineRequests * (1 - effectiveReduction);
-
-	const tokensSaved = Math.max(0, baselineTokens - projectedTokens);
-	const costUsdSaved = Math.max(0, baselineCostUsd - projectedCostUsd);
-	const requestsSaved = Math.max(0, baselineRequests - projectedRequests);
-
-	return {
-		baseline: {
-			tokens: baselineTokens,
-			costUsd: baselineCostUsd,
-			requests: baselineRequests,
-		},
-		projectedAfterHardPathway: {
-			tokens: projectedTokens,
-			costUsd: projectedCostUsd,
-			requests: projectedRequests,
-		},
-		delta: {
-			tokensSaved,
-			costUsdSaved,
-			requestsSaved,
-			tokensSavedPct: baselineTokens > 0 ? (tokensSaved / baselineTokens) * 100 : 0,
-			costUsdSavedPct: baselineCostUsd > 0 ? (costUsdSaved / baselineCostUsd) * 100 : 0,
-			requestsSavedPct: baselineRequests > 0 ? (requestsSaved / baselineRequests) * 100 : 0,
-		},
-		assumptions: {
-			automationCoveragePct: automationCoverage,
-			residualLlmPct: residualLlm,
-			riskBufferPct: riskBuffer,
-		},
-	};
-}
-
-export interface QuotaVisibilitySettings {
-	defaultDays?: number;
-	weeklyQuotaTokens?: number;
-	weeklyQuotaCostUsd?: number;
-	weeklyQuotaRequests?: number;
-	monthlyQuotaTokens?: number;
-	monthlyQuotaCostUsd?: number;
-	monthlyQuotaRequests?: number;
-	providerWindowHours?: ProviderWindowHours;
-	providerBudgets?: ProviderBudgetMap;
-	routeModelRefs?: Record<string, string>;
-	outputPolicy?: QuotaToolOutputPolicy;
-}
-
-export interface QuotaToolOutputPolicy {
-	compactLargeJson: boolean;
-	maxInlineJsonChars: number;
-}
+import type {
+	ProviderModel,
+	ProviderWindowHours,
+	UsageBreakdown,
+	SessionSample,
+	ParsedSessionData,
+	DailyAggregate,
+	ModelAggregate,
+	QuotaUsageEvent,
+	RollingWindowSnapshot,
+	ProviderWindowInsight,
+	ProviderBudgetConfig,
+	ProviderBudgetMap,
+	ProviderBudgetStatus,
+	RoutingProfile,
+	RouteAdvisory,
+	QuotaStatus,
+	HardPathwayMitigationProjection,
+} from "./quota-visibility-types";
+export type {
+	ProviderModel,
+	ProviderWindowHours,
+	UsageBreakdown,
+	SessionSample,
+	ParsedSessionData,
+	DailyAggregate,
+	ModelAggregate,
+	QuotaUsageEvent,
+	RollingWindowSnapshot,
+	ProviderWindowInsight,
+	ProviderBudgetConfig,
+	ProviderBudgetMap,
+	ProviderBudgetStatus,
+	RoutingProfile,
+	RouteAdvisory,
+	QuotaStatus,
+	HardPathwayMitigationProjection,
+} from "./quota-visibility-types";
 
 export const SETTINGS_PATH = ["piStack", "quotaVisibility"];
 export const DEFAULT_DAYS = 7;
@@ -314,11 +46,6 @@ export const SESSION_TS_RE = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3
 export const DEFAULT_PROVIDER_WINDOW_HOURS: ProviderWindowHours = {
 	anthropic: 5,
 	"openai-codex": 5,
-};
-
-export const DEFAULT_TOOL_OUTPUT_POLICY: QuotaToolOutputPolicy = {
-	compactLargeJson: true,
-	maxInlineJsonChars: 1200,
 };
 
 export const DEFAULT_COPILOT_BILLING_PATH = path.join(
@@ -333,43 +60,6 @@ export interface CopilotBillingExtractParams {
 	sourceFile: string;
 	windowStartMs: number;
 	windowEndMs?: number;
-}
-
-export function resolveQuotaToolOutputPolicy(
-	settings?: QuotaVisibilitySettings,
-): QuotaToolOutputPolicy {
-	const raw = settings?.outputPolicy;
-	const maxInline =
-		typeof raw?.maxInlineJsonChars === "number" &&
-		Number.isFinite(raw.maxInlineJsonChars)
-			? Math.max(400, Math.min(20_000, Math.floor(raw.maxInlineJsonChars)))
-			: DEFAULT_TOOL_OUTPUT_POLICY.maxInlineJsonChars;
-
-	return {
-		compactLargeJson: raw?.compactLargeJson !== false,
-		maxInlineJsonChars: maxInline,
-	};
-}
-
-export function formatQuotaToolJsonOutput(
-	label: string,
-	data: unknown,
-	policy: QuotaToolOutputPolicy = DEFAULT_TOOL_OUTPUT_POLICY,
-): string {
-	const pretty = JSON.stringify(data, null, 2);
-	if (!policy.compactLargeJson || pretty.length <= policy.maxInlineJsonChars) {
-		return pretty;
-	}
-
-	const maxPreview = Math.max(200, policy.maxInlineJsonChars - 120);
-	const preview = pretty.slice(0, maxPreview).trimEnd();
-	return [
-		`${label}: output compactado (${pretty.length} chars > ${policy.maxInlineJsonChars})`,
-		"preview:",
-		preview,
-		"...",
-		"(payload completo disponível em details)",
-	].join("\n");
 }
 
 export function safeNum(v: unknown): number {

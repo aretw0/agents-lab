@@ -13,15 +13,25 @@
  * - ~/.pi/agent/sessions (arquivos .jsonl recursivos)
  */
 
-import { createReadStream, promises as fs, readFileSync } from "node:fs";
+import { promises as fs, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import readline from "node:readline";
 import type {
 	ExtensionAPI,
 	ExtensionContext,
 } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
+import { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
+import {
+	type QuotaVisibilitySettings,
+} from "./quota-visibility-output-policy";
+import { parseSessionFile, walkJsonlFiles } from "./quota-visibility-session-reader";
+
+export { extractCopilotBillingUsageEvents } from "./quota-visibility-billing";
+export { estimateHardPathwayMitigation } from "./quota-visibility-hard-pathway";
+export { formatQuotaToolJsonOutput, resolveQuotaToolOutputPolicy } from "./quota-visibility-output-policy";
+export type { QuotaToolOutputPolicy, QuotaVisibilitySettings } from "./quota-visibility-output-policy";
 
 import {
 	DEFAULT_COPILOT_BILLING_PATH,
@@ -35,16 +45,13 @@ import {
 	computeWindowStartScores,
 	extractUsage,
 	formatBudgetStatusParts,
-	formatQuotaToolJsonOutput,
 	parseProviderAccountKey,
 	parseProviderBudgets,
 	parseProviderWindowHours,
 	parseRouteModelRefs,
 	parseSessionStartFromFilename,
-	resolveQuotaToolOutputPolicy,
 	safeNum,
 	shortProviderLabel,
-	estimateHardPathwayMitigation,
 	normalizeProvider,
 	normalizeAccountId,
 	resolveUsageEventAccount,
@@ -77,16 +84,13 @@ export {
 	computeWindowStartScores,
 	extractUsage,
 	formatBudgetStatusParts,
-	formatQuotaToolJsonOutput,
 	parseProviderAccountKey,
 	parseProviderBudgets,
 	parseProviderWindowHours,
 	parseRouteModelRefs,
 	parseSessionStartFromFilename,
-	resolveQuotaToolOutputPolicy,
 	safeNum,
 	shortProviderLabel,
-	estimateHardPathwayMitigation,
 	type CopilotBillingExtractParams,
 	type HardPathwayMitigationProjection,
 	type ProviderAccountRef,
@@ -100,40 +104,6 @@ export {
 	type RouteAdvisory,
 	type RoutingProfile,
 } from "./quota-visibility-model";
-
-async function walkJsonlFiles(root: string): Promise<string[]> {
-	const out: string[] = [];
-	const stack = [root];
-
-	while (stack.length > 0) {
-		const dir = stack.pop()!;
-		let entries: Array<{
-			name: string;
-			isDirectory: () => boolean;
-			isFile: () => boolean;
-		}> = [];
-		try {
-			entries = (await fs.readdir(dir, { withFileTypes: true })) as Array<{
-				name: string;
-				isDirectory: () => boolean;
-				isFile: () => boolean;
-			}>;
-		} catch {
-			continue;
-		}
-
-		for (const entry of entries) {
-			const p = path.join(dir, entry.name);
-			if (entry.isDirectory()) {
-				stack.push(p);
-				continue;
-			}
-			if (entry.isFile() && entry.name.endsWith(".jsonl")) out.push(p);
-		}
-	}
-
-	return out;
-}
 
 function readSettings(cwd: string): QuotaVisibilitySettings {
 	try {
@@ -168,256 +138,6 @@ function readSettings(cwd: string): QuotaVisibilitySettings {
 	} catch {
 		return {};
 	}
-}
-
-async function parseSessionFile(
-	filePath: string,
-): Promise<ParsedSessionData | undefined> {
-	const fileName = path.basename(filePath);
-	let startedAt = parseSessionStartFromFilename(fileName);
-
-	const usageTotal = makeUsage();
-	const byModel = new Map<string, ModelAggregate>();
-	const usageEvents: QuotaUsageEvent[] = [];
-
-	let userMessages = 0;
-	let assistantMessages = 0;
-	let toolResultMessages = 0;
-
-	const stream = createReadStream(filePath, { encoding: "utf8" });
-	const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
-
-	try {
-		for await (const line of rl) {
-			if (!line) continue;
-			let obj: any;
-			try {
-				obj = JSON.parse(line);
-			} catch {
-				continue;
-			}
-
-			if (obj?.type === "session") {
-				if (!startedAt && typeof obj.timestamp === "string") {
-					const d = new Date(obj.timestamp);
-					if (Number.isFinite(d.getTime())) startedAt = d;
-				}
-				continue;
-			}
-
-			if (obj?.type !== "message") continue;
-			const msg = obj.message ?? {};
-			const role = typeof msg.role === "string" ? msg.role : undefined;
-			if (role === "user") {
-				userMessages += 1;
-				continue;
-			}
-			if (role === "toolResult") {
-				toolResultMessages += 1;
-				continue;
-			}
-			if (role !== "assistant") continue;
-
-			assistantMessages += 1;
-
-			const provider = normalizeProvider(
-				typeof obj.provider === "string" ? obj.provider : msg.provider,
-			);
-			const account = resolveUsageEventAccount(
-				obj as Record<string, unknown>,
-				msg as Record<string, unknown>,
-			);
-			const providerAccountKey = buildProviderAccountKey(provider, account);
-			const model =
-				typeof obj.model === "string"
-					? obj.model
-					: typeof msg.model === "string"
-						? msg.model
-						: typeof obj.modelId === "string"
-							? obj.modelId
-							: typeof msg.modelId === "string"
-								? msg.modelId
-								: "unknown";
-			const modelKey = `${provider}/${model}`;
-
-			const usage = extractUsage(obj.usage ?? msg.usage);
-			mergeUsage(usageTotal, usage);
-
-			const curr = byModel.get(modelKey) ?? {
-				...makeUsage(),
-				assistantMessages: 0,
-			};
-			mergeUsage(curr, usage);
-			curr.assistantMessages += 1;
-			byModel.set(modelKey, curr);
-
-			const baseTime = startedAt ?? new Date();
-			const ts = parseTimestamp(obj.timestamp ?? msg.timestamp, baseTime);
-
-			const rawUsage = (obj.usage ?? msg.usage ?? {}) as Record<
-				string,
-				unknown
-			>;
-			const explicitRequests = safeNum(
-				rawUsage.requests ??
-					rawUsage.requestCount ??
-					rawUsage.request_count ??
-					rawUsage.premiumRequests ??
-					rawUsage.premium_requests,
-			);
-			const inferredRequests = provider === "github-copilot" ? 1 : 0;
-			const requests =
-				explicitRequests > 0 ? explicitRequests : inferredRequests;
-
-			usageEvents.push({
-				timestampIso: ts.toISOString(),
-				timestampMs: ts.getTime(),
-				dayLocal: toDayLocal(ts),
-				hourLocal: hourLocal(ts),
-				provider,
-				account,
-				providerAccountKey,
-				model,
-				tokens: usage.totalTokens,
-				costUsd: usage.costTotalUsd,
-				requests,
-				sessionFile: filePath,
-			});
-		}
-	} finally {
-		rl.close();
-		stream.destroy();
-	}
-
-	if (!startedAt) return undefined;
-
-	const byModelObj: Record<string, ModelAggregate> = {};
-	for (const [k, v] of byModel.entries()) byModelObj[k] = v;
-
-	return {
-		session: {
-			filePath,
-			startedAtIso: startedAt.toISOString(),
-			userMessages,
-			assistantMessages,
-			toolResultMessages,
-			usage: usageTotal,
-			byModel: byModelObj,
-		},
-		usageEvents,
-	};
-}
-
-function parseCopilotBillingTimestamp(raw: unknown): Date | undefined {
-	if (typeof raw !== "string") return undefined;
-	const ts = raw.trim();
-	if (!ts) return undefined;
-	const d = new Date(ts);
-	return Number.isFinite(d.getTime()) ? d : undefined;
-}
-
-function normalizeCopilotBillingModel(raw: unknown): string {
-	if (typeof raw !== "string") return "billing-adjustment";
-	const value = raw.trim();
-	return value.length > 0 ? value : "billing-adjustment";
-}
-
-function normalizeCopilotBillingRows(raw: unknown): Array<Record<string, unknown>> {
-	if (Array.isArray(raw)) {
-		return raw.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === "object");
-	}
-	if (!raw || typeof raw !== "object") return [];
-	const obj = raw as Record<string, unknown>;
-	const candidates = [obj.records, obj.items, obj.events, obj.data];
-	for (const candidate of candidates) {
-		if (!Array.isArray(candidate)) continue;
-		return candidate.filter((x): x is Record<string, unknown> => Boolean(x) && typeof x === "object");
-	}
-	return [];
-}
-
-export function extractCopilotBillingUsageEvents(
-	raw: unknown,
-	params: CopilotBillingExtractParams,
-): QuotaUsageEvent[] {
-	const rows = normalizeCopilotBillingRows(raw);
-	const endMs = Number.isFinite(params.windowEndMs)
-		? (params.windowEndMs as number)
-		: Date.now();
-	const out: QuotaUsageEvent[] = [];
-
-	for (const row of rows) {
-		const timestamp =
-			parseCopilotBillingTimestamp(row.timestampIso) ??
-			parseCopilotBillingTimestamp(row.timestamp) ??
-			parseCopilotBillingTimestamp(row.atIso) ??
-			parseCopilotBillingTimestamp(row.at) ??
-			parseCopilotBillingTimestamp(row.date);
-		if (!timestamp) continue;
-
-		const timestampMs = timestamp.getTime();
-		if (!Number.isFinite(timestampMs)) continue;
-		if (timestampMs < params.windowStartMs || timestampMs > endMs) continue;
-
-		const provider = normalizeProvider(row.provider ?? "github-copilot");
-		if (provider !== "github-copilot") continue;
-
-		const account = normalizeAccountId(
-			row.account ??
-				row.accountId ??
-				row.account_id ??
-				row.organization ??
-				row.org ??
-				row.orgId ??
-				row.org_id,
-		);
-		const providerAccountKey = buildProviderAccountKey(provider, account);
-
-		const costUsd = Math.max(
-			0,
-			safeNum(
-				row.costUsd ??
-					row.cost_usd ??
-					row.billedCostUsd ??
-					row.billed_cost_usd ??
-					row.amountUsd ??
-					row.amount_usd ??
-					row.cost,
-			),
-		);
-		const tokens = Math.max(
-			0,
-			safeNum(row.tokens ?? row.totalTokens ?? row.total_tokens),
-		);
-		const requests = Math.max(
-			0,
-			safeNum(
-				row.requests ??
-					row.requestCount ??
-					row.request_count ??
-					row.premiumRequests ??
-					row.premium_requests,
-			),
-		);
-		if (costUsd <= 0 && tokens <= 0 && requests <= 0) continue;
-
-		out.push({
-			timestampIso: timestamp.toISOString(),
-			timestampMs,
-			dayLocal: toDayLocal(timestamp),
-			hourLocal: hourLocal(timestamp),
-			provider,
-			account,
-			providerAccountKey,
-			model: normalizeCopilotBillingModel(row.model),
-			tokens,
-			costUsd,
-			requests,
-			sessionFile: params.sourceFile,
-		});
-	}
-
-	return out;
 }
 
 async function loadCopilotBillingUsageEvents(
