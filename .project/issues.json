@@ -804,6 +804,14 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-moryn7pa",
+      "description": "The agent produced an empty response, leaving the requested assessment unreported instead of stating findings or status.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }

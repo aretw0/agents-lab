@@ -12381,6 +12381,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T01:37:22.447Z",
       "evidence": "Extracted antiBloatCue composition into packages/pi-stack/extensions/guardrails-core-autonomy-lane-anti-bloat.ts while preserving autonomy_lane_status payload/summary contract. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts (54 passed). [rationale:risk-control] Cohesive extraction reduces surface growth while retaining report-only/fail-closed semantics."
+    },
+    {
+      "id": "VER-BUD-1129",
+      "target": "TASK-BUD-777",
+      "target_type": "task",
+      "status": "passed",
+      "method": "structured-marker-check",
+      "timestamp": "2026-05-05T01:54:47.245Z",
+      "evidence": "Added docs/research/monitor-provider-divergence-2026-05.md capturing the false-positive empty-response hypothesis, provider/model divergence suspicion, deterministic evidence requirements (JSONL/final chars/render correlation), and advisory-only operational decision. Validation: safe_marker_check matched 4/4 anchors including assistantFinalChars, monitor-context-divergence, and monitor advisory posture. [rationale:risk-control] Reframes monitor LLM output as untrusted advisory unless backed by deterministic evidence, reducing provider-sensitive hallucination risk."
     }
   ]
 }

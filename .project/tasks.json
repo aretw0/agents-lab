@@ -17450,6 +17450,30 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Após conectar o cue, a próxima fatia anti-bloat deve reduzir acoplamento na surface grande e preservar contrato report-only/fail-closed.\n[provenance:human] source_task=TASK-BUD-775 reason=Continuar anti-bloat governance com extração coesa imediatamente após TASK-BUD-775.\nClosed via VER-BUD-1128: antiBloatCue composition extracted to dedicated module; smoke passed (54 tests). [rationale:risk-control] Reduces autonomy surface growth without changing contract.",
       "verification": "VER-BUD-1128"
+    },
+    {
+      "id": "TASK-BUD-777",
+      "description": "Investigar falsos positivos de monitores classificados como empty-response quando há resposta visível, correlacionando provider/modelo (GitHub Copilot vs openai-codex) e contexto compactado/reload.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-776"
+      ],
+      "files": [
+        ".project/issues.json",
+        "docs/research/monitor-provider-divergence-2026-05.md",
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Registrar hipótese de divergência provider/modelo sem tratar feedback de monitor como fato bruto.",
+        "Definir evidência mínima para classificar empty-response: ausência real de assistant final/content no JSONL ou falha de renderização, não apenas heurística do classificador.",
+        "Propor caminho barato/determinístico para reduzir dependência de análise LLM vazia em monitores.",
+        "Manter monitores advisory e sem bloquear execução local-safe."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] O feedback recente de fragility alegou empty response apesar de haver resposta visível; precisamos tratar isso como possível falha de engenharia de contexto/provider e reduzir dependência de classificadores LLM frágeis.\n[provenance:human] source_task=none reason=Usuário relatou falso positivo após mover monitores para GitHub Copilot e control plane para openai-codex; quer backlog para investigar provider-sensitive monitor hallucination.\nClosed via VER-BUD-1129: provider-sensitive monitor false-positive hypothesis documented with deterministic evidence requirements. [rationale:risk-control] Prevents LLM-only monitor feedback from becoming operational fact.",
+      "verification": "VER-BUD-1129"
     }
   ]
 }
