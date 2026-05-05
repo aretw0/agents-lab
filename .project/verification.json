@@ -12345,6 +12345,15 @@
       "method": "test",
       "timestamp": "2026-05-05T00:38:28.711Z",
       "evidence": "Doutrina atualizada em `docs/guides/control-plane-operating-doctrine.md` com contrato explícito de batch lane: seção `Contrato hard/soft intent para batch lane`, distinção `hard-intent batch gates` vs `soft-intent batch preferences`, e critérios operacionais de quando continuar, checkpointar e pausar para decisão estratégica. Checklist de docs expandido em `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` para validar âncoras novas (incluindo `autonomy_lane_batch_preview`). Validação: `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (45 passed) e pack regressão local-safe (108 passed)."
+    },
+    {
+      "id": "VER-BUD-1125",
+      "target": "TASK-BUD-773",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T00:52:20.660Z",
+      "evidence": "Hard intent anti-bloat faseado adicionado em `docs/guides/control-plane-operating-doctrine.md` com meta arquitetural `<=1000 linhas`, thresholds `watch/extract/critical`, regras de quando extrair/adiar e formato canônico de exceção `bloat-exception`. Checklist smoke atualizado em `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` para validar anchors novas. Validação: `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (2 passed)."
     }
   ]
 }

@@ -780,6 +780,14 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-morwjk7e",
+      "description": "The agent returned an empty response, leaving the task with no reported outcome or explanation.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }

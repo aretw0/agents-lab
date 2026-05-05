@@ -17366,6 +17366,66 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] alinhar autonomia prolongada com governança explícita e previsível.\nContrato hard/soft intent para execução em lote documentado e coberto por checklist de anchors para prevenir drift.",
       "verification": "VER-BUD-1124"
+    },
+    {
+      "id": "TASK-BUD-773",
+      "description": "Estabelecer hard intent anti-bloat para surfaces TS: política faseada rumo a <=1000 linhas, com gatilhos de extração e exceções auditáveis.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Doutrina define meta futura <=1000 linhas por surface TS com rollout faseado (não-bloqueante imediato).",
+        "Regras explícitas: quando extrair, quando adiar, e como registrar exceção.",
+        "Checklist smoke valida anchors do hard intent anti-bloat."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] estabelecer hard intent anti-inchaço faseado reduz risco de regressão por refactors grandes e alinha evolução arquitetural para meta <=1000 linhas.\n[rationale:risk-control] Governar crescimento por thresholds explícitos (watch/extract/critical) e exceção auditável evita inchaço contínuo sem impor big-bang refactor.\nDireção pactuada: potência arquitetural com guardrail anti-inchaço explícito, sem refactor caótico.",
+      "verification": "VER-BUD-1125"
+    },
+    {
+      "id": "TASK-BUD-774",
+      "description": "Adicionar superfície report-only para orçamento de tamanho por arquivo (line budget snapshot) com recomendação extract|watch|ok e blockers/riscos.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-773"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts",
+        "docs/primitives/agents-as-tools-calibration-score.md"
+      ],
+      "acceptance_criteria": [
+        "Tool report-only expõe top arquivos acima do budget com severidade estável.",
+        "Sem mutação/dispatch implícito; authorization=none preservado.",
+        "Smoke cobre caminhos ok/watch/extract com payload estável."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] adicionar snapshot de orçamento de linhas torna a dívida de acoplamento observável e acionável antes de regressão estrutural.\n[rationale:risk-control] Precisamos visibilidade report-only de budget por arquivo para priorizar extrações com menor risco e maior retorno arquitetural."
+    },
+    {
+      "id": "TASK-BUD-775",
+      "description": "Conectar cue de anti-bloat ao fluxo de autonomia para sugerir wave de extração quando budgets excederem limite de fase.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-774"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "docs/guides/control-plane-operating-doctrine.md"
+      ],
+      "acceptance_criteria": [
+        "Status expõe cue curto anti-bloat sem quebrar contrato report-only/fail-closed.",
+        "Cue diferencia crescimento saudável vs wave de extração recomendada.",
+        "Smoke garante compatibilidade de summary/recommendationCode."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] conectar cue anti-bloat à autonomia reduz drift e força sinal precoce de extração antes de inchaço crítico.\n[rationale:risk-control] O status da lane deve refletir orçamento estrutural para orientar continuidade local-safe sem surpresa de manutenção tardia."
     }
   ]
 }
