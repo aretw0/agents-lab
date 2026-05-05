@@ -12597,6 +12597,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:30:40.329Z",
       "evidence": "Extracted board summary/compact tool formatting helpers from project-board-surface.ts into project-board-tool-formatting.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 1908 to 1835 lines without changing compact tool outputs."
+    },
+    {
+      "id": "VER-BUD-1153",
+      "target": "TASK-BUD-801",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:33:06.948Z",
+      "evidence": "Extracted context-watchdog status/command/compact-stage/deterministic-stop formatting helpers into context-watchdog-status-formatting.ts, preserving public re-exports. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 3 files passed, 74 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts while preserving context_watch_* summary contracts."
     }
   ]
 }

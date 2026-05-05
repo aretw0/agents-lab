@@ -17960,7 +17960,7 @@
     {
       "id": "TASK-BUD-801",
       "description": "Extrair formatadores/status summaries de context-watchdog para módulo coeso, preservando tools context_watch_* e smoke focal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -17974,7 +17974,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe para reduzir context-watchdog.ts por extração de formatting/status; reload pode ser batched.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em superfície crítica context-watchdog."
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir context-watchdog.ts por extração de formatting/status; reload pode ser batched.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em superfície crítica context-watchdog.\nStarted after TASK-BUD-799 in AFK anti-bloat chain; TASK-BUD-800 left planned because completion flow is more coupled and should be handled with a dedicated bounded slice. [rationale:refactor] Continue with simpler context-watchdog formatting/status extraction.\nClosed via VER-BUD-1153: status formatting extracted; context-watchdog smoke passed (74 tests). [rationale:refactor] Summary contracts preserved.",
+      "verification": "VER-BUD-1153"
     },
     {
       "id": "TASK-BUD-802",
