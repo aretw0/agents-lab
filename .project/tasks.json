@@ -18058,7 +18058,7 @@
     {
       "id": "TASK-BUD-806",
       "description": "Extrair helpers de config/summary do colony-pilot para módulo coeso local-safe, preservando smoke de parsers/preflight quando escolhido na wave.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "packages/pi-stack/extensions/colony-pilot.ts",
@@ -18072,7 +18072,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts passa antes de qualquer commit"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia planejada de menor prioridade em arquivo crítico; executar só se helpers puros forem identificados claramente, sem launching/background side effects.\n[provenance:human] source_task=TASK-BUD-795 reason=Seed AFK reserva para caso guardrails/context/board fiquem bloqueados."
+      "notes": "[rationale:refactor] Fatia planejada de menor prioridade em arquivo crítico; executar só se helpers puros forem identificados claramente, sem launching/background side effects.\n[provenance:human] source_task=TASK-BUD-795 reason=Seed AFK reserva para caso guardrails/context/board fiquem bloqueados.\nStarted after TASK-BUD-805 in AFK anti-bloat chain because colony-pilot.ts remains above critical line threshold. [rationale:refactor] Only extract pure summary/config helpers; do not launch/stop colonies or touch background process behavior.\nClosed via VER-BUD-1157: colony pilot help/check summary helpers extracted; parser/hatch smoke passed (86 tests). [rationale:refactor] No colony launch/stop/background behavior touched.",
+      "verification": "VER-BUD-1157"
     },
     {
       "id": "TASK-BUD-807",

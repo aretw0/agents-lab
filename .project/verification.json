@@ -12633,6 +12633,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:40:04.818Z",
       "evidence": "Extracted context-watchdog runtime status helpers (source mtime reader, threshold override reader, watchdog config reader, deferred lane queue count) into context-watchdog-runtime-status.ts while preserving post-reload/continuation behavior. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts => 3 files passed, 74 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts and keeps reload batched/non-suppressing continuity semantics intact."
+    },
+    {
+      "id": "VER-BUD-1157",
+      "target": "TASK-BUD-806",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:43:53.531Z",
+      "evidence": "Extracted colony-pilot help/check summary formatting into colony-pilot-summary.ts without launching colonies or changing runtime side effects. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts => 2 files passed, 86 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces colony-pilot.ts from 2128 to 2054 lines while preserving command/status formatting behavior."
     }
   ]
 }

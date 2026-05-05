@@ -171,6 +171,11 @@ import {
 	writeProjectSettings as writeProjectSettingsImpl,
 } from "./colony-pilot-settings";
 import {
+	buildColonyPilotCheckLines,
+	collectColonyPilotCheckModelIssues,
+	formatColonyPilotHelp,
+} from "./colony-pilot-summary";
+import {
 	formatProviderBudgetStatusLine as formatProviderBudgetStatusLineImpl,
 	type ProviderBudgetGateCacheEntry,
 	type ProviderBudgetGateSnapshot,
@@ -1324,30 +1329,7 @@ export default function (pi: ExtensionAPI) {
 			const caps = getCapabilitiesImpl(pi);
 
 			if (!cmd || cmd === "help") {
-				ctx.ui.notify(
-					[
-						"Usage: /colony-pilot <command>",
-						"",
-						"Commands:",
-						"  prep                          Mostrar plano recomendado do pilot",
-						"  run <goal>                    Prepara sequência manual: /monitors off -> /remote -> /colony <goal> (sem maxCost no /colony)",
-						"  stop [--restore-monitors]     Prepara sequência manual: /colony-stop all -> /remote stop [-> /monitors on]",
-						"  monitors <on|off>             Prepara comando de profile de monitores",
-						"  web <start|stop|open|status>  Controla/inspeciona sessão web",
-						"  tui                           Mostra como entrar/retomar sessão no TUI",
-						"  status                        Snapshot consolidado",
-						"  check                         Diagnóstico de capacidades + readiness de provider/model/budget para ant_colony",
-						"  hatch [check|doctor|apply] [default|phase2] [--advanced]  Onboarding progressivo (simple-first; escala avançada opt-in)",
-						"  models <status|template|apply> [copilot|codex|hybrid|factory-strict|factory-strict-copilot|factory-strict-hybrid]  Política granular de modelos por classe",
-						"  preflight                     Executa gates duros (capabilities + executáveis) antes da colony",
-						"  baseline [show|apply] [default|phase2]  Baseline de .pi/settings.json (phase2 = mais estrito)",
-						"  artifacts                     Mostra onde colony guarda states/worktrees para recovery",
-						"",
-						"Nota: o pi não expõe API confiável para uma extensão invocar slash commands de outra",
-						"extensão no mesmo runtime. O pilot prepara e guia execução manual assistida.",
-					].join("\n"),
-					"info",
-				);
+				ctx.ui.notify(formatColonyPilotHelp(), "info");
 				return;
 			}
 
@@ -1400,80 +1382,24 @@ export default function (pi: ExtensionAPI) {
 					deliveryPolicyConfig,
 				);
 
-				const lines = [
-					"colony-pilot capabilities",
-					`  monitors: ${caps.monitors ? "ok" : "missing"}`,
-					`  session-web: ${caps.sessionWeb ? "ok" : "missing"}`,
-					`  remote: ${caps.remote ? "ok" : "missing"}`,
-					`  colony: ${caps.colony ? "ok" : "missing"}`,
-					`  colony-stop: ${caps.colonyStop ? "ok" : "missing"}`,
-					"",
-					...formatModelReadiness(readiness),
-					"",
-					...formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
-					"",
-					...formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
-					"",
-					...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
-					"",
-					"project-task-sync:",
-					`  enabled: ${projectTaskSyncConfig.enabled ? "yes" : "no"}`,
-					`  createOnLaunch: ${projectTaskSyncConfig.createOnLaunch ? "yes" : "no"}`,
-					`  trackProgress: ${projectTaskSyncConfig.trackProgress ? "yes" : "no"}`,
-					`  markTerminalState: ${projectTaskSyncConfig.markTerminalState ? "yes" : "no"}`,
-					`  requireHumanClose: ${projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
-					`  taskIdPrefix: ${projectTaskSyncConfig.taskIdPrefix}`,
-					`  autoQueueRecoveryOnCandidate: ${projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
-					`  recoveryTaskSuffix: ${projectTaskSyncConfig.recoveryTaskSuffix}`,
-					"candidate-retention:",
-					`  enabled: ${candidateRetentionConfig.enabled ? "yes" : "no"}`,
-					`  maxEntries: ${candidateRetentionConfig.maxEntries}`,
-					`  maxAgeDays: ${candidateRetentionConfig.maxAgeDays}`,
-				];
-
-				if (missing.length > 0) {
-					lines.push(
-						"",
-						"Gaps detectados:",
-						...missing.map((m) => `  - ${capabilityGuidance(m)}`),
-					);
-				}
-
-				const modelIssues: string[] = [];
-				if (
-					readiness.currentModelStatus !== "ok" &&
-					readiness.currentModelStatus !== "unavailable"
-				) {
-					modelIssues.push(
-						"Current session model cannot run ant_colony defaults reliably.",
-					);
-				}
-				if (
-					readiness.defaultModelStatus !== "ok" &&
-					readiness.defaultModelStatus !== "not-set" &&
-					readiness.defaultModelStatus !== "unavailable"
-				) {
-					modelIssues.push(
-						"defaultProvider/defaultModel appears misconfigured or unauthenticated.",
-					);
-				}
-				if (policyEval.issues.length > 0) {
-					modelIssues.push(...policyEval.issues);
-				}
-				if (budgetPolicyConfig.enabled && budgetEval.issues.length > 0) {
-					modelIssues.push(...budgetEval.issues);
-				}
-
-				if (modelIssues.length > 0) {
-					lines.push(
-						"",
-						"Provider/model issues:",
-						...modelIssues.map((m) => `  - ${m}`),
-					);
-					lines.push(
-						"  - Use /model and/or configure piStack.colonyPilot.modelPolicy/budgetPolicy.",
-					);
-				}
+				const modelIssues = collectColonyPilotCheckModelIssues({
+					currentModelStatus: readiness.currentModelStatus,
+					defaultModelStatus: readiness.defaultModelStatus,
+					policyIssues: policyEval.issues,
+					budgetPolicyEnabled: budgetPolicyConfig.enabled,
+					budgetIssues: budgetEval.issues,
+				});
+				const lines = buildColonyPilotCheckLines({
+					caps,
+					missingGuidance: missing.map((m) => capabilityGuidance(m)),
+					modelReadinessLines: formatModelReadiness(readiness),
+					modelPolicyLines: formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
+					budgetPolicyLines: formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
+					deliveryPolicyLines: formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
+					projectTaskSyncConfig,
+					candidateRetentionConfig,
+					modelIssues,
+				});
 
 				const warn = missing.length > 0 || modelIssues.length > 0;
 				ctx.ui.notify(lines.join("\n"), warn ? "warning" : "info");
