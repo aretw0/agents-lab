@@ -19308,6 +19308,73 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Fatia local-safe para reduzir ruído em análises de sessão.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: analytics report-only ainda retorna JSON cru em content.\n[slice-start] Migrando session_analytics_query para summary-first via buildOperatorVisibleToolResponse; manter runQuery/details intactos e command humano separado.\n[slice-complete] session_analytics_query now emits compact session-analytics summary in content with full payload in details. Rollback: revert session-analytics.ts and session-analytics.test.ts changes.",
       "verification": "VER-BUD-1228"
+    },
+    {
+      "id": "TASK-BUD-864",
+      "description": "Migrar guardrails report-only surfaces restantes (macro-refactor, safe-mutation, delivery) para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-863"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-macro-refactor-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-safe-mutation-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-delivery-surface.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "tool content usa resumo humano curto, não JSON.stringify bruto",
+        "details preserva payload estruturado existente",
+        "testes focais cobrem pelo menos duas superfícies migradas"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe do pacote UI cohesion para reduzir JSON bruto em content sem alterar semântica de guardrails. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863; no protected dispatch/runtime behavior requested.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining guardrails report-only surfaces with JSON.stringify content."
+    },
+    {
+      "id": "TASK-BUD-865",
+      "description": "Migrar surfaces de status/diagnóstico local (environment-doctor, scheduler-governance, context-watch bootstrap checkpoint) para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-863"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/environment-doctor.ts",
+        "packages/pi-stack/extensions/scheduler-governance.ts",
+        "packages/pi-stack/extensions/context-watchdog-checkpoint-bootstrap-surface.ts",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "tool content usa resumo humano curto, não JSON.stringify bruto",
+        "details preserva payload estruturado existente",
+        "testes focais cobrem status/diagnóstico sem mutações operacionais"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe de UI cohesion para diagnósticos locais report-only; não executa manutenção nem scheduler. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining local status/diagnostic surfaces with JSON.stringify content."
+    },
+    {
+      "id": "TASK-BUD-866",
+      "description": "Auditar project-board-surface e stack-sovereignty/provider-advisory outputs restantes, classificando local-safe vs protected antes de qualquer migração de content JSON bruto.",
+      "status": "planned",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-863"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/stack-sovereignty.ts",
+        "packages/pi-stack/extensions/provider-readiness.ts",
+        "packages/pi-stack/extensions/handoff-advisor.ts",
+        "docs/research"
+      ],
+      "acceptance_criteria": [
+        "documentar quais outputs são local-safe e quais exigem foco protegido",
+        "não alterar provider routing/cost/handoff behavior",
+        "se houver migração, limitar a surfaces classificadas local-safe com testes focais"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:risk-control] Alguns outputs restantes envolvem board/provider/handoff; primeiro classificar para manter governança e evitar protected-scope implícito. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed local/protected-looking surfaces.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found mixed project/provider/handoff surfaces requiring classification before migration."
     }
   ]
 }
