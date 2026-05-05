@@ -2,6 +2,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent, type BackgroundProcessKind, type BackgroundProcessLifecycleEventKind, type BackgroundProcessMode, type BackgroundProcessStopSource } from "./guardrails-core-background-process";
 import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -193,10 +194,11 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         stacktraceCapture: typeof p.stacktrace_capture === "boolean" ? p.stacktrace_capture : undefined,
         healthcheckKnown: typeof p.healthcheck_known === "boolean" ? p.healthcheck_known : undefined,
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "background_process_plan",
+        summary: result.evidence,
         details: result,
-      };
+      });
     },
   });
 
@@ -236,10 +238,11 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         rehearsalSlices: typeof p.rehearsal_slices === "number" ? p.rehearsal_slices : undefined,
         stopSourceCoveragePct: typeof p.stop_source_coverage_pct === "number" ? p.stop_source_coverage_pct : undefined,
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "background_process_readiness_score",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 
@@ -271,10 +274,11 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         destructiveRestartRequested: asOptionalBoolean(p.destructive_restart_requested),
         protectedScopeRequested: asOptionalBoolean(p.protected_scope_requested),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "background_process_rehearsal_gate",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 

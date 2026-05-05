@@ -339,9 +339,28 @@ describe("background process control plan", () => {
   it("exposes readiness/rehearsal/lifecycle classifiers as read-only tools", async () => {
     const pi = makeMockPi();
     guardrailsCore(pi);
+    const planTool = getTool(pi, "background_process_plan");
     const readinessTool = getTool(pi, "background_process_readiness_score");
     const rehearsalTool = getTool(pi, "background_process_rehearsal_gate");
     const tool = getTool(pi, "background_process_lifecycle_plan");
+
+    const plan = await planTool.execute(
+      "tc-bg-plan",
+      {
+        kind: "backend",
+        requested_mode: "shared-service",
+        requested_port: 3000,
+        existing_service_reusable: true,
+        healthcheck_known: true,
+      },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+    expect(plan.details?.mode).toBe("background-process-control-plan");
+    expect(String(plan.content?.[0]?.text)).toContain("background-process-plan decision=ready-for-design");
+    expect(String(plan.content?.[0]?.text)).toContain("payload completo disponível em details");
+    expect(String(plan.content?.[0]?.text)).not.toContain('\"decision\"');
 
     const readiness = await readinessTool.execute(
       "tc-bg-readiness",
@@ -362,6 +381,9 @@ describe("background process control plan", () => {
     );
     expect(readiness.details?.recommendationCode).toBe("background-process-readiness-strong");
     expect(String(readiness.details?.summary)).toContain("background-process-readiness:");
+    expect(String(readiness.content?.[0]?.text)).toContain("background-process-readiness: ok=yes");
+    expect(String(readiness.content?.[0]?.text)).toContain("payload completo disponível em details");
+    expect(String(readiness.content?.[0]?.text)).not.toContain('\"recommendationCode\"');
 
     const rehearsal = await rehearsalTool.execute(
       "tc-bg-rehearsal",
@@ -379,6 +401,9 @@ describe("background process control plan", () => {
     );
     expect(rehearsal.details?.decision).toBe("ready");
     expect(rehearsal.details?.dispatchAllowed).toBe(false);
+    expect(String(rehearsal.content?.[0]?.text)).toContain("background-process-rehearsal: decision=ready");
+    expect(String(rehearsal.content?.[0]?.text)).toContain("payload completo disponível em details");
+    expect(String(rehearsal.content?.[0]?.text)).not.toContain('\"decision\"');
 
     const result = await tool.execute(
       "tc-bg-lifecycle",

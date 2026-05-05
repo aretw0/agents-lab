@@ -13254,6 +13254,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:04:28.343Z",
       "evidence": "Migrated tool_hygiene_scorecard and agents_as_tools_calibration_score in packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts to buildOperatorVisibleToolResponse using existing evidence/summary as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts to assert summary-first content and no raw JSON mode field in content for both surfaces. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts -> 2 files passed, 15 tests passed."
+    },
+    {
+      "id": "VER-BUD-1226",
+      "target": "TASK-BUD-861",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:08:38.627Z",
+      "evidence": "Migrated background_process_plan, background_process_readiness_score, and background_process_rehearsal_gate in packages/pi-stack/extensions/guardrails-core-background-process-surface.ts to buildOperatorVisibleToolResponse. Existing background_process_readiness_packet and background_process_lifecycle_plan already used summary/evidence-only content and retained structured details. Updated packages/pi-stack/test/smoke/guardrails-background-process.test.ts to assert summary-first content, details hint, and no raw JSON fields in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts -> 3 files passed, 16 tests passed."
     }
   ]
 }

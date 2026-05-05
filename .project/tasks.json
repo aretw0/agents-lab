@@ -19248,7 +19248,7 @@
     {
       "id": "TASK-BUD-861",
       "description": "Migrar background_process_* surfaces para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19264,7 +19264,8 @@
         "testes focais devem cobrir pelo menos duas decisões"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Fatia local-safe para futuro long-run/background readiness sem lançar processos.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: fortalecer runway antes de delegações/colônia."
+      "notes": "[rationale:operator-experience] Fatia local-safe para futuro long-run/background readiness sem lançar processos.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: fortalecer runway antes de delegações/colônia.\n[slice-start] Aplicando helper operator-visible em background_process_plan, background_process_readiness_score e background_process_rehearsal_gate; packet/lifecycle já estavam summary/evidence-only.\n[slice-complete] background process plan/readiness/rehearsal surfaces now use summary-first operator-visible output while preserving full details. Rollback: revert guardrails-core-background-process-surface.ts and guardrails-background-process.test.ts changes.",
+      "verification": "VER-BUD-1226"
     },
     {
       "id": "TASK-BUD-862",
