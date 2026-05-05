@@ -18506,7 +18506,7 @@
     {
       "id": "TASK-BUD-827",
       "description": "Analisar supressão de auto-resume por reload pendente e melhorar evidência/operador sem tangente imediata.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -18520,7 +18520,11 @@
         "validar com smoke focal post-reload antes de qualquer fechamento"
       ],
       "milestone": "guardrails-monitor-recalibration",
-      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente.\n[evidence:auto-resume-reload-suppression] Operador relatou pós-compactação forçada: auto-resume foi suprimido esperando reload; após reload manual, auto-resume veio em seguida. Operador suprimiu manualmente para registrar evidência. Isso confirma acoplamento reload-pendente -> supressão de auto-resume.\nFatia implementada: auto-resume bloqueado por reload pendente agora é comunicado como deferred (não suppressed) no reason/hint/notificação, preservando o contrato de continuar após /reload. Validação focal: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 58 tests passed. [rationale:operational] Reload pendente não é falha do loop; é handoff diferido para continuar após reload."
+      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente.\n[evidence:auto-resume-reload-suppression] Operador relatou pós-compactação forçada: auto-resume foi suprimido esperando reload; após reload manual, auto-resume veio em seguida. Operador suprimiu manualmente para registrar evidência. Isso confirma acoplamento reload-pendente -> supressão de auto-resume.\nFatia implementada: auto-resume bloqueado por reload pendente agora é comunicado como deferred (não suppressed) no reason/hint/notificação, preservando o contrato de continuar após /reload. Validação focal: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 58 tests passed. [rationale:operational] Reload pendente não é falha do loop; é handoff diferido para continuar após reload.\nCompleted after dependency hygiene fix: added completed prerequisite TASK-BUD-310. Validation: context-watchdog-post-reload smoke -> 4 passed; quality gate closeAllowed=yes; decision packet recommended close with no blockers. Added VER-BUD-1205.",
+      "depends_on": [
+        "TASK-BUD-310"
+      ],
+      "verification": "VER-BUD-1205"
     },
     {
       "id": "TASK-BUD-828",

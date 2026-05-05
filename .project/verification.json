@@ -13065,6 +13065,15 @@
       "method": "test",
       "timestamp": "2026-05-05T21:38:37.658Z",
       "evidence": "Completed TASK-BUD-837 anti-bloat target. context-watchdog.ts reduced from 1361 lines to 998 lines (<=1000) via bounded internal extractions: runtime state, post-reload auto-resume runtime, and auto-compact completion/error runtime, plus small import compaction. Public export surface was not broadly rewritten. Focal validation passed after final slice: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed. line_budget_snapshot: recommendation=watch, aboveExtract=0, aboveCritical=0. [rationale:refactor] Cohesive internal extraction preserved public contracts and reached the <=1000 line target."
+    },
+    {
+      "id": "VER-BUD-1205",
+      "target": "TASK-BUD-827",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T21:41:36.875Z",
+      "evidence": "Closed TASK-BUD-827 after dependency hygiene was repaired by linking completed prerequisite TASK-BUD-310 (post-reload stale-focus validation). Existing implementation evidence VER-BUD-1189 recalibrated reload-pending auto-resume copy from suppressed to deferred. Additional focal validation in this session: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 4 passed, confirming deferred post-reload intent is surfaced, dispatched after reload when gates are green, retained when blocked, and reported as deferred/not suppressed. Quality gate after dependency update: closeAllowed=yes; decision packet recommended close with no blockers. [rationale:operational] Reload-pending auto-resume is an intentional deferred continuation contract, not a failed/suppressed loop."
     }
   ]
 }

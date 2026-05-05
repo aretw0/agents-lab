@@ -1,48 +1,48 @@
 {
-  "timestamp": "2026-05-05T21:39:06.987Z",
-  "context": "TASK-BUD-837 completed. Final anti-bloat slice extracted auto-compact completion/error runtime into packages/pi-stack/extensions/context-watc [snip] elected by autonomy lane: TASK-BUD-827. [truncated:+421 chars]",
+  "timestamp": "2026-05-05T21:42:05.481Z",
+  "context": "TASK-BUD-827 completed. Dependency hygiene repaired by adding completed prerequisite TASK-BUD-310. Post-reload focal smoke passed: context-wa [snip] t/idle graceful-stop before hard limit. [truncated:+277 chars]",
   "current_tasks": [
-    "TASK-BUD-827"
+    "TASK-BUD-826"
   ],
   "next_actions": [
-    "Commit final TASK-BUD-837 auto-compact runtime extraction and board/handoff updates.",
-    "Start TASK-BUD-827 with a bounded local-safe slice after commit.",
-    "Keep reload batching: source changes likely require /reload later, but reloadGate is not requiring immediate reload."
+    "Commit TASK-BUD-827 board/handoff dependency/closure update.",
+    "Start TASK-BUD-826 with a bounded local-safe analysis/test slice around graceful stop before compact limit.",
+    "Keep reload batching; no immediate /reload unless a live regression appears."
   ],
   "blockers": [
-    "Runtime reload still needed later to adopt new context-watchdog source in live [snip] ve regression appears. [truncated:+57 chars]"
+    "Runtime reload still needed later to adopt context-watchdog source changes in [snip] ad preference applies. [truncated:+26 chars]"
   ],
   "recent_validation": [
-    "wc -l packages/pi-stack/extensions/context-watchdog.ts -> 998",
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] ation.test.ts -> 75 passed [truncated:+93 chars]",
-    "line_budget_snapshot -> recommendation=watch aboveExtract=0 aboveCritical=0"
+    "board_task_dependencies TASK-BUD-827 add TASK-BUD-310 -> ok",
+    "board_task_quality_gate TASK-BUD-827 -> closeAllowed=yes",
+    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 4 passed"
   ],
   "recent_commits": [
-    "a487a70c refactor(context-watch): extract post reload runtime",
-    "ffb3794e refactor(context-watch): extract runtime state"
+    "66a5da5e refactor(context-watch): extract auto compact runtime",
+    "a487a70c refactor(context-watch): extract post reload runtime"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-827",
+    "focus": "TASK-BUD-826",
     "canonical_links": [
+      "task:TASK-BUD-826",
       "task:TASK-BUD-827",
-      "task:TASK-BUD-837",
-      "verification:VER-BUD-1204",
-      "commit:a487a70c"
+      "task:TASK-BUD-310",
+      "verification:VER-BUD-1205"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T21:39:06.987Z",
+    "generatedAtIso": "2026-05-05T21:42:05.481Z",
     "level": "ok",
-    "percent": 31,
+    "percent": 36,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T21:39:06.987Z",
+      "atIso": "2026-05-05T21:42:05.481Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 31,
+      "percent": 36,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
