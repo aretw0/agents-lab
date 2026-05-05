@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-05-05T02:30:13.866Z",
-  "context": "Completed TASK-BUD-785: extracted guardrails-core web-routing and port-conflict helpers into guardrails-core-web-routing.ts. guardrails-core. [snip] eated dirty entry and remains unstaged. [truncated:+84 chars]",
+  "timestamp": "2026-05-05T02:33:16.145Z",
+  "context": "Completed TASK-BUD-786: extracted guardrails runtime config/pragmatic autonomy helpers into guardrails-core-runtime-config.ts. guardrails-cor [snip] unstaged entry outside intended slice. [truncated:+89 chars]",
   "next_actions": [
-    "commit TASK-BUD-785 extraction slice",
+    "commit TASK-BUD-786 extraction slice",
     "refresh line budget/autonomy status",
     "continue anti-bloat wave on next largest critical surface"
   ],
@@ -10,20 +10,20 @@
     "uncommitted monitor-created .project/issues.json entry remains unstaged"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-port-conflict.test.ts packages/pi-st [snip] icies.test.ts -> 10 passed [truncated:+102 chars]"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed"
   ],
   "recent_commits": [
-    "83922228 refactor(context): extract progress signals"
+    "e8bea80d refactor(guardrails): extract web routing helpers"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-785",
+    "focus": "TASK-BUD-786",
     "canonical_links": [
-      "task:TASK-BUD-785",
-      "commit:83922228"
+      "task:TASK-BUD-786",
+      "commit:e8bea80d"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T02:30:13.866Z",
+    "generatedAtIso": "2026-05-05T02:33:16.145Z",
     "level": "ok",
     "action": "continue",
     "recommendation": "continue",
@@ -34,7 +34,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T02:30:13.866Z",
+      "atIso": "2026-05-05T02:33:16.145Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -51,6 +51,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-785"
+    "TASK-BUD-786"
   ]
 }

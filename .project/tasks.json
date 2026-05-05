@@ -17658,6 +17658,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] antiBloatCue agora aponta guardrails-core.ts como maior superfície crítica; extrair helpers determinísticos de routing/porta é coeso e baixo risco.\n[provenance:human] source_task=TASK-BUD-784 reason=Continuar wave anti-bloat na maior superfície crítica após context-watchdog cair para terceiro lugar.\nClosed via VER-BUD-1137: web-routing/port-conflict helpers extracted; focal guardrails smokes passed (10 tests). [rationale:risk-control] Reduces guardrails-core critical surface while preserving public exports.",
       "verification": "VER-BUD-1137"
+    },
+    {
+      "id": "TASK-BUD-786",
+      "description": "Extrair runtime config/pragmatic autonomy helpers de guardrails-core para módulo coeso, preservando comandos /guardrails-config.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-785"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-runtime-config.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover specs, coercion/validation, snapshot/status/get/set e pragmatic autonomy prompt para módulo dedicado.",
+        "Preservar exports públicos de guardrails-core.ts usados por testes/consumidores.",
+        "Smokes de long-run intent queue/runtime config permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Extração coesa de tabela/configuração determinística da maior superfície crítica; validação focal cobre os contratos públicos.\n[provenance:human] source_task=TASK-BUD-785 reason=antiBloatCue continua em extract para guardrails-core.ts.\nClosed via VER-BUD-1138: runtime config/pragmatic autonomy helpers extracted; long-run intent queue/runtime config smoke passed (52 tests). [rationale:risk-control] Major reduction of guardrails-core critical surface while preserving public config contract.",
+      "verification": "VER-BUD-1138"
     }
   ]
 }
