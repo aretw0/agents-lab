@@ -19106,7 +19106,7 @@
     {
       "id": "TASK-BUD-854",
       "description": "Migrar shell_spoofing_coverage_score para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19121,7 +19121,8 @@
         "teste focal deve cobrir que content não contém JSON cru"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: surface report-only ainda emite JSON cru em content.\n[provenance:human] source_task=none reason=Usuário pediu seed do trabalho que falta sem depender dele; inventário local encontrou 20 occurrences de JSON cru."
+      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: surface report-only ainda emite JSON cru em content.\n[provenance:human] source_task=none reason=Usuário pediu seed do trabalho que falta sem depender dele; inventário local encontrou 20 occurrences de JSON cru.\n[slice-start] Aplicando helper operator-visible em shell_spoofing_coverage_score; score core permanece read-only/report-only.\n[slice-complete] shell_spoofing_coverage_score no longer emits raw JSON as primary content. Rollback: revert guardrails-core-shell-spoofing-score-surface.ts and guardrails-shell-spoofing-score-surface.test.ts changes.",
+      "verification": "VER-BUD-1219"
     },
     {
       "id": "TASK-BUD-855",

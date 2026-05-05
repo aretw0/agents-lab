@@ -13191,6 +13191,15 @@
       "method": "test",
       "timestamp": "2026-05-05T22:33:06.680Z",
       "evidence": "Migrated agent_spawn_readiness_gate in packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts to buildOperatorVisibleToolResponse using result.summary as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts to assert summary-first content and no raw JSON decision field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts -> 2 files passed, 8 tests passed."
+    },
+    {
+      "id": "VER-BUD-1219",
+      "target": "TASK-BUD-854",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T22:44:56.539Z",
+      "evidence": "Migrated shell_spoofing_coverage_score in packages/pi-stack/extensions/guardrails-core-shell-spoofing-score-surface.ts to buildOperatorVisibleToolResponse using result.summary as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts to assert summary-first content and no raw JSON recommendationCode field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts packages/pi-stack/test/smoke/guardrails-shell-spoofing-score.test.ts -> 3 files passed, 8 tests passed."
     }
   ]
 }

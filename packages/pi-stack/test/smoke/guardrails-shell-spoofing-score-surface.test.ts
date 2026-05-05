@@ -12,7 +12,7 @@ type RegisteredTool = {
     signal?: unknown,
     onUpdate?: unknown,
     ctx?: { cwd: string },
-  ) => { details: Record<string, unknown> };
+  ) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 function seedWorkspace(): string {
@@ -62,5 +62,8 @@ describe("guardrails shell spoofing score surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(result?.details.summary).toContain("shell-spoofing-coverage:");
+    expect(result?.content?.[0]?.text).toContain("shell-spoofing-coverage: ok=yes");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"recommendationCode\"');
   });
 });

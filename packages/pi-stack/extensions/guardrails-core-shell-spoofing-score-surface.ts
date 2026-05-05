@@ -4,6 +4,7 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { BASH_GUARD_POLICIES, evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
 import { buildShellSpoofingCoverageScore } from "./guardrails-core-shell-spoofing-score";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function hasTool(pi: ExtensionAPI, name: string): boolean {
   return pi.getAllTools().some((tool) => tool?.name === name);
@@ -55,10 +56,11 @@ export function registerGuardrailsShellSpoofingScoreSurface(pi: ExtensionAPI): v
         hasValidationMethodSurfaceTest: hasFile(cwd, "packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts"),
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "shell_spoofing_coverage_score",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }
