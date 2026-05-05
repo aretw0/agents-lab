@@ -14,6 +14,7 @@
  */
 
 import { createReadStream, promises as fs, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import type {

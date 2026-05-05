@@ -12516,6 +12516,15 @@
       "method": "test",
       "timestamp": "2026-05-05T03:45:14.765Z",
       "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts => 6 files passed, 103 tests passed. Extracted quota visibility formatting/route advisory helpers to quota-visibility-formatting.ts. [rationale:refactor] quota-visibility.ts reduced to 1209 lines, below extract threshold; public buildRouteAdvisory remains re-exported."
+    },
+    {
+      "id": "VER-BUD-1144",
+      "target": "TASK-BUD-792",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T03:53:28.975Z",
+      "evidence": "Fixed quota-visibility.ts by restoring import { homedir } from node:os for analyzeQuota after extraction. Validation: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 6 files passed, 102 tests passed. [rationale:fix] Addresses reload/runtime error 'homedir is not defined' observed via guardrails-core provider budget governor path."
     }
   ]
 }

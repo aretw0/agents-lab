@@ -17784,6 +17784,24 @@
       "milestone": "anti-bloat",
       "notes": "[rationale:refactor] Segunda fatia local-safe de quota-visibility para retirar formatação/route advisory da superfície principal sem mudança de contrato.\n[provenance:human] source_task=TASK-BUD-790 reason=Continuação anti-bloat local-safe para baixar quota-visibility.ts abaixo de extract após extração do modelo.\nClosed via VER-BUD-1143: quota formatting/route advisory extracted; related quota smoke pack passed (103 tests). [rationale:refactor] quota-visibility.ts now 1209 lines, below extract threshold.",
       "verification": "VER-BUD-1143"
+    },
+    {
+      "id": "TASK-BUD-792",
+      "description": "Corrigir regressão pós-extração em quota-visibility: analyzeQuota ainda depende de homedir após reload, preservando runtime guardrails-core.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "quota-visibility.ts importa homedir ou remove a dependência quebrada",
+        "guardrails-core deixa de falhar com 'homedir is not defined' ao chamar analyzeQuota",
+        "smoke quota/guardrails relacionado passa"
+      ],
+      "milestone": "anti-bloat-fix",
+      "notes": "[rationale:fix] Regressão criada pela extração quota: analyzeQuota usa homedir para localizar ~/.pi/agent/sessions; correção local-safe e sem escopo protegido.\n[provenance:human] source_task=TASK-BUD-791 reason=Usuário reportou erro de extensão após reload: homedir is not defined em analyzeQuota.\nClosed via VER-BUD-1144: restored homedir import in quota-visibility.ts; related quota/guardrails smoke passed (102 tests). [rationale:fix] Fixes post-reload extension regression reported by user.",
+      "verification": "VER-BUD-1144"
     }
   ]
 }
