@@ -17702,6 +17702,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] antiBloatCue agora aponta project-board-surface.ts como maior superfície crítica; extrair modelo/rationale é coeso e testável.\n[provenance:human] source_task=TASK-BUD-786 reason=Continuar wave anti-bloat na maior superfície crítica atual.\nClosed via VER-BUD-1139: project-board model/cache/rationale helpers extracted; project-board-surface smoke passed (64 tests). [rationale:refactor] Cohesive extraction reduces critical board surface while preserving query/update/complete contracts.",
       "verification": "VER-BUD-1139"
+    },
+    {
+      "id": "TASK-BUD-788",
+      "description": "Extrair helpers de dependência/qualidade do project-board-surface para módulo coeso de governança do board.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-787"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-governance-helpers.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover diagnósticos de dependência, sinais protected/broad-task e scoring helpers para módulo dedicado.",
+        "Preservar exports públicos e contratos das ferramentas board dependency/quality/planning.",
+        "Smoke project-board-surface permanece verde."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:refactor] Continuação local-safe da wave anti-bloat no project-board-surface; extrair helpers puros reduz superfície crítica sem alterar I/O do board.\n[provenance:human] source_task=TASK-BUD-787 reason=antiBloatCue permanece em extract e project-board-surface ainda está critical.\nClosed via VER-BUD-1140: governance helper extraction complete; project-board-surface smoke passed (64 tests). [rationale:refactor] Pure helper extraction preserves board dependency/quality/planning contracts.",
+      "verification": "VER-BUD-1140"
     }
   ]
 }

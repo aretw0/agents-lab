@@ -12480,6 +12480,15 @@
       "method": "test",
       "timestamp": "2026-05-05T02:53:25Z",
       "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 64 passed. project-board model/cache/rationale helpers extracted to project-board-model.ts; public board surface smoke preserved. [rationale:refactor] Cohesive extraction reduces project-board-surface.ts from ~2995 to 2467 lines while preserving query/update/complete contracts."
+    },
+    {
+      "id": "VER-BUD-1140",
+      "target": "TASK-BUD-788",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T03:59:51Z",
+      "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 64 passed. Extracted dependency diagnostics, protected/broad-task signals, partial-verification detection, and scoring helpers to project-board-governance-helpers.ts. [rationale:refactor] Pure helper extraction reduces project-board-surface.ts to 2324 lines while preserving board dependency/quality/planning contracts."
     }
   ]
 }
