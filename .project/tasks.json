@@ -19270,7 +19270,7 @@
     {
       "id": "TASK-BUD-862",
       "description": "Migrar subagent_readiness_status para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19285,7 +19285,8 @@
         "teste focal deve cobrir content sem JSON cru"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Fatia local-safe alinhada à futura trilha agents-as-tools/delegação.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: readiness de subagentes precisa ser legível antes de loops maiores."
+      "notes": "[rationale:operator-experience] Fatia local-safe alinhada à futura trilha agents-as-tools/delegação.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: readiness de subagentes precisa ser legível antes de loops maiores.\n[slice-start] Migrando subagent_readiness_status para buildOperatorVisibleToolResponse com formatResult como resumo humano e details preservado.\n[slice-complete] subagent_readiness_status now emits compact readiness summary in content with full payload in details. Rollback: revert subagent-readiness.ts and subagent-readiness.test.ts changes.",
+      "verification": "VER-BUD-1227"
     },
     {
       "id": "TASK-BUD-863",

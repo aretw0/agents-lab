@@ -12,6 +12,7 @@ import path from "node:path";
 import process from "node:process";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 const STRICT_REQUIRED_PILOT_PACKAGES = [
 	"@ifi/oh-pi-ant-colony",
@@ -555,10 +556,11 @@ export default function subagentReadinessExtension(pi: ExtensionAPI) {
 		}),
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const result = runSubagentReadiness(ctx.cwd, params as SubagentReadinessOptions);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "subagent_readiness_status",
+				summary: formatResult(result),
 				details: result,
-			};
+			});
 		},
 	});
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +7,7 @@ import {
 	recommendationForReadinessCheck,
 	runSubagentReadiness,
 } from "../../extensions/subagent-readiness";
+import subagentReadinessExtension from "../../extensions/subagent-readiness";
 
 function makeWorkspace(): string {
 	const dir = mkdtempSync(join(tmpdir(), "pi-subagent-readiness-"));
@@ -24,6 +25,30 @@ function msg(role: string, text: string): string {
 	});
 }
 
+function makeMockPi() {
+	const rawPi = {
+		registerTool: vi.fn(),
+		registerCommand: vi.fn(),
+	};
+	return rawPi as unknown as Parameters<typeof subagentReadinessExtension>[0];
+}
+
+function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+	const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+		([tool]) => tool?.name === name,
+	);
+	if (!call) throw new Error(`tool not found: ${name}`);
+	return call[0] as {
+		execute: (
+			toolCallId: string,
+			params: Record<string, unknown>,
+			signal: AbortSignal,
+			onUpdate: (update: unknown) => void,
+			ctx: { cwd: string },
+		) => Promise<{ details?: Record<string, unknown>; content?: Array<{ text?: string }> }>;
+	};
+}
+
 describe("subagent-readiness extension", () => {
 	it("extractPackageName parses scoped npm specs", () => {
 		expect(extractPackageName("npm:@ifi/pi-web-remote@1.2.3")).toBe(
@@ -37,6 +62,59 @@ describe("subagent-readiness extension", () => {
 	it("returns actionable recommendation hints by check name", () => {
 		expect(recommendationForReadinessCheck("colony-min-complete-signals")).toContain("COMPLETE");
 		expect(recommendationForReadinessCheck("pilot-package:@ifi/oh-pi-ant-colony")).toContain("pi:pilot:on:project");
+	});
+
+	it("subagent_readiness_status emits summary-first content with details preserved", async () => {
+		const dir = makeWorkspace();
+		try {
+			writeFileSync(
+				join(dir, ".sandbox", "pi-agent", "settings.json"),
+				JSON.stringify(
+					{
+						packages: [
+							{ source: "npm:@ifi/oh-pi-ant-colony" },
+							{ source: "npm:@ifi/pi-web-remote" },
+						],
+					},
+					null,
+					2,
+				) + "\n",
+			);
+			writeFileSync(
+				join(
+					dir,
+					".sandbox",
+					"pi-agent",
+					"sessions",
+					"--fixture--",
+					"session-tool.jsonl",
+				),
+				[
+					msg("user", "turn1"),
+					msg("user", "turn2"),
+					msg("user", "turn3"),
+					msg("assistant", "[COLONY_SIGNAL:COMPLETE] done"),
+				].join("\n") + "\n",
+			);
+
+			const pi = makeMockPi();
+			subagentReadinessExtension(pi);
+			const tool = getTool(pi, "subagent_readiness_status");
+			const result = await tool.execute(
+				"tc-subagent-readiness-status",
+				{ source: "isolated", strict: true, tailBytes: 200_000, days: 1, limit: 1 },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd: dir },
+			);
+
+			expect(result.details?.ready).toBe(true);
+			expect(String(result.content?.[0]?.text)).toContain("subagent-readiness: READY");
+			expect(String(result.content?.[0]?.text)).toContain("payload completo disponível em details");
+			expect(String(result.content?.[0]?.text)).not.toContain('\"ready\"');
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
 	});
 
 	it("strict readiness passes with complete signal and required pilot packages", () => {
