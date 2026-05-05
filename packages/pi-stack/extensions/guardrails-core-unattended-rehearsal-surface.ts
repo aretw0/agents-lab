@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateUnattendedRehearsalGate, summarizeUnattendedRehearsalGate } from "./guardrails-core-unattended-rehearsal";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -37,10 +38,11 @@ export function registerGuardrailsUnattendedRehearsalSurface(pi: ExtensionAPI): 
         unresolvedBlockers: asNumber(p.unresolved_blockers, 0),
       });
       const result = { ...gate, summary: summarizeUnattendedRehearsalGate(gate) };
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "unattended_rehearsal_gate",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

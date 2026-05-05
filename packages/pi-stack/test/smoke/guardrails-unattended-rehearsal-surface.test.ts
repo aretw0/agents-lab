@@ -3,7 +3,7 @@ import { registerGuardrailsUnattendedRehearsalSurface } from "../../extensions/g
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 describe("guardrails unattended rehearsal surface", () => {
@@ -27,5 +27,8 @@ describe("guardrails unattended rehearsal surface", () => {
     expect(result?.details.ready).toBe(true);
     expect(result?.details.decision).toBe("ready-for-canary");
     expect(result?.details.summary).toBe("unattended-rehearsal: decision=ready-for-canary ready=yes score=6/6 blockers=none");
+    expect(result?.content?.[0]?.text).toContain("unattended-rehearsal: decision=ready-for-canary ready=yes");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });

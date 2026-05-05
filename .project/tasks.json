@@ -19127,7 +19127,7 @@
     {
       "id": "TASK-BUD-855",
       "description": "Migrar unattended_rehearsal_gate para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19142,7 +19142,8 @@
         "teste focal deve cobrir que content não contém JSON cru"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: gate report-only de unattended readiness deve ser legível antes de loops longos.\n[provenance:human] source_task=none reason=Usuário pediu seed de limpeza/alinhamento para evoluir com arquitetura mais forte."
+      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: gate report-only de unattended readiness deve ser legível antes de loops longos.\n[provenance:human] source_task=none reason=Usuário pediu seed de limpeza/alinhamento para evoluir com arquitetura mais forte.\n[slice-start] Aplicando helper operator-visible em unattended_rehearsal_gate; avaliação core permanece read-only/report-only.\n[slice-complete] unattended_rehearsal_gate no longer emits raw JSON as primary content. Rollback: revert guardrails-core-unattended-rehearsal-surface.ts and guardrails-unattended-rehearsal-surface.test.ts changes.",
+      "verification": "VER-BUD-1220"
     },
     {
       "id": "TASK-BUD-856",
