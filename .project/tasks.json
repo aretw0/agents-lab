@@ -18545,7 +18545,7 @@
     {
       "id": "TASK-BUD-829",
       "description": "Extrair surface/orquestração coesa de guardrails-core para limpar último aboveExtract.",
-      "status": "in-progress",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -18560,7 +18560,8 @@
         "manter protected-scope sem auto-dispatch"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Após TASK-BUD-825, line_budget_snapshot mostra aboveExtract=1; o alvo restante é guardrails-core.ts.\n[provenance:human] source_task=none reason=Continuação pedida pelo usuário após backlogar lane de UI."
+      "notes": "[rationale:anti-bloat] Após TASK-BUD-825, line_budget_snapshot mostra aboveExtract=1; o alvo restante é guardrails-core.ts.\n[provenance:human] source_task=none reason=Continuação pedida pelo usuário após backlogar lane de UI.\nConcluído: event surface extraída, último aboveExtract limpo; line budget agora recommendation=watch acimaExtract=0.",
+      "verification": "VER-BUD-1178"
     },
     {
       "id": "TASK-BUD-830",

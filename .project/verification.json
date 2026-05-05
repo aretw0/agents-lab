@@ -12822,6 +12822,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T14:19:17.774Z",
       "evidence": "Extraído registerContextWatchdogStatusSurface/buildContextWatchdogApplyPreset para packages/pi-stack/extensions/context-watchdog-status-surface.ts; context-watchdog.ts caiu para 1357 linhas (<1400 acceptance) e line_budget_snapshot reduziu aboveExtract para 1. Validação focal: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts => 3 files/75 tests passed."
+    },
+    {
+      "id": "VER-BUD-1178",
+      "target": "TASK-BUD-829",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:02:53.881Z",
+      "evidence": "Extraído registerGuardrailsCoreEventSurface/guardrailsCoreHandleStructuredMutationBloat para packages/pi-stack/extensions/guardrails-core-event-surface.ts; guardrails-core.ts caiu para 1395 linhas (<1400) e line_budget_snapshot ficou aboveCritical=0 aboveExtract=0 aboveWatch=12 recommendation=watch. Validação focal: pnpm vitest --run guardrails-core-orchestrator-budget, guardrails-core-hardening-reexport, guardrails-long-run-intent-queue => 3 files/55 tests passed; validação adicional i18n/provider-budget/shell-route/bash-policies => 4 files/13 tests passed; git diff --check focal clean."
     }
   ]
 }
