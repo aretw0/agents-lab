@@ -3,6 +3,7 @@ import { Type } from "@sinclair/typebox";
 import { readFileSync } from "node:fs";
 import { relative, resolve, sep } from "node:path";
 import { evaluateTextMarkerCheck } from "./guardrails-core-marker-check";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -43,7 +44,11 @@ export function registerGuardrailsMarkerCheckSurface(pi: ExtensionAPI): void {
           summary: "marker-check: ok=no matched=0/0 missing=path commandSensitive=none",
           error: "path-outside-workspace-or-empty",
         };
-        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }], details: result };
+        return buildOperatorVisibleToolResponse({
+          label: "safe_marker_check",
+          summary: result.summary,
+          details: result,
+        });
       }
 
       const text = readFileSync(resolve(ctx.cwd, rawPath), "utf8");
@@ -54,10 +59,11 @@ export function registerGuardrailsMarkerCheckSurface(pi: ExtensionAPI): void {
         caseSensitive: asBool(p.case_sensitive, true),
         forbidCommandSensitiveMarkers: asBool(p.forbid_command_sensitive_markers, true),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "safe_marker_check",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

@@ -13101,6 +13101,15 @@
       "method": "test",
       "timestamp": "2026-05-05T21:56:42.546Z",
       "evidence": "Added packages/pi-stack/extensions/operator-visible-output.ts with buildOperatorVisibleToolResponse helper. It defaults to summary-first content with details preserved, fail-closes when summary is missing, supports explicit bounded raw JSON opt-in, and compacts long opt-in JSON without leaking the full payload. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts -> 4 passed."
+    },
+    {
+      "id": "VER-BUD-1209",
+      "target": "TASK-BUD-845",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T21:58:14.464Z",
+      "evidence": "Applied buildOperatorVisibleToolResponse to safe_marker_check in packages/pi-stack/extensions/guardrails-core-marker-check-surface.ts. Content now shows the stable marker-check summary plus details hint instead of raw JSON; details still preserve full structured result. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts -> 3 files passed, 11 tests passed."
     }
   ]
 }

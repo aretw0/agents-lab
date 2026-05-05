@@ -18915,7 +18915,7 @@
     {
       "id": "TASK-BUD-845",
       "description": "Aplicar o padrão operator-visible em uma primeira superfície local-safe de alto ruído e validar smoke focal.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -18931,7 +18931,8 @@
         "registrar rollback simples"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para limitar a implementação inicial a uma superfície e reduzir risco de regressão.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário."
+      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para limitar a implementação inicial a uma superfície e reduzir risco de regressão.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário.\n[slice-start] Primeira superfície escolhida: safe_marker_check, por ser local-safe, operator-visible e atualmente retornar JSON cru no content principal.\n[slice-complete] safe_marker_check migrated to summary-first content with full structured details retained. Rollback: revert guardrails-core-marker-check-surface.ts and guardrails-marker-check-surface.test.ts changes.",
+      "verification": "VER-BUD-1209"
     }
   ]
 }

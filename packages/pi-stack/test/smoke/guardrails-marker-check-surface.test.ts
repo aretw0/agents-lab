@@ -6,7 +6,7 @@ import { registerGuardrailsMarkerCheckSurface } from "../../extensions/guardrail
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 describe("guardrails marker check surface", () => {
@@ -30,6 +30,9 @@ describe("guardrails marker check surface", () => {
 
     expect(result?.details.ok).toBe(true);
     expect(result?.details.summary).toBe("marker-check: ok=yes matched=1/1 missing=none commandSensitive=none");
+    expect(result?.content?.[0]?.text).toContain("marker-check: ok=yes matched=1/1 missing=none commandSensitive=none");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('"matched"');
   });
 
   it("blocks paths outside the workspace", () => {
@@ -47,5 +50,7 @@ describe("guardrails marker check surface", () => {
 
     expect(result?.details.ok).toBe(false);
     expect(result?.details.error).toBe("path-outside-workspace-or-empty");
+    expect(result?.content?.[0]?.text).toContain("marker-check: ok=no");
+    expect(result?.content?.[0]?.text).not.toContain('"error"');
   });
 });
