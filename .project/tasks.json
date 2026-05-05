@@ -17520,6 +17520,29 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Recorrência do falso positivo mostra que a mitigação precisa sair do julgamento LLM e virar evidência estrutural barata do JSONL.\n[provenance:human] source_task=TASK-BUD-777 reason=Segundo alerta falso de empty-response após resposta visível; usuário quer reduzir dependência de análises vazias de monitores.\nClosed via VER-BUD-1131: deterministic JSONL evidence primitive added for empty-response vs monitor-context-divergence; smoke and marker checks passed. [rationale:risk-control] Removes LLM-only monitor claim from operational truth path.",
       "verification": "VER-BUD-1131"
+    },
+    {
+      "id": "TASK-BUD-780",
+      "description": "Extrair helpers de auto-resume-after-reload do context-watchdog para módulo coeso, reduzindo surface crítica sem alterar contrato público.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-779"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-reload-intent.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover AutoResumeAfterReloadIntent types/helpers para módulo dedicado.",
+        "context-watchdog.ts preserva re-exports públicos e comportamento post-reload.",
+        "Smokes context-watchdog/post-reload permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] antiBloatCue ainda aponta context-watchdog.ts como superfície crítica; extrair helpers de reload intent é coeso e baixo risco.\n[provenance:human] source_task=TASK-BUD-778 reason=Continuar wave anti-bloat local-safe indicada por antiBloatCue.\nClosed via VER-BUD-1132: auto-resume-after-reload helpers extracted; post-reload/context smokes passed (62 tests). [rationale:risk-control] Reduces context-watchdog bloat while preserving public contract.",
+      "verification": "VER-BUD-1132"
     }
   ]
 }
