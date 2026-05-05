@@ -53,6 +53,75 @@ export function collectColonyPilotCheckModelIssues(input: {
 	return modelIssues;
 }
 
+export function buildColonyPilotHatchLines(input: {
+	mode: "simple" | "advanced";
+	ready: boolean;
+	readinessLines: string[];
+	runbookLines: string[];
+}): string[] {
+	const lines = [
+		"colony-pilot hatch",
+		`mode: ${input.mode} ${input.mode === "simple" ? "(default simple-first, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
+		...input.readinessLines,
+		"",
+		...input.runbookLines,
+	];
+	if (input.mode === "simple") lines.push("", "scale opt-in: /colony-pilot hatch check --advanced");
+	if (!input.ready) lines.push("", "ação sugerida: /colony-pilot hatch apply default");
+	return lines;
+}
+
+export function buildColonyPilotStatusLines(input: {
+	snapshot: string;
+	caps: ColonyPilotCapabilitiesSummary;
+	modelReadinessLines: string[];
+	modelPolicyLines: string[];
+	budgetPolicyLines: string[];
+	deliveryPolicyLines: string[];
+	projectTaskSyncConfig: {
+		enabled: boolean;
+		taskIdPrefix: string;
+		requireHumanClose: boolean;
+		autoQueueRecoveryOnCandidate: boolean;
+		recoveryTaskSuffix: string;
+	};
+	candidateRetentionConfig: {
+		enabled: boolean;
+		maxEntries: number;
+		maxAgeDays: number;
+	};
+}): string[] {
+	return [
+		input.snapshot,
+		"",
+		"capabilities:",
+		`  monitors=${input.caps.monitors ? "ok" : "missing"}`,
+		`  session-web=${input.caps.sessionWeb ? "ok" : "missing"}`,
+		`  remote=${input.caps.remote ? "ok" : "missing"}`,
+		`  colony=${input.caps.colony ? "ok" : "missing"}`,
+		`  colony-stop=${input.caps.colonyStop ? "ok" : "missing"}`,
+		"",
+		...input.modelReadinessLines,
+		"",
+		...input.modelPolicyLines,
+		"",
+		...input.budgetPolicyLines,
+		"",
+		...input.deliveryPolicyLines,
+		"",
+		"project-task-sync:",
+		`  enabled: ${input.projectTaskSyncConfig.enabled ? "yes" : "no"}`,
+		`  taskIdPrefix: ${input.projectTaskSyncConfig.taskIdPrefix}`,
+		`  requireHumanClose: ${input.projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
+		`  autoQueueRecoveryOnCandidate: ${input.projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
+		`  recoveryTaskSuffix: ${input.projectTaskSyncConfig.recoveryTaskSuffix}`,
+		"candidate-retention:",
+		`  enabled: ${input.candidateRetentionConfig.enabled ? "yes" : "no"}`,
+		`  maxEntries: ${input.candidateRetentionConfig.maxEntries}`,
+		`  maxAgeDays: ${input.candidateRetentionConfig.maxAgeDays}`,
+	];
+}
+
 export function buildColonyPilotCheckLines(input: {
 	caps: ColonyPilotCapabilitiesSummary;
 	missingGuidance: string[];

@@ -172,6 +172,8 @@ import {
 } from "./colony-pilot-settings";
 import {
 	buildColonyPilotCheckLines,
+	buildColonyPilotHatchLines,
+	buildColonyPilotStatusLines,
 	collectColonyPilotCheckModelIssues,
 	formatColonyPilotHelp,
 } from "./colony-pilot-summary";
@@ -1519,24 +1521,12 @@ export default function (pi: ExtensionAPI) {
 						.length,
 				});
 
-				const lines = [
-					"colony-pilot hatch",
-					`mode: ${hatchMode} ${hatchMode === "simple" ? "(default simple-first, no swarm CTA)" : "(explicit opt-in for swarm/delegation)"}`,
-					...formatHatchReadiness(readiness),
-					"",
-					...formatHatchRunbook(hatchMode),
-				];
-
-				if (hatchMode === "simple") {
-					lines.push(
-						"",
-						"scale opt-in: /colony-pilot hatch check --advanced",
-					);
-				}
-
-				if (!readiness.ready) {
-					lines.push("", "ação sugerida: /colony-pilot hatch apply default");
-				}
+				const lines = buildColonyPilotHatchLines({
+					mode: hatchMode,
+					ready: readiness.ready,
+					readinessLines: formatHatchReadiness(readiness),
+					runbookLines: formatHatchRunbook(hatchMode),
+				});
 
 				ctx.ui.setStatus?.(
 					"colony-pilot-hatch",
@@ -1570,35 +1560,16 @@ export default function (pi: ExtensionAPI) {
 					"running",
 					deliveryPolicyConfig,
 				);
-				const lines = [
-					formatPilotSnapshot(state),
-					"",
-					"capabilities:",
-					`  monitors=${caps.monitors ? "ok" : "missing"}`,
-					`  session-web=${caps.sessionWeb ? "ok" : "missing"}`,
-					`  remote=${caps.remote ? "ok" : "missing"}`,
-					`  colony=${caps.colony ? "ok" : "missing"}`,
-					`  colony-stop=${caps.colonyStop ? "ok" : "missing"}`,
-					"",
-					...formatModelReadiness(readiness),
-					"",
-					...formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
-					"",
-					...formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
-					"",
-					...formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
-					"",
-					"project-task-sync:",
-					`  enabled: ${projectTaskSyncConfig.enabled ? "yes" : "no"}`,
-					`  taskIdPrefix: ${projectTaskSyncConfig.taskIdPrefix}`,
-					`  requireHumanClose: ${projectTaskSyncConfig.requireHumanClose ? "yes" : "no"}`,
-					`  autoQueueRecoveryOnCandidate: ${projectTaskSyncConfig.autoQueueRecoveryOnCandidate ? "yes" : "no"}`,
-					`  recoveryTaskSuffix: ${projectTaskSyncConfig.recoveryTaskSuffix}`,
-					"candidate-retention:",
-					`  enabled: ${candidateRetentionConfig.enabled ? "yes" : "no"}`,
-					`  maxEntries: ${candidateRetentionConfig.maxEntries}`,
-					`  maxAgeDays: ${candidateRetentionConfig.maxAgeDays}`,
-				];
+				const lines = buildColonyPilotStatusLines({
+					snapshot: formatPilotSnapshot(state),
+					caps,
+					modelReadinessLines: formatModelReadiness(readiness),
+					modelPolicyLines: formatPolicyEvaluationImpl(modelPolicyConfig, policyEval),
+					budgetPolicyLines: formatBudgetPolicyEvaluationImpl(budgetPolicyConfig, budgetEval),
+					deliveryPolicyLines: formatDeliveryPolicyEvaluation(deliveryPolicyConfig, deliveryEval),
+					projectTaskSyncConfig,
+					candidateRetentionConfig,
+				});
 				const warn =
 					!policyEval.ok || (budgetPolicyConfig.enabled && !budgetEval.ok);
 				ctx.ui.notify(lines.join("\n"), warn ? "warning" : "info");
