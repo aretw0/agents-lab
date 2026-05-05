@@ -1,15 +1,17 @@
 {
-  "timestamp": "2026-05-05T21:43:58.287Z",
+  "timestamp": "2026-05-05T21:49:12.132Z",
   "context": "TASK-BUD-826 completed as evidence/calibration closure. Dependency hygiene repaired by linking completed sibling TASK-BUD-827. Verification V [snip] n for operator-visible session blocks). [truncated:+376 chars]",
   "current_tasks": [
     "TASK-BUD-828"
   ],
   "next_actions": [
+    "Context-watch action: level=checkpoint 57% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Commit TASK-BUD-826 board/handoff dependency/closure update.",
     "Start TASK-BUD-828 with a bounded local-safe inventory/first-slice, avoiding protected scopes.",
     "Keep reload batching; /reload needed later to adopt context-watchdog source changes."
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "Runtime reload still needed later to adopt context-watchdog source changes; ba [snip] ad preference applies. [truncated:+8 chars]"
   ],
   "recent_validation": [
@@ -50,6 +52,32 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "continue-bounded"
+    },
+    {
+      "atIso": "2026-05-05T21:46:00.076Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 58,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-05T21:49:12.132Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 57,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ]
 }
