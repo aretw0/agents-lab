@@ -12651,6 +12651,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:46:54.856Z",
       "evidence": "Extracted colony-pilot hatch/status summary formatting into colony-pilot-summary.ts without touching launch/stop/background behavior. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts => 2 files passed, 86 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces colony-pilot.ts from 2054 to 2025 lines, close to critical threshold, with only formatting movement."
+    },
+    {
+      "id": "VER-BUD-1159",
+      "target": "TASK-BUD-800",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T10:34:08.410Z",
+      "evidence": "Extracted board verification append/task completion flow into project-board-completion.ts, keeping project-board-surface.ts as a thin wrapper that injects updateProjectTaskBoard. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 1835 to 1664 lines while preserving board_verification_append and board_task_complete contracts."
     }
   ]
 }

@@ -17942,7 +17942,7 @@
     {
       "id": "TASK-BUD-800",
       "description": "Extrair fluxo append/complete verification do project-board-surface para módulo de completion, preservando board_task_complete e gates de rationale.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/project-board-surface.ts",
@@ -17955,7 +17955,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe: isolar completion/verification flow do board sem mudar semântica de fechamento.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat para project-board-surface.ts."
+      "notes": "[rationale:refactor] Fatia local-safe: isolar completion/verification flow do board sem mudar semântica de fechamento.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat para project-board-surface.ts.\nClosed via VER-BUD-1159: project board completion flow extracted; project-board smoke passed (64 tests). [rationale:refactor] Surface now delegates completion to project-board-completion.ts.",
+      "verification": "VER-BUD-1159"
     },
     {
       "id": "TASK-BUD-801",
@@ -18116,6 +18117,26 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:refactor] Fatia emergente local-safe para completar redução de colony-pilot.ts após TASK-BUD-806, mantendo comportamento runtime intacto.\n[provenance:human] source_task=TASK-BUD-806 reason=colony-pilot.ts permaneceu em 2054 linhas, ainda acima do limiar critical.\nClosed via VER-BUD-1158: hatch/status summaries extracted; parser/hatch smoke passed (86 tests). [rationale:refactor] colony-pilot.ts now close to critical threshold with no operational side effects touched.",
       "verification": "VER-BUD-1158"
+    },
+    {
+      "id": "TASK-BUD-809",
+      "description": "Corrigir regressão runtime do comando /lane-queue: resolveLoopActivationMarkers is not defined.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "/lane-queue não lança erro runtime `resolveLoopActivationMarkers is not defined`",
+        "import/export ou extração relacionada a resolveLoopActivationMarkers fica consistente após reload",
+        "smoke focal de lane queue/autonomy passa antes de commit",
+        "registrar verificação com evidência do erro e da validação"
+      ],
+      "milestone": "runtime-regression",
+      "notes": "[rationale:bugfix] Reportado pelo usuário após tentar usar /lane-queue: `Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined`. Resolver depois como regressão runtime, sem misturar com a wave anti-bloat atual.\n[provenance:human] source_task=none reason=User-reported runtime error to add to board for later."
     }
   ]
 }
