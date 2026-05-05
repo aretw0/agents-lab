@@ -12759,6 +12759,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:24:08.416Z",
       "evidence": "Extracted guardrails-config command registration from packages/pi-stack/extensions/guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-runtime-config-surface.ts with runtime.onConfigChanged callback preserving immediate refresh of long-run, pragmatic autonomy, and i18n config plus lane status update. Also moved small command helpers normalizeCmdName and shouldAnnounceStrictInteractiveMode into packages/pi-stack/extensions/guardrails-core-command-utils.ts while preserving public export for shouldAnnounceStrictInteractiveMode. guardrails-core.ts reduced from 1984 to 1897 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 3 files passed, 56 tests passed; safe_marker_check passed for runtime-config surface and command utils; git diff --check clean; line_budget_snapshot aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Removes another near-critical orchestrator surface while batching reload-needing runtime changes."
+    },
+    {
+      "id": "VER-BUD-1171",
+      "target": "TASK-BUD-819",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:40:54.070Z",
+      "evidence": "Extracted colony_pilot_status, colony_pilot_artifacts, colony_pilot_preflight, and colony_pilot_baseline tool registration from packages/pi-stack/extensions/colony-pilot.ts into packages/pi-stack/extensions/colony-pilot-tool-surface.ts via registerColonyPilotToolSurface. Preserved tool names, JSON output policy, baseline apply/preview behavior, and preflight cache update through runtime.setPreflightCache callback. colony-pilot.ts reduced from 1920 to 1742 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 3 files passed, 93 tests passed; safe_marker_check passed for extracted surface; git diff --check clean; line_budget_snapshot remains aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Continues post-reload local-safe anti-bloat and lowers colony-pilot below near-critical range."
     }
   ]
 }

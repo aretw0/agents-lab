@@ -18334,6 +18334,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] guardrails-core.ts está em 1984 linhas; comando guardrails-config é surface extraível e corrige acoplamento de runtime sem tocar protected scopes.\n[provenance:human] source_task=none reason=User asked to continue local-safe anti-bloat and batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração do comando guardrails-config; manter runtime refresh por callback e reload acumulado para final.\nClosed via VER-BUD-1170: extracted guardrails runtime-config command surface and command utils; validated 56 focal tests. [rationale:anti-bloat] guardrails-core.ts now 1897 (<1900); reload still batched.",
       "verification": "VER-BUD-1170"
+    },
+    {
+      "id": "TASK-BUD-819",
+      "description": "Extrair surface de tools colony-pilot status/artifacts/preflight/baseline para reduzir colony-pilot.ts sem alterar contratos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/colony-pilot-tool-surface.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover registros colony_pilot_status/artifacts/preflight/baseline para módulo coeso",
+        "preservar nomes, payloads e cache de preflight via callbacks",
+        "reduzir colony-pilot.ts abaixo de 1800 linhas",
+        "validar smokes focais de colony-pilot"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Após reload, continuar local-safe: colony-pilot.ts está em 1920 linhas e a surface de tools read/report é extraível sem protected scope.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração da tool surface colony-pilot após reload confirmado.\nClosed via VER-BUD-1171: extracted colony-pilot tool surface and validated 93 focal tests. [rationale:anti-bloat] colony-pilot.ts now 1742; aboveCritical remains 0.",
+      "verification": "VER-BUD-1171"
     }
   ]
 }

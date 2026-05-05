@@ -20,7 +20,6 @@ import type {
 	ExtensionContext,
 } from "@mariozechner/pi-coding-agent";
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
-import { Type } from "@sinclair/typebox";
 import {
 	captureColonyRuntimeSnapshot,
 	persistColonyRetentionRecord,
@@ -161,6 +160,7 @@ import {
 	resolveColonyPilotCandidateRetentionConfig as resolveColonyPilotCandidateRetentionConfigImpl,
 	resolveColonyPilotOutputPolicy as resolveColonyPilotOutputPolicyImpl,
 } from "./colony-pilot-output-policy";
+import { registerColonyPilotToolSurface } from "./colony-pilot-tool-surface";
 import {
 	parseColonyPilotSettings as parseColonyPilotSettingsImpl,
 	parseQuotaVisibilityBudgetSettings as parseQuotaVisibilityBudgetSettingsImpl,
@@ -1023,196 +1023,18 @@ export default function (pi: ExtensionAPI) {
 		return undefined;
 	});
 
-	pi.registerTool({
-		name: "colony_pilot_status",
-		label: "Colony Pilot Status",
-		description:
-			"Mostra o estado atual do pilot: monitores, remote web e colonies em background.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const snapshot = snapshotPilotState(state);
-			const retentionSnapshot = readColonyRetentionSnapshot(ctx.cwd, 5);
-			const capabilities = getCapabilitiesImpl(pi);
-			const currentModelRef = ctx.model
-				? `${ctx.model.provider}/${ctx.model.id}`
-				: undefined;
-			const modelReadiness = resolveColonyModelReadiness(
-				ctx.cwd,
-				currentModelRef,
-				ctx.modelRegistry,
-			);
-			const modelPolicyEvaluation = evaluateAntColonyModelPolicy(
-				{ goal: "status" },
-				currentModelRef,
-				ctx.modelRegistry,
-				modelPolicyConfig,
-			);
-			const budgetPolicyEvaluation = evaluateAntColonyBudgetPolicy(
-				{ goal: "status" },
-				budgetPolicyConfig,
-			);
-			const deliveryPolicyEvaluation = evaluateColonyDeliveryEvidence(
-				"",
-				"running",
-				deliveryPolicyConfig,
-			);
-			const payload = {
-				...snapshot,
-				capabilities,
-				modelReadiness,
-				modelPolicy: modelPolicyConfig,
-				modelPolicyEvaluation,
-				budgetPolicy: budgetPolicyConfig,
-				budgetPolicyEvaluation,
-				providerBudgetGateCache: providerBudgetGateCache
-					? {
-							at: new Date(providerBudgetGateCache.at).toISOString(),
-							lookbackDays: providerBudgetGateCache.snapshot.lookbackDays,
-							generatedAtIso: providerBudgetGateCache.snapshot.generatedAtIso,
-							blockedProviders: providerBudgetGateCache.snapshot.budgets
-								.filter((b) => b.state === "blocked")
-								.map((b) => b.provider),
-							allocationWarnings:
-								providerBudgetGateCache.snapshot.allocationWarnings,
-						}
-					: undefined,
-				projectTaskSync: projectTaskSyncConfig,
-				deliveryPolicy: deliveryPolicyConfig,
-				deliveryPolicyEvaluation,
-				retention: {
-					config: candidateRetentionConfig,
-					root: retentionSnapshot.root,
-					exists: retentionSnapshot.exists,
-					count: retentionSnapshot.count,
-					records: retentionSnapshot.records.map((entry) => ({
-						colonyId: entry.record.colonyId,
-						runtimeColonyId: entry.record.runtimeColonyId,
-						phase: entry.record.phase,
-						updatedAtIso: entry.updatedAtIso,
-						path: entry.path,
-						runtimeSnapshotPath: entry.record.runtimeSnapshotPath,
-						runtimeSnapshotTaskCount:
-							entry.record.runtimeSnapshotTaskCount,
-						runtimeSnapshotMissingReason:
-							entry.record.runtimeSnapshotMissingReason,
-						goal: entry.record.goal,
-					})),
-				},
-			};
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: formatToolJsonOutput(
-							"colony_pilot_status",
-							payload,
-							outputPolicyConfig,
-						),
-					},
-				],
-				details: payload,
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "colony_pilot_artifacts",
-		label: "Colony Pilot Artifacts",
-		description:
-			"Inspect colony runtime artifacts (workspace mirrors, state files, worktrees).",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const data = inspectAntColonyRuntimeImpl(ctx.cwd);
-			return {
-				content: [
-					{
-						type: "text",
-						text: formatToolJsonOutput(
-							"colony_pilot_artifacts",
-							data,
-							outputPolicyConfig,
-						),
-					},
-				],
-				details: data,
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "colony_pilot_preflight",
-		label: "Colony Pilot Preflight",
-		description: "Run hard preflight checks used to gate ant_colony execution.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const caps = getCapabilitiesImpl(pi);
-			const result = await runColonyPilotPreflight(pi, caps, preflightConfig, ctx.cwd);
-			preflightCache = { at: Date.now(), result };
-			return {
-				content: [
-					{
-						type: "text",
-						text: formatToolJsonOutput(
-							"colony_pilot_preflight",
-							result,
-							outputPolicyConfig,
-						),
-					},
-				],
-				details: result,
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "colony_pilot_baseline",
-		label: "Colony Pilot Baseline",
-		description:
-			"Show or apply project baseline settings for colony/web runtime governance.",
-		parameters: Type.Object({
-			apply: Type.Optional(Type.Boolean()),
-			profile: Type.Optional(Type.String({ description: "default | phase2" })),
-		}),
-		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const p = params as { apply?: boolean; profile?: string };
-			const apply = Boolean(p?.apply);
-			const profile = resolveBaselineProfile(p?.profile);
-			const baseline = buildProjectBaselineSettings(profile);
-			if (!apply) {
-				return {
-					content: [
-						{
-							type: "text",
-							text: formatToolJsonOutput(
-								"colony_pilot_baseline",
-								{ profile, baseline },
-								outputPolicyConfig,
-							),
-						},
-					],
-					details: { profile, baseline },
-				};
-			}
-
-			const merged = applyProjectBaselineSettings(
-				readProjectSettingsImpl(ctx.cwd),
-				profile,
-			);
-			writeProjectSettingsImpl(ctx.cwd, merged);
-			return {
-				content: [
-					{
-						type: "text",
-						text: `Applied project baseline (${profile}) to .pi/settings.json`,
-					},
-				],
-				details: {
-					applied: true,
-					profile,
-					path: path.join(ctx.cwd, ".pi", "settings.json"),
-				},
-			};
+	registerColonyPilotToolSurface(pi, {
+		state,
+		getModelPolicyConfig: () => modelPolicyConfig,
+		getBudgetPolicyConfig: () => budgetPolicyConfig,
+		getDeliveryPolicyConfig: () => deliveryPolicyConfig,
+		getProviderBudgetGateCache: () => providerBudgetGateCache,
+		getProjectTaskSyncConfig: () => projectTaskSyncConfig,
+		getCandidateRetentionConfig: () => candidateRetentionConfig,
+		getOutputPolicyConfig: () => outputPolicyConfig,
+		getPreflightConfig: () => preflightConfig,
+		setPreflightCache: (entry) => {
+			preflightCache = entry;
 		},
 	});
 
