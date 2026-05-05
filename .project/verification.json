@@ -13137,6 +13137,15 @@
       "method": "research+marker-check+i18n-lint",
       "timestamp": "2026-05-05T22:10:47.654Z",
       "evidence": "Researched openai/symphony at commit 58cf97da06d556c019ccea20c67f4f77da124bf3 via git checkout cache and wrote docs/research/openai-symphony-influence-2026-05.md. The synthesis maps Symphony patterns to bounded pi-stack/control-plane recommendations with source permalinks and explicitly avoids adopting external scheduler/runtime behavior. Validation: safe_marker_check on the research doc matched 4/4 required markers; i18n_lint_text expected pt-BR passed with 0 issues."
+    },
+    {
+      "id": "VER-BUD-1213",
+      "target": "TASK-BUD-847",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check+i18n-lint",
+      "timestamp": "2026-05-05T22:12:45.300Z",
+      "evidence": "Created docs/primitives/symphony-pattern-matrix.md from the Symphony research synthesis. The matrix maps Symphony patterns to pi-stack primitives and explicitly blocks adoption of external scheduler/Linear/runtime unattended behavior. Validation: safe_marker_check matched 4/4 markers; i18n_lint_text expected pt-BR passed with 0 issues."
     }
   ]
 }
