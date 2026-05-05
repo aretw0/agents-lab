@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { structuredJsonRead, structuredJsonWrite, structuredRead, structuredWrite } from "./guardrails-core-structured-io";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
 	ctx: ExtensionContext,
@@ -11,6 +12,26 @@ export type GuardrailsAuditAppender = (
 ) => void;
 
 export type GuardrailsPathInsideCwdChecker = (inputPath: string, cwd: string) => boolean;
+
+function buildStructuredIoToolResponse(label: string, details: Record<string, unknown>) {
+	const summaryParts = [
+		`${label}: ok=${details.ok === true ? "yes" : "no"}`,
+		typeof details.operation === "string" ? `operation=${details.operation}` : undefined,
+		typeof details.path === "string" ? `path=${details.path}` : undefined,
+		typeof details.selector === "string" ? `selector=${details.selector}` : undefined,
+		typeof details.reason === "string" ? `reason=${details.reason}` : undefined,
+		typeof details.found === "boolean" ? `found=${details.found ? "yes" : "no"}` : undefined,
+		typeof details.dryRun === "boolean" ? `dryRun=${details.dryRun ? "yes" : "no"}` : undefined,
+		typeof details.applied === "boolean" ? `applied=${details.applied ? "yes" : "no"}` : undefined,
+		typeof details.changed === "boolean" ? `changed=${details.changed ? "yes" : "no"}` : undefined,
+	].filter((part): part is string => Boolean(part));
+
+	return buildOperatorVisibleToolResponse({
+		label,
+		summary: summaryParts.join(" "),
+		details,
+	});
+}
 
 export function registerGuardrailsStructuredIoSurface(
 	pi: ExtensionAPI,
@@ -56,18 +77,18 @@ export function registerGuardrailsStructuredIoSurface(
 
 			if (!targetPath || !selector) {
 				const details = { ok: false, reason: "missing-path-or-selector" };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			if (!isInsideCwd(targetPath, ctx.cwd)) {
 				const details = { ok: false, reason: "path-outside-cwd", path: targetPath };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			const absolutePath = resolve(ctx.cwd, targetPath);
 			if (!existsSync(absolutePath)) {
 				const details = { ok: false, reason: "file-not-found", path: targetPath };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			const content = readFileSync(absolutePath, "utf8");
@@ -85,17 +106,17 @@ export function registerGuardrailsStructuredIoSurface(
 					sourceSpan: result.sourceSpan,
 				});
 				const details = { ok: true, path: targetPath, selector, operation, ...result };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			if (operation !== "set" && operation !== "remove") {
 				const details = { ok: false, reason: "invalid-operation", operation, allowed: ["read", "set", "remove"] };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			if (operation === "set" && p.payload === undefined) {
 				const details = { ok: false, reason: "missing-payload-for-set" };
-				return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+				return buildStructuredIoToolResponse("structured_io", details);
 			}
 
 			const result = structuredWrite({
@@ -133,7 +154,7 @@ export function registerGuardrailsStructuredIoSurface(
 			});
 
 			const details = { ok: true, path: targetPath, selector, operation, ...result };
-			return { content: [{ type: "text", text: JSON.stringify(details, null, 2) }], details };
+			return buildStructuredIoToolResponse("structured_io", details);
 		},
 	});
 
@@ -171,10 +192,7 @@ export function registerGuardrailsStructuredIoSurface(
 					ok: false,
 					reason: "missing-path-or-selector",
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			if (!isInsideCwd(targetPath, ctx.cwd)) {
@@ -183,10 +201,7 @@ export function registerGuardrailsStructuredIoSurface(
 					reason: "path-outside-cwd",
 					path: targetPath,
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			const absolutePath = resolve(ctx.cwd, targetPath);
@@ -196,10 +211,7 @@ export function registerGuardrailsStructuredIoSurface(
 					reason: "file-not-found",
 					path: targetPath,
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			const content = readFileSync(absolutePath, "utf8");
@@ -222,10 +234,7 @@ export function registerGuardrailsStructuredIoSurface(
 					operation,
 					...result,
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			if (operation !== "set" && operation !== "remove") {
@@ -235,10 +244,7 @@ export function registerGuardrailsStructuredIoSurface(
 					operation,
 					allowed: ["read", "set", "remove"],
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			if (operation === "set" && p.payload === undefined) {
@@ -246,10 +252,7 @@ export function registerGuardrailsStructuredIoSurface(
 					ok: false,
 					reason: "missing-payload-for-set",
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-					details,
-				};
+				return buildStructuredIoToolResponse("structured_io_json", details);
 			}
 
 			const result = structuredJsonWrite({
@@ -289,10 +292,7 @@ export function registerGuardrailsStructuredIoSurface(
 				operation,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
-				details,
-			};
+			return buildStructuredIoToolResponse("structured_io_json", details);
 		},
 	});
 

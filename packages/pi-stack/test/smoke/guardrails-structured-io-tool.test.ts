@@ -25,7 +25,7 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
       signal: AbortSignal,
       onUpdate: (update: unknown) => void,
       ctx: any,
-    ) => Promise<{ details?: Record<string, unknown> }>;
+    ) => Promise<{ content?: Array<{ type: string; text?: string }>; details?: Record<string, unknown> }>;
   };
 }
 
@@ -63,6 +63,9 @@ describe("guardrails-core structured_io_json tool", () => {
     );
     expect((dry.details as any)?.applied).toBe(false);
     expect((dry.details as any)?.reason).toBe("ok-preview");
+    expect(String(dry.content?.[0]?.text ?? "")).toContain("structured_io_json: ok=yes operation=set path=data.json selector=a.b");
+    expect(String(dry.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(dry.content?.[0]?.text ?? "")).not.toContain('\"output\"');
 
     const unchanged = JSON.parse(readFileSync(path, "utf8"));
     expect(unchanged.a.b).toBe(1);
@@ -159,6 +162,8 @@ describe("guardrails-core structured_io_json tool", () => {
     );
     expect((read.details as any)?.kind).toBe("markdown");
     expect((read.details as any)?.value).toBe("old");
+    expect(String(read.content?.[0]?.text ?? "")).toContain("structured_io: ok=yes operation=read path=doc.md selector=heading:Target");
+    expect(String(read.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
 
     const apply = await tool.execute(
       "tc-md-write",

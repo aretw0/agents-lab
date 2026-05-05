@@ -13344,6 +13344,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:49:34.201Z",
       "evidence": "Migrated claude_code_adapter_status only to summary-first operator-visible output using buildOperatorVisibleToolResponse, preserving full structured details. Left claude_code_execute JSON/dry-run/subprocess/budget behavior unchanged because executable adapter paths remain protected/deferred. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 2 files passed, 28 tests passed."
+    },
+    {
+      "id": "VER-BUD-1236",
+      "target": "TASK-BUD-871",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:52:27.756Z",
+      "evidence": "Migrated structured_io and structured_io_json tool responses from raw JSON content to summary-first operator-visible output with details preserved. Added buildStructuredIoToolResponse helper and replaced read, dry-run, apply, blocked, and error path JSON content returns. Preserved selector parsing, path checks, dryRun default, maxTouchedLines, audit entries, and write/apply semantics. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts -> 3 files passed, 20 tests passed."
     }
   ]
 }

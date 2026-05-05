@@ -19464,6 +19464,28 @@
       "milestone": "ui-cohesion",
       "notes": "[auto-seed] Local-safe follow-up from TASK-BUD-869 audit. Protected/executable claude_code_execute remains deferred; this task is status-only.\n[provenance:human] source_task=TASK-BUD-869 reason=Auto-resume handoff requested seeding a new explicit local-safe cleanup task after protected boundary; status-only adapter output migration is bounded and non-executable.\n[auto-chain] Starting status-only Claude Code adapter summary migration. Guardrail: do not alter claude_code_execute subprocess/budget behavior.\n[slice-complete] Status-only Claude Code adapter output is summary-first; executable claude_code_execute remains untouched/deferred. Rollback: revert claude-code-adapter.ts and claude-code-adapter-parsers.test.ts changes plus this task/verification entry.",
       "verification": "VER-BUD-1235"
+    },
+    {
+      "id": "TASK-BUD-871",
+      "description": "Migrate structured_io and structured_io_json operator-visible outputs to summary-first content while preserving details and dry-first mutation safeguards.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-870"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-structured-io-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-tool.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-io-contract.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Only operator-visible content formatting changes; selector parsing, read/set/remove semantics, dry_run defaults, and maxTouchedLines safeguards remain unchanged.",
+        "Primary content is concise summary-first for read, dry-run, apply, blocked, and error paths with full structured payload preserved in details.",
+        "Focal structured-io tests pass."
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[auto-seed] Local-safe output-formatting follow-up from handoff candidate. Mutation semantics are not expanded; formatting only.\n[provenance:human] source_task=TASK-BUD-870 reason=Continue local-safe UI cohesion after no eligible tasks remained; structured-io surface has raw JSON content but can be migrated without changing mutation behavior.\n[auto-chain] Starting structured_io/structured_io_json summary-first output migration. Guardrail: formatting only; no selector, dry-run, apply, or blast-radius logic changes.\n[slice-complete] structured_io and structured_io_json content is summary-first across tool paths; mutation semantics unchanged. Rollback: revert guardrails-core-structured-io-surface.ts and guardrails-structured-io-tool.test.ts changes plus this task/verification entry.",
+      "verification": "VER-BUD-1236"
     }
   ]
 }
