@@ -153,6 +153,29 @@ Checklist pragmático por fatia de housekeeping:
 - dif semântica mínima (renome/realocação + cola de import);
 - nota curta explicando por que a extração reduz acoplamento real.
 
+### Hard intent anti-inchaço para surfaces TS (meta <=1000 linhas)
+
+Direção estratégica: chegar a **<=1000 linhas** por surface TS como padrão sustentável. Isso é alvo arquitetural, não gatilho para refactor caótico.
+
+Rollout faseado (sem travar fluxo local-safe agora):
+
+1. **fase watch**: `1001-1400` linhas gera recomendação de extração planejada (`watch`);
+2. **fase extract**: `1401-2000` linhas exige abrir fatia de extração coesa no milestone ativo (`extract`);
+3. **fase critical**: `>2000` linhas vira prioridade arquitetural explícita, com wave dedicada e checkpoint por fatia (`critical`).
+
+Regras hard-intent:
+
+- **quando extrair**: se entrar em `extract|critical`, extrair por domínio coeso antes de adicionar nova lógica grande no mesmo arquivo;
+- **quando adiar**: adiar só com justificativa curta e explícita (ex.: incidente crítico, release gate, blocker externo);
+- **como registrar exceção**: adicionar nota canônica com `bloat-exception: <motivo curto> | prazo=<milestone|data> | owner=<task>`.
+
+Guardrails de execução:
+
+- sem mudança de contrato externo durante extração anti-inchaço;
+- smoke focal obrigatório por fatia;
+- rollback simples e imediato;
+- sem auto-dispatch: promoção de wave continua decisão humana.
+
 ### Calibração de substrato operacional (background + agents-as-tools)
 
 Quando o control-plane estiver estável, o foco pode migrar para calibração do substrato operacional sem abandonar governança.

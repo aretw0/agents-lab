@@ -109,6 +109,19 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of batchLaneIntentAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const antiBloatHardIntentAnchors = [
+      "hard intent anti-inchaço para surfaces ts",
+      "meta <=1000 linhas",
+      "fase watch",
+      "fase extract",
+      "fase critical",
+      "bloat-exception:",
+    ];
+
+    for (const marker of antiBloatHardIntentAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {
