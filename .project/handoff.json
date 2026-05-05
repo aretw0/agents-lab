@@ -1,13 +1,13 @@
 {
-  "timestamp": "2026-05-05T20:30:11.763Z",
-  "context": "Fatia monitor-runtime-contract concluída: ampliei o bypass determinístico de unauthorized-action apenas para diagnósticos/read-only/report-on [snip] nal do batch para validar runtime vivo. [truncated:+357 chars]",
+  "timestamp": "2026-05-05T20:30:50.670Z",
+  "context": "Fatia monitor-runtime-contract concluída e commitada em b01d5aa6. O bypass determinístico de unauthorized-action agora cobre diagnósticos/rea [snip] a de /reload para validar runtime vivo. [truncated:+213 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Commitar alteração monitor-runtime-contract + teste + board/handoff.",
     "Rodar /reload para validar adoção runtime da nova lista read-only.",
-    "Após reload, verificar git limpo, classifyFail=0 e ausência de nova issue inválida em .project [snip] urgir novo falso positivo. [truncated:+109 chars]"
+    "Após reload, verificar git limpo, classifyFail=0 e ausência de nova issue monitor false-positi [snip] y em .project/issues.json. [truncated:+7 chars]",
+    "Preparar decision packet para fechamento parcial de TASK-BUD-841 se a validação pós-reload ficar limpa."
   ],
   "blockers": [
     "/reload necessário para validar runtime vivo da nova calibração monitor-runtime-contract."
@@ -18,18 +18,18 @@
     "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed"
   ],
   "recent_commits": [
+    "b01d5aa6 fix(monitors): widen read-only runtime bypass",
     "0b0983f4 chore(board): record post-reload monitor validation"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "verification:VER-BUD-1193",
-      "commit:0b0983f4"
+      "commit:b01d5aa6"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:30:11.763Z",
+    "generatedAtIso": "2026-05-05T20:30:50.670Z",
     "level": "ok",
     "percent": 23,
     "action": "continue",
@@ -37,7 +37,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:30:11.763Z",
+      "atIso": "2026-05-05T20:30:50.670Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 23,
