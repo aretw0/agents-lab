@@ -7,7 +7,20 @@ Avaliar se a stack está calibrada para usar agentes como tools com governança,
 ## Surface
 
 - Tool: `agents_as_tools_calibration_score`
+- Tool complementar: `line_budget_snapshot` (report-only para orçamento de linhas em `packages/pi-stack/extensions/*.ts`)
 - Fonte: `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts`
+
+## Line budget snapshot (anti-bloat)
+
+`line_budget_snapshot` expõe recomendação estável `ok|watch|extract` para arquivos acima do budget faseado (watch/extract/critical), sem mutação e sem dispatch.
+
+Campos principais:
+
+- `recommendation`: `ok | watch | extract`
+- `thresholds`: `watch=1000`, `extract=1400`, `critical=2000` (defaults)
+- `totals`: contagem escaneada e acima de cada faixa
+- `rows`: top arquivos acima do budget com `phase`, `overBy` e `riskFlags`
+- `blockers/risks`: sinais curtos para priorizar wave de extração
 
 ## Dimensões
 

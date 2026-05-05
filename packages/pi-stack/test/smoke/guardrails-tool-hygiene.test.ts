@@ -1,5 +1,13 @@
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import guardrailsCore, { buildAgentsAsToolsCalibrationScore, buildToolHygieneScorecard, classifyToolHygiene } from "../../extensions/guardrails-core";
+import guardrailsCore, {
+  buildAgentsAsToolsCalibrationScore,
+  buildLineBudgetSnapshot,
+  buildToolHygieneScorecard,
+  classifyToolHygiene,
+} from "../../extensions/guardrails-core";
 
 describe("tool hygiene scorecard", () => {
   it("classifies protected long-run and scheduler tools as human-approval only", () => {
@@ -150,5 +158,68 @@ describe("tool hygiene scorecard", () => {
     expect(result.details?.mode).toBe("agents-as-tools-calibration-score");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.authorization).toBe("none");
+  });
+
+  it("builds line-budget snapshot with stable ok/watch/extract recommendation", () => {
+    const packet = buildLineBudgetSnapshot({
+      files: [
+        { path: "a.ts", lines: 990 },
+        { path: "b.ts", lines: 1205 },
+        { path: "c.ts", lines: 2201 },
+      ],
+      limit: 10,
+    });
+
+    expect(packet.mode).toBe("line-budget-snapshot");
+    expect(packet.authorization).toBe("none");
+    expect(packet.dispatchAllowed).toBe(false);
+    expect(packet.recommendation).toBe("extract");
+    expect(packet.recommendationCode).toBe("line-budget-extract");
+    expect(packet.totals.aboveWatch).toBe(2);
+    expect(packet.totals.aboveCritical).toBe(1);
+    expect(packet.blockers).toContain("line-budget-extract-required");
+  });
+
+  it("exposes line_budget_snapshot tool as report-only surface", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+
+    guardrailsCore(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "line_budget_snapshot");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
+    };
+
+    const cwd = mkdtempSync(path.join(tmpdir(), "line-budget-snapshot-"));
+    const extDir = path.join(cwd, "packages", "pi-stack", "extensions");
+    mkdirSync(extDir, { recursive: true });
+    writeFileSync(path.join(extDir, "small.ts"), "export const a = 1;\n", "utf8");
+    writeFileSync(path.join(extDir, "watch.ts"), `${"x\n".repeat(1105)}`, "utf8");
+
+    const result = await tool.execute(
+      "tc-line-budget",
+      {},
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd },
+    );
+
+    expect(result.details?.mode).toBe("line-budget-snapshot");
+    expect(["ok", "watch", "extract"]).toContain(result.details?.recommendation as string);
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.details?.authorization).toBe("none");
+    expect(Array.isArray(result.details?.rows)).toBe(true);
   });
 });

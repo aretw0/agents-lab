@@ -1,6 +1,14 @@
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
-import { buildAgentsAsToolsCalibrationScore, buildToolHygieneScorecard, type ToolHygieneInputTool } from "./guardrails-core-tool-hygiene";
+import {
+  buildAgentsAsToolsCalibrationScore,
+  buildLineBudgetSnapshot,
+  buildToolHygieneScorecard,
+  type LineBudgetFileEntry,
+  type ToolHygieneInputTool,
+} from "./guardrails-core-tool-hygiene";
 
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   if (!tool || typeof tool !== "object") return undefined;
@@ -11,6 +19,37 @@ function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
     description: typeof t.description === "string" ? t.description : typeof t.label === "string" ? t.label : undefined,
     parameters: t.parameters,
   };
+}
+
+function collectTypeScriptFiles(rootDir: string): string[] {
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) out.push(full);
+    }
+  };
+  walk(rootDir);
+  return out;
+}
+
+function countLines(filePath: string): number {
+  const text = readFileSync(filePath, "utf8");
+  return text.split(/\r?\n/).length;
+}
+
+function buildExtensionLineBudgetEntries(cwd: string): LineBudgetFileEntry[] {
+  const root = path.join(cwd, "packages", "pi-stack", "extensions");
+  const files = collectTypeScriptFiles(root);
+  return files.map((file) => ({
+    path: path.relative(cwd, file).replace(/\\/g, "/"),
+    lines: countLines(file),
+  }));
 }
 
 export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
@@ -35,6 +74,33 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+        details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "line_budget_snapshot",
+    label: "Line Budget Snapshot",
+    description: "Report-only line-budget snapshot for extension surfaces with stable recommendation (ok|watch|extract) and no dispatch authority.",
+    parameters: Type.Object({
+      limit: Type.Optional(Type.Number({ description: "Max rows to return (1..100). Default 20." })),
+      watch_threshold: Type.Optional(Type.Number({ description: "Watch threshold (default 1000)." })),
+      extract_threshold: Type.Optional(Type.Number({ description: "Extract threshold (default 1400)." })),
+      critical_threshold: Type.Optional(Type.Number({ description: "Critical threshold (default 2000)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const entries = buildExtensionLineBudgetEntries(ctx.cwd);
+      const result = buildLineBudgetSnapshot({
+        files: entries,
+        limit: typeof p.limit === "number" ? p.limit : undefined,
+        watchThreshold: typeof p.watch_threshold === "number" ? p.watch_threshold : undefined,
+        extractThreshold: typeof p.extract_threshold === "number" ? p.extract_threshold : undefined,
+        criticalThreshold: typeof p.critical_threshold === "number" ? p.critical_threshold : undefined,
+      });
+      return {
+        content: [{ type: "text", text: result.summary }],
         details: result,
       };
     },

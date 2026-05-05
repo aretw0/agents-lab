@@ -38,6 +38,51 @@ export type AgentsAsToolsCalibrationRecommendationCode =
   | "agents-as-tools-calibration-needs-boundedness"
   | "agents-as-tools-calibration-needs-observability";
 
+export type LineBudgetRecommendation = "ok" | "watch" | "extract";
+export type LineBudgetPhase = "healthy" | "watch" | "extract" | "critical";
+
+export interface LineBudgetFileEntry {
+  path: string;
+  lines: number;
+}
+
+export interface LineBudgetSnapshotRow {
+  path: string;
+  lines: number;
+  phase: LineBudgetPhase;
+  recommendation: LineBudgetRecommendation;
+  overBy: number;
+  riskFlags: string[];
+}
+
+export interface LineBudgetSnapshot {
+  mode: "line-budget-snapshot";
+  activation: "none";
+  authorization: "none";
+  dispatchAllowed: false;
+  mutationAllowed: false;
+  recommendation: LineBudgetRecommendation;
+  recommendationCode:
+    | "line-budget-ok"
+    | "line-budget-watch"
+    | "line-budget-extract";
+  thresholds: {
+    watch: number;
+    extract: number;
+    critical: number;
+  };
+  totals: {
+    scanned: number;
+    aboveWatch: number;
+    aboveExtract: number;
+    aboveCritical: number;
+  };
+  rows: LineBudgetSnapshotRow[];
+  blockers: string[];
+  risks: string[];
+  summary: string;
+}
+
 export interface AgentsAsToolsCalibrationScore {
   mode: "agents-as-tools-calibration-score";
   activation: "none";
@@ -192,6 +237,110 @@ export function buildToolHygieneScorecard(input: {
     riskSummary,
     rows: shownRows,
     evidence,
+  };
+}
+
+export function buildLineBudgetSnapshot(input: {
+  files: LineBudgetFileEntry[];
+  limit?: number;
+  watchThreshold?: number;
+  extractThreshold?: number;
+  criticalThreshold?: number;
+}): LineBudgetSnapshot {
+  const watch = Math.max(400, Math.floor(input.watchThreshold ?? 1000));
+  const extract = Math.max(watch + 1, Math.floor(input.extractThreshold ?? 1400));
+  const critical = Math.max(extract + 1, Math.floor(input.criticalThreshold ?? 2000));
+  const limit = Math.max(1, Math.min(100, Math.floor(input.limit ?? 20)));
+
+  const normalizePhase = (lines: number): LineBudgetPhase => {
+    if (lines > critical) return "critical";
+    if (lines > extract) return "extract";
+    if (lines > watch) return "watch";
+    return "healthy";
+  };
+
+  const rowsAll = (input.files ?? [])
+    .filter((row) => typeof row.path === "string" && row.path.trim().length > 0 && Number.isFinite(row.lines))
+    .map((row) => {
+      const lines = Math.max(0, Math.floor(row.lines));
+      const phase = normalizePhase(lines);
+      const recommendation: LineBudgetRecommendation = phase === "healthy" ? "ok" : phase === "watch" ? "watch" : "extract";
+      const riskFlags: string[] = [];
+      if (phase === "critical") riskFlags.push("phase-critical");
+      if (phase === "extract") riskFlags.push("phase-extract");
+      if (lines >= 3000) riskFlags.push("mega-file-3000-plus");
+      return {
+        path: row.path,
+        lines,
+        phase,
+        recommendation,
+        overBy: Math.max(0, lines - watch),
+        riskFlags,
+      } satisfies LineBudgetSnapshotRow;
+    })
+    .sort((a, b) => b.lines - a.lines || a.path.localeCompare(b.path));
+
+  const aboveWatchRows = rowsAll.filter((row) => row.phase !== "healthy");
+  const rows = aboveWatchRows.slice(0, limit);
+
+  const totals = {
+    scanned: rowsAll.length,
+    aboveWatch: rowsAll.filter((row) => row.phase === "watch" || row.phase === "extract" || row.phase === "critical").length,
+    aboveExtract: rowsAll.filter((row) => row.phase === "extract" || row.phase === "critical").length,
+    aboveCritical: rowsAll.filter((row) => row.phase === "critical").length,
+  };
+
+  const recommendation: LineBudgetRecommendation = totals.aboveExtract > 0
+    ? "extract"
+    : totals.aboveWatch > 0
+      ? "watch"
+      : "ok";
+
+  const recommendationCode = recommendation === "extract"
+    ? "line-budget-extract"
+    : recommendation === "watch"
+      ? "line-budget-watch"
+      : "line-budget-ok";
+
+  const blockers = recommendation === "extract"
+    ? ["line-budget-extract-required"]
+    : [];
+
+  const risks = [
+    totals.aboveCritical > 0 ? "critical-files-present" : undefined,
+    rowsAll.some((row) => row.riskFlags.includes("mega-file-3000-plus")) ? "mega-file-present" : undefined,
+  ].filter((value): value is string => Boolean(value));
+
+  const summary = [
+    "line-budget-snapshot:",
+    `recommendation=${recommendation}`,
+    `code=${recommendationCode}`,
+    `scanned=${totals.scanned}`,
+    `aboveWatch=${totals.aboveWatch}`,
+    `aboveExtract=${totals.aboveExtract}`,
+    `aboveCritical=${totals.aboveCritical}`,
+    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "line-budget-snapshot",
+    activation: "none",
+    authorization: "none",
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    recommendation,
+    recommendationCode,
+    thresholds: {
+      watch,
+      extract,
+      critical,
+    },
+    totals,
+    rows,
+    blockers,
+    risks,
+    summary,
   };
 }
 

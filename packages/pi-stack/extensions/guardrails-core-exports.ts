@@ -87,7 +87,7 @@ export { resolveStructuredFirstMutationDecision } from "./guardrails-core-struct
 export { resolveStructuredInterview } from "./guardrails-core-structured-interview";
 export { resolveSkillAccessRoot, resolveSkillReadAccess, resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 export { resolveToolCadenceDecision } from "./guardrails-core-tool-cadence";
-export { buildAgentsAsToolsCalibrationScore, buildToolHygieneScorecard, classifyToolHygiene } from "./guardrails-core-tool-hygiene";
+export { buildAgentsAsToolsCalibrationScore, buildLineBudgetSnapshot, buildToolHygieneScorecard, classifyToolHygiene } from "./guardrails-core-tool-hygiene";
 export { evaluateGrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
 export { buildShellSpoofingCoverageScore } from "./guardrails-core-shell-spoofing-score";
 export { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan, resolveBackgroundProcessLifecycleEvent } from "./guardrails-core-background-process";
