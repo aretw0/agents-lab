@@ -796,6 +796,14 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-morxfdlz",
+      "description": "The agent produced an empty response instead of reporting the outcome or any encountered issues, leaving the user without the required result.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }
