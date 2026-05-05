@@ -18164,7 +18164,7 @@
     {
       "id": "TASK-BUD-811",
       "description": "Criar trilha de governança para atribuição de mudanças: separar o que é agents-lab/pi-stack local do que vem de atualizações upstream do Pi/dependências, com critérios de assimilação/negação segura.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "package.json",
@@ -18181,7 +18181,8 @@
         "não auto-atualizar dependências; toda assimilação exige decisão explícita"
       ],
       "milestone": "dependency-governance",
-      "notes": "[rationale:governance] Usuário perguntou como saber o que fomos nós que fizemos versus atualizações do Pi/deps, e quer acompanhar de perto novidades para assimilar com segurança ou negar atualização.\n[provenance:human] source_task=none reason=Need backlog lane for safe dependency/upstream change attribution and assimilation."
+      "notes": "[rationale:governance] Usuário perguntou como saber o que fomos nós que fizemos versus atualizações do Pi/deps, e quer acompanhar de perto novidades para assimilar com segurança ou negar atualização.\n[provenance:human] source_task=none reason=Need backlog lane for safe dependency/upstream change attribution and assimilation.\n[rationale:governance] Iniciando trilha local-safe para classificar mudanças local-stack vs upstream Pi/deps e decisão assimilate|hold|reject sem auto-update.\nClosed via VER-BUD-1163: added dependency/upstream attribution guide and doctrine/index links. [rationale:governance] Defines assimilate|hold|reject with package/lock, installed version, upstream evidence, local file, runtime-risk and rollback evidence; no auto-update.",
+      "verification": "VER-BUD-1163"
     },
     {
       "id": "TASK-BUD-812",

@@ -256,6 +256,8 @@ Pesquisa remota bounded deve usar helper versionado, não receitas frágeis com 
 
 Antes de promover nova pesquisa externa para foco protected, preencher intake local-safe curto (`docs/primitives/external-influence-intake-template.md`) com hipótese, valor/risco/esforço, canário e rollback. Esse intake prepara a decisão; não autoriza execução externa automática.
 
+Para atualizações do Pi upstream/dependências, usar também `docs/guides/dependency-upstream-governance.md`: classificar `local-stack|upstream-pi|third-party-package|lockfile-resolution|mixed|unknown`, registrar package/lock diff, versão instalada, evidência externa quando disponível, arquivos nossos alterados, risco runtime, rollback e decisão `assimilate|hold|reject`. A decisão padrão continua `hold` quando faltar evidência; não há auto-update.
+
 Janela mínima para assimilar influência externa (report-only, sem dispatch):
 
 - **estoque local-safe validado** em nível saudável (mínimo configurado por run, default 3);
