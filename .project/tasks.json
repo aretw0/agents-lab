@@ -18934,6 +18934,28 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para limitar a implementação inicial a uma superfície e reduzir risco de regressão.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário.\n[slice-start] Primeira superfície escolhida: safe_marker_check, por ser local-safe, operator-visible e atualmente retornar JSON cru no content principal.\n[slice-complete] safe_marker_check migrated to summary-first content with full structured details retained. Rollback: revert guardrails-core-marker-check-surface.ts and guardrails-marker-check-surface.test.ts changes.",
       "verification": "VER-BUD-1209"
+    },
+    {
+      "id": "TASK-BUD-846",
+      "description": "Migrar monitor_classify_failure_readiness para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve mostrar summary humano curto, não JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir a tool por nome",
+        "não alterar comportamento de /mstatus full opt-in"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe após TASK-BUD-828: aplicar o helper recém-criado em uma superfície watch sem protected scope.\n[provenance:human] source_task=TASK-BUD-828 reason=Pedido do usuário para prosseguir com trabalho local-safe; TASK-BUD-842 permanece external-research parked.\n[slice-start] Aplicando buildOperatorVisibleToolResponse apenas em monitor_classify_failure_readiness; /mstatus full permanece opt-in raw.\n[slice-complete] monitor_classify_failure_readiness no longer emits raw JSON as primary content; /mstatus full raw opt-in unchanged. Rollback: revert monitor-summary.ts and monitor-summary.test.ts changes.",
+      "verification": "VER-BUD-1211"
     }
   ]
 }

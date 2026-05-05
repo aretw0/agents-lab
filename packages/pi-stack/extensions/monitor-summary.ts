@@ -26,6 +26,7 @@ import {
 	type ClassifyFailureSummary,
 } from "./monitor-observability";
 import { shouldEmitMonitorSummaryStatus } from "./monitor-summary-status-dedupe";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 interface MonitorMeta {
 	name: string;
@@ -227,10 +228,11 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 					blockAfter: typeof p.block_after === "number" ? p.block_after : undefined,
 				},
 			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "monitor_classify_failure_readiness",
+				summary: result.evidence,
 				details: result,
-			};
+			});
 		},
 	});
 

@@ -132,6 +132,37 @@ describe("monitor-summary", () => {
 		expect(result.details.classifyFailures.lastMonitor).toBe("fragility");
 	});
 
+	it("monitor_classify_failure_readiness usa summary-first e preserva details", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-readiness-summary-"));
+		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const ctx = {
+			cwd,
+			sessionManager: {
+				getSessionFile: () => undefined,
+			},
+			ui: {
+				setStatus: vi.fn(),
+				notify: vi.fn(),
+			},
+		} as any;
+
+		pi.handlers.get("session_start")?.({ reason: "new" }, ctx);
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([def]) => def)
+			.find((def) => def?.name === "monitor_classify_failure_readiness");
+
+		const result = await tool.execute("tc-readiness", {}, undefined, undefined, ctx);
+		expect(result.details.mode).toBe("monitor-classify-failure-readiness");
+		expect(result.details.decision).toBe("ok");
+		expect(result.content?.[0]?.text).toContain("monitor-classify-failure-readiness decision=ok");
+		expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
+		expect(result.content?.[0]?.text).not.toContain('"decision"');
+	});
+
 	it("expõe evidência determinística para rebaixar falso empty-response", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-evidence-"));
 		const sessionFile = join(cwd, "session.jsonl");

@@ -13119,6 +13119,15 @@
       "method": "inspection+test",
       "timestamp": "2026-05-05T21:59:01.056Z",
       "evidence": "Completed the UI cohesion lane through decomposed local-safe tasks TASK-BUD-843, TASK-BUD-844, and TASK-BUD-845. Inventory and policy documented in docs/guides/recommended-pi-stack.md; reusable buildOperatorVisibleToolResponse helper added; first operator-visible surface safe_marker_check migrated from raw JSON content to summary-first content while preserving details. Validation evidence: safe_marker_check marker/i18n checks for docs passed; pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts -> 4 passed; pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts -> 3 files passed, 11 tests passed. No protected-scope changes."
+    },
+    {
+      "id": "VER-BUD-1211",
+      "target": "TASK-BUD-846",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T22:03:32.628Z",
+      "evidence": "Migrated monitor_classify_failure_readiness in packages/pi-stack/extensions/monitor-summary.ts to buildOperatorVisibleToolResponse using result.evidence as summary-first content while preserving full structured details. Added focal test by tool name in packages/pi-stack/test/smoke/monitor-summary.test.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts -> 2 files passed, 15 tests passed."
     }
   ]
 }
