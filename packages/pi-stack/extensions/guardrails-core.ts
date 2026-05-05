@@ -159,6 +159,9 @@ import { registerGuardrailsShellSpoofingScoreSurface } from "./guardrails-core-s
 import { registerGuardrailsI18nLintSurface } from "./guardrails-core-i18n-lint-surface";
 import { registerGuardrailsBackgroundProcessSurface } from "./guardrails-core-background-process-surface";
 import { registerGuardrailsHumanConfirmationSurface } from "./guardrails-core-human-confirmation-surface";
+import { registerGuardrailsRuntimeConfigSurface } from "./guardrails-core-runtime-config-surface";
+import { normalizeCmdName, shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
+export { shouldAnnounceStrictInteractiveMode } from "./guardrails-core-command-utils";
 import { normalizeContextWatchdogConfig } from "./context-watchdog-config";
 import { readProjectSettings as readProjectSettingsImpl, writeProjectSettings as writeProjectSettingsImpl } from "./context-watchdog-storage";
 import {
@@ -235,20 +238,9 @@ export {
 } from "./guardrails-core-provider-budget-governor";
 export type { ProviderBudgetGovernorMisconfig } from "./guardrails-core-provider-budget-governor";
 
-function normalizeCmdName(text: string): string {
-  const t = text.trim();
-  if (!t.startsWith("/")) return "";
-  const name = t.slice(1).split(/\s+/)[0] ?? "";
-  return name.toLowerCase();
-}
-
 import {
-  buildGuardrailsRuntimeConfigGetLines,
-  buildGuardrailsRuntimeConfigSetResult,
-  buildGuardrailsRuntimeConfigStatus,
   buildPragmaticAutonomySystemPrompt,
   DEFAULT_PRAGMATIC_AUTONOMY_CONFIG,
-  readGuardrailsRuntimeConfigSnapshot,
   resolvePragmaticAutonomyConfig,
   type PragmaticAutonomyConfig,
 } from "./guardrails-core-runtime-config";
@@ -300,13 +292,6 @@ function updateLongRunLaneStatus(
     "guardrails-core-lane",
     `[lane] ${lane} queued=${queued} loop=${state.mode}/${state.health}`,
   );
-}
-
-export function shouldAnnounceStrictInteractiveMode(
-  alreadyAnnounced: boolean,
-  strictMode: boolean,
-): boolean {
-  return strictMode && !alreadyAnnounced;
 }
 
 // =============================================================================
@@ -1828,84 +1813,12 @@ export default function (pi: ExtensionAPI) {
     return undefined;
   });
 
-  pi.registerCommand("guardrails-config", {
-    description: "Operate runtime config safely (get/set) for guardrails long-run/pragmatic autonomy without manual settings edits. Usage: /guardrails-config [status|help|get <key>|set <key> <value>]",
-    handler: async (args, ctx) => {
-      const rawArgs = String(args ?? "").trim();
-      const tokens = rawArgs.split(/\s+/).filter(Boolean);
-      const sub = (tokens[0] ?? "status").toLowerCase();
-
-      if (sub === "help") {
-        ctx.ui.notify(buildGuardrailsConfigHelpLines().join("\n"), "info");
-        return;
-      }
-
-      if (sub === "status") {
-        ctx.ui.notify(buildGuardrailsRuntimeConfigStatus(ctx.cwd).join("\n"), "info");
-        return;
-      }
-
-      if (sub === "get") {
-        const key = tokens[1];
-        if (!key) {
-          ctx.ui.notify("guardrails-config: usage /guardrails-config get <key>", "warning");
-          return;
-        }
-        const lines = buildGuardrailsRuntimeConfigGetLines(ctx.cwd, key);
-        const isUnsupported = lines[0]?.includes("unsupported key") === true;
-        ctx.ui.notify(lines.join("\n"), isUnsupported ? "warning" : "info");
-        return;
-      }
-
-      if (sub === "set") {
-        const key = tokens[1];
-        const rawValue = tokens.slice(2).join(" ");
-        if (!key || rawValue.length === 0) {
-          ctx.ui.notify("guardrails-config: usage /guardrails-config set <key> <value>", "warning");
-          return;
-        }
-
-        const before = readGuardrailsRuntimeConfigSnapshot(ctx.cwd);
-        const result = buildGuardrailsRuntimeConfigSetResult({ cwd: ctx.cwd, key, rawValue });
-        if (!result.ok) {
-          ctx.ui.notify(result.lines.join("\n"), "warning");
-          return;
-        }
-
-        // Re-read mutable configs so frequently tuned knobs apply now.
-        longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
-        pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
-        i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
-
-        const after = readGuardrailsRuntimeConfigSnapshot(ctx.cwd);
-        appendAuditEntry(ctx, "guardrails-core.runtime-config-set", {
-          atIso: new Date().toISOString(),
-          actor: "operator-command",
-          command: "guardrails-config set",
-          key: result.spec.key,
-          oldConfigured: result.oldConfigured,
-          newConfigured: result.newValue,
-          oldEffective: before[result.spec.key],
-          newEffective: after[result.spec.key],
-          settingsPath: result.settingsPath,
-          reloadRecommended: result.spec.reloadRequired,
-        });
-
-        updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
-
-        const lines = [
-          ...result.lines,
-          `effective: ${formatRuntimeConfigValue(before[result.spec.key])} -> ${formatRuntimeConfigValue(after[result.spec.key])}`,
-          "fallback: unsupported keys can still be edited in .pi/settings.json (manual mode).",
-        ];
-        ctx.ui.notify(lines.join("\n"), "info");
-        return;
-      }
-
-      ctx.ui.notify(
-        [`guardrails-config: unknown subcommand '${sub}'.`, ...buildGuardrailsConfigHelpLines()].join("\n"),
-        "warning",
-      );
+  registerGuardrailsRuntimeConfigSurface(pi, appendAuditEntry, {
+    onConfigChanged: (ctx) => {
+      longRunIntentQueueConfig = resolveLongRunIntentQueueConfig(ctx.cwd);
+      pragmaticAutonomyConfig = resolvePragmaticAutonomyConfig(ctx.cwd);
+      i18nIntentConfig = resolveI18nIntentConfig(ctx.cwd);
+      updateLongRunLaneStatus(ctx, !ctx.isIdle() || ctx.hasPendingMessages(), longRunLoopRuntimeState);
     },
   });
 

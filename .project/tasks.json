@@ -18313,6 +18313,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Continuação local-safe após auto-resume: context-watchdog.ts está em 1999 linhas; extrair tools independentes reduz risco de voltar ao critical.\n[provenance:human] source_task=none reason=User asked to continue anti-bloat and batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração de context_watch_checkpoint/context_watch_bootstrap; reload segue acumulado para o final.\nClosed via VER-BUD-1169: extracted checkpoint/bootstrap surface and validated 75 focal tests. [rationale:anti-bloat] context-watchdog.ts now 1897; aboveCritical remains 0; reload still batched.",
       "verification": "VER-BUD-1169"
+    },
+    {
+      "id": "TASK-BUD-818",
+      "description": "Extrair comando guardrails-config de guardrails-core para surface dedicada com callbacks de runtime.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-runtime-config-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover registro do comando guardrails-config para módulo coeso",
+        "preservar subcomandos help/status/get/set e auditoria",
+        "manter refresh imediato dos configs mutáveis via callback",
+        "reduzir guardrails-core.ts abaixo de 1900 linhas e validar smokes focais"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] guardrails-core.ts está em 1984 linhas; comando guardrails-config é surface extraível e corrige acoplamento de runtime sem tocar protected scopes.\n[provenance:human] source_task=none reason=User asked to continue local-safe anti-bloat and batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração do comando guardrails-config; manter runtime refresh por callback e reload acumulado para final.\nClosed via VER-BUD-1170: extracted guardrails runtime-config command surface and command utils; validated 56 focal tests. [rationale:anti-bloat] guardrails-core.ts now 1897 (<1900); reload still batched.",
+      "verification": "VER-BUD-1170"
     }
   ]
 }
