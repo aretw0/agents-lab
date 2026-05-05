@@ -1071,8 +1071,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 							},
 						);
 						if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
+							const resumeStateLabel = autoResumeSnapshot.reason === "reload-required" ? "deferred" : "suppressed";
 							ctx.ui.notify(
-								`context-watch: auto resume suppressed (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
+								`context-watch: auto resume ${resumeStateLabel} (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
 								"warning",
 							);
 						}

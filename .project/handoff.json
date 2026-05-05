@@ -1,46 +1,46 @@
 {
-  "timestamp": "2026-05-05T17:57:25.488Z",
-  "context": "Transição de lane assimilada: control plane saudável e produtivo em long-runs, mas anti-bloat principal pausado para focar guardrails/monitor [snip] e classifyRouting sem import corrigido. [truncated:+212 chars]",
+  "timestamp": "2026-05-05T18:27:02.332Z",
+  "context": "Batch continuado em guardrails/monitor recalibration. Commit anterior c8d8f982 aplicou calibração de unauthorized-action/hedge. Nesta fatia, [snip] o auto-resume deferred, não suppressed. [truncated:+259 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Rodar /reload para validar hotfix vivo da extensão guardrails-core.",
-    "Priorizar TASK-BUD-841: pesquisar/recalibrar guardrails e monitores para loops longos com advi [snip] /dedupe e evidência local. [truncated:+47 chars]",
-    "Manter TASK-BUD-837 anti-bloat pausado; retomar depois que degradação de guardrails/monitores for reduzida."
+    "Commitar fatia context-watchdog deferred reload + board/verification.",
+    "Pedir /reload ao final do batch para validar mudanças runtime acumuladas.",
+    "Continuar TASK-BUD-841 pesquisando falsos positivos de guard/monitor; tratar monitor-runtime-c [snip] com ancoragem/teste menor. [truncated:+43 chars]"
   ],
   "blockers": [
-    ".project/tasks.json e .project/handoff.json seguem dirty por assimilação/checkpoint local.",
-    "Validação live da extensão requer /reload."
+    "Validação live da extensão requer /reload após commit desta fatia.",
+    "monitor-runtime-contract.ts read-only bypass expansion bloqueado por falso pos [snip] plicado nesse arquivo. [truncated:+26 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts pac [snip] -> 3 files/56 tests passed [truncated:+140 chars]",
-    "git diff --check -- packages/pi-stack/extensions/guardrails-core-event-surface.ts -> clean"
+    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 1 file / 58 tests passed",
+    "git diff --check -> passed"
   ],
   "recent_commits": [
-    "357fcf80 fix(guardrails): restore routing import in event surface"
+    "c8d8f982 fix(monitors): calibrate authorization blockers"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "task:TASK-BUD-837",
-      "commit:357fcf80"
+      "task:TASK-BUD-827",
+      "commit:c8d8f982"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T17:57:25.488Z",
+    "generatedAtIso": "2026-05-05T18:27:02.332Z",
     "level": "ok",
-    "percent": 18,
+    "percent": 31,
     "action": "continue",
     "recommendation": "continue"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T17:57:25.488Z",
+      "atIso": "2026-05-05T18:27:02.332Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 18,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

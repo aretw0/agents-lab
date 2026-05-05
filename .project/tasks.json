@@ -18506,7 +18506,7 @@
     {
       "id": "TASK-BUD-827",
       "description": "Analisar supressão de auto-resume por reload pendente e melhorar evidência/operador sem tangente imediata.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -18520,7 +18520,7 @@
         "validar com smoke focal post-reload antes de qualquer fechamento"
       ],
       "milestone": "guardrails-monitor-recalibration",
-      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente.\n[evidence:auto-resume-reload-suppression] Operador relatou pós-compactação forçada: auto-resume foi suprimido esperando reload; após reload manual, auto-resume veio em seguida. Operador suprimiu manualmente para registrar evidência. Isso confirma acoplamento reload-pendente -> supressão de auto-resume."
+      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente.\n[evidence:auto-resume-reload-suppression] Operador relatou pós-compactação forçada: auto-resume foi suprimido esperando reload; após reload manual, auto-resume veio em seguida. Operador suprimiu manualmente para registrar evidência. Isso confirma acoplamento reload-pendente -> supressão de auto-resume.\nFatia implementada: auto-resume bloqueado por reload pendente agora é comunicado como deferred (não suppressed) no reason/hint/notificação, preservando o contrato de continuar após /reload. Validação focal: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 58 tests passed. [rationale:operational] Reload pendente não é falha do loop; é handoff diferido para continuar após reload."
     },
     {
       "id": "TASK-BUD-828",
@@ -18836,7 +18836,7 @@
         "Produzir plano de mudanças pequenas com regressões antes de mexer em enforcement."
       ],
       "milestone": "guardrails-monitor-recalibration",
-      "notes": "[rationale:operator-steer] Após horas de trabalho, operador observou que o control plane está saudável e produtivo, mas o gargalo virou guardrails/monitores ingenuamente rígidos ou não agregadores. Pausar anti-bloat principal e focar em reduzir esse peso para voltar a evoluir.\n[provenance:human] source_task=none reason=Transição explícita de lane solicitada pelo operador.\n[evidence:runtime-regression] Durante transição de lane, reload revelou erro vivo de extensão: guardrails-core-event-surface.ts usava classifyRouting sem import após extração. Hotfix aplicado em commit 357fcf80. Esse caso entra na pesquisa sobre regressões e contratos de extração/monitoramento que precisam agregar sem bloquear loops legítimos.\nIniciado em modo batch após reload: foco em pesquisar/recalibrar guardrails e monitores para loops longos, acumulando mudanças que exijam reload para validação final conjunta.\nPrimeira fatia implementada: monitor-provider agora calibra unauthorized-action/hedge com conversation_history e instruções critical-only/long-run-local-safe; .pi/settings ativa hedgeConversationHistory=true. Mantido sem fechar a lane: ainda falta pesquisar/recalibrar outros bloqueios e graceful-stop/auto-resume."
+      "notes": "[rationale:operator-steer] Após horas de trabalho, operador observou que o control plane está saudável e produtivo, mas o gargalo virou guardrails/monitores ingenuamente rígidos ou não agregadores. Pausar anti-bloat principal e focar em reduzir esse peso para voltar a evoluir.\n[provenance:human] source_task=none reason=Transição explícita de lane solicitada pelo operador.\n[evidence:runtime-regression] Durante transição de lane, reload revelou erro vivo de extensão: guardrails-core-event-surface.ts usava classifyRouting sem import após extração. Hotfix aplicado em commit 357fcf80. Esse caso entra na pesquisa sobre regressões e contratos de extração/monitoramento que precisam agregar sem bloquear loops legítimos.\nIniciado em modo batch após reload: foco em pesquisar/recalibrar guardrails e monitores para loops longos, acumulando mudanças que exijam reload para validação final conjunta.\nPrimeira fatia implementada: monitor-provider agora calibra unauthorized-action/hedge com conversation_history e instruções critical-only/long-run-local-safe; .pi/settings ativa hedgeConversationHistory=true. Mantido sem fechar a lane: ainda falta pesquisar/recalibrar outros bloqueios e graceful-stop/auto-resume.\nEvidência adicional: tentativas pequenas e ancoradas de expandir bypass read-only do unauthorized-action em monitor-runtime-contract.ts foram bloqueadas pelo próprio guard/monitor como se corrompessem a lógica, mesmo sem diff aplicado. Classificação: false positive enforcement-worthy para recalibração posterior; mantive sem bypass shell e avancei em fatia context-watchdog não sensível."
     }
   ]
 }

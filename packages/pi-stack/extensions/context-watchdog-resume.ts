@@ -42,7 +42,7 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 		case "send":
 			return "dispatched";
 		case "reload-required":
-			return "suppressed: reload-required";
+			return "deferred: reload-required";
 		case "checkpoint-evidence-missing":
 			return "suppressed: checkpoint-evidence-missing";
 		case "board-handoff-divergence":
@@ -62,7 +62,7 @@ export function describeAutoResumeDispatchReason(reason: AutoResumeDispatchReaso
 export function describeAutoResumeDispatchHint(reason: AutoResumeDispatchReason): string | undefined {
 	switch (reason) {
 		case "reload-required":
-			return "run /reload and continue from handoff checkpoint";
+			return "auto-resume deferred until /reload, then continue from handoff checkpoint";
 		case "checkpoint-evidence-missing":
 			return "persist or refresh handoff checkpoint evidence before resume";
 		case "board-handoff-divergence":
