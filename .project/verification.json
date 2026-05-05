@@ -12453,6 +12453,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T02:27:37.349Z",
       "evidence": "Extracted progress preservation, context economy, pre-compact calm-close, anti-paralysis dispatch, pre-compact idle prep, and auto-resume handoff focus reconciliation signals into packages/pi-stack/extensions/context-watchdog-progress-signals.ts. context-watchdog.ts imports and re-exports the moved public contract. context-watchdog.ts reduced to 2799 lines; new module is 405 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (62 passed). [rationale:risk-control] Cohesive extraction of pure signal helpers with public re-export compatibility and focal smoke coverage."
+    },
+    {
+      "id": "VER-BUD-1137",
+      "target": "TASK-BUD-785",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T02:30:02.588Z",
+      "evidence": "Extracted deterministic web-routing and port-conflict helpers from guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-web-routing.ts. guardrails-core.ts now imports internal helpers and re-exports the public functions/types (RoutingDecision, classifyRouting, isDisallowedBash, extractDomains, port helpers). guardrails-core.ts reduced to 2986 lines; new module is 153 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-port-conflict.test.ts packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts (10 passed). [rationale:risk-control] Cohesive extraction from the largest critical surface with focused routing/port smoke coverage."
     }
   ]
 }

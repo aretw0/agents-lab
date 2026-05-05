@@ -1,29 +1,29 @@
 {
-  "timestamp": "2026-05-05T02:27:50.592Z",
-  "context": "Completed TASK-BUD-784: extracted progress preservation/context economy/calm-close/anti-paralysis/auto-resume focus reconciliation signals in [snip] eated dirty entry and remains unstaged. [truncated:+142 chars]",
+  "timestamp": "2026-05-05T02:30:13.866Z",
+  "context": "Completed TASK-BUD-785: extracted guardrails-core web-routing and port-conflict helpers into guardrails-core-web-routing.ts. guardrails-core. [snip] eated dirty entry and remains unstaged. [truncated:+84 chars]",
   "next_actions": [
-    "commit TASK-BUD-784 extraction slice",
-    "refresh autonomy_lane_status and line budget",
-    "continue anti-bloat wave; context-watchdog.ts dropped below guardrails-core.ts but remains critical"
+    "commit TASK-BUD-785 extraction slice",
+    "refresh line budget/autonomy status",
+    "continue anti-bloat wave on next largest critical surface"
   ],
   "blockers": [
     "uncommitted monitor-created .project/issues.json entry remains unstaged"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] eload.test.ts -> 62 passed [truncated:+30 chars]"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-port-conflict.test.ts packages/pi-st [snip] icies.test.ts -> 10 passed [truncated:+102 chars]"
   ],
   "recent_commits": [
-    "0ec49f4c refactor(context): extract afk material readiness"
+    "83922228 refactor(context): extract progress signals"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-784",
+    "focus": "TASK-BUD-785",
     "canonical_links": [
-      "task:TASK-BUD-784",
-      "commit:0ec49f4c"
+      "task:TASK-BUD-785",
+      "commit:83922228"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T02:27:50.592Z",
+    "generatedAtIso": "2026-05-05T02:30:13.866Z",
     "level": "ok",
     "action": "continue",
     "recommendation": "continue",
@@ -34,7 +34,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T02:27:50.592Z",
+      "atIso": "2026-05-05T02:30:13.866Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -51,6 +51,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-784"
+    "TASK-BUD-785"
   ]
 }

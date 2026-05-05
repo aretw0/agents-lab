@@ -17635,6 +17635,29 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Continuação local-safe da wave anti-bloat após reload; extração coesa de sinais puros e validável por smokes existentes.\n[provenance:human] source_task=TASK-BUD-783 reason=antiBloatCue continua em extract para context-watchdog.ts.\nClosed via VER-BUD-1136: progress/economy/calm-close/anti-paralysis/focus reconciliation signals extracted; focal context-watchdog smokes passed (62 tests). [rationale:risk-control] Reduces critical surface while preserving public contract.",
       "verification": "VER-BUD-1136"
+    },
+    {
+      "id": "TASK-BUD-785",
+      "description": "Extrair web-routing/port-conflict guard helpers de guardrails-core para módulo coeso, preservando exports públicos e smokes.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-784"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-web-routing.ts",
+        "packages/pi-stack/test/smoke/guardrails-port-conflict.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-shell-routing.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover RoutingDecision, classifyRouting, isDisallowedBash e helpers de porta para módulo dedicado.",
+        "Preservar exports públicos via guardrails-core.ts para consumidores/testes existentes.",
+        "Smokes de port-conflict e shell/web routing permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] antiBloatCue agora aponta guardrails-core.ts como maior superfície crítica; extrair helpers determinísticos de routing/porta é coeso e baixo risco.\n[provenance:human] source_task=TASK-BUD-784 reason=Continuar wave anti-bloat na maior superfície crítica após context-watchdog cair para terceiro lugar.\nClosed via VER-BUD-1137: web-routing/port-conflict helpers extracted; focal guardrails smokes passed (10 tests). [rationale:risk-control] Reduces guardrails-core critical surface while preserving public exports.",
+      "verification": "VER-BUD-1137"
     }
   ]
 }
