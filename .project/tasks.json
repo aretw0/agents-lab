@@ -19081,6 +19081,27 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Continuação local-safe: growth_maturity_score_packet é report-only e ainda retorna JSON cru em content.\n[provenance:human] source_task=TASK-BUD-851 reason=Continuar migração bounded de surfaces report-only para summary-first após recurring_failure_hardening_plan.\n[slice-start] Aplicando helper operator-visible em growth_maturity_score_packet; avaliação core permanece inalterada.\n[slice-complete] growth_maturity_score_packet no longer emits raw JSON as primary content. Rollback: revert guardrails-core-growth-maturity-surface.ts and guardrails-growth-maturity.test.ts changes.",
       "verification": "VER-BUD-1217"
+    },
+    {
+      "id": "TASK-BUD-853",
+      "description": "Migrar agent_spawn_readiness_gate para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-agent-spawn-readiness-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-agent-spawn-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que o content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe importante para futura trilha agents-as-tools/delegação: readiness gate deve ser legível e barato para operador.\n[provenance:human] source_task=TASK-BUD-852 reason=Prosseguir em UI cohesion com surface report-only relacionada à preparação de agents-as-tools sem habilitar dispatch.\n[slice-start] Aplicando helper operator-visible em agent_spawn_readiness_gate; avaliação core permanece report-only sem dispatch.\n[slice-complete] agent_spawn_readiness_gate no longer emits raw JSON as primary content. Rollback: revert guardrails-core-agent-spawn-readiness-surface.ts and guardrails-agent-spawn-readiness.test.ts changes.",
+      "verification": "VER-BUD-1218"
     }
   ]
 }

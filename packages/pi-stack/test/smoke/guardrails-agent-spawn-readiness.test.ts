@@ -75,7 +75,7 @@ describe("agent spawn readiness contract", () => {
         signal: AbortSignal,
         onUpdate: (update: unknown) => void,
         ctx: { cwd: string },
-      ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
     };
 
     const result = await tool.execute(
@@ -97,5 +97,8 @@ describe("agent spawn readiness contract", () => {
     expect(result.details?.mode).toBe("agent-spawn-readiness");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.decision).toBe("ready-for-simple-spawn");
+    expect(result.content?.[0]?.text).toContain("agent-spawn-readiness: decision=ready-for-simple-spawn");
+    expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });

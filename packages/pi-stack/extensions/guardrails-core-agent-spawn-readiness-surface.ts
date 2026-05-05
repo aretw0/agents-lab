@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateAgentSpawnReadiness } from "./guardrails-core-agent-spawn-readiness";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asOptionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
@@ -31,10 +32,11 @@ export function registerGuardrailsAgentSpawnReadinessSurface(pi: ExtensionAPI): 
         boundedScopeKnown: asOptionalBoolean(p.bounded_scope_known),
         liveReloadCompleted: asOptionalBoolean(p.live_reload_completed),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "agent_spawn_readiness_gate",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }
