@@ -17821,6 +17821,25 @@
       "milestone": "anti-bloat",
       "notes": "[rationale:refactor] Fatia local-safe pós-reload: mover helpers coesos de avaliação bloat para módulo já existente, preservando contrato público via reexport.\n[provenance:human] source_task=TASK-BUD-792 reason=Continuação da wave anti-bloat depois da correção pós-reload.\nClosed via VER-BUD-1145: bloat assessment helpers moved to guardrails-core-bloat.ts; long-run intent queue smoke passed (52 tests). [rationale:refactor] Public guardrails-core exports preserved.",
       "verification": "VER-BUD-1145"
+    },
+    {
+      "id": "TASK-BUD-794",
+      "description": "Extrair helpers puros de path/read guard de guardrails-core para módulo coeso, preservando exports públicos e smoke de bash guard.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-path-guard.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts"
+      ],
+      "acceptance_criteria": [
+        "isInsideCwd/isSensitive/isAllowedOutside/isUpstreamPiPackagePath/upstreamPiPackageMutationToolReason/extractPathsFromBash continuam exportados por guardrails-core.ts",
+        "guardReadPath/guardBashPathReads continuam usando os helpers sem mudança de comportamento",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts passa"
+      ],
+      "milestone": "anti-bloat",
+      "notes": "[rationale:refactor] Fatia local-safe pós-reload para reduzir guardrails-core.ts por extração coesa de path/read guard helpers puros, sem alterar escopo protegido.\n[provenance:human] source_task=TASK-BUD-793 reason=Continuação da wave anti-bloat após reload e confirmação de monitores ruidosos.\nClosed via VER-BUD-1146: path/read guard helpers extracted to guardrails-core-path-guard.ts; guardrails smoke passed (53 tests). [rationale:refactor] Public exports preserved via guardrails-core.ts.",
+      "verification": "VER-BUD-1146"
     }
   ]
 }

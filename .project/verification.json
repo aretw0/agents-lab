@@ -12534,6 +12534,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:00:13.339Z",
       "evidence": "Extracted bloat/slice-width assessment helpers from guardrails-core.ts into existing guardrails-core-bloat.ts with public re-exports preserved from guardrails-core.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 52 passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2378 to 2244 lines while keeping long-run bloat advisory contract intact."
+    },
+    {
+      "id": "VER-BUD-1146",
+      "target": "TASK-BUD-794",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:05:42.223Z",
+      "evidence": "Extracted pure path/read guard helpers from guardrails-core.ts into guardrails-core-path-guard.ts and preserved public re-exports from guardrails-core.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 2 files passed, 53 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2244 to 2203 lines without changing read/path guard behavior."
     }
   ]
 }
