@@ -12858,6 +12858,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:11:07.292Z",
       "evidence": "Extraídos helpers de ops calibration surface para packages/pi-stack/extensions/guardrails-core-ops-calibration-surface-helpers.ts. guardrails-core-ops-calibration-surface.ts reduziu de 1267 para 687 linhas; helper novo tem 608 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 2 files/24 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=11 recommendation=watch."
+    },
+    {
+      "id": "VER-BUD-1182",
+      "target": "TASK-BUD-833",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:16:33.372Z",
+      "evidence": "Extraído runtime state da fila para packages/pi-stack/extensions/guardrails-core-lane-queue-runtime.ts. guardrails-core-lane-queue.ts reduziu de 1250 para 967 linhas; runtime novo tem 311 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts => 2 files/56 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=10 recommendation=watch; git diff --check focal clean."
     }
   ]
 }

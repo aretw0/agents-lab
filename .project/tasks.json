@@ -18636,7 +18636,7 @@
     {
       "id": "TASK-BUD-833",
       "description": "Reduzir guardrails-core-lane-queue.ts rumo a <=1000 linhas preservando loop/auto-drain.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18653,7 +18653,8 @@
         "não habilitar auto-dispatch novo nem protected scope"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Lane queue é superfície central para loops AFK e está acima de watch; fatia local-safe aumenta autonomia futura.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Lane queue é superfície central para loops AFK e está acima de watch; fatia local-safe aumenta autonomia futura.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após TASK-BUD-832; alvo watch: guardrails-core-lane-queue.ts.\nConcluído: runtime state da lane queue extraído; arquivo principal agora <1000 linhas e aboveWatch caiu para 10.",
+      "verification": "VER-BUD-1182"
     },
     {
       "id": "TASK-BUD-834",
