@@ -12543,6 +12543,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:05:42.223Z",
       "evidence": "Extracted pure path/read guard helpers from guardrails-core.ts into guardrails-core-path-guard.ts and preserved public re-exports from guardrails-core.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 2 files passed, 53 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2244 to 2203 lines without changing read/path guard behavior."
+    },
+    {
+      "id": "VER-BUD-1147",
+      "target": "TASK-BUD-795",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:18:48.203Z",
+      "evidence": "Extracted provider budget governor config/settings/misconfig helpers from guardrails-core.ts into guardrails-core-provider-budget-governor.ts with public re-exports preserved. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 88 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2203 to 2120 lines while keeping provider budget governor behavior intact."
     }
   ]
 }

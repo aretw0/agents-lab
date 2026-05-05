@@ -13,7 +13,7 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyzeQuota, parseProviderBudgets, safeNum, type ProviderBudgetMap, type ProviderBudgetStatus } from "./quota-visibility";
+import { analyzeQuota } from "./quota-visibility";
 import { parseBudgetOverrideReason } from "./colony-pilot";
 import {
   DEFAULT_BLOAT_SMELL_CONFIG,
@@ -301,19 +301,20 @@ export type {
   GuardrailsPortConflictConfig,
   RoutingDecision,
 } from "./guardrails-core-web-routing";
-
-interface ProviderBudgetGovernorConfig {
-  enabled: boolean;
-  lookbackDays: number;
-  allowOverride: boolean;
-  overrideToken: string;
-  recoveryCommands: string[];
-}
-
-interface ProviderBudgetGovernorSnapshot {
-  atIso: string;
-  budgets: ProviderBudgetStatus[];
-}
+import {
+  detectProviderBudgetGovernorMisconfig,
+  providerBudgetGovernorMisconfigReason,
+  readQuotaBudgetSettings,
+  resolveProviderBudgetGovernorConfig,
+  type ProviderBudgetGovernorConfig,
+  type ProviderBudgetGovernorMisconfig,
+  type ProviderBudgetGovernorSnapshot,
+} from "./guardrails-core-provider-budget-governor";
+export {
+  detectProviderBudgetGovernorMisconfig,
+  providerBudgetGovernorMisconfigReason,
+} from "./guardrails-core-provider-budget-governor";
+export type { ProviderBudgetGovernorMisconfig } from "./guardrails-core-provider-budget-governor";
 
 function appendAuditEntry(ctx: ExtensionContext, key: string, value: Record<string, unknown>): void {
   const maybeAppend = (ctx as unknown as { appendEntry?: (k: string, v: Record<string, unknown>) => void }).appendEntry;
@@ -348,90 +349,6 @@ function normalizeCmdName(text: string): string {
   if (!t.startsWith("/")) return "";
   const name = t.slice(1).split(/\s+/)[0] ?? "";
   return name.toLowerCase();
-}
-
-function readQuotaBudgetSettings(cwd: string): {
-  weeklyQuotaTokens?: number;
-  weeklyQuotaCostUsd?: number;
-  weeklyQuotaRequests?: number;
-  monthlyQuotaTokens?: number;
-  monthlyQuotaCostUsd?: number;
-  monthlyQuotaRequests?: number;
-  providerBudgets: ProviderBudgetMap;
-} {
-  try {
-    const p = join(cwd, ".pi", "settings.json");
-    if (!existsSync(p)) return { providerBudgets: {} };
-    const json = JSON.parse(readFileSync(p, "utf8"));
-    const cfg = json?.piStack?.quotaVisibility ?? {};
-    return {
-      weeklyQuotaTokens: safeNum(cfg.weeklyQuotaTokens) || undefined,
-      weeklyQuotaCostUsd: safeNum(cfg.weeklyQuotaCostUsd) || undefined,
-      weeklyQuotaRequests: safeNum(cfg.weeklyQuotaRequests) || undefined,
-      monthlyQuotaTokens: safeNum(cfg.monthlyQuotaTokens) || undefined,
-      monthlyQuotaCostUsd: safeNum(cfg.monthlyQuotaCostUsd) || undefined,
-      monthlyQuotaRequests: safeNum(cfg.monthlyQuotaRequests) || undefined,
-      providerBudgets: parseProviderBudgets(cfg.providerBudgets),
-    };
-  } catch {
-    return { providerBudgets: {} };
-  }
-}
-
-function resolveProviderBudgetGovernorConfig(cwd: string): ProviderBudgetGovernorConfig {
-  const defaults: ProviderBudgetGovernorConfig = {
-    enabled: false,
-    lookbackDays: 30,
-    allowOverride: true,
-    overrideToken: "budget-override:",
-    recoveryCommands: ["doctor", "quota-visibility", "model", "login"],
-  };
-
-  try {
-    const p = join(cwd, ".pi", "settings.json");
-    if (!existsSync(p)) return defaults;
-    const json = JSON.parse(readFileSync(p, "utf8"));
-    const cfg = json?.piStack?.guardrailsCore?.providerBudgetGovernor ?? {};
-    const lookback = Number.isFinite(Number(cfg.lookbackDays)) ? Math.floor(Number(cfg.lookbackDays)) : defaults.lookbackDays;
-    const recoveryCommands = Array.isArray(cfg.recoveryCommands)
-      ? cfg.recoveryCommands
-        .filter((x: unknown): x is string => typeof x === "string" && x.trim().length > 0)
-        .map((x: string) => x.trim().toLowerCase())
-      : defaults.recoveryCommands;
-
-    return {
-      enabled: cfg?.enabled === true,
-      lookbackDays: Math.max(1, Math.min(90, lookback)),
-      allowOverride: cfg?.allowOverride !== false,
-      overrideToken: typeof cfg?.overrideToken === "string" && cfg.overrideToken.trim().length > 0 ? cfg.overrideToken.trim() : defaults.overrideToken,
-      recoveryCommands,
-    };
-  } catch {
-    return defaults;
-  }
-}
-
-export type ProviderBudgetGovernorMisconfig = "missing-provider-budgets";
-
-export function detectProviderBudgetGovernorMisconfig(
-  enabled: boolean,
-  providerBudgets: ProviderBudgetMap,
-): ProviderBudgetGovernorMisconfig | undefined {
-  if (!enabled) return undefined;
-  if (Object.keys(providerBudgets).length === 0) return "missing-provider-budgets";
-  return undefined;
-}
-
-export function providerBudgetGovernorMisconfigReason(
-  issue: ProviderBudgetGovernorMisconfig,
-): string {
-  if (issue === "missing-provider-budgets") {
-    return [
-      "guardrails-core: providerBudgetGovernor habilitado sem quotaVisibility.providerBudgets.",
-      "BLOCK por provider não será aplicado até configurar budgets em .pi/settings.json.",
-    ].join(" ");
-  }
-  return "guardrails-core: providerBudgetGovernor misconfigured.";
 }
 
 import {

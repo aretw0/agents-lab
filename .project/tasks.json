@@ -17840,6 +17840,231 @@
       "milestone": "anti-bloat",
       "notes": "[rationale:refactor] Fatia local-safe pós-reload para reduzir guardrails-core.ts por extração coesa de path/read guard helpers puros, sem alterar escopo protegido.\n[provenance:human] source_task=TASK-BUD-793 reason=Continuação da wave anti-bloat após reload e confirmação de monitores ruidosos.\nClosed via VER-BUD-1146: path/read guard helpers extracted to guardrails-core-path-guard.ts; guardrails smoke passed (53 tests). [rationale:refactor] Public exports preserved via guardrails-core.ts.",
       "verification": "VER-BUD-1146"
+    },
+    {
+      "id": "TASK-BUD-795",
+      "description": "Extrair provider budget governor helpers de guardrails-core para módulo coeso, preservando exports públicos e validação quota/guardrails.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-provider-budget-governor.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "detectProviderBudgetGovernorMisconfig e providerBudgetGovernorMisconfigReason continuam exportados por guardrails-core.ts",
+        "resolve/read helpers do provider budget governor ficam fora de guardrails-core.ts sem mudar comportamento runtime",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Primeira fatia AFK local-safe: reduzir guardrails-core.ts por extração coesa de budget governor; reload pode ser batched ao final da sequência.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK solicitado pelo usuário para manter cadência anti-bloat longa sem depender de iteração humana.\nClosed via VER-BUD-1147: provider budget governor helpers extracted; guardrails/quota smoke passed (88 tests). [rationale:refactor] Public guardrails-core exports preserved.",
+      "verification": "VER-BUD-1147"
+    },
+    {
+      "id": "TASK-BUD-796",
+      "description": "Extrair wrappers de audit/trusted UI confirmation de guardrails-core para módulo coeso, preservando evidência estruturada e smoke de human-confirmation.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-confirmation-audit.ts",
+        "packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-human-confirmation-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "appendAuditEntry/appendTrustedUiConfirmationEvidence equivalentes continuam usados por guardrails-core.ts",
+        "nenhum comportamento de confirmação destrutiva/protegida é habilitado",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation-surface.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe: separar audit/confirmation glue sem alterar política protected-scope.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para reduzir guardrails-core.ts por coesão."
+    },
+    {
+      "id": "TASK-BUD-797",
+      "description": "Extrair handlers runtime de read/bash path guard de guardrails-core para módulo coeso com callbacks auditáveis, preservando bloqueios e prompts existentes.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-read-path-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-path-guard.ts",
+        "packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts"
+      ],
+      "acceptance_criteria": [
+        "guardReadPath e guardBashPathReads deixam guardrails-core.ts ou viram wrappers finos",
+        "bloqueios de path sensível/fora do projeto continuam equivalentes",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe posterior aos helpers puros de path guard; manter comportamento protegido intacto.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para continuar extração guardrails-core sem perguntar."
+    },
+    {
+      "id": "TASK-BUD-798",
+      "description": "Extrair query/filter/row mapping de project-board-surface para project-board-query, preservando board_query e smoke completo do board.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-query.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "queryProjectTasks e queryProjectVerification preservam contrato público e tipos exportados",
+        "filtros status/search/milestone/rationale continuam equivalentes",
+        "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts por extração de leitura/query; sem tocar escopo protegido.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície ainda crítica do board."
+    },
+    {
+      "id": "TASK-BUD-799",
+      "description": "Extrair formatadores compactos e summaries de ferramentas do project-board-surface para módulo coeso, preservando resultados das tools do board.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-tool-formatting.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "buildBoard*Summary, normalizeVerificationEvidence e compact*ToolResult ficam em módulo dedicado ou wrappers finos",
+        "saídas compactas das tools permanecem compatíveis",
+        "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts sem mudar contrato de tool output.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície project-board remanescente."
+    },
+    {
+      "id": "TASK-BUD-800",
+      "description": "Extrair fluxo append/complete verification do project-board-surface para módulo de completion, preservando board_task_complete e gates de rationale.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-completion.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "appendProjectVerificationBoard e completeProjectTaskBoardWithVerification continuam exportados e compatíveis",
+        "gates de rationale/consistency e auto-advance permanecem equivalentes",
+        "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe: isolar completion/verification flow do board sem mudar semântica de fechamento.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat para project-board-surface.ts."
+    },
+    {
+      "id": "TASK-BUD-801",
+      "description": "Extrair formatadores/status summaries de context-watchdog para módulo coeso, preservando tools context_watch_* e smoke focal.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-formatting.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts"
+      ],
+      "acceptance_criteria": [
+        "formatTimeoutPressureSummary e formatContextWatch*Summary continuam exportados/compatíveis",
+        "tools context_watch_status/compact_stage mantêm summary estável",
+        "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir context-watchdog.ts por extração de formatting/status; reload pode ser batched.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em superfície crítica context-watchdog."
+    },
+    {
+      "id": "TASK-BUD-802",
+      "description": "Extrair helpers de handoff growth snapshot e checkpoint focus de context-watchdog para módulo coeso, preservando checkpoint/handoff behavior.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-growth-checkpoint.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "resolveHandoffGrowthMaturitySnapshot/applyCheckpointTaskStatusFocus ou wrappers equivalentes saem da superfície principal",
+        "context_watch_checkpoint mantém payload e handoff compatíveis",
+        "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe para context-watchdog focada em handoff/checkpoint helpers, sem alterar política de reload/auto-resume.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat para reduzir context-watchdog.ts."
+    },
+    {
+      "id": "TASK-BUD-803",
+      "description": "Extrair tool result/summary helpers de guardrails-core-autonomy-lane-surface para módulo coeso, preservando autonomy_lane_status e batch preview.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-formatting.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "autonomy_lane_status summary tokens permanecem estáveis",
+        "batch/material/auto-advance surfaces continuam registradas sem mudança de schema",
+        "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe em superfície acima de extract; focar em formatting/result assembly, não em política.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em guardrails-core-autonomy-lane-surface.ts."
+    },
+    {
+      "id": "TASK-BUD-804",
+      "description": "Extrair registro/schema de tools de guardrails-core-autonomy-lane-surface em slices menores, preservando contratos públicos de autonomia.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-tools.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "nomes e schemas das tools autonomy_lane_* permanecem compatíveis",
+        "módulo surface principal reduz tamanho sem alterar decisões report-only",
+        "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe posterior a formatting; separar registro/schema mantendo report-only/no-dispatch.\n[provenance:human] source_task=TASK-BUD-803 reason=Seed AFK anti-bloat para continuar superfície autonomy lane se a fatia anterior estiver verde."
+    },
+    {
+      "id": "TASK-BUD-805",
+      "description": "Extrair helpers de status/lifecycle compactos de context-watchdog para módulo dedicado, preservando post-reload/continuation smoke.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-runtime-status.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts"
+      ],
+      "acceptance_criteria": [
+        "readContextWatchdogSourceMtimeMs/readWatchdogConfig/readDeferredLaneQueueCount ou wrappers equivalentes saem da superfície principal",
+        "post-reload status não bloqueia auto-resume por reload batched quando a próxima fatia é local-safe",
+        "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe para consolidar status/lifecycle do context-watchdog e reforçar reload batched como não supressor de continuidade local-safe.\n[provenance:human] source_task=TASK-BUD-802 reason=Seed AFK anti-bloat alinhado ao pedido de não deixar reload suprimir auto-resume."
+    },
+    {
+      "id": "TASK-BUD-806",
+      "description": "Extrair helpers de config/summary do colony-pilot para módulo coeso local-safe, preservando smoke de parsers/preflight quando escolhido na wave.",
+      "status": "planned",
+      "priority": "p3",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/colony-pilot-summary.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "extração evita iniciar colonies/processos; apenas helpers puros/formatadores",
+        "comandos/status do colony-pilot mantêm contrato público",
+        "pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts passa antes de qualquer commit"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia planejada de menor prioridade em arquivo crítico; executar só se helpers puros forem identificados claramente, sem launching/background side effects.\n[provenance:human] source_task=TASK-BUD-795 reason=Seed AFK reserva para caso guardrails/context/board fiquem bloqueados."
     }
   ]
 }
