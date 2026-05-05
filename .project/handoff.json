@@ -1,55 +1,73 @@
 {
-  "timestamp": "2026-05-05T23:26:31.752Z",
-  "context": "Completed chained UI cohesion local-safe slices through TASK-BUD-865. Recent completions after auto-resume: TASK-BUD-861 background_process s [snip] 01b5e6d3, ac9ce95a, e88b1071, 169cb548. [truncated:+282 chars]",
+  "timestamp": "2026-05-05T23:47:01.588Z",
+  "context": "Auto-resume continuation completed UI cohesion chain. Completed and committed TASK-BUD-866 mixed board/stack/provider audit, TASK-BUD-867 aut [snip] arked model/provider/cost/API strategy. [truncated:+422 chars]",
   "next_actions": [
-    "Commit this handoff checkpoint if dirty.",
-    "Next eligible local-safe task is TASK-BUD-866: audit mixed project-board/stack-sovereignty/pro [snip] rotected before migration. [truncated:+60 chars]",
-    "Respect context-watch checkpoint level; continue only with micro-slice or resume after compact/reload if needed."
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Stop local-safe chain at protected-scope boundary.",
+    "For future local-safe continuation, seed a new explicit cleanup task after compact/reload; sug [snip] d/mutation classification. [truncated:+123 chars]",
+    "For protected lane, TASK-BUD-849 requires explicit human focus before model/provider/API/cost work."
   ],
   "blockers": [
-    "TASK-BUD-849 remains protected parked model/provider/cost/API strategy until explicit human focus.",
-    "Git auto-packing warned about unreachable loose objects earlier; git_maintenan [snip] , so no prune was run. [truncated:+50 chars]"
+    "context-watch-checkpoint-required",
+    "No eligible local-safe planned tasks remain under current filters.",
+    "TASK-BUD-849 remains protected parked model/provider/cost/API strategy.",
+    "Context watch is warn/compact-output with cooldown active; checkpoint committed after this write."
   ],
   "recent_validation": [
-    "TASK-BUD-865 validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-outpu [snip] s passed, 26 tests passed. [truncated:+206 chars]",
-    "Final git status was clean before checkpoint write except checkpoint will dirty .project/handoff.json."
+    "TASK-BUD-866 validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-outpu [snip] s passed, 74 tests passed. [truncated:+197 chars]",
+    "TASK-BUD-867 validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-outpu [snip] s passed, 48 tests passed. [truncated:+78 chars]",
+    "TASK-BUD-868 validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-outpu [snip] s passed, 26 tests passed. [truncated:+83 chars]"
   ],
   "recent_commits": [
-    "03f1869e feat(ui): summarize background process output",
-    "b69993fd feat(ui): summarize subagent readiness output"
+    "b704070a feat(ui): summarize board provider diagnostics",
+    "269af38d chore(board): seed ui cohesion followups"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-865",
+    "focus": "TASK-BUD-869",
     "canonical_links": [
-      "task:TASK-BUD-865",
-      "task:TASK-BUD-861",
-      "commit:03f1869e"
+      "task:TASK-BUD-869",
+      "task:TASK-BUD-866",
+      "task:TASK-BUD-867",
+      "commit:b704070a"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T23:26:31.752Z",
-    "level": "checkpoint",
-    "percent": 61,
-    "action": "checkpoint-refresh",
-    "recommendation": "checkpoint-before-next-slice",
+    "generatedAtIso": "2026-05-05T23:46:56.469Z",
+    "level": "warn",
+    "percent": 54,
+    "action": "continue",
+    "recommendation": "pause-at-protected-boundary",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T23:26:31.752Z",
+      "atIso": "2026-05-05T23:46:56.469Z",
       "reason": "manual_checkpoint",
-      "level": "checkpoint",
-      "percent": 61,
+      "level": "warn",
+      "percent": 54,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "checkpoint-before-next-slice"
+      "recommendation": "pause-at-protected-boundary"
+    },
+    {
+      "atIso": "2026-05-05T23:47:01.588Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-865"
+    "TASK-BUD-869"
   ]
 }
