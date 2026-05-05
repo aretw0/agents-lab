@@ -1,56 +1,54 @@
 {
-  "timestamp": "2026-05-05T21:02:56.354Z",
-  "context": "After user reload, runtime remained healthy (reloadGate=reload-not-required, classifyFail=0). Resolved TASK-BUD-840 close path: added complet [snip] 37 returns ready execute-bounded-slice. [truncated:+489 chars]",
+  "timestamp": "2026-05-05T21:17:24.469Z",
+  "context": "User explicitly authorized correction of the broken TASK-BUD-837 extraction. The safest correction was to roll back the uncommitted context-w [snip] lidated extraction with explicit scope. [truncated:+343 chars]",
   "current_tasks": [
     "TASK-BUD-837"
   ],
   "next_actions": [
-    "Commit board closure updates for TASK-BUD-840/TASK-BUD-841 and handoff.",
-    "Start TASK-BUD-837 as bounded anti-bloat slice: inspect current context-watchdog.ts line count [snip] uto-resume policy changes. [truncated:+62 chars]",
-    "Run focal context-watchdog smokes, record verification, and commit if slice succeeds."
+    "Commit board/handoff note for rollback correction.",
+    "Resume TASK-BUD-837 with a smaller extraction that does not rewrite the context-watchdog publi [snip] PI extraction slice first. [truncated:+57 chars]",
+    "Keep focal gate: context-watchdog.test.ts + storage/continuation smokes."
   ],
   "blockers": [
-    "TASK-BUD-837 has no own verification yet; do not close until a focused anti-bl [snip] at slice is validated. [truncated:+1 chars]",
-    "Do not change auto-compact/auto-resume thresholds or runtime policy while doin [snip] SK-BUD-837 anti-bloat. [truncated:+4 chars]"
+    "TASK-BUD-837 still has no successful anti-bloat verification; do not close yet.",
+    "Avoid broad context-watchdog public API rewrites unless explicitly scoped and validated."
   ],
   "recent_validation": [
-    "board_task_quality_gate TASK-BUD-840 -> closeAllowed=yes before completion",
-    "board_task_complete TASK-BUD-840 VER-BUD-1200 -> status=completed",
-    "board_task_quality_gate TASK-BUD-841 -> closeAllowed=yes after TASK-BUD-840 completion"
+    "git restore context-watchdog.ts and remove untracked context-watchdog-public-api.ts/context-wa [snip] state.ts -> clean baseline [truncated:+15 chars]",
+    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] ation.test.ts -> 75 passed [truncated:+93 chars]",
+    "monitors_compact_status -> classifyFail=0"
   ],
   "recent_commits": [
-    "50a537be chore(board): record anti-bloat reload validation",
-    "14d4f869 fix(monitors): allow authorized anti-bloat extractions"
+    "a5da4979 chore(board): add symphony influence backlog",
+    "9d5f8221 chore(board): close guardrail recalibration tasks"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-837",
     "canonical_links": [
       "task:TASK-BUD-837",
-      "task:TASK-BUD-840",
-      "task:TASK-BUD-825",
-      "verification:VER-BUD-1200"
+      "commit:a5da4979"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T21:02:56.354Z",
-    "level": "ok",
-    "percent": 32,
+    "generatedAtIso": "2026-05-05T21:17:24.469Z",
+    "level": "warn",
+    "percent": 52,
     "action": "continue",
-    "recommendation": "continue"
+    "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T21:02:56.354Z",
+      "atIso": "2026-05-05T21:17:24.469Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 32,
+      "level": "warn",
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "continue-bounded"
     }
   ]
 }
