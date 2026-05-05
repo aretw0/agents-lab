@@ -18206,6 +18206,28 @@
       "milestone": "agents-lab-blog",
       "notes": "[rationale:docs] Usuário conectou a trilha de updates/deps ao futuro blog do agents-lab para posts sobre o que há de novo no ecossistema próprio e nas ferramentas usadas.\n[provenance:human] source_task=none reason=Future agents-lab blog/release notes should reuse dependency-governance evidence.\n[rationale:docs] Iniciando fatia local-safe: guia/template editorial que reutiliza a atribuição local-stack vs upstream/deps de TASK-BUD-811, sem publicar nem pesquisar externo automaticamente.\nClosed via VER-BUD-1164: created agents-lab editorial pipeline/template linked from guides index. [rationale:docs] Separates nossa-stack/upstream/deps/curadoria, requires evidence per item, and holds unsupported upstream claims.",
       "verification": "VER-BUD-1164"
+    },
+    {
+      "id": "TASK-BUD-813",
+      "description": "Extrair helpers puros/locais do runtime de context-watchdog para reduzir superfície acima do limite sem alterar comportamento de tools/commands.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-runtime-helpers.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover helpers pequenos de checkpoint/handoff/overflow para módulo novo coeso",
+        "preservar exports públicos existentes de context-watchdog.ts quando houver consumidores",
+        "reduzir line count de context-watchdog.ts sem tocar protected scopes",
+        "validar com smoke tests focais de context-watchdog"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Line budget recomenda extract; context-watchdog.ts está acima de critical (~2556 linhas). Fatiar helpers locais é reversível e local-safe.\n[provenance:human] source_task=none reason=Seed local-safe anti-bloat material after TASK-BUD-811/812 completed and no eligible local-safe tasks remained.\n[rationale:anti-bloat] Iniciando extração focada de helpers de context-watchdog runtime; escopo local TS + smoke focal, sem protected scope.\nClosed via VER-BUD-1165: extracted context-watchdog runtime helpers, preserved exports, and validated 75 focal smoke tests. [rationale:anti-bloat] context-watchdog.ts dropped to 2460 lines; line budget still recommends further extraction.",
+      "verification": "VER-BUD-1165"
     }
   ]
 }

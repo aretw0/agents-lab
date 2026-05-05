@@ -12705,6 +12705,15 @@
       "method": "inspection",
       "timestamp": "2026-05-05T11:02:29.397Z",
       "evidence": "Added docs/guides/agents-lab-editorial-pipeline.md with editorial categories separating nossa-stack, upstream-pi, deps-terceiros, curadoria, and misto; source-evidence requirements for each item; explicit rule not to assert upstream changes without verifiable evidence; and first internal release note/post template with sections for Nossa stack, Pi upstream, Dependências e terceiros, Curadoria, Itens em hold, safety notes, and pre-publication checklist. Linked from docs/guides/README.md. Validation: safe_marker_check passed for guide and README (backtick markers intentionally allowed for literal category names); i18n_lint_text pt-BR passed; git diff --check clean. [rationale:docs] Reuses TASK-BUD-811 attribution evidence so editorial output separates local work from upstream/dependency changes."
+    },
+    {
+      "id": "VER-BUD-1165",
+      "target": "TASK-BUD-813",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T11:07:13.125Z",
+      "evidence": "Extracted context-watchdog runtime helpers into packages/pi-stack/extensions/context-watchdog-runtime-helpers.ts: isProviderRequestTimeoutError, composeAutoResumeSuppressionHint wrapper, writeLocalSliceHandoffCheckpoint, persistContextWatchHandoffEvent, isContextWindowOverflowErrorMessage, and applyEmergencyContextWindowFallbackConfig. context-watchdog.ts preserves public exports by re-exporting helper bindings and continues using imported helpers internally. Line count for context-watchdog.ts reduced from ~2556 to 2460. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 3 files passed, 75 tests passed; safe_marker_check passed for helper exports; git diff --check clean; line_budget_snapshot still recommends extract with aboveCritical=2/aboveExtract=7. [rationale:anti-bloat] Local-safe extraction reduces critical surface without changing runtime behavior."
     }
   ]
 }
