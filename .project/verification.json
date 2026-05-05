@@ -12390,6 +12390,15 @@
       "method": "structured-marker-check",
       "timestamp": "2026-05-05T01:54:47.245Z",
       "evidence": "Added docs/research/monitor-provider-divergence-2026-05.md capturing the false-positive empty-response hypothesis, provider/model divergence suspicion, deterministic evidence requirements (JSONL/final chars/render correlation), and advisory-only operational decision. Validation: safe_marker_check matched 4/4 anchors including assistantFinalChars, monitor-context-divergence, and monitor advisory posture. [rationale:risk-control] Reframes monitor LLM output as untrusted advisory unless backed by deterministic evidence, reducing provider-sensitive hallucination risk."
+    },
+    {
+      "id": "VER-BUD-1130",
+      "target": "TASK-BUD-778",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T01:59:09.843Z",
+      "evidence": "Extracted context-watchdog operator/deterministic-stop/cadence signals into packages/pi-stack/extensions/context-watchdog-operator-signals.ts while preserving public re-exports from context-watchdog.ts. context-watchdog.ts reduced to 3598 lines; new module is 463 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (75 passed). [rationale:risk-control] Cohesive extraction reduces critical surface size without behavior or API drift."
     }
   ]
 }

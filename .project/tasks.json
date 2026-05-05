@@ -17474,6 +17474,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] O feedback recente de fragility alegou empty response apesar de haver resposta visível; precisamos tratar isso como possível falha de engenharia de contexto/provider e reduzir dependência de classificadores LLM frágeis.\n[provenance:human] source_task=none reason=Usuário relatou falso positivo após mover monitores para GitHub Copilot e control plane para openai-codex; quer backlog para investigar provider-sensitive monitor hallucination.\nClosed via VER-BUD-1129: provider-sensitive monitor false-positive hypothesis documented with deterministic evidence requirements. [rationale:risk-control] Prevents LLM-only monitor feedback from becoming operational fact.",
       "verification": "VER-BUD-1129"
+    },
+    {
+      "id": "TASK-BUD-778",
+      "description": "Extrair sinais operacionais do context-watchdog para módulo coeso, reduzindo surface crítica sem alterar exports públicos.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-777"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-operator-signals.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover tipos/funções de operator/deterministic stop/cadence para módulo dedicado sem alterar nomes públicos exportados por context-watchdog.ts.",
+        "Preservar comportamento de steering, reload-required, timeout-pressure e cadence.",
+        "Smoke focal de context-watchdog permanece verde."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] antiBloatCue mostrou context-watchdog.ts como maior arquivo crítico; extração coesa reduz risco estrutural mantendo contrato público.\n[provenance:human] source_task=TASK-BUD-775 reason=Continuar wave anti-bloat indicada por antiBloatCue após resolver feedback de monitor/provider.\nClosed via VER-BUD-1130: operator/deterministic-stop/cadence signals extracted; focal context-watchdog smoke passed (75 tests). [rationale:risk-control] Reduces bloat while preserving public exports.",
+      "verification": "VER-BUD-1130"
     }
   ]
 }
