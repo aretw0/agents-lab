@@ -13110,6 +13110,15 @@
       "method": "test",
       "timestamp": "2026-05-05T21:58:14.464Z",
       "evidence": "Applied buildOperatorVisibleToolResponse to safe_marker_check in packages/pi-stack/extensions/guardrails-core-marker-check-surface.ts. Content now shows the stable marker-check summary plus details hint instead of raw JSON; details still preserve full structured result. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts -> 3 files passed, 11 tests passed."
+    },
+    {
+      "id": "VER-BUD-1210",
+      "target": "TASK-BUD-828",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection+test",
+      "timestamp": "2026-05-05T21:59:01.056Z",
+      "evidence": "Completed the UI cohesion lane through decomposed local-safe tasks TASK-BUD-843, TASK-BUD-844, and TASK-BUD-845. Inventory and policy documented in docs/guides/recommended-pi-stack.md; reusable buildOperatorVisibleToolResponse helper added; first operator-visible surface safe_marker_check migrated from raw JSON content to summary-first content while preserving details. Validation evidence: safe_marker_check marker/i18n checks for docs passed; pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts -> 4 passed; pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-marker-check-surface.test.ts packages/pi-stack/test/smoke/guardrails-marker-check.test.ts -> 3 files passed, 11 tests passed. No protected-scope changes."
     }
   ]
 }

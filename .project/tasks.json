@@ -18533,7 +18533,7 @@
     {
       "id": "TASK-BUD-828",
       "description": "Criar lane de limpeza/cohesão de UI para blocos de sessão vistos pelo operador.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions",
@@ -18548,12 +18548,13 @@
         "validar uma primeira fatia local-safe sem alterar protected scope"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual.",
+      "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual.\n[macro-complete] UI cohesion lane seeded and validated: inventory + helper + first surface migration. Remaining watch/extract surfaces should be handled as future narrow tasks rather than broad rewrites.",
       "depends_on": [
         "TASK-BUD-843",
         "TASK-BUD-844",
         "TASK-BUD-845"
-      ]
+      ],
+      "verification": "VER-BUD-1210"
     },
     {
       "id": "TASK-BUD-829",
