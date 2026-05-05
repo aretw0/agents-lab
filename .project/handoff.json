@@ -1,29 +1,30 @@
 {
-  "timestamp": "2026-05-05T02:21:46.989Z",
-  "context": "Completed TASK-BUD-782: extracted context-watchdog freshness/prompt preview helpers into context-watchdog-freshness.ts. context-watchdog.ts n [snip] ked, so it remains explicitly unstaged. [truncated:+145 chars]",
+  "timestamp": "2026-05-05T02:24:10.244Z",
+  "context": "Completed TASK-BUD-783: extracted AFK material readiness snapshot helpers/types into context-watchdog-afk-material.ts. context-watchdog.ts no [snip] d entry that was not part of the slice. [truncated:+93 chars]",
   "next_actions": [
-    "commit TASK-BUD-782 extraction slice",
+    "commit TASK-BUD-783 extraction slice",
     "refresh autonomy_lane_status",
-    "continue next local-safe anti-bloat slice"
+    "continue anti-bloat wave; context-watchdog.ts still critical but closer to guardrails-core.ts"
   ],
   "blockers": [
     "uncommitted monitor-created .project/issues.json entry remains unstaged"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] eload.test.ts -> 65 passed [truncated:+91 chars]"
+    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 58 passed"
   ],
   "recent_commits": [
-    "07d155d5 refactor(context): extract operator brief helpers"
+    "07d155d5 refactor(context): extract operator brief helpers",
+    "33de1f89 refactor(context): extract freshness helpers"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-782",
+    "focus": "TASK-BUD-783",
     "canonical_links": [
-      "task:TASK-BUD-782",
+      "task:TASK-BUD-783",
       "commit:07d155d5"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T02:21:46.989Z",
+    "generatedAtIso": "2026-05-05T02:24:10.244Z",
     "level": "ok",
     "action": "continue",
     "recommendation": "continue",
@@ -34,7 +35,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T02:21:46.989Z",
+      "atIso": "2026-05-05T02:24:10.244Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -51,6 +52,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-782"
+    "TASK-BUD-783"
   ]
 }

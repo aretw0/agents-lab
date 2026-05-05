@@ -17590,6 +17590,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Continuação local-safe da wave anti-bloat; slice coesa e validável por smokes existentes.\n[provenance:human] source_task=TASK-BUD-781 reason=antiBloatCue continua em extract para context-watchdog.ts.\nClosed via VER-BUD-1134: freshness/prompt preview helpers extracted; context-watchdog/resume/post-reload smokes passed (65 tests). [rationale:risk-control] Reduces critical surface while preserving continuation and auto-resume preview behavior.",
       "verification": "VER-BUD-1134"
+    },
+    {
+      "id": "TASK-BUD-783",
+      "description": "Extrair snapshot de AFK material readiness do context-watchdog para módulo coeso, preservando cues de continuidade local-safe.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-782"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-afk-material.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover tipos/helpers de AfkMaterialReadinessSnapshot para módulo dedicado.",
+        "Preservar decisão continue|seed-backlog|blocked usada nos previews/status.",
+        "Smokes focais de context-watchdog permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Slice coesa de anti-bloat em context-watchdog.ts, sem alterar protected-scope behavior.\n[provenance:human] source_task=TASK-BUD-782 reason=antiBloatCue continua exigindo extrações coesas de superfícies críticas.\nClosed via VER-BUD-1135: AFK material readiness snapshot extracted; context-watchdog smoke passed (58 tests). [rationale:risk-control] Reduces critical surface while preserving local-safe material readiness cues.",
+      "verification": "VER-BUD-1135"
     }
   ]
 }
