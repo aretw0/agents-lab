@@ -18541,6 +18541,251 @@
       ],
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual."
+    },
+    {
+      "id": "TASK-BUD-829",
+      "description": "Extrair surface/orquestração coesa de guardrails-core para limpar último aboveExtract.",
+      "status": "in-progress",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-exports.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts"
+      ],
+      "acceptance_criteria": [
+        "reduzir guardrails-core.ts abaixo de 1400 linhas",
+        "preservar registro principal e reexports públicos",
+        "validar smokes focais de guardrails-core",
+        "manter protected-scope sem auto-dispatch"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Após TASK-BUD-825, line_budget_snapshot mostra aboveExtract=1; o alvo restante é guardrails-core.ts.\n[provenance:human] source_task=none reason=Continuação pedida pelo usuário após backlogar lane de UI."
+    },
+    {
+      "id": "TASK-BUD-830",
+      "description": "Extrair runtime de bloat-smell do guardrails-core para módulo dedicado após limpar o último aboveExtract.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-bloat-runtime.ts",
+        "packages/pi-stack/extensions/guardrails-core-bloat.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover handlers de turn_end/tool_call relacionados a text/code bloat para módulo coeso",
+        "preservar status/audit keys existentes",
+        "reduzir guardrails-core.ts com comportamento equivalente",
+        "validar smokes focais de guardrails-core e bloat quando aplicável"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Fatia sucessora local-safe para manter loop após TASK-BUD-829; escopo sem protected scope e com rollback por git.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-831",
+      "description": "Ratchet de orçamento do guardrails-core após extrações, com teste de regressão anti-reinflation.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts",
+        "docs/research/control-plane-anti-bloat-lane-2026-05-01.md"
+      ],
+      "acceptance_criteria": [
+        "baixar budget do teste de orquestrador para refletir o novo patamar alcançado",
+        "documentar critério de próxima extração sem bloquear trabalho local-safe",
+        "validar teste de orçamento focal",
+        "não alterar comportamento runtime"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Após reduzir o último aboveExtract, precisamos evitar reinflação e manter o loop orientado por orçamento estável.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-832",
+      "description": "Reduzir guardrails-core-ops-calibration-surface rumo a <=1000 linhas por extração coesa.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-ops-calibration.ts",
+        "packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts"
+      ],
+      "acceptance_criteria": [
+        "identificar bloco coeso de formatação/schema/helper para extração",
+        "reduzir arquivo alvo sem mudar contrato da tool",
+        "validar smoke focal ops-calibration",
+        "manter output humano resumido e detalhes estruturados"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Arquivo acima de watch (~1267 linhas) é bom candidato após limpar aboveExtract; também conversa com a lane de UI coesa.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-833",
+      "description": "Reduzir guardrails-core-lane-queue.ts rumo a <=1000 linhas preservando loop/auto-drain.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-lane-queue.ts",
+        "packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "extrair helpers puros de auto-drain/loop activation ou parsing em módulo dedicado",
+        "preservar contratos públicos usados por guardrails-core",
+        "validar smoke focal long-run intent queue",
+        "não habilitar auto-dispatch novo nem protected scope"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Lane queue é superfície central para loops AFK e está acima de watch; fatia local-safe aumenta autonomia futura.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-834",
+      "description": "Reduzir guardrails-core-unattended-continuation.ts rumo a <=1000 linhas após extrações de one-slice.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-one-slice-contracts.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts"
+      ],
+      "acceptance_criteria": [
+        "identificar helpers ainda coesos para extração sem alterar decisões report-only",
+        "preservar contratos one-slice e unattended continuation",
+        "validar smoke focal unattended-continuation",
+        "manter dispatchAllowed=false onde aplicável"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Superfície acima de watch (~1242 linhas) e relevante para loops sem nudge; boa sucessora local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-835",
+      "description": "Reduzir session-analytics.ts abaixo de watch/extract via nova extração read-only JSONL/formatting.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "packages/pi-stack/extensions/session-analytics-jsonl.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts",
+        "packages/pi-stack/test/session-analytics-outliers.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "extrair bloco coeso ainda restante de parsing/formatting/read-only query",
+        "preservar contratos de session_analytics_query",
+        "validar smokes/testes focais session analytics",
+        "manter scans bounded e read-only"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] session-analytics.ts está próximo de extract (~1365) e é alvo local-safe após limpar guardrails-core.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-836",
+      "description": "Reduzir monitor-provider-patch.ts abaixo de watch preservando patches e contratos de monitor.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-provider-patch.ts",
+        "packages/pi-stack/test/monitor-provider-patch.test.mjs",
+        "packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts"
+      ],
+      "acceptance_criteria": [
+        "extrair helpers puros de classificação/normalização sem tocar node_modules",
+        "preservar comportamento first-party de monitor provider patch",
+        "validar testes focais de monitor provider/runtime contract",
+        "manter evidência de não-mutação de dependências"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Arquivo está em watch alto (~1374) e próximo do extract; fatia deve respeitar política de não mutar node_modules.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-837",
+      "description": "Reduzir context-watchdog.ts de watch para <=1000 linhas após surface de status extraída.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-825",
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "identificar próxima extração coesa sem mexer na calibração de auto-compact pendente",
+        "preservar reload/auto-resume behavior já validado",
+        "validar smokes focais context-watchdog",
+        "não resolver TASK-BUD-826/827 nesta fatia"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] context-watchdog.ts saiu de extract mas ainda está em watch (~1360); criar fatia futura sem abrir tangente de calibração.\n[provenance:human] source_task=TASK-BUD-825 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-838",
+      "description": "Reduzir quota-visibility surfaces acima de watch por extração de formatting/model helpers.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/quota-visibility-model.ts",
+        "packages/pi-stack/extensions/quota-visibility-formatting.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "escolher uma fatia coesa entre quota-visibility.ts e quota-visibility-model.ts",
+        "reduzir pelo menos um alvo acima de watch sem alterar contratos de tool",
+        "validar smoke focal quota visibility",
+        "preservar comportamento read-only/sem auto-switch"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] quota visibility tem superfícies em watch (1209/1287) e contratos report-only; boa sequência local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+    },
+    {
+      "id": "TASK-BUD-839",
+      "description": "Reduzir colony-pilot.ts/project-board-surface.ts remanescentes acima de watch sem tocar escopos protegidos.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-829"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "selecionar um alvo acima de watch e extrair bloco coeso pequeno",
+        "preservar surfaces e comandos existentes",
+        "validar smoke focal do alvo escolhido",
+        "não iniciar colônias, CI ou protected-scope"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Últimos arquivos pouco acima de watch (~1087/~1075) podem ser tratados em fatias pequenas após alvos maiores.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
     }
   ]
 }
