@@ -12867,6 +12867,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:16:33.372Z",
       "evidence": "Extraído runtime state da fila para packages/pi-stack/extensions/guardrails-core-lane-queue-runtime.ts. guardrails-core-lane-queue.ts reduziu de 1250 para 967 linhas; runtime novo tem 311 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts => 2 files/56 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=10 recommendation=watch; git diff --check focal clean."
+    },
+    {
+      "id": "VER-BUD-1183",
+      "target": "TASK-BUD-839",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:24:38.681Z",
+      "evidence": "Reduzidos remanescentes watch-level sem executar pilot/remote/protected scope: project-board-surface.ts extraiu mutações para packages/pi-stack/extensions/project-board-mutations.ts (1075 -> 808 linhas); colony-pilot.ts extraiu API pública para packages/pi-stack/extensions/colony-pilot-public-api.ts e compactou imports runtime (1087 -> 887 linhas). Validação: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts => 2 files/146 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=8 recommendation=watch; git diff --check focal clean."
     }
   ]
 }

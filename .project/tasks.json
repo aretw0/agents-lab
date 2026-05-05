@@ -18772,7 +18772,7 @@
     {
       "id": "TASK-BUD-839",
       "description": "Reduzir colony-pilot.ts/project-board-surface.ts remanescentes acima de watch sem tocar escopos protegidos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18790,7 +18790,8 @@
         "não iniciar colônias, CI ou protected-scope"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Últimos arquivos pouco acima de watch (~1087/~1075) podem ser tratados em fatias pequenas após alvos maiores.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Últimos arquivos pouco acima de watch (~1087/~1075) podem ser tratados em fatias pequenas após alvos maiores.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado por foco auto-resume; alvo local-safe: reduzir colony-pilot.ts/project-board-surface.ts watch-level sem executar pilot/remote/protected scope.\nConcluído: colony-pilot.ts e project-board-surface.ts ficaram <1000 linhas; aboveWatch caiu para 8.",
+      "verification": "VER-BUD-1183"
     }
   ]
 }
