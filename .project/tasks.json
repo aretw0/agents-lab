@@ -18977,6 +18977,27 @@
       "milestone": "external-influence-assimilation",
       "notes": "[rationale:risk-control] Após TASK-BUD-842, há uma continuação local-safe: absorver a pesquisa como matriz governada, sem protected dispatch ou integração externa.\n[provenance:human] source_task=TASK-BUD-842 reason=Continuação automática local-safe após foco de pesquisa externa concluído; não há tarefas elegíveis não protegidas no board.\n[slice-start] Criando matriz de assimilação local-safe baseada em docs/research/openai-symphony-influence-2026-05.md; sem integração Linear/Symphony ou scheduler novo.\n[slice-complete] Matrix documented as local-safe assimilation artifact; no runtime/scheduler integration added. Rollback: remove docs/primitives/symphony-pattern-matrix.md and this verification.",
       "verification": "VER-BUD-1213"
+    },
+    {
+      "id": "TASK-BUD-848",
+      "description": "Migrar i18n_lint_text para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-i18n-lint-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-i18n-lint.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar resumo i18n-lint curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir tool surface por nome"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe da matriz Symphony/status surface e de TASK-BUD-828: reduzir JSON cru em tool report-only de alto uso.\n[provenance:human] source_task=TASK-BUD-847 reason=Não havia tarefas locais elegíveis; próxima fatia local-safe deterministicamente selecionada por inventory de JSON cru em surfaces report-only.\n[slice-start] Aplicando helper operator-visible apenas em i18n_lint_text surface; core lint logic permanece inalterada.\n[slice-complete] i18n_lint_text no longer emits raw JSON as primary content. Rollback: revert guardrails-core-i18n-lint-surface.ts and guardrails-i18n-lint.test.ts changes.",
+      "verification": "VER-BUD-1214"
     }
   ]
 }

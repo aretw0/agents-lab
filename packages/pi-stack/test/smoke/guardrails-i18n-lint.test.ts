@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { lintI18nUserFacingText } from "../../extensions/guardrails-core";
+import { registerGuardrailsI18nLintSurface } from "../../extensions/guardrails-core-i18n-lint-surface";
 
 describe("guardrails i18n user-facing lint", () => {
   it("passes consistent Portuguese user-facing text", () => {
@@ -48,5 +49,25 @@ describe("guardrails i18n user-facing lint", () => {
 
     expect(result.decision).toBe("invalid");
     expect(result.issues[0]?.kind).toBe("input-too-large");
+  });
+
+  it("surface retorna resumo operator-visible e preserva details", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsI18nLintSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "i18n_lint_text");
+    const result = tool?.execute("tc-i18n", {
+      expected_language: "pt-BR",
+      text: "Esta validação preserva o idioma do usuário.",
+    });
+
+    expect(result?.details.decision).toBe("pass");
+    expect(result?.content?.[0]?.text).toContain("i18n-lint: decision=pass");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });

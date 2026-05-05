@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { lintI18nUserFacingText } from "./guardrails-core-i18n-lint";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export function registerGuardrailsI18nLintSurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -21,10 +22,11 @@ export function registerGuardrailsI18nLintSurface(pi: ExtensionAPI): void {
         path: typeof p.path === "string" ? p.path : undefined,
         maxTextChars: typeof p.max_text_chars === "number" ? p.max_text_chars : undefined,
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "i18n_lint_text",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

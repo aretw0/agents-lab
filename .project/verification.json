@@ -13146,6 +13146,15 @@
       "method": "marker-check+i18n-lint",
       "timestamp": "2026-05-05T22:12:45.300Z",
       "evidence": "Created docs/primitives/symphony-pattern-matrix.md from the Symphony research synthesis. The matrix maps Symphony patterns to pi-stack primitives and explicitly blocks adoption of external scheduler/Linear/runtime unattended behavior. Validation: safe_marker_check matched 4/4 markers; i18n_lint_text expected pt-BR passed with 0 issues."
+    },
+    {
+      "id": "VER-BUD-1214",
+      "target": "TASK-BUD-848",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T22:15:16.053Z",
+      "evidence": "Migrated packages/pi-stack/extensions/guardrails-core-i18n-lint-surface.ts to buildOperatorVisibleToolResponse using result.summary as primary content while preserving full structured details. Added focal surface test in packages/pi-stack/test/smoke/guardrails-i18n-lint.test.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-i18n-lint.test.ts -> 2 files passed, 9 tests passed."
     }
   ]
 }
