@@ -82,6 +82,26 @@ Checklist de resize (first-class):
 - medium: resumo operacional completo sem depender de raw dump;
 - wide: detalhes adicionais sem duplicação confusa de status.
 
+### Coesão de blocos de sessão visíveis ao operador
+
+Critério padrão para tools/comandos first-party que aparecem como blocos na sessão/TUI:
+
+- `content[0].text` e `ctx.ui.notify(...)` devem ser **summary-first**: uma linha curta, humana e estável;
+- payload JSON completo deve ficar em `details` ou em seção/arquivo explicitamente colapsável, não como dump cru por padrão;
+- dumps JSON inline só são aceitáveis quando bounded, pequenos e deliberadamente diagnósticos;
+- saídas longas devem dizer `payload completo disponível em details` ou equivalente;
+- comandos de inspeção `full`, `debug` ou `export` podem mostrar raw, desde que sejam opt-in explícito.
+
+Inventário inicial (`TASK-BUD-843`):
+
+| Superfície | Estado | Classificação | Próxima ação |
+|---|---|---|---|
+| `monitor-summary` / `/mstatus inline` | resumo curto + `details`; `/mstatus full` é opt-in | ok | manter padrão |
+| `colony-pilot-output-policy`, `quota-visibility-output-policy`, `web-session-gateway` | já compactam JSON grande e apontam para `details` | ok/watch | convergir linguagem/limites em helper comum |
+| `claude-code-adapter`, `provider-readiness`, `session-analytics`, `scheduler-governance`, `stack-sovereignty` | tools ainda retornam `JSON.stringify(..., null, 2)` como bloco principal | watch | escolher uma primeira superfície para summary-first preservando `details` |
+| `guardrails-core-*surface`, `project-board-surface`, `safe-boot` | mistura de summaries estáveis com fallback JSON cru | watch/extract | migrar por fatias, sem alterar contrato público em massa |
+| comandos `full`/`debug` explícitos | raw é intencional e acionado pelo operador | ok | manter opt-in e limitar tamanho quando necessário |
+
 Guia detalhado de curadoria visual:
 - [`control-plane-ux-curation.md`](./control-plane-ux-curation.md)
 

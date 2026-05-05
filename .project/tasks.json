@@ -18548,7 +18548,12 @@
         "validar uma primeira fatia local-safe sem alterar protected scope"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual."
+      "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual.",
+      "depends_on": [
+        "TASK-BUD-843",
+        "TASK-BUD-844",
+        "TASK-BUD-845"
+      ]
     },
     {
       "id": "TASK-BUD-829",
@@ -18865,6 +18870,67 @@
       ],
       "milestone": "external-influence-backlog",
       "notes": "[provenance:human] Operador pediu adicionar como nova fonte de influências para pesquisar e aprender depois: https://github.com/openai/symphony. [parking:external-research] Backlog apenas; não pesquisar agora sem foco explícito por envolver URL/fonte externa.\n[provenance:human] source_task=none reason=Nova fonte de influência indicada pelo operador para pesquisa/aprendizado posterior."
+    },
+    {
+      "id": "TASK-BUD-843",
+      "description": "Inventariar superfícies operator-visible que aparecem como blocos de sessão/TUI e classificar risco de output cru.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "listar superfícies que retornam JSON cru como content text, notify ou comando",
+        "classificar cada superfície em ok/watch/extract para coesão visual",
+        "registrar critério de resumo humano vs payload estruturado",
+        "não alterar protected scope"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para criar inventário auditável antes de alterar superfícies visíveis ao operador.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário.\n[slice-start] Inventário local-safe iniciado a partir de busca por `JSON.stringify(..., null, 2)` em content/notify de extensions; sem protected scope.\n[slice-complete] Inventário inicial registrado: superfícies ok/watch/extract classificadas e critério summary-first vs details estruturado documentado. Rollback: revertir a seção adicionada em docs/guides/recommended-pi-stack.md.",
+      "verification": "VER-BUD-1207"
+    },
+    {
+      "id": "TASK-BUD-844",
+      "description": "Definir helper/padrão de saída operator-visible para tools report-only com resumo curto e detalhes estruturados recolhíveis.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-843"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "fornecer padrão reutilizável para content text curto + details estruturado",
+        "evitar JSON cru por padrão em superfícies de sessão/TUI",
+        "cobrir fail-closed e payload longo em teste focal",
+        "não mudar contratos públicos fora da primeira superfície escolhida"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para padronizar affordance de resumo/detalhes sem expandir escopo protegido.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário."
+    },
+    {
+      "id": "TASK-BUD-845",
+      "description": "Aplicar o padrão operator-visible em uma primeira superfície local-safe de alto ruído e validar smoke focal.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "selecionar uma superfície watch/extract do inventário",
+        "substituir output cru por resumo humano curto preservando details estruturado",
+        "validar compatibilidade com teste smoke existente ou novo",
+        "registrar rollback simples"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para limitar a implementação inicial a uma superfície e reduzir risco de regressão.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário."
     }
   ]
 }

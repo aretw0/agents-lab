@@ -13083,6 +13083,15 @@
       "method": "inspection+test",
       "timestamp": "2026-05-05T21:43:42.360Z",
       "evidence": "Completed TASK-BUD-826 as an evidence/calibration closure. Dependency hygiene repaired by linking completed sibling TASK-BUD-827. Inspection: context-watchdog runtime now has explicit final-turn close window before force compact (checkpoint with compact headroom <= FINAL_TURN_CLOSE_HEADROOM_PCT=10, plus compact window), deterministic compact-checkpoint-required stop signaling, and user-facing line 'context-watch-final-turn: use this turn only to close the current slice (checkpoint curto) and then stay idle for auto-compact.' This addresses the operator evidence that prior loops stayed active too close to the limit. Focal validation already run in this session after final context-watchdog refactor: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed; post-reload smoke -> 4 passed. No protected-scope or auto-dispatch policy change. [rationale:operational] Treat graceful-stop-before-compact as operator evidence/telemetry calibration, not a protected automation expansion."
+    },
+    {
+      "id": "VER-BUD-1207",
+      "target": "TASK-BUD-843",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-05T21:54:41.250Z",
+      "evidence": "Inventory slice documented in docs/guides/recommended-pi-stack.md under 'Coesão de blocos de sessão visíveis ao operador'. Validation: safe_marker_check matched 3/3 markers; i18n_lint_text passed for pt-BR section. No protected scope touched."
     }
   ]
 }
