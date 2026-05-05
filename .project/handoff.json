@@ -1,48 +1,48 @@
 {
-  "timestamp": "2026-05-05T21:42:05.481Z",
-  "context": "TASK-BUD-827 completed. Dependency hygiene repaired by adding completed prerequisite TASK-BUD-310. Post-reload focal smoke passed: context-wa [snip] t/idle graceful-stop before hard limit. [truncated:+277 chars]",
+  "timestamp": "2026-05-05T21:43:58.287Z",
+  "context": "TASK-BUD-826 completed as evidence/calibration closure. Dependency hygiene repaired by linking completed sibling TASK-BUD-827. Verification V [snip] n for operator-visible session blocks). [truncated:+376 chars]",
   "current_tasks": [
-    "TASK-BUD-826"
+    "TASK-BUD-828"
   ],
   "next_actions": [
-    "Commit TASK-BUD-827 board/handoff dependency/closure update.",
-    "Start TASK-BUD-826 with a bounded local-safe analysis/test slice around graceful stop before compact limit.",
-    "Keep reload batching; no immediate /reload unless a live regression appears."
+    "Commit TASK-BUD-826 board/handoff dependency/closure update.",
+    "Start TASK-BUD-828 with a bounded local-safe inventory/first-slice, avoiding protected scopes.",
+    "Keep reload batching; /reload needed later to adopt context-watchdog source changes."
   ],
   "blockers": [
-    "Runtime reload still needed later to adopt context-watchdog source changes in [snip] ad preference applies. [truncated:+26 chars]"
+    "Runtime reload still needed later to adopt context-watchdog source changes; ba [snip] ad preference applies. [truncated:+8 chars]"
   ],
   "recent_validation": [
-    "board_task_dependencies TASK-BUD-827 add TASK-BUD-310 -> ok",
-    "board_task_quality_gate TASK-BUD-827 -> closeAllowed=yes",
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 4 passed"
+    "board_task_dependencies TASK-BUD-826 add TASK-BUD-827 -> ok",
+    "board_task_complete TASK-BUD-826 VER-BUD-1206 -> ok",
+    "prior validation reused: context-watchdog/storage/continuation smokes -> 75 passed; post-reload smoke -> 4 passed"
   ],
   "recent_commits": [
-    "66a5da5e refactor(context-watch): extract auto compact runtime",
-    "a487a70c refactor(context-watch): extract post reload runtime"
+    "ae1bab04 chore(board): close reload auto resume task",
+    "66a5da5e refactor(context-watch): extract auto compact runtime"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-826",
+    "focus": "TASK-BUD-828",
     "canonical_links": [
+      "task:TASK-BUD-828",
       "task:TASK-BUD-826",
       "task:TASK-BUD-827",
-      "task:TASK-BUD-310",
-      "verification:VER-BUD-1205"
+      "verification:VER-BUD-1206"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T21:42:05.481Z",
+    "generatedAtIso": "2026-05-05T21:43:58.287Z",
     "level": "ok",
-    "percent": 36,
+    "percent": 39,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T21:42:05.481Z",
+      "atIso": "2026-05-05T21:43:58.287Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 36,
+      "percent": 39,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

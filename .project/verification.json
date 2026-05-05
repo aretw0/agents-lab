@@ -13074,6 +13074,15 @@
       "method": "test",
       "timestamp": "2026-05-05T21:41:36.875Z",
       "evidence": "Closed TASK-BUD-827 after dependency hygiene was repaired by linking completed prerequisite TASK-BUD-310 (post-reload stale-focus validation). Existing implementation evidence VER-BUD-1189 recalibrated reload-pending auto-resume copy from suppressed to deferred. Additional focal validation in this session: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 4 passed, confirming deferred post-reload intent is surfaced, dispatched after reload when gates are green, retained when blocked, and reported as deferred/not suppressed. Quality gate after dependency update: closeAllowed=yes; decision packet recommended close with no blockers. [rationale:operational] Reload-pending auto-resume is an intentional deferred continuation contract, not a failed/suppressed loop."
+    },
+    {
+      "id": "VER-BUD-1206",
+      "target": "TASK-BUD-826",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection+test",
+      "timestamp": "2026-05-05T21:43:42.360Z",
+      "evidence": "Completed TASK-BUD-826 as an evidence/calibration closure. Dependency hygiene repaired by linking completed sibling TASK-BUD-827. Inspection: context-watchdog runtime now has explicit final-turn close window before force compact (checkpoint with compact headroom <= FINAL_TURN_CLOSE_HEADROOM_PCT=10, plus compact window), deterministic compact-checkpoint-required stop signaling, and user-facing line 'context-watch-final-turn: use this turn only to close the current slice (checkpoint curto) and then stay idle for auto-compact.' This addresses the operator evidence that prior loops stayed active too close to the limit. Focal validation already run in this session after final context-watchdog refactor: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed; post-reload smoke -> 4 passed. No protected-scope or auto-dispatch policy change. [rationale:operational] Treat graceful-stop-before-compact as operator evidence/telemetry calibration, not a protected automation expansion."
     }
   ]
 }

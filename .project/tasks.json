@@ -18486,7 +18486,7 @@
     {
       "id": "TASK-BUD-826",
       "description": "Registrar e calibrar transição context-watch auto-compact/idle para evitar bater limite antes de parada graciosa.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -18501,7 +18501,11 @@
         "validar com teste/regressão focal antes de aplicar qualquer mudança"
       ],
       "milestone": "guardrails-monitor-recalibration",
-      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata.\n[evidence:auto-compact-calibration] Operador observou que, na transição de auto compactação/auto-resume, o agente não parou graciosamente cedo o bastante para deixar o idle auto-compactar; ficou confortável demais até bater/forçar limite. Não tangenciar agora; usar como evidência futura para calibrar threshold/stop-before-compact e expectativa de idle graceful-stop.\n[transition-evidence] Operador reforçou que o control plane está saudável e trabalha por horas, mas ainda falta reservar espaço no fim da janela para checkpoint/handoff/wrap-up e parada graciosa para o idle auto-compactar, em cenários de hard/soft intent de continuar via auto-resume. Priorizar calibração sem perder pragmatismo; não é jogar tudo fora.\n[evidence:forced-compact] Operador relatou que o agente bateu no limite da janela e a compactação aconteceu forçadamente, em vez de conseguir reservar espaço para checkpoint/handoff/wrap-up e parar graciosamente para idle auto-compact quando há hard/soft intent de continuar."
+      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata.\n[evidence:auto-compact-calibration] Operador observou que, na transição de auto compactação/auto-resume, o agente não parou graciosamente cedo o bastante para deixar o idle auto-compactar; ficou confortável demais até bater/forçar limite. Não tangenciar agora; usar como evidência futura para calibrar threshold/stop-before-compact e expectativa de idle graceful-stop.\n[transition-evidence] Operador reforçou que o control plane está saudável e trabalha por horas, mas ainda falta reservar espaço no fim da janela para checkpoint/handoff/wrap-up e parada graciosa para o idle auto-compactar, em cenários de hard/soft intent de continuar via auto-resume. Priorizar calibração sem perder pragmatismo; não é jogar tudo fora.\n[evidence:forced-compact] Operador relatou que o agente bateu no limite da janela e a compactação aconteceu forçadamente, em vez de conseguir reservar espaço para checkpoint/handoff/wrap-up e parar graciosamente para idle auto-compact quando há hard/soft intent de continuar.\nCompleted evidence/calibration closure after adding dependency on TASK-BUD-827. Existing context-watchdog behavior now provides final-turn close-window steering before compact threshold and deterministic compact-checkpoint-required stop signaling. Validation: context-watchdog/storage/continuation smokes -> 75 passed; post-reload smoke -> 4 passed. Added VER-BUD-1206.",
+      "depends_on": [
+        "TASK-BUD-827"
+      ],
+      "verification": "VER-BUD-1206"
     },
     {
       "id": "TASK-BUD-827",
