@@ -19443,6 +19443,27 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:risk-control] Esses outputs misturam alertas report-only com settings/subprocess/protected behavior; exigir classificação antes de qualquer migração.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found mixed remaining surfaces requiring classification.\n[auto-chain] Starting mixed-output audit under warn/compact-output. Scope: classify quota-alerts/safe-boot/claude-code-adapter and migrate only local-safe report-only output if bounded.\n[slice-complete] Mixed protected output audit complete. quota_alerts migrated; safe_boot and claude-code adapter paths classified/deferred. Rollback: revert quota-alerts.ts, quota-alerts.test.ts, and docs/research/task-bud-869-protected-output-audit-2026-05.md.",
       "verification": "VER-BUD-1234"
+    },
+    {
+      "id": "TASK-BUD-870",
+      "description": "Migrate claude_code_adapter_status operator-visible output to summary-first content while preserving full structured details and leaving claude_code_execute behavior unchanged.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-869"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/claude-code-adapter.ts",
+        "packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Only claude_code_adapter_status content formatting changes; no subprocess execution path, budget gate, auth detection, or provider routing behavior changes.",
+        "Primary content is a concise human summary with full payload preserved in details.",
+        "Focal smoke tests validate summary-first content and details preservation."
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[auto-seed] Local-safe follow-up from TASK-BUD-869 audit. Protected/executable claude_code_execute remains deferred; this task is status-only.\n[provenance:human] source_task=TASK-BUD-869 reason=Auto-resume handoff requested seeding a new explicit local-safe cleanup task after protected boundary; status-only adapter output migration is bounded and non-executable.\n[auto-chain] Starting status-only Claude Code adapter summary migration. Guardrail: do not alter claude_code_execute subprocess/budget behavior.\n[slice-complete] Status-only Claude Code adapter output is summary-first; executable claude_code_execute remains untouched/deferred. Rollback: revert claude-code-adapter.ts and claude-code-adapter-parsers.test.ts changes plus this task/verification entry.",
+      "verification": "VER-BUD-1235"
     }
   ]
 }

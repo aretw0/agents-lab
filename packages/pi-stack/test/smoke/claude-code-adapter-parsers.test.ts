@@ -124,6 +124,31 @@ describe("claude-code adapter — checkBudgetGate", () => {
 });
 
 describe("claude-code adapter — execute signature", () => {
+  it("emits summary-first status content with details preserved", async () => {
+    let registeredTool: {
+      name: string;
+      execute: () => Promise<{ content?: Array<{ type: string; text?: string }>; details: Record<string, unknown> }>;
+    } | undefined;
+
+    claudeCodeAdapterExtension({
+      registerTool(tool: unknown) {
+        const candidate = tool as typeof registeredTool;
+        if (candidate?.name === "claude_code_adapter_status") registeredTool = candidate;
+      },
+      registerCommand() {},
+      async exec() {
+        return { stdout: "", stderr: "not found", code: 1, killed: false };
+      },
+    } as never);
+
+    const output = await registeredTool?.execute();
+
+    expect(output?.details.available).toBe(false);
+    expect(String(output?.content?.[0]?.text ?? "")).toContain("claude-code-adapter-status: available=no");
+    expect(String(output?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(output?.content?.[0]?.text ?? "")).not.toContain('\"providerHint\"');
+  });
+
   it("usa params como segundo argumento na assinatura real do pi", async () => {
     let registeredTool: {
       name: string;

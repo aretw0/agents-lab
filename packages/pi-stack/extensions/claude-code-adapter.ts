@@ -12,6 +12,7 @@
  */
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // ---------------------------------------------------------------------------
 // Runtime status (detection)
@@ -255,10 +256,11 @@ export default function claudeCodeAdapterExtension(pi: ExtensionAPI) {
         providerHint: ClaudeCodeProviderHint;
       } = { available, binaryPath, authStatus, notes, budgetState, providerHint };
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "claude_code_adapter_status",
+        summary: `claude-code-adapter-status: available=${available ? "yes" : "no"} auth=${authStatus} budget=${budgetState.state} requests=${budgetState.requestsUsed}/${budgetState.requestsCap}`,
         details: payload,
-      };
+      });
     },
   });
 

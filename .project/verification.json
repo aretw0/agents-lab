@@ -13335,6 +13335,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:45:55.273Z",
       "evidence": "Audited quota-alerts, safe-boot, and claude-code-adapter remaining raw JSON content surfaces and documented classification in docs/research/task-bud-869-protected-output-audit-2026-05.md. Migrated only local-safe quota_alerts to summary-first operator-visible output with details preserved. Deferred safe_boot because it writes/restores .pi/settings.json; deferred claude_code_execute because it invokes subprocess/budget, and claude_code_adapter_status because it is coupled to the executable adapter surface and deserves a separate bounded task. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts -> 2 files passed, 23 tests passed."
+    },
+    {
+      "id": "VER-BUD-1235",
+      "target": "TASK-BUD-870",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:49:34.201Z",
+      "evidence": "Migrated claude_code_adapter_status only to summary-first operator-visible output using buildOperatorVisibleToolResponse, preserving full structured details. Left claude_code_execute JSON/dry-run/subprocess/budget behavior unchanged because executable adapter paths remain protected/deferred. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/claude-code-adapter-parsers.test.ts -> 2 files passed, 28 tests passed."
     }
   ]
 }
