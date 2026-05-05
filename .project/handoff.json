@@ -1,12 +1,14 @@
 {
-  "timestamp": "2026-05-05T22:25:30.242Z",
+  "timestamp": "2026-05-05T22:26:07.796Z",
   "context": "User confirmed reload completed, asked to add medium-term Model Infrastructure backlog, then continue prior local-safe UI cohesion work. Adde [snip] tent with structured details preserved. [truncated:+158 chars]",
   "next_actions": [
+    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Commit this handoff checkpoint if dirty.",
     "Continue only bounded local-safe UI-cohesion follow-ups, e.g. migrate another report-only JSON content surface.",
     "Keep TASK-BUD-849 parked until explicit medium-term model-infrastructure focus; it involves pr [snip] leaderboard/API strategy. [truncated:+21 chars]"
   ],
   "blockers": [
+    "context-watch-checkpoint-required",
     "Remaining pre-existing planned board items are protected parked legacy/external lanes.",
     "TASK-BUD-849 is intentionally medium-term protected backlog, not current implementation."
   ],
@@ -46,6 +48,19 @@
       },
       "action": "checkpoint-refresh",
       "recommendation": "checkpoint-or-continue-bounded"
+    },
+    {
+      "atIso": "2026-05-05T22:26:07.796Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
     }
   ],
   "completed_tasks": [
