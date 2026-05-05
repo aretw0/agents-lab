@@ -18228,6 +18228,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Line budget recomenda extract; context-watchdog.ts está acima de critical (~2556 linhas). Fatiar helpers locais é reversível e local-safe.\n[provenance:human] source_task=none reason=Seed local-safe anti-bloat material after TASK-BUD-811/812 completed and no eligible local-safe tasks remained.\n[rationale:anti-bloat] Iniciando extração focada de helpers de context-watchdog runtime; escopo local TS + smoke focal, sem protected scope.\nClosed via VER-BUD-1165: extracted context-watchdog runtime helpers, preserved exports, and validated 75 focal smoke tests. [rationale:anti-bloat] context-watchdog.ts dropped to 2460 lines; line budget still recommends further extraction.",
       "verification": "VER-BUD-1165"
+    },
+    {
+      "id": "TASK-BUD-814",
+      "description": "Extrair defaults e resolvers de política do colony-pilot para reduzir colony-pilot.ts abaixo do limiar crítico de 2000 linhas sem mudar comportamento.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/colony-pilot-policy-defaults.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover DEFAULT_BUDGET_POLICY, DEFAULT_PROJECT_TASK_SYNC e resolvers relacionados para módulo coeso",
+        "preservar exports públicos existentes em colony-pilot.ts",
+        "reduzir colony-pilot.ts abaixo de 2000 linhas",
+        "validar smoke focal de colony-pilot"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Após descartar .project/issues.json monitor-only, line budget ainda recomenda extract; colony-pilot.ts está em 2025 linhas e pode cair abaixo de critical com extração pequena.\n[provenance:human] source_task=none reason=Continuation after reload and explicit permission to discard monitor-created issues.\n[rationale:anti-bloat] Iniciando extração pequena em colony-pilot defaults/resolvers; escopo local TS + smoke focal, objetivo <2000 linhas.\nClosed via VER-BUD-1166: extracted colony-pilot policy defaults/resolvers and validated 86 focal smoke tests. [rationale:anti-bloat] colony-pilot.ts dropped to 1920 (<2000); line budget aboveCritical now 1.",
+      "verification": "VER-BUD-1166"
     }
   ]
 }
