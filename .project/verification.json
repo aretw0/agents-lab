@@ -13128,6 +13128,15 @@
       "method": "test",
       "timestamp": "2026-05-05T22:03:32.628Z",
       "evidence": "Migrated monitor_classify_failure_readiness in packages/pi-stack/extensions/monitor-summary.ts to buildOperatorVisibleToolResponse using result.evidence as summary-first content while preserving full structured details. Added focal test by tool name in packages/pi-stack/test/smoke/monitor-summary.test.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts -> 2 files passed, 15 tests passed."
+    },
+    {
+      "id": "VER-BUD-1212",
+      "target": "TASK-BUD-842",
+      "target_type": "task",
+      "status": "passed",
+      "method": "research+marker-check+i18n-lint",
+      "timestamp": "2026-05-05T22:10:47.654Z",
+      "evidence": "Researched openai/symphony at commit 58cf97da06d556c019ccea20c67f4f77da124bf3 via git checkout cache and wrote docs/research/openai-symphony-influence-2026-05.md. The synthesis maps Symphony patterns to bounded pi-stack/control-plane recommendations with source permalinks and explicitly avoids adopting external scheduler/runtime behavior. Validation: safe_marker_check on the research doc matched 4/4 required markers; i18n_lint_text expected pt-BR passed with 0 issues."
     }
   ]
 }

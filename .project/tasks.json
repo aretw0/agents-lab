@@ -18859,7 +18859,7 @@
     {
       "id": "TASK-BUD-842",
       "description": "Pesquisar OpenAI Symphony como fonte de influência para aprender padrões aplicáveis ao control plane/pi-stack.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/research/openai-symphony-influence-2026-05.md"
@@ -18870,7 +18870,8 @@
         "Registrar síntese curta com links/evidências e possíveis tasks locais-safe derivadas, sem materializar mudanças automaticamente."
       ],
       "milestone": "external-influence-backlog",
-      "notes": "[provenance:human] Operador pediu adicionar como nova fonte de influências para pesquisar e aprender depois: https://github.com/openai/symphony. [parking:external-research] Backlog apenas; não pesquisar agora sem foco explícito por envolver URL/fonte externa.\n[provenance:human] source_task=none reason=Nova fonte de influência indicada pelo operador para pesquisa/aprendizado posterior."
+      "notes": "[provenance:human] Operador pediu adicionar como nova fonte de influências para pesquisar e aprender depois: https://github.com/openai/symphony. [parking:external-research] Backlog apenas; não pesquisar agora sem foco explícito por envolver URL/fonte externa.\n[provenance:human] source_task=none reason=Nova fonte de influência indicada pelo operador para pesquisa/aprendizado posterior.\n[slice-start] Auto-resume focus explicitly included TASK-BUD-842; starting bounded source-research slice using git checkout cache, with no protected dispatch or code mutation.\n[slice-complete] External influence research completed as bounded source synthesis only; no protected dispatch or runtime integration added. Rollback: remove docs/research/openai-symphony-influence-2026-05.md and this verification.",
+      "verification": "VER-BUD-1212"
     },
     {
       "id": "TASK-BUD-843",
