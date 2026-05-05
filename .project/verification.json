@@ -12966,6 +12966,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:29:34.334Z",
       "evidence": "Monitor runtime read-only bypass recalibration: expanded deterministic unauthorized-action bypass for first-party read-only/report-only diagnostics used in long-running loops (git_dirty_snapshot, safe_marker_check, context_watch previews, autonomy lane read-only selectors, board read-only queries/packets) while keeping mutation surfaces such as board_update and context_watch_checkpoint out of the bypass. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 5 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed. [rationale:communicable] This reduces L3 pre-execution noise for bounded diagnostics without weakening protected-scope or mutation authorization gates."
+    },
+    {
+      "id": "VER-BUD-1194",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:34:51.970Z",
+      "evidence": "Post-reload adoption check found the installed behavior-monitor runtime still had the older unauthorized-action read-only prefilter (runtime marker check: git_dirty_snapshot/context_watch_auto_resume_preview/board_query missing) because the repair contract treated any existing prefilter as complete. Fixed monitor-runtime-contract to require canonical read-only markers and replace stale helper bodies without duplicating the hook. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 6 passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed. [rationale:communicable] This preserves the intended local-safe diagnostic bypass across reloads while keeping mutation/protected surfaces outside the bypass."
     }
   ]
 }

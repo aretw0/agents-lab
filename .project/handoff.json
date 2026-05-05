@@ -1,46 +1,47 @@
 {
-  "timestamp": "2026-05-05T20:30:50.670Z",
-  "context": "Fatia monitor-runtime-contract concluída e commitada em b01d5aa6. O bypass determinístico de unauthorized-action agora cobre diagnósticos/rea [snip] a de /reload para validar runtime vivo. [truncated:+213 chars]",
+  "timestamp": "2026-05-05T20:35:17.559Z",
+  "context": "Após /reload, a checagem bounded mostrou que o runtime instalado node_modules/@davidorex/pi-behavior-monitors/dist/index.js ainda tinha helpe [snip] ara aplicar a correção no runtime vivo. [truncated:+349 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Rodar /reload para validar adoção runtime da nova lista read-only.",
-    "Após reload, verificar git limpo, classifyFail=0 e ausência de nova issue monitor false-positi [snip] y em .project/issues.json. [truncated:+7 chars]",
-    "Preparar decision packet para fechamento parcial de TASK-BUD-841 se a validação pós-reload ficar limpa."
+    "Commitar stale-helper repair + board/handoff.",
+    "Rodar /reload para acionar session_start e atualizar o helper runtime stale.",
+    "Após reload, repetir marker check em node_modules/@davidorex/pi-behavior-monitors/dist/index.j [snip] git limpo/classifyFail=0. [truncated:+13 chars]"
   ],
   "blockers": [
-    "/reload necessário para validar runtime vivo da nova calibração monitor-runtime-contract."
+    "/reload necessário para validar runtime vivo depois do repair de helper stale."
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 5 passed",
-    "node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed",
+    "runtime marker check pós-reload -> marker-missing para git_dirty_snapshot/context_watch_auto_resume_preview/board_query",
+    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 6 passed",
     "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed"
   ],
   "recent_commits": [
-    "b01d5aa6 fix(monitors): widen read-only runtime bypass",
-    "0b0983f4 chore(board): record post-reload monitor validation"
+    "20bdcaa2 chore(handoff): checkpoint read-only bypass slice",
+    "b01d5aa6 fix(monitors): widen read-only runtime bypass"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "commit:b01d5aa6"
+      "verification:VER-BUD-1194",
+      "commit:20bdcaa2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:30:50.670Z",
+    "generatedAtIso": "2026-05-05T20:35:17.559Z",
     "level": "ok",
-    "percent": 23,
+    "percent": 28,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:30:50.670Z",
+      "atIso": "2026-05-05T20:35:17.559Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 23,
+      "percent": 28,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

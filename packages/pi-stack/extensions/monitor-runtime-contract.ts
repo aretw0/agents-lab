@@ -16,6 +16,21 @@ const HAS_CONTRACT_PATTERN = /systemPrompt:\s*.*compiled\.systemPrompt/;
 
 const READ_ONLY_PREFILTER_MARKER =
   "function isUnauthorizedActionReadOnlyBypass";
+const READ_ONLY_PREFILTER_CALL =
+  'm.name === "unauthorized-action" && isUnauthorizedActionReadOnlyBypass(ev)';
+const REQUIRED_READ_ONLY_PREFILTER_MARKERS = [
+  '"git_dirty_snapshot"',
+  '"safe_marker_check"',
+  '"context_watch_auto_resume_preview"',
+  '"context_watch_continuation_readiness"',
+  '"context_watch_one_slice_operator_packet_preview"',
+  '"local_continuity_audit"',
+  '"autonomy_lane_next_task"',
+  '"autonomy_lane_batch_preview"',
+  '"board_query"',
+  '"board_decision_packet"',
+  '"board_dependency_hygiene_score"',
+];
 
 const READ_ONLY_PREFILTER_HELPER = `
 function isUnauthorizedActionReadOnlyShellCommand(command) {
@@ -98,7 +113,8 @@ function hasRobustContract(content: string): boolean {
 function hasReadOnlyPrefilter(content: string): boolean {
   return (
     content.includes(READ_ONLY_PREFILTER_MARKER) &&
-    content.includes('m.name === "unauthorized-action" && isUnauthorizedActionReadOnlyBypass(ev)')
+    content.includes(READ_ONLY_PREFILTER_CALL) &&
+    REQUIRED_READ_ONLY_PREFILTER_MARKERS.every((marker) => content.includes(marker))
   );
 }
 
@@ -140,20 +156,35 @@ function repairUnauthorizedActionReadOnlyPrefilterContent(content: string): {
 } {
   if (hasReadOnlyPrefilter(content)) return { changed: false, content };
 
-  const withHelper = content.replace(
-    "// =============================================================================\n// Extension entry point\n// =============================================================================",
-    `${READ_ONLY_PREFILTER_HELPER}\n// =============================================================================\n// Extension entry point\n// =============================================================================`,
-  );
-  if (withHelper === content) return { changed: false, content };
+  const entryPointMarker =
+    "// =============================================================================\n// Extension entry point\n// =============================================================================";
+  let next = content;
 
-  const patched = withHelper.replace(
-    "                    // Build pending tool call context for template injection.\n                    const toolContext = `Pending tool call:\\nTool: ${ev.toolName}\\nArguments: ${JSON.stringify(ev.input, null, 2).slice(0, 2000)}`;",
-    "                    if (m.name === \"unauthorized-action\" && isUnauthorizedActionReadOnlyBypass(ev)) {\n                        if (m.whileCount > 0) {\n                            m.whileCount = 0;\n                            updateStatus();\n                        }\n                        continue;\n                    }\n                    // Build pending tool call context for template injection.\n                    const toolContext = `Pending tool call:\\nTool: ${ev.toolName}\\nArguments: ${JSON.stringify(ev.input, null, 2).slice(0, 2000)}`;",
-  );
+  if (next.includes(READ_ONLY_PREFILTER_MARKER)) {
+    next = next.replace(
+      /function isUnauthorizedActionReadOnlyShellCommand\(command\) \{[\s\S]*?\n\}\nfunction isUnauthorizedActionReadOnlyBypass\(ev\) \{[\s\S]*?\n\}\n\n\/\/ =============================================================================\n\/\/ Extension entry point\n\/\/ =============================================================================/,
+      `${READ_ONLY_PREFILTER_HELPER}\n${entryPointMarker}`,
+    );
+  } else {
+    next = next.replace(
+      entryPointMarker,
+      `${READ_ONLY_PREFILTER_HELPER}\n${entryPointMarker}`,
+    );
+  }
+  if (next === content && !next.includes(READ_ONLY_PREFILTER_MARKER)) {
+    return { changed: false, content };
+  }
+
+  if (!next.includes(READ_ONLY_PREFILTER_CALL)) {
+    next = next.replace(
+      "                    // Build pending tool call context for template injection.\n                    const toolContext = `Pending tool call:\\nTool: ${ev.toolName}\\nArguments: ${JSON.stringify(ev.input, null, 2).slice(0, 2000)}`;",
+      "                    if (m.name === \"unauthorized-action\" && isUnauthorizedActionReadOnlyBypass(ev)) {\n                        if (m.whileCount > 0) {\n                            m.whileCount = 0;\n                            updateStatus();\n                        }\n                        continue;\n                    }\n                    // Build pending tool call context for template injection.\n                    const toolContext = `Pending tool call:\\nTool: ${ev.toolName}\\nArguments: ${JSON.stringify(ev.input, null, 2).slice(0, 2000)}`;",
+    );
+  }
 
   return {
-    changed: patched !== content && hasReadOnlyPrefilter(patched),
-    content: patched,
+    changed: next !== content && hasReadOnlyPrefilter(next),
+    content: next,
   };
 }
 

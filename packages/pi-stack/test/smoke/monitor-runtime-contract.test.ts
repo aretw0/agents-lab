@@ -78,6 +78,24 @@ describe("monitor runtime contract repair", () => {
     expect(result.content).not.toContain('"context_watch_checkpoint"');
   });
 
+  it("updates stale read-only prefilter helpers without duplicating the hook", () => {
+    const current = repairClassifyContractContent(runtimeFixture()).content;
+    const stale = current
+      .replace('        "git_dirty_snapshot",\n', "")
+      .replace('        "context_watch_auto_resume_preview",\n', "")
+      .replace('        "board_query",\n', "");
+
+    const result = repairClassifyContractContent(stale);
+
+    expect(result.changed).toBe(true);
+    expect(result.content).toContain('"git_dirty_snapshot"');
+    expect(result.content).toContain('"context_watch_auto_resume_preview"');
+    expect(result.content).toContain('"board_query"');
+    expect(
+      result.content.match(/m\.name === "unauthorized-action" && isUnauthorizedActionReadOnlyBypass\(ev\)/g),
+    ).toHaveLength(1);
+  });
+
   it("keeps destructive-looking shell commands out of the deterministic bypass", () => {
     const result = repairClassifyContractContent(runtimeFixture());
 
