@@ -11,9 +11,8 @@
  * Supports autonomous checkpoint/compact actions with cooldown + idle guards.
  */
 
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
@@ -83,6 +82,12 @@ import {
 	formatTimeoutPressureSummary,
 	resolveContextWatchAdaptiveStatusSummary,
 } from "./context-watchdog-status-formatting";
+import {
+	makeContextWatchdogSourceMtimeReader,
+	readContextThresholdOverrides,
+	readDeferredLaneQueueCount,
+	readWatchdogConfig,
+} from "./context-watchdog-runtime-status";
 export {
 	formatContextWatchCommandStatusSummary,
 	formatContextWatchCompactStageStatusSummary,
@@ -205,7 +210,6 @@ import {
 import {
 	readHandoffJson,
 	readProjectSettings,
-	readSettingsJson,
 	writeHandoffJson,
 	writeProjectSettings,
 } from "./context-watchdog-storage";
@@ -351,15 +355,7 @@ export type {
 	ProgressPreservationStatus,
 } from "./context-watchdog-progress-signals";
 
-const CONTEXT_WATCHDOG_SOURCE_PATH = fileURLToPath(import.meta.url);
-
-function readContextWatchdogSourceMtimeMs(): number | undefined {
-	try {
-		return statSync(CONTEXT_WATCHDOG_SOURCE_PATH).mtimeMs;
-	} catch {
-		return undefined;
-	}
-}
+const readContextWatchdogSourceMtimeMs = makeContextWatchdogSourceMtimeReader(import.meta.url);
 
 const DEFAULT_CONFIG: ContextWatchdogConfig = DEFAULT_CONTEXT_WATCHDOG_CONFIG;
 
@@ -451,41 +447,6 @@ function persistContextWatchHandoffEvent(
 	const current = readHandoffJson(ctx.cwd);
 	const next = applyContextWatchToHandoff(current, assessment, reason, nowIso);
 	return writeHandoffJson(ctx.cwd, next);
-}
-
-function readContextThresholdOverrides(cwd: string): ContextThresholdOverrides | undefined {
-	const settings = readSettingsJson(cwd);
-	const cfg = (settings.piStack as Record<string, unknown> | undefined)?.customFooter;
-	const pressure = (cfg as Record<string, unknown> | undefined)?.contextPressure;
-	if (!pressure || typeof pressure !== "object") return undefined;
-	const parsed = pressure as ContextThresholdOverrides;
-	return {
-		default: parsed.default,
-		byProvider: parsed.byProvider,
-		byProviderModel: parsed.byProviderModel,
-	};
-}
-
-function readWatchdogConfig(cwd: string): ContextWatchdogConfig {
-	const settings = readSettingsJson(cwd);
-	const piStack = (settings.piStack as Record<string, unknown> | undefined) ?? {};
-	return normalizeContextWatchdogConfig(piStack.contextWatchdog);
-}
-
-function readDeferredLaneQueueCount(cwd: string): number {
-	const queuePath = path.join(cwd, ".pi", "deferred-intents.json");
-	if (!existsSync(queuePath)) return 0;
-	try {
-		const json = JSON.parse(readFileSync(queuePath, "utf8"));
-		if (!Array.isArray(json?.items)) return 0;
-		return json.items.filter((item: unknown) => {
-			if (!item || typeof item !== "object") return false;
-			const row = item as { text?: unknown };
-			return typeof row.text === "string" && row.text.trim().length > 0;
-		}).length;
-	} catch {
-		return 0;
-	}
 }
 
 function isContextWindowOverflowErrorMessage(message: string): boolean {

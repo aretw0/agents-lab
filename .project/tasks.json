@@ -18038,7 +18038,7 @@
     {
       "id": "TASK-BUD-805",
       "description": "Extrair helpers de status/lifecycle compactos de context-watchdog para módulo dedicado, preservando post-reload/continuation smoke.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -18052,7 +18052,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe para consolidar status/lifecycle do context-watchdog e reforçar reload batched como não supressor de continuidade local-safe.\n[provenance:human] source_task=TASK-BUD-802 reason=Seed AFK anti-bloat alinhado ao pedido de não deixar reload suprimir auto-resume."
+      "notes": "[rationale:refactor] Fatia local-safe para consolidar status/lifecycle do context-watchdog e reforçar reload batched como não supressor de continuidade local-safe.\n[provenance:human] source_task=TASK-BUD-802 reason=Seed AFK anti-bloat alinhado ao pedido de não deixar reload suprimir auto-resume.\nStarted after TASK-BUD-803 in AFK anti-bloat chain. [rationale:refactor] Focus context-watchdog runtime status/lifecycle helpers to keep reducing critical surface while preserving post-reload continuity semantics.\nClosed via VER-BUD-1156: runtime status helpers extracted; post-reload/continuation smoke passed (74 tests). [rationale:refactor] Reload remains batched rather than blocking local-safe continuation.",
+      "verification": "VER-BUD-1156"
     },
     {
       "id": "TASK-BUD-806",

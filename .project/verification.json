@@ -12624,6 +12624,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:37:44.582Z",
       "evidence": "Extracted autonomy_lane_status and delegation capability summary assembly helpers into guardrails-core-autonomy-lane-formatting.ts while preserving report-only/no-dispatch result contracts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts => 2 files passed, 52 tests passed. git diff --check for touched files => clean. [rationale:refactor] Formatting seams are now isolated for subsequent surface extraction without changing autonomy lane decisions."
+    },
+    {
+      "id": "VER-BUD-1156",
+      "target": "TASK-BUD-805",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:40:04.818Z",
+      "evidence": "Extracted context-watchdog runtime status helpers (source mtime reader, threshold override reader, watchdog config reader, deferred lane queue count) into context-watchdog-runtime-status.ts while preserving post-reload/continuation behavior. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts => 3 files passed, 74 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts and keeps reload batched/non-suppressing continuity semantics intact."
     }
   ]
 }
