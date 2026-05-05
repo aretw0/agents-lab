@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { resolveValidationMethodPlan, type ValidationMethodKind } from "./guardrails-core-validation-method";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -35,10 +36,11 @@ export function registerGuardrailsValidationMethodSurface(pi: ExtensionAPI): voi
         needsMutation: asBool(p.needs_mutation, false),
         focalGateKnown: asBool(p.focal_gate_known, false),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "validation_method_plan",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

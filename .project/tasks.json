@@ -19018,6 +19018,27 @@
       ],
       "milestone": "protected-parked-model-infrastructure",
       "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning."
+    },
+    {
+      "id": "TASK-BUD-850",
+      "description": "Migrar validation_method_plan para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-validation-method-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-validation-method-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que o content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe do trabalho de UI cohesion: validation_method_plan é report-only, read-only e ainda retorna JSON cru em content.\n[provenance:human] source_task=TASK-BUD-848 reason=Usuário pediu para voltar ao trabalho anterior; próxima fatia segura é migrar mais uma tool report-only para operator-visible summary-first.\n[slice-start] Aplicando helper operator-visible em validation_method_plan; lógica core resolveValidationMethodPlan permanece inalterada.\n[slice-complete] validation_method_plan no longer emits raw JSON as primary content. Rollback: revert guardrails-core-validation-method-surface.ts and guardrails-validation-method-surface.test.ts changes.",
+      "verification": "VER-BUD-1215"
     }
   ]
 }

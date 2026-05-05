@@ -3,7 +3,7 @@ import { registerGuardrailsValidationMethodSurface } from "../../extensions/guar
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 describe("guardrails validation method surface", () => {
@@ -24,5 +24,8 @@ describe("guardrails validation method surface", () => {
     expect(result?.details.decision).toBe("use-safe-marker-check");
     expect(result?.details.canValidate).toBe(true);
     expect(result?.details.summary).toBe("validation-method: decision=use-safe-marker-check canValidate=yes kind=marker-check reasons=legacy-shell-inline-requested,command-sensitive-markers");
+    expect(result?.content?.[0]?.text).toContain("validation-method: decision=use-safe-marker-check canValidate=yes kind=marker-check");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });
