@@ -18501,7 +18501,7 @@
         "validar com teste/regressão focal antes de aplicar qualquer mudança"
       ],
       "milestone": "context-graceful-stop",
-      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata."
+      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata.\n[evidence:auto-compact-calibration] Operador observou que, na transição de auto compactação/auto-resume, o agente não parou graciosamente cedo o bastante para deixar o idle auto-compactar; ficou confortável demais até bater/forçar limite. Não tangenciar agora; usar como evidência futura para calibrar threshold/stop-before-compact e expectativa de idle graceful-stop."
     },
     {
       "id": "TASK-BUD-827",
@@ -18682,7 +18682,7 @@
     {
       "id": "TASK-BUD-835",
       "description": "Reduzir session-analytics.ts abaixo de watch/extract via nova extração read-only JSONL/formatting.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18700,7 +18700,8 @@
         "manter scans bounded e read-only"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] session-analytics.ts está próximo de extract (~1365) e é alvo local-safe após limpar guardrails-core.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] session-analytics.ts está próximo de extract (~1365) e é alvo local-safe após limpar guardrails-core.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após TASK-BUD-834; alvo local-safe: reduzir session-analytics.ts watch-level por extração JSONL/formatting read-only.\nConcluído: parsing extraído para session-analytics-parsers.ts; surface principal agora <1000 linhas e aboveWatch caiu para 4.",
+      "verification": "VER-BUD-1186"
     },
     {
       "id": "TASK-BUD-836",

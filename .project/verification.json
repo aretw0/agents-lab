@@ -12894,6 +12894,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:34:19.599Z",
       "evidence": "Extraídos tipos de nudge-free/unattended para packages/pi-stack/extensions/guardrails-core-unattended-continuation-types.ts. guardrails-core-unattended-continuation.ts reduziu de 1242 para 948 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts => 2 files/54 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=5 recommendation=watch."
+    },
+    {
+      "id": "VER-BUD-1186",
+      "target": "TASK-BUD-835",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:39:45.969Z",
+      "evidence": "Extraído parser/query parsing de session analytics para packages/pi-stack/extensions/session-analytics-parsers.ts. session-analytics.ts reduziu de 1365 para 565 linhas; novo parser tem 833 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/session-analytics.test.ts => 1 file/26 tests passed; node --test packages/pi-stack/test/session-analytics-outliers.test.mjs packages/pi-stack/test/session-log-scan-guard.test.mjs => 15 tests passed; git diff --check focal clean. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=4 recommendation=watch."
     }
   ]
 }
