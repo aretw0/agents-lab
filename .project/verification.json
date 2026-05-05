@@ -12444,6 +12444,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T02:24:01.257Z",
       "evidence": "Extracted AFK material readiness decision/types/helpers into packages/pi-stack/extensions/context-watchdog-afk-material.ts and imported buildAfkMaterialReadinessSnapshot from context-watchdog.ts. context-watchdog.ts reduced to 3164 lines; new module is 135 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts (58 passed). [rationale:risk-control] Cohesive anti-bloat extraction preserving AFK material readiness cues and local-safe/protected-scope filtering behavior."
+    },
+    {
+      "id": "VER-BUD-1136",
+      "target": "TASK-BUD-784",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T02:27:37.349Z",
+      "evidence": "Extracted progress preservation, context economy, pre-compact calm-close, anti-paralysis dispatch, pre-compact idle prep, and auto-resume handoff focus reconciliation signals into packages/pi-stack/extensions/context-watchdog-progress-signals.ts. context-watchdog.ts imports and re-exports the moved public contract. context-watchdog.ts reduced to 2799 lines; new module is 405 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (62 passed). [rationale:risk-control] Cohesive extraction of pure signal helpers with public re-export compatibility and focal smoke coverage."
     }
   ]
 }

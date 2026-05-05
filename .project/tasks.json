@@ -17612,6 +17612,29 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Slice coesa de anti-bloat em context-watchdog.ts, sem alterar protected-scope behavior.\n[provenance:human] source_task=TASK-BUD-782 reason=antiBloatCue continua exigindo extrações coesas de superfícies críticas.\nClosed via VER-BUD-1135: AFK material readiness snapshot extracted; context-watchdog smoke passed (58 tests). [rationale:risk-control] Reduces critical surface while preserving local-safe material readiness cues.",
       "verification": "VER-BUD-1135"
+    },
+    {
+      "id": "TASK-BUD-784",
+      "description": "Extrair sinais de preservação/progresso/economia/anti-paralisia do context-watchdog para módulo coeso, preservando contrato público.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-783"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-progress-signals.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover tipos e helpers de progress preservation, context economy, calm-close, anti-paralysis e reconcileAutoResumeHandoffFocus para módulo dedicado.",
+        "Preservar re-exports públicos de context-watchdog.ts para testes/consumidores existentes.",
+        "Smokes focais de context-watchdog permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Continuação local-safe da wave anti-bloat após reload; extração coesa de sinais puros e validável por smokes existentes.\n[provenance:human] source_task=TASK-BUD-783 reason=antiBloatCue continua em extract para context-watchdog.ts.\nClosed via VER-BUD-1136: progress/economy/calm-close/anti-paralysis/focus reconciliation signals extracted; focal context-watchdog smokes passed (62 tests). [rationale:risk-control] Reduces critical surface while preserving public contract.",
+      "verification": "VER-BUD-1136"
     }
   ]
 }
