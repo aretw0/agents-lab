@@ -17864,7 +17864,7 @@
     {
       "id": "TASK-BUD-796",
       "description": "Extrair wrappers de audit/trusted UI confirmation de guardrails-core para módulo coeso, preservando evidência estruturada e smoke de human-confirmation.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -17878,7 +17878,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation-surface.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe: separar audit/confirmation glue sem alterar política protected-scope.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para reduzir guardrails-core.ts por coesão."
+      "notes": "[rationale:refactor] Fatia local-safe: separar audit/confirmation glue sem alterar política protected-scope.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para reduzir guardrails-core.ts por coesão.\nStarted after TASK-BUD-795 in AFK anti-bloat chain. [rationale:refactor] Continue local-safe extraction without requiring human iteration; reload remains batched until checkpoint.\nClosed via VER-BUD-1148: confirmation audit wrappers extracted; human-confirmation/guardrails smoke passed (69 tests). [rationale:refactor] No policy or protected-scope behavior changed.",
+      "verification": "VER-BUD-1148"
     },
     {
       "id": "TASK-BUD-797",

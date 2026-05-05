@@ -181,7 +181,10 @@ export {
 import { resolveStructuredFirstMutationDecision } from "./guardrails-core-structured-first";
 import { resolveTrustedGlobalSkillReadAccess } from "./guardrails-core-skill-access-policy";
 import { evaluateBashGuardPolicies } from "./guardrails-core-bash-guard-policies";
-import { recordTrustedHumanConfirmationUiDecision, type HumanConfirmationActionFingerprint } from "./guardrails-core-human-confirmation";
+import {
+  appendAuditEntry,
+  appendTrustedUiConfirmationEvidence,
+} from "./guardrails-core-confirmation-audit";
 import {
   classifyRouting,
   detectPortConflict,
@@ -315,34 +318,6 @@ export {
   providerBudgetGovernorMisconfigReason,
 } from "./guardrails-core-provider-budget-governor";
 export type { ProviderBudgetGovernorMisconfig } from "./guardrails-core-provider-budget-governor";
-
-function appendAuditEntry(ctx: ExtensionContext, key: string, value: Record<string, unknown>): void {
-  const maybeAppend = (ctx as unknown as { appendEntry?: (k: string, v: Record<string, unknown>) => void }).appendEntry;
-  if (typeof maybeAppend === "function") {
-    maybeAppend(key, value);
-  }
-}
-
-function appendTrustedUiConfirmationEvidence(
-  ctx: ExtensionContext,
-  fingerprint: HumanConfirmationActionFingerprint,
-  confirmed: boolean,
-): void {
-  const result = recordTrustedHumanConfirmationUiDecision({
-    ...fingerprint,
-    confirmed,
-    nowIso: new Date().toISOString(),
-  });
-  appendAuditEntry(ctx, "guardrails-core.human-confirmation-ui-decision", {
-    atIso: new Date().toISOString(),
-    decision: result.decision,
-    reasons: result.reasons,
-    dispatchAllowed: result.dispatchAllowed,
-    canOverrideMonitorBlock: result.canOverrideMonitorBlock,
-    authorization: result.authorization,
-    evidence: result.envelope?.details,
-  });
-}
 
 function normalizeCmdName(text: string): string {
   const t = text.trim();
