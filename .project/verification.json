@@ -12903,6 +12903,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:39:45.969Z",
       "evidence": "Extraído parser/query parsing de session analytics para packages/pi-stack/extensions/session-analytics-parsers.ts. session-analytics.ts reduziu de 1365 para 565 linhas; novo parser tem 833 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/session-analytics.test.ts => 1 file/26 tests passed; node --test packages/pi-stack/test/session-analytics-outliers.test.mjs packages/pi-stack/test/session-log-scan-guard.test.mjs => 15 tests passed; git diff --check focal clean. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=4 recommendation=watch."
+    },
+    {
+      "id": "VER-BUD-1187",
+      "target": "TASK-BUD-836",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:47:45.405Z",
+      "evidence": "Extraído núcleo provider/model/override de monitor-provider-patch para packages/pi-stack/extensions/monitor-provider-core.ts. monitor-provider-patch.ts reduziu de 1374 para 871 linhas; novo helper tem 519 linhas. Validação: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs => 36 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts => 3 files/16 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=3 recommendation=watch."
     }
   ]
 }

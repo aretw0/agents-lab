@@ -18706,7 +18706,7 @@
     {
       "id": "TASK-BUD-836",
       "description": "Reduzir monitor-provider-patch.ts abaixo de watch preservando patches e contratos de monitor.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18723,7 +18723,8 @@
         "manter evidência de não-mutação de dependências"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Arquivo está em watch alto (~1374) e próximo do extract; fatia deve respeitar política de não mutar node_modules.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Arquivo está em watch alto (~1374) e próximo do extract; fatia deve respeitar política de não mutar node_modules.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após deferir context-watchdog para não tangenciar auto-compact; alvo local-safe: reduzir monitor-provider-patch.ts preservando patches/contratos de monitor.\nConcluído: provider/model/override core extraído; monitor-provider-patch.ts agora <1000 linhas e aboveWatch caiu para 3.",
+      "verification": "VER-BUD-1187"
     },
     {
       "id": "TASK-BUD-837",
@@ -18746,7 +18747,7 @@
         "não resolver TASK-BUD-826/827 nesta fatia"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] context-watchdog.ts saiu de extract mas ainda está em watch (~1360); criar fatia futura sem abrir tangente de calibração.\n[provenance:human] source_task=TASK-BUD-825 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] context-watchdog.ts saiu de extract mas ainda está em watch (~1360); criar fatia futura sem abrir tangente de calibração.\n[provenance:human] source_task=TASK-BUD-825 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após TASK-BUD-835; alvo local-safe: reduzir context-watchdog.ts watch-level preservando runtime/reload/checkpoint behavior.\nDeferido sem commit: usuário pediu não tangenciar na área auto-compact/auto-resume; para evitar misturar anti-bloat de context-watchdog com evidência de calibração, mantido no backlog para retomada explícita posterior."
     },
     {
       "id": "TASK-BUD-838",
