@@ -18143,7 +18143,7 @@
     {
       "id": "TASK-BUD-810",
       "description": "Documentar que /reload pode acionar auto-compactação/context-watch logo após a recarga, explicando que é um efeito esperado quando os thresholds de contexto pedem compact/checkpoint.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "docs/guides/openai-context-window-playbook.md",
@@ -18158,7 +18158,8 @@
         "validar com leitura/marker check focal"
       ],
       "milestone": "runtime-docs",
-      "notes": "[rationale:docs] Usuário observou que após /reload foi gatilhada auto compactação e gostou do efeito, mas pediu que isso fique documentado como 'pode acontecer'.\n[provenance:human] source_task=none reason=User-observed reload -> auto-compact behavior should be documented for future operators."
+      "notes": "[rationale:docs] Usuário observou que após /reload foi gatilhada auto compactação e gostou do efeito, mas pediu que isso fique documentado como 'pode acontecer'.\n[provenance:human] source_task=none reason=User-observed reload -> auto-compact behavior should be documented for future operators.\n[rationale:docs] Iniciando documentação focal após reload confirmar comportamento observado: reload pode ser seguido de auto-compact conforme thresholds de context-watch.\nClosed via VER-BUD-1162: documented that /reload can be followed by context-watch auto-compact when thresholds/checkpoint gates allow it. [rationale:docs] Includes 57% vs 39% example and safe resume guidance.",
+      "verification": "VER-BUD-1162"
     },
     {
       "id": "TASK-BUD-811",

@@ -144,6 +144,18 @@ Para `github-copilot/gpt-5.3-codex` com `checkpoint=60` e `compact=65`, operar c
 
 Se houver `reload-required`, manter fail-closed para auto-resume (sem dispatch), mas reforçar cedo a ação de operador (`/reload`) ainda na janela de checkpoint.
 
+### Reload seguido de auto-compactação pode acontecer
+
+Depois de um `/reload`, o `context-watchdog` reavalia a sessão com o estado recém-carregado. Se o contexto já estiver em `checkpoint`/`compact` e houver evidência de checkpoint/handoff suficiente, a sequência esperada pode ser:
+
+```text
+/reload -> context-watch reavalia thresholds -> auto-compact/checkpoint path
+```
+
+Isso não deve ser tratado automaticamente como regressão: é um efeito operacional esperado quando a janela de contexto já está perto do limite. Exemplo observado: reload em ~57% com thresholds efetivos de checkpoint pode disparar auto-compact; reload em ~39% pode não disparar nada. A diferença esperada vem do percentual atual, thresholds do provider/model e gates de checkpoint.
+
+Regra prática: quando isso ocorrer, retomar pelo `.project/handoff.json` e verificar `context_watch_events` antes de abrir nova fatia. Se o reload acontecer bem abaixo do threshold, não esperar compactação.
+
 ### Runbook final — contexto cheio + reload obrigatório
 1. Consultar `context_watch_compact_stage_status`.
    - `stage=graceful-stop-window`: fechar slice, salvar checkpoint e **não** abrir escopo novo.

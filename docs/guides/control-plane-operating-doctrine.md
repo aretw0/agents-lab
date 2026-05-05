@@ -934,6 +934,8 @@ Próximos passos diretos:
 
 Quando não houver reload necessário, diga isso de forma curta se houver risco de dúvida: `Reload não necessário para a próxima fatia`. A regra é comunicação, não gate novo: ela não deve interromper trabalho local-safe nem pedir confirmação quando o próximo passo é óbvio e reversível.
 
+Nota operacional: `/reload` pode ser seguido imediatamente por auto-compactação/context-watch quando a sessão já está em janela de `checkpoint`/`compact` e há handoff/checkpoint suficiente. Isso é aceitável e deve ser comunicado como “pode acontecer”, não como bug. A forma segura de retomar é ler o handoff e continuar do foco registrado; se o contexto estiver baixo, a mesma ação de reload pode não disparar compactação.
+
 Use o mesmo formato para outros bloqueios simples de continuidade: **ação necessária**, motivo em uma linha e próximos passos diretos. O objetivo é reduzir ambiguidade no fim do turno, não criar mais cerimônia.
 
 ## Falhas recorrentes

@@ -12678,6 +12678,15 @@
       "method": "test",
       "timestamp": "2026-05-05T10:51:18.329Z",
       "evidence": "Fixed /lane-queue runtime regression by importing resolveLoopActivationMarkers in guardrails-core-lane-queue-surface.ts and added a command-level smoke that executes /lane-queue status to catch missing helper bindings. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts => 3 files passed, 58 tests passed. git diff --check for touched files => clean. [rationale:bugfix] Addresses user-reported error: Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined."
+    },
+    {
+      "id": "VER-BUD-1162",
+      "target": "TASK-BUD-810",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-05T10:56:35.803Z",
+      "evidence": "Documented reload->context-watch auto-compact behavior in docs/guides/openai-context-window-playbook.md and docs/guides/control-plane-operating-doctrine.md. Evidence markers found: 'Reload seguido de auto-compactação pode acontecer', '/reload -> context-watch reavalia thresholds -> auto-compact/checkpoint path', observed 57% vs 39% threshold behavior, and operating doctrine note. Validation: safe_marker_check passed for both docs (doctrine marker intentionally allowed backtick marker), i18n_lint_text pt-BR passed, git diff --check clean. [rationale:docs] Captures observed behavior as expected/possible rather than a regression."
     }
   ]
 }
