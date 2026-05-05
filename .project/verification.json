@@ -12354,6 +12354,15 @@
       "method": "test",
       "timestamp": "2026-05-05T00:52:20.660Z",
       "evidence": "Hard intent anti-bloat faseado adicionado em `docs/guides/control-plane-operating-doctrine.md` com meta arquitetural `<=1000 linhas`, thresholds `watch/extract/critical`, regras de quando extrair/adiar e formato canônico de exceção `bloat-exception`. Checklist smoke atualizado em `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` para validar anchors novas. Validação: `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (2 passed)."
+    },
+    {
+      "id": "VER-BUD-1126",
+      "target": "TASK-BUD-774",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T01:03:53.502Z",
+      "evidence": "Implementada surface report-only `line_budget_snapshot` em `packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts` (escopo inicial: `packages/pi-stack/extensions/*.ts`) com recomendação estável `ok|watch|extract`, thresholds padrão `watch=1000/extract=1400/critical=2000`, `blockers/risks` e invariantes `authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`. Núcleo adicionado em `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts` via `buildLineBudgetSnapshot(...)`; export habilitado em `packages/pi-stack/extensions/guardrails-core-exports.ts`; doc atualizada em `docs/primitives/agents-as-tools-calibration-score.md`; smoke ampliado em `packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` (builder + tool surface). Validação: `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (32 passed) e `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (3 passed)."
     }
   ]
 }

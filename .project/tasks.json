@@ -17388,7 +17388,7 @@
     {
       "id": "TASK-BUD-774",
       "description": "Adicionar superfície report-only para orçamento de tamanho por arquivo (line budget snapshot) com recomendação extract|watch|ok e blockers/riscos.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-773"
@@ -17404,7 +17404,8 @@
         "Smoke cobre caminhos ok/watch/extract com payload estável."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] adicionar snapshot de orçamento de linhas torna a dívida de acoplamento observável e acionável antes de regressão estrutural.\n[rationale:risk-control] Precisamos visibilidade report-only de budget por arquivo para priorizar extrações com menor risco e maior retorno arquitetural."
+      "notes": "[rationale:risk-control] adicionar snapshot de orçamento de linhas torna a dívida de acoplamento observável e acionável antes de regressão estrutural.\n[rationale:risk-control] Precisamos visibilidade report-only de budget por arquivo para priorizar extrações com menor risco e maior retorno arquitetural.\nSnapshot de budget de linhas entregue como radar report-only para acionar extrações coesas sem auto-dispatch.",
+      "verification": "VER-BUD-1126"
     },
     {
       "id": "TASK-BUD-775",

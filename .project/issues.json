@@ -788,6 +788,14 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-morx0eva",
+      "description": "The agent returned an empty response instead of reporting any findings or conclusions.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }
