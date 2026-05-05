@@ -18122,7 +18122,7 @@
     {
       "id": "TASK-BUD-809",
       "description": "Corrigir regressão runtime do comando /lane-queue: resolveLoopActivationMarkers is not defined.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-lane-queue-surface.ts",
@@ -18137,7 +18137,8 @@
         "registrar verificação com evidência do erro e da validação"
       ],
       "milestone": "runtime-regression",
-      "notes": "[rationale:bugfix] Reportado pelo usuário após tentar usar /lane-queue: `Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined`. Resolver depois como regressão runtime, sem misturar com a wave anti-bloat atual.\n[provenance:human] source_task=none reason=User-reported runtime error to add to board for later."
+      "notes": "[rationale:bugfix] Reportado pelo usuário após tentar usar /lane-queue: `Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined`. Resolver depois como regressão runtime, sem misturar com a wave anti-bloat atual.\n[provenance:human] source_task=none reason=User-reported runtime error to add to board for later.\n[rationale:bugfix] Iniciando correção focal após reload confirmar que /lane-queue é próximo trabalho prioritário.\nClosed via VER-BUD-1161: imported missing loop marker helper and added /lane-queue status regression smoke. [rationale:bugfix] User-reported runtime error fixed.",
+      "verification": "VER-BUD-1161"
     },
     {
       "id": "TASK-BUD-810",

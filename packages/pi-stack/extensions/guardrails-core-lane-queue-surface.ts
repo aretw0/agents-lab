@@ -25,6 +25,7 @@ import {
   resolveLaneQueueBoardNextMilestoneSelection,
   resolveLongRunLoopStopBoundary,
   resolveDispatchFailureRuntimeGate,
+  resolveLoopActivationMarkers,
   shouldWarnLaneEvidence,
   type AutoDrainGateReason,
   type LongRunIntentQueueConfig,

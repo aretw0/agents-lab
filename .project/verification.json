@@ -12669,6 +12669,15 @@
       "method": "test",
       "timestamp": "2026-05-05T10:38:55.598Z",
       "evidence": "Extracted repeated autonomy lane task-selection/material/brainstorm tool schemas into guardrails-core-autonomy-lane-tool-schemas.ts, preserving tool registration contracts and descriptions. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts => 3 files passed, 61 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core-autonomy-lane-surface.ts from 1840 to 1768 lines while keeping schemas centralized for further slices."
+    },
+    {
+      "id": "VER-BUD-1161",
+      "target": "TASK-BUD-809",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T10:51:18.329Z",
+      "evidence": "Fixed /lane-queue runtime regression by importing resolveLoopActivationMarkers in guardrails-core-lane-queue-surface.ts and added a command-level smoke that executes /lane-queue status to catch missing helper bindings. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/guardrails-loop-heartbeat-helper.test.ts => 3 files passed, 58 tests passed. git diff --check for touched files => clean. [rationale:bugfix] Addresses user-reported error: Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined."
     }
   ]
 }
