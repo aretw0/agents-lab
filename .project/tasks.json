@@ -18000,7 +18000,7 @@
     {
       "id": "TASK-BUD-803",
       "description": "Extrair tool result/summary helpers de guardrails-core-autonomy-lane-surface para módulo coeso, preservando autonomy_lane_status e batch preview.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -18014,7 +18014,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe em superfície acima de extract; focar em formatting/result assembly, não em política.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em guardrails-core-autonomy-lane-surface.ts."
+      "notes": "[rationale:refactor] Fatia local-safe em superfície acima de extract; focar em formatting/result assembly, não em política.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat em guardrails-core-autonomy-lane-surface.ts.\nStarted after checkpoint in AFK anti-bloat chain. [rationale:refactor] Extract autonomy lane surface formatting/result assembly while preserving report-only/no-dispatch contracts.\nClosed via VER-BUD-1155: autonomy lane formatting helpers extracted; autonomy smoke passed (52 tests). [rationale:refactor] Report-only/no-dispatch contracts preserved.",
+      "verification": "VER-BUD-1155"
     },
     {
       "id": "TASK-BUD-804",

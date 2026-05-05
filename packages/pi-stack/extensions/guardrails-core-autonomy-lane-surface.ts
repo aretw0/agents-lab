@@ -23,6 +23,11 @@ import {
   readDelegationFreshnessSignals,
 } from "./guardrails-core-autonomy-lane-runway";
 import { buildAutonomyAntiBloatCue } from "./guardrails-core-autonomy-lane-anti-bloat";
+import {
+  buildAutonomyLaneSeededNextAction,
+  buildAutonomyLaneStatusSummary,
+  buildDelegationLaneCapabilitySummary,
+} from "./guardrails-core-autonomy-lane-formatting";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -1413,36 +1418,31 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         nextTaskMnemonic,
       });
       const iterationReminder = buildIterationReminder(ctx.cwd, handoffFreshness.label, seedingGuidance);
-      const statusSummary = [
-        "autonomy-lane-status:",
-        `ready=${plan.ready && selection.ready ? "yes" : "no"}`,
-        `code=${selection.recommendationCode}`,
-        selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
-        `queue=${readyQueue.previewCount}`,
-        Number.isFinite(seedingGuidance?.suggestedSeedCount)
-          ? `seedCount=${Math.max(1, Math.floor(Number(seedingGuidance?.suggestedSeedCount)))}`
-          : undefined,
-        seedingGuidance?.seedWhy ? `seedWhy=${seedingGuidance.seedWhy}` : undefined,
-        seedingGuidance?.seedPriority ? `seedPriority=${seedingGuidance.seedPriority}` : undefined,
-        influenceWindowCue?.decision ? `influenceWindow=${influenceWindowCue.decision}` : undefined,
-        `protectedReady=${protectedReadyCue.decision}`,
-        `protectedEligible=${protectedReadyCue.eligibleProtectedCount}`,
-        `decisionCue=${decisionCue.reasonCode}`,
-        `runway=${runwayReadinessCue.decision}`,
-        `delegationReady=${runwayReadinessCue.delegation.decision}`,
-        `backgroundReady=${runwayReadinessCue.background.decision}`,
-        `antiBloat=${antiBloatCue.decision}`,
-        `lineBudgetAboveExtract=${antiBloatCue.totals.aboveExtract}`,
-        "authorization=none",
-      ].filter(Boolean).join(" ");
-      const seededNextAction = !selection.ready && seedingGuidance?.decision === "seed-now"
-        ? [
-          `seed ${Math.max(1, Math.floor(Number(seedingGuidance.suggestedSeedCount ?? 1)))} local-safe tasks`,
-          `seedWhy=${seedingGuidance.seedWhy ?? "unknown"}`,
-          `seedPriority=${seedingGuidance.seedPriority ?? "unknown"}`,
-          "then re-run autonomy_lane_status",
-        ].join("; ")
-        : undefined;
+      const statusSummary = buildAutonomyLaneStatusSummary({
+        ready: plan.ready && selection.ready,
+        recommendationCode: selection.recommendationCode,
+        nextTaskId: selection.nextTaskId,
+        readyQueuePreviewCount: readyQueue.previewCount,
+        suggestedSeedCount: seedingGuidance?.suggestedSeedCount,
+        seedWhy: seedingGuidance?.seedWhy,
+        seedPriority: seedingGuidance?.seedPriority,
+        influenceWindowDecision: influenceWindowCue?.decision,
+        protectedReadyDecision: protectedReadyCue.decision,
+        protectedEligibleCount: protectedReadyCue.eligibleProtectedCount,
+        decisionCueReasonCode: decisionCue.reasonCode,
+        runwayDecision: runwayReadinessCue.decision,
+        delegationDecision: runwayReadinessCue.delegation.decision,
+        backgroundDecision: runwayReadinessCue.background.decision,
+        antiBloatDecision: antiBloatCue.decision,
+        lineBudgetAboveExtract: antiBloatCue.totals.aboveExtract,
+      });
+      const seededNextAction = buildAutonomyLaneSeededNextAction({
+        selectionReady: selection.ready,
+        seedingDecision: seedingGuidance?.decision,
+        suggestedSeedCount: seedingGuidance?.suggestedSeedCount,
+        seedWhy: seedingGuidance?.seedWhy,
+        seedPriority: seedingGuidance?.seedPriority,
+      });
       const result = {
         ready: plan.ready && selection.ready,
         summary: statusSummary,
@@ -1502,16 +1502,14 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         dispatchAllowed: false,
         mutationAllowed: false,
       };
-      const summary = [
-        "delegation-lane-capability:",
-        `decision=${snapshot.decision}`,
-        `preload=${snapshot.signals.preloadDecision}`,
-        `dirty=${snapshot.signals.dirtySignal}`,
-        `monitorClassifyFailures=${snapshot.signals.monitorClassifyFailures}`,
-        `subagentsReady=${snapshot.signals.subagentsReady ? "yes" : "no"}`,
-        `code=${snapshot.recommendationCode}`,
-        "authorization=none",
-      ].join(" ");
+      const summary = buildDelegationLaneCapabilitySummary({
+        decision: snapshot.decision,
+        preloadDecision: snapshot.signals.preloadDecision,
+        dirtySignal: snapshot.signals.dirtySignal,
+        monitorClassifyFailures: snapshot.signals.monitorClassifyFailures,
+        subagentsReady: snapshot.signals.subagentsReady,
+        recommendationCode: snapshot.recommendationCode,
+      });
       return {
         content: [{ type: "text", text: summary }],
         details: {

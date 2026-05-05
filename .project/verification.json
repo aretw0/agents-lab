@@ -12615,6 +12615,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:35:25.041Z",
       "evidence": "Extracted handoff growth snapshot resolution and checkpoint focus reconciliation helpers from context-watchdog.ts into context-watchdog-growth-checkpoint.ts, preserving reload-intent public re-exports after initial smoke caught the missing export. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts => 3 files passed, 83 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts while preserving checkpoint/handoff behavior."
+    },
+    {
+      "id": "VER-BUD-1155",
+      "target": "TASK-BUD-803",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:37:44.582Z",
+      "evidence": "Extracted autonomy_lane_status and delegation capability summary assembly helpers into guardrails-core-autonomy-lane-formatting.ts while preserving report-only/no-dispatch result contracts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts => 2 files passed, 52 tests passed. git diff --check for touched files => clean. [rationale:refactor] Formatting seams are now isolated for subsequent surface extraction without changing autonomy lane decisions."
     }
   ]
 }
