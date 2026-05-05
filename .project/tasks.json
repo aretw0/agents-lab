@@ -19102,6 +19102,101 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Continuação local-safe importante para futura trilha agents-as-tools/delegação: readiness gate deve ser legível e barato para operador.\n[provenance:human] source_task=TASK-BUD-852 reason=Prosseguir em UI cohesion com surface report-only relacionada à preparação de agents-as-tools sem habilitar dispatch.\n[slice-start] Aplicando helper operator-visible em agent_spawn_readiness_gate; avaliação core permanece report-only sem dispatch.\n[slice-complete] agent_spawn_readiness_gate no longer emits raw JSON as primary content. Rollback: revert guardrails-core-agent-spawn-readiness-surface.ts and guardrails-agent-spawn-readiness.test.ts changes.",
       "verification": "VER-BUD-1218"
+    },
+    {
+      "id": "TASK-BUD-854",
+      "description": "Migrar shell_spoofing_coverage_score para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-shell-spoofing-score-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-shell-spoofing-score-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: surface report-only ainda emite JSON cru em content.\n[provenance:human] source_task=none reason=Usuário pediu seed do trabalho que falta sem depender dele; inventário local encontrou 20 occurrences de JSON cru."
+    },
+    {
+      "id": "TASK-BUD-855",
+      "description": "Migrar unattended_rehearsal_gate para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-rehearsal-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-rehearsal-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Seed local-safe sem entrevista: gate report-only de unattended readiness deve ser legível antes de loops longos.\n[provenance:human] source_task=none reason=Usuário pediu seed de limpeza/alinhamento para evoluir com arquitetura mais forte."
+    },
+    {
+      "id": "TASK-BUD-856",
+      "description": "Migrar structured_interview_plan para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-structured-interview-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-structured-interview.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve resumir decisão/estado da entrevista em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir surface por nome e content sem JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Seed local-safe: a própria surface de entrevista precisa ser legível antes de entrevistas futuras.\n[provenance:human] source_task=none reason=Usuário perguntou se precisa ser entrevistado; antes disso, alinhar a primitive de entrevista como output operator-visible."
+    },
+    {
+      "id": "TASK-BUD-857",
+      "description": "Inventariar e planejar redução das surfaces TS acima de 1000 linhas sem extração de alto risco.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/research/pi-stack-line-budget-watch-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "listar arquivos acima de 1000 linhas e próximos a 1000",
+        "classificar cada alvo como watch/extract/critical",
+        "propor fatias pequenas com validação focal e rollback",
+        "não executar extrações nesta task"
+      ],
+      "milestone": "architecture-hygiene",
+      "notes": "[rationale:architecture] Seed local-safe sem entrevista: line-budget report mostrou recommendation=watch, 3 arquivos acima de 1000 e nenhum critical/extract.\n[provenance:human] source_task=none reason=Usuário sinalizou disposição para semanas de limpeza/alinhamento antes de evolução arquitetural forte."
+    },
+    {
+      "id": "TASK-BUD-858",
+      "description": "Decompor backlog aberto em packs locais/protegidos para elevar planning clarity antes de novas features.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        ".project/tasks.json",
+        "docs/research/planning-clarity-seed-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "separar tarefas local-safe de tarefas protected parked",
+        "sugerir pelo menos 5 fatias locais sem dependência de entrevista",
+        "preservar TASK-BUD-849 como médio prazo/protected até foco explícito",
+        "não fechar tarefas automaticamente"
+      ],
+      "milestone": "planning-clarity",
+      "notes": "[rationale:planning] Seed local-safe sem entrevista: planning clarity score=63 needs-decomposition; preparar fila sustentável antes de voltar a features maiores.\n[provenance:human] source_task=none reason=Usuário perguntou o que falta e se dá para seedar várias coisas sem ele."
     }
   ]
 }
