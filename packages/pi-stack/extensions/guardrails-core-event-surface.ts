@@ -5,6 +5,7 @@ import { buildBoardExecuteNextIntent, buildGuardrailsIntentSystemPrompt, encodeG
 import { resolveGuardrailsIntentRuntimeDecision } from "./guardrails-core-intent-runtime";
 import { buildBehaviorRouteSystemPrompt, classifyBehaviorRoute } from "./guardrails-core-behavior-routing";
 import { buildShellRoutingSystemPrompt, type CommandRoutingProfile } from "./guardrails-core-shell-routing";
+import { classifyRouting } from "./guardrails-core-web-routing";
 import { buildI18nIntentSystemPrompt, summarizeI18nIntentConfig, type I18nIntentConfig } from "./guardrails-core-i18n-intents";
 import { buildPragmaticAutonomySystemPrompt, type PragmaticAutonomyConfig } from "./guardrails-core-runtime-config";
 import { buildBoardReadinessStatusLabel, evaluateBoardLongRunReadiness } from "./guardrails-core-board-readiness";
