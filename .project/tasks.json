@@ -17428,6 +17428,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] conectar cue anti-bloat à autonomia reduz drift e força sinal precoce de extração antes de inchaço crítico.\n[rationale:risk-control] O status da lane deve refletir orçamento estrutural para orientar continuidade local-safe sem surpresa de manutenção tardia.\nClosed via VER-BUD-1127: antiBloatCue connected to autonomy_lane_status; focal smoke passed (56 tests). [rationale:risk-control] Keeps anti-bloat steering deterministic/report-only without auto-dispatch.",
       "verification": "VER-BUD-1127"
+    },
+    {
+      "id": "TASK-BUD-776",
+      "description": "Extrair antiBloatCue do autonomy_lane_status para módulo coeso, reduzindo crescimento da surface sem alterar contrato público.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-775"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-anti-bloat.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Novo helper/módulo compõe antiBloatCue sem duplicar scanner de line-budget.",
+        "autonomy_lane_status preserva campos antiBloatCue, summary antiBloat e lineBudgetAboveExtract.",
+        "Smoke focal de autonomy lane permanece verde."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Após conectar o cue, a próxima fatia anti-bloat deve reduzir acoplamento na surface grande e preservar contrato report-only/fail-closed.\n[provenance:human] source_task=TASK-BUD-775 reason=Continuar anti-bloat governance com extração coesa imediatamente após TASK-BUD-775.\nClosed via VER-BUD-1128: antiBloatCue composition extracted to dedicated module; smoke passed (54 tests). [rationale:risk-control] Reduces autonomy surface growth without changing contract.",
+      "verification": "VER-BUD-1128"
     }
   ]
 }

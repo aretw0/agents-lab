@@ -12372,6 +12372,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T01:34:12.378Z",
       "evidence": "Implemented report-only antiBloatCue in autonomy_lane_status, backed by shared extension line-budget scanner and focal smoke. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts (56 passed). [rationale:risk-control] Cue is read-only/report-only with authorization=none, dispatchAllowed=false, mutationAllowed=false and only steers bounded extraction waves when line-budget thresholds exceed phase limits."
+    },
+    {
+      "id": "VER-BUD-1128",
+      "target": "TASK-BUD-776",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T01:37:22.447Z",
+      "evidence": "Extracted antiBloatCue composition into packages/pi-stack/extensions/guardrails-core-autonomy-lane-anti-bloat.ts while preserving autonomy_lane_status payload/summary contract. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts (54 passed). [rationale:risk-control] Cohesive extraction reduces surface growth while retaining report-only/fail-closed semantics."
     }
   ]
 }
