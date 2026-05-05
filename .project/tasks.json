@@ -19335,7 +19335,7 @@
     {
       "id": "TASK-BUD-865",
       "description": "Migrar surfaces de status/diagnóstico local (environment-doctor, scheduler-governance, context-watch bootstrap checkpoint) para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-863"
@@ -19352,7 +19352,8 @@
         "testes focais cobrem status/diagnóstico sem mutações operacionais"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Continuação local-safe de UI cohesion para diagnósticos locais report-only; não executa manutenção nem scheduler. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining local status/diagnostic surfaces with JSON.stringify content."
+      "notes": "[rationale:operator-experience] Continuação local-safe de UI cohesion para diagnósticos locais report-only; não executa manutenção nem scheduler. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining local status/diagnostic surfaces with JSON.stringify content.\n[slice-complete] environment doctor, scheduler governance, and context bootstrap outputs are summary-first with structured details preserved. Rollback: revert the three surface files plus environment-doctor-surface, scheduler-governance, and context-watchdog-checkpoint test changes.",
+      "verification": "VER-BUD-1230"
     },
     {
       "id": "TASK-BUD-866",

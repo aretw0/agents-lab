@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-05-05T23:07:40.707Z",
+  "timestamp": "2026-05-05T23:22:18.583Z",
   "context": "Responded to strategic question by measuring current state and seeding local-safe queue. Evidence: planning clarity score=63 needs-decomposit [snip] coverage_score summary-first migration. [truncated:+250 chars]",
   "next_actions": [
-    "Context-watch action: level=checkpoint 55% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
+    "Context-watch action: level=checkpoint 56% (write-checkpoint) · Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold.",
     "Commit this handoff checkpoint if dirty.",
     "Continue TASK-BUD-855 unattended_rehearsal_gate summary-first migration.",
     "Then TASK-BUD-856 structured_interview_plan summary-first migration."
@@ -55,6 +55,19 @@
       "reason": "message_end",
       "level": "checkpoint",
       "percent": 55,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-05T23:22:18.583Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 56,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,

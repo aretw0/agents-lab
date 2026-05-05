@@ -7,6 +7,7 @@ import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import {
   SchedulerRuntime,
   SCHEDULER_LEASE_STALE_AFTER_MS,
@@ -476,10 +477,20 @@ export default function schedulerGovernanceExtension(pi: ExtensionAPI) {
     async execute(_id, _params, _signal, _onUpdate, ctx) {
       const cfg = resolveSchedulerGovernanceConfig(ctx.cwd);
       const snapshot = buildSchedulerOwnershipSnapshot(ctx.cwd, cfg.policy, cfg.staleAfterMs);
-      return {
-        content: [{ type: "text", text: JSON.stringify(snapshot, null, 2) }],
+      const summary = [
+        "scheduler-governance:",
+        `policy=${snapshot.policy}`,
+        `owner=${snapshot.owner?.instanceId ?? "none"}`,
+        `activeForeignOwner=${snapshot.activeForeignOwner ? "yes" : "no"}`,
+        `foreignTasks=${snapshot.foreignTaskCount}`,
+        `tasks=${snapshot.taskCount}`,
+        snapshot.heartbeatAgeMs !== undefined ? `heartbeatAgeMs=${snapshot.heartbeatAgeMs}` : undefined,
+      ].filter(Boolean).join(" ");
+      return buildOperatorVisibleToolResponse({
+        label: "scheduler_governance_status",
+        summary,
         details: snapshot,
-      };
+      });
     },
   });
 

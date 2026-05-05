@@ -2,6 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { Type } from "@sinclair/typebox";
 import { buildContextWatchBootstrapPlan } from "./context-watchdog-bootstrap";
 import { writeLocalSliceHandoffCheckpoint } from "./context-watchdog-runtime-helpers";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface ContextWatchdogBootstrapApplyResult {
 	preset: string;
@@ -110,19 +111,20 @@ export function registerContextWatchdogCheckpointBootstrapSurface(
 			const p = params as { preset?: string; apply?: boolean };
 			if (p.apply) {
 				const applied = runtime.applyPreset(ctx, p.preset);
-				return {
-					content: [{
-						type: "text",
-						text: JSON.stringify({ ...applied, applied: true, reloadRequired: false }, null, 2),
-					}],
-					details: { ...applied, applied: true, reloadRequired: false },
-				};
+				const details = { ...applied, applied: true, reloadRequired: false };
+				return buildOperatorVisibleToolResponse({
+					label: "context_watch_bootstrap",
+					summary: `context-watch-bootstrap: applied=yes preset=${applied.preset} notes=${applied.notes.length} reloadRequired=no`,
+					details,
+				});
 			}
 			const plan = buildContextWatchBootstrapPlan(p.preset);
-			return {
-				content: [{ type: "text", text: JSON.stringify({ ...plan, applied: false }, null, 2) }],
-				details: { ...plan, applied: false },
-			};
+			const details = { ...plan, applied: false };
+			return buildOperatorVisibleToolResponse({
+				label: "context_watch_bootstrap",
+				summary: `context-watch-bootstrap: applied=no preset=${plan.preset} notes=${plan.notes.length}`,
+				details,
+			});
 		},
 	});
 }

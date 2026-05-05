@@ -16,6 +16,7 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, parse, resolve } from "node:path";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // --- Types ---
 
@@ -770,11 +771,22 @@ export default function (pi: ExtensionAPI) {
         profile,
         hatch,
       };
+      const summary = [
+        "environment-doctor:",
+        `ok=${payload.issues.length === 0 ? "yes" : "no"}`,
+        `profile=${profile}`,
+        `checks=${payload.okCount}/${payload.totalCount}`,
+        `issues=${payload.issues.length}`,
+        `terminal=${terminalId}`,
+        `shell=${shellId}`,
+        hatch ? "hatch=yes" : undefined,
+      ].filter(Boolean).join(" ");
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "environment_doctor_status",
+        summary,
         details: payload,
-      };
+      });
     },
   });
 

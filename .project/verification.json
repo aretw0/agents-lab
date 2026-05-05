@@ -13290,6 +13290,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:20:50.485Z",
       "evidence": "Migrated guardrails report-only surfaces to summary-first operator-visible output: refactor_rename_symbol/refactor_organize_imports/refactor_format_target in guardrails-core-macro-refactor-surface.ts, safe_mutate_large_file/structured_query_plan in guardrails-core-safe-mutation-surface.ts, and delivery_mode_plan/state_reconcile_plan in guardrails-core-delivery-surface.ts. Each preserves structured details. Updated focal smoke tests to assert summary content, details hint, and no raw JSON fields in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-macro-refactor-tool.test.ts packages/pi-stack/test/smoke/guardrails-safe-mutation-tool.test.ts packages/pi-stack/test/smoke/guardrails-delivery-mode-surface.test.ts packages/pi-stack/test/smoke/guardrails-state-reconcile-surface.test.ts -> 5 files passed, 17 tests passed."
+    },
+    {
+      "id": "VER-BUD-1230",
+      "target": "TASK-BUD-865",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:25:53.194Z",
+      "evidence": "Migrated local status/diagnostic surfaces to summary-first operator-visible output: environment_doctor_status in environment-doctor.ts, scheduler_governance_status in scheduler-governance.ts, and context_watch_bootstrap in context-watchdog-checkpoint-bootstrap-surface.ts. context_watch_checkpoint already emitted compact summary and was left intact. Added/updated smoke tests for environment doctor, scheduler governance, and context bootstrap summary-first content with details preservation. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/environment-doctor-surface.test.ts packages/pi-stack/test/smoke/scheduler-governance.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts -> 4 files passed, 26 tests passed."
     }
   ]
 }

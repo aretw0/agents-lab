@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -10,6 +10,7 @@ import {
   computeForeignTaskCount,
   resolveSchedulerGovernanceConfig,
 } from "../../extensions/scheduler-governance";
+import schedulerGovernanceExtension from "../../extensions/scheduler-governance";
 
 function makeTempWorkspace(): string {
   const cwd = mkdtempSync(join(tmpdir(), "scheduler-governance-"));
@@ -18,6 +19,31 @@ function makeTempWorkspace(): string {
 }
 
 describe("scheduler-governance", () => {
+  function makeMockPi() {
+    return {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      sendUserMessage: vi.fn(),
+    } as unknown as Parameters<typeof schedulerGovernanceExtension>[0];
+  }
+
+  function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+    const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+      ([tool]) => tool?.name === name,
+    );
+    if (!call) throw new Error(`tool not found: ${name}`);
+    return call[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ text?: string }>; details?: Record<string, unknown> }>;
+    };
+  }
+
   it("default config é observe (safe)", () => {
     const cwd = makeTempWorkspace();
     try {
@@ -67,6 +93,29 @@ describe("scheduler-governance", () => {
 
     const foreignForB = computeForeignTaskCount(tasks as any, "inst-B", lease as any);
     expect(foreignForB).toBe(2);
+  });
+
+  it("scheduler_governance_status emits summary-first content with details preserved", async () => {
+    const cwd = makeTempWorkspace();
+    try {
+      const pi = makeMockPi();
+      schedulerGovernanceExtension(pi);
+      const tool = getTool(pi, "scheduler_governance_status");
+      const result = await tool.execute(
+        "tc-scheduler-governance-status",
+        {},
+        undefined as unknown as AbortSignal,
+        () => {},
+        { cwd },
+      );
+
+      expect(result.details?.policy).toBe("observe");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("scheduler-governance: policy=observe");
+      expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String(result.content?.[0]?.text ?? "")).not.toContain('\"policy\"');
+    } finally {
+      rmSync(cwd, { recursive: true, force: true });
+    }
   });
 
   it("status snapshot mostra owner e foreign ativo quando lease fresco é de outro pid", () => {

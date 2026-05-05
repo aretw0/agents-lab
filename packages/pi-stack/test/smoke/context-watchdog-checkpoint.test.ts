@@ -112,6 +112,30 @@ describe("context-watchdog", () => {
 		};
 	}
 
+	it("context_watch_bootstrap emits summary-first plan with details preserved", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-bootstrap-"));
+		try {
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_bootstrap");
+			const result = await tool.execute(
+				"tc-context-watch-bootstrap",
+				{ preset: "agent-worker", apply: false },
+				undefined as unknown as AbortSignal,
+				() => {},
+				{ cwd },
+			);
+
+			expect(result.details?.preset).toBe("agent-worker");
+			expect(result.details?.applied).toBe(false);
+			expect(result.content?.[0]?.text).toContain("context-watch-bootstrap: applied=no preset=agent-worker");
+			expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
+			expect(result.content?.[0]?.text).not.toContain('\"preset\"');
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("context_watch_checkpoint tool writes compact bounded checkpoints", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-tool-checkpoint-"));
 		try {
