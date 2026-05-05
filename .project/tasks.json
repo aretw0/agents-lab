@@ -18138,6 +18138,70 @@
       ],
       "milestone": "runtime-regression",
       "notes": "[rationale:bugfix] Reportado pelo usuário após tentar usar /lane-queue: `Extension \"command:lane-queue\" error: resolveLoopActivationMarkers is not defined`. Resolver depois como regressão runtime, sem misturar com a wave anti-bloat atual.\n[provenance:human] source_task=none reason=User-reported runtime error to add to board for later."
+    },
+    {
+      "id": "TASK-BUD-810",
+      "description": "Documentar que /reload pode acionar auto-compactação/context-watch logo após a recarga, explicando que é um efeito esperado quando os thresholds de contexto pedem compact/checkpoint.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/guides/openai-context-window-playbook.md",
+        "docs/guides/control-plane-operating-doctrine.md",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/extensions/context-watchdog.ts"
+      ],
+      "acceptance_criteria": [
+        "documento menciona explicitamente que reload pode ser seguido por auto-compact quando context-watch detectar threshold",
+        "distinguir efeito esperado de bug/regressão",
+        "incluir orientação operacional: checkpoint/reload/auto-compact pode acontecer em sequência e retomar via handoff",
+        "validar com leitura/marker check focal"
+      ],
+      "milestone": "runtime-docs",
+      "notes": "[rationale:docs] Usuário observou que após /reload foi gatilhada auto compactação e gostou do efeito, mas pediu que isso fique documentado como 'pode acontecer'.\n[provenance:human] source_task=none reason=User-observed reload -> auto-compact behavior should be documented for future operators."
+    },
+    {
+      "id": "TASK-BUD-811",
+      "description": "Criar trilha de governança para atribuição de mudanças: separar o que é agents-lab/pi-stack local do que vem de atualizações upstream do Pi/dependências, com critérios de assimilação/negação segura.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "packages/pi-stack/package.json",
+        "docs/guides/control-plane-evolution-playbook.md",
+        "docs/guides/recommended-pi-stack.md",
+        "docs/research"
+      ],
+      "acceptance_criteria": [
+        "definir relatório/checklist que classifica mudanças em local-stack vs upstream Pi/dependências",
+        "incluir sinais mínimos: package/lock diff, versão instalada, changelog/release notes quando disponível, arquivos nossos alterados, riscos de runtime",
+        "definir decisão assimilate|hold|reject com critérios de segurança e rollback",
+        "não auto-atualizar dependências; toda assimilação exige decisão explícita"
+      ],
+      "milestone": "dependency-governance",
+      "notes": "[rationale:governance] Usuário perguntou como saber o que fomos nós que fizemos versus atualizações do Pi/deps, e quer acompanhar de perto novidades para assimilar com segurança ou negar atualização.\n[provenance:human] source_task=none reason=Need backlog lane for safe dependency/upstream change attribution and assimilation."
+    },
+    {
+      "id": "TASK-BUD-812",
+      "description": "Planejar pipeline de notas de release/blog do agents-lab: gerar material editorial sobre novidades do nosso ecossistema e do que usamos, a partir da trilha de mudanças local vs upstream.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-811"
+      ],
+      "files": [
+        "docs/research",
+        "docs/guides",
+        "README.md"
+      ],
+      "acceptance_criteria": [
+        "definir formato de changelog editorial separando 'nossa stack' e 'upstream/deps'",
+        "incluir fonte de evidência para cada item publicado",
+        "incluir regra para não divulgar/assumir mudança upstream sem evidência verificável",
+        "produzir primeiro template de post ou release note interna"
+      ],
+      "milestone": "agents-lab-blog",
+      "notes": "[rationale:docs] Usuário conectou a trilha de updates/deps ao futuro blog do agents-lab para posts sobre o que há de novo no ecossistema próprio e nas ferramentas usadas.\n[provenance:human] source_task=none reason=Future agents-lab blog/release notes should reuse dependency-governance evidence."
     }
   ]
 }
