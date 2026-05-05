@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveStructuredInterview } from "../../extensions/guardrails-core";
+import { registerGuardrailsStructuredInterviewSurface } from "../../extensions/guardrails-core-structured-interview-surface";
 
 describe("structured interview primitive", () => {
   it("asks for the first missing required answer without authorizing dispatch", () => {
@@ -63,5 +64,28 @@ describe("structured interview primitive", () => {
       "single-choice-value-not-in-options",
       "skip-not-allowed",
     ]);
+  });
+
+  it("surface retorna resumo operator-visible e preserva details", () => {
+    const tools: Array<{ name: string; execute: (id: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> } }> = [];
+    registerGuardrailsStructuredInterviewSurface({
+      registerTool(tool: unknown) {
+        tools.push(tool as (typeof tools)[number]);
+      },
+    } as never);
+
+    const tool = tools.find((item) => item.name === "structured_interview_plan");
+    const result = tool?.execute("tc-interview", {
+      questions: [
+        { id: "task", prompt: "Qual task?", kind: "text" },
+        { id: "validation", prompt: "Qual validação?", kind: "single-choice", options: ["test", "inspection"] },
+      ],
+      answers: [{ questionId: "task", value: "TASK-BUD-856" }],
+    });
+
+    expect(result?.details.decision).toBe("needs-human-answer");
+    expect(result?.content?.[0]?.text).toContain("structured-interview: decision=needs-human-answer");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });

@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { resolveStructuredInterview, type StructuredInterviewAnswer, type StructuredInterviewQuestion } from "./guardrails-core-structured-interview";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asQuestions(value: unknown): StructuredInterviewQuestion[] {
   return Array.isArray(value) ? value as StructuredInterviewQuestion[] : [];
@@ -38,10 +39,11 @@ export function registerGuardrailsStructuredInterviewSurface(pi: ExtensionAPI): 
         questions: asQuestions(p.questions),
         answers: asAnswers(p.answers),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "structured_interview_plan",
+        summary: result.evidence,
         details: result,
-      };
+      });
     },
   });
 }

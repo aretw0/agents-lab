@@ -19148,7 +19148,7 @@
     {
       "id": "TASK-BUD-856",
       "description": "Migrar structured_interview_plan para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19163,7 +19163,8 @@
         "teste focal deve cobrir surface por nome e content sem JSON cru"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Seed local-safe: a própria surface de entrevista precisa ser legível antes de entrevistas futuras.\n[provenance:human] source_task=none reason=Usuário perguntou se precisa ser entrevistado; antes disso, alinhar a primitive de entrevista como output operator-visible."
+      "notes": "[rationale:operator-experience] Seed local-safe: a própria surface de entrevista precisa ser legível antes de entrevistas futuras.\n[provenance:human] source_task=none reason=Usuário perguntou se precisa ser entrevistado; antes disso, alinhar a primitive de entrevista como output operator-visible.\n[slice-start] Aplicando helper operator-visible em structured_interview_plan usando evidence como summary; primitive core permanece backend-first/read-only.\n[slice-complete] structured_interview_plan no longer emits raw JSON as primary content. Rollback: revert guardrails-core-structured-interview-surface.ts and guardrails-structured-interview.test.ts changes.",
+      "verification": "VER-BUD-1221"
     },
     {
       "id": "TASK-BUD-857",
