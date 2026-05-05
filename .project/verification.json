@@ -13236,6 +13236,15 @@
       "method": "marker-check+i18n-lint+board-seed",
       "timestamp": "2026-05-05T22:59:38.234Z",
       "evidence": "Created docs/research/planning-clarity-seed-2026-05.md separating local-safe packs from protected parked work. Seeded five local-safe follow-up tasks: TASK-BUD-859, TASK-BUD-860, TASK-BUD-861, TASK-BUD-862, TASK-BUD-863. Preserved TASK-BUD-849 as medium-term protected Model Infrastructure focus requiring explicit human/provider/cost decisions. Validation: safe_marker_check matched 4/4 exact markers after correcting marker quoting; i18n_lint_text expected pt-BR passed with 0 issues."
+    },
+    {
+      "id": "VER-BUD-1224",
+      "target": "TASK-BUD-859",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:01:40.547Z",
+      "evidence": "Migrated git_maintenance_status and co-located git_dirty_snapshot in packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts to buildOperatorVisibleToolResponse using existing summaries as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts to assert summary-first content for both tools and no raw JSON fields in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts packages/pi-stack/test/smoke/guardrails-git-maintenance.test.ts -> 3 files passed, 14 tests passed."
     }
   ]
 }

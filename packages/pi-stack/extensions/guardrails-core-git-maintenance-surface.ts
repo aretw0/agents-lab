@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { evaluateGitMaintenanceSignal } from "./guardrails-core-git-maintenance";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export interface GitMaintenanceDiagnostics {
   looseObjectCount: number;
@@ -215,10 +216,11 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
         diagnosticsCommand: "git count-objects -vH",
         cleanupCommandsExecuted: [],
       };
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "git_maintenance_status",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 
@@ -234,10 +236,11 @@ export function registerGuardrailsGitMaintenanceSurface(pi: ExtensionAPI): void 
       } catch (error) {
         snapshot = buildUnavailableGitDirtySnapshot(error);
       }
-      return {
-        content: [{ type: "text", text: JSON.stringify(snapshot, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "git_dirty_snapshot",
+        summary: snapshot.summary,
         details: snapshot,
-      };
+      });
     },
   });
 

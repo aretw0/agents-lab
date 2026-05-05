@@ -12,7 +12,7 @@ import {
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 type RegisteredCommand = {
@@ -100,6 +100,12 @@ describe("guardrails git maintenance surface", () => {
     expect(maintenanceTool?.name).toBe("git_maintenance_status");
     expect(dirtyTool?.name).toBe("git_dirty_snapshot");
     expect(typeof dirtyCommand?.handler).toBe("function");
+
+    const maintenanceResult = maintenanceTool?.execute("tc-git-maintenance", {}, undefined, undefined, { cwd: process.cwd() });
+    expect(maintenanceResult?.details.summary).toContain("git-maintenance:");
+    expect(maintenanceResult?.content?.[0]?.text).toContain("git-maintenance:");
+    expect(maintenanceResult?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(maintenanceResult?.content?.[0]?.text).not.toContain('\"severity\"');
   });
 
   it("git_dirty_snapshot tool returns unavailable envelope outside git repo", () => {
@@ -123,6 +129,9 @@ describe("guardrails git maintenance surface", () => {
         dispatchAllowed: false,
         authorization: "none",
       });
+      expect(result?.content?.[0]?.text).toContain("git-dirty-snapshot: unavailable");
+      expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+      expect(result?.content?.[0]?.text).not.toContain('\"mode\"');
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
