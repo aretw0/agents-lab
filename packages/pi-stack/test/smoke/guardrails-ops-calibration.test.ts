@@ -424,6 +424,9 @@ describe("ops calibration decision packet", () => {
     expect(result.details.dispatchAllowed).toBe(false);
     expect(result.details.authorization).toBe("none");
     expect(String(result.details.summary)).toContain("ops-calibration-packet:");
+    expect(String(result.content?.[0]?.text ?? "")).toContain("ops-calibration-packet:");
+    expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result.content?.[0]?.text ?? "")).not.toContain('\"decision\"');
   });
 
   it("registers delegate_or_execute_decision_packet as read-only packet tool", async () => {

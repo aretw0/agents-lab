@@ -23,6 +23,7 @@ import {
   parseAutoAdvanceHardIntentTelemetry,
   parseDelegationMixScore,
 } from "./session-analytics";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 import {
   asOptionalBoolean,
@@ -678,10 +679,11 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
         liveReloadCompleted: p.live_reload_completed === true,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "ops_calibration_decision_packet",
+        summary: packet.summary,
         details: packet,
-      };
+      });
     },
   });
 }

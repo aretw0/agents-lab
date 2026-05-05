@@ -19403,7 +19403,7 @@
     {
       "id": "TASK-BUD-868",
       "description": "Migrar ops_calibration_decision_packet para output summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p4",
       "depends_on": [
         "TASK-BUD-867"
@@ -19418,7 +19418,8 @@
         "não lançar, parar ou reiniciar processos"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:risk-control] Report-only ops calibration ainda usa JSON bruto em content; migração deve manter superfície sem autoridade operacional.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found remaining report-only ops calibration surface."
+      "notes": "[rationale:risk-control] Report-only ops calibration ainda usa JSON bruto em content; migração deve manter superfície sem autoridade operacional.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found remaining report-only ops calibration surface.\n[auto-chain] Starting summary-first migration for ops_calibration_decision_packet only; no process lifecycle behavior changes.\n[slice-complete] ops_calibration_decision_packet content is summary-first with structured details preserved. Rollback: revert guardrails-core-ops-calibration-surface.ts and guardrails-ops-calibration.test.ts changes.",
+      "verification": "VER-BUD-1233"
     },
     {
       "id": "TASK-BUD-869",
