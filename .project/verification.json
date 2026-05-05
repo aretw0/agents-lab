@@ -12561,6 +12561,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:21:15.140Z",
       "evidence": "Extracted audit/trusted UI confirmation wrappers from guardrails-core.ts into guardrails-core-confirmation-audit.ts without enabling destructive/protected confirmations. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation-surface.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 69 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2120 to 2095 lines while preserving audit evidence behavior."
+    },
+    {
+      "id": "VER-BUD-1149",
+      "target": "TASK-BUD-797",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:23:18.553Z",
+      "evidence": "Extracted guardReadPath/guardBashPathReads runtime handlers from guardrails-core.ts into guardrails-core-read-path-runtime.ts using existing path guard helpers and confirmation audit wrapper. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 68 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2095 to 2010 lines while preserving read/bash path guard behavior."
     }
   ]
 }

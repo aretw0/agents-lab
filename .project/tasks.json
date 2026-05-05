@@ -17884,7 +17884,7 @@
     {
       "id": "TASK-BUD-797",
       "description": "Extrair handlers runtime de read/bash path guard de guardrails-core para módulo coeso com callbacks auditáveis, preservando bloqueios e prompts existentes.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/guardrails-core.ts",
@@ -17898,7 +17898,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe posterior aos helpers puros de path guard; manter comportamento protegido intacto.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para continuar extração guardrails-core sem perguntar."
+      "notes": "[rationale:refactor] Fatia local-safe posterior aos helpers puros de path guard; manter comportamento protegido intacto.\n[provenance:human] source_task=TASK-BUD-794 reason=Seed AFK anti-bloat para continuar extração guardrails-core sem perguntar.\nStarted after TASK-BUD-796 in AFK anti-bloat chain. [rationale:refactor] Continue local-safe extraction of read/bash runtime guard wrappers using existing pure path guard helpers.\nClosed via VER-BUD-1149: read/bash path runtime handlers extracted; guardrails smoke passed (68 tests). [rationale:refactor] Blocking and confirmation paths preserved.",
+      "verification": "VER-BUD-1149"
     },
     {
       "id": "TASK-BUD-798",
