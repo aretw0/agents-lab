@@ -12930,6 +12930,15 @@
       "method": "test",
       "timestamp": "2026-05-05T18:26:15.570Z",
       "evidence": "Auto-resume reload-pending copy recalibrated from suppressed to deferred in context-watchdog reason/hint/notification. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 1 file / 58 tests passed."
+    },
+    {
+      "id": "VER-BUD-1190",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T18:34:22.354Z",
+      "evidence": "Fragility false-positive recalibration for reload-deferred handoff/stale dirty feedback. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 42 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 tests passed."
     }
   ]
 }

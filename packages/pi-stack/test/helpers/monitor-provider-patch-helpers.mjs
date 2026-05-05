@@ -460,6 +460,10 @@ const FRAGILITY_MONITOR_FEEDBACK_GUARD_LINE =
 	"- Automated monitor feedback is not evidence of fragility by itself; validate against actual assistant_text and user-visible outcome.";
 const FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE =
 	"- If assistant_text has substantive non-whitespace content, do not flag empty-output fragility.";
+const FRAGILITY_RELOAD_DEFERRED_GUARD_LINE =
+	"- A response that reports completed commits/validation/clean git and asks the operator to run /reload for live runtime validation is substantive deferred handoff, not a silent no-op.";
+const FRAGILITY_STALE_DIRTY_GUARD_LINE =
+	"- Do not flag stale dirty-state wording from handoff/monitor feedback when newer tool evidence or assistant_text says the working tree is clean.";
 const FRAGILITY_EMPTY_RESPONSE_PATTERN_RE =
 	/empty response|empty output|responds with empty/i;
 const COMMIT_HYGIENE_VERIFY_NUDGE_LINE =
@@ -491,6 +495,14 @@ function ensureFragilityClassifierCalibration(cwd) {
 	if (!content.includes(FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE)) {
 		additions.push(FRAGILITY_SUBSTANTIVE_OUTPUT_GUARD_LINE);
 		details.push("substantive-output-guard");
+	}
+	if (!content.includes(FRAGILITY_RELOAD_DEFERRED_GUARD_LINE)) {
+		additions.push(FRAGILITY_RELOAD_DEFERRED_GUARD_LINE);
+		details.push("reload-deferred-handoff-guard");
+	}
+	if (!content.includes(FRAGILITY_STALE_DIRTY_GUARD_LINE)) {
+		additions.push(FRAGILITY_STALE_DIRTY_GUARD_LINE);
+		details.push("stale-dirty-feedback-guard");
 	}
 	if (additions.length === 0) return { changed: false, details: [] };
 

@@ -675,6 +675,14 @@ describe("integration: full flow", () => {
 			updated,
 			/If assistant_text has substantive non-whitespace content, do not flag empty-output fragility/i,
 		);
+		assert.match(
+			updated,
+			/reports completed commits\/validation\/clean git and asks the operator to run \/reload/i,
+		);
+		assert.match(
+			updated,
+			/Do not flag stale dirty-state wording from handoff\/monitor feedback/i,
+		);
 	});
 
 	it("session_start applies distributed quality nudges to monitor instructions", () => {

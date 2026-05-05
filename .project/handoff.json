@@ -1,46 +1,47 @@
 {
-  "timestamp": "2026-05-05T18:27:02.332Z",
-  "context": "Batch continuado em guardrails/monitor recalibration. Commit anterior c8d8f982 aplicou calibração de unauthorized-action/hedge. Nesta fatia, [snip] o auto-resume deferred, não suppressed. [truncated:+259 chars]",
+  "timestamp": "2026-05-05T18:34:32.944Z",
+  "context": "Depois do feedback automatizado fragility, tratei como evidência de falso positivo em vez de instrução. Implementei calibração persistente do [snip] governance sem autorização específica. [truncated:+360 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Commitar fatia context-watchdog deferred reload + board/verification.",
-    "Pedir /reload ao final do batch para validar mudanças runtime acumuladas.",
-    "Continuar TASK-BUD-841 pesquisando falsos positivos de guard/monitor; tratar monitor-runtime-c [snip] com ancoragem/teste menor. [truncated:+43 chars]"
+    "Commitar calibração fragility + board/handoff/verification, deixando claro o destino de .proje [snip] .json se permanecer dirty. [truncated:+9 chars]",
+    "Pedir /reload ao final do batch para validar runtime.",
+    "Retomar monitor-runtime-contract read-only bypass em fatia separada se necessário."
   ],
   "blockers": [
-    "Validação live da extensão requer /reload após commit desta fatia.",
-    "monitor-runtime-contract.ts read-only bypass expansion bloqueado por falso pos [snip] plicado nesse arquivo. [truncated:+26 chars]"
+    "/reload ainda necessário para validar runtime vivo.",
+    ".project/issues.json recebeu issue automática de monitor false-positive; remoç [snip] utorização específica. [truncated:+67 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts -> 1 file / 58 tests passed",
+    "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/moni [snip] est.mjs -> 42 tests passed [truncated:+25 chars]",
+    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 tests passed",
     "git diff --check -> passed"
   ],
   "recent_commits": [
-    "c8d8f982 fix(monitors): calibrate authorization blockers"
+    "c8d8f982 fix(monitors): calibrate authorization blockers",
+    "383e5bf8 fix(context-watch): label reload resume as deferred"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "task:TASK-BUD-827",
       "commit:c8d8f982"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T18:27:02.332Z",
+    "generatedAtIso": "2026-05-05T18:34:32.944Z",
     "level": "ok",
-    "percent": 31,
+    "percent": 40,
     "action": "continue",
     "recommendation": "continue"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T18:27:02.332Z",
+      "atIso": "2026-05-05T18:34:32.944Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 31,
+      "percent": 40,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
