@@ -12939,6 +12939,15 @@
       "method": "test",
       "timestamp": "2026-05-05T18:34:22.354Z",
       "evidence": "Fragility false-positive recalibration for reload-deferred handoff/stale dirty feedback. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 42 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 tests passed."
+    },
+    {
+      "id": "VER-BUD-1191",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:10:09.083Z",
+      "evidence": "Monitor issue write template schema fix: ensureMonitorIssueWriteTemplateSchema normalizes fragility/work-quality writes to .project/issues.json schema-compatible title/body/location/category=issue/priority high|medium/package/source. Runtime .pi monitor files patched. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 passed; safe_marker_check fragility/work-quality monitor.json -> ok."
     }
   ]
 }

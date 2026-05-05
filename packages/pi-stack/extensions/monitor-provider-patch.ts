@@ -356,6 +356,92 @@ export function ensureWorkQualityInstructionCalibration(cwd: string): {
 	});
 }
 
+const MONITOR_ISSUE_WRITERS = ["fragility", "work-quality"] as const;
+
+type MonitorIssueWriterName = typeof MONITOR_ISSUE_WRITERS[number];
+
+const MONITOR_ISSUE_PRIORITY: Record<"on_flag" | "on_new", string> = {
+	on_flag: "high",
+	on_new: "medium",
+};
+
+function schemaCompatibleMonitorIssueTemplate(
+	monitorName: MonitorIssueWriterName,
+	actionName: "on_flag" | "on_new",
+	existingId: unknown,
+): Record<string, string> {
+	return {
+		id: typeof existingId === "string" && existingId.trim().length > 0
+			? existingId
+			: `${monitorName}-{finding_id}`,
+		title: "{description}",
+		body: "{description}",
+		location: `.pi/monitors/${monitorName}.monitor.json`,
+		status: "open",
+		category: "issue",
+		priority: MONITOR_ISSUE_PRIORITY[actionName],
+		package: "pi-stack",
+		source: "monitor",
+	};
+}
+
+export function ensureMonitorIssueWriteTemplateSchema(cwd: string): {
+	changed: boolean;
+	details: string[];
+} {
+	let changed = false;
+	const details: string[] = [];
+
+	for (const monitorName of MONITOR_ISSUE_WRITERS) {
+		const monitorPath = join(cwd, ".pi", "monitors", `${monitorName}.monitor.json`);
+		if (!existsSync(monitorPath)) continue;
+
+		let monitor: Record<string, unknown>;
+		try {
+			monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+		} catch {
+			continue;
+		}
+
+		const actions = monitor["actions"] && typeof monitor["actions"] === "object"
+			? monitor["actions"] as Record<string, unknown>
+			: undefined;
+		if (!actions) continue;
+
+		let monitorChanged = false;
+		for (const actionName of ["on_flag", "on_new"] as const) {
+			const action = actions[actionName] && typeof actions[actionName] === "object"
+				? actions[actionName] as Record<string, unknown>
+				: undefined;
+			const write = action?.["write"] && typeof action["write"] === "object"
+				? action["write"] as Record<string, unknown>
+				: undefined;
+			if (!write || write["path"] !== ".project/issues.json") continue;
+
+			const template = write["template"] && typeof write["template"] === "object"
+				? write["template"] as Record<string, unknown>
+				: {};
+			const nextTemplate = schemaCompatibleMonitorIssueTemplate(
+				monitorName,
+				actionName,
+				template["id"],
+			);
+			if (JSON.stringify(template) !== JSON.stringify(nextTemplate)) {
+				write["template"] = nextTemplate;
+				monitorChanged = true;
+			}
+		}
+
+		if (monitorChanged) {
+			writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+			changed = true;
+			details.push(`${monitorName}=issue-template-schema`);
+		}
+	}
+
+	return { changed, details };
+}
+
 type FragilityMonitorPolicy = {
 	when: string;
 };
@@ -750,6 +836,7 @@ export default function (pi: ExtensionAPI) {
 			ensureCommitHygieneInstructionCalibration(ctx.cwd);
 		const workQualityInstructionPatch =
 			ensureWorkQualityInstructionCalibration(ctx.cwd);
+		const monitorIssueTemplatePatch = ensureMonitorIssueWriteTemplateSchema(ctx.cwd);
 
 		const provider = detectDefaultProvider(ctx.cwd);
 		const { model, source } = resolveClassifierModel(ctx.cwd, provider);
@@ -799,6 +886,11 @@ export default function (pi: ExtensionAPI) {
 			if (workQualityInstructionPatch.changed) {
 				earlyDetails.push(
 					`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (monitorIssueTemplatePatch.changed) {
+				earlyDetails.push(
+					`monitor issue templates synced (${monitorIssueTemplatePatch.details.join(", ") || "ok"})`,
 				);
 			}
 			const output = planSessionStartOutput(earlyDetails, "info", {
@@ -884,6 +976,11 @@ export default function (pi: ExtensionAPI) {
 				`corrigiu prompt.system ausente em ${systemPromptRepair.repaired.length} override(s)`,
 			);
 		}
+		if (monitorIssueTemplatePatch.changed) {
+			details.push(
+				`monitor issue templates synced (${monitorIssueTemplatePatch.details.join(", ") || "ok"})`,
+			);
+		}
 
 		let severity: "info" | "warning" = "info";
 
@@ -919,6 +1016,7 @@ export default function (pi: ExtensionAPI) {
 				workQualityInstructionPatch.changed ||
 				legacyTemplateRepair.repaired.length > 0 ||
 				systemPromptRepair.repaired.length > 0 ||
+				monitorIssueTemplatePatch.changed ||
 				runtimeContract.repaired.length > 0,
 		});
 		ctx.ui?.setStatus?.("monitor-provider-patch", output.status);

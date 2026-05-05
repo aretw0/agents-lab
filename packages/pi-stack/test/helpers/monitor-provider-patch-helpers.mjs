@@ -590,6 +590,58 @@ function ensureWorkQualityInstructionCalibration(cwd) {
 	);
 }
 
+const MONITOR_ISSUE_WRITERS = ["fragility", "work-quality"];
+const MONITOR_ISSUE_PRIORITY = { on_flag: "high", on_new: "medium" };
+
+function schemaCompatibleMonitorIssueTemplate(monitorName, actionName, existingId) {
+	return {
+		id: typeof existingId === "string" && existingId.trim().length > 0 ? existingId : `${monitorName}-{finding_id}`,
+		title: "{description}",
+		body: "{description}",
+		location: `.pi/monitors/${monitorName}.monitor.json`,
+		status: "open",
+		category: "issue",
+		priority: MONITOR_ISSUE_PRIORITY[actionName],
+		package: "pi-stack",
+		source: "monitor",
+	};
+}
+
+function ensureMonitorIssueWriteTemplateSchema(cwd) {
+	let changed = false;
+	const details = [];
+	for (const monitorName of MONITOR_ISSUE_WRITERS) {
+		const monitorPath = join(cwd, ".pi", "monitors", `${monitorName}.monitor.json`);
+		if (!existsSync(monitorPath)) continue;
+		let monitor;
+		try {
+			monitor = JSON.parse(readFileSync(monitorPath, "utf8"));
+		} catch {
+			continue;
+		}
+		const actions = monitor.actions && typeof monitor.actions === "object" ? monitor.actions : undefined;
+		if (!actions) continue;
+		let monitorChanged = false;
+		for (const actionName of ["on_flag", "on_new"]) {
+			const action = actions[actionName] && typeof actions[actionName] === "object" ? actions[actionName] : undefined;
+			const write = action?.write && typeof action.write === "object" ? action.write : undefined;
+			if (!write || write.path !== ".project/issues.json") continue;
+			const template = write.template && typeof write.template === "object" ? write.template : {};
+			const nextTemplate = schemaCompatibleMonitorIssueTemplate(monitorName, actionName, template.id);
+			if (JSON.stringify(template) !== JSON.stringify(nextTemplate)) {
+				write.template = nextTemplate;
+				monitorChanged = true;
+			}
+		}
+		if (monitorChanged) {
+			writeFileSync(monitorPath, JSON.stringify(monitor, null, 2) + "\n", "utf8");
+			changed = true;
+			details.push(`${monitorName}=issue-template-schema`);
+		}
+	}
+	return { changed, details };
+}
+
 function ensureFragilityMonitorPolicy(cwd, policy) {
 	const monitorPath = join(cwd, ".pi", "monitors", "fragility.monitor.json");
 	if (!existsSync(monitorPath)) return { changed: false, details: [] };
@@ -654,6 +706,7 @@ function simulateSessionStart(cwd) {
 		ensureCommitHygieneInstructionCalibration(cwd);
 	const workQualityInstructionPatch =
 		ensureWorkQualityInstructionCalibration(cwd);
+	const monitorIssueTemplatePatch = ensureMonitorIssueWriteTemplateSchema(cwd);
 
 	const provider = detectDefaultProvider(cwd);
 	if (provider !== "github-copilot") {
@@ -688,6 +741,11 @@ function simulateSessionStart(cwd) {
 				`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (monitorIssueTemplatePatch.changed) {
+			earlyDetails.push(
+				`monitor issue templates synced (${monitorIssueTemplatePatch.details.join(", ") || "ok"})`,
+			);
+		}
 		const output = planSessionStartOutput(earlyDetails, "info", {
 			requiresReload: earlyDetails.length > 0,
 		});
@@ -700,6 +758,7 @@ function simulateSessionStart(cwd) {
 			fragilityPatternsChanged: fragilityPatternPatch.changed,
 			commitHygieneInstructionsChanged: commitHygieneInstructionPatch.changed,
 			workQualityInstructionsChanged: workQualityInstructionPatch.changed,
+			monitorIssueTemplatesChanged: monitorIssueTemplatePatch.changed,
 			created: [],
 			repaired: [],
 			output,
@@ -730,6 +789,9 @@ function simulateSessionStart(cwd) {
 			`work-quality instructions synced (${workQualityInstructionPatch.details.join(", ") || "ok"})`,
 		);
 	}
+	if (monitorIssueTemplatePatch.changed) {
+		details.push(`monitor issue templates synced (${monitorIssueTemplatePatch.details.join(", ") || "ok"})`);
+	}
 	if (repaired.length > 0) details.push(`corrigiu template legado em ${repaired.length} override(s)`);
 	if (repairedSystemPrompt.length > 0) {
 		details.push(`corrigiu prompt.system ausente em ${repairedSystemPrompt.length} override(s)`);
@@ -743,6 +805,7 @@ function simulateSessionStart(cwd) {
 			fragilityPatternPatch.changed ||
 			commitHygieneInstructionPatch.changed ||
 			workQualityInstructionPatch.changed ||
+			monitorIssueTemplatePatch.changed ||
 			repaired.length > 0 ||
 			repairedSystemPrompt.length > 0,
 	});
@@ -755,6 +818,7 @@ function simulateSessionStart(cwd) {
 		fragilityPatternsChanged: fragilityPatternPatch.changed,
 		commitHygieneInstructionsChanged: commitHygieneInstructionPatch.changed,
 		workQualityInstructionsChanged: workQualityInstructionPatch.changed,
+		monitorIssueTemplatesChanged: monitorIssueTemplatePatch.changed,
 		created,
 		repaired,
 		repairedSystemPrompt,
@@ -795,5 +859,6 @@ export {
 	ensureFragilityPatternHygiene,
 	ensureCommitHygieneInstructionCalibration,
 	ensureWorkQualityInstructionCalibration,
+	ensureMonitorIssueWriteTemplateSchema,
 	simulateSessionStart,
 };

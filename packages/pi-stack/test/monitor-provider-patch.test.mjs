@@ -44,6 +44,7 @@ import {
 	normalizeHedgeContext,
 	ensureHedgeMonitorPolicy,
 	ensureHedgeMonitorContext,
+	ensureMonitorIssueWriteTemplateSchema,
 	simulateSessionStart,
 } from "./helpers/monitor-provider-patch-helpers.mjs";
 
@@ -683,6 +684,79 @@ describe("integration: full flow", () => {
 			updated,
 			/Do not flag stale dirty-state wording from handoff\/monitor feedback/i,
 		);
+	});
+
+	it("session_start keeps monitor issue writes schema-compatible", () => {
+		const piDir = join(tmpDir, ".pi");
+		const monitorsDir = join(piDir, "monitors");
+		mkdirSync(monitorsDir, { recursive: true });
+		writeFileSync(
+			join(piDir, "settings.json"),
+			JSON.stringify({ defaultProvider: "anthropic" }, null, 2) + "\n",
+			"utf8",
+		);
+
+		for (const name of ["fragility", "work-quality"]) {
+			writeFileSync(
+				join(monitorsDir, `${name}.monitor.json`),
+				JSON.stringify({
+					name,
+					actions: {
+						on_flag: {
+							write: {
+								path: ".project/issues.json",
+								template: {
+									id: `${name}-{finding_id}`,
+									description: "{description}",
+									status: "open",
+									category: name,
+									priority: "{severity}",
+									source: "monitor",
+								},
+							},
+						},
+						on_new: {
+							write: {
+								path: ".project/issues.json",
+								template: {
+									id: `${name}-{finding_id}`,
+									description: "{description}",
+									status: "open",
+									category: name,
+									priority: "warning",
+									source: "monitor",
+								},
+							},
+						},
+					},
+				}, null, 2) + "\n",
+				"utf8",
+			);
+		}
+
+		const direct = ensureMonitorIssueWriteTemplateSchema(tmpDir);
+		assert.equal(direct.changed, true);
+		assert.deepEqual(direct.details, [
+			"fragility=issue-template-schema",
+			"work-quality=issue-template-schema",
+		]);
+
+		const fragility = JSON.parse(readFileSync(join(monitorsDir, "fragility.monitor.json"), "utf8"));
+		assert.deepEqual(fragility.actions.on_flag.write.template, {
+			id: "fragility-{finding_id}",
+			title: "{description}",
+			body: "{description}",
+			location: ".pi/monitors/fragility.monitor.json",
+			status: "open",
+			category: "issue",
+			priority: "high",
+			package: "pi-stack",
+			source: "monitor",
+		});
+		assert.equal(fragility.actions.on_new.write.template.priority, "medium");
+
+		const second = ensureMonitorIssueWriteTemplateSchema(tmpDir);
+		assert.equal(second.changed, false);
 	});
 
 	it("session_start applies distributed quality nudges to monitor instructions", () => {
