@@ -12471,6 +12471,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T02:33:06.796Z",
       "evidence": "Extracted pragmatic autonomy config and guardrails runtime config specs/status/get/set/coercion helpers from guardrails-core.ts into packages/pi-stack/extensions/guardrails-core-runtime-config.ts. guardrails-core.ts imports runtime config helpers and re-exports the public contract used by tests/consumers. guardrails-core.ts reduced to 2378 lines; new module is 646 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts (52 passed). [rationale:risk-control] Large cohesive extraction of deterministic config surface with focused runtime-config smoke coverage."
+    },
+    {
+      "id": "VER-BUD-1139",
+      "target": "TASK-BUD-787",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T02:53:25Z",
+      "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 64 passed. project-board model/cache/rationale helpers extracted to project-board-model.ts; public board surface smoke preserved. [rationale:refactor] Cohesive extraction reduces project-board-surface.ts from ~2995 to 2467 lines while preserving query/update/complete contracts."
     }
   ]
 }

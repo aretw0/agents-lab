@@ -17680,6 +17680,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] Extração coesa de tabela/configuração determinística da maior superfície crítica; validação focal cobre os contratos públicos.\n[provenance:human] source_task=TASK-BUD-785 reason=antiBloatCue continua em extract para guardrails-core.ts.\nClosed via VER-BUD-1138: runtime config/pragmatic autonomy helpers extracted; long-run intent queue/runtime config smoke passed (52 tests). [rationale:risk-control] Major reduction of guardrails-core critical surface while preserving public config contract.",
       "verification": "VER-BUD-1138"
+    },
+    {
+      "id": "TASK-BUD-787",
+      "description": "Extrair modelo/cache/rationale helpers de project-board-surface para módulo coeso, preservando superfície pública do board.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-786"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-model.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover tipos internos, caches, parsers, normalizers e rationale helpers para módulo dedicado.",
+        "project-board-surface.ts preserva exports públicos e comportamento de query/update/complete.",
+        "Smoke project-board-surface permanece verde."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] antiBloatCue agora aponta project-board-surface.ts como maior superfície crítica; extrair modelo/rationale é coeso e testável.\n[provenance:human] source_task=TASK-BUD-786 reason=Continuar wave anti-bloat na maior superfície crítica atual.\nClosed via VER-BUD-1139: project-board model/cache/rationale helpers extracted; project-board-surface smoke passed (64 tests). [rationale:refactor] Cohesive extraction reduces critical board surface while preserving query/update/complete contracts.",
+      "verification": "VER-BUD-1139"
     }
   ]
 }
