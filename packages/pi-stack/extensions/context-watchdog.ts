@@ -92,6 +92,7 @@ import {
 	createContextWatchAnnouncementWindow,
 	createContextWatchTimeoutPressure,
 } from "./context-watchdog-runtime-state";
+import { handlePostReloadAutoResume } from "./context-watchdog-post-reload-runtime";
 import { buildContextWatchdogApplyPreset, registerContextWatchdogStatusSurface } from "./context-watchdog-status-surface";
 import {
 	applyEmergencyContextWindowFallbackConfig,
@@ -487,133 +488,22 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		const timeoutPressure = readTimeoutPressureState(now);
 		let handoffPath: string | undefined;
 		const reloadRequiredAtRunStart = isReloadRequiredForSourceUpdate();
-		const handoffForPostReloadResume = readHandoffJson(ctx.cwd);
-		const pendingAutoResumeAfterReload = readAutoResumeAfterReloadIntent(handoffForPostReloadResume);
-		if (!pendingAutoResumeAfterReload) {
-			postReloadPendingNotifyMemory = {};
+		const postReloadAutoResume = handlePostReloadAutoResume({
+			pi,
+			ctx,
+			config,
+			nowMs: now,
+			reloadRequiredAtRunStart,
+			timeoutPressure,
+			postReloadPendingNotifyMemory,
+			postReloadPendingNotifyMinCooldownMs: POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
+		});
+		postReloadPendingNotifyMemory = postReloadAutoResume.postReloadPendingNotifyMemory;
+		if (postReloadAutoResume.lastAutoResumeAt !== undefined) {
+			lastAutoResumeAt = postReloadAutoResume.lastAutoResumeAt;
 		}
-		if (pendingAutoResumeAfterReload && !reloadRequiredAtRunStart) {
-			const hasPendingMessages = ctx.hasPendingMessages();
-			const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
-			let handoffForDispatch = handoffForPostReloadResume;
-			const taskStatusById = readProjectTaskStatusById(ctx.cwd);
-			const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
-			let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
-				handoff: handoffForDispatch,
-				taskStatusById,
-				nowMs: now,
-				maxFreshAgeMs: config.handoffFreshMaxAgeMs,
-			});
-			if (!handoffBoardReconciliation.ok) {
-				const reconcile = reconcileAutoResumeHandoffFocus({
-					handoff: handoffForDispatch,
-					taskStatusById,
-					preferredTaskIds,
-					maxTasks: 3,
-				});
-				if (reconcile.changed) {
-					handoffForDispatch = {
-						...handoffForDispatch,
-						timestamp: new Date(now).toISOString(),
-						current_tasks: reconcile.nextFocus,
-					};
-					writeHandoffJson(ctx.cwd, handoffForDispatch);
-					handoffBoardReconciliation = resolveHandoffBoardReconciliation({
-						handoff: handoffForDispatch,
-						taskStatusById,
-						nowMs: now,
-						maxFreshAgeMs: config.handoffFreshMaxAgeMs,
-					});
-				}
-			}
-			const handoffEvent = latestContextWatchEvent(handoffForDispatch);
-			const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
-				handoffLastEventLevel: handoffEvent?.level,
-				handoffLastEventAgeMs: contextWatchEventAgeMs(handoffEvent, now),
-				maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
-			});
-			const autoResumeDecision = resolveAutoResumeDispatchDecision({
-				autoResumeReady: true,
-				reloadRequired: false,
-				checkpointEvidenceReady,
-				handoffBoardReconciled: handoffBoardReconciliation.ok,
-				hasPendingMessages,
-				hasRecentSteerInput: false,
-				queuedLaneIntents,
-			});
-			const autoResumeSnapshot = buildAutoResumeDecisionSnapshot({
-				nowMs: now,
-				decision: autoResumeDecision,
-				reloadRequired: false,
-				checkpointEvidenceReady,
-				handoffBoardReconciled: handoffBoardReconciliation.ok,
-				handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
-				hasPendingMessages,
-				hasRecentSteerInput: false,
-				queuedLaneIntents,
-				timeoutPressureActive: timeoutPressure.active,
-				timeoutPressureCount: timeoutPressure.count,
-				timeoutPressureThreshold: timeoutPressure.threshold,
-			});
-			if (autoResumeDecision.shouldDispatch) {
-				lastAutoResumeAt = now;
-				postReloadPendingNotifyMemory = {};
-				const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
-					handoffForDispatch,
-					config.handoffFreshMaxAgeMs,
-					now,
-					{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1) },
-				);
-				autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
-				const clearedHandoff = clearAutoResumeAfterReloadIntent(handoffForDispatch);
-				writeHandoffJson(ctx.cwd, clearedHandoff);
-				(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-					"context-watchdog.auto-resume-post-reload-dispatch",
-					{
-						atIso: autoResumeSnapshot.atIso,
-						reason: pendingAutoResumeAfterReload.reason,
-						focusTasks: pendingAutoResumeAfterReload.focusTasks,
-						diagnosticsSummary: summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics),
-						preview: resumeEnvelope.prompt.slice(0, 240),
-					},
-				);
-				pi.sendUserMessage(resumeEnvelope.prompt, { deliverAs: "followUp" });
-				if (config.notify) {
-					ctx.ui.notify("context-watch: post-reload auto resume queued", "info");
-				}
-			} else {
-				const pendingNotifyDecision = resolvePostReloadPendingNotifyDecision({
-					nowMs: now,
-					intentCreatedAtIso: pendingAutoResumeAfterReload.createdAtIso,
-					reason: autoResumeSnapshot.reason,
-					previous: postReloadPendingNotifyMemory,
-					cooldownMs: config.cooldownMs,
-					minCooldownMs: POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
-				});
-				if (pendingNotifyDecision.shouldEmit) {
-					(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-						"context-watchdog.auto-resume-post-reload-pending",
-						{
-							atIso: autoResumeSnapshot.atIso,
-							reason: autoResumeSnapshot.reason,
-							hint: autoResumeSnapshot.hint,
-							hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
-							queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
-							checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
-							handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
-							handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
-						},
-					);
-					if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
-						ctx.ui.notify(
-							`context-watch: post-reload auto resume pending (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
-							"warning",
-						);
-					}
-					postReloadPendingNotifyMemory = pendingNotifyDecision.next;
-				}
-			}
-			lastAutoResumeDecision = autoResumeSnapshot;
+		if (postReloadAutoResume.lastAutoResumeDecision) {
+			lastAutoResumeDecision = postReloadAutoResume.lastAutoResumeDecision;
 		}
 
 		if (config.status) {
