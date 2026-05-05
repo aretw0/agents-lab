@@ -12813,6 +12813,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T13:25:49.960Z",
       "evidence": "Extraído registro do comando /colony-pilot para packages/pi-stack/extensions/colony-pilot-main-command.ts com runtime explícito; colony-pilot.ts reduziu para 1087 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 93 passed; safe_marker_check ok; git diff --check clean; line_budget_snapshot aboveExtract=2. [rationale:anti-bloat]"
+    },
+    {
+      "id": "VER-BUD-1177",
+      "target": "TASK-BUD-825",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T14:19:17.774Z",
+      "evidence": "Extraído registerContextWatchdogStatusSurface/buildContextWatchdogApplyPreset para packages/pi-stack/extensions/context-watchdog-status-surface.ts; context-watchdog.ts caiu para 1357 linhas (<1400 acceptance) e line_budget_snapshot reduziu aboveExtract para 1. Validação focal: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts => 3 files/75 tests passed."
     }
   ]
 }

@@ -18460,6 +18460,87 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] colony-pilot.ts segue acima de extract em 1705 linhas; o bloco do comando /colony-pilot é coeso e já separado do tool-surface/shortcut.\n[provenance:human] source_task=none reason=Usuário fez reload e pediu continuar anti-bloat local-safe.\nConcluído: /colony-pilot movido para surface dedicada; line budget acima de extract caiu para 2.",
       "verification": "VER-BUD-1176"
+    },
+    {
+      "id": "TASK-BUD-825",
+      "description": "Extrair surface de status/comando do context-watchdog para módulo dedicado.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-status-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover tools de status/freshness/auto-resume preview e comando /context-watch para módulo dedicado",
+        "preservar comportamento dos eventos principais e payloads de status",
+        "reduzir context-watchdog.ts abaixo de 1400 linhas",
+        "validar smokes focais context-watchdog"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] context-watchdog.ts segue acima de extract em 1896 linhas; surface de status/comando é coesa para extração local-safe.\n[provenance:human] source_task=none reason=Usuário fez reload e pediu continuar anti-bloat local-safe.\nConcluído: surface de status/comando extraída; smokes focais context-watchdog passaram; line budget acima de extract caiu para 1.",
+      "verification": "VER-BUD-1177"
+    },
+    {
+      "id": "TASK-BUD-826",
+      "description": "Registrar e calibrar transição context-watch auto-compact/idle para evitar bater limite antes de parada graciosa.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-auto-compact.ts",
+        "packages/pi-stack/extensions/context-watchdog-policy.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "registrar evidência de sessão em que o agente continuou até compactação em vez de parar graciosamente para idle",
+        "avaliar thresholds/sinais que deveriam pedir parada antes do limite",
+        "propor ajuste sem abrir protected scope nem auto-dispatch",
+        "validar com teste/regressão focal antes de aplicar qualquer mudança"
+      ],
+      "milestone": "context-graceful-stop",
+      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata."
+    },
+    {
+      "id": "TASK-BUD-827",
+      "description": "Analisar supressão de auto-resume por reload pendente e melhorar evidência/operador sem tangente imediata.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-reload-intent.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "preservar evidência de sessão em que auto-resume foi suprimido por reload pendente e retomado após reload manual",
+        "avaliar se o cue ao operador está suficientemente claro e não bloqueia continuidade indevidamente",
+        "propor melhoria de UX/telemetria sem alterar política protected-scope",
+        "validar com smoke focal post-reload antes de qualquer fechamento"
+      ],
+      "milestone": "context-graceful-stop",
+      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente."
+    },
+    {
+      "id": "TASK-BUD-828",
+      "description": "Criar lane de limpeza/cohesão de UI para blocos de sessão vistos pelo operador.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions",
+        "packages/pi-stack/test/smoke",
+        "docs/guides/recommended-pi-stack.md"
+      ],
+      "acceptance_criteria": [
+        "inventariar superfícies que aparecem como blocos na sessão/TUI para o operador",
+        "classificar outputs crus demais, longos ou sem affordance de recolher/expandir",
+        "propor padrão coeso inspirado em superfícies recolhíveis/expansíveis como ctrl+o quando aplicável",
+        "definir critério para payload estruturado vs resumo humano sem vazar detalhes crus por padrão",
+        "validar uma primeira fatia local-safe sem alterar protected scope"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Usuário observou que, como escolhemos o que entra nos modelos e aparece como blocos da sessão no TUI, nada visível ao operador deveria ficar cru demais ou sem affordance de recolher/expandir; ctrl+o foi dado só como exemplo, com coesão esperada em todas as superfícies.\n[provenance:human] source_task=none reason=Pedido explícito do usuário para backlog antes de continuar trabalho atual."
     }
   ]
 }

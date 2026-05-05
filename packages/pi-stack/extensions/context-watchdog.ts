@@ -14,7 +14,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Type } from "@sinclair/typebox";
 import {
 	resolveContextThresholds,
 	type ContextThresholdOverrides,
@@ -88,8 +87,7 @@ import {
 	readDeferredLaneQueueCount,
 	readWatchdogConfig,
 } from "./context-watchdog-runtime-status";
-import { registerContextWatchdogContinuationSurface } from "./context-watchdog-continuation-surface";
-import { registerContextWatchdogCheckpointBootstrapSurface } from "./context-watchdog-checkpoint-bootstrap-surface";
+import { buildContextWatchdogApplyPreset, registerContextWatchdogStatusSurface } from "./context-watchdog-status-surface";
 import {
 	applyEmergencyContextWindowFallbackConfig,
 	composeAutoResumeSuppressionHint,
@@ -1252,171 +1250,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		}
 	};
 
-	const currentAutoCompactState = (
-		ctx: ExtensionContext,
-		assessment: ContextWatchAssessment,
-		deferCount = compactDeferCount,
-	) => {
-		const nowMs = Date.now();
-		const handoff = readHandoffJson(ctx.cwd);
-		const handoffTimestamp = typeof handoff.timestamp === "string" ? handoff.timestamp : undefined;
-		const autoResumeAfterReloadIntent = readAutoResumeAfterReloadIntent(handoff);
-		const handoffFreshness = resolveHandoffFreshness(handoffTimestamp, nowMs, config.handoffFreshMaxAgeMs);
-		const handoffFreshnessAgeSec = toAgeSec(handoffFreshness.ageMs);
-		const handoffLastEvent = latestContextWatchEvent(handoff);
-		const handoffLastEventAgeMs = contextWatchEventAgeMs(handoffLastEvent, nowMs);
-		const handoffLastEventAgeSec = toAgeSec(handoffLastEventAgeMs);
-		const refreshMode = handoffRefreshMode(handoffFreshness.label, config.autoResumeAfterCompact);
-		const handoffPrep = resolveHandoffPrepDecision(assessment, config, handoffFreshness.label);
-		const compactCheckpointPersistence = resolveCompactCheckpointPersistence({
-			enabled: config.autoResumeAfterCompact,
-			assessmentLevel: assessment.level,
-			handoffLastEventLevel: handoffLastEvent?.level,
-			handoffLastEventAgeMs,
-			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
-		});
-		const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
-			handoffLastEventLevel: handoffLastEvent?.level,
-			handoffLastEventAgeMs,
-			maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
-		});
-		const state = buildAutoCompactDiagnostics(assessment, config, {
-			nowMs,
-			lastAutoCompactAt,
-			inFlight: autoCompactInFlight,
-			isIdle: ctx.isIdle(),
-			hasPendingMessages: ctx.hasPendingMessages(),
-			checkpointEvidenceReady,
-		}, AUTO_COMPACT_RETRY_DELAY_MS);
-		const timeoutPressure = readTimeoutPressureState(nowMs);
-		const timeoutPressureGuard = resolveAutoCompactTimeoutPressureGuard({
-			assessmentLevel: assessment.level,
-			autoCompactTrigger: state.decision.trigger,
-			timeoutPressureActive: timeoutPressure.active,
-		});
-		const retryInMs = autoCompactRetryDueAt > 0 ? Math.max(0, autoCompactRetryDueAt - nowMs) : undefined;
-		const calmClose = resolvePreCompactCalmCloseSignal({
-			assessmentLevel: assessment.level,
-			decisionReason: state.decision.reason,
-			checkpointEvidenceReady,
-			deferCount,
-			deferThreshold: CALM_CLOSE_DEFER_THRESHOLD,
-		});
-		const autoCompactTriggerOrigin = resolveContextWatchAutoCompactTriggerOrigin({
-			assessmentLevel: assessment.level,
-			autoCompactTrigger: state.decision.trigger,
-		});
-		const progressPreservation = resolveProgressPreservationSignal({
-			assessmentLevel: assessment.level,
-			handoffFreshnessLabel: handoffFreshness.label,
-			checkpointEvidenceReady,
-			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
-			autoResumeEnabled: config.autoResumeAfterCompact,
-		});
-		const autoResumePromptDiagnostics = lastAutoResumeDecision?.promptDiagnostics;
-		const contextEconomy = resolveContextEconomySignal({
-			handoffBytes: JSON.stringify(handoff).length,
-			nextActionCount: Array.isArray(handoff.next_actions) ? handoff.next_actions.length : undefined,
-			autoResumeDroppedNextActions: autoResumePromptDiagnostics?.nextActions.droppedByLimitCount,
-			autoResumeGlobalTruncated: autoResumePromptDiagnostics?.globalTruncated,
-		});
-		const antiParalysisDispatch = resolveAntiParalysisDispatch({
-			triggered: calmClose.antiParalysisTriggered,
-			nowMs,
-			deferWindowStartedAtMs: compactDeferWindowStartedAt,
-			graceWindowMs: ANTI_PARALYSIS_GRACE_WINDOW_MS,
-			lastNotifyAtMs: lastAntiParalysisNotifyAt,
-			notifyCooldownMs: ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
-			notifiesInWindow: antiParalysisNotifyCountInWindow,
-			maxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
-		});
-		return {
-			...state,
-			retryScheduled: Boolean(autoCompactRetryTimer),
-			retryInMs,
-			autoResumeEnabled: config.autoResumeAfterCompact,
-			autoResumeCooldownMs: config.autoResumeCooldownMs,
-			autoResumeReady: shouldEmitAutoResumeAfterCompact(config, nowMs, lastAutoResumeAt),
-			autoResumeAfterReloadPending: Boolean(autoResumeAfterReloadIntent),
-			autoResumeAfterReloadIntent,
-			autoResumeLastDecision: lastAutoResumeDecision,
-			autoResumeLastDecisionReason: lastAutoResumeDecision?.reason ?? "none",
-			autoResumeLastDecisionSummary: lastAutoResumeDecision
-				? describeAutoResumeDispatchReason(lastAutoResumeDecision.reason)
-				: "none",
-			autoResumeLastDecisionHint: lastAutoResumeDecision?.hint
-				?? describeAutoResumeDispatchHint(lastAutoResumeDecision?.reason ?? "send"),
-			autoResumeLastPromptDiagnosticsSummary: summarizeAutoResumePromptDiagnostics(
-				lastAutoResumeDecision?.promptDiagnostics,
-			),
-			autoResumeLastDecisionAtIso: lastAutoResumeDecision?.atIso,
-			autoResumeLastDispatched: lastAutoResumeDecision?.dispatched ?? false,
-			autoResumeLastReloadRequired: lastAutoResumeDecision?.reloadRequired ?? false,
-			autoResumeLastCheckpointEvidenceReady: lastAutoResumeDecision?.checkpointEvidenceReady ?? true,
-			steeringLastSignal: lastSteeringSignal,
-			steeringLastSignalSummary: lastSteeringSignal
-				? `${lastSteeringSignal.reason} level=${lastSteeringSignal.level} action=${lastSteeringSignal.action} delivery=${lastSteeringSignal.delivery} at=${lastSteeringSignal.atIso}`
-				: "none",
-			handoffFreshMaxAgeMs: config.handoffFreshMaxAgeMs,
-			handoffTimestamp,
-			handoffFreshness,
-			handoffFreshnessAgeSec,
-			handoffAdvice: handoffFreshnessAdvice(handoffFreshness.label, config.autoResumeAfterCompact),
-			handoffRefreshMode: refreshMode,
-			handoffManualRefreshRequired: refreshMode === "manual",
-			handoffPrepRefreshOnTrigger: handoffPrep.refreshOnTrigger,
-			handoffPrepReason: handoffPrep.reason,
-			handoffLastEvent: handoffLastEvent ?? null,
-			handoffLastEventSummary: summarizeContextWatchEvent(handoffLastEvent),
-			handoffLastEventAgeMs,
-			handoffLastEventAgeSec,
-			progressPreservation,
-			progressPreservationSummary: summarizeProgressPreservationSignal(progressPreservation),
-			contextEconomy,
-			contextEconomySummary: summarizeContextEconomySignal(contextEconomy),
-			calmCloseReady: calmClose.calmCloseReady,
-			checkpointEvidenceReady: calmClose.checkpointEvidenceReady,
-			autoCompactTriggerOrigin,
-			autoCompactCheckpointWindowEligible: assessment.level === "checkpoint",
-			autoCompactCandidateOrigin: assessment.level === "checkpoint"
-				? "checkpoint-window"
-				: assessment.level === "compact"
-					? "hard-compact"
-					: "none",
-			deferCount: calmClose.deferCount,
-			deferThreshold: calmClose.deferThreshold,
-			antiParalysisTriggered: calmClose.antiParalysisTriggered,
-			antiParalysisDispatchReason: antiParalysisDispatch.reason,
-			antiParalysisGraceRemainingMs: antiParalysisDispatch.graceRemainingMs,
-			antiParalysisCooldownRemainingMs: antiParalysisDispatch.cooldownRemainingMs,
-			antiParalysisNotifyCountInWindow,
-			antiParalysisMaxNotifiesPerWindow: ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
-			calmCloseRecommendation: calmClose.recommendation,
-			compactCheckpointPersistRecommended: compactCheckpointPersistence.shouldPersist,
-			compactCheckpointPersistReason: compactCheckpointPersistence.reason,
-			timeoutPressure,
-			timeoutPressureGuard,
-		};
-	};
-
-	const applyPreset = (ctx: ExtensionContext, presetInput?: unknown) => {
-		const merged = applyContextWatchBootstrapToSettings(
-			readProjectSettings(ctx.cwd),
-			presetInput,
-		);
-		const settingsPath = writeProjectSettings(ctx.cwd, merged.settings);
-		const piStack = (merged.settings.piStack as Record<string, unknown> | undefined) ?? {};
-		config = normalizeContextWatchdogConfig(piStack.contextWatchdog);
-		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
-		run(ctx, "message_end");
-		return {
-			preset: merged.preset,
-			settingsPath,
-			patch: merged.plan.patch,
-			notes: merged.plan.notes,
-		};
-	};
-
 	pi.on("session_start", (_event, ctx) => {
 		config = readWatchdogConfig(ctx.cwd);
 		thresholdOverrides = readContextThresholdOverrides(ctx.cwd);
@@ -1460,437 +1293,68 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		run(ctx, "message_end");
 	});
 
-	pi.registerTool({
-		name: "context_watch_status",
-		label: "Context Watch Status",
-		description:
-			"Non-blocking context-window advisory (warn/checkpoint/compact) with model-aware thresholds.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const assessment = buildAssessment(ctx, config, thresholdOverrides);
-			lastAssessment = assessment;
-			const autoCompact = currentAutoCompactState(ctx, assessment);
-			const nowMs = Date.now();
-			const reloadRequired = isReloadRequiredForSourceUpdate();
-			const preCompactReloadSignal = resolvePreCompactReloadSignal({
-				assessmentLevel: assessment.level,
-				reloadRequired,
-			});
-			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired,
-				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
-				signalNoiseExcessive: resolveContextWatchSignalNoiseExcessive(
-					getAnnouncementsInWindow(nowMs),
-					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				),
-				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
-				timeoutPressureActive: autoCompact.timeoutPressure?.active === true
-					&& (assessment.level === "checkpoint" || assessment.level === "compact"),
-			});
-			const deterministicStop = resolveContextWatchDeterministicStopSignal({
-				assessmentLevel: assessment.level,
-				operatorSignal,
-				autoCompactDecision: autoCompact.decision.reason,
-			});
-			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
-			const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });
-			const operatingCadence = resolveContextWatchOperatingCadence({
-				assessmentLevel: assessment.level,
-				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
-			});
-			const compactStage = resolveContextWatchCompactStage(assessment);
-			const signalNoise = {
-				windowMs: SIGNAL_NOISE_WINDOW_MS,
-				announcementsInWindow: getAnnouncementsInWindow(nowMs),
-				maxAnnouncementsPerWindow: SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				finalTurnSuppressionsInWindow: getFinalTurnSuppressionsInWindow(nowMs),
-				excessive: resolveContextWatchSignalNoiseExcessive(
-					getAnnouncementsInWindow(nowMs),
-					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				),
-			};
-			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
-			const handoffFreshThresholdSec = Math.max(60, Math.floor(autoCompact.handoffFreshMaxAgeMs / 1000));
-			const handoffForOperatorBrief = readHandoffJson(ctx.cwd);
-			const operatorBrief = buildContextWatchOperatorBrief({
-				cwd: ctx.cwd,
-				handoff: handoffForOperatorBrief,
-				operatorActionKind: operatorAction.kind,
-				deterministicStopReason: deterministicStop.reason,
-				timeoutPressureActive: autoCompact.timeoutPressure?.active === true,
-				timeoutPressureCount: autoCompact.timeoutPressure?.count,
-				timeoutPressureThreshold: autoCompact.timeoutPressure?.threshold,
-			});
-			const timeoutPressureSummary = formatTimeoutPressureSummary(autoCompact.timeoutPressure);
-			const reloadGate = preCompactReloadSignal.reason;
-			const fullSummary = formatContextWatchStatusToolSummary({
-				level: assessment.level,
-				percent: assessment.percent,
-				action: assessment.action,
-				autoCompactDecision: autoCompact.decision.reason,
-				operatorActionKind: operatorAction.kind,
-				operatingCadence: operatingCadence.operatingCadence,
-				handoffFreshness: autoCompact.handoffFreshness.label,
-				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
-				handoffFreshThresholdSec,
-				reloadGate,
-				timeoutPressureSummary,
-				postReloadResume: autoCompact.autoResumeAfterReloadPending ? "pending" : undefined,
-			});
-			const adaptiveSummary = resolveContextWatchAdaptiveStatusSummary({
-				level: assessment.level,
-				summary: fullSummary,
-				nowMs,
-				lastLevel: lastStatusToolLevel,
-				lastEmittedAtMs: lastStatusToolAt,
-				cooldownMs: config.cooldownMs,
-			});
-			lastStatusToolLevel = assessment.level;
-			lastStatusToolAt = nowMs;
-			const payload = {
-				...assessment,
-				summary: adaptiveSummary.summary,
-				fullSummary,
-				handoffAgeSec: autoCompact.handoffFreshnessAgeSec,
-				handoffFreshThresholdSec,
-				reloadGate,
-				timeoutPressureSummary,
-				outputShape: {
-					mode: adaptiveSummary.mode,
-					cooldownMs: config.cooldownMs,
-					cooldownRemainingSec: adaptiveSummary.cooldownRemainingSec,
-				},
-				steeringStatus: formatContextWatchSteeringStatus(assessment),
-				autoCompact,
-				operatorSignal,
-				deterministicStop,
-				deterministicStopHint,
-				operatorAction,
-				operatorBrief,
-				operatingCadence,
-				compactStage,
-				signalNoise,
-				preCompactReloadSignal,
-				dirtySignal: freshness.dirtySignal,
-				preloadDecision: freshness.preloadDecision,
-				gitDirty: freshness.gitDirty,
-				preload: freshness.preload,
-			};
-			return {
-				content: [{ type: "text", text: adaptiveSummary.summary }],
-				details: payload,
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "context_watch_compact_stage_status",
-		label: "Context Watch Compact Stage Status",
-		description:
-			"Read-only compact-stage status with graceful-vs-force stage, reload gate, and deterministic next action.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const assessment = buildAssessment(ctx, config, thresholdOverrides);
-			lastAssessment = assessment;
-			const nowMs = Date.now();
-			const autoCompact = currentAutoCompactState(ctx, assessment);
-			const compactStage = resolveContextWatchCompactStage(assessment);
-			const signalNoise = {
-				windowMs: SIGNAL_NOISE_WINDOW_MS,
-				announcementsInWindow: getAnnouncementsInWindow(nowMs),
-				maxAnnouncementsPerWindow: SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				finalTurnSuppressionsInWindow: getFinalTurnSuppressionsInWindow(nowMs),
-				excessive: resolveContextWatchSignalNoiseExcessive(
-					getAnnouncementsInWindow(nowMs),
-					SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-				),
-			};
-			const reloadRequired = isReloadRequiredForSourceUpdate();
-			const preCompactReloadSignal = resolvePreCompactReloadSignal({
-				assessmentLevel: assessment.level,
-				reloadRequired,
-			});
-			const nextAction = preCompactReloadSignal.active
-				? (preCompactReloadSignal.hint ?? "run /reload and continue from handoff checkpoint")
-				: compactStage.shouldForceCompact
-					? "compact now and continue from checkpoint"
-					: compactStage.shouldGracefulStop
-						? "close current slice and checkpoint before compact threshold"
-						: "continue bounded work";
-			const summary = formatContextWatchCompactStageStatusSummary({
-				stage: compactStage.stage,
-				level: assessment.level,
-				checkpointPct: assessment.thresholds.checkpointPct,
-				compactPct: assessment.thresholds.compactPct,
-				reloadGate: preCompactReloadSignal.reason,
-				nextAction,
-			});
-			return {
-				content: [{ type: "text", text: summary }],
-				details: {
-					summary,
-					level: assessment.level,
-					percent: assessment.percent,
-					thresholds: assessment.thresholds,
-					compactStage,
-					autoCompactTelemetry: {
-						decision: autoCompact.decision.reason,
-						trigger: autoCompact.decision.trigger,
-						triggerOrigin: autoCompact.autoCompactTriggerOrigin,
-						candidateOrigin: autoCompact.autoCompactCandidateOrigin,
-						checkpointWindowEligible: autoCompact.autoCompactCheckpointWindowEligible,
-						checkpointEvidenceReady: autoCompact.checkpointEvidenceReady,
-					},
-					signalNoise,
-					preCompactReloadSignal,
-					nextAction,
-					effect: "none",
-					mode: "read-only-compact-stage",
-					authorization: "none",
-					dispatchAllowed: false,
-				},
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "context_watch_freshness_status",
-		label: "Context Watch Freshness Status",
-		description:
-			"Read-only freshness snapshot with preload decision and git dirty signal in one call.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
-			const summary = [
-				"context-watch-freshness-status:",
-				`preload=${freshness.preloadDecision}`,
-				`dirty=${freshness.dirtySignal}`,
-				"authorization=none",
-			].join(" ");
-			return {
-				content: [{ type: "text", text: summary }],
-				details: {
-					summary,
-					preloadDecision: freshness.preloadDecision,
-					dirtySignal: freshness.dirtySignal,
-					preload: freshness.preload,
-					gitDirty: freshness.gitDirty,
-					effect: "none",
-					mode: "read-only-freshness",
-					authorization: "none",
-					dispatchAllowed: false,
-				},
-			};
-		},
-	});
-
-	pi.registerTool({
-		name: "context_watch_auto_resume_preview",
-		label: "Context Watch Auto-Resume Preview",
-		description:
-			"Read-only preview of the auto-resume prompt from .project/handoff.json and .project/tasks.json. Never dispatches resume, compact, scheduler, remote, or automation.",
-		parameters: Type.Object({}),
-		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
-			const envelope = buildAutoResumePromptEnvelopeFromHandoff(
-				readHandoffJson(ctx.cwd),
-				config.handoffFreshMaxAgeMs,
-				Date.now(),
-				{ taskStatusById: readProjectTaskStatusById(ctx.cwd), preferredTaskIds: readProjectPreferredActiveTaskIds(ctx.cwd, 1) },
-			);
-			const diagnosticsSummary = summarizeAutoResumePromptDiagnostics(envelope.diagnostics);
-			const focusTaskIds = Array.isArray(envelope.diagnostics.focusTasksListed)
-				? envelope.diagnostics.focusTasksListed
-				: [];
-			const focusTasks = focusTaskIds.length > 0
-				? focusTaskIds.join(", ")
-				: extractAutoResumePromptValue(envelope.prompt, "focusTasks", "none-listed");
-			const focusMnemonics = summarizeFocusMnemonicsForPreview(
-				focusTaskIds.map((taskId) => (
-					toOperatorTaskMnemonic(taskId, readProjectTaskDescriptionById(ctx.cwd, taskId)) ?? taskId
-				)),
-			);
-			const staleFocus = extractAutoResumePromptValue(envelope.prompt, "staleFocus", "none");
-			const staleFocusCount = envelope.diagnostics.staleFocusTasks?.length ?? 0;
-			const reloadRequired = isReloadRequiredForSourceUpdate();
-			const reloadHint = reloadRequired ? formatAutoResumeReloadHintShort() : undefined;
-			const summary = formatContextWatchAutoResumePreviewSummary({
-				focusTasks,
-				focusMnemonics,
-				staleFocusCount,
-				diagnosticsSummary,
-				reloadGate: reloadRequired ? "required" : "clear",
-				reloadHint,
-			});
-			return {
-				content: [{ type: "text", text: summary }],
-				details: {
-					summary,
-					prompt: envelope.prompt,
-					focusTasks,
-					focusMnemonics,
-					staleFocus,
-					diagnostics: envelope.diagnostics,
-					diagnosticsSummary,
-					reloadGate: {
-						reloadRequired,
-						reason: reloadRequired ? "reload-required" : "clear",
-						hint: reloadHint,
-					},
-					effect: "none",
-					mode: "read-only-preview",
-					authorization: "none",
-				},
-			};
-		},
-	});
-
-	registerContextWatchdogContinuationSurface(pi, {
+	const statusRuntime = {
 		getConfig: () => config,
-	});
-
-	registerContextWatchdogCheckpointBootstrapSurface(pi, {
+		setConfig: (next: ContextWatchdogConfig) => { config = next; },
+		getThresholdOverrides: () => thresholdOverrides,
+		setThresholdOverrides: (next: ContextThresholdOverrides | undefined) => { thresholdOverrides = next; },
+		readContextThresholdOverrides,
+		buildAssessment: (ctx: ExtensionContext) => buildAssessment(ctx, config, thresholdOverrides),
+		run,
+		readTimeoutPressureState,
 		isReloadRequiredForSourceUpdate,
-		applyPreset,
-	});
-
-	pi.registerCommand("context-watch", {
-		description: "Show/reset status, show freshness, print bootstrap patch, or apply preset. Usage: /context-watch [status|freshness|reset|bootstrap [control-plane|agent-worker]|apply [control-plane|agent-worker]]",
-		handler: async (args, ctx) => {
-			const tokens = String(args ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean);
-			const sub = tokens[0] ?? "status";
-			if (sub === "reset") {
-				lastAssessment = null;
-				lastAnnouncedLevel = null;
-				lastAnnouncedAt = 0;
-				lastAutoCheckpointAt = 0;
-				lastAutoCompactAt = 0;
-				lastAutoResumeAt = 0;
-				lastAutoResumeDecision = null;
-				lastSteeringSignal = null;
-				lastStatusToolLevel = undefined;
-				lastStatusToolAt = 0;
-				autoCompactInFlight = false;
-				clearAutoCompactRetryTimer();
-				consecutiveWarnCount = 0;
-				compactDeferCount = 0;
-				compactDeferWindowStartedAt = 0;
-				antiParalysisNotifyCountInWindow = 0;
-				lastAntiParalysisNotifyAt = 0;
-				lastPreCompactPrepNotifyAt = 0;
-				announceWindowStartAt = 0;
-				announceCountInWindow = 0;
-				finalTurnSuppressionCountInWindow = 0;
-				lastDeterministicStopSignalAt = 0;
-				timeoutPressureWindowStartedAt = 0;
-				timeoutPressureCount = 0;
-				timeoutPressureLastSeenAt = 0;
-				timeoutPressureLastMessage = "";
-				ctx.ui.setStatus?.("context-watch-steering", "[ctx-steer] reset");
-				ctx.ui.setStatus?.("context-watch-operator", "[ctx-op] reset");
-				ctx.ui.notify("context-watch: state reset", "info");
-				return;
-			}
-
-			if (sub === "freshness") {
-				const freshness = readContextWatchFreshnessSignals(ctx.cwd, "control-plane-core");
-				ctx.ui.notify(
-					[
-						"context-watch freshness:",
-						`preload=${freshness.preloadDecision}`,
-						`dirty=${freshness.dirtySignal}`,
-						`rows=${freshness.gitDirty.rowCount}`,
-						`authorization=none`,
-					].join("\n"),
-					"info",
-				);
-				return;
-			}
-
-			if (sub === "bootstrap") {
-				const plan = buildContextWatchBootstrapPlan(tokens[1]);
-				ctx.ui.notify(
-					[
-						`context-watch bootstrap (${plan.preset})`,
-						JSON.stringify(plan.patch, null, 2),
-						...plan.notes.map((n) => `- ${n}`),
-					].join("\n"),
-					"info",
-				);
-				return;
-			}
-
-			if (sub === "apply") {
-				const applied = applyPreset(ctx, tokens[1]);
-				ctx.ui.notify(
-					[
-						`context-watch preset applied (${applied.preset})`,
-						`settings: ${applied.settingsPath}`,
-						"effective now for context-watchdog (no /reload required).",
-						...applied.notes.map((n) => `- ${n}`),
-					].join("\n"),
-					"info",
-				);
-				return;
-			}
-
-			const assessment = buildAssessment(ctx, config, thresholdOverrides);
-			lastAssessment = assessment;
-			const autoCompact = currentAutoCompactState(ctx, assessment);
-			const nowMs = Date.now();
-			const reloadRequired = isReloadRequiredForSourceUpdate();
-			const preCompactReloadSignal = resolvePreCompactReloadSignal({
-				assessmentLevel: assessment.level,
-				reloadRequired,
-			});
-			const announcementsInWindow = getAnnouncementsInWindow(nowMs);
-			const finalTurnSuppressionsInWindow = getFinalTurnSuppressionsInWindow(nowMs);
-			const signalNoiseExcessive = resolveContextWatchSignalNoiseExcessive(
-				announcementsInWindow,
-				SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
-			);
-			const operatorSignal = resolveContextWatchOperatorSignal({
-				reloadRequired,
-				handoffManualRefreshRequired: autoCompact.handoffManualRefreshRequired,
-				signalNoiseExcessive,
-				compactCheckpointPersistRequired: autoCompact.compactCheckpointPersistRecommended,
-				timeoutPressureActive: autoCompact.timeoutPressure?.active === true
-					&& (assessment.level === "checkpoint" || assessment.level === "compact"),
-			});
-			const deterministicStop = resolveContextWatchDeterministicStopSignal({
-				assessmentLevel: assessment.level,
-				operatorSignal,
-				autoCompactDecision: autoCompact.decision.reason,
-			});
-			const deterministicStopHint = describeContextWatchDeterministicStopHint(deterministicStop);
-			const operatorAction = resolveContextWatchOperatorActionPlan({ deterministicStop, operatorSignal });
-			const operatingCadence = resolveContextWatchOperatingCadence({
-				assessmentLevel: assessment.level,
-				handoffLastEventLevel: autoCompact.handoffLastEvent?.level,
-			});
-			ctx.ui.notify(
-				[
-					formatContextWatchCommandStatusSummary({
-						level: assessment.level,
-						percent: assessment.percent,
-						action: assessment.action,
-						autoCompactDecision: autoCompact.decision.reason,
-						autoCompactTrigger: autoCompact.decision.trigger,
-						autoCompactTriggerOrigin: autoCompact.autoCompactTriggerOrigin,
-						retryScheduled: autoCompact.retryScheduled,
-						calmCloseReady: autoCompact.calmCloseReady,
-						checkpointEvidenceReady: autoCompact.checkpointEvidenceReady,
-						operatorActionKind: operatorAction.kind,
-						handoffFreshness: autoCompact.handoffFreshness.label,
-					}),
-					`recommendation=${assessment.recommendation}`,
-					preCompactReloadSignal.active
-						? `reloadGate=${preCompactReloadSignal.reason} hint=${(preCompactReloadSignal.hint ?? "run_/reload").replace(/\s+/g, "_")}`
-						: `reloadGate=${preCompactReloadSignal.reason}`,
-					`noise=${announcementsInWindow}/${SIGNAL_NOISE_MAX_ANNOUNCEMENTS} suppressed=${finalTurnSuppressionsInWindow}${signalNoiseExcessive ? " excessive=yes" : " excessive=no"}`,
-					"details=context_watch_status structured payload",
-				].join("\n"),
-				assessment.severity,
-			);
+		clearAutoCompactRetryTimer,
+		setLastAssessment: (assessment: ContextWatchAssessment | null) => { lastAssessment = assessment; },
+		getLastAutoCompactAt: () => lastAutoCompactAt,
+		getAutoCompactInFlight: () => autoCompactInFlight,
+		getAutoCompactRetryDueAt: () => autoCompactRetryDueAt,
+		hasAutoCompactRetryTimer: () => Boolean(autoCompactRetryTimer),
+		getLastAutoResumeDecision: () => lastAutoResumeDecision,
+		getLastAutoResumeAt: () => lastAutoResumeAt,
+		getLastSteeringSignal: () => lastSteeringSignal,
+		getCompactDeferCount: () => compactDeferCount,
+		getCompactDeferWindowStartedAt: () => compactDeferWindowStartedAt,
+		getLastAntiParalysisNotifyAt: () => lastAntiParalysisNotifyAt,
+		getAntiParalysisNotifyCountInWindow: () => antiParalysisNotifyCountInWindow,
+		getAnnouncementsInWindow,
+		getFinalTurnSuppressionsInWindow,
+		resetState: (ctx: ExtensionContext) => {
+			lastAssessment = null;
+			lastAnnouncedLevel = null;
+			lastAnnouncedAt = 0;
+			lastAutoCheckpointAt = 0;
+			lastAutoCompactAt = 0;
+			lastAutoResumeAt = 0;
+			lastAutoResumeDecision = null;
+			lastSteeringSignal = null;
+			autoCompactInFlight = false;
+			clearAutoCompactRetryTimer();
+			consecutiveWarnCount = 0;
+			compactDeferCount = 0;
+			compactDeferWindowStartedAt = 0;
+			antiParalysisNotifyCountInWindow = 0;
+			lastAntiParalysisNotifyAt = 0;
+			lastPreCompactPrepNotifyAt = 0;
+			announceWindowStartAt = 0;
+			announceCountInWindow = 0;
+			finalTurnSuppressionCountInWindow = 0;
+			lastDeterministicStopSignalAt = 0;
+			timeoutPressureWindowStartedAt = 0;
+			timeoutPressureCount = 0;
+			timeoutPressureLastSeenAt = 0;
+			timeoutPressureLastMessage = "";
 		},
-	});
+		applyPreset: (ctx: ExtensionContext, presetInput?: unknown) => buildContextWatchdogApplyPreset(statusRuntime, ctx, presetInput),
+		constants: {
+			AUTO_COMPACT_RETRY_DELAY_MS,
+			SIGNAL_NOISE_WINDOW_MS,
+			SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+			FINAL_TURN_CLOSE_HEADROOM_PCT,
+			CALM_CLOSE_DEFER_THRESHOLD,
+			ANTI_PARALYSIS_GRACE_WINDOW_MS,
+			ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
+			ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
+		},
+	};
+	registerContextWatchdogStatusSurface(pi, statusRuntime);
 }
