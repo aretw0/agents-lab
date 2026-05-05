@@ -12507,6 +12507,15 @@
       "method": "test",
       "timestamp": "2026-05-05T03:42:33.248Z",
       "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts => 6 files passed, 103 tests passed. Extracted quota-visibility model/parsers/budget helpers to quota-visibility-model.ts. [rationale:refactor] Reduces quota-visibility.ts from 2678 to 1470 lines while preserving public re-exports and related consumers."
+    },
+    {
+      "id": "VER-BUD-1143",
+      "target": "TASK-BUD-791",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T03:45:14.765Z",
+      "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts => 6 files passed, 103 tests passed. Extracted quota visibility formatting/route advisory helpers to quota-visibility-formatting.ts. [rationale:refactor] quota-visibility.ts reduced to 1209 lines, below extract threshold; public buildRouteAdvisory remains re-exported."
     }
   ]
 }

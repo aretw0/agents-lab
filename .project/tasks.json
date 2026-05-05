@@ -17765,6 +17765,25 @@
       "milestone": "anti-bloat",
       "notes": "[rationale:refactor] Fatia local-safe pós-reload para reduzir superfície crítica de quota-visibility.ts por extração coesa de modelo/parsers; sem tocar escopo protegido.\n[provenance:human] source_task=TASK-BUD-789 reason=Continuação local-safe anti-bloat após reload e conclusão da extração anterior.\nClosed via VER-BUD-1142: quota visibility model/parsers/budget helpers extracted; related smoke pack passed (103 tests). [rationale:refactor] Public exports preserved through quota-visibility.ts re-exports.",
       "verification": "VER-BUD-1142"
+    },
+    {
+      "id": "TASK-BUD-791",
+      "description": "Extrair formatadores/route advisory de quota-visibility para módulo coeso, reduzindo quota-visibility.ts abaixo do limiar extract com reexports públicos preservados.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/quota-visibility-formatting.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "buildRouteAdvisory e formatadores continuam disponíveis para quota-visibility.ts e comandos/tools existentes",
+        "quota-visibility.ts fica abaixo do limiar extract de 1400 linhas",
+        "smoke focal e consumidores quota relacionados continuam verdes"
+      ],
+      "milestone": "anti-bloat",
+      "notes": "[rationale:refactor] Segunda fatia local-safe de quota-visibility para retirar formatação/route advisory da superfície principal sem mudança de contrato.\n[provenance:human] source_task=TASK-BUD-790 reason=Continuação anti-bloat local-safe para baixar quota-visibility.ts abaixo de extract após extração do modelo.\nClosed via VER-BUD-1143: quota formatting/route advisory extracted; related quota smoke pack passed (103 tests). [rationale:refactor] quota-visibility.ts now 1209 lines, below extract threshold.",
+      "verification": "VER-BUD-1143"
     }
   ]
 }
