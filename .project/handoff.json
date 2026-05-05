@@ -1,48 +1,48 @@
 {
-  "timestamp": "2026-05-05T21:35:23.917Z",
-  "context": "Second bounded TASK-BUD-837 anti-bloat slice complete. Extracted post-reload auto-resume runtime handling into packages/pi-stack/extensions/c [snip] eds ~182 lines reduced to reach <=1000. [truncated:+386 chars]",
+  "timestamp": "2026-05-05T21:39:06.987Z",
+  "context": "TASK-BUD-837 completed. Final anti-bloat slice extracted auto-compact completion/error runtime into packages/pi-stack/extensions/context-watc [snip] elected by autonomy lane: TASK-BUD-827. [truncated:+421 chars]",
   "current_tasks": [
-    "TASK-BUD-837"
+    "TASK-BUD-827"
   ],
   "next_actions": [
-    "Commit TASK-BUD-837 post-reload runtime extraction and board/handoff updates.",
-    "Continue with one more bounded extraction to remove ~182 lines; candidate: auto-compact onComp [snip] ring payload construction. [truncated:+45 chars]",
-    "Keep focal gate: context-watchdog.test.ts + storage/continuation smokes."
+    "Commit final TASK-BUD-837 auto-compact runtime extraction and board/handoff updates.",
+    "Start TASK-BUD-827 with a bounded local-safe slice after commit.",
+    "Keep reload batching: source changes likely require /reload later, but reloadGate is not requiring immediate reload."
   ],
   "blockers": [
-    "TASK-BUD-837 not yet <=1000; context-watchdog.ts currently 1182 lines.",
-    "Avoid broad public export rewrites unless explicitly scoped as separate validated slice."
+    "Runtime reload still needed later to adopt new context-watchdog source in live [snip] ve regression appears. [truncated:+57 chars]"
   ],
   "recent_validation": [
-    "wc -l context-watchdog.ts context-watchdog-post-reload-runtime.ts context-watchdog-runtime-state.ts -> 1182 + 201 + 132",
+    "wc -l packages/pi-stack/extensions/context-watchdog.ts -> 998",
     "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] ation.test.ts -> 75 passed [truncated:+93 chars]",
-    "VER-BUD-1203 appended"
+    "line_budget_snapshot -> recommendation=watch aboveExtract=0 aboveCritical=0"
   ],
   "recent_commits": [
-    "ffb3794e refactor(context-watch): extract runtime state",
-    "6996673e chore(handoff): record context watchdog rollback"
+    "a487a70c refactor(context-watch): extract post reload runtime",
+    "ffb3794e refactor(context-watch): extract runtime state"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-837",
+    "focus": "TASK-BUD-827",
     "canonical_links": [
+      "task:TASK-BUD-827",
       "task:TASK-BUD-837",
-      "verification:VER-BUD-1203",
-      "commit:ffb3794e"
+      "verification:VER-BUD-1204",
+      "commit:a487a70c"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T21:35:23.917Z",
+    "generatedAtIso": "2026-05-05T21:39:06.987Z",
     "level": "ok",
-    "percent": 27,
+    "percent": 31,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T21:35:23.917Z",
+      "atIso": "2026-05-05T21:39:06.987Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 27,
+      "percent": 31,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

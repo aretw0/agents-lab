@@ -14,29 +14,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import {
-	resolveContextThresholds,
-	type ContextThresholdOverrides,
-} from "./custom-footer";
-import {
-	buildAutoCompactDiagnostics,
-	resolveAutoCompactCheckpointGate,
-	resolveAutoCompactEffectiveIdle,
-	resolveAutoCompactRetryDelayMs,
-	isAutoCompactDeferralReason,
-	shouldScheduleAutoCompactRetry,
-	shouldTriggerAutoCompact,
-	type ContextWatchAutoCompactDecision,
-	type ContextWatchAutoCompactDiagnostics,
-	type ContextWatchAutoCompactIdleState,
-} from "./context-watchdog-auto-compact";
-import {
-	DEFAULT_CONTEXT_WATCHDOG_CONFIG,
-	deriveContextWatchThresholds,
-	normalizeContextWatchdogConfig,
-	type ContextWatchdogConfig,
-	type ContextWatchThresholds,
-} from "./context-watchdog-config";
+import { resolveContextThresholds, type ContextThresholdOverrides } from "./custom-footer";
+import { buildAutoCompactDiagnostics, resolveAutoCompactCheckpointGate, resolveAutoCompactEffectiveIdle, resolveAutoCompactRetryDelayMs, isAutoCompactDeferralReason, shouldScheduleAutoCompactRetry, shouldTriggerAutoCompact, type ContextWatchAutoCompactDecision, type ContextWatchAutoCompactDiagnostics, type ContextWatchAutoCompactIdleState } from "./context-watchdog-auto-compact";
+import { DEFAULT_CONTEXT_WATCHDOG_CONFIG, deriveContextWatchThresholds, normalizeContextWatchdogConfig, type ContextWatchdogConfig, type ContextWatchThresholds } from "./context-watchdog-config";
 import {
 	applyContextWatchBootstrapToSettings,
 	buildContextWatchBootstrapPlan,
@@ -92,6 +72,10 @@ import {
 	createContextWatchAnnouncementWindow,
 	createContextWatchTimeoutPressure,
 } from "./context-watchdog-runtime-state";
+import {
+	handleAutoCompactComplete,
+	handleAutoCompactError,
+} from "./context-watchdog-auto-compact-runtime";
 import { handlePostReloadAutoResume } from "./context-watchdog-post-reload-runtime";
 import { buildContextWatchdogApplyPreset, registerContextWatchdogStatusSurface } from "./context-watchdog-status-surface";
 import {
@@ -748,201 +732,33 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			ctx.compact({
 				onComplete: () => {
 					autoCompactInFlight = false;
-					ctx.ui.notify("context-watch: auto compact completed", "info");
-					const nowAfterCompact = Date.now();
-					const hasPendingMessages = ctx.hasPendingMessages();
-					const hasRecentSteerInput = lastInputAt > lastAutoCompactTriggerAt;
-					const queuedLaneIntents = readDeferredLaneQueueCount(ctx.cwd);
-					let handoffAfterCompact = readHandoffJson(ctx.cwd);
-					const handoffEventAfterCompact = latestContextWatchEvent(handoffAfterCompact);
-					const handoffEventAgeAfterCompact = contextWatchEventAgeMs(handoffEventAfterCompact, nowAfterCompact);
-					const checkpointEvidenceReady = resolveCheckpointEvidenceReadyForCalmClose({
-						handoffLastEventLevel: handoffEventAfterCompact?.level,
-						handoffLastEventAgeMs: handoffEventAgeAfterCompact,
-						maxCheckpointAgeMs: config.handoffFreshMaxAgeMs,
+					const complete = handleAutoCompactComplete({
+						pi,
+						ctx,
+						config,
+						lastAutoResumeAt,
+						lastInputAt,
+						lastAutoCompactTriggerAt,
+						readTimeoutPressureState,
+						isReloadRequiredForSourceUpdate,
 					});
-					const taskStatusById = readProjectTaskStatusById(ctx.cwd);
-					const preferredTaskIds = readProjectPreferredActiveTaskIds(ctx.cwd, 3);
-					let handoffBoardReconciliation = resolveHandoffBoardReconciliation({
-						handoff: handoffAfterCompact,
-						taskStatusById,
-						nowMs: nowAfterCompact,
-						maxFreshAgeMs: config.handoffFreshMaxAgeMs,
-					});
-					if (!handoffBoardReconciliation.ok) {
-						const reconcile = reconcileAutoResumeHandoffFocus({
-							handoff: handoffAfterCompact,
-							taskStatusById,
-							preferredTaskIds,
-							maxTasks: 3,
-						});
-						if (reconcile.changed) {
-							handoffAfterCompact = {
-								...handoffAfterCompact,
-								timestamp: new Date(nowAfterCompact).toISOString(),
-								current_tasks: reconcile.nextFocus,
-							};
-							writeHandoffJson(ctx.cwd, handoffAfterCompact);
-							handoffBoardReconciliation = resolveHandoffBoardReconciliation({
-								handoff: handoffAfterCompact,
-								taskStatusById,
-								nowMs: nowAfterCompact,
-								maxFreshAgeMs: config.handoffFreshMaxAgeMs,
-							});
-							(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-								"context-watchdog.auto-resume-handoff-reconciled",
-								{
-									atIso: new Date(nowAfterCompact).toISOString(),
-									reason: reconcile.reason,
-									previousFocus: reconcile.previousFocus,
-									nextFocus: reconcile.nextFocus,
-									droppedFocus: reconcile.droppedFocus,
-									handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
-								},
-							);
-							if (config.notify) {
-								ctx.ui.notify(
-									`context-watch: handoff focus reconciled before auto-resume (${reconcile.reason})`,
-									"info",
-								);
-							}
-						}
+					if (complete.lastAutoResumeAt !== undefined) {
+						lastAutoResumeAt = complete.lastAutoResumeAt;
 					}
-					const timeoutPressureAfterCompact = readTimeoutPressureState(nowAfterCompact);
-					const autoResumeReady = shouldEmitAutoResumeAfterCompact(config, nowAfterCompact, lastAutoResumeAt);
-					const reloadRequired = isReloadRequiredForSourceUpdate();
-					const autoResumeDecision = resolveAutoResumeDispatchDecision({
-						autoResumeReady,
-						reloadRequired,
-						checkpointEvidenceReady,
-						handoffBoardReconciled: handoffBoardReconciliation.ok,
-						hasPendingMessages,
-						hasRecentSteerInput,
-						queuedLaneIntents,
-					});
-					const autoResumeSnapshot: AutoResumeDecisionSnapshot & {
-						promptDiagnostics?: AutoResumePromptDiagnostics;
-					} = buildAutoResumeDecisionSnapshot({
-						nowMs: nowAfterCompact,
-						decision: autoResumeDecision,
-						reloadRequired,
-						checkpointEvidenceReady,
-						handoffBoardReconciled: handoffBoardReconciliation.ok,
-						handoffBoardReconciliationSummary: handoffBoardReconciliation.summary,
-						hasPendingMessages,
-						hasRecentSteerInput,
-						queuedLaneIntents,
-						timeoutPressureActive: timeoutPressureAfterCompact.active,
-						timeoutPressureCount: timeoutPressureAfterCompact.count,
-						timeoutPressureThreshold: timeoutPressureAfterCompact.threshold,
-					});
-					if (autoResumeDecision.shouldDispatch) {
-						lastAutoResumeAt = nowAfterCompact;
-						handoffAfterCompact = clearAutoResumeAfterReloadIntent(handoffAfterCompact);
-						writeHandoffJson(ctx.cwd, handoffAfterCompact);
-						const resumeEnvelope = buildAutoResumePromptEnvelopeFromHandoff(
-							handoffAfterCompact,
-							config.handoffFreshMaxAgeMs,
-							Date.now(),
-							{ taskStatusById, preferredTaskIds: preferredTaskIds.slice(0, 1) },
-						);
-						autoResumeSnapshot.promptDiagnostics = resumeEnvelope.diagnostics;
-						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-							"context-watchdog.auto-resume-prompt",
-							{
-								atIso: autoResumeSnapshot.atIso,
-								diagnostics: resumeEnvelope.diagnostics,
-								diagnosticsSummary: summarizeAutoResumePromptDiagnostics(resumeEnvelope.diagnostics),
-								preview: resumeEnvelope.prompt.slice(0, 240),
-							},
-						);
-						pi.sendUserMessage(resumeEnvelope.prompt, { deliverAs: "followUp" });
-						ctx.ui.notify("context-watch: auto resume queued", "info");
-					} else {
-						if (autoResumeSnapshot.reason === "reload-required") {
-							const focusTasks = Array.isArray(handoffAfterCompact.current_tasks)
-								? handoffAfterCompact.current_tasks
-									.filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)
-									.slice(0, 3)
-								: [];
-							handoffAfterCompact = withAutoResumeAfterReloadIntent(handoffAfterCompact, {
-								pending: true,
-								createdAtIso: autoResumeSnapshot.atIso,
-								reason: "reload-required-after-compact",
-								focusTasks,
-							});
-							writeHandoffJson(ctx.cwd, handoffAfterCompact);
-							(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-								"context-watchdog.auto-resume-deferred-reload",
-								{
-									atIso: autoResumeSnapshot.atIso,
-									reason: "reload-required-after-compact",
-									focusTasks,
-									nextAction: "run /reload to dispatch deferred auto-resume from handoff",
-								},
-							);
-						}
-						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-							"context-watchdog.auto-resume-suppressed",
-							{
-								atIso: autoResumeSnapshot.atIso,
-								reason: autoResumeSnapshot.reason,
-								hint: autoResumeSnapshot.hint,
-								hasPendingMessages: autoResumeSnapshot.hasPendingMessages,
-								hasRecentSteerInput: autoResumeSnapshot.hasRecentSteerInput,
-								queuedLaneIntents: autoResumeSnapshot.queuedLaneIntents,
-								reloadRequired: autoResumeSnapshot.reloadRequired,
-								checkpointEvidenceReady: autoResumeSnapshot.checkpointEvidenceReady,
-								handoffBoardReconciled: autoResumeSnapshot.handoffBoardReconciled,
-								handoffBoardReconciliationSummary: autoResumeSnapshot.handoffBoardReconciliationSummary,
-								timeoutPressureActive: autoResumeSnapshot.timeoutPressureActive,
-								timeoutPressureCount: autoResumeSnapshot.timeoutPressureCount,
-								timeoutPressureThreshold: autoResumeSnapshot.timeoutPressureThreshold,
-								timeoutPressureHint: autoResumeSnapshot.timeoutPressureHint,
-							},
-						);
-						if (config.notify && shouldNotifyAutoResumeSuppression(autoResumeSnapshot.reason)) {
-							const resumeStateLabel = autoResumeSnapshot.reason === "reload-required" ? "deferred" : "suppressed";
-							ctx.ui.notify(
-								`context-watch: auto resume ${resumeStateLabel} (${autoResumeSnapshot.reason})${autoResumeSnapshot.hint ? ` · ${autoResumeSnapshot.hint}` : ""}`,
-								"warning",
-							);
-						}
+					if (complete.lastAutoResumeDecision) {
+						lastAutoResumeDecision = complete.lastAutoResumeDecision;
 					}
-					lastAutoResumeDecision = autoResumeSnapshot;
 				},
 				onError: (error) => {
 					autoCompactInFlight = false;
-					const nowOnError = Date.now();
-					const message = String(error?.message ?? "unknown-error");
-					const timeoutPressureEvent = recordTimeoutPressure(message, nowOnError);
-					if (timeoutPressureEvent.matched) {
-						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-							"context-watchdog.timeout-pressure",
-							{
-								atIso: new Date(nowOnError).toISOString(),
-								message,
-								timeoutPressure: timeoutPressureEvent.state,
-							},
-						);
-					}
-					if (isContextWindowOverflowErrorMessage(message)) {
-						config = applyEmergencyContextWindowFallbackConfig(config);
-						(pi as unknown as { appendEntry?: (type: string, payload: unknown) => void }).appendEntry?.(
-							"context-watchdog.context-window-overflow-fallback",
-							{
-								atIso: new Date(nowOnError).toISOString(),
-								message,
-								fallbackCheckpointPct: config.checkpointPct,
-								fallbackCompactPct: config.compactPct,
-							},
-						);
-						ctx.ui.notify(
-							"context-watch: provider context-window overflow detected; emergency thresholds enabled (checkpoint<=65 / compact<=69) for this session.",
-							"warning",
-						);
-					}
-					ctx.ui.notify(`context-watch: auto compact failed (${message})`, "warning");
+					const errorResult = handleAutoCompactError({
+						pi,
+						ctx,
+						config,
+						error,
+						recordTimeoutPressure,
+					});
+					config = errorResult.config;
 				},
 			});
 		} else if (autoCompactCandidateLevel && timeoutPressureGuard.blocked) {

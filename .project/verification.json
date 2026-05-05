@@ -13056,6 +13056,15 @@
       "method": "test",
       "timestamp": "2026-05-05T21:35:07.805Z",
       "evidence": "Second successful TASK-BUD-837 anti-bloat slice: extracted post-reload auto-resume handling from context-watchdog.ts into packages/pi-stack/extensions/context-watchdog-post-reload-runtime.ts, preserving deferred reload dispatch/pending notification behavior and avoiding public export rewrites. Line count: context-watchdog.ts 1292 -> 1182. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed. [rationale:refactor] Internal runtime extraction with unchanged public contracts; task remains open for further reduction toward <=1000."
+    },
+    {
+      "id": "VER-BUD-1204",
+      "target": "TASK-BUD-837",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T21:38:37.658Z",
+      "evidence": "Completed TASK-BUD-837 anti-bloat target. context-watchdog.ts reduced from 1361 lines to 998 lines (<=1000) via bounded internal extractions: runtime state, post-reload auto-resume runtime, and auto-compact completion/error runtime, plus small import compaction. Public export surface was not broadly rewritten. Focal validation passed after final slice: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed. line_budget_snapshot: recommendation=watch, aboveExtract=0, aboveCritical=0. [rationale:refactor] Cohesive internal extraction preserved public contracts and reached the <=1000 line target."
     }
   ]
 }
