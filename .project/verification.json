@@ -12804,6 +12804,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T13:10:20.848Z",
       "evidence": "Extraídos helpers de status/material/seleção para packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface-helpers.ts; guardrails-core-autonomy-lane-surface.ts reduziu para 597 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts => 76 passed; safe_marker_check ok; git diff --check clean; line_budget_snapshot aboveExtract=3. [rationale:anti-bloat]"
+    },
+    {
+      "id": "VER-BUD-1176",
+      "target": "TASK-BUD-824",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T13:25:49.960Z",
+      "evidence": "Extraído registro do comando /colony-pilot para packages/pi-stack/extensions/colony-pilot-main-command.ts com runtime explícito; colony-pilot.ts reduziu para 1087 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 93 passed; safe_marker_check ok; git diff --check clean; line_budget_snapshot aboveExtract=2. [rationale:anti-bloat]"
     }
   ]
 }
