@@ -17980,7 +17980,7 @@
     {
       "id": "TASK-BUD-802",
       "description": "Extrair helpers de handoff growth snapshot e checkpoint focus de context-watchdog para módulo coeso, preservando checkpoint/handoff behavior.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/context-watchdog.ts",
@@ -17994,7 +17994,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe para context-watchdog focada em handoff/checkpoint helpers, sem alterar política de reload/auto-resume.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat para reduzir context-watchdog.ts."
+      "notes": "[rationale:refactor] Fatia local-safe para context-watchdog focada em handoff/checkpoint helpers, sem alterar política de reload/auto-resume.\n[provenance:human] source_task=TASK-BUD-793 reason=Seed AFK anti-bloat para reduzir context-watchdog.ts.\nClosed via VER-BUD-1154: growth/checkpoint helpers extracted; context-watchdog checkpoint smoke passed (83 tests). [rationale:refactor] Missing reload-intent re-export caught and fixed before commit.",
+      "verification": "VER-BUD-1154"
     },
     {
       "id": "TASK-BUD-803",

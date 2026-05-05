@@ -12606,6 +12606,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:33:06.948Z",
       "evidence": "Extracted context-watchdog status/command/compact-stage/deterministic-stop formatting helpers into context-watchdog-status-formatting.ts, preserving public re-exports. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 3 files passed, 74 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts while preserving context_watch_* summary contracts."
+    },
+    {
+      "id": "VER-BUD-1154",
+      "target": "TASK-BUD-802",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:35:25.041Z",
+      "evidence": "Extracted handoff growth snapshot resolution and checkpoint focus reconciliation helpers from context-watchdog.ts into context-watchdog-growth-checkpoint.ts, preserving reload-intent public re-exports after initial smoke caught the missing export. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts => 3 files passed, 83 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces context-watchdog.ts while preserving checkpoint/handoff behavior."
     }
   ]
 }
