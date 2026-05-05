@@ -12417,6 +12417,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T02:10:57.002Z",
       "evidence": "Extracted AutoResumeAfterReloadIntent types and helpers into packages/pi-stack/extensions/context-watchdog-reload-intent.ts while preserving public re-exports from context-watchdog.ts. context-watchdog.ts reduced to 3538 lines; new module is 77 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts (62 passed). [rationale:risk-control] Cohesive low-risk extraction reduces critical surface size without post-reload behavior drift."
+    },
+    {
+      "id": "VER-BUD-1133",
+      "target": "TASK-BUD-781",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T02:18:10.551Z",
+      "evidence": "Extracted context-watchdog focus/task/operator brief helpers into packages/pi-stack/extensions/context-watchdog-operator-brief.ts. context-watchdog.ts imports the helpers and preserves operatorBrief, preferred active focus, task status, and mnemonic behavior. context-watchdog.ts reduced to 3362 lines; new module is 190 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (62 passed). [rationale:risk-control] Cohesive anti-bloat extraction with focal smoke coverage and no protected-scope changes."
     }
   ]
 }

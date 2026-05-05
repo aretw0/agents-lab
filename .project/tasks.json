@@ -17543,6 +17543,29 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] antiBloatCue ainda aponta context-watchdog.ts como superfície crítica; extrair helpers de reload intent é coeso e baixo risco.\n[provenance:human] source_task=TASK-BUD-778 reason=Continuar wave anti-bloat local-safe indicada por antiBloatCue.\nClosed via VER-BUD-1132: auto-resume-after-reload helpers extracted; post-reload/context smokes passed (62 tests). [rationale:risk-control] Reduces context-watchdog bloat while preserving public contract.",
       "verification": "VER-BUD-1132"
+    },
+    {
+      "id": "TASK-BUD-781",
+      "description": "Extrair helpers de foco/brief operacional do context-watchdog para módulo coeso, preservando contrato público e reduzindo surface crítica.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-780"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-operator-brief.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover leitura de tasks, mnemonics, focus preferido e buildContextWatchOperatorBrief para módulo dedicado.",
+        "context-watchdog.ts mantém comportamento de operatorBrief, auto-resume focus e previews.",
+        "Smokes focais de context-watchdog permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] antiBloatCue ainda aponta context-watchdog.ts como superfície crítica; extrair helpers de foco/brief é coeso e local-safe.\n[provenance:human] source_task=TASK-BUD-780 reason=Continuar wave anti-bloat local-safe após reload.\nClosed via VER-BUD-1133: focus/task/operator brief helpers extracted; focal context-watchdog smokes passed (62 tests). [rationale:risk-control] Reduces critical surface while preserving operator brief and auto-resume focus behavior.",
+      "verification": "VER-BUD-1133"
     }
   ]
 }
