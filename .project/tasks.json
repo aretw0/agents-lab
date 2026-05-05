@@ -17496,6 +17496,29 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] antiBloatCue mostrou context-watchdog.ts como maior arquivo crítico; extração coesa reduz risco estrutural mantendo contrato público.\n[provenance:human] source_task=TASK-BUD-775 reason=Continuar wave anti-bloat indicada por antiBloatCue após resolver feedback de monitor/provider.\nClosed via VER-BUD-1130: operator/deterministic-stop/cadence signals extracted; focal context-watchdog smoke passed (75 tests). [rationale:risk-control] Reduces bloat while preserving public exports.",
       "verification": "VER-BUD-1130"
+    },
+    {
+      "id": "TASK-BUD-779",
+      "description": "Implementar primitive determinística para evidência de `empty-response`/`monitor-context-divergence` a partir do JSONL da sessão, sem depender de classificador LLM.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-777"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/monitor-observability.ts",
+        "packages/pi-stack/extensions/monitor-summary.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts",
+        "docs/research/monitor-provider-divergence-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Expor evidência determinística com assistantFinalChars, evidenceSource e sessionFile/turnTimestamp quando disponível.",
+        "Se assistantFinalChars > 0, recomendação deve ser monitor-context-divergence, não empty-response.",
+        "Primitive deve ser read-only/report-only e não bloquear execução local-safe.",
+        "Smoke cobre caminho com conteúdo visível e caminho vazio real."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Recorrência do falso positivo mostra que a mitigação precisa sair do julgamento LLM e virar evidência estrutural barata do JSONL.\n[provenance:human] source_task=TASK-BUD-777 reason=Segundo alerta falso de empty-response após resposta visível; usuário quer reduzir dependência de análises vazias de monitores."
     }
   ]
 }

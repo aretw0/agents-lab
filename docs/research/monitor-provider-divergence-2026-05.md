@@ -45,6 +45,12 @@ A hipótese do operador é plausível: monitores rodando em um provider diferent
 
 Ainda não há prova suficiente para dizer que GitHub Copilot ou `openai-codex` é melhor/pior neste caso. O ponto de engenharia é remover a dependência de julgamento LLM onde uma checagem estrutural simples resolve.
 
+## Recorrência observada
+
+Após a primeira documentação, o monitor voltou a emitir `empty response` mesmo depois de uma resposta visível com mini-packet. Isso reforça que o problema não deve ser tratado como falha factual do agente sem prova estrutural; o padrão observado é mais compatível com `monitor-context-divergence` ou desalinhamento de contexto/provider.
+
+Evidência operacional mínima para próximos alertas: antes de abrir issue de `empty-response`, coletar `assistantFinalChars`, `sessionFile`, `turnTimestamp` e `evidenceSource`. Se esses campos não existirem, o alerta deve ser `classifier-only` e advisory.
+
 ## Decisão operacional
 
 - Feedback de monitor permanece advisory.

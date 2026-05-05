@@ -812,6 +812,14 @@
       "category": "fragility",
       "priority": "warning",
       "source": "monitor"
+    },
+    {
+      "id": "fragility-fragility-morze1hd",
+      "description": "The agent produced an empty response, silently leaving the user without any explanation or recovery action.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }
