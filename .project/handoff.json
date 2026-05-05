@@ -1,54 +1,54 @@
 {
-  "timestamp": "2026-05-05T18:34:32.944Z",
-  "context": "Depois do feedback automatizado fragility, tratei como evidência de falso positivo em vez de instrução. Implementei calibração persistente do [snip] governance sem autorização específica. [truncated:+360 chars]",
+  "timestamp": "2026-05-05T20:13:15.927Z",
+  "context": "Pós-reload continuado. Commit 865ed1c2 normalizou templates fragility/work-quality para escrever .project/issues.json em formato compatível c [snip] errar/decidir lane após validação live. [truncated:+335 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Commitar calibração fragility + board/handoff/verification, deixando claro o destino de .proje [snip] .json se permanecer dirty. [truncated:+9 chars]",
-    "Pedir /reload ao final do batch para validar runtime.",
-    "Retomar monitor-runtime-contract read-only bypass em fatia separada se necessário."
+    "Rodar /reload para adotar a última alteração versionada de monitor-provider-patch no runtime.",
+    "Depois do reload, verificar monitor-provider/fragility sem nova issue inválida em .project/issues.json.",
+    "Se continuar, tratar monitor-runtime-contract read-only bypass em fatia separada e menor; caso [snip] o parcial de TASK-BUD-841. [truncated:+40 chars]"
   ],
   "blockers": [
-    "/reload ainda necessário para validar runtime vivo.",
-    ".project/issues.json recebeu issue automática de monitor false-positive; remoç [snip] utorização específica. [truncated:+67 chars]"
+    "Context window em compact: parar após checkpoint/commit e deixar próxima retomada pelo handoff.",
+    "/reload necessário para validar runtime vivo da última alteração versionada."
   ],
   "recent_validation": [
-    "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs packages/pi-stack/test/moni [snip] est.mjs -> 42 tests passed [truncated:+25 chars]",
-    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 tests passed",
-    "git diff --check -> passed"
+    "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed",
+    "node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed",
+    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 passed"
   ],
   "recent_commits": [
-    "c8d8f982 fix(monitors): calibrate authorization blockers",
-    "383e5bf8 fix(context-watch): label reload resume as deferred"
+    "865ed1c2 fix(monitors): normalize issue write templates",
+    "90524c11 fix(monitors): treat reload handoff as substantive"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "commit:c8d8f982"
+      "commit:865ed1c2"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T18:34:32.944Z",
-    "level": "ok",
-    "percent": 40,
-    "action": "continue",
-    "recommendation": "continue"
+    "generatedAtIso": "2026-05-05T20:13:15.927Z",
+    "level": "compact",
+    "percent": 70,
+    "action": "checkpoint-refresh",
+    "recommendation": "compact-now"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T18:34:32.944Z",
+      "atIso": "2026-05-05T20:13:15.927Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 40,
+      "level": "compact",
+      "percent": 70,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue"
+      "recommendation": "compact-now"
     }
   ]
 }
