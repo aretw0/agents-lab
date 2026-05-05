@@ -12588,6 +12588,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:28:38.307Z",
       "evidence": "Extracted board query/filter/row mapping from project-board-surface.ts into project-board-query.ts and preserved public queryProjectTasks/queryProjectVerification exports and query result types. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 2157 to 1908 lines while preserving board_query behavior."
+    },
+    {
+      "id": "VER-BUD-1152",
+      "target": "TASK-BUD-799",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:30:40.329Z",
+      "evidence": "Extracted board summary/compact tool formatting helpers from project-board-surface.ts into project-board-tool-formatting.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 1908 to 1835 lines without changing compact tool outputs."
     }
   ]
 }

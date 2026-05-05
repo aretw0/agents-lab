@@ -17923,7 +17923,7 @@
     {
       "id": "TASK-BUD-799",
       "description": "Extrair formatadores compactos e summaries de ferramentas do project-board-surface para módulo coeso, preservando resultados das tools do board.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         "packages/pi-stack/extensions/project-board-surface.ts",
@@ -17936,7 +17936,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts sem mudar contrato de tool output.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície project-board remanescente."
+      "notes": "[rationale:refactor] Fatia local-safe para reduzir project-board-surface.ts sem mudar contrato de tool output.\n[provenance:human] source_task=TASK-BUD-789 reason=Seed AFK anti-bloat em superfície project-board remanescente.\nStarted after TASK-BUD-798 in AFK anti-bloat chain. [rationale:refactor] Continue project-board-surface reduction by extracting compact summary/format helpers with full board smoke gate.\nClosed via VER-BUD-1152: board formatting helpers extracted; board smoke passed (64 tests). [rationale:refactor] Tool output summaries preserved.",
+      "verification": "VER-BUD-1152"
     },
     {
       "id": "TASK-BUD-800",
