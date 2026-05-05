@@ -1,7 +1,7 @@
 name: hedge-classifier
 role: sensor
 description: Classifies whether assistant deviated from user intent
-model: github-copilot/gpt-5.4-mini
+model: github-copilot/claude-haiku-4.5
 thinking: "off"
 output:
   format: json
