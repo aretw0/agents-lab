@@ -3,7 +3,7 @@ import { registerGuardrailsRecurringFailureSurface } from "../../extensions/guar
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>) => { content?: Array<{ type: "text"; text: string }>; details: Record<string, unknown> };
 };
 
 describe("guardrails recurring failure surface", () => {
@@ -26,5 +26,8 @@ describe("guardrails recurring failure surface", () => {
     expect(result?.details.decision).toBe("create-primitive");
     expect(result?.details.hardIntentRequired).toBe(true);
     expect(result?.details.summary).toBe("recurring-failure: decision=create-primitive hardIntent=yes occurrences=2 reasons=primitive-missing,regression-test-missing");
+    expect(result?.content?.[0]?.text).toContain("recurring-failure: decision=create-primitive hardIntent=yes occurrences=2");
+    expect(result?.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result?.content?.[0]?.text).not.toContain('\"decision\"');
   });
 });

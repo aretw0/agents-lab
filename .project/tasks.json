@@ -19039,6 +19039,27 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Continuação local-safe do trabalho de UI cohesion: validation_method_plan é report-only, read-only e ainda retorna JSON cru em content.\n[provenance:human] source_task=TASK-BUD-848 reason=Usuário pediu para voltar ao trabalho anterior; próxima fatia segura é migrar mais uma tool report-only para operator-visible summary-first.\n[slice-start] Aplicando helper operator-visible em validation_method_plan; lógica core resolveValidationMethodPlan permanece inalterada.\n[slice-complete] validation_method_plan no longer emits raw JSON as primary content. Rollback: revert guardrails-core-validation-method-surface.ts and guardrails-validation-method-surface.test.ts changes.",
       "verification": "VER-BUD-1215"
+    },
+    {
+      "id": "TASK-BUD-851",
+      "description": "Migrar recurring_failure_hardening_plan para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-recurring-failure-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que o content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe do trabalho de UI cohesion solicitado após reload; TASK-BUD-849 permanece parked/protected de médio prazo.\n[provenance:human] source_task=TASK-BUD-850 reason=Retomar o trabalho anterior até onde precisa continuar: migrar outra surface report-only que ainda retorna JSON cru em content.\n[slice-start] Aplicando helper operator-visible em recurring_failure_hardening_plan; lógica core resolveRecurringFailureHardening permanece inalterada.\n[slice-complete] recurring_failure_hardening_plan no longer emits raw JSON as primary content. Rollback: revert guardrails-core-recurring-failure-surface.ts and guardrails-recurring-failure-surface.test.ts changes.",
+      "verification": "VER-BUD-1216"
     }
   ]
 }

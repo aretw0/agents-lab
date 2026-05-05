@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { resolveRecurringFailureHardening } from "./guardrails-core-recurring-failure";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function asBool(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
@@ -34,10 +35,11 @@ export function registerGuardrailsRecurringFailureSurface(pi: ExtensionAPI): voi
         hasRuntimeGuard: asBool(p.has_runtime_guard, false),
         oldPathStillAvailable: asBool(p.old_path_still_available, true),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "recurring_failure_hardening_plan",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }
