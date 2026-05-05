@@ -17802,6 +17802,25 @@
       "milestone": "anti-bloat-fix",
       "notes": "[rationale:fix] Regressão criada pela extração quota: analyzeQuota usa homedir para localizar ~/.pi/agent/sessions; correção local-safe e sem escopo protegido.\n[provenance:human] source_task=TASK-BUD-791 reason=Usuário reportou erro de extensão após reload: homedir is not defined em analyzeQuota.\nClosed via VER-BUD-1144: restored homedir import in quota-visibility.ts; related quota/guardrails smoke passed (102 tests). [rationale:fix] Fixes post-reload extension regression reported by user.",
       "verification": "VER-BUD-1144"
+    },
+    {
+      "id": "TASK-BUD-793",
+      "description": "Extrair avaliações de bloat/slice-width de guardrails-core para guardrails-core-bloat, preservando exports públicos e smoke de long-run queue.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-bloat.ts",
+        "packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts"
+      ],
+      "acceptance_criteria": [
+        "summarizeAssumptionText/evaluate*BloatSmell/buildWideSingleFileSliceStatusLabel continuam exportados por guardrails-core.ts",
+        "guardrails-core.ts reduz linhas sem alterar runtime guardrails",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts passa"
+      ],
+      "milestone": "anti-bloat",
+      "notes": "[rationale:refactor] Fatia local-safe pós-reload: mover helpers coesos de avaliação bloat para módulo já existente, preservando contrato público via reexport.\n[provenance:human] source_task=TASK-BUD-792 reason=Continuação da wave anti-bloat depois da correção pós-reload.\nClosed via VER-BUD-1145: bloat assessment helpers moved to guardrails-core-bloat.ts; long-run intent queue smoke passed (52 tests). [rationale:refactor] Public guardrails-core exports preserved.",
+      "verification": "VER-BUD-1145"
     }
   ]
 }

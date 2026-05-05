@@ -12525,6 +12525,15 @@
       "method": "test",
       "timestamp": "2026-05-05T03:53:28.975Z",
       "evidence": "Fixed quota-visibility.ts by restoring import { homedir } from node:os for analyzeQuota after extraction. Validation: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 6 files passed, 102 tests passed. [rationale:fix] Addresses reload/runtime error 'homedir is not defined' observed via guardrails-core provider budget governor path."
+    },
+    {
+      "id": "VER-BUD-1145",
+      "target": "TASK-BUD-793",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:00:13.339Z",
+      "evidence": "Extracted bloat/slice-width assessment helpers from guardrails-core.ts into existing guardrails-core-bloat.ts with public re-exports preserved from guardrails-core.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 52 passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2378 to 2244 lines while keeping long-run bloat advisory contract intact."
     }
   ]
 }

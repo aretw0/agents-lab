@@ -200,3 +200,154 @@ export function buildCodeBloatStatusLabel(assessment: {
 }): string {
   return `[bloat] code lines=${assessment.metrics.changedLines} hunks=${assessment.metrics.hunks} files=${assessment.metrics.filesTouched}`;
 }
+
+export function summarizeAssumptionText(text: string, maxChars: number): string {
+  const normalized = String(text ?? "").replace(/\s+/g, " ").trim();
+  const max = Math.max(20, Math.floor(maxChars));
+  if (normalized.length <= max) return normalized;
+  return `${normalized.slice(0, max)}…`;
+}
+
+export interface TextBloatSmellAssessment {
+  triggered: boolean;
+  reasons: string[];
+  recommendation: string;
+  metrics: {
+    chars: number;
+    lines: number;
+    repeatedLineRatio: number;
+  };
+}
+
+export interface CodeBloatSmellAssessment {
+  triggered: boolean;
+  reasons: string[];
+  recommendation: string;
+  metrics: {
+    changedLines: number;
+    hunks: number;
+    filesTouched: number;
+  };
+}
+
+export interface WideSingleFileSliceAssessment {
+  triggered: boolean;
+  reasons: string[];
+  recommendation: string;
+  metrics: {
+    changedLines: number;
+    hunks: number;
+    filesTouched: number;
+  };
+}
+
+export function evaluateTextBloatSmell(
+  text: string,
+  thresholds?: Partial<{ chars: number; lines: number; repeatedLineRatio: number }>,
+): TextBloatSmellAssessment {
+  const normalized = String(text ?? "").replace(/\r\n/g, "\n");
+  const chars = normalized.trim().length;
+  const linesRaw = normalized.split("\n").map((line) => line.trim()).filter(Boolean);
+  const lines = linesRaw.length;
+  const uniqueCount = new Set(linesRaw.map((line) => line.toLowerCase())).size;
+  const repeatedLineRatio = lines > 0 ? (lines - uniqueCount) / lines : 0;
+
+  const charsThreshold = Math.max(200, Math.floor(Number(thresholds?.chars ?? 1200)));
+  const linesThreshold = Math.max(8, Math.floor(Number(thresholds?.lines ?? 24)));
+  const repeatedLineRatioThreshold = Number.isFinite(Number(thresholds?.repeatedLineRatio))
+    ? Math.max(0.1, Math.min(0.9, Number(thresholds?.repeatedLineRatio ?? 0.35)))
+    : 0.35;
+
+  const reasons: string[] = [];
+  if (chars >= charsThreshold) reasons.push(`high-char-count:${chars}`);
+  if (lines >= linesThreshold) reasons.push(`high-line-count:${lines}`);
+  if (repeatedLineRatio >= repeatedLineRatioThreshold) {
+    reasons.push(`high-repetition:${repeatedLineRatio.toFixed(2)}`);
+  }
+
+  return {
+    triggered: reasons.length > 0,
+    reasons,
+    recommendation: reasons.length > 0
+      ? "text-bloat advisory: keep key claim first, trim repetition, and split into concise bullets/sections."
+      : "text-bloat: healthy",
+    metrics: {
+      chars,
+      lines,
+      repeatedLineRatio,
+    },
+  };
+}
+
+export function evaluateCodeBloatSmell(
+  metricsInput: { changedLines: number; hunks: number; filesTouched?: number },
+  thresholds?: Partial<{ changedLines: number; hunks: number; filesTouched: number }>,
+): CodeBloatSmellAssessment {
+  const changedLines = Math.max(0, Math.floor(Number(metricsInput?.changedLines ?? 0)));
+  const hunks = Math.max(0, Math.floor(Number(metricsInput?.hunks ?? 0)));
+  const filesTouched = Math.max(0, Math.floor(Number(metricsInput?.filesTouched ?? 1)));
+
+  const changedLinesThreshold = Math.max(20, Math.floor(Number(thresholds?.changedLines ?? 120)));
+  const hunksThreshold = Math.max(1, Math.floor(Number(thresholds?.hunks ?? 8)));
+  const filesTouchedThreshold = Math.max(1, Math.floor(Number(thresholds?.filesTouched ?? 5)));
+
+  const reasons: string[] = [];
+  if (changedLines >= changedLinesThreshold) reasons.push(`high-changed-lines:${changedLines}`);
+  if (hunks >= hunksThreshold) reasons.push(`high-hunks:${hunks}`);
+  if (filesTouched >= filesTouchedThreshold) reasons.push(`high-files-touched:${filesTouched}`);
+
+  return {
+    triggered: reasons.length > 0,
+    reasons,
+    recommendation: reasons.length > 0
+      ? "code-bloat advisory: split into micro-slices; if indivisible, register explicit backlog note before continuing."
+      : "code-bloat: healthy",
+    metrics: {
+      changedLines,
+      hunks,
+      filesTouched,
+    },
+  };
+}
+
+export function evaluateWideSingleFileSlice(
+  metricsInput: { changedLines: number; hunks: number; filesTouched?: number },
+  thresholds?: Partial<{ changedLines: number; hunks: number }>,
+): WideSingleFileSliceAssessment {
+  const changedLines = Math.max(0, Math.floor(Number(metricsInput?.changedLines ?? 0)));
+  const hunks = Math.max(0, Math.floor(Number(metricsInput?.hunks ?? 0)));
+  const filesTouched = Math.max(0, Math.floor(Number(metricsInput?.filesTouched ?? 1)));
+
+  const changedLinesThreshold = Math.max(20, Math.floor(Number(thresholds?.changedLines ?? 40)));
+  const hunksThreshold = Math.max(2, Math.floor(Number(thresholds?.hunks ?? 3)));
+
+  const reasons: string[] = [];
+  if (filesTouched !== 1) {
+    reasons.push(`files-touched:${filesTouched}`);
+  }
+  if (changedLines >= changedLinesThreshold) {
+    reasons.push(`wide-lines:${changedLines}`);
+  }
+  if (hunks >= hunksThreshold) {
+    reasons.push(`wide-hunks:${hunks}`);
+  }
+
+  const triggered = filesTouched === 1 && changedLines >= changedLinesThreshold && hunks >= hunksThreshold;
+
+  return {
+    triggered,
+    reasons: triggered ? reasons.filter((reason) => reason.startsWith("wide-")) : reasons,
+    recommendation: triggered
+      ? "slice-wide advisory: split this file change into micro-slices; if indivisible, register backlog/board note now before continuing."
+      : "slice-width: healthy",
+    metrics: {
+      changedLines,
+      hunks,
+      filesTouched,
+    },
+  };
+}
+
+export function buildWideSingleFileSliceStatusLabel(assessment: WideSingleFileSliceAssessment): string {
+  return `[slice] wide-file lines=${assessment.metrics.changedLines} hunks=${assessment.metrics.hunks}`;
+}
