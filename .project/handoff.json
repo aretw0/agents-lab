@@ -1,24 +1,25 @@
 {
-  "timestamp": "2026-05-05T20:43:44.528Z",
-  "context": "Depois de validar TASK-BUD-841 pós-reload e registrar VER-BUD-1195/commit 666d088b, continuei pela dependência TASK-BUD-840. Primeira fatia l [snip] D-1196; TASK-BUD-840 agora in-progress. [truncated:+272 chars]",
+  "timestamp": "2026-05-05T20:45:54.002Z",
+  "context": "TASK-BUD-840 recebeu duas micro-fatias de hardening contextual: (1) bloat/slice-wide advisories reconhecem extração coesa anti-bloat/refactor [snip] em /reload posterior para runtime vivo. [truncated:+323 chars]",
   "current_tasks": [
     "TASK-BUD-840"
   ],
   "next_actions": [
-    "Commitar TASK-BUD-840 advisory hardening + test + board/handoff.",
-    "Continuar TASK-BUD-840 com outra micro-fatia se necessário: diferenciar explicitamente refacto [snip] drails ou monitor prompts. [truncated:+58 chars]",
-    "Depois de TASK-BUD-840 ficar suficiente, reavaliar TASK-BUD-841 close/defer; quality gate atua [snip] TASK-BUD-840/TASK-BUD-837. [truncated:+38 chars]"
+    "Commitar segunda fatia TASK-BUD-840 + board/handoff.",
+    "Rodar /reload ao final para validar runtime vivo das strings/surfaces de guardrails-core-bloat/autonomy anti-bloat cue.",
+    "Depois do reload, verificar git limpo/classifyFail=0 e reavaliar quality gate de TASK-BUD-840/TASK-BUD-841."
   ],
   "blockers": [
-    "TASK-BUD-841 close bloqueado por dependency chain: TASK-BUD-840/TASK-BUD-837.",
-    "Mudança em guardrails-core-bloat.ts requer /reload posterior para validar runt [snip] sta fatia for mantida. [truncated:+13 chars]"
+    "/reload necessário para validar runtime vivo das alterações TS em guardrails-c [snip] tonomy anti-bloat cue. [truncated:+12 chars]",
+    "TASK-BUD-840 ainda depende de TASK-BUD-837; TASK-BUD-841 close continua bloque [snip] lver/deferir a cadeia. [truncated:+12 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check node_modules/@davidorex/pi-behavior-monitors/dist/index.js -> read-only markers present",
-    "git_dirty_snapshot antes da fatia -> clean",
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed",
+    "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack [snip] queue.test.ts -> 96 passed [truncated:+39 chars]",
+    "VER-BUD-1196 appended"
   ],
   "recent_commits": [
+    "cf1d7d00 fix(guardrails): clarify authorized refactor advisories",
     "666d088b chore(board): record runtime bypass reload validation"
   ],
   "slice_memory": {
@@ -26,23 +27,23 @@
     "canonical_links": [
       "task:TASK-BUD-840",
       "task:TASK-BUD-841",
-      "verification:VER-BUD-1195",
-      "commit:666d088b"
+      "verification:VER-BUD-1196",
+      "commit:cf1d7d00"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:43:44.528Z",
+    "generatedAtIso": "2026-05-05T20:45:54.002Z",
     "level": "ok",
-    "percent": 42,
+    "percent": 43,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:43:44.528Z",
+      "atIso": "2026-05-05T20:45:54.002Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 42,
+      "percent": 43,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

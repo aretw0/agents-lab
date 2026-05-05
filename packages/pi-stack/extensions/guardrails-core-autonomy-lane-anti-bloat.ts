@@ -33,14 +33,14 @@ export function buildAutonomyAntiBloatCue(cwd: string): AutonomyAntiBloatCue {
       ? "anti-bloat-watch"
       : "anti-bloat-ok";
   const recommendation = snapshot.recommendation === "extract"
-    ? "prefer cohesive extraction slices before growing oversized extension surfaces"
+    ? "prefer cohesive extraction slices before growing oversized extension surfaces; authorized anti-bloat/refactor extraction is not a tangent"
     : snapshot.recommendation === "watch"
-      ? "keep new code in small modules and monitor line-budget drift"
+      ? "keep new code in small modules and monitor line-budget drift; authorized extraction may contain growth"
       : "line-budget posture is within autonomy-lane budget";
   const nextAction = snapshot.recommendation === "extract"
-    ? "schedule/continue bounded anti-bloat extraction wave; preserve public contracts; run focal smoke"
+    ? "schedule/continue bounded anti-bloat extraction wave; preserve public contracts; run focal smoke; keep backlog/policy tangents separate"
     : snapshot.recommendation === "watch"
-      ? "avoid adding to watch surfaces unless the slice extracts or contains growth"
+      ? "avoid adding to watch surfaces unless the slice extracts or contains authorized refactor growth"
       : "continue local-safe slice selection";
   const summary = [
     "anti-bloat-cue:",

@@ -12993,6 +12993,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:43:17.915Z",
       "evidence": "First contextual authorization hardening slice: code-bloat and wide-slice advisories now state that explicitly authorized anti-bloat/refactor extraction is in-scope while backlog/policy tangents still need separate focus. Regression assertions added in packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed. [rationale:communicable] This addresses the anti-bloat/refactor false-steer without weakening unrelated tangent or policy-change separation."
+    },
+    {
+      "id": "VER-BUD-1197",
+      "target": "TASK-BUD-840",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:45:18.528Z",
+      "evidence": "Second contextual authorization hardening slice: autonomy anti-bloat cue now explicitly says authorized anti-bloat/refactor extraction is not a tangent and keeps backlog/policy tangents separate; status remains report-only/no dispatch/no mutation. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 96 passed. [rationale:communicable] This gives long-running lane selection clearer anti-bloat authorization guidance without changing protected-scope or dispatch authority."
     }
   ]
 }

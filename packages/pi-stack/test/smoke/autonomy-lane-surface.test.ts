@@ -1018,6 +1018,8 @@ describe("autonomy lane surface", () => {
     const cue = (result?.details.antiBloatCue as {
       decision?: string;
       recommendationCode?: string;
+      recommendation?: string;
+      nextAction?: string;
       dispatchAllowed?: boolean;
       mutationAllowed?: boolean;
       totals?: { aboveExtract?: number };
@@ -1026,6 +1028,8 @@ describe("autonomy lane surface", () => {
 
     expect(cue?.decision).toBe("extract");
     expect(cue?.recommendationCode).toBe("anti-bloat-extract");
+    expect(cue?.recommendation).toContain("authorized anti-bloat/refactor extraction is not a tangent");
+    expect(cue?.nextAction).toContain("keep backlog/policy tangents separate");
     expect(cue?.dispatchAllowed).toBe(false);
     expect(cue?.mutationAllowed).toBe(false);
     expect(cue?.totals?.aboveExtract).toBe(1);
