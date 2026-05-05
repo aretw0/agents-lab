@@ -19291,7 +19291,7 @@
     {
       "id": "TASK-BUD-863",
       "description": "Migrar session_analytics_query para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19306,7 +19306,8 @@
         "teste focal deve cobrir uma query analítica sem JSON cru em content"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Fatia local-safe para reduzir ruído em análises de sessão.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: analytics report-only ainda retorna JSON cru em content."
+      "notes": "[rationale:operator-experience] Fatia local-safe para reduzir ruído em análises de sessão.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: analytics report-only ainda retorna JSON cru em content.\n[slice-start] Migrando session_analytics_query para summary-first via buildOperatorVisibleToolResponse; manter runQuery/details intactos e command humano separado.\n[slice-complete] session_analytics_query now emits compact session-analytics summary in content with full payload in details. Rollback: revert session-analytics.ts and session-analytics.test.ts changes.",
+      "verification": "VER-BUD-1228"
     }
   ]
 }

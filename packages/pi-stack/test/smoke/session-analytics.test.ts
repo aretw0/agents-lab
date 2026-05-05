@@ -219,7 +219,7 @@ describe("session-analytics — local sandbox session discovery", () => {
         signal: AbortSignal | undefined,
         onUpdate: unknown,
         ctx: { cwd: string },
-      ) => { details: ReturnType<typeof runQuery> };
+      ) => { details: ReturnType<typeof runQuery>; content?: Array<{ text?: string }> };
     } | undefined;
     try {
       const key = toSessionWorkspaceKey(dir);
@@ -256,6 +256,9 @@ describe("session-analytics — local sandbox session discovery", () => {
       expect(output?.details.queryType).toBe("outliers");
       expect(output?.details.lookbackHours).toBe(2);
       expect(data.outliers[0]?.textChars).toBe(25_000);
+      expect(String(output?.content?.[0]?.text ?? "")).toContain("session-analytics: outliers");
+      expect(String(output?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+      expect(String(output?.content?.[0]?.text ?? "")).not.toContain('\"queryType\"');
     } finally {
       process.chdir(oldCwd);
       rmSync(dir, { recursive: true, force: true });

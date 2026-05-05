@@ -13272,6 +13272,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:11:12.854Z",
       "evidence": "Migrated subagent_readiness_status in packages/pi-stack/extensions/subagent-readiness.ts to buildOperatorVisibleToolResponse using the existing formatResult(result) human summary and preserving the full structured result in details. Added a tool-level smoke test in packages/pi-stack/test/smoke/subagent-readiness.test.ts asserting summary-first content, details preservation, and no raw JSON ready field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/subagent-readiness.test.ts -> 2 files passed, 13 tests passed."
+    },
+    {
+      "id": "VER-BUD-1228",
+      "target": "TASK-BUD-863",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:13:34.018Z",
+      "evidence": "Migrated session_analytics_query in packages/pi-stack/extensions/session-analytics.ts to buildOperatorVisibleToolResponse with a compact query-specific session-analytics summary while preserving the full runQuery result in details. Updated packages/pi-stack/test/smoke/session-analytics.test.ts to assert summary-first content, details hint, and no raw JSON queryType field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/session-analytics-outliers.test.mjs -> reported 2 files passed, 30 tests passed."
     }
   ]
 }

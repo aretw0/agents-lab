@@ -30,6 +30,7 @@ import {
   type SessionJsonlReadResult,
   type SessionJsonlScanLimits,
 } from "./session-analytics-jsonl";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 export {
   DEFAULT_SESSION_JSONL_SCAN_LIMITS,
   clampScanLimits,
@@ -344,6 +345,29 @@ export function runQuery(
   };
 }
 
+function summarizeSessionAnalyticsResult(result: SessionAnalyticsResult): string {
+  const lines = [
+    `session-analytics: ${result.queryType}`,
+    `scanned=${result.filesScanned} lookback=${result.lookbackHours}h`,
+    `scanGuard=bytes:${result.scan.totalBytesRead}/${result.scan.totalFileBytes} tailWindowFiles:${result.scan.tailWindowFiles} parseErrors:${result.scan.parseErrors} skippedLongLines:${result.scan.skippedLongLines}`,
+  ];
+  const data = result.data as Record<string, unknown>;
+  if (result.queryType === "signals") {
+    lines.push(`signals=${data.totalSignals ?? 0}`);
+  } else if (result.queryType === "timeline") {
+    lines.push(`events=${Array.isArray(data.events) ? data.events.length : 0}`);
+  } else if (result.queryType === "model-usage") {
+    lines.push(`modelChanges=${Array.isArray(data.modelChanges) ? data.modelChanges.length : 0}`);
+  } else if (result.queryType === "outliers") {
+    lines.push(`outliers=${Array.isArray(data.outliers) ? data.outliers.length : 0}`);
+  } else if (result.queryType === "galvanization") {
+    lines.push(`candidates=${Array.isArray(data.candidates) ? data.candidates.length : 0}`);
+  } else {
+    lines.push(`records=${data.totalRecords ?? 0} messages=${data.totalMessages ?? 0}`);
+  }
+  return lines.join(" ");
+}
+
 // ---------------------------------------------------------------------------
 // Extension factory
 // ---------------------------------------------------------------------------
@@ -457,10 +481,11 @@ export default function sessionAnalyticsExtension(pi: ExtensionAPI) {
         normalized.limit,
         normalized.minChars,
       );
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "session_analytics_query",
+        summary: summarizeSessionAnalyticsResult(result),
         details: result,
-      };
+      });
     },
   });
 
