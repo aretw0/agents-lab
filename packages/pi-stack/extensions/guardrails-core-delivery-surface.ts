@@ -11,6 +11,7 @@ import {
 	resolveStateReconcilePlan,
 	type StateArtifactKind,
 } from "./guardrails-core-state-reconcile";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
 	ctx: ExtensionContext,
@@ -64,10 +65,11 @@ export function registerGuardrailsDeliverySurface(
 					validValues: ["direct-branch", "pull-request", "merge-request"],
 					aliases: ["direct", "branch", "pr", "pull_request", "mr", "merge_request"],
 				};
-				return {
-					content: [{ type: "text", text: "delivery_mode_plan: invalid preferChannel; use direct-branch|pull-request|merge-request (aliases: direct|pr|mr)" }],
+				return buildOperatorVisibleToolResponse({
+					label: "delivery_mode_plan",
+					summary: "delivery_mode_plan: invalid preferChannel; use direct-branch|pull-request|merge-request (aliases: direct|pr|mr)",
 					details,
-				};
+				});
 			}
 			const plan = resolveDeliveryModePlan({ preferChannel });
 			appendAuditEntry(ctx, "guardrails-core.delivery-mode-plan", {
@@ -84,10 +86,11 @@ export function registerGuardrailsDeliverySurface(
 				ok: true,
 				...plan,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "delivery_mode_plan",
+				summary: formatDeliveryModePlan(plan).join(" | "),
 				details,
-			};
+			});
 		},
 	});
 
@@ -186,10 +189,11 @@ export function registerGuardrailsDeliverySurface(
 						deliveryChannelAliases: ["direct", "branch", "pr", "pull_request", "mr", "merge_request"],
 					},
 				};
-				return {
-					content: [{ type: "text", text: `state_reconcile_plan: invalid ${invalidFields.join(",")}; valid artifact=board|settings|handoff|generic-json runtime=native|container|ci channel=direct-branch|pull-request|merge-request (aliases: direct|pr|mr)` }],
+				return buildOperatorVisibleToolResponse({
+					label: "state_reconcile_plan",
+					summary: `state_reconcile_plan: invalid ${invalidFields.join(",")}; valid artifact=board|settings|handoff|generic-json runtime=native|container|ci channel=direct-branch|pull-request|merge-request (aliases: direct|pr|mr)`,
 					details,
-				};
+				});
 			}
 			const delivery = resolveDeliveryModePlan();
 			const plan = resolveStateReconcilePlan({
@@ -215,10 +219,11 @@ export function registerGuardrailsDeliverySurface(
 				ok: true,
 				...plan,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "state_reconcile_plan",
+				summary: formatStateReconcilePlan(plan).join(" | "),
 				details,
-			};
+			});
 		},
 	});
 

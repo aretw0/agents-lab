@@ -79,6 +79,9 @@ describe("guardrails-core delivery mode command/tool", () => {
 		expect((result.details as any)?.ok).toBe(true);
 		expect((result.details as any)?.deliveryChannel).toBe("merge-request");
 		expect((result.details as any)?.runtimeMode).toBeDefined();
+		expect(String((result as any).content?.[0]?.text ?? "")).toContain("delivery-mode");
+		expect(String((result as any).content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+		expect(String((result as any).content?.[0]?.text ?? "")).not.toContain('\"deliveryChannel\"');
 	});
 
 	it("accepts aliases and returns concise invalid tool feedback", async () => {
@@ -105,5 +108,6 @@ describe("guardrails-core delivery mode command/tool", () => {
 		);
 		expect((invalidResult.details as any)?.ok).toBe(false);
 		expect(String((invalidResult as any).content[0].text)).toContain("use direct-branch|pull-request|merge-request");
+		expect(String((invalidResult as any).content[0].text)).toContain("payload completo disponível em details");
 	});
 });

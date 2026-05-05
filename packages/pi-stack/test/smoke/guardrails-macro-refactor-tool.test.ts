@@ -74,6 +74,9 @@ describe("guardrails-core macro-refactor tools", () => {
     expect((result.details as any)?.reason).toBe("engine-unavailable");
     expect((result.details as any)?.supported).toBe(false);
     expect((result.details as any)?.applied).toBe(false);
+    expect(String((result as any).content?.[0]?.text ?? "")).toContain("refactor rename");
+    expect(String((result as any).content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String((result as any).content?.[0]?.text ?? "")).not.toContain('\"operation\"');
   });
 
   it("blocks scoped rename without path anchor", async () => {
@@ -91,5 +94,6 @@ describe("guardrails-core macro-refactor tools", () => {
 
     expect((result.details as any)?.blocked).toBe(true);
     expect((result.details as any)?.reason).toBe("invalid-target");
+    expect(String((result as any).content?.[0]?.text ?? "")).toContain("refactor rename");
   });
 });

@@ -59,6 +59,9 @@ describe("guardrails-core safe mutation tools", () => {
 
     expect((largeFile.details as any)?.applied).toBe(true);
     expect((largeFile.details as any)?.decision).toBe("allow-apply");
+    expect(String((largeFile as any).content?.[0]?.text ?? "")).toContain("safe-mutate-large-file: ok=yes");
+    expect(String((largeFile as any).content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String((largeFile as any).content?.[0]?.text ?? "")).not.toContain('\"decision\"');
 
     const invalidCounts = await largeFileTool.execute(
       "tc-safe-1-invalid",
@@ -70,6 +73,7 @@ describe("guardrails-core safe mutation tools", () => {
 
     expect((invalidCounts.details as any)?.ok).toBe(false);
     expect((invalidCounts.details as any)?.reason).toBe("invalid-line-counts");
+    expect(String((invalidCounts as any).content?.[0]?.text ?? "")).toContain("safe-mutate-large-file: ok=no reason=invalid-line-counts");
 
     const queryTool = getTool(pi, "structured_query_plan");
     const query = await queryTool.execute(
@@ -82,6 +86,9 @@ describe("guardrails-core safe mutation tools", () => {
 
     expect((query.details as any)?.blocked).toBe(true);
     expect((query.details as any)?.reason).toBe("blocked:mutation-forbidden");
+    expect(String((query as any).content?.[0]?.text ?? "")).toContain("structured-query-plan: blocked=yes");
+    expect(String((query as any).content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String((query as any).content?.[0]?.text ?? "")).not.toContain('\"blocked\"');
 
     const multi = await queryTool.execute(
       "tc-safe-3",

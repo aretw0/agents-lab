@@ -86,6 +86,9 @@ describe("guardrails-core state reconcile command/tool", () => {
 		expect((result.details as any)?.artifactKind).toBe("settings");
 		expect((result.details as any)?.concurrencyRisk).toBe("high");
 		expect((result.details as any)?.recommendedPolicies).toContain("single-writer-branch");
+		expect(String((result as any).content?.[0]?.text ?? "")).toContain("state-reconcile");
+		expect(String((result as any).content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+		expect(String((result as any).content?.[0]?.text ?? "")).not.toContain('\"artifactKind\"');
 	});
 
 	it("accepts channel aliases and returns concise invalid tool feedback", async () => {
@@ -123,5 +126,6 @@ describe("guardrails-core state reconcile command/tool", () => {
 		expect((invalidResult.details as any)?.ok).toBe(false);
 		expect((invalidResult.details as any)?.invalidFields).toEqual(["artifactKind", "runtimeMode", "deliveryChannel"]);
 		expect(String((invalidResult as any).content[0].text)).toContain("valid artifact=board|settings|handoff|generic-json");
+		expect(String((invalidResult as any).content[0].text)).toContain("payload completo disponível em details");
 	});
 });

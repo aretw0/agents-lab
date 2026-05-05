@@ -6,6 +6,7 @@ import {
 	buildSafeLargeFileMutationResult,
 	buildStructuredQueryPlanResult,
 } from "./guardrails-core-safe-mutation";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
 	ctx: ExtensionContext,
@@ -48,10 +49,11 @@ export function registerGuardrailsSafeMutationSurface(
 					anchorState,
 					allowed: ["unique", "missing", "ambiguous"],
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+				return buildOperatorVisibleToolResponse({
+					label: "safe_mutate_large_file",
+					summary: `safe-mutate-large-file: ok=no reason=${details.reason}`,
 					details,
-				};
+				});
 			}
 
 			const touchedLines = Number(p.touchedLines);
@@ -74,10 +76,11 @@ export function registerGuardrailsSafeMutationSurface(
 						maxTouchedLines: "integer >= 1",
 					},
 				};
-				return {
-					content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+				return buildOperatorVisibleToolResponse({
+					label: "safe_mutate_large_file",
+					summary: `safe-mutate-large-file: ok=no reason=${details.reason}`,
 					details,
-				};
+				});
 			}
 
 			const dryRun = p.dryRun !== false;
@@ -111,10 +114,11 @@ export function registerGuardrailsSafeMutationSurface(
 				anchorState,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "safe_mutate_large_file",
+				summary: `safe-mutate-large-file: ok=yes decision=${details.decision} risk=${details.riskLevel} dryRun=${details.dryRun ? "yes" : "no"}`,
 				details,
-			};
+			});
 		},
 	});
 
@@ -158,10 +162,11 @@ export function registerGuardrailsSafeMutationSurface(
 				forbidMutation,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "structured_query_plan",
+				summary: `structured-query-plan: blocked=${details.blocked ? "yes" : "no"} risk=${details.riskLevel} reason=${details.reason}`,
 				details,
-			};
+			});
 		},
 	});
 

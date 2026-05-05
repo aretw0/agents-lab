@@ -5,6 +5,7 @@ import {
 	buildRefactorOrganizeImportsResult,
 	buildRefactorRenameSymbolResult,
 } from "./guardrails-core-macro-refactor";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export type GuardrailsAuditAppender = (
 	ctx: ExtensionContext,
@@ -69,10 +70,11 @@ export function registerGuardrailsMacroRefactorSurface(
 				ok: !result.blocked,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "refactor_rename_symbol",
+				summary: result.summary,
 				details,
-			};
+			});
 		},
 	});
 
@@ -106,10 +108,11 @@ export function registerGuardrailsMacroRefactorSurface(
 				ok: !result.blocked,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "refactor_organize_imports",
+				summary: result.summary,
 				details,
-			};
+			});
 		},
 	});
 
@@ -152,10 +155,11 @@ export function registerGuardrailsMacroRefactorSurface(
 				ok: !result.blocked,
 				...result,
 			};
-			return {
-				content: [{ type: "text", text: JSON.stringify(details, null, 2) }],
+			return buildOperatorVisibleToolResponse({
+				label: "refactor_format_target",
+				summary: result.summary,
 				details,
-			};
+			});
 		},
 	});
 

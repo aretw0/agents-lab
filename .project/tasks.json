@@ -19312,7 +19312,7 @@
     {
       "id": "TASK-BUD-864",
       "description": "Migrar guardrails report-only surfaces restantes (macro-refactor, safe-mutation, delivery) para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-863"
@@ -19329,7 +19329,8 @@
         "testes focais cobrem pelo menos duas superfícies migradas"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Continuação local-safe do pacote UI cohesion para reduzir JSON bruto em content sem alterar semântica de guardrails. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863; no protected dispatch/runtime behavior requested.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining guardrails report-only surfaces with JSON.stringify content."
+      "notes": "[rationale:operator-experience] Continuação local-safe do pacote UI cohesion para reduzir JSON bruto em content sem alterar semântica de guardrails. [provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit after TASK-BUD-863; no protected dispatch/runtime behavior requested.\n[provenance:human] source_task=TASK-BUD-858 reason=Raw JSON surface audit found remaining guardrails report-only surfaces with JSON.stringify content.\n[slice-complete] guardrails macro-refactor, safe-mutation, delivery, and state-reconcile tool content is summary-first with details preserved. Rollback: revert the three surface files and four focal smoke tests touched in this slice.",
+      "verification": "VER-BUD-1229"
     },
     {
       "id": "TASK-BUD-865",
