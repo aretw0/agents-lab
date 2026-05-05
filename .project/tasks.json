@@ -17724,6 +17724,28 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:refactor] Continuação local-safe da wave anti-bloat no project-board-surface; extrair helpers puros reduz superfície crítica sem alterar I/O do board.\n[provenance:human] source_task=TASK-BUD-787 reason=antiBloatCue permanece em extract e project-board-surface ainda está critical.\nClosed via VER-BUD-1140: governance helper extraction complete; project-board-surface smoke passed (64 tests). [rationale:refactor] Pure helper extraction preserves board dependency/quality/planning contracts.",
       "verification": "VER-BUD-1140"
+    },
+    {
+      "id": "TASK-BUD-789",
+      "description": "Extrair auto-advance de foco/handoff do project-board-surface para módulo coeso.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-788"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-auto-advance.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover leitura de handoff, normalização de foco e seleção de sucessor para módulo dedicado.",
+        "Preservar comportamento de board_task_complete e auto-advance local-safe.",
+        "Smoke project-board-surface permanece verde."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:refactor] Extração coesa de auto-advance/handoff reduz project-board-surface sem alterar contratos públicos do board.\n[provenance:human] source_task=TASK-BUD-788 reason=Continuar wave anti-bloat em superfície critical local-safe.\nClosed via VER-BUD-1141: board auto-advance helpers extracted; project-board-surface smoke passed (64 tests). [rationale:refactor] Handoff/focus successor extraction preserves board_task_complete behavior.",
+      "verification": "VER-BUD-1141"
     }
   ]
 }
