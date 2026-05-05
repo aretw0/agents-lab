@@ -7,7 +7,7 @@ import { registerGuardrailsAutonomyLaneSurface } from "../../extensions/guardrai
 
 type RegisteredTool = {
   name: string;
-  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown> };
+  execute: (toolCallId: string, params: Record<string, unknown>, signal?: unknown, onUpdate?: unknown, ctx?: { cwd: string }) => { details: Record<string, unknown>; content?: Array<{ text?: string }> };
 };
 
 function initCleanGitRepo(cwd: string): void {
@@ -39,6 +39,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.ready).toBe(true);
     expect(result?.details.decision).toBe("bounded");
     expect(result?.details.allowedWork).toBe("bounded-only");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("autonomy-lane-plan: ready=yes");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"decision\"');
   });
 
   it("registers delegation capability snapshot tool with read-only contract", () => {
@@ -87,6 +90,9 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.ready).toBe(true);
     expect(result?.details.nextTaskId).toBe("TASK-LOCAL");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("autonomy-lane-next-task: ready=yes");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"nextTaskId\"');
   });
 
   it("includes chaining summary in next-task payload for continuous execution loops", () => {
@@ -159,6 +165,9 @@ describe("autonomy lane surface", () => {
 
     expect(result?.details.summary).toContain("autonomy-protected-scope-report:");
     expect(result?.details.totals?.protected).toBe(1);
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("autonomy-protected-scope-report:");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"rows\"');
     const rows = (result?.details.rows as Array<Record<string, unknown>> | undefined) ?? [];
     const external = rows.find((row) => row.id === "TASK-EXT");
     const local = rows.find((row) => row.id === "TASK-LOCAL");
@@ -224,6 +233,9 @@ describe("autonomy lane surface", () => {
 
     expect((result?.details.selection as { nextTaskId?: string } | undefined)?.nextTaskId).toBe("TASK-FOCUS");
     expect((result?.details.selection as { focusSource?: string } | undefined)?.focusSource).toBe("handoff");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("autonomy-lane-status:");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selection\"');
   });
 
   it("auto-advances from completed handoff focus when hard-intent guards are green", () => {
@@ -1411,6 +1423,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
     expect(result?.details.mode).toBe("report-only");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("project-intake: decision=ready-for-human-review");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"profile\"');
   });
 
   it("blocks project_intake_plan when protected scope is requested", () => {
@@ -1466,6 +1481,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.decision).toBe("ready-for-human-review");
     expect(result?.details.recommendationCode).toBe("seed-local-safe-lane");
     expect((result?.details.selectedSlices as unknown[] | undefined)?.length).toBeGreaterThan(0);
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=ready-for-human-review");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"selectedSlices\"');
   });
 
   it("clips max_slices and falls back to eligible tasks when ideas are invalid", () => {
@@ -1522,6 +1540,8 @@ describe("autonomy lane surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm: decision=blocked");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
   });
 
   it("emits visible brainstorm seed preview that requires human confirmation", () => {
@@ -1552,6 +1572,9 @@ describe("autonomy lane surface", () => {
     expect(result?.details.dispatchAllowed).toBe(false);
     expect(result?.details.mutationAllowed).toBe(false);
     expect(result?.details.authorization).toBe("none");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("lane-brainstorm-seed-preview: decision=needs-human-seeding-decision");
+    expect(String(result?.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result?.content?.[0]?.text ?? "")).not.toContain('\"proposals\"');
   });
 
   it("keeps brainstorm seed preview blocked for protected-only lane", () => {

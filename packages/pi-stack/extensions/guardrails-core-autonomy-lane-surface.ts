@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 import {
   evaluateAutonomyLaneReadiness,
   evaluateDelegationLaneCapabilitySnapshot,
@@ -76,10 +77,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         ready: asBool(p.board_ready, true),
         nextTaskId: typeof p.next_task_id === "string" ? p.next_task_id : undefined,
       }));
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "autonomy_lane_plan",
+        summary: `autonomy-lane-plan: ready=${result.ready ? "yes" : "no"} decision=${result.decision} code=${result.recommendationCode} allowed=${result.allowedWork}`,
         details: result,
-      };
+      });
     },
   });
 
@@ -303,10 +305,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           ? chaining.nextAction
           : (selection.ready ? plan.nextAction : (seededNextAction ?? selection.recommendation)),
       };
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "autonomy_lane_status",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 
@@ -385,10 +388,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
           handoffFreshMaxAgeMs: handoffFreshness.maxAgeMs,
         },
       };
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "autonomy_lane_next_task",
+        summary: `autonomy-lane-next-task: ready=${result.ready ? "yes" : "no"} reason=${result.reason} next=${result.nextTaskId ?? "none"} code=${result.recommendationCode} chaining=${result.chaining.decision}`,
         details: result,
-      };
+      });
     },
   });
 
@@ -493,10 +497,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         milestone: typeof p.milestone === "string" ? p.milestone : undefined,
         limit: asNumber(p.limit, 10),
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "autonomy_lane_protected_scope_report",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 
@@ -533,10 +538,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         selection,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(packet, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "lane_brainstorm_packet",
+        summary: `lane-brainstorm: decision=${packet.decision} code=${packet.recommendationCode} ideas=${packet.ideas.length} slices=${packet.selectedSlices.length}`,
         details: packet,
-      };
+      });
     },
   });
 
@@ -559,10 +565,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         packet,
         source: p.source === "human" || p.source === "tangent-approved" ? p.source : "brainstorm",
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(preview, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "lane_brainstorm_seed_preview",
+        summary: `lane-brainstorm-seed-preview: decision=${preview.decision} code=${preview.recommendationCode} proposals=${preview.proposals.length} source=${preview.source} confirmation=yes`,
         details: preview,
-      };
+      });
     },
   });
 
@@ -588,10 +595,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
         repositoryScale: typeof p.repository_scale === "string" ? p.repository_scale : undefined,
         protectedScopeRequested: p.protected_scope_requested === true,
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(plan, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "project_intake_plan",
+        summary: `project-intake: decision=${plan.decision} profile=${plan.profile} code=${plan.recommendationCode} authorization=${plan.authorization}`,
         details: plan,
-      };
+      });
     },
   });
 }

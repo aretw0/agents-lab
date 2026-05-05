@@ -19382,7 +19382,7 @@
     {
       "id": "TASK-BUD-867",
       "description": "Migrar guardrails-core-autonomy-lane report-only surfaces restantes para output summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "depends_on": [
         "TASK-BUD-866"
@@ -19397,7 +19397,8 @@
         "não alterar seleção de tasks, protected-scope policy ou dispatch authorization"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:risk-control] Próximo grupo local-safe de JSON bruto após TASK-BUD-866; ferramentas são report-only e devem preservar semântica de governança.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=TASK-BUD-866 audit left raw JSON content in autonomy-lane report-only surfaces."
+      "notes": "[rationale:risk-control] Próximo grupo local-safe de JSON bruto após TASK-BUD-866; ferramentas são report-only e devem preservar semântica de governança.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=TASK-BUD-866 audit left raw JSON content in autonomy-lane report-only surfaces.\n[auto-chain] Starting local-safe report-only UI migration after TASK-BUD-866; scope limited to operator-visible content formatting in autonomy-lane surface.\n[slice-complete] Autonomy lane report-only content is summary-first for the remaining raw JSON surfaces in guardrails-core-autonomy-lane-surface.ts. Rollback: revert that surface file and autonomy-lane-surface smoke test changes.",
+      "verification": "VER-BUD-1232"
     },
     {
       "id": "TASK-BUD-868",

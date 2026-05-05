@@ -13308,6 +13308,15 @@
       "method": "test",
       "timestamp": "2026-05-05T23:34:57.758Z",
       "evidence": "Audited mixed project-board/stack-sovereignty/provider-advisory raw JSON content surfaces and documented classification in docs/research/task-bud-866-mixed-output-audit-2026-05.md. Migrated local-safe report/read-only outputs only: board_query and board_decision_packet in project-board-surface.ts, stack_sovereignty_status in stack-sovereignty.ts, and provider_readiness_matrix in provider-readiness.ts now use summary-first operator-visible content with full details preserved. Explicitly deferred handoff_advisor because it contains protected execute=true provider switch path; no provider routing/cost/handoff behavior changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/project-board-surface.test.ts packages/pi-stack/test/smoke/stack-sovereignty-surface.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts -> 4 files passed, 74 tests passed."
+    },
+    {
+      "id": "VER-BUD-1232",
+      "target": "TASK-BUD-867",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T23:41:37.249Z",
+      "evidence": "Migrated guardrails-core-autonomy-lane report-only surfaces from raw JSON content to summary-first operator-visible output with details preserved: autonomy_lane_plan, autonomy_lane_status, autonomy_lane_next_task, autonomy_lane_protected_scope_report, lane_brainstorm_packet, lane_brainstorm_seed_preview, and project_intake_plan. Preserved governance semantics: no changes to task selection, protected-scope filtering, dispatch authorization, mutation flags, or report-only payload details. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts -> 2 files passed, 48 tests passed."
     }
   ]
 }
