@@ -12498,6 +12498,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:03:12Z",
       "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 64 passed. Extracted board handoff focus auto-advance helpers to project-board-auto-advance.ts. [rationale:refactor] Auto-advance extraction reduces project-board-surface.ts to 2157 lines while preserving board_task_complete behavior."
+    },
+    {
+      "id": "VER-BUD-1142",
+      "target": "TASK-BUD-790",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T03:42:33.248Z",
+      "evidence": "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts packages/pi-stack/test/smoke/colony-pilot-budget-gate-e2e-min.test.ts => 6 files passed, 103 tests passed. Extracted quota-visibility model/parsers/budget helpers to quota-visibility-model.ts. [rationale:refactor] Reduces quota-visibility.ts from 2678 to 1470 lines while preserving public re-exports and related consumers."
     }
   ]
 }

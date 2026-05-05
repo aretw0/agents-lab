@@ -17746,6 +17746,25 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:refactor] Extração coesa de auto-advance/handoff reduz project-board-surface sem alterar contratos públicos do board.\n[provenance:human] source_task=TASK-BUD-788 reason=Continuar wave anti-bloat em superfície critical local-safe.\nClosed via VER-BUD-1141: board auto-advance helpers extracted; project-board-surface smoke passed (64 tests). [rationale:refactor] Handoff/focus successor extraction preserves board_task_complete behavior.",
       "verification": "VER-BUD-1141"
+    },
+    {
+      "id": "TASK-BUD-790",
+      "description": "Extrair helpers de parsing/normalização/budget model de quota-visibility para módulo coeso, preservando ferramentas públicas de quota e smoke focal.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/extensions/quota-visibility-model.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "quota-visibility.ts continua registrando comandos/tools existentes sem mudança de contrato público",
+        "helpers exportados usados por consumidores existentes permanecem disponíveis via quota-visibility.ts",
+        "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts passa"
+      ],
+      "milestone": "anti-bloat",
+      "notes": "[rationale:refactor] Fatia local-safe pós-reload para reduzir superfície crítica de quota-visibility.ts por extração coesa de modelo/parsers; sem tocar escopo protegido.\n[provenance:human] source_task=TASK-BUD-789 reason=Continuação local-safe anti-bloat após reload e conclusão da extração anterior.\nClosed via VER-BUD-1142: quota visibility model/parsers/budget helpers extracted; related smoke pack passed (103 tests). [rationale:refactor] Public exports preserved through quota-visibility.ts re-exports.",
+      "verification": "VER-BUD-1142"
     }
   ]
 }
