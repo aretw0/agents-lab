@@ -13020,6 +13020,24 @@
       "method": "inspection",
       "timestamp": "2026-05-05T20:57:03.005Z",
       "evidence": "Post-reload/runtime validation for authorized anti-bloat/refactor calibration: .pi/monitors/unauthorized-action/classify.md and .pi/monitors/unauthorized-action.instructions.json both contain the marker 'Explicitly authorized anti-bloat/refactor micro-extractions are local-safe when they preserve public contracts and stay within declared files; backlog/policy tangents still require separate focus.' Runtime gates: context_watch_status reloadGate=reload-not-required; monitors_compact_status classifyFail=0. Dependency metadata corrected with structured_io_json: TASK-BUD-840 no longer depends on TASK-BUD-837 because TASK-BUD-840 was created from TASK-BUD-837 friction and is intended to unblock that later anti-bloat work, not wait for it. [rationale:communicable] This closes the live/runtime validation blocker while preserving separation between guardrail hardening and the paused context-watchdog anti-bloat task."
+    },
+    {
+      "id": "VER-BUD-1200",
+      "target": "TASK-BUD-840",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-05T21:01:49.387Z",
+      "evidence": "Closure verification for TASK-BUD-840: contextual authorization hardening now covers three durable surfaces: guardrails bloat advisory (VER-BUD-1196), autonomy anti-bloat report-only cue (VER-BUD-1197), and unauthorized-action monitor calibration with stale prompt repair plus runtime marker adoption (VER-BUD-1198/1199). Post-reload status remained classifyFail=0 and reloadGate=reload-not-required. Dependency hygiene reconciled: TASK-BUD-840 now depends only on completed anti-bloat lane prerequisites TASK-BUD-825 and TASK-BUD-829, while paused TASK-BUD-837 is no longer an unresolved prerequisite. board_task_quality_gate TASK-BUD-840 -> closeAllowed=yes decision=ready. [rationale:communicable] Closing this guardrail hardening task unblocks TASK-BUD-841 review and later safe resumption of TASK-BUD-837 without changing protected scope, thresholds, or node_modules."
+    },
+    {
+      "id": "VER-BUD-1201",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-05T21:02:13.628Z",
+      "evidence": "Closure verification for TASK-BUD-841: guardrail/monitor recalibration lane produced durable fixes and runtime validation across the recurring long-loop false positives: authorization blockers calibrated (c8d8f982), reload-resume/fragility copy calibrated (383e5bf8, 90524c11), monitor issue write schema normalized (865ed1c2), read-only runtime bypass widened and stale helper repair validated post-reload (b01d5aa6, 67c3b2b8, VER-BUD-1193/1194/1195), and anti-bloat/refactor authorization hardening completed in TASK-BUD-840 (VER-BUD-1196..1200). Current gates: TASK-BUD-841 board_task_quality_gate -> closeAllowed=yes decision=ready; board_decision_packet -> recommendedDecision=close blockers=[]. Runtime: classifyFail=0, reloadGate=reload-not-required, git clean before board mutations. [rationale:communicable] This closes the recalibration meta-task only after its dependency TASK-BUD-840 was resolved, leaving TASK-BUD-837 as explicit downstream anti-bloat work rather than mixing it into monitor calibration."
     }
   ]
 }
