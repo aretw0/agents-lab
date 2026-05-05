@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildBudgetAlerts,
   build429StreakAlerts,
@@ -9,6 +9,7 @@ import {
   extractTextFromRecord,
   type QuotaAlertEntry,
 } from "../../extensions/quota-alerts";
+import quotaAlertsExtension from "../../extensions/quota-alerts";
 import type { ProviderBudgetStatus } from "../../extensions/quota-visibility";
 
 // ---------------------------------------------------------------------------
@@ -183,6 +184,31 @@ describe("quota-alerts — buildWindowPressureAlerts", () => {
 // ---------------------------------------------------------------------------
 // buildQuotaAlerts (integração — sem sessoes reais)
 // ---------------------------------------------------------------------------
+
+describe("quota-alerts — tool surface", () => {
+  it("quota_alerts emits summary-first content with details preserved", async () => {
+    const tools: any[] = [];
+    const pi = {
+      registerTool: vi.fn((tool) => tools.push(tool)),
+      registerCommand: vi.fn(),
+    } as unknown as Parameters<typeof quotaAlertsExtension>[0];
+
+    quotaAlertsExtension(pi);
+    const tool = tools.find((row) => row?.name === "quota_alerts");
+    const result = await tool.execute(
+      "tc-quota-alerts",
+      { lookback_hours: 1 },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: "/nonexistent/path" },
+    );
+
+    expect(result.details.summary.total).toBeGreaterThanOrEqual(0);
+    expect(String(result.content?.[0]?.text ?? "")).toContain("quota-alerts: total=");
+    expect(String(result.content?.[0]?.text ?? "")).toContain("payload completo disponível em details");
+    expect(String(result.content?.[0]?.text ?? "")).not.toContain('\"alerts\"');
+  });
+});
 
 describe("quota-alerts — buildQuotaAlerts", () => {
   it("retorna resultado vazio quando nao ha sessoes nem configuracao", async () => {

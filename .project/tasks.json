@@ -19424,7 +19424,7 @@
     {
       "id": "TASK-BUD-869",
       "description": "Auditar quota-alerts, safe-boot e claude-code-adapter outputs remanescentes, separando migração local-safe de caminhos protegidos/executáveis.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p4",
       "depends_on": [
         "TASK-BUD-868"
@@ -19441,7 +19441,8 @@
         "migrar somente outputs classificados local-safe e cobertos por teste focal"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:risk-control] Esses outputs misturam alertas report-only com settings/subprocess/protected behavior; exigir classificação antes de qualquer migração.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found mixed remaining surfaces requiring classification."
+      "notes": "[rationale:risk-control] Esses outputs misturam alertas report-only com settings/subprocess/protected behavior; exigir classificação antes de qualquer migração.\n[provenance:tangent-approved] source_task=TASK-BUD-866 reason=Raw JSON content audit found mixed remaining surfaces requiring classification.\n[auto-chain] Starting mixed-output audit under warn/compact-output. Scope: classify quota-alerts/safe-boot/claude-code-adapter and migrate only local-safe report-only output if bounded.\n[slice-complete] Mixed protected output audit complete. quota_alerts migrated; safe_boot and claude-code adapter paths classified/deferred. Rollback: revert quota-alerts.ts, quota-alerts.test.ts, and docs/research/task-bud-869-protected-output-audit-2026-05.md.",
+      "verification": "VER-BUD-1234"
     }
   ]
 }

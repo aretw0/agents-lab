@@ -24,6 +24,7 @@ import {
   safeNum,
   type ProviderBudgetStatus,
 } from "./quota-visibility";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 // ---------------------------------------------------------------------------
 // Alert types
@@ -312,10 +313,11 @@ export default function quotaAlertsExtension(pi: ExtensionAPI) {
       const p = params as { lookback_hours?: number };
       const hours = typeof p.lookback_hours === "number" && p.lookback_hours > 0 ? p.lookback_hours : 24;
       const result = await buildQuotaAlerts(ctx.cwd, hours);
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "quota_alerts",
+        summary: `quota-alerts: total=${result.summary.total} block=${result.summary.block} warn=${result.summary.warn} info=${result.summary.info} lookbackHours=${hours}`,
         details: result,
-      };
+      });
     },
   });
 
