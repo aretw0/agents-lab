@@ -18659,7 +18659,7 @@
     {
       "id": "TASK-BUD-834",
       "description": "Reduzir guardrails-core-unattended-continuation.ts rumo a <=1000 linhas após extrações de one-slice.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18676,7 +18676,8 @@
         "manter dispatchAllowed=false onde aplicável"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Superfície acima de watch (~1242 linhas) e relevante para loops sem nudge; boa sucessora local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Superfície acima de watch (~1242 linhas) e relevante para loops sem nudge; boa sucessora local-safe.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após foco auto-resume; alvo local-safe: reduzir guardrails-core-unattended-continuation.ts watch-level preservando one-slice/unattended gates.\nConcluído: tipos nudge-free/unattended extraídos; arquivo principal agora <1000 linhas e aboveWatch caiu para 5.",
+      "verification": "VER-BUD-1185"
     },
     {
       "id": "TASK-BUD-835",

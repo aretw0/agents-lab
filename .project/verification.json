@@ -12885,6 +12885,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:31:24.839Z",
       "evidence": "Reduzidas quota-visibility surfaces watch-level: quota-visibility.ts 1209 -> 931 por extração de session reader/billing; quota-visibility-model.ts 1287 -> 977 por extração de types/hard-pathway/output-policy. Novos módulos: quota-visibility-session-reader.ts, quota-visibility-billing.ts, quota-visibility-types.ts, quota-visibility-hard-pathway.ts, quota-visibility-output-policy.ts. Validação: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/quota-panel.test.ts => 3 files/76 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=6 recommendation=watch; git diff --check focal clean."
+    },
+    {
+      "id": "VER-BUD-1185",
+      "target": "TASK-BUD-834",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:34:19.599Z",
+      "evidence": "Extraídos tipos de nudge-free/unattended para packages/pi-stack/extensions/guardrails-core-unattended-continuation-types.ts. guardrails-core-unattended-continuation.ts reduziu de 1242 para 948 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts => 2 files/54 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=5 recommendation=watch."
     }
   ]
 }
