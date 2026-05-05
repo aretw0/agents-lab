@@ -12570,6 +12570,15 @@
       "method": "test",
       "timestamp": "2026-05-05T04:23:18.553Z",
       "evidence": "Extracted guardReadPath/guardBashPathReads runtime handlers from guardrails-core.ts into guardrails-core-read-path-runtime.ts using existing path guard helpers and confirmation audit wrapper. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-bash-guard-policies.test.ts packages/pi-stack/test/smoke/guardrails-human-confirmation.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 68 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2095 to 2010 lines while preserving read/bash path guard behavior."
+    },
+    {
+      "id": "VER-BUD-1150",
+      "target": "TASK-BUD-807",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T04:26:09.415Z",
+      "evidence": "Extracted provider budget snapshot resolution/cache helper into guardrails-core-provider-budget-governor.ts; guardrails-core.ts now uses a thin wrapper and dropped below critical line threshold. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts => 3 files passed, 88 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core.ts from 2010 to 1984 lines while preserving cache/analyzeQuota behavior."
     }
   ]
 }

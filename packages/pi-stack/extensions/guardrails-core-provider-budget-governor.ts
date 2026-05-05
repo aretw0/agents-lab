@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  analyzeQuota,
   parseProviderBudgets,
   safeNum,
   type ProviderBudgetMap,
@@ -18,6 +19,17 @@ export interface ProviderBudgetGovernorConfig {
 export interface ProviderBudgetGovernorSnapshot {
   atIso: string;
   budgets: ProviderBudgetStatus[];
+}
+
+export interface ProviderBudgetGovernorSnapshotCache {
+  at: number;
+  key: string;
+  snapshot: ProviderBudgetGovernorSnapshot;
+}
+
+export interface ProviderBudgetGovernorSnapshotResult {
+  snapshot?: ProviderBudgetGovernorSnapshot;
+  cache?: ProviderBudgetGovernorSnapshotCache;
 }
 
 export interface QuotaBudgetSettings {
@@ -83,6 +95,42 @@ export function resolveProviderBudgetGovernorConfig(cwd: string): ProviderBudget
   } catch {
     return defaults;
   }
+}
+
+export async function resolveProviderBudgetGovernorSnapshot(
+  cwd: string,
+  config: ProviderBudgetGovernorConfig,
+  cache?: ProviderBudgetGovernorSnapshotCache,
+): Promise<ProviderBudgetGovernorSnapshotResult> {
+  const quota = readQuotaBudgetSettings(cwd);
+  if (Object.keys(quota.providerBudgets).length === 0) return { cache };
+
+  const key = JSON.stringify({
+    lookbackDays: config.lookbackDays,
+    quota,
+  });
+
+  if (cache && cache.key === key && Date.now() - cache.at < 60_000) {
+    return { snapshot: cache.snapshot, cache };
+  }
+
+  const status = await analyzeQuota({
+    days: config.lookbackDays,
+    weeklyQuotaTokens: quota.weeklyQuotaTokens,
+    weeklyQuotaCostUsd: quota.weeklyQuotaCostUsd,
+    weeklyQuotaRequests: quota.weeklyQuotaRequests,
+    monthlyQuotaTokens: quota.monthlyQuotaTokens,
+    monthlyQuotaCostUsd: quota.monthlyQuotaCostUsd,
+    monthlyQuotaRequests: quota.monthlyQuotaRequests,
+    providerWindowHours: {},
+    providerBudgets: quota.providerBudgets,
+  });
+
+  const snapshot: ProviderBudgetGovernorSnapshot = {
+    atIso: status.source.generatedAtIso,
+    budgets: status.providerBudgets,
+  };
+  return { snapshot, cache: { at: Date.now(), key, snapshot } };
 }
 
 export function detectProviderBudgetGovernorMisconfig(

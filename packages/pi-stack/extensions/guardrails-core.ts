@@ -13,7 +13,6 @@ import { Type } from "@sinclair/typebox";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyzeQuota } from "./quota-visibility";
 import { parseBudgetOverrideReason } from "./colony-pilot";
 import {
   DEFAULT_BLOAT_SMELL_CONFIG,
@@ -224,9 +223,11 @@ import {
   providerBudgetGovernorMisconfigReason,
   readQuotaBudgetSettings,
   resolveProviderBudgetGovernorConfig,
+  resolveProviderBudgetGovernorSnapshot,
   type ProviderBudgetGovernorConfig,
   type ProviderBudgetGovernorMisconfig,
   type ProviderBudgetGovernorSnapshot,
+  type ProviderBudgetGovernorSnapshotCache,
 } from "./guardrails-core-provider-budget-governor";
 export {
   detectProviderBudgetGovernorMisconfig,
@@ -324,7 +325,7 @@ export default function (pi: ExtensionAPI) {
     overrideToken: "budget-override:",
     recoveryCommands: ["doctor", "quota-visibility", "model", "login"],
   };
-  let providerBudgetSnapshotCache: { at: number; key: string; snapshot: ProviderBudgetGovernorSnapshot } | undefined;
+  let providerBudgetSnapshotCache: ProviderBudgetGovernorSnapshotCache | undefined;
   let providerBudgetGovernorMisconfig: ProviderBudgetGovernorMisconfig | undefined;
   let longRunIntentQueueConfig: LongRunIntentQueueConfig = DEFAULT_LONG_RUN_INTENT_QUEUE_CONFIG;
   let longRunProviderRetryConfig: LongRunProviderTransientRetryConfig =
@@ -383,36 +384,9 @@ export default function (pi: ExtensionAPI) {
   };
 
   async function resolveProviderBudgetSnapshot(ctx: ExtensionContext): Promise<ProviderBudgetGovernorSnapshot | undefined> {
-    const quota = readQuotaBudgetSettings(ctx.cwd);
-    if (Object.keys(quota.providerBudgets).length === 0) return undefined;
-
-    const key = JSON.stringify({
-      lookbackDays: providerBudgetGovernorConfig.lookbackDays,
-      quota,
-    });
-
-    if (providerBudgetSnapshotCache && providerBudgetSnapshotCache.key === key && Date.now() - providerBudgetSnapshotCache.at < 60_000) {
-      return providerBudgetSnapshotCache.snapshot;
-    }
-
-    const status = await analyzeQuota({
-      days: providerBudgetGovernorConfig.lookbackDays,
-      weeklyQuotaTokens: quota.weeklyQuotaTokens,
-      weeklyQuotaCostUsd: quota.weeklyQuotaCostUsd,
-      weeklyQuotaRequests: quota.weeklyQuotaRequests,
-      monthlyQuotaTokens: quota.monthlyQuotaTokens,
-      monthlyQuotaCostUsd: quota.monthlyQuotaCostUsd,
-      monthlyQuotaRequests: quota.monthlyQuotaRequests,
-      providerWindowHours: {},
-      providerBudgets: quota.providerBudgets,
-    });
-
-    const snapshot: ProviderBudgetGovernorSnapshot = {
-      atIso: status.source.generatedAtIso,
-      budgets: status.providerBudgets,
-    };
-    providerBudgetSnapshotCache = { at: Date.now(), key, snapshot };
-    return snapshot;
+    const result = await resolveProviderBudgetGovernorSnapshot(ctx.cwd, providerBudgetGovernorConfig, providerBudgetSnapshotCache);
+    providerBudgetSnapshotCache = result.cache;
+    return result.snapshot;
   }
 
   function clearAutoDrainTimer(): void {

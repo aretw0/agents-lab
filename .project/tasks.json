@@ -18067,6 +18067,27 @@
       ],
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:refactor] Fatia planejada de menor prioridade em arquivo crítico; executar só se helpers puros forem identificados claramente, sem launching/background side effects.\n[provenance:human] source_task=TASK-BUD-795 reason=Seed AFK reserva para caso guardrails/context/board fiquem bloqueados."
+    },
+    {
+      "id": "TASK-BUD-807",
+      "description": "Extrair resolução/cache de provider budget snapshot de guardrails-core para budget governor module, levando guardrails-core abaixo do limiar critical.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core.ts",
+        "packages/pi-stack/extensions/guardrails-core-provider-budget-governor.ts",
+        "packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "resolveProviderBudgetSnapshot em guardrails-core vira wrapper fino sobre helper do budget governor module",
+        "cache de snapshot e semântica de analyzeQuota permanecem equivalentes",
+        "guardrails-core.ts fica abaixo ou muito próximo do limiar critical de 2000 linhas",
+        "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts passa"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:refactor] Fatia local-safe emergente após TASK-BUD-797 para remover o último bloco crítico de guardrails-core.ts antes de mudar para board/context surfaces.\n[provenance:human] source_task=TASK-BUD-795 reason=Continuação AFK anti-bloat: guardrails-core.ts ficou em 2010 linhas, ainda acima do limiar critical.\nClosed via VER-BUD-1150: provider budget snapshot/cache moved to budget governor module; guardrails-core.ts now 1984 lines. [rationale:refactor] Critical threshold cleared with smoke green.",
+      "verification": "VER-BUD-1150"
     }
   ]
 }
