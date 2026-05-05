@@ -12948,6 +12948,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:10:09.083Z",
       "evidence": "Monitor issue write template schema fix: ensureMonitorIssueWriteTemplateSchema normalizes fragility/work-quality writes to .project/issues.json schema-compatible title/body/location/category=issue/priority high|medium/package/source. Runtime .pi monitor files patched. Validation: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 3 passed; safe_marker_check fragility/work-quality monitor.json -> ok."
+    },
+    {
+      "id": "VER-BUD-1192",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-05T20:25:41.595Z",
+      "evidence": "Post-reload monitor calibration validation: context_watch_status reports reloadGate=reload-not-required, monitors_compact_status reports classifyFail=0, safe_marker_check confirms fragility/work-quality runtime monitor write templates include schema-compatible issue fields, and rg found no fragility-fragility-mosyracc entry in .project/issues.json. [rationale:communicable] Reload validation closes the immediate runtime-adoption risk without auto-selecting protected scope; TASK-BUD-841 remains open for smaller follow-up monitor-runtime-contract calibration if needed."
     }
   ]
 }
