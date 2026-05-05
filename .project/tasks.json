@@ -19187,7 +19187,7 @@
     {
       "id": "TASK-BUD-858",
       "description": "Decompor backlog aberto em packs locais/protegidos para elevar planning clarity antes de novas features.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "files": [
         ".project/tasks.json",
@@ -19200,7 +19200,109 @@
         "não fechar tarefas automaticamente"
       ],
       "milestone": "planning-clarity",
-      "notes": "[rationale:planning] Seed local-safe sem entrevista: planning clarity score=63 needs-decomposition; preparar fila sustentável antes de voltar a features maiores.\n[provenance:human] source_task=none reason=Usuário perguntou o que falta e se dá para seedar várias coisas sem ele."
+      "notes": "[rationale:planning] Seed local-safe sem entrevista: planning clarity score=63 needs-decomposition; preparar fila sustentável antes de voltar a features maiores.\n[provenance:human] source_task=none reason=Usuário perguntou o que falta e se dá para seedar várias coisas sem ele.\n[slice-start] Decompondo backlog aberto em packs: protected parked permanece separado; seeded TASK-BUD-859..863 como fila local-safe de UI cohesion/readiness sem entrevista.\n[slice-complete] Backlog decomposed into local-safe UI cohesion/readiness pack and protected parked pack; no task was auto-closed except this decomposition task. Rollback: remove docs/research/planning-clarity-seed-2026-05.md and newly seeded TASK-BUD-859..863 if explicitly desired.",
+      "verification": "VER-BUD-1223"
+    },
+    {
+      "id": "TASK-BUD-859",
+      "description": "Migrar git_maintenance_status para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-git-maintenance-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-git-maintenance-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir content sem JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Fatia local-safe seeded por TASK-BUD-858; output report-only ainda retorna JSON cru.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: reduzir surfaces operator-visible restantes sem entrevista."
+    },
+    {
+      "id": "TASK-BUD-860",
+      "description": "Migrar tool_hygiene_scorecard e agents_as_tools_calibration_score para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts"
+      ],
+      "acceptance_criteria": [
+        "ambas tools devem retornar content summary-first",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir ausência de JSON cru em content"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Fatia local-safe relevante para agents-as-tools; output precisa ser barato e legível.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: preparar delegação/agents-as-tools sem aumentar autonomia."
+    },
+    {
+      "id": "TASK-BUD-861",
+      "description": "Migrar background_process_* surfaces para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-background-process-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-background-process-rehearsal.test.ts"
+      ],
+      "acceptance_criteria": [
+        "background_process_plan/readiness/rehearsal devem evitar JSON cru em content",
+        "details deve preservar payload estruturado completo",
+        "testes focais devem cobrir pelo menos duas decisões"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Fatia local-safe para futuro long-run/background readiness sem lançar processos.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: fortalecer runway antes de delegações/colônia."
+    },
+    {
+      "id": "TASK-BUD-862",
+      "description": "Migrar subagent_readiness_status para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/subagent-readiness.ts",
+        "packages/pi-stack/test/smoke/subagent-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir content sem JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Fatia local-safe alinhada à futura trilha agents-as-tools/delegação.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: readiness de subagentes precisa ser legível antes de loops maiores."
+    },
+    {
+      "id": "TASK-BUD-863",
+      "description": "Migrar session_analytics_query para saída operator-visible summary-first preservando details estruturado.",
+      "status": "planned",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir uma query analítica sem JSON cru em content"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Fatia local-safe para reduzir ruído em análises de sessão.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: analytics report-only ainda retorna JSON cru em content."
     }
   ]
 }
