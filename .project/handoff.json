@@ -1,47 +1,48 @@
 {
-  "timestamp": "2026-05-05T20:35:17.559Z",
-  "context": "Após /reload, a checagem bounded mostrou que o runtime instalado node_modules/@davidorex/pi-behavior-monitors/dist/index.js ainda tinha helpe [snip] ara aplicar a correção no runtime vivo. [truncated:+349 chars]",
+  "timestamp": "2026-05-05T20:39:59.743Z",
+  "context": "Após o /reload, validei adoção runtime da correção 67c3b2b8: node_modules/@davidorex/pi-behavior-monitors/dist/index.js contém os marcadores [snip] TASK-BUD-840 ou manter aberto/deferir. [truncated:+451 chars]",
   "current_tasks": [
     "TASK-BUD-841"
   ],
   "next_actions": [
-    "Commitar stale-helper repair + board/handoff.",
-    "Rodar /reload para acionar session_start e atualizar o helper runtime stale.",
-    "Após reload, repetir marker check em node_modules/@davidorex/pi-behavior-monitors/dist/index.j [snip] git limpo/classifyFail=0. [truncated:+13 chars]"
+    "Commitar VER-BUD-1195 + handoff/note pós-reload.",
+    "Continuar pela dependência TASK-BUD-840 em fatia pequena: hardening contextual de autorização [snip] xplicitamente autorizadas. [truncated:+42 chars]",
+    "Não completar TASK-BUD-841 até resolver/deferir a cadeia TASK-BUD-840/TASK-BUD-837 ou receber decisão humana explícita."
   ],
   "blockers": [
-    "/reload necessário para validar runtime vivo depois do repair de helper stale."
+    "TASK-BUD-841 close bloqueado por unresolved-dependencies: TASK-BUD-840 planned -> TASK-BUD-837."
   ],
   "recent_validation": [
-    "runtime marker check pós-reload -> marker-missing para git_dirty_snapshot/context_watch_auto_resume_preview/board_query",
-    "pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 6 passed",
-    "node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed"
+    "safe_marker_check node_modules/@davidorex/pi-behavior-monitors/dist/index.js -> matched git_di [snip] uery/board_decision_packet [truncated:+54 chars]",
+    "git_dirty_snapshot -> clean",
+    "monitors_compact_status -> classifyFail=0"
   ],
   "recent_commits": [
-    "20bdcaa2 chore(handoff): checkpoint read-only bypass slice",
-    "b01d5aa6 fix(monitors): widen read-only runtime bypass"
+    "67c3b2b8 fix(monitors): refresh stale read-only runtime helper",
+    "20bdcaa2 chore(handoff): checkpoint read-only bypass slice"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-841",
     "canonical_links": [
       "task:TASK-BUD-841",
-      "verification:VER-BUD-1194",
-      "commit:20bdcaa2"
+      "task:TASK-BUD-840",
+      "verification:VER-BUD-1195",
+      "commit:67c3b2b8"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:35:17.559Z",
+    "generatedAtIso": "2026-05-05T20:39:59.743Z",
     "level": "ok",
-    "percent": 28,
+    "percent": 29,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:35:17.559Z",
+      "atIso": "2026-05-05T20:39:59.743Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 28,
+      "percent": 29,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

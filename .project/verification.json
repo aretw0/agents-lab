@@ -12975,6 +12975,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:34:51.970Z",
       "evidence": "Post-reload adoption check found the installed behavior-monitor runtime still had the older unauthorized-action read-only prefilter (runtime marker check: git_dirty_snapshot/context_watch_auto_resume_preview/board_query missing) because the repair contract treated any existing prefilter as complete. Fixed monitor-runtime-contract to require canonical read-only markers and replace stale helper bodies without duplicating the hook. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 6 passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 passed; node --test packages/pi-stack/test/monitor-interference-matrix.test.mjs -> 6 passed. [rationale:communicable] This preserves the intended local-safe diagnostic bypass across reloads while keeping mutation/protected surfaces outside the bypass."
+    },
+    {
+      "id": "VER-BUD-1195",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspect",
+      "timestamp": "2026-05-05T20:38:41.081Z",
+      "evidence": "Post-reload runtime adoption validation for stale read-only helper repair: safe_marker_check on node_modules/@davidorex/pi-behavior-monitors/dist/index.js matched git_dirty_snapshot, context_watch_auto_resume_preview, board_query, and board_decision_packet; git_dirty_snapshot reports clean; monitors_compact_status reports classifyFail=0; context_watch_status reports reloadGate=reload-not-required. [rationale:communicable] The live runtime now carries the intended local-safe read-only bypass markers while preserving mutation/protected-scope gates in source and tests."
     }
   ]
 }
