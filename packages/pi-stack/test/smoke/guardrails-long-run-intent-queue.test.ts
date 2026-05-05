@@ -437,6 +437,7 @@ describe("guardrails-core long-run intent queue", () => {
     expect(triggered.reasons).toContain("wide-lines:64");
     expect(triggered.reasons).toContain("wide-hunks:4");
     expect(triggered.recommendation).toContain("split this file change into micro-slices");
+    expect(triggered.recommendation).toContain("authorized anti-bloat/refactor extraction is in-scope");
     const status = buildWideSingleFileSliceStatusLabel(triggered);
     expect(status).toContain("[slice] wide-file");
 
@@ -485,6 +486,8 @@ describe("guardrails-core long-run intent queue", () => {
     expect(codeAssessment.reasons).toContain("high-changed-lines:180");
     expect(codeAssessment.reasons).toContain("high-hunks:10");
     expect(codeAssessment.recommendation).toContain("code-bloat advisory");
+    expect(codeAssessment.recommendation).toContain("explicitly authorizes anti-bloat/refactor");
+    expect(codeAssessment.recommendation).toContain("backlog/policy tangents still need separate focus");
 
     const healthyText = evaluateTextBloatSmell("mensagem curta", { chars: 80, lines: 4, repeatedLineRatio: 0.5 });
     expect(healthyText.triggered).toBe(false);

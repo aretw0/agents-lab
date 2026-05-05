@@ -1,48 +1,48 @@
 {
-  "timestamp": "2026-05-05T20:39:59.743Z",
-  "context": "Após o /reload, validei adoção runtime da correção 67c3b2b8: node_modules/@davidorex/pi-behavior-monitors/dist/index.js contém os marcadores [snip] TASK-BUD-840 ou manter aberto/deferir. [truncated:+451 chars]",
+  "timestamp": "2026-05-05T20:43:44.528Z",
+  "context": "Depois de validar TASK-BUD-841 pós-reload e registrar VER-BUD-1195/commit 666d088b, continuei pela dependência TASK-BUD-840. Primeira fatia l [snip] D-1196; TASK-BUD-840 agora in-progress. [truncated:+272 chars]",
   "current_tasks": [
-    "TASK-BUD-841"
+    "TASK-BUD-840"
   ],
   "next_actions": [
-    "Commitar VER-BUD-1195 + handoff/note pós-reload.",
-    "Continuar pela dependência TASK-BUD-840 em fatia pequena: hardening contextual de autorização [snip] xplicitamente autorizadas. [truncated:+42 chars]",
-    "Não completar TASK-BUD-841 até resolver/deferir a cadeia TASK-BUD-840/TASK-BUD-837 ou receber decisão humana explícita."
+    "Commitar TASK-BUD-840 advisory hardening + test + board/handoff.",
+    "Continuar TASK-BUD-840 com outra micro-fatia se necessário: diferenciar explicitamente refacto [snip] drails ou monitor prompts. [truncated:+58 chars]",
+    "Depois de TASK-BUD-840 ficar suficiente, reavaliar TASK-BUD-841 close/defer; quality gate atua [snip] TASK-BUD-840/TASK-BUD-837. [truncated:+38 chars]"
   ],
   "blockers": [
-    "TASK-BUD-841 close bloqueado por unresolved-dependencies: TASK-BUD-840 planned -> TASK-BUD-837."
+    "TASK-BUD-841 close bloqueado por dependency chain: TASK-BUD-840/TASK-BUD-837.",
+    "Mudança em guardrails-core-bloat.ts requer /reload posterior para validar runt [snip] sta fatia for mantida. [truncated:+13 chars]"
   ],
   "recent_validation": [
-    "safe_marker_check node_modules/@davidorex/pi-behavior-monitors/dist/index.js -> matched git_di [snip] uery/board_decision_packet [truncated:+54 chars]",
-    "git_dirty_snapshot -> clean",
-    "monitors_compact_status -> classifyFail=0"
+    "safe_marker_check node_modules/@davidorex/pi-behavior-monitors/dist/index.js -> read-only markers present",
+    "git_dirty_snapshot antes da fatia -> clean",
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed"
   ],
   "recent_commits": [
-    "67c3b2b8 fix(monitors): refresh stale read-only runtime helper",
-    "20bdcaa2 chore(handoff): checkpoint read-only bypass slice"
+    "666d088b chore(board): record runtime bypass reload validation"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-841",
+    "focus": "TASK-BUD-840",
     "canonical_links": [
-      "task:TASK-BUD-841",
       "task:TASK-BUD-840",
+      "task:TASK-BUD-841",
       "verification:VER-BUD-1195",
-      "commit:67c3b2b8"
+      "commit:666d088b"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:39:59.743Z",
+    "generatedAtIso": "2026-05-05T20:43:44.528Z",
     "level": "ok",
-    "percent": 29,
+    "percent": 42,
     "action": "continue",
     "recommendation": "continue-bounded"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:39:59.743Z",
+      "atIso": "2026-05-05T20:43:44.528Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 29,
+      "percent": 42,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,

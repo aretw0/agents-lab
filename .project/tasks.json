@@ -18800,7 +18800,7 @@
     {
       "id": "TASK-BUD-840",
       "description": "Corrigir guardrails de autorização para não bloquear micro-extrações anti-bloat explicitamente autorizadas.",
-      "status": "planned",
+      "status": "in-progress",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-837"
@@ -18815,7 +18815,7 @@
         "Adicionar regressão/evidência para diferenciar autorização contextual de refactor vs tangente de backlog."
       ],
       "milestone": "guardrails-monitor-recalibration",
-      "notes": "[evidence:blocker-friction] Operador registrou: estamos falhando em engenharia com bloqueios que atrapalham o trabalho; durante TASK-BUD-837 o guardrail bloqueou repetidamente writes/edits/bash para micro-extrações coesas de context-watchdog, mesmo após autorização contextual para anti-bloat. Isso deve virar hardening do guardrail, não workaround manual recorrente.\n[provenance:human] source_task=TASK-BUD-837 reason=Bloqueios recorrentes atrapalharam execução de anti-bloat autorizada.\nPromovido para lane de recalibração: operador confirmou que bloqueios de autorização estão atrapalhando anti-bloat legítimo. Critério: permitir micro-extrações coesas autorizadas por objetivo de refactor/anti-bloat, mas continuar bloqueando tangentes de backlog e mudanças de política/threshold sem foco explícito."
+      "notes": "[evidence:blocker-friction] Operador registrou: estamos falhando em engenharia com bloqueios que atrapalham o trabalho; durante TASK-BUD-837 o guardrail bloqueou repetidamente writes/edits/bash para micro-extrações coesas de context-watchdog, mesmo após autorização contextual para anti-bloat. Isso deve virar hardening do guardrail, não workaround manual recorrente.\n[provenance:human] source_task=TASK-BUD-837 reason=Bloqueios recorrentes atrapalharam execução de anti-bloat autorizada.\nPromovido para lane de recalibração: operador confirmou que bloqueios de autorização estão atrapalhando anti-bloat legítimo. Critério: permitir micro-extrações coesas autorizadas por objetivo de refactor/anti-bloat, mas continuar bloqueando tangentes de backlog e mudanças de política/threshold sem foco explícito.\n2026-05-05 primeira fatia local-safe: recalibrado advisory de bloat/slice-wide para reconhecer que, quando a task ativa autoriza explicitamente anti-bloat/refactor, extração coesa é in-scope; tangentes de backlog/policy continuam exigindo foco separado. Isso reduz falso bloqueio/steer contra micro-extrações autorizadas sem liberar mudanças não relacionadas."
     },
     {
       "id": "TASK-BUD-841",

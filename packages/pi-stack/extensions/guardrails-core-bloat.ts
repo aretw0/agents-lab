@@ -300,7 +300,7 @@ export function evaluateCodeBloatSmell(
     triggered: reasons.length > 0,
     reasons,
     recommendation: reasons.length > 0
-      ? "code-bloat advisory: split into micro-slices; if indivisible, register explicit backlog note before continuing."
+      ? "code-bloat advisory: split into micro-slices; when the active task explicitly authorizes anti-bloat/refactor, cohesive extraction is in-scope, but backlog/policy tangents still need separate focus."
       : "code-bloat: healthy",
     metrics: {
       changedLines,
@@ -338,7 +338,7 @@ export function evaluateWideSingleFileSlice(
     triggered,
     reasons: triggered ? reasons.filter((reason) => reason.startsWith("wide-")) : reasons,
     recommendation: triggered
-      ? "slice-wide advisory: split this file change into micro-slices; if indivisible, register backlog/board note now before continuing."
+      ? "slice-wide advisory: split this file change into micro-slices; authorized anti-bloat/refactor extraction is in-scope, but unrelated backlog/policy changes still need separate focus."
       : "slice-width: healthy",
     metrics: {
       changedLines,

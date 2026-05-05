@@ -12984,6 +12984,15 @@
       "method": "inspect",
       "timestamp": "2026-05-05T20:38:41.081Z",
       "evidence": "Post-reload runtime adoption validation for stale read-only helper repair: safe_marker_check on node_modules/@davidorex/pi-behavior-monitors/dist/index.js matched git_dirty_snapshot, context_watch_auto_resume_preview, board_query, and board_decision_packet; git_dirty_snapshot reports clean; monitors_compact_status reports classifyFail=0; context_watch_status reports reloadGate=reload-not-required. [rationale:communicable] The live runtime now carries the intended local-safe read-only bypass markers while preserving mutation/protected-scope gates in source and tests."
+    },
+    {
+      "id": "VER-BUD-1196",
+      "target": "TASK-BUD-840",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:43:17.915Z",
+      "evidence": "First contextual authorization hardening slice: code-bloat and wide-slice advisories now state that explicitly authorized anti-bloat/refactor extraction is in-scope while backlog/policy tangents still need separate focus. Regression assertions added in packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts. Validation: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed. [rationale:communicable] This addresses the anti-bloat/refactor false-steer without weakening unrelated tangent or policy-change separation."
     }
   ]
 }
