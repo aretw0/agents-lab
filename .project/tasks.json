@@ -18355,6 +18355,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Após reload, continuar local-safe: colony-pilot.ts está em 1920 linhas e a surface de tools read/report é extraível sem protected scope.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração da tool surface colony-pilot após reload confirmado.\nClosed via VER-BUD-1171: extracted colony-pilot tool surface and validated 93 focal tests. [rationale:anti-bloat] colony-pilot.ts now 1742; aboveCritical remains 0.",
       "verification": "VER-BUD-1171"
+    },
+    {
+      "id": "TASK-BUD-820",
+      "description": "Extrair comando colony-promote de colony-pilot para módulo de command shortcuts.",
+      "status": "completed",
+      "priority": "p2",
+      "files": [
+        "packages/pi-stack/extensions/colony-pilot.ts",
+        "packages/pi-stack/extensions/colony-pilot-command-shortcuts.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts",
+        "packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover registro de /colony-promote para módulo coeso",
+        "preservar mensagens e contrato de confirmação manual",
+        "reduzir colony-pilot.ts sem alterar fluxo principal",
+        "validar smokes focais de colony-pilot"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Pequena extração local-safe pós tool-surface para continuar reduzindo colony-pilot.ts e separar shortcut de promoção.\n[provenance:human] source_task=none reason=Usuário pediu continuar após reload.\n[rationale:anti-bloat] Iniciando extração do shortcut /colony-promote; reload será acumulado para o fim da leva.\nClosed via VER-BUD-1172: extracted colony-promote shortcut and validated 93 focal tests. [rationale:anti-bloat] colony-pilot.ts now 1706; reload batched for final.",
+      "verification": "VER-BUD-1172"
     }
   ]
 }

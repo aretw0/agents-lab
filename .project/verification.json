@@ -12768,6 +12768,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:40:54.070Z",
       "evidence": "Extracted colony_pilot_status, colony_pilot_artifacts, colony_pilot_preflight, and colony_pilot_baseline tool registration from packages/pi-stack/extensions/colony-pilot.ts into packages/pi-stack/extensions/colony-pilot-tool-surface.ts via registerColonyPilotToolSurface. Preserved tool names, JSON output policy, baseline apply/preview behavior, and preflight cache update through runtime.setPreflightCache callback. colony-pilot.ts reduced from 1920 to 1742 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 3 files passed, 93 tests passed; safe_marker_check passed for extracted surface; git diff --check clean; line_budget_snapshot remains aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Continues post-reload local-safe anti-bloat and lowers colony-pilot below near-critical range."
+    },
+    {
+      "id": "VER-BUD-1172",
+      "target": "TASK-BUD-820",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:45:25.365Z",
+      "evidence": "Extracted /colony-promote command registration from packages/pi-stack/extensions/colony-pilot.ts into packages/pi-stack/extensions/colony-pilot-command-shortcuts.ts via registerColonyPilotCommandShortcuts. Preserved manual confirmation wording and deliveryMode='apply-to-branch' prompt contract. colony-pilot.ts reduced from 1742 to 1706 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 3 files passed, 93 tests passed; safe_marker_check passed; git diff --check clean; line_budget_snapshot aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Small local-safe extraction keeps promotion shortcut separate from main pilot orchestration."
     }
   ]
 }
