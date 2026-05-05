@@ -18249,6 +18249,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Após descartar .project/issues.json monitor-only, line budget ainda recomenda extract; colony-pilot.ts está em 2025 linhas e pode cair abaixo de critical com extração pequena.\n[provenance:human] source_task=none reason=Continuation after reload and explicit permission to discard monitor-created issues.\n[rationale:anti-bloat] Iniciando extração pequena em colony-pilot defaults/resolvers; escopo local TS + smoke focal, objetivo <2000 linhas.\nClosed via VER-BUD-1166: extracted colony-pilot policy defaults/resolvers and validated 86 focal smoke tests. [rationale:anti-bloat] colony-pilot.ts dropped to 1920 (<2000); line budget aboveCritical now 1.",
       "verification": "VER-BUD-1166"
+    },
+    {
+      "id": "TASK-BUD-815",
+      "description": "Extrair surface read-only de continuação do context-watchdog para reduzir arquivo crítico sem exigir reload intermediário.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-continuation-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover tools context_preload_consume e previews de continuação/canário/operator packet para módulo coeso",
+        "preservar nomes e contratos públicos das tools",
+        "reduzir context-watchdog.ts de forma significativa rumo a <2000 linhas",
+        "validar smoke focal de context-watchdog/continuation"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Usuário pediu acumular mudanças que precisam reload e interagir só ao final; fatia local-safe agrupa runtime refactor sem pedir reload intermediário.\n[provenance:human] source_task=none reason=Continuation after reload with explicit instruction to batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração de tools read-only de continuação; reload será acumulado para o final conforme steer do usuário.\nClosed via VER-BUD-1167: extracted context-watchdog continuation surface and validated 87 focal tests. [rationale:anti-bloat] context-watchdog.ts now 1999 lines; line budget aboveCritical=0; reload batched for final operator interaction.",
+      "verification": "VER-BUD-1167"
     }
   ]
 }

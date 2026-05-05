@@ -12723,6 +12723,15 @@
       "method": "test",
       "timestamp": "2026-05-05T11:22:42.909Z",
       "evidence": "Discarded .project/issues.json monitor-only uncommitted entries after user explicitly allowed discard; dirty state now only handoff plus current task edits. Extracted colony-pilot defaults/resolvers to packages/pi-stack/extensions/colony-pilot-policy-defaults.ts: DEFAULT_BUDGET_POLICY, DEFAULT_PROJECT_TASK_SYNC, DEFAULT_DELIVERY_POLICY, resolveColonyPilotBudgetPolicy, and resolveColonyPilotProjectTaskSync. colony-pilot.ts preserves public exports/re-exports and dropped from 2025 to 1920 lines, below critical 2000. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts => 2 files passed, 86 tests passed; safe_marker_check passed for extracted defaults/resolvers; git diff --check clean; line_budget_snapshot improved aboveCritical from 2 to 1 while still recommending extract. [rationale:anti-bloat] Cohesive local-safe extraction removes colony-pilot from critical line budget without changing runtime behavior."
+    },
+    {
+      "id": "VER-BUD-1167",
+      "target": "TASK-BUD-815",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:03:05.421Z",
+      "evidence": "Extracted context-watchdog continuation/read-only preview tool registration into packages/pi-stack/extensions/context-watchdog-continuation-surface.ts. Moved context_preload_consume, context_watch_continuation_readiness, turn_boundary_decision_packet, context_watch_one_slice_canary_preview, and context_watch_one_slice_operator_packet_preview registration behind registerContextWatchdogContinuationSurface while preserving public tool names/contracts. context-watchdog.ts reduced from 2460 to 1999 lines; line_budget_snapshot now reports aboveCritical=0, aboveExtract=7, recommendation=extract. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 4 files passed, 87 tests passed; safe_marker_check passed for extracted surface; git diff --check clean. [rationale:anti-bloat] Batches reload-needing runtime refactor per user instruction while removing last critical line-budget surface."
     }
   ]
 }
