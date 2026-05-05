@@ -12660,6 +12660,15 @@
       "method": "test",
       "timestamp": "2026-05-05T10:34:08.410Z",
       "evidence": "Extracted board verification append/task completion flow into project-board-completion.ts, keeping project-board-surface.ts as a thin wrapper that injects updateProjectTaskBoard. Validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces project-board-surface.ts from 1835 to 1664 lines while preserving board_verification_append and board_task_complete contracts."
+    },
+    {
+      "id": "VER-BUD-1160",
+      "target": "TASK-BUD-804",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T10:38:55.598Z",
+      "evidence": "Extracted repeated autonomy lane task-selection/material/brainstorm tool schemas into guardrails-core-autonomy-lane-tool-schemas.ts, preserving tool registration contracts and descriptions. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/lane-brainstorm-packet.test.ts => 3 files passed, 61 tests passed. git diff --check for touched files => clean. [rationale:refactor] Reduces guardrails-core-autonomy-lane-surface.ts from 1840 to 1768 lines while keeping schemas centralized for further slices."
     }
   ]
 }

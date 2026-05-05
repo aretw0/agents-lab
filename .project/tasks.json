@@ -18021,7 +18021,7 @@
     {
       "id": "TASK-BUD-804",
       "description": "Extrair registro/schema de tools de guardrails-core-autonomy-lane-surface em slices menores, preservando contratos públicos de autonomia.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p3",
       "files": [
         "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
@@ -18034,7 +18034,8 @@
         "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts passa"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:refactor] Fatia local-safe posterior a formatting; separar registro/schema mantendo report-only/no-dispatch.\n[provenance:human] source_task=TASK-BUD-803 reason=Seed AFK anti-bloat para continuar superfície autonomy lane se a fatia anterior estiver verde."
+      "notes": "[rationale:refactor] Fatia local-safe posterior a formatting; separar registro/schema mantendo report-only/no-dispatch.\n[provenance:human] source_task=TASK-BUD-803 reason=Seed AFK anti-bloat para continuar superfície autonomy lane se a fatia anterior estiver verde.\nClosed via VER-BUD-1160: repeated autonomy lane tool schemas extracted; autonomy lane/brainstorm smoke passed (61 tests). [rationale:refactor] Registration surface is smaller and schema definitions are reusable.",
+      "verification": "VER-BUD-1160"
     },
     {
       "id": "TASK-BUD-805",

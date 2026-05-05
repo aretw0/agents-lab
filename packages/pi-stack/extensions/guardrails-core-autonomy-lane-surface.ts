@@ -28,6 +28,11 @@ import {
   buildAutonomyLaneStatusSummary,
   buildDelegationLaneCapabilitySummary,
 } from "./guardrails-core-autonomy-lane-formatting";
+import {
+  buildAutonomyMaterialParameters,
+  buildAutonomyTaskSelectionParameters,
+  buildLaneBrainstormParameters,
+} from "./guardrails-core-autonomy-lane-tool-schemas";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -1524,14 +1529,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_next_task",
     label: "Autonomy Lane Next Task",
     description: "Select the next conservative autonomy-lane board task. Read-only and side-effect-free.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
-    }),
+    parameters: buildAutonomyTaskSelectionParameters(),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
@@ -1568,14 +1566,11 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_batch_preview",
     label: "Autonomy Lane Batch Preview",
     description: "Report-only batch preview listing 3-7 local-safe slices with short validation/rollback cues for continuous execution.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to inspect before preview (1..20)." })),
-      slice_count: Type.Optional(Type.Number({ description: "Requested preview size (3..7, default 5)." })),
+    parameters: buildAutonomyTaskSelectionParameters({
+      sampleLimitDescription: "Max eligible ids to inspect before preview (1..20).",
+      extra: {
+        slice_count: Type.Optional(Type.Number({ description: "Requested preview size (3..7, default 5)." })),
+      },
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -1595,16 +1590,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_material_readiness_packet",
     label: "Autonomy Lane Material Readiness Packet",
     description: "Report-only AFK lane material readiness packet (continue|seed-backlog|blocked) with no dispatch authorization.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
-      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum local-safe validated slices to continue AFK run (default 3)." })),
-      target_slices: Type.Optional(Type.Number({ description: "Target local-safe validated slices to keep stocked (default 7)." })),
-    }),
+    parameters: buildAutonomyMaterialParameters(),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAfkMaterialReadinessPacket(p, ctx.cwd);
@@ -1619,17 +1605,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_material_seed_packet",
     label: "Autonomy Lane Material Seed Packet",
     description: "Report-only AFK seeding recommendation packet (seed-now|wait|blocked) with no dispatch authorization.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
-      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum local-safe validated slices to continue AFK run (default 3)." })),
-      target_slices: Type.Optional(Type.Number({ description: "Target local-safe validated slices to keep stocked (default 7)." })),
-      max_seed_slices: Type.Optional(Type.Number({ description: "Maximum suggested slices for one explicit seeding decision (1..10, default 3)." })),
-    }),
+    parameters: buildAutonomyMaterialParameters({ maxSeedSlices: true }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const packet = buildAfkMaterialSeedPacket(p, ctx.cwd);
@@ -1644,15 +1620,9 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_influence_assimilation_packet",
     label: "Autonomy Lane Influence Assimilation Packet",
     description: "Report-only packet recommending when to assimilate external influences (ready-window|defer|blocked) without dispatch authorization.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
-      min_ready_slices: Type.Optional(Type.Number({ description: "Minimum validated local-safe stock before considering external influence assimilation (default 3)." })),
-      target_slices: Type.Optional(Type.Number({ description: "Target validated local-safe stock to preserve after assimilation decision (default 7)." })),
-      min_validation_coverage_pct: Type.Optional(Type.Number({ description: "Minimum local-safe validation maturity percentage before assimilation window opens (default 80)." })),
+    parameters: buildAutonomyMaterialParameters({
+      includeProtectedScopes: false,
+      influenceMaturity: true,
     }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
@@ -1668,14 +1638,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "autonomy_lane_auto_advance_snapshot",
     label: "Autonomy Lane Auto-Advance Snapshot",
     description: "Report-only snapshot for hard-intent auto-advance (focus-complete -> successor) with explicit fail-closed blockers.",
-    parameters: Type.Object({
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
-      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
-      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to return (1..20)." })),
-    }),
+    parameters: buildAutonomyTaskSelectionParameters(),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const snapshot = buildAutoAdvanceHardIntentSnapshot(p, ctx.cwd);
@@ -1728,24 +1691,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "lane_brainstorm_packet",
     label: "Lane Brainstorm Packet",
     description: "Report-only lane brainstorm packet with ranked ideas and stable recommendationCode/nextAction.",
-    parameters: Type.Object({
-      goal: Type.Optional(Type.String({ description: "Short lane objective." })),
-      ideas: Type.Optional(Type.Array(Type.Object({
-        id: Type.String(),
-        theme: Type.String(),
-        value: Type.Optional(Type.String()),
-        risk: Type.Optional(Type.String()),
-        effort: Type.Optional(Type.String()),
-      }))),
-      max_ideas: Type.Optional(Type.Number({ description: "Max ranked ideas (1..50)." })),
-      max_slices: Type.Optional(Type.Number({ description: "Max suggested slices (1..10)." })),
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in protected scopes." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in missing rationale tasks." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String())),
-      use_handoff_focus: Type.Optional(Type.Boolean()),
-      sample_limit: Type.Optional(Type.Number()),
-    }),
+    parameters: buildLaneBrainstormParameters(),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
@@ -1768,25 +1714,7 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
     name: "lane_brainstorm_seed_preview",
     label: "Lane Brainstorm Seed Preview",
     description: "Report-only visible seeding preview from brainstorm slices; always requires explicit human decision before task materialization.",
-    parameters: Type.Object({
-      goal: Type.Optional(Type.String({ description: "Short lane objective." })),
-      ideas: Type.Optional(Type.Array(Type.Object({
-        id: Type.String(),
-        theme: Type.String(),
-        value: Type.Optional(Type.String()),
-        risk: Type.Optional(Type.String()),
-        effort: Type.Optional(Type.String()),
-      }))),
-      max_ideas: Type.Optional(Type.Number({ description: "Max ranked ideas (1..50)." })),
-      max_slices: Type.Optional(Type.Number({ description: "Max suggested slices (1..10)." })),
-      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
-      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in protected scopes." })),
-      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in missing rationale tasks." })),
-      focus_task_ids: Type.Optional(Type.Array(Type.String())),
-      use_handoff_focus: Type.Optional(Type.Boolean()),
-      sample_limit: Type.Optional(Type.Number()),
-      source: Type.Optional(Type.String({ description: "brainstorm | human | tangent-approved" })),
-    }),
+    parameters: buildLaneBrainstormParameters({ includeSource: true }),
     execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const p = (params ?? {}) as Record<string, unknown>;
       const selection = resolveTaskSelection(p, ctx.cwd);
