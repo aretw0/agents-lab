@@ -18566,7 +18566,7 @@
     {
       "id": "TASK-BUD-830",
       "description": "Extrair runtime de bloat-smell do guardrails-core para módulo dedicado após limpar o último aboveExtract.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-829"
@@ -18584,12 +18584,13 @@
         "validar smokes focais de guardrails-core e bloat quando aplicável"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Fatia sucessora local-safe para manter loop após TASK-BUD-829; escopo sem protected scope e com rollback por git.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Fatia sucessora local-safe para manter loop após TASK-BUD-829; escopo sem protected scope e com rollback por git.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nConcluído por sobreposição com TASK-BUD-829: bloat-smell runtime foi movido para event surface coesa; sem código adicional necessário.",
+      "verification": "VER-BUD-1179"
     },
     {
       "id": "TASK-BUD-831",
       "description": "Ratchet de orçamento do guardrails-core após extrações, com teste de regressão anti-reinflation.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-829"
@@ -18606,7 +18607,8 @@
         "não alterar comportamento runtime"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Após reduzir o último aboveExtract, precisamos evitar reinflação e manter o loop orientado por orçamento estável.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Após reduzir o último aboveExtract, precisamos evitar reinflação e manter o loop orientado por orçamento estável.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nConcluído: orçamento do orchestrator guardrails-core ratcheted para 1400 linhas com checagem da event surface.",
+      "verification": "VER-BUD-1180"
     },
     {
       "id": "TASK-BUD-832",

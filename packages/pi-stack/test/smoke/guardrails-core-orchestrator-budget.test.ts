@@ -4,7 +4,7 @@ import * as path from "node:path";
 
 const CORE_PATH = path.resolve(__dirname, "../../extensions/guardrails-core.ts");
 // Staged ratchet: tighten gradually as surfaces are extracted.
-const MAX_ORCHESTRATOR_LINES = 3600;
+const MAX_ORCHESTRATOR_LINES = 1400;
 
 describe("guardrails-core orchestrator budget", () => {
 	it("stays under orchestrator line budget", () => {
@@ -18,6 +18,7 @@ describe("guardrails-core orchestrator budget", () => {
 
 	it("keeps extracted surface registrars wired in orchestrator", () => {
 		const source = readFileSync(CORE_PATH, "utf8");
+		expect(source).toContain("registerGuardrailsCoreEventSurface(pi, eventSurfaceRuntime)");
 		expect(source).toContain("registerGuardrailsDeliverySurface(pi, appendAuditEntry)");
 		expect(source).toContain("registerGuardrailsSafeMutationSurface(pi, appendAuditEntry)");
 		expect(source).toContain("evaluateBashGuardPolicies(command)");
