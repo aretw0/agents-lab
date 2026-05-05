@@ -18613,7 +18613,7 @@
     {
       "id": "TASK-BUD-832",
       "description": "Reduzir guardrails-core-ops-calibration-surface rumo a <=1000 linhas por extração coesa.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-829"
@@ -18630,7 +18630,8 @@
         "manter output humano resumido e detalhes estruturados"
       ],
       "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] Arquivo acima de watch (~1267 linhas) é bom candidato após limpar aboveExtract; também conversa com a lane de UI coesa.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK."
+      "notes": "[rationale:anti-bloat] Arquivo acima de watch (~1267 linhas) é bom candidato após limpar aboveExtract; também conversa com a lane de UI coesa.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após limpar aboveExtract; alvo watch: guardrails-core-ops-calibration-surface.ts.\nConcluído: helpers de ops calibration extraídos; aboveWatch caiu para 11.",
+      "verification": "VER-BUD-1181"
     },
     {
       "id": "TASK-BUD-833",

@@ -12849,6 +12849,15 @@
       "method": "test",
       "timestamp": "2026-05-05T16:07:24.846Z",
       "evidence": "Ratchet anti-reinflation aplicado: MAX_ORCHESTRATOR_LINES em packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts reduzido de 3600 para 1400 e teste passou a exigir registerGuardrailsCoreEventSurface wired. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 1 file/2 tests passed."
+    },
+    {
+      "id": "VER-BUD-1181",
+      "target": "TASK-BUD-832",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T16:11:07.292Z",
+      "evidence": "Extraídos helpers de ops calibration surface para packages/pi-stack/extensions/guardrails-core-ops-calibration-surface-helpers.ts. guardrails-core-ops-calibration-surface.ts reduziu de 1267 para 687 linhas; helper novo tem 608 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts => 2 files/24 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=11 recommendation=watch."
     }
   ]
 }
