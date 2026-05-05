@@ -12777,6 +12777,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:45:25.365Z",
       "evidence": "Extracted /colony-promote command registration from packages/pi-stack/extensions/colony-pilot.ts into packages/pi-stack/extensions/colony-pilot-command-shortcuts.ts via registerColonyPilotCommandShortcuts. Preserved manual confirmation wording and deliveryMode='apply-to-branch' prompt contract. colony-pilot.ts reduced from 1742 to 1706 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/colony-pilot-parsers.test.ts packages/pi-stack/test/smoke/colony-pilot-hatch-e2e-harness.test.ts packages/pi-stack/test/smoke/package-list.test.ts => 3 files passed, 93 tests passed; safe_marker_check passed; git diff --check clean; line_budget_snapshot aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Small local-safe extraction keeps promotion shortcut separate from main pilot orchestration."
+    },
+    {
+      "id": "VER-BUD-1173",
+      "target": "TASK-BUD-821",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:56:25.072Z",
+      "evidence": "Extracted project-board governance helpers from packages/pi-stack/extensions/project-board-surface.ts into packages/pi-stack/extensions/project-board-governance-surface-helpers.ts: buildProjectTaskDecisionPacket, updateProjectTaskDependencies, buildProjectTaskQualityGate, buildBoardPlanningClarityScore, buildBoardDependencyHealthSnapshot, and buildBoardDependencyHygieneScore plus related result types. Preserved public exports through project-board-surface.ts and imported bindings for tool registrations. project-board-surface.ts reduced from 1664 to 1076 lines. Validation: initial focal run exposed missing local imports for tool execute bindings; fixed by importing helpers. Final validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed; safe_marker_check passed for extracted helpers; git diff --check clean; line_budget_snapshot improved aboveExtract from 6 to 5, aboveCritical=0. [rationale:anti-bloat] Removes project-board-surface from aboveExtract while preserving board tool contracts."
     }
   ]
 }

@@ -18376,6 +18376,26 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Pequena extração local-safe pós tool-surface para continuar reduzindo colony-pilot.ts e separar shortcut de promoção.\n[provenance:human] source_task=none reason=Usuário pediu continuar após reload.\n[rationale:anti-bloat] Iniciando extração do shortcut /colony-promote; reload será acumulado para o fim da leva.\nClosed via VER-BUD-1172: extracted colony-promote shortcut and validated 93 focal tests. [rationale:anti-bloat] colony-pilot.ts now 1706; reload batched for final.",
       "verification": "VER-BUD-1172"
+    },
+    {
+      "id": "TASK-BUD-821",
+      "description": "Extrair helpers de governança do project-board-surface para reduzir superfície acima de extract mantendo exports públicos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/project-board-surface.ts",
+        "packages/pi-stack/extensions/project-board-governance-surface-helpers.ts",
+        "packages/pi-stack/test/smoke/project-board-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover decision packet, dependency update, quality gate, planning clarity e dependency hygiene helpers para módulo coeso",
+        "preservar exports públicos via project-board-surface.ts",
+        "reduzir project-board-surface.ts abaixo de 1400 linhas",
+        "validar smoke focal project-board-surface"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Após reload confirmado, continuar em superfície local-safe acima de extract; helpers puros/read-mostly são extraíveis sem protected scope.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração de helpers de governança do project-board-surface; reload será acumulado para final da leva.\nClosed via VER-BUD-1173: extracted project-board governance helpers and validated 64 focal tests. [rationale:anti-bloat] project-board-surface.ts now 1076; line budget aboveExtract=5.",
+      "verification": "VER-BUD-1173"
     }
   ]
 }
