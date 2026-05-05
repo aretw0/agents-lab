@@ -772,6 +772,14 @@
       "resolution": "fixed-immediately",
       "resolvedAtIso": "2026-04-29T00:25:30.000Z",
       "resolvedNote": "Rewrote .project/handoff.json with fresh context-watch checkpoint/compact state and current machine-maintenance OK evidence; removed stale disk-pressure-block payload."
+    },
+    {
+      "id": "fragility-fragility-morulqak",
+      "description": "The agent returned an empty response, leaving the outcome undefined instead of reporting what it found or did.",
+      "status": "open",
+      "category": "fragility",
+      "priority": "warning",
+      "source": "monitor"
     }
   ]
 }

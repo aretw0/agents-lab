@@ -12309,6 +12309,42 @@
       "method": "test",
       "timestamp": "2026-05-04T23:44:49.514Z",
       "evidence": "Consolidado `delegation_readiness_status_packet` com `operationalRunway` (delegação+background), recomendação `local-execute|simple-delegate|defer` e blockers normalizados. Smoke focal verde: `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (22 passed), `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` (81 passed), `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (2 passed)."
+    },
+    {
+      "id": "VER-BUD-1121",
+      "target": "TASK-BUD-769",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T00:26:58.787Z",
+      "evidence": "Extraída composição de runway para módulo dedicado `packages/pi-stack/extensions/guardrails-core-autonomy-lane-runway.ts` (tipos explícitos + buildRunwayReadinessCue/readDelegationFreshnessSignals). `guardrails-core-autonomy-lane-surface.ts` passou a consumir o módulo mantendo contrato/summaries (`runway`, `delegationReady`, `backgroundReady`) e invariantes report-only/fail-closed. Smoke focal verde: `pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (40 passed), `pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts` (32 passed)."
+    },
+    {
+      "id": "VER-BUD-1122",
+      "target": "TASK-BUD-770",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T00:27:18.028Z",
+      "evidence": "Adicionado `unlockChecklist` normalizado (top blockers + next action) em `delegation_readiness_status_packet` e `background_process_readiness_packet`, preservando `authorization=none` e `dispatchAllowed=false`. Cobertura smoke para caminhos blocked/needs-evidence/ready atualizada em `packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` e `packages/pi-stack/test/smoke/guardrails-background-process.test.ts`; documentação alinhada em `docs/primitives/ops-calibration-decision-packet.md` e `docs/primitives/background-process-control.md`. Validação: `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (33 passed)."
+    },
+    {
+      "id": "VER-BUD-1123",
+      "target": "TASK-BUD-771",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T00:38:18.983Z",
+      "evidence": "Novo tool report-only `autonomy_lane_batch_preview` adicionado em `packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts`, com fila bounded 3-7 slices local-safe e payload por slice contendo `validationGate` e `rollback` curtos; fail-closed preservado (`authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`). Cobertura smoke incluída em `packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` para caminhos ready, seed-backlog e blocked-dirty. Validação: `pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts packages/pi-stack/test/smoke/autonomy-task-selector.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts packages/pi-stack/test/smoke/guardrails-background-process.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (108 passed)."
+    },
+    {
+      "id": "VER-BUD-1124",
+      "target": "TASK-BUD-772",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T00:38:28.711Z",
+      "evidence": "Doutrina atualizada em `docs/guides/control-plane-operating-doctrine.md` com contrato explícito de batch lane: seção `Contrato hard/soft intent para batch lane`, distinção `hard-intent batch gates` vs `soft-intent batch preferences`, e critérios operacionais de quando continuar, checkpointar e pausar para decisão estratégica. Checklist de docs expandido em `packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` para validar âncoras novas (incluindo `autonomy_lane_batch_preview`). Validação: `pnpm vitest --run packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts` (45 passed) e pack regressão local-safe (108 passed)."
     }
   ]
 }

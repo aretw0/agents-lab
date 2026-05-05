@@ -17283,7 +17283,7 @@
     {
       "id": "TASK-BUD-769",
       "description": "Anti-bloat Wave 3: extrair a composição de `runwayReadinessCue` de `guardrails-core-autonomy-lane-surface.ts` para módulo dedicado, preservando contrato/summary atuais.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-768"
@@ -17299,12 +17299,13 @@
         "Smoke focal de autonomia permanece verde sem regressão de payload."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] reduzir acoplamento no surface principal para acelerar ondas longas de manutenção boring com rollback simples."
+      "notes": "[rationale:risk-control] reduzir acoplamento no surface principal para acelerar ondas longas de manutenção boring com rollback simples.\nAnti-bloat wave 3 concluída: composição de runway extraída para módulo dedicado com rollback simples.",
+      "verification": "VER-BUD-1121"
     },
     {
       "id": "TASK-BUD-770",
       "description": "Adicionar `unlockChecklist` normalizado no `delegation_readiness_status_packet` e no `background_process_readiness_packet`, priorizando blockers acionáveis para reduzir polling manual.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-768"
@@ -17321,12 +17322,13 @@
         "Smokes cobrem caminhos blocked, needs-evidence e ready com checklist consistente."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] melhorar throughput operacional sem abrir promoções automáticas."
+      "notes": "[rationale:risk-control] melhorar throughput operacional sem abrir promoções automáticas.\nUnlock checklist acionável entregue nos packets de readiness para reduzir polling manual sem abrir auto-promoção.",
+      "verification": "VER-BUD-1122"
     },
     {
       "id": "TASK-BUD-771",
       "description": "Criar `autonomy_lane_batch_preview` (report-only) para listar 3-7 slices local-safe elegíveis com validação/rollback resumidos para execução contínua de várias horas.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-769"
@@ -17341,12 +17343,13 @@
         "Contrato fail-closed mantido: sem dispatch/autorização implícita."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] criar material pronto para long-runs locais com baixa necessidade de intervenção humana."
+      "notes": "[rationale:risk-control] criar material pronto para long-runs locais com baixa necessidade de intervenção humana.\nBatch preview report-only (3-7 slices) entregue com gate mínimo de validação/rollback por fatia e contrato fail-closed preservado.",
+      "verification": "VER-BUD-1123"
     },
     {
       "id": "TASK-BUD-772",
       "description": "Documentar e validar contrato hard/soft intent para execução em lote (batch lane): quando continuar sozinho, quando checkpointar e quando pausar para decisão estratégica.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-771"
@@ -17361,7 +17364,8 @@
         "Guia orienta retorno ao usuário apenas em blocker/protected/decisão irreversível."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] alinhar autonomia prolongada com governança explícita e previsível."
+      "notes": "[rationale:risk-control] alinhar autonomia prolongada com governança explícita e previsível.\nContrato hard/soft intent para execução em lote documentado e coberto por checklist de anchors para prevenir drift.",
+      "verification": "VER-BUD-1124"
     }
   ]
 }
