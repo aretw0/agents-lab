@@ -13173,6 +13173,15 @@
       "method": "test",
       "timestamp": "2026-05-05T22:28:56.663Z",
       "evidence": "Migrated recurring_failure_hardening_plan in packages/pi-stack/extensions/guardrails-core-recurring-failure-surface.ts to buildOperatorVisibleToolResponse using result.summary as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts to assert summary-first content and no raw JSON decision field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure-surface.test.ts packages/pi-stack/test/smoke/guardrails-recurring-failure.test.ts -> 3 files passed, 10 tests passed."
+    },
+    {
+      "id": "VER-BUD-1217",
+      "target": "TASK-BUD-852",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T22:31:28.193Z",
+      "evidence": "Migrated growth_maturity_score_packet in packages/pi-stack/extensions/guardrails-core-growth-maturity-surface.ts to buildOperatorVisibleToolResponse using result.summary as primary content while preserving structured details. Updated packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts to assert summary-first content and no raw JSON decision field in content. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts -> 2 files passed, 8 tests passed. Initial assertion expected the wrong summary prefix, then was corrected to the actual growth-maturity-score summary."
     }
   ]
 }

@@ -1,6 +1,7 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { evaluateGrowthMaturityScorePacket } from "./guardrails-core-growth-maturity";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 export function registerGuardrailsGrowthMaturitySurface(pi: ExtensionAPI): void {
   pi.registerTool({
@@ -30,10 +31,11 @@ export function registerGuardrailsGrowthMaturitySurface(pi: ExtensionAPI): void 
         criticalBlockers: typeof p.critical_blockers === "number" ? p.critical_blockers : undefined,
       });
 
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "growth_maturity_score_packet",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

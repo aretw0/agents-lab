@@ -24,7 +24,7 @@ function getTool(pi: ReturnType<typeof makeMockPi>, name: string) {
       signal: AbortSignal,
       onUpdate: (update: unknown) => void,
       ctx: { cwd: string },
-    ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
+    ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
   };
 }
 
@@ -108,6 +108,9 @@ describe("growth maturity score packet", () => {
     expect(ready.details?.dispatchAllowed).toBe(false);
     expect(ready.details?.mutationAllowed).toBe(false);
     expect(ready.details?.authorization).toBe("none");
+    expect(ready.content?.[0]?.text).toContain("growth-maturity-score: decision=go code=growth-maturity-go-expand-bounded score=88");
+    expect(ready.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(ready.content?.[0]?.text).not.toContain('\"decision\"');
 
     const missing = await tool.execute(
       "tc-growth-maturity-missing",

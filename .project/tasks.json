@@ -19060,6 +19060,27 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Continuação local-safe do trabalho de UI cohesion solicitado após reload; TASK-BUD-849 permanece parked/protected de médio prazo.\n[provenance:human] source_task=TASK-BUD-850 reason=Retomar o trabalho anterior até onde precisa continuar: migrar outra surface report-only que ainda retorna JSON cru em content.\n[slice-start] Aplicando helper operator-visible em recurring_failure_hardening_plan; lógica core resolveRecurringFailureHardening permanece inalterada.\n[slice-complete] recurring_failure_hardening_plan no longer emits raw JSON as primary content. Rollback: revert guardrails-core-recurring-failure-surface.ts and guardrails-recurring-failure-surface.test.ts changes.",
       "verification": "VER-BUD-1216"
+    },
+    {
+      "id": "TASK-BUD-852",
+      "description": "Migrar growth_maturity_score_packet para saída operator-visible summary-first preservando details estruturado.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-844"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-growth-maturity-surface.ts",
+        "packages/pi-stack/test/smoke/guardrails-growth-maturity.test.ts"
+      ],
+      "acceptance_criteria": [
+        "content principal deve usar summary curto em vez de JSON cru",
+        "details deve preservar payload estruturado completo",
+        "teste focal deve cobrir que o content não contém JSON cru"
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[rationale:operator-experience] Continuação local-safe: growth_maturity_score_packet é report-only e ainda retorna JSON cru em content.\n[provenance:human] source_task=TASK-BUD-851 reason=Continuar migração bounded de surfaces report-only para summary-first após recurring_failure_hardening_plan.\n[slice-start] Aplicando helper operator-visible em growth_maturity_score_packet; avaliação core permanece inalterada.\n[slice-complete] growth_maturity_score_packet no longer emits raw JSON as primary content. Rollback: revert guardrails-core-growth-maturity-surface.ts and guardrails-growth-maturity.test.ts changes.",
+      "verification": "VER-BUD-1217"
     }
   ]
 }
