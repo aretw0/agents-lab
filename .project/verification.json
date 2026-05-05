@@ -12426,6 +12426,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T02:18:10.551Z",
       "evidence": "Extracted context-watchdog focus/task/operator brief helpers into packages/pi-stack/extensions/context-watchdog-operator-brief.ts. context-watchdog.ts imports the helpers and preserves operatorBrief, preferred active focus, task status, and mnemonic behavior. context-watchdog.ts reduced to 3362 lines; new module is 190 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (62 passed). [rationale:risk-control] Cohesive anti-bloat extraction with focal smoke coverage and no protected-scope changes."
+    },
+    {
+      "id": "VER-BUD-1134",
+      "target": "TASK-BUD-782",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T02:21:37.827Z",
+      "evidence": "Extracted auto-resume prompt parsing, focus mnemonic preview summarization, and context-watch freshness/git-dirty signal helpers into packages/pi-stack/extensions/context-watchdog-freshness.ts. context-watchdog.ts imports the helpers and preserves continuation readiness, auto-resume preview, and post-reload behavior. context-watchdog.ts reduced to 3296 lines; new module is 72 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (65 passed). [rationale:risk-control] Cohesive anti-bloat extraction with focal resume/preview smoke coverage and no protected-scope changes."
     }
   ]
 }

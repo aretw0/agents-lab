@@ -1,30 +1,29 @@
 {
-  "timestamp": "2026-05-05T02:18:19.358Z",
-  "context": "Completed TASK-BUD-781: extracted context-watchdog task/focus/operator-brief helpers into context-watchdog-operator-brief.ts. context-watchdo [snip] lice; no new tool wiring in this slice. [truncated:+89 chars]",
+  "timestamp": "2026-05-05T02:21:46.989Z",
+  "context": "Completed TASK-BUD-782: extracted context-watchdog freshness/prompt preview helpers into context-watchdog-freshness.ts. context-watchdog.ts n [snip] ked, so it remains explicitly unstaged. [truncated:+145 chars]",
   "next_actions": [
-    "commit TASK-BUD-781 extraction slice",
+    "commit TASK-BUD-782 extraction slice",
     "refresh autonomy_lane_status",
     "continue next local-safe anti-bloat slice"
   ],
   "blockers": [
-    "uncommitted monitor-created .project/issues.json entry left unstaged unless intentionally reconciled"
+    "uncommitted monitor-created .project/issues.json entry remains unstaged"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] eload.test.ts -> 62 passed [truncated:+30 chars]"
+    "pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test [snip] eload.test.ts -> 65 passed [truncated:+91 chars]"
   ],
   "recent_commits": [
-    "1d60f043 feat(monitors): add empty-response evidence",
-    "4ea847d7 refactor(context): extract reload intent"
+    "07d155d5 refactor(context): extract operator brief helpers"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-781",
+    "focus": "TASK-BUD-782",
     "canonical_links": [
-      "task:TASK-BUD-781",
-      "commit:1d60f043"
+      "task:TASK-BUD-782",
+      "commit:07d155d5"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T02:18:19.358Z",
+    "generatedAtIso": "2026-05-05T02:21:46.989Z",
     "level": "ok",
     "action": "continue",
     "recommendation": "continue",
@@ -35,7 +34,7 @@
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T02:18:19.358Z",
+      "atIso": "2026-05-05T02:21:46.989Z",
       "reason": "manual_checkpoint",
       "level": "ok",
       "percent": 0,
@@ -52,6 +51,6 @@
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-781"
+    "TASK-BUD-782"
   ]
 }

@@ -17566,6 +17566,30 @@
       "milestone": "runtime-hardening-2026-05",
       "notes": "[rationale:risk-control] antiBloatCue ainda aponta context-watchdog.ts como superfície crítica; extrair helpers de foco/brief é coeso e local-safe.\n[provenance:human] source_task=TASK-BUD-780 reason=Continuar wave anti-bloat local-safe após reload.\nClosed via VER-BUD-1133: focus/task/operator brief helpers extracted; focal context-watchdog smokes passed (62 tests). [rationale:risk-control] Reduces critical surface while preserving operator brief and auto-resume focus behavior.",
       "verification": "VER-BUD-1133"
+    },
+    {
+      "id": "TASK-BUD-782",
+      "description": "Extrair helpers de freshness/prompt preview do context-watchdog para módulo coeso, preservando comportamento de auto-resume e reduzindo surface crítica.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-781"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-freshness.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-resume.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Mover helpers de extractAutoResumePromptValue, summarizeFocusMnemonicsForPreview e freshness/git dirty para módulo dedicado.",
+        "Preservar uso de preload/git dirty signals em readiness, preview e auto-resume.",
+        "Smokes focais de context-watchdog/resume permanecem verdes."
+      ],
+      "milestone": "runtime-hardening-2026-05",
+      "notes": "[rationale:risk-control] Continuação local-safe da wave anti-bloat; slice coesa e validável por smokes existentes.\n[provenance:human] source_task=TASK-BUD-781 reason=antiBloatCue continua em extract para context-watchdog.ts.\nClosed via VER-BUD-1134: freshness/prompt preview helpers extracted; context-watchdog/resume/post-reload smokes passed (65 tests). [rationale:risk-control] Reduces critical surface while preserving continuation and auto-resume preview behavior.",
+      "verification": "VER-BUD-1134"
     }
   ]
 }
