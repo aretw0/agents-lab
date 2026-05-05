@@ -12786,6 +12786,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:56:25.072Z",
       "evidence": "Extracted project-board governance helpers from packages/pi-stack/extensions/project-board-surface.ts into packages/pi-stack/extensions/project-board-governance-surface-helpers.ts: buildProjectTaskDecisionPacket, updateProjectTaskDependencies, buildProjectTaskQualityGate, buildBoardPlanningClarityScore, buildBoardDependencyHealthSnapshot, and buildBoardDependencyHygieneScore plus related result types. Preserved public exports through project-board-surface.ts and imported bindings for tool registrations. project-board-surface.ts reduced from 1664 to 1076 lines. Validation: initial focal run exposed missing local imports for tool execute bindings; fixed by importing helpers. Final validation: pnpm vitest --run packages/pi-stack/test/smoke/project-board-surface.test.ts => 1 file passed, 64 tests passed; safe_marker_check passed for extracted helpers; git diff --check clean; line_budget_snapshot improved aboveExtract from 6 to 5, aboveCritical=0. [rationale:anti-bloat] Removes project-board-surface from aboveExtract while preserving board tool contracts."
+    },
+    {
+      "id": "VER-BUD-1174",
+      "target": "TASK-BUD-822",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test+inspection",
+      "timestamp": "2026-05-05T13:03:57.579Z",
+      "evidence": "Extraídos contratos one-slice para packages/pi-stack/extensions/guardrails-core-one-slice-contracts.ts; guardrails-core-unattended-continuation.ts reduziu para 1242 linhas. Validação: pnpm vitest --run packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts => 54 passed; safe_marker_check ok; git diff --check clean. [rationale:anti-bloat]"
     }
   ]
 }

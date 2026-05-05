@@ -18396,6 +18396,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Após reload confirmado, continuar em superfície local-safe acima de extract; helpers puros/read-mostly são extraíveis sem protected scope.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração de helpers de governança do project-board-surface; reload será acumulado para final da leva.\nClosed via VER-BUD-1173: extracted project-board governance helpers and validated 64 focal tests. [rationale:anti-bloat] project-board-surface.ts now 1076; line budget aboveExtract=5.",
       "verification": "VER-BUD-1173"
+    },
+    {
+      "id": "TASK-BUD-822",
+      "description": "Extrair contratos one-slice do guardrails-core-unattended-continuation para módulo dedicado.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-unattended-continuation.ts",
+        "packages/pi-stack/extensions/guardrails-core-one-slice-contracts.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover tipos/funções one-slice canary/dispatch/backlog/contract review para módulo coeso",
+        "preservar exports públicos via guardrails-core-unattended-continuation.ts",
+        "reduzir guardrails-core-unattended-continuation.ts abaixo de 1400 linhas",
+        "validar smokes focais unattended continuation"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] guardrails-core-unattended-continuation.ts está em 1631 linhas; contratos one-slice são coesos e puros para extração local-safe.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração dos contratos one-slice; reload acumulado para final da leva.\nConcluído: contratos one-slice extraídos e exports preservados; line budget acima de extract caiu para 4.",
+      "verification": "VER-BUD-1174"
     }
   ]
 }
