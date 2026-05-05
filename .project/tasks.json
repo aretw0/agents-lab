@@ -18998,6 +18998,26 @@
       "milestone": "ui-cohesion",
       "notes": "[rationale:operator-experience] Continuação local-safe da matriz Symphony/status surface e de TASK-BUD-828: reduzir JSON cru em tool report-only de alto uso.\n[provenance:human] source_task=TASK-BUD-847 reason=Não havia tarefas locais elegíveis; próxima fatia local-safe deterministicamente selecionada por inventory de JSON cru em surfaces report-only.\n[slice-start] Aplicando helper operator-visible apenas em i18n_lint_text surface; core lint logic permanece inalterada.\n[slice-complete] i18n_lint_text no longer emits raw JSON as primary content. Rollback: revert guardrails-core-i18n-lint-surface.ts and guardrails-i18n-lint.test.ts changes.",
       "verification": "VER-BUD-1214"
+    },
+    {
+      "id": "TASK-BUD-849",
+      "description": "Backlog médio prazo: Model Infrastructure para reduzir dependência de provedores específicos e otimizar custo por roteamento dinâmico de modelos.",
+      "status": "planned",
+      "priority": "p2",
+      "files": [
+        "docs/primitives/model-infrastructure-routing.md",
+        "packages/pi-stack/extensions/provider-readiness.ts",
+        "packages/pi-stack/extensions/quota-visibility.ts"
+      ],
+      "acceptance_criteria": [
+        "Definir tiers de roteamento por tipo de tarefa/contexto sem acoplar a um provedor específico",
+        "Incluir estratégia de custo com context caching e speculative decoding quando APIs suportarem",
+        "Manter consumo via API; VPS/frontier self-hosting fora de escopo por ROI de VRAM/H100",
+        "Prever assimilação periódica report-only de LLM Leaderboard/LLM Stats com revisão humana antes de alterar tiers",
+        "Conectar a agents-as-tools/delegação para desonerar o control plane antes de qualquer colônia"
+      ],
+      "milestone": "protected-parked-model-infrastructure",
+      "notes": "[rationale:strategy] Pedido explícito do usuário para backlog médio prazo. Não implementar agora: envolve provedores externos, custo, APIs e eventual pesquisa periódica. Foco futuro deve ser independência de provider, roteamento por tarefa e economia antes de ampliar agents-as-tools/delegações/colônia.\n[provenance:human] source_task=none reason=User provided Backlog: Model Infrastructure with provider-independence, task-level routing tiers, token-cost efficiency, API-only infra, and periodic leaderboard learning."
     }
   ]
 }
