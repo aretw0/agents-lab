@@ -1,56 +1,70 @@
 {
-  "timestamp": "2026-05-05T20:45:54.002Z",
-  "context": "TASK-BUD-840 recebeu duas micro-fatias de hardening contextual: (1) bloat/slice-wide advisories reconhecem extração coesa anti-bloat/refactor [snip] em /reload posterior para runtime vivo. [truncated:+323 chars]",
+  "timestamp": "2026-05-05T20:52:17.378Z",
+  "context": "Pós-/reload validei que guardrails-core-bloat/autonomy anti-bloat cue carregaram as strings de authorized anti-bloat/refactor; git estava lim [snip] ova calibração no runtime .pi ignorado. [truncated:+499 chars]",
   "current_tasks": [
     "TASK-BUD-840"
   ],
   "next_actions": [
-    "Commitar segunda fatia TASK-BUD-840 + board/handoff.",
-    "Rodar /reload ao final para validar runtime vivo das strings/surfaces de guardrails-core-bloat/autonomy anti-bloat cue.",
-    "Depois do reload, verificar git limpo/classifyFail=0 e reavaliar quality gate de TASK-BUD-840/TASK-BUD-841."
+    "Context-watch action: level=compact 73% (compact-now) · Compact now and continue from checkpoint.",
+    "Commitar terceira fatia TASK-BUD-840 + board/handoff.",
+    "Rodar /reload para aplicar prompt/instruction patch de unauthorized-action no runtime .pi ignorado.",
+    "Após reload, verificar marcador anti-bloat/refactor em .pi/monitors/unauthorized-action/classi [snip] it limpo e classifyFail=0. [truncated:+23 chars]"
   ],
   "blockers": [
-    "/reload necessário para validar runtime vivo das alterações TS em guardrails-c [snip] tonomy anti-bloat cue. [truncated:+12 chars]",
-    "TASK-BUD-840 ainda depende de TASK-BUD-837; TASK-BUD-841 close continua bloque [snip] lver/deferir a cadeia. [truncated:+12 chars]"
+    "context-watch-compact-required",
+    "/reload necessário para validar runtime vivo da nova calibração unauthorized-a [snip] n anti-bloat/refactor. [truncated:+4 chars]",
+    "TASK-BUD-840 ainda depende de TASK-BUD-837 no board; dependency chain precisa [snip] -BUD-840/TASK-BUD-841. [truncated:+50 chars]"
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed",
-    "pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack [snip] queue.test.ts -> 96 passed [truncated:+39 chars]",
-    "VER-BUD-1196 appended"
+    "git_dirty_snapshot pós-reload -> clean",
+    "monitors_compact_status pós-reload -> classifyFail=0",
+    "autonomy_lane_status antiBloatCue -> authorized extraction may contain growth"
   ],
   "recent_commits": [
-    "cf1d7d00 fix(guardrails): clarify authorized refactor advisories",
-    "666d088b chore(board): record runtime bypass reload validation"
+    "50ae69ef fix(guardrails): distinguish authorized anti-bloat slices",
+    "cf1d7d00 fix(guardrails): clarify authorized refactor advisories"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-840",
     "canonical_links": [
       "task:TASK-BUD-840",
-      "task:TASK-BUD-841",
-      "verification:VER-BUD-1196",
-      "commit:cf1d7d00"
+      "verification:VER-BUD-1198",
+      "commit:50ae69ef"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T20:45:54.002Z",
-    "level": "ok",
-    "percent": 43,
-    "action": "continue",
-    "recommendation": "continue-bounded"
+    "generatedAtIso": "2026-05-05T20:52:17.338Z",
+    "level": "checkpoint",
+    "percent": 57,
+    "action": "checkpoint-refresh",
+    "recommendation": "write-checkpoint"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T20:45:54.002Z",
+      "atIso": "2026-05-05T20:52:17.338Z",
       "reason": "manual_checkpoint",
-      "level": "ok",
-      "percent": 43,
+      "level": "checkpoint",
+      "percent": 57,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue-bounded"
+      "recommendation": "write-checkpoint"
+    },
+    {
+      "atIso": "2026-05-05T20:52:17.378Z",
+      "reason": "message_end",
+      "level": "compact",
+      "percent": 73,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "compact-now",
+      "recommendation": "Compact now and continue from checkpoint."
     }
   ]
 }

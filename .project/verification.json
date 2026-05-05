@@ -13002,6 +13002,15 @@
       "method": "test",
       "timestamp": "2026-05-05T20:45:18.528Z",
       "evidence": "Second contextual authorization hardening slice: autonomy anti-bloat cue now explicitly says authorized anti-bloat/refactor extraction is not a tangent and keeps backlog/policy tangents separate; status remains report-only/no dispatch/no mutation. Validation: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 96 passed. [rationale:communicable] This gives long-running lane selection clearer anti-bloat authorization guidance without changing protected-scope or dispatch authority."
+    },
+    {
+      "id": "VER-BUD-1198",
+      "target": "TASK-BUD-840",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T20:51:33.268Z",
+      "evidence": "Third contextual authorization hardening slice: unauthorized-action monitor calibration now explicitly treats authorized anti-bloat/refactor micro-extractions as local-safe when they preserve public contracts and declared file scope, while keeping backlog/policy tangents as separate focus. Existing stale prompts are upgraded, and instructions receive the same durable line. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts -> 100 passed. [rationale:communicable] This addresses the actual L3 authorization false-positive path without allowing protected scope, destructive actions, or unrelated policy/backlog drift."
     }
   ]
 }
