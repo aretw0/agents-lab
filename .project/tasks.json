@@ -18417,6 +18417,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] guardrails-core-unattended-continuation.ts está em 1631 linhas; contratos one-slice são coesos e puros para extração local-safe.\n[provenance:human] source_task=none reason=Usuário confirmou reload e pediu continuar.\n[rationale:anti-bloat] Iniciando extração dos contratos one-slice; reload acumulado para final da leva.\nConcluído: contratos one-slice extraídos e exports preservados; line budget acima de extract caiu para 4.",
       "verification": "VER-BUD-1174"
+    },
+    {
+      "id": "TASK-BUD-823",
+      "description": "Extrair helpers de status/material da autonomy-lane surface para módulo dedicado.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts",
+        "packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface-helpers.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts",
+        "packages/pi-stack/test/smoke/autonomy-lane-readiness.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover helpers puros de seleção/status/material AFK para módulo coeso",
+        "preservar contratos e nomes das ferramentas autonomy_lane_*",
+        "reduzir guardrails-core-autonomy-lane-surface.ts abaixo de 1000 linhas",
+        "validar smokes focais autonomy lane"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Próximo acima de extract: guardrails-core-autonomy-lane-surface.ts em 1767 linhas; o bloco de helpers antes do registro de tools é coeso e local-safe para extração.\n[provenance:human] source_task=none reason=Continuação anti-bloat após reload confirmado.\nConcluído: surface reduzida para 597 linhas; line budget acima de extract caiu para 3.",
+      "verification": "VER-BUD-1175"
     }
   ]
 }
