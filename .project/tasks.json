@@ -18893,7 +18893,7 @@
     {
       "id": "TASK-BUD-844",
       "description": "Definir helper/padrão de saída operator-visible para tools report-only com resumo curto e detalhes estruturados recolhíveis.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-843"
@@ -18909,7 +18909,8 @@
         "não mudar contratos públicos fora da primeira superfície escolhida"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para padronizar affordance de resumo/detalhes sem expandir escopo protegido.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário."
+      "notes": "[rationale:operator-experience] Decomposição de TASK-BUD-828 para padronizar affordance de resumo/detalhes sem expandir escopo protegido.\n[provenance:human] source_task=TASK-BUD-828 reason=Decomposição local-safe do macro de coesão de UI solicitado pelo usuário.\n[slice-start] Helper local-safe criado para content summary-first + details estruturado, sem aplicar em superfície pública ainda.\n[slice-complete] Reusable operator-visible output helper and focal smoke added. Public surfaces unchanged; rollback: remove operator-visible-output.ts and operator-visible-output.test.ts.",
+      "verification": "VER-BUD-1208"
     },
     {
       "id": "TASK-BUD-845",

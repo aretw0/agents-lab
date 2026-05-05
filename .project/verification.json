@@ -13092,6 +13092,15 @@
       "method": "inspect",
       "timestamp": "2026-05-05T21:54:41.250Z",
       "evidence": "Inventory slice documented in docs/guides/recommended-pi-stack.md under 'Coesão de blocos de sessão visíveis ao operador'. Validation: safe_marker_check matched 3/3 markers; i18n_lint_text passed for pt-BR section. No protected scope touched."
+    },
+    {
+      "id": "VER-BUD-1208",
+      "target": "TASK-BUD-844",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T21:56:42.546Z",
+      "evidence": "Added packages/pi-stack/extensions/operator-visible-output.ts with buildOperatorVisibleToolResponse helper. It defaults to summary-first content with details preserved, fail-closes when summary is missing, supports explicit bounded raw JSON opt-in, and compacts long opt-in JSON without leaking the full payload. Validation: pnpm vitest --run packages/pi-stack/test/smoke/operator-visible-output.test.ts -> 4 passed."
     }
   ]
 }
