@@ -506,7 +506,20 @@ Controle e auditoria não bastam sem material. Antes de tentar um ciclo AFK long
 
 Sem esse abastecimento, a lane deve preferir limpeza/triagem/pesquisa bounded para criar próximas fatias em vez de forçar continuidade vazia.
 
-Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK.
+Para medição read-only dessa prontidão, usar `autonomy_lane_material_readiness_packet` (`continue|seed-backlog|blocked`) antes de ampliar ciclos AFK. Para execução contínua de várias horas, usar também `autonomy_lane_batch_preview` (report-only): fila bounded de 3-7 slices local-safe com `validationGate` e `rollback` curtos por slice, sempre com `authorization=none`.
+
+#### Contrato hard/soft intent para batch lane
+
+Use `autonomy_lane_batch_preview` como superfície de trabalho e aplique o contrato abaixo:
+
+- **hard-intent batch gates (bloqueantes):** `protected scope`, risco destrutivo/irreversível, `reload-required-or-dirty`, validação focal ausente/desconhecida, ou blocker operacional explícito.
+- **soft-intent batch preferences (direção):** manter batch pequeno, reduzir ruído de handoff, priorizar slices de maior desbloqueio e adiar assimilação externa enquanto stock local-safe estiver baixo.
+
+Decisão operacional no batch lane:
+
+1. **quando continuar sozinho:** preview `decision=ready`, gates hard-intent limpos, e fila local-safe suficiente;
+2. **quando checkpointar:** após cada slice concluído (commit pequeno + checkpoint bounded) ou antes de fronteira de compact;
+3. **quando pausar para decisão estratégica:** qualquer blocker hard-intent, necessidade de escopo protegido, ou conflito entre caminhos estratégicos.
 
 Quando a lane cair em `no-eligible-tasks`, ler `seedingGuidance` no `autonomy_lane_status` (mesmos sinais de `seedWhy` + `seedPriority`) para decisão rápida. O próprio `summary` do status também deve carregar esse cue curto (`code/next/queue` + `seedCount/seedWhy/seedPriority` quando houver) para reduzir nudge operacional, e o `nextAction` pode vir enriquecido com diretiva direta (`seed <n> local-safe ...`). Além disso, acompanhar `influenceWindowCue` e `protectedReadyCue` no status para saber quando a janela protected está `ready-window` com candidato elegível, sem abrir packet separado a cada ciclo. Quando quiser um gatilho único, usar `decisionCue` (`seed-local-safe-required` ou `protected-focus-ready`) para saber se há decisão humana pendente. Em compact com `reload-required`, tratar supressão de auto-resume como defer temporário: persistir intent no handoff e reavaliar dispatch após `/reload`, mantendo gates de checkpoint/board/queue fail-closed; quando houver intent pendente, `context_watch_status`, `context_watch_continuation_readiness` e `context_watch_one_slice_canary_preview` devem sinalizar `postReloadResume=pending` no summary curto. Se precisar detalhe completo, usar `autonomy_lane_material_seed_packet` (`seed-now|wait|blocked`) e `autonomy_lane_influence_assimilation_packet`. Ao reseedar, registrar `seedWhy`/`reseedJustification`, `seedPriority` e `seedCount` no fechamento curto para manter motivo auditável e prioridade de longo prazo explícita.
 

@@ -409,6 +409,141 @@ describe("autonomy lane surface", () => {
     expect(result?.details.authorization).toBe("none");
   });
 
+  it("emits ready autonomy-lane-batch-preview packet with local-safe slices", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-batch-preview-ready-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-A",
+          description: "[P1] local-safe slice A",
+          status: "planned",
+          acceptance_criteria: ["run smoke test A"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+        },
+        {
+          id: "TASK-B",
+          description: "[P1] local-safe slice B",
+          status: "planned",
+          acceptance_criteria: ["run vitest smoke B"],
+          files: ["packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"],
+        },
+        {
+          id: "TASK-C",
+          description: "[P2] local-safe slice C",
+          status: "planned",
+          acceptance_criteria: ["inspection + marker-check"],
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-A"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_batch_preview");
+    const result = packetTool?.execute("call-test", { slice_count: 7 }, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("ready");
+    expect(result?.details.recommendationCode).toBe("autonomy-lane-batch-preview-ready");
+    expect(result?.details.requestedSliceCount).toBe(7);
+    expect(result?.details.availableSliceCount).toBe(3);
+    const slices = (result?.details.slices as Array<Record<string, unknown>> | undefined) ?? [];
+    expect(slices).toHaveLength(3);
+    for (const slice of slices) {
+      expect(typeof slice.taskId).toBe("string");
+      expect(typeof slice.validationGate).toBe("string");
+      expect(String(slice.validationGate).length).toBeGreaterThan(0);
+      expect(typeof slice.rollback).toBe("string");
+      expect(String(slice.rollback)).toContain("git restore");
+    }
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("emits seed-backlog autonomy-lane-batch-preview packet when fewer than three slices are available", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-batch-preview-seed-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-A",
+          description: "[P1] local-safe slice A",
+          status: "planned",
+          acceptance_criteria: ["run smoke test A"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-A"] }), "utf8");
+    initCleanGitRepo(cwd);
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_batch_preview");
+    const result = packetTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("seed-backlog");
+    expect(result?.details.recommendationCode).toBe("autonomy-lane-batch-preview-seed-backlog");
+    expect(result?.details.availableSliceCount).toBe(1);
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
+  it("emits blocked autonomy-lane-batch-preview packet when workspace is dirty", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-batch-preview-blocked-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        {
+          id: "TASK-A",
+          description: "[P1] local-safe slice A",
+          status: "planned",
+          acceptance_criteria: ["run smoke test A"],
+          files: ["packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts"],
+        },
+        {
+          id: "TASK-B",
+          description: "[P1] local-safe slice B",
+          status: "planned",
+          acceptance_criteria: ["run smoke test B"],
+          files: ["packages/pi-stack/extensions/guardrails-core-autonomy-lane-surface.ts"],
+        },
+        {
+          id: "TASK-C",
+          description: "[P1] local-safe slice C",
+          status: "planned",
+          acceptance_criteria: ["run smoke test C"],
+          files: ["docs/guides/control-plane-operating-doctrine.md"],
+        },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, ".project", "handoff.json"), JSON.stringify({ current_tasks: ["TASK-A"] }), "utf8");
+    initCleanGitRepo(cwd);
+    writeFileSync(path.join(cwd, "dirty.txt"), "dirty\n", "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const packetTool = tools.find((tool) => tool.name === "autonomy_lane_batch_preview");
+    const result = packetTool?.execute("call-test", {}, undefined, undefined, { cwd });
+
+    expect(result?.details.decision).toBe("blocked");
+    expect(result?.details.recommendationCode).toBe("autonomy-lane-batch-preview-blocked-reload-or-dirty");
+    expect((result?.details.blockedReasons as string[])).toContain("reload-required-or-dirty");
+    expect(result?.details.dispatchAllowed).toBe(false);
+    expect(result?.details.authorization).toBe("none");
+  });
+
   it("emits seed-backlog material-readiness packet when AFK stock is low", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-material-readiness-seed-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

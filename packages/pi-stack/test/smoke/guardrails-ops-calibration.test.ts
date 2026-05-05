@@ -508,6 +508,8 @@ describe("ops calibration decision packet", () => {
       expect(String(result.details.summary)).toContain("delegation-readiness-status:");
       expect(result.details.operationalRunway.recommendedOption).toBe("local-execute");
       expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-local-execute");
+      expect(result.details.unlockChecklist.decision).toBe("needs-action");
+      expect(result.details.unlockChecklist.items[0]).toContain("blocker:");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -569,6 +571,8 @@ describe("ops calibration decision packet", () => {
       expect(result.details.operationalRunway.recommendedOption).toBe("simple-delegate");
       expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-simple-delegate");
       expect(result.details.operationalRunway.decision.background).toBe("ready-window");
+      expect(result.details.unlockChecklist.decision).toBe("ready");
+      expect(String(result.details.unlockChecklist.summary)).toContain("topBlockers=none");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }
@@ -618,6 +622,8 @@ describe("ops calibration decision packet", () => {
       expect(String(result.details.summary)).toContain("authorization=none");
       expect(result.details.operationalRunway.recommendedOption).toBe("defer");
       expect(result.details.operationalRunway.recommendationCode).toBe("operational-runway-defer-blocked");
+      expect(result.details.unlockChecklist.decision).toBe("needs-action");
+      expect(result.details.unlockChecklist.topBlockers).toContain("capability-blocked");
     } finally {
       rmSync(cwd, { recursive: true, force: true });
     }

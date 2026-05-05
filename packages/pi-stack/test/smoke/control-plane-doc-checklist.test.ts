@@ -95,6 +95,20 @@ describe("control-plane anti-bloat docs checklist", () => {
     for (const marker of capacityTriageAnchors) {
       expect(doctrine).toContain(marker);
     }
+
+    const batchLaneIntentAnchors = [
+      "contrato hard/soft intent para batch lane",
+      "hard-intent batch gates",
+      "soft-intent batch preferences",
+      "quando continuar sozinho",
+      "quando checkpointar",
+      "quando pausar para decisão estratégica",
+      "autonomy_lane_batch_preview",
+    ];
+
+    for (const marker of batchLaneIntentAnchors) {
+      expect(doctrine).toContain(marker);
+    }
   });
 
   it("keeps critical guide index links for control-plane operation", () => {

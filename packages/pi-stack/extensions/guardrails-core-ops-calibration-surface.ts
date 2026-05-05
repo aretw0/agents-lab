@@ -444,6 +444,40 @@ function buildOperationalRunwayPacket(input: {
   };
 }
 
+type UnlockChecklist = {
+  decision: "ready" | "needs-action";
+  topBlockers: string[];
+  nextAction: string;
+  items: string[];
+  summary: string;
+};
+
+function buildUnlockChecklist(input: {
+  option: "simple-delegate" | "local-execute" | "defer";
+  blockers: string[];
+  nextAction: string;
+}): UnlockChecklist {
+  const topBlockers = [...new Set(input.blockers.filter((row) => typeof row === "string" && row.trim().length > 0))].slice(0, 3);
+  const decision = input.option === "simple-delegate" ? "ready" : "needs-action";
+  const items = [
+    ...topBlockers.map((blocker, index) => `blocker:${index + 1}:${blocker}`),
+    `next:${input.nextAction}`,
+  ];
+  const summary = [
+    "unlock-checklist:",
+    `decision=${decision}`,
+    topBlockers.length > 0 ? `topBlockers=${topBlockers.join("|")}` : "topBlockers=none",
+    `next=${input.nextAction}`,
+  ].join(" ");
+  return {
+    decision,
+    topBlockers,
+    nextAction: input.nextAction,
+    items,
+    summary,
+  };
+}
+
 type OperatorPauseOption = {
   option: "start" | "defer" | "abort";
   impact: string;
@@ -980,7 +1014,12 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           rehearsalBlockers: backgroundRehearsal.blockers,
         },
       });
-      const summary = `${status.summary} ${operationalRunway.summary}`;
+      const unlockChecklist = buildUnlockChecklist({
+        option: operationalRunway.recommendedOption,
+        blockers: operationalRunway.normalizedBlockers,
+        nextAction: operationalRunway.nextAction,
+      });
+      const summary = `${status.summary} ${operationalRunway.summary} ${unlockChecklist.summary}`;
 
       return {
         content: [{ type: "text", text: summary }],
@@ -999,6 +1038,7 @@ export function registerGuardrailsOpsCalibrationSurface(pi: ExtensionAPI): void 
           delegatePacket,
           rehearsalPacket,
           operationalRunway,
+          unlockChecklist,
           backgroundPlan,
           backgroundReadiness,
           backgroundRehearsal,

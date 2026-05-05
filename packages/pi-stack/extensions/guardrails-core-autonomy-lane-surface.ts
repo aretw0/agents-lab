@@ -16,12 +16,12 @@ import {
 import { readProjectTasksBlock, type ProjectTaskItem } from "./colony-pilot-task-sync";
 import { buildLaneBrainstormPacket, buildLaneBrainstormSeedPreview } from "./lane-brainstorm-packet";
 import { evaluateProjectIntakePlan } from "./project-intake-primitive";
-import { consumeContextPreloadPack } from "./context-watchdog-continuation";
 import { resolveHandoffFreshness, type HandoffFreshnessLabel } from "./context-watchdog-handoff";
-import { buildUnavailableGitDirtySnapshot, readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
-import { buildDelegateOrExecuteDecisionPacket, buildSimpleDelegateRehearsalDecisionPacket } from "./guardrails-core-ops-calibration";
-import { buildBackgroundProcessReadinessScore, resolveBackgroundProcessControlPlan } from "./guardrails-core-background-process";
-import { evaluateBackgroundProcessRehearsal } from "./guardrails-core-background-process-rehearsal";
+import { readGitDirtySnapshot } from "./guardrails-core-git-maintenance-surface";
+import {
+  buildRunwayReadinessCue,
+  readDelegationFreshnessSignals,
+} from "./guardrails-core-autonomy-lane-runway";
 
 function normalizeContextLevel(value: unknown): AutonomyContextLevel {
   return value === "compact" || value === "checkpoint" || value === "warn" || value === "ok" ? value : "ok";
@@ -39,22 +39,6 @@ function asNumber(value: unknown, fallback: number): number {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
-}
-
-function asOptionalBoolean(value: unknown): boolean | undefined {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function asOptionalNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function asOptionalString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-}
-
-function pickEnumValue<T extends string>(value: unknown, allowed: readonly T[]): T | undefined {
-  return typeof value === "string" && allowed.includes(value as T) ? value as T : undefined;
 }
 
 const DEFAULT_HANDOFF_FRESH_MAX_AGE_MS = 30 * 60 * 1000;
@@ -901,6 +885,140 @@ function buildReadyQueuePreview(selection: {
   };
 }
 
+function toShortSentence(value: string, maxLen = 90): string {
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (!compact) return "";
+  return compact.length > maxLen ? `${compact.slice(0, Math.max(12, maxLen - 3))}...` : compact;
+}
+
+function buildSliceValidationGate(task: ProjectTaskItem): string {
+  const criteria = Array.isArray(task.acceptance_criteria)
+    ? task.acceptance_criteria.filter((item): item is string => typeof item === "string")
+    : [];
+  const fromCriteria = criteria.find((item) => /(smoke|test|spec|vitest|marker-check|inspection|lint|typecheck|build)/i.test(item));
+  if (fromCriteria) return toShortSentence(fromCriteria, 110);
+  if (taskValidationGateKnown(task)) return "run focal smoke/test gate for this slice";
+  return "define focal validation gate before execution";
+}
+
+function buildSliceRollback(task: ProjectTaskItem): string {
+  const files = Array.isArray(task.files)
+    ? task.files.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
+  if (files.length <= 0) return "git restore -- <declared-files>";
+  const hint = files.slice(0, 2).join(" ");
+  return files.length > 2 ? `git restore -- ${hint} ...` : `git restore -- ${hint}`;
+}
+
+function buildAutonomyLaneBatchPreviewPacket(p: Record<string, unknown>, cwd: string) {
+  const selection = resolveTaskSelection(p, cwd);
+  const requestedSliceCount = Math.max(3, Math.min(7, Math.floor(asNumber(p.slice_count, 5))));
+  const sampleLimit = Math.max(requestedSliceCount, Math.min(20, Math.floor(asNumber(p.sample_limit, 20))));
+  const tasks = readProjectTasksBlock(cwd).tasks;
+
+  const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
+  const includeProtectedScopes = p.include_protected_scopes === true;
+
+  const completedTaskIds = new Set(
+    tasks
+      .filter((task) => task.status === "completed")
+      .map((task) => normalizeTaskId(task.id))
+      .filter((id): id is string => Boolean(id)),
+  );
+
+  const fallbackTaskIds = tasks
+    .filter((task) => {
+      if (task.status !== "planned" && task.status !== "in-progress") return false;
+      if (milestone && (task.milestone ?? "").trim() !== milestone) return false;
+      if (!includeProtectedScopes && taskHasProtectedSignal(task)) return false;
+      if (taskHasRiskSignal(task)) return false;
+      if (!taskValidationGateKnown(task)) return false;
+      const deps = normalizeDependsOn(task.depends_on);
+      return deps.every((dep) => completedTaskIds.has(dep));
+    })
+    .map((task) => normalizeTaskId(task.id))
+    .filter((id): id is string => Boolean(id));
+
+  const selectionTaskIds = Array.isArray(selection.eligibleTaskIds)
+    ? selection.eligibleTaskIds.filter((id): id is string => typeof id === "string" && id.trim().length > 0)
+    : [];
+  const mergedTaskIds = [
+    ...selectionTaskIds,
+    ...fallbackTaskIds.filter((id) => !selectionTaskIds.includes(id)),
+  ].slice(0, sampleLimit);
+
+  const eligibleSlices = mergedTaskIds
+    .map((taskId) => findTaskById(tasks, taskId))
+    .filter((task): task is ProjectTaskItem => Boolean(task))
+    .filter((task) => (includeProtectedScopes || !taskHasProtectedSignal(task)) && !taskHasRiskSignal(task) && taskValidationGateKnown(task))
+    .map((task) => {
+      const taskId = normalizeTaskId(task.id);
+      return {
+        taskId,
+        mnemonic: toTaskMnemonic(task),
+        validationGate: buildSliceValidationGate(task),
+        rollback: buildSliceRollback(task),
+        files: Array.isArray(task.files)
+          ? task.files.filter((item): item is string => typeof item === "string" && item.trim().length > 0).slice(0, 3)
+          : [],
+      };
+    });
+
+  const slices = eligibleSlices.slice(0, requestedSliceCount);
+  const blockedReasons: string[] = [];
+  if (!workspaceLooksClean(cwd)) blockedReasons.push("reload-required-or-dirty");
+  if (!selection.ready && eligibleSlices.length <= 0) blockedReasons.push(`selection-${selection.reason}`);
+
+  let decision: "ready" | "seed-backlog" | "blocked" = "ready";
+  let recommendationCode = "autonomy-lane-batch-preview-ready";
+  let nextAction = "execute batch in listed order with commit+checkpoint per slice; refresh status after each slice.";
+
+  if (blockedReasons.length > 0) {
+    decision = "blocked";
+    recommendationCode = blockedReasons.includes("reload-required-or-dirty")
+      ? "autonomy-lane-batch-preview-blocked-reload-or-dirty"
+      : "autonomy-lane-batch-preview-blocked-selection";
+    nextAction = blockedReasons.includes("reload-required-or-dirty")
+      ? "clean workspace/reload and re-run autonomy_lane_batch_preview."
+      : "resolve local-safe selection blockers and re-run autonomy_lane_batch_preview.";
+  } else if (eligibleSlices.length < 3) {
+    decision = "seed-backlog";
+    recommendationCode = "autonomy-lane-batch-preview-seed-backlog";
+    nextAction = `seed ${Math.max(1, 3 - eligibleSlices.length)} additional local-safe slices before long batch execution.`;
+  }
+
+  const summary = [
+    "autonomy-lane-batch-preview:",
+    `decision=${decision}`,
+    `code=${recommendationCode}`,
+    `requested=${requestedSliceCount}`,
+    `available=${eligibleSlices.length}`,
+    `preview=${slices.length}`,
+    selection.nextTaskId ? `next=${selection.nextTaskId}` : undefined,
+    blockedReasons.length > 0 ? `blockers=${blockedReasons.join("|")}` : undefined,
+    "authorization=none",
+  ].filter(Boolean).join(" ");
+
+  return {
+    mode: "report-only",
+    decision,
+    recommendationCode,
+    nextAction,
+    requestedSliceCount,
+    minimumSliceCount: 3,
+    maximumSliceCount: 7,
+    availableSliceCount: eligibleSlices.length,
+    slices,
+    blockedReasons,
+    selectionReason: selection.reason,
+    nextTaskId: selection.nextTaskId,
+    dispatchAllowed: false,
+    mutationAllowed: false,
+    authorization: "none",
+    summary,
+  };
+}
+
 function resolveTaskSelection(p: Record<string, unknown>, cwd: string) {
   const focus = resolveFocusTaskIds(p, cwd);
   const milestone = typeof p.milestone === "string" ? p.milestone : undefined;
@@ -1048,317 +1166,6 @@ function buildAutoAdvanceHardIntentSnapshot(p: Record<string, unknown>, cwd: str
     mutationAllowed: false,
     authorization: "none",
     summary: `autonomy-lane-auto-advance-snapshot: decision=eligible code=auto-advance-snapshot-eligible next=${fallback.nextTaskId}`,
-  };
-}
-
-function readDelegationFreshnessSignals(cwd: string): {
-  preloadDecision: "use-pack" | "fallback-canonical";
-  dirtySignal: "clean" | "dirty" | "unknown";
-} {
-  const preload = consumeContextPreloadPack(cwd, { profile: "control-plane-core" });
-  let dirtySignal: "clean" | "dirty" | "unknown" = "unknown";
-  try {
-    const snapshot = readGitDirtySnapshot(cwd);
-    dirtySignal = snapshot.clean ? "clean" : "dirty";
-  } catch (error) {
-    const unavailable = buildUnavailableGitDirtySnapshot(error);
-    dirtySignal = unavailable.available ? (unavailable.clean ? "clean" : "dirty") : "unknown";
-  }
-  return {
-    preloadDecision: preload.decision,
-    dirtySignal,
-  };
-}
-
-type DelegationRunwayCue = {
-  decision: "ready-simple-delegate" | "local-execute-first" | "defer";
-  recommendationCode:
-    | "delegation-readiness-ready-simple-delegate"
-    | "delegation-readiness-local-execute-first"
-    | "delegation-readiness-defer-blocked";
-  nextAction: string;
-  blockers: string[];
-};
-
-type BackgroundRunwayCue = {
-  decision: "ready-window" | "needs-evidence" | "blocked";
-  recommendationCode:
-    | "background-process-readiness-packet-ready"
-    | "background-process-readiness-packet-needs-evidence"
-    | "background-process-readiness-packet-blocked";
-  nextAction: string;
-  blockers: string[];
-};
-
-type RunwayReadinessCue = {
-  decision: "ready-window" | "needs-evidence" | "blocked";
-  recommendationCode:
-    | "runway-readiness-ready-window"
-    | "runway-readiness-needs-evidence"
-    | "runway-readiness-blocked";
-  recommendation: string;
-  nextAction: string;
-  blockers: string[];
-  delegation: DelegationRunwayCue;
-  background: BackgroundRunwayCue;
-  summary: string;
-};
-
-function inferBackgroundCapabilitySignals(toolNames: Set<string>): {
-  hasProcessRegistry: boolean;
-  hasPortLeaseLock: boolean;
-  hasBoundedLogTail: boolean;
-  hasStructuredStacktraceCapture: boolean;
-  hasHealthcheckProbe: boolean;
-  hasGracefulStopThenKill: boolean;
-  hasReloadHandoffCleanup: boolean;
-} {
-  const has = (name: string): boolean => toolNames.has(name);
-  const hasAnyContaining = (fragment: string): boolean => {
-    const f = fragment.toLowerCase();
-    return Array.from(toolNames).some((name) => name.toLowerCase().includes(f));
-  };
-  const hasBgStatus = has("bg_status");
-
-  return {
-    hasProcessRegistry: hasBgStatus,
-    hasPortLeaseLock: has("background_process_plan") && hasAnyContaining("port"),
-    hasBoundedLogTail: hasBgStatus,
-    hasStructuredStacktraceCapture: hasAnyContaining("stacktrace") || has("background_process_plan"),
-    hasHealthcheckProbe: hasAnyContaining("healthcheck"),
-    hasGracefulStopThenKill: hasBgStatus,
-    hasReloadHandoffCleanup: hasAnyContaining("context_watch_checkpoint") || hasAnyContaining("handoff"),
-  };
-}
-
-function normalizeBackgroundKind(value: unknown): "frontend" | "backend" | "test-server" | "worker" | "generic" | undefined {
-  return value === "frontend" || value === "backend" || value === "test-server" || value === "worker" || value === "generic" ? value : undefined;
-}
-
-function normalizeBackgroundMode(value: unknown): "auto" | "shared-service" | "isolated-worker" | undefined {
-  return value === "auto" || value === "shared-service" || value === "isolated-worker" ? value : undefined;
-}
-
-function buildDelegationRunwayCue(p: Record<string, unknown>, cwd: string): DelegationRunwayCue {
-  const freshness = readDelegationFreshnessSignals(cwd);
-  const capability = evaluateDelegationLaneCapabilitySnapshot({
-    preloadDecision: pickEnumValue(p.delegation_preload_decision, ["use-pack", "fallback-canonical"]) ?? freshness.preloadDecision,
-    dirtySignal: pickEnumValue(p.delegation_dirty_signal, ["clean", "dirty", "unknown"]) ?? freshness.dirtySignal,
-    monitorClassifyFailures: asNumber(p.monitor_classify_failures, 0),
-    subagentsReady: asBool(p.subagents_ready, true),
-  });
-
-  const delegatePacket = buildDelegateOrExecuteDecisionPacket({
-    capabilityDecision: pickEnumValue(p.delegation_capability_decision, ["ready", "needs-evidence", "blocked"]) ?? capability.decision,
-    capabilityRecommendationCode: asOptionalString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
-    capabilityBlockers: asStringArray(p.delegation_capability_blockers).length > 0
-      ? asStringArray(p.delegation_capability_blockers)
-      : capability.blockers,
-    capabilityEvidenceGaps: asStringArray(p.delegation_capability_evidence_gaps).length > 0
-      ? asStringArray(p.delegation_capability_evidence_gaps)
-      : capability.evidenceGaps,
-    mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
-    mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
-    mixRecommendationCode: asOptionalString(p.delegation_mix_recommendation_code) ?? "delegation-mix-needs-evidence",
-    mixSimpleDelegateEvents: asOptionalNumber(p.delegation_mix_simple_delegate_events) ?? 0,
-    mixSwarmEvents: asOptionalNumber(p.delegation_mix_swarm_events) ?? 0,
-  });
-
-  const rehearsalPacket = buildSimpleDelegateRehearsalDecisionPacket({
-    capabilityDecision: pickEnumValue(p.delegation_capability_decision, ["ready", "needs-evidence", "blocked"]) ?? capability.decision,
-    capabilityRecommendationCode: asOptionalString(p.delegation_capability_recommendation_code) ?? capability.recommendationCode,
-    capabilityBlockers: asStringArray(p.delegation_capability_blockers).length > 0
-      ? asStringArray(p.delegation_capability_blockers)
-      : capability.blockers,
-    mixDecision: pickEnumValue(p.delegation_mix_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
-    mixScore: asOptionalNumber(p.delegation_mix_score) ?? 0,
-    mixSimpleDelegateEvents: asOptionalNumber(p.delegation_mix_simple_delegate_events) ?? 0,
-    autoAdvanceDecision: pickEnumValue(p.delegation_auto_advance_decision, ["eligible", "blocked"]) ?? "blocked",
-    autoAdvanceBlockedReasons: asStringArray(p.delegation_auto_advance_blocked_reasons),
-    telemetryDecision: pickEnumValue(p.delegation_telemetry_decision, ["ready", "needs-evidence"]) ?? "needs-evidence",
-    telemetryScore: asOptionalNumber(p.delegation_telemetry_score) ?? 0,
-    telemetryBlockedRatePct: asOptionalNumber(p.delegation_telemetry_blocked_rate_pct) ?? 100,
-  });
-
-  const blockers = [...new Set([...delegatePacket.blockers, ...rehearsalPacket.blockers])];
-
-  if (delegatePacket.recommendedOption === "simple-delegate" && rehearsalPacket.decision === "ready") {
-    return {
-      decision: "ready-simple-delegate",
-      recommendationCode: "delegation-readiness-ready-simple-delegate",
-      nextAction: "run simple_delegate_rehearsal_start_packet and require explicit human start/defer decision.",
-      blockers,
-    };
-  }
-
-  if (delegatePacket.recommendedOption === "local-execute" || rehearsalPacket.decision === "needs-evidence") {
-    return {
-      decision: "local-execute-first",
-      recommendationCode: "delegation-readiness-local-execute-first",
-      nextAction: "execute one bounded local-safe slice and refresh delegation readiness packets.",
-      blockers,
-    };
-  }
-
-  return {
-    decision: "defer",
-    recommendationCode: "delegation-readiness-defer-blocked",
-    nextAction: "resolve delegation blockers and rerun delegation_readiness_status_packet.",
-    blockers,
-  };
-}
-
-function buildBackgroundRunwayCue(
-  p: Record<string, unknown>,
-  toolNames: Set<string>,
-): BackgroundRunwayCue {
-  const inferred = inferBackgroundCapabilitySignals(toolNames);
-  const plan = resolveBackgroundProcessControlPlan({
-    kind: normalizeBackgroundKind(p.background_kind),
-    requestedMode: normalizeBackgroundMode(p.background_requested_mode),
-    needsServer: asOptionalBoolean(p.background_needs_server),
-    requestedPort: asOptionalNumber(p.background_requested_port),
-    parallelAgents: asOptionalNumber(p.background_parallel_agents),
-    existingServiceReusable: asOptionalBoolean(p.background_existing_service_reusable),
-    destructiveRestart: asOptionalBoolean(p.background_destructive_restart),
-    logTailMaxLines: asOptionalNumber(p.background_log_tail_max_lines),
-    stacktraceCapture: asOptionalBoolean(p.background_stacktrace_capture),
-    healthcheckKnown: asOptionalBoolean(p.background_healthcheck_known),
-  });
-
-  const readiness = buildBackgroundProcessReadinessScore({
-    hasProcessRegistry: asOptionalBoolean(p.background_has_process_registry) ?? inferred.hasProcessRegistry,
-    hasPortLeaseLock: asOptionalBoolean(p.background_has_port_lease_lock) ?? inferred.hasPortLeaseLock,
-    hasBoundedLogTail: asOptionalBoolean(p.background_has_bounded_log_tail) ?? inferred.hasBoundedLogTail,
-    hasStructuredStacktraceCapture: asOptionalBoolean(p.background_has_structured_stacktrace_capture) ?? inferred.hasStructuredStacktraceCapture,
-    hasHealthcheckProbe: asOptionalBoolean(p.background_has_healthcheck_probe) ?? inferred.hasHealthcheckProbe,
-    hasGracefulStopThenKill: asOptionalBoolean(p.background_has_graceful_stop_then_kill) ?? inferred.hasGracefulStopThenKill,
-    hasReloadHandoffCleanup: asOptionalBoolean(p.background_has_reload_handoff_cleanup) ?? inferred.hasReloadHandoffCleanup,
-    hasPlanSurface: asOptionalBoolean(p.background_has_plan_surface) ?? toolNames.has("background_process_plan"),
-    hasLifecycleSurface: asOptionalBoolean(p.background_has_lifecycle_surface) ?? toolNames.has("background_process_lifecycle_plan"),
-    rehearsalSlices: asOptionalNumber(p.background_rehearsal_slices),
-    stopSourceCoveragePct: asOptionalNumber(p.background_stop_source_coverage_pct),
-  });
-
-  const rehearsal = evaluateBackgroundProcessRehearsal({
-    readinessScore: readiness.score,
-    readinessRecommendationCode: readiness.recommendationCode,
-    lifecycleClassified: asBool(p.background_lifecycle_classified, false),
-    stopSourceCoveragePct: asOptionalNumber(p.background_stop_source_coverage_pct),
-    rollbackPlanKnown: asBool(p.background_rollback_plan_known, false),
-    rehearsalSlices: asOptionalNumber(p.background_rehearsal_slices),
-    unresolvedBlockers: asNumber(p.background_unresolved_blockers, 0),
-    destructiveRestartRequested: asBool(p.background_destructive_restart_requested, false),
-    protectedScopeRequested: asBool(p.background_protected_scope_requested, false),
-  });
-
-  const blockers = [...new Set([
-    ...(Array.isArray(plan.blockers) ? plan.blockers : []),
-    ...(Array.isArray(rehearsal.blockers) ? rehearsal.blockers : []),
-  ])];
-
-  if (plan.decision === "blocked" || rehearsal.decision === "blocked") {
-    return {
-      decision: "blocked",
-      recommendationCode: "background-process-readiness-packet-blocked",
-      nextAction: "resolve background-process blockers and rerun background_process_readiness_packet.",
-      blockers,
-    };
-  }
-
-  if (plan.decision !== "ready-for-design" || rehearsal.decision !== "ready") {
-    return {
-      decision: "needs-evidence",
-      recommendationCode: "background-process-readiness-packet-needs-evidence",
-      nextAction: "increase background-process readiness evidence (lifecycle classification, stopSource, rollback, slices).",
-      blockers,
-    };
-  }
-
-  return {
-    decision: "ready-window",
-    recommendationCode: "background-process-readiness-packet-ready",
-    nextAction: "plan one bounded local rehearsal slice with explicit rollback and lifecycle capture.",
-    blockers,
-  };
-}
-
-function buildRunwayReadinessCue(
-  p: Record<string, unknown>,
-  ctx: { cwd: string },
-  pi: ExtensionAPI,
-): RunwayReadinessCue {
-  const toolNames = new Set(
-    (typeof pi.getAllTools === "function" ? pi.getAllTools() : [])
-      .map((tool) => (tool && typeof tool === "object" ? (tool as { name?: unknown }).name : undefined))
-      .filter((name): name is string => typeof name === "string"),
-  );
-
-  const delegation = buildDelegationRunwayCue(p, ctx.cwd);
-  const background = buildBackgroundRunwayCue(p, toolNames);
-  const blockers = [...new Set([...delegation.blockers, ...background.blockers])];
-
-  if (delegation.decision === "defer" || background.decision === "blocked") {
-    const summary = [
-      "runway-readiness-cue:",
-      "decision=blocked",
-      "code=runway-readiness-blocked",
-      `delegation=${delegation.decision}`,
-      `background=${background.decision}`,
-      blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-      "authorization=none",
-    ].filter(Boolean).join(" ");
-    return {
-      decision: "blocked",
-      recommendationCode: "runway-readiness-blocked",
-      recommendation: "runway blocked; keep local-safe execution and resolve blockers before scale promotion.",
-      nextAction: `${delegation.nextAction} ${background.nextAction}`,
-      blockers,
-      delegation,
-      background,
-      summary,
-    };
-  }
-
-  if (delegation.decision === "ready-simple-delegate" && background.decision === "ready-window") {
-    const summary = [
-      "runway-readiness-cue:",
-      "decision=ready-window",
-      "code=runway-readiness-ready-window",
-      `delegation=${delegation.decision}`,
-      `background=${background.decision}`,
-      "authorization=none",
-    ].join(" ");
-    return {
-      decision: "ready-window",
-      recommendationCode: "runway-readiness-ready-window",
-      recommendation: "delegation/background runway is ready for bounded promotion planning (still explicit human decision).",
-      nextAction: "choose one promotion lane (simple-delegate or background rehearsal) and keep explicit human start/defer.",
-      blockers,
-      delegation,
-      background,
-      summary,
-    };
-  }
-
-  const summary = [
-    "runway-readiness-cue:",
-    "decision=needs-evidence",
-    "code=runway-readiness-needs-evidence",
-    `delegation=${delegation.decision}`,
-    `background=${background.decision}`,
-    blockers.length > 0 ? `blockers=${blockers.join("|")}` : undefined,
-    "authorization=none",
-  ].filter(Boolean).join(" ");
-  return {
-    decision: "needs-evidence",
-    recommendationCode: "runway-readiness-needs-evidence",
-    recommendation: "runway still needs evidence; continue local-safe slices while collecting readiness signals.",
-    nextAction: delegation.decision !== "ready-simple-delegate" ? delegation.nextAction : background.nextAction,
-    blockers,
-    delegation,
-    background,
-    summary,
   };
 }
 
@@ -1750,6 +1557,33 @@ export function registerGuardrailsAutonomyLaneSurface(pi: ExtensionAPI): void {
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
         details: result,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: "autonomy_lane_batch_preview",
+    label: "Autonomy Lane Batch Preview",
+    description: "Report-only batch preview listing 3-7 local-safe slices with short validation/rollback cues for continuous execution.",
+    parameters: Type.Object({
+      milestone: Type.Optional(Type.String({ description: "Optional milestone filter." })),
+      include_protected_scopes: Type.Optional(Type.Boolean({ description: "Opt in to CI/settings/publish/.obsidian scopes. Default false." })),
+      include_missing_rationale: Type.Optional(Type.Boolean({ description: "Opt in to rationale-sensitive tasks that still lack rationale evidence. Default false." })),
+      focus_task_ids: Type.Optional(Type.Array(Type.String(), { description: "Optional focus task ids; when omitted, fresh handoff current_tasks are used by default." })),
+      use_handoff_focus: Type.Optional(Type.Boolean({ description: "Use .project/handoff.json current_tasks as focus when focus_task_ids is omitted. Default true." })),
+      sample_limit: Type.Optional(Type.Number({ description: "Max eligible ids to inspect before preview (1..20)." })),
+      slice_count: Type.Optional(Type.Number({ description: "Requested preview size (3..7, default 5)." })),
+    }),
+    execute(_toolCallId, params, _signal, _onUpdate, ctx) {
+      const p = (params ?? {}) as Record<string, unknown>;
+      const packet = buildAutonomyLaneBatchPreviewPacket({
+        ...p,
+        include_protected_scopes: p.include_protected_scopes === true,
+        include_missing_rationale: p.include_missing_rationale === true,
+      }, ctx.cwd);
+      return {
+        content: [{ type: "text", text: packet.summary }],
+        details: packet,
       };
     },
   });

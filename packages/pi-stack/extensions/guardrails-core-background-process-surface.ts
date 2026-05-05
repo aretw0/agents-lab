@@ -50,11 +50,7 @@ function normalizeStopSource(value: unknown): BackgroundProcessStopSource | unde
   return value === "human" || value === "agent" || value === "timeout" || value === "unknown" ? value : undefined;
 }
 
-function buildBackgroundProcessReadinessPacket(input: {
-  plan: ReturnType<typeof resolveBackgroundProcessControlPlan>;
-  readiness: ReturnType<typeof buildBackgroundProcessReadinessScore>;
-  rehearsal: ReturnType<typeof evaluateBackgroundProcessRehearsal>;
-}): {
+type BackgroundReadinessPacket = {
   decision: "ready-window" | "needs-evidence" | "blocked";
   recommendationCode:
     | "background-process-readiness-packet-ready"
@@ -64,7 +60,13 @@ function buildBackgroundProcessReadinessPacket(input: {
   nextAction: string;
   blockers: string[];
   summary: string;
-} {
+};
+
+function buildBackgroundProcessReadinessPacket(input: {
+  plan: ReturnType<typeof resolveBackgroundProcessControlPlan>;
+  readiness: ReturnType<typeof buildBackgroundProcessReadinessScore>;
+  rehearsal: ReturnType<typeof evaluateBackgroundProcessRehearsal>;
+}): BackgroundReadinessPacket {
   const blockers = [...new Set([
     ...(Array.isArray(input.plan.blockers) ? input.plan.blockers : []),
     ...(Array.isArray(input.rehearsal.blockers) ? input.rehearsal.blockers : []),
@@ -126,6 +128,36 @@ function buildBackgroundProcessReadinessPacket(input: {
     recommendation: "background-process runway is ready for bounded local rehearsal planning (still no process start from this packet).",
     nextAction: "run one bounded rehearsal slice with explicit rollback and lifecycle evidence capture.",
     blockers,
+    summary,
+  };
+}
+
+type UnlockChecklist = {
+  decision: "ready" | "needs-action";
+  topBlockers: string[];
+  nextAction: string;
+  items: string[];
+  summary: string;
+};
+
+function buildUnlockChecklist(packet: BackgroundReadinessPacket): UnlockChecklist {
+  const topBlockers = [...new Set(packet.blockers.filter((row) => typeof row === "string" && row.trim().length > 0))].slice(0, 3);
+  const decision = packet.decision === "ready-window" ? "ready" : "needs-action";
+  const items = [
+    ...topBlockers.map((blocker, index) => `blocker:${index + 1}:${blocker}`),
+    `next:${packet.nextAction}`,
+  ];
+  const summary = [
+    "unlock-checklist:",
+    `decision=${decision}`,
+    topBlockers.length > 0 ? `topBlockers=${topBlockers.join("|")}` : "topBlockers=none",
+    `next=${packet.nextAction}`,
+  ].join(" ");
+  return {
+    decision,
+    topBlockers,
+    nextAction: packet.nextAction,
+    items,
     summary,
   };
 }
@@ -327,9 +359,11 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
         readiness,
         rehearsal,
       });
+      const unlockChecklist = buildUnlockChecklist(packet);
+      const summary = `${packet.summary} ${unlockChecklist.summary}`;
 
       return {
-        content: [{ type: "text", text: packet.summary }],
+        content: [{ type: "text", text: summary }],
         details: {
           mode: "background-process-readiness-packet",
           activation: "none",
@@ -339,6 +373,8 @@ export function registerGuardrailsBackgroundProcessSurface(pi: ExtensionAPI): vo
           processStopAllowed: false,
           mutationAllowed: false,
           ...packet,
+          summary,
+          unlockChecklist,
           plan,
           readiness,
           rehearsal,
