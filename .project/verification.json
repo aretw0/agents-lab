@@ -12732,6 +12732,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:03:05.421Z",
       "evidence": "Extracted context-watchdog continuation/read-only preview tool registration into packages/pi-stack/extensions/context-watchdog-continuation-surface.ts. Moved context_preload_consume, context_watch_continuation_readiness, turn_boundary_decision_packet, context_watch_one_slice_canary_preview, and context_watch_one_slice_operator_packet_preview registration behind registerContextWatchdogContinuationSurface while preserving public tool names/contracts. context-watchdog.ts reduced from 2460 to 1999 lines; line_budget_snapshot now reports aboveCritical=0, aboveExtract=7, recommendation=extract. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 4 files passed, 87 tests passed; safe_marker_check passed for extracted surface; git diff --check clean. [rationale:anti-bloat] Batches reload-needing runtime refactor per user instruction while removing last critical line-budget surface."
+    },
+    {
+      "id": "VER-BUD-1168",
+      "target": "TASK-BUD-816",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:08:26.982Z",
+      "evidence": "Extracted bounded JSONL scan primitives from session-analytics.ts into packages/pi-stack/extensions/session-analytics-jsonl.ts: SessionJsonl* types, DEFAULT_SESSION_JSONL_SCAN_LIMITS, clampScanLimits, and readJsonlLines. session-analytics.ts preserves public exports via re-export and dropped from 1491 to 1366 lines, below extract threshold 1400. Validation: initial focal run caught missing clampScanLimits import; fixed by exporting/importing it. Final validation: pnpm vitest --run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 2 files passed, 60 tests passed; node --test packages/pi-stack/test/session-analytics-outliers.test.mjs packages/pi-stack/test/session-log-scan-guard.test.mjs => 15 passed; safe_marker_check passed for JSONL exports; git diff --check clean; line_budget_snapshot improved aboveExtract from 7 to 6, aboveCritical=0. [rationale:anti-bloat] Batches another reload-needing runtime extraction before final operator reload."
     }
   ]
 }

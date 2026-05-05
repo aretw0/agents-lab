@@ -18270,6 +18270,28 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Usuário pediu acumular mudanças que precisam reload e interagir só ao final; fatia local-safe agrupa runtime refactor sem pedir reload intermediário.\n[provenance:human] source_task=none reason=Continuation after reload with explicit instruction to batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração de tools read-only de continuação; reload será acumulado para o final conforme steer do usuário.\nClosed via VER-BUD-1167: extracted context-watchdog continuation surface and validated 87 focal tests. [rationale:anti-bloat] context-watchdog.ts now 1999 lines; line budget aboveCritical=0; reload batched for final operator interaction.",
       "verification": "VER-BUD-1167"
+    },
+    {
+      "id": "TASK-BUD-816",
+      "description": "Extrair primitivas bounded de leitura JSONL de session-analytics para reduzir superfície acima de extract sem alterar queries.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/session-analytics.ts",
+        "packages/pi-stack/extensions/session-analytics-jsonl.ts",
+        "packages/pi-stack/test/smoke/session-analytics.test.ts",
+        "packages/pi-stack/test/session-analytics-outliers.test.mjs",
+        "packages/pi-stack/test/session-log-scan-guard.test.mjs"
+      ],
+      "acceptance_criteria": [
+        "mover tipos/limites/readJsonlLines para módulo coeso",
+        "preservar exports públicos existentes via re-export em session-analytics.ts",
+        "reduzir session-analytics.ts abaixo de 1400 linhas",
+        "validar testes focais de session analytics e scan guard"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Batch adicional antes de pedir reload: session-analytics.ts está em 1491 linhas e pode sair de aboveExtract com extração pequena de JSONL bounded.\n[provenance:human] source_task=none reason=User asked to accumulate reload-needing work and minimize interactions.\n[rationale:anti-bloat] Iniciando extração JSONL bounded de session-analytics; reload acumulado para final da leva.\nClosed via VER-BUD-1168: extracted session JSONL scan primitives and validated focal vitest/node tests. [rationale:anti-bloat] session-analytics.ts now 1366 (<1400); line budget aboveExtract=6/aboveCritical=0.",
+      "verification": "VER-BUD-1168"
     }
   ]
 }
