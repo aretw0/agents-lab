@@ -87,6 +87,11 @@ import {
 	readDeferredLaneQueueCount,
 	readWatchdogConfig,
 } from "./context-watchdog-runtime-status";
+import {
+	CONTEXT_WATCHDOG_RUNTIME_CONSTANTS,
+	createContextWatchAnnouncementWindow,
+	createContextWatchTimeoutPressure,
+} from "./context-watchdog-runtime-state";
 import { buildContextWatchdogApplyPreset, registerContextWatchdogStatusSurface } from "./context-watchdog-status-surface";
 import {
 	applyEmergencyContextWindowFallbackConfig,
@@ -409,54 +414,29 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 	let antiParalysisNotifyCountInWindow = 0;
 	let lastAntiParalysisNotifyAt = 0;
 	let lastPreCompactPrepNotifyAt = 0;
-	let announceWindowStartAt = 0;
-	let announceCountInWindow = 0;
-	let finalTurnSuppressionCountInWindow = 0;
 	let lastDeterministicStopSignalAt = 0;
-	let timeoutPressureWindowStartedAt = 0;
-	let timeoutPressureCount = 0;
-	let timeoutPressureLastSeenAt = 0;
-	let timeoutPressureLastMessage = "";
-	const SIGNAL_NOISE_WINDOW_MS = 10 * 60 * 1000;
-	const SIGNAL_NOISE_MAX_ANNOUNCEMENTS = 4;
-	const FINAL_TURN_CLOSE_HEADROOM_PCT = 10;
-	const CALM_CLOSE_DEFER_THRESHOLD = 3;
-	const ANTI_PARALYSIS_GRACE_WINDOW_MS = 2 * 60 * 1000;
-	const ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS = 5 * 60 * 1000;
-	const ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW = 1;
-	const TIMEOUT_PRESSURE_WINDOW_MS = 10 * 60 * 1000;
-	const TIMEOUT_PRESSURE_THRESHOLD = 2;
-	const POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS = 5 * 60 * 1000;
-
-	const getAnnouncementsInWindow = (nowMs: number): number => {
-		if (announceWindowStartAt <= 0) return 0;
-		if ((nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) return 0;
-		return announceCountInWindow;
-	};
-
-	const markAnnouncement = (nowMs: number): void => {
-		if (announceWindowStartAt <= 0 || (nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) {
-			announceWindowStartAt = nowMs;
-			announceCountInWindow = 0;
-			finalTurnSuppressionCountInWindow = 0;
-		}
-		announceCountInWindow += 1;
-	};
-
-	const markFinalTurnSuppression = (nowMs: number): void => {
-		if (announceWindowStartAt <= 0 || (nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) {
-			announceWindowStartAt = nowMs;
-			announceCountInWindow = 0;
-			finalTurnSuppressionCountInWindow = 0;
-		}
-		finalTurnSuppressionCountInWindow += 1;
-	};
-
-	const getFinalTurnSuppressionsInWindow = (nowMs: number): number => {
-		if (announceWindowStartAt <= 0) return 0;
-		if ((nowMs - announceWindowStartAt) > SIGNAL_NOISE_WINDOW_MS) return 0;
-		return finalTurnSuppressionCountInWindow;
-	};
+	const {
+		SIGNAL_NOISE_WINDOW_MS,
+		SIGNAL_NOISE_MAX_ANNOUNCEMENTS,
+		FINAL_TURN_CLOSE_HEADROOM_PCT,
+		CALM_CLOSE_DEFER_THRESHOLD,
+		ANTI_PARALYSIS_GRACE_WINDOW_MS,
+		ANTI_PARALYSIS_NOTIFY_COOLDOWN_MS,
+		ANTI_PARALYSIS_MAX_NOTIFIES_PER_WINDOW,
+		POST_RELOAD_PENDING_NOTIFY_MIN_COOLDOWN_MS,
+	} = CONTEXT_WATCHDOG_RUNTIME_CONSTANTS;
+	const {
+		getAnnouncementsInWindow,
+		markAnnouncement,
+		markFinalTurnSuppression,
+		getFinalTurnSuppressionsInWindow,
+		reset: resetAnnouncementWindow,
+	} = createContextWatchAnnouncementWindow();
+	const {
+		readTimeoutPressureState,
+		recordTimeoutPressure,
+		reset: resetTimeoutPressure,
+	} = createContextWatchTimeoutPressure();
 
 	const isReloadRequiredForSourceUpdate = (): boolean => {
 		if (!Number.isFinite(sourceMtimeMsAtSessionStart)) return false;
@@ -485,45 +465,6 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			autoCompactRetryDueAt = 0;
 			run(ctx, "message_end");
 		}, safeDelayMs);
-	};
-
-	const decayTimeoutPressureWindow = (nowMs: number) => {
-		if (timeoutPressureWindowStartedAt <= 0) return;
-		if ((nowMs - timeoutPressureWindowStartedAt) <= TIMEOUT_PRESSURE_WINDOW_MS) return;
-		timeoutPressureWindowStartedAt = 0;
-		timeoutPressureCount = 0;
-	};
-
-	const readTimeoutPressureState = (nowMs: number) => {
-		decayTimeoutPressureWindow(nowMs);
-		const active = timeoutPressureCount >= TIMEOUT_PRESSURE_THRESHOLD;
-		const ageMs = timeoutPressureLastSeenAt > 0
-			? Math.max(0, nowMs - timeoutPressureLastSeenAt)
-			: undefined;
-		return {
-			active,
-			count: timeoutPressureCount,
-			threshold: TIMEOUT_PRESSURE_THRESHOLD,
-			windowMs: TIMEOUT_PRESSURE_WINDOW_MS,
-			windowStartedAtMs: timeoutPressureWindowStartedAt,
-			lastSeenAtMs: timeoutPressureLastSeenAt,
-			ageMs,
-			lastMessage: timeoutPressureLastMessage,
-		};
-	};
-
-	const recordTimeoutPressure = (message: string, nowMs: number) => {
-		if (!isProviderRequestTimeoutError(message)) {
-			return { matched: false, state: readTimeoutPressureState(nowMs) };
-		}
-		if (timeoutPressureWindowStartedAt <= 0 || (nowMs - timeoutPressureWindowStartedAt) > TIMEOUT_PRESSURE_WINDOW_MS) {
-			timeoutPressureWindowStartedAt = nowMs;
-			timeoutPressureCount = 0;
-		}
-		timeoutPressureCount += 1;
-		timeoutPressureLastSeenAt = nowMs;
-		timeoutPressureLastMessage = String(message ?? "").slice(0, 240);
-		return { matched: true, state: readTimeoutPressureState(nowMs) };
 	};
 
 	const run = (ctx: ExtensionContext, reason: ContextWatchHandoffReason) => {
@@ -1273,14 +1214,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 		antiParalysisNotifyCountInWindow = 0;
 		lastAntiParalysisNotifyAt = 0;
 		lastPreCompactPrepNotifyAt = 0;
-		announceWindowStartAt = 0;
-		announceCountInWindow = 0;
-		finalTurnSuppressionCountInWindow = 0;
+		resetAnnouncementWindow();
 		lastDeterministicStopSignalAt = 0;
-		timeoutPressureWindowStartedAt = 0;
-		timeoutPressureCount = 0;
-		timeoutPressureLastSeenAt = 0;
-		timeoutPressureLastMessage = "";
+		resetTimeoutPressure();
 		run(ctx, "session_start");
 	});
 
@@ -1336,14 +1272,9 @@ export default function contextWatchdogExtension(pi: ExtensionAPI) {
 			antiParalysisNotifyCountInWindow = 0;
 			lastAntiParalysisNotifyAt = 0;
 			lastPreCompactPrepNotifyAt = 0;
-			announceWindowStartAt = 0;
-			announceCountInWindow = 0;
-			finalTurnSuppressionCountInWindow = 0;
+			resetAnnouncementWindow();
 			lastDeterministicStopSignalAt = 0;
-			timeoutPressureWindowStartedAt = 0;
-			timeoutPressureCount = 0;
-			timeoutPressureLastSeenAt = 0;
-			timeoutPressureLastMessage = "";
+			resetTimeoutPressure();
 		},
 		applyPreset: (ctx: ExtensionContext, presetInput?: unknown) => buildContextWatchdogApplyPreset(statusRuntime, ctx, presetInput),
 		constants: {

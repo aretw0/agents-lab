@@ -13038,6 +13038,15 @@
       "method": "inspection",
       "timestamp": "2026-05-05T21:02:13.628Z",
       "evidence": "Closure verification for TASK-BUD-841: guardrail/monitor recalibration lane produced durable fixes and runtime validation across the recurring long-loop false positives: authorization blockers calibrated (c8d8f982), reload-resume/fragility copy calibrated (383e5bf8, 90524c11), monitor issue write schema normalized (865ed1c2), read-only runtime bypass widened and stale helper repair validated post-reload (b01d5aa6, 67c3b2b8, VER-BUD-1193/1194/1195), and anti-bloat/refactor authorization hardening completed in TASK-BUD-840 (VER-BUD-1196..1200). Current gates: TASK-BUD-841 board_task_quality_gate -> closeAllowed=yes decision=ready; board_decision_packet -> recommendedDecision=close blockers=[]. Runtime: classifyFail=0, reloadGate=reload-not-required, git clean before board mutations. [rationale:communicable] This closes the recalibration meta-task only after its dependency TASK-BUD-840 was resolved, leaving TASK-BUD-837 as explicit downstream anti-bloat work rather than mixing it into monitor calibration."
+    },
+    {
+      "id": "VER-BUD-1202",
+      "target": "TASK-BUD-837",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T21:21:41.393Z",
+      "evidence": "First successful TASK-BUD-837 anti-bloat slice after rollback: extracted context-watchdog runtime window/timeout-pressure state into packages/pi-stack/extensions/context-watchdog-runtime-state.ts without rewriting the public export surface or changing auto-compact/auto-resume policy. Line count: context-watchdog.ts 1361 -> 1292; new helper 132 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-storage.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts -> 75 passed. [rationale:refactor] This is a cohesive internal-state extraction that preserves public contracts and leaves the task open for further reduction toward <=1000 lines."
     }
   ]
 }
