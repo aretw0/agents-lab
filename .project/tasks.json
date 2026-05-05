@@ -18500,8 +18500,8 @@
         "propor ajuste sem abrir protected scope nem auto-dispatch",
         "validar com teste/regressão focal antes de aplicar qualquer mudança"
       ],
-      "milestone": "context-graceful-stop",
-      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata.\n[evidence:auto-compact-calibration] Operador observou que, na transição de auto compactação/auto-resume, o agente não parou graciosamente cedo o bastante para deixar o idle auto-compactar; ficou confortável demais até bater/forçar limite. Não tangenciar agora; usar como evidência futura para calibrar threshold/stop-before-compact e expectativa de idle graceful-stop."
+      "milestone": "guardrails-monitor-recalibration",
+      "notes": "[rationale:operator-evidence] Usuário observou em 2026-05-05 que a transição auto-compact não parou graciosamente para permitir idle; agente ficou confortável demais perto do limite. Não executar agora; backlog para calibração futura.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para deixar evidência em backlog, sem tangente imediata.\n[evidence:auto-compact-calibration] Operador observou que, na transição de auto compactação/auto-resume, o agente não parou graciosamente cedo o bastante para deixar o idle auto-compactar; ficou confortável demais até bater/forçar limite. Não tangenciar agora; usar como evidência futura para calibrar threshold/stop-before-compact e expectativa de idle graceful-stop.\n[transition-evidence] Operador reforçou que o control plane está saudável e trabalha por horas, mas ainda falta reservar espaço no fim da janela para checkpoint/handoff/wrap-up e parada graciosa para o idle auto-compactar, em cenários de hard/soft intent de continuar via auto-resume. Priorizar calibração sem perder pragmatismo; não é jogar tudo fora.\n[evidence:forced-compact] Operador relatou que o agente bateu no limite da janela e a compactação aconteceu forçadamente, em vez de conseguir reservar espaço para checkpoint/handoff/wrap-up e parar graciosamente para idle auto-compact quando há hard/soft intent de continuar."
     },
     {
       "id": "TASK-BUD-827",
@@ -18519,8 +18519,8 @@
         "propor melhoria de UX/telemetria sem alterar política protected-scope",
         "validar com smoke focal post-reload antes de qualquer fechamento"
       ],
-      "milestone": "context-graceful-stop",
-      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente."
+      "milestone": "guardrails-monitor-recalibration",
+      "notes": "[rationale:operator-evidence] Usuário relatou que auto-resume foi suprimido por reload pendente; reload foi feito e a sessão retomou. Não executar agora; backlog para investigação futura junto da calibração de auto-compact/idle.\n[provenance:human] source_task=none reason=Comentário explícito do usuário para registrar evidência em backlog sem abrir tangente.\n[evidence:auto-resume-reload-suppression] Operador relatou pós-compactação forçada: auto-resume foi suprimido esperando reload; após reload manual, auto-resume veio em seguida. Operador suprimiu manualmente para registrar evidência. Isso confirma acoplamento reload-pendente -> supressão de auto-resume."
     },
     {
       "id": "TASK-BUD-828",
@@ -18746,8 +18746,8 @@
         "validar smokes focais context-watchdog",
         "não resolver TASK-BUD-826/827 nesta fatia"
       ],
-      "milestone": "anti-bloat-afk",
-      "notes": "[rationale:anti-bloat] context-watchdog.ts saiu de extract mas ainda está em watch (~1360); criar fatia futura sem abrir tangente de calibração.\n[provenance:human] source_task=TASK-BUD-825 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após TASK-BUD-835; alvo local-safe: reduzir context-watchdog.ts watch-level preservando runtime/reload/checkpoint behavior.\nDeferido sem commit: usuário pediu não tangenciar na área auto-compact/auto-resume; para evitar misturar anti-bloat de context-watchdog com evidência de calibração, mantido no backlog para retomada explícita posterior."
+      "milestone": "anti-bloat-paused",
+      "notes": "[rationale:anti-bloat] context-watchdog.ts saiu de extract mas ainda está em watch (~1360); criar fatia futura sem abrir tangente de calibração.\n[provenance:human] source_task=TASK-BUD-825 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado após TASK-BUD-835; alvo local-safe: reduzir context-watchdog.ts watch-level preservando runtime/reload/checkpoint behavior.\nDeferido sem commit: usuário pediu não tangenciar na área auto-compact/auto-resume; para evitar misturar anti-bloat de context-watchdog com evidência de calibração, mantido no backlog para retomada explícita posterior.\nRetomado por pedido explícito do operador; escopo limitado a anti-bloat estrutural/readability de context-watchdog.ts, sem calibrar auto-compact/auto-resume thresholds ou alterar política runtime.\nPausado por transição explícita de lane: anti-bloat permanece valioso e será retomado, mas agora prioridade passa a guardrails/monitores que estão atrapalhando loops longos. Estado seguro: tentativa parcial em context-watchdog foi revertida; sem source dirty relacionado."
     },
     {
       "id": "TASK-BUD-838",
@@ -18796,6 +18796,47 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Últimos arquivos pouco acima de watch (~1087/~1075) podem ser tratados em fatias pequenas após alvos maiores.\n[provenance:human] source_task=TASK-BUD-829 reason=Usuário pediu semear mais tasks na mesma lane para aumentar loops AFK.\nIniciado por foco auto-resume; alvo local-safe: reduzir colony-pilot.ts/project-board-surface.ts watch-level sem executar pilot/remote/protected scope.\nConcluído: colony-pilot.ts e project-board-surface.ts ficaram <1000 linhas; aboveWatch caiu para 8.",
       "verification": "VER-BUD-1183"
+    },
+    {
+      "id": "TASK-BUD-840",
+      "description": "Corrigir guardrails de autorização para não bloquear micro-extrações anti-bloat explicitamente autorizadas.",
+      "status": "planned",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-837"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core*.ts",
+        "packages/pi-stack/extensions/write-preview-guard.ts"
+      ],
+      "acceptance_criteria": [
+        "Quando o operador autoriza anti-bloat/refactor estrutural, criação de módulos auxiliares coesos não deve ser bloqueada como tangente por heurística genérica.",
+        "O guardrail continua bloqueando mudanças de política/thresholds/calibração quando o pedido foi apenas registrar backlog.",
+        "Adicionar regressão/evidência para diferenciar autorização contextual de refactor vs tangente de backlog."
+      ],
+      "milestone": "guardrails-monitor-recalibration",
+      "notes": "[evidence:blocker-friction] Operador registrou: estamos falhando em engenharia com bloqueios que atrapalham o trabalho; durante TASK-BUD-837 o guardrail bloqueou repetidamente writes/edits/bash para micro-extrações coesas de context-watchdog, mesmo após autorização contextual para anti-bloat. Isso deve virar hardening do guardrail, não workaround manual recorrente.\n[provenance:human] source_task=TASK-BUD-837 reason=Bloqueios recorrentes atrapalharam execução de anti-bloat autorizada.\nPromovido para lane de recalibração: operador confirmou que bloqueios de autorização estão atrapalhando anti-bloat legítimo. Critério: permitir micro-extrações coesas autorizadas por objetivo de refactor/anti-bloat, mas continuar bloqueando tangentes de backlog e mudanças de política/threshold sem foco explícito."
+    },
+    {
+      "id": "TASK-BUD-841",
+      "description": "Pesquisar e recalibrar guardrails/monitores que deixaram de agregar em loops longos do control plane.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-840"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/guardrails-core*.ts",
+        "packages/pi-stack/extensions/monitor-*.ts",
+        ".pi/monitors"
+      ],
+      "acceptance_criteria": [
+        "Inventariar bloqueios/alertas recentes que atrapalharam trabalho legítimo e separar falsos positivos, regras úteis e regras rígidas demais.",
+        "Pesquisar/priorizar desenho pragmático para monitores/guardrails em loops longos: advisory vs block, autorização contextual, cooldown/dedupe e evidência local.",
+        "Produzir plano de mudanças pequenas com regressões antes de mexer em enforcement."
+      ],
+      "milestone": "guardrails-monitor-recalibration",
+      "notes": "[rationale:operator-steer] Após horas de trabalho, operador observou que o control plane está saudável e produtivo, mas o gargalo virou guardrails/monitores ingenuamente rígidos ou não agregadores. Pausar anti-bloat principal e focar em reduzir esse peso para voltar a evoluir.\n[provenance:human] source_task=none reason=Transição explícita de lane solicitada pelo operador.\n[evidence:runtime-regression] Durante transição de lane, reload revelou erro vivo de extensão: guardrails-core-event-surface.ts usava classifyRouting sem import após extração. Hotfix aplicado em commit 357fcf80. Esse caso entra na pesquisa sobre regressões e contratos de extração/monitoramento que precisam agregar sem bloquear loops legítimos.\nIniciado em modo batch após reload: foco em pesquisar/recalibrar guardrails e monitores para loops longos, acumulando mudanças que exijam reload para validação final conjunta.\nPrimeira fatia implementada: monitor-provider agora calibra unauthorized-action/hedge com conversation_history e instruções critical-only/long-run-local-safe; .pi/settings ativa hedgeConversationHistory=true. Mantido sem fechar a lane: ainda falta pesquisar/recalibrar outros bloqueios e graceful-stop/auto-resume."
     }
   ]
 }

@@ -12912,6 +12912,15 @@
       "method": "test+inspection",
       "timestamp": "2026-05-05T16:47:45.405Z",
       "evidence": "Extraído núcleo provider/model/override de monitor-provider-patch para packages/pi-stack/extensions/monitor-provider-core.ts. monitor-provider-patch.ts reduziu de 1374 para 871 linhas; novo helper tem 519 linhas. Validação: node --test packages/pi-stack/test/monitor-provider-patch.test.mjs => 36 tests passed; pnpm vitest --run packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts packages/pi-stack/test/smoke/monitor-summary.test.ts packages/pi-stack/test/smoke/monitor-summary-status-dedupe.test.ts => 3 files/16 tests passed. line_budget_snapshot: aboveCritical=0 aboveExtract=0 aboveWatch=3 recommendation=watch."
+    },
+    {
+      "id": "VER-BUD-1188",
+      "target": "TASK-BUD-841",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T18:17:46.630Z",
+      "evidence": "Primeira fatia de recalibração guardrails/monitores: adicionado monitor-provider-authorization-calibration para aplicar history/context e instruções critical-only em unauthorized-action/hedge; hedgeConversationHistory ativado. Validação: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 1 file/3 tests passed; node --test monitor-interference-matrix, monitor-profile-policy, settings-shape-guard, monitor-provider-patch -> 48 tests passed."
     }
   ]
 }

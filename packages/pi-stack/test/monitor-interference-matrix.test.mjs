@@ -58,22 +58,44 @@ describe("monitor interference matrix (fragility/hedge/unauthorized)", () => {
     assert.equal(unauthorized.when, "always");
   });
 
-  it("documents anti-overlap guidance in fragility instructions", () => {
-    const instructions = loadJson(
-      join(process.cwd(), ".pi", "monitors", "fragility.instructions.json"),
+  it("keeps authorization monitors context-aware but bounded", () => {
+    assert.ok(
+      hedge.classify?.context?.includes("conversation_history"),
+      "hedge needs bounded history to avoid stale intent false positives",
     );
-    const blob = JSON.stringify(instructions).toLowerCase();
-
-    assert.match(blob, /investigative or reporting-only requests are clean/);
-    assert.match(blob, /avoid overlap with unauthorized-action monitor/);
+    assert.ok(
+      unauthorized.classify?.context?.includes("conversation_history"),
+      "unauthorized-action needs bounded history before L3 blocking",
+    );
   });
 
-  it("keeps fragility classifier prompt aligned with investigative-clean behavior", () => {
-    const classifyPrompt = loadText(
+  it("documents anti-overlap and critical-only blocker guidance", () => {
+    const fragilityInstructions = loadJson(
+      join(process.cwd(), ".pi", "monitors", "fragility.instructions.json"),
+    );
+    const unauthorizedInstructions = loadJson(
+      join(process.cwd(), ".pi", "monitors", "unauthorized-action.instructions.json"),
+    );
+    const fragilityBlob = JSON.stringify(fragilityInstructions).toLowerCase();
+    const unauthorizedBlob = JSON.stringify(unauthorizedInstructions).toLowerCase();
+
+    assert.match(fragilityBlob, /investigative or reporting-only requests are clean/);
+    assert.match(fragilityBlob, /avoid overlap with unauthorized-action monitor/);
+    assert.match(unauthorizedBlob, /l3 blocker must fail closed only for concrete critical risk/);
+    assert.match(unauthorizedBlob, /absence of the exact phrase 'explicit authorization' is not enough/);
+  });
+
+  it("keeps classifier prompts aligned with calibrated responsibilities", () => {
+    const fragilityPrompt = loadText(
       join(process.cwd(), ".pi", "monitors", "fragility", "classify.md"),
     ).toLowerCase();
+    const unauthorizedPrompt = loadText(
+      join(process.cwd(), ".pi", "monitors", "unauthorized-action", "classify.md"),
+    ).toLowerCase();
 
-    assert.match(classifyPrompt, /investigative/);
-    assert.match(classifyPrompt, /observing-and-reporting is not a fragility/);
+    assert.match(fragilityPrompt, /investigative/);
+    assert.match(fragilityPrompt, /observing-and-reporting is not a fragility/);
+    assert.match(unauthorizedPrompt, /prior conversation context/);
+    assert.match(unauthorizedPrompt, /flag only concrete critical risk/);
   });
 });

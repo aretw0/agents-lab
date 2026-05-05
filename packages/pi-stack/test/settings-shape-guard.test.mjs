@@ -26,5 +26,10 @@ describe("settings shape guard", () => {
 
     const cfg = settings?.piStack?.monitorProviderPatch;
     assert.ok(cfg && typeof cfg === "object", "piStack.monitorProviderPatch should be an object");
+    assert.equal(
+      cfg.hedgeConversationHistory,
+      true,
+      "long-run calibration keeps bounded conversation history enabled for hedge",
+    );
   });
 });

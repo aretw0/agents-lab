@@ -1,56 +1,53 @@
 {
-  "timestamp": "2026-05-05T02:33:16.145Z",
-  "context": "Completed TASK-BUD-786: extracted guardrails runtime config/pragmatic autonomy helpers into guardrails-core-runtime-config.ts. guardrails-cor [snip] unstaged entry outside intended slice. [truncated:+89 chars]",
+  "timestamp": "2026-05-05T17:57:25.488Z",
+  "context": "Transição de lane assimilada: control plane saudável e produtivo em long-runs, mas anti-bloat principal pausado para focar guardrails/monitor [snip] e classifyRouting sem import corrigido. [truncated:+212 chars]",
+  "current_tasks": [
+    "TASK-BUD-841"
+  ],
   "next_actions": [
-    "commit TASK-BUD-786 extraction slice",
-    "refresh line budget/autonomy status",
-    "continue anti-bloat wave on next largest critical surface"
+    "Rodar /reload para validar hotfix vivo da extensão guardrails-core.",
+    "Priorizar TASK-BUD-841: pesquisar/recalibrar guardrails e monitores para loops longos com advi [snip] /dedupe e evidência local. [truncated:+47 chars]",
+    "Manter TASK-BUD-837 anti-bloat pausado; retomar depois que degradação de guardrails/monitores for reduzida."
   ],
   "blockers": [
-    "uncommitted monitor-created .project/issues.json entry remains unstaged"
+    ".project/tasks.json e .project/handoff.json seguem dirty por assimilação/checkpoint local.",
+    "Validação live da extensão requer /reload."
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-long-run-intent-queue.test.ts -> 52 passed"
+    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-shell-route-registration.test.ts pac [snip] -> 3 files/56 tests passed [truncated:+140 chars]",
+    "git diff --check -- packages/pi-stack/extensions/guardrails-core-event-surface.ts -> clean"
   ],
   "recent_commits": [
-    "e8bea80d refactor(guardrails): extract web routing helpers"
+    "357fcf80 fix(guardrails): restore routing import in event surface"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-786",
+    "focus": "TASK-BUD-841",
     "canonical_links": [
-      "task:TASK-BUD-786",
-      "commit:e8bea80d"
+      "task:TASK-BUD-841",
+      "task:TASK-BUD-837",
+      "commit:357fcf80"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-05T02:33:16.145Z",
+    "generatedAtIso": "2026-05-05T17:57:25.488Z",
     "level": "ok",
+    "percent": 18,
     "action": "continue",
-    "recommendation": "continue",
-    "growth_maturity": {
-      "decision": "go"
-    },
-    "focus_task_status": "completed"
+    "recommendation": "continue"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-05T02:33:16.145Z",
+      "atIso": "2026-05-05T17:57:25.488Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 0,
+      "percent": 18,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "continue",
-      "growth_maturity": {
-        "decision": "go"
-      }
+      "recommendation": "continue"
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-786"
   ]
 }

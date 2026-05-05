@@ -43,6 +43,12 @@ import {
 	type ThinkingLevel,
 } from "./monitor-provider-config";
 import { ensureMonitorRuntimeClassifyContract } from "./monitor-runtime-contract";
+import {
+	ensureHedgeInstructionCalibration,
+	ensureUnauthorizedActionClassifierCalibration,
+	ensureUnauthorizedActionInstructionCalibration,
+	ensureUnauthorizedActionMonitorPolicy,
+} from "./monitor-provider-authorization-calibration";
 
 import { parseCommandInput, detectSetting, detectBooleanSetting, detectStringSetting, detectStringMapSetting, detectDefaultProvider, resolveClassifierModel, detectClassifierThinking, detectHedgeWhen, detectHedgeIncludeProjectContext, detectFragilityWhen, parseModelRef, generateAgentYaml, ensureOverrides, syncOverrides, extractModelFromAgentYaml, extractTemplateFromAgentYaml, hasSystemPromptInAgentYaml, repairLegacyTemplateOverrides, repairMissingSystemPromptOverrides, readOverrideModels, checkModelAvailability } from "./monitor-provider-core";
 export { parseCommandInput, detectSetting, detectBooleanSetting, detectStringSetting, detectStringMapSetting, detectDefaultProvider, resolveClassifierModel, detectClassifierThinking, detectHedgeWhen, detectHedgeIncludeProjectContext, detectFragilityWhen, parseModelRef, generateAgentYaml, ensureOverrides, syncOverrides, extractModelFromAgentYaml, extractTemplateFromAgentYaml, hasSystemPromptInAgentYaml, repairLegacyTemplateOverrides, repairMissingSystemPromptOverrides, readOverrideModels, checkModelAvailability } from "./monitor-provider-core";
@@ -567,7 +573,7 @@ function buildTemplateSnippet(): string {
 					classifierThinking: "off",
 					hedgeWhen: "has_bash",
 					hedgeIncludeProjectContext: false,
-					hedgeConversationHistory: false,
+					hedgeConversationHistory: true,
 					classifierModelByProvider: {
 						"github-copilot": "github-copilot/claude-haiku-4.5",
 						"openai-codex": "openai-codex/gpt-5.4-mini",
@@ -722,6 +728,12 @@ export default function (pi: ExtensionAPI) {
 			ctx.cwd,
 		);
 		const fragilityPatternPatch = ensureFragilityPatternHygiene(ctx.cwd);
+		const unauthorizedMonitorPatch = ensureUnauthorizedActionMonitorPolicy(ctx.cwd);
+		const unauthorizedClassifierPatch =
+			ensureUnauthorizedActionClassifierCalibration(ctx.cwd);
+		const unauthorizedInstructionPatch =
+			ensureUnauthorizedActionInstructionCalibration(ctx.cwd);
+		const hedgeInstructionPatch = ensureHedgeInstructionCalibration(ctx.cwd);
 		const commitHygieneInstructionPatch =
 			ensureCommitHygieneInstructionCalibration(ctx.cwd);
 		const workQualityInstructionPatch =
@@ -750,6 +762,21 @@ export default function (pi: ExtensionAPI) {
 			if (fragilityPatternPatch.changed) {
 				earlyDetails.push(
 					`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (unauthorizedMonitorPatch.changed) {
+				earlyDetails.push(
+					`unauthorized-action policy synced (${unauthorizedMonitorPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (unauthorizedClassifierPatch.changed) {
+				earlyDetails.push(
+					`unauthorized-action classifier synced (${unauthorizedClassifierPatch.details.join(", ") || "ok"})`,
+				);
+			}
+			if (unauthorizedInstructionPatch.changed || hedgeInstructionPatch.changed) {
+				earlyDetails.push(
+					`authorization monitor instructions synced (${[...unauthorizedInstructionPatch.details, ...hedgeInstructionPatch.details].join(", ") || "ok"})`,
 				);
 			}
 			if (commitHygieneInstructionPatch.changed) {
@@ -815,6 +842,21 @@ export default function (pi: ExtensionAPI) {
 				`fragility patterns synced (${fragilityPatternPatch.details.join(", ") || "ok"})`,
 			);
 		}
+		if (unauthorizedMonitorPatch.changed) {
+			details.push(
+				`unauthorized-action policy synced (${unauthorizedMonitorPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (unauthorizedClassifierPatch.changed) {
+			details.push(
+				`unauthorized-action classifier synced (${unauthorizedClassifierPatch.details.join(", ") || "ok"})`,
+			);
+		}
+		if (unauthorizedInstructionPatch.changed || hedgeInstructionPatch.changed) {
+			details.push(
+				`authorization monitor instructions synced (${[...unauthorizedInstructionPatch.details, ...hedgeInstructionPatch.details].join(", ") || "ok"})`,
+			);
+		}
 		if (commitHygieneInstructionPatch.changed) {
 			details.push(
 				`commit-hygiene instructions synced (${commitHygieneInstructionPatch.details.join(", ") || "ok"})`,
@@ -857,6 +899,10 @@ export default function (pi: ExtensionAPI) {
 				fragilityPatch.changed ||
 				fragilityClassifierPatch.changed ||
 				fragilityPatternPatch.changed ||
+				unauthorizedMonitorPatch.changed ||
+				unauthorizedClassifierPatch.changed ||
+				unauthorizedInstructionPatch.changed ||
+				hedgeInstructionPatch.changed ||
 				commitHygieneInstructionPatch.changed ||
 				workQualityInstructionPatch.changed ||
 				legacyTemplateRepair.repaired.length > 0 ||

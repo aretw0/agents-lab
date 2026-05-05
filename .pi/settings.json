@@ -55,7 +55,7 @@
       "classifierThinking": "off",
       "hedgeWhen": "has_bash",
       "hedgeIncludeProjectContext": false,
-      "hedgeConversationHistory": false,
+      "hedgeConversationHistory": true,
       "classifierModelByProvider": {
         "openai-codex": "openai-codex/gpt-5.4-mini"
       }
