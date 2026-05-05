@@ -12741,6 +12741,15 @@
       "method": "test",
       "timestamp": "2026-05-05T12:08:26.982Z",
       "evidence": "Extracted bounded JSONL scan primitives from session-analytics.ts into packages/pi-stack/extensions/session-analytics-jsonl.ts: SessionJsonl* types, DEFAULT_SESSION_JSONL_SCAN_LIMITS, clampScanLimits, and readJsonlLines. session-analytics.ts preserves public exports via re-export and dropped from 1491 to 1366 lines, below extract threshold 1400. Validation: initial focal run caught missing clampScanLimits import; fixed by exporting/importing it. Final validation: pnpm vitest --run packages/pi-stack/test/smoke/session-analytics.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts => 2 files passed, 60 tests passed; node --test packages/pi-stack/test/session-analytics-outliers.test.mjs packages/pi-stack/test/session-log-scan-guard.test.mjs => 15 passed; safe_marker_check passed for JSONL exports; git diff --check clean; line_budget_snapshot improved aboveExtract from 7 to 6, aboveCritical=0. [rationale:anti-bloat] Batches another reload-needing runtime extraction before final operator reload."
+    },
+    {
+      "id": "VER-BUD-1169",
+      "target": "TASK-BUD-817",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-05T12:17:07.032Z",
+      "evidence": "Extracted context_watch_checkpoint and context_watch_bootstrap registration from packages/pi-stack/extensions/context-watchdog.ts into packages/pi-stack/extensions/context-watchdog-checkpoint-bootstrap-surface.ts via registerContextWatchdogCheckpointBootstrapSurface. Preserved tool names, schemas, checkpoint payload behavior, bootstrap apply/preview behavior, and reload hint callback. context-watchdog.ts reduced from 1999 to 1897 lines. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts => 3 files passed, 75 tests passed; safe_marker_check passed for extracted surface; git diff --check clean; line_budget_snapshot remains aboveCritical=0/aboveExtract=6. [rationale:anti-bloat] Further reduces context-watchdog risk while batching reload-needing runtime changes for final operator reload."
     }
   ]
 }

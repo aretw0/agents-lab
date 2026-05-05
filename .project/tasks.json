@@ -18292,6 +18292,27 @@
       "milestone": "anti-bloat-afk",
       "notes": "[rationale:anti-bloat] Batch adicional antes de pedir reload: session-analytics.ts está em 1491 linhas e pode sair de aboveExtract com extração pequena de JSONL bounded.\n[provenance:human] source_task=none reason=User asked to accumulate reload-needing work and minimize interactions.\n[rationale:anti-bloat] Iniciando extração JSONL bounded de session-analytics; reload acumulado para final da leva.\nClosed via VER-BUD-1168: extracted session JSONL scan primitives and validated focal vitest/node tests. [rationale:anti-bloat] session-analytics.ts now 1366 (<1400); line budget aboveExtract=6/aboveCritical=0.",
       "verification": "VER-BUD-1168"
+    },
+    {
+      "id": "TASK-BUD-817",
+      "description": "Extrair tools de checkpoint/bootstrap do context-watchdog para surface coesa e reduzir o arquivo principal sem mudar contratos.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        "packages/pi-stack/extensions/context-watchdog.ts",
+        "packages/pi-stack/extensions/context-watchdog-checkpoint-bootstrap-surface.ts",
+        "packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts",
+        "packages/pi-stack/test/smoke/context-watchdog.test.ts"
+      ],
+      "acceptance_criteria": [
+        "mover registro de context_watch_checkpoint e context_watch_bootstrap para módulo coeso",
+        "preservar nomes e payloads dos tools",
+        "reduzir context-watchdog.ts mantendo-o abaixo do critical threshold",
+        "validar smoke focal de context-watchdog/checkpoint"
+      ],
+      "milestone": "anti-bloat-afk",
+      "notes": "[rationale:anti-bloat] Continuação local-safe após auto-resume: context-watchdog.ts está em 1999 linhas; extrair tools independentes reduz risco de voltar ao critical.\n[provenance:human] source_task=none reason=User asked to continue anti-bloat and batch reload-needing changes.\n[rationale:anti-bloat] Iniciando extração de context_watch_checkpoint/context_watch_bootstrap; reload segue acumulado para o final.\nClosed via VER-BUD-1169: extracted checkpoint/bootstrap surface and validated 75 focal tests. [rationale:anti-bloat] context-watchdog.ts now 1897; aboveCritical remains 0; reload still batched.",
+      "verification": "VER-BUD-1169"
     }
   ]
 }
