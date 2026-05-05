@@ -132,6 +132,53 @@ describe("monitor-summary", () => {
 		expect(result.details.classifyFailures.lastMonitor).toBe("fragility");
 	});
 
+	it("expõe evidência determinística para rebaixar falso empty-response", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-evidence-"));
+		const sessionFile = join(cwd, "session.jsonl");
+		writeFileSync(
+			sessionFile,
+			`${JSON.stringify({ timestamp: "2026-05-05T02:00:00.000Z", message: { role: "assistant", content: [{ type: "text", text: "feito: resposta visível" }] } })}\n`,
+			"utf8",
+		);
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([def]) => def)
+			.find((def) => def?.name === "monitor_empty_response_evidence");
+
+		const result = await tool.execute("tc-empty-evidence", { session_file: sessionFile }, undefined, undefined, { cwd });
+		expect(result.details.mode).toBe("monitor-empty-response-evidence");
+		expect(result.details.decision).toBe("monitor-context-divergence");
+		expect(result.details.recommendationCode).toBe("monitor-context-divergence");
+		expect(result.details.evidenceSource).toBe("jsonl");
+		expect(result.details.assistantFinalChars).toBeGreaterThan(0);
+		expect(result.details.dispatchAllowed).toBe(false);
+		expect(String(result.content?.[0]?.text ?? "")).toContain("assistantFinalChars=");
+	});
+
+	it("preserva empty-response quando o JSONL comprova final vazio", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "monitor-empty-response-real-"));
+		const sessionFile = join(cwd, "session.jsonl");
+		writeFileSync(
+			sessionFile,
+			`${JSON.stringify({ timestamp: "2026-05-05T02:01:00.000Z", message: { role: "assistant", content: [{ type: "text", text: "   " }] } })}\n`,
+			"utf8",
+		);
+
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([def]) => def)
+			.find((def) => def?.name === "monitor_empty_response_evidence");
+
+		const result = await tool.execute("tc-empty-real", { session_file: sessionFile }, undefined, undefined, { cwd });
+		expect(result.details.decision).toBe("empty-response");
+		expect(result.details.recommendationCode).toBe("monitor-empty-response-real");
+		expect(result.details.assistantFinalChars).toBe(0);
+		expect(result.details.evidenceSource).toBe("jsonl");
+	});
+
 	it("ignora placeholder genérico de monitor classify failed", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-generic-fail-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });

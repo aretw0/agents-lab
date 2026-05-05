@@ -17,6 +17,7 @@ import type {
 import { Type } from "@sinclair/typebox";
 import {
 	bumpClassifyFailureFromText,
+	buildMonitorEmptyResponseEvidence,
 	cloneClassifyFailureSummary,
 	newClassifyFailureSummary,
 	resolveMonitorClassifyFailureReadiness,
@@ -228,6 +229,28 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+				details: result,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "monitor_empty_response_evidence",
+		label: "Monitor Empty Response Evidence",
+		description:
+			"Read-only deterministic JSONL evidence for empty-response vs monitor-context-divergence alerts. Never blocks execution.",
+		parameters: Type.Object({
+			session_file: Type.Optional(Type.String({ description: "Optional session JSONL path. Defaults to current session file when available." })),
+			max_scan_bytes: Type.Optional(Type.Number({ description: "Max tail bytes to scan. Default 512KB." })),
+		}),
+		execute(_id, params, _signal, _onUpdate, ctx) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const result = buildMonitorEmptyResponseEvidence({
+				sessionFile: typeof p.session_file === "string" ? p.session_file : ctx?.sessionManager?.getSessionFile?.(),
+				maxScanBytes: typeof p.max_scan_bytes === "number" ? p.max_scan_bytes : undefined,
+			});
+			return {
+				content: [{ type: "text", text: result.summary }],
 				details: result,
 			};
 		},

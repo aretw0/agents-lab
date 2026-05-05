@@ -27,6 +27,8 @@ export interface ClassifyFailureScanState {
 }
 
 export type MonitorClassifyFailureDecision = "ok" | "warn" | "degrade" | "block";
+export type MonitorEmptyResponseDecision = "empty-response" | "monitor-context-divergence" | "insufficient-evidence";
+export type MonitorEmptyResponseEvidenceSource = "jsonl" | "missing-session" | "unreadable-session" | "classifier-only";
 
 export interface MonitorClassifyFailureReadinessOptions {
 	warnAfter?: number;
@@ -49,6 +51,25 @@ export interface MonitorClassifyFailureReadiness {
 	reasons: string[];
 	nextActions: string[];
 	evidence: string;
+}
+
+export interface MonitorEmptyResponseEvidence {
+	mode: "monitor-empty-response-evidence";
+	activation: "none";
+	authorization: "none";
+	dispatchAllowed: false;
+	decision: MonitorEmptyResponseDecision;
+	recommendationCode:
+		| "monitor-empty-response-real"
+		| "monitor-context-divergence"
+		| "monitor-empty-response-insufficient-evidence";
+	evidenceSource: MonitorEmptyResponseEvidenceSource;
+	assistantFinalChars: number;
+	sessionFile?: string;
+	turnTimestamp?: string;
+	reasons: string[];
+	nextActions: string[];
+	summary: string;
 }
 
 const CLASSIFY_FAIL_LINE_RE =
@@ -252,6 +273,167 @@ function readTail(pathToFile: string, maxBytes = DEFAULT_CLASSIFY_SCAN_BYTES): s
 	} finally {
 		closeSync(fd);
 	}
+}
+
+function normalizeTextLength(value: string): number {
+	return value.replace(/\s+/g, " ").trim().length;
+}
+
+function extractTextFromMessageLike(value: unknown): string {
+	const parts: string[] = [];
+	collectTextParts(value, parts);
+	return parts.join("\n");
+}
+
+function extractTimestamp(value: Record<string, unknown>, fallback?: string): string | undefined {
+	for (const key of ["timestamp", "atIso", "createdAt", "created_at", "time"]) {
+		const raw = value[key];
+		if (typeof raw === "string" && raw.trim()) return raw.trim();
+	}
+	return fallback;
+}
+
+function findAssistantFinalCandidates(
+	value: unknown,
+	out: Array<{ text: string; timestamp?: string }>,
+	fallbackTimestamp?: string,
+	depth = 0,
+): void {
+	if (depth > 8 || !value || typeof value !== "object") return;
+	if (Array.isArray(value)) {
+		for (const item of value) findAssistantFinalCandidates(item, out, fallbackTimestamp, depth + 1);
+		return;
+	}
+
+	const obj = value as Record<string, unknown>;
+	const timestamp = extractTimestamp(obj, fallbackTimestamp);
+	const role = typeof obj.role === "string" ? obj.role.toLowerCase() : undefined;
+	if (role === "assistant") {
+		out.push({ text: extractTextFromMessageLike(obj), timestamp });
+	}
+
+	for (const nested of Object.values(obj)) {
+		findAssistantFinalCandidates(nested, out, timestamp, depth + 1);
+	}
+}
+
+export function buildMonitorEmptyResponseEvidence(input: {
+	sessionFile?: string;
+	maxScanBytes?: number;
+}): MonitorEmptyResponseEvidence {
+	const sessionFile = input.sessionFile;
+	if (!sessionFile) {
+		return buildMonitorEmptyResponseEvidenceResult({
+			decision: "insufficient-evidence",
+			evidenceSource: "missing-session",
+			assistantFinalChars: 0,
+			reasons: ["session-file-missing"],
+		});
+	}
+	if (!existsSync(sessionFile)) {
+		return buildMonitorEmptyResponseEvidenceResult({
+			decision: "insufficient-evidence",
+			evidenceSource: "missing-session",
+			assistantFinalChars: 0,
+			sessionFile,
+			reasons: ["session-file-not-found"],
+		});
+	}
+
+	let chunk = "";
+	try {
+		chunk = readTail(sessionFile, input.maxScanBytes ?? DEFAULT_CLASSIFY_SCAN_BYTES);
+	} catch {
+		return buildMonitorEmptyResponseEvidenceResult({
+			decision: "insufficient-evidence",
+			evidenceSource: "unreadable-session",
+			assistantFinalChars: 0,
+			sessionFile,
+			reasons: ["session-file-unreadable"],
+		});
+	}
+
+	const candidates: Array<{ text: string; timestamp?: string }> = [];
+	for (const line of chunk.split(/\r?\n/)) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+		try {
+			const parsed = JSON.parse(trimmed) as unknown;
+			const rootTimestamp = parsed && typeof parsed === "object"
+				? extractTimestamp(parsed as Record<string, unknown>)
+				: undefined;
+			findAssistantFinalCandidates(parsed, candidates, rootTimestamp);
+		} catch {
+			// Session tails can contain partial lines; ignore non-JSON fragments.
+		}
+	}
+
+	const last = candidates.at(-1);
+	if (!last) {
+		return buildMonitorEmptyResponseEvidenceResult({
+			decision: "insufficient-evidence",
+			evidenceSource: "jsonl",
+			assistantFinalChars: 0,
+			sessionFile,
+			reasons: ["assistant-final-not-found"],
+		});
+	}
+
+	const assistantFinalChars = normalizeTextLength(last.text);
+	return buildMonitorEmptyResponseEvidenceResult({
+		decision: assistantFinalChars > 0 ? "monitor-context-divergence" : "empty-response",
+		evidenceSource: "jsonl",
+		assistantFinalChars,
+		sessionFile,
+		turnTimestamp: last.timestamp,
+		reasons: assistantFinalChars > 0
+			? ["assistant-final-has-visible-content", "classifier-empty-response-should-downgrade"]
+			: ["assistant-final-empty"],
+	});
+}
+
+function buildMonitorEmptyResponseEvidenceResult(input: {
+	decision: MonitorEmptyResponseDecision;
+	evidenceSource: MonitorEmptyResponseEvidenceSource;
+	assistantFinalChars: number;
+	sessionFile?: string;
+	turnTimestamp?: string;
+	reasons: string[];
+}): MonitorEmptyResponseEvidence {
+	const recommendationCode = input.decision === "empty-response"
+		? "monitor-empty-response-real"
+		: input.decision === "monitor-context-divergence"
+			? "monitor-context-divergence"
+			: "monitor-empty-response-insufficient-evidence";
+	const nextActions = input.decision === "empty-response"
+		? ["treat-as-real-empty-response", "inspect-rendering-and-final-message-path"]
+		: input.decision === "monitor-context-divergence"
+			? ["downgrade-monitor-alert", "inspect-provider-context-envelope", "continue-local-safe-work"]
+			: ["collect-session-jsonl-evidence", "keep-monitor-alert-advisory"];
+	const summary = [
+		"monitor-empty-response-evidence:",
+		`decision=${input.decision}`,
+		`source=${input.evidenceSource}`,
+		`assistantFinalChars=${Math.max(0, Math.floor(input.assistantFinalChars))}`,
+		input.turnTimestamp ? `turnTimestamp=${input.turnTimestamp}` : undefined,
+		"authorization=none",
+	].filter(Boolean).join(" ");
+
+	return {
+		mode: "monitor-empty-response-evidence",
+		activation: "none",
+		authorization: "none",
+		dispatchAllowed: false,
+		decision: input.decision,
+		recommendationCode,
+		evidenceSource: input.evidenceSource,
+		assistantFinalChars: Math.max(0, Math.floor(input.assistantFinalChars)),
+		sessionFile: input.sessionFile,
+		turnTimestamp: input.turnTimestamp,
+		reasons: input.reasons,
+		nextActions,
+		summary,
+	};
 }
 
 export function scanSessionFileForClassifyFailures(

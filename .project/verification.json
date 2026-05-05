@@ -12399,6 +12399,15 @@
       "method": "smoke",
       "timestamp": "2026-05-05T01:59:09.843Z",
       "evidence": "Extracted context-watchdog operator/deterministic-stop/cadence signals into packages/pi-stack/extensions/context-watchdog-operator-signals.ts while preserving public re-exports from context-watchdog.ts. context-watchdog.ts reduced to 3598 lines; new module is 463 lines. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts (75 passed). [rationale:risk-control] Cohesive extraction reduces critical surface size without behavior or API drift."
+    },
+    {
+      "id": "VER-BUD-1131",
+      "target": "TASK-BUD-779",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke+marker-check",
+      "timestamp": "2026-05-05T02:08:30.892Z",
+      "evidence": "Implemented read-only/report-only monitor_empty_response_evidence in monitor-summary backed by buildMonitorEmptyResponseEvidence in monitor-observability. It scans the session JSONL tail for assistant final content and returns assistantFinalChars, evidenceSource, sessionFile, turnTimestamp, and decision empty-response|monitor-context-divergence|insufficient-evidence. If assistantFinalChars > 0 it downgrades to monitor-context-divergence instead of empty-response. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/monitor-summary.test.ts (10 passed); safe_marker_check docs/research/monitor-provider-divergence-2026-05.md matched 4/4 anchors. [rationale:risk-control] Converts provider-sensitive monitor claims into deterministic structural evidence and keeps alerts advisory/report-only."
     }
   ]
 }

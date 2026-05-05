@@ -39,6 +39,8 @@ Sem essa evidência, a saída deve ser rebaixada para `possible-render/context-m
 4. Fail-closed de severidade: se `assistantFinalChars > 0`, não emitir `empty-response`; emitir `monitor-context-divergence`.
 5. Amostragem comparativa provider/modelo só como evidência adicional, nunca como gate operacional.
 
+Primitive local adicionada: `monitor_empty_response_evidence` lê o JSONL da sessão de forma read-only/report-only e retorna `assistantFinalChars`, `evidenceSource`, `sessionFile`, `turnTimestamp` e `decision=empty-response|monitor-context-divergence|insufficient-evidence`.
+
 ## Hipótese provider/modelo
 
 A hipótese do operador é plausível: monitores rodando em um provider diferente do control plane podem receber envelope, truncamento, system prompt e comportamento de inferência distintos. Isso pode explicar falsos positivos, especialmente quando a tarefa depende de leitura global do contexto e não de evidência determinística.

@@ -17500,7 +17500,7 @@
     {
       "id": "TASK-BUD-779",
       "description": "Implementar primitive determinística para evidência de `empty-response`/`monitor-context-divergence` a partir do JSONL da sessão, sem depender de classificador LLM.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p1",
       "depends_on": [
         "TASK-BUD-777"
@@ -17518,7 +17518,8 @@
         "Smoke cobre caminho com conteúdo visível e caminho vazio real."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] Recorrência do falso positivo mostra que a mitigação precisa sair do julgamento LLM e virar evidência estrutural barata do JSONL.\n[provenance:human] source_task=TASK-BUD-777 reason=Segundo alerta falso de empty-response após resposta visível; usuário quer reduzir dependência de análises vazias de monitores."
+      "notes": "[rationale:risk-control] Recorrência do falso positivo mostra que a mitigação precisa sair do julgamento LLM e virar evidência estrutural barata do JSONL.\n[provenance:human] source_task=TASK-BUD-777 reason=Segundo alerta falso de empty-response após resposta visível; usuário quer reduzir dependência de análises vazias de monitores.\nClosed via VER-BUD-1131: deterministic JSONL evidence primitive added for empty-response vs monitor-context-divergence; smoke and marker checks passed. [rationale:risk-control] Removes LLM-only monitor claim from operational truth path.",
+      "verification": "VER-BUD-1131"
     }
   ]
 }
