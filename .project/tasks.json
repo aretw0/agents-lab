@@ -19486,6 +19486,28 @@
       "milestone": "ui-cohesion",
       "notes": "[auto-seed] Local-safe output-formatting follow-up from handoff candidate. Mutation semantics are not expanded; formatting only.\n[provenance:human] source_task=TASK-BUD-870 reason=Continue local-safe UI cohesion after no eligible tasks remained; structured-io surface has raw JSON content but can be migrated without changing mutation behavior.\n[auto-chain] Starting structured_io/structured_io_json summary-first output migration. Guardrail: formatting only; no selector, dry-run, apply, or blast-radius logic changes.\n[slice-complete] structured_io and structured_io_json content is summary-first across tool paths; mutation semantics unchanged. Rollback: revert guardrails-core-structured-io-surface.ts and guardrails-structured-io-tool.test.ts changes plus this task/verification entry.",
       "verification": "VER-BUD-1236"
+    },
+    {
+      "id": "TASK-BUD-872",
+      "description": "Document the remaining raw JSON operator-visible outputs as protected/executable/settings leftovers and park implementation behind explicit focus.",
+      "status": "completed",
+      "priority": "p3",
+      "depends_on": [
+        "TASK-BUD-871"
+      ],
+      "files": [
+        "docs/research/task-bud-872-raw-json-protected-leftovers-2026-05.md",
+        ".project/tasks.json",
+        ".project/verification.json"
+      ],
+      "acceptance_criteria": [
+        "List remaining raw JSON content surfaces and classify why each is protected/deferred.",
+        "Do not modify executable/provider/settings behavior.",
+        "Record suggested future protected tasks without auto-starting them."
+      ],
+      "milestone": "ui-cohesion",
+      "notes": "[auto-seed] Local-safe documentation/backlog boundary after code migrations removed remaining local-safe raw JSON content candidates.\n[provenance:human] source_task=TASK-BUD-871 reason=autonomy_lane_next_task had no eligible local-safe code tasks; remaining raw JSON surfaces are protected/executable/settings and need a documented boundary.\n[auto-chain] Documenting protected leftovers only. No code/runtime/settings mutation beyond project doc and board evidence.\n[slice-complete] Remaining raw JSON outputs are documented as protected leftovers with suggested future protected tasks. No code/runtime/settings behavior changed.",
+      "verification": "VER-BUD-1237"
     }
   ]
 }
