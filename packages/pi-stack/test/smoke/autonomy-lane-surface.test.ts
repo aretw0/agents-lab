@@ -997,6 +997,43 @@ describe("autonomy lane surface", () => {
     expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("runway=ready-window");
   });
 
+  it("exposes report-only anti-bloat cue in autonomy lane status", () => {
+    const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-anti-bloat-"));
+    mkdirSync(path.join(cwd, ".project"), { recursive: true });
+    mkdirSync(path.join(cwd, "packages", "pi-stack", "extensions"), { recursive: true });
+    writeFileSync(path.join(cwd, ".project", "tasks.json"), JSON.stringify({
+      tasks: [
+        { id: "TASK-NEXT", description: "[P1] local", status: "planned" },
+      ],
+    }), "utf8");
+    writeFileSync(path.join(cwd, "packages", "pi-stack", "extensions", "large.ts"), `${"x\n".repeat(1505)}`, "utf8");
+
+    const tools: RegisteredTool[] = [];
+    registerGuardrailsAutonomyLaneSurface({
+      registerTool(tool: unknown) { tools.push(tool as RegisteredTool); },
+    } as never);
+
+    const statusTool = tools.find((tool) => tool.name === "autonomy_lane_status");
+    const result = statusTool?.execute("call-test", { context_level: "warn", provider_ready: 1 }, undefined, undefined, { cwd });
+    const cue = (result?.details.antiBloatCue as {
+      decision?: string;
+      recommendationCode?: string;
+      dispatchAllowed?: boolean;
+      mutationAllowed?: boolean;
+      totals?: { aboveExtract?: number };
+      topFiles?: Array<{ path?: string; lines?: number }>;
+    } | undefined);
+
+    expect(cue?.decision).toBe("extract");
+    expect(cue?.recommendationCode).toBe("anti-bloat-extract");
+    expect(cue?.dispatchAllowed).toBe(false);
+    expect(cue?.mutationAllowed).toBe(false);
+    expect(cue?.totals?.aboveExtract).toBe(1);
+    expect(cue?.topFiles?.[0]?.path).toBe("packages/pi-stack/extensions/large.ts");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("antiBloat=extract");
+    expect(String((result?.details as { summary?: string } | undefined)?.summary ?? "")).toContain("lineBudgetAboveExtract=1");
+  });
+
   it("includes iterationReminder from handoff next_actions when available", () => {
     const cwd = mkdtempSync(path.join(tmpdir(), "autonomy-lane-status-reminder-"));
     mkdirSync(path.join(cwd, ".project"), { recursive: true });

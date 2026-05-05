@@ -12363,6 +12363,15 @@
       "method": "test",
       "timestamp": "2026-05-05T01:03:53.502Z",
       "evidence": "Implementada surface report-only `line_budget_snapshot` em `packages/pi-stack/extensions/guardrails-core-tool-hygiene-surface.ts` (escopo inicial: `packages/pi-stack/extensions/*.ts`) com recomendação estável `ok|watch|extract`, thresholds padrão `watch=1000/extract=1400/critical=2000`, `blockers/risks` e invariantes `authorization=none`, `dispatchAllowed=false`, `mutationAllowed=false`. Núcleo adicionado em `packages/pi-stack/extensions/guardrails-core-tool-hygiene.ts` via `buildLineBudgetSnapshot(...)`; export habilitado em `packages/pi-stack/extensions/guardrails-core-exports.ts`; doc atualizada em `docs/primitives/agents-as-tools-calibration-score.md`; smoke ampliado em `packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts` (builder + tool surface). Validação: `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/guardrails-ops-calibration.test.ts` (32 passed) e `pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-hardening-reexport.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts` (3 passed)."
+    },
+    {
+      "id": "VER-BUD-1127",
+      "target": "TASK-BUD-775",
+      "target_type": "task",
+      "status": "passed",
+      "method": "smoke",
+      "timestamp": "2026-05-05T01:34:12.378Z",
+      "evidence": "Implemented report-only antiBloatCue in autonomy_lane_status, backed by shared extension line-budget scanner and focal smoke. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/autonomy-lane-surface.test.ts packages/pi-stack/test/smoke/guardrails-tool-hygiene.test.ts packages/pi-stack/test/smoke/control-plane-doc-checklist.test.ts (56 passed). [rationale:risk-control] Cue is read-only/report-only with authorization=none, dispatchAllowed=false, mutationAllowed=false and only steers bounded extraction waves when line-budget thresholds exceed phase limits."
     }
   ]
 }

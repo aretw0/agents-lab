@@ -17410,7 +17410,7 @@
     {
       "id": "TASK-BUD-775",
       "description": "Conectar cue de anti-bloat ao fluxo de autonomia para sugerir wave de extração quando budgets excederem limite de fase.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-774"
@@ -17426,7 +17426,8 @@
         "Smoke garante compatibilidade de summary/recommendationCode."
       ],
       "milestone": "runtime-hardening-2026-05",
-      "notes": "[rationale:risk-control] conectar cue anti-bloat à autonomia reduz drift e força sinal precoce de extração antes de inchaço crítico.\n[rationale:risk-control] O status da lane deve refletir orçamento estrutural para orientar continuidade local-safe sem surpresa de manutenção tardia."
+      "notes": "[rationale:risk-control] conectar cue anti-bloat à autonomia reduz drift e força sinal precoce de extração antes de inchaço crítico.\n[rationale:risk-control] O status da lane deve refletir orçamento estrutural para orientar continuidade local-safe sem surpresa de manutenção tardia.\nClosed via VER-BUD-1127: antiBloatCue connected to autonomy_lane_status; focal smoke passed (56 tests). [rationale:risk-control] Keeps anti-bloat steering deterministic/report-only without auto-dispatch.",
+      "verification": "VER-BUD-1127"
     }
   ]
 }

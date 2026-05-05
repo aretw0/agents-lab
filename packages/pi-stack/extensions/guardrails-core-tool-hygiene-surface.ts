@@ -1,14 +1,12 @@
-import { readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import {
   buildAgentsAsToolsCalibrationScore,
   buildLineBudgetSnapshot,
   buildToolHygieneScorecard,
-  type LineBudgetFileEntry,
   type ToolHygieneInputTool,
 } from "./guardrails-core-tool-hygiene";
+import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
 
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   if (!tool || typeof tool !== "object") return undefined;
@@ -19,37 +17,6 @@ function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
     description: typeof t.description === "string" ? t.description : typeof t.label === "string" ? t.label : undefined,
     parameters: t.parameters,
   };
-}
-
-function collectTypeScriptFiles(rootDir: string): string[] {
-  const out: string[] = [];
-  const walk = (dir: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        walk(full);
-        continue;
-      }
-      if (!entry.isFile()) continue;
-      if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) out.push(full);
-    }
-  };
-  walk(rootDir);
-  return out;
-}
-
-function countLines(filePath: string): number {
-  const text = readFileSync(filePath, "utf8");
-  return text.split(/\r?\n/).length;
-}
-
-function buildExtensionLineBudgetEntries(cwd: string): LineBudgetFileEntry[] {
-  const root = path.join(cwd, "packages", "pi-stack", "extensions");
-  const files = collectTypeScriptFiles(root);
-  return files.map((file) => ({
-    path: path.relative(cwd, file).replace(/\\/g, "/"),
-    lines: countLines(file),
-  }));
 }
 
 export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
