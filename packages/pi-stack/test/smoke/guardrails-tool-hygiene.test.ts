@@ -144,7 +144,7 @@ describe("tool hygiene scorecard", () => {
         signal: AbortSignal,
         onUpdate: (update: unknown) => void,
         ctx: { cwd: string },
-      ) => Promise<{ details?: Record<string, unknown> }> | { details?: Record<string, unknown> };
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
     };
 
     const result = await tool.execute(
@@ -158,6 +158,46 @@ describe("tool hygiene scorecard", () => {
     expect(result.details?.mode).toBe("agents-as-tools-calibration-score");
     expect(result.details?.dispatchAllowed).toBe(false);
     expect(result.details?.authorization).toBe("none");
+    expect(result.content?.[0]?.text).toContain("agents-as-tools-calibration:");
+    expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result.content?.[0]?.text).not.toContain('\"mode\"');
+  });
+
+  it("exposes tool_hygiene_scorecard with summary-first content", async () => {
+    const rawPi = {
+      on: vi.fn(),
+      registerTool: vi.fn(),
+      registerCommand: vi.fn(),
+      getAllTools: vi.fn(() => [] as unknown[]),
+    };
+    rawPi.getAllTools = vi.fn(() => (rawPi.registerTool as ReturnType<typeof vi.fn>).mock.calls.map(([tool]) => tool));
+    const pi = rawPi as unknown as Parameters<typeof guardrailsCore>[0];
+
+    guardrailsCore(pi);
+    const toolCall = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(([tool]) => tool?.name === "tool_hygiene_scorecard");
+    const tool = toolCall?.[0] as {
+      execute: (
+        toolCallId: string,
+        params: Record<string, unknown>,
+        signal: AbortSignal,
+        onUpdate: (update: unknown) => void,
+        ctx: { cwd: string },
+      ) => Promise<{ content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> }> | { content?: Array<{ type: "text"; text: string }>; details?: Record<string, unknown> };
+    };
+
+    const result = await tool.execute(
+      "tc-tool-hygiene",
+      { tool_names: ["tool_hygiene_scorecard", "agents_as_tools_calibration_score"] },
+      undefined as unknown as AbortSignal,
+      () => {},
+      { cwd: process.cwd() },
+    );
+
+    expect(result.details?.mode).toBe("tool-hygiene-scorecard");
+    expect(result.details?.dispatchAllowed).toBe(false);
+    expect(result.content?.[0]?.text).toContain("tool-hygiene-scorecard:");
+    expect(result.content?.[0]?.text).toContain("payload completo disponível em details");
+    expect(result.content?.[0]?.text).not.toContain('\"mode\"');
   });
 
   it("builds line-budget snapshot with stable ok/watch/extract recommendation", () => {

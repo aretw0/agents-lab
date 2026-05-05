@@ -7,6 +7,7 @@ import {
   type ToolHygieneInputTool,
 } from "./guardrails-core-tool-hygiene";
 import { buildExtensionLineBudgetEntries } from "./guardrails-core-line-budget-files";
+import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
 function toolInfoToInput(tool: unknown): ToolHygieneInputTool | undefined {
   if (!tool || typeof tool !== "object") return undefined;
@@ -39,10 +40,11 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
         tools,
         limit: typeof p.limit === "number" ? p.limit : undefined,
       });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "tool_hygiene_scorecard",
+        summary: result.evidence,
         details: result,
-      };
+      });
     },
   });
 
@@ -88,10 +90,11 @@ export function registerGuardrailsToolHygieneSurface(pi: ExtensionAPI): void {
       const allTools = pi.getAllTools().map(toolInfoToInput).filter((tool): tool is ToolHygieneInputTool => Boolean(tool));
       const tools = selectedNames ? allTools.filter((tool) => selectedNames.has(tool.name)) : allTools;
       const result = buildAgentsAsToolsCalibrationScore({ tools });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      return buildOperatorVisibleToolResponse({
+        label: "agents_as_tools_calibration_score",
+        summary: result.summary,
         details: result,
-      };
+      });
     },
   });
 }

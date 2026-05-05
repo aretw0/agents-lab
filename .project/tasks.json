@@ -19227,7 +19227,7 @@
     {
       "id": "TASK-BUD-860",
       "description": "Migrar tool_hygiene_scorecard e agents_as_tools_calibration_score para saída operator-visible summary-first preservando details estruturado.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-844"
@@ -19242,7 +19242,8 @@
         "teste focal deve cobrir ausência de JSON cru em content"
       ],
       "milestone": "ui-cohesion",
-      "notes": "[rationale:operator-experience] Fatia local-safe relevante para agents-as-tools; output precisa ser barato e legível.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: preparar delegação/agents-as-tools sem aumentar autonomia."
+      "notes": "[rationale:operator-experience] Fatia local-safe relevante para agents-as-tools; output precisa ser barato e legível.\n[provenance:human] source_task=TASK-BUD-858 reason=Planning clarity pack: preparar delegação/agents-as-tools sem aumentar autonomia.\n[slice-start] Aplicando helper operator-visible em tool_hygiene_scorecard e agents_as_tools_calibration_score; line_budget_snapshot já estava summary-only.\n[slice-complete] tool hygiene and agents-as-tools calibration surfaces no longer emit raw JSON as primary content. Rollback: revert guardrails-core-tool-hygiene-surface.ts and guardrails-tool-hygiene.test.ts changes.",
+      "verification": "VER-BUD-1225"
     },
     {
       "id": "TASK-BUD-861",
