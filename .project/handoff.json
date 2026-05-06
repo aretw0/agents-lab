@@ -1,33 +1,39 @@
 {
-  "timestamp": "2026-05-06T15:12:18.699Z",
-  "context": "Cleanup: previous checkpoint payload corrected to keep handoff evidence consistent; completed TASK-BUD-930 only, with no protected mutations.",
+  "timestamp": "2026-05-06T15:28:15.959Z",
+  "context": "Auto-resume follow-up executed with focus TASK-BUD-849. Re-ran autonomy/material-readiness and continuation packets on clean state: materials [snip] ue checkpoint-validity/validation gaps. [truncated:+139 chars]",
+  "current_tasks": [
+    "TASK-BUD-849"
+  ],
   "next_actions": [
-    "Context-watch action: level=compact 68% (compact-now) · Compact now and continue from checkpoint.",
-    "Return focus to TASK-BUD-849 for guarded provider/model decisions.",
-    "Re-run autonomy/material readiness packets on clean git state before further execution-mode shifts."
+    "Context-watch action: level=compact 65% (compact-now) · Compact now and continue from checkpoint.",
+    "Keep focus on TASK-BUD-849 as listed by user; do not mutate provider/model settings in this run.",
+    "Re-run bounded local-safe slice once an approved readiness packet confirms candidate-material and fresh checkpoint.",
+    "If explicit human asks for protected mutation, require explicit rollback and canary evidence p [snip] TASK-BUD-849 notes first. [truncated:+6 chars]"
   ],
   "blockers": [
     "context-watch-compact-required",
-    "auto-advance and continuity still blocked; keep local-safe-only slices"
+    "auto-advance and continuity blockers remain active",
+    "material/seed readiness blocked",
+    "focus-not-ready for auto-advance"
   ],
   "recent_validation": [
-    "safe_marker_check on docs/guides/README.md and 0-8 index audit",
-    "i18n_lint_text pass",
-    "board_task_complete for TASK-BUD-930"
+    "autonomy_lane_material_readiness_packet",
+    "autonomy_lane_material_seed_packet",
+    "delegation_readiness_status_packet"
   ],
   "recent_commits": [
+    "52dce6c1",
     "e1a85b52"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-930",
+    "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-930",
       "task:TASK-BUD-849",
-      "commit:e1a85b52"
+      "commit:52dce6c1"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T15:12:18.635Z",
+    "generatedAtIso": "2026-05-06T15:17:58.675Z",
     "level": "warn",
     "percent": 55,
     "action": "continue",
@@ -36,12 +42,11 @@
       "decision": "hold",
       "score": 75,
       "recommendationCode": "planning-clarity-needs-focus"
-    },
-    "focus_task_status": "completed"
+    }
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T15:12:18.635Z",
+      "atIso": "2026-05-06T15:17:58.675Z",
       "reason": "manual_checkpoint",
       "level": "warn",
       "percent": 55,
@@ -54,10 +59,23 @@
       "recommendation": "compact"
     },
     {
-      "atIso": "2026-05-06T15:12:18.699Z",
+      "atIso": "2026-05-06T15:26:59.148Z",
+      "reason": "message_end",
+      "level": "checkpoint",
+      "percent": 61,
+      "thresholds": {
+        "warnPct": 50,
+        "checkpointPct": 55,
+        "compactPct": 65
+      },
+      "action": "write-checkpoint",
+      "recommendation": "Graceful-stop window: close current slice and write handoff checkpoint before the compact threshold."
+    },
+    {
+      "atIso": "2026-05-06T15:28:15.959Z",
       "reason": "message_end",
       "level": "compact",
-      "percent": 68,
+      "percent": 65,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 55,
@@ -66,8 +84,5 @@
       "action": "compact-now",
       "recommendation": "Compact now and continue from checkpoint."
     }
-  ],
-  "completed_tasks": [
-    "TASK-BUD-930"
   ]
 }
