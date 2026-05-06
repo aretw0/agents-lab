@@ -162,6 +162,12 @@ export function isProtectedAutoResumeTaskPath(value: unknown): boolean {
 	return normalized === ".pi/settings.json" || normalized === ".obsidian" || normalized.startsWith(".obsidian/") || normalized.startsWith(".github/");
 }
 
+export function isProtectedAutoResumeTaskMilestone(value: unknown): boolean {
+	const normalized = String(value ?? "").trim().toLowerCase();
+	if (!normalized) return false;
+	return normalized.includes("protected") || normalized.includes("parked") || normalized.includes("legacy");
+}
+
 export function taskIdNumericSuffix(id: string): number {
 	const match = id.match(/(\d+)(?!.*\d)/);
 	return match ? Number(match[1]) : -1;
@@ -174,6 +180,7 @@ export function readProjectPreferredActiveTaskIds(cwd: string, limit = 3): strin
 			const status = (task as { status?: unknown }).status;
 			if (typeof id !== "string" || typeof status !== "string") return false;
 			if (status !== "in-progress" && status !== "planned") return false;
+			if (isProtectedAutoResumeTaskMilestone((task as { milestone?: unknown }).milestone)) return false;
 			const files = (task as { files?: unknown }).files;
 			return !Array.isArray(files) || !files.some(isProtectedAutoResumeTaskPath);
 		})

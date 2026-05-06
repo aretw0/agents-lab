@@ -2137,6 +2137,37 @@ describe("context-watchdog", () => {
 		}
 	});
 
+	it("context_watch_auto_resume_preview skips protected parked successor tasks", async () => {
+		const cwd = mkdtempSync(join(tmpdir(), "ctx-auto-resume-protected-successor-"));
+		try {
+			mkdirSync(join(cwd, ".project"), { recursive: true });
+			writeFileSync(join(cwd, ".project", "handoff.json"), JSON.stringify({
+				timestamp: "2026-04-30T05:43:29.396Z",
+				completed_tasks: ["TASK-BUD-944"],
+				next_actions: ["select next local-safe task via board"],
+				context: "TASK-BUD-944 completed; choose local-safe successor only.",
+				blockers: [],
+			}));
+			writeFileSync(join(cwd, ".project", "tasks.json"), JSON.stringify({ tasks: [
+				{ id: "TASK-BUD-944", status: "completed" },
+				{ id: "TASK-BUD-999", description: "external influence parked", status: "planned", milestone: "protected-parked-legacy" },
+				{ id: "TASK-BUD-998", description: "local-safe docs cleanup", status: "planned", milestone: "signal-integrity-calibration", files: ["docs/research/local.md"] },
+			] }));
+			const pi = makeMockPi();
+			contextWatchdogExtension(pi);
+			const tool = getTool(pi, "context_watch_auto_resume_preview");
+			const result = await tool.execute("tc-auto-resume-protected-successor", {}, undefined as unknown as AbortSignal, () => {}, { cwd });
+
+			expect(result.content?.[0]?.text).toContain("focusTasks=TASK-BUD-998");
+			expect(result.content?.[0]?.text).not.toContain("TASK-BUD-999");
+			expect(result.details?.focusTasks).toBe("TASK-BUD-998");
+			expect(result.details?.diagnostics?.focusTasksListed).toEqual(["TASK-BUD-998"]);
+			expect(result.details?.prompt).not.toContain("TASK-BUD-999");
+		} finally {
+			rmSync(cwd, { recursive: true, force: true });
+		}
+	});
+
 	it("consumeContextPreloadPack aplica fallback canônico quando pack está stale", () => {
 		const cwd = mkdtempSync(join(tmpdir(), "ctx-preload-consume-"));
 		try {
