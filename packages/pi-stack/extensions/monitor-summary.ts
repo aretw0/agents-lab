@@ -25,6 +25,7 @@ import {
 	type ClassifyFailureScanState,
 	type ClassifyFailureSummary,
 } from "./monitor-observability";
+import { resolveMonitorStaleFeedbackPrefilter } from "./monitor-runtime-contract";
 import { shouldEmitMonitorSummaryStatus } from "./monitor-summary-status-dedupe";
 import { buildOperatorVisibleToolResponse } from "./operator-visible-output";
 
@@ -255,6 +256,45 @@ export default function monitorSummaryExtension(pi: ExtensionAPI) {
 				content: [{ type: "text", text: result.summary }],
 				details: result,
 			};
+		},
+	});
+
+	pi.registerTool({
+		name: "monitor_stale_feedback_prefilter",
+		label: "Monitor Stale Feedback Prefilter",
+		description:
+			"Report-only deterministic prefilter for stale/duplicate monitor feedback before classifier calls. Never suppresses monitor output by itself.",
+		parameters: Type.Object({
+			monitor: Type.Optional(Type.String()),
+			message: Type.Optional(Type.String()),
+			blocker: Type.Optional(Type.String()),
+			compact_stage: Type.Optional(Type.String()),
+			reload_gate: Type.Optional(Type.String()),
+			task_status: Type.Optional(Type.String()),
+			has_later_commit: Type.Optional(Type.Boolean()),
+			has_later_verification: Type.Optional(Type.Boolean()),
+			has_superseding_task: Type.Optional(Type.Boolean()),
+			duplicate_count: Type.Optional(Type.Number()),
+		}),
+		execute(_id, params) {
+			const p = (params ?? {}) as Record<string, unknown>;
+			const result = resolveMonitorStaleFeedbackPrefilter({
+				monitor: typeof p.monitor === "string" ? p.monitor : undefined,
+				message: typeof p.message === "string" ? p.message : undefined,
+				blocker: typeof p.blocker === "string" ? p.blocker : undefined,
+				compactStage: typeof p.compact_stage === "string" ? p.compact_stage : undefined,
+				reloadGate: typeof p.reload_gate === "string" ? p.reload_gate : undefined,
+				taskStatus: typeof p.task_status === "string" ? p.task_status : undefined,
+				hasLaterCommit: typeof p.has_later_commit === "boolean" ? p.has_later_commit : undefined,
+				hasLaterVerification: typeof p.has_later_verification === "boolean" ? p.has_later_verification : undefined,
+				hasSupersedingTask: typeof p.has_superseding_task === "boolean" ? p.has_superseding_task : undefined,
+				duplicateCount: typeof p.duplicate_count === "number" ? p.duplicate_count : undefined,
+			});
+			return buildOperatorVisibleToolResponse({
+				label: "monitor_stale_feedback_prefilter",
+				summary: result.summary,
+				details: { ...result, effect: "none", mode: "report-only", authorization: "none" },
+			});
 		},
 	});
 

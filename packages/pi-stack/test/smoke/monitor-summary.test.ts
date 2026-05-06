@@ -49,6 +49,33 @@ describe("monitor-summary", () => {
 		expect(text).toContain("lastFail=fragility");
 	});
 
+	it("expõe prefilter stale de monitores como canário report-only", async () => {
+		const pi = makeMockPi();
+		monitorSummaryExtension(pi as any);
+
+		const tool = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls
+			.map(([registered]) => registered)
+			.find((registered) => registered?.name === "monitor_stale_feedback_prefilter");
+		expect(tool).toBeTruthy();
+
+		const result = await tool.execute("tc-prefilter", {
+			monitor: "context-watch",
+			blocker: "context-watch-compact-required",
+			compact_stage: "normal-window",
+			reload_gate: "reload-not-required",
+		});
+
+		expect(result.content?.[0]?.text).toContain("monitor-stale-prefilter: decision=suppress-stale classifier=skip reason=context-watch-transient-resolved");
+		expect(result.details).toMatchObject({
+			decision: "suppress-stale",
+			classifierAllowed: false,
+			tokenSpendAvoidable: true,
+			effect: "none",
+			mode: "report-only",
+			authorization: "none",
+		});
+	});
+
 	it("carrega monitores do workspace e expõe compact tool", async () => {
 		const cwd = mkdtempSync(join(tmpdir(), "monitor-summary-"));
 		mkdirSync(join(cwd, ".pi", "monitors"), { recursive: true });
