@@ -13524,6 +13524,15 @@
       "method": "test",
       "timestamp": "2026-05-06T02:13:13.151Z",
       "evidence": "Fixed quota advisory consistency by passing cwd into analyzeQuota from handoff-advisor, quota-alerts, and provider-readiness. This makes all read-only provider-economy advisory surfaces use the same sandbox-aware quota session roots introduced by TASK-BUD-888/889. Added regression coverage for handoff_advisor and quota_alerts using a temp workspace with a resumed old-named sandbox session and blocked budget; focal pack also covered provider-readiness and quota parser behavior. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/handoff-advisor.test.ts packages/pi-stack/test/smoke/quota-alerts.test.ts packages/pi-stack/test/smoke/provider-readiness.test.ts packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 4 files passed, 83 tests passed. No provider switch, model routing, API key, cost cap, or settings mutation was performed."
+    },
+    {
+      "id": "VERIFY-BUD-891",
+      "target": "TASK-BUD-891",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T02:17:02.957Z",
+      "evidence": "Compressed two adjacent analyzeQuota parameter declaration lines in quota-visibility.ts with no behavior change. wc -l packages/pi-stack/extensions/quota-visibility.ts -> 999. line_budget_snapshot -> recommendation=ok, aboveWatch=0, aboveExtract=0, aboveCritical=0. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed."
     }
   ]
 }

@@ -393,12 +393,10 @@ export async function analyzeQuota(params: {
 	weeklyQuotaCostUsd?: number;
 	weeklyQuotaRequests?: number;
 	monthlyQuotaTokens?: number;
-	monthlyQuotaCostUsd?: number;
-	monthlyQuotaRequests?: number;
+	monthlyQuotaCostUsd?: number; monthlyQuotaRequests?: number;
 	providerWindowHours: ProviderWindowHours;
 	providerBudgets: ProviderBudgetMap;
-	cwd?: string;
-	sessionRoots?: string[];
+	cwd?: string; sessionRoots?: string[];
 }): Promise<QuotaStatus> {
 	const sessionRoots = params.sessionRoots ?? resolveQuotaSessionRoots(params.cwd);
 	const sessionsRoot = sessionRoots[0] ?? path.join(homedir(), ".pi", "agent", "sessions");

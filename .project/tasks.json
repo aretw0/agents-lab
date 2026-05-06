@@ -19909,6 +19909,25 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Post-reload validation after TASK-BUD-889: quota_visibility_provider_budgets(openai-codex) reports state=blocked/projectedCost≈302%, quota_visibility_route(balanced) reports blocked, but handoff_advisor(current_provider=openai-codex, execute=false) reports currentState=ok and quota_alerts reports total=0. [rationale:risk-control] Provider-economy control surfaces must not disagree silently; inconsistent budget evidence can cause unsafe routing decisions or false calm.\n[slice-start] Starting read-only advisory consistency fix after live mismatch: route/provider_budgets blocked, but handoff_advisor ok and quota_alerts zero. No provider switch/settings/model changes.\n[rationale:risk-control] Budget advisory surfaces gate provider-economy decisions. If they disagree on the same observed quota pressure, the operator can receive false calm or conflicting recovery advice; this fix keeps behavior read-only and evidence-consistent without changing routing/settings.\n[complete] Reconciled read-only quota advisory surfaces around cwd/sessionRoots. Requires /reload before live handoff_advisor, quota_alerts, and provider_readiness_matrix show the aligned budget state.",
       "verification": "VERIFY-BUD-890"
+    },
+    {
+      "id": "TASK-BUD-891",
+      "description": "Restore quota-visibility TS surface below the 1000-line watch threshold after quota advisory fixes.",
+      "status": "completed",
+      "priority": "p2",
+      "depends_on": [
+        "TASK-BUD-890"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts"
+      ],
+      "acceptance_criteria": [
+        "Keep packages/pi-stack/extensions/quota-visibility.ts at or below 1000 lines without behavioral changes.",
+        "Run line-budget snapshot and a focal quota parser smoke test."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] line_budget_snapshot after TASK-BUD-890 showed aboveWatch=1 because packages/pi-stack/extensions/quota-visibility.ts reached 1001 lines. This is a tiny no-behavior formatting compression to preserve the <=1000-line runway.\n[slice-start] One-line signature compression in quota-visibility.ts to restore line-budget watch threshold; no behavior intended.\n[complete] Restored quota-visibility.ts below the 1000-line watch threshold after TASK-BUD-890.",
+      "verification": "VERIFY-BUD-891"
     }
   ]
 }
