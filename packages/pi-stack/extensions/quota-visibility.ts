@@ -107,6 +107,24 @@ export {
 	type RoutingProfile,
 } from "./quota-visibility-model";
 
+export function resolveQuotaSessionRoots(cwd?: string): string[] {
+	const roots = [path.join(homedir(), ".pi", "agent", "sessions")];
+	if (cwd && cwd.trim().length > 0) {
+		roots.push(path.join(cwd, ".sandbox", "pi-agent", "sessions"));
+	}
+
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const root of roots) {
+		const normalized = path.resolve(root);
+		const key = process.platform === "win32" ? normalized.toLowerCase() : normalized;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		out.push(normalized);
+	}
+	return out;
+}
+
 function readSettings(cwd: string): QuotaVisibilitySettings {
 	try {
 		const p = path.join(cwd, ".pi", "settings.json");
@@ -181,6 +199,7 @@ export function buildQuotaStatus(
 	params: {
 		days: number;
 		sessionsRoot: string;
+		sessionRoots?: string[];
 		scannedFiles: number;
 		weeklyQuotaTokens?: number;
 		weeklyQuotaCostUsd?: number;
@@ -281,6 +300,7 @@ export function buildQuotaStatus(
 	return {
 		source: {
 			sessionsRoot: params.sessionsRoot,
+			sessionRoots: params.sessionRoots,
 			scannedFiles: params.scannedFiles,
 			parsedSessions: sessions.length,
 			parsedEvents: usageEvents.length,
@@ -329,9 +349,12 @@ export async function analyzeQuota(params: {
 	monthlyQuotaRequests?: number;
 	providerWindowHours: ProviderWindowHours;
 	providerBudgets: ProviderBudgetMap;
+	cwd?: string;
+	sessionRoots?: string[];
 }): Promise<QuotaStatus> {
-	const sessionsRoot = path.join(homedir(), ".pi", "agent", "sessions");
-	const files = await walkJsonlFiles(sessionsRoot);
+	const sessionRoots = params.sessionRoots ?? resolveQuotaSessionRoots(params.cwd);
+	const sessionsRoot = sessionRoots[0] ?? path.join(homedir(), ".pi", "agent", "sessions");
+	const files = Array.from(new Set((await Promise.all(sessionRoots.map((root) => walkJsonlFiles(root)))).flat()));
 
 	const now = nowLocalMidnight();
 	const start = addDays(now, -(params.days - 1));
@@ -362,6 +385,7 @@ export async function analyzeQuota(params: {
 	const status = buildQuotaStatus(sessions, usageEvents, {
 		days: params.days,
 		sessionsRoot,
+		sessionRoots,
 		scannedFiles: filtered.length,
 		weeklyQuotaTokens: params.weeklyQuotaTokens,
 		weeklyQuotaCostUsd: params.weeklyQuotaCostUsd,
@@ -480,6 +504,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 		const days = Math.max(baseDays, needsMonthlyWindow ? dayOfMonth : 0);
 
 		const key = JSON.stringify({
+			cwd: ctx.cwd,
 			days,
 			weeklyQuotaTokens,
 			weeklyQuotaCostUsd,
@@ -503,6 +528,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 			monthlyQuotaRequests,
 			providerWindowHours,
 			providerBudgets,
+			cwd: ctx.cwd,
 		});
 		cache.set(key, { at: Date.now(), value: status });
 		return status;
@@ -913,6 +939,7 @@ export default function quotaVisibilityExtension(pi: ExtensionAPI) {
 				days: Math.max(dayOfMonth, 7),
 				providerBudgets,
 				providerWindowHours: {},
+				cwd: ctx.cwd,
 			});
 
 			if (status.providerBudgets.length === 0) return;

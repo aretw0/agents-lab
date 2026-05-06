@@ -155,6 +155,7 @@ export interface RouteAdvisory {
 export interface QuotaStatus {
 	source: {
 		sessionsRoot: string;
+		sessionRoots?: string[];
 		scannedFiles: number;
 		parsedSessions: number;
 		parsedEvents: number;

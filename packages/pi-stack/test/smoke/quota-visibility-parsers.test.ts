@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it, expect, vi } from "vitest";
@@ -16,6 +16,8 @@ import quotaVisibilityExtension, {
   resolveQuotaToolOutputPolicy,
   formatQuotaToolJsonOutput,
   estimateHardPathwayMitigation,
+  analyzeQuota,
+  resolveQuotaSessionRoots,
   type QuotaUsageEvent,
   type ProviderBudgetStatus,
 } from "../../extensions/quota-visibility";
@@ -91,6 +93,67 @@ describe("quota-visibility extension — registration smoke", () => {
         expect(result.content?.[0]?.text).toBeTruthy();
         expect(result.details).toBeTruthy();
       }
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("descobre e conta sessões sandbox locais de forma bounded", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "quota-sandbox-"));
+    try {
+      const sandboxRoot = join(tmp, ".sandbox", "pi-agent", "sessions", "workspace-a");
+      mkdirSync(sandboxRoot, { recursive: true });
+      const stamp = new Date().toISOString();
+      const fileStamp = stamp.replace(/:/g, "-").replace(/\./g, "-");
+      writeFileSync(
+        join(sandboxRoot, `${fileStamp}_session.jsonl`),
+        [
+          JSON.stringify({ type: "session", timestamp: stamp }),
+          JSON.stringify({ type: "message", message: { role: "user" } }),
+          JSON.stringify({
+            type: "message",
+            provider: "openai-codex",
+            model: "gpt-test",
+            message: { role: "assistant" },
+            usage: { input: 10, output: 15, totalTokens: 25, cost: { total: 0.01 } },
+          }),
+        ].join("\n"),
+        "utf8",
+      );
+
+      const roots = resolveQuotaSessionRoots(tmp);
+      expect(roots).toContain(join(tmp, ".sandbox", "pi-agent", "sessions"));
+
+      const status = await analyzeQuota({
+        days: 1,
+        providerWindowHours: {},
+        providerBudgets: {},
+        sessionRoots: [join(tmp, ".sandbox", "pi-agent", "sessions")],
+      });
+
+      expect(status.source.sessionRoots).toEqual([join(tmp, ".sandbox", "pi-agent", "sessions")]);
+      expect(status.source.scannedFiles).toBe(1);
+      expect(status.totals.sessions).toBe(1);
+      expect(status.totals.tokens).toBe(25);
+      expect(status.models[0]?.model).toBe("openai-codex/gpt-test");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("mantém raízes ausentes seguras e sem sessões falsas", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "quota-missing-root-"));
+    try {
+      const status = await analyzeQuota({
+        days: 1,
+        providerWindowHours: {},
+        providerBudgets: {},
+        sessionRoots: [join(tmp, "missing", "sessions")],
+      });
+
+      expect(status.source.scannedFiles).toBe(0);
+      expect(status.totals.sessions).toBe(0);
+      expect(status.totals.tokens).toBe(0);
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }

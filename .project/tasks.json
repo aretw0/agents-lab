@@ -19839,6 +19839,28 @@
       "milestone": "architecture-runway-implementation",
       "notes": "[auto-seed] TASK-BUD-886 reduced guardrails-core.ts to 1240 lines but line_budget_snapshot still reports one file above the 1000-line watch threshold. Prefer lifecycle/eventSurfaceRuntime/default-state extraction before touching auto-drain semantics.\n[slice-start] Continuing local-safe guardrails-core extraction after TASK-BUD-886 commit 6c78afc6. Scope stays architecture-only: no provider/model/API behavior changes and no protected-scope policy changes.\n[rationale-sync] Added risk-control rationale before closure because TASK-BUD-887 touches guardrails-core runtime orchestration.\n[rationale:risk-control] Closing the final >1000-line guardrails-core orchestrator surface is rationale-sensitive because this file owns runtime guardrails, long-run dispatch boundaries, protected-scope gates and operator trust signals. Extracting auto-drain behind explicit state accessors lowers mainte…\n[complete] Extracted auto-drain seam; all TS surfaces are now below 1000-line watch threshold (line_budget_snapshot aboveWatch=0).",
       "verification": "VERIFY-BUD-887"
+    },
+    {
+      "id": "TASK-BUD-888",
+      "description": "Teach quota visibility to include local sandbox pi session logs so provider-economy metrics are not falsely empty after isolated runs.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-884"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility*.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Discover the workspace sandbox session root alongside the existing user pi sessions root without changing provider routing, model selection, API keys, costs, or settings.",
+        "Keep quota visibility read-only and bounded; do not scan arbitrary large directories beyond known pi session roots.",
+        "Add or update focal smoke coverage proving sandbox sessions are counted when present and missing roots remain safe.",
+        "Validate the quota visibility parser/surface tests and record that this is observability-only, not a provider strategy change."
+      ],
+      "milestone": "provider-economy-observability",
+      "notes": "[auto-seed] Post-reload quota_visibility_status no longer throws resolveQuotaToolOutputPolicy, but it reports scannedFiles=0 because it only scans C:\\Users\\aretw\\.pi\\agent\\sessions and misses this workspace's .sandbox/pi-agent/sessions tree. [rationale:risk-control] Quota/provider-economy decisions are only safe if observability includes the actual local session corpus; this task improves evidence collection without changing provider routing or costs.\n[slice-start] Reload validated quota tools execute without the old binding error, but live output is falsely empty because sandbox sessions are not scanned. Starting observability-only fix; no provider routing/model/cost/API/settings changes.\n[rationale:risk-control] Quota visibility informs provider-economy choices; missing the active sandbox session corpus creates false zero-usage evidence. This slice only broadens read-only local session discovery inside known pi roots, preserving protected provider strategy boundaries.\n[complete] Fixed quota visibility session-source coverage for sandbox pi sessions; requires /reload before live quota tools show nonzero scannedFiles for this workspace.",
+      "verification": "VERIFY-BUD-888"
     }
   ]
 }

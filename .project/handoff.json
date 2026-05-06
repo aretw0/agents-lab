@@ -1,55 +1,54 @@
 {
-  "timestamp": "2026-05-06T01:31:14.892Z",
-  "context": "Completed TASK-BUD-887 after extracting guardrails-core auto-drain/board auto-advance orchestration into guardrails-core-auto-drain.ts. All s [snip] tasks without explicit protected focus. [truncated:+191 chars]",
+  "timestamp": "2026-05-06T01:57:05.798Z",
+  "context": "Completed TASK-BUD-888 observability-only quota visibility fix after reload. quota_visibility_status live no longer had resolveQuotaToolOutpu [snip] del/API/cost/settings behavior changed. [truncated:+271 chars]",
   "next_actions": [
-    "Commit TASK-BUD-887 code/board checkpoint if dirty.",
-    "Stop local-safe auto-selection unless a new non-protected task is seeded or the human explicit [snip] ure/provider-economy work. [truncated:+38 chars]",
-    "Provider-economy follow-up remains a planning/protected-focus topic: quota visibility data-sou [snip] uire explicit human focus. [truncated:+107 chars]"
+    "Commit TASK-BUD-888 code/board checkpoint if dirty.",
+    "Run /reload before trusting live quota_visibility_status/windows/provider_budgets to include s [snip] onRoots from TASK-BUD-888. [truncated:+12 chars]",
+    "After reload, rerun quota_visibility_status(days=7) and confirm source.sessionRoots includes . [snip] es > 0 for this workspace. [truncated:+40 chars]"
   ],
   "blockers": [
-    "No eligible local-safe board task found after TASK-BUD-887 completion.",
-    "TASK-BUD-849 remains protected/parked for provider/model/cost/API changes with [snip] explicit human focus. [truncated:+3 chars]"
+    "TASK-BUD-849 remains protected/parked for provider/model/cost/API strategy cha [snip] explicit human focus. [truncated:+12 chars]",
+    "TASK-BUD-888 live effect requires /reload because quota-visibility extension code changed."
   ],
   "recent_validation": [
-    "pnpm vitest --run packages/pi-stack/test/smoke/guardrails-core-orchestrator-budget.test.ts pac [snip] es passed, 57 tests passed [truncated:+223 chars]",
-    "line_budget_snapshot -> recommendation=ok, aboveWatch=0, aboveExtract=0, aboveCritical=0",
-    "autonomy_lane_next_task(use_handoff_focus=false) -> ready=no, code=local-stop-protected-focus-required"
+    "quota_visibility_status(days=7) before code change -> executed without binding error but scann [snip] s\\aretw\\.pi\\agent\\sessions [truncated:+20 chars]",
+    "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed"
   ],
   "recent_commits": [
-    "6c78afc6 refactor(guardrails): extract core registration seams"
+    "6c78afc6 refactor(guardrails): extract core registration seams",
+    "96d332d5 refactor(guardrails): extract auto-drain runtime"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-887",
+    "focus": "TASK-BUD-888",
     "canonical_links": [
-      "task:TASK-BUD-887",
-      "task:TASK-BUD-849",
+      "task:TASK-BUD-888",
       "commit:6c78afc6"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T01:31:14.892Z",
+    "generatedAtIso": "2026-05-06T01:57:05.798Z",
     "level": "ok",
-    "percent": 41,
+    "percent": 49,
     "action": "continue",
-    "recommendation": "commit-task-bud-887-then-wait-for-explicit-focus-or-new-local-safe-seed",
+    "recommendation": "commit-task-bud-888-then-reload-validate-quota-session-roots",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T01:31:14.892Z",
+      "atIso": "2026-05-06T01:57:05.798Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 41,
+      "percent": 49,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-887-then-wait-for-explicit-focus-or-new-local-safe-seed"
+      "recommendation": "commit-task-bud-888-then-reload-validate-quota-session-roots"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-887"
+    "TASK-BUD-888"
   ]
 }
