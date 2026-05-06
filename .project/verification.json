@@ -13506,6 +13506,15 @@
       "method": "test",
       "timestamp": "2026-05-06T01:56:52.448Z",
       "evidence": "Quota visibility now resolves known local pi session roots with resolveQuotaSessionRoots(cwd): the existing user root plus cwd/.sandbox/pi-agent/sessions, deduped and bounded to known roots. analyzeQuota accepts cwd/sessionRoots, scans all resolved roots, records source.sessionRoots, and cache keys include cwd. Tool and footer calls pass ctx.cwd. Added smoke coverage for counting a sandbox session and safely ignoring a missing root. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed. This is observability-only; no provider routing, model selection, API keys, costs, or settings were changed."
+    },
+    {
+      "id": "VERIFY-BUD-889",
+      "target": "TASK-BUD-889",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T02:03:26.576Z",
+      "evidence": "Updated analyzeQuota to parse all JSONL files in known session roots instead of pre-filtering by filename timestamp, then build a windowed SessionSample for sessions whose original start is older than the requested window but whose usage events fall inside it. This avoids missing resumed long sessions and avoids counting old usage outside the window. Added regression by creating an old-named sandbox session file with a current assistant timestamp and verifying it is counted; missing roots remain safe. Validation passed: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed."
     }
   ]
 }

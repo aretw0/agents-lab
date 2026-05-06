@@ -104,9 +104,9 @@ describe("quota-visibility extension — registration smoke", () => {
       const sandboxRoot = join(tmp, ".sandbox", "pi-agent", "sessions", "workspace-a");
       mkdirSync(sandboxRoot, { recursive: true });
       const stamp = new Date().toISOString();
-      const fileStamp = stamp.replace(/:/g, "-").replace(/\./g, "-");
+      const fileStamp = "2020-01-01T00-00-00-000Z";
       writeFileSync(
-        join(sandboxRoot, `${fileStamp}_session.jsonl`),
+        join(sandboxRoot, `${fileStamp}_resumed-session.jsonl`),
         [
           JSON.stringify({ type: "session", timestamp: stamp }),
           JSON.stringify({ type: "message", message: { role: "user" } }),
@@ -114,6 +114,7 @@ describe("quota-visibility extension — registration smoke", () => {
             type: "message",
             provider: "openai-codex",
             model: "gpt-test",
+            timestamp: stamp,
             message: { role: "assistant" },
             usage: { input: 10, output: 15, totalTokens: 25, cost: { total: 0.01 } },
           }),

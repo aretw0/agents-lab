@@ -1,54 +1,55 @@
 {
-  "timestamp": "2026-05-06T01:57:05.798Z",
-  "context": "Completed TASK-BUD-888 observability-only quota visibility fix after reload. quota_visibility_status live no longer had resolveQuotaToolOutpu [snip] del/API/cost/settings behavior changed. [truncated:+271 chars]",
+  "timestamp": "2026-05-06T02:03:37.948Z",
+  "context": "After reload, TASK-BUD-888 was partially validated: quota_visibility_status now reports source.sessionRoots including the workspace .sandbox/ [snip] etry without provider strategy changes. [truncated:+351 chars]",
   "next_actions": [
-    "Commit TASK-BUD-888 code/board checkpoint if dirty.",
-    "Run /reload before trusting live quota_visibility_status/windows/provider_budgets to include s [snip] onRoots from TASK-BUD-888. [truncated:+12 chars]",
-    "After reload, rerun quota_visibility_status(days=7) and confirm source.sessionRoots includes . [snip] es > 0 for this workspace. [truncated:+40 chars]"
+    "Commit TASK-BUD-889 code/board checkpoint if dirty.",
+    "Run /reload before trusting live quota_visibility_status/windows/provider_budgets to reflect TASK-BUD-889 windowing fix.",
+    "After reload, rerun quota_visibility_status(days=7) and confirm scannedFiles > 0 and parsedSes [snip] resumed sandbox activity. [truncated:+19 chars]"
   ],
   "blockers": [
-    "TASK-BUD-849 remains protected/parked for provider/model/cost/API strategy cha [snip] explicit human focus. [truncated:+12 chars]",
-    "TASK-BUD-888 live effect requires /reload because quota-visibility extension code changed."
+    "TASK-BUD-889 live effect requires /reload because quota-visibility extension code changed.",
+    "TASK-BUD-849 remains protected/parked for provider/model/cost/API strategy cha [snip] explicit human focus. [truncated:+12 chars]"
   ],
   "recent_validation": [
-    "quota_visibility_status(days=7) before code change -> executed without binding error but scann [snip] s\\aretw\\.pi\\agent\\sessions [truncated:+20 chars]",
+    "quota_visibility_status(days=7) after reload -> source.sessionRoots includes C:\\Users\\aretw\\Do [snip] e TASK-BUD-889 code change [truncated:+77 chars]",
+    "find .sandbox/pi-agent/sessions -type f -name '*.jsonl' -> 11 files, including resumed 2026-04-28 session",
     "pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 37 tests passed"
   ],
   "recent_commits": [
-    "6c78afc6 refactor(guardrails): extract core registration seams",
-    "96d332d5 refactor(guardrails): extract auto-drain runtime"
+    "f87f7230 fix(quota): include sandbox session roots"
   ],
   "slice_memory": {
-    "focus": "TASK-BUD-888",
+    "focus": "TASK-BUD-889",
     "canonical_links": [
+      "task:TASK-BUD-889",
       "task:TASK-BUD-888",
-      "commit:6c78afc6"
+      "commit:f87f7230"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T01:57:05.798Z",
+    "generatedAtIso": "2026-05-06T02:03:37.948Z",
     "level": "ok",
-    "percent": 49,
+    "percent": 52,
     "action": "continue",
-    "recommendation": "commit-task-bud-888-then-reload-validate-quota-session-roots",
+    "recommendation": "commit-task-bud-889-then-reload-validate-quota-windowing",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T01:57:05.798Z",
+      "atIso": "2026-05-06T02:03:37.948Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 49,
+      "percent": 52,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "commit-task-bud-888-then-reload-validate-quota-session-roots"
+      "recommendation": "commit-task-bud-889-then-reload-validate-quota-windowing"
     }
   ],
   "completed_tasks": [
-    "TASK-BUD-888"
+    "TASK-BUD-889"
   ]
 }

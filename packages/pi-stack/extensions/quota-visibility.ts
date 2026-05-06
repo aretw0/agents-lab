@@ -339,6 +339,54 @@ export function buildQuotaStatus(
 	};
 }
 
+function buildWindowedSessionSample(
+	parsed: ParsedSessionData,
+	start: Date,
+): { session: SessionSample; usageEvents: QuotaUsageEvent[] } | undefined {
+	const sessionStart = new Date(parsed.session.startedAtIso);
+	if (sessionStart >= start) {
+		return { session: parsed.session, usageEvents: parsed.usageEvents };
+	}
+
+	const usageEvents = parsed.usageEvents.filter((event) => event.timestampMs >= start.getTime());
+	if (usageEvents.length === 0) return undefined;
+
+	const usage = makeUsage();
+	const byModel = new Map<string, ModelAggregate>();
+	for (const event of usageEvents) {
+		const eventUsage = {
+			input: 0,
+			output: 0,
+			cacheRead: 0,
+			cacheWrite: 0,
+			totalTokens: event.tokens,
+			costTotalUsd: event.costUsd,
+		};
+		mergeUsage(usage, eventUsage);
+		const modelKey = `${event.provider}/${event.model}`;
+		const current = byModel.get(modelKey) ?? { ...makeUsage(), assistantMessages: 0 };
+		mergeUsage(current, eventUsage);
+		current.assistantMessages += 1;
+		byModel.set(modelKey, current);
+	}
+
+	const byModelObj: Record<string, ModelAggregate> = {};
+	for (const [key, value] of byModel.entries()) byModelObj[key] = value;
+
+	return {
+		session: {
+			...parsed.session,
+			startedAtIso: usageEvents[0]?.timestampIso ?? parsed.session.startedAtIso,
+			userMessages: 0,
+			assistantMessages: usageEvents.length,
+			toolResultMessages: 0,
+			usage,
+			byModel: byModelObj,
+		},
+		usageEvents,
+	};
+}
+
 export async function analyzeQuota(params: {
 	days: number;
 	weeklyQuotaTokens?: number;
@@ -359,22 +407,17 @@ export async function analyzeQuota(params: {
 	const now = nowLocalMidnight();
 	const start = addDays(now, -(params.days - 1));
 
-	const filtered = files.filter((f) => {
-		const d = parseSessionStartFromFilename(path.basename(f));
-		if (!d) return true;
-		return d >= start;
-	});
-
 	const sessions: SessionSample[] = [];
 	const usageEvents: QuotaUsageEvent[] = [];
 
-	for (const filePath of filtered) {
+	for (const filePath of files) {
 		const parsed = await parseSessionFile(filePath);
 		if (!parsed) continue;
 
-		if (new Date(parsed.session.startedAtIso) < start) continue;
-		sessions.push(parsed.session);
-		usageEvents.push(...parsed.usageEvents);
+		const windowed = buildWindowedSessionSample(parsed, start);
+		if (!windowed) continue;
+		sessions.push(windowed.session);
+		usageEvents.push(...windowed.usageEvents);
 	}
 
 	const copilotBilling = await loadCopilotBillingUsageEvents(params.days);
@@ -386,7 +429,7 @@ export async function analyzeQuota(params: {
 		days: params.days,
 		sessionsRoot,
 		sessionRoots,
-		scannedFiles: filtered.length,
+		scannedFiles: files.length,
 		weeklyQuotaTokens: params.weeklyQuotaTokens,
 		weeklyQuotaCostUsd: params.weeklyQuotaCostUsd,
 		weeklyQuotaRequests: params.weeklyQuotaRequests,
