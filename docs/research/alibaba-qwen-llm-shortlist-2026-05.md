@@ -27,7 +27,7 @@ Próxima execução real deve ser um packet protegido com no máximo **duas cham
 | Tier | Modelo candidato | Status | Quota restante/total | Papel | Próxima ação |
 | --- | --- | --- | --- | --- | --- |
 | baseline curto | `qwen-plus` | smoke passou | 968,126 / 1,000,000 | referência Qwen inicial para prompts curtos | não repetir até ter necessidade clara |
-| cheap/fast | `qwen3.6-flash` | canary passou com `enable_thinking=false` | dashboard pendente; uso canary manual 1.922 tokens/10 casos sem thinking | monitor/classifier advisory barato | usar em `commit-hygiene`/`work-quality`; acompanhar dashboard + cap local |
+| cheap/fast | `qwen3.6-flash` | canary passou com `enable_thinking=false` | 986,687 / 1,000,000 | monitor/classifier advisory barato | usar em `commit-hygiene`/`work-quality`; acompanhar dashboard + cap local |
 | coder/delegation | `qwen3-coder-next` | doc oficial recomenda para código; não testado | preencher no dashboard | fatias local-safe pequenas | confirmar quota/free trial, depois smoke sintético protegido |
 
 ## 3. Baseline já provado — qwen-plus
@@ -51,8 +51,9 @@ Critério: priorizar custo/latência para monitores e classifiers simples.
 | Campo | Valor |
 | --- | --- |
 | Modelo id | `qwen3.6-flash` |
-| Nome no dashboard | preencher no dashboard |
-| Quota remaining/total | preencher no dashboard |
+| Nome no dashboard | `qwen3.6-flash` |
+| Quota remaining/total | Remaining 986,687 / Total 1,000,000 |
+| Consumo observado no dashboard | 13,313 tokens após canaries conhecidos |
 | Context window | preencher no dashboard/docs |
 | Streaming | documentado genericamente para Qwen/DashScope; confirmar por modelo |
 | Tool/function calling | provável para famílias Qwen recentes; confirmar por modelo antes de monitor canary |
@@ -61,7 +62,7 @@ Critério: priorizar custo/latência para monitores e classifiers simples.
 | Motivo da escolha | `/models` retornou `qwen3.6-flash`; docs oficiais listam `qwen3.6-flash` entre modelos principais de texto e recomendam `qwen3.6-flash` para tarefas leves/auxiliares; é melhor ponto inicial moderno que enumerar 100 modelos |
 | Stop condition específica | parar se não houver free trial/quota visível no dashboard, se `free quota exhausted stop` não puder ser ligado nem justificado, se endpoint `dashscope-intl` não aceitar o modelo, se `enable_thinking=false` deixar de funcionar, ou se burn por chamada exceder cap aprovado |
 
-Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-flash`/`qwen3-coder-flash` como próximos candidatos. `qwen-turbo` é barato, mas o canary parou cedo por falso `clean` crítico no QWEN-CH-002; não promover sem prompt/canary novo.
+Alternativas se o dashboard negar free trial/endpoint/cap: `qwen-flash`/`qwen3-coder-flash` como próximos candidatos. `qwen-turbo` tem Remaining 999,621 / Total 1,000,000 e consumiu apenas 379 tokens, mas o canary parou cedo por falso `clean` crítico no QWEN-CH-002; não promover sem prompt/canary novo.
 
 Canary futuro sugerido:
 
@@ -129,7 +130,7 @@ Só abrir protected packet para smoke cheap/fast + coder se:
 
 - [ ] `qwen-plus` continuar como baseline, sem repetir chamada desnecessária;
 - [x] cheap/fast escolhido por API/docs como `qwen3.6-flash`;
-- [ ] cheap/fast quota/free trial registrada no dashboard;
+- [x] cheap/fast quota/free trial registrada no dashboard: `qwen3.6-flash` Remaining 986,687 / Total 1,000,000;
 - [ ] `free quota exhausted stop` ligado para cheap/fast ou indisponibilidade justificada;
 - [x] coder escolhido por API/docs como `qwen3-coder-next`;
 - [ ] coder quota/free trial registrada no dashboard;

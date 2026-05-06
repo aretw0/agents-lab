@@ -1,43 +1,42 @@
 {
-  "timestamp": "2026-05-06T12:21:54.666Z",
-  "context": "Committed protected monitor-provider economy rollout slice TASK-BUD-912 after Copilot classifier quota exhaustion. Advisory classifiers commi [snip] dashboard tracking runbook documented. [truncated:+162 chars]",
+  "timestamp": "2026-05-06T12:30:29.637Z",
+  "context": "Committed operator-provided Alibaba/DashScope dashboard quota snapshot for the only Qwen models used so far: qwen-plus, qwen3.6-flash, and qw [snip] rejected despite high remaining quota. [truncated:+148 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Manual dashboard-check DashScope free quota/freeQuotaStop when operator is available; do not print/store keys.",
-    "Resume non-provider local-safe work; keep TASK-BUD-849 broader model infrastructure protected/in-progress.",
+    "Manual dashboard-check Free quota exhausted stop remains pending; do not print/store keys.",
+    "Resume non-provider local-safe work; keep broader TASK-BUD-849 protected/in-progress.",
     "Do not use qwen-turbo for classifiers without a new passing canary."
   ],
   "blockers": [
-    "Dashboard Alibaba freeQuotaStop/remaining quota still requires human visual confirmation.",
+    "Dashboard Alibaba freeQuotaStop state still requires human visual confirmation.",
     "Do not push/publish/deploy unless explicitly requested."
   ],
   "recent_validation": [
-    "Qwen canary: qwen3.6-flash enable_thinking=false 10/10 parseable, 10/10 verdicts, 0 critical f [snip] ejected after false clean. [truncated:+43 chars]",
-    "safe_marker_check passed for settings/agents/docs markers.",
-    "i18n_lint_text passed for rollout doc."
+    "safe_marker_check passed for dashboard quota markers in rollout, shortlist, and free-trial strategy docs.",
+    "i18n_lint_text passed for quota snapshot text."
   ],
   "recent_commits": [
-    "chore(providers): route monitor volume to qwen"
+    "e3a59ea1 docs(providers): record qwen dashboard quotas"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
       "task:TASK-BUD-849",
-      "task:TASK-BUD-912"
+      "commit:e3a59ea1"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T12:21:54.666Z",
+    "generatedAtIso": "2026-05-06T12:30:29.637Z",
     "level": "checkpoint",
     "percent": 55,
     "action": "checkpoint-refresh",
-    "recommendation": "resume-local-safe-work-provider-rollout-committed"
+    "recommendation": "resume-local-safe-work-dashboard-quota-committed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T12:21:54.666Z",
+      "atIso": "2026-05-06T12:30:29.637Z",
       "reason": "manual_checkpoint",
       "level": "checkpoint",
       "percent": 55,
@@ -47,7 +46,7 @@
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "resume-local-safe-work-provider-rollout-committed"
+      "recommendation": "resume-local-safe-work-dashboard-quota-committed"
     }
   ]
 }

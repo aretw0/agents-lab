@@ -14,7 +14,10 @@ Fatos reportados:
 - endpoint operacional observado: `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`;
 - dashboard: `https://modelstudio.console.alibabacloud.com`;
 - quota `qwen-plus`: Remaining `968,126` / Total `1,000,000` após o smoke;
-- consumo observado: cerca de 3% da quota `qwen-plus`;
+- quota `qwen3.6-flash`: Remaining `986,687` / Total `1,000,000` após canaries;
+- quota `qwen-turbo`: Remaining `999,621` / Total `1,000,000` após canary interrompido;
+- esses são os únicos modelos Qwen/DashScope usados até agora;
+- consumo observado: cerca de 3% da quota `qwen-plus`, cerca de 1,33% de `qwen3.6-flash`, e 379 tokens de `qwen-turbo`;
 - catálogo free-trial grande: cerca de 100 LLMs, 55 visual models, 17 multimodal models, 36 speech models e 5 embedding models;
 - trocar para `qwen-plus` em contexto de control-plane fez a UI mostrar cerca de 25% de contexto usado (`31.6k/304`), então Qwen não deve assumir long-context control-plane ainda.
 
@@ -121,7 +124,7 @@ Qwen pode assumir mais carga quando houver:
 | Copilot pode acabar nos monitores | priorizar Qwen cheap/fast classifier canary |
 | OpenAI Codex virar carga única | reservar OpenAI para cockpit/heavy/recovery |
 | Catálogo Alibaba enorme | tiering, não inventário exaustivo |
-| Quota free trial queima rápido | dashboard before/after em cada smoke |
+| Quota free trial queima rápido | dashboard before/after em cada smoke; snapshot atual mostra apenas `qwen-plus`, `qwen3.6-flash` e `qwen-turbo` usados |
 | Endpoint/API key por região | manter `dashscope-intl` como operacional; documentar `dashscope.aliyuncs.com` 401 |
 
 ## 8. Próximo passo local-safe
@@ -131,7 +134,7 @@ Preencher a shortlist manual em [`docs/research/alibaba-qwen-llm-shortlist-2026-
 | Tier | Modelo candidato | Quota restante/total | Motivo |
 | --- | --- | --- | --- |
 | baseline | qwen-plus | 968,126 / 1,000,000 | smoke já passou |
-| cheap/fast |  |  | monitor/classifier candidate |
+| cheap/fast | qwen3.6-flash | 986,687 / 1,000,000 | monitor/classifier candidate; canary passou com thinking off |
 | coder |  |  | delegação local-safe candidate |
 
 Depois disso, preparar um packet protegido para **no máximo 2 chamadas sintéticas adicionais**: cheap/fast e coder.

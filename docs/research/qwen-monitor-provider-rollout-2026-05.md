@@ -70,6 +70,18 @@ Observação: a execução do canary foi feita por script local direto em `.tmp`
 
 Esse budget é **política local conservadora**, não leitura oficial do dashboard Alibaba.
 
+### Dashboard Alibaba confirmado pelo operador
+
+Snapshot manual do dashboard após os canaries conhecidos:
+
+| Modelo | Remaining | Total | Consumido aproximado | Leitura |
+| --- | ---: | ---: | ---: | --- |
+| `qwen-plus` | 968.126 | 1.000.000 | 31.874 | baseline curto já usado; não repetir sem necessidade. |
+| `qwen3.6-flash` | 986.687 | 1.000.000 | 13.313 | compatível com canary; modelo ativo para advisory classifiers. |
+| `qwen-turbo` | 999.621 | 1.000.000 | 379 | bate com o canary interrompido; não promover por falso `clean` crítico. |
+
+Esses são os únicos modelos DashScope/Qwen usados até agora. O dashboard confirma que `qwen3.6-flash` ainda tem folga alta; manter o cap local conservador mesmo assim para evitar surpresa de cobrança.
+
 ## 4. Como acompanhar gasto da DashScope
 
 ### Checks locais no pi
@@ -97,7 +109,7 @@ Estado observado logo após configurar o cap local:
 - `projectedPctTokens≈65,87%`;
 - `warnPct=70`, `hardPct=90`.
 
-Interpretação: está seguro agora, mas perto o bastante do `warn` projetado para monitorar.
+Interpretação: está seguro agora. O dashboard por modelo mostra consumo real baixo no `qwen3.6-flash` ativo, mas o cap local continua útil como freio conservador porque o dashboard é a fonte oficial e pode ter atraso.
 
 ### Dashboard Alibaba/DashScope
 
