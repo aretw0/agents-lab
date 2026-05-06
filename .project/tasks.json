@@ -21070,6 +21070,31 @@
       "milestone": "short-mid-monitor-economy-calibration",
       "notes": "Achado do usuário: `reloadGate=reload-not-required` ficou falso-negativo após alteração em `monitor-provider-output.ts`; a lógica exigia reload, mas o gate só observava sourceMtime do context-watchdog + settings/agents.\n[closure] User correctly identified that `reloadGate=reload-not-required` was a false negative after runtime extension source changes. Fix is local/bounded and does not touch provider/settings. Because this changes runtime detection code, one more reload is required before the improved gate can be trusted live.",
       "verification": "VER-BUD-942-RELOAD-GATE-SOURCE-DIR"
+    },
+    {
+      "id": "TASK-BUD-943",
+      "description": "[Lane] Inventariar e endurecer sinais/gates falsos do control-plane antes de avançar novas features.",
+      "status": "in-progress",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-942"
+      ],
+      "files": [
+        "docs/research/control-plane-signal-integrity-audit-2026-05.md",
+        "packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts",
+        "packages/pi-stack/test/smoke/guardrails-unattended-continuation-surface.test.ts",
+        "packages/pi-stack/test/smoke/monitor-summary.test.ts"
+      ],
+      "acceptance_criteria": [
+        "Criar inventário dos sinais críticos usados para continuidade/reload/delegação/monitoramento, com risco de falso positivo e falso negativo.",
+        "Mapear cobertura existente e gaps de regressão por sinal.",
+        "Priorizar 3-5 regressões de maior ROI para evitar voltar atrás por sinais falsos.",
+        "Adicionar pelo menos uma regressão ou referenciar explicitamente uma regressão recém-criada que cubra o incidente de `reloadGate` falso negativo.",
+        "Manter mudanças locais/report-only; sem provider/settings/apply/delegação automática."
+      ],
+      "milestone": "signal-integrity-calibration",
+      "notes": "Lane criada a partir da observação do usuário: se o reloadGate estava falso, precisamos calibrar sinais/tools que induzem continuidade errada antes de avançar features.\n[slice] Inventário inicial criado com incidente raiz reloadGate, classes de falha, sinais críticos, P0/P1/P2 e critério de maturidade. Próxima fatia recomendada: regressão P0 negativa garantindo que `monitor_stale_feedback_prefilter` não suprime sinal crítico/fresco.",
+      "verification": "VER-BUD-943-INVENTORY-P0"
     }
   ]
 }

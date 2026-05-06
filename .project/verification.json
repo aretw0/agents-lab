@@ -14129,6 +14129,15 @@
       "method": "focal regression test",
       "timestamp": "2026-05-06T20:05:31.830Z",
       "evidence": "Confirmed and fixed reloadGate false negative: previous logic only compared context-watchdog source mtime plus settings/agent overrides, so changes in other pi-stack extension sources such as `monitor-provider-output.ts` were missed. Added bounded scan of `packages/pi-stack/extensions/*.ts` to `readContextWatchdogRuntimeReloadMtimeMs` and regression covering a changed `monitor-provider-output.ts` file. Validation: `npx vitest run packages/pi-stack/test/smoke/context-watchdog-runtime-reload.test.ts` -> 3 passed; `project-validate` -> clean; `git diff --check` -> clean."
+    },
+    {
+      "id": "VER-BUD-943-INVENTORY-P0",
+      "target": "TASK-BUD-943",
+      "target_type": "task",
+      "status": "passed",
+      "method": "marker-check + project validation",
+      "timestamp": "2026-05-06T20:12:23.008Z",
+      "evidence": "Created `docs/research/control-plane-signal-integrity-audit-2026-05.md` with root incident, failure classes, initial inventory of critical signals/tools, P0/P1/P2 regression priorities, and lane maturity criteria. Validation: safe_marker_check matched 4/4 (`Incidente raiz`, `Inventário inicial de sinais críticos`, `Priorização de regressões`, `Critério de pronto da lane`); `project-validate` clean; `git diff --check` clean."
     }
   ]
 }
