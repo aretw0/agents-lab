@@ -1,18 +1,16 @@
 {
-  "timestamp": "2026-05-06T22:18:29.100Z",
-  "context": "TASK-BUD-949 concluída: planned p3/no-priority agora entra em excludedTaskIds e é filtrada também de hints derivados do handoff, next_actions [snip] pós reload via canonical_links/context. [truncated:+78 chars]",
+  "timestamp": "2026-05-06T22:19:51.257Z",
+  "context": "TASK-BUD-949 concluída e validada live: auto-resume agora retorna focusTasks=none-listed, não promove TASK-BUD-947/TASK-BUD-676. Reload gate [snip] runtime-reload anterior foi consumido. [truncated:+19 chars]",
   "next_actions": [
-    "commit source/test + board/handoff",
-    "/reload necessário por alteração runtime",
-    "após reload validar auto-resume live não escolhe TASK-BUD-947/TASK-BUD-676 e não contém esses IDs no prompt"
+    "selecionar explicitamente próxima task local-safe p1/p2 ou seedar material antes de nova continuação",
+    "não executar TASK-BUD-946/947 automaticamente; ambos são backlog p3 de ruído operador",
+    "delegação simples continua bloqueada até haver foco local-safe e telemetria auto-advance suficiente"
   ],
-  "blockers": [
-    "runtime-reload-required-after-auto-resume-p3-derived-hints-change"
-  ],
+  "blockers": [],
   "recent_validation": [
+    "auto-resume live: focusTasks=none-listed, reload=clear",
     "context-watchdog.test.ts: 62 passed",
-    "project-validate: clean",
-    "git diff --check: clean"
+    "project-validate: clean"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-949",
@@ -22,26 +20,26 @@
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T22:18:29.100Z",
+    "generatedAtIso": "2026-05-06T22:19:51.257Z",
     "level": "warn",
-    "percent": 23,
+    "percent": 24,
     "action": "continue",
-    "recommendation": "Commitar; depois reload antes de confiar no preview live.",
+    "recommendation": "Pausar auto-continuação ampla; próxima ação deve escolher/seedar foco local-safe real.",
     "focus_task_status": "completed"
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T22:18:29.100Z",
+      "atIso": "2026-05-06T22:19:51.257Z",
       "reason": "manual_checkpoint",
       "level": "warn",
-      "percent": 23,
+      "percent": 24,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Commitar; depois reload antes de confiar no preview live."
+      "recommendation": "Pausar auto-continuação ampla; próxima ação deve escolher/seedar foco local-safe real."
     }
   ],
   "completed_tasks": [
