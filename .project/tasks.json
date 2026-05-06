@@ -20282,6 +20282,25 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] User asked to squeeze useful official Alibaba documentation into the current Qwen selection/canary path. [rationale:decision-quality] Official docs should reduce dashboard ambiguity before protected canary execution or skill cultivation.\n[slice-start] Official Alibaba docs convergence: model list/pricing/free quota/rate limits/billing stop/regions/tool calling. Read-only docs/API metadata only.\n[rationale:risk-control] Official provider docs can narrow model selection and canary prerequisites without spending quota or changing protected runtime configuration.\n[complete] Official Alibaba docs now converge the next Qwen canary: qwen3.6-flash primary, qwen-turbo cost-floor fallback, qwen3-coder-next coder candidate, freeQuotaStop/dashboard gates required.",
       "verification": "VERIFY-BUD-906"
+    },
+    {
+      "id": "TASK-BUD-907",
+      "description": "Ignore generated workflow monitor JSONL artifacts without hiding workflow specs.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".gitignore",
+        "docs/research/workflows-monitor-artifact-ignore-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Inspect untracked .workflows artifacts and classify whether they are generated runtime logs.",
+        "Add a narrow .gitignore rule for .workflows monitor JSONL artifacts without ignoring all .workflows content.",
+        "Document the decision, evidence, validation, and rollback.",
+        "Do not delete generated logs, do not touch monitor settings, and do not change protected provider/runtime configuration."
+      ],
+      "milestone": "local-safe-maintenance",
+      "notes": "[auto-seed] Repo has a persistent untracked .workflows/monitors/*.jsonl artifact, including a large unauthorized-action log. [rationale:risk-control] Generated monitor logs should not pollute commits, but workflow specs must remain versionable if introduced later.\n[slice-start] Classifying .workflows/monitors JSONL as generated runtime logs and adding narrow ignore rule. No deletion or monitor settings changes.\n[rationale:risk-control] Large generated monitor JSONL artifacts should not remain as untracked commit noise, while future .workflows specs must remain discoverable/versionable.\n[complete] Narrow ignore rule added for generated .workflows monitor JSONL logs; workflow specs remain versionable; local logs were not deleted.",
+      "verification": "VERIFY-BUD-907"
     }
   ]
 }

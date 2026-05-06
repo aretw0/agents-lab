@@ -13668,6 +13668,15 @@
       "method": "skill-skeleton+docs+marker+tests",
       "timestamp": "2026-05-06T05:42:41.822Z",
       "evidence": "Created provider-model-discovery as a report-only skill skeleton at packages/lab-skills/skills/provider-model-discovery/SKILL.md. The skill codifies safe provider model discovery: scope/provider capture, env-var presence check without printing secret, read-only OpenAI-compatible /models listing, model-family classification, official docs lookup, quota/free-trial/billing/rate/tool-calling gates, small shortlist generation, and protected canary packet template. It explicitly forbids prompt/completion calls, settings/routing/monitor migration, paid spend, scheduler/loop/retry, and secret storage without explicit operator approval. Created docs/research/provider-model-discovery-skill-runway-2026-05.md deciding that this pattern should start as a skill, not an extension, because it is mainly instruction/curation and does not yet require state/UI/tools. Updated packages/lab-skills/README.md, README.md, docs/guides/recommended-pi-stack.md, and packages/pi-stack/README.md to list the new skill. No provider calls, settings changes, routing changes, or paid spend. Validation: i18n_lint_text skill sample -> pass; safe_marker_check skill -> pass; safe_marker_check runway -> pass; safe_marker_check lab README -> pass; pnpm vitest --run packages/pi-stack/test/smoke/package-list.test.ts packages/pi-stack/test/smoke/manifest-integrity.test.ts packages/pi-stack/test/smoke/installer-filters.test.ts -> 3 files passed, 63 tests passed."
+    },
+    {
+      "id": "VERIFY-BUD-907",
+      "target": "TASK-BUD-907",
+      "target_type": "task",
+      "status": "passed",
+      "method": "artifact-inspection+ignore-rule+marker+tests",
+      "timestamp": "2026-05-06T05:45:45.292Z",
+      "evidence": "Inspected untracked .workflows artifacts. Found only generated monitor JSONL logs under .workflows/monitors for commit-hygiene, fragility, hedge, and unauthorized-action; largest file was unauthorized-action/2026-05-06.jsonl at ~10.9 MB. Read-only samples showed session_start/classify_call monitor telemetry with monitorName/agentName/model/cwd/renderedPrompt, consistent with runtime logs. Added narrow .gitignore rule .workflows/monitors/**/*.jsonl, intentionally not ignoring all .workflows so future workflow specs remain versionable. Created docs/research/workflows-monitor-artifact-ignore-2026-05.md documenting evidence, decision, non-actions, validation, and rollback. Did not delete logs, did not alter monitor settings, did not change .pi/settings.json/providers/routing/budgets/defaults. Validation: safe_marker_check .gitignore -> pass; safe_marker_check decision doc -> pass; i18n_lint_text -> pass; git status no longer lists .workflows; git check-ignore shows .gitignore rule matching .workflows/monitors/unauthorized-action/2026-05-06.jsonl; pnpm vitest --run packages/pi-stack/test/smoke/manifest-integrity.test.ts packages/pi-stack/test/smoke/monitor-runtime-contract.test.ts -> 2 files passed, 57 tests passed."
     }
   ]
 }
