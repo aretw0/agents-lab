@@ -1,62 +1,49 @@
 {
-  "timestamp": "2026-05-06T17:45:26.735Z",
-  "context": "Avançamos com a primitiva de board-debt hygiene (classificação hard/soft/parked) e registramos evidência. Não há novas violações hard no boar [snip] ue com blocos pequenos + handoff curto. [truncated:+194 chars]",
+  "timestamp": "2026-05-06T17:48:28.525Z",
+  "context": "Concluído slice de micro-limpeza soft: normalizei 10 tasks (TASK-BUD-886 a TASK-BUD-895) trocando verification de VERIFY-BUD-* para VER-BUD-* [snip] ed=0. project-validate permanece clean. [truncated:+95 chars]",
   "current_tasks": [
     "TASK-BUD-849"
   ],
   "next_actions": [
-    "Context-watch action: level=compact 70% (compact-now) · Compact now and continue from checkpoint.",
-    "se necessário, executar o novo script em modo --strict em janela separada para limpeza de back [snip] backfill histórico/legacy [truncated:+53 chars]",
-    "seguir monitorando context_watch_continuation_readiness apenas entre slices"
+    "seguir próxima fatia com próximos 10 itens (896-905), mantendo validação local-slice (hygiene + continuation check)",
+    "manter continuidade bloqueada apenas em stop-conditions até resolução explícita"
   ],
   "blockers": [
-    "context-watch-compact-required",
-    "git-state:invalid / stop-conditions:invalid"
+    "stop-conditions:invalid"
   ],
   "recent_validation": [
     "node scripts/project/board-debt-hygiene.mjs --json",
     "project-validate",
-    "npm run test:smoke -- packages/pi-stack/test/smoke/context-watchdog.test.ts"
+    "context-watch-continuation"
   ],
   "slice_memory": {
     "focus": "TASK-BUD-849",
     "canonical_links": [
-      "task:TASK-BUD-849"
+      "task:TASK-BUD-849",
+      "task:TASK-BUD-886",
+      "task:TASK-BUD-895"
     ]
   },
   "context_watch": {
-    "generatedAtIso": "2026-05-06T17:45:26.656Z",
+    "generatedAtIso": "2026-05-06T17:48:28.525Z",
     "level": "ok",
-    "percent": 18,
+    "percent": 14,
     "action": "continue",
-    "recommendation": "Continuar TASK-BUD-849 com micro-slices até aprovação de limpeza de dívida soft."
+    "recommendation": "Continuar micro-slices locais; sem alteração de escopo ou protected scopes."
   },
   "context_watch_events": [
     {
-      "atIso": "2026-05-06T17:45:26.656Z",
+      "atIso": "2026-05-06T17:48:28.525Z",
       "reason": "manual_checkpoint",
       "level": "ok",
-      "percent": 18,
+      "percent": 14,
       "thresholds": {
         "warnPct": 50,
         "checkpointPct": 68,
         "compactPct": 72
       },
       "action": "checkpoint-refresh",
-      "recommendation": "Continuar TASK-BUD-849 com micro-slices até aprovação de limpeza de dívida soft."
-    },
-    {
-      "atIso": "2026-05-06T17:45:26.735Z",
-      "reason": "message_end",
-      "level": "compact",
-      "percent": 70,
-      "thresholds": {
-        "warnPct": 50,
-        "checkpointPct": 55,
-        "compactPct": 65
-      },
-      "action": "compact-now",
-      "recommendation": "Compact now and continue from checkpoint."
+      "recommendation": "Continuar micro-slices locais; sem alteração de escopo ou protected scopes."
     }
   ]
 }
