@@ -20437,6 +20437,28 @@
       "milestone": "provider-economy-observability",
       "notes": "[provenance:human] User observed qwen monitor not-found was probably missing reload and noted reload signal coverage is incomplete. [rationale:risk-control] Making reload-required signal cover model/runtime settings reduces hidden provider/monitor failures without changing routing choices. Related protected umbrella: TASK-BUD-849.\n[provenance:human] source_task=TASK-BUD-849 reason=Reload signal gap found during protected Qwen monitor rollout.\n[complete] Reload-required signal now covers model catalog, sandbox enabledModels/settings, project settings, and classifier agent override files with bounded non-recursive checks.\n[validation] Final gate passed after formatting/test refinements: npm run ci:smoke:gate (129 files / 1174 tests, stack-sovereignty blockers=0, sovereignty diff blockers=0).",
       "verification": "VERIFY-BUD-913"
+    },
+    {
+      "id": "TASK-BUD-914",
+      "description": "Backlog short/mid-term: consolidate CI/CD and GitHub Actions cohesion after current initiatives stabilize.",
+      "status": "planned",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish.yml",
+        ".github/workflows/release-draft.yml",
+        "package.json",
+        "packages/pi-stack/test/smoke"
+      ],
+      "acceptance_criteria": [
+        "Collect current GitHub Actions failure evidence before changing workflows.",
+        "Map local parity gates vs GitHub Actions jobs and identify drift/failure classes.",
+        "Propose a protected rollout plan with rollback before mutating CI/CD workflows.",
+        "Keep initial analysis report-only until explicit human approval for protected CI/CD changes.",
+        "Preserve existing local smoke/sovereignty gates or explain any intentional changes."
+      ],
+      "milestone": "short-mid-ci-cd-cohesion",
+      "notes": "[provenance:human] User requested a short/mid-term backlog tangent for CI/CD cohesion because GitHub Actions is failing, to pick up after current initiatives reach a stable state. [rationale:risk-control] CI/CD and GitHub Actions are protected scope; keep as explicit backlog/planning item, no auto-dispatch or workflow mutation without later approval. Existing related completed history includes TASK-BUD-910 and TASK-BUD-622, but no open backlog item was found.\n[provenance:human] source_task=TASK-BUD-849 reason=User wants future tangent after current provider/model/runtime initiatives stabilize."
     }
   ]
 }
