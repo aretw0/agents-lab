@@ -13416,6 +13416,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:28:03.150Z",
       "evidence": "Created docs/research/context-watchdog-decomposition-runway-2026-05.md. Audit records context-watchdog.ts at ~999 lines plus related context-watchdog files, clarifies that context-watchdog-public-api.ts does not currently exist and context-watchdog.ts is the public barrel, maps safe decomposition order (public-api reexports first, runtime factory, run loop, status runtime adapter), and lists invariants for warn-as-steering, checkpoint graceful-stop, auto-compact gates, reload/auto-resume, bounded handoff, and report-only tools. No context-watchdog code changed. Validation: pnpm vitest --run packages/pi-stack/test/smoke/context-watchdog.test.ts packages/pi-stack/test/smoke/context-watchdog-continuation.test.ts packages/pi-stack/test/smoke/context-watchdog-checkpoint.test.ts packages/pi-stack/test/smoke/context-watchdog-resume.test.ts packages/pi-stack/test/smoke/context-watchdog-post-reload.test.ts -> 5 files passed, 91 tests passed; i18n_lint_text pt-BR pass; project JSON parse pass."
+    },
+    {
+      "id": "VER-BUD-1244",
+      "target": "TASK-BUD-878",
+      "target_type": "task",
+      "status": "passed",
+      "method": "inspection",
+      "timestamp": "2026-05-06T00:31:26.472Z",
+      "evidence": "Created docs/research/board-planning-clarity-runway-2026-05.md. Document uses board_planning_clarity_score evidence (63, planning-clarity-needs-decomposition) and dependency hygiene evidence (100, strong) to identify that clarity debt comes from macro/protected parked items rather than dependency health. It decomposes remaining protected legacy colony promotions, external influence parked tasks, and TASK-BUD-849 Model Infrastructure into local-safe packet/audit vs protected decision phases without unparking protected tasks or starting external/provider/colony work. Validation: i18n_lint_text pt-BR pass; board_dependency_hygiene_score 100 strong; board_dependency_health_snapshot strong with no missing/cycle/protected coupling blockers; project JSON parse pass."
     }
   ]
 }

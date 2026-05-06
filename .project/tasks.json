@@ -19618,7 +19618,7 @@
     {
       "id": "TASK-BUD-878",
       "description": "Improve board planning clarity by decomposing remaining macro/protected parked items into explicit local-safe audit tasks vs protected decision tasks, without changing protected status.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-877"
@@ -19633,7 +19633,8 @@
         "Do not unpark protected tasks or start external/provider/colony work."
       ],
       "milestone": "architecture-runway",
-      "notes": "[auto-seed] Board clarity score is currently needs-decomposition; this can be improved locally without interview.\n[provenance:human] source_task=TASK-BUD-873 reason=Planning clarity score was 63 needs-decomposition while dependency hygiene is strong; decomposition is the next local-safe governance cleanup."
+      "notes": "[auto-seed] Board clarity score is currently needs-decomposition; this can be improved locally without interview.\n[provenance:human] source_task=TASK-BUD-873 reason=Planning clarity score was 63 needs-decomposition while dependency hygiene is strong; decomposition is the next local-safe governance cleanup.\n[auto-chain] Starting board planning clarity decomposition. Scope: local-safe board/docs hygiene; improve decomposition and verification traceability without protected-scope implementation.\n[slice-complete] Board planning clarity decomposition complete. Next local-safe task: TASK-BUD-879 protected-interview packet for Model Infrastructure; do not alter routing/provider budgets/settings/API contracts.",
+      "verification": "VER-BUD-1244"
     },
     {
       "id": "TASK-BUD-879",
