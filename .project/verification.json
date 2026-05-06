@@ -13812,6 +13812,15 @@
       "method": "doc+marker+i18n+link",
       "timestamp": "2026-05-06T14:33:58.146Z",
       "evidence": "Created docs/research/monitor-stale-feedback-intake-template-2026-05.md as a report-only evidence template for TASK-BUD-915, including incident fields, mandatory evidence, token-economy fields, allowed no-runtime decisions, stop conditions, and readiness criteria. Linked the template from docs/research/0-8-readiness-map.md. Validation: safe_marker_check passed for template anchors after avoiding command-sensitive backtick marker; safe_marker_check passed for readiness-map link; i18n_lint_text passed for pt-BR summary. No monitor runtime, provider, settings, override, or classifier routing changes were made."
+    },
+    {
+      "id": "VERIFY-BUD-931",
+      "target": "TASK-BUD-931",
+      "target_type": "task",
+      "status": "passed",
+      "method": "doc+marker+i18n",
+      "timestamp": "2026-05-06T14:35:16.871Z",
+      "evidence": "Created docs/research/0-8-local-safe-rollback-cookbook.md with rollback cues for docs-only, board-only, test-only, helper-pure, cleanup, handoff/checkpoint, delegation-readiness, monitor-economy, and CI/CD-prep slices. It defines when commit revert is insufficient and a quick pre-edit checklist. Validation: safe_marker_check passed 6/6 anchors; i18n_lint_text passed for pt-BR summary."
     }
   ]
 }

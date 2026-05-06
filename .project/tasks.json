@@ -20810,7 +20810,7 @@
     {
       "id": "TASK-BUD-931",
       "description": "Create a local-safe rollback cue cookbook for recurring 0.8.0 slice types.",
-      "status": "planned",
+      "status": "completed",
       "priority": "p2",
       "depends_on": [
         "TASK-BUD-919"
@@ -20825,7 +20825,8 @@
         "Validate with safe_marker_check and i18n lint."
       ],
       "milestone": "0.8-local-safe-compounding-lane",
-      "notes": "[rationale:rollback] Clear rollback cues support longer low-interaction runs while keeping changes reversible."
+      "notes": "[rationale:rollback] Clear rollback cues support longer low-interaction runs while keeping changes reversible.\n[start] Creating docs-only rollback cue cookbook for recurring local-safe slice types.\n[complete] Rollback cookbook created; lane rollback remains commit-revert first and stops before destructive/protected recovery needs.",
+      "verification": "VERIFY-BUD-931"
     }
   ]
 }
