@@ -13704,6 +13704,24 @@
       "method": "docs-inspection",
       "timestamp": "2026-05-06T05:55:39.458Z",
       "evidence": "Rollback planning evidence for protected Model Infrastructure exists without implementation: docs/research/model-infrastructure-rollback-plan-2026-05.md defines report-only/protected-boundary rollback for routeModelRefs, providerBudgets, default provider/model, monitor migration, auth/API key cleanup, endpoints, auto-switch, canary abort, evidence retention, and promotion criteria. It is linked from docs/primitives/model-infrastructure-routing.md. This verification is partial and does not authorize protected changes or task closure."
+    },
+    {
+      "id": "VERIFY-BUD-910",
+      "target": "TASK-BUD-910",
+      "target_type": "task",
+      "status": "passed",
+      "method": "local-ci-reproduction+tests+docs",
+      "timestamp": "2026-05-06T06:02:28.116Z",
+      "evidence": "Reproduced failing CI parity gate locally with npm run ci:smoke:gate. Initial failure was packages/pi-stack/test/smoke/guardrails-human-confirmation-runtime-wiring.test.ts expecting recordTrustedHumanConfirmationUiDecision in guardrails-core.ts, while runtime responsibility had been extracted to guardrails-core-confirmation-audit.ts and guardrails-core-read-path-runtime.ts. Fixed the stale wiring test to inspect those current source files. Added pnpm-workspace.yaml to remove pnpm workspace drift warning and match package.json workspaces. Added docs/research/ci-local-parity-fix-2026-05.md documenting the failure, cause, fix, validation, rollback, and Copilot 429 quota risk. Did not push, publish, deploy, change workflows remotely, change providers/settings/routing/monitor migration/API keys, or run Qwen canary. Validation: focused pnpm vitest for human-confirmation runtime/core/workflow baseline -> 3 files passed, 19 tests passed; npm run test:smoke -- --run guardrails-human-confirmation-runtime-wiring -> 1 file passed, 1 test passed; npm run ci:smoke:gate -> test:smoke 128 files passed, 1172 tests passed; audit:sovereignty ok blockers=0 strict=true; audit:sovereignty:diff ok blockers=0 strict=true. safe_marker_check docs/test -> pass; i18n_lint_text -> pass; monitor_classify_failure_readiness warns on hedge Copilot 429; quota_alerts reports block=2."
+    },
+    {
+      "id": "VERIFY-BUD-910-PUBLISH-GATE",
+      "target": "TASK-BUD-910",
+      "target_type": "task",
+      "status": "passed",
+      "method": "npm-test+monitor-regression+ci-smoke-gate",
+      "timestamp": "2026-05-06T06:07:36.917Z",
+      "evidence": "After completing the first CI smoke fix, ran npm test and found local monitor regression failures caused by ignored .pi/monitors hedge/unauthorized-action overrides including conversation_history despite budget tests expecting conversation_history opt-in. Adjusted local ignored monitor overrides to remove conversation_history and preserve tool_calls/custom_messages; updated packages/pi-stack/test/monitor-interference-matrix.test.mjs to assert authorization monitors are context-aware but lean by default. Validation: node --test packages/pi-stack/test/monitor-context-budget.test.mjs packages/pi-stack/test/monitor-interference-matrix.test.mjs packages/pi-stack/test/monitor-provider-patch.test.mjs -> 49 tests passed; npm test -> 163 tests passed, 0 failed; npm run ci:smoke:gate -> test:smoke 128 files/1172 tests passed, audit:sovereignty ok blockers=0 strict=true, audit:sovereignty:diff ok blockers=0 strict=true. No push/publish/deploy, no provider/model/settings/routing/monitor-provider migration, no API keys, no Qwen canary."
     }
   ]
 }

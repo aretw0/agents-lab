@@ -20344,6 +20344,29 @@
       "milestone": "provider-economy-observability",
       "notes": "[auto-seed] Protected focus packet for TASK-BUD-849 reported missing-rollback-plan. [rationale:risk-control] A report-only rollback plan can close the planning gap without touching settings/providers/routing.\n[slice-start] Drafting documentation-only rollback plan for future TASK-BUD-849 protected model infrastructure changes. No settings/provider/routing changes.\n[rationale:risk-control] Protected focus packet flagged missing rollback evidence; documenting rollback prerequisites reduces risk while preserving the protected boundary.\n[complete] Added report-only rollback plan and linked primitive; protected model infrastructure remains unimplemented/blocked pending human decision.",
       "verification": "VERIFY-BUD-909"
+    },
+    {
+      "id": "TASK-BUD-910",
+      "description": "Reproduce and prepare local CI/CD parity fixes for failing GitHub Actions without pushing.",
+      "status": "completed",
+      "priority": "p1",
+      "files": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish.yml",
+        ".github/workflows/release-draft.yml",
+        "pnpm-workspace.yaml",
+        "docs/research/ci-local-parity-fix-2026-05.md"
+      ],
+      "acceptance_criteria": [
+        "Inspect GitHub Actions workflow commands and reproduce the relevant failing gate locally where possible.",
+        "Apply only local-safe CI/CD repository changes needed to align GitHub Actions with local validated commands.",
+        "Do not push, publish, create releases, or run protected remote deployment.",
+        "Document failure, fix, validation, and rollback.",
+        "Account for Copilot quota exhaustion as a monitor/provider risk without changing provider settings or monitor routing."
+      ],
+      "milestone": "ci-local-parity",
+      "notes": "[provenance:human] User explicitly requested local-safe CI/CD fixes for pushed GitHub Actions failing tests, to reproduce locally and leave correction ready without pushing. [rationale:risk-control] CI workflow edits are protected-adjacent but explicitly requested; scope is local repo only, no push/publish/deploy.\n[slice-start] Reproducing CI smoke/parity locally. Scope: local workflow/package changes only; no push/publish/deploy/provider switch. Copilot 429 treated as monitor-provider risk evidence, not as authorization to change routing.\n[rationale:risk-control] User explicitly approved local CI/CD parity fixes while preserving no-push and no provider-migration boundaries.\n[complete] Local CI gate reproduced and repaired; correction is ready locally with no push and no protected provider/routing changes.\n[extra-validation] Added VERIFY-BUD-910-PUBLISH-GATE after npm test also passed. Local ignored monitor overrides were trimmed to reduce Copilot classifier context, but no monitor provider/routing/settings migration was performed.",
+      "verification": "VERIFY-BUD-910"
     }
   ]
 }

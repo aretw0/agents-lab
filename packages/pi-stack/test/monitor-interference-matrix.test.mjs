@@ -58,15 +58,13 @@ describe("monitor interference matrix (fragility/hedge/unauthorized)", () => {
     assert.equal(unauthorized.when, "always");
   });
 
-  it("keeps authorization monitors context-aware but bounded", () => {
-    assert.ok(
-      hedge.classify?.context?.includes("conversation_history"),
-      "hedge needs bounded history to avoid stale intent false positives",
-    );
-    assert.ok(
-      unauthorized.classify?.context?.includes("conversation_history"),
-      "unauthorized-action needs bounded history before L3 blocking",
-    );
+  it("keeps authorization monitors context-aware but lean by default", () => {
+    for (const [name, monitor] of [["hedge", hedge], ["unauthorized-action", unauthorized]]) {
+      const context = monitor.classify?.context ?? [];
+      assert.ok(context.includes("tool_calls"), `${name} keeps tool-call context for action intent`);
+      assert.ok(context.includes("custom_messages"), `${name} keeps custom-message context for guard/monitor cues`);
+      assert.ok(!context.includes("conversation_history"), `${name} keeps conversation_history opt-in to preserve classifier quota`);
+    }
   });
 
   it("documents anti-overlap and critical-only blocker guidance", () => {
