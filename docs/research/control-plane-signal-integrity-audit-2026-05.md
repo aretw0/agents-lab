@@ -44,8 +44,8 @@ Correção já aplicada:
 
 P0 — já iniciado:
 
-1. `reloadGate` observa mudanças de extensão pi-stack fora do context-watchdog.
-2. `monitor_stale_feedback_prefilter` não suprime sinais críticos frescos.
+1. `reloadGate` observa mudanças de extensão pi-stack fora do context-watchdog. Coberto por `context-watchdog-runtime-reload.test.ts`.
+2. `monitor_stale_feedback_prefilter` não suprime sinais críticos frescos. Coberto por `monitor-runtime-contract.test.ts` com `unauthorized-action`/protected/destructive fresh.
 
 P1 — próxima onda:
 

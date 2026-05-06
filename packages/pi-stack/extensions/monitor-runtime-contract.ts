@@ -80,6 +80,19 @@ function hasRuntimeReloadTransientSignal(input: MonitorStaleFeedbackPrefilterInp
   return text.includes("runtime-reload-required-for-updated-tool-behavior");
 }
 
+function hasCriticalFreshSignal(input: MonitorStaleFeedbackPrefilterInput): boolean {
+  const text = [input.monitor, input.message, input.blocker].map(normalizeMonitorSignal).join(" ");
+  return (
+    text.includes("unauthorized-action") ||
+    text.includes("protected scope") ||
+    text.includes("protected-scope") ||
+    text.includes("destructive") ||
+    text.includes("branch protection") ||
+    text.includes("git push") ||
+    text.includes("/monitor-provider apply")
+  );
+}
+
 export function resolveMonitorStaleFeedbackPrefilter(
   input: MonitorStaleFeedbackPrefilterInput,
 ): MonitorStaleFeedbackPrefilterResult {
@@ -88,6 +101,11 @@ export function resolveMonitorStaleFeedbackPrefilter(
   const taskStatus = normalizeMonitorSignal(input.taskStatus);
   const duplicateCount = Number.isFinite(input.duplicateCount) ? Math.max(0, Math.floor(Number(input.duplicateCount))) : 0;
   const evidence: string[] = [];
+
+  if (hasCriticalFreshSignal(input) && taskStatus !== "completed" && taskStatus !== "resolved") {
+    evidence.push("criticalSignal=fresh-or-unresolved");
+    return buildMonitorStaleFeedbackPrefilterResult("allow-classifier", "fresh-or-unknown", evidence);
+  }
 
   if (hasContextWatchTransientSignal(input) && compactStage === "normal-window" && reloadGate === "reload-not-required") {
     evidence.push("context-watch-transient=resolved", `compactStage=${compactStage}`, `reloadGate=${reloadGate}`);

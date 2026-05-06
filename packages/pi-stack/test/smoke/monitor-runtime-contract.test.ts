@@ -57,6 +57,23 @@ describe("monitor runtime contract repair", () => {
     expect(result.reasonCode).toBe("runtime-reload-transient-resolved");
   });
 
+  it("keeps critical fresh monitor feedback eligible for classifier", () => {
+    const result = resolveMonitorStaleFeedbackPrefilter({
+      monitor: "unauthorized-action",
+      message: "protected scope destructive /monitor-provider apply requested without approval",
+      hasSupersedingTask: true,
+      duplicateCount: 3,
+    });
+
+    expect(result).toMatchObject({
+      decision: "allow-classifier",
+      classifierAllowed: true,
+      reasonCode: "fresh-or-unknown",
+      tokenSpendAvoidable: false,
+    });
+    expect(result.evidence).toContain("criticalSignal=fresh-or-unresolved");
+  });
+
   it("allows classifier when stale evidence is incomplete", () => {
     const result = resolveMonitorStaleFeedbackPrefilter({
       monitor: "fragility",
