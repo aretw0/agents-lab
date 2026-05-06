@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import quotaVisibilityExtension, {
   extractUsage,
@@ -24,6 +27,22 @@ function makeMockPi() {
     registerCommand: vi.fn(),
     registerTool: vi.fn(),
   } as unknown as Parameters<typeof quotaVisibilityExtension>[0];
+}
+
+function getRegisteredTool(pi: ReturnType<typeof makeMockPi>, name: string) {
+  const call = (pi.registerTool as ReturnType<typeof vi.fn>).mock.calls.find(
+    ([def]: [{ name: string }]) => def.name === name,
+  );
+  if (!call) throw new Error(`tool not registered: ${name}`);
+  return call[0] as {
+    execute: (
+      toolCallId: string,
+      params: Record<string, unknown>,
+      signal: AbortSignal,
+      onUpdate: (update: unknown) => void,
+      ctx: { cwd: string },
+    ) => Promise<{ content?: Array<{ text?: string }>; details?: unknown }>;
+  };
 }
 
 describe("quota-visibility extension — registration smoke", () => {
@@ -53,6 +72,28 @@ describe("quota-visibility extension — registration smoke", () => {
 
     expect(commandNames).toContain("quota-visibility");
     expect(toolNames).toContain("quota_visibility_provider_budgets");
+  });
+
+  it("executa tools de quota com output policy resolvido", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "quota-tools-"));
+    try {
+      const pi = makeMockPi();
+      quotaVisibilityExtension(pi);
+      const ctx = { cwd: tmp };
+      const signal = new AbortController().signal;
+      for (const name of [
+        "quota_visibility_status",
+        "quota_visibility_windows",
+        "quota_visibility_provider_budgets",
+      ]) {
+        const tool = getRegisteredTool(pi, name);
+        const result = await tool.execute("tool-call", { days: 1 }, signal, () => undefined, ctx);
+        expect(result.content?.[0]?.text).toBeTruthy();
+        expect(result.details).toBeTruthy();
+      }
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
   });
 
   describe("quota tool output policy", () => {

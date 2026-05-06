@@ -13461,6 +13461,15 @@
       "method": "test",
       "timestamp": "2026-05-06T00:46:13.021Z",
       "evidence": "Extracted monitor-provider output/status helpers into packages/pi-stack/extensions/monitor-provider-output.ts and re-exported buildStatusReport, buildTemplateSnippet, and planSessionStartOutput from monitor-provider-patch.ts. monitor-provider-patch.ts reduced to 762 lines; new output module is 199 lines. /monitor-provider status/template formatting and session_start notification semantics remain unchanged. Validation: pnpm vitest --run packages/pi-stack/test/smoke/monitor-provider-patch-surface.test.ts packages/pi-stack/test/smoke/monitor-provider-authorization-calibration.test.ts -> 2 files passed, 5 tests passed; node --test packages/pi-stack/test/monitor-provider-patch.test.mjs -> 37 tests passed; targeted TypeScript missing-name/module probe returned no output."
+    },
+    {
+      "id": "VER-BUD-1249",
+      "target": "TASK-BUD-884",
+      "target_type": "task",
+      "status": "passed",
+      "method": "test",
+      "timestamp": "2026-05-06T01:01:49.328Z",
+      "evidence": "Fixed quota-visibility tool runtime output-policy binding on disk by importing formatQuotaToolJsonOutput and resolveQuotaToolOutputPolicy from quota-visibility-output-policy in packages/pi-stack/extensions/quota-visibility.ts. Added regression coverage that executes registered quota_visibility_status, quota_visibility_windows, and quota_visibility_provider_budgets tools in a fresh extension instance and asserts content/details. Validation: pnpm vitest --run packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts -> 1 file passed, 35 tests passed. Live current-session tool calls still report resolveQuotaToolOutputPolicy is not defined because the extension runtime is stale until /reload; no provider routing, budgets, settings, or external API behavior changed."
     }
   ]
 }

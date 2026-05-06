@@ -19746,6 +19746,27 @@
       "milestone": "architecture-runway-implementation",
       "notes": "[auto-seed] Local-safe continuation from TASK-BUD-876 audit after TASK-BUD-881 status coverage and TASK-BUD-882 issue-template extraction. No provider/model/settings semantics should change.\n[provenance:human] source_task=TASK-BUD-876 reason=User requested continuous local-safe work; status coverage is now in place, making output extraction the next bounded audit-derived slice.\n[slice-complete] Extracted monitor-provider output/status helpers with status surface regression green. Context is warn/continue-bounded; checkpoint next.",
       "verification": "VER-BUD-1248"
+    },
+    {
+      "id": "TASK-BUD-884",
+      "description": "Fix quota-visibility tool runtime output-policy binding before provider economy work.",
+      "status": "completed",
+      "priority": "p1",
+      "depends_on": [
+        "TASK-BUD-879"
+      ],
+      "files": [
+        "packages/pi-stack/extensions/quota-visibility.ts",
+        "packages/pi-stack/test/smoke/quota-visibility-parsers.test.ts"
+      ],
+      "acceptance_criteria": [
+        "quota_visibility_status, quota_visibility_windows, and quota_visibility_provider_budgets no longer throw resolveQuotaToolOutputPolicy is not defined.",
+        "Add regression coverage that executes the registered quota tools, not just registration/imports.",
+        "Do not change provider routing, budgets, settings, or external API behavior."
+      ],
+      "milestone": "provider-economy",
+      "notes": "[auto-seed] User confirmed provider economy is becoming urgent: Copilot monitor quota is ending, OpenAI should be reserved for heavier models, Kimi/Claude Code opportunities need measured use. First local-safe step is fixing quota observability tools before strategy changes.\n[provenance:human] source_task=TASK-BUD-879 reason=Runtime regression observed in quota_visibility_status/windows/provider_budgets while planning provider economy; fix is local-safe and prerequisite to informed provider decisions.\n[slice-complete] Fixed quota output-policy binding and added fresh-runtime tool execution regression. Live session still needs /reload before current tool registry reflects the fix.",
+      "verification": "VER-BUD-1249"
     }
   ]
 }
