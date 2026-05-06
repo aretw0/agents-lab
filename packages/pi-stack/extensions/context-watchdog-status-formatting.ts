@@ -56,6 +56,20 @@ export function formatContextWatchStatusToolSummary(input: {
 	].filter(Boolean).join(" ");
 }
 
+export function resolveContextWatchCompactStageNextAction(input: {
+	reloadGate: string;
+	reloadHint?: string;
+	shouldForceCompact?: boolean;
+	shouldGracefulStop?: boolean;
+}): string {
+	if (input.reloadGate !== "reload-not-required" && input.reloadHint) {
+		return input.reloadHint;
+	}
+	if (input.shouldForceCompact) return "compact now and continue from checkpoint";
+	if (input.shouldGracefulStop) return "close current slice and checkpoint before compact threshold";
+	return "continue bounded work";
+}
+
 export function formatContextWatchCompactStageStatusSummary(input: {
 	stage: string;
 	level: ContextWatchdogLevel;

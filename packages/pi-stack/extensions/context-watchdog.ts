@@ -60,6 +60,7 @@ import {
 	formatContextWatchStatusToolSummary,
 	formatTimeoutPressureSummary,
 	resolveContextWatchAdaptiveStatusSummary,
+	resolveContextWatchCompactStageNextAction,
 } from "./context-watchdog-status-formatting";
 import {
 	makeContextWatchdogSourceMtimeReader,
@@ -101,6 +102,7 @@ export {
 	formatContextWatchStatusToolSummary,
 	formatTimeoutPressureSummary,
 	resolveContextWatchAdaptiveStatusSummary,
+	resolveContextWatchCompactStageNextAction,
 } from "./context-watchdog-status-formatting";
 import {
 	clearAutoResumeAfterReloadIntent,

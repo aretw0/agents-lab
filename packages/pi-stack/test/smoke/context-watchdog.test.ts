@@ -20,6 +20,7 @@ import contextWatchdogExtension, {
 	formatTimeoutPressureSummary,
 	formatContextWatchCompactStageStatusSummary,
 	resolveContextWatchAdaptiveStatusSummary,
+	resolveContextWatchCompactStageNextAction,
 	formatContextWatchAutoResumePreviewSummary,
 	formatContextWatchContinuationReadinessSummary,
 	consumeContextPreloadPack,
@@ -1392,6 +1393,12 @@ describe("context-watchdog", () => {
 			reason: "level-not-precompact",
 		});
 		expect(preCompact.hint).toContain("/reload");
+		expect(resolveContextWatchCompactStageNextAction({
+			reloadGate: preCompact.reason,
+			reloadHint: preCompact.hint,
+			shouldForceCompact: false,
+			shouldGracefulStop: false,
+		})).toContain("/reload");
 
 		const operatorSignal = resolveContextWatchOperatorSignal({
 			reloadRequired: true,

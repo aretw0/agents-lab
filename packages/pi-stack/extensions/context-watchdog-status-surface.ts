@@ -18,7 +18,7 @@ import { reconcileAutoResumeHandoffFocus, resolveAntiParalysisDispatch, resolveC
 import { readAutoResumeAfterReloadIntent } from "./context-watchdog-reload-intent";
 import { describeAutoResumeDispatchHint, describeAutoResumeDispatchReason, resolveHandoffPrepDecision, resolvePreCompactReloadSignal, shouldEmitAutoResumeAfterCompact, type AutoResumeDecisionSnapshot } from "./context-watchdog-resume";
 import { readHandoffJson, readProjectSettings, writeProjectSettings } from "./context-watchdog-storage";
-import { formatContextWatchCommandStatusSummary, formatContextWatchCompactStageStatusSummary, formatContextWatchStatusToolSummary, formatTimeoutPressureSummary, resolveContextWatchAdaptiveStatusSummary } from "./context-watchdog-status-formatting";
+import { formatContextWatchCommandStatusSummary, formatContextWatchCompactStageStatusSummary, formatContextWatchStatusToolSummary, formatTimeoutPressureSummary, resolveContextWatchAdaptiveStatusSummary, resolveContextWatchCompactStageNextAction } from "./context-watchdog-status-formatting";
 
 export interface ContextWatchdogStatusSurfaceRuntime {
 	getConfig(): ContextWatchdogConfig;
@@ -387,13 +387,12 @@ export function registerContextWatchdogStatusSurface(pi: ExtensionAPI, runtime: 
 				assessmentLevel: assessment.level,
 				reloadRequired,
 			});
-			const nextAction = preCompactReloadSignal.active
-				? (preCompactReloadSignal.hint ?? "run /reload and continue from handoff checkpoint")
-				: compactStage.shouldForceCompact
-					? "compact now and continue from checkpoint"
-					: compactStage.shouldGracefulStop
-						? "close current slice and checkpoint before compact threshold"
-						: "continue bounded work";
+			const nextAction = resolveContextWatchCompactStageNextAction({
+				reloadGate: preCompactReloadSignal.reason,
+				reloadHint: preCompactReloadSignal.hint,
+				shouldForceCompact: compactStage.shouldForceCompact,
+				shouldGracefulStop: compactStage.shouldGracefulStop,
+			});
 			const summary = formatContextWatchCompactStageStatusSummary({
 				stage: compactStage.stage,
 				level: assessment.level,
