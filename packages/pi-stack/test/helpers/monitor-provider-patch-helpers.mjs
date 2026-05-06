@@ -56,12 +56,29 @@ const CLASSIFIER_SYSTEM_PROMPT_LINES = [
 	"Do not fail just because monitor instructions are empty; classify from available context.",
 ];
 
+function isDivergentOverrideGuidanceOnly(details) {
+	return (
+		details.length > 0 &&
+		details.every((detail) =>
+			detail.startsWith("overrides divergentes detectados"),
+		)
+	);
+}
+
 function planSessionStartOutput(details, severity, opts = {}) {
 	if (!Array.isArray(details) || details.length === 0) {
 		return { notify: false };
 	}
 	const requiresReload = opts?.requiresReload === true;
 	const baseMessage = `monitor-provider-patch: ${details.join(", ")}`;
+	if (severity === "warning" && isDivergentOverrideGuidanceOnly(details)) {
+		return {
+			notify: false,
+			message: baseMessage,
+			severity: "info",
+			status: `[mprov] drift:${details.length}`,
+		};
+	}
 	if (severity === "warning") {
 		return {
 			notify: true,

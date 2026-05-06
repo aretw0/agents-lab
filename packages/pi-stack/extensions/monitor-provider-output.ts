@@ -54,6 +54,15 @@ function readHedgeMonitorState(cwd: string): {
 	};
 }
 
+function isDivergentOverrideGuidanceOnly(details: string[]): boolean {
+	return (
+		details.length > 0 &&
+		details.every((detail) =>
+			detail.startsWith("overrides divergentes detectados"),
+		)
+	);
+}
+
 export function planSessionStartOutput(
 	details: string[],
 	severity: "info" | "warning",
@@ -69,6 +78,14 @@ export function planSessionStartOutput(
 	}
 	const requiresReload = opts?.requiresReload === true;
 	const baseMessage = `monitor-provider-patch: ${details.join(", ")}`;
+	if (severity === "warning" && isDivergentOverrideGuidanceOnly(details)) {
+		return {
+			notify: false,
+			message: baseMessage,
+			severity: "info",
+			status: `[mprov] drift:${details.length}`,
+		};
+	}
 	if (severity === "warning") {
 		return {
 			notify: true,

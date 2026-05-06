@@ -342,9 +342,20 @@ describe("session_start output planning", () => {
 		assert.match(output.message, /Recomendado: \/reload/i);
 	});
 
-	it("keeps warning notifications for actionable issues", () => {
+	it("downgrades divergent-only override guidance to non-notifying status", () => {
 		const output = planSessionStartOutput(
 			["overrides divergentes detectados (2) — use /monitor-provider apply"],
+			"warning",
+		);
+		assert.equal(output.notify, false);
+		assert.equal(output.status, "[mprov] drift:1");
+		assert.equal(output.severity, "info");
+		assert.match(output.message, /use \/monitor-provider apply/i);
+	});
+
+	it("keeps warning notifications for actionable issues", () => {
+		const output = planSessionStartOutput(
+			["modelo openai-codex/gpt-x indisponivel (missing)"],
 			"warning",
 		);
 		assert.equal(output.notify, true);
